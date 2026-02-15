@@ -1,0 +1,15 @@
+name: openbudget_client
+description: Starting point for a Serverpod client.
+
+environment:
+  sdk: ^3.11.0
+
+resolution: workspace
+
+dependencies:
+  serverpod_auth_idp_client: 3.3.0
+  serverpod_client: 3.3.0
+
+dev_dependencies:
+  openbudget_lints:
+    path: ../openbudget_lints
