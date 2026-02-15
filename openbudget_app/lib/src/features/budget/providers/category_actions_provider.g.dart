@@ -41,7 +41,7 @@ final class CategoryActionsProvider
   }
 }
 
-String _$categoryActionsHash() => r'7dde7d8fd2201da3523863b9bef209797b7c3afb';
+String _$categoryActionsHash() => r'07214a044a715d0a01b86ce4e30829798c25fc7e';
 
 abstract class _$CategoryActions extends $Notifier<AsyncValue<void>> {
   AsyncValue<void> build();

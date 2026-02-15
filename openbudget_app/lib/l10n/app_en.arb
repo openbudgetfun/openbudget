@@ -58,5 +58,15 @@
   "budgetLoadError": "Could not load budget details",
   "dialogSave": "Save",
   "dialogSaving": "Saving...",
-  "dialogCancel": "Cancel"
+  "dialogCancel": "Cancel",
+  "transactionAddIncome": "Add Income",
+  "transactionAddExpense": "Add Expense",
+  "transactionDescriptionLabel": "Description",
+  "transactionAmountLabel": "Amount",
+  "transactionSave": "Save Transaction",
+  "transactionSubmitting": "Saving...",
+  "transactionUnassigned": "Unassigned",
+  "transactionListTitle": "Transactions",
+  "transactionLoadError": "Could not load transactions",
+  "transactionEmpty": "No transactions yet"
 }

@@ -405,6 +405,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cancel'**
   String get dialogCancel;
+
+  /// No description provided for @transactionAddIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Income'**
+  String get transactionAddIncome;
+
+  /// No description provided for @transactionAddExpense.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Expense'**
+  String get transactionAddExpense;
+
+  /// No description provided for @transactionDescriptionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get transactionDescriptionLabel;
+
+  /// No description provided for @transactionAmountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get transactionAmountLabel;
+
+  /// No description provided for @transactionSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Transaction'**
+  String get transactionSave;
+
+  /// No description provided for @transactionSubmitting.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving...'**
+  String get transactionSubmitting;
+
+  /// No description provided for @transactionUnassigned.
+  ///
+  /// In en, this message translates to:
+  /// **'Unassigned'**
+  String get transactionUnassigned;
+
+  /// No description provided for @transactionListTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Transactions'**
+  String get transactionListTitle;
+
+  /// No description provided for @transactionLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load transactions'**
+  String get transactionLoadError;
+
+  /// No description provided for @transactionEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No transactions yet'**
+  String get transactionEmpty;
 }
 
 class _AppLocalizationsDelegate

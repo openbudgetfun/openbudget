@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'envelope_actions_provider.dart';
+part of 'transaction_actions_provider.dart';
 
 // **************************************************************************
 // RiverpodGenerator
@@ -9,28 +9,28 @@ part of 'envelope_actions_provider.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
-@ProviderFor(EnvelopeActions)
-final envelopeActionsProvider = EnvelopeActionsProvider._();
+@ProviderFor(TransactionActions)
+final transactionActionsProvider = TransactionActionsProvider._();
 
-final class EnvelopeActionsProvider
-    extends $NotifierProvider<EnvelopeActions, AsyncValue<void>> {
-  EnvelopeActionsProvider._()
+final class TransactionActionsProvider
+    extends $NotifierProvider<TransactionActions, AsyncValue<void>> {
+  TransactionActionsProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'envelopeActionsProvider',
+        name: r'transactionActionsProvider',
         isAutoDispose: true,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$envelopeActionsHash();
+  String debugGetCreateSourceHash() => _$transactionActionsHash();
 
   @$internal
   @override
-  EnvelopeActions create() => EnvelopeActions();
+  TransactionActions create() => TransactionActions();
 
   /// {@macro riverpod.override_with_value}
   Override overrideWithValue(AsyncValue<void> value) {
@@ -41,9 +41,10 @@ final class EnvelopeActionsProvider
   }
 }
 
-String _$envelopeActionsHash() => r'1ea88e951e98df8b31fb88a79f68e8e7b9411f3a';
+String _$transactionActionsHash() =>
+    r'3fa65817d5c9b40e1619cf98142cbcdf8ca779f9';
 
-abstract class _$EnvelopeActions extends $Notifier<AsyncValue<void>> {
+abstract class _$TransactionActions extends $Notifier<AsyncValue<void>> {
   AsyncValue<void> build();
   @$mustCallSuper
   @override

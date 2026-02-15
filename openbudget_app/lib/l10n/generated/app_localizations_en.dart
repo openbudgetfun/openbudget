@@ -175,4 +175,34 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dialogCancel => 'Cancel';
+
+  @override
+  String get transactionAddIncome => 'Add Income';
+
+  @override
+  String get transactionAddExpense => 'Add Expense';
+
+  @override
+  String get transactionDescriptionLabel => 'Description';
+
+  @override
+  String get transactionAmountLabel => 'Amount';
+
+  @override
+  String get transactionSave => 'Save Transaction';
+
+  @override
+  String get transactionSubmitting => 'Saving...';
+
+  @override
+  String get transactionUnassigned => 'Unassigned';
+
+  @override
+  String get transactionListTitle => 'Transactions';
+
+  @override
+  String get transactionLoadError => 'Could not load transactions';
+
+  @override
+  String get transactionEmpty => 'No transactions yet';
 }
