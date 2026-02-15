@@ -1,0 +1,9 @@
+# Gitleaks configuration
+# https://github.com/gitleaks/gitleaks
+
+[allowlist]
+# CocoaPods Podfile.lock contains spec checksums that trigger
+# the generic-api-key rule. These are NOT secrets.
+paths = [
+  '''Podfile\.lock$''',
+]

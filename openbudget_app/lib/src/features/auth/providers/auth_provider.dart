@@ -16,6 +16,8 @@ class AuthNotifier extends _$AuthNotifier {
     // Placeholder: simulate a login delay
     await Future<void>.delayed(const Duration(milliseconds: 500));
 
+    if (!ref.mounted) return;
+
     // For now, always succeed with a mock user
     state = AuthState.authenticated(userId: 'mock-user-$email');
   }

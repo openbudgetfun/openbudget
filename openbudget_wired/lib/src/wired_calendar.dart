@@ -43,10 +43,9 @@ class WiredCalendar extends HookWidget {
               text: day.day.toString(),
               selected: sel != null && day == DateTime.parse(sel),
               dimmed: day.month != firstDayInMonth.month,
-              color:
-                  day.month == firstDayInMonth.month
-                      ? textColor
-                      : disabledTextColor,
+              color: day.month == firstDayInMonth.month
+                  ? textColor
+                  : disabledTextColor,
             ),
           );
 
@@ -126,20 +125,12 @@ Widget _buildWeekdaysNav({
       children: [
         InkWell(
           onTap: onPre,
-          child: _wiredText(
-            '<<',
-            fontWeight: FontWeight.bold,
-            fontSize: 24.0,
-          ),
+          child: _wiredText('<<', fontWeight: FontWeight.bold, fontSize: 24.0),
         ),
         _wiredText(monthYear, fontWeight: FontWeight.bold, fontSize: 22.0),
         InkWell(
           onTap: onNext,
-          child: _wiredText(
-            '>>',
-            fontWeight: FontWeight.bold,
-            fontSize: 24.0,
-          ),
+          child: _wiredText('>>', fontWeight: FontWeight.bold, fontSize: 24.0),
         ),
       ],
     ),
@@ -192,44 +183,44 @@ Widget _buildCell(
 }) {
   return selected
       ? Stack(
-        fit: StackFit.expand,
-        children: [
-          Positioned(
-            left: 0,
-            top: 0,
-            width: width,
-            height: height,
-            child: WiredCanvas(
-              painter: WiredCircleBase(diameterRatio: .8),
-              fillerType: RoughFilter.noFiller,
-            ),
-          ),
-          SizedBox(
-            width: width,
-            height: height,
-            child: Center(
-              child: _wiredText(
-                text,
-                fontWeight: fontWeight,
-                fontSize: fontSize,
-                color: color,
+          fit: StackFit.expand,
+          children: [
+            Positioned(
+              left: 0,
+              top: 0,
+              width: width,
+              height: height,
+              child: WiredCanvas(
+                painter: WiredCircleBase(diameterRatio: .8),
+                fillerType: RoughFilter.noFiller,
               ),
             ),
-          ),
-        ],
-      )
+            SizedBox(
+              width: width,
+              height: height,
+              child: Center(
+                child: _wiredText(
+                  text,
+                  fontWeight: fontWeight,
+                  fontSize: fontSize,
+                  color: color,
+                ),
+              ),
+            ),
+          ],
+        )
       : SizedBox(
-        width: width,
-        height: height,
-        child: Center(
-          child: _wiredText(
-            text,
-            fontWeight: fontWeight,
-            fontSize: fontSize,
-            color: color,
+          width: width,
+          height: height,
+          child: Center(
+            child: _wiredText(
+              text,
+              fontWeight: fontWeight,
+              fontSize: fontSize,
+              color: color,
+            ),
           ),
-        ),
-      );
+        );
 }
 
 Widget _wiredText(

@@ -16,6 +16,9 @@ class CreateBudgetScreen extends HookConsumerWidget {
     final nameController = useTextEditingController();
     final selectedCurrency = useState(CurrencyCode.usd);
 
+    // Watch to keep the auto-dispose provider alive while this screen is mounted.
+    ref.watch(createBudgetProvider);
+
     return Scaffold(
       body: Center(
         child: SingleChildScrollView(
@@ -42,20 +45,17 @@ class CreateBudgetScreen extends HookConsumerWidget {
                     const SizedBox(height: 16),
                     WiredCombo(
                       value: selectedCurrency.value.code,
-                      items:
-                          CurrencyCode.values
-                              .map(
-                                (c) => DropdownMenuItem(
-                                  value: c.code,
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(left: 5),
-                                    child: Text(
-                                      '${c.symbol} ${c.displayName}',
-                                    ),
-                                  ),
-                                ),
-                              )
-                              .toList(),
+                      items: CurrencyCode.values
+                          .map(
+                            (c) => DropdownMenuItem(
+                              value: c.code,
+                              child: Padding(
+                                padding: const EdgeInsets.only(left: 5),
+                                child: Text('${c.symbol} ${c.displayName}'),
+                              ),
+                            ),
+                          )
+                          .toList(),
                       onChanged: (value) {
                         selectedCurrency.value = CurrencyCode.values.firstWhere(
                           (c) => c.code == value,

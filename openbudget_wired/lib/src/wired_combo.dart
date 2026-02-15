@@ -57,22 +57,21 @@ class WiredCombo extends HookWidget {
                   child: Icon(Icons.arrow_downward),
                 ),
                 value: internalValue.value,
-                items:
-                    items.map((item) {
-                      return DropdownMenuItem<dynamic>(
-                        value: item.value,
-                        child: Stack(
-                          children: [
-                            WiredCanvas(
-                              painter: WiredRectangleBase(),
-                              fillerType: RoughFilter.noFiller,
-                              size: Size(double.infinity, height.value),
-                            ),
-                            Positioned(top: 20.0, child: item.child),
-                          ],
+                items: items.map((item) {
+                  return DropdownMenuItem<dynamic>(
+                    value: item.value,
+                    child: Stack(
+                      children: [
+                        WiredCanvas(
+                          painter: WiredRectangleBase(),
+                          fillerType: RoughFilter.noFiller,
+                          size: Size(double.infinity, height.value),
                         ),
-                      );
-                    }).toList(),
+                        Positioned(top: 20.0, child: item.child),
+                      ],
+                    ),
+                  );
+                }).toList(),
                 onChanged: (dynamic changedValue) {
                   final isControlled = onChanged?.call(changedValue) ?? false;
 

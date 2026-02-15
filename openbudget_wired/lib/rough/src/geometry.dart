@@ -3,11 +3,7 @@ import 'dart:math';
 import 'core.dart';
 import 'entities.dart';
 
-List<PointD> rotatePoints(
-  List<PointD>? points,
-  PointD center,
-  double degrees,
-) {
+List<PointD> rotatePoints(List<PointD>? points, PointD center, double degrees) {
   if (points != null && points.isNotEmpty) {
     return points.map((p) => rotatePoint(p, center, degrees)).toList();
   } else {
@@ -30,15 +26,14 @@ PointD rotatePoint(PointD point, PointD center, double degrees) {
   );
 }
 
-List<Line> rotateLines(List<Line> lines, PointD center, double degrees) =>
-    lines
-        .map(
-          (line) => Line(
-            rotatePoint(line.source, center, degrees),
-            rotatePoint(line.target, center, degrees),
-          ),
-        )
-        .toList();
+List<Line> rotateLines(List<Line> lines, PointD center, double degrees) => lines
+    .map(
+      (line) => Line(
+        rotatePoint(line.source, center, degrees),
+        rotatePoint(line.target, center, degrees),
+      ),
+    )
+    .toList();
 
 enum PointsOrientation { collinear, clockwise, counterclockwise }
 
@@ -85,13 +80,12 @@ class Edge {
 
   Edge({this.yMin, this.yMax, this.x, this.slope});
 
-  Edge copyWith({double? yMin, double? yMax, double? x, double? slope}) =>
-      Edge(
-        yMin: yMin ?? this.yMin,
-        yMax: yMax ?? this.yMax,
-        x: x ?? this.x,
-        slope: slope ?? this.slope,
-      );
+  Edge copyWith({double? yMin, double? yMax, double? x, double? slope}) => Edge(
+    yMin: yMin ?? this.yMin,
+    yMax: yMax ?? this.yMax,
+    x: x ?? this.x,
+    slope: slope ?? this.slope,
+  );
 
   @override
   String toString() {

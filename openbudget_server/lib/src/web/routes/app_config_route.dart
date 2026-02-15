@@ -1,15 +1,12 @@
 import 'package:serverpod/serverpod.dart';
 
 class AppConfigWidget extends JsonWidget {
-  AppConfigWidget({
-    required String apiUrl,
-  }) : super(object: {'apiUrl': apiUrl});
+  AppConfigWidget({required String apiUrl}) : super(object: {'apiUrl': apiUrl});
 }
 
 class AppConfigRoute extends WidgetRoute {
-  AppConfigRoute({
-    required ServerConfig apiConfig,
-  }) : widget = AppConfigWidget(apiUrl: apiConfig.apiUrl.toString());
+  AppConfigRoute({required ServerConfig apiConfig})
+    : widget = AppConfigWidget(apiUrl: apiConfig.apiUrl.toString());
 
   final AppConfigWidget widget;
 
@@ -20,9 +17,6 @@ class AppConfigRoute extends WidgetRoute {
 }
 
 extension on ServerConfig {
-  Uri get apiUrl => Uri(
-        scheme: publicScheme,
-        host: publicHost,
-        port: publicPort,
-      );
+  Uri get apiUrl =>
+      Uri(scheme: publicScheme, host: publicHost, port: publicPort);
 }

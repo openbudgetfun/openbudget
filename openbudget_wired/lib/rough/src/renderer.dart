@@ -187,9 +187,7 @@ class OpSetBuilder {
     final double arcIn = min(ellipseInc / 2, (stp - strt) / 2);
     ops
       ..addAll(OpsGenerator.arc(arcIn, cx, cy, rx, ry, strt, stp, 1, config))
-      ..addAll(
-        OpsGenerator.arc(arcIn, cx, cy, rx, ry, strt, stp, 1.5, config),
-      );
+      ..addAll(OpsGenerator.arc(arcIn, cx, cy, rx, ry, strt, stp, 1.5, config));
     if (closed) {
       if (roughClosure) {
         ops
@@ -255,10 +253,7 @@ class OpSetBuilder {
     }
     points
       ..add(
-        PointD(
-          center.x + radiusX * cos(stop),
-          center.y + radiusY * sin(stop),
-        ),
+        PointD(center.x + radiusX * cos(stop), center.y + radiusY * sin(stop)),
       )
       ..add(center);
     return points;

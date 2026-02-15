@@ -1,45 +1,44 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:integration_test/integration_test.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
-import 'package:patrol/patrol.dart';
 
 import 'common/patrol_helpers.dart';
 import 'common/test_data.dart';
 
 void main() {
-  patrolTest('shows login screen on launch', ($) async {
-    await initApp($);
+  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-    final loginPage = LoginPage($);
+  testWidgets('shows login screen on launch', (tester) async {
+    await initApp(tester);
+
+    final loginPage = LoginPage(tester);
 
     expect(loginPage.emailField, findsOneWidget);
     expect(loginPage.passwordField, findsOneWidget);
     expect(loginPage.signInButton, findsOneWidget);
-    expect($('Welcome to OpenBudget'), findsOneWidget);
+    expect(find.text('Welcome to OpenBudget'), findsOneWidget);
   });
 
-  patrolTest('login navigates to create budget screen', ($) async {
-    await initApp($);
+  testWidgets('login navigates to create budget screen', (tester) async {
+    await initApp(tester);
 
-    final loginPage = LoginPage($);
-    final createBudgetPage = CreateBudgetPage($);
+    final loginPage = LoginPage(tester);
 
     await loginPage.signIn(TestData.validEmail, TestData.validPassword);
 
-    await createBudgetPage.nameField.waitUntilVisible();
-    expect(createBudgetPage.nameField, findsOneWidget);
-    expect(createBudgetPage.currencyCombo, findsOneWidget);
-    expect(createBudgetPage.createButton, findsOneWidget);
-    expect($('Create Budget'), findsOneWidget);
+    expect(find.text('Create Budget'), findsOneWidget);
+    expect(find.byType(WiredCombo), findsOneWidget);
+    expect(find.byType(WiredButton), findsOneWidget);
   });
 
-  patrolTest('redirects unauthenticated user to login', ($) async {
-    await initApp($);
+  testWidgets('redirects unauthenticated user to login', (tester) async {
+    await initApp(tester);
 
     // Verify login is shown (auth guard redirects unauthenticated users)
-    expect($('Welcome to OpenBudget'), findsOneWidget);
+    expect(find.text('Welcome to OpenBudget'), findsOneWidget);
 
     // Verify budget creation form is NOT accessible
-    expect($(WiredCombo), findsNothing);
-    expect($('Create Budget'), findsNothing);
+    expect(find.byType(WiredCombo), findsNothing);
+    expect(find.text('Create Budget'), findsNothing);
   });
 }

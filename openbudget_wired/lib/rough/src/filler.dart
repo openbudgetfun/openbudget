@@ -156,13 +156,12 @@ abstract class Filler {
         }
 
         y += gap;
-        activeEdges =
-            activeEdges.map((ae) {
-              return ActiveEdge(
-                ae.s,
-                ae.edge.copyWith(x: ae.edge.x! + (gap! * ae.edge.slope!)),
-              );
-            }).toList();
+        activeEdges = activeEdges.map((ae) {
+          return ActiveEdge(
+            ae.s,
+            ae.edge.copyWith(x: ae.edge.x! + (gap! * ae.edge.slope!)),
+          );
+        }).toList();
       }
     }
     return lines;
@@ -258,8 +257,9 @@ abstract class Filler {
     }
     if (intersections.length > 1) {
       intersections.sort((a, b) => (a.distance! - b.distance!).ceil());
-      final List<PointD> intersectionPoints =
-          intersections.map((d) => d.point!).toList();
+      final List<PointD> intersectionPoints = intersections
+          .map((d) => d.point!)
+          .toList();
       if (segment.source.isInPolygon(polygon)) {
         intersectionPoints.removeAt(0);
       }
@@ -354,10 +354,7 @@ class DashedFiller extends Filler {
   @override
   OpSet fill(List<PointD> points) {
     final List<Line> lines = buildFillLines(points, _config);
-    return OpSet(
-      type: OpSetType.fillSketch,
-      ops: dashedLines(lines, _config!),
-    );
+    return OpSet(type: OpSetType.fillSketch, ops: dashedLines(lines, _config!));
   }
 
   List<Op> dashedLines(List<Line> lines, FillerConfig config) {
@@ -367,8 +364,7 @@ class DashedFiller extends Filler {
     for (final Line line in lines) {
       final double length = line.length;
       final int count = (length / (offset + gap)).floor();
-      final double lineOffset =
-          (length + gap - (count * (offset + gap))) / 2;
+      final double lineOffset = (length + gap - (count * (offset + gap))) / 2;
       PointD lineStart = line.source;
       PointD lineEnd = line.target;
       if (lineStart.x > lineEnd.x) {
@@ -471,21 +467,16 @@ class SolidFiller extends Filler {
   OpSet fill(List<PointD> points) {
     List<PointD> result = [];
     if (points.length > 2) {
-      result =
-          points
-              .map(
-                (point) => PointD(
-                  point.x +
-                      _config!.drawConfig!.offsetSymmetric(
-                        _config!.fillWeight!,
-                      ),
-                  point.y +
-                      _config!.drawConfig!.offsetSymmetric(
-                        _config!.fillWeight!,
-                      ),
-                ),
-              )
-              .toList();
+      result = points
+          .map(
+            (point) => PointD(
+              point.x +
+                  _config!.drawConfig!.offsetSymmetric(_config!.fillWeight!),
+              point.y +
+                  _config!.drawConfig!.offsetSymmetric(_config!.fillWeight!),
+            ),
+          )
+          .toList();
       result
         ..add(result.first)
         ..add(result[1])

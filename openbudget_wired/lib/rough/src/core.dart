@@ -93,9 +93,9 @@ class Line {
     final double determinant = yDiff * lineXDiff - lineYDiff * xDiff;
     return determinant == 0
         ? PointD(
-          (lineXDiff * diff - xDiff * lineDiff) / determinant,
-          (yDiff * lineDiff - lineYDiff * diff) / determinant,
-        )
+            (lineXDiff * diff - xDiff * lineDiff) / determinant,
+            (yDiff * lineDiff - lineYDiff * diff) / determinant,
+          )
         : null;
   }
 

@@ -11,32 +11,49 @@ jobs:
     runs-on: blacksmith-2vcpu-ubuntu-2404
     steps:
       - uses: actions/checkout@v4
+      - name: Read Flutter version
+        id: fvm
+        run: echo "FLUTTER_VERSION=$(jq -r '.flutter' .fvmrc)" >> "$GITHUB_OUTPUT"
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version-file: .fvmrc
+          flutter-version: ${{ steps.fvm.outputs.FLUTTER_VERSION }}
+      - name: Link FVM SDK path
+        run: mkdir -p .fvm && ln -s "$FLUTTER_ROOT" .fvm/flutter_sdk
       - run: dart pub get
-      - run: dart run melos run analyze
+      - run: dart pub global activate melos
+      - run: melos run analyze
 
   test:
     runs-on: blacksmith-2vcpu-ubuntu-2404
     steps:
       - uses: actions/checkout@v4
+      - name: Read Flutter version
+        id: fvm
+        run: echo "FLUTTER_VERSION=$(jq -r '.flutter' .fvmrc)" >> "$GITHUB_OUTPUT"
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version-file: .fvmrc
+          flutter-version: ${{ steps.fvm.outputs.FLUTTER_VERSION }}
+      - name: Link FVM SDK path
+        run: mkdir -p .fvm && ln -s "$FLUTTER_ROOT" .fvm/flutter_sdk
       - run: dart pub get
-      - run: dart run melos exec -- "flutter test" --scope="openbudget_app"
-      - run: dart run melos exec -- "flutter test" --scope="openbudget_wired"
-      - run: dart run melos exec -- "dart test" --scope="openbudget_core"
-      - run: dart run melos exec -- "dart test" --scope="openbudget_server"
+      - run: dart pub global activate melos
+      - run: melos exec --scope="openbudget_app" -- flutter test
+      - run: melos exec --scope="openbudget_wired" -- flutter test
+      - run: melos exec --scope="openbudget_core" -- dart test
 
   format:
     runs-on: blacksmith-2vcpu-ubuntu-2404
     steps:
       - uses: actions/checkout@v4
+      - name: Read Flutter version
+        id: fvm
+        run: echo "FLUTTER_VERSION=$(jq -r '.flutter' .fvmrc)" >> "$GITHUB_OUTPUT"
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version-file: .fvmrc
+          flutter-version: ${{ steps.fvm.outputs.FLUTTER_VERSION }}
+      - name: Link FVM SDK path
+        run: mkdir -p .fvm && ln -s "$FLUTTER_ROOT" .fvm/flutter_sdk
+      - run: dart pub get
       - run: dart format --set-exit-if-changed .
       - uses: dprint/check@v2.2
 
@@ -44,12 +61,26 @@ jobs:
     runs-on: blacksmith-2vcpu-ubuntu-2404
     steps:
       - uses: actions/checkout@v4
+      - name: Read Flutter version
+        id: fvm
+        run: echo "FLUTTER_VERSION=$(jq -r '.flutter' .fvmrc)" >> "$GITHUB_OUTPUT"
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version-file: .fvmrc
-      - run: sudo apt-get update && sudo apt-get install -y libgtk-3-dev libx11-dev pkg-config cmake ninja-build libblkid-dev
+          flutter-version: ${{ steps.fvm.outputs.FLUTTER_VERSION }}
+      - name: Link FVM SDK path
+        run: mkdir -p .fvm && ln -s "$FLUTTER_ROOT" .fvm/flutter_sdk
+      - run: sudo apt-get update && sudo apt-get install -y libgtk-3-dev libx11-dev pkg-config cmake ninja-build libblkid-dev libwebkit2gtk-4.1-dev libsecret-1-dev
       - run: dart pub get
-      - run: xvfb-run flutter test integration_test -d linux
+      - name: Run integration tests
+        working-directory: openbudget_app
+        run: |
+          xvfb-run bash -c '
+            for f in integration_test/*_test.dart; do
+              echo "::group::Running $f"
+              flutter test "$f" -d linux
+              echo "::endgroup::"
+            done
+          '
 
   no-stateful-or-stateless:
     name: Ban StatefulWidget and StatelessWidget
@@ -87,4 +118,4 @@ jobs:
           curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" \
             | tar xz -C /usr/local/bin gitleaks
       - name: Run gitleaks
-        run: gitleaks detect --source . --verbose --redact
+        run: gitleaks detect --source . --verbose --redact --config .gitleaks.toml

@@ -18,8 +18,9 @@ void main() {
   }
 
   group('CreateBudgetScreen', () {
-    testWidgets('renders budget name input and currency selector',
-        (tester) async {
+    testWidgets('renders budget name input and currency selector', (
+      tester,
+    ) async {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
