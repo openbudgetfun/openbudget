@@ -162,6 +162,77 @@ jobs:
           fi
           echo "No banned widget types found."
 
+  native-change-check:
+    name: Detect native dependency changes
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for native dependency changes
+        run: |
+          BASE=${{ github.event.pull_request.base.sha }}
+
+          # Files that indicate native dependency changes
+          NATIVE_FILES=(
+            "openbudget_app/ios/Podfile"
+            "openbudget_app/ios/Podfile.lock"
+            "openbudget_app/ios/Runner.xcodeproj/project.pbxproj"
+            "openbudget_app/android/app/build.gradle.kts"
+            "openbudget_app/android/build.gradle.kts"
+            "openbudget_app/android/settings.gradle.kts"
+            "openbudget_app/android/gradle/wrapper/gradle-wrapper.properties"
+            "openbudget_app/macos/Podfile"
+            "openbudget_app/macos/Podfile.lock"
+            "openbudget_app/linux/CMakeLists.txt"
+            "openbudget_app/windows/CMakeLists.txt"
+          )
+
+          CHANGED=false
+          for file in "${NATIVE_FILES[@]}"; do
+            if git diff --name-only "$BASE"...HEAD | grep -q "^$file$"; then
+              echo "::warning::Native file changed: $file"
+              CHANGED=true
+            fi
+          done
+
+          # Also check if pubspec.yaml added/changed any plugin dependencies
+          if git diff "$BASE"...HEAD -- openbudget_app/pubspec.yaml | grep -E '^\+.*:' | grep -vE '^\+\+\+|^\+\s*#|^\+\s*$|path:|sdk:' | head -20; then
+            echo "::notice::App pubspec.yaml dependencies changed — review for native plugins"
+          fi
+
+          if [ "$CHANGED" = true ]; then
+            echo "::warning::Native dependencies changed! This PR requires a MAJOR version bump for openbudget_app (full app store release). Shorebird patches cannot include native changes."
+          else
+            echo "No native dependency changes detected. Safe for Shorebird patch (minor/patch bump)."
+          fi
+
+  pinned-deps:
+    name: Enforce pinned app dependencies
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check for unpinned dependencies
+        run: |
+          # Extract dependency lines from openbudget_app/pubspec.yaml
+          # Skip path deps, sdk deps, and 'any'
+          VIOLATIONS=$(sed -n '/^dependencies:/,/^[^ ]/p' openbudget_app/pubspec.yaml \
+            | grep -E ':\s*[\^>~]' \
+            | grep -v '^\s*#' \
+            || true)
+
+          if [ -n "$VIOLATIONS" ]; then
+            echo "::error::openbudget_app has unpinned dependencies. All app dependencies must use exact versions (no ^, >=, ~)."
+            echo ""
+            echo "$VIOLATIONS"
+            echo ""
+            echo "Pin to exact versions (e.g., 'cupertino_icons: 1.0.8' instead of 'cupertino_icons: ^1.0.8')"
+            exit 1
+          fi
+          echo "All app dependencies are pinned to exact versions."
+
   secrets-scan:
     name: Secrets Detection
     runs-on: blacksmith-2vcpu-ubuntu-2404

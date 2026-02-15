@@ -53,6 +53,11 @@ melos run serverpod:generate # Run Serverpod code generation
 
 # Server
 server:start                 # Start Serverpod dev server (devenv script)
+
+# Versioning & Publishing
+knope document-change        # Create a changeset file for version bumps
+melos run publish:dry        # Dry-run publish (validate publishable packages)
+melos run publish            # Publish packages to pub.dev
 ```
 
 ## Architecture Decisions
@@ -116,6 +121,51 @@ When investigating a bug or verifying a feature, **always use the appropriate MC
 
 Use `GoRouter` for all navigation. Routes are defined in `app_router.dart` with `@riverpod`. Route constants live in `route_names.dart`. Auth redirects are handled in the router's `redirect` callback.
 
+## Version Management & Releases
+
+### Changeset Workflow (Knope)
+
+The project uses [knope](https://knope.tech) for **changeset-only** version management. Conventional commits do **not** trigger version bumps — only explicit changeset files do.
+
+- Run `knope document-change` to create a changeset file in `.changeset/`
+- Every PR with user-facing changes **must** include a changeset
+- On push to `main`, a bot workflow creates/updates a release PR on the `knope/release` branch
+- Merging the release PR triggers `knope forced-release`, which creates GitHub releases and git tags
+
+### Publishing with Melos
+
+Knope manages **git tags and GitHub releases**. Melos manages **package publishing**.
+
+```bash
+melos run publish:dry           # Dry-run — validate all publishable packages
+melos run publish               # Publish all publishable packages to pub.dev
+melos run publish --no-select   # Non-interactive (used in CI)
+```
+
+**How it works:**
+
+- Melos filters on `noPrivate: true`, so only packages **without** `publish_to: none` are published.
+- Currently all packages have `publish_to: none`. To make a package publishable, remove that line from its `pubspec.yaml`.
+- The `release.yml` workflow runs `melos run publish --no-select` automatically after knope creates the GitHub releases.
+- CI publishing requires a `PUB_CREDENTIALS` secret with a valid pub.dev credential JSON.
+
+**Making a package publishable:**
+
+1. Remove `publish_to: none` from the package's `pubspec.yaml`
+2. Ensure the package has a proper `description`, `repository`, and `homepage` field
+3. Run `melos run publish:dry` to validate
+4. The next release will automatically publish it
+
+### App Versioning Rules (`openbudget_app`)
+
+- **Major** bump = full app store release (native dependency changes — iOS Podfile, Android Gradle, etc.)
+- **Minor/Patch** bump = Shorebird code push (Dart-only changes)
+- CI runs a `native-change-check` job on PRs that warns when native files changed, signaling a major bump is needed
+
+### Pinned App Dependencies
+
+`openbudget_app/pubspec.yaml` must use **exact versions** for all external dependencies (no `^`, `>=`, or `~` ranges). Exceptions: `intl: any` (Flutter SDK peer), path deps, and SDK deps. CI enforces this via the `pinned-deps` job.
+
 ## Commit Conventions
 
 ### Conventional Commits (Mandatory)
@@ -140,7 +190,7 @@ All work MUST go through feature branches and pull requests. No direct commits t
 
 ### CI Requirements
 
-All PRs must pass: analyze, test, format, integration-test, widget-ban, secrets-scan, server-test.
+All PRs must pass: analyze, test, format, integration-test, widget-ban, secrets-scan, server-test, pinned-deps.
 
 ### Database Migrations (Minimize)
 
@@ -165,3 +215,4 @@ See `.specify/memory/constitution.md` for the full project constitution (v1.0.0)
 - **Melos** 7.x — monorepo tooling (config in root `pubspec.yaml`, no `melos.yaml`)
 - **Patrol** — E2E integration testing
 - **dprint** — non-Dart formatting
+- **Knope** — changeset-based version management and release automation

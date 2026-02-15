@@ -1,5 +1,6 @@
 name: openbudget_client
 description: Starting point for a Serverpod client.
+version: 0.1.0
 
 environment:
   sdk: ^3.11.0

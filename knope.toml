@@ -1,0 +1,85 @@
+[packages.openbudget_app]
+versioned_files = ["openbudget_app/pubspec.yaml"]
+changelog = "openbudget_app/CHANGELOG.md"
+scopes = ["app"]
+
+[packages.openbudget_server]
+versioned_files = ["openbudget_server/pubspec.yaml"]
+changelog = "openbudget_server/CHANGELOG.md"
+scopes = ["server"]
+
+[packages.openbudget_client]
+versioned_files = ["openbudget_client/pubspec.yaml"]
+changelog = "openbudget_client/CHANGELOG.md"
+scopes = ["client"]
+
+[packages.openbudget_core]
+versioned_files = ["openbudget_core/pubspec.yaml"]
+changelog = "openbudget_core/CHANGELOG.md"
+scopes = ["core"]
+
+[packages.openbudget_ui]
+versioned_files = ["openbudget_ui/pubspec.yaml"]
+changelog = "openbudget_ui/CHANGELOG.md"
+scopes = ["ui"]
+
+[packages.openbudget_wired]
+versioned_files = ["openbudget_wired/pubspec.yaml"]
+changelog = "openbudget_wired/CHANGELOG.md"
+scopes = ["wired"]
+
+[packages.openbudget_lints]
+versioned_files = ["openbudget_lints/pubspec.yaml"]
+changelog = "openbudget_lints/CHANGELOG.md"
+scopes = ["lints"]
+
+[packages.openbudget_test_utils]
+versioned_files = ["openbudget_test_utils/pubspec.yaml"]
+changelog = "openbudget_test_utils/CHANGELOG.md"
+scopes = ["test_utils"]
+
+[[workflows]]
+name = "release"
+
+[[workflows.steps]]
+type = "PrepareRelease"
+ignore_conventional_commits = true
+
+[[workflows.steps]]
+type = "Command"
+command = "dprint fmt"
+
+[[workflows.steps]]
+type = "Command"
+command = "git add --all"
+
+[[workflows.steps]]
+type = "Command"
+command = 'git commit -m "chore: prepare releases"'
+
+[[workflows.steps]]
+type = "Command"
+command = "git push"
+
+[[workflows.steps]]
+type = "Release"
+
+[[workflows]]
+name = "document-change"
+
+[[workflows.steps]]
+type = "CreateChangeFile"
+
+[[workflows.steps]]
+type = "Command"
+command = "dprint fmt .changeset/* --allow-no-files"
+
+[[workflows]]
+name = "forced-release"
+
+[[workflows.steps]]
+type = "Release"
+
+[github]
+owner = "openbudgetfun"
+repo = "openbudget"

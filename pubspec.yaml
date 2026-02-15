@@ -72,3 +72,15 @@ melos:
     upgrade:
       description: Upgrade dependencies in all packages.
       exec: dart pub upgrade
+
+    publish:
+      description: Publish all publishable packages to pub.dev.
+      exec: dart pub publish --force
+      packageFilters:
+        noPrivate: true
+
+    publish:dry:
+      description: Dry-run publish for all publishable packages.
+      exec: dart pub publish --dry-run
+      packageFilters:
+        noPrivate: true
