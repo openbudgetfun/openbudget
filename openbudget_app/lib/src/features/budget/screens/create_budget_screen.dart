@@ -15,11 +15,12 @@ class CreateBudgetScreen extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final nameController = useTextEditingController();
     final selectedCurrency = useState(CurrencyCode.usd);
+    final isSubmitting = useState(false);
 
-    // Watch to keep the auto-dispose provider alive while this screen is mounted.
     ref.watch(createBudgetProvider);
 
     return Scaffold(
+      appBar: AppBar(title: Text(l10n.createBudgetTitle)),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(32),
@@ -65,18 +66,45 @@ class CreateBudgetScreen extends HookConsumerWidget {
                     ),
                     const SizedBox(height: 24),
                     WiredButton(
-                      onPressed: () async {
-                        final budgetId = await ref
-                            .read(createBudgetProvider.notifier)
-                            .create(
-                              name: nameController.text,
-                              currency: selectedCurrency.value,
-                            );
-                        if (context.mounted) {
-                          context.go('/budgets/$budgetId');
-                        }
-                      },
-                      child: Text(l10n.createBudgetButton),
+                      onPressed: isSubmitting.value
+                          ? () {}
+                          : () async {
+                              final name = nameController.text.trim();
+                              if (name.isEmpty) return;
+
+                              isSubmitting.value = true;
+                              try {
+                                final budgetId = await ref
+                                    .read(createBudgetProvider.notifier)
+                                    .create(
+                                      name: name,
+                                      currency: selectedCurrency.value,
+                                    );
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(l10n.createBudgetSuccess),
+                                    ),
+                                  );
+                                  context.go('/budgets/$budgetId');
+                                }
+                              } on Exception catch (_) {
+                                isSubmitting.value = false;
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(l10n.createBudgetError),
+                                      backgroundColor: ColorTokens.error,
+                                    ),
+                                  );
+                                }
+                              }
+                            },
+                      child: Text(
+                        isSubmitting.value
+                            ? l10n.createBudgetCreating
+                            : l10n.createBudgetButton,
+                      ),
                     ),
                   ],
                 ),

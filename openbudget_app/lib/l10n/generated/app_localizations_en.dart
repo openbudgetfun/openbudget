@@ -205,4 +205,56 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get transactionEmpty => 'No transactions yet';
+
+  @override
+  String get createBudgetCreating => 'Creating...';
+
+  @override
+  String get createBudgetSuccess => 'Budget created successfully';
+
+  @override
+  String get createBudgetError => 'Could not create budget. Please try again.';
+
+  @override
+  String get budgetCategoryCreated => 'Category created';
+
+  @override
+  String get budgetEnvelopeCreated => 'Envelope created';
+
+  @override
+  String get budgetCategoryCreateError => 'Could not create category';
+
+  @override
+  String get budgetEnvelopeCreateError => 'Could not create envelope';
+
+  @override
+  String get transactionSuccess => 'Transaction saved';
+
+  @override
+  String get transactionError =>
+      'Could not save transaction. Please try again.';
+
+  @override
+  String get deleteConfirmTitle => 'Delete';
+
+  @override
+  String get deleteConfirmMessage => 'Are you sure you want to delete this?';
+
+  @override
+  String get deleteConfirmButton => 'Delete';
+
+  @override
+  String get deleteSuccess => 'Deleted successfully';
+
+  @override
+  String get deleteError => 'Could not delete. Please try again.';
+
+  @override
+  String get editEnvelopeTitle => 'Edit Envelope';
+
+  @override
+  String get editEnvelopeSaved => 'Envelope updated';
+
+  @override
+  String get editEnvelopeError => 'Could not update envelope';
 }

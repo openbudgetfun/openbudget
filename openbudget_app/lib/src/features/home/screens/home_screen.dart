@@ -74,38 +74,41 @@ class HomeScreen extends HookConsumerWidget {
             );
           }
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: budgetList.length,
-            itemBuilder: (context, index) {
-              final budget = budgetList[index];
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: GestureDetector(
-                  onTap: () => context.go('/budgets/${budget.id}'),
-                  child: WiredCard(
-                    height: 80,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              budget.name,
-                              style: Theme.of(context).textTheme.titleMedium,
+          return RefreshIndicator(
+            onRefresh: () async => ref.invalidate(budgetListProvider),
+            child: ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: budgetList.length,
+              itemBuilder: (context, index) {
+                final budget = budgetList[index];
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: GestureDetector(
+                    onTap: () => context.go('/budgets/${budget.id}'),
+                    child: WiredCard(
+                      height: 80,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                budget.name,
+                                style: Theme.of(context).textTheme.titleMedium,
+                              ),
                             ),
-                          ),
-                          Text(
-                            budget.currencyCode,
-                            style: Theme.of(context).textTheme.bodyMedium,
-                          ),
-                        ],
+                            Text(
+                              budget.currencyCode,
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           );
         },
       ),

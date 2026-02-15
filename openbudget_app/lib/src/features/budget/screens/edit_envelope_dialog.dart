@@ -2,23 +2,32 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
-import 'package:openbudget_app/src/features/budget/providers/category_actions_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/envelope_actions_provider.dart';
+import 'package:openbudget_client/openbudget_client.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
-class AddCategoryDialog extends HookConsumerWidget {
-  const AddCategoryDialog({
+class EditEnvelopeDialog extends HookConsumerWidget {
+  const EditEnvelopeDialog({
+    required this.envelope,
+    required this.categoryId,
     required this.budgetId,
-    required this.nextSortOrder,
+    required this.currencyCode,
     super.key,
   });
 
+  final Envelope envelope;
+  final String categoryId;
   final String budgetId;
-  final int nextSortOrder;
+  final CurrencyCode currencyCode;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final nameController = useTextEditingController();
+    final nameController = useTextEditingController(text: envelope.name);
+    final amountController = useTextEditingController(
+      text: _formatInitialAmount(envelope.budgetedAmountCents, currencyCode),
+    );
     final isSubmitting = useState(false);
 
     return WiredDialog(
@@ -26,13 +35,18 @@ class AddCategoryDialog extends HookConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            l10n.budgetAddCategory,
+            l10n.editEnvelopeTitle,
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 16),
           WiredInput(
             controller: nameController,
-            hintText: l10n.budgetCategoryNameLabel,
+            hintText: l10n.budgetEnvelopeNameLabel,
+          ),
+          const SizedBox(height: 12),
+          WiredInput(
+            controller: amountController,
+            hintText: l10n.budgetEnvelopeAmountLabel,
           ),
           const SizedBox(height: 24),
           Row(
@@ -49,20 +63,26 @@ class AddCategoryDialog extends HookConsumerWidget {
                     : () async {
                         final name = nameController.text.trim();
                         if (name.isEmpty) return;
+
+                        final amountText = amountController.text.trim();
+                        final amount = double.tryParse(amountText) ?? 0;
+                        final amountCents =
+                            (amount * _pow10(currencyCode.decimals)).round();
+
                         isSubmitting.value = true;
                         try {
                           await ref
-                              .read(categoryActionsProvider.notifier)
-                              .createCategory(
-                                name: name,
+                              .read(envelopeActionsProvider.notifier)
+                              .updateEnvelope(
+                                envelopeId: envelope.id?.toString() ?? '',
+                                categoryId: categoryId,
                                 budgetId: budgetId,
-                                sortOrder: nextSortOrder,
+                                name: name,
+                                budgetedAmountCents: amountCents,
                               );
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(l10n.budgetCategoryCreated),
-                              ),
+                              SnackBar(content: Text(l10n.editEnvelopeSaved)),
                             );
                             Navigator.of(context).pop();
                           }
@@ -71,7 +91,7 @@ class AddCategoryDialog extends HookConsumerWidget {
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text(l10n.budgetCategoryCreateError),
+                                content: Text(l10n.editEnvelopeError),
                                 backgroundColor: ColorTokens.error,
                               ),
                             );
@@ -88,4 +108,18 @@ class AddCategoryDialog extends HookConsumerWidget {
       ),
     );
   }
+
+  String _formatInitialAmount(int cents, CurrencyCode currency) {
+    final divisor = _pow10(currency.decimals);
+    final value = cents / divisor;
+    return value.toStringAsFixed(currency.decimals);
+  }
+}
+
+double _pow10(int exponent) {
+  var result = 1.0;
+  for (var i = 0; i < exponent; i++) {
+    result *= 10;
+  }
+  return result;
 }

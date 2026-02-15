@@ -56,56 +56,60 @@ class TransactionListScreen extends HookConsumerWidget {
           final sorted = List.of(transactions)
             ..sort((a, b) => b.transactionDate.compareTo(a.transactionDate));
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: sorted.length,
-            itemBuilder: (context, index) {
-              final tx = sorted[index];
-              final isIncome = tx.amountCents > 0;
-              final color = isIncome
-                  ? ColorTokens.secondary
-                  : ColorTokens.error;
+          return RefreshIndicator(
+            onRefresh: () async =>
+                ref.invalidate(transactionListProvider(budgetId)),
+            child: ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: sorted.length,
+              itemBuilder: (context, index) {
+                final tx = sorted[index];
+                final isIncome = tx.amountCents > 0;
+                final color = isIncome
+                    ? ColorTokens.secondary
+                    : ColorTokens.error;
 
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: WiredCard(
-                  height: 70,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          flex: 3,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                tx.description,
-                                style: Theme.of(context).textTheme.bodyMedium,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              Text(
-                                _formatDate(tx.transactionDate),
-                                style: Theme.of(context).textTheme.bodySmall,
-                              ),
-                            ],
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: WiredCard(
+                    height: 70,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            flex: 3,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  tx.description,
+                                  style: Theme.of(context).textTheme.bodyMedium,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                Text(
+                                  _formatDate(tx.transactionDate),
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        Text(
-                          formatCents(tx.amountCents, currency),
-                          style: Theme.of(context).textTheme.titleSmall
-                              ?.copyWith(
-                                color: color,
-                                fontWeight: FontWeight.bold,
-                              ),
-                        ),
-                      ],
+                          Text(
+                            formatCents(tx.amountCents, currency),
+                            style: Theme.of(context).textTheme.titleSmall
+                                ?.copyWith(
+                                  color: color,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           );
         },
       ),

@@ -465,6 +465,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No transactions yet'**
   String get transactionEmpty;
+
+  /// No description provided for @createBudgetCreating.
+  ///
+  /// In en, this message translates to:
+  /// **'Creating...'**
+  String get createBudgetCreating;
+
+  /// No description provided for @createBudgetSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget created successfully'**
+  String get createBudgetSuccess;
+
+  /// No description provided for @createBudgetError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not create budget. Please try again.'**
+  String get createBudgetError;
+
+  /// No description provided for @budgetCategoryCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Category created'**
+  String get budgetCategoryCreated;
+
+  /// No description provided for @budgetEnvelopeCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Envelope created'**
+  String get budgetEnvelopeCreated;
+
+  /// No description provided for @budgetCategoryCreateError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not create category'**
+  String get budgetCategoryCreateError;
+
+  /// No description provided for @budgetEnvelopeCreateError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not create envelope'**
+  String get budgetEnvelopeCreateError;
+
+  /// No description provided for @transactionSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction saved'**
+  String get transactionSuccess;
+
+  /// No description provided for @transactionError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save transaction. Please try again.'**
+  String get transactionError;
+
+  /// No description provided for @deleteConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get deleteConfirmTitle;
+
+  /// No description provided for @deleteConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this?'**
+  String get deleteConfirmMessage;
+
+  /// No description provided for @deleteConfirmButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get deleteConfirmButton;
+
+  /// No description provided for @deleteSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted successfully'**
+  String get deleteSuccess;
+
+  /// No description provided for @deleteError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not delete. Please try again.'**
+  String get deleteError;
+
+  /// No description provided for @editEnvelopeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Envelope'**
+  String get editEnvelopeTitle;
+
+  /// No description provided for @editEnvelopeSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Envelope updated'**
+  String get editEnvelopeSaved;
+
+  /// No description provided for @editEnvelopeError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not update envelope'**
+  String get editEnvelopeError;
 }
 
 class _AppLocalizationsDelegate

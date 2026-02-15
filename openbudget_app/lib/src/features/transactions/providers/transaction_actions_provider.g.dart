@@ -42,7 +42,7 @@ final class TransactionActionsProvider
 }
 
 String _$transactionActionsHash() =>
-    r'3fa65817d5c9b40e1619cf98142cbcdf8ca779f9';
+    r'a4eeb3fa96218ad56cb54c0ca0213678a0aaccaf';
 
 abstract class _$TransactionActions extends $Notifier<AsyncValue<void>> {
   AsyncValue<void> build();

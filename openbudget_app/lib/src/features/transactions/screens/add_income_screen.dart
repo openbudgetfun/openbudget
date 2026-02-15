@@ -89,10 +89,23 @@ class AddIncomeScreen extends HookConsumerWidget {
                                       date: DateTime.now(),
                                     );
                                 if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(l10n.transactionSuccess),
+                                    ),
+                                  );
                                   context.go('/budgets/$budgetId');
                                 }
                               } on Exception catch (_) {
                                 isSubmitting.value = false;
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(l10n.transactionError),
+                                      backgroundColor: ColorTokens.error,
+                                    ),
+                                  );
+                                }
                               }
                             },
                       child: Text(

@@ -75,9 +75,24 @@ class AddEnvelopeDialog extends HookConsumerWidget {
                                 currencyCode: currencyCode.code,
                                 budgetId: budgetId,
                               );
-                          if (context.mounted) Navigator.of(context).pop();
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(l10n.budgetEnvelopeCreated),
+                              ),
+                            );
+                            Navigator.of(context).pop();
+                          }
                         } on Exception catch (_) {
                           isSubmitting.value = false;
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(l10n.budgetEnvelopeCreateError),
+                                backgroundColor: ColorTokens.error,
+                              ),
+                            );
+                          }
                         }
                       },
                 child: Text(
