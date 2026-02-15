@@ -127,4 +127,52 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get budgetEmptySubtitle =>
       'Add your first envelope category to start budgeting';
+
+  @override
+  String get budgetReadyToAssign => 'Ready to Assign';
+
+  @override
+  String get budgetColumnBudgeted => 'Budgeted';
+
+  @override
+  String get budgetColumnSpent => 'Spent';
+
+  @override
+  String get budgetColumnAvailable => 'Available';
+
+  @override
+  String get budgetAddCategory => 'Add Category';
+
+  @override
+  String get budgetAddEnvelope => 'Add Envelope';
+
+  @override
+  String get budgetAddIncome => 'Add Income';
+
+  @override
+  String get budgetAddExpense => 'Add Expense';
+
+  @override
+  String get budgetCategoryTotal => 'Total';
+
+  @override
+  String get budgetCategoryNameLabel => 'Category Name';
+
+  @override
+  String get budgetEnvelopeNameLabel => 'Envelope Name';
+
+  @override
+  String get budgetEnvelopeAmountLabel => 'Budgeted Amount';
+
+  @override
+  String get budgetLoadError => 'Could not load budget details';
+
+  @override
+  String get dialogSave => 'Save';
+
+  @override
+  String get dialogSaving => 'Saving...';
+
+  @override
+  String get dialogCancel => 'Cancel';
 }

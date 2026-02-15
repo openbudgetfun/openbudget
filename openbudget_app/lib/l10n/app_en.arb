@@ -42,5 +42,21 @@
   "createBudgetCurrencyLabel": "Primary Currency",
   "createBudgetButton": "Create",
   "budgetEmptyTitle": "No Categories Yet",
-  "budgetEmptySubtitle": "Add your first envelope category to start budgeting"
+  "budgetEmptySubtitle": "Add your first envelope category to start budgeting",
+  "budgetReadyToAssign": "Ready to Assign",
+  "budgetColumnBudgeted": "Budgeted",
+  "budgetColumnSpent": "Spent",
+  "budgetColumnAvailable": "Available",
+  "budgetAddCategory": "Add Category",
+  "budgetAddEnvelope": "Add Envelope",
+  "budgetAddIncome": "Add Income",
+  "budgetAddExpense": "Add Expense",
+  "budgetCategoryTotal": "Total",
+  "budgetCategoryNameLabel": "Category Name",
+  "budgetEnvelopeNameLabel": "Envelope Name",
+  "budgetEnvelopeAmountLabel": "Budgeted Amount",
+  "budgetLoadError": "Could not load budget details",
+  "dialogSave": "Save",
+  "dialogSaving": "Saving...",
+  "dialogCancel": "Cancel"
 }

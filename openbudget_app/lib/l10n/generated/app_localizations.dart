@@ -309,6 +309,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add your first envelope category to start budgeting'**
   String get budgetEmptySubtitle;
+
+  /// No description provided for @budgetReadyToAssign.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to Assign'**
+  String get budgetReadyToAssign;
+
+  /// No description provided for @budgetColumnBudgeted.
+  ///
+  /// In en, this message translates to:
+  /// **'Budgeted'**
+  String get budgetColumnBudgeted;
+
+  /// No description provided for @budgetColumnSpent.
+  ///
+  /// In en, this message translates to:
+  /// **'Spent'**
+  String get budgetColumnSpent;
+
+  /// No description provided for @budgetColumnAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Available'**
+  String get budgetColumnAvailable;
+
+  /// No description provided for @budgetAddCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Category'**
+  String get budgetAddCategory;
+
+  /// No description provided for @budgetAddEnvelope.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Envelope'**
+  String get budgetAddEnvelope;
+
+  /// No description provided for @budgetAddIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Income'**
+  String get budgetAddIncome;
+
+  /// No description provided for @budgetAddExpense.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Expense'**
+  String get budgetAddExpense;
+
+  /// No description provided for @budgetCategoryTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get budgetCategoryTotal;
+
+  /// No description provided for @budgetCategoryNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Category Name'**
+  String get budgetCategoryNameLabel;
+
+  /// No description provided for @budgetEnvelopeNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Envelope Name'**
+  String get budgetEnvelopeNameLabel;
+
+  /// No description provided for @budgetEnvelopeAmountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Budgeted Amount'**
+  String get budgetEnvelopeAmountLabel;
+
+  /// No description provided for @budgetLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load budget details'**
+  String get budgetLoadError;
+
+  /// No description provided for @dialogSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get dialogSave;
+
+  /// No description provided for @dialogSaving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving...'**
+  String get dialogSaving;
+
+  /// No description provided for @dialogCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get dialogCancel;
 }
 
 class _AppLocalizationsDelegate
