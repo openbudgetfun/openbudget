@@ -1,12 +1,16 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:integration_test/integration_test.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
-import 'package:patrol/patrol.dart';
+import 'package:patrol_finders/patrol_finders.dart';
 
 import 'common/patrol_helpers.dart';
 import 'common/test_data.dart';
 
 void main() {
-  patrolTest('create budget screen renders form', ($) async {
+  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+
+  testWidgets('create budget screen renders form', (tester) async {
+    final $ = PatrolTester(tester: tester, config: PatrolTesterConfig());
     await initApp($);
 
     final loginPage = LoginPage($);
@@ -23,7 +27,8 @@ void main() {
     expect($('Create Budget'), findsOneWidget);
   });
 
-  patrolTest('creating a budget navigates to budget detail', ($) async {
+  testWidgets('creating a budget navigates to budget detail', (tester) async {
+    final $ = PatrolTester(tester: tester, config: PatrolTesterConfig());
     await initApp($);
 
     final loginPage = LoginPage($);
@@ -43,7 +48,8 @@ void main() {
     expect($('Budget: mock-budget-1'), findsOneWidget);
   });
 
-  patrolTest('budget detail shows empty state', ($) async {
+  testWidgets('budget detail shows empty state', (tester) async {
+    final $ = PatrolTester(tester: tester, config: PatrolTesterConfig());
     await initApp($);
 
     final loginPage = LoginPage($);

@@ -1,12 +1,16 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:integration_test/integration_test.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
-import 'package:patrol/patrol.dart';
+import 'package:patrol_finders/patrol_finders.dart';
 
 import 'common/patrol_helpers.dart';
 import 'common/test_data.dart';
 
 void main() {
-  patrolTest('shows login screen on launch', ($) async {
+  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+
+  testWidgets('shows login screen on launch', (tester) async {
+    final $ = PatrolTester(tester: tester, config: PatrolTesterConfig());
     await initApp($);
 
     final loginPage = LoginPage($);
@@ -17,7 +21,8 @@ void main() {
     expect($('Welcome to OpenBudget'), findsOneWidget);
   });
 
-  patrolTest('login navigates to create budget screen', ($) async {
+  testWidgets('login navigates to create budget screen', (tester) async {
+    final $ = PatrolTester(tester: tester, config: PatrolTesterConfig());
     await initApp($);
 
     final loginPage = LoginPage($);
@@ -32,7 +37,8 @@ void main() {
     expect($('Create Budget'), findsOneWidget);
   });
 
-  patrolTest('redirects unauthenticated user to login', ($) async {
+  testWidgets('redirects unauthenticated user to login', (tester) async {
+    final $ = PatrolTester(tester: tester, config: PatrolTesterConfig());
     await initApp($);
 
     // Verify login is shown (auth guard redirects unauthenticated users)

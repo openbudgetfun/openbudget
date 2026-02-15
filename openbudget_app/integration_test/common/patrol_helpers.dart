@@ -1,10 +1,10 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/main.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
-import 'package:patrol/patrol.dart';
+import 'package:patrol_finders/patrol_finders.dart';
 
 /// Pumps the full OpenBudget app inside a [ProviderScope].
-Future<void> initApp(PatrolIntegrationTester $) async {
+Future<void> initApp(PatrolTester $) async {
   await $.pumpWidgetAndSettle(const ProviderScope(child: OpenBudgetApp()));
 }
 
@@ -12,7 +12,7 @@ Future<void> initApp(PatrolIntegrationTester $) async {
 class LoginPage {
   LoginPage(this.$);
 
-  final PatrolIntegrationTester $;
+  final PatrolTester $;
 
   PatrolFinder get emailField => $(WiredInput).at(0);
   PatrolFinder get passwordField => $(WiredInput).at(1);
@@ -29,7 +29,7 @@ class LoginPage {
 class CreateBudgetPage {
   CreateBudgetPage(this.$);
 
-  final PatrolIntegrationTester $;
+  final PatrolTester $;
 
   PatrolFinder get nameField => $(WiredInput).first;
   PatrolFinder get currencyCombo => $(WiredCombo);
@@ -45,7 +45,7 @@ class CreateBudgetPage {
 class BudgetDetailPage {
   BudgetDetailPage(this.$);
 
-  final PatrolIntegrationTester $;
+  final PatrolTester $;
 
   PatrolFinder get budgetHeader => $(WiredCard).first;
   PatrolFinder get emptyStateTitle => $('No Categories Yet');

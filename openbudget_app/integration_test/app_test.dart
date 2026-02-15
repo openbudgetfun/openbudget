@@ -1,11 +1,17 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:patrol/patrol.dart';
+import 'package:integration_test/integration_test.dart';
+import 'package:patrol_finders/patrol_finders.dart';
 
 import 'common/patrol_helpers.dart';
 import 'common/test_data.dart';
 
 void main() {
-  patrolTest('full app flow: login → create budget → view budget', ($) async {
+  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+
+  testWidgets('full app flow: login → create budget → view budget', (
+    tester,
+  ) async {
+    final $ = PatrolTester(tester: tester, config: PatrolTesterConfig());
     await initApp($);
 
     final loginPage = LoginPage($);

@@ -76,7 +76,7 @@ jobs:
         run: |
           for f in integration_test/*_test.dart; do
             echo "::group::Running $f"
-            xvfb-run flutter test "$f"
+            xvfb-run flutter test "$f" -d linux
             echo "::endgroup::"
           done
 
