@@ -140,7 +140,14 @@ All work MUST go through feature branches and pull requests. No direct commits t
 
 ### CI Requirements
 
-All PRs must pass: analyze, test, format, integration-test, widget-ban, secrets-scan.
+All PRs must pass: analyze, test, format, integration-test, widget-ban, secrets-scan, server-test.
+
+### Database Migrations (Minimize)
+
+- Each PR/feature MUST produce at most **one** Serverpod migration.
+- If you modify multiple models in the same PR, run `serverpod create-migration` once after all model changes are complete.
+- Never create incremental migrations for iterative tweaks within the same branch — squash into a single migration before opening the PR.
+- Migration files (`openbudget_server/migrations/`) are committed alongside the code they support.
 
 ## Constitution
 

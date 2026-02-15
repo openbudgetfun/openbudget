@@ -1,0 +1,17 @@
+### An envelope within a category, tracking budgeted and spent amounts.
+class: Envelope
+table: envelope
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  name: String
+  categoryId: UuidValue, relation(parent=category)
+  ### Budgeted amount stored as integer cents to avoid floating-point issues.
+  budgetedAmountCents: int
+  ### Spent amount stored as integer cents.
+  spentAmountCents: int
+  ### ISO 4217 currency code.
+  currencyCode: String
+  createdAt: DateTime, default=now
+indexes:
+  envelope_category_idx:
+    fields: categoryId

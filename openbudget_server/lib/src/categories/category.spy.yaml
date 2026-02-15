@@ -1,0 +1,12 @@
+### A grouping of envelopes within a budget.
+class: Category
+table: category
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  name: String
+  budgetId: UuidValue, relation(parent=budget)
+  sortOrder: int
+  createdAt: DateTime, default=now
+indexes:
+  category_budget_idx:
+    fields: budgetId
