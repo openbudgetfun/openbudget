@@ -1,0 +1,28 @@
+name: openbudget_test_utils
+description: Shared test helpers for OpenBudget packages.
+version: 1.0.0
+publish_to: none
+
+environment:
+  sdk: ^3.11.0
+  flutter: ^3.41.0
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  flutter_test:
+    sdk: flutter
+  go_router: ^15.1.0
+  hooks_riverpod: ^3.2.0
+  openbudget_core:
+    path: ../openbudget_core
+  openbudget_ui:
+    path: ../openbudget_ui
+
+dev_dependencies:
+  openbudget_lints:
+    path: ../openbudget_lints
