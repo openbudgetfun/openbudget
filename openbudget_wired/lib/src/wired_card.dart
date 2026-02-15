@@ -27,8 +27,7 @@ class WiredCard extends HookWidget {
         children: [
           WiredCanvas(
             painter: WiredRectangleBase(),
-            fillerType:
-                fill ? RoughFilter.hachureFiller : RoughFilter.noFiller,
+            fillerType: fill ? RoughFilter.hachureFiller : RoughFilter.noFiller,
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,

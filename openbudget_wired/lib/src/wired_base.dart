@@ -7,20 +7,18 @@ import 'const.dart';
 
 /// Utility class with default Paint objects for wired widgets.
 class WiredBase {
-  static final Paint pathPaint =
-      Paint()
-        ..color = borderColor
-        ..style = PaintingStyle.stroke
-        ..isAntiAlias = true
-        ..strokeCap = StrokeCap.square
-        ..strokeWidth = 2;
+  static final Paint pathPaint = Paint()
+    ..color = borderColor
+    ..style = PaintingStyle.stroke
+    ..isAntiAlias = true
+    ..strokeCap = StrokeCap.square
+    ..strokeWidth = 2;
 
-  static final Paint fillPaint =
-      Paint()
-        ..color = filledColor
-        ..style = PaintingStyle.stroke
-        ..isAntiAlias = true
-        ..strokeWidth = 2;
+  static final Paint fillPaint = Paint()
+    ..color = filledColor
+    ..style = PaintingStyle.stroke
+    ..isAntiAlias = true
+    ..strokeWidth = 2;
 
   static Paint fillPainter(Color color) {
     return Paint()

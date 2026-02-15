@@ -8,10 +8,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: WiredButton(
-              onPressed: () {},
-              child: const Text('Press me'),
-            ),
+            body: WiredButton(onPressed: () {}, child: const Text('Press me')),
           ),
         ),
       );
@@ -57,9 +54,7 @@ void main() {
     testWidgets('renders child widget', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(
-            body: WiredCard(child: const Text('Card content')),
-          ),
+          home: Scaffold(body: WiredCard(child: const Text('Card content'))),
         ),
       );
 
@@ -73,10 +68,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: WiredCheckbox(
-              value: false,
-              onChanged: (v) => lastValue = v,
-            ),
+            body: WiredCheckbox(value: false, onChanged: (v) => lastValue = v),
           ),
         ),
       );
@@ -96,10 +88,7 @@ void main() {
               child: SizedBox(
                 width: 100,
                 height: 100,
-                child: WiredToggle(
-                  value: false,
-                  onChange: (v) => true,
-                ),
+                child: WiredToggle(value: false, onChange: (v) => true),
               ),
             ),
           ),

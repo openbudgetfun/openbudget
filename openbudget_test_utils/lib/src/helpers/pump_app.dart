@@ -42,15 +42,10 @@ extension PumpApp on WidgetTester {
 
     if (container != null) {
       return pumpWidget(
-        UncontrolledProviderScope(
-          container: container,
-          child: app,
-        ),
+        UncontrolledProviderScope(container: container, child: app),
       );
     }
 
-    return pumpWidget(
-      ProviderScope(child: app),
-    );
+    return pumpWidget(ProviderScope(child: app));
   }
 }

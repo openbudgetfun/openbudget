@@ -42,14 +42,10 @@ class EndpointEmailIdp extends _i1.EndpointEmailIdpBase {
   _i3.Future<_i4.AuthSuccess> login({
     required String email,
     required String password,
-  }) => caller.callServerEndpoint<_i4.AuthSuccess>(
-    'emailIdp',
-    'login',
-    {
-      'email': email,
-      'password': password,
-    },
-  );
+  }) => caller.callServerEndpoint<_i4.AuthSuccess>('emailIdp', 'login', {
+    'email': email,
+    'password': password,
+  });
 
   /// Starts the registration for a new user account with an email-based login
   /// associated to it.
@@ -83,14 +79,11 @@ class EndpointEmailIdp extends _i1.EndpointEmailIdpBase {
   _i3.Future<String> verifyRegistrationCode({
     required _i2.UuidValue accountRequestId,
     required String verificationCode,
-  }) => caller.callServerEndpoint<String>(
-    'emailIdp',
-    'verifyRegistrationCode',
-    {
-      'accountRequestId': accountRequestId,
-      'verificationCode': verificationCode,
-    },
-  );
+  }) =>
+      caller.callServerEndpoint<String>('emailIdp', 'verifyRegistrationCode', {
+        'accountRequestId': accountRequestId,
+        'verificationCode': verificationCode,
+      });
 
   /// Completes a new account registration, creating a new auth user with a
   /// profile and attaching the given email account to it.
@@ -113,10 +106,7 @@ class EndpointEmailIdp extends _i1.EndpointEmailIdpBase {
   }) => caller.callServerEndpoint<_i4.AuthSuccess>(
     'emailIdp',
     'finishRegistration',
-    {
-      'registrationToken': registrationToken,
-      'password': password,
-    },
+    {'registrationToken': registrationToken, 'password': password},
   );
 
   /// Requests a password reset for [email].
@@ -158,14 +148,11 @@ class EndpointEmailIdp extends _i1.EndpointEmailIdpBase {
   _i3.Future<String> verifyPasswordResetCode({
     required _i2.UuidValue passwordResetRequestId,
     required String verificationCode,
-  }) => caller.callServerEndpoint<String>(
-    'emailIdp',
-    'verifyPasswordResetCode',
-    {
-      'passwordResetRequestId': passwordResetRequestId,
-      'verificationCode': verificationCode,
-    },
-  );
+  }) =>
+      caller.callServerEndpoint<String>('emailIdp', 'verifyPasswordResetCode', {
+        'passwordResetRequestId': passwordResetRequestId,
+        'verificationCode': verificationCode,
+      });
 
   /// Completes a password reset request by setting a new password.
   ///
@@ -185,21 +172,14 @@ class EndpointEmailIdp extends _i1.EndpointEmailIdpBase {
   _i3.Future<void> finishPasswordReset({
     required String finishPasswordResetToken,
     required String newPassword,
-  }) => caller.callServerEndpoint<void>(
-    'emailIdp',
-    'finishPasswordReset',
-    {
-      'finishPasswordResetToken': finishPasswordResetToken,
-      'newPassword': newPassword,
-    },
-  );
+  }) => caller.callServerEndpoint<void>('emailIdp', 'finishPasswordReset', {
+    'finishPasswordResetToken': finishPasswordResetToken,
+    'newPassword': newPassword,
+  });
 
   @override
-  _i3.Future<bool> hasAccount() => caller.callServerEndpoint<bool>(
-    'emailIdp',
-    'hasAccount',
-    {},
-  );
+  _i3.Future<bool> hasAccount() =>
+      caller.callServerEndpoint<bool>('emailIdp', 'hasAccount', {});
 }
 
 /// By extending [RefreshJwtTokensEndpoint], the JWT token refresh endpoint
@@ -250,12 +230,8 @@ class EndpointGreeting extends _i2.EndpointRef {
   String get name => 'greeting';
 
   /// Returns a personalized greeting message: "Hello {name}".
-  _i3.Future<_i5.Greeting> hello(String name) =>
-      caller.callServerEndpoint<_i5.Greeting>(
-        'greeting',
-        'hello',
-        {'name': name},
-      );
+  _i3.Future<_i5.Greeting> hello(String name) => caller
+      .callServerEndpoint<_i5.Greeting>('greeting', 'hello', {'name': name});
 }
 
 class Modules {
@@ -279,12 +255,7 @@ class Client extends _i2.ServerpodClientShared {
     super.authenticationKeyManager,
     Duration? streamingConnectionTimeout,
     Duration? connectionTimeout,
-    Function(
-      _i2.MethodCallContext,
-      Object,
-      StackTrace,
-    )?
-    onFailedCall,
+    Function(_i2.MethodCallContext, Object, StackTrace)? onFailedCall,
     Function(_i2.MethodCallContext)? onSucceededCall,
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(

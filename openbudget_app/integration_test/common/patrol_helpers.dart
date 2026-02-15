@@ -5,9 +5,7 @@ import 'package:patrol/patrol.dart';
 
 /// Pumps the full OpenBudget app inside a [ProviderScope].
 Future<void> initApp(PatrolIntegrationTester $) async {
-  await $.pumpWidgetAndSettle(
-    const ProviderScope(child: OpenBudgetApp()),
-  );
+  await $.pumpWidgetAndSettle(const ProviderScope(child: OpenBudgetApp()));
 }
 
 /// Page object for the login screen.

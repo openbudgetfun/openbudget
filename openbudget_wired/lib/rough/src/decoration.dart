@@ -67,10 +67,9 @@ class RoughDecorationPainter extends BoxPainter {
       rect,
     );
 
-    final Paint fillPaint =
-        roughDecoration.fillStyle == null
-            ? borderPaint
-            : _buildDrawPaint(roughDecoration.fillStyle!, rect);
+    final Paint fillPaint = roughDecoration.fillStyle == null
+        ? borderPaint
+        : _buildDrawPaint(roughDecoration.fillStyle!, rect);
 
     Drawable drawable;
     switch (roughDecoration.shape) {
@@ -102,14 +101,13 @@ class RoughDecorationPainter extends BoxPainter {
 
   Paint _buildDrawPaint(RoughDrawingStyle roughDrawDecoration, Rect rect) {
     const defaultColor = Color(0x00000000);
-    final Paint paint =
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..isAntiAlias = true
-          ..strokeCap = StrokeCap.square
-          ..strokeWidth = roughDrawDecoration.width ?? 0.1
-          ..color = roughDrawDecoration.color ?? defaultColor
-          ..shader = roughDrawDecoration.gradient?.createShader(rect);
+    final Paint paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..isAntiAlias = true
+      ..strokeCap = StrokeCap.square
+      ..strokeWidth = roughDrawDecoration.width ?? 0.1
+      ..color = roughDrawDecoration.color ?? defaultColor
+      ..shader = roughDrawDecoration.gradient?.createShader(rect);
     if (roughDrawDecoration.blendMode != null) {
       paint.blendMode = roughDrawDecoration.blendMode!;
     }
