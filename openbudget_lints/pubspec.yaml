@@ -1,0 +1,13 @@
+name: openbudget_lints
+description: Centralized lint rules for the OpenBudget project.
+version: 1.0.0
+publish_to: none
+
+environment:
+  sdk: ^3.11.0
+
+resolution: workspace
+
+dependencies:
+  riverpod_lint: ^3.1.2
+  very_good_analysis: ^7.0.0
