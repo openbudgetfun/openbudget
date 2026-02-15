@@ -1,0 +1,74 @@
+name: openbudget_workspace
+publish_to: none
+
+environment:
+  sdk: ^3.11.0
+
+workspace:
+  - openbudget_app
+  - openbudget_client
+  - openbudget_server
+  - openbudget_core
+  - openbudget_ui
+  - openbudget_lints
+  - openbudget_test_utils
+  - openbudget_wired
+
+dev_dependencies:
+  melos: ^7.4.0
+
+melos:
+  name: openbudget
+  sdkPath: .fvm/flutter_sdk
+
+  scripts:
+    analyze:
+      description: Run dart analyze across all packages.
+      exec: dart analyze --fatal-infos .
+
+    test:
+      description: Run tests in all packages.
+      exec: dart test
+      packageFilters:
+        dirExists: test
+
+    test:flutter:
+      description: Run Flutter tests in Flutter packages.
+      exec: flutter test
+      packageFilters:
+        dependsOn: flutter
+        dirExists: test
+
+    format:
+      description: Format all Dart code.
+      run: dart format .
+
+    generate:
+      description: Run build_runner in all packages that use it.
+      exec: dart run build_runner build --delete-conflicting-outputs
+      packageFilters:
+        dependsOn: build_runner
+
+    generate:watch:
+      description: Run build_runner in watch mode.
+      exec: dart run build_runner watch --delete-conflicting-outputs
+      packageFilters:
+        dependsOn: build_runner
+
+    serverpod:generate:
+      description: Run Serverpod code generation.
+      run: cd openbudget_server && dart run serverpod generate
+
+    clean:
+      description: Clean all packages.
+      exec: flutter clean
+      packageFilters:
+        dependsOn: flutter
+
+    test:integration:
+      description: Run Patrol integration tests.
+      run: cd openbudget_app && flutter test integration_test
+
+    upgrade:
+      description: Upgrade dependencies in all packages.
+      exec: dart pub upgrade
