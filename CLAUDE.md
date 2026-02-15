@@ -6,16 +6,16 @@ OpenBudget is a cross-platform envelope budgeting app built with Flutter and Ser
 
 ## Repository Structure
 
-| Package | Type | Description |
-|---|---|---|
-| `openbudget_app` | Flutter app | Main application entry point |
-| `openbudget_server` | Serverpod server | Backend API and business logic |
-| `openbudget_client` | Dart package | Generated Serverpod client protocol |
-| `openbudget_core` | Dart package | Shared models, constants, utilities (no Flutter dependency) |
-| `openbudget_ui` | Flutter package | Shared widgets, theme, design tokens |
-| `openbudget_wired` | Flutter package | Hand-drawn wired UI components (ported from verily_wired) |
-| `openbudget_lints` | Dart package | Centralized lint rules (all packages depend on this) |
-| `openbudget_test_utils` | Flutter package | Shared test helpers (`pumpApp`, etc.) |
+| Package                 | Type             | Description                                                 |
+| ----------------------- | ---------------- | ----------------------------------------------------------- |
+| `openbudget_app`        | Flutter app      | Main application entry point                                |
+| `openbudget_server`     | Serverpod server | Backend API and business logic                              |
+| `openbudget_client`     | Dart package     | Generated Serverpod client protocol                         |
+| `openbudget_core`       | Dart package     | Shared models, constants, utilities (no Flutter dependency) |
+| `openbudget_ui`         | Flutter package  | Shared widgets, theme, design tokens                        |
+| `openbudget_wired`      | Flutter package  | Hand-drawn wired UI components (ported from verily_wired)   |
+| `openbudget_lints`      | Dart package     | Centralized lint rules (all packages depend on this)        |
+| `openbudget_test_utils` | Flutter package  | Shared test helpers (`pumpApp`, etc.)                       |
 
 ## Dependency Graph
 

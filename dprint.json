@@ -1,22 +1,6 @@
 {
   "$schema": "https://dprint.dev/schemas/v0.json",
   "incremental": true,
-  "exec": {
-    "commands": [
-      {
-        "command": "nixfmt",
-        "exts": ["nix"]
-      },
-      {
-        "command": "shfmt --filename {{file_path}} -i 0",
-        "exts": ["sh", "bash"]
-      },
-      {
-        "command": "dartfmt {{file_path}}",
-        "exts": ["dart"]
-      }
-    ]
-  },
   "json": {
     "indentWidth": 2,
     "useTabs": false
