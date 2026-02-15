@@ -74,11 +74,13 @@ jobs:
       - name: Run integration tests
         working-directory: openbudget_app
         run: |
-          for f in integration_test/*_test.dart; do
-            echo "::group::Running $f"
-            xvfb-run flutter test "$f" -d linux
-            echo "::endgroup::"
-          done
+          xvfb-run bash -c '
+            for f in integration_test/*_test.dart; do
+              echo "::group::Running $f"
+              flutter test "$f" -d linux
+              echo "::endgroup::"
+            done
+          '
 
   no-stateful-or-stateless:
     name: Ban StatefulWidget and StatelessWidget
