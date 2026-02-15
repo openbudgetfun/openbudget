@@ -9,5 +9,29 @@ emailIdp:
   - hasAccount:
 jwtRefresh:
   - refreshAccessToken:
-greeting:
-  - hello:
+budget:
+  - create:
+  - list:
+  - get:
+  - update:
+  - delete:
+budgetStream:
+  - budgetUpdates:
+category:
+  - create:
+  - list:
+  - get:
+  - update:
+  - delete:
+envelope:
+  - create:
+  - list:
+  - get:
+  - update:
+  - delete:
+transaction:
+  - create:
+  - list:
+  - get:
+  - update:
+  - delete:

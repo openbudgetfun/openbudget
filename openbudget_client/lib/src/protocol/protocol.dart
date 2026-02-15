@@ -11,12 +11,23 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod_client/serverpod_client.dart' as _i1;
-import 'greetings/greeting.dart' as _i2;
+import 'budgets/budget.dart' as _i2;
+import 'categories/category.dart' as _i3;
+import 'envelopes/envelope.dart' as _i4;
+import 'transactions/transaction.dart' as _i5;
+import 'package:openbudget_client/src/protocol/budgets/budget.dart' as _i6;
+import 'package:openbudget_client/src/protocol/categories/category.dart' as _i7;
+import 'package:openbudget_client/src/protocol/envelopes/envelope.dart' as _i8;
+import 'package:openbudget_client/src/protocol/transactions/transaction.dart'
+    as _i9;
 import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart'
-    as _i3;
+    as _i10;
 import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
-    as _i4;
-export 'greetings/greeting.dart';
+    as _i11;
+export 'budgets/budget.dart';
+export 'categories/category.dart';
+export 'envelopes/envelope.dart';
+export 'transactions/transaction.dart';
 export 'client.dart';
 
 class Protocol extends _i1.SerializationManager {
@@ -50,24 +61,61 @@ class Protocol extends _i1.SerializationManager {
       }
     }
 
-    if (t == _i2.Greeting) {
-      return _i2.Greeting.fromJson(data) as T;
+    if (t == _i2.Budget) {
+      return _i2.Budget.fromJson(data) as T;
     }
-    if (t == _i1.getType<_i2.Greeting?>()) {
-      return (data != null ? _i2.Greeting.fromJson(data) : null) as T;
+    if (t == _i3.Category) {
+      return _i3.Category.fromJson(data) as T;
+    }
+    if (t == _i4.Envelope) {
+      return _i4.Envelope.fromJson(data) as T;
+    }
+    if (t == _i5.Transaction) {
+      return _i5.Transaction.fromJson(data) as T;
+    }
+    if (t == _i1.getType<_i2.Budget?>()) {
+      return (data != null ? _i2.Budget.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i3.Category?>()) {
+      return (data != null ? _i3.Category.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i4.Envelope?>()) {
+      return (data != null ? _i4.Envelope.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i5.Transaction?>()) {
+      return (data != null ? _i5.Transaction.fromJson(data) : null) as T;
+    }
+    if (t == List<_i6.Budget>) {
+      return (data as List).map((e) => deserialize<_i6.Budget>(e)).toList()
+          as T;
+    }
+    if (t == List<_i7.Category>) {
+      return (data as List).map((e) => deserialize<_i7.Category>(e)).toList()
+          as T;
+    }
+    if (t == List<_i8.Envelope>) {
+      return (data as List).map((e) => deserialize<_i8.Envelope>(e)).toList()
+          as T;
+    }
+    if (t == List<_i9.Transaction>) {
+      return (data as List).map((e) => deserialize<_i9.Transaction>(e)).toList()
+          as T;
     }
     try {
-      return _i3.Protocol().deserialize<T>(data, t);
+      return _i10.Protocol().deserialize<T>(data, t);
     } on _i1.DeserializationTypeNotFoundException catch (_) {}
     try {
-      return _i4.Protocol().deserialize<T>(data, t);
+      return _i11.Protocol().deserialize<T>(data, t);
     } on _i1.DeserializationTypeNotFoundException catch (_) {}
     return super.deserialize<T>(data, t);
   }
 
   static String? getClassNameForType(Type type) {
     return switch (type) {
-      _i2.Greeting => 'Greeting',
+      _i2.Budget => 'Budget',
+      _i3.Category => 'Category',
+      _i4.Envelope => 'Envelope',
+      _i5.Transaction => 'Transaction',
       _ => null,
     };
   }
@@ -82,14 +130,20 @@ class Protocol extends _i1.SerializationManager {
     }
 
     switch (data) {
-      case _i2.Greeting():
-        return 'Greeting';
+      case _i2.Budget():
+        return 'Budget';
+      case _i3.Category():
+        return 'Category';
+      case _i4.Envelope():
+        return 'Envelope';
+      case _i5.Transaction():
+        return 'Transaction';
     }
-    className = _i3.Protocol().getClassNameForObject(data);
+    className = _i10.Protocol().getClassNameForObject(data);
     if (className != null) {
       return 'serverpod_auth_idp.$className';
     }
-    className = _i4.Protocol().getClassNameForObject(data);
+    className = _i11.Protocol().getClassNameForObject(data);
     if (className != null) {
       return 'serverpod_auth_core.$className';
     }
@@ -102,16 +156,25 @@ class Protocol extends _i1.SerializationManager {
     if (dataClassName is! String) {
       return super.deserializeByClassName(data);
     }
-    if (dataClassName == 'Greeting') {
-      return deserialize<_i2.Greeting>(data['data']);
+    if (dataClassName == 'Budget') {
+      return deserialize<_i2.Budget>(data['data']);
+    }
+    if (dataClassName == 'Category') {
+      return deserialize<_i3.Category>(data['data']);
+    }
+    if (dataClassName == 'Envelope') {
+      return deserialize<_i4.Envelope>(data['data']);
+    }
+    if (dataClassName == 'Transaction') {
+      return deserialize<_i5.Transaction>(data['data']);
     }
     if (dataClassName.startsWith('serverpod_auth_idp.')) {
       data['className'] = dataClassName.substring(19);
-      return _i3.Protocol().deserializeByClassName(data);
+      return _i10.Protocol().deserializeByClassName(data);
     }
     if (dataClassName.startsWith('serverpod_auth_core.')) {
       data['className'] = dataClassName.substring(20);
-      return _i4.Protocol().deserializeByClassName(data);
+      return _i11.Protocol().deserializeByClassName(data);
     }
     return super.deserializeByClassName(data);
   }
@@ -126,10 +189,10 @@ class Protocol extends _i1.SerializationManager {
       return null;
     }
     try {
-      return _i3.Protocol().mapRecordToJson(record);
+      return _i10.Protocol().mapRecordToJson(record);
     } catch (_) {}
     try {
-      return _i4.Protocol().mapRecordToJson(record);
+      return _i11.Protocol().mapRecordToJson(record);
     } catch (_) {}
     throw Exception('Unsupported record type ${record.runtimeType}');
   }

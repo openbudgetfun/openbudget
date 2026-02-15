@@ -38,7 +38,7 @@ database:
 
 # This is the setup for your Redis test instance.
 redis:
-  enabled: false
+  enabled: true
   host: localhost
   port: 9091
   #user: # defaults to empty

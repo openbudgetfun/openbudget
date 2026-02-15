@@ -1,12 +1,16 @@
 import 'dart:io';
 
+import 'package:openbudget_server/src/auth/email_sender.dart';
 import 'package:openbudget_server/src/generated/endpoints.dart';
-import 'package:openbudget_server/src/generated/protocol.dart';
+import 'package:openbudget_server/src/generated/protocol.dart' hide Transaction;
 import 'package:openbudget_server/src/web/routes/app_config_route.dart';
 import 'package:openbudget_server/src/web/routes/root.dart';
 import 'package:serverpod/serverpod.dart';
 import 'package:serverpod_auth_idp_server/core.dart';
 import 'package:serverpod_auth_idp_server/providers/email.dart';
+
+/// Email sender instance. Replace with [SmtpEmailSender] for production.
+final EmailSender _emailSender = ConsoleEmailSender();
 
 /// The starting point of the Serverpod server.
 Future<void> run(List<String> args) async {
@@ -70,7 +74,11 @@ void _sendRegistrationCode(
   required String verificationCode,
   required Transaction? transaction,
 }) {
-  session.log('[EmailIdp] Registration code ($email): $verificationCode');
+  _emailSender.sendVerificationCode(
+    session,
+    email: email,
+    code: verificationCode,
+  );
 }
 
 void _sendPasswordResetCode(
@@ -80,5 +88,9 @@ void _sendPasswordResetCode(
   required String verificationCode,
   required Transaction? transaction,
 }) {
-  session.log('[EmailIdp] Password reset code ($email): $verificationCode');
+  _emailSender.sendPasswordResetCode(
+    session,
+    email: email,
+    code: verificationCode,
+  );
 }

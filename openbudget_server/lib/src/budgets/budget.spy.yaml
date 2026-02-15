@@ -1,0 +1,15 @@
+### A budget owned by a user, representing a financial plan in a specific currency.
+class: Budget
+table: budget
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  name: String
+  ### ISO 4217 currency code (e.g. USD, EUR).
+  currencyCode: String
+  ### The user who owns this budget.
+  ownerId: UuidValue
+  createdAt: DateTime, default=now
+  updatedAt: DateTime, default=now
+indexes:
+  budget_owner_idx:
+    fields: ownerId

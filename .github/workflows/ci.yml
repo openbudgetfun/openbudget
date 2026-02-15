@@ -41,6 +41,63 @@ jobs:
       - run: melos exec --scope="openbudget_wired" -- flutter test
       - run: melos exec --scope="openbudget_core" -- dart test
 
+  server-test:
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: changeme
+          POSTGRES_DB: openbudget_test
+        ports:
+          - 9090:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Start Redis with password
+        run: |
+          docker run -d --name redis-test \
+            --network host \
+            redis:6.2.6 \
+            redis-server --port 9091 --requirepass changeme
+          for i in $(seq 1 10); do
+            redis-cli -p 9091 -a changeme ping 2>/dev/null && break || sleep 1
+          done
+      - name: Create test passwords
+        run: |
+          cat > openbudget_server/config/passwords.yaml << 'EOF'
+          development:
+            database: 'changeme'
+            redis: 'changeme'
+            serviceSecret: 'ci-service-secret'
+            emailSecretHashPepper: 'ci-email-pepper'
+            jwtHmacSha512PrivateKey: 'ci-jwt-key-must-be-long-enough-32chars'
+            jwtRefreshTokenHashPepper: 'ci-jwt-refresh-pepper'
+          test:
+            database: 'changeme'
+            redis: 'changeme'
+            serviceSecret: 'ci-service-secret'
+            emailSecretHashPepper: 'ci-email-pepper'
+            jwtHmacSha512PrivateKey: 'ci-jwt-key-must-be-long-enough-32chars'
+            jwtRefreshTokenHashPepper: 'ci-jwt-refresh-pepper'
+          EOF
+      - name: Read Flutter version
+        id: fvm
+        run: echo "FLUTTER_VERSION=$(jq -r '.flutter' .fvmrc)" >> "$GITHUB_OUTPUT"
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ steps.fvm.outputs.FLUTTER_VERSION }}
+      - name: Link FVM SDK path
+        run: mkdir -p .fvm && ln -s "$FLUTTER_ROOT" .fvm/flutter_sdk
+      - run: dart pub get
+      - run: dart pub global activate melos
+      - run: melos exec --scope="openbudget_server" -- dart test
+
   format:
     runs-on: blacksmith-2vcpu-ubuntu-2404
     steps:
