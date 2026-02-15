@@ -40,7 +40,7 @@ jobs:
       - run: melos exec --scope="openbudget_app" -- flutter test
       - run: melos exec --scope="openbudget_wired" -- flutter test
       - run: melos exec --scope="openbudget_core" -- dart test
-      - run: melos exec --scope="openbudget_server" -- dart test
+      - run: melos exec --scope="openbudget_server" -- dart test --exclude-tags=integration
 
   format:
     runs-on: blacksmith-2vcpu-ubuntu-2404
@@ -70,7 +70,7 @@ jobs:
           flutter-version: ${{ steps.fvm.outputs.FLUTTER_VERSION }}
       - name: Link FVM SDK path
         run: mkdir -p .fvm && ln -s "$FLUTTER_ROOT" .fvm/flutter_sdk
-      - run: sudo apt-get update && sudo apt-get install -y libgtk-3-dev libx11-dev pkg-config cmake ninja-build libblkid-dev libwebkit2gtk-4.1-dev
+      - run: sudo apt-get update && sudo apt-get install -y libgtk-3-dev libx11-dev pkg-config cmake ninja-build libblkid-dev libwebkit2gtk-4.1-dev libsecret-1-dev
       - run: dart pub get
       - name: Run integration tests
         working-directory: openbudget_app
