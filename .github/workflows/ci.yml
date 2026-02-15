@@ -1,0 +1,90 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  analyze:
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version-file: .fvmrc
+      - run: dart pub get
+      - run: dart run melos run analyze
+
+  test:
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version-file: .fvmrc
+      - run: dart pub get
+      - run: dart run melos exec -- "flutter test" --scope="openbudget_app"
+      - run: dart run melos exec -- "flutter test" --scope="openbudget_wired"
+      - run: dart run melos exec -- "dart test" --scope="openbudget_core"
+      - run: dart run melos exec -- "dart test" --scope="openbudget_server"
+
+  format:
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version-file: .fvmrc
+      - run: dart format --set-exit-if-changed .
+      - uses: dprint/check@v2.2
+
+  integration-test:
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version-file: .fvmrc
+      - run: sudo apt-get update && sudo apt-get install -y libgtk-3-dev libx11-dev pkg-config cmake ninja-build libblkid-dev
+      - run: dart pub get
+      - run: xvfb-run flutter test integration_test -d linux
+
+  no-stateful-or-stateless:
+    name: Ban StatefulWidget and StatelessWidget
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check for banned widget types
+        run: |
+          VIOLATIONS=$(grep -rn 'extends StatefulWidget\|extends StatelessWidget' \
+            --include='*.dart' \
+            --exclude-dir='.dart_tool' \
+            --exclude-dir='generated' \
+            --exclude='*.g.dart' \
+            --exclude='*.freezed.dart' \
+            . || true)
+          if [ -n "$VIOLATIONS" ]; then
+            echo "::error::StatefulWidget and StatelessWidget are banned."
+            echo "Use HookWidget or HookConsumerWidget instead."
+            echo ""
+            echo "$VIOLATIONS"
+            exit 1
+          fi
+          echo "No banned widget types found."
+
+  secrets-scan:
+    name: Secrets Detection
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install gitleaks
+        run: |
+          GITLEAKS_VERSION=8.24.3
+          curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" \
+            | tar xz -C /usr/local/bin gitleaks
+      - name: Run gitleaks
+        run: gitleaks detect --source . --verbose --redact
