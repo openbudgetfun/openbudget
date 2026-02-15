@@ -1,0 +1,15 @@
+{
+  "@@locale": "en",
+  "appTitle": "OpenBudget",
+  "loginTitle": "Welcome to OpenBudget",
+  "loginEmailLabel": "Email",
+  "loginPasswordLabel": "Password",
+  "loginButton": "Sign In",
+  "loginCreateAccount": "Create Account",
+  "createBudgetTitle": "Create Budget",
+  "createBudgetNameLabel": "Budget Name",
+  "createBudgetCurrencyLabel": "Primary Currency",
+  "createBudgetButton": "Create",
+  "budgetEmptyTitle": "No Categories Yet",
+  "budgetEmptySubtitle": "Add your first envelope category to start budgeting"
+}
