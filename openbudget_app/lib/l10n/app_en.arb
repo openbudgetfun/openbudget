@@ -24,6 +24,19 @@
   "registerCodeError": "Invalid verification code. Please try again.",
   "registerPasswordRequired": "Please enter a password",
   "registerPasswordMismatch": "Passwords do not match",
+  "homeLogout": "Sign Out",
+  "homeNoBudgets": "No Budgets Yet",
+  "homeCreateBudget": "Create Your First Budget",
+  "homeLoadError": "Could not load budgets",
+  "homeRetry": "Retry",
+  "homeBudgetCount": "{count, plural, =1{1 budget} other{{count} budgets}}",
+  "@homeBudgetCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "createBudgetTitle": "Create Budget",
   "createBudgetNameLabel": "Budget Name",
   "createBudgetCurrencyLabel": "Primary Currency",

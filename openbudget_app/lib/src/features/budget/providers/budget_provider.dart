@@ -1,3 +1,5 @@
+import 'package:openbudget_app/src/features/home/providers/budget_list_provider.dart';
+import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -15,14 +17,20 @@ class CreateBudget extends _$CreateBudget {
     required CurrencyCode currency,
   }) async {
     state = const AsyncValue.loading();
+    final client = ref.read(serverpodClientProvider);
 
-    // Placeholder: simulate budget creation
-    await Future<void>.delayed(const Duration(milliseconds: 300));
+    try {
+      final budget = await client.budget.create(name, currency.code);
+      if (!ref.mounted) return '';
 
-    if (!ref.mounted) return '';
-
-    const budgetId = 'mock-budget-1';
-    state = const AsyncValue.data(budgetId);
-    return budgetId;
+      final budgetId = budget.id?.toString() ?? '';
+      state = AsyncValue.data(budgetId);
+      ref.invalidate(budgetListProvider);
+      return budgetId;
+    } on Exception catch (e, st) {
+      if (!ref.mounted) return '';
+      state = AsyncValue.error(e, st);
+      return '';
+    }
   }
 }

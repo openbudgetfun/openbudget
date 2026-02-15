@@ -84,6 +84,32 @@ class AppLocalizationsEn extends AppLocalizations {
   String get registerPasswordMismatch => 'Passwords do not match';
 
   @override
+  String get homeLogout => 'Sign Out';
+
+  @override
+  String get homeNoBudgets => 'No Budgets Yet';
+
+  @override
+  String get homeCreateBudget => 'Create Your First Budget';
+
+  @override
+  String get homeLoadError => 'Could not load budgets';
+
+  @override
+  String get homeRetry => 'Retry';
+
+  @override
+  String homeBudgetCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count budgets',
+      one: '1 budget',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get createBudgetTitle => 'Create Budget';
 
   @override

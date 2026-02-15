@@ -41,7 +41,7 @@ final class CreateBudgetProvider
   }
 }
 
-String _$createBudgetHash() => r'0c83b01d9cbec18dc6785219da423cd0150190a2';
+String _$createBudgetHash() => r'087140c351c01bc5b84d3efda4befcd773412129';
 
 abstract class _$CreateBudget extends $Notifier<AsyncValue<String?>> {
   AsyncValue<String?> build();

@@ -238,6 +238,42 @@ abstract class AppLocalizations {
   /// **'Passwords do not match'**
   String get registerPasswordMismatch;
 
+  /// No description provided for @homeLogout.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign Out'**
+  String get homeLogout;
+
+  /// No description provided for @homeNoBudgets.
+  ///
+  /// In en, this message translates to:
+  /// **'No Budgets Yet'**
+  String get homeNoBudgets;
+
+  /// No description provided for @homeCreateBudget.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Your First Budget'**
+  String get homeCreateBudget;
+
+  /// No description provided for @homeLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load budgets'**
+  String get homeLoadError;
+
+  /// No description provided for @homeRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get homeRetry;
+
+  /// No description provided for @homeBudgetCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 budget} other{{count} budgets}}'**
+  String homeBudgetCount(int count);
+
   /// No description provided for @createBudgetTitle.
   ///
   /// In en, this message translates to:

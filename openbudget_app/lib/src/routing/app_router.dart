@@ -6,6 +6,7 @@ import 'package:openbudget_app/src/features/auth/screens/login_screen.dart';
 import 'package:openbudget_app/src/features/auth/screens/register_screen.dart';
 import 'package:openbudget_app/src/features/budget/screens/budget_detail_screen.dart';
 import 'package:openbudget_app/src/features/budget/screens/create_budget_screen.dart';
+import 'package:openbudget_app/src/features/home/screens/home_screen.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -44,7 +45,7 @@ GoRouter appRouter(Ref ref) {
       GoRoute(
         name: homeRoute,
         path: homePath,
-        builder: (context, state) => const CreateBudgetScreen(),
+        builder: (context, state) => const HomeScreen(),
       ),
       GoRoute(
         name: createBudgetRoute,
