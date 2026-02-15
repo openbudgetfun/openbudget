@@ -16,6 +16,9 @@ class CreateBudgetScreen extends HookConsumerWidget {
     final nameController = useTextEditingController();
     final selectedCurrency = useState(CurrencyCode.usd);
 
+    // Watch to keep the auto-dispose provider alive while this screen is mounted.
+    ref.watch(createBudgetProvider);
+
     return Scaffold(
       body: Center(
         child: SingleChildScrollView(

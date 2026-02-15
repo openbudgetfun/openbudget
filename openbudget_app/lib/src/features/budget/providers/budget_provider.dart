@@ -19,6 +19,8 @@ class CreateBudget extends _$CreateBudget {
     // Placeholder: simulate budget creation
     await Future<void>.delayed(const Duration(milliseconds: 300));
 
+    if (!ref.mounted) return '';
+
     const budgetId = 'mock-budget-1';
     state = const AsyncValue.data(budgetId);
     return budgetId;
