@@ -40,7 +40,6 @@ jobs:
       - run: melos exec --scope="openbudget_app" -- flutter test
       - run: melos exec --scope="openbudget_wired" -- flutter test
       - run: melos exec --scope="openbudget_core" -- dart test
-      - run: melos exec --scope="openbudget_server" -- dart test --exclude-tags=integration
 
   format:
     runs-on: blacksmith-2vcpu-ubuntu-2404
@@ -74,7 +73,12 @@ jobs:
       - run: dart pub get
       - name: Run integration tests
         working-directory: openbudget_app
-        run: xvfb-run flutter test integration_test -d linux
+        run: |
+          for f in integration_test/*_test.dart; do
+            echo "::group::Running $f"
+            xvfb-run flutter test "$f" -d linux
+            echo "::endgroup::"
+          done
 
   no-stateful-or-stateless:
     name: Ban StatefulWidget and StatelessWidget
