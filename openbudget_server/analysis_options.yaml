@@ -1,0 +1,9 @@
+include: package:openbudget_lints/analysis_options.yaml
+
+analyzer:
+  errors:
+    # Serverpod uses experimental UuidValue in its API
+    experimental_member_use: ignore
+  exclude:
+    - lib/src/generated/**
+    - test/integration/test_tools/serverpod_test_tools.dart
