@@ -1,0 +1,74 @@
+# Devenv
+.devenv*
+devenv.local.nix
+devenv.local.yaml
+
+# direnv
+.direnv
+
+# pre-commit
+.pre-commit-config.yaml
+
+# FVM Version Cache
+.fvm/
+
+# Dart/Flutter
+.dart_tool/
+build/
+.packages
+.pub/
+
+# Generated — do NOT ignore *.g.dart or *.freezed.dart (constitution: committed)
+
+# IDE
+*.iml
+.idea/
+*.swp
+*.swo
+.vscode/
+
+# macOS
+.DS_Store
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+
+# Android
+**/android/**/gradle-wrapper.jar
+**/android/.gradle
+**/android/captures/
+**/android/gradlew
+**/android/gradlew.bat
+**/android/local.properties
+**/android/**/GeneratedPluginRegistrant.java
+**/android/key.properties
+*.jks
+
+# iOS
+**/ios/**/*.mode1v3
+**/ios/**/*.mode2v3
+**/ios/**/*.moved-aside
+**/ios/**/*.pbxuser
+**/ios/**/*.perspectivev3
+**/ios/**/Pods/
+**/ios/.symlinks/
+**/ios/Flutter/.last_build_id
+**/ios/Flutter/flutter_export_environment.sh
+
+# Web
+**/web/favicon.png
+
+# Serverpod passwords
+**/config/passwords.yaml
+
+# Docker Compose env
+.env
+
+# Shorebird
+.shorebird/
+
+# Lock files — only keep pubspec.lock for the app package
+pubspec.lock
+!openbudget_app/pubspec.lock
+
+# Local properties
+local.properties
