@@ -124,11 +124,119 @@ abstract class AppLocalizations {
   /// **'Sign In'**
   String get loginButton;
 
+  /// No description provided for @loginLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Signing In...'**
+  String get loginLoading;
+
   /// No description provided for @loginCreateAccount.
   ///
   /// In en, this message translates to:
   /// **'Create Account'**
   String get loginCreateAccount;
+
+  /// No description provided for @registerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Account'**
+  String get registerTitle;
+
+  /// No description provided for @registerStepEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email to get started'**
+  String get registerStepEmail;
+
+  /// No description provided for @registerStepCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the verification code sent to your email'**
+  String get registerStepCode;
+
+  /// No description provided for @registerStepPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a password for your account'**
+  String get registerStepPassword;
+
+  /// No description provided for @registerSendCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Verification Code'**
+  String get registerSendCode;
+
+  /// No description provided for @registerCodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification Code'**
+  String get registerCodeLabel;
+
+  /// No description provided for @registerVerifyCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify Code'**
+  String get registerVerifyCode;
+
+  /// No description provided for @registerConfirmPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Password'**
+  String get registerConfirmPassword;
+
+  /// No description provided for @registerCreateAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Account'**
+  String get registerCreateAccount;
+
+  /// No description provided for @registerSubmitting.
+  ///
+  /// In en, this message translates to:
+  /// **'Please wait...'**
+  String get registerSubmitting;
+
+  /// No description provided for @registerAlreadyHaveAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Already have an account? Sign In'**
+  String get registerAlreadyHaveAccount;
+
+  /// No description provided for @registerEmailRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your email address'**
+  String get registerEmailRequired;
+
+  /// No description provided for @registerEmailError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not start registration. Please try again.'**
+  String get registerEmailError;
+
+  /// No description provided for @registerCodeRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter the verification code'**
+  String get registerCodeRequired;
+
+  /// No description provided for @registerCodeError.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid verification code. Please try again.'**
+  String get registerCodeError;
+
+  /// No description provided for @registerPasswordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a password'**
+  String get registerPasswordRequired;
+
+  /// No description provided for @registerPasswordMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match'**
+  String get registerPasswordMismatch;
 
   /// No description provided for @createBudgetTitle.
   ///

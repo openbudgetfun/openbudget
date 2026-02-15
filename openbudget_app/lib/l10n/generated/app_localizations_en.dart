@@ -24,7 +24,64 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loginButton => 'Sign In';
 
   @override
+  String get loginLoading => 'Signing In...';
+
+  @override
   String get loginCreateAccount => 'Create Account';
+
+  @override
+  String get registerTitle => 'Create Account';
+
+  @override
+  String get registerStepEmail => 'Enter your email to get started';
+
+  @override
+  String get registerStepCode =>
+      'Enter the verification code sent to your email';
+
+  @override
+  String get registerStepPassword => 'Choose a password for your account';
+
+  @override
+  String get registerSendCode => 'Send Verification Code';
+
+  @override
+  String get registerCodeLabel => 'Verification Code';
+
+  @override
+  String get registerVerifyCode => 'Verify Code';
+
+  @override
+  String get registerConfirmPassword => 'Confirm Password';
+
+  @override
+  String get registerCreateAccount => 'Create Account';
+
+  @override
+  String get registerSubmitting => 'Please wait...';
+
+  @override
+  String get registerAlreadyHaveAccount => 'Already have an account? Sign In';
+
+  @override
+  String get registerEmailRequired => 'Please enter your email address';
+
+  @override
+  String get registerEmailError =>
+      'Could not start registration. Please try again.';
+
+  @override
+  String get registerCodeRequired => 'Please enter the verification code';
+
+  @override
+  String get registerCodeError =>
+      'Invalid verification code. Please try again.';
+
+  @override
+  String get registerPasswordRequired => 'Please enter a password';
+
+  @override
+  String get registerPasswordMismatch => 'Passwords do not match';
 
   @override
   String get createBudgetTitle => 'Create Budget';
