@@ -33,10 +33,7 @@ class EnvelopeGoalEndpoint extends Endpoint {
     Session session,
     UuidValue envelopeId,
   ) async {
-    return EnvelopeGoalService.getForEnvelope(
-      session,
-      envelopeId: envelopeId,
-    );
+    return EnvelopeGoalService.getForEnvelope(session, envelopeId: envelopeId);
   }
 
   /// Lists all goals for a set of envelope IDs.
@@ -44,10 +41,7 @@ class EnvelopeGoalEndpoint extends Endpoint {
     Session session,
     List<UuidValue> envelopeIds,
   ) async {
-    return EnvelopeGoalService.listForBudget(
-      session,
-      envelopeIds: envelopeIds,
-    );
+    return EnvelopeGoalService.listForBudget(session, envelopeIds: envelopeIds);
   }
 
   /// Deletes a goal by ID.
