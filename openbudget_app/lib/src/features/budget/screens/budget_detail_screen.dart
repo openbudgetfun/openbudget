@@ -13,6 +13,7 @@ import 'package:openbudget_app/src/features/budget/providers/selected_month_prov
 import 'package:openbudget_app/src/features/budget/screens/add_category_dialog.dart';
 import 'package:openbudget_app/src/features/budget/screens/add_envelope_dialog.dart';
 import 'package:openbudget_app/src/features/budget/screens/edit_envelope_dialog.dart';
+import 'package:openbudget_app/src/features/budget/screens/envelope_activity_sheet.dart';
 import 'package:openbudget_app/src/features/budget/screens/move_money_dialog.dart';
 import 'package:openbudget_app/src/features/budget/screens/quick_budget_dialog.dart';
 import 'package:openbudget_app/src/features/budget/widgets/budget_header.dart';
@@ -233,6 +234,14 @@ class BudgetDetailScreen extends HookConsumerWidget {
                         year: summary.year,
                         month: summary.month,
                       ),
+                      onShowActivity: (envelope, monthlyData, goal) =>
+                          _showEnvelopeActivity(
+                            context,
+                            envelope,
+                            currencyCode,
+                            monthlyData: monthlyData,
+                            goal: goal,
+                          ),
                     ),
                   ),
                 ),
@@ -306,6 +315,32 @@ class BudgetDetailScreen extends HookConsumerWidget {
           ),
         );
       },
+    );
+  }
+
+  void _showEnvelopeActivity(
+    BuildContext context,
+    Envelope envelope,
+    CurrencyCode currencyCode, {
+    MonthlyEnvelopeData? monthlyData,
+    EnvelopeGoal? goal,
+  }) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(RadiusTokens.lg),
+        ),
+      ),
+      builder: (_) => EnvelopeActivitySheet(
+        envelope: envelope,
+        budgetId: budgetId,
+        currencyCode: currencyCode,
+        monthlyData: monthlyData,
+        goal: goal,
+      ),
     );
   }
 

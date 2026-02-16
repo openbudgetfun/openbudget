@@ -332,5 +332,7 @@
       }
     }
   },
-  "autoAssignError": "Could not auto-assign. Please try again."
+  "autoAssignError": "Could not auto-assign. Please try again.",
+  "envelopeActivityTitle": "Activity",
+  "envelopeNoActivity": "No transactions this month"
 }
