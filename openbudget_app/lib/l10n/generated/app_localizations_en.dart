@@ -1480,10 +1480,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get transactionFilterAll => 'All';
 
   @override
+  String get transactionFilterCleared => 'Cleared';
+
+  @override
   String get transactionFilterExpense => 'Expense';
 
   @override
+  String get transactionFilterFlagged => 'Flagged';
+
+  @override
   String get transactionFilterIncome => 'Income';
+
+  @override
+  String get transactionFilterReconciled => 'Reconciled';
+
+  @override
+  String get transactionFilterStatus => 'Status';
+
+  @override
+  String get transactionFilterUncleared => 'Uncleared';
 
   @override
   String get transactionListTitle => 'Transactions';

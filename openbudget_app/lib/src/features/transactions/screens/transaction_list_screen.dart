@@ -17,6 +17,8 @@ import 'package:openbudget_ui/openbudget_ui.dart';
 
 enum TransactionFilter { all, income, expense }
 
+enum TransactionStatusFilter { all, cleared, uncleared, reconciled }
+
 enum TransactionSort { dateDesc, dateAsc, amountDesc, amountAsc, description }
 
 class TransactionListScreen extends HookConsumerWidget {
@@ -38,6 +40,8 @@ class TransactionListScreen extends HookConsumerWidget {
     final dateRangeStart = useState<DateTime?>(null);
     final dateRangeEnd = useState<DateTime?>(null);
     final sortOrder = useState(TransactionSort.dateDesc);
+    final flagFilter = useState<String?>(null);
+    final statusFilter = useState(TransactionStatusFilter.all);
     final selectionMode = useState(false);
     final selectedIds = useState(<String>{});
 
@@ -217,6 +221,21 @@ class TransactionListScreen extends HookConsumerWidget {
                 tx.amountCents >= 0) {
               return false;
             }
+            if (flagFilter.value != null && tx.flagColor != flagFilter.value) {
+              return false;
+            }
+            if (statusFilter.value == TransactionStatusFilter.cleared &&
+                !tx.cleared) {
+              return false;
+            }
+            if (statusFilter.value == TransactionStatusFilter.uncleared &&
+                (tx.cleared || tx.reconciled)) {
+              return false;
+            }
+            if (statusFilter.value == TransactionStatusFilter.reconciled &&
+                !tx.reconciled) {
+              return false;
+            }
             if (query.isNotEmpty &&
                 !tx.description.toLowerCase().contains(query) &&
                 !(tx.memo?.toLowerCase().contains(query) ?? false)) {
@@ -280,63 +299,88 @@ class TransactionListScreen extends HookConsumerWidget {
                   horizontal: SpacingTokens.md,
                   vertical: SpacingTokens.sm,
                 ),
-                child: Row(
-                  children: [
-                    _FilterChip(
-                      label: l10n.transactionFilterAll,
-                      selected: filter.value == TransactionFilter.all,
-                      onSelected: () => filter.value = TransactionFilter.all,
-                    ),
-                    const SizedBox(width: SpacingTokens.sm),
-                    _FilterChip(
-                      label: l10n.transactionFilterIncome,
-                      selected: filter.value == TransactionFilter.income,
-                      onSelected: () => filter.value = TransactionFilter.income,
-                      color: ColorTokens.secondary,
-                    ),
-                    const SizedBox(width: SpacingTokens.sm),
-                    _FilterChip(
-                      label: l10n.transactionFilterExpense,
-                      selected: filter.value == TransactionFilter.expense,
-                      onSelected: () =>
-                          filter.value = TransactionFilter.expense,
-                      color: ColorTokens.error,
-                    ),
-                    const SizedBox(width: SpacingTokens.sm),
-                    _FilterChip(
-                      label: dateRangeStart.value != null
-                          ? _formatShortDate(dateRangeStart.value!)
-                          : l10n.transactionDateRangeFilter,
-                      selected: dateRangeStart.value != null,
-                      onSelected: () => _pickDateRange(
-                        context,
-                        dateRangeStart,
-                        dateRangeEnd,
-                        transactions,
-                      ),
-                    ),
-                    if (dateRangeStart.value != null)
-                      IconButton(
-                        icon: const Icon(Icons.clear, size: 16),
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(
-                          minWidth: 24,
-                          minHeight: 24,
+                child: SizedBox(
+                  height: 36,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: ListView(
+                          scrollDirection: Axis.horizontal,
+                          children: [
+                            _FilterChip(
+                              label: l10n.transactionFilterAll,
+                              selected: filter.value == TransactionFilter.all,
+                              onSelected: () =>
+                                  filter.value = TransactionFilter.all,
+                            ),
+                            const SizedBox(width: SpacingTokens.sm),
+                            _FilterChip(
+                              label: l10n.transactionFilterIncome,
+                              selected:
+                                  filter.value == TransactionFilter.income,
+                              onSelected: () =>
+                                  filter.value = TransactionFilter.income,
+                              color: ColorTokens.secondary,
+                            ),
+                            const SizedBox(width: SpacingTokens.sm),
+                            _FilterChip(
+                              label: l10n.transactionFilterExpense,
+                              selected:
+                                  filter.value == TransactionFilter.expense,
+                              onSelected: () =>
+                                  filter.value = TransactionFilter.expense,
+                              color: ColorTokens.error,
+                            ),
+                            const SizedBox(width: SpacingTokens.sm),
+                            _FilterChip(
+                              label: dateRangeStart.value != null
+                                  ? _formatShortDate(dateRangeStart.value!)
+                                  : l10n.transactionDateRangeFilter,
+                              selected: dateRangeStart.value != null,
+                              onSelected: () => _pickDateRange(
+                                context,
+                                dateRangeStart,
+                                dateRangeEnd,
+                                transactions,
+                              ),
+                            ),
+                            if (dateRangeStart.value != null) ...[
+                              IconButton(
+                                icon: const Icon(Icons.clear, size: 16),
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(
+                                  minWidth: 24,
+                                  minHeight: 24,
+                                ),
+                                tooltip: l10n.transactionDateRangeClear,
+                                onPressed: () {
+                                  dateRangeStart.value = null;
+                                  dateRangeEnd.value = null;
+                                },
+                              ),
+                            ],
+                            const SizedBox(width: SpacingTokens.sm),
+                            _FlagFilterChip(
+                              selectedFlag: flagFilter.value,
+                              onSelected: (flag) => flagFilter.value = flag,
+                            ),
+                            const SizedBox(width: SpacingTokens.sm),
+                            _StatusFilterChip(
+                              value: statusFilter.value,
+                              onSelected: (v) => statusFilter.value = v,
+                            ),
+                          ],
                         ),
-                        tooltip: l10n.transactionDateRangeClear,
-                        onPressed: () {
-                          dateRangeStart.value = null;
-                          dateRangeEnd.value = null;
-                        },
                       ),
-                    const Spacer(),
-                    Text(
-                      l10n.transactionResultCount(filtered.length),
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
+                      const SizedBox(width: SpacingTokens.sm),
+                      Text(
+                        l10n.transactionResultCount(filtered.length),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
               if (filtered.isEmpty)
@@ -672,6 +716,206 @@ class _FilterChip extends HookWidget {
       labelStyle: TextStyle(
         color: selected ? chipColor : theme.colorScheme.onSurfaceVariant,
         fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
+      ),
+    );
+  }
+}
+
+class _FlagFilterChip extends HookWidget {
+  const _FlagFilterChip({required this.selectedFlag, required this.onSelected});
+
+  final String? selectedFlag;
+  final ValueChanged<String?> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final flagColor = _flagColorFromString(selectedFlag);
+    final isActive = selectedFlag != null;
+
+    return FilterChip(
+      avatar: Icon(
+        isActive ? Icons.flag_rounded : Icons.flag_outlined,
+        size: 16,
+        color: flagColor ?? theme.colorScheme.onSurfaceVariant,
+      ),
+      label: Text(l10n.transactionFilterFlagged),
+      selected: isActive,
+      selectedColor: (flagColor ?? theme.colorScheme.primary).withAlpha(30),
+      checkmarkColor: flagColor,
+      labelStyle: TextStyle(
+        color: isActive ? flagColor : theme.colorScheme.onSurfaceVariant,
+        fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
+      ),
+      onSelected: (_) => _showFlagPicker(context, l10n),
+    );
+  }
+
+  void _showFlagPicker(BuildContext context, AppLocalizations l10n) {
+    final flags = <(String, String, Color)>[
+      ('red', l10n.transactionFlagRed, Colors.red),
+      ('orange', l10n.transactionFlagOrange, Colors.orange),
+      ('yellow', l10n.transactionFlagYellow, Colors.amber),
+      ('green', l10n.transactionFlagGreen, Colors.green),
+      ('blue', l10n.transactionFlagBlue, Colors.blue),
+      ('purple', l10n.transactionFlagPurple, Colors.purple),
+    ];
+
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(SpacingTokens.md),
+              child: Text(
+                l10n.transactionFilterFlagged,
+                style: Theme.of(ctx).textTheme.titleMedium,
+              ),
+            ),
+            Wrap(
+              spacing: SpacingTokens.md,
+              runSpacing: SpacingTokens.sm,
+              alignment: WrapAlignment.center,
+              children: [
+                for (final (value, label, color) in flags)
+                  ActionChip(
+                    avatar: Icon(
+                      selectedFlag == value
+                          ? Icons.flag_rounded
+                          : Icons.flag_outlined,
+                      color: color,
+                      size: 18,
+                    ),
+                    label: Text(label),
+                    side: selectedFlag == value
+                        ? BorderSide(color: color, width: 2)
+                        : null,
+                    onPressed: () {
+                      Navigator.of(ctx).pop();
+                      onSelected(selectedFlag == value ? null : value);
+                    },
+                  ),
+              ],
+            ),
+            if (selectedFlag != null) ...[
+              const Divider(),
+              ListTile(
+                leading: const Icon(Icons.clear_rounded),
+                title: Text(l10n.transactionFlagClear),
+                onTap: () {
+                  Navigator.of(ctx).pop();
+                  onSelected(null);
+                },
+              ),
+            ],
+            const SizedBox(height: SpacingTokens.sm),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _StatusFilterChip extends HookWidget {
+  const _StatusFilterChip({required this.value, required this.onSelected});
+
+  final TransactionStatusFilter value;
+  final ValueChanged<TransactionStatusFilter> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final isActive = value != TransactionStatusFilter.all;
+    final label = switch (value) {
+      TransactionStatusFilter.all => l10n.transactionFilterStatus,
+      TransactionStatusFilter.cleared => l10n.transactionFilterCleared,
+      TransactionStatusFilter.uncleared => l10n.transactionFilterUncleared,
+      TransactionStatusFilter.reconciled => l10n.transactionFilterReconciled,
+    };
+
+    return FilterChip(
+      avatar: Icon(
+        isActive
+            ? Icons.check_circle_rounded
+            : Icons.check_circle_outline_rounded,
+        size: 16,
+        color: isActive
+            ? theme.colorScheme.primary
+            : theme.colorScheme.onSurfaceVariant,
+      ),
+      label: Text(label),
+      selected: isActive,
+      selectedColor: theme.colorScheme.primary.withAlpha(30),
+      checkmarkColor: theme.colorScheme.primary,
+      labelStyle: TextStyle(
+        color: isActive
+            ? theme.colorScheme.primary
+            : theme.colorScheme.onSurfaceVariant,
+        fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
+      ),
+      onSelected: (_) => _showStatusPicker(context, l10n),
+    );
+  }
+
+  void _showStatusPicker(BuildContext context, AppLocalizations l10n) {
+    final options = <(TransactionStatusFilter, String, IconData)>[
+      (
+        TransactionStatusFilter.all,
+        l10n.transactionFilterAll,
+        Icons.list_rounded,
+      ),
+      (
+        TransactionStatusFilter.cleared,
+        l10n.transactionFilterCleared,
+        Icons.check_circle_outline,
+      ),
+      (
+        TransactionStatusFilter.uncleared,
+        l10n.transactionFilterUncleared,
+        Icons.circle_outlined,
+      ),
+      (
+        TransactionStatusFilter.reconciled,
+        l10n.transactionFilterReconciled,
+        Icons.lock_outline_rounded,
+      ),
+    ];
+
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(SpacingTokens.md),
+              child: Text(
+                l10n.transactionFilterStatus,
+                style: Theme.of(ctx).textTheme.titleMedium,
+              ),
+            ),
+            const Divider(height: 1),
+            for (final (filterValue, label, icon) in options)
+              ListTile(
+                leading: Icon(icon),
+                title: Text(label),
+                trailing: value == filterValue
+                    ? Icon(
+                        Icons.check_rounded,
+                        color: Theme.of(ctx).colorScheme.primary,
+                      )
+                    : null,
+                onTap: () {
+                  Navigator.of(ctx).pop();
+                  onSelected(filterValue);
+                },
+              ),
+          ],
+        ),
       ),
     );
   }
