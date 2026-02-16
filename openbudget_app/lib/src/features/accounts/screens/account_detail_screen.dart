@@ -5,6 +5,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_transactions_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
+import 'package:openbudget_app/src/features/payees/providers/payee_list_provider.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
@@ -178,6 +180,26 @@ class AccountDetailScreen extends HookConsumerWidget {
                 ),
               ),
               data: (transactions) {
+                // Build payee and envelope name lookup maps.
+                final payeeAsync = ref.watch(payeeListProvider(budgetId));
+                final summaryAsync = ref.watch(budgetSummaryProvider(budgetId));
+                final payeeMap = <String, String>{};
+                if (payeeAsync.hasValue) {
+                  for (final payee in payeeAsync.value!) {
+                    final id = payee.id?.toString();
+                    if (id != null) payeeMap[id] = payee.name;
+                  }
+                }
+                final envelopeMap = <String, String>{};
+                if (summaryAsync.hasValue && summaryAsync.value != null) {
+                  for (final cat in summaryAsync.value!.categories) {
+                    for (final env in cat.envelopes) {
+                      final id = env.id?.toString();
+                      if (id != null) envelopeMap[id] = env.name;
+                    }
+                  }
+                }
+
                 // Apply search filter.
                 var filtered = transactions;
                 if (searchQuery.value.isNotEmpty) {
@@ -244,10 +266,18 @@ class AccountDetailScreen extends HookConsumerWidget {
                       final txn = filtered[index];
                       final runningBalance =
                           balanceMap[txn.id?.toString() ?? '$index'] ?? 0;
+                      final payeeName = txn.payeeId != null
+                          ? payeeMap[txn.payeeId.toString()]
+                          : null;
+                      final envelopeName = txn.envelopeId != null
+                          ? envelopeMap[txn.envelopeId.toString()]
+                          : null;
                       return _TransactionRow(
                         transaction: txn,
                         currencyCode: currencyCode,
                         runningBalanceCents: runningBalance,
+                        payeeName: payeeName,
+                        envelopeName: envelopeName,
                         onToggleCleared: txn.reconciled
                             ? null
                             : () => _toggleCleared(context, ref, txn),
@@ -384,13 +414,26 @@ class _TransactionRow extends HookWidget {
     required this.transaction,
     required this.currencyCode,
     required this.runningBalanceCents,
+    this.payeeName,
+    this.envelopeName,
     this.onToggleCleared,
   });
 
   final Transaction transaction;
   final CurrencyCode currencyCode;
   final int runningBalanceCents;
+  final String? payeeName;
+  final String? envelopeName;
   final VoidCallback? onToggleCleared;
+
+  String get _detailLine {
+    final parts = <String>[];
+    if (payeeName != null && payeeName!.isNotEmpty) parts.add(payeeName!);
+    if (envelopeName != null && envelopeName!.isNotEmpty) {
+      parts.add(envelopeName!);
+    }
+    return parts.join(' \u2022 ');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -435,6 +478,15 @@ class _TransactionRow extends HookWidget {
                       color: colorScheme.onSurfaceVariant,
                     ),
                   ),
+                  if (_detailLine.isNotEmpty)
+                    Text(
+                      _detailLine,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                 ],
               ),
             ),
