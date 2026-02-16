@@ -108,6 +108,8 @@ The project follows a full testing pyramid:
 
 **No feature is considered complete without Patrol E2E tests** covering the primary user flow. All E2E tests MUST use the page object pattern (selectors centralized in `integration_test/common/patrol_helpers.dart`). Test data lives in `integration_test/common/test_data.dart`.
 
+**AI agents MUST test everything they create.** When implementing a feature or fix — whether frontend UI, backend endpoints, providers, or utilities — the agent MUST also write and run the corresponding tests (unit, widget, and/or integration) before considering the work complete. No code should be committed without verifying it passes `melos run test` and `melos run analyze`. Both frontend and backend changes require test coverage.
+
 ### Debugging with MCP Tools
 
 When investigating a bug or verifying a feature, **always use the appropriate MCP tool to visually confirm behavior** rather than relying solely on test output.
