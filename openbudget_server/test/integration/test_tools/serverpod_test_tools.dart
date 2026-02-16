@@ -1874,6 +1874,51 @@ class _TransactionEndpoint {
     });
   }
 
+  _i3.Future<List<_i12.Transaction>> transfer(
+    _i1.TestSessionBuilder sessionBuilder,
+    String description,
+    int amountCents,
+    String currencyCode,
+    _i2.UuidValue budgetId,
+    _i2.UuidValue fromAccountId,
+    _i2.UuidValue toAccountId,
+    DateTime transactionDate,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'transaction',
+            method: 'transfer',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'transaction',
+          methodName: 'transfer',
+          parameters: _i1.testObjectToJson({
+            'description': description,
+            'amountCents': amountCents,
+            'currencyCode': currencyCode,
+            'budgetId': budgetId,
+            'fromAccountId': fromAccountId,
+            'toAccountId': toAccountId,
+            'transactionDate': transactionDate,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<List<_i12.Transaction>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
   _i3.Future<_i12.Transaction> delete(
     _i1.TestSessionBuilder sessionBuilder,
     _i2.UuidValue transactionId,

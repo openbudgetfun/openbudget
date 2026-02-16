@@ -33,6 +33,13 @@ class AccountListScreen extends HookConsumerWidget {
           onPressed: () => context.go('/budgets/$budgetId'),
         ),
         title: Text(l10n.accountListTitle),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.swap_horiz_rounded),
+            tooltip: l10n.transferTitle,
+            onPressed: () => context.go('/budgets/$budgetId/transfer'),
+          ),
+        ],
       ),
       body: accounts.when(
         loading: () => const Center(child: CircularProgressIndicator()),

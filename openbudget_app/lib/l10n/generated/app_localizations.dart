@@ -987,6 +987,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Set Goal'**
   String get goalSetGoal;
+
+  /// No description provided for @transferTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer'**
+  String get transferTitle;
+
+  /// No description provided for @transferFromAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'From Account'**
+  String get transferFromAccount;
+
+  /// No description provided for @transferToAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'To Account'**
+  String get transferToAccount;
+
+  /// No description provided for @transferDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer Date'**
+  String get transferDate;
+
+  /// No description provided for @transferButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer'**
+  String get transferButton;
+
+  /// No description provided for @transferDefaultDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Transfer'**
+  String get transferDefaultDescription;
+
+  /// No description provided for @transferSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer completed'**
+  String get transferSuccess;
+
+  /// No description provided for @transferError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not complete transfer. Please try again.'**
+  String get transferError;
+
+  /// No description provided for @transferSameAccountError.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot transfer to the same account'**
+  String get transferSameAccountError;
+
+  /// No description provided for @transferNeedTwoAccounts.
+  ///
+  /// In en, this message translates to:
+  /// **'You need at least two accounts to make a transfer'**
+  String get transferNeedTwoAccounts;
 }
 
 class _AppLocalizationsDelegate

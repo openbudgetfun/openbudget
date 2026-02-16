@@ -679,6 +679,26 @@ class EndpointTransaction extends _i1.EndpointRef {
     'transactionDate': transactionDate,
   });
 
+  /// Creates a transfer between two accounts.
+  _i2.Future<List<_i12.Transaction>> transfer(
+    String description,
+    int amountCents,
+    String currencyCode,
+    _i1.UuidValue budgetId,
+    _i1.UuidValue fromAccountId,
+    _i1.UuidValue toAccountId,
+    DateTime transactionDate,
+  ) => caller
+      .callServerEndpoint<List<_i12.Transaction>>('transaction', 'transfer', {
+        'description': description,
+        'amountCents': amountCents,
+        'currencyCode': currencyCode,
+        'budgetId': budgetId,
+        'fromAccountId': fromAccountId,
+        'toAccountId': toAccountId,
+        'transactionDate': transactionDate,
+      });
+
   /// Deletes a transaction by ID.
   _i2.Future<_i12.Transaction> delete(_i1.UuidValue transactionId) =>
       caller.callServerEndpoint<_i12.Transaction>('transaction', 'delete', {

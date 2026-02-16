@@ -78,6 +78,29 @@ class TransactionEndpoint extends Endpoint {
     );
   }
 
+  /// Creates a transfer between two accounts.
+  Future<List<Transaction>> transfer(
+    Session session,
+    String description,
+    int amountCents,
+    String currencyCode,
+    UuidValue budgetId,
+    UuidValue fromAccountId,
+    UuidValue toAccountId,
+    DateTime transactionDate,
+  ) async {
+    return TransactionService.createTransfer(
+      session,
+      description: description,
+      amountCents: amountCents,
+      currencyCode: currencyCode,
+      budgetId: budgetId,
+      fromAccountId: fromAccountId,
+      toAccountId: toAccountId,
+      transactionDate: transactionDate,
+    );
+  }
+
   /// Deletes a transaction by ID.
   Future<Transaction> delete(Session session, UuidValue transactionId) async {
     return TransactionService.delete(session, transactionId: transactionId);

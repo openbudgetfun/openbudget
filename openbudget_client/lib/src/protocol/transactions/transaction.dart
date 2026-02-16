@@ -24,6 +24,7 @@ abstract class Transaction implements _i1.SerializableModel {
     this.accountId,
     this.payeeId,
     required this.transactionDate,
+    this.transferPairId,
     DateTime? createdAt,
   }) : createdAt = createdAt ?? DateTime.now();
 
@@ -37,6 +38,7 @@ abstract class Transaction implements _i1.SerializableModel {
     _i1.UuidValue? accountId,
     _i1.UuidValue? payeeId,
     required DateTime transactionDate,
+    _i1.UuidValue? transferPairId,
     DateTime? createdAt,
   }) = _TransactionImpl;
 
@@ -65,6 +67,11 @@ abstract class Transaction implements _i1.SerializableModel {
       transactionDate: _i1.DateTimeJsonExtension.fromJson(
         jsonSerialization['transactionDate'],
       ),
+      transferPairId: jsonSerialization['transferPairId'] == null
+          ? null
+          : _i1.UuidValueJsonExtension.fromJson(
+              jsonSerialization['transferPairId'],
+            ),
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
@@ -96,6 +103,9 @@ abstract class Transaction implements _i1.SerializableModel {
 
   DateTime transactionDate;
 
+  /// If this transaction is part of a transfer, this links to the paired transaction.
+  _i1.UuidValue? transferPairId;
+
   DateTime createdAt;
 
   /// Returns a shallow copy of this [Transaction]
@@ -111,6 +121,7 @@ abstract class Transaction implements _i1.SerializableModel {
     _i1.UuidValue? accountId,
     _i1.UuidValue? payeeId,
     DateTime? transactionDate,
+    _i1.UuidValue? transferPairId,
     DateTime? createdAt,
   });
   @override
@@ -126,6 +137,7 @@ abstract class Transaction implements _i1.SerializableModel {
       if (accountId != null) 'accountId': accountId?.toJson(),
       if (payeeId != null) 'payeeId': payeeId?.toJson(),
       'transactionDate': transactionDate.toJson(),
+      if (transferPairId != null) 'transferPairId': transferPairId?.toJson(),
       'createdAt': createdAt.toJson(),
     };
   }
@@ -149,6 +161,7 @@ class _TransactionImpl extends Transaction {
     _i1.UuidValue? accountId,
     _i1.UuidValue? payeeId,
     required DateTime transactionDate,
+    _i1.UuidValue? transferPairId,
     DateTime? createdAt,
   }) : super._(
          id: id,
@@ -160,6 +173,7 @@ class _TransactionImpl extends Transaction {
          accountId: accountId,
          payeeId: payeeId,
          transactionDate: transactionDate,
+         transferPairId: transferPairId,
          createdAt: createdAt,
        );
 
@@ -177,6 +191,7 @@ class _TransactionImpl extends Transaction {
     Object? accountId = _Undefined,
     Object? payeeId = _Undefined,
     DateTime? transactionDate,
+    Object? transferPairId = _Undefined,
     DateTime? createdAt,
   }) {
     return Transaction(
@@ -189,6 +204,9 @@ class _TransactionImpl extends Transaction {
       accountId: accountId is _i1.UuidValue? ? accountId : this.accountId,
       payeeId: payeeId is _i1.UuidValue? ? payeeId : this.payeeId,
       transactionDate: transactionDate ?? this.transactionDate,
+      transferPairId: transferPairId is _i1.UuidValue?
+          ? transferPairId
+          : this.transferPairId,
       createdAt: createdAt ?? this.createdAt,
     );
   }
