@@ -62,6 +62,14 @@ class ReportsScreen extends HookConsumerWidget {
               pathParameters: {'id': budgetId},
             ),
           ),
+          IconButton(
+            icon: const Icon(Icons.compare_arrows_rounded),
+            tooltip: l10n.comparisonTitle,
+            onPressed: () => context.pushNamed(
+              multiMonthComparisonRoute,
+              pathParameters: {'id': budgetId},
+            ),
+          ),
         ],
       ),
       body: Column(

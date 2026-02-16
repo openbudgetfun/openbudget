@@ -40,5 +40,7 @@ const spendingByPayeeRoute = 'spendingByPayee';
 const spendingByPayeePath = '/budgets/:id/reports/payees';
 const categoryTrendsRoute = 'categoryTrends';
 const categoryTrendsPath = '/budgets/:id/reports/category-trends';
+const multiMonthComparisonRoute = 'multiMonthComparison';
+const multiMonthComparisonPath = '/budgets/:id/reports/comparison';
 const settingsRoute = 'settings';
 const settingsPath = '/budgets/:id/settings';

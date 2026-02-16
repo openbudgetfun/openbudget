@@ -1,5 +1,12 @@
 {
   "@@locale": "en",
+  "@comparisonMonths": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "@ageOfMoneyLabel": {
     "placeholders": {
       "days": {
@@ -280,6 +287,14 @@
   "categoryTrendsEmptyTitle": "No Category Data",
   "categoryTrendsLoadError": "Could not load category trends",
   "categoryTrendsTitle": "Category Trends",
+  "comparisonTitle": "Budget Comparison",
+  "comparisonMonthRange": "Month Range",
+  "comparisonMonths": "{count, plural, =1{Last 1 month} other{Last {count} months}}",
+  "comparisonLoadError": "Could not load comparison data",
+  "comparisonEmptyTitle": "No Budget Data",
+  "comparisonEmptySubtitle": "Add categories and envelopes to compare months",
+  "comparisonCategoryLabel": "Category",
+  "comparisonTotalLabel": "Total Spending",
   "createBudgetButton": "Create",
   "createBudgetCreating": "Creating...",
   "createBudgetCurrencyLabel": "Primary Currency",
