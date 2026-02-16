@@ -26,26 +26,13 @@ class BudgetHeader extends HookConsumerWidget {
   final int month;
   final int totalOverspentCents;
 
-  static const _monthNames = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
-  ];
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final ageOfMoneyAsync = ref.watch(ageOfMoneyProvider(budgetId));
+    final now = DateTime.now();
+    final isCurrentMonth = year == now.year && month == now.month;
     final color = readyToAssignCents > 0
         ? ColorTokens.secondary
         : readyToAssignCents < 0
@@ -82,14 +69,33 @@ class BudgetHeader extends HookConsumerWidget {
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: SpacingTokens.sm,
-                ),
-                child: Text(
-                  '${_monthNames[month - 1]} $year',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
+              GestureDetector(
+                onTap: isCurrentMonth
+                    ? null
+                    : () => ref
+                          .read(selectedMonthProvider(budgetId).notifier)
+                          .setMonth(now.year, now.month),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: SpacingTokens.sm,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '${_localizedMonth(l10n, month)} $year',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      if (!isCurrentMonth)
+                        Text(
+                          l10n.budgetGoToToday,
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: theme.colorScheme.primary,
+                          ),
+                        ),
+                    ],
                   ),
                 ),
               ),
@@ -196,6 +202,22 @@ class BudgetHeader extends HookConsumerWidget {
       ),
     );
   }
+
+  String _localizedMonth(AppLocalizations l10n, int month) => switch (month) {
+    1 => l10n.budgetMonthJanuary,
+    2 => l10n.budgetMonthFebruary,
+    3 => l10n.budgetMonthMarch,
+    4 => l10n.budgetMonthApril,
+    5 => l10n.budgetMonthMay,
+    6 => l10n.budgetMonthJune,
+    7 => l10n.budgetMonthJuly,
+    8 => l10n.budgetMonthAugust,
+    9 => l10n.budgetMonthSeptember,
+    10 => l10n.budgetMonthOctober,
+    11 => l10n.budgetMonthNovember,
+    12 => l10n.budgetMonthDecember,
+    _ => '',
+  };
 
   void _showAutoAssignDialog(BuildContext context) {
     showDialog<void>(
