@@ -1851,6 +1851,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not delete budget. Please try again.'**
   String get budgetDeleteError;
+
+  /// No description provided for @settingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settingsTitle;
+
+  /// No description provided for @settingsLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load settings'**
+  String get settingsLoadError;
+
+  /// No description provided for @settingsBudgetSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget'**
+  String get settingsBudgetSection;
+
+  /// No description provided for @settingsBudgetName.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget Name'**
+  String get settingsBudgetName;
+
+  /// No description provided for @settingsCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency'**
+  String get settingsCurrency;
+
+  /// No description provided for @settingsNavigationSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Access'**
+  String get settingsNavigationSection;
+
+  /// No description provided for @settingsAccountSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get settingsAccountSection;
+
+  /// No description provided for @settingsRenameBudget.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename Budget'**
+  String get settingsRenameBudget;
+
+  /// No description provided for @settingsRenameSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget renamed'**
+  String get settingsRenameSuccess;
+
+  /// No description provided for @settingsRenameError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not rename budget. Please try again.'**
+  String get settingsRenameError;
+
+  /// No description provided for @settingsLogoutConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to sign out?'**
+  String get settingsLogoutConfirm;
+
+  /// No description provided for @settingsVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenBudget v1.0.0'**
+  String get settingsVersion;
 }
 
 class _AppLocalizationsDelegate

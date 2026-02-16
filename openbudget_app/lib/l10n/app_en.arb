@@ -397,5 +397,17 @@
   },
   "budgetDeleteButton": "Delete",
   "budgetDeleteSuccess": "Budget deleted",
-  "budgetDeleteError": "Could not delete budget. Please try again."
+  "budgetDeleteError": "Could not delete budget. Please try again.",
+  "settingsTitle": "Settings",
+  "settingsLoadError": "Could not load settings",
+  "settingsBudgetSection": "Budget",
+  "settingsBudgetName": "Budget Name",
+  "settingsCurrency": "Currency",
+  "settingsNavigationSection": "Quick Access",
+  "settingsAccountSection": "Account",
+  "settingsRenameBudget": "Rename Budget",
+  "settingsRenameSuccess": "Budget renamed",
+  "settingsRenameError": "Could not rename budget. Please try again.",
+  "settingsLogoutConfirm": "Are you sure you want to sign out?",
+  "settingsVersion": "OpenBudget v1.0.0"
 }

@@ -134,6 +134,11 @@ class BudgetDetailScreen extends HookConsumerWidget {
                   onPressed: () =>
                       context.go('/budgets/$budgetId/transactions'),
                 ),
+                IconButton(
+                  icon: const Icon(Icons.settings_rounded),
+                  tooltip: l10n.settingsTitle,
+                  onPressed: () => context.go('/budgets/$budgetId/settings'),
+                ),
               ],
             ],
           ),
