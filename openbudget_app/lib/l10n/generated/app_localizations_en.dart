@@ -737,4 +737,14 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get payeeNone => 'No Payee';
+
+  @override
+  String get payeeLabel => 'Payee';
+
+  @override
+  String get payeeAutoEnvelopeHint =>
+      'Envelope auto-suggested from last transaction with this payee';
 }

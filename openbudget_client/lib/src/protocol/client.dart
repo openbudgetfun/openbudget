@@ -630,6 +630,16 @@ class EndpointPayee extends _i1.EndpointRef {
         'name': name,
       });
 
+  /// Returns the envelope ID from the most recent transaction for a payee.
+  _i2.Future<_i1.UuidValue?> lastUsedEnvelopeId(
+    _i1.UuidValue payeeId,
+    _i1.UuidValue budgetId,
+  ) => caller.callServerEndpoint<_i1.UuidValue?>(
+    'payee',
+    'lastUsedEnvelopeId',
+    {'payeeId': payeeId, 'budgetId': budgetId},
+  );
+
   /// Deletes a payee by ID.
   _i2.Future<_i11.Payee> delete(_i1.UuidValue payeeId) => caller
       .callServerEndpoint<_i11.Payee>('payee', 'delete', {'payeeId': payeeId});

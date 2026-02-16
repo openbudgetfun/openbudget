@@ -33,6 +33,19 @@ class PayeeEndpoint extends Endpoint {
     return PayeeService.update(session, payeeId: payeeId, name: name);
   }
 
+  /// Returns the envelope ID from the most recent transaction for a payee.
+  Future<UuidValue?> lastUsedEnvelopeId(
+    Session session,
+    UuidValue payeeId,
+    UuidValue budgetId,
+  ) async {
+    return PayeeService.lastUsedEnvelopeId(
+      session,
+      payeeId: payeeId,
+      budgetId: budgetId,
+    );
+  }
+
   /// Deletes a payee by ID.
   Future<Payee> delete(Session session, UuidValue payeeId) async {
     return PayeeService.delete(session, payeeId: payeeId);

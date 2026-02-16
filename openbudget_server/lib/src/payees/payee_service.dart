@@ -1,7 +1,7 @@
 import 'package:openbudget_server/src/budgets/budget_service.dart';
 import 'package:openbudget_server/src/exceptions/exceptions.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
-import 'package:serverpod/serverpod.dart';
+import 'package:serverpod/serverpod.dart' hide Transaction;
 
 /// Business logic for managing payees within a budget.
 ///
@@ -61,6 +61,30 @@ class PayeeService {
 
     final updated = payee.copyWith(name: name ?? payee.name);
     return Payee.db.updateRow(session, updated);
+  }
+
+  /// Returns the envelope ID from the most recent transaction for a payee,
+  /// or null if no transactions exist for the payee.
+  static Future<UuidValue?> lastUsedEnvelopeId(
+    Session session, {
+    required UuidValue payeeId,
+    required UuidValue budgetId,
+  }) async {
+    await BudgetService.getById(session, budgetId: budgetId);
+
+    final transactions = await Transaction.db.find(
+      session,
+      where: (t) =>
+          t.payeeId.equals(payeeId) &
+          t.budgetId.equals(budgetId) &
+          t.envelopeId.notEquals(null),
+      orderBy: (t) => t.transactionDate,
+      orderDescending: true,
+      limit: 1,
+    );
+
+    if (transactions.isEmpty) return null;
+    return transactions.first.envelopeId;
   }
 
   /// Deletes a payee, verifying ownership.
