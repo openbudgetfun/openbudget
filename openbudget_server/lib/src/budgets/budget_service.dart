@@ -151,11 +151,7 @@ class BudgetService {
       },
       'categories': [
         for (final c in categories)
-          {
-            'id': c.id?.toString(),
-            'name': c.name,
-            'sortOrder': c.sortOrder,
-          },
+          {'id': c.id?.toString(), 'name': c.name, 'sortOrder': c.sortOrder},
       ],
       'envelopes': [
         for (final e in envelopes)
@@ -196,11 +192,7 @@ class BudgetService {
           },
       ],
       'payees': [
-        for (final p in payees)
-          {
-            'id': p.id?.toString(),
-            'name': p.name,
-          },
+        for (final p in payees) {'id': p.id?.toString(), 'name': p.name},
       ],
       'recurringTransactions': [
         for (final r in recurringTransactions)
