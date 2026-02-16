@@ -40,10 +40,7 @@ void main() {
     ),
   ];
 
-  Widget buildSubject({
-    Budget? budget,
-    List<Payee>? payees,
-  }) {
+  Widget buildSubject({Budget? budget, List<Payee>? payees}) {
     return ProviderScope(
       overrides: [
         budgetDetailProvider.overrideWith(
@@ -173,9 +170,7 @@ void main() {
       expect(find.text('Freelance Client'), findsOneWidget);
     });
 
-    testWidgets('renders empty payee dropdown when no payees', (
-      tester,
-    ) async {
+    testWidgets('renders empty payee dropdown when no payees', (tester) async {
       await tester.pumpWidget(buildSubject(payees: []));
       await tester.pumpAndSettle();
 
