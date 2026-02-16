@@ -138,5 +138,16 @@
         "type": "int"
       }
     }
-  }
+  },
+  "payeeListTitle": "Payees",
+  "payeeLoadError": "Could not load payees",
+  "payeeEmptyTitle": "No Payees Yet",
+  "payeeEmptySubtitle": "Add payees to track who you transact with",
+  "payeeAddButton": "Add Payee",
+  "payeeNameLabel": "Payee Name",
+  "payeeCreateSuccess": "Payee created",
+  "payeeCreateError": "Could not create payee. Please try again.",
+  "payeeEditTitle": "Edit Payee",
+  "payeeEditSuccess": "Payee updated",
+  "payeeEditError": "Could not update payee. Please try again."
 }

@@ -405,4 +405,37 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get payeeListTitle => 'Payees';
+
+  @override
+  String get payeeLoadError => 'Could not load payees';
+
+  @override
+  String get payeeEmptyTitle => 'No Payees Yet';
+
+  @override
+  String get payeeEmptySubtitle => 'Add payees to track who you transact with';
+
+  @override
+  String get payeeAddButton => 'Add Payee';
+
+  @override
+  String get payeeNameLabel => 'Payee Name';
+
+  @override
+  String get payeeCreateSuccess => 'Payee created';
+
+  @override
+  String get payeeCreateError => 'Could not create payee. Please try again.';
+
+  @override
+  String get payeeEditTitle => 'Edit Payee';
+
+  @override
+  String get payeeEditSuccess => 'Payee updated';
+
+  @override
+  String get payeeEditError => 'Could not update payee. Please try again.';
 }

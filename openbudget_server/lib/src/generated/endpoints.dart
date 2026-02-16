@@ -19,11 +19,12 @@ import '../budgets/budget_stream.dart' as _i6;
 import '../categories/category_endpoint.dart' as _i7;
 import '../envelopes/envelope_endpoint.dart' as _i8;
 import '../monthly_allocations/monthly_allocation_endpoint.dart' as _i9;
-import '../transactions/transaction_endpoint.dart' as _i10;
+import '../payees/payee_endpoint.dart' as _i10;
+import '../transactions/transaction_endpoint.dart' as _i11;
 import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
-    as _i11;
-import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
     as _i12;
+import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
+    as _i13;
 
 class Endpoints extends _i1.EndpointDispatch {
   @override
@@ -40,7 +41,8 @@ class Endpoints extends _i1.EndpointDispatch {
       'envelope': _i8.EnvelopeEndpoint()..initialize(server, 'envelope', null),
       'monthlyAllocation': _i9.MonthlyAllocationEndpoint()
         ..initialize(server, 'monthlyAllocation', null),
-      'transaction': _i10.TransactionEndpoint()
+      'payee': _i10.PayeeEndpoint()..initialize(server, 'payee', null),
+      'transaction': _i11.TransactionEndpoint()
         ..initialize(server, 'transaction', null),
     };
     connectors['account'] = _i1.EndpointConnector(
@@ -802,6 +804,99 @@ class Endpoints extends _i1.EndpointDispatch {
         ),
       },
     );
+    connectors['payee'] = _i1.EndpointConnector(
+      name: 'payee',
+      endpoint: endpoints['payee']!,
+      methodConnectors: {
+        'create': _i1.MethodConnector(
+          name: 'create',
+          params: {
+            'name': _i1.ParameterDescription(
+              name: 'name',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'budgetId': _i1.ParameterDescription(
+              name: 'budgetId',
+              type: _i1.getType<_i1.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call: (_i1.Session session, Map<String, dynamic> params) async =>
+              (endpoints['payee'] as _i10.PayeeEndpoint).create(
+                session,
+                params['name'],
+                params['budgetId'],
+              ),
+        ),
+        'list': _i1.MethodConnector(
+          name: 'list',
+          params: {
+            'budgetId': _i1.ParameterDescription(
+              name: 'budgetId',
+              type: _i1.getType<_i1.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call: (_i1.Session session, Map<String, dynamic> params) async =>
+              (endpoints['payee'] as _i10.PayeeEndpoint).list(
+                session,
+                params['budgetId'],
+              ),
+        ),
+        'get': _i1.MethodConnector(
+          name: 'get',
+          params: {
+            'payeeId': _i1.ParameterDescription(
+              name: 'payeeId',
+              type: _i1.getType<_i1.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call: (_i1.Session session, Map<String, dynamic> params) async =>
+              (endpoints['payee'] as _i10.PayeeEndpoint).get(
+                session,
+                params['payeeId'],
+              ),
+        ),
+        'update': _i1.MethodConnector(
+          name: 'update',
+          params: {
+            'payeeId': _i1.ParameterDescription(
+              name: 'payeeId',
+              type: _i1.getType<_i1.UuidValue>(),
+              nullable: false,
+            ),
+            'name': _i1.ParameterDescription(
+              name: 'name',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+          },
+          call: (_i1.Session session, Map<String, dynamic> params) async =>
+              (endpoints['payee'] as _i10.PayeeEndpoint).update(
+                session,
+                params['payeeId'],
+                name: params['name'],
+              ),
+        ),
+        'delete': _i1.MethodConnector(
+          name: 'delete',
+          params: {
+            'payeeId': _i1.ParameterDescription(
+              name: 'payeeId',
+              type: _i1.getType<_i1.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call: (_i1.Session session, Map<String, dynamic> params) async =>
+              (endpoints['payee'] as _i10.PayeeEndpoint).delete(
+                session,
+                params['payeeId'],
+              ),
+        ),
+      },
+    );
     connectors['transaction'] = _i1.EndpointConnector(
       name: 'transaction',
       endpoint: endpoints['transaction']!,
@@ -839,9 +934,14 @@ class Endpoints extends _i1.EndpointDispatch {
               type: _i1.getType<_i1.UuidValue?>(),
               nullable: true,
             ),
+            'payeeId': _i1.ParameterDescription(
+              name: 'payeeId',
+              type: _i1.getType<_i1.UuidValue?>(),
+              nullable: true,
+            ),
           },
           call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['transaction'] as _i10.TransactionEndpoint).create(
+              (endpoints['transaction'] as _i11.TransactionEndpoint).create(
                 session,
                 params['description'],
                 params['amountCents'],
@@ -849,6 +949,7 @@ class Endpoints extends _i1.EndpointDispatch {
                 params['budgetId'],
                 params['transactionDate'],
                 envelopeId: params['envelopeId'],
+                payeeId: params['payeeId'],
               ),
         ),
         'list': _i1.MethodConnector(
@@ -861,7 +962,7 @@ class Endpoints extends _i1.EndpointDispatch {
             ),
           },
           call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['transaction'] as _i10.TransactionEndpoint).list(
+              (endpoints['transaction'] as _i11.TransactionEndpoint).list(
                 session,
                 params['budgetId'],
               ),
@@ -886,7 +987,7 @@ class Endpoints extends _i1.EndpointDispatch {
             ),
           },
           call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['transaction'] as _i10.TransactionEndpoint)
+              (endpoints['transaction'] as _i11.TransactionEndpoint)
                   .listByMonth(
                     session,
                     params['budgetId'],
@@ -904,7 +1005,7 @@ class Endpoints extends _i1.EndpointDispatch {
             ),
           },
           call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['transaction'] as _i10.TransactionEndpoint).get(
+              (endpoints['transaction'] as _i11.TransactionEndpoint).get(
                 session,
                 params['transactionId'],
               ),
@@ -932,6 +1033,11 @@ class Endpoints extends _i1.EndpointDispatch {
               type: _i1.getType<_i1.UuidValue?>(),
               nullable: true,
             ),
+            'payeeId': _i1.ParameterDescription(
+              name: 'payeeId',
+              type: _i1.getType<_i1.UuidValue?>(),
+              nullable: true,
+            ),
             'transactionDate': _i1.ParameterDescription(
               name: 'transactionDate',
               type: _i1.getType<DateTime?>(),
@@ -939,12 +1045,13 @@ class Endpoints extends _i1.EndpointDispatch {
             ),
           },
           call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['transaction'] as _i10.TransactionEndpoint).update(
+              (endpoints['transaction'] as _i11.TransactionEndpoint).update(
                 session,
                 params['transactionId'],
                 description: params['description'],
                 amountCents: params['amountCents'],
                 envelopeId: params['envelopeId'],
+                payeeId: params['payeeId'],
                 transactionDate: params['transactionDate'],
               ),
         ),
@@ -958,16 +1065,16 @@ class Endpoints extends _i1.EndpointDispatch {
             ),
           },
           call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['transaction'] as _i10.TransactionEndpoint).delete(
+              (endpoints['transaction'] as _i11.TransactionEndpoint).delete(
                 session,
                 params['transactionId'],
               ),
         ),
       },
     );
-    modules['serverpod_auth_idp'] = _i11.Endpoints()
+    modules['serverpod_auth_idp'] = _i12.Endpoints()
       ..initializeEndpoints(server);
-    modules['serverpod_auth_core'] = _i12.Endpoints()
+    modules['serverpod_auth_core'] = _i13.Endpoints()
       ..initializeEndpoints(server);
   }
 }

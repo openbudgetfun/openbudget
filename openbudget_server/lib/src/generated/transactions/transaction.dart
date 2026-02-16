@@ -23,6 +23,7 @@ abstract class Transaction
     this.envelopeId,
     required this.budgetId,
     this.accountId,
+    this.payeeId,
     required this.transactionDate,
     DateTime? createdAt,
   }) : createdAt = createdAt ?? DateTime.now();
@@ -35,6 +36,7 @@ abstract class Transaction
     _i1.UuidValue? envelopeId,
     required _i1.UuidValue budgetId,
     _i1.UuidValue? accountId,
+    _i1.UuidValue? payeeId,
     required DateTime transactionDate,
     DateTime? createdAt,
   }) = _TransactionImpl;
@@ -58,6 +60,9 @@ abstract class Transaction
       accountId: jsonSerialization['accountId'] == null
           ? null
           : _i1.UuidValueJsonExtension.fromJson(jsonSerialization['accountId']),
+      payeeId: jsonSerialization['payeeId'] == null
+          ? null
+          : _i1.UuidValueJsonExtension.fromJson(jsonSerialization['payeeId']),
       transactionDate: _i1.DateTimeJsonExtension.fromJson(
         jsonSerialization['transactionDate'],
       ),
@@ -89,6 +94,9 @@ abstract class Transaction
   /// The account this transaction belongs to (optional for backwards compat).
   _i1.UuidValue? accountId;
 
+  /// The payee associated with this transaction.
+  _i1.UuidValue? payeeId;
+
   DateTime transactionDate;
 
   DateTime createdAt;
@@ -107,6 +115,7 @@ abstract class Transaction
     _i1.UuidValue? envelopeId,
     _i1.UuidValue? budgetId,
     _i1.UuidValue? accountId,
+    _i1.UuidValue? payeeId,
     DateTime? transactionDate,
     DateTime? createdAt,
   });
@@ -121,6 +130,7 @@ abstract class Transaction
       if (envelopeId != null) 'envelopeId': envelopeId?.toJson(),
       'budgetId': budgetId.toJson(),
       if (accountId != null) 'accountId': accountId?.toJson(),
+      if (payeeId != null) 'payeeId': payeeId?.toJson(),
       'transactionDate': transactionDate.toJson(),
       'createdAt': createdAt.toJson(),
     };
@@ -137,6 +147,7 @@ abstract class Transaction
       if (envelopeId != null) 'envelopeId': envelopeId?.toJson(),
       'budgetId': budgetId.toJson(),
       if (accountId != null) 'accountId': accountId?.toJson(),
+      if (payeeId != null) 'payeeId': payeeId?.toJson(),
       'transactionDate': transactionDate.toJson(),
       'createdAt': createdAt.toJson(),
     };
@@ -183,6 +194,7 @@ class _TransactionImpl extends Transaction {
     _i1.UuidValue? envelopeId,
     required _i1.UuidValue budgetId,
     _i1.UuidValue? accountId,
+    _i1.UuidValue? payeeId,
     required DateTime transactionDate,
     DateTime? createdAt,
   }) : super._(
@@ -193,6 +205,7 @@ class _TransactionImpl extends Transaction {
          envelopeId: envelopeId,
          budgetId: budgetId,
          accountId: accountId,
+         payeeId: payeeId,
          transactionDate: transactionDate,
          createdAt: createdAt,
        );
@@ -209,6 +222,7 @@ class _TransactionImpl extends Transaction {
     Object? envelopeId = _Undefined,
     _i1.UuidValue? budgetId,
     Object? accountId = _Undefined,
+    Object? payeeId = _Undefined,
     DateTime? transactionDate,
     DateTime? createdAt,
   }) {
@@ -220,6 +234,7 @@ class _TransactionImpl extends Transaction {
       envelopeId: envelopeId is _i1.UuidValue? ? envelopeId : this.envelopeId,
       budgetId: budgetId ?? this.budgetId,
       accountId: accountId is _i1.UuidValue? ? accountId : this.accountId,
+      payeeId: payeeId is _i1.UuidValue? ? payeeId : this.payeeId,
       transactionDate: transactionDate ?? this.transactionDate,
       createdAt: createdAt ?? this.createdAt,
     );
@@ -249,6 +264,9 @@ class TransactionUpdateTable extends _i1.UpdateTable<TransactionTable> {
     _i1.UuidValue? value,
   ) => _i1.ColumnValue(table.accountId, value);
 
+  _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> payeeId(_i1.UuidValue? value) =>
+      _i1.ColumnValue(table.payeeId, value);
+
   _i1.ColumnValue<DateTime, DateTime> transactionDate(DateTime value) =>
       _i1.ColumnValue(table.transactionDate, value);
 
@@ -265,6 +283,7 @@ class TransactionTable extends _i1.Table<_i1.UuidValue?> {
     envelopeId = _i1.ColumnUuid('envelopeId', this);
     budgetId = _i1.ColumnUuid('budgetId', this);
     accountId = _i1.ColumnUuid('accountId', this);
+    payeeId = _i1.ColumnUuid('payeeId', this);
     transactionDate = _i1.ColumnDateTime('transactionDate', this);
     createdAt = _i1.ColumnDateTime('createdAt', this, hasDefault: true);
   }
@@ -286,6 +305,9 @@ class TransactionTable extends _i1.Table<_i1.UuidValue?> {
   /// The account this transaction belongs to (optional for backwards compat).
   late final _i1.ColumnUuid accountId;
 
+  /// The payee associated with this transaction.
+  late final _i1.ColumnUuid payeeId;
+
   late final _i1.ColumnDateTime transactionDate;
 
   late final _i1.ColumnDateTime createdAt;
@@ -299,6 +321,7 @@ class TransactionTable extends _i1.Table<_i1.UuidValue?> {
     envelopeId,
     budgetId,
     accountId,
+    payeeId,
     transactionDate,
     createdAt,
   ];

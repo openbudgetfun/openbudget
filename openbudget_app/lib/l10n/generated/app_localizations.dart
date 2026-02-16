@@ -843,6 +843,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 result} other{{count} results}}'**
   String transactionResultCount(int count);
+
+  /// No description provided for @payeeListTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payees'**
+  String get payeeListTitle;
+
+  /// No description provided for @payeeLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load payees'**
+  String get payeeLoadError;
+
+  /// No description provided for @payeeEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No Payees Yet'**
+  String get payeeEmptyTitle;
+
+  /// No description provided for @payeeEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add payees to track who you transact with'**
+  String get payeeEmptySubtitle;
+
+  /// No description provided for @payeeAddButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Payee'**
+  String get payeeAddButton;
+
+  /// No description provided for @payeeNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Payee Name'**
+  String get payeeNameLabel;
+
+  /// No description provided for @payeeCreateSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Payee created'**
+  String get payeeCreateSuccess;
+
+  /// No description provided for @payeeCreateError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not create payee. Please try again.'**
+  String get payeeCreateError;
+
+  /// No description provided for @payeeEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Payee'**
+  String get payeeEditTitle;
+
+  /// No description provided for @payeeEditSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Payee updated'**
+  String get payeeEditSuccess;
+
+  /// No description provided for @payeeEditError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not update payee. Please try again.'**
+  String get payeeEditError;
 }
 
 class _AppLocalizationsDelegate
