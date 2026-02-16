@@ -28,6 +28,7 @@ category:
   - list:
   - get:
   - update:
+  - reorder:
   - delete:
 envelopeGoal:
   - upsert:

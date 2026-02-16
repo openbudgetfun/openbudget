@@ -49,6 +49,22 @@ class CategoryEndpoint extends Endpoint {
     );
   }
 
+  /// Batch-reorders categories by their new position.
+  ///
+  /// The [categoryIds] list defines the new sort order: the first ID gets
+  /// sort order 0, the second gets 1, etc.
+  Future<List<Category>> reorder(
+    Session session,
+    UuidValue budgetId,
+    List<UuidValue> categoryIds,
+  ) async {
+    return CategoryService.reorder(
+      session,
+      budgetId: budgetId,
+      categoryIds: categoryIds,
+    );
+  }
+
   /// Deletes a category by ID.
   Future<Category> delete(Session session, UuidValue categoryId) async {
     return CategoryService.delete(session, categoryId: categoryId);

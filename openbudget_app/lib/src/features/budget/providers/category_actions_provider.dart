@@ -43,6 +43,40 @@ class CategoryActions extends _$CategoryActions {
     }
   }
 
+  Future<void> reorderCategories({
+    required String budgetId,
+    required List<String> categoryIds,
+  }) async {
+    state = const AsyncValue.loading();
+    final client = ref.read(serverpodClientProvider);
+    try {
+      await client.category.reorder(
+        // Serverpod API requires UuidValue which is experimental in uuid package.
+        // ignore: experimental_member_use
+        UuidValue.fromString(budgetId),
+        categoryIds
+            .map(
+              // Serverpod API requires UuidValue which is experimental in uuid package.
+              // ignore: experimental_member_use
+              UuidValue.fromString,
+            )
+            .toList(),
+      );
+      if (ref.mounted) {
+        ref
+          ..invalidate(categoryListProvider(budgetId))
+          ..invalidate(budgetSummaryProvider(budgetId))
+          ..invalidate(budgetMonthlySummaryProvider(budgetId));
+        state = const AsyncValue.data(null);
+      }
+    } on Exception catch (e, st) {
+      if (ref.mounted) {
+        state = AsyncValue.error(e, st);
+      }
+      rethrow;
+    }
+  }
+
   Future<void> deleteCategory({
     required String categoryId,
     required String budgetId,

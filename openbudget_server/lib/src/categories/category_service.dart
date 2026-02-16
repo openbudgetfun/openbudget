@@ -71,6 +71,24 @@ class CategoryService {
     return Category.db.updateRow(session, updated);
   }
 
+  /// Batch-updates sort order for multiple categories in a single budget.
+  static Future<List<Category>> reorder(
+    Session session, {
+    required UuidValue budgetId,
+    required List<UuidValue> categoryIds,
+  }) async {
+    await BudgetService.getById(session, budgetId: budgetId);
+
+    final results = <Category>[];
+    for (var i = 0; i < categoryIds.length; i++) {
+      final category = await Category.db.findById(session, categoryIds[i]);
+      if (category == null) continue;
+      final updated = category.copyWith(sortOrder: i);
+      results.add(await Category.db.updateRow(session, updated));
+    }
+    return results;
+  }
+
   /// Deletes a category, verifying budget ownership.
   static Future<Category> delete(
     Session session, {
