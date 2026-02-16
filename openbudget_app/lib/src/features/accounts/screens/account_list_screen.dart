@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
@@ -158,7 +159,7 @@ class AccountListScreen extends HookConsumerWidget {
   }
 }
 
-class _SectionHeader extends StatelessWidget {
+class _SectionHeader extends HookWidget {
   const _SectionHeader({
     required this.title,
     required this.total,
@@ -203,7 +204,7 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
-class _AccountTile extends StatelessWidget {
+class _AccountTile extends HookWidget {
   const _AccountTile({required this.account, required this.budgetId});
 
   final Account account;
