@@ -53,6 +53,19 @@ class EnvelopeEndpoint extends Endpoint {
     );
   }
 
+  /// Reorders envelopes within a category.
+  Future<List<Envelope>> reorder(
+    Session session,
+    UuidValue categoryId,
+    List<String> envelopeIds,
+  ) async {
+    return EnvelopeService.reorder(
+      session,
+      categoryId: categoryId,
+      envelopeIds: envelopeIds.map(UuidValue.fromString).toList(),
+    );
+  }
+
   /// Deletes an envelope by ID.
   Future<Envelope> delete(Session session, UuidValue envelopeId) async {
     return EnvelopeService.delete(session, envelopeId: envelopeId);

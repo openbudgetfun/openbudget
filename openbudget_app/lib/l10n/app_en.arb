@@ -472,6 +472,7 @@
     "settingsExportDataHint": "Copy all budget data as JSON to clipboard",
     "settingsExportSuccess": "Budget data copied to clipboard",
     "settingsExportError": "Could not export budget data. Please try again.",
+    "envelopeReorderHint": "Long press an envelope to reorder within category",
     "templateTitle": "Budget Templates",
     "templateSaveButton": "Save Current Month as Template",
     "templateNameLabel": "Template Name",

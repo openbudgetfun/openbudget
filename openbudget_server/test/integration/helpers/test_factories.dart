@@ -22,12 +22,14 @@ Envelope createTestEnvelope({
   int budgetedAmountCents = 10000,
   int spentAmountCents = 0,
   String currencyCode = 'USD',
+  int sortOrder = 0,
 }) => Envelope(
   name: name,
   categoryId: categoryId,
   budgetedAmountCents: budgetedAmountCents,
   spentAmountCents: spentAmountCents,
   currencyCode: currencyCode,
+  sortOrder: sortOrder,
 );
 
 /// Creates a deterministic test [Transaction] instance.

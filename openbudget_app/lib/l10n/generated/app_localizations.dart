@@ -2128,6 +2128,12 @@ abstract class AppLocalizations {
   /// **'Could not export budget data. Please try again.'**
   String get settingsExportError;
 
+  /// No description provided for @envelopeReorderHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Long press an envelope to reorder within category'**
+  String get envelopeReorderHint;
+
   /// No description provided for @templateTitle.
   ///
   /// In en, this message translates to:

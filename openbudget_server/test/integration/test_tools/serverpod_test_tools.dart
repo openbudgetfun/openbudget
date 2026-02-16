@@ -1590,6 +1590,41 @@ class _EnvelopeEndpoint {
     });
   }
 
+  _i3.Future<List<_i11.Envelope>> reorder(
+    _i1.TestSessionBuilder sessionBuilder,
+    _i2.UuidValue categoryId,
+    List<String> envelopeIds,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'envelope',
+            method: 'reorder',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'envelope',
+          methodName: 'reorder',
+          parameters: _i1.testObjectToJson({
+            'categoryId': categoryId,
+            'envelopeIds': envelopeIds,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<List<_i11.Envelope>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
   _i3.Future<_i11.Envelope> delete(
     _i1.TestSessionBuilder sessionBuilder,
     _i2.UuidValue envelopeId,

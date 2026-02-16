@@ -46,6 +46,7 @@ envelope:
   - list:
   - get:
   - update:
+  - reorder:
   - delete:
 monthlyAllocation:
   - upsert:

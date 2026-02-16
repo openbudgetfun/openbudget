@@ -931,6 +931,27 @@ class Endpoints extends _i1.EndpointDispatch {
                 spentAmountCents: params['spentAmountCents'],
               ),
         ),
+        'reorder': _i1.MethodConnector(
+          name: 'reorder',
+          params: {
+            'categoryId': _i1.ParameterDescription(
+              name: 'categoryId',
+              type: _i1.getType<_i1.UuidValue>(),
+              nullable: false,
+            ),
+            'envelopeIds': _i1.ParameterDescription(
+              name: 'envelopeIds',
+              type: _i1.getType<List<String>>(),
+              nullable: false,
+            ),
+          },
+          call: (_i1.Session session, Map<String, dynamic> params) async =>
+              (endpoints['envelope'] as _i10.EnvelopeEndpoint).reorder(
+                session,
+                params['categoryId'],
+                params['envelopeIds'],
+              ),
+        ),
         'delete': _i1.MethodConnector(
           name: 'delete',
           params: {

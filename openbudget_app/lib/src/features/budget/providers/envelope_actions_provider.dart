@@ -78,6 +78,23 @@ class EnvelopeActions extends _$EnvelopeActions {
     }
   }
 
+  Future<void> reorderEnvelopes({
+    required String categoryId,
+    required String budgetId,
+    required List<String> envelopeIds,
+  }) async {
+    final client = ref.read(serverpodClientProvider);
+    // Serverpod API requires UuidValue which is experimental in uuid package.
+    // ignore: experimental_member_use
+    final categoryUuid = UuidValue.fromString(categoryId);
+    await client.envelope.reorder(categoryUuid, envelopeIds);
+    if (ref.mounted) {
+      ref
+        ..invalidate(envelopeListProvider(categoryId))
+        ..invalidate(budgetSummaryProvider(budgetId));
+    }
+  }
+
   Future<void> deleteEnvelope({
     required String envelopeId,
     required String categoryId,

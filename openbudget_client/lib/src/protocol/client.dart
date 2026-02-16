@@ -595,6 +595,15 @@ class EndpointEnvelope extends _i1.EndpointRef {
     'spentAmountCents': spentAmountCents,
   });
 
+  /// Reorders envelopes within a category.
+  _i2.Future<List<_i11.Envelope>> reorder(
+    _i1.UuidValue categoryId,
+    List<String> envelopeIds,
+  ) => caller.callServerEndpoint<List<_i11.Envelope>>('envelope', 'reorder', {
+    'categoryId': categoryId,
+    'envelopeIds': envelopeIds,
+  });
+
   /// Deletes an envelope by ID.
   _i2.Future<_i11.Envelope> delete(_i1.UuidValue envelopeId) =>
       caller.callServerEndpoint<_i11.Envelope>('envelope', 'delete', {
