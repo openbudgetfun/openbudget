@@ -46,6 +46,23 @@ class PayeeEndpoint extends Endpoint {
     );
   }
 
+  /// Merges the source payee into the target payee.
+  ///
+  /// All transactions and rules from the source are reassigned to the target.
+  /// The source payee is deleted after merging.
+  /// Returns the number of transactions reassigned.
+  Future<int> merge(
+    Session session,
+    UuidValue sourcePayeeId,
+    UuidValue targetPayeeId,
+  ) async {
+    return PayeeService.merge(
+      session,
+      sourcePayeeId: sourcePayeeId,
+      targetPayeeId: targetPayeeId,
+    );
+  }
+
   /// Deletes a payee by ID.
   Future<Payee> delete(Session session, UuidValue payeeId) async {
     return PayeeService.delete(session, payeeId: payeeId);

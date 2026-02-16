@@ -87,6 +87,71 @@ class PayeeService {
     return transactions.first.envelopeId;
   }
 
+  /// Merges the source payee into the target payee.
+  ///
+  /// Reassigns all transactions and transaction rules from the source payee
+  /// to the target payee, then deletes the source payee.
+  /// Returns the number of transactions reassigned.
+  static Future<int> merge(
+    Session session, {
+    required UuidValue sourcePayeeId,
+    required UuidValue targetPayeeId,
+  }) async {
+    final sourcePayee = await getById(session, payeeId: sourcePayeeId);
+    final targetPayee = await getById(session, payeeId: targetPayeeId);
+
+    if (sourcePayee.budgetId != targetPayee.budgetId) {
+      throw ValidationException('Payees must belong to the same budget');
+    }
+
+    // Reassign all transactions from source to target payee.
+    final transactions = await Transaction.db.find(
+      session,
+      where: (t) => t.payeeId.equals(sourcePayeeId),
+    );
+
+    var count = 0;
+    for (final tx in transactions) {
+      await Transaction.db.updateRow(
+        session,
+        tx.copyWith(payeeId: targetPayeeId),
+      );
+      count++;
+    }
+
+    // Reassign transaction rules from source to target payee.
+    final rules = await TransactionRule.db.find(
+      session,
+      where: (t) => t.payeeId.equals(sourcePayeeId),
+    );
+
+    for (final rule in rules) {
+      // Check if a rule already exists for the target payee in this budget.
+      final existing = await TransactionRule.db.find(
+        session,
+        where: (t) =>
+            t.payeeId.equals(targetPayeeId) & t.budgetId.equals(rule.budgetId),
+        limit: 1,
+      );
+
+      if (existing.isEmpty) {
+        // Reassign the rule to the target payee.
+        await TransactionRule.db.updateRow(
+          session,
+          rule.copyWith(payeeId: targetPayeeId),
+        );
+      } else {
+        // A rule already exists for the target; delete the duplicate.
+        await TransactionRule.db.deleteRow(session, rule);
+      }
+    }
+
+    // Delete the source payee.
+    await Payee.db.deleteRow(session, sourcePayee);
+
+    return count;
+  }
+
   /// Deletes a payee, verifying ownership.
   static Future<Payee> delete(
     Session session, {

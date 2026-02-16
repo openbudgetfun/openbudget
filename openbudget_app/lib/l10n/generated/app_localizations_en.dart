@@ -790,6 +790,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get payeeLoadError => 'Could not load payees';
 
   @override
+  String get payeeMergeButton => 'Merge';
+
+  @override
+  String get payeeMergeError => 'Could not merge payees. Please try again.';
+
+  @override
+  String get payeeMergeInto => 'Merge into';
+
+  @override
+  String get payeeMergeSuccess => 'Payees merged';
+
+  @override
+  String get payeeMergeTitle => 'Merge Payee';
+
+  @override
   String get payeeNameLabel => 'Payee Name';
 
   @override

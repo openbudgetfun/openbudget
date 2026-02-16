@@ -65,6 +65,35 @@ class PayeeActions extends _$PayeeActions {
     }
   }
 
+  Future<int> mergePayees({
+    required String sourcePayeeId,
+    required String targetPayeeId,
+    required String budgetId,
+  }) async {
+    state = const AsyncValue.loading();
+    final client = ref.read(serverpodClientProvider);
+    try {
+      final count = await client.payee.merge(
+        // Serverpod API requires UuidValue which is experimental in uuid package.
+        // ignore: experimental_member_use
+        UuidValue.fromString(sourcePayeeId),
+        // Serverpod API requires UuidValue which is experimental in uuid package.
+        // ignore: experimental_member_use
+        UuidValue.fromString(targetPayeeId),
+      );
+      if (ref.mounted) {
+        ref.invalidate(payeeListProvider(budgetId));
+        state = const AsyncValue.data(null);
+      }
+      return count;
+    } on Exception catch (e, st) {
+      if (ref.mounted) {
+        state = AsyncValue.error(e, st);
+      }
+      rethrow;
+    }
+  }
+
   Future<void> deletePayee({
     required String payeeId,
     required String budgetId,

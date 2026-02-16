@@ -1266,6 +1266,27 @@ class Endpoints extends _i1.EndpointDispatch {
                 params['budgetId'],
               ),
         ),
+        'merge': _i1.MethodConnector(
+          name: 'merge',
+          params: {
+            'sourcePayeeId': _i1.ParameterDescription(
+              name: 'sourcePayeeId',
+              type: _i1.getType<_i1.UuidValue>(),
+              nullable: false,
+            ),
+            'targetPayeeId': _i1.ParameterDescription(
+              name: 'targetPayeeId',
+              type: _i1.getType<_i1.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call: (_i1.Session session, Map<String, dynamic> params) async =>
+              (endpoints['payee'] as _i12.PayeeEndpoint).merge(
+                session,
+                params['sourcePayeeId'],
+                params['targetPayeeId'],
+              ),
+        ),
         'delete': _i1.MethodConnector(
           name: 'delete',
           params: {

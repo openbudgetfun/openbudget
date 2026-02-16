@@ -754,6 +754,19 @@ class EndpointPayee extends _i1.EndpointRef {
     {'payeeId': payeeId, 'budgetId': budgetId},
   );
 
+  /// Merges the source payee into the target payee.
+  ///
+  /// All transactions and rules from the source are reassigned to the target.
+  /// The source payee is deleted after merging.
+  /// Returns the number of transactions reassigned.
+  _i2.Future<int> merge(
+    _i1.UuidValue sourcePayeeId,
+    _i1.UuidValue targetPayeeId,
+  ) => caller.callServerEndpoint<int>('payee', 'merge', {
+    'sourcePayeeId': sourcePayeeId,
+    'targetPayeeId': targetPayeeId,
+  });
+
   /// Deletes a payee by ID.
   _i2.Future<_i12.Payee> delete(_i1.UuidValue payeeId) => caller
       .callServerEndpoint<_i12.Payee>('payee', 'delete', {'payeeId': payeeId});

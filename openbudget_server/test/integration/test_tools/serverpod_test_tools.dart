@@ -2045,6 +2045,41 @@ class _PayeeEndpoint {
     });
   }
 
+  _i3.Future<int> merge(
+    _i1.TestSessionBuilder sessionBuilder,
+    _i2.UuidValue sourcePayeeId,
+    _i2.UuidValue targetPayeeId,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'payee',
+            method: 'merge',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'payee',
+          methodName: 'merge',
+          parameters: _i1.testObjectToJson({
+            'sourcePayeeId': sourcePayeeId,
+            'targetPayeeId': targetPayeeId,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<int>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
   _i3.Future<_i12.Payee> delete(
     _i1.TestSessionBuilder sessionBuilder,
     _i2.UuidValue payeeId,

@@ -1378,6 +1378,36 @@ abstract class AppLocalizations {
   /// **'Could not load payees'**
   String get payeeLoadError;
 
+  /// No description provided for @payeeMergeButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge'**
+  String get payeeMergeButton;
+
+  /// No description provided for @payeeMergeError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not merge payees. Please try again.'**
+  String get payeeMergeError;
+
+  /// No description provided for @payeeMergeInto.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge into'**
+  String get payeeMergeInto;
+
+  /// No description provided for @payeeMergeSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Payees merged'**
+  String get payeeMergeSuccess;
+
+  /// No description provided for @payeeMergeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge Payee'**
+  String get payeeMergeTitle;
+
   /// No description provided for @payeeNameLabel.
   ///
   /// In en, this message translates to:
