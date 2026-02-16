@@ -42,5 +42,7 @@ const categoryTrendsRoute = 'categoryTrends';
 const categoryTrendsPath = '/budgets/:id/reports/category-trends';
 const multiMonthComparisonRoute = 'multiMonthComparison';
 const multiMonthComparisonPath = '/budgets/:id/reports/comparison';
+const recurringCalendarRoute = 'recurringCalendar';
+const recurringCalendarPath = '/budgets/:id/recurring/calendar';
 const settingsRoute = 'settings';
 const settingsPath = '/budgets/:id/settings';

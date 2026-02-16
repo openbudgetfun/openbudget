@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/recurring/providers/recurring_actions_provider.dart';
 import 'package:openbudget_app/src/features/recurring/providers/recurring_list_provider.dart';
+import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -24,6 +26,14 @@ class RecurringListScreen extends HookConsumerWidget {
       appBar: AppBar(
         title: Text(l10n.recurringListTitle),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.calendar_month_rounded),
+            tooltip: l10n.scheduledCalendarTitle,
+            onPressed: () => context.pushNamed(
+              recurringCalendarRoute,
+              pathParameters: {'id': budgetId},
+            ),
+          ),
           IconButton(
             icon: const Icon(Icons.add),
             tooltip: l10n.recurringAddButton,
