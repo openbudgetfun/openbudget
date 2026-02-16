@@ -131,6 +131,16 @@ class BudgetDetailScreen extends HookConsumerWidget {
           totalActivityCents += cat.totalSpentCents;
         }
 
+        var hiddenCount = 0;
+        for (final cat in summary.categories) {
+          if (cat.category.isHidden ?? false) {
+            hiddenCount++;
+          }
+          for (final env in cat.envelopes) {
+            if (env.isHidden ?? false) hiddenCount++;
+          }
+        }
+
         return Scaffold(
           appBar: AppBar(
             leading: IconButton(
@@ -161,12 +171,20 @@ class BudgetDetailScreen extends HookConsumerWidget {
                   },
                 ),
                 IconButton(
-                  icon: Icon(
-                    showHidden.value
-                        ? Icons.visibility_rounded
-                        : Icons.visibility_off_rounded,
+                  icon: Badge(
+                    isLabelVisible: !showHidden.value && hiddenCount > 0,
+                    label: Text('$hiddenCount'),
+                    child: Icon(
+                      showHidden.value
+                          ? Icons.visibility_rounded
+                          : Icons.visibility_off_rounded,
+                    ),
                   ),
-                  tooltip: l10n.budgetShowHidden,
+                  tooltip: showHidden.value
+                      ? l10n.budgetShowHidden
+                      : hiddenCount > 0
+                      ? l10n.budgetHiddenCount(hiddenCount)
+                      : l10n.budgetShowHidden,
                   onPressed: () => showHidden.value = !showHidden.value,
                 ),
                 IconButton(
