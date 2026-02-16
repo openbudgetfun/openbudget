@@ -17,6 +17,8 @@ class TransactionListScreen extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final transactionsAsync = ref.watch(transactionListProvider(budgetId));
     final budgetAsync = ref.watch(budgetDetailProvider(budgetId));
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     final currency =
         budgetAsync.whenOrNull(
@@ -38,17 +40,43 @@ class TransactionListScreen extends HookConsumerWidget {
       body: transactionsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(
-          child: Text(
-            l10n.transactionLoadError,
-            style: const TextStyle(color: ColorTokens.error),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.error_outline_rounded,
+                size: 48,
+                color: colorScheme.error,
+              ),
+              const SizedBox(height: SpacingTokens.md),
+              Text(
+                l10n.transactionLoadError,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: colorScheme.error,
+                ),
+              ),
+            ],
           ),
         ),
         data: (transactions) {
           if (transactions.isEmpty) {
             return Center(
-              child: Text(
-                l10n.transactionEmpty,
-                style: Theme.of(context).textTheme.bodyLarge,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.receipt_long_rounded,
+                    size: 48,
+                    color: colorScheme.outlineVariant,
+                  ),
+                  const SizedBox(height: SpacingTokens.md),
+                  Text(
+                    l10n.transactionEmpty,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
               ),
             );
           }
@@ -60,7 +88,7 @@ class TransactionListScreen extends HookConsumerWidget {
             onRefresh: () async =>
                 ref.invalidate(transactionListProvider(budgetId)),
             child: ListView.builder(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(SpacingTokens.md),
               itemCount: sorted.length,
               itemBuilder: (context, index) {
                 final tx = sorted[index];
@@ -68,42 +96,33 @@ class TransactionListScreen extends HookConsumerWidget {
                 final color = isIncome
                     ? ColorTokens.secondary
                     : ColorTokens.error;
+                final icon = isIncome
+                    ? Icons.arrow_downward_rounded
+                    : Icons.arrow_upward_rounded;
 
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: WiredCard(
-                    height: 70,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            flex: 3,
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  tx.description,
-                                  style: Theme.of(context).textTheme.bodyMedium,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                Text(
-                                  _formatDate(tx.transactionDate),
-                                  style: Theme.of(context).textTheme.bodySmall,
-                                ),
-                              ],
-                            ),
-                          ),
-                          Text(
-                            formatCents(tx.amountCents, currency),
-                            style: Theme.of(context).textTheme.titleSmall
-                                ?.copyWith(
-                                  color: color,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                          ),
-                        ],
+                return Card(
+                  margin: const EdgeInsets.only(bottom: SpacingTokens.sm),
+                  child: ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: color.withAlpha(25),
+                      child: Icon(icon, color: color, size: 20),
+                    ),
+                    title: Text(
+                      tx.description,
+                      style: theme.textTheme.bodyMedium,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    subtitle: Text(
+                      _formatDate(tx.transactionDate),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    trailing: Text(
+                      formatCents(tx.amountCents, currency),
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        color: color,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),

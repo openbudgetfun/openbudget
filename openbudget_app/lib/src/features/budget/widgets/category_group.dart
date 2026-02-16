@@ -31,9 +31,10 @@ class CategoryGroup extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final category = categoryWithEnvelopes.category;
     final envelopes = categoryWithEnvelopes.envelopes;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
-    return WiredCard(
-      height: null,
+    return Card(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
@@ -41,18 +42,26 @@ class CategoryGroup extends HookConsumerWidget {
           GestureDetector(
             onLongPress: onDeleteCategory,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              color: ColorTokens.primary.withAlpha(30),
+              padding: const EdgeInsets.symmetric(
+                horizontal: SpacingTokens.md,
+                vertical: SpacingTokens.sm + SpacingTokens.xs,
+              ),
+              decoration: BoxDecoration(
+                color: colorScheme.primaryContainer.withAlpha(80),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(RadiusTokens.md),
+                ),
+              ),
               child: Row(
                 children: [
                   Expanded(
                     flex: 4,
                     child: Text(
                       category.name.toUpperCase(),
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 0.5,
-                          ),
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.5,
+                      ),
                     ),
                   ),
                   Expanded(
@@ -60,12 +69,9 @@ class CategoryGroup extends HookConsumerWidget {
                     child: Text(
                       l10n.budgetColumnBudgeted,
                       textAlign: TextAlign.right,
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onSurface
-                                .withAlpha(150),
-                          ),
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
                     ),
                   ),
                   Expanded(
@@ -73,12 +79,9 @@ class CategoryGroup extends HookConsumerWidget {
                     child: Text(
                       l10n.budgetColumnSpent,
                       textAlign: TextAlign.right,
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onSurface
-                                .withAlpha(150),
-                          ),
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
                     ),
                   ),
                   Expanded(
@@ -86,19 +89,16 @@ class CategoryGroup extends HookConsumerWidget {
                     child: Text(
                       l10n.budgetColumnAvailable,
                       textAlign: TextAlign.right,
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onSurface
-                                .withAlpha(150),
-                          ),
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
           ),
-          const WiredDivider(),
+          const Divider(),
           ...envelopes.map(
             (envelope) => EnvelopeRow(
               envelope: envelope,
@@ -107,19 +107,22 @@ class CategoryGroup extends HookConsumerWidget {
               onLongPress: () => onDeleteEnvelope(envelope),
             ),
           ),
-          if (envelopes.isNotEmpty) const WiredDivider(),
+          if (envelopes.isNotEmpty) const Divider(),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            padding: const EdgeInsets.symmetric(
+              horizontal: SpacingTokens.sm + SpacingTokens.xs,
+              vertical: SpacingTokens.sm + 2,
+            ),
             child: Row(
               children: [
-                const SizedBox(width: 4),
+                const SizedBox(width: SpacingTokens.xs),
                 Expanded(
                   flex: 4,
                   child: Text(
                     l10n.budgetCategoryTotal,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 Expanded(
@@ -132,9 +135,9 @@ class CategoryGroup extends HookConsumerWidget {
                     textAlign: TextAlign.right,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 Expanded(
@@ -147,38 +150,42 @@ class CategoryGroup extends HookConsumerWidget {
                     textAlign: TextAlign.right,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: categoryWithEnvelopes.totalSpentCents > 0
-                              ? ColorTokens.error
-                              : null,
-                        ),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: categoryWithEnvelopes.totalSpentCents > 0
+                          ? ColorTokens.error
+                          : null,
+                    ),
                   ),
                 ),
-                const SizedBox(width: 4),
+                const SizedBox(width: SpacingTokens.xs),
                 Text(
                   formatCents(
                     categoryWithEnvelopes.totalAvailableCents,
                     currencyCode,
                   ),
                   maxLines: 1,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: _availableColor(
-                          categoryWithEnvelopes.totalAvailableCents,
-                        ),
-                      ),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: _availableColor(
+                      categoryWithEnvelopes.totalAvailableCents,
+                    ),
+                  ),
                 ),
               ],
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(left: 32, bottom: 8),
+            padding: const EdgeInsets.only(
+              left: SpacingTokens.md,
+              bottom: SpacingTokens.sm,
+            ),
             child: Align(
               alignment: Alignment.centerLeft,
-              child: WiredButton(
+              child: TextButton.icon(
                 onPressed: onAddEnvelope,
-                child: Text(l10n.budgetAddEnvelope),
+                icon: const Icon(Icons.add, size: 18),
+                label: Text(l10n.budgetAddEnvelope),
               ),
             ),
           ),

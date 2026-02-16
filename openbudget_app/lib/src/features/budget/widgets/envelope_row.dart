@@ -27,20 +27,24 @@ class EnvelopeRow extends HookConsumerWidget {
         : available < 0
         ? ColorTokens.error
         : ColorTokens.tertiary;
+    final theme = Theme.of(context);
 
-    return GestureDetector(
+    return InkWell(
       onTap: onTap,
       onLongPress: onLongPress,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: const EdgeInsets.symmetric(
+          horizontal: SpacingTokens.sm + SpacingTokens.xs,
+          vertical: SpacingTokens.sm,
+        ),
         child: Row(
           children: [
-            const SizedBox(width: 4),
+            const SizedBox(width: SpacingTokens.xs),
             Expanded(
               flex: 4,
               child: Text(
                 envelope.name,
-                style: Theme.of(context).textTheme.bodyMedium,
+                style: theme.textTheme.bodyMedium,
                 overflow: TextOverflow.ellipsis,
               ),
             ),
@@ -51,7 +55,7 @@ class EnvelopeRow extends HookConsumerWidget {
                 textAlign: TextAlign.right,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.bodySmall,
+                style: theme.textTheme.bodySmall,
               ),
             ),
             Expanded(
@@ -61,17 +65,16 @@ class EnvelopeRow extends HookConsumerWidget {
                 textAlign: TextAlign.right,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: envelope.spentAmountCents > 0
-                          ? ColorTokens.error
-                          : null,
-                    ),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: envelope.spentAmountCents > 0
+                      ? ColorTokens.error
+                      : null,
+                ),
               ),
             ),
-            const SizedBox(width: 4),
+            const SizedBox(width: SpacingTokens.xs),
             Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
                 color: availableColor.withAlpha(25),
                 borderRadius: BorderRadius.circular(4),
@@ -79,10 +82,10 @@ class EnvelopeRow extends HookConsumerWidget {
               child: Text(
                 formatCents(available, currencyCode),
                 maxLines: 1,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: availableColor,
-                      fontWeight: FontWeight.w600,
-                    ),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: availableColor,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ],

@@ -14,13 +14,15 @@ class HomeScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final budgets = ref.watch(budgetListProvider);
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.appTitle),
         actions: [
           IconButton(
-            icon: const Icon(Icons.logout),
+            icon: const Icon(Icons.logout_rounded),
             tooltip: l10n.homeLogout,
             onPressed: () => ref.read(authProvider.notifier).logout(),
           ),
@@ -32,14 +34,23 @@ class HomeScreen extends HookConsumerWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              Icon(
+                Icons.error_outline_rounded,
+                size: 48,
+                color: colorScheme.error,
+              ),
+              const SizedBox(height: SpacingTokens.md),
               Text(
                 l10n.homeLoadError,
-                style: const TextStyle(color: ColorTokens.error),
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: colorScheme.error,
+                ),
               ),
-              const SizedBox(height: 16),
-              WiredButton(
+              const SizedBox(height: SpacingTokens.md),
+              FilledButton.icon(
                 onPressed: () => ref.invalidate(budgetListProvider),
-                child: Text(l10n.homeRetry),
+                icon: const Icon(Icons.refresh_rounded),
+                label: Text(l10n.homeRetry),
               ),
             ],
           ),
@@ -48,27 +59,28 @@ class HomeScreen extends HookConsumerWidget {
           if (budgetList.isEmpty) {
             return Center(
               child: Padding(
-                padding: const EdgeInsets.all(32),
-                child: WiredCard(
-                  height: 200,
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          l10n.homeNoBudgets,
-                          style: Theme.of(context).textTheme.titleMedium,
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 16),
-                        WiredButton(
-                          onPressed: () => context.go(createBudgetPath),
-                          child: Text(l10n.homeCreateBudget),
-                        ),
-                      ],
+                padding: const EdgeInsets.all(SpacingTokens.xl),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.savings_rounded,
+                      size: 64,
+                      color: colorScheme.outlineVariant,
                     ),
-                  ),
+                    const SizedBox(height: SpacingTokens.lg),
+                    Text(
+                      l10n.homeNoBudgets,
+                      style: theme.textTheme.titleMedium,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: SpacingTokens.lg),
+                    FilledButton.icon(
+                      onPressed: () => context.go(createBudgetPath),
+                      icon: const Icon(Icons.add),
+                      label: Text(l10n.homeCreateBudget),
+                    ),
+                  ],
                 ),
               ),
             );
@@ -77,33 +89,35 @@ class HomeScreen extends HookConsumerWidget {
           return RefreshIndicator(
             onRefresh: () async => ref.invalidate(budgetListProvider),
             child: ListView.builder(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(SpacingTokens.md),
               itemCount: budgetList.length,
               itemBuilder: (context, index) {
                 final budget = budgetList[index];
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: GestureDetector(
+                return Card(
+                  margin: const EdgeInsets.only(bottom: SpacingTokens.sm),
+                  child: ListTile(
                     onTap: () => context.go('/budgets/${budget.id}'),
-                    child: WiredCard(
-                      height: 80,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                budget.name,
-                                style: Theme.of(context).textTheme.titleMedium,
-                              ),
-                            ),
-                            Text(
-                              budget.currencyCode,
-                              style: Theme.of(context).textTheme.bodyMedium,
-                            ),
-                          ],
-                        ),
+                    leading: CircleAvatar(
+                      backgroundColor: colorScheme.primaryContainer,
+                      child: Icon(
+                        Icons.account_balance_wallet_rounded,
+                        color: colorScheme.onPrimaryContainer,
+                        size: 20,
                       ),
+                    ),
+                    title: Text(
+                      budget.name,
+                      style: theme.textTheme.titleMedium,
+                    ),
+                    subtitle: Text(
+                      budget.currencyCode,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    trailing: Icon(
+                      Icons.chevron_right_rounded,
+                      color: colorScheme.onSurfaceVariant,
                     ),
                   ),
                 );

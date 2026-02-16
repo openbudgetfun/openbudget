@@ -18,40 +18,44 @@ class BudgetHeader extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
     final color = readyToAssignCents > 0
         ? ColorTokens.secondary
         : readyToAssignCents < 0
-            ? ColorTokens.error
-            : ColorTokens.tertiary;
+        ? ColorTokens.error
+        : ColorTokens.tertiary;
     final bgColor = readyToAssignCents > 0
         ? ColorTokens.secondary.withAlpha(20)
         : readyToAssignCents < 0
-            ? ColorTokens.error.withAlpha(20)
-            : ColorTokens.tertiary.withAlpha(20);
+        ? ColorTokens.error.withAlpha(20)
+        : ColorTokens.tertiary.withAlpha(20);
 
     return Container(
       decoration: BoxDecoration(
         color: bgColor,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(RadiusTokens.md),
         border: Border.all(color: color.withAlpha(80)),
       ),
-      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+      padding: const EdgeInsets.symmetric(
+        vertical: SpacingTokens.lg - 4,
+        horizontal: SpacingTokens.md,
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
             l10n.budgetReadyToAssign,
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  color: color.withAlpha(200),
-                ),
+            style: theme.textTheme.titleSmall?.copyWith(
+              color: color.withAlpha(200),
+            ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: SpacingTokens.xs),
           Text(
             formatCents(readyToAssignCents, currencyCode),
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: color,
-                  fontWeight: FontWeight.bold,
-                ),
+            style: theme.textTheme.headlineMedium?.copyWith(
+              color: color,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ],
       ),

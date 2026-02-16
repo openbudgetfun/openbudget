@@ -25,83 +25,110 @@ class AddEnvelopeDialog extends HookConsumerWidget {
     final amountController = useTextEditingController();
     final isSubmitting = useState(false);
 
-    return WiredDialog(
-      child: Column(
+    return AlertDialog(
+      title: Text(l10n.budgetAddEnvelope),
+      content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            l10n.budgetAddEnvelope,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 16),
-          WiredInput(
+          TextField(
             controller: nameController,
-            hintText: l10n.budgetEnvelopeNameLabel,
+            decoration: InputDecoration(
+              labelText: l10n.budgetEnvelopeNameLabel,
+              prefixIcon: const Icon(Icons.mail_outlined),
+            ),
+            autofocus: true,
+            textInputAction: TextInputAction.next,
           ),
-          const SizedBox(height: 12),
-          WiredInput(
+          const SizedBox(height: SpacingTokens.md),
+          TextField(
             controller: amountController,
-            hintText: l10n.budgetEnvelopeAmountLabel,
-          ),
-          const SizedBox(height: 24),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              WiredButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: Text(l10n.dialogCancel),
-              ),
-              const SizedBox(width: 12),
-              WiredButton(
-                onPressed: isSubmitting.value
-                    ? () {}
-                    : () async {
-                        final name = nameController.text.trim();
-                        if (name.isEmpty) return;
-
-                        final amountText = amountController.text.trim();
-                        final amount = double.tryParse(amountText) ?? 0;
-                        final amountCents =
-                            (amount * _pow10(currencyCode.decimals)).round();
-
-                        isSubmitting.value = true;
-                        final navigator = Navigator.of(context);
-                        final messenger = ScaffoldMessenger.of(context);
-                        try {
-                          await ref
-                              .read(envelopeActionsProvider.notifier)
-                              .createEnvelope(
-                                name: name,
-                                categoryId: categoryId,
-                                budgetedAmountCents: amountCents,
-                                currencyCode: currencyCode.code,
-                                budgetId: budgetId,
-                              );
-                          messenger.showSnackBar(
-                            SnackBar(
-                              content: Text(l10n.budgetEnvelopeCreated),
-                            ),
-                          );
-                          navigator.pop();
-                        } on Exception catch (_) {
-                          isSubmitting.value = false;
-                          messenger.showSnackBar(
-                            SnackBar(
-                              content: Text(l10n.budgetEnvelopeCreateError),
-                              backgroundColor: ColorTokens.error,
-                            ),
-                          );
-                        }
-                      },
-                child: Text(
-                  isSubmitting.value ? l10n.dialogSaving : l10n.dialogSave,
-                ),
-              ),
-            ],
+            decoration: InputDecoration(
+              labelText: l10n.budgetEnvelopeAmountLabel,
+              prefixText: '${currencyCode.symbol} ',
+            ),
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            textInputAction: TextInputAction.done,
+            onSubmitted: isSubmitting.value
+                ? null
+                : (_) => _submit(
+                    context,
+                    ref,
+                    nameController,
+                    amountController,
+                    isSubmitting,
+                  ),
           ),
         ],
       ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(l10n.dialogCancel),
+        ),
+        FilledButton(
+          onPressed: isSubmitting.value
+              ? null
+              : () => _submit(
+                  context,
+                  ref,
+                  nameController,
+                  amountController,
+                  isSubmitting,
+                ),
+          child: isSubmitting.value
+              ? const SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : Text(l10n.dialogSave),
+        ),
+      ],
     );
+  }
+
+  Future<void> _submit(
+    BuildContext context,
+    WidgetRef ref,
+    TextEditingController nameController,
+    TextEditingController amountController,
+    ValueNotifier<bool> isSubmitting,
+  ) async {
+    final l10n = AppLocalizations.of(context);
+    final name = nameController.text.trim();
+    if (name.isEmpty) return;
+
+    final amountText = amountController.text.trim();
+    final amount = double.tryParse(amountText) ?? 0;
+    final amountCents = (amount * _pow10(currencyCode.decimals)).round();
+
+    isSubmitting.value = true;
+    final navigator = Navigator.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
+    try {
+      await ref
+          .read(envelopeActionsProvider.notifier)
+          .createEnvelope(
+            name: name,
+            categoryId: categoryId,
+            budgetedAmountCents: amountCents,
+            currencyCode: currencyCode.code,
+            budgetId: budgetId,
+          );
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.budgetEnvelopeCreated)),
+      );
+      navigator.pop();
+    } on Exception catch (_) {
+      isSubmitting.value = false;
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(l10n.budgetEnvelopeCreateError),
+          backgroundColor: colorScheme.error,
+        ),
+      );
+    }
   }
 }
 

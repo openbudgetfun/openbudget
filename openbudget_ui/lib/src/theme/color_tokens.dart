@@ -26,3 +26,28 @@ abstract final class ColorTokens {
   /// Background color for dark theme.
   static const Color backgroundDark = Color(0xFF1E1E1E);
 }
+
+/// Spacing tokens for consistent layout.
+abstract final class SpacingTokens {
+  static const double xs = 4;
+  static const double sm = 8;
+  static const double md = 16;
+  static const double lg = 24;
+  static const double xl = 32;
+  static const double xxl = 48;
+}
+
+/// Border radius tokens for consistent rounding.
+abstract final class RadiusTokens {
+  static const double sm = 8;
+  static const double md = 12;
+  static const double lg = 16;
+  static const double xl = 24;
+}
+
+/// Elevation tokens for consistent depth.
+abstract final class ElevationTokens {
+  static const double none = 0;
+  static const double low = 1;
+  static const double med = 4;
+}

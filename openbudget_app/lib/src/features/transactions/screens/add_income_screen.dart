@@ -20,6 +20,8 @@ class AddIncomeScreen extends HookConsumerWidget {
     final amountController = useTextEditingController();
     final isSubmitting = useState(false);
     final budgetAsync = ref.watch(budgetDetailProvider(budgetId));
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return Scaffold(
       appBar: AppBar(
@@ -31,41 +33,70 @@ class AddIncomeScreen extends HookConsumerWidget {
       ),
       body: Center(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(32),
+          padding: const EdgeInsets.all(SpacingTokens.xl),
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 400),
-            child: WiredCard(
-              height: 320,
+            child: Card(
               child: Padding(
-                padding: const EdgeInsets.all(24),
+                padding: const EdgeInsets.all(SpacingTokens.lg),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    Center(
+                      child: Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: ColorTokens.secondary.withAlpha(30),
+                          borderRadius: BorderRadius.circular(RadiusTokens.md),
+                        ),
+                        child: const Icon(
+                          Icons.arrow_downward_rounded,
+                          color: ColorTokens.secondary,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: SpacingTokens.md),
                     Text(
                       l10n.transactionAddIncome,
-                      style: Theme.of(context).textTheme.headlineSmall,
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 24),
-                    WiredInput(
+                    const SizedBox(height: SpacingTokens.lg),
+                    TextField(
                       controller: descriptionController,
-                      hintText: l10n.transactionDescriptionLabel,
+                      decoration: InputDecoration(
+                        labelText: l10n.transactionDescriptionLabel,
+                        prefixIcon: const Icon(Icons.description_outlined),
+                      ),
+                      textInputAction: TextInputAction.next,
                     ),
-                    const SizedBox(height: 16),
-                    WiredInput(
+                    const SizedBox(height: SpacingTokens.md),
+                    TextField(
                       controller: amountController,
-                      hintText: l10n.transactionAmountLabel,
+                      decoration: InputDecoration(
+                        labelText: l10n.transactionAmountLabel,
+                        prefixIcon: const Icon(Icons.attach_money_rounded),
+                      ),
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      textInputAction: TextInputAction.done,
                     ),
-                    const SizedBox(height: 24),
-                    WiredButton(
+                    const SizedBox(height: SpacingTokens.lg),
+                    FilledButton(
                       onPressed: isSubmitting.value
-                          ? () {}
+                          ? null
                           : () async {
                               final description = descriptionController.text
                                   .trim();
                               final amountText = amountController.text.trim();
                               final amount = double.tryParse(amountText) ?? 0;
-                              if (description.isEmpty || amount <= 0) return;
+                              if (description.isEmpty || amount <= 0) {
+                                return;
+                              }
 
                               final budget = budgetAsync.value;
                               if (budget == null) return;
@@ -101,16 +132,18 @@ class AddIncomeScreen extends HookConsumerWidget {
                                 messenger.showSnackBar(
                                   SnackBar(
                                     content: Text(l10n.transactionError),
-                                    backgroundColor: ColorTokens.error,
+                                    backgroundColor: colorScheme.error,
                                   ),
                                 );
                               }
                             },
-                      child: Text(
-                        isSubmitting.value
-                            ? l10n.transactionSubmitting
-                            : l10n.transactionSave,
-                      ),
+                      child: isSubmitting.value
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : Text(l10n.transactionSave),
                     ),
                   ],
                 ),

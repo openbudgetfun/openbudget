@@ -1,6 +1,6 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
-import 'package:openbudget_ui/openbudget_ui.dart';
 
 import 'common/patrol_helpers.dart';
 import 'common/test_data.dart';
@@ -27,8 +27,8 @@ void main() {
     await loginPage.signIn(TestData.validEmail, TestData.validPassword);
 
     expect(find.text('Create Budget'), findsOneWidget);
-    expect(find.byType(WiredCombo), findsOneWidget);
-    expect(find.byType(WiredButton), findsOneWidget);
+    expect(find.byType(DropdownButtonFormField<String>), findsOneWidget);
+    expect(find.byType(FilledButton), findsOneWidget);
   });
 
   testWidgets('redirects unauthenticated user to login', (tester) async {
@@ -38,7 +38,7 @@ void main() {
     expect(find.text('Welcome to OpenBudget'), findsOneWidget);
 
     // Verify budget creation form is NOT accessible
-    expect(find.byType(WiredCombo), findsNothing);
+    expect(find.byType(DropdownButtonFormField<String>), findsNothing);
     expect(find.text('Create Budget'), findsNothing);
   });
 }

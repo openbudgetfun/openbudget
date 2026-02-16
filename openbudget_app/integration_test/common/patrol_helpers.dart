@@ -1,7 +1,7 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/main.dart';
-import 'package:openbudget_ui/openbudget_ui.dart';
 
 /// Pumps the full OpenBudget app inside a [ProviderScope] and waits for it
 /// to settle.
@@ -16,9 +16,9 @@ class LoginPage {
 
   final WidgetTester tester;
 
-  Finder get emailField => find.byType(WiredInput).at(0);
-  Finder get passwordField => find.byType(WiredInput).at(1);
-  Finder get signInButton => find.byType(WiredButton).first;
+  Finder get emailField => find.byType(TextField).at(0);
+  Finder get passwordField => find.byType(TextField).at(1);
+  Finder get signInButton => find.byType(FilledButton).first;
 
   Future<void> signIn(String email, String password) async {
     await tester.enterText(emailField, email);
@@ -36,9 +36,9 @@ class CreateBudgetPage {
 
   final WidgetTester tester;
 
-  Finder get nameField => find.byType(WiredInput).first;
-  Finder get currencyCombo => find.byType(WiredCombo);
-  Finder get createButton => find.byType(WiredButton).first;
+  Finder get nameField => find.byType(TextField).first;
+  Finder get currencyDropdown => find.byType(DropdownButtonFormField<String>);
+  Finder get createButton => find.byType(FilledButton).first;
 
   Future<void> createBudget(String name) async {
     await tester.enterText(nameField, name);
@@ -55,9 +55,9 @@ class BudgetDetailPage {
 
   final WidgetTester tester;
 
-  Finder get budgetHeader => find.byType(WiredCard).first;
+  Finder get budgetHeader => find.byType(Card).first;
   Finder get emptyStateTitle => find.text('No Categories Yet');
   Finder get emptyStateSubtitle =>
       find.text('Add your first envelope category to start budgeting');
-  Finder get addCategoryButton => find.byType(WiredButton).first;
+  Finder get addCategoryButton => find.byType(OutlinedButton).first;
 }

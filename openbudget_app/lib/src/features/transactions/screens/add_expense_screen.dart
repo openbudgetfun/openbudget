@@ -24,14 +24,13 @@ class AddExpenseScreen extends HookConsumerWidget {
     final selectedCategoryId = useState<String?>(null);
     final budgetAsync = ref.watch(budgetDetailProvider(budgetId));
     final summaryAsync = ref.watch(budgetSummaryProvider(budgetId));
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
-    final envelopeItems = <DropdownMenuItem<dynamic>>[
+    final envelopeItems = <DropdownMenuItem<String>>[
       DropdownMenuItem<String>(
         value: '',
-        child: Padding(
-          padding: const EdgeInsets.only(left: 5),
-          child: Text(l10n.transactionUnassigned),
-        ),
+        child: Text(l10n.transactionUnassigned),
       ),
     ];
 
@@ -41,10 +40,7 @@ class AddExpenseScreen extends HookConsumerWidget {
           envelopeItems.add(
             DropdownMenuItem<String>(
               value: envelope.id?.toString() ?? '',
-              child: Padding(
-                padding: const EdgeInsets.only(left: 5),
-                child: Text('${catEnv.category.name} / ${envelope.name}'),
-              ),
+              child: Text('${catEnv.category.name} / ${envelope.name}'),
             ),
           );
         }
@@ -61,37 +57,64 @@ class AddExpenseScreen extends HookConsumerWidget {
       ),
       body: Center(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(32),
+          padding: const EdgeInsets.all(SpacingTokens.xl),
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 400),
-            child: WiredCard(
-              height: 420,
+            child: Card(
               child: Padding(
-                padding: const EdgeInsets.all(24),
+                padding: const EdgeInsets.all(SpacingTokens.lg),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    Center(
+                      child: Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: ColorTokens.error.withAlpha(30),
+                          borderRadius: BorderRadius.circular(RadiusTokens.md),
+                        ),
+                        child: const Icon(
+                          Icons.arrow_upward_rounded,
+                          color: ColorTokens.error,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: SpacingTokens.md),
                     Text(
                       l10n.transactionAddExpense,
-                      style: Theme.of(context).textTheme.headlineSmall,
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 24),
-                    WiredInput(
+                    const SizedBox(height: SpacingTokens.lg),
+                    TextField(
                       controller: descriptionController,
-                      hintText: l10n.transactionDescriptionLabel,
+                      decoration: InputDecoration(
+                        labelText: l10n.transactionDescriptionLabel,
+                        prefixIcon: const Icon(Icons.description_outlined),
+                      ),
+                      textInputAction: TextInputAction.next,
                     ),
-                    const SizedBox(height: 16),
-                    WiredInput(
+                    const SizedBox(height: SpacingTokens.md),
+                    TextField(
                       controller: amountController,
-                      hintText: l10n.transactionAmountLabel,
+                      decoration: InputDecoration(
+                        labelText: l10n.transactionAmountLabel,
+                        prefixIcon: const Icon(Icons.attach_money_rounded),
+                      ),
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      textInputAction: TextInputAction.next,
                     ),
-                    const SizedBox(height: 16),
-                    WiredCombo(
-                      value: selectedEnvelopeId.value ?? '',
+                    const SizedBox(height: SpacingTokens.md),
+                    DropdownButtonFormField<String>(
+                      initialValue: selectedEnvelopeId.value ?? '',
                       items: envelopeItems,
                       onChanged: (value) {
-                        final envId = value as String? ?? '';
+                        final envId = value ?? '';
                         selectedEnvelopeId.value = envId.isEmpty ? null : envId;
 
                         if (envId.isNotEmpty && summaryAsync.hasValue) {
@@ -106,19 +129,25 @@ class AddExpenseScreen extends HookConsumerWidget {
                         } else {
                           selectedCategoryId.value = null;
                         }
-                        return true;
                       },
+                      decoration: InputDecoration(
+                        prefixIcon: const Icon(Icons.mail_outlined),
+                        labelText: l10n.transactionUnassigned,
+                      ),
+                      isExpanded: true,
                     ),
-                    const SizedBox(height: 24),
-                    WiredButton(
+                    const SizedBox(height: SpacingTokens.lg),
+                    FilledButton(
                       onPressed: isSubmitting.value
-                          ? () {}
+                          ? null
                           : () async {
                               final description = descriptionController.text
                                   .trim();
                               final amountText = amountController.text.trim();
                               final amount = double.tryParse(amountText) ?? 0;
-                              if (description.isEmpty || amount <= 0) return;
+                              if (description.isEmpty || amount <= 0) {
+                                return;
+                              }
 
                               final budget = budgetAsync.value;
                               if (budget == null) return;
@@ -156,16 +185,18 @@ class AddExpenseScreen extends HookConsumerWidget {
                                 messenger.showSnackBar(
                                   SnackBar(
                                     content: Text(l10n.transactionError),
-                                    backgroundColor: ColorTokens.error,
+                                    backgroundColor: colorScheme.error,
                                   ),
                                 );
                               }
                             },
-                      child: Text(
-                        isSubmitting.value
-                            ? l10n.transactionSubmitting
-                            : l10n.transactionSave,
-                      ),
+                      child: isSubmitting.value
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : Text(l10n.transactionSave),
                     ),
                   ],
                 ),

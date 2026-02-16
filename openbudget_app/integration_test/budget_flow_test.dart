@@ -1,6 +1,6 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
-import 'package:openbudget_ui/openbudget_ui.dart';
 
 import 'common/patrol_helpers.dart';
 import 'common/test_data.dart';
@@ -17,9 +17,9 @@ void main() {
     await loginPage.signIn(TestData.validEmail, TestData.validPassword);
 
     // Verify form elements
-    expect(find.byType(WiredInput), findsOneWidget);
-    expect(find.byType(WiredCombo), findsOneWidget);
-    expect(find.byType(WiredButton), findsOneWidget);
+    expect(find.byType(TextField), findsOneWidget);
+    expect(find.byType(DropdownButtonFormField<String>), findsOneWidget);
+    expect(find.byType(FilledButton), findsOneWidget);
     expect(find.text('Create Budget'), findsOneWidget);
   });
 

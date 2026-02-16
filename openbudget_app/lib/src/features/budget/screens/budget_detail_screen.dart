@@ -25,6 +25,8 @@ class BudgetDetailScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final summaryAsync = ref.watch(budgetSummaryProvider(budgetId));
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return summaryAsync.when(
       loading: () => Scaffold(
@@ -40,9 +42,22 @@ class BudgetDetailScreen extends HookConsumerWidget {
           title: Text(l10n.appTitle),
         ),
         body: Center(
-          child: Text(
-            l10n.budgetLoadError,
-            style: const TextStyle(color: ColorTokens.error),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.error_outline_rounded,
+                size: 48,
+                color: colorScheme.error,
+              ),
+              const SizedBox(height: SpacingTokens.md),
+              Text(
+                l10n.budgetLoadError,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: colorScheme.error,
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -61,7 +76,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
             title: Text(summary.budget.name),
             actions: [
               IconButton(
-                icon: const Icon(Icons.list),
+                icon: const Icon(Icons.receipt_long_rounded),
                 tooltip: l10n.transactionListTitle,
                 onPressed: () => context.go('/budgets/$budgetId/transactions'),
               ),
@@ -76,27 +91,37 @@ class BudgetDetailScreen extends HookConsumerWidget {
                 ..invalidate(budgetSummaryProvider(budgetId));
             },
             child: ListView(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(SpacingTokens.md),
               children: [
                 BudgetHeader(
                   readyToAssignCents: summary.readyToAssignCents,
                   currencyCode: currencyCode,
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: SpacingTokens.md),
                 if (summary.categories.isEmpty)
                   Center(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 32),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: SpacingTokens.xl,
+                      ),
                       child: Column(
                         children: [
+                          Icon(
+                            Icons.category_rounded,
+                            size: 48,
+                            color: colorScheme.outlineVariant,
+                          ),
+                          const SizedBox(height: SpacingTokens.md),
                           Text(
                             l10n.budgetEmptyTitle,
-                            style: Theme.of(context).textTheme.titleMedium,
+                            style: theme.textTheme.titleMedium,
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: SpacingTokens.sm),
                           Text(
                             l10n.budgetEmptySubtitle,
-                            style: Theme.of(context).textTheme.bodyMedium,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
+                            ),
                             textAlign: TextAlign.center,
                           ),
                         ],
@@ -105,7 +130,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
                   ),
                 ...summary.categories.map(
                   (catWithEnvelopes) => Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
+                    padding: const EdgeInsets.only(bottom: SpacingTokens.md),
                     child: CategoryGroup(
                       categoryWithEnvelopes: catWithEnvelopes,
                       currencyCode: currencyCode,
@@ -136,34 +161,48 @@ class BudgetDetailScreen extends HookConsumerWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: SpacingTokens.sm),
                 Center(
-                  child: WiredButton(
+                  child: OutlinedButton.icon(
                     onPressed: () => _showAddCategoryDialog(
                       context,
                       summary.categories.length,
                     ),
-                    child: Text(l10n.budgetAddCategory),
+                    icon: const Icon(Icons.add),
+                    label: Text(l10n.budgetAddCategory),
                   ),
                 ),
-                const SizedBox(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    WiredButton(
+                const SizedBox(height: SpacingTokens.xxl),
+              ],
+            ),
+          ),
+          bottomNavigationBar: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: SpacingTokens.md,
+                vertical: SpacingTokens.sm,
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: FilledButton.icon(
                       onPressed: () =>
                           context.go('/budgets/$budgetId/income/add'),
-                      child: Text(l10n.budgetAddIncome),
+                      icon: const Icon(Icons.arrow_downward_rounded),
+                      label: Text(l10n.budgetAddIncome),
                     ),
-                    WiredButton(
+                  ),
+                  const SizedBox(width: SpacingTokens.sm),
+                  Expanded(
+                    child: OutlinedButton.icon(
                       onPressed: () =>
                           context.go('/budgets/$budgetId/expenses/add'),
-                      child: Text(l10n.budgetAddExpense),
+                      icon: const Icon(Icons.arrow_upward_rounded),
+                      label: Text(l10n.budgetAddExpense),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-              ],
+                  ),
+                ],
+              ),
             ),
           ),
         );
@@ -218,6 +257,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
     String categoryName,
   ) async {
     final l10n = AppLocalizations.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -228,12 +268,13 @@ class BudgetDetailScreen extends HookConsumerWidget {
             onPressed: () => Navigator.of(ctx).pop(false),
             child: Text(l10n.dialogCancel),
           ),
-          TextButton(
+          FilledButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text(
-              l10n.deleteConfirmButton,
-              style: const TextStyle(color: ColorTokens.error),
+            style: FilledButton.styleFrom(
+              backgroundColor: colorScheme.error,
+              foregroundColor: colorScheme.onError,
             ),
+            child: Text(l10n.deleteConfirmButton),
           ),
         ],
       ),
@@ -255,7 +296,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(l10n.deleteError),
-            backgroundColor: ColorTokens.error,
+            backgroundColor: colorScheme.error,
           ),
         );
       }
@@ -270,6 +311,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
     String envelopeName,
   ) async {
     final l10n = AppLocalizations.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -280,12 +322,13 @@ class BudgetDetailScreen extends HookConsumerWidget {
             onPressed: () => Navigator.of(ctx).pop(false),
             child: Text(l10n.dialogCancel),
           ),
-          TextButton(
+          FilledButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text(
-              l10n.deleteConfirmButton,
-              style: const TextStyle(color: ColorTokens.error),
+            style: FilledButton.styleFrom(
+              backgroundColor: colorScheme.error,
+              foregroundColor: colorScheme.onError,
             ),
+            child: Text(l10n.deleteConfirmButton),
           ),
         ],
       ),
@@ -311,7 +354,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(l10n.deleteError),
-            backgroundColor: ColorTokens.error,
+            backgroundColor: colorScheme.error,
           ),
         );
       }
