@@ -437,5 +437,9 @@
         "type": "int"
       }
     }
-  }
+  },
+  "themeTitle": "Appearance",
+  "themeSystem": "System",
+  "themeLight": "Light",
+  "themeDark": "Dark"
 }
