@@ -1500,6 +1500,21 @@ class Endpoints extends _i1.EndpointDispatch {
                     params['budgetId'],
                   ),
         ),
+        'ageOfMoney': _i1.MethodConnector(
+          name: 'ageOfMoney',
+          params: {
+            'budgetId': _i1.ParameterDescription(
+              name: 'budgetId',
+              type: _i1.getType<_i1.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call: (_i1.Session session, Map<String, dynamic> params) async =>
+              (endpoints['transaction'] as _i13.TransactionEndpoint).ageOfMoney(
+                session,
+                params['budgetId'],
+              ),
+        ),
         'delete': _i1.MethodConnector(
           name: 'delete',
           params: {

@@ -138,6 +138,14 @@ class TransactionEndpoint extends Endpoint {
     );
   }
 
+  /// Calculates the "Age of Money" for a budget.
+  ///
+  /// Returns the average days between income and spending, or null if
+  /// there is insufficient data.
+  Future<int?> ageOfMoney(Session session, UuidValue budgetId) async {
+    return TransactionService.ageOfMoney(session, budgetId: budgetId);
+  }
+
   /// Deletes a transaction by ID.
   Future<Transaction> delete(Session session, UuidValue transactionId) async {
     return TransactionService.delete(session, transactionId: transactionId);

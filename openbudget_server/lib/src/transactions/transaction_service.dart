@@ -208,6 +208,70 @@ class TransactionService {
     return cleared.length;
   }
 
+  /// Calculates the "Age of Money" for a budget using FIFO matching.
+  ///
+  /// Returns the average number of days between income receipt and spending
+  /// for the most recent outflows, or null if insufficient data.
+  static Future<int?> ageOfMoney(
+    Session session, {
+    required UuidValue budgetId,
+  }) async {
+    await BudgetService.getById(session, budgetId: budgetId);
+
+    final transactions = await Transaction.db.find(
+      session,
+      where: (t) => t.budgetId.equals(budgetId),
+      orderBy: (t) => t.transactionDate,
+    );
+
+    if (transactions.isEmpty) return null;
+
+    // Separate inflows and outflows (exclude transfers), sorted oldest first.
+    final inflows = transactions
+        .where((t) => t.amountCents > 0 && t.transferPairId == null)
+        .toList();
+    final outflows = transactions
+        .where((t) => t.amountCents < 0 && t.transferPairId == null)
+        .toList();
+
+    if (inflows.isEmpty || outflows.isEmpty) return null;
+
+    // FIFO: match each outflow cent to the oldest available inflow cent.
+    final remainingCents = inflows.map((i) => i.amountCents).toList();
+    var inflowIdx = 0;
+    final ages = <int>[];
+
+    for (final outflow in outflows) {
+      var remaining = outflow.amountCents.abs();
+
+      while (remaining > 0 && inflowIdx < remainingCents.length) {
+        final available = remainingCents[inflowIdx];
+        final consumed = remaining < available ? remaining : available;
+        final ageDays = outflow.transactionDate
+            .difference(inflows[inflowIdx].transactionDate)
+            .inDays;
+
+        if (ageDays >= 0) {
+          ages.add(ageDays);
+        }
+
+        remaining -= consumed;
+        remainingCents[inflowIdx] -= consumed;
+
+        if (remainingCents[inflowIdx] <= 0) {
+          inflowIdx++;
+        }
+      }
+    }
+
+    if (ages.isEmpty) return null;
+
+    // Return average of the last 10 ages for recency.
+    final recentAges = ages.length > 10 ? ages.sublist(ages.length - 10) : ages;
+    final sum = recentAges.fold<int>(0, (s, a) => s + a);
+    return (sum / recentAges.length).round();
+  }
+
   /// Deletes a transaction, verifying budget ownership.
   static Future<Transaction> delete(
     Session session, {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
+import 'package:openbudget_app/src/features/budget/providers/age_of_money_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/selected_month_provider.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_core/openbudget_core.dart';
@@ -41,6 +42,7 @@ class BudgetHeader extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
+    final ageOfMoneyAsync = ref.watch(ageOfMoneyProvider(budgetId));
     final color = readyToAssignCents > 0
         ? ColorTokens.secondary
         : readyToAssignCents < 0
@@ -114,6 +116,26 @@ class BudgetHeader extends HookConsumerWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
+          if (ageOfMoneyAsync.hasValue && ageOfMoneyAsync.value != null) ...[
+            const SizedBox(height: SpacingTokens.sm),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.hourglass_bottom_rounded,
+                  size: 16,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+                const SizedBox(width: SpacingTokens.xs),
+                Text(
+                  l10n.ageOfMoneyLabel(ageOfMoneyAsync.value!),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );

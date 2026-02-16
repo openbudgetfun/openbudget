@@ -225,5 +225,13 @@
   "recurringCreateSuccess": "Recurring transaction created",
   "recurringCreateError": "Could not create recurring transaction. Please try again.",
   "recurringEditSuccess": "Recurring transaction updated",
-  "recurringEditError": "Could not update recurring transaction. Please try again."
+  "recurringEditError": "Could not update recurring transaction. Please try again.",
+  "ageOfMoneyLabel": "{days, plural, =1{Age of Money: 1 day} other{Age of Money: {days} days}}",
+  "@ageOfMoneyLabel": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  }
 }
