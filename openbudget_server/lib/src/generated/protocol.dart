@@ -1467,6 +1467,9 @@ class Protocol extends _i1.SerializationManagerServer {
               .toList()
           as T;
     }
+    if (t == List<int>) {
+      return (data as List).map((e) => deserialize<int>(e)).toList() as T;
+    }
     if (t == List<_i27.SplitItem>) {
       return (data as List).map((e) => deserialize<_i27.SplitItem>(e)).toList()
           as T;

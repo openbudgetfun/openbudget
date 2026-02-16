@@ -142,6 +142,24 @@ class TransactionEndpoint extends Endpoint {
     );
   }
 
+  /// Reconciles an account with a statement balance.
+  ///
+  /// If the cleared balance differs from the statement balance, creates an
+  /// adjustment transaction. Returns [reconciledCount, adjustmentCents].
+  Future<List<int>> reconcileWithBalance(
+    Session session,
+    UuidValue accountId,
+    UuidValue budgetId,
+    int statementBalanceCents,
+  ) async {
+    return TransactionService.reconcileWithBalance(
+      session,
+      accountId: accountId,
+      budgetId: budgetId,
+      statementBalanceCents: statementBalanceCents,
+    );
+  }
+
   /// Calculates the "Age of Money" for a budget.
   ///
   /// Returns the average days between income and spending, or null if

@@ -212,6 +212,64 @@ class TransactionService {
     return cleared.length;
   }
 
+  /// Reconciles an account with a statement balance.
+  ///
+  /// Computes the cleared balance (sum of all cleared & unreconciled
+  /// transactions plus previously reconciled transactions). If it differs
+  /// from [statementBalanceCents], an adjustment transaction is created.
+  /// All cleared transactions are then marked reconciled.
+  ///
+  /// Returns a list containing: [reconciledCount, adjustmentCents].
+  static Future<List<int>> reconcileWithBalance(
+    Session session, {
+    required UuidValue accountId,
+    required UuidValue budgetId,
+    required int statementBalanceCents,
+  }) async {
+    final budget = await BudgetService.getById(session, budgetId: budgetId);
+
+    // Sum all transactions for this account to get the current balance.
+    final allTransactions = await Transaction.db.find(
+      session,
+      where: (t) => t.budgetId.equals(budgetId) & t.accountId.equals(accountId),
+    );
+
+    // Cleared balance = sum of all reconciled + cleared transactions.
+    var clearedBalanceCents = 0;
+    for (final txn in allTransactions) {
+      if (txn.reconciled || txn.cleared) {
+        clearedBalanceCents += txn.amountCents;
+      }
+    }
+
+    final adjustmentCents = statementBalanceCents - clearedBalanceCents;
+
+    // Create adjustment transaction if needed.
+    if (adjustmentCents != 0) {
+      final adjustment = Transaction(
+        budgetId: budgetId,
+        accountId: accountId,
+        amountCents: adjustmentCents,
+        currencyCode: budget.currencyCode,
+        description: 'Reconciliation adjustment',
+        transactionDate: DateTime.now(),
+        cleared: true,
+        reconciled: true,
+        createdAt: DateTime.now(),
+      );
+      await Transaction.db.insertRow(session, adjustment);
+    }
+
+    // Mark all cleared transactions as reconciled.
+    final count = await reconcileAccount(
+      session,
+      accountId: accountId,
+      budgetId: budgetId,
+    );
+
+    return [count, adjustmentCents];
+  }
+
   /// Calculates the "Age of Money" for a budget using FIFO matching.
   ///
   /// Returns the average number of days between income receipt and spending

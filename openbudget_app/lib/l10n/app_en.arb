@@ -105,6 +105,16 @@
       }
     }
   },
+  "@reconcileSuccessWithAdjustment": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "adjustment": {
+        "type": "String"
+      }
+    }
+  },
   "@recurringDueBanner": {
     "placeholders": {
       "count": {
@@ -349,10 +359,16 @@
   "quickBudgetLastMonth": "Budgeted Last Month",
   "quickBudgetSpentLastMonth": "Spent Last Month",
   "quickBudgetTitle": "Quick Budget",
+  "reconcileAdjustmentNote": "An adjustment transaction will be created for the difference.",
+  "reconcileBalanceHint": "Enter your current bank balance",
+  "reconcileBalanceLabel": "Statement Balance",
   "reconcileButton": "Reconcile",
+  "reconcileClearedBalance": "Cleared Balance",
+  "reconcileDifference": "Difference",
   "reconcileError": "Could not reconcile account. Please try again.",
   "reconcileMessage": "Mark all cleared transactions as reconciled? This locks them from further editing.",
   "reconcileSuccess": "{count, plural, =0{No transactions to reconcile} =1{1 transaction reconciled} other{{count} transactions reconciled}}",
+  "reconcileSuccessWithAdjustment": "{count, plural, =0{Reconciled with {adjustment} adjustment} =1{1 transaction reconciled with {adjustment} adjustment} other{{count} transactions reconciled with {adjustment} adjustment}}",
   "reconcileTitle": "Reconcile Account",
   "recurringAddButton": "Add Recurring",
   "recurringAddTitle": "Add Recurring Transaction",

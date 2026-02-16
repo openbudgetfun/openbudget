@@ -80,6 +80,7 @@ transaction:
   - listByAccount:
   - toggleCleared:
   - reconcileAccount:
+  - reconcileWithBalance:
   - ageOfMoney:
   - createSplit:
   - listSplits:

@@ -54,7 +54,9 @@ class AccountDetailScreen extends HookConsumerWidget {
           IconButton(
             icon: const Icon(Icons.check_circle_outline_rounded),
             tooltip: l10n.reconcileButton,
-            onPressed: () => _reconcile(context, ref),
+            onPressed: txnAsync.hasValue
+                ? () => _reconcile(context, ref, txnAsync.value!, currencyCode)
+                : null,
           ),
         ],
       ),
@@ -202,37 +204,60 @@ class AccountDetailScreen extends HookConsumerWidget {
     }
   }
 
-  Future<void> _reconcile(BuildContext context, WidgetRef ref) async {
+  Future<void> _reconcile(
+    BuildContext context,
+    WidgetRef ref,
+    List<Transaction> transactions,
+    CurrencyCode currencyCode,
+  ) async {
     final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
-    final confirmed = await showDialog<bool>(
+
+    // Compute cleared balance from transactions.
+    var clearedBalanceCents = 0;
+    for (final txn in transactions) {
+      if (txn.reconciled || txn.cleared) {
+        clearedBalanceCents += txn.amountCents;
+      }
+    }
+
+    final result = await showDialog<int>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.reconcileTitle),
-        content: Text(l10n.reconcileMessage),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(l10n.dialogCancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text(l10n.reconcileButton),
-          ),
-        ],
+      builder: (_) => _ReconcileDialog(
+        clearedBalanceCents: clearedBalanceCents,
+        currencyCode: currencyCode,
       ),
     );
 
-    if (confirmed != true || !context.mounted) return;
+    if (result == null || !context.mounted) return;
 
     try {
-      final count = await ref
+      final response = await ref
           .read(accountTransactionActionsProvider.notifier)
-          .reconcileAccount(accountId: accountId, budgetId: budgetId);
+          .reconcileWithBalance(
+            accountId: accountId,
+            budgetId: budgetId,
+            statementBalanceCents: result,
+          );
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(l10n.reconcileSuccess(count))));
+        final count = response[0];
+        final adjustment = response[1];
+        if (adjustment != 0) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                l10n.reconcileSuccessWithAdjustment(
+                  count,
+                  formatCents(adjustment, currencyCode),
+                ),
+              ),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(l10n.reconcileSuccess(count))));
+        }
       }
     } on Exception catch (_) {
       if (context.mounted) {
@@ -359,5 +384,111 @@ class _TransactionRow extends HookWidget {
 
   static String _formatDate(DateTime date) {
     return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+  }
+}
+
+class _ReconcileDialog extends HookWidget {
+  const _ReconcileDialog({
+    required this.clearedBalanceCents,
+    required this.currencyCode,
+  });
+
+  final int clearedBalanceCents;
+  final CurrencyCode currencyCode;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final controller = useTextEditingController();
+    final enteredCents = useState<int?>(null);
+
+    final differenceCents = enteredCents.value != null
+        ? enteredCents.value! - clearedBalanceCents
+        : null;
+
+    return AlertDialog(
+      title: Text(l10n.reconcileTitle),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                l10n.reconcileClearedBalance,
+                style: theme.textTheme.bodyMedium,
+              ),
+              Text(
+                formatCents(clearedBalanceCents, currencyCode),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: SpacingTokens.md),
+          TextField(
+            controller: controller,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            decoration: InputDecoration(
+              labelText: l10n.reconcileBalanceLabel,
+              hintText: l10n.reconcileBalanceHint,
+              border: const OutlineInputBorder(),
+            ),
+            onChanged: (value) {
+              final parsed = double.tryParse(value);
+              enteredCents.value = parsed != null
+                  ? (parsed * 100).round()
+                  : null;
+            },
+          ),
+          if (differenceCents != null) ...[
+            const SizedBox(height: SpacingTokens.md),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  l10n.reconcileDifference,
+                  style: theme.textTheme.bodyMedium,
+                ),
+                Text(
+                  formatCents(differenceCents, currencyCode),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: differenceCents != 0
+                        ? colorScheme.error
+                        : ColorTokens.secondary,
+                  ),
+                ),
+              ],
+            ),
+            if (differenceCents != 0) ...[
+              const SizedBox(height: SpacingTokens.sm),
+              Text(
+                l10n.reconcileAdjustmentNote,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ],
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(l10n.dialogCancel),
+        ),
+        FilledButton(
+          onPressed: enteredCents.value != null
+              ? () => Navigator.of(context).pop(enteredCents.value)
+              : null,
+          child: Text(l10n.reconcileButton),
+        ),
+      ],
+    );
   }
 }

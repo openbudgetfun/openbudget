@@ -1306,11 +1306,41 @@ abstract class AppLocalizations {
   /// **'Quick Budget'**
   String get quickBudgetTitle;
 
+  /// No description provided for @reconcileAdjustmentNote.
+  ///
+  /// In en, this message translates to:
+  /// **'An adjustment transaction will be created for the difference.'**
+  String get reconcileAdjustmentNote;
+
+  /// No description provided for @reconcileBalanceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your current bank balance'**
+  String get reconcileBalanceHint;
+
+  /// No description provided for @reconcileBalanceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Statement Balance'**
+  String get reconcileBalanceLabel;
+
   /// No description provided for @reconcileButton.
   ///
   /// In en, this message translates to:
   /// **'Reconcile'**
   String get reconcileButton;
+
+  /// No description provided for @reconcileClearedBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Cleared Balance'**
+  String get reconcileClearedBalance;
+
+  /// No description provided for @reconcileDifference.
+  ///
+  /// In en, this message translates to:
+  /// **'Difference'**
+  String get reconcileDifference;
 
   /// No description provided for @reconcileError.
   ///
@@ -1329,6 +1359,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =0{No transactions to reconcile} =1{1 transaction reconciled} other{{count} transactions reconciled}}'**
   String reconcileSuccess(int count);
+
+  /// No description provided for @reconcileSuccessWithAdjustment.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Reconciled with {adjustment} adjustment} =1{1 transaction reconciled with {adjustment} adjustment} other{{count} transactions reconciled with {adjustment} adjustment}}'**
+  String reconcileSuccessWithAdjustment(int count, String adjustment);
 
   /// No description provided for @reconcileTitle.
   ///

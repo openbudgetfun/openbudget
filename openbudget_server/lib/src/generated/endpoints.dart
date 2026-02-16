@@ -1787,6 +1787,34 @@ class Endpoints extends _i1.EndpointDispatch {
                     params['budgetId'],
                   ),
         ),
+        'reconcileWithBalance': _i1.MethodConnector(
+          name: 'reconcileWithBalance',
+          params: {
+            'accountId': _i1.ParameterDescription(
+              name: 'accountId',
+              type: _i1.getType<_i1.UuidValue>(),
+              nullable: false,
+            ),
+            'budgetId': _i1.ParameterDescription(
+              name: 'budgetId',
+              type: _i1.getType<_i1.UuidValue>(),
+              nullable: false,
+            ),
+            'statementBalanceCents': _i1.ParameterDescription(
+              name: 'statementBalanceCents',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call: (_i1.Session session, Map<String, dynamic> params) async =>
+              (endpoints['transaction'] as _i14.TransactionEndpoint)
+                  .reconcileWithBalance(
+                    session,
+                    params['accountId'],
+                    params['budgetId'],
+                    params['statementBalanceCents'],
+                  ),
+        ),
         'ageOfMoney': _i1.MethodConnector(
           name: 'ageOfMoney',
           params: {
