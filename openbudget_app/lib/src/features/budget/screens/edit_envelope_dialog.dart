@@ -3,7 +3,9 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/envelope_actions_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/envelope_goal_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/monthly_allocation_provider.dart';
+import 'package:openbudget_app/src/features/budget/screens/set_goal_dialog.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -67,6 +69,15 @@ class EditEnvelopeDialog extends HookConsumerWidget {
                     amountController,
                     isSubmitting,
                   ),
+          ),
+          const SizedBox(height: SpacingTokens.md),
+          OutlinedButton.icon(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _showGoalDialog(context, ref);
+            },
+            icon: const Icon(Icons.flag_outlined, size: 18),
+            label: Text(l10n.goalSetGoal),
           ),
         ],
       ),
@@ -146,6 +157,23 @@ class EditEnvelopeDialog extends HookConsumerWidget {
         ),
       );
     }
+  }
+
+  void _showGoalDialog(BuildContext context, WidgetRef ref) {
+    final goalAsync = ref.read(
+      envelopeGoalProvider(envelope.id?.toString() ?? ''),
+    );
+    final existingGoal = goalAsync.whenOrNull(data: (g) => g);
+
+    showDialog<void>(
+      context: context,
+      builder: (_) => SetGoalDialog(
+        envelopeId: envelope.id?.toString() ?? '',
+        budgetId: budgetId,
+        currencyCode: currencyCode,
+        existingGoal: existingGoal,
+      ),
+    );
   }
 
   String _formatInitialAmount(int cents, CurrencyCode currency) {

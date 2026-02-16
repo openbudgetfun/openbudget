@@ -438,4 +438,43 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get payeeEditError => 'Could not update payee. Please try again.';
+
+  @override
+  String get goalSetTitle => 'Set Goal';
+
+  @override
+  String get goalTypeLabel => 'Goal Type';
+
+  @override
+  String get goalTypeBalance => 'Balance';
+
+  @override
+  String get goalTypeByDate => 'By Date';
+
+  @override
+  String get goalTypeMonthly => 'Monthly';
+
+  @override
+  String get goalAmountLabel => 'Target Amount';
+
+  @override
+  String get goalDateLabel => 'Target Date';
+
+  @override
+  String get goalDateSelect => 'Select a date';
+
+  @override
+  String get goalSaved => 'Goal saved';
+
+  @override
+  String get goalRemoved => 'Goal removed';
+
+  @override
+  String get goalRemove => 'Remove Goal';
+
+  @override
+  String get goalError => 'Could not save goal. Please try again.';
+
+  @override
+  String get goalSetGoal => 'Set Goal';
 }

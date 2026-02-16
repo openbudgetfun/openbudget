@@ -19,24 +19,28 @@ import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
 import 'accounts/account.dart' as _i5;
 import 'budgets/budget.dart' as _i6;
 import 'categories/category.dart' as _i7;
-import 'envelopes/envelope.dart' as _i8;
-import 'monthly_allocations/monthly_allocation.dart' as _i9;
-import 'payees/payee.dart' as _i10;
-import 'transactions/transaction.dart' as _i11;
-import 'package:openbudget_server/src/generated/accounts/account.dart' as _i12;
-import 'package:openbudget_server/src/generated/budgets/budget.dart' as _i13;
+import 'envelope_goals/envelope_goal.dart' as _i8;
+import 'envelopes/envelope.dart' as _i9;
+import 'monthly_allocations/monthly_allocation.dart' as _i10;
+import 'payees/payee.dart' as _i11;
+import 'transactions/transaction.dart' as _i12;
+import 'package:openbudget_server/src/generated/accounts/account.dart' as _i13;
+import 'package:openbudget_server/src/generated/budgets/budget.dart' as _i14;
 import 'package:openbudget_server/src/generated/categories/category.dart'
-    as _i14;
-import 'package:openbudget_server/src/generated/envelopes/envelope.dart'
     as _i15;
-import 'package:openbudget_server/src/generated/monthly_allocations/monthly_allocation.dart'
+import 'package:openbudget_server/src/generated/envelope_goals/envelope_goal.dart'
     as _i16;
-import 'package:openbudget_server/src/generated/payees/payee.dart' as _i17;
-import 'package:openbudget_server/src/generated/transactions/transaction.dart'
+import 'package:openbudget_server/src/generated/envelopes/envelope.dart'
+    as _i17;
+import 'package:openbudget_server/src/generated/monthly_allocations/monthly_allocation.dart'
     as _i18;
+import 'package:openbudget_server/src/generated/payees/payee.dart' as _i19;
+import 'package:openbudget_server/src/generated/transactions/transaction.dart'
+    as _i20;
 export 'accounts/account.dart';
 export 'budgets/budget.dart';
 export 'categories/category.dart';
+export 'envelope_goals/envelope_goal.dart';
 export 'envelopes/envelope.dart';
 export 'monthly_allocations/monthly_allocation.dart';
 export 'payees/payee.dart';
@@ -407,6 +411,106 @@ class Protocol extends _i1.SerializationManagerServer {
           ],
           type: 'btree',
           isUnique: false,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _i2.TableDefinition(
+      name: 'envelope_goal',
+      dartName: 'EnvelopeGoal',
+      schema: 'public',
+      module: 'openbudget',
+      columns: [
+        _i2.ColumnDefinition(
+          name: 'id',
+          columnType: _i2.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue?',
+          columnDefault: 'gen_random_uuid_v7()',
+        ),
+        _i2.ColumnDefinition(
+          name: 'envelopeId',
+          columnType: _i2.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _i2.ColumnDefinition(
+          name: 'goalType',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'targetAmountCents',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _i2.ColumnDefinition(
+          name: 'targetDate',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: true,
+          dartType: 'DateTime?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'monthlyFundingCents',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: true,
+          dartType: 'int?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'CURRENT_TIMESTAMP',
+        ),
+        _i2.ColumnDefinition(
+          name: 'updatedAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'CURRENT_TIMESTAMP',
+        ),
+      ],
+      foreignKeys: [
+        _i2.ForeignKeyDefinition(
+          constraintName: 'envelope_goal_fk_0',
+          columns: ['envelopeId'],
+          referenceTable: 'envelope',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _i2.ForeignKeyAction.noAction,
+          onDelete: _i2.ForeignKeyAction.noAction,
+          matchType: null,
+        ),
+      ],
+      indexes: [
+        _i2.IndexDefinition(
+          indexName: 'envelope_goal_pkey',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'id',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: true,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'envelope_goal_envelope_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'envelopeId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
           isPrimary: false,
         ),
       ],
@@ -885,17 +989,20 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == _i7.Category) {
       return _i7.Category.fromJson(data) as T;
     }
-    if (t == _i8.Envelope) {
-      return _i8.Envelope.fromJson(data) as T;
+    if (t == _i8.EnvelopeGoal) {
+      return _i8.EnvelopeGoal.fromJson(data) as T;
     }
-    if (t == _i9.MonthlyAllocation) {
-      return _i9.MonthlyAllocation.fromJson(data) as T;
+    if (t == _i9.Envelope) {
+      return _i9.Envelope.fromJson(data) as T;
     }
-    if (t == _i10.Payee) {
-      return _i10.Payee.fromJson(data) as T;
+    if (t == _i10.MonthlyAllocation) {
+      return _i10.MonthlyAllocation.fromJson(data) as T;
     }
-    if (t == _i11.Transaction) {
-      return _i11.Transaction.fromJson(data) as T;
+    if (t == _i11.Payee) {
+      return _i11.Payee.fromJson(data) as T;
+    }
+    if (t == _i12.Transaction) {
+      return _i12.Transaction.fromJson(data) as T;
     }
     if (t == _i1.getType<_i5.Account?>()) {
       return (data != null ? _i5.Account.fromJson(data) : null) as T;
@@ -906,47 +1013,60 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == _i1.getType<_i7.Category?>()) {
       return (data != null ? _i7.Category.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i8.Envelope?>()) {
-      return (data != null ? _i8.Envelope.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i8.EnvelopeGoal?>()) {
+      return (data != null ? _i8.EnvelopeGoal.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i9.MonthlyAllocation?>()) {
-      return (data != null ? _i9.MonthlyAllocation.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i9.Envelope?>()) {
+      return (data != null ? _i9.Envelope.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i10.Payee?>()) {
-      return (data != null ? _i10.Payee.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i10.MonthlyAllocation?>()) {
+      return (data != null ? _i10.MonthlyAllocation.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i11.Transaction?>()) {
-      return (data != null ? _i11.Transaction.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i11.Payee?>()) {
+      return (data != null ? _i11.Payee.fromJson(data) : null) as T;
     }
-    if (t == List<_i12.Account>) {
-      return (data as List).map((e) => deserialize<_i12.Account>(e)).toList()
+    if (t == _i1.getType<_i12.Transaction?>()) {
+      return (data != null ? _i12.Transaction.fromJson(data) : null) as T;
+    }
+    if (t == List<_i13.Account>) {
+      return (data as List).map((e) => deserialize<_i13.Account>(e)).toList()
           as T;
     }
-    if (t == List<_i13.Budget>) {
-      return (data as List).map((e) => deserialize<_i13.Budget>(e)).toList()
+    if (t == List<_i14.Budget>) {
+      return (data as List).map((e) => deserialize<_i14.Budget>(e)).toList()
           as T;
     }
-    if (t == List<_i14.Category>) {
-      return (data as List).map((e) => deserialize<_i14.Category>(e)).toList()
+    if (t == List<_i15.Category>) {
+      return (data as List).map((e) => deserialize<_i15.Category>(e)).toList()
           as T;
     }
-    if (t == List<_i15.Envelope>) {
-      return (data as List).map((e) => deserialize<_i15.Envelope>(e)).toList()
-          as T;
-    }
-    if (t == List<_i16.MonthlyAllocation>) {
+    if (t == List<_i16.EnvelopeGoal>) {
       return (data as List)
-              .map((e) => deserialize<_i16.MonthlyAllocation>(e))
+              .map((e) => deserialize<_i16.EnvelopeGoal>(e))
               .toList()
           as T;
     }
-    if (t == List<_i17.Payee>) {
-      return (data as List).map((e) => deserialize<_i17.Payee>(e)).toList()
+    if (t == List<_i1.UuidValue>) {
+      return (data as List).map((e) => deserialize<_i1.UuidValue>(e)).toList()
           as T;
     }
-    if (t == List<_i18.Transaction>) {
+    if (t == List<_i17.Envelope>) {
+      return (data as List).map((e) => deserialize<_i17.Envelope>(e)).toList()
+          as T;
+    }
+    if (t == List<_i18.MonthlyAllocation>) {
       return (data as List)
-              .map((e) => deserialize<_i18.Transaction>(e))
+              .map((e) => deserialize<_i18.MonthlyAllocation>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_i19.Payee>) {
+      return (data as List).map((e) => deserialize<_i19.Payee>(e)).toList()
+          as T;
+    }
+    if (t == List<_i20.Transaction>) {
+      return (data as List)
+              .map((e) => deserialize<_i20.Transaction>(e))
               .toList()
           as T;
     }
@@ -967,10 +1087,11 @@ class Protocol extends _i1.SerializationManagerServer {
       _i5.Account => 'Account',
       _i6.Budget => 'Budget',
       _i7.Category => 'Category',
-      _i8.Envelope => 'Envelope',
-      _i9.MonthlyAllocation => 'MonthlyAllocation',
-      _i10.Payee => 'Payee',
-      _i11.Transaction => 'Transaction',
+      _i8.EnvelopeGoal => 'EnvelopeGoal',
+      _i9.Envelope => 'Envelope',
+      _i10.MonthlyAllocation => 'MonthlyAllocation',
+      _i11.Payee => 'Payee',
+      _i12.Transaction => 'Transaction',
       _ => null,
     };
   }
@@ -991,13 +1112,15 @@ class Protocol extends _i1.SerializationManagerServer {
         return 'Budget';
       case _i7.Category():
         return 'Category';
-      case _i8.Envelope():
+      case _i8.EnvelopeGoal():
+        return 'EnvelopeGoal';
+      case _i9.Envelope():
         return 'Envelope';
-      case _i9.MonthlyAllocation():
+      case _i10.MonthlyAllocation():
         return 'MonthlyAllocation';
-      case _i10.Payee():
+      case _i11.Payee():
         return 'Payee';
-      case _i11.Transaction():
+      case _i12.Transaction():
         return 'Transaction';
     }
     className = _i2.Protocol().getClassNameForObject(data);
@@ -1030,17 +1153,20 @@ class Protocol extends _i1.SerializationManagerServer {
     if (dataClassName == 'Category') {
       return deserialize<_i7.Category>(data['data']);
     }
+    if (dataClassName == 'EnvelopeGoal') {
+      return deserialize<_i8.EnvelopeGoal>(data['data']);
+    }
     if (dataClassName == 'Envelope') {
-      return deserialize<_i8.Envelope>(data['data']);
+      return deserialize<_i9.Envelope>(data['data']);
     }
     if (dataClassName == 'MonthlyAllocation') {
-      return deserialize<_i9.MonthlyAllocation>(data['data']);
+      return deserialize<_i10.MonthlyAllocation>(data['data']);
     }
     if (dataClassName == 'Payee') {
-      return deserialize<_i10.Payee>(data['data']);
+      return deserialize<_i11.Payee>(data['data']);
     }
     if (dataClassName == 'Transaction') {
-      return deserialize<_i11.Transaction>(data['data']);
+      return deserialize<_i12.Transaction>(data['data']);
     }
     if (dataClassName.startsWith('serverpod.')) {
       data['className'] = dataClassName.substring(10);
@@ -1084,14 +1210,16 @@ class Protocol extends _i1.SerializationManagerServer {
         return _i6.Budget.t;
       case _i7.Category:
         return _i7.Category.t;
-      case _i8.Envelope:
-        return _i8.Envelope.t;
-      case _i9.MonthlyAllocation:
-        return _i9.MonthlyAllocation.t;
-      case _i10.Payee:
-        return _i10.Payee.t;
-      case _i11.Transaction:
-        return _i11.Transaction.t;
+      case _i8.EnvelopeGoal:
+        return _i8.EnvelopeGoal.t;
+      case _i9.Envelope:
+        return _i9.Envelope.t;
+      case _i10.MonthlyAllocation:
+        return _i10.MonthlyAllocation.t;
+      case _i11.Payee:
+        return _i11.Payee.t;
+      case _i12.Transaction:
+        return _i12.Transaction.t;
     }
     return null;
   }

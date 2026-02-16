@@ -149,5 +149,18 @@
   "payeeCreateError": "Could not create payee. Please try again.",
   "payeeEditTitle": "Edit Payee",
   "payeeEditSuccess": "Payee updated",
-  "payeeEditError": "Could not update payee. Please try again."
+  "payeeEditError": "Could not update payee. Please try again.",
+  "goalSetTitle": "Set Goal",
+  "goalTypeLabel": "Goal Type",
+  "goalTypeBalance": "Balance",
+  "goalTypeByDate": "By Date",
+  "goalTypeMonthly": "Monthly",
+  "goalAmountLabel": "Target Amount",
+  "goalDateLabel": "Target Date",
+  "goalDateSelect": "Select a date",
+  "goalSaved": "Goal saved",
+  "goalRemoved": "Goal removed",
+  "goalRemove": "Remove Goal",
+  "goalError": "Could not save goal. Please try again.",
+  "goalSetGoal": "Set Goal"
 }
