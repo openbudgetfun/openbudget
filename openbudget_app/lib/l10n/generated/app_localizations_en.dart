@@ -920,4 +920,29 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get netWorthEmptySubtitle =>
       'Add accounts to see your net worth breakdown';
+
+  @override
+  String get spendingTrendsTitle => 'Spending Trends';
+
+  @override
+  String get spendingTrendsLoadError => 'Could not load spending trends';
+
+  @override
+  String get spendingTrendsEmptyTitle => 'No Spending Data';
+
+  @override
+  String get spendingTrendsEmptySubtitle =>
+      'Add transactions to see spending trends over time';
+
+  @override
+  String get spendingTrendsAvgIncome => 'Avg. Income';
+
+  @override
+  String get spendingTrendsAvgExpenses => 'Avg. Expenses';
+
+  @override
+  String get spendingTrendsMonthly => 'Monthly Comparison';
+
+  @override
+  String get spendingTrendsBreakdown => 'Monthly Breakdown';
 }

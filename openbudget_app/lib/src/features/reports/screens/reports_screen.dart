@@ -38,6 +38,14 @@ class ReportsScreen extends HookConsumerWidget {
               pathParameters: {'id': budgetId},
             ),
           ),
+          IconButton(
+            icon: const Icon(Icons.trending_up_rounded),
+            tooltip: l10n.spendingTrendsTitle,
+            onPressed: () => context.pushNamed(
+              spendingTrendsRoute,
+              pathParameters: {'id': budgetId},
+            ),
+          ),
         ],
       ),
       body: Column(

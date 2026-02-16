@@ -34,3 +34,5 @@ const importTransactionsRoute = 'importTransactions';
 const importTransactionsPath = '/budgets/:id/import';
 const netWorthRoute = 'netWorth';
 const netWorthPath = '/budgets/:id/net-worth';
+const spendingTrendsRoute = 'spendingTrends';
+const spendingTrendsPath = '/budgets/:id/reports/trends';
