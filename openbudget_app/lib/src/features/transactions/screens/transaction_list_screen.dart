@@ -31,6 +31,8 @@ class TransactionListScreen extends HookConsumerWidget {
     final searchController = useTextEditingController();
     final searchQuery = useState('');
     final filter = useState(TransactionFilter.all);
+    final dateRangeStart = useState<DateTime?>(null);
+    final dateRangeEnd = useState<DateTime?>(null);
     final selectionMode = useState(false);
     final selectedIds = useState(<String>{});
 
@@ -158,8 +160,25 @@ class TransactionListScreen extends HookConsumerWidget {
               return false;
             }
             if (query.isNotEmpty &&
-                !tx.description.toLowerCase().contains(query)) {
+                !tx.description.toLowerCase().contains(query) &&
+                !(tx.memo?.toLowerCase().contains(query) ?? false)) {
               return false;
+            }
+            if (dateRangeStart.value != null) {
+              final txDate = DateTime(
+                tx.transactionDate.year,
+                tx.transactionDate.month,
+                tx.transactionDate.day,
+              );
+              if (txDate.isBefore(dateRangeStart.value!)) return false;
+            }
+            if (dateRangeEnd.value != null) {
+              final txDate = DateTime(
+                tx.transactionDate.year,
+                tx.transactionDate.month,
+                tx.transactionDate.day,
+              );
+              if (txDate.isAfter(dateRangeEnd.value!)) return false;
             }
             return true;
           }).toList();
@@ -225,6 +244,33 @@ class TransactionListScreen extends HookConsumerWidget {
                           filter.value = TransactionFilter.expense,
                       color: ColorTokens.error,
                     ),
+                    const SizedBox(width: SpacingTokens.sm),
+                    _FilterChip(
+                      label: dateRangeStart.value != null
+                          ? _formatShortDate(dateRangeStart.value!)
+                          : l10n.transactionDateRangeFilter,
+                      selected: dateRangeStart.value != null,
+                      onSelected: () => _pickDateRange(
+                        context,
+                        dateRangeStart,
+                        dateRangeEnd,
+                        transactions,
+                      ),
+                    ),
+                    if (dateRangeStart.value != null)
+                      IconButton(
+                        icon: const Icon(Icons.clear, size: 16),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(
+                          minWidth: 24,
+                          minHeight: 24,
+                        ),
+                        tooltip: l10n.transactionDateRangeClear,
+                        onPressed: () {
+                          dateRangeStart.value = null;
+                          dateRangeEnd.value = null;
+                        },
+                      ),
                     const Spacer(),
                     Text(
                       l10n.transactionResultCount(filtered.length),
@@ -435,6 +481,39 @@ class TransactionListScreen extends HookConsumerWidget {
     }
     return value;
   }
+
+  Future<void> _pickDateRange(
+    BuildContext context,
+    ValueNotifier<DateTime?> dateRangeStart,
+    ValueNotifier<DateTime?> dateRangeEnd,
+    List<Transaction> transactions,
+  ) async {
+    final now = DateTime.now();
+    final earliest = transactions.isNotEmpty
+        ? transactions
+              .map((tx) => tx.transactionDate)
+              .reduce((a, b) => a.isBefore(b) ? a : b)
+        : DateTime(now.year - 1);
+
+    final picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(earliest.year, earliest.month, earliest.day),
+      lastDate: now,
+      initialDateRange: dateRangeStart.value != null
+          ? DateTimeRange(
+              start: dateRangeStart.value!,
+              end: dateRangeEnd.value ?? now,
+            )
+          : null,
+    );
+
+    if (picked != null) {
+      dateRangeStart.value = picked.start;
+      dateRangeEnd.value = picked.end;
+    }
+  }
+
+  static String _formatShortDate(DateTime date) => '${date.month}/${date.day}';
 }
 
 class _FilterChip extends HookWidget {

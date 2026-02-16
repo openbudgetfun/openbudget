@@ -1445,7 +1445,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get transactionSave => 'Save Transaction';
 
   @override
-  String get transactionSearchHint => 'Search transactions...';
+  String get transactionDateRangeFilter => 'Date range';
+
+  @override
+  String get transactionDateRangeClear => 'Clear date filter';
+
+  @override
+  String get transactionSearchHint => 'Search description or memo...';
 
   @override
   String get transactionSubmitting => 'Saving...';
