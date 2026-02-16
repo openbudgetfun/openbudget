@@ -22,3 +22,5 @@ const payeeListRoute = 'payeeList';
 const payeeListPath = '/budgets/:id/payees';
 const createTransferRoute = 'createTransfer';
 const createTransferPath = '/budgets/:id/transfer';
+const reportsRoute = 'reports';
+const reportsPath = '/budgets/:id/reports';

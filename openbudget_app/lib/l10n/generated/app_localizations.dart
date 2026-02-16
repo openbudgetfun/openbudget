@@ -1047,6 +1047,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You need at least two accounts to make a transfer'**
   String get transferNeedTwoAccounts;
+
+  /// No description provided for @reportsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reports'**
+  String get reportsTitle;
+
+  /// No description provided for @reportsLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load report data'**
+  String get reportsLoadError;
+
+  /// No description provided for @reportsIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get reportsIncome;
+
+  /// No description provided for @reportsExpenses.
+  ///
+  /// In en, this message translates to:
+  /// **'Expenses'**
+  String get reportsExpenses;
+
+  /// No description provided for @reportsNetIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Net Income'**
+  String get reportsNetIncome;
+
+  /// No description provided for @reportsTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'Transactions'**
+  String get reportsTransactions;
+
+  /// No description provided for @reportsSpendingByCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Spending by Category'**
+  String get reportsSpendingByCategory;
+
+  /// No description provided for @reportsEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No Data Yet'**
+  String get reportsEmptyTitle;
+
+  /// No description provided for @reportsEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add transactions to see spending reports for this month'**
+  String get reportsEmptySubtitle;
 }
 
 class _AppLocalizationsDelegate

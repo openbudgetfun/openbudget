@@ -172,5 +172,14 @@
   "transferSuccess": "Transfer completed",
   "transferError": "Could not complete transfer. Please try again.",
   "transferSameAccountError": "Cannot transfer to the same account",
-  "transferNeedTwoAccounts": "You need at least two accounts to make a transfer"
+  "transferNeedTwoAccounts": "You need at least two accounts to make a transfer",
+  "reportsTitle": "Reports",
+  "reportsLoadError": "Could not load report data",
+  "reportsIncome": "Income",
+  "reportsExpenses": "Expenses",
+  "reportsNetIncome": "Net Income",
+  "reportsTransactions": "Transactions",
+  "reportsSpendingByCategory": "Spending by Category",
+  "reportsEmptyTitle": "No Data Yet",
+  "reportsEmptySubtitle": "Add transactions to see spending reports for this month"
 }
