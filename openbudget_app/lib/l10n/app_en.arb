@@ -359,5 +359,13 @@
   "netWorthLiabilities": "Liabilities",
   "netWorthLoadError": "Could not load net worth data",
   "netWorthEmptyTitle": "No Accounts Yet",
-  "netWorthEmptySubtitle": "Add accounts to see your net worth breakdown"
+  "netWorthEmptySubtitle": "Add accounts to see your net worth breakdown",
+  "spendingTrendsTitle": "Spending Trends",
+  "spendingTrendsLoadError": "Could not load spending trends",
+  "spendingTrendsEmptyTitle": "No Spending Data",
+  "spendingTrendsEmptySubtitle": "Add transactions to see spending trends over time",
+  "spendingTrendsAvgIncome": "Avg. Income",
+  "spendingTrendsAvgExpenses": "Avg. Expenses",
+  "spendingTrendsMonthly": "Monthly Comparison",
+  "spendingTrendsBreakdown": "Monthly Breakdown"
 }

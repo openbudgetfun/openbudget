@@ -1665,6 +1665,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add accounts to see your net worth breakdown'**
   String get netWorthEmptySubtitle;
+
+  /// No description provided for @spendingTrendsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Spending Trends'**
+  String get spendingTrendsTitle;
+
+  /// No description provided for @spendingTrendsLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load spending trends'**
+  String get spendingTrendsLoadError;
+
+  /// No description provided for @spendingTrendsEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No Spending Data'**
+  String get spendingTrendsEmptyTitle;
+
+  /// No description provided for @spendingTrendsEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add transactions to see spending trends over time'**
+  String get spendingTrendsEmptySubtitle;
+
+  /// No description provided for @spendingTrendsAvgIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Avg. Income'**
+  String get spendingTrendsAvgIncome;
+
+  /// No description provided for @spendingTrendsAvgExpenses.
+  ///
+  /// In en, this message translates to:
+  /// **'Avg. Expenses'**
+  String get spendingTrendsAvgExpenses;
+
+  /// No description provided for @spendingTrendsMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly Comparison'**
+  String get spendingTrendsMonthly;
+
+  /// No description provided for @spendingTrendsBreakdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly Breakdown'**
+  String get spendingTrendsBreakdown;
 }
 
 class _AppLocalizationsDelegate
