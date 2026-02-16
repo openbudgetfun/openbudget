@@ -91,7 +91,7 @@ class TransactionActions extends _$TransactionActions {
     }
   }
 
-  Future<void> deleteTransaction({
+  Future<Transaction> deleteTransaction({
     required String transactionId,
     required String budgetId,
   }) async {
@@ -100,13 +100,53 @@ class TransactionActions extends _$TransactionActions {
     try {
       // Serverpod API requires UuidValue which is experimental in uuid package.
       // ignore: experimental_member_use
-      await client.transaction.delete(UuidValue.fromString(transactionId));
+      final deleted = await client.transaction.delete(
+        // Serverpod API requires UuidValue which is experimental in uuid package.
+        // ignore: experimental_member_use
+        UuidValue.fromString(transactionId),
+      );
       if (ref.mounted) {
         ref
           ..invalidate(transactionListProvider(budgetId))
           ..invalidate(budgetSummaryProvider(budgetId));
         state = const AsyncValue.data(null);
       }
+      return deleted;
+    } on Exception catch (e, st) {
+      if (ref.mounted) {
+        state = AsyncValue.error(e, st);
+      }
+      rethrow;
+    }
+  }
+
+  /// Recreates a previously deleted transaction for undo support.
+  Future<Transaction> undoDeleteTransaction({
+    required Transaction deletedTransaction,
+    required String budgetId,
+  }) async {
+    state = const AsyncValue.loading();
+    final client = ref.read(serverpodClientProvider);
+    try {
+      final restored = await client.transaction.create(
+        deletedTransaction.description,
+        deletedTransaction.amountCents,
+        deletedTransaction.currencyCode,
+        // Serverpod API requires UuidValue which is experimental in uuid package.
+        // ignore: experimental_member_use
+        UuidValue.fromString(budgetId),
+        deletedTransaction.transactionDate,
+        envelopeId: deletedTransaction.envelopeId,
+        payeeId: deletedTransaction.payeeId,
+        memo: deletedTransaction.memo,
+      );
+      if (ref.mounted) {
+        ref
+          ..invalidate(transactionListProvider(budgetId))
+          ..invalidate(budgetSummaryProvider(budgetId));
+        state = const AsyncValue.data(null);
+      }
+      return restored;
     } on Exception catch (e, st) {
       if (ref.mounted) {
         state = AsyncValue.error(e, st);
