@@ -562,6 +562,27 @@ class EndpointMonthlyAllocation extends _i1.EndpointRef {
     {'budgetId': budgetId, 'year': year, 'month': month},
   );
 
+  /// Moves money between two envelopes in the same budget and month.
+  _i2.Future<List<_i10.MonthlyAllocation>> moveMoney(
+    _i1.UuidValue fromEnvelopeId,
+    _i1.UuidValue toEnvelopeId,
+    _i1.UuidValue budgetId,
+    int year,
+    int month,
+    int amountCents,
+  ) => caller.callServerEndpoint<List<_i10.MonthlyAllocation>>(
+    'monthlyAllocation',
+    'moveMoney',
+    {
+      'fromEnvelopeId': fromEnvelopeId,
+      'toEnvelopeId': toEnvelopeId,
+      'budgetId': budgetId,
+      'year': year,
+      'month': month,
+      'amountCents': amountCents,
+    },
+  );
+
   /// Deletes a monthly allocation by ID.
   _i2.Future<_i10.MonthlyAllocation> delete(_i1.UuidValue allocationId) =>
       caller.callServerEndpoint<_i10.MonthlyAllocation>(

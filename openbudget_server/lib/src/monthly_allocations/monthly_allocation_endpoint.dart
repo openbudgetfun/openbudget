@@ -45,6 +45,27 @@ class MonthlyAllocationEndpoint extends Endpoint {
     );
   }
 
+  /// Moves money between two envelopes in the same budget and month.
+  Future<List<MonthlyAllocation>> moveMoney(
+    Session session,
+    UuidValue fromEnvelopeId,
+    UuidValue toEnvelopeId,
+    UuidValue budgetId,
+    int year,
+    int month,
+    int amountCents,
+  ) async {
+    return MonthlyAllocationService.moveMoney(
+      session,
+      fromEnvelopeId: fromEnvelopeId,
+      toEnvelopeId: toEnvelopeId,
+      budgetId: budgetId,
+      year: year,
+      month: month,
+      amountCents: amountCents,
+    );
+  }
+
   /// Deletes a monthly allocation by ID.
   Future<MonthlyAllocation> delete(
     Session session,

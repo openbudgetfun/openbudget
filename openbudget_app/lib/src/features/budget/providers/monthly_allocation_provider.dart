@@ -50,6 +50,46 @@ class MonthlyAllocationActions extends _$MonthlyAllocationActions {
     return const AsyncValue.data(null);
   }
 
+  Future<List<MonthlyAllocation>> moveMoney({
+    required String fromEnvelopeId,
+    required String toEnvelopeId,
+    required String budgetId,
+    required int year,
+    required int month,
+    required int amountCents,
+  }) async {
+    state = const AsyncValue.loading();
+    final client = ref.read(serverpodClientProvider);
+    try {
+      final result = await client.monthlyAllocation.moveMoney(
+        // Serverpod API requires UuidValue which is experimental in uuid package.
+        // ignore: experimental_member_use
+        UuidValue.fromString(fromEnvelopeId),
+        // Serverpod API requires UuidValue which is experimental in uuid package.
+        // ignore: experimental_member_use
+        UuidValue.fromString(toEnvelopeId),
+        // Serverpod API requires UuidValue which is experimental in uuid package.
+        // ignore: experimental_member_use
+        UuidValue.fromString(budgetId),
+        year,
+        month,
+        amountCents,
+      );
+      if (ref.mounted) {
+        ref
+          ..invalidate(monthlyAllocationsProvider(budgetId, year, month))
+          ..invalidate(budgetMonthlySummaryProvider(budgetId));
+        state = const AsyncValue.data(null);
+      }
+      return result;
+    } on Exception catch (e, st) {
+      if (ref.mounted) {
+        state = AsyncValue.error(e, st);
+      }
+      rethrow;
+    }
+  }
+
   Future<MonthlyAllocation> upsertAllocation({
     required String envelopeId,
     required String budgetId,

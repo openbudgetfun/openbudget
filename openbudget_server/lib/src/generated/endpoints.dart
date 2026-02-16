@@ -878,6 +878,52 @@ class Endpoints extends _i1.EndpointDispatch {
                     params['month'],
                   ),
         ),
+        'moveMoney': _i1.MethodConnector(
+          name: 'moveMoney',
+          params: {
+            'fromEnvelopeId': _i1.ParameterDescription(
+              name: 'fromEnvelopeId',
+              type: _i1.getType<_i1.UuidValue>(),
+              nullable: false,
+            ),
+            'toEnvelopeId': _i1.ParameterDescription(
+              name: 'toEnvelopeId',
+              type: _i1.getType<_i1.UuidValue>(),
+              nullable: false,
+            ),
+            'budgetId': _i1.ParameterDescription(
+              name: 'budgetId',
+              type: _i1.getType<_i1.UuidValue>(),
+              nullable: false,
+            ),
+            'year': _i1.ParameterDescription(
+              name: 'year',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'month': _i1.ParameterDescription(
+              name: 'month',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'amountCents': _i1.ParameterDescription(
+              name: 'amountCents',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call: (_i1.Session session, Map<String, dynamic> params) async =>
+              (endpoints['monthlyAllocation'] as _i10.MonthlyAllocationEndpoint)
+                  .moveMoney(
+                    session,
+                    params['fromEnvelopeId'],
+                    params['toEnvelopeId'],
+                    params['budgetId'],
+                    params['year'],
+                    params['month'],
+                    params['amountCents'],
+                  ),
+        ),
         'delete': _i1.MethodConnector(
           name: 'delete',
           params: {
