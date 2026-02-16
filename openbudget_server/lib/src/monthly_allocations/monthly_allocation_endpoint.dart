@@ -45,6 +45,25 @@ class MonthlyAllocationEndpoint extends Endpoint {
     );
   }
 
+  /// Copies all allocations from a source month to a target month.
+  Future<List<MonthlyAllocation>> copyMonth(
+    Session session,
+    UuidValue budgetId,
+    int sourceYear,
+    int sourceMonth,
+    int targetYear,
+    int targetMonth,
+  ) async {
+    return MonthlyAllocationService.copyMonth(
+      session,
+      budgetId: budgetId,
+      sourceYear: sourceYear,
+      sourceMonth: sourceMonth,
+      targetYear: targetYear,
+      targetMonth: targetMonth,
+    );
+  }
+
   /// Moves money between two envelopes in the same budget and month.
   Future<List<MonthlyAllocation>> moveMoney(
     Session session,

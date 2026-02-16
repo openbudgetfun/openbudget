@@ -16,6 +16,7 @@ class BudgetHeader extends HookConsumerWidget {
     required this.year,
     required this.month,
     this.totalOverspentCents = 0,
+    this.onCopyLastMonth,
     super.key,
   });
 
@@ -25,6 +26,7 @@ class BudgetHeader extends HookConsumerWidget {
   final int year;
   final int month;
   final int totalOverspentCents;
+  final VoidCallback? onCopyLastMonth;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -167,6 +169,24 @@ class BudgetHeader extends HookConsumerWidget {
               style: FilledButton.styleFrom(
                 backgroundColor: ColorTokens.secondary,
                 foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: SpacingTokens.md,
+                  vertical: SpacingTokens.xs,
+                ),
+                minimumSize: Size.zero,
+                textStyle: theme.textTheme.labelMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+          if (onCopyLastMonth != null) ...[
+            const SizedBox(height: SpacingTokens.sm),
+            OutlinedButton.icon(
+              onPressed: onCopyLastMonth,
+              icon: const Icon(Icons.content_copy_rounded, size: 16),
+              label: Text(l10n.budgetCopyLastMonth),
+              style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(
                   horizontal: SpacingTokens.md,
                   vertical: SpacingTokens.xs,

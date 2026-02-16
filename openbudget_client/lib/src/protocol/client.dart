@@ -653,6 +653,25 @@ class EndpointMonthlyAllocation extends _i1.EndpointRef {
     {'budgetId': budgetId, 'year': year, 'month': month},
   );
 
+  /// Copies all allocations from a source month to a target month.
+  _i2.Future<List<_i7.MonthlyAllocation>> copyMonth(
+    _i1.UuidValue budgetId,
+    int sourceYear,
+    int sourceMonth,
+    int targetYear,
+    int targetMonth,
+  ) => caller.callServerEndpoint<List<_i7.MonthlyAllocation>>(
+    'monthlyAllocation',
+    'copyMonth',
+    {
+      'budgetId': budgetId,
+      'sourceYear': sourceYear,
+      'sourceMonth': sourceMonth,
+      'targetYear': targetYear,
+      'targetMonth': targetMonth,
+    },
+  );
+
   /// Moves money between two envelopes in the same budget and month.
   _i2.Future<List<_i7.MonthlyAllocation>> moveMoney(
     _i1.UuidValue fromEnvelopeId,

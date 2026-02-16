@@ -51,6 +51,7 @@ envelope:
 monthlyAllocation:
   - upsert:
   - list:
+  - copyMonth:
   - moveMoney:
   - delete:
 payee:
