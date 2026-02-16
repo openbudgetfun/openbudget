@@ -1241,6 +1241,63 @@ class Endpoints extends _i1.EndpointDispatch {
                 params['transactionDate'],
               ),
         ),
+        'listByAccount': _i1.MethodConnector(
+          name: 'listByAccount',
+          params: {
+            'accountId': _i1.ParameterDescription(
+              name: 'accountId',
+              type: _i1.getType<_i1.UuidValue>(),
+              nullable: false,
+            ),
+            'budgetId': _i1.ParameterDescription(
+              name: 'budgetId',
+              type: _i1.getType<_i1.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call: (_i1.Session session, Map<String, dynamic> params) async =>
+              (endpoints['transaction'] as _i12.TransactionEndpoint)
+                  .listByAccount(
+                    session,
+                    params['accountId'],
+                    params['budgetId'],
+                  ),
+        ),
+        'toggleCleared': _i1.MethodConnector(
+          name: 'toggleCleared',
+          params: {
+            'transactionId': _i1.ParameterDescription(
+              name: 'transactionId',
+              type: _i1.getType<_i1.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call: (_i1.Session session, Map<String, dynamic> params) async =>
+              (endpoints['transaction'] as _i12.TransactionEndpoint)
+                  .toggleCleared(session, params['transactionId']),
+        ),
+        'reconcileAccount': _i1.MethodConnector(
+          name: 'reconcileAccount',
+          params: {
+            'accountId': _i1.ParameterDescription(
+              name: 'accountId',
+              type: _i1.getType<_i1.UuidValue>(),
+              nullable: false,
+            ),
+            'budgetId': _i1.ParameterDescription(
+              name: 'budgetId',
+              type: _i1.getType<_i1.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call: (_i1.Session session, Map<String, dynamic> params) async =>
+              (endpoints['transaction'] as _i12.TransactionEndpoint)
+                  .reconcileAccount(
+                    session,
+                    params['accountId'],
+                    params['budgetId'],
+                  ),
+        ),
         'delete': _i1.MethodConnector(
           name: 'delete',
           params: {

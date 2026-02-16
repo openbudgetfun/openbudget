@@ -240,6 +240,7 @@ class _AccountTile extends HookWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: SpacingTokens.xs),
       child: ListTile(
+        onTap: () => context.go('/budgets/$budgetId/accounts/${account.id}'),
         leading: CircleAvatar(
           backgroundColor: colorScheme.secondaryContainer,
           child: Icon(icon, color: colorScheme.onSecondaryContainer, size: 20),

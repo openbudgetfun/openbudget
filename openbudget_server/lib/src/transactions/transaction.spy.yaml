@@ -17,6 +17,10 @@ fields:
   transactionDate: DateTime
   ### If this transaction is part of a transfer, this links to the paired transaction.
   transferPairId: UuidValue?
+  ### Whether this transaction has been cleared by the user.
+  cleared: bool, default=false
+  ### Whether this transaction has been reconciled.
+  reconciled: bool, default=false
   createdAt: DateTime, default=now
 indexes:
   transaction_envelope_idx:

@@ -563,4 +563,41 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get creditCardSpentThisMonth => 'Spent this month';
+
+  @override
+  String get accountDetailBalance => 'Balance';
+
+  @override
+  String get transactionUncleared => 'Uncleared';
+
+  @override
+  String get transactionCleared => 'Cleared';
+
+  @override
+  String get transactionReconciled => 'Reconciled';
+
+  @override
+  String get reconcileTitle => 'Reconcile Account';
+
+  @override
+  String get reconcileMessage =>
+      'Mark all cleared transactions as reconciled? This locks them from further editing.';
+
+  @override
+  String get reconcileButton => 'Reconcile';
+
+  @override
+  String reconcileSuccess(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count transactions reconciled',
+      one: '1 transaction reconciled',
+      zero: 'No transactions to reconcile',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get reconcileError => 'Could not reconcile account. Please try again.';
 }

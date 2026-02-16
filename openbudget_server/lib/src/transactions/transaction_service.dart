@@ -157,6 +157,57 @@ class TransactionService {
     return [updatedOutflow, savedInflow];
   }
 
+  /// Lists transactions for a specific account.
+  static Future<List<Transaction>> listForAccount(
+    Session session, {
+    required UuidValue accountId,
+    required UuidValue budgetId,
+  }) async {
+    await BudgetService.getById(session, budgetId: budgetId);
+
+    return Transaction.db.find(
+      session,
+      where: (t) => t.budgetId.equals(budgetId) & t.accountId.equals(accountId),
+      orderBy: (t) => t.transactionDate,
+      orderDescending: true,
+    );
+  }
+
+  /// Toggles the cleared status of a transaction.
+  static Future<Transaction> toggleCleared(
+    Session session, {
+    required UuidValue transactionId,
+  }) async {
+    final transaction = await getById(session, transactionId: transactionId);
+    final updated = transaction.copyWith(cleared: !transaction.cleared);
+    return Transaction.db.updateRow(session, updated);
+  }
+
+  /// Reconciles an account by marking all cleared transactions as reconciled
+  /// and returning the count of reconciled transactions.
+  static Future<int> reconcileAccount(
+    Session session, {
+    required UuidValue accountId,
+    required UuidValue budgetId,
+  }) async {
+    await BudgetService.getById(session, budgetId: budgetId);
+
+    final cleared = await Transaction.db.find(
+      session,
+      where: (t) =>
+          t.budgetId.equals(budgetId) &
+          t.accountId.equals(accountId) &
+          t.cleared.equals(true) &
+          t.reconciled.equals(false),
+    );
+
+    for (final txn in cleared) {
+      await Transaction.db.updateRow(session, txn.copyWith(reconciled: true));
+    }
+
+    return cleared.length;
+  }
+
   /// Deletes a transaction, verifying budget ownership.
   static Future<Transaction> delete(
     Session session, {
