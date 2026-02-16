@@ -622,6 +622,12 @@ abstract class AppLocalizations {
   /// **'Back to Today'**
   String get budgetGoToToday;
 
+  /// No description provided for @budgetMonthPickerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Jump to Month'**
+  String get budgetMonthPickerTitle;
+
   /// No description provided for @budgetHideCategory.
   ///
   /// In en, this message translates to:

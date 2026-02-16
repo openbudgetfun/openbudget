@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/age_of_money_provider.dart';
@@ -77,6 +78,7 @@ class BudgetHeader extends HookConsumerWidget {
                     : () => ref
                           .read(selectedMonthProvider(budgetId).notifier)
                           .setMonth(now.year, now.month),
+                onLongPress: () => _showMonthPicker(context, ref, l10n),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: SpacingTokens.sm,
@@ -244,6 +246,154 @@ class BudgetHeader extends HookConsumerWidget {
       context: context,
       builder: (_) =>
           AutoAssignDialog(budgetId: budgetId, currencyCode: currencyCode),
+    );
+  }
+
+  void _showMonthPicker(
+    BuildContext context,
+    WidgetRef ref,
+    AppLocalizations l10n,
+  ) {
+    final now = DateTime.now();
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => _MonthPickerDialog(
+        currentYear: year,
+        currentMonth: month,
+        todayYear: now.year,
+        todayMonth: now.month,
+        l10n: l10n,
+        onSelect: (selectedYear, selectedMonth) {
+          ref
+              .read(selectedMonthProvider(budgetId).notifier)
+              .setMonth(selectedYear, selectedMonth);
+          Navigator.of(ctx).pop();
+        },
+      ),
+    );
+  }
+}
+
+class _MonthPickerDialog extends HookWidget {
+  const _MonthPickerDialog({
+    required this.currentYear,
+    required this.currentMonth,
+    required this.todayYear,
+    required this.todayMonth,
+    required this.l10n,
+    required this.onSelect,
+  });
+
+  final int currentYear;
+  final int currentMonth;
+  final int todayYear;
+  final int todayMonth;
+  final AppLocalizations l10n;
+  final void Function(int year, int month) onSelect;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final displayYear = useState(currentYear);
+
+    final months = [
+      l10n.budgetMonthJanuary,
+      l10n.budgetMonthFebruary,
+      l10n.budgetMonthMarch,
+      l10n.budgetMonthApril,
+      l10n.budgetMonthMay,
+      l10n.budgetMonthJune,
+      l10n.budgetMonthJuly,
+      l10n.budgetMonthAugust,
+      l10n.budgetMonthSeptember,
+      l10n.budgetMonthOctober,
+      l10n.budgetMonthNovember,
+      l10n.budgetMonthDecember,
+    ];
+
+    return AlertDialog(
+      title: Text(l10n.budgetMonthPickerTitle),
+      content: SizedBox(
+        width: 300,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.chevron_left),
+                  onPressed: () => displayYear.value--,
+                ),
+                Text(
+                  '${displayYear.value}',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.chevron_right),
+                  onPressed: () => displayYear.value++,
+                ),
+              ],
+            ),
+            const SizedBox(height: SpacingTokens.sm),
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                childAspectRatio: 2.2,
+                crossAxisSpacing: SpacingTokens.xs,
+                mainAxisSpacing: SpacingTokens.xs,
+              ),
+              itemCount: 12,
+              itemBuilder: (ctx, index) {
+                final m = index + 1;
+                final isSelected =
+                    displayYear.value == currentYear && m == currentMonth;
+                final isToday =
+                    displayYear.value == todayYear && m == todayMonth;
+
+                return Material(
+                  color: isSelected
+                      ? colorScheme.primary
+                      : isToday
+                      ? colorScheme.primaryContainer
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(RadiusTokens.sm),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(RadiusTokens.sm),
+                    onTap: () => onSelect(displayYear.value, m),
+                    child: Center(
+                      child: Text(
+                        months[index].substring(0, 3),
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: isSelected
+                              ? colorScheme.onPrimary
+                              : isToday
+                              ? colorScheme.primary
+                              : null,
+                          fontWeight: isSelected || isToday
+                              ? FontWeight.w600
+                              : null,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(l10n.dialogCancel),
+        ),
+      ],
     );
   }
 }

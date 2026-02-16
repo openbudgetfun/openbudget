@@ -333,6 +333,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get budgetGoToToday => 'Back to Today';
 
   @override
+  String get budgetMonthPickerTitle => 'Jump to Month';
+
+  @override
   String get budgetHideCategory => 'Hide Category';
 
   @override
