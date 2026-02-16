@@ -125,5 +125,18 @@
   "budgetMonthNovember": "November",
   "budgetMonthDecember": "December",
   "budgetAllocationUpdated": "Allocation updated",
-  "budgetAllocationError": "Could not update allocation"
+  "budgetAllocationError": "Could not update allocation",
+  "transactionSearchHint": "Search transactions...",
+  "transactionFilterAll": "All",
+  "transactionFilterIncome": "Income",
+  "transactionFilterExpense": "Expense",
+  "transactionNoResults": "No matching transactions",
+  "transactionResultCount": "{count, plural, =1{1 result} other{{count} results}}",
+  "@transactionResultCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

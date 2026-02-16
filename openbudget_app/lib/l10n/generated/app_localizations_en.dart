@@ -379,4 +379,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get budgetAllocationError => 'Could not update allocation';
+
+  @override
+  String get transactionSearchHint => 'Search transactions...';
+
+  @override
+  String get transactionFilterAll => 'All';
+
+  @override
+  String get transactionFilterIncome => 'Income';
+
+  @override
+  String get transactionFilterExpense => 'Expense';
+
+  @override
+  String get transactionNoResults => 'No matching transactions';
+
+  @override
+  String transactionResultCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count results',
+      one: '1 result',
+    );
+    return '$_temp0';
+  }
 }
