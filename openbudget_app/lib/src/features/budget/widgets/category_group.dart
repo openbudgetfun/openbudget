@@ -17,6 +17,7 @@ class CategoryGroup extends HookConsumerWidget {
     required this.onEditEnvelope,
     required this.onDeleteEnvelope,
     this.onQuickBudget,
+    this.goalsMap = const {},
     super.key,
   });
 
@@ -27,6 +28,7 @@ class CategoryGroup extends HookConsumerWidget {
   final void Function(Envelope envelope) onEditEnvelope;
   final void Function(Envelope envelope) onDeleteEnvelope;
   final void Function(Envelope envelope)? onQuickBudget;
+  final Map<String, EnvelopeGoal> goalsMap;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -103,6 +105,7 @@ class CategoryGroup extends HookConsumerWidget {
           const Divider(),
           ...envelopes.asMap().entries.map((entry) {
             final envelope = entry.value;
+            final envelopeId = envelope.id?.toString() ?? '';
             final monthlyData =
                 categoryWithEnvelopes.monthlyEnvelopes.isNotEmpty &&
                     entry.key < categoryWithEnvelopes.monthlyEnvelopes.length
@@ -112,6 +115,7 @@ class CategoryGroup extends HookConsumerWidget {
               envelope: envelope,
               currencyCode: currencyCode,
               monthlyData: monthlyData,
+              goal: goalsMap[envelopeId],
               onTap: () => onEditEnvelope(envelope),
               onLongPress: () => onDeleteEnvelope(envelope),
               onQuickBudget: onQuickBudget != null
