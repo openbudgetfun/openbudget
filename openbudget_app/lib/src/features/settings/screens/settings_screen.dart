@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/auth/providers/auth_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
+import 'package:openbudget_app/src/features/settings/providers/budget_export_provider.dart';
 import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
 import 'package:openbudget_app/src/providers/theme_mode_provider.dart';
 import 'package:openbudget_client/openbudget_client.dart';
@@ -74,6 +76,21 @@ class SettingsScreen extends HookConsumerWidget {
             const SizedBox(height: SpacingTokens.lg),
             _SectionTitle(title: l10n.themeTitle),
             const _ThemeSelector(),
+            const SizedBox(height: SpacingTokens.lg),
+            _SectionTitle(title: l10n.settingsDataSection),
+            Card(
+              child: Column(
+                children: [
+                  ListTile(
+                    leading: const Icon(Icons.download_rounded),
+                    title: Text(l10n.settingsExportData),
+                    subtitle: Text(l10n.settingsExportDataHint),
+                    trailing: const Icon(Icons.chevron_right_rounded),
+                    onTap: () => _exportBudgetData(context, ref),
+                  ),
+                ],
+              ),
+            ),
             const SizedBox(height: SpacingTokens.lg),
             _SectionTitle(title: l10n.settingsAccountSection),
             Card(
@@ -169,6 +186,33 @@ class SettingsScreen extends HookConsumerWidget {
           backgroundColor: colorScheme.error,
         ),
       );
+    }
+  }
+
+  Future<void> _exportBudgetData(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
+
+    try {
+      final json = await ref
+          .read(budgetExportProvider.notifier)
+          .exportBudget(budgetId);
+      await Clipboard.setData(ClipboardData(text: json));
+      if (context.mounted) {
+        messenger.showSnackBar(
+          SnackBar(content: Text(l10n.settingsExportSuccess)),
+        );
+      }
+    } on Exception catch (_) {
+      if (context.mounted) {
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(l10n.settingsExportError),
+            backgroundColor: colorScheme.error,
+          ),
+        );
+      }
     }
   }
 
