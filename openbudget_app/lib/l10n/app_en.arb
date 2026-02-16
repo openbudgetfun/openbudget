@@ -206,5 +206,24 @@
       }
     }
   },
-  "reconcileError": "Could not reconcile account. Please try again."
+  "reconcileError": "Could not reconcile account. Please try again.",
+  "recurringListTitle": "Recurring Transactions",
+  "recurringLoadError": "Could not load recurring transactions",
+  "recurringEmptyTitle": "No Recurring Transactions",
+  "recurringEmptySubtitle": "Set up recurring transactions for bills, subscriptions, and regular income",
+  "recurringAddButton": "Add Recurring",
+  "recurringAddTitle": "Add Recurring Transaction",
+  "recurringEditTitle": "Edit Recurring Transaction",
+  "recurringFrequencyLabel": "Frequency",
+  "recurringFreqDaily": "Daily",
+  "recurringFreqWeekly": "Weekly",
+  "recurringFreqBiweekly": "Biweekly",
+  "recurringFreqMonthly": "Monthly",
+  "recurringFreqYearly": "Yearly",
+  "recurringStartDate": "Start Date",
+  "recurringNextDate": "Next",
+  "recurringCreateSuccess": "Recurring transaction created",
+  "recurringCreateError": "Could not create recurring transaction. Please try again.",
+  "recurringEditSuccess": "Recurring transaction updated",
+  "recurringEditError": "Could not update recurring transaction. Please try again."
 }

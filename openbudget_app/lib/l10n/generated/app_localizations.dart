@@ -1209,6 +1209,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not reconcile account. Please try again.'**
   String get reconcileError;
+
+  /// No description provided for @recurringListTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recurring Transactions'**
+  String get recurringListTitle;
+
+  /// No description provided for @recurringLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load recurring transactions'**
+  String get recurringLoadError;
+
+  /// No description provided for @recurringEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No Recurring Transactions'**
+  String get recurringEmptyTitle;
+
+  /// No description provided for @recurringEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up recurring transactions for bills, subscriptions, and regular income'**
+  String get recurringEmptySubtitle;
+
+  /// No description provided for @recurringAddButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Recurring'**
+  String get recurringAddButton;
+
+  /// No description provided for @recurringAddTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Recurring Transaction'**
+  String get recurringAddTitle;
+
+  /// No description provided for @recurringEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Recurring Transaction'**
+  String get recurringEditTitle;
+
+  /// No description provided for @recurringFrequencyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Frequency'**
+  String get recurringFrequencyLabel;
+
+  /// No description provided for @recurringFreqDaily.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily'**
+  String get recurringFreqDaily;
+
+  /// No description provided for @recurringFreqWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly'**
+  String get recurringFreqWeekly;
+
+  /// No description provided for @recurringFreqBiweekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Biweekly'**
+  String get recurringFreqBiweekly;
+
+  /// No description provided for @recurringFreqMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get recurringFreqMonthly;
+
+  /// No description provided for @recurringFreqYearly.
+  ///
+  /// In en, this message translates to:
+  /// **'Yearly'**
+  String get recurringFreqYearly;
+
+  /// No description provided for @recurringStartDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Date'**
+  String get recurringStartDate;
+
+  /// No description provided for @recurringNextDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get recurringNextDate;
+
+  /// No description provided for @recurringCreateSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Recurring transaction created'**
+  String get recurringCreateSuccess;
+
+  /// No description provided for @recurringCreateError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not create recurring transaction. Please try again.'**
+  String get recurringCreateError;
+
+  /// No description provided for @recurringEditSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Recurring transaction updated'**
+  String get recurringEditSuccess;
+
+  /// No description provided for @recurringEditError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not update recurring transaction. Please try again.'**
+  String get recurringEditError;
 }
 
 class _AppLocalizationsDelegate

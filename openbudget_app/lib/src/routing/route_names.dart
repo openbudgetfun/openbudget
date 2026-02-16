@@ -26,3 +26,5 @@ const accountDetailRoute = 'accountDetail';
 const accountDetailPath = '/budgets/:id/accounts/:accountId';
 const reportsRoute = 'reports';
 const reportsPath = '/budgets/:id/reports';
+const recurringListRoute = 'recurringList';
+const recurringListPath = '/budgets/:id/recurring';

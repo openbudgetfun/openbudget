@@ -600,4 +600,64 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reconcileError => 'Could not reconcile account. Please try again.';
+
+  @override
+  String get recurringListTitle => 'Recurring Transactions';
+
+  @override
+  String get recurringLoadError => 'Could not load recurring transactions';
+
+  @override
+  String get recurringEmptyTitle => 'No Recurring Transactions';
+
+  @override
+  String get recurringEmptySubtitle =>
+      'Set up recurring transactions for bills, subscriptions, and regular income';
+
+  @override
+  String get recurringAddButton => 'Add Recurring';
+
+  @override
+  String get recurringAddTitle => 'Add Recurring Transaction';
+
+  @override
+  String get recurringEditTitle => 'Edit Recurring Transaction';
+
+  @override
+  String get recurringFrequencyLabel => 'Frequency';
+
+  @override
+  String get recurringFreqDaily => 'Daily';
+
+  @override
+  String get recurringFreqWeekly => 'Weekly';
+
+  @override
+  String get recurringFreqBiweekly => 'Biweekly';
+
+  @override
+  String get recurringFreqMonthly => 'Monthly';
+
+  @override
+  String get recurringFreqYearly => 'Yearly';
+
+  @override
+  String get recurringStartDate => 'Start Date';
+
+  @override
+  String get recurringNextDate => 'Next';
+
+  @override
+  String get recurringCreateSuccess => 'Recurring transaction created';
+
+  @override
+  String get recurringCreateError =>
+      'Could not create recurring transaction. Please try again.';
+
+  @override
+  String get recurringEditSuccess => 'Recurring transaction updated';
+
+  @override
+  String get recurringEditError =>
+      'Could not update recurring transaction. Please try again.';
 }

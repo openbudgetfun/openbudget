@@ -23,20 +23,23 @@ import 'envelope_goals/envelope_goal.dart' as _i8;
 import 'envelopes/envelope.dart' as _i9;
 import 'monthly_allocations/monthly_allocation.dart' as _i10;
 import 'payees/payee.dart' as _i11;
-import 'transactions/transaction.dart' as _i12;
-import 'package:openbudget_server/src/generated/accounts/account.dart' as _i13;
-import 'package:openbudget_server/src/generated/budgets/budget.dart' as _i14;
+import 'recurring_transactions/recurring_transaction.dart' as _i12;
+import 'transactions/transaction.dart' as _i13;
+import 'package:openbudget_server/src/generated/accounts/account.dart' as _i14;
+import 'package:openbudget_server/src/generated/budgets/budget.dart' as _i15;
 import 'package:openbudget_server/src/generated/categories/category.dart'
-    as _i15;
-import 'package:openbudget_server/src/generated/envelope_goals/envelope_goal.dart'
     as _i16;
-import 'package:openbudget_server/src/generated/envelopes/envelope.dart'
+import 'package:openbudget_server/src/generated/envelope_goals/envelope_goal.dart'
     as _i17;
-import 'package:openbudget_server/src/generated/monthly_allocations/monthly_allocation.dart'
+import 'package:openbudget_server/src/generated/envelopes/envelope.dart'
     as _i18;
-import 'package:openbudget_server/src/generated/payees/payee.dart' as _i19;
+import 'package:openbudget_server/src/generated/monthly_allocations/monthly_allocation.dart'
+    as _i19;
+import 'package:openbudget_server/src/generated/payees/payee.dart' as _i20;
+import 'package:openbudget_server/src/generated/recurring_transactions/recurring_transaction.dart'
+    as _i21;
 import 'package:openbudget_server/src/generated/transactions/transaction.dart'
-    as _i20;
+    as _i22;
 export 'accounts/account.dart';
 export 'budgets/budget.dart';
 export 'categories/category.dart';
@@ -44,6 +47,7 @@ export 'envelope_goals/envelope_goal.dart';
 export 'envelopes/envelope.dart';
 export 'monthly_allocations/monthly_allocation.dart';
 export 'payees/payee.dart';
+export 'recurring_transactions/recurring_transaction.dart';
 export 'transactions/transaction.dart';
 
 class Protocol extends _i1.SerializationManagerServer {
@@ -759,6 +763,202 @@ class Protocol extends _i1.SerializationManagerServer {
       managed: true,
     ),
     _i2.TableDefinition(
+      name: 'recurring_transaction',
+      dartName: 'RecurringTransaction',
+      schema: 'public',
+      module: 'openbudget',
+      columns: [
+        _i2.ColumnDefinition(
+          name: 'id',
+          columnType: _i2.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue?',
+          columnDefault: 'gen_random_uuid_v7()',
+        ),
+        _i2.ColumnDefinition(
+          name: 'description',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'amountCents',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _i2.ColumnDefinition(
+          name: 'currencyCode',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'envelopeId',
+          columnType: _i2.ColumnType.uuid,
+          isNullable: true,
+          dartType: 'UuidValue?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'budgetId',
+          columnType: _i2.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _i2.ColumnDefinition(
+          name: 'accountId',
+          columnType: _i2.ColumnType.uuid,
+          isNullable: true,
+          dartType: 'UuidValue?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'payeeId',
+          columnType: _i2.ColumnType.uuid,
+          isNullable: true,
+          dartType: 'UuidValue?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'frequency',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'nextOccurrence',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+        _i2.ColumnDefinition(
+          name: 'endDate',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: true,
+          dartType: 'DateTime?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'isActive',
+          columnType: _i2.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+        ),
+        _i2.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'CURRENT_TIMESTAMP',
+        ),
+        _i2.ColumnDefinition(
+          name: 'updatedAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'CURRENT_TIMESTAMP',
+        ),
+      ],
+      foreignKeys: [
+        _i2.ForeignKeyDefinition(
+          constraintName: 'recurring_transaction_fk_0',
+          columns: ['envelopeId'],
+          referenceTable: 'envelope',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _i2.ForeignKeyAction.noAction,
+          onDelete: _i2.ForeignKeyAction.noAction,
+          matchType: null,
+        ),
+        _i2.ForeignKeyDefinition(
+          constraintName: 'recurring_transaction_fk_1',
+          columns: ['budgetId'],
+          referenceTable: 'budget',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _i2.ForeignKeyAction.noAction,
+          onDelete: _i2.ForeignKeyAction.noAction,
+          matchType: null,
+        ),
+        _i2.ForeignKeyDefinition(
+          constraintName: 'recurring_transaction_fk_2',
+          columns: ['accountId'],
+          referenceTable: 'account',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _i2.ForeignKeyAction.noAction,
+          onDelete: _i2.ForeignKeyAction.noAction,
+          matchType: null,
+        ),
+        _i2.ForeignKeyDefinition(
+          constraintName: 'recurring_transaction_fk_3',
+          columns: ['payeeId'],
+          referenceTable: 'payee',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _i2.ForeignKeyAction.noAction,
+          onDelete: _i2.ForeignKeyAction.noAction,
+          matchType: null,
+        ),
+      ],
+      indexes: [
+        _i2.IndexDefinition(
+          indexName: 'recurring_transaction_pkey',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'id',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: true,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'recurring_transaction_budget_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'budgetId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'recurring_transaction_next_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'nextOccurrence',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'recurring_transaction_active_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'budgetId',
+            ),
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'isActive',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _i2.TableDefinition(
       name: 'transaction',
       dartName: 'Transaction',
       schema: 'public',
@@ -983,7 +1183,10 @@ class Protocol extends _i1.SerializationManagerServer {
   }
 
   @override
-  T deserialize<T>(dynamic data, [Type? t]) {
+  T deserialize<T>(
+    dynamic data, [
+    Type? t,
+  ]) {
     t ??= T;
 
     final dataClassName = getClassNameFromObjectJson(data);
@@ -1021,8 +1224,11 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == _i11.Payee) {
       return _i11.Payee.fromJson(data) as T;
     }
-    if (t == _i12.Transaction) {
-      return _i12.Transaction.fromJson(data) as T;
+    if (t == _i12.RecurringTransaction) {
+      return _i12.RecurringTransaction.fromJson(data) as T;
+    }
+    if (t == _i13.Transaction) {
+      return _i13.Transaction.fromJson(data) as T;
     }
     if (t == _i1.getType<_i5.Account?>()) {
       return (data != null ? _i5.Account.fromJson(data) : null) as T;
@@ -1045,24 +1251,28 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == _i1.getType<_i11.Payee?>()) {
       return (data != null ? _i11.Payee.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i12.Transaction?>()) {
-      return (data != null ? _i12.Transaction.fromJson(data) : null) as T;
-    }
-    if (t == List<_i13.Account>) {
-      return (data as List).map((e) => deserialize<_i13.Account>(e)).toList()
+    if (t == _i1.getType<_i12.RecurringTransaction?>()) {
+      return (data != null ? _i12.RecurringTransaction.fromJson(data) : null)
           as T;
     }
-    if (t == List<_i14.Budget>) {
-      return (data as List).map((e) => deserialize<_i14.Budget>(e)).toList()
+    if (t == _i1.getType<_i13.Transaction?>()) {
+      return (data != null ? _i13.Transaction.fromJson(data) : null) as T;
+    }
+    if (t == List<_i14.Account>) {
+      return (data as List).map((e) => deserialize<_i14.Account>(e)).toList()
           as T;
     }
-    if (t == List<_i15.Category>) {
-      return (data as List).map((e) => deserialize<_i15.Category>(e)).toList()
+    if (t == List<_i15.Budget>) {
+      return (data as List).map((e) => deserialize<_i15.Budget>(e)).toList()
           as T;
     }
-    if (t == List<_i16.EnvelopeGoal>) {
+    if (t == List<_i16.Category>) {
+      return (data as List).map((e) => deserialize<_i16.Category>(e)).toList()
+          as T;
+    }
+    if (t == List<_i17.EnvelopeGoal>) {
       return (data as List)
-              .map((e) => deserialize<_i16.EnvelopeGoal>(e))
+              .map((e) => deserialize<_i17.EnvelopeGoal>(e))
               .toList()
           as T;
     }
@@ -1070,23 +1280,29 @@ class Protocol extends _i1.SerializationManagerServer {
       return (data as List).map((e) => deserialize<_i1.UuidValue>(e)).toList()
           as T;
     }
-    if (t == List<_i17.Envelope>) {
-      return (data as List).map((e) => deserialize<_i17.Envelope>(e)).toList()
+    if (t == List<_i18.Envelope>) {
+      return (data as List).map((e) => deserialize<_i18.Envelope>(e)).toList()
           as T;
     }
-    if (t == List<_i18.MonthlyAllocation>) {
+    if (t == List<_i19.MonthlyAllocation>) {
       return (data as List)
-              .map((e) => deserialize<_i18.MonthlyAllocation>(e))
+              .map((e) => deserialize<_i19.MonthlyAllocation>(e))
               .toList()
           as T;
     }
-    if (t == List<_i19.Payee>) {
-      return (data as List).map((e) => deserialize<_i19.Payee>(e)).toList()
+    if (t == List<_i20.Payee>) {
+      return (data as List).map((e) => deserialize<_i20.Payee>(e)).toList()
           as T;
     }
-    if (t == List<_i20.Transaction>) {
+    if (t == List<_i21.RecurringTransaction>) {
       return (data as List)
-              .map((e) => deserialize<_i20.Transaction>(e))
+              .map((e) => deserialize<_i21.RecurringTransaction>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_i22.Transaction>) {
+      return (data as List)
+              .map((e) => deserialize<_i22.Transaction>(e))
               .toList()
           as T;
     }
@@ -1111,7 +1327,8 @@ class Protocol extends _i1.SerializationManagerServer {
       _i9.Envelope => 'Envelope',
       _i10.MonthlyAllocation => 'MonthlyAllocation',
       _i11.Payee => 'Payee',
-      _i12.Transaction => 'Transaction',
+      _i12.RecurringTransaction => 'RecurringTransaction',
+      _i13.Transaction => 'Transaction',
       _ => null,
     };
   }
@@ -1140,7 +1357,9 @@ class Protocol extends _i1.SerializationManagerServer {
         return 'MonthlyAllocation';
       case _i11.Payee():
         return 'Payee';
-      case _i12.Transaction():
+      case _i12.RecurringTransaction():
+        return 'RecurringTransaction';
+      case _i13.Transaction():
         return 'Transaction';
     }
     className = _i2.Protocol().getClassNameForObject(data);
@@ -1185,8 +1404,11 @@ class Protocol extends _i1.SerializationManagerServer {
     if (dataClassName == 'Payee') {
       return deserialize<_i11.Payee>(data['data']);
     }
+    if (dataClassName == 'RecurringTransaction') {
+      return deserialize<_i12.RecurringTransaction>(data['data']);
+    }
     if (dataClassName == 'Transaction') {
-      return deserialize<_i12.Transaction>(data['data']);
+      return deserialize<_i13.Transaction>(data['data']);
     }
     if (dataClassName.startsWith('serverpod.')) {
       data['className'] = dataClassName.substring(10);
@@ -1238,8 +1460,10 @@ class Protocol extends _i1.SerializationManagerServer {
         return _i10.MonthlyAllocation.t;
       case _i11.Payee:
         return _i11.Payee.t;
-      case _i12.Transaction:
-        return _i12.Transaction.t;
+      case _i12.RecurringTransaction:
+        return _i12.RecurringTransaction.t;
+      case _i13.Transaction:
+        return _i13.Transaction.t;
     }
     return null;
   }

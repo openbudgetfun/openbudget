@@ -1,0 +1,31 @@
+### A recurring/scheduled transaction template that generates transactions on a schedule.
+class: RecurringTransaction
+table: recurring_transaction
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  description: String
+  ### Amount in integer cents. Positive = inflow, negative = outflow.
+  amountCents: int
+  ### ISO 4217 currency code.
+  currencyCode: String
+  envelopeId: UuidValue?, relation(parent=envelope)
+  budgetId: UuidValue, relation(parent=budget)
+  accountId: UuidValue?, relation(parent=account)
+  payeeId: UuidValue?, relation(parent=payee)
+  ### Recurrence frequency: daily, weekly, biweekly, monthly, yearly.
+  frequency: String
+  ### The next date a transaction should be created.
+  nextOccurrence: DateTime
+  ### Optional end date after which no more transactions are generated.
+  endDate: DateTime?
+  ### Whether this recurring transaction is active.
+  isActive: bool
+  createdAt: DateTime, default=now
+  updatedAt: DateTime, default=now
+indexes:
+  recurring_transaction_budget_idx:
+    fields: budgetId
+  recurring_transaction_next_idx:
+    fields: nextOccurrence
+  recurring_transaction_active_idx:
+    fields: budgetId, isActive

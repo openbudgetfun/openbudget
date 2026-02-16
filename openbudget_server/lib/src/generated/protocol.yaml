@@ -51,6 +51,12 @@ payee:
   - get:
   - update:
   - delete:
+recurringTransaction:
+  - create:
+  - list:
+  - get:
+  - update:
+  - delete:
 transaction:
   - create:
   - list:
