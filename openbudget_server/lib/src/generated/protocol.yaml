@@ -15,6 +15,11 @@ emailIdp:
   - hasAccount:
 jwtRefresh:
   - refreshAccessToken:
+budgetTemplate:
+  - saveFromMonth:
+  - list:
+  - applyToMonth:
+  - delete:
 budget:
   - create:
   - list:
