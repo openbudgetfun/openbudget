@@ -119,6 +119,7 @@ class TransactionActions extends _$TransactionActions {
     required DateTime date,
     String? envelopeId,
     String? categoryId,
+    String? payeeId,
   }) async {
     state = const AsyncValue.loading();
     final client = ref.read(serverpodClientProvider);
@@ -135,6 +136,11 @@ class TransactionActions extends _$TransactionActions {
             // Serverpod API requires UuidValue which is experimental in uuid package.
             // ignore: experimental_member_use
             ? UuidValue.fromString(envelopeId)
+            : null,
+        payeeId: payeeId != null
+            // Serverpod API requires UuidValue which is experimental in uuid package.
+            // ignore: experimental_member_use
+            ? UuidValue.fromString(payeeId)
             : null,
       );
 

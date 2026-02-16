@@ -5,6 +5,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
+import 'package:openbudget_app/src/features/payees/providers/payee_last_envelope_provider.dart';
+import 'package:openbudget_app/src/features/payees/providers/payee_list_provider.dart';
 import 'package:openbudget_app/src/features/transactions/providers/transaction_actions_provider.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -22,18 +24,35 @@ class AddExpenseScreen extends HookConsumerWidget {
     final isSubmitting = useState(false);
     final selectedEnvelopeId = useState<String?>(null);
     final selectedCategoryId = useState<String?>(null);
+    final selectedPayeeId = useState<String?>(null);
     final budgetAsync = ref.watch(budgetDetailProvider(budgetId));
     final summaryAsync = ref.watch(budgetSummaryProvider(budgetId));
+    final payeesAsync = ref.watch(payeeListProvider(budgetId));
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
+    // Build payee dropdown items.
+    final payeeItems = <DropdownMenuItem<String>>[
+      DropdownMenuItem<String>(value: '', child: Text(l10n.payeeNone)),
+    ];
+    if (payeesAsync.hasValue) {
+      for (final payee in payeesAsync.value!) {
+        payeeItems.add(
+          DropdownMenuItem<String>(
+            value: payee.id?.toString() ?? '',
+            child: Text(payee.name),
+          ),
+        );
+      }
+    }
+
+    // Build envelope dropdown items.
     final envelopeItems = <DropdownMenuItem<String>>[
       DropdownMenuItem<String>(
         value: '',
         child: Text(l10n.transactionUnassigned),
       ),
     ];
-
     if (summaryAsync.hasValue) {
       for (final catEnv in summaryAsync.value!.categories) {
         for (final envelope in catEnv.envelopes) {
@@ -45,6 +64,21 @@ class AddExpenseScreen extends HookConsumerWidget {
           );
         }
       }
+    }
+
+    // Helper to update selectedCategoryId when envelope changes.
+    void updateCategoryForEnvelope(String envId) {
+      if (envId.isNotEmpty && summaryAsync.hasValue) {
+        for (final catEnv in summaryAsync.value!.categories) {
+          for (final envelope in catEnv.envelopes) {
+            if (envelope.id?.toString() == envId) {
+              selectedCategoryId.value = catEnv.category.id?.toString();
+              return;
+            }
+          }
+        }
+      }
+      selectedCategoryId.value = null;
     }
 
     return Scaffold(
@@ -111,24 +145,37 @@ class AddExpenseScreen extends HookConsumerWidget {
                     ),
                     const SizedBox(height: SpacingTokens.md),
                     DropdownButtonFormField<String>(
+                      initialValue: selectedPayeeId.value ?? '',
+                      items: payeeItems,
+                      onChanged: (value) async {
+                        final payId = value ?? '';
+                        selectedPayeeId.value = payId.isEmpty ? null : payId;
+
+                        // Auto-suggest last-used envelope for this payee.
+                        if (payId.isNotEmpty) {
+                          final lastEnvelope = await ref.read(
+                            payeeLastEnvelopeProvider(payId, budgetId).future,
+                          );
+                          if (lastEnvelope != null) {
+                            selectedEnvelopeId.value = lastEnvelope;
+                            updateCategoryForEnvelope(lastEnvelope);
+                          }
+                        }
+                      },
+                      decoration: InputDecoration(
+                        prefixIcon: const Icon(Icons.store_rounded),
+                        labelText: l10n.payeeLabel,
+                      ),
+                      isExpanded: true,
+                    ),
+                    const SizedBox(height: SpacingTokens.md),
+                    DropdownButtonFormField<String>(
                       initialValue: selectedEnvelopeId.value ?? '',
                       items: envelopeItems,
                       onChanged: (value) {
                         final envId = value ?? '';
                         selectedEnvelopeId.value = envId.isEmpty ? null : envId;
-
-                        if (envId.isNotEmpty && summaryAsync.hasValue) {
-                          for (final catEnv in summaryAsync.value!.categories) {
-                            for (final envelope in catEnv.envelopes) {
-                              if (envelope.id?.toString() == envId) {
-                                selectedCategoryId.value = catEnv.category.id
-                                    ?.toString();
-                              }
-                            }
-                          }
-                        } else {
-                          selectedCategoryId.value = null;
-                        }
+                        updateCategoryForEnvelope(envId);
                       },
                       decoration: InputDecoration(
                         prefixIcon: const Icon(Icons.mail_outlined),
@@ -136,6 +183,18 @@ class AddExpenseScreen extends HookConsumerWidget {
                       ),
                       isExpanded: true,
                     ),
+                    if (selectedPayeeId.value != null &&
+                        selectedEnvelopeId.value != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: SpacingTokens.xs),
+                        child: Text(
+                          l10n.payeeAutoEnvelopeHint,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      ),
                     const SizedBox(height: SpacingTokens.lg),
                     FilledButton(
                       onPressed: isSubmitting.value
@@ -173,6 +232,7 @@ class AddExpenseScreen extends HookConsumerWidget {
                                       date: DateTime.now(),
                                       envelopeId: selectedEnvelopeId.value,
                                       categoryId: selectedCategoryId.value,
+                                      payeeId: selectedPayeeId.value,
                                     );
                                 messenger.showSnackBar(
                                   SnackBar(

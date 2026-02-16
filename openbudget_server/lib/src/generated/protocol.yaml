@@ -50,6 +50,7 @@ payee:
   - list:
   - get:
   - update:
+  - lastUsedEnvelopeId:
   - delete:
 recurringTransaction:
   - create:

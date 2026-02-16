@@ -1443,6 +1443,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 split} other{{count} splits}}'**
   String splitCount(int count);
+
+  /// No description provided for @payeeNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No Payee'**
+  String get payeeNone;
+
+  /// No description provided for @payeeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Payee'**
+  String get payeeLabel;
+
+  /// No description provided for @payeeAutoEnvelopeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Envelope auto-suggested from last transaction with this payee'**
+  String get payeeAutoEnvelopeHint;
 }
 
 class _AppLocalizationsDelegate
