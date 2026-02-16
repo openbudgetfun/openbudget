@@ -10,6 +10,7 @@ import 'package:openbudget_app/src/features/budget/screens/budget_detail_screen.
 import 'package:openbudget_app/src/features/budget/screens/create_budget_screen.dart';
 import 'package:openbudget_app/src/features/home/screens/home_screen.dart';
 import 'package:openbudget_app/src/features/payees/screens/payee_list_screen.dart';
+import 'package:openbudget_app/src/features/reports/screens/reports_screen.dart';
 import 'package:openbudget_app/src/features/transactions/screens/add_expense_screen.dart';
 import 'package:openbudget_app/src/features/transactions/screens/add_income_screen.dart';
 import 'package:openbudget_app/src/features/transactions/screens/transaction_list_screen.dart';
@@ -121,6 +122,14 @@ GoRouter appRouter(Ref ref) {
         builder: (context, state) {
           final id = state.pathParameters['id']!;
           return CreateTransferScreen(budgetId: id);
+        },
+      ),
+      GoRoute(
+        name: reportsRoute,
+        path: reportsPath,
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return ReportsScreen(budgetId: id);
         },
       ),
     ],

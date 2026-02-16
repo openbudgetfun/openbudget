@@ -508,4 +508,32 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get transferNeedTwoAccounts =>
       'You need at least two accounts to make a transfer';
+
+  @override
+  String get reportsTitle => 'Reports';
+
+  @override
+  String get reportsLoadError => 'Could not load report data';
+
+  @override
+  String get reportsIncome => 'Income';
+
+  @override
+  String get reportsExpenses => 'Expenses';
+
+  @override
+  String get reportsNetIncome => 'Net Income';
+
+  @override
+  String get reportsTransactions => 'Transactions';
+
+  @override
+  String get reportsSpendingByCategory => 'Spending by Category';
+
+  @override
+  String get reportsEmptyTitle => 'No Data Yet';
+
+  @override
+  String get reportsEmptySubtitle =>
+      'Add transactions to see spending reports for this month';
 }
