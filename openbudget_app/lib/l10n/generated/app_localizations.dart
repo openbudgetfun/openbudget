@@ -1539,6 +1539,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{...and 1 more row} other{...and {count} more rows}}'**
   String importMoreRows(int count);
+
+  /// No description provided for @autoAssignTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-Assign'**
+  String get autoAssignTitle;
+
+  /// No description provided for @autoAssignButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-Assign'**
+  String get autoAssignButton;
+
+  /// No description provided for @autoAssignAssigning.
+  ///
+  /// In en, this message translates to:
+  /// **'Assigning...'**
+  String get autoAssignAssigning;
+
+  /// No description provided for @autoAssignDistributing.
+  ///
+  /// In en, this message translates to:
+  /// **'Distributing to underfunded envelopes'**
+  String get autoAssignDistributing;
+
+  /// No description provided for @autoAssignNothingToAssign.
+  ///
+  /// In en, this message translates to:
+  /// **'All envelopes with goals are fully funded!'**
+  String get autoAssignNothingToAssign;
+
+  /// No description provided for @autoAssignEnvelopeCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 envelope} other{{count} envelopes}}'**
+  String autoAssignEnvelopeCount(int count);
+
+  /// No description provided for @autoAssignSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Auto-assigned to 1 envelope} other{Auto-assigned to {count} envelopes}}'**
+  String autoAssignSuccess(int count);
+
+  /// No description provided for @autoAssignError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not auto-assign. Please try again.'**
+  String get autoAssignError;
 }
 
 class _AppLocalizationsDelegate

@@ -3,6 +3,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/age_of_money_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/selected_month_provider.dart';
+import 'package:openbudget_app/src/features/budget/screens/auto_assign_dialog.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -151,6 +152,26 @@ class BudgetHeader extends HookConsumerWidget {
               ),
             ),
           ],
+          if (readyToAssignCents > 0) ...[
+            const SizedBox(height: SpacingTokens.sm),
+            FilledButton.icon(
+              onPressed: () => _showAutoAssignDialog(context),
+              icon: const Icon(Icons.auto_fix_high_rounded, size: 16),
+              label: Text(l10n.autoAssignButton),
+              style: FilledButton.styleFrom(
+                backgroundColor: ColorTokens.secondary,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: SpacingTokens.md,
+                  vertical: SpacingTokens.xs,
+                ),
+                minimumSize: Size.zero,
+                textStyle: theme.textTheme.labelMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
           if (ageOfMoneyAsync.hasValue && ageOfMoneyAsync.value != null) ...[
             const SizedBox(height: SpacingTokens.sm),
             Row(
@@ -173,6 +194,14 @@ class BudgetHeader extends HookConsumerWidget {
           ],
         ],
       ),
+    );
+  }
+
+  void _showAutoAssignDialog(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (_) =>
+          AutoAssignDialog(budgetId: budgetId, currencyCode: currencyCode),
     );
   }
 }
