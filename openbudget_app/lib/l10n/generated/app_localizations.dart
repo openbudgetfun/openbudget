@@ -723,6 +723,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not update transaction. Please try again.'**
   String get transactionEditError;
+
+  /// No description provided for @budgetMonthJanuary.
+  ///
+  /// In en, this message translates to:
+  /// **'January'**
+  String get budgetMonthJanuary;
+
+  /// No description provided for @budgetMonthFebruary.
+  ///
+  /// In en, this message translates to:
+  /// **'February'**
+  String get budgetMonthFebruary;
+
+  /// No description provided for @budgetMonthMarch.
+  ///
+  /// In en, this message translates to:
+  /// **'March'**
+  String get budgetMonthMarch;
+
+  /// No description provided for @budgetMonthApril.
+  ///
+  /// In en, this message translates to:
+  /// **'April'**
+  String get budgetMonthApril;
+
+  /// No description provided for @budgetMonthMay.
+  ///
+  /// In en, this message translates to:
+  /// **'May'**
+  String get budgetMonthMay;
+
+  /// No description provided for @budgetMonthJune.
+  ///
+  /// In en, this message translates to:
+  /// **'June'**
+  String get budgetMonthJune;
+
+  /// No description provided for @budgetMonthJuly.
+  ///
+  /// In en, this message translates to:
+  /// **'July'**
+  String get budgetMonthJuly;
+
+  /// No description provided for @budgetMonthAugust.
+  ///
+  /// In en, this message translates to:
+  /// **'August'**
+  String get budgetMonthAugust;
+
+  /// No description provided for @budgetMonthSeptember.
+  ///
+  /// In en, this message translates to:
+  /// **'September'**
+  String get budgetMonthSeptember;
+
+  /// No description provided for @budgetMonthOctober.
+  ///
+  /// In en, this message translates to:
+  /// **'October'**
+  String get budgetMonthOctober;
+
+  /// No description provided for @budgetMonthNovember.
+  ///
+  /// In en, this message translates to:
+  /// **'November'**
+  String get budgetMonthNovember;
+
+  /// No description provided for @budgetMonthDecember.
+  ///
+  /// In en, this message translates to:
+  /// **'December'**
+  String get budgetMonthDecember;
+
+  /// No description provided for @budgetAllocationUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Allocation updated'**
+  String get budgetAllocationUpdated;
+
+  /// No description provided for @budgetAllocationError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not update allocation'**
+  String get budgetAllocationError;
 }
 
 class _AppLocalizationsDelegate

@@ -35,6 +35,21 @@ class TransactionEndpoint extends Endpoint {
     return TransactionService.listForBudget(session, budgetId: budgetId);
   }
 
+  /// Lists transactions for a budget within a specific month.
+  Future<List<Transaction>> listByMonth(
+    Session session,
+    UuidValue budgetId,
+    int year,
+    int month,
+  ) async {
+    return TransactionService.listForBudgetMonth(
+      session,
+      budgetId: budgetId,
+      year: year,
+      month: month,
+    );
+  }
+
   /// Gets a single transaction by ID.
   Future<Transaction> get(Session session, UuidValue transactionId) async {
     return TransactionService.getById(session, transactionId: transactionId);

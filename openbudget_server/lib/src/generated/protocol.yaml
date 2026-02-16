@@ -35,9 +35,14 @@ envelope:
   - get:
   - update:
   - delete:
+monthlyAllocation:
+  - upsert:
+  - list:
+  - delete:
 transaction:
   - create:
   - list:
+  - listByMonth:
   - get:
   - update:
   - delete:

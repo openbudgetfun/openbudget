@@ -337,4 +337,46 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get transactionEditError =>
       'Could not update transaction. Please try again.';
+
+  @override
+  String get budgetMonthJanuary => 'January';
+
+  @override
+  String get budgetMonthFebruary => 'February';
+
+  @override
+  String get budgetMonthMarch => 'March';
+
+  @override
+  String get budgetMonthApril => 'April';
+
+  @override
+  String get budgetMonthMay => 'May';
+
+  @override
+  String get budgetMonthJune => 'June';
+
+  @override
+  String get budgetMonthJuly => 'July';
+
+  @override
+  String get budgetMonthAugust => 'August';
+
+  @override
+  String get budgetMonthSeptember => 'September';
+
+  @override
+  String get budgetMonthOctober => 'October';
+
+  @override
+  String get budgetMonthNovember => 'November';
+
+  @override
+  String get budgetMonthDecember => 'December';
+
+  @override
+  String get budgetAllocationUpdated => 'Allocation updated';
+
+  @override
+  String get budgetAllocationError => 'Could not update allocation';
 }
