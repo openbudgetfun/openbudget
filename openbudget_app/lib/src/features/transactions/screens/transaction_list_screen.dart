@@ -15,6 +15,8 @@ import 'package:openbudget_ui/openbudget_ui.dart';
 
 enum TransactionFilter { all, income, expense }
 
+enum TransactionSort { dateDesc, dateAsc, amountDesc, amountAsc, description }
+
 class TransactionListScreen extends HookConsumerWidget {
   const TransactionListScreen({required this.budgetId, super.key});
 
@@ -33,6 +35,7 @@ class TransactionListScreen extends HookConsumerWidget {
     final filter = useState(TransactionFilter.all);
     final dateRangeStart = useState<DateTime?>(null);
     final dateRangeEnd = useState<DateTime?>(null);
+    final sortOrder = useState(TransactionSort.dateDesc);
     final selectionMode = useState(false);
     final selectedIds = useState(<String>{});
 
@@ -99,6 +102,12 @@ class TransactionListScreen extends HookConsumerWidget {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 IconButton(
+                                  icon: const Icon(Icons.sort_rounded),
+                                  tooltip: l10n.transactionSortTitle,
+                                  onPressed: () =>
+                                      _showSortMenu(context, sortOrder),
+                                ),
+                                IconButton(
                                   icon: const Icon(Icons.checklist_rounded),
                                   tooltip: l10n.bulkAssignEnvelope,
                                   onPressed: () => selectionMode.value = true,
@@ -147,7 +156,26 @@ class TransactionListScreen extends HookConsumerWidget {
               .where((tx) => tx.parentTransactionId == null)
               .toList();
           final sorted = List.of(topLevel)
-            ..sort((a, b) => b.transactionDate.compareTo(a.transactionDate));
+            ..sort(
+              (a, b) => switch (sortOrder.value) {
+                TransactionSort.dateDesc => b.transactionDate.compareTo(
+                  a.transactionDate,
+                ),
+                TransactionSort.dateAsc => a.transactionDate.compareTo(
+                  b.transactionDate,
+                ),
+                TransactionSort.amountDesc => b.amountCents.abs().compareTo(
+                  a.amountCents.abs(),
+                ),
+                TransactionSort.amountAsc => a.amountCents.abs().compareTo(
+                  b.amountCents.abs(),
+                ),
+                TransactionSort.description =>
+                  a.description.toLowerCase().compareTo(
+                    b.description.toLowerCase(),
+                  ),
+              },
+            );
 
           final query = searchQuery.value.toLowerCase();
           final filtered = sorted.where((tx) {
@@ -514,6 +542,74 @@ class TransactionListScreen extends HookConsumerWidget {
   }
 
   static String _formatShortDate(DateTime date) => '${date.month}/${date.day}';
+
+  void _showSortMenu(
+    BuildContext context,
+    ValueNotifier<TransactionSort> sortOrder,
+  ) {
+    final l10n = AppLocalizations.of(context);
+    final sortOptions = <(TransactionSort, String, IconData)>[
+      (
+        TransactionSort.dateDesc,
+        l10n.transactionSortDateDesc,
+        Icons.arrow_downward_rounded,
+      ),
+      (
+        TransactionSort.dateAsc,
+        l10n.transactionSortDateAsc,
+        Icons.arrow_upward_rounded,
+      ),
+      (
+        TransactionSort.amountDesc,
+        l10n.transactionSortAmountDesc,
+        Icons.arrow_downward_rounded,
+      ),
+      (
+        TransactionSort.amountAsc,
+        l10n.transactionSortAmountAsc,
+        Icons.arrow_upward_rounded,
+      ),
+      (
+        TransactionSort.description,
+        l10n.transactionSortDescription,
+        Icons.sort_by_alpha_rounded,
+      ),
+    ];
+
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(SpacingTokens.md),
+              child: Text(
+                l10n.transactionSortTitle,
+                style: Theme.of(ctx).textTheme.titleMedium,
+              ),
+            ),
+            const Divider(height: 1),
+            for (final (value, label, icon) in sortOptions)
+              ListTile(
+                leading: Icon(icon),
+                title: Text(label),
+                trailing: sortOrder.value == value
+                    ? Icon(
+                        Icons.check_rounded,
+                        color: Theme.of(ctx).colorScheme.primary,
+                      )
+                    : null,
+                onTap: () {
+                  sortOrder.value = value;
+                  Navigator.of(ctx).pop();
+                },
+              ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _FilterChip extends HookWidget {

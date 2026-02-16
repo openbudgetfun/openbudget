@@ -1565,4 +1565,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get undoDeleteError => 'Could not restore. Please try again.';
+
+  @override
+  String get transactionSortTitle => 'Sort by';
+
+  @override
+  String get transactionSortDateDesc => 'Date (newest first)';
+
+  @override
+  String get transactionSortDateAsc => 'Date (oldest first)';
+
+  @override
+  String get transactionSortAmountDesc => 'Amount (highest first)';
+
+  @override
+  String get transactionSortAmountAsc => 'Amount (lowest first)';
+
+  @override
+  String get transactionSortDescription => 'Description (A-Z)';
 }

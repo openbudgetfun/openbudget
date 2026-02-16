@@ -627,5 +627,11 @@
   "transferToAccount": "To Account",
   "undoAction": "Undo",
   "undoDeleteSuccess": "Restored successfully",
-  "undoDeleteError": "Could not restore. Please try again."
+  "undoDeleteError": "Could not restore. Please try again.",
+  "transactionSortTitle": "Sort by",
+  "transactionSortDateDesc": "Date (newest first)",
+  "transactionSortDateAsc": "Date (oldest first)",
+  "transactionSortAmountDesc": "Amount (highest first)",
+  "transactionSortAmountAsc": "Amount (lowest first)",
+  "transactionSortDescription": "Description (A-Z)"
 }

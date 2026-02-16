@@ -2709,6 +2709,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not restore. Please try again.'**
   String get undoDeleteError;
+
+  /// No description provided for @transactionSortTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort by'**
+  String get transactionSortTitle;
+
+  /// No description provided for @transactionSortDateDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Date (newest first)'**
+  String get transactionSortDateDesc;
+
+  /// No description provided for @transactionSortDateAsc.
+  ///
+  /// In en, this message translates to:
+  /// **'Date (oldest first)'**
+  String get transactionSortDateAsc;
+
+  /// No description provided for @transactionSortAmountDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount (highest first)'**
+  String get transactionSortAmountDesc;
+
+  /// No description provided for @transactionSortAmountAsc.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount (lowest first)'**
+  String get transactionSortAmountAsc;
+
+  /// No description provided for @transactionSortDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Description (A-Z)'**
+  String get transactionSortDescription;
 }
 
 class _AppLocalizationsDelegate
