@@ -442,16 +442,63 @@ class TransactionListScreen extends HookConsumerWidget {
           ? SafeArea(
               child: Padding(
                 padding: const EdgeInsets.all(SpacingTokens.md),
-                child: FilledButton.icon(
-                  onPressed: () => _showEnvelopePicker(
-                    context,
-                    ref,
-                    selectedIds.value,
-                    selectionMode,
-                    selectedIds,
-                  ),
-                  icon: const Icon(Icons.mail_outlined),
-                  label: Text(l10n.bulkAssignEnvelope),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: FilledButton.icon(
+                        onPressed: () => _showEnvelopePicker(
+                          context,
+                          ref,
+                          selectedIds.value,
+                          selectionMode,
+                          selectedIds,
+                        ),
+                        icon: const Icon(Icons.mail_outlined, size: 18),
+                        label: Text(l10n.bulkAssignEnvelope),
+                      ),
+                    ),
+                    const SizedBox(width: SpacingTokens.sm),
+                    IconButton.filled(
+                      onPressed: () => _showBulkFlagMenu(
+                        context,
+                        ref,
+                        selectedIds.value,
+                        selectionMode,
+                        selectedIds,
+                      ),
+                      icon: const Icon(Icons.flag_rounded),
+                      tooltip: l10n.bulkSetFlag,
+                    ),
+                    const SizedBox(width: SpacingTokens.sm),
+                    IconButton.filled(
+                      onPressed: () => _bulkMarkCleared(
+                        context,
+                        ref,
+                        transactionsAsync,
+                        selectedIds.value,
+                        selectionMode,
+                        selectedIds,
+                      ),
+                      icon: const Icon(Icons.check_circle_outline),
+                      tooltip: l10n.bulkMarkCleared,
+                    ),
+                    const SizedBox(width: SpacingTokens.sm),
+                    IconButton.filled(
+                      onPressed: () => _confirmBulkDelete(
+                        context,
+                        ref,
+                        selectedIds.value,
+                        selectionMode,
+                        selectedIds,
+                      ),
+                      icon: const Icon(Icons.delete_outline_rounded),
+                      tooltip: l10n.bulkDeleteTitle,
+                      style: IconButton.styleFrom(
+                        backgroundColor: colorScheme.error,
+                        foregroundColor: colorScheme.onError,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             )
@@ -538,6 +585,251 @@ class TransactionListScreen extends HookConsumerWidget {
         messenger.showSnackBar(
           SnackBar(
             content: Text(l10n.bulkAssignError),
+            backgroundColor: colorScheme.error,
+          ),
+        );
+      }
+    }
+  }
+
+  void _showBulkFlagMenu(
+    BuildContext context,
+    WidgetRef ref,
+    Set<String> ids,
+    ValueNotifier<bool> selectionMode,
+    ValueNotifier<Set<String>> selectedIds,
+  ) {
+    final l10n = AppLocalizations.of(context);
+    final flags = <(String, String, Color)>[
+      ('red', l10n.transactionFlagRed, Colors.red),
+      ('orange', l10n.transactionFlagOrange, Colors.orange),
+      ('yellow', l10n.transactionFlagYellow, Colors.amber),
+      ('green', l10n.transactionFlagGreen, Colors.green),
+      ('blue', l10n.transactionFlagBlue, Colors.blue),
+      ('purple', l10n.transactionFlagPurple, Colors.purple),
+    ];
+
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(SpacingTokens.md),
+              child: Text(
+                l10n.bulkSetFlag,
+                style: Theme.of(ctx).textTheme.titleMedium,
+              ),
+            ),
+            Wrap(
+              spacing: SpacingTokens.md,
+              runSpacing: SpacingTokens.sm,
+              alignment: WrapAlignment.center,
+              children: [
+                for (final (value, label, color) in flags)
+                  ActionChip(
+                    avatar: Icon(Icons.flag_rounded, color: color, size: 18),
+                    label: Text(label),
+                    onPressed: () {
+                      Navigator.of(ctx).pop();
+                      _applyBulkFlag(
+                        context,
+                        ref,
+                        ids,
+                        selectionMode,
+                        selectedIds,
+                        flagColor: value,
+                      );
+                    },
+                  ),
+              ],
+            ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.flag_outlined),
+              title: Text(l10n.bulkClearFlag),
+              onTap: () {
+                Navigator.of(ctx).pop();
+                _applyBulkFlag(context, ref, ids, selectionMode, selectedIds);
+              },
+            ),
+            const SizedBox(height: SpacingTokens.sm),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _applyBulkFlag(
+    BuildContext context,
+    WidgetRef ref,
+    Set<String> ids,
+    ValueNotifier<bool> selectionMode,
+    ValueNotifier<Set<String>> selectedIds, {
+    String? flagColor,
+  }) async {
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      final count = await ref
+          .read(transactionActionsProvider.notifier)
+          .bulkSetFlag(
+            transactionIds: ids.toList(),
+            budgetId: budgetId,
+            flagColor: flagColor,
+          );
+      selectionMode.value = false;
+      selectedIds.value = {};
+      if (context.mounted) {
+        messenger.showSnackBar(
+          SnackBar(content: Text(l10n.bulkFlagSuccess(count))),
+        );
+      }
+    } on Exception catch (_) {
+      if (context.mounted) {
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(l10n.bulkFlagError),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _bulkMarkCleared(
+    BuildContext context,
+    WidgetRef ref,
+    AsyncValue<List<Transaction>> transactionsAsync,
+    Set<String> ids,
+    ValueNotifier<bool> selectionMode,
+    ValueNotifier<Set<String>> selectedIds,
+  ) async {
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+
+    // Only toggle uncleared, non-reconciled transactions to "cleared".
+    final unclearedIds = <String>[];
+    if (transactionsAsync.hasValue) {
+      for (final tx in transactionsAsync.value!) {
+        final txId = tx.id?.toString() ?? '';
+        if (ids.contains(txId) && !tx.cleared && !tx.reconciled) {
+          unclearedIds.add(txId);
+        }
+      }
+    }
+
+    if (unclearedIds.isEmpty) {
+      // All selected are already cleared — toggle them to uncleared instead.
+      final clearedIds = <String>[];
+      if (transactionsAsync.hasValue) {
+        for (final tx in transactionsAsync.value!) {
+          final txId = tx.id?.toString() ?? '';
+          if (ids.contains(txId) && tx.cleared && !tx.reconciled) {
+            clearedIds.add(txId);
+          }
+        }
+      }
+      if (clearedIds.isEmpty) return;
+
+      try {
+        final count = await ref
+            .read(transactionActionsProvider.notifier)
+            .bulkToggleCleared(transactionIds: clearedIds, budgetId: budgetId);
+        selectionMode.value = false;
+        selectedIds.value = {};
+        if (context.mounted) {
+          messenger.showSnackBar(
+            SnackBar(content: Text(l10n.bulkClearSuccess(count))),
+          );
+        }
+      } on Exception catch (_) {
+        if (context.mounted) {
+          messenger.showSnackBar(
+            SnackBar(
+              content: Text(l10n.bulkClearError),
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+          );
+        }
+      }
+      return;
+    }
+
+    try {
+      final count = await ref
+          .read(transactionActionsProvider.notifier)
+          .bulkToggleCleared(transactionIds: unclearedIds, budgetId: budgetId);
+      selectionMode.value = false;
+      selectedIds.value = {};
+      if (context.mounted) {
+        messenger.showSnackBar(
+          SnackBar(content: Text(l10n.bulkClearSuccess(count))),
+        );
+      }
+    } on Exception catch (_) {
+      if (context.mounted) {
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(l10n.bulkClearError),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _confirmBulkDelete(
+    BuildContext context,
+    WidgetRef ref,
+    Set<String> ids,
+    ValueNotifier<bool> selectionMode,
+    ValueNotifier<Set<String>> selectedIds,
+  ) async {
+    final l10n = AppLocalizations.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.bulkDeleteTitle),
+        content: Text(l10n.bulkDeleteConfirm(ids.length)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l10n.dialogCancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            style: FilledButton.styleFrom(
+              backgroundColor: colorScheme.error,
+              foregroundColor: colorScheme.onError,
+            ),
+            child: Text(l10n.deleteConfirmButton),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !context.mounted) return;
+
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      final count = await ref
+          .read(transactionActionsProvider.notifier)
+          .bulkDelete(transactionIds: ids.toList(), budgetId: budgetId);
+      selectionMode.value = false;
+      selectedIds.value = {};
+      if (context.mounted) {
+        messenger.showSnackBar(
+          SnackBar(content: Text(l10n.bulkDeleteSuccess(count))),
+        );
+      }
+    } on Exception catch (_) {
+      if (context.mounted) {
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(l10n.bulkDeleteError),
             backgroundColor: colorScheme.error,
           ),
         );

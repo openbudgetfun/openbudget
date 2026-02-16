@@ -240,6 +240,85 @@ class TransactionActions extends _$TransactionActions {
     return count;
   }
 
+  /// Sets or clears flag on multiple transactions at once.
+  Future<int> bulkSetFlag({
+    required List<String> transactionIds,
+    required String budgetId,
+    String? flagColor,
+  }) async {
+    final client = ref.read(serverpodClientProvider);
+    var count = 0;
+    for (final txId in transactionIds) {
+      try {
+        await client.transaction.setFlag(
+          // Serverpod API requires UuidValue which is experimental in uuid package.
+          // ignore: experimental_member_use
+          UuidValue.fromString(txId),
+          flagColor: flagColor,
+        );
+        count++;
+      } on Exception catch (_) {
+        // Continue with other transactions on individual failure.
+      }
+    }
+    if (ref.mounted) {
+      ref.invalidate(transactionListProvider(budgetId));
+    }
+    return count;
+  }
+
+  /// Deletes multiple transactions at once.
+  Future<int> bulkDelete({
+    required List<String> transactionIds,
+    required String budgetId,
+  }) async {
+    final client = ref.read(serverpodClientProvider);
+    var count = 0;
+    for (final txId in transactionIds) {
+      try {
+        await client.transaction.delete(
+          // Serverpod API requires UuidValue which is experimental in uuid package.
+          // ignore: experimental_member_use
+          UuidValue.fromString(txId),
+        );
+        count++;
+      } on Exception catch (_) {
+        // Continue with other transactions on individual failure.
+      }
+    }
+    if (ref.mounted) {
+      ref
+        ..invalidate(transactionListProvider(budgetId))
+        ..invalidate(budgetSummaryProvider(budgetId));
+    }
+    return count;
+  }
+
+  /// Toggles cleared status on multiple transactions at once.
+  Future<int> bulkToggleCleared({
+    required List<String> transactionIds,
+    required String budgetId,
+  }) async {
+    final client = ref.read(serverpodClientProvider);
+    var count = 0;
+    for (final txId in transactionIds) {
+      try {
+        await client.transaction.toggleCleared(
+          // Serverpod API requires UuidValue which is experimental in uuid package.
+          // ignore: experimental_member_use
+          UuidValue.fromString(txId),
+        );
+        count++;
+      } on Exception catch (_) {
+        // Continue with other transactions on individual failure.
+      }
+    }
+    if (ref.mounted) {
+      ref.invalidate(transactionListProvider(budgetId));
+    }
+    return count;
+  }
+
   Future<Transaction> addExpense({
     required String description,
     required int amountCents,
