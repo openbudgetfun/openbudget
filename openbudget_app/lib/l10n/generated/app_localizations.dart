@@ -1384,6 +1384,12 @@ abstract class AppLocalizations {
   /// **'Add Recurring Transaction'**
   String get recurringAddTitle;
 
+  /// No description provided for @recurringAutoPosted.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 scheduled transaction auto-posted} other{{count} scheduled transactions auto-posted}}'**
+  String recurringAutoPosted(int count);
+
   /// No description provided for @recurringCreateError.
   ///
   /// In en, this message translates to:

@@ -788,6 +788,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recurringAddTitle => 'Add Recurring Transaction';
 
   @override
+  String recurringAutoPosted(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count scheduled transactions auto-posted',
+      one: '1 scheduled transaction auto-posted',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get recurringCreateError =>
       'Could not create recurring transaction. Please try again.';
 
