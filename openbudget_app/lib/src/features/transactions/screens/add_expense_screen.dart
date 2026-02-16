@@ -21,6 +21,7 @@ class AddExpenseScreen extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final descriptionController = useTextEditingController();
     final amountController = useTextEditingController();
+    final memoController = useTextEditingController();
     final isSubmitting = useState(false);
     final selectedEnvelopeId = useState<String?>(null);
     final selectedCategoryId = useState<String?>(null);
@@ -195,6 +196,17 @@ class AddExpenseScreen extends HookConsumerWidget {
                           ),
                         ),
                       ),
+                    const SizedBox(height: SpacingTokens.md),
+                    TextField(
+                      controller: memoController,
+                      decoration: InputDecoration(
+                        labelText: l10n.transactionMemoLabel,
+                        prefixIcon: const Icon(Icons.note_outlined),
+                        hintText: l10n.transactionMemoHint,
+                      ),
+                      maxLines: 2,
+                      textInputAction: TextInputAction.done,
+                    ),
                     const SizedBox(height: SpacingTokens.lg),
                     FilledButton(
                       onPressed: isSubmitting.value
@@ -222,6 +234,7 @@ class AddExpenseScreen extends HookConsumerWidget {
                               final messenger = ScaffoldMessenger.of(context);
                               final router = GoRouter.of(context);
                               try {
+                                final memoText = memoController.text.trim();
                                 await ref
                                     .read(transactionActionsProvider.notifier)
                                     .addExpense(
@@ -233,6 +246,7 @@ class AddExpenseScreen extends HookConsumerWidget {
                                       envelopeId: selectedEnvelopeId.value,
                                       categoryId: selectedCategoryId.value,
                                       payeeId: selectedPayeeId.value,
+                                      memo: memoText.isEmpty ? null : memoText,
                                     );
                                 messenger.showSnackBar(
                                   SnackBar(

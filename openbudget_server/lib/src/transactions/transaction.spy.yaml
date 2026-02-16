@@ -19,6 +19,8 @@ fields:
   transferPairId: UuidValue?
   ### If this is a split sub-transaction, links to the parent transaction.
   parentTransactionId: UuidValue?
+  ### Optional user memo or note for additional context.
+  memo: String?
   ### Whether this transaction has been cleared by the user.
   cleared: bool, default=false
   ### Whether this transaction has been reconciled.

@@ -376,11 +376,26 @@ class _TransactionTile extends HookConsumerWidget {
               ],
             ],
           ),
-          subtitle: Text(
-            _formatDate(transaction.transactionDate),
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-            ),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                _formatDate(transaction.transactionDate),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+              if (transaction.memo != null && transaction.memo!.isNotEmpty)
+                Text(
+                  transaction.memo!,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                    fontStyle: FontStyle.italic,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+            ],
           ),
           trailing: Text(
             formatCents(transaction.amountCents, currencyCode),

@@ -789,6 +789,7 @@ class EndpointTransaction extends _i1.EndpointRef {
     DateTime transactionDate, {
     _i1.UuidValue? envelopeId,
     _i1.UuidValue? payeeId,
+    String? memo,
   }) => caller.callServerEndpoint<_i13.Transaction>('transaction', 'create', {
     'description': description,
     'amountCents': amountCents,
@@ -797,6 +798,7 @@ class EndpointTransaction extends _i1.EndpointRef {
     'transactionDate': transactionDate,
     'envelopeId': envelopeId,
     'payeeId': payeeId,
+    'memo': memo,
   });
 
   /// Lists all transactions for a budget.
@@ -830,6 +832,7 @@ class EndpointTransaction extends _i1.EndpointRef {
     _i1.UuidValue? envelopeId,
     _i1.UuidValue? payeeId,
     DateTime? transactionDate,
+    String? memo,
   }) => caller.callServerEndpoint<_i13.Transaction>('transaction', 'update', {
     'transactionId': transactionId,
     'description': description,
@@ -837,6 +840,7 @@ class EndpointTransaction extends _i1.EndpointRef {
     'envelopeId': envelopeId,
     'payeeId': payeeId,
     'transactionDate': transactionDate,
+    'memo': memo,
   });
 
   /// Creates a transfer between two accounts.

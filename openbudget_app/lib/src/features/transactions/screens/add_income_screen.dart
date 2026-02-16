@@ -18,6 +18,7 @@ class AddIncomeScreen extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final descriptionController = useTextEditingController();
     final amountController = useTextEditingController();
+    final memoController = useTextEditingController();
     final isSubmitting = useState(false);
     final budgetAsync = ref.watch(budgetDetailProvider(budgetId));
     final theme = Theme.of(context);
@@ -83,6 +84,17 @@ class AddIncomeScreen extends HookConsumerWidget {
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
                       ),
+                      textInputAction: TextInputAction.next,
+                    ),
+                    const SizedBox(height: SpacingTokens.md),
+                    TextField(
+                      controller: memoController,
+                      decoration: InputDecoration(
+                        labelText: l10n.transactionMemoLabel,
+                        prefixIcon: const Icon(Icons.note_outlined),
+                        hintText: l10n.transactionMemoHint,
+                      ),
+                      maxLines: 2,
                       textInputAction: TextInputAction.done,
                     ),
                     const SizedBox(height: SpacingTokens.lg),
@@ -112,6 +124,7 @@ class AddIncomeScreen extends HookConsumerWidget {
                               final messenger = ScaffoldMessenger.of(context);
                               final router = GoRouter.of(context);
                               try {
+                                final memoText = memoController.text.trim();
                                 await ref
                                     .read(transactionActionsProvider.notifier)
                                     .addIncome(
@@ -120,6 +133,7 @@ class AddIncomeScreen extends HookConsumerWidget {
                                       currencyCode: budget.currencyCode,
                                       budgetId: budgetId,
                                       date: DateTime.now(),
+                                      memo: memoText.isEmpty ? null : memoText,
                                     );
                                 messenger.showSnackBar(
                                   SnackBar(
