@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/auth/providers/auth_provider.dart';
+import 'package:openbudget_app/src/features/home/providers/budget_actions_provider.dart';
 import 'package:openbudget_app/src/features/home/providers/budget_list_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -97,6 +98,12 @@ class HomeScreen extends HookConsumerWidget {
                   margin: const EdgeInsets.only(bottom: SpacingTokens.sm),
                   child: ListTile(
                     onTap: () => context.go('/budgets/${budget.id}'),
+                    onLongPress: () => _confirmDeleteBudget(
+                      context,
+                      ref,
+                      budget.id?.toString() ?? '',
+                      budget.name,
+                    ),
                     leading: CircleAvatar(
                       backgroundColor: colorScheme.primaryContainer,
                       child: Icon(
@@ -136,5 +143,58 @@ class HomeScreen extends HookConsumerWidget {
         orElse: () => null,
       ),
     );
+  }
+
+  Future<void> _confirmDeleteBudget(
+    BuildContext context,
+    WidgetRef ref,
+    String budgetId,
+    String budgetName,
+  ) async {
+    final l10n = AppLocalizations.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.budgetDeleteTitle),
+        content: Text(l10n.budgetDeleteConfirm(budgetName)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l10n.dialogCancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            style: FilledButton.styleFrom(
+              backgroundColor: colorScheme.error,
+              foregroundColor: colorScheme.onError,
+            ),
+            child: Text(l10n.budgetDeleteButton),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !context.mounted) return;
+
+    try {
+      await ref
+          .read(budgetActionsProvider.notifier)
+          .deleteBudget(budgetId: budgetId);
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.budgetDeleteSuccess)));
+      }
+    } on Exception catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.budgetDeleteError),
+            backgroundColor: colorScheme.error,
+          ),
+        );
+      }
+    }
   }
 }

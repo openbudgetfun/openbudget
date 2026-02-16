@@ -1001,4 +1001,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get accountReopenSuccess => 'Account reopened';
+
+  @override
+  String get budgetDeleteTitle => 'Delete Budget';
+
+  @override
+  String budgetDeleteConfirm(String name) {
+    return 'Delete \"$name\"? This will permanently remove the budget and all its data.';
+  }
+
+  @override
+  String get budgetDeleteButton => 'Delete';
+
+  @override
+  String get budgetDeleteSuccess => 'Budget deleted';
+
+  @override
+  String get budgetDeleteError => 'Could not delete budget. Please try again.';
 }
