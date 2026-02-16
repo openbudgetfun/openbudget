@@ -1257,6 +1257,34 @@ class Endpoints extends _i1.EndpointDispatch {
                       as _i12.RecurringTransactionEndpoint)
                   .delete(session, params['recurringTransactionId']),
         ),
+        'postDue': _i1.MethodConnector(
+          name: 'postDue',
+          params: {
+            'budgetId': _i1.ParameterDescription(
+              name: 'budgetId',
+              type: _i1.getType<_i1.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call: (_i1.Session session, Map<String, dynamic> params) async =>
+              (endpoints['recurringTransaction']
+                      as _i12.RecurringTransactionEndpoint)
+                  .postDue(session, params['budgetId']),
+        ),
+        'countDue': _i1.MethodConnector(
+          name: 'countDue',
+          params: {
+            'budgetId': _i1.ParameterDescription(
+              name: 'budgetId',
+              type: _i1.getType<_i1.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call: (_i1.Session session, Map<String, dynamic> params) async =>
+              (endpoints['recurringTransaction']
+                      as _i12.RecurringTransactionEndpoint)
+                  .countDue(session, params['budgetId']),
+        ),
       },
     );
     connectors['transaction'] = _i1.EndpointConnector(

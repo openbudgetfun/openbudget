@@ -101,4 +101,16 @@ class RecurringTransactionEndpoint extends Endpoint {
       recurringTransactionId: recurringTransactionId,
     );
   }
+
+  /// Posts all due recurring transactions for a budget, creating actual
+  /// transactions and advancing the schedule. Returns the count of created
+  /// transactions.
+  Future<int> postDue(Session session, UuidValue budgetId) async {
+    return RecurringTransactionService.postDue(session, budgetId: budgetId);
+  }
+
+  /// Returns the count of active recurring transactions that are currently due.
+  Future<int> countDue(Session session, UuidValue budgetId) async {
+    return RecurringTransactionService.countDue(session, budgetId: budgetId);
+  }
 }

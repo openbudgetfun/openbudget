@@ -311,6 +311,25 @@
       }
     }
   },
+  "recurringDueBanner": "{count, plural, =1{1 scheduled transaction is due} other{{count} scheduled transactions are due}}",
+  "@recurringDueBanner": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recurringPostDue": "Post Now",
+  "recurringPosting": "Posting...",
+  "recurringPostSuccess": "{count, plural, =1{1 transaction posted} other{{count} transactions posted}}",
+  "@recurringPostSuccess": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recurringPostError": "Could not post scheduled transactions. Please try again.",
   "autoAssignTitle": "Auto-Assign",
   "autoAssignButton": "Auto-Assign",
   "autoAssignAssigning": "Assigning...",

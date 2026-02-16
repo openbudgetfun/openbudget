@@ -1,7 +1,7 @@
 import 'package:openbudget_server/src/budgets/budget_service.dart';
 import 'package:openbudget_server/src/exceptions/exceptions.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
-import 'package:serverpod/serverpod.dart';
+import 'package:serverpod/serverpod.dart' hide Transaction;
 
 /// Business logic for managing recurring transactions within a budget.
 ///
@@ -125,6 +125,86 @@ class RecurringTransactionService {
       recurringTransactionId: recurringTransactionId,
     );
     return RecurringTransaction.db.deleteRow(session, recurring);
+  }
+
+  /// Posts all due recurring transactions for a budget.
+  ///
+  /// Finds active recurring transactions where `nextOccurrence <= now`,
+  /// creates actual transactions for each, advances `nextOccurrence`, and
+  /// deactivates any that have passed their `endDate`.
+  ///
+  /// Returns the number of transactions created.
+  static Future<int> postDue(
+    Session session, {
+    required UuidValue budgetId,
+  }) async {
+    await BudgetService.getById(session, budgetId: budgetId);
+
+    final now = DateTime.now();
+    final dueRecurrings = await RecurringTransaction.db.find(
+      session,
+      where: (r) =>
+          r.budgetId.equals(budgetId) &
+          r.isActive.equals(true) &
+          (r.nextOccurrence <= now),
+      orderBy: (r) => r.nextOccurrence,
+    );
+
+    var count = 0;
+
+    for (final recurring in dueRecurrings) {
+      // Create the actual transaction from the recurring template.
+      final transaction = Transaction(
+        description: recurring.description,
+        amountCents: recurring.amountCents,
+        currencyCode: recurring.currencyCode,
+        budgetId: recurring.budgetId,
+        envelopeId: recurring.envelopeId,
+        accountId: recurring.accountId,
+        payeeId: recurring.payeeId,
+        transactionDate: recurring.nextOccurrence,
+        createdAt: DateTime.now(),
+      );
+      await Transaction.db.insertRow(session, transaction);
+      count++;
+
+      // Advance to next occurrence.
+      final nextDate = calculateNextOccurrence(
+        recurring.frequency,
+        recurring.nextOccurrence,
+      );
+
+      // Deactivate if past endDate.
+      final shouldDeactivate =
+          recurring.endDate != null && nextDate.isAfter(recurring.endDate!);
+
+      final updated = recurring.copyWith(
+        nextOccurrence: nextDate,
+        isActive: !shouldDeactivate,
+        updatedAt: DateTime.now(),
+      );
+      await RecurringTransaction.db.updateRow(session, updated);
+    }
+
+    return count;
+  }
+
+  /// Counts active recurring transactions that are due (nextOccurrence <= now).
+  static Future<int> countDue(
+    Session session, {
+    required UuidValue budgetId,
+  }) async {
+    await BudgetService.getById(session, budgetId: budgetId);
+
+    final now = DateTime.now();
+    final count = await RecurringTransaction.db.count(
+      session,
+      where: (r) =>
+          r.budgetId.equals(budgetId) &
+          r.isActive.equals(true) &
+          (r.nextOccurrence <= now),
+    );
+    return count;
   }
 
   /// Calculates the next occurrence based on frequency and current date.

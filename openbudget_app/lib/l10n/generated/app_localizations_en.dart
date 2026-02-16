@@ -824,6 +824,38 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String recurringDueBanner(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count scheduled transactions are due',
+      one: '1 scheduled transaction is due',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get recurringPostDue => 'Post Now';
+
+  @override
+  String get recurringPosting => 'Posting...';
+
+  @override
+  String recurringPostSuccess(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count transactions posted',
+      one: '1 transaction posted',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get recurringPostError =>
+      'Could not post scheduled transactions. Please try again.';
+
+  @override
   String get autoAssignTitle => 'Auto-Assign';
 
   @override

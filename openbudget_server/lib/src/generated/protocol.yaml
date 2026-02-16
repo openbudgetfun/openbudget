@@ -58,6 +58,8 @@ recurringTransaction:
   - get:
   - update:
   - delete:
+  - postDue:
+  - countDue:
 transaction:
   - create:
   - list:

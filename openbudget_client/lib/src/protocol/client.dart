@@ -742,6 +742,20 @@ class EndpointRecurringTransaction extends _i1.EndpointRef {
     'delete',
     {'recurringTransactionId': recurringTransactionId},
   );
+
+  /// Posts all due recurring transactions for a budget, creating actual
+  /// transactions and advancing the schedule. Returns the count of created
+  /// transactions.
+  _i2.Future<int> postDue(_i1.UuidValue budgetId) =>
+      caller.callServerEndpoint<int>('recurringTransaction', 'postDue', {
+        'budgetId': budgetId,
+      });
+
+  /// Returns the count of active recurring transactions that are currently due.
+  _i2.Future<int> countDue(_i1.UuidValue budgetId) =>
+      caller.callServerEndpoint<int>('recurringTransaction', 'countDue', {
+        'budgetId': budgetId,
+      });
 }
 
 /// API surface for transaction operations.

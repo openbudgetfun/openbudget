@@ -1540,6 +1540,36 @@ abstract class AppLocalizations {
   /// **'{count, plural, =1{...and 1 more row} other{...and {count} more rows}}'**
   String importMoreRows(int count);
 
+  /// No description provided for @recurringDueBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 scheduled transaction is due} other{{count} scheduled transactions are due}}'**
+  String recurringDueBanner(int count);
+
+  /// No description provided for @recurringPostDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Post Now'**
+  String get recurringPostDue;
+
+  /// No description provided for @recurringPosting.
+  ///
+  /// In en, this message translates to:
+  /// **'Posting...'**
+  String get recurringPosting;
+
+  /// No description provided for @recurringPostSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 transaction posted} other{{count} transactions posted}}'**
+  String recurringPostSuccess(int count);
+
+  /// No description provided for @recurringPostError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not post scheduled transactions. Please try again.'**
+  String get recurringPostError;
+
   /// No description provided for @autoAssignTitle.
   ///
   /// In en, this message translates to:
