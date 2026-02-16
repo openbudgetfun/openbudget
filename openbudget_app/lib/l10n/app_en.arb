@@ -264,6 +264,46 @@
   "bulkDeselectAll": "Deselect All",
   "bulkSelectEnvelope": "Select an envelope to assign",
   "bulkSelectedCount": "{count, plural, =1{1 selected} other{{count} selected}}",
+  "bulkDeleteConfirm": "Delete {count, plural, =1{1 transaction} other{{count} transactions}}? This cannot be undone.",
+  "@bulkDeleteConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bulkDeleteError": "Could not delete transactions. Please try again.",
+  "bulkDeleteSuccess": "{count, plural, =1{1 transaction deleted} other{{count} transactions deleted}}",
+  "@bulkDeleteSuccess": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bulkDeleteTitle": "Delete Transactions",
+  "bulkFlagError": "Could not set flags. Please try again.",
+  "bulkFlagSuccess": "{count, plural, =1{1 transaction flagged} other{{count} transactions flagged}}",
+  "@bulkFlagSuccess": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bulkSetFlag": "Set Flag",
+  "bulkClearFlag": "Clear Flag",
+  "bulkClearError": "Could not update transactions. Please try again.",
+  "bulkClearSuccess": "{count, plural, =1{1 transaction cleared} other{{count} transactions cleared}}",
+  "@bulkClearSuccess": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bulkMarkCleared": "Mark Cleared",
+  "bulkMarkUncleared": "Mark Uncleared",
   "budgetAddCategory": "Add Category",
   "budgetAddEnvelope": "Add Envelope",
   "budgetAddExpense": "Add Expense",

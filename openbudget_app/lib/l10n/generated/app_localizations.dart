@@ -484,6 +484,78 @@ abstract class AppLocalizations {
   /// **'{count, plural, =1{1 selected} other{{count} selected}}'**
   String bulkSelectedCount(int count);
 
+  /// No description provided for @bulkDeleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {count, plural, =1{1 transaction} other{{count} transactions}}? This cannot be undone.'**
+  String bulkDeleteConfirm(int count);
+
+  /// No description provided for @bulkDeleteError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not delete transactions. Please try again.'**
+  String get bulkDeleteError;
+
+  /// No description provided for @bulkDeleteSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 transaction deleted} other{{count} transactions deleted}}'**
+  String bulkDeleteSuccess(int count);
+
+  /// No description provided for @bulkDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Transactions'**
+  String get bulkDeleteTitle;
+
+  /// No description provided for @bulkFlagError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not set flags. Please try again.'**
+  String get bulkFlagError;
+
+  /// No description provided for @bulkFlagSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 transaction flagged} other{{count} transactions flagged}}'**
+  String bulkFlagSuccess(int count);
+
+  /// No description provided for @bulkSetFlag.
+  ///
+  /// In en, this message translates to:
+  /// **'Set Flag'**
+  String get bulkSetFlag;
+
+  /// No description provided for @bulkClearFlag.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Flag'**
+  String get bulkClearFlag;
+
+  /// No description provided for @bulkClearError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not update transactions. Please try again.'**
+  String get bulkClearError;
+
+  /// No description provided for @bulkClearSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 transaction cleared} other{{count} transactions cleared}}'**
+  String bulkClearSuccess(int count);
+
+  /// No description provided for @bulkMarkCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark Cleared'**
+  String get bulkMarkCleared;
+
+  /// No description provided for @bulkMarkUncleared.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark Uncleared'**
+  String get bulkMarkUncleared;
+
   /// No description provided for @budgetAddCategory.
   ///
   /// In en, this message translates to:

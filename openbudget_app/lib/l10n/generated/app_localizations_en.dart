@@ -249,6 +249,76 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String bulkDeleteConfirm(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count transactions',
+      one: '1 transaction',
+    );
+    return 'Delete $_temp0? This cannot be undone.';
+  }
+
+  @override
+  String get bulkDeleteError =>
+      'Could not delete transactions. Please try again.';
+
+  @override
+  String bulkDeleteSuccess(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count transactions deleted',
+      one: '1 transaction deleted',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get bulkDeleteTitle => 'Delete Transactions';
+
+  @override
+  String get bulkFlagError => 'Could not set flags. Please try again.';
+
+  @override
+  String bulkFlagSuccess(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count transactions flagged',
+      one: '1 transaction flagged',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get bulkSetFlag => 'Set Flag';
+
+  @override
+  String get bulkClearFlag => 'Clear Flag';
+
+  @override
+  String get bulkClearError =>
+      'Could not update transactions. Please try again.';
+
+  @override
+  String bulkClearSuccess(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count transactions cleared',
+      one: '1 transaction cleared',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get bulkMarkCleared => 'Mark Cleared';
+
+  @override
+  String get bulkMarkUncleared => 'Mark Uncleared';
+
+  @override
   String get budgetAddCategory => 'Add Category';
 
   @override
