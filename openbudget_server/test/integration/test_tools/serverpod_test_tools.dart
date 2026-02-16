@@ -2543,6 +2543,7 @@ class _TransactionEndpoint {
     _i2.UuidValue? payeeId,
     DateTime? transactionDate,
     String? memo,
+    String? flagColor,
   }) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
@@ -2563,6 +2564,42 @@ class _TransactionEndpoint {
             'payeeId': payeeId,
             'transactionDate': transactionDate,
             'memo': memo,
+            'flagColor': flagColor,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<_i14.Transaction>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<_i14.Transaction> setFlag(
+    _i1.TestSessionBuilder sessionBuilder,
+    _i2.UuidValue transactionId, {
+    String? flagColor,
+  }) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'transaction',
+            method: 'setFlag',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'transaction',
+          methodName: 'setFlag',
+          parameters: _i1.testObjectToJson({
+            'transactionId': transactionId,
+            'flagColor': flagColor,
           }),
           serializationManager: _serializationManager,
         );

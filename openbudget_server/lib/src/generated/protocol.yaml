@@ -76,6 +76,7 @@ transaction:
   - listByMonth:
   - get:
   - update:
+  - setFlag:
   - transfer:
   - listByAccount:
   - toggleCleared:

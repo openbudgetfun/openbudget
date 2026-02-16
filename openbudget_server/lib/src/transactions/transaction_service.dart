@@ -99,6 +99,7 @@ class TransactionService {
     UuidValue? payeeId,
     DateTime? transactionDate,
     String? memo,
+    String? flagColor,
   }) async {
     final transaction = await getById(session, transactionId: transactionId);
 
@@ -109,7 +110,19 @@ class TransactionService {
       payeeId: payeeId ?? transaction.payeeId,
       transactionDate: transactionDate ?? transaction.transactionDate,
       memo: memo ?? transaction.memo,
+      flagColor: flagColor ?? transaction.flagColor,
     );
+    return Transaction.db.updateRow(session, updated);
+  }
+
+  /// Sets or clears the flag color on a transaction.
+  static Future<Transaction> setFlag(
+    Session session, {
+    required UuidValue transactionId,
+    String? flagColor,
+  }) async {
+    final transaction = await getById(session, transactionId: transactionId);
+    final updated = transaction.copyWith(flagColor: flagColor);
     return Transaction.db.updateRow(session, updated);
   }
 

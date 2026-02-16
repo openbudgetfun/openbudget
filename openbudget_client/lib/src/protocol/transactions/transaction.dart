@@ -29,6 +29,7 @@ abstract class Transaction implements _i1.SerializableModel {
     this.memo,
     bool? cleared,
     bool? reconciled,
+    this.flagColor,
     DateTime? createdAt,
   }) : cleared = cleared ?? false,
        reconciled = reconciled ?? false,
@@ -49,6 +50,7 @@ abstract class Transaction implements _i1.SerializableModel {
     String? memo,
     bool? cleared,
     bool? reconciled,
+    String? flagColor,
     DateTime? createdAt,
   }) = _TransactionImpl;
 
@@ -90,6 +92,7 @@ abstract class Transaction implements _i1.SerializableModel {
       memo: jsonSerialization['memo'] as String?,
       cleared: jsonSerialization['cleared'] as bool?,
       reconciled: jsonSerialization['reconciled'] as bool?,
+      flagColor: jsonSerialization['flagColor'] as String?,
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
@@ -136,6 +139,9 @@ abstract class Transaction implements _i1.SerializableModel {
   /// Whether this transaction has been reconciled.
   bool reconciled;
 
+  /// Optional flag color for marking transactions (red, orange, yellow, green, blue, purple).
+  String? flagColor;
+
   DateTime createdAt;
 
   /// Returns a shallow copy of this [Transaction]
@@ -156,6 +162,7 @@ abstract class Transaction implements _i1.SerializableModel {
     String? memo,
     bool? cleared,
     bool? reconciled,
+    String? flagColor,
     DateTime? createdAt,
   });
   @override
@@ -177,6 +184,7 @@ abstract class Transaction implements _i1.SerializableModel {
       if (memo != null) 'memo': memo,
       'cleared': cleared,
       'reconciled': reconciled,
+      if (flagColor != null) 'flagColor': flagColor,
       'createdAt': createdAt.toJson(),
     };
   }
@@ -205,6 +213,7 @@ class _TransactionImpl extends Transaction {
     String? memo,
     bool? cleared,
     bool? reconciled,
+    String? flagColor,
     DateTime? createdAt,
   }) : super._(
          id: id,
@@ -221,6 +230,7 @@ class _TransactionImpl extends Transaction {
          memo: memo,
          cleared: cleared,
          reconciled: reconciled,
+         flagColor: flagColor,
          createdAt: createdAt,
        );
 
@@ -243,6 +253,7 @@ class _TransactionImpl extends Transaction {
     Object? memo = _Undefined,
     bool? cleared,
     bool? reconciled,
+    Object? flagColor = _Undefined,
     DateTime? createdAt,
   }) {
     return Transaction(
@@ -264,6 +275,7 @@ class _TransactionImpl extends Transaction {
       memo: memo is String? ? memo : this.memo,
       cleared: cleared ?? this.cleared,
       reconciled: reconciled ?? this.reconciled,
+      flagColor: flagColor is String? ? flagColor : this.flagColor,
       createdAt: createdAt ?? this.createdAt,
     );
   }

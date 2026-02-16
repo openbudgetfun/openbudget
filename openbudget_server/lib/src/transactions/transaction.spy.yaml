@@ -25,6 +25,8 @@ fields:
   cleared: bool, default=false
   ### Whether this transaction has been reconciled.
   reconciled: bool, default=false
+  ### Optional flag color for marking transactions (red, orange, yellow, green, blue, purple).
+  flagColor: String?
   createdAt: DateTime, default=now
 indexes:
   transaction_envelope_idx:

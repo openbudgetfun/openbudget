@@ -138,6 +138,31 @@ class TransactionActions extends _$TransactionActions {
     }
   }
 
+  Future<Transaction> setFlag({
+    required String transactionId,
+    required String budgetId,
+    String? flagColor,
+  }) async {
+    final client = ref.read(serverpodClientProvider);
+    try {
+      final transaction = await client.transaction.setFlag(
+        // Serverpod API requires UuidValue which is experimental in uuid package.
+        // ignore: experimental_member_use
+        UuidValue.fromString(transactionId),
+        flagColor: flagColor,
+      );
+      if (ref.mounted) {
+        ref.invalidate(transactionListProvider(budgetId));
+      }
+      return transaction;
+    } on Exception catch (e, st) {
+      if (ref.mounted) {
+        state = AsyncValue.error(e, st);
+      }
+      rethrow;
+    }
+  }
+
   Future<Transaction> addExpense({
     required String description,
     required int amountCents,

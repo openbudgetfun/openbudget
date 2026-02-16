@@ -30,6 +30,7 @@ abstract class Transaction
     this.memo,
     bool? cleared,
     bool? reconciled,
+    this.flagColor,
     DateTime? createdAt,
   }) : cleared = cleared ?? false,
        reconciled = reconciled ?? false,
@@ -50,6 +51,7 @@ abstract class Transaction
     String? memo,
     bool? cleared,
     bool? reconciled,
+    String? flagColor,
     DateTime? createdAt,
   }) = _TransactionImpl;
 
@@ -91,6 +93,7 @@ abstract class Transaction
       memo: jsonSerialization['memo'] as String?,
       cleared: jsonSerialization['cleared'] as bool?,
       reconciled: jsonSerialization['reconciled'] as bool?,
+      flagColor: jsonSerialization['flagColor'] as String?,
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
@@ -139,6 +142,9 @@ abstract class Transaction
   /// Whether this transaction has been reconciled.
   bool reconciled;
 
+  /// Optional flag color for marking transactions (red, orange, yellow, green, blue, purple).
+  String? flagColor;
+
   DateTime createdAt;
 
   @override
@@ -162,6 +168,7 @@ abstract class Transaction
     String? memo,
     bool? cleared,
     bool? reconciled,
+    String? flagColor,
     DateTime? createdAt,
   });
   @override
@@ -183,6 +190,7 @@ abstract class Transaction
       if (memo != null) 'memo': memo,
       'cleared': cleared,
       'reconciled': reconciled,
+      if (flagColor != null) 'flagColor': flagColor,
       'createdAt': createdAt.toJson(),
     };
   }
@@ -206,6 +214,7 @@ abstract class Transaction
       if (memo != null) 'memo': memo,
       'cleared': cleared,
       'reconciled': reconciled,
+      if (flagColor != null) 'flagColor': flagColor,
       'createdAt': createdAt.toJson(),
     };
   }
@@ -258,6 +267,7 @@ class _TransactionImpl extends Transaction {
     String? memo,
     bool? cleared,
     bool? reconciled,
+    String? flagColor,
     DateTime? createdAt,
   }) : super._(
          id: id,
@@ -274,6 +284,7 @@ class _TransactionImpl extends Transaction {
          memo: memo,
          cleared: cleared,
          reconciled: reconciled,
+         flagColor: flagColor,
          createdAt: createdAt,
        );
 
@@ -296,6 +307,7 @@ class _TransactionImpl extends Transaction {
     Object? memo = _Undefined,
     bool? cleared,
     bool? reconciled,
+    Object? flagColor = _Undefined,
     DateTime? createdAt,
   }) {
     return Transaction(
@@ -317,6 +329,7 @@ class _TransactionImpl extends Transaction {
       memo: memo is String? ? memo : this.memo,
       cleared: cleared ?? this.cleared,
       reconciled: reconciled ?? this.reconciled,
+      flagColor: flagColor is String? ? flagColor : this.flagColor,
       createdAt: createdAt ?? this.createdAt,
     );
   }
@@ -368,6 +381,9 @@ class TransactionUpdateTable extends _i1.UpdateTable<TransactionTable> {
   _i1.ColumnValue<bool, bool> reconciled(bool value) =>
       _i1.ColumnValue(table.reconciled, value);
 
+  _i1.ColumnValue<String, String> flagColor(String? value) =>
+      _i1.ColumnValue(table.flagColor, value);
+
   _i1.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
       _i1.ColumnValue(table.createdAt, value);
 }
@@ -388,6 +404,7 @@ class TransactionTable extends _i1.Table<_i1.UuidValue?> {
     memo = _i1.ColumnString('memo', this);
     cleared = _i1.ColumnBool('cleared', this, hasDefault: true);
     reconciled = _i1.ColumnBool('reconciled', this, hasDefault: true);
+    flagColor = _i1.ColumnString('flagColor', this);
     createdAt = _i1.ColumnDateTime('createdAt', this, hasDefault: true);
   }
 
@@ -428,6 +445,9 @@ class TransactionTable extends _i1.Table<_i1.UuidValue?> {
   /// Whether this transaction has been reconciled.
   late final _i1.ColumnBool reconciled;
 
+  /// Optional flag color for marking transactions (red, orange, yellow, green, blue, purple).
+  late final _i1.ColumnString flagColor;
+
   late final _i1.ColumnDateTime createdAt;
 
   @override
@@ -446,6 +466,7 @@ class TransactionTable extends _i1.Table<_i1.UuidValue?> {
     memo,
     cleared,
     reconciled,
+    flagColor,
     createdAt,
   ];
 }
