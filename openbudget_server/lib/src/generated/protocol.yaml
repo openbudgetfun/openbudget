@@ -77,4 +77,5 @@ transaction:
   - createSplit:
   - listSplits:
   - bulkImport:
+  - findDuplicates:
   - delete:

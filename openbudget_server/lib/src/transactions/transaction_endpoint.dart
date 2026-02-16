@@ -205,6 +205,21 @@ class TransactionEndpoint extends Endpoint {
     );
   }
 
+  /// Finds potential duplicate transactions with the same amount near a date.
+  Future<List<Transaction>> findDuplicates(
+    Session session,
+    UuidValue budgetId,
+    int amountCents,
+    DateTime transactionDate,
+  ) async {
+    return TransactionService.findDuplicates(
+      session,
+      budgetId: budgetId,
+      amountCents: amountCents,
+      transactionDate: transactionDate,
+    );
+  }
+
   /// Deletes a transaction by ID.
   Future<Transaction> delete(Session session, UuidValue transactionId) async {
     return TransactionService.delete(session, transactionId: transactionId);

@@ -7,6 +7,7 @@ import 'package:openbudget_app/src/features/budget/providers/budget_detail_provi
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
 import 'package:openbudget_app/src/features/payees/providers/payee_last_envelope_provider.dart';
 import 'package:openbudget_app/src/features/payees/providers/payee_list_provider.dart';
+import 'package:openbudget_app/src/features/transactions/providers/duplicate_check_provider.dart';
 import 'package:openbudget_app/src/features/transactions/providers/transaction_actions_provider.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -26,11 +27,37 @@ class AddExpenseScreen extends HookConsumerWidget {
     final selectedEnvelopeId = useState<String?>(null);
     final selectedCategoryId = useState<String?>(null);
     final selectedPayeeId = useState<String?>(null);
+    final duplicateCount = useState(0);
     final budgetAsync = ref.watch(budgetDetailProvider(budgetId));
     final summaryAsync = ref.watch(budgetSummaryProvider(budgetId));
     final payeesAsync = ref.watch(payeeListProvider(budgetId));
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+
+    // Check for duplicates when amount changes.
+    Future<void> checkDuplicates() async {
+      final budget = budgetAsync.value;
+      if (budget == null) return;
+      final amountText = amountController.text.trim();
+      final amount = double.tryParse(amountText) ?? 0;
+      if (amount <= 0) {
+        duplicateCount.value = 0;
+        return;
+      }
+      final currency = CurrencyCode.values.firstWhere(
+        (c) => c.code == budget.currencyCode,
+        orElse: () => CurrencyCode.usd,
+      );
+      final amountCents = (amount * _pow10(currency.decimals)).round();
+      try {
+        final duplicates = await ref.read(
+          duplicateCheckProvider(budgetId, -amountCents, DateTime.now()).future,
+        );
+        duplicateCount.value = duplicates.length;
+      } on Exception catch (_) {
+        duplicateCount.value = 0;
+      }
+    }
 
     // Build payee dropdown items.
     final payeeItems = <DropdownMenuItem<String>>[
@@ -143,6 +170,7 @@ class AddExpenseScreen extends HookConsumerWidget {
                         decimal: true,
                       ),
                       textInputAction: TextInputAction.next,
+                      onEditingComplete: checkDuplicates,
                     ),
                     const SizedBox(height: SpacingTokens.md),
                     DropdownButtonFormField<String>(
@@ -207,6 +235,34 @@ class AddExpenseScreen extends HookConsumerWidget {
                       maxLines: 2,
                       textInputAction: TextInputAction.done,
                     ),
+                    if (duplicateCount.value > 0)
+                      Padding(
+                        padding: const EdgeInsets.only(top: SpacingTokens.sm),
+                        child: Card(
+                          color: colorScheme.errorContainer,
+                          child: Padding(
+                            padding: const EdgeInsets.all(SpacingTokens.sm),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.warning_amber_rounded,
+                                  color: colorScheme.onErrorContainer,
+                                  size: 20,
+                                ),
+                                const SizedBox(width: SpacingTokens.sm),
+                                Expanded(
+                                  child: Text(
+                                    l10n.duplicateWarning(duplicateCount.value),
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: colorScheme.onErrorContainer,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
                     const SizedBox(height: SpacingTokens.lg),
                     FilledButton(
                       onPressed: isSubmitting.value
