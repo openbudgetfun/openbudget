@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
@@ -18,6 +19,7 @@ import 'package:openbudget_app/src/features/budget/screens/quick_budget_dialog.d
 import 'package:openbudget_app/src/features/budget/widgets/budget_header.dart';
 import 'package:openbudget_app/src/features/budget/widgets/category_group.dart';
 import 'package:openbudget_app/src/features/budget/widgets/credit_card_section.dart';
+import 'package:openbudget_app/src/features/recurring/providers/recurring_auto_post_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
@@ -34,6 +36,8 @@ class BudgetDetailScreen extends HookConsumerWidget {
     final summaryAsync = ref.watch(budgetMonthlySummaryProvider(budgetId));
     final ccPayments = ref.watch(creditCardPaymentsProvider(budgetId));
     final goalsAsync = ref.watch(budgetGoalsProvider(budgetId));
+    final dueCountAsync = ref.watch(recurringDueCountProvider(budgetId));
+    final isPosting = useState(false);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
@@ -127,6 +131,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
                 ..invalidate(budgetSummaryProvider(budgetId))
                 ..invalidate(budgetMonthlySummaryProvider(budgetId))
                 ..invalidate(budgetGoalsProvider(budgetId))
+                ..invalidate(recurringDueCountProvider(budgetId))
                 ..invalidate(
                   monthlyAllocationsProvider(
                     budgetId,
@@ -154,6 +159,12 @@ class BudgetDetailScreen extends HookConsumerWidget {
                   totalOverspentCents: totalOverspentCents,
                 ),
                 const SizedBox(height: SpacingTokens.md),
+                if (dueCountAsync.hasValue && dueCountAsync.value! > 0)
+                  _DueBanner(
+                    count: dueCountAsync.value!,
+                    isPosting: isPosting.value,
+                    onPost: () => _postDueTransactions(context, ref, isPosting),
+                  ),
                 if (ccPayments.hasValue && ccPayments.value!.isNotEmpty) ...[
                   CreditCardSection(
                     payments: ccPayments.value!,
@@ -447,6 +458,36 @@ class BudgetDetailScreen extends HookConsumerWidget {
     }
   }
 
+  Future<void> _postDueTransactions(
+    BuildContext context,
+    WidgetRef ref,
+    ValueNotifier<bool> isPosting,
+  ) async {
+    final l10n = AppLocalizations.of(context);
+    isPosting.value = true;
+    try {
+      final count = await ref
+          .read(recurringAutoPostActionsProvider.notifier)
+          .postDue(budgetId: budgetId);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.recurringPostSuccess(count))),
+        );
+      }
+    } on Exception catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.recurringPostError),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    } finally {
+      isPosting.value = false;
+    }
+  }
+
   Future<void> _confirmDeleteEnvelope(
     BuildContext context,
     WidgetRef ref,
@@ -503,5 +544,85 @@ class BudgetDetailScreen extends HookConsumerWidget {
         );
       }
     }
+  }
+}
+
+class _DueBanner extends HookWidget {
+  const _DueBanner({
+    required this.count,
+    required this.isPosting,
+    required this.onPost,
+  });
+
+  final int count;
+  final bool isPosting;
+  final VoidCallback onPost;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: SpacingTokens.md),
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: SpacingTokens.md,
+          vertical: SpacingTokens.sm,
+        ),
+        decoration: BoxDecoration(
+          color: ColorTokens.primary.withAlpha(15),
+          borderRadius: BorderRadius.circular(RadiusTokens.md),
+          border: Border.all(color: ColorTokens.primary.withAlpha(60)),
+        ),
+        child: Row(
+          children: [
+            const Icon(
+              Icons.schedule_rounded,
+              size: 20,
+              color: ColorTokens.primary,
+            ),
+            const SizedBox(width: SpacingTokens.sm),
+            Expanded(
+              child: Text(
+                l10n.recurringDueBanner(count),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: ColorTokens.primary,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            const SizedBox(width: SpacingTokens.sm),
+            FilledButton.icon(
+              onPressed: isPosting ? null : onPost,
+              icon: isPosting
+                  ? const SizedBox(
+                      width: 14,
+                      height: 14,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Icon(Icons.play_arrow_rounded, size: 16),
+              label: Text(
+                isPosting ? l10n.recurringPosting : l10n.recurringPostDue,
+              ),
+              style: FilledButton.styleFrom(
+                backgroundColor: ColorTokens.primary,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: SpacingTokens.md,
+                  vertical: SpacingTokens.xs,
+                ),
+                textStyle: theme.textTheme.labelSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
