@@ -43,6 +43,7 @@ class EnvelopeEndpoint extends Endpoint {
     String? name,
     int? budgetedAmountCents,
     int? spentAmountCents,
+    String? note,
   }) async {
     return EnvelopeService.update(
       session,
@@ -50,6 +51,7 @@ class EnvelopeEndpoint extends Endpoint {
       name: name,
       budgetedAmountCents: budgetedAmountCents,
       spentAmountCents: spentAmountCents,
+      note: note,
     );
   }
 

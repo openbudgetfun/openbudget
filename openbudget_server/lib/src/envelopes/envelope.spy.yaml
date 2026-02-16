@@ -13,6 +13,8 @@ fields:
   currencyCode: String
   ### Display order within the parent category.
   sortOrder: int
+  ### Optional user-facing note providing context for the envelope.
+  note: String?
   createdAt: DateTime, default=now
 indexes:
   envelope_category_idx:

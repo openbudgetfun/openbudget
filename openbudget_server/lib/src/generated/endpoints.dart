@@ -921,6 +921,11 @@ class Endpoints extends _i1.EndpointDispatch {
               type: _i1.getType<int?>(),
               nullable: true,
             ),
+            'note': _i1.ParameterDescription(
+              name: 'note',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
           },
           call: (_i1.Session session, Map<String, dynamic> params) async =>
               (endpoints['envelope'] as _i10.EnvelopeEndpoint).update(
@@ -929,6 +934,7 @@ class Endpoints extends _i1.EndpointDispatch {
                 name: params['name'],
                 budgetedAmountCents: params['budgetedAmountCents'],
                 spentAmountCents: params['spentAmountCents'],
+                note: params['note'],
               ),
         ),
         'reorder': _i1.MethodConnector(
