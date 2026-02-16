@@ -1118,4 +1118,34 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get transactionDateYesterday => 'Yesterday';
+
+  @override
+  String get spendingByPayeeTitle => 'Spending by Payee';
+
+  @override
+  String get spendingByPayeeEmptyTitle => 'No Payee Data';
+
+  @override
+  String get spendingByPayeeEmptySubtitle =>
+      'Add expense transactions to see spending by payee';
+
+  @override
+  String get spendingByPayeeTotalSpent => 'Total Spent';
+
+  @override
+  String get spendingByPayeePayeeCount => 'Payees';
+
+  @override
+  String get spendingByPayeeBreakdown => 'Spending Breakdown';
+
+  @override
+  String spendingByPayeeTransactionCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count transactions',
+      one: '1 transaction',
+    );
+    return '$_temp0';
+  }
 }

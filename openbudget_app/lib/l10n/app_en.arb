@@ -443,6 +443,21 @@
   "themeLight": "Light",
   "themeDark": "Dark",
   "transactionDateToday": "Today",
-  "transactionDateYesterday": "Yesterday"
+  "transactionDateYesterday": "Yesterday",
+  "spendingByPayeeTitle": "Spending by Payee",
+  "spendingByPayeeEmptyTitle": "No Payee Data",
+  "spendingByPayeeEmptySubtitle": "Add expense transactions to see spending by payee",
+  "spendingByPayeeTotalSpent": "Total Spent",
+  "spendingByPayeePayeeCount": "Payees",
+  "spendingByPayeeBreakdown": "Spending Breakdown",
+  "spendingByPayeeTransactionCount": "{count, plural, =1{1 transaction} other{{count} transactions}}",
+  "@spendingByPayeeTransactionCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
+
 
 }

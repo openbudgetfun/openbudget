@@ -31,6 +31,14 @@ class ReportsScreen extends HookConsumerWidget {
         title: Text(l10n.reportsTitle),
         actions: [
           IconButton(
+            icon: const Icon(Icons.store_rounded),
+            tooltip: l10n.spendingByPayeeTitle,
+            onPressed: () => context.pushNamed(
+              spendingByPayeeRoute,
+              pathParameters: {'id': budgetId},
+            ),
+          ),
+          IconButton(
             icon: const Icon(Icons.account_balance_wallet_rounded),
             tooltip: l10n.netWorthTitle,
             onPressed: () => context.pushNamed(
