@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
@@ -9,6 +10,8 @@ import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
+
+enum TransactionFilter { all, income, expense }
 
 class TransactionListScreen extends HookConsumerWidget {
   const TransactionListScreen({required this.budgetId, super.key});
@@ -22,6 +25,16 @@ class TransactionListScreen extends HookConsumerWidget {
     final budgetAsync = ref.watch(budgetDetailProvider(budgetId));
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+
+    final searchController = useTextEditingController();
+    final searchQuery = useState('');
+    final filter = useState(TransactionFilter.all);
+
+    useEffect(() {
+      void listener() => searchQuery.value = searchController.text;
+      searchController.addListener(listener);
+      return () => searchController.removeListener(listener);
+    }, [searchController]);
 
     final currency =
         budgetAsync.whenOrNull(
@@ -62,48 +75,177 @@ class TransactionListScreen extends HookConsumerWidget {
           ),
         ),
         data: (transactions) {
-          if (transactions.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.receipt_long_rounded,
-                    size: 48,
-                    color: colorScheme.outlineVariant,
-                  ),
-                  const SizedBox(height: SpacingTokens.md),
-                  Text(
-                    l10n.transactionEmpty,
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }
-
           final sorted = List.of(transactions)
             ..sort((a, b) => b.transactionDate.compareTo(a.transactionDate));
 
-          return RefreshIndicator(
-            onRefresh: () async =>
-                ref.invalidate(transactionListProvider(budgetId)),
-            child: ListView.builder(
-              padding: const EdgeInsets.all(SpacingTokens.md),
-              itemCount: sorted.length,
-              itemBuilder: (context, index) {
-                final tx = sorted[index];
-                return _TransactionTile(
-                  transaction: tx,
-                  budgetId: budgetId,
-                  currencyCode: currency,
-                );
-              },
-            ),
+          final query = searchQuery.value.toLowerCase();
+          final filtered = sorted.where((tx) {
+            if (filter.value == TransactionFilter.income &&
+                tx.amountCents <= 0) {
+              return false;
+            }
+            if (filter.value == TransactionFilter.expense &&
+                tx.amountCents >= 0) {
+              return false;
+            }
+            if (query.isNotEmpty &&
+                !tx.description.toLowerCase().contains(query)) {
+              return false;
+            }
+            return true;
+          }).toList();
+
+          return Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  SpacingTokens.md,
+                  SpacingTokens.sm,
+                  SpacingTokens.md,
+                  0,
+                ),
+                child: TextField(
+                  controller: searchController,
+                  decoration: InputDecoration(
+                    hintText: l10n.transactionSearchHint,
+                    prefixIcon: const Icon(Icons.search),
+                    suffixIcon: searchQuery.value.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear),
+                            onPressed: () {
+                              searchController.clear();
+                              searchQuery.value = '';
+                            },
+                          )
+                        : null,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(RadiusTokens.md),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: SpacingTokens.md,
+                      vertical: SpacingTokens.sm,
+                    ),
+                    isDense: true,
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: SpacingTokens.md,
+                  vertical: SpacingTokens.sm,
+                ),
+                child: Row(
+                  children: [
+                    _FilterChip(
+                      label: l10n.transactionFilterAll,
+                      selected: filter.value == TransactionFilter.all,
+                      onSelected: () => filter.value = TransactionFilter.all,
+                    ),
+                    const SizedBox(width: SpacingTokens.sm),
+                    _FilterChip(
+                      label: l10n.transactionFilterIncome,
+                      selected: filter.value == TransactionFilter.income,
+                      onSelected: () => filter.value = TransactionFilter.income,
+                      color: ColorTokens.secondary,
+                    ),
+                    const SizedBox(width: SpacingTokens.sm),
+                    _FilterChip(
+                      label: l10n.transactionFilterExpense,
+                      selected: filter.value == TransactionFilter.expense,
+                      onSelected: () =>
+                          filter.value = TransactionFilter.expense,
+                      color: ColorTokens.error,
+                    ),
+                    const Spacer(),
+                    Text(
+                      l10n.transactionResultCount(filtered.length),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (filtered.isEmpty)
+                Expanded(
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.receipt_long_rounded,
+                          size: 48,
+                          color: colorScheme.outlineVariant,
+                        ),
+                        const SizedBox(height: SpacingTokens.md),
+                        Text(
+                          transactions.isEmpty
+                              ? l10n.transactionEmpty
+                              : l10n.transactionNoResults,
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              else
+                Expanded(
+                  child: RefreshIndicator(
+                    onRefresh: () async =>
+                        ref.invalidate(transactionListProvider(budgetId)),
+                    child: ListView.builder(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: SpacingTokens.md,
+                      ),
+                      itemCount: filtered.length,
+                      itemBuilder: (context, index) {
+                        final tx = filtered[index];
+                        return _TransactionTile(
+                          transaction: tx,
+                          budgetId: budgetId,
+                          currencyCode: currency,
+                        );
+                      },
+                    ),
+                  ),
+                ),
+            ],
           );
         },
+      ),
+    );
+  }
+}
+
+class _FilterChip extends HookWidget {
+  const _FilterChip({
+    required this.label,
+    required this.selected,
+    required this.onSelected,
+    this.color,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onSelected;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final chipColor = color ?? theme.colorScheme.primary;
+
+    return FilterChip(
+      label: Text(label),
+      selected: selected,
+      onSelected: (_) => onSelected(),
+      selectedColor: chipColor.withAlpha(30),
+      checkmarkColor: chipColor,
+      labelStyle: TextStyle(
+        color: selected ? chipColor : theme.colorScheme.onSurfaceVariant,
+        fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
       ),
     );
   }

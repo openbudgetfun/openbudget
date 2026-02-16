@@ -807,6 +807,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not update allocation'**
   String get budgetAllocationError;
+
+  /// No description provided for @transactionSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search transactions...'**
+  String get transactionSearchHint;
+
+  /// No description provided for @transactionFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get transactionFilterAll;
+
+  /// No description provided for @transactionFilterIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get transactionFilterIncome;
+
+  /// No description provided for @transactionFilterExpense.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense'**
+  String get transactionFilterExpense;
+
+  /// No description provided for @transactionNoResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching transactions'**
+  String get transactionNoResults;
+
+  /// No description provided for @transactionResultCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 result} other{{count} results}}'**
+  String transactionResultCount(int count);
 }
 
 class _AppLocalizationsDelegate
