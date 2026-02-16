@@ -39,6 +39,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
     final goalsAsync = ref.watch(budgetGoalsProvider(budgetId));
     final dueCountAsync = ref.watch(recurringDueCountProvider(budgetId));
     final isPosting = useState(false);
+    final isReordering = useState(false);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
@@ -100,26 +101,39 @@ class BudgetDetailScreen extends HookConsumerWidget {
             ),
             title: Text(summary.budget.name),
             actions: [
-              IconButton(
-                icon: const Icon(Icons.account_balance_rounded),
-                tooltip: l10n.budgetViewAccounts,
-                onPressed: () => context.go('/budgets/$budgetId/accounts'),
-              ),
-              IconButton(
-                icon: const Icon(Icons.store_rounded),
-                tooltip: l10n.payeeListTitle,
-                onPressed: () => context.go('/budgets/$budgetId/payees'),
-              ),
-              IconButton(
-                icon: const Icon(Icons.bar_chart_rounded),
-                tooltip: l10n.reportsTitle,
-                onPressed: () => context.go('/budgets/$budgetId/reports'),
-              ),
-              IconButton(
-                icon: const Icon(Icons.receipt_long_rounded),
-                tooltip: l10n.transactionListTitle,
-                onPressed: () => context.go('/budgets/$budgetId/transactions'),
-              ),
+              if (isReordering.value)
+                TextButton(
+                  onPressed: () => isReordering.value = false,
+                  child: Text(l10n.budgetReorderDone),
+                )
+              else ...[
+                IconButton(
+                  icon: const Icon(Icons.swap_vert_rounded),
+                  tooltip: l10n.budgetReorderCategories,
+                  onPressed: () => isReordering.value = true,
+                ),
+                IconButton(
+                  icon: const Icon(Icons.account_balance_rounded),
+                  tooltip: l10n.budgetViewAccounts,
+                  onPressed: () => context.go('/budgets/$budgetId/accounts'),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.store_rounded),
+                  tooltip: l10n.payeeListTitle,
+                  onPressed: () => context.go('/budgets/$budgetId/payees'),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.bar_chart_rounded),
+                  tooltip: l10n.reportsTitle,
+                  onPressed: () => context.go('/budgets/$budgetId/reports'),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.receipt_long_rounded),
+                  tooltip: l10n.transactionListTitle,
+                  onPressed: () =>
+                      context.go('/budgets/$budgetId/transactions'),
+                ),
+              ],
             ],
           ),
           body: RefreshIndicator(
@@ -203,59 +217,65 @@ class BudgetDetailScreen extends HookConsumerWidget {
                       ),
                     ),
                   ),
-                ...summary.categories.map(
-                  (catWithEnvelopes) => Padding(
-                    padding: const EdgeInsets.only(bottom: SpacingTokens.md),
-                    child: CategoryGroup(
-                      categoryWithEnvelopes: catWithEnvelopes,
-                      currencyCode: currencyCode,
-                      goalsMap: goalsMap,
-                      onAddEnvelope: () => _showAddEnvelopeDialog(
-                        context,
-                        catWithEnvelopes.category.id?.toString() ?? '',
-                        currencyCode,
-                        year: summary.year,
-                        month: summary.month,
+                if (isReordering.value && summary.categories.isNotEmpty)
+                  _ReorderableCategoryList(
+                    categories: summary.categories,
+                    budgetId: budgetId,
+                  ),
+                if (!isReordering.value)
+                  ...summary.categories.map(
+                    (catWithEnvelopes) => Padding(
+                      padding: const EdgeInsets.only(bottom: SpacingTokens.md),
+                      child: CategoryGroup(
+                        categoryWithEnvelopes: catWithEnvelopes,
+                        currencyCode: currencyCode,
+                        goalsMap: goalsMap,
+                        onAddEnvelope: () => _showAddEnvelopeDialog(
+                          context,
+                          catWithEnvelopes.category.id?.toString() ?? '',
+                          currencyCode,
+                          year: summary.year,
+                          month: summary.month,
+                        ),
+                        onDeleteCategory: () => _confirmDeleteCategory(
+                          context,
+                          ref,
+                          catWithEnvelopes.category.id?.toString() ?? '',
+                          catWithEnvelopes.category.name,
+                        ),
+                        onEditEnvelope: (envelope) => _showEditEnvelopeDialog(
+                          context,
+                          envelope,
+                          catWithEnvelopes.category.id?.toString() ?? '',
+                          currencyCode,
+                          year: summary.year,
+                          month: summary.month,
+                        ),
+                        onDeleteEnvelope: (envelope) => _confirmDeleteEnvelope(
+                          context,
+                          ref,
+                          envelope.id?.toString() ?? '',
+                          catWithEnvelopes.category.id?.toString() ?? '',
+                          envelope.name,
+                        ),
+                        onQuickBudget: (envelope) => _showQuickBudgetDialog(
+                          context,
+                          envelope,
+                          currencyCode,
+                          year: summary.year,
+                          month: summary.month,
+                        ),
+                        onShowActivity: (envelope, monthlyData, goal) =>
+                            _showEnvelopeActivity(
+                              context,
+                              envelope,
+                              currencyCode,
+                              monthlyData: monthlyData,
+                              goal: goal,
+                            ),
                       ),
-                      onDeleteCategory: () => _confirmDeleteCategory(
-                        context,
-                        ref,
-                        catWithEnvelopes.category.id?.toString() ?? '',
-                        catWithEnvelopes.category.name,
-                      ),
-                      onEditEnvelope: (envelope) => _showEditEnvelopeDialog(
-                        context,
-                        envelope,
-                        catWithEnvelopes.category.id?.toString() ?? '',
-                        currencyCode,
-                        year: summary.year,
-                        month: summary.month,
-                      ),
-                      onDeleteEnvelope: (envelope) => _confirmDeleteEnvelope(
-                        context,
-                        ref,
-                        envelope.id?.toString() ?? '',
-                        catWithEnvelopes.category.id?.toString() ?? '',
-                        envelope.name,
-                      ),
-                      onQuickBudget: (envelope) => _showQuickBudgetDialog(
-                        context,
-                        envelope,
-                        currencyCode,
-                        year: summary.year,
-                        month: summary.month,
-                      ),
-                      onShowActivity: (envelope, monthlyData, goal) =>
-                          _showEnvelopeActivity(
-                            context,
-                            envelope,
-                            currencyCode,
-                            monthlyData: monthlyData,
-                            goal: goal,
-                          ),
                     ),
                   ),
-                ),
                 const SizedBox(height: SpacingTokens.sm),
                 Center(
                   child: OutlinedButton.icon(
@@ -654,6 +674,156 @@ class _DueBanner extends HookWidget {
                   fontWeight: FontWeight.w600,
                 ),
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ReorderableCategoryList extends HookConsumerWidget {
+  const _ReorderableCategoryList({
+    required this.categories,
+    required this.budgetId,
+  });
+
+  final List<CategoryWithEnvelopes> categories;
+  final String budgetId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final orderedCategories = useState(List.of(categories));
+
+    // Sync with provider state when categories change.
+    useEffect(() {
+      orderedCategories.value = List.of(categories);
+      return null;
+    }, [categories]);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(bottom: SpacingTokens.sm),
+          child: Row(
+            children: [
+              Icon(
+                Icons.info_outline_rounded,
+                size: 16,
+                color: colorScheme.onSurfaceVariant,
+              ),
+              const SizedBox(width: SpacingTokens.xs),
+              Text(
+                l10n.budgetReorderHint,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ),
+        ...orderedCategories.value.asMap().entries.map((entry) {
+          final index = entry.key;
+          final cat = entry.value;
+          return _ReorderableCategoryTile(
+            key: ValueKey(cat.category.id),
+            category: cat,
+            index: index,
+            total: orderedCategories.value.length,
+            onMoveUp: index > 0
+                ? () => _swap(orderedCategories, index, index - 1, ref)
+                : null,
+            onMoveDown: index < orderedCategories.value.length - 1
+                ? () => _swap(orderedCategories, index, index + 1, ref)
+                : null,
+          );
+        }),
+      ],
+    );
+  }
+
+  Future<void> _swap(
+    ValueNotifier<List<CategoryWithEnvelopes>> orderedCategories,
+    int from,
+    int to,
+    WidgetRef ref,
+  ) async {
+    final list = List.of(orderedCategories.value);
+    final item = list.removeAt(from);
+    list.insert(to, item);
+    orderedCategories.value = list;
+
+    final categoryIds = list
+        .map((c) => c.category.id?.toString() ?? '')
+        .where((id) => id.isNotEmpty)
+        .toList();
+
+    try {
+      await ref
+          .read(categoryActionsProvider.notifier)
+          .reorderCategories(budgetId: budgetId, categoryIds: categoryIds);
+    } on Exception catch (_) {
+      // Revert on error handled by provider re-fetch.
+    }
+  }
+}
+
+class _ReorderableCategoryTile extends HookWidget {
+  const _ReorderableCategoryTile({
+    required this.category,
+    required this.index,
+    required this.total,
+    this.onMoveUp,
+    this.onMoveDown,
+    super.key,
+  });
+
+  final CategoryWithEnvelopes category;
+  final int index;
+  final int total;
+  final VoidCallback? onMoveUp;
+  final VoidCallback? onMoveDown;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: SpacingTokens.sm),
+      child: ListTile(
+        leading: Icon(
+          Icons.drag_handle_rounded,
+          color: colorScheme.onSurfaceVariant,
+        ),
+        title: Text(
+          category.category.name,
+          style: theme.textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        subtitle: Text(
+          '${category.envelopes.length} envelopes',
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: colorScheme.onSurfaceVariant,
+          ),
+        ),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.arrow_upward_rounded),
+              onPressed: onMoveUp,
+              iconSize: 20,
+            ),
+            IconButton(
+              icon: const Icon(Icons.arrow_downward_rounded),
+              onPressed: onMoveDown,
+              iconSize: 20,
             ),
           ],
         ),

@@ -587,6 +587,27 @@ class Endpoints extends _i1.EndpointDispatch {
                 sortOrder: params['sortOrder'],
               ),
         ),
+        'reorder': _i1.MethodConnector(
+          name: 'reorder',
+          params: {
+            'budgetId': _i1.ParameterDescription(
+              name: 'budgetId',
+              type: _i1.getType<_i1.UuidValue>(),
+              nullable: false,
+            ),
+            'categoryIds': _i1.ParameterDescription(
+              name: 'categoryIds',
+              type: _i1.getType<List<_i1.UuidValue>>(),
+              nullable: false,
+            ),
+          },
+          call: (_i1.Session session, Map<String, dynamic> params) async =>
+              (endpoints['category'] as _i7.CategoryEndpoint).reorder(
+                session,
+                params['budgetId'],
+                params['categoryIds'],
+              ),
+        ),
         'delete': _i1.MethodConnector(
           name: 'delete',
           params: {

@@ -945,4 +945,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get spendingTrendsBreakdown => 'Monthly Breakdown';
+
+  @override
+  String get budgetReorderCategories => 'Reorder Categories';
+
+  @override
+  String get budgetReorderDone => 'Done';
+
+  @override
+  String get budgetReorderHint => 'Drag to reorder categories';
+
+  @override
+  String get budgetReorderSuccess => 'Categories reordered';
+
+  @override
+  String get budgetReorderError => 'Could not reorder categories';
 }

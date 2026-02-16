@@ -1713,6 +1713,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Monthly Breakdown'**
   String get spendingTrendsBreakdown;
+
+  /// No description provided for @budgetReorderCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Reorder Categories'**
+  String get budgetReorderCategories;
+
+  /// No description provided for @budgetReorderDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get budgetReorderDone;
+
+  /// No description provided for @budgetReorderHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag to reorder categories'**
+  String get budgetReorderHint;
+
+  /// No description provided for @budgetReorderSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Categories reordered'**
+  String get budgetReorderSuccess;
+
+  /// No description provided for @budgetReorderError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not reorder categories'**
+  String get budgetReorderError;
 }
 
 class _AppLocalizationsDelegate

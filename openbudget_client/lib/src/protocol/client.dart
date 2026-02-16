@@ -415,6 +415,18 @@ class EndpointCategory extends _i1.EndpointRef {
     'sortOrder': sortOrder,
   });
 
+  /// Batch-reorders categories by their new position.
+  ///
+  /// The [categoryIds] list defines the new sort order: the first ID gets
+  /// sort order 0, the second gets 1, etc.
+  _i2.Future<List<_i7.Category>> reorder(
+    _i1.UuidValue budgetId,
+    List<_i1.UuidValue> categoryIds,
+  ) => caller.callServerEndpoint<List<_i7.Category>>('category', 'reorder', {
+    'budgetId': budgetId,
+    'categoryIds': categoryIds,
+  });
+
   /// Deletes a category by ID.
   _i2.Future<_i7.Category> delete(_i1.UuidValue categoryId) =>
       caller.callServerEndpoint<_i7.Category>('category', 'delete', {

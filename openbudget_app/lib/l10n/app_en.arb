@@ -367,5 +367,10 @@
   "spendingTrendsAvgIncome": "Avg. Income",
   "spendingTrendsAvgExpenses": "Avg. Expenses",
   "spendingTrendsMonthly": "Monthly Comparison",
-  "spendingTrendsBreakdown": "Monthly Breakdown"
+  "spendingTrendsBreakdown": "Monthly Breakdown",
+  "budgetReorderCategories": "Reorder Categories",
+  "budgetReorderDone": "Done",
+  "budgetReorderHint": "Drag to reorder categories",
+  "budgetReorderSuccess": "Categories reordered",
+  "budgetReorderError": "Could not reorder categories"
 }
