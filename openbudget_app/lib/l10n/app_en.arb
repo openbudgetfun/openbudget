@@ -310,5 +310,27 @@
         "type": "int"
       }
     }
-  }
+  },
+  "autoAssignTitle": "Auto-Assign",
+  "autoAssignButton": "Auto-Assign",
+  "autoAssignAssigning": "Assigning...",
+  "autoAssignDistributing": "Distributing to underfunded envelopes",
+  "autoAssignNothingToAssign": "All envelopes with goals are fully funded!",
+  "autoAssignEnvelopeCount": "{count, plural, =1{1 envelope} other{{count} envelopes}}",
+  "@autoAssignEnvelopeCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "autoAssignSuccess": "{count, plural, =1{Auto-assigned to 1 envelope} other{Auto-assigned to {count} envelopes}}",
+  "@autoAssignSuccess": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "autoAssignError": "Could not auto-assign. Please try again."
 }

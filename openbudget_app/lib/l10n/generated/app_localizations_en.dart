@@ -822,4 +822,45 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get autoAssignTitle => 'Auto-Assign';
+
+  @override
+  String get autoAssignButton => 'Auto-Assign';
+
+  @override
+  String get autoAssignAssigning => 'Assigning...';
+
+  @override
+  String get autoAssignDistributing => 'Distributing to underfunded envelopes';
+
+  @override
+  String get autoAssignNothingToAssign =>
+      'All envelopes with goals are fully funded!';
+
+  @override
+  String autoAssignEnvelopeCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count envelopes',
+      one: '1 envelope',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String autoAssignSuccess(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Auto-assigned to $count envelopes',
+      one: 'Auto-assigned to 1 envelope',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get autoAssignError => 'Could not auto-assign. Please try again.';
 }
