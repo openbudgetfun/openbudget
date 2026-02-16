@@ -4,6 +4,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
+import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
 import 'package:openbudget_app/src/features/payees/providers/payee_list_provider.dart';
@@ -148,9 +149,10 @@ class TransactionListScreen extends HookConsumerWidget {
           ),
         ),
         data: (transactions) {
-          // Build payee and envelope name lookup maps.
+          // Build payee, envelope, and account name lookup maps.
           final payeeAsync = ref.watch(payeeListProvider(budgetId));
           final summaryAsync = ref.watch(budgetSummaryProvider(budgetId));
+          final accountsAsync = ref.watch(accountListProvider(budgetId));
           final payeeMap = <String, String>{};
           if (payeeAsync.hasValue) {
             for (final payee in payeeAsync.value!) {
@@ -165,6 +167,13 @@ class TransactionListScreen extends HookConsumerWidget {
                 final id = env.id?.toString();
                 if (id != null) envelopeMap[id] = env.name;
               }
+            }
+          }
+          final accountMap = <String, String>{};
+          if (accountsAsync.hasValue) {
+            for (final account in accountsAsync.value!) {
+              final id = account.id?.toString();
+              if (id != null) accountMap[id] = account.name;
             }
           }
 
@@ -366,6 +375,7 @@ class TransactionListScreen extends HookConsumerWidget {
                       currencyCode: currency,
                       payeeMap: payeeMap,
                       envelopeMap: envelopeMap,
+                      accountMap: accountMap,
                       selectionMode: selectionMode.value,
                       selectedIds: selectedIds.value,
                       onToggleSelection: (id) {
@@ -687,6 +697,7 @@ class _TransactionTile extends HookConsumerWidget {
     this.isSplit = false,
     this.payeeName,
     this.envelopeName,
+    this.accountName,
     this.selectionMode = false,
     this.isSelected = false,
     this.onToggleSelection,
@@ -698,6 +709,7 @@ class _TransactionTile extends HookConsumerWidget {
   final bool isSplit;
   final String? payeeName;
   final String? envelopeName;
+  final String? accountName;
   final bool selectionMode;
   final bool isSelected;
   final VoidCallback? onToggleSelection;
@@ -843,6 +855,9 @@ class _TransactionTile extends HookConsumerWidget {
 
   Widget? _buildSubtitle(ThemeData theme, ColorScheme colorScheme) {
     final parts = <String>[];
+    if (accountName != null && accountName!.isNotEmpty) {
+      parts.add(accountName!);
+    }
     if (payeeName != null && payeeName!.isNotEmpty) {
       parts.add(payeeName!);
     }
@@ -1131,6 +1146,7 @@ class _GroupedTransactionList extends HookWidget {
     required this.currencyCode,
     this.payeeMap = const {},
     this.envelopeMap = const {},
+    this.accountMap = const {},
     this.selectionMode = false,
     this.selectedIds = const {},
     this.onToggleSelection,
@@ -1142,6 +1158,7 @@ class _GroupedTransactionList extends HookWidget {
   final CurrencyCode currencyCode;
   final Map<String, String> payeeMap;
   final Map<String, String> envelopeMap;
+  final Map<String, String> accountMap;
   final bool selectionMode;
   final Set<String> selectedIds;
   final ValueChanged<String>? onToggleSelection;
@@ -1185,6 +1202,9 @@ class _GroupedTransactionList extends HookWidget {
         final envelopeName = tx.envelopeId != null
             ? envelopeMap[tx.envelopeId.toString()]
             : null;
+        final accountName = tx.accountId != null
+            ? accountMap[tx.accountId.toString()]
+            : null;
         return _TransactionTile(
           transaction: tx,
           budgetId: budgetId,
@@ -1192,6 +1212,7 @@ class _GroupedTransactionList extends HookWidget {
           isSplit: isSplit,
           payeeName: payeeName,
           envelopeName: envelopeName,
+          accountName: accountName,
           selectionMode: selectionMode,
           isSelected: selectedIds.contains(txId),
           onToggleSelection: txId.isNotEmpty
