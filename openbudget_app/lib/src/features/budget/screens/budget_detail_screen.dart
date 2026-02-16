@@ -268,6 +268,13 @@ class BudgetDetailScreen extends HookConsumerWidget {
                   totalIncomeCents: summary.totalIncomeCents,
                   totalBudgetedCents: summary.totalBudgetedCents,
                   totalActivityCents: totalActivityCents,
+                  onCopyLastMonth: () => _confirmCopyLastMonth(
+                    context,
+                    ref,
+                    budgetId,
+                    summary.year,
+                    summary.month,
+                  ),
                 ),
                 const SizedBox(height: SpacingTokens.md),
                 if (dueCountAsync.hasValue && dueCountAsync.value! > 0)
@@ -896,6 +903,60 @@ class BudgetDetailScreen extends HookConsumerWidget {
       }
     } finally {
       isPosting.value = false;
+    }
+  }
+
+  Future<void> _confirmCopyLastMonth(
+    BuildContext context,
+    WidgetRef ref,
+    String budgetId,
+    int year,
+    int month,
+  ) async {
+    final l10n = AppLocalizations.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.budgetCopyLastMonth),
+        content: Text(l10n.budgetCopyLastMonthConfirm),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l10n.dialogCancel),
+          ),
+          FilledButton.icon(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            icon: const Icon(Icons.content_copy_rounded, size: 16),
+            label: Text(l10n.budgetCopyLastMonth),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !context.mounted) return;
+
+    try {
+      await ref
+          .read(monthlyAllocationActionsProvider.notifier)
+          .copyPreviousMonth(
+            budgetId: budgetId,
+            currentYear: year,
+            currentMonth: month,
+          );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.budgetCopyLastMonthSuccess)),
+        );
+      }
+    } on Exception catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.budgetCopyLastMonthError),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
     }
   }
 
