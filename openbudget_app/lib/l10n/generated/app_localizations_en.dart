@@ -706,7 +706,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get quickBudgetTitle => 'Quick Budget';
 
   @override
+  String get reconcileAdjustmentNote =>
+      'An adjustment transaction will be created for the difference.';
+
+  @override
+  String get reconcileBalanceHint => 'Enter your current bank balance';
+
+  @override
+  String get reconcileBalanceLabel => 'Statement Balance';
+
+  @override
   String get reconcileButton => 'Reconcile';
+
+  @override
+  String get reconcileClearedBalance => 'Cleared Balance';
+
+  @override
+  String get reconcileDifference => 'Difference';
 
   @override
   String get reconcileError => 'Could not reconcile account. Please try again.';
@@ -723,6 +739,18 @@ class AppLocalizationsEn extends AppLocalizations {
       other: '$count transactions reconciled',
       one: '1 transaction reconciled',
       zero: 'No transactions to reconcile',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reconcileSuccessWithAdjustment(int count, String adjustment) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count transactions reconciled with $adjustment adjustment',
+      one: '1 transaction reconciled with $adjustment adjustment',
+      zero: 'Reconciled with $adjustment adjustment',
     );
     return '$_temp0';
   }

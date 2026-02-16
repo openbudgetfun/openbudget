@@ -62,4 +62,27 @@ class AccountTransactionActions extends _$AccountTransactionActions {
       ..invalidate(accountListProvider(budgetId));
     return count;
   }
+
+  Future<List<int>> reconcileWithBalance({
+    required String accountId,
+    required String budgetId,
+    required int statementBalanceCents,
+  }) async {
+    final client = ref.read(serverpodClientProvider);
+    // Serverpod API requires UuidValue which is experimental in uuid package.
+    // ignore: experimental_member_use
+    final accountUuid = UuidValue.fromString(accountId);
+    // UuidValue.fromString is experimental in uuid package.
+    // ignore: experimental_member_use
+    final budgetUuid = UuidValue.fromString(budgetId);
+    final result = await client.transaction.reconcileWithBalance(
+      accountUuid,
+      budgetUuid,
+      statementBalanceCents,
+    );
+    ref
+      ..invalidate(accountTransactionsProvider(budgetId, accountId))
+      ..invalidate(accountListProvider(budgetId));
+    return result;
+  }
 }

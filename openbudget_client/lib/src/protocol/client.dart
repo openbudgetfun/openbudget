@@ -992,6 +992,21 @@ class EndpointTransaction extends _i1.EndpointRef {
     'budgetId': budgetId,
   });
 
+  /// Reconciles an account with a statement balance.
+  ///
+  /// If the cleared balance differs from the statement balance, creates an
+  /// adjustment transaction. Returns [reconciledCount, adjustmentCents].
+  _i2.Future<List<int>> reconcileWithBalance(
+    _i1.UuidValue accountId,
+    _i1.UuidValue budgetId,
+    int statementBalanceCents,
+  ) => caller
+      .callServerEndpoint<List<int>>('transaction', 'reconcileWithBalance', {
+        'accountId': accountId,
+        'budgetId': budgetId,
+        'statementBalanceCents': statementBalanceCents,
+      });
+
   /// Calculates the "Age of Money" for a budget.
   ///
   /// Returns the average days between income and spending, or null if
