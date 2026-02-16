@@ -1144,6 +1144,57 @@ class Endpoints extends _i1.EndpointDispatch {
                 transactionDate: params['transactionDate'],
               ),
         ),
+        'transfer': _i1.MethodConnector(
+          name: 'transfer',
+          params: {
+            'description': _i1.ParameterDescription(
+              name: 'description',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'amountCents': _i1.ParameterDescription(
+              name: 'amountCents',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'currencyCode': _i1.ParameterDescription(
+              name: 'currencyCode',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'budgetId': _i1.ParameterDescription(
+              name: 'budgetId',
+              type: _i1.getType<_i1.UuidValue>(),
+              nullable: false,
+            ),
+            'fromAccountId': _i1.ParameterDescription(
+              name: 'fromAccountId',
+              type: _i1.getType<_i1.UuidValue>(),
+              nullable: false,
+            ),
+            'toAccountId': _i1.ParameterDescription(
+              name: 'toAccountId',
+              type: _i1.getType<_i1.UuidValue>(),
+              nullable: false,
+            ),
+            'transactionDate': _i1.ParameterDescription(
+              name: 'transactionDate',
+              type: _i1.getType<DateTime>(),
+              nullable: false,
+            ),
+          },
+          call: (_i1.Session session, Map<String, dynamic> params) async =>
+              (endpoints['transaction'] as _i12.TransactionEndpoint).transfer(
+                session,
+                params['description'],
+                params['amountCents'],
+                params['currencyCode'],
+                params['budgetId'],
+                params['fromAccountId'],
+                params['toAccountId'],
+                params['transactionDate'],
+              ),
+        ),
         'delete': _i1.MethodConnector(
           name: 'delete',
           params: {

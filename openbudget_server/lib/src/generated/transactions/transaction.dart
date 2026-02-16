@@ -25,6 +25,7 @@ abstract class Transaction
     this.accountId,
     this.payeeId,
     required this.transactionDate,
+    this.transferPairId,
     DateTime? createdAt,
   }) : createdAt = createdAt ?? DateTime.now();
 
@@ -38,6 +39,7 @@ abstract class Transaction
     _i1.UuidValue? accountId,
     _i1.UuidValue? payeeId,
     required DateTime transactionDate,
+    _i1.UuidValue? transferPairId,
     DateTime? createdAt,
   }) = _TransactionImpl;
 
@@ -66,6 +68,11 @@ abstract class Transaction
       transactionDate: _i1.DateTimeJsonExtension.fromJson(
         jsonSerialization['transactionDate'],
       ),
+      transferPairId: jsonSerialization['transferPairId'] == null
+          ? null
+          : _i1.UuidValueJsonExtension.fromJson(
+              jsonSerialization['transferPairId'],
+            ),
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
@@ -99,6 +106,9 @@ abstract class Transaction
 
   DateTime transactionDate;
 
+  /// If this transaction is part of a transfer, this links to the paired transaction.
+  _i1.UuidValue? transferPairId;
+
   DateTime createdAt;
 
   @override
@@ -117,6 +127,7 @@ abstract class Transaction
     _i1.UuidValue? accountId,
     _i1.UuidValue? payeeId,
     DateTime? transactionDate,
+    _i1.UuidValue? transferPairId,
     DateTime? createdAt,
   });
   @override
@@ -132,6 +143,7 @@ abstract class Transaction
       if (accountId != null) 'accountId': accountId?.toJson(),
       if (payeeId != null) 'payeeId': payeeId?.toJson(),
       'transactionDate': transactionDate.toJson(),
+      if (transferPairId != null) 'transferPairId': transferPairId?.toJson(),
       'createdAt': createdAt.toJson(),
     };
   }
@@ -149,6 +161,7 @@ abstract class Transaction
       if (accountId != null) 'accountId': accountId?.toJson(),
       if (payeeId != null) 'payeeId': payeeId?.toJson(),
       'transactionDate': transactionDate.toJson(),
+      if (transferPairId != null) 'transferPairId': transferPairId?.toJson(),
       'createdAt': createdAt.toJson(),
     };
   }
@@ -196,6 +209,7 @@ class _TransactionImpl extends Transaction {
     _i1.UuidValue? accountId,
     _i1.UuidValue? payeeId,
     required DateTime transactionDate,
+    _i1.UuidValue? transferPairId,
     DateTime? createdAt,
   }) : super._(
          id: id,
@@ -207,6 +221,7 @@ class _TransactionImpl extends Transaction {
          accountId: accountId,
          payeeId: payeeId,
          transactionDate: transactionDate,
+         transferPairId: transferPairId,
          createdAt: createdAt,
        );
 
@@ -224,6 +239,7 @@ class _TransactionImpl extends Transaction {
     Object? accountId = _Undefined,
     Object? payeeId = _Undefined,
     DateTime? transactionDate,
+    Object? transferPairId = _Undefined,
     DateTime? createdAt,
   }) {
     return Transaction(
@@ -236,6 +252,9 @@ class _TransactionImpl extends Transaction {
       accountId: accountId is _i1.UuidValue? ? accountId : this.accountId,
       payeeId: payeeId is _i1.UuidValue? ? payeeId : this.payeeId,
       transactionDate: transactionDate ?? this.transactionDate,
+      transferPairId: transferPairId is _i1.UuidValue?
+          ? transferPairId
+          : this.transferPairId,
       createdAt: createdAt ?? this.createdAt,
     );
   }
@@ -270,6 +289,10 @@ class TransactionUpdateTable extends _i1.UpdateTable<TransactionTable> {
   _i1.ColumnValue<DateTime, DateTime> transactionDate(DateTime value) =>
       _i1.ColumnValue(table.transactionDate, value);
 
+  _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> transferPairId(
+    _i1.UuidValue? value,
+  ) => _i1.ColumnValue(table.transferPairId, value);
+
   _i1.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
       _i1.ColumnValue(table.createdAt, value);
 }
@@ -285,6 +308,7 @@ class TransactionTable extends _i1.Table<_i1.UuidValue?> {
     accountId = _i1.ColumnUuid('accountId', this);
     payeeId = _i1.ColumnUuid('payeeId', this);
     transactionDate = _i1.ColumnDateTime('transactionDate', this);
+    transferPairId = _i1.ColumnUuid('transferPairId', this);
     createdAt = _i1.ColumnDateTime('createdAt', this, hasDefault: true);
   }
 
@@ -310,6 +334,9 @@ class TransactionTable extends _i1.Table<_i1.UuidValue?> {
 
   late final _i1.ColumnDateTime transactionDate;
 
+  /// If this transaction is part of a transfer, this links to the paired transaction.
+  late final _i1.ColumnUuid transferPairId;
+
   late final _i1.ColumnDateTime createdAt;
 
   @override
@@ -323,6 +350,7 @@ class TransactionTable extends _i1.Table<_i1.UuidValue?> {
     accountId,
     payeeId,
     transactionDate,
+    transferPairId,
     createdAt,
   ];
 }

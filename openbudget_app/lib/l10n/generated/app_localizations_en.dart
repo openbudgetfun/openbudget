@@ -477,4 +477,35 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get goalSetGoal => 'Set Goal';
+
+  @override
+  String get transferTitle => 'Transfer';
+
+  @override
+  String get transferFromAccount => 'From Account';
+
+  @override
+  String get transferToAccount => 'To Account';
+
+  @override
+  String get transferDate => 'Transfer Date';
+
+  @override
+  String get transferButton => 'Transfer';
+
+  @override
+  String get transferDefaultDescription => 'Account Transfer';
+
+  @override
+  String get transferSuccess => 'Transfer completed';
+
+  @override
+  String get transferError => 'Could not complete transfer. Please try again.';
+
+  @override
+  String get transferSameAccountError => 'Cannot transfer to the same account';
+
+  @override
+  String get transferNeedTwoAccounts =>
+      'You need at least two accounts to make a transfer';
 }

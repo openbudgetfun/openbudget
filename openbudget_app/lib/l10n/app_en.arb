@@ -162,5 +162,15 @@
   "goalRemoved": "Goal removed",
   "goalRemove": "Remove Goal",
   "goalError": "Could not save goal. Please try again.",
-  "goalSetGoal": "Set Goal"
+  "goalSetGoal": "Set Goal",
+  "transferTitle": "Transfer",
+  "transferFromAccount": "From Account",
+  "transferToAccount": "To Account",
+  "transferDate": "Transfer Date",
+  "transferButton": "Transfer",
+  "transferDefaultDescription": "Account Transfer",
+  "transferSuccess": "Transfer completed",
+  "transferError": "Could not complete transfer. Please try again.",
+  "transferSameAccountError": "Cannot transfer to the same account",
+  "transferNeedTwoAccounts": "You need at least two accounts to make a transfer"
 }

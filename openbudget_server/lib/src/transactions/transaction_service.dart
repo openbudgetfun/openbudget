@@ -109,6 +109,54 @@ class TransactionService {
     return Transaction.db.updateRow(session, updated);
   }
 
+  /// Creates a transfer between two accounts within a budget.
+  ///
+  /// This creates two linked transactions: an outflow from the source account
+  /// and an inflow to the destination account, linked by `transferPairId`.
+  static Future<List<Transaction>> createTransfer(
+    Session session, {
+    required String description,
+    required int amountCents,
+    required String currencyCode,
+    required UuidValue budgetId,
+    required UuidValue fromAccountId,
+    required UuidValue toAccountId,
+    required DateTime transactionDate,
+  }) async {
+    await BudgetService.getById(session, budgetId: budgetId);
+
+    final outflow = Transaction(
+      description: description,
+      amountCents: -amountCents.abs(),
+      currencyCode: currencyCode,
+      budgetId: budgetId,
+      accountId: fromAccountId,
+      transactionDate: transactionDate,
+      createdAt: DateTime.now(),
+    );
+    final savedOutflow = await Transaction.db.insertRow(session, outflow);
+
+    final inflow = Transaction(
+      description: description,
+      amountCents: amountCents.abs(),
+      currencyCode: currencyCode,
+      budgetId: budgetId,
+      accountId: toAccountId,
+      transferPairId: savedOutflow.id,
+      transactionDate: transactionDate,
+      createdAt: DateTime.now(),
+    );
+    final savedInflow = await Transaction.db.insertRow(session, inflow);
+
+    final linkedOutflow = savedOutflow.copyWith(transferPairId: savedInflow.id);
+    final updatedOutflow = await Transaction.db.updateRow(
+      session,
+      linkedOutflow,
+    );
+
+    return [updatedOutflow, savedInflow];
+  }
+
   /// Deletes a transaction, verifying budget ownership.
   static Future<Transaction> delete(
     Session session, {
