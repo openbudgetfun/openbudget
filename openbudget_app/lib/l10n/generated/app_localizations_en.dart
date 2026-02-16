@@ -580,6 +580,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get envelopeActivityTitle => 'Activity';
 
   @override
+  String envelopeCarryover(String amount) {
+    return 'Carried over: $amount';
+  }
+
+  @override
   String get envelopeNoActivity => 'No transactions this month';
 
   @override
