@@ -527,6 +527,13 @@ class BudgetDetailScreen extends HookConsumerWidget {
                   ),
                   const SizedBox(width: SpacingTokens.sm),
                   IconButton.filled(
+                    onPressed: () =>
+                        context.go('/budgets/$budgetId/transfers/create'),
+                    icon: const Icon(Icons.sync_alt_rounded),
+                    tooltip: l10n.transferTitle,
+                  ),
+                  const SizedBox(width: SpacingTokens.sm),
+                  IconButton.filled(
                     onPressed: () => _showMoveMoneyDialog(
                       context,
                       summary.categories,
