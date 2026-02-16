@@ -263,5 +263,13 @@
   "payeeNone": "No Payee",
   "payeeLabel": "Payee",
   "payeeAutoEnvelopeHint": "Envelope auto-suggested from last transaction with this payee",
-  "accountRunningBalance": "Running Balance"
+  "accountRunningBalance": "Running Balance",
+  "budgetOverspentWarning": "Overspent: {amount}",
+  "@budgetOverspentWarning": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -79,6 +79,14 @@ class BudgetDetailScreen extends HookConsumerWidget {
             ? goalsAsync.value!
             : <String, EnvelopeGoal>{};
 
+        // Compute total overspent cents across all categories.
+        var totalOverspentCents = 0;
+        for (final cat in summary.categories) {
+          if (cat.totalAvailableCents < 0) {
+            totalOverspentCents += cat.totalAvailableCents.abs();
+          }
+        }
+
         return Scaffold(
           appBar: AppBar(
             leading: IconButton(
@@ -143,6 +151,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
                   budgetId: budgetId,
                   year: summary.year,
                   month: summary.month,
+                  totalOverspentCents: totalOverspentCents,
                 ),
                 const SizedBox(height: SpacingTokens.md),
                 if (ccPayments.hasValue && ccPayments.value!.isNotEmpty) ...[
