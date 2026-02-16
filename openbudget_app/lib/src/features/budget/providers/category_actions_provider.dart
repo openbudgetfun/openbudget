@@ -77,6 +77,36 @@ class CategoryActions extends _$CategoryActions {
     }
   }
 
+  Future<Category> updateCategory({
+    required String categoryId,
+    required String budgetId,
+    required String name,
+  }) async {
+    state = const AsyncValue.loading();
+    final client = ref.read(serverpodClientProvider);
+    try {
+      final category = await client.category.update(
+        // Serverpod API requires UuidValue which is experimental in uuid package.
+        // ignore: experimental_member_use
+        UuidValue.fromString(categoryId),
+        name: name,
+      );
+      if (ref.mounted) {
+        ref
+          ..invalidate(categoryListProvider(budgetId))
+          ..invalidate(budgetSummaryProvider(budgetId))
+          ..invalidate(budgetMonthlySummaryProvider(budgetId));
+        state = const AsyncValue.data(null);
+      }
+      return category;
+    } on Exception catch (e, st) {
+      if (ref.mounted) {
+        state = AsyncValue.error(e, st);
+      }
+      rethrow;
+    }
+  }
+
   Future<void> deleteCategory({
     required String categoryId,
     required String budgetId,

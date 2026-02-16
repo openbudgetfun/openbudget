@@ -13,6 +13,7 @@ import 'package:openbudget_app/src/features/budget/providers/monthly_allocation_
 import 'package:openbudget_app/src/features/budget/providers/selected_month_provider.dart';
 import 'package:openbudget_app/src/features/budget/screens/add_category_dialog.dart';
 import 'package:openbudget_app/src/features/budget/screens/add_envelope_dialog.dart';
+import 'package:openbudget_app/src/features/budget/screens/edit_category_dialog.dart';
 import 'package:openbudget_app/src/features/budget/screens/edit_envelope_dialog.dart';
 import 'package:openbudget_app/src/features/budget/screens/envelope_activity_sheet.dart';
 import 'package:openbudget_app/src/features/budget/screens/move_money_dialog.dart';
@@ -237,6 +238,11 @@ class BudgetDetailScreen extends HookConsumerWidget {
                           year: summary.year,
                           month: summary.month,
                         ),
+                        onEditCategory: () => _showEditCategoryDialog(
+                          context,
+                          catWithEnvelopes.category.id?.toString() ?? '',
+                          catWithEnvelopes.category.name,
+                        ),
                         onDeleteCategory: () => _confirmDeleteCategory(
                           context,
                           ref,
@@ -408,6 +414,21 @@ class BudgetDetailScreen extends HookConsumerWidget {
         currencyCode: currencyCode,
         year: year,
         month: month,
+      ),
+    );
+  }
+
+  void _showEditCategoryDialog(
+    BuildContext context,
+    String categoryId,
+    String currentName,
+  ) {
+    showDialog<void>(
+      context: context,
+      builder: (_) => EditCategoryDialog(
+        categoryId: categoryId,
+        budgetId: budgetId,
+        currentName: currentName,
       ),
     );
   }

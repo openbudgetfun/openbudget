@@ -1714,6 +1714,24 @@ abstract class AppLocalizations {
   /// **'Monthly Breakdown'**
   String get spendingTrendsBreakdown;
 
+  /// No description provided for @budgetEditCategoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename Category'**
+  String get budgetEditCategoryTitle;
+
+  /// No description provided for @budgetEditCategorySuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Category renamed'**
+  String get budgetEditCategorySuccess;
+
+  /// No description provided for @budgetEditCategoryError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not rename category. Please try again.'**
+  String get budgetEditCategoryError;
+
   /// No description provided for @budgetReorderCategories.
   ///
   /// In en, this message translates to:

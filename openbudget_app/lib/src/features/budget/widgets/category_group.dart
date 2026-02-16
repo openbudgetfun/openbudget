@@ -14,6 +14,7 @@ class CategoryGroup extends HookConsumerWidget {
     required this.currencyCode,
     required this.onAddEnvelope,
     required this.onDeleteCategory,
+    required this.onEditCategory,
     required this.onEditEnvelope,
     required this.onDeleteEnvelope,
     this.onQuickBudget,
@@ -26,6 +27,7 @@ class CategoryGroup extends HookConsumerWidget {
   final CurrencyCode currencyCode;
   final VoidCallback onAddEnvelope;
   final VoidCallback onDeleteCategory;
+  final VoidCallback onEditCategory;
   final void Function(Envelope envelope) onEditEnvelope;
   final void Function(Envelope envelope) onDeleteEnvelope;
   final void Function(Envelope envelope)? onQuickBudget;
@@ -47,6 +49,7 @@ class CategoryGroup extends HookConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           GestureDetector(
+            onTap: onEditCategory,
             onLongPress: onDeleteCategory,
             child: Container(
               padding: const EdgeInsets.symmetric(

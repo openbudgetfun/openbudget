@@ -947,6 +947,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get spendingTrendsBreakdown => 'Monthly Breakdown';
 
   @override
+  String get budgetEditCategoryTitle => 'Rename Category';
+
+  @override
+  String get budgetEditCategorySuccess => 'Category renamed';
+
+  @override
+  String get budgetEditCategoryError =>
+      'Could not rename category. Please try again.';
+
+  @override
   String get budgetReorderCategories => 'Reorder Categories';
 
   @override
