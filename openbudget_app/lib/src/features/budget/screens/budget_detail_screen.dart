@@ -13,6 +13,7 @@ import 'package:openbudget_app/src/features/budget/screens/add_category_dialog.d
 import 'package:openbudget_app/src/features/budget/screens/add_envelope_dialog.dart';
 import 'package:openbudget_app/src/features/budget/screens/edit_envelope_dialog.dart';
 import 'package:openbudget_app/src/features/budget/screens/move_money_dialog.dart';
+import 'package:openbudget_app/src/features/budget/screens/quick_budget_dialog.dart';
 import 'package:openbudget_app/src/features/budget/widgets/budget_header.dart';
 import 'package:openbudget_app/src/features/budget/widgets/category_group.dart';
 import 'package:openbudget_app/src/features/budget/widgets/credit_card_section.dart';
@@ -214,6 +215,13 @@ class BudgetDetailScreen extends HookConsumerWidget {
                         catWithEnvelopes.category.id?.toString() ?? '',
                         envelope.name,
                       ),
+                      onQuickBudget: (envelope) => _showQuickBudgetDialog(
+                        context,
+                        envelope,
+                        currencyCode,
+                        year: summary.year,
+                        month: summary.month,
+                      ),
                     ),
                   ),
                 ),
@@ -290,6 +298,26 @@ class BudgetDetailScreen extends HookConsumerWidget {
         year: year,
         month: month,
         categories: categories,
+      ),
+    );
+  }
+
+  void _showQuickBudgetDialog(
+    BuildContext context,
+    Envelope envelope,
+    CurrencyCode currencyCode, {
+    required int year,
+    required int month,
+  }) {
+    showDialog<void>(
+      context: context,
+      builder: (_) => QuickBudgetDialog(
+        budgetId: budgetId,
+        envelopeId: envelope.id?.toString() ?? '',
+        envelopeName: envelope.name,
+        currencyCode: currencyCode,
+        year: year,
+        month: month,
       ),
     );
   }

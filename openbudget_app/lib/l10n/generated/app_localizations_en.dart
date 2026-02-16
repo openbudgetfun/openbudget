@@ -671,4 +671,22 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get quickBudgetTitle => 'Quick Budget';
+
+  @override
+  String get quickBudgetLastMonth => 'Budgeted Last Month';
+
+  @override
+  String get quickBudgetSpentLastMonth => 'Spent Last Month';
+
+  @override
+  String get quickBudgetAverageBudgeted => 'Average Budgeted';
+
+  @override
+  String get quickBudgetAverageSpent => 'Average Spent';
+
+  @override
+  String get quickBudgetError => 'Could not load budget suggestions';
 }
