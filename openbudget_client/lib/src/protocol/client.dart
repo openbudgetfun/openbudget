@@ -344,12 +344,6 @@ class EndpointBudget extends _i1.EndpointRef {
       caller.callServerEndpoint<_i6.Budget>('budget', 'delete', {
         'budgetId': budgetId,
       });
-
-  /// Exports all budget data as a JSON string for data portability.
-  _i2.Future<String> exportData(_i1.UuidValue budgetId) =>
-      caller.callServerEndpoint<String>('budget', 'exportData', {
-        'budgetId': budgetId,
-      });
 }
 
 /// Streaming endpoint for real-time budget updates.
