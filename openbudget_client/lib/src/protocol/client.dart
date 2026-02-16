@@ -848,6 +848,15 @@ class EndpointTransaction extends _i1.EndpointRef {
     'budgetId': budgetId,
   });
 
+  /// Calculates the "Age of Money" for a budget.
+  ///
+  /// Returns the average days between income and spending, or null if
+  /// there is insufficient data.
+  _i2.Future<int?> ageOfMoney(_i1.UuidValue budgetId) =>
+      caller.callServerEndpoint<int?>('transaction', 'ageOfMoney', {
+        'budgetId': budgetId,
+      });
+
   /// Creates a split transaction with multiple envelope assignments.
   _i2.Future<List<_i13.Transaction>> createSplit(
     String description,
