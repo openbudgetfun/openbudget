@@ -60,10 +60,14 @@ class TransactionActions extends _$TransactionActions {
     final client = ref.read(serverpodClientProvider);
     try {
       final transaction = await client.transaction.update(
+        // Serverpod API requires UuidValue which is experimental in uuid package.
+        // ignore: experimental_member_use
         UuidValue.fromString(transactionId),
         description: description,
         amountCents: amountCents,
         envelopeId: envelopeId != null
+            // Serverpod API requires UuidValue which is experimental in uuid package.
+            // ignore: experimental_member_use
             ? UuidValue.fromString(envelopeId)
             : null,
         transactionDate: transactionDate,
@@ -90,6 +94,8 @@ class TransactionActions extends _$TransactionActions {
     state = const AsyncValue.loading();
     final client = ref.read(serverpodClientProvider);
     try {
+      // Serverpod API requires UuidValue which is experimental in uuid package.
+      // ignore: experimental_member_use
       await client.transaction.delete(UuidValue.fromString(transactionId));
       if (ref.mounted) {
         ref
