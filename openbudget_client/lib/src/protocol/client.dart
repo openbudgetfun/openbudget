@@ -964,6 +964,21 @@ class EndpointTransaction extends _i1.EndpointRef {
     'accountId': accountId,
   });
 
+  /// Finds potential duplicate transactions with the same amount near a date.
+  _i2.Future<List<_i13.Transaction>> findDuplicates(
+    _i1.UuidValue budgetId,
+    int amountCents,
+    DateTime transactionDate,
+  ) => caller.callServerEndpoint<List<_i13.Transaction>>(
+    'transaction',
+    'findDuplicates',
+    {
+      'budgetId': budgetId,
+      'amountCents': amountCents,
+      'transactionDate': transactionDate,
+    },
+  );
+
   /// Deletes a transaction by ID.
   _i2.Future<_i13.Transaction> delete(_i1.UuidValue transactionId) =>
       caller.callServerEndpoint<_i13.Transaction>('transaction', 'delete', {

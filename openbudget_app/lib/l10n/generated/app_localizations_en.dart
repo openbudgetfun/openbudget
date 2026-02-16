@@ -1194,4 +1194,15 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get settingsExportError =>
       'Could not export budget data. Please try again.';
+
+  @override
+  String duplicateWarning(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Possible duplicates: $count similar transactions found',
+      one: 'Possible duplicate: 1 similar transaction found',
+    );
+    return '$_temp0';
+  }
 }

@@ -1736,6 +1736,34 @@ class Endpoints extends _i1.EndpointDispatch {
                 accountId: params['accountId'],
               ),
         ),
+        'findDuplicates': _i1.MethodConnector(
+          name: 'findDuplicates',
+          params: {
+            'budgetId': _i1.ParameterDescription(
+              name: 'budgetId',
+              type: _i1.getType<_i1.UuidValue>(),
+              nullable: false,
+            ),
+            'amountCents': _i1.ParameterDescription(
+              name: 'amountCents',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'transactionDate': _i1.ParameterDescription(
+              name: 'transactionDate',
+              type: _i1.getType<DateTime>(),
+              nullable: false,
+            ),
+          },
+          call: (_i1.Session session, Map<String, dynamic> params) async =>
+              (endpoints['transaction'] as _i13.TransactionEndpoint)
+                  .findDuplicates(
+                    session,
+                    params['budgetId'],
+                    params['amountCents'],
+                    params['transactionDate'],
+                  ),
+        ),
         'delete': _i1.MethodConnector(
           name: 'delete',
           params: {

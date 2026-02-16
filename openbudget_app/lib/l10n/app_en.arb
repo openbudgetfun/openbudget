@@ -471,5 +471,13 @@
   "settingsExportData": "Export Budget",
   "settingsExportDataHint": "Copy all budget data as JSON to clipboard",
   "settingsExportSuccess": "Budget data copied to clipboard",
-  "settingsExportError": "Could not export budget data. Please try again."
+  "settingsExportError": "Could not export budget data. Please try again.",
+  "duplicateWarning": "{count, plural, =1{Possible duplicate: 1 similar transaction found} other{Possible duplicates: {count} similar transactions found}}",
+  "@duplicateWarning": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

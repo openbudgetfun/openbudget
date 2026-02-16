@@ -383,6 +383,34 @@ class TransactionService {
     return count;
   }
 
+  /// Finds potential duplicate transactions for a given amount and date.
+  ///
+  /// Matches transactions with the same absolute amount within ±1 day
+  /// of the given date. Returns up to 5 potential duplicates.
+  static Future<List<Transaction>> findDuplicates(
+    Session session, {
+    required UuidValue budgetId,
+    required int amountCents,
+    required DateTime transactionDate,
+  }) async {
+    await BudgetService.getById(session, budgetId: budgetId);
+
+    final dayBefore = transactionDate.subtract(const Duration(days: 1));
+    final dayAfter = transactionDate.add(const Duration(days: 1));
+
+    return Transaction.db.find(
+      session,
+      where: (t) =>
+          t.budgetId.equals(budgetId) &
+          t.amountCents.equals(amountCents) &
+          (t.transactionDate >= dayBefore) &
+          (t.transactionDate <= dayAfter),
+      orderBy: (t) => t.transactionDate,
+      orderDescending: true,
+      limit: 5,
+    );
+  }
+
   /// Deletes a transaction, verifying budget ownership.
   static Future<Transaction> delete(
     Session session, {

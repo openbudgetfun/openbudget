@@ -2127,6 +2127,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not export budget data. Please try again.'**
   String get settingsExportError;
+
+  /// No description provided for @duplicateWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Possible duplicate: 1 similar transaction found} other{Possible duplicates: {count} similar transactions found}}'**
+  String duplicateWarning(int count);
 }
 
 class _AppLocalizationsDelegate
