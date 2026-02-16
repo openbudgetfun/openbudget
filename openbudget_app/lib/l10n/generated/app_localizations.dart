@@ -748,6 +748,54 @@ abstract class AppLocalizations {
   /// **'Category Trends'**
   String get categoryTrendsTitle;
 
+  /// No description provided for @comparisonTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget Comparison'**
+  String get comparisonTitle;
+
+  /// No description provided for @comparisonMonthRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Month Range'**
+  String get comparisonMonthRange;
+
+  /// No description provided for @comparisonMonths.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Last 1 month} other{Last {count} months}}'**
+  String comparisonMonths(int count);
+
+  /// No description provided for @comparisonLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load comparison data'**
+  String get comparisonLoadError;
+
+  /// No description provided for @comparisonEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No Budget Data'**
+  String get comparisonEmptyTitle;
+
+  /// No description provided for @comparisonEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add categories and envelopes to compare months'**
+  String get comparisonEmptySubtitle;
+
+  /// No description provided for @comparisonCategoryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get comparisonCategoryLabel;
+
+  /// No description provided for @comparisonTotalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Spending'**
+  String get comparisonTotalLabel;
+
   /// No description provided for @createBudgetButton.
   ///
   /// In en, this message translates to:

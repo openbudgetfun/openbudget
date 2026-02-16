@@ -389,6 +389,39 @@ class AppLocalizationsEn extends AppLocalizations {
   String get categoryTrendsTitle => 'Category Trends';
 
   @override
+  String get comparisonTitle => 'Budget Comparison';
+
+  @override
+  String get comparisonMonthRange => 'Month Range';
+
+  @override
+  String comparisonMonths(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Last $count months',
+      one: 'Last 1 month',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get comparisonLoadError => 'Could not load comparison data';
+
+  @override
+  String get comparisonEmptyTitle => 'No Budget Data';
+
+  @override
+  String get comparisonEmptySubtitle =>
+      'Add categories and envelopes to compare months';
+
+  @override
+  String get comparisonCategoryLabel => 'Category';
+
+  @override
+  String get comparisonTotalLabel => 'Total Spending';
+
+  @override
   String get createBudgetButton => 'Create';
 
   @override
