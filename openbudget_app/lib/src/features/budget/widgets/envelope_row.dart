@@ -73,34 +73,62 @@ class EnvelopeRow extends HookConsumerWidget {
                   const SizedBox(width: SpacingTokens.xs),
                 Expanded(
                   flex: 4,
-                  child: Row(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Flexible(
-                        child: Text(
-                          envelope.name,
-                          style: theme.textTheme.bodyMedium,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              envelope.name,
+                              style: theme.textTheme.bodyMedium,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (carryover != 0)
+                            Tooltip(
+                              message: l10n.envelopeCarryover(
+                                formatCents(carryover, currencyCode),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.only(
+                                  left: SpacingTokens.xs,
+                                ),
+                                child: Icon(
+                                  carryover > 0
+                                      ? Icons.arrow_forward_rounded
+                                      : Icons.arrow_back_rounded,
+                                  size: 12,
+                                  color: carryover > 0
+                                      ? ColorTokens.secondary
+                                      : ColorTokens.error,
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
-                      if (carryover != 0)
-                        Tooltip(
-                          message: l10n.envelopeCarryover(
-                            formatCents(carryover, currencyCode),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.only(
-                              left: SpacingTokens.xs,
+                      if (envelope.note != null && envelope.note!.isNotEmpty)
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.sticky_note_2_outlined,
+                              size: 10,
+                              color: theme.colorScheme.onSurfaceVariant,
                             ),
-                            child: Icon(
-                              carryover > 0
-                                  ? Icons.arrow_forward_rounded
-                                  : Icons.arrow_back_rounded,
-                              size: 12,
-                              color: carryover > 0
-                                  ? ColorTokens.secondary
-                                  : ColorTokens.error,
+                            const SizedBox(width: 2),
+                            Flexible(
+                              child: Text(
+                                envelope.note!,
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                  fontStyle: FontStyle.italic,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
-                          ),
+                          ],
                         ),
                     ],
                   ),
