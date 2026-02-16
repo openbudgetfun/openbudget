@@ -111,6 +111,29 @@ class TransactionActions extends _$TransactionActions {
     }
   }
 
+  Future<Transaction> toggleCleared({
+    required String transactionId,
+    required String budgetId,
+  }) async {
+    final client = ref.read(serverpodClientProvider);
+    try {
+      final transaction = await client.transaction.toggleCleared(
+        // Serverpod API requires UuidValue which is experimental in uuid package.
+        // ignore: experimental_member_use
+        UuidValue.fromString(transactionId),
+      );
+      if (ref.mounted) {
+        ref.invalidate(transactionListProvider(budgetId));
+      }
+      return transaction;
+    } on Exception catch (e, st) {
+      if (ref.mounted) {
+        state = AsyncValue.error(e, st);
+      }
+      rethrow;
+    }
+  }
+
   Future<Transaction> addExpense({
     required String description,
     required int amountCents,
