@@ -1755,6 +1755,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add a note (optional)'**
   String get transactionMemoHint;
+
+  /// No description provided for @accountEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Account'**
+  String get accountEditTitle;
+
+  /// No description provided for @accountEditSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Account updated'**
+  String get accountEditSuccess;
+
+  /// No description provided for @accountEditError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not update account. Please try again.'**
+  String get accountEditError;
+
+  /// No description provided for @accountCloseButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Close Account'**
+  String get accountCloseButton;
+
+  /// No description provided for @accountCloseConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Close this account? It will be moved to Closed Accounts.'**
+  String get accountCloseConfirm;
+
+  /// No description provided for @accountCloseSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Account closed'**
+  String get accountCloseSuccess;
+
+  /// No description provided for @accountReopenButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Reopen Account'**
+  String get accountReopenButton;
+
+  /// No description provided for @accountReopenSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Account reopened'**
+  String get accountReopenSuccess;
 }
 
 class _AppLocalizationsDelegate
