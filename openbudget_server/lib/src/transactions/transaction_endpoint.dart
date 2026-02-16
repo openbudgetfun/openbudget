@@ -101,6 +101,43 @@ class TransactionEndpoint extends Endpoint {
     );
   }
 
+  /// Lists transactions for a specific account.
+  Future<List<Transaction>> listByAccount(
+    Session session,
+    UuidValue accountId,
+    UuidValue budgetId,
+  ) async {
+    return TransactionService.listForAccount(
+      session,
+      accountId: accountId,
+      budgetId: budgetId,
+    );
+  }
+
+  /// Toggles the cleared status of a transaction.
+  Future<Transaction> toggleCleared(
+    Session session,
+    UuidValue transactionId,
+  ) async {
+    return TransactionService.toggleCleared(
+      session,
+      transactionId: transactionId,
+    );
+  }
+
+  /// Reconciles all cleared transactions for an account.
+  Future<int> reconcileAccount(
+    Session session,
+    UuidValue accountId,
+    UuidValue budgetId,
+  ) async {
+    return TransactionService.reconcileAccount(
+      session,
+      accountId: accountId,
+      budgetId: budgetId,
+    );
+  }
+
   /// Deletes a transaction by ID.
   Future<Transaction> delete(Session session, UuidValue transactionId) async {
     return TransactionService.delete(session, transactionId: transactionId);

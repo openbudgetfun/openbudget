@@ -58,4 +58,7 @@ transaction:
   - get:
   - update:
   - transfer:
+  - listByAccount:
+  - toggleCleared:
+  - reconcileAccount:
   - delete:

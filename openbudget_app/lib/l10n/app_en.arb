@@ -190,5 +190,21 @@
   "moveMoneyError": "Could not move money. Please try again.",
   "moveMoneySameError": "Cannot move money to the same envelope",
   "creditCardPaymentsTitle": "Credit Card Payments",
-  "creditCardSpentThisMonth": "Spent this month"
+  "creditCardSpentThisMonth": "Spent this month",
+  "accountDetailBalance": "Balance",
+  "transactionUncleared": "Uncleared",
+  "transactionCleared": "Cleared",
+  "transactionReconciled": "Reconciled",
+  "reconcileTitle": "Reconcile Account",
+  "reconcileMessage": "Mark all cleared transactions as reconciled? This locks them from further editing.",
+  "reconcileButton": "Reconcile",
+  "reconcileSuccess": "{count, plural, =0{No transactions to reconcile} =1{1 transaction reconciled} other{{count} transactions reconciled}}",
+  "@reconcileSuccess": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reconcileError": "Could not reconcile account. Please try again."
 }

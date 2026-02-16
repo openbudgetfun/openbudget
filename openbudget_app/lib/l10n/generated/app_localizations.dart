@@ -1155,6 +1155,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Spent this month'**
   String get creditCardSpentThisMonth;
+
+  /// No description provided for @accountDetailBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance'**
+  String get accountDetailBalance;
+
+  /// No description provided for @transactionUncleared.
+  ///
+  /// In en, this message translates to:
+  /// **'Uncleared'**
+  String get transactionUncleared;
+
+  /// No description provided for @transactionCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'Cleared'**
+  String get transactionCleared;
+
+  /// No description provided for @transactionReconciled.
+  ///
+  /// In en, this message translates to:
+  /// **'Reconciled'**
+  String get transactionReconciled;
+
+  /// No description provided for @reconcileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reconcile Account'**
+  String get reconcileTitle;
+
+  /// No description provided for @reconcileMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark all cleared transactions as reconciled? This locks them from further editing.'**
+  String get reconcileMessage;
+
+  /// No description provided for @reconcileButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Reconcile'**
+  String get reconcileButton;
+
+  /// No description provided for @reconcileSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No transactions to reconcile} =1{1 transaction reconciled} other{{count} transactions reconciled}}'**
+  String reconcileSuccess(int count);
+
+  /// No description provided for @reconcileError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not reconcile account. Please try again.'**
+  String get reconcileError;
 }
 
 class _AppLocalizationsDelegate

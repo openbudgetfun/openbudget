@@ -25,8 +25,12 @@ abstract class Transaction implements _i1.SerializableModel {
     this.payeeId,
     required this.transactionDate,
     this.transferPairId,
+    bool? cleared,
+    bool? reconciled,
     DateTime? createdAt,
-  }) : createdAt = createdAt ?? DateTime.now();
+  }) : cleared = cleared ?? false,
+       reconciled = reconciled ?? false,
+       createdAt = createdAt ?? DateTime.now();
 
   factory Transaction({
     _i1.UuidValue? id,
@@ -39,6 +43,8 @@ abstract class Transaction implements _i1.SerializableModel {
     _i1.UuidValue? payeeId,
     required DateTime transactionDate,
     _i1.UuidValue? transferPairId,
+    bool? cleared,
+    bool? reconciled,
     DateTime? createdAt,
   }) = _TransactionImpl;
 
@@ -72,6 +78,8 @@ abstract class Transaction implements _i1.SerializableModel {
           : _i1.UuidValueJsonExtension.fromJson(
               jsonSerialization['transferPairId'],
             ),
+      cleared: jsonSerialization['cleared'] as bool?,
+      reconciled: jsonSerialization['reconciled'] as bool?,
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
@@ -106,6 +114,12 @@ abstract class Transaction implements _i1.SerializableModel {
   /// If this transaction is part of a transfer, this links to the paired transaction.
   _i1.UuidValue? transferPairId;
 
+  /// Whether this transaction has been cleared by the user.
+  bool cleared;
+
+  /// Whether this transaction has been reconciled.
+  bool reconciled;
+
   DateTime createdAt;
 
   /// Returns a shallow copy of this [Transaction]
@@ -122,6 +136,8 @@ abstract class Transaction implements _i1.SerializableModel {
     _i1.UuidValue? payeeId,
     DateTime? transactionDate,
     _i1.UuidValue? transferPairId,
+    bool? cleared,
+    bool? reconciled,
     DateTime? createdAt,
   });
   @override
@@ -138,6 +154,8 @@ abstract class Transaction implements _i1.SerializableModel {
       if (payeeId != null) 'payeeId': payeeId?.toJson(),
       'transactionDate': transactionDate.toJson(),
       if (transferPairId != null) 'transferPairId': transferPairId?.toJson(),
+      'cleared': cleared,
+      'reconciled': reconciled,
       'createdAt': createdAt.toJson(),
     };
   }
@@ -162,6 +180,8 @@ class _TransactionImpl extends Transaction {
     _i1.UuidValue? payeeId,
     required DateTime transactionDate,
     _i1.UuidValue? transferPairId,
+    bool? cleared,
+    bool? reconciled,
     DateTime? createdAt,
   }) : super._(
          id: id,
@@ -174,6 +194,8 @@ class _TransactionImpl extends Transaction {
          payeeId: payeeId,
          transactionDate: transactionDate,
          transferPairId: transferPairId,
+         cleared: cleared,
+         reconciled: reconciled,
          createdAt: createdAt,
        );
 
@@ -192,6 +214,8 @@ class _TransactionImpl extends Transaction {
     Object? payeeId = _Undefined,
     DateTime? transactionDate,
     Object? transferPairId = _Undefined,
+    bool? cleared,
+    bool? reconciled,
     DateTime? createdAt,
   }) {
     return Transaction(
@@ -207,6 +231,8 @@ class _TransactionImpl extends Transaction {
       transferPairId: transferPairId is _i1.UuidValue?
           ? transferPairId
           : this.transferPairId,
+      cleared: cleared ?? this.cleared,
+      reconciled: reconciled ?? this.reconciled,
       createdAt: createdAt ?? this.createdAt,
     );
   }

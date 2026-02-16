@@ -720,6 +720,33 @@ class EndpointTransaction extends _i1.EndpointRef {
         'transactionDate': transactionDate,
       });
 
+  /// Lists transactions for a specific account.
+  _i2.Future<List<_i12.Transaction>> listByAccount(
+    _i1.UuidValue accountId,
+    _i1.UuidValue budgetId,
+  ) => caller.callServerEndpoint<List<_i12.Transaction>>(
+    'transaction',
+    'listByAccount',
+    {'accountId': accountId, 'budgetId': budgetId},
+  );
+
+  /// Toggles the cleared status of a transaction.
+  _i2.Future<_i12.Transaction> toggleCleared(_i1.UuidValue transactionId) =>
+      caller.callServerEndpoint<_i12.Transaction>(
+        'transaction',
+        'toggleCleared',
+        {'transactionId': transactionId},
+      );
+
+  /// Reconciles all cleared transactions for an account.
+  _i2.Future<int> reconcileAccount(
+    _i1.UuidValue accountId,
+    _i1.UuidValue budgetId,
+  ) => caller.callServerEndpoint<int>('transaction', 'reconcileAccount', {
+    'accountId': accountId,
+    'budgetId': budgetId,
+  });
+
   /// Deletes a transaction by ID.
   _i2.Future<_i12.Transaction> delete(_i1.UuidValue transactionId) =>
       caller.callServerEndpoint<_i12.Transaction>('transaction', 'delete', {
