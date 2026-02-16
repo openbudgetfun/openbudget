@@ -21,11 +21,12 @@ import '../envelope_goals/envelope_goal_endpoint.dart' as _i8;
 import '../envelopes/envelope_endpoint.dart' as _i9;
 import '../monthly_allocations/monthly_allocation_endpoint.dart' as _i10;
 import '../payees/payee_endpoint.dart' as _i11;
-import '../transactions/transaction_endpoint.dart' as _i12;
+import '../recurring_transactions/recurring_transaction_endpoint.dart' as _i12;
+import '../transactions/transaction_endpoint.dart' as _i13;
 import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
-    as _i13;
-import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
     as _i14;
+import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
+    as _i15;
 
 class Endpoints extends _i1.EndpointDispatch {
   @override
@@ -45,7 +46,9 @@ class Endpoints extends _i1.EndpointDispatch {
       'monthlyAllocation': _i10.MonthlyAllocationEndpoint()
         ..initialize(server, 'monthlyAllocation', null),
       'payee': _i11.PayeeEndpoint()..initialize(server, 'payee', null),
-      'transaction': _i12.TransactionEndpoint()
+      'recurringTransaction': _i12.RecurringTransactionEndpoint()
+        ..initialize(server, 'recurringTransaction', null),
+      'transaction': _i13.TransactionEndpoint()
         ..initialize(server, 'transaction', null),
     };
     connectors['account'] = _i1.EndpointConnector(
@@ -1032,6 +1035,205 @@ class Endpoints extends _i1.EndpointDispatch {
         ),
       },
     );
+    connectors['recurringTransaction'] = _i1.EndpointConnector(
+      name: 'recurringTransaction',
+      endpoint: endpoints['recurringTransaction']!,
+      methodConnectors: {
+        'create': _i1.MethodConnector(
+          name: 'create',
+          params: {
+            'description': _i1.ParameterDescription(
+              name: 'description',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'amountCents': _i1.ParameterDescription(
+              name: 'amountCents',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'currencyCode': _i1.ParameterDescription(
+              name: 'currencyCode',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'budgetId': _i1.ParameterDescription(
+              name: 'budgetId',
+              type: _i1.getType<_i1.UuidValue>(),
+              nullable: false,
+            ),
+            'frequency': _i1.ParameterDescription(
+              name: 'frequency',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'nextOccurrence': _i1.ParameterDescription(
+              name: 'nextOccurrence',
+              type: _i1.getType<DateTime>(),
+              nullable: false,
+            ),
+            'envelopeId': _i1.ParameterDescription(
+              name: 'envelopeId',
+              type: _i1.getType<_i1.UuidValue?>(),
+              nullable: true,
+            ),
+            'accountId': _i1.ParameterDescription(
+              name: 'accountId',
+              type: _i1.getType<_i1.UuidValue?>(),
+              nullable: true,
+            ),
+            'payeeId': _i1.ParameterDescription(
+              name: 'payeeId',
+              type: _i1.getType<_i1.UuidValue?>(),
+              nullable: true,
+            ),
+            'endDate': _i1.ParameterDescription(
+              name: 'endDate',
+              type: _i1.getType<DateTime?>(),
+              nullable: true,
+            ),
+          },
+          call: (_i1.Session session, Map<String, dynamic> params) async =>
+              (endpoints['recurringTransaction']
+                      as _i12.RecurringTransactionEndpoint)
+                  .create(
+                    session,
+                    params['description'],
+                    params['amountCents'],
+                    params['currencyCode'],
+                    params['budgetId'],
+                    params['frequency'],
+                    params['nextOccurrence'],
+                    envelopeId: params['envelopeId'],
+                    accountId: params['accountId'],
+                    payeeId: params['payeeId'],
+                    endDate: params['endDate'],
+                  ),
+        ),
+        'list': _i1.MethodConnector(
+          name: 'list',
+          params: {
+            'budgetId': _i1.ParameterDescription(
+              name: 'budgetId',
+              type: _i1.getType<_i1.UuidValue>(),
+              nullable: false,
+            ),
+            'activeOnly': _i1.ParameterDescription(
+              name: 'activeOnly',
+              type: _i1.getType<bool?>(),
+              nullable: true,
+            ),
+          },
+          call: (_i1.Session session, Map<String, dynamic> params) async =>
+              (endpoints['recurringTransaction']
+                      as _i12.RecurringTransactionEndpoint)
+                  .list(
+                    session,
+                    params['budgetId'],
+                    activeOnly: params['activeOnly'],
+                  ),
+        ),
+        'get': _i1.MethodConnector(
+          name: 'get',
+          params: {
+            'recurringTransactionId': _i1.ParameterDescription(
+              name: 'recurringTransactionId',
+              type: _i1.getType<_i1.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call: (_i1.Session session, Map<String, dynamic> params) async =>
+              (endpoints['recurringTransaction']
+                      as _i12.RecurringTransactionEndpoint)
+                  .get(session, params['recurringTransactionId']),
+        ),
+        'update': _i1.MethodConnector(
+          name: 'update',
+          params: {
+            'recurringTransactionId': _i1.ParameterDescription(
+              name: 'recurringTransactionId',
+              type: _i1.getType<_i1.UuidValue>(),
+              nullable: false,
+            ),
+            'description': _i1.ParameterDescription(
+              name: 'description',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'amountCents': _i1.ParameterDescription(
+              name: 'amountCents',
+              type: _i1.getType<int?>(),
+              nullable: true,
+            ),
+            'envelopeId': _i1.ParameterDescription(
+              name: 'envelopeId',
+              type: _i1.getType<_i1.UuidValue?>(),
+              nullable: true,
+            ),
+            'accountId': _i1.ParameterDescription(
+              name: 'accountId',
+              type: _i1.getType<_i1.UuidValue?>(),
+              nullable: true,
+            ),
+            'payeeId': _i1.ParameterDescription(
+              name: 'payeeId',
+              type: _i1.getType<_i1.UuidValue?>(),
+              nullable: true,
+            ),
+            'frequency': _i1.ParameterDescription(
+              name: 'frequency',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'nextOccurrence': _i1.ParameterDescription(
+              name: 'nextOccurrence',
+              type: _i1.getType<DateTime?>(),
+              nullable: true,
+            ),
+            'endDate': _i1.ParameterDescription(
+              name: 'endDate',
+              type: _i1.getType<DateTime?>(),
+              nullable: true,
+            ),
+            'isActive': _i1.ParameterDescription(
+              name: 'isActive',
+              type: _i1.getType<bool?>(),
+              nullable: true,
+            ),
+          },
+          call: (_i1.Session session, Map<String, dynamic> params) async =>
+              (endpoints['recurringTransaction']
+                      as _i12.RecurringTransactionEndpoint)
+                  .update(
+                    session,
+                    params['recurringTransactionId'],
+                    description: params['description'],
+                    amountCents: params['amountCents'],
+                    envelopeId: params['envelopeId'],
+                    accountId: params['accountId'],
+                    payeeId: params['payeeId'],
+                    frequency: params['frequency'],
+                    nextOccurrence: params['nextOccurrence'],
+                    endDate: params['endDate'],
+                    isActive: params['isActive'],
+                  ),
+        ),
+        'delete': _i1.MethodConnector(
+          name: 'delete',
+          params: {
+            'recurringTransactionId': _i1.ParameterDescription(
+              name: 'recurringTransactionId',
+              type: _i1.getType<_i1.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call: (_i1.Session session, Map<String, dynamic> params) async =>
+              (endpoints['recurringTransaction']
+                      as _i12.RecurringTransactionEndpoint)
+                  .delete(session, params['recurringTransactionId']),
+        ),
+      },
+    );
     connectors['transaction'] = _i1.EndpointConnector(
       name: 'transaction',
       endpoint: endpoints['transaction']!,
@@ -1076,7 +1278,7 @@ class Endpoints extends _i1.EndpointDispatch {
             ),
           },
           call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['transaction'] as _i12.TransactionEndpoint).create(
+              (endpoints['transaction'] as _i13.TransactionEndpoint).create(
                 session,
                 params['description'],
                 params['amountCents'],
@@ -1097,7 +1299,7 @@ class Endpoints extends _i1.EndpointDispatch {
             ),
           },
           call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['transaction'] as _i12.TransactionEndpoint).list(
+              (endpoints['transaction'] as _i13.TransactionEndpoint).list(
                 session,
                 params['budgetId'],
               ),
@@ -1122,7 +1324,7 @@ class Endpoints extends _i1.EndpointDispatch {
             ),
           },
           call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['transaction'] as _i12.TransactionEndpoint)
+              (endpoints['transaction'] as _i13.TransactionEndpoint)
                   .listByMonth(
                     session,
                     params['budgetId'],
@@ -1140,7 +1342,7 @@ class Endpoints extends _i1.EndpointDispatch {
             ),
           },
           call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['transaction'] as _i12.TransactionEndpoint).get(
+              (endpoints['transaction'] as _i13.TransactionEndpoint).get(
                 session,
                 params['transactionId'],
               ),
@@ -1180,7 +1382,7 @@ class Endpoints extends _i1.EndpointDispatch {
             ),
           },
           call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['transaction'] as _i12.TransactionEndpoint).update(
+              (endpoints['transaction'] as _i13.TransactionEndpoint).update(
                 session,
                 params['transactionId'],
                 description: params['description'],
@@ -1230,7 +1432,7 @@ class Endpoints extends _i1.EndpointDispatch {
             ),
           },
           call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['transaction'] as _i12.TransactionEndpoint).transfer(
+              (endpoints['transaction'] as _i13.TransactionEndpoint).transfer(
                 session,
                 params['description'],
                 params['amountCents'],
@@ -1256,7 +1458,7 @@ class Endpoints extends _i1.EndpointDispatch {
             ),
           },
           call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['transaction'] as _i12.TransactionEndpoint)
+              (endpoints['transaction'] as _i13.TransactionEndpoint)
                   .listByAccount(
                     session,
                     params['accountId'],
@@ -1273,7 +1475,7 @@ class Endpoints extends _i1.EndpointDispatch {
             ),
           },
           call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['transaction'] as _i12.TransactionEndpoint)
+              (endpoints['transaction'] as _i13.TransactionEndpoint)
                   .toggleCleared(session, params['transactionId']),
         ),
         'reconcileAccount': _i1.MethodConnector(
@@ -1291,7 +1493,7 @@ class Endpoints extends _i1.EndpointDispatch {
             ),
           },
           call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['transaction'] as _i12.TransactionEndpoint)
+              (endpoints['transaction'] as _i13.TransactionEndpoint)
                   .reconcileAccount(
                     session,
                     params['accountId'],
@@ -1308,16 +1510,16 @@ class Endpoints extends _i1.EndpointDispatch {
             ),
           },
           call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['transaction'] as _i12.TransactionEndpoint).delete(
+              (endpoints['transaction'] as _i13.TransactionEndpoint).delete(
                 session,
                 params['transactionId'],
               ),
         ),
       },
     );
-    modules['serverpod_auth_idp'] = _i13.Endpoints()
+    modules['serverpod_auth_idp'] = _i14.Endpoints()
       ..initializeEndpoints(server);
-    modules['serverpod_auth_core'] = _i14.Endpoints()
+    modules['serverpod_auth_core'] = _i15.Endpoints()
       ..initializeEndpoints(server);
   }
 }

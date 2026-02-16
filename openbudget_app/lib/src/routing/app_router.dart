@@ -11,6 +11,7 @@ import 'package:openbudget_app/src/features/budget/screens/budget_detail_screen.
 import 'package:openbudget_app/src/features/budget/screens/create_budget_screen.dart';
 import 'package:openbudget_app/src/features/home/screens/home_screen.dart';
 import 'package:openbudget_app/src/features/payees/screens/payee_list_screen.dart';
+import 'package:openbudget_app/src/features/recurring/screens/recurring_list_screen.dart';
 import 'package:openbudget_app/src/features/reports/screens/reports_screen.dart';
 import 'package:openbudget_app/src/features/transactions/screens/add_expense_screen.dart';
 import 'package:openbudget_app/src/features/transactions/screens/add_income_screen.dart';
@@ -140,6 +141,14 @@ GoRouter appRouter(Ref ref) {
         builder: (context, state) {
           final id = state.pathParameters['id']!;
           return ReportsScreen(budgetId: id);
+        },
+      ),
+      GoRoute(
+        name: recurringListRoute,
+        path: recurringListPath,
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return RecurringListScreen(budgetId: id);
         },
       ),
     ],
