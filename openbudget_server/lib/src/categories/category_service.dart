@@ -61,12 +61,14 @@ class CategoryService {
     required UuidValue categoryId,
     String? name,
     int? sortOrder,
+    bool? isHidden,
   }) async {
     final category = await getById(session, categoryId: categoryId);
 
     final updated = category.copyWith(
       name: name ?? category.name,
       sortOrder: sortOrder ?? category.sortOrder,
+      isHidden: isHidden ?? category.isHidden,
     );
     return Category.db.updateRow(session, updated);
   }

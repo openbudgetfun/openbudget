@@ -698,6 +698,11 @@ class Endpoints extends _i1.EndpointDispatch {
               type: _i1.getType<int?>(),
               nullable: true,
             ),
+            'isHidden': _i1.ParameterDescription(
+              name: 'isHidden',
+              type: _i1.getType<bool?>(),
+              nullable: true,
+            ),
           },
           call: (_i1.Session session, Map<String, dynamic> params) async =>
               (endpoints['category'] as _i8.CategoryEndpoint).update(
@@ -705,6 +710,7 @@ class Endpoints extends _i1.EndpointDispatch {
                 params['categoryId'],
                 name: params['name'],
                 sortOrder: params['sortOrder'],
+                isHidden: params['isHidden'],
               ),
         ),
         'reorder': _i1.MethodConnector(
@@ -926,6 +932,11 @@ class Endpoints extends _i1.EndpointDispatch {
               type: _i1.getType<String?>(),
               nullable: true,
             ),
+            'isHidden': _i1.ParameterDescription(
+              name: 'isHidden',
+              type: _i1.getType<bool?>(),
+              nullable: true,
+            ),
           },
           call: (_i1.Session session, Map<String, dynamic> params) async =>
               (endpoints['envelope'] as _i10.EnvelopeEndpoint).update(
@@ -935,6 +946,7 @@ class Endpoints extends _i1.EndpointDispatch {
                 budgetedAmountCents: params['budgetedAmountCents'],
                 spentAmountCents: params['spentAmountCents'],
                 note: params['note'],
+                isHidden: params['isHidden'],
               ),
         ),
         'reorder': _i1.MethodConnector(

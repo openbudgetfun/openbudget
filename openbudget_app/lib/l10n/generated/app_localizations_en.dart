@@ -262,7 +262,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get budgetEnvelopeNameLabel => 'Envelope Name';
 
   @override
+  String budgetHiddenCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count hidden',
+      one: '1 hidden',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get budgetGoToToday => 'Back to Today';
+
+  @override
+  String get budgetHideCategory => 'Hide Category';
+
+  @override
+  String get budgetHideEnvelope => 'Hide Envelope';
+
+  @override
+  String get budgetHiddenLabel => 'Hidden';
 
   @override
   String get budgetLoadError => 'Could not load budget details';
@@ -327,6 +347,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get budgetReorderSuccess => 'Categories reordered';
 
   @override
+  String get budgetShowHidden => 'Show Hidden';
+
+  @override
   String get budgetSearchHint => 'Search envelopes...';
 
   @override
@@ -342,6 +365,12 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get budgetUnhideCategory => 'Unhide Category';
+
+  @override
+  String get budgetUnhideEnvelope => 'Unhide Envelope';
 
   @override
   String get budgetViewAccounts => 'Accounts';

@@ -1202,6 +1202,7 @@ class _CategoryEndpoint {
     _i2.UuidValue categoryId, {
     String? name,
     int? sortOrder,
+    bool? isHidden,
   }) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
@@ -1218,6 +1219,7 @@ class _CategoryEndpoint {
             'categoryId': categoryId,
             'name': name,
             'sortOrder': sortOrder,
+            'isHidden': isHidden,
           }),
           serializationManager: _serializationManager,
         );
@@ -1558,6 +1560,7 @@ class _EnvelopeEndpoint {
     int? budgetedAmountCents,
     int? spentAmountCents,
     String? note,
+    bool? isHidden,
   }) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
@@ -1576,6 +1579,7 @@ class _EnvelopeEndpoint {
             'budgetedAmountCents': budgetedAmountCents,
             'spentAmountCents': spentAmountCents,
             'note': note,
+            'isHidden': isHidden,
           }),
           serializationManager: _serializationManager,
         );

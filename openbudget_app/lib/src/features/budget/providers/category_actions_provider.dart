@@ -77,6 +77,34 @@ class CategoryActions extends _$CategoryActions {
     }
   }
 
+  Future<void> toggleHidden({
+    required String categoryId,
+    required String budgetId,
+    required bool isHidden,
+  }) async {
+    state = const AsyncValue.loading();
+    final client = ref.read(serverpodClientProvider);
+    try {
+      await client.category.update(
+        // Serverpod API requires UuidValue which is experimental in uuid package.
+        // ignore: experimental_member_use
+        UuidValue.fromString(categoryId),
+        isHidden: isHidden,
+      );
+      if (ref.mounted) {
+        ref
+          ..invalidate(categoryListProvider(budgetId))
+          ..invalidate(budgetSummaryProvider(budgetId))
+          ..invalidate(budgetMonthlySummaryProvider(budgetId));
+        state = const AsyncValue.data(null);
+      }
+    } on Exception catch (e, st) {
+      if (ref.mounted) {
+        state = AsyncValue.error(e, st);
+      }
+    }
+  }
+
   Future<Category> updateCategory({
     required String categoryId,
     required String budgetId,

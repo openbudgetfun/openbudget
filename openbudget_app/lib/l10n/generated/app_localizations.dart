@@ -532,11 +532,35 @@ abstract class AppLocalizations {
   /// **'Envelope Name'**
   String get budgetEnvelopeNameLabel;
 
+  /// No description provided for @budgetHiddenCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 hidden} other{{count} hidden}}'**
+  String budgetHiddenCount(int count);
+
   /// No description provided for @budgetGoToToday.
   ///
   /// In en, this message translates to:
   /// **'Back to Today'**
   String get budgetGoToToday;
+
+  /// No description provided for @budgetHideCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide Category'**
+  String get budgetHideCategory;
+
+  /// No description provided for @budgetHideEnvelope.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide Envelope'**
+  String get budgetHideEnvelope;
+
+  /// No description provided for @budgetHiddenLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Hidden'**
+  String get budgetHiddenLabel;
 
   /// No description provided for @budgetLoadError.
   ///
@@ -658,6 +682,12 @@ abstract class AppLocalizations {
   /// **'Categories reordered'**
   String get budgetReorderSuccess;
 
+  /// No description provided for @budgetShowHidden.
+  ///
+  /// In en, this message translates to:
+  /// **'Show Hidden'**
+  String get budgetShowHidden;
+
   /// No description provided for @budgetSearchHint.
   ///
   /// In en, this message translates to:
@@ -675,6 +705,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 match} other{{count} matches}}'**
   String budgetSearchResultCount(int count);
+
+  /// No description provided for @budgetUnhideCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Unhide Category'**
+  String get budgetUnhideCategory;
+
+  /// No description provided for @budgetUnhideEnvelope.
+  ///
+  /// In en, this message translates to:
+  /// **'Unhide Envelope'**
+  String get budgetUnhideEnvelope;
 
   /// No description provided for @budgetViewAccounts.
   ///
