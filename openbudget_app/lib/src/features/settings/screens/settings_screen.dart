@@ -70,6 +70,15 @@ class SettingsScreen extends HookConsumerWidget {
                       context,
                     ).pushNamed('/budgets/$budgetId/recurring'),
                   ),
+                  const Divider(height: 1),
+                  ListTile(
+                    leading: const Icon(Icons.rule_rounded),
+                    title: Text(l10n.transactionRulesTitle),
+                    trailing: const Icon(Icons.chevron_right_rounded),
+                    onTap: () => Navigator.of(
+                      context,
+                    ).pushNamed('/budgets/$budgetId/rules'),
+                  ),
                 ],
               ),
             ),

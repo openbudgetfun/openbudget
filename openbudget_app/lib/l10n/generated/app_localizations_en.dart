@@ -1448,5 +1448,51 @@ class AppLocalizationsEn extends AppLocalizations {
   String get transferTitle => 'Transfer';
 
   @override
+  String get transactionRulesTitle => 'Transaction Rules';
+
+  @override
+  String get transactionRulesEmptyTitle => 'No Rules Yet';
+
+  @override
+  String get transactionRulesEmptySubtitle =>
+      'Create rules to auto-assign envelopes when you select a payee';
+
+  @override
+  String get transactionRulesLoadError => 'Could not load transaction rules';
+
+  @override
+  String get transactionRulesAddButton => 'Add Rule';
+
+  @override
+  String get transactionRulesPayeeLabel => 'When payee is';
+
+  @override
+  String get transactionRulesEnvelopeLabel => 'Assign to envelope';
+
+  @override
+  String get transactionRulesCreateError =>
+      'Could not create rule. Please try again.';
+
+  @override
+  String get transactionRulesCreateSuccess => 'Rule created';
+
+  @override
+  String get transactionRulesDeleteError =>
+      'Could not delete rule. Please try again.';
+
+  @override
+  String get transactionRulesDeleteSuccess => 'Rule deleted';
+
+  @override
+  String get transactionRulesToggleError =>
+      'Could not update rule. Please try again.';
+
+  @override
+  String get transactionRulesDisabled => 'Disabled';
+
+  @override
+  String get transactionRulesAutoAssigned => 'Auto-assigned by rule';
+
+  @override
   String get transferToAccount => 'To Account';
 }
