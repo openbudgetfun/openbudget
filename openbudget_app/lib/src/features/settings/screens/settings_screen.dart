@@ -5,6 +5,7 @@ import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/auth/providers/auth_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
 import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
+import 'package:openbudget_app/src/providers/theme_mode_provider.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
@@ -70,6 +71,9 @@ class SettingsScreen extends HookConsumerWidget {
                 ],
               ),
             ),
+            const SizedBox(height: SpacingTokens.lg),
+            _SectionTitle(title: l10n.themeTitle),
+            const _ThemeSelector(),
             const SizedBox(height: SpacingTokens.lg),
             _SectionTitle(title: l10n.settingsAccountSection),
             Card(
@@ -195,6 +199,64 @@ class SettingsScreen extends HookConsumerWidget {
 
     if (confirmed != true) return;
     await ref.read(authProvider.notifier).logout();
+  }
+}
+
+class _ThemeSelector extends HookConsumerWidget {
+  const _ThemeSelector();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final currentMode = ref.watch(themeModeProvider);
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(SpacingTokens.md),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.palette_outlined),
+                const SizedBox(width: SpacingTokens.sm),
+                Text(
+                  l10n.themeTitle,
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+              ],
+            ),
+            const SizedBox(height: SpacingTokens.sm),
+            SizedBox(
+              width: double.infinity,
+              child: SegmentedButton<ThemeMode>(
+                segments: [
+                  ButtonSegment(
+                    value: ThemeMode.system,
+                    label: Text(l10n.themeSystem),
+                    icon: const Icon(Icons.brightness_auto_rounded),
+                  ),
+                  ButtonSegment(
+                    value: ThemeMode.light,
+                    label: Text(l10n.themeLight),
+                    icon: const Icon(Icons.light_mode_rounded),
+                  ),
+                  ButtonSegment(
+                    value: ThemeMode.dark,
+                    label: Text(l10n.themeDark),
+                    icon: const Icon(Icons.dark_mode_rounded),
+                  ),
+                ],
+                selected: {currentMode},
+                onSelectionChanged: (selected) => ref
+                    .read(themeModeProvider.notifier)
+                    .setThemeMode(selected.first),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
