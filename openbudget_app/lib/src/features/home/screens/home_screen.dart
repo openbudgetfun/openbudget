@@ -93,24 +93,30 @@ class HomeScreen extends HookConsumerWidget {
 
           return RefreshIndicator(
             onRefresh: () async => ref.invalidate(budgetListProvider),
-            child: ListView.builder(
+            child: ListView(
               padding: const EdgeInsets.all(SpacingTokens.md),
-              itemCount: budgetList.length,
-              itemBuilder: (context, index) {
-                final budget = budgetList[index];
-                return _BudgetCard(
-                  budgetId: budget.id?.toString() ?? '',
-                  budgetName: budget.name,
-                  currencyCode: budget.currencyCode,
-                  onTap: () => context.go('/budgets/${budget.id}'),
-                  onLongPress: () => _confirmDeleteBudget(
-                    context,
-                    ref,
-                    budget.id?.toString() ?? '',
-                    budget.name,
+              children: [
+                _NetWorthSummary(
+                  budgetIds: budgetList
+                      .map((b) => b.id?.toString() ?? '')
+                      .where((id) => id.isNotEmpty)
+                      .toList(),
+                ),
+                const SizedBox(height: SpacingTokens.md),
+                for (final budget in budgetList)
+                  _BudgetCard(
+                    budgetId: budget.id?.toString() ?? '',
+                    budgetName: budget.name,
+                    currencyCode: budget.currencyCode,
+                    onTap: () => context.go('/budgets/${budget.id}'),
+                    onLongPress: () => _confirmDeleteBudget(
+                      context,
+                      ref,
+                      budget.id?.toString() ?? '',
+                      budget.name,
+                    ),
                   ),
-                );
-              },
+              ],
             ),
           );
         },
@@ -293,6 +299,98 @@ class _BudgetCard extends HookConsumerWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _NetWorthSummary extends HookConsumerWidget {
+  const _NetWorthSummary({required this.budgetIds});
+
+  final List<String> budgetIds;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    var totalBalanceCents = 0;
+    var totalAccounts = 0;
+    var loaded = false;
+
+    for (final budgetId in budgetIds) {
+      final accountsAsync = ref.watch(accountListProvider(budgetId));
+      if (accountsAsync.hasValue) {
+        loaded = true;
+        final active = accountsAsync.value!.where((a) => !a.isClosed);
+        for (final account in active) {
+          totalBalanceCents += account.balanceCents;
+          totalAccounts++;
+        }
+      }
+    }
+
+    if (!loaded) return const SizedBox.shrink();
+
+    final isPositive = totalBalanceCents >= 0;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(SpacingTokens.md),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: isPositive
+              ? [
+                  ColorTokens.primary.withAlpha(15),
+                  ColorTokens.secondary.withAlpha(15),
+                ]
+              : [
+                  ColorTokens.error.withAlpha(15),
+                  ColorTokens.error.withAlpha(8),
+                ],
+        ),
+        borderRadius: BorderRadius.circular(RadiusTokens.md),
+        border: Border.all(
+          color: isPositive
+              ? ColorTokens.primary.withAlpha(40)
+              : ColorTokens.error.withAlpha(40),
+        ),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.account_balance_wallet_rounded,
+                size: 18,
+                color: colorScheme.onSurfaceVariant,
+              ),
+              const SizedBox(width: SpacingTokens.xs),
+              Text(
+                l10n.homeNetWorthLabel,
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const Spacer(),
+              Text(
+                l10n.homeNetWorthAccounts(totalAccounts),
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: SpacingTokens.xs),
+          Text(
+            formatCents(totalBalanceCents, CurrencyCode.usd),
+            style: theme.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: isPositive ? ColorTokens.secondary : ColorTokens.error,
+            ),
+          ),
+        ],
       ),
     );
   }

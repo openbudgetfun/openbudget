@@ -1198,6 +1198,18 @@ abstract class AppLocalizations {
   /// **'Sign Out'**
   String get homeLogout;
 
+  /// No description provided for @homeNetWorthLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Net Worth'**
+  String get homeNetWorthLabel;
+
+  /// No description provided for @homeNetWorthAccounts.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 account} other{{count} accounts}}'**
+  String homeNetWorthAccounts(int count);
+
   /// No description provided for @homeNoBudgets.
   ///
   /// In en, this message translates to:
