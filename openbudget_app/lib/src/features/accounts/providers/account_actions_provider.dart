@@ -25,6 +25,8 @@ class AccountActions extends _$AccountActions {
       accountType,
       balanceCents,
       currencyCode,
+      // Serverpod API requires UuidValue which is experimental in uuid package.
+      // ignore: experimental_member_use
       UuidValue.fromString(budgetId),
       onBudget: onBudget,
       sortOrder: sortOrder,
@@ -45,6 +47,8 @@ class AccountActions extends _$AccountActions {
   }) async {
     final client = ref.read(serverpodClientProvider);
     final account = await client.account.update(
+      // Serverpod API requires UuidValue which is experimental in uuid package.
+      // ignore: experimental_member_use
       UuidValue.fromString(accountId),
       name: name,
       accountType: accountType,
@@ -62,6 +66,8 @@ class AccountActions extends _$AccountActions {
     required String budgetId,
   }) async {
     final client = ref.read(serverpodClientProvider);
+    // Serverpod API requires UuidValue which is experimental in uuid package.
+    // ignore: experimental_member_use
     await client.account.delete(UuidValue.fromString(accountId));
     ref.invalidate(accountListProvider(budgetId));
   }
