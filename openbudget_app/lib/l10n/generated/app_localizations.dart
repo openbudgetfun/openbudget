@@ -2691,6 +2691,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'To Account'**
   String get transferToAccount;
+
+  /// No description provided for @undoAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get undoAction;
+
+  /// No description provided for @undoDeleteSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction restored'**
+  String get undoDeleteSuccess;
+
+  /// No description provided for @undoDeleteError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not restore transaction. Please try again.'**
+  String get undoDeleteError;
 }
 
 class _AppLocalizationsDelegate

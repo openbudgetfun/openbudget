@@ -624,5 +624,8 @@
   "transactionRulesToggleError": "Could not update rule. Please try again.",
   "transactionRulesDisabled": "Disabled",
   "transactionRulesAutoAssigned": "Auto-assigned by rule",
-  "transferToAccount": "To Account"
+  "transferToAccount": "To Account",
+  "undoAction": "Undo",
+  "undoDeleteSuccess": "Transaction restored",
+  "undoDeleteError": "Could not restore transaction. Please try again."
 }

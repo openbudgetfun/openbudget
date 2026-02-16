@@ -786,16 +786,23 @@ class _TransactionTile extends HookConsumerWidget {
     ColorScheme colorScheme,
   ) async {
     try {
-      await ref
+      final deleted = await ref
           .read(transactionActionsProvider.notifier)
           .deleteTransaction(
             transactionId: transaction.id?.toString() ?? '',
             budgetId: budgetId,
           );
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(l10n.deleteSuccess)));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.deleteSuccess),
+            action: SnackBarAction(
+              label: l10n.undoAction,
+              onPressed: () => _undoDelete(context, ref, deleted, l10n),
+            ),
+            duration: const Duration(seconds: 5),
+          ),
+        );
       }
     } on Exception catch (_) {
       if (context.mounted) {
@@ -803,6 +810,36 @@ class _TransactionTile extends HookConsumerWidget {
           SnackBar(
             content: Text(l10n.deleteError),
             backgroundColor: colorScheme.error,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _undoDelete(
+    BuildContext context,
+    WidgetRef ref,
+    Transaction deleted,
+    AppLocalizations l10n,
+  ) async {
+    try {
+      await ref
+          .read(transactionActionsProvider.notifier)
+          .undoDeleteTransaction(
+            deletedTransaction: deleted,
+            budgetId: budgetId,
+          );
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.undoDeleteSuccess)));
+      }
+    } on Exception catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.undoDeleteError),
+            backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
       }

@@ -1556,4 +1556,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get transferToAccount => 'To Account';
+
+  @override
+  String get undoAction => 'Undo';
+
+  @override
+  String get undoDeleteSuccess => 'Transaction restored';
+
+  @override
+  String get undoDeleteError =>
+      'Could not restore transaction. Please try again.';
 }
