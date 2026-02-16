@@ -909,6 +909,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not update payee. Please try again.'**
   String get payeeEditError;
+
+  /// No description provided for @goalSetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set Goal'**
+  String get goalSetTitle;
+
+  /// No description provided for @goalTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal Type'**
+  String get goalTypeLabel;
+
+  /// No description provided for @goalTypeBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance'**
+  String get goalTypeBalance;
+
+  /// No description provided for @goalTypeByDate.
+  ///
+  /// In en, this message translates to:
+  /// **'By Date'**
+  String get goalTypeByDate;
+
+  /// No description provided for @goalTypeMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get goalTypeMonthly;
+
+  /// No description provided for @goalAmountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Target Amount'**
+  String get goalAmountLabel;
+
+  /// No description provided for @goalDateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Target Date'**
+  String get goalDateLabel;
+
+  /// No description provided for @goalDateSelect.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a date'**
+  String get goalDateSelect;
+
+  /// No description provided for @goalSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal saved'**
+  String get goalSaved;
+
+  /// No description provided for @goalRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal removed'**
+  String get goalRemoved;
+
+  /// No description provided for @goalRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove Goal'**
+  String get goalRemove;
+
+  /// No description provided for @goalError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save goal. Please try again.'**
+  String get goalError;
+
+  /// No description provided for @goalSetGoal.
+  ///
+  /// In en, this message translates to:
+  /// **'Set Goal'**
+  String get goalSetGoal;
 }
 
 class _AppLocalizationsDelegate

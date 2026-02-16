@@ -29,6 +29,11 @@ category:
   - get:
   - update:
   - delete:
+envelopeGoal:
+  - upsert:
+  - getForEnvelope:
+  - listForEnvelopes:
+  - delete:
 envelope:
   - create:
   - list:
