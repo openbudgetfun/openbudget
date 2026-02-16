@@ -15,72 +15,134 @@ class CreateBudgetScreen extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final nameController = useTextEditingController();
     final selectedCurrency = useState(CurrencyCode.usd);
+    final isSubmitting = useState(false);
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
-    // Watch to keep the auto-dispose provider alive while this screen is mounted.
     ref.watch(createBudgetProvider);
 
     return Scaffold(
+      appBar: AppBar(title: Text(l10n.createBudgetTitle)),
       body: Center(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(32),
+          padding: const EdgeInsets.all(SpacingTokens.xl),
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 400),
-            child: WiredCard(
-              height: 350,
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      l10n.createBudgetTitle,
-                      style: Theme.of(context).textTheme.headlineSmall,
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 32),
-                    WiredInput(
-                      controller: nameController,
-                      hintText: l10n.createBudgetNameLabel,
-                    ),
-                    const SizedBox(height: 16),
-                    WiredCombo(
-                      value: selectedCurrency.value.code,
-                      items: CurrencyCode.values
-                          .map(
-                            (c) => DropdownMenuItem(
-                              value: c.code,
-                              child: Padding(
-                                padding: const EdgeInsets.only(left: 5),
-                                child: Text('${c.symbol} ${c.displayName}'),
-                              ),
-                            ),
-                          )
-                          .toList(),
-                      onChanged: (value) {
-                        selectedCurrency.value = CurrencyCode.values.firstWhere(
-                          (c) => c.code == value,
-                        );
-                        return true;
-                      },
-                    ),
-                    const SizedBox(height: 24),
-                    WiredButton(
-                      onPressed: () async {
-                        final budgetId = await ref
-                            .read(createBudgetProvider.notifier)
-                            .create(
-                              name: nameController.text,
-                              currency: selectedCurrency.value,
-                            );
-                        if (context.mounted) {
-                          context.go('/budgets/$budgetId');
-                        }
-                      },
-                      child: Text(l10n.createBudgetButton),
-                    ),
-                  ],
+            child: Column(
+              children: [
+                Container(
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    color: colorScheme.secondaryContainer,
+                    borderRadius: BorderRadius.circular(RadiusTokens.lg),
+                  ),
+                  child: Icon(
+                    Icons.savings_rounded,
+                    size: 32,
+                    color: colorScheme.onSecondaryContainer,
+                  ),
                 ),
-              ),
+                const SizedBox(height: SpacingTokens.md),
+                Text(
+                  l10n.createBudgetTitle,
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: SpacingTokens.lg),
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(SpacingTokens.lg),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        TextField(
+                          controller: nameController,
+                          decoration: InputDecoration(
+                            labelText: l10n.createBudgetNameLabel,
+                            prefixIcon: const Icon(Icons.edit_outlined),
+                          ),
+                          textInputAction: TextInputAction.done,
+                        ),
+                        const SizedBox(height: SpacingTokens.md),
+                        DropdownButtonFormField<String>(
+                          initialValue: selectedCurrency.value.code,
+                          decoration: const InputDecoration(
+                            prefixIcon: Icon(Icons.currency_exchange),
+                          ),
+                          isExpanded: true,
+                          items: CurrencyCode.values
+                              .map(
+                                (c) => DropdownMenuItem(
+                                  value: c.code,
+                                  child: Text('${c.symbol} ${c.displayName}'),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (value) {
+                            selectedCurrency.value = CurrencyCode.values
+                                .firstWhere((c) => c.code == value);
+                          },
+                        ),
+                        const SizedBox(height: SpacingTokens.lg),
+                        FilledButton(
+                          onPressed: isSubmitting.value
+                              ? null
+                              : () async {
+                                  final name = nameController.text.trim();
+                                  if (name.isEmpty) return;
+
+                                  isSubmitting.value = true;
+                                  try {
+                                    final budgetId = await ref
+                                        .read(createBudgetProvider.notifier)
+                                        .create(
+                                          name: name,
+                                          currency: selectedCurrency.value,
+                                        );
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            l10n.createBudgetSuccess,
+                                          ),
+                                        ),
+                                      );
+                                      context.go('/budgets/$budgetId');
+                                    }
+                                  } on Exception catch (_) {
+                                    isSubmitting.value = false;
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text(l10n.createBudgetError),
+                                          backgroundColor: colorScheme.error,
+                                        ),
+                                      );
+                                    }
+                                  }
+                                },
+                          child: isSubmitting.value
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : Text(l10n.createBudgetButton),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),

@@ -1,6 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
+import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/category_actions_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/envelope_actions_provider.dart';
+import 'package:openbudget_app/src/features/budget/screens/add_category_dialog.dart';
+import 'package:openbudget_app/src/features/budget/screens/add_envelope_dialog.dart';
+import 'package:openbudget_app/src/features/budget/screens/edit_envelope_dialog.dart';
+import 'package:openbudget_app/src/features/budget/widgets/budget_header.dart';
+import 'package:openbudget_app/src/features/budget/widgets/category_group.dart';
+import 'package:openbudget_app/src/routing/route_names.dart';
+import 'package:openbudget_client/openbudget_client.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 class BudgetDetailScreen extends HookConsumerWidget {
@@ -11,48 +24,340 @@ class BudgetDetailScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
+    final summaryAsync = ref.watch(budgetSummaryProvider(budgetId));
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
-    return Scaffold(
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 500),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                WiredCard(
-                  height: 80,
-                  child: Center(
-                    child: Text(
-                      'Budget: $budgetId',
-                      style: Theme.of(context).textTheme.headlineSmall,
-                    ),
-                  ),
+    return summaryAsync.when(
+      loading: () => Scaffold(
+        appBar: AppBar(title: Text(l10n.appTitle)),
+        body: const Center(child: CircularProgressIndicator()),
+      ),
+      error: (error, _) => Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => context.go(homePath),
+          ),
+          title: Text(l10n.appTitle),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.error_outline_rounded,
+                size: 48,
+                color: colorScheme.error,
+              ),
+              const SizedBox(height: SpacingTokens.md),
+              Text(
+                l10n.budgetLoadError,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: colorScheme.error,
                 ),
-                const SizedBox(height: 48),
-                Text(
-                  l10n.budgetEmptyTitle,
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  l10n.budgetEmptySubtitle,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 24),
-                WiredButton(
-                  onPressed: () {
-                    // TODO(openbudget): Navigate to add category screen.
-                  },
-                  child: const Text('Add Category'),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
+      data: (summary) {
+        final currencyCode = CurrencyCode.values.firstWhere(
+          (c) => c.code == summary.budget.currencyCode,
+          orElse: () => CurrencyCode.usd,
+        );
+
+        return Scaffold(
+          appBar: AppBar(
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () => context.go(homePath),
+            ),
+            title: Text(summary.budget.name),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.receipt_long_rounded),
+                tooltip: l10n.transactionListTitle,
+                onPressed: () => context.go('/budgets/$budgetId/transactions'),
+              ),
+            ],
+          ),
+          body: RefreshIndicator(
+            onRefresh: () async {
+              ref
+                ..invalidate(budgetDetailProvider(budgetId))
+                ..invalidate(categoryListProvider(budgetId))
+                ..invalidate(transactionListProvider(budgetId))
+                ..invalidate(budgetSummaryProvider(budgetId));
+            },
+            child: ListView(
+              padding: const EdgeInsets.all(SpacingTokens.md),
+              children: [
+                BudgetHeader(
+                  readyToAssignCents: summary.readyToAssignCents,
+                  currencyCode: currencyCode,
+                ),
+                const SizedBox(height: SpacingTokens.md),
+                if (summary.categories.isEmpty)
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: SpacingTokens.xl,
+                      ),
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.category_rounded,
+                            size: 48,
+                            color: colorScheme.outlineVariant,
+                          ),
+                          const SizedBox(height: SpacingTokens.md),
+                          Text(
+                            l10n.budgetEmptyTitle,
+                            style: theme.textTheme.titleMedium,
+                          ),
+                          const SizedBox(height: SpacingTokens.sm),
+                          Text(
+                            l10n.budgetEmptySubtitle,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ...summary.categories.map(
+                  (catWithEnvelopes) => Padding(
+                    padding: const EdgeInsets.only(bottom: SpacingTokens.md),
+                    child: CategoryGroup(
+                      categoryWithEnvelopes: catWithEnvelopes,
+                      currencyCode: currencyCode,
+                      onAddEnvelope: () => _showAddEnvelopeDialog(
+                        context,
+                        catWithEnvelopes.category.id?.toString() ?? '',
+                        currencyCode,
+                      ),
+                      onDeleteCategory: () => _confirmDeleteCategory(
+                        context,
+                        ref,
+                        catWithEnvelopes.category.id?.toString() ?? '',
+                        catWithEnvelopes.category.name,
+                      ),
+                      onEditEnvelope: (envelope) => _showEditEnvelopeDialog(
+                        context,
+                        envelope,
+                        catWithEnvelopes.category.id?.toString() ?? '',
+                        currencyCode,
+                      ),
+                      onDeleteEnvelope: (envelope) => _confirmDeleteEnvelope(
+                        context,
+                        ref,
+                        envelope.id?.toString() ?? '',
+                        catWithEnvelopes.category.id?.toString() ?? '',
+                        envelope.name,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: SpacingTokens.sm),
+                Center(
+                  child: OutlinedButton.icon(
+                    onPressed: () => _showAddCategoryDialog(
+                      context,
+                      summary.categories.length,
+                    ),
+                    icon: const Icon(Icons.add),
+                    label: Text(l10n.budgetAddCategory),
+                  ),
+                ),
+                const SizedBox(height: SpacingTokens.xxl),
+              ],
+            ),
+          ),
+          bottomNavigationBar: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: SpacingTokens.md,
+                vertical: SpacingTokens.sm,
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: FilledButton.icon(
+                      onPressed: () =>
+                          context.go('/budgets/$budgetId/income/add'),
+                      icon: const Icon(Icons.arrow_downward_rounded),
+                      label: Text(l10n.budgetAddIncome),
+                    ),
+                  ),
+                  const SizedBox(width: SpacingTokens.sm),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () =>
+                          context.go('/budgets/$budgetId/expenses/add'),
+                      icon: const Icon(Icons.arrow_upward_rounded),
+                      label: Text(l10n.budgetAddExpense),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
+  }
+
+  void _showAddCategoryDialog(BuildContext context, int nextSortOrder) {
+    showDialog<void>(
+      context: context,
+      builder: (_) =>
+          AddCategoryDialog(budgetId: budgetId, nextSortOrder: nextSortOrder),
+    );
+  }
+
+  void _showAddEnvelopeDialog(
+    BuildContext context,
+    String categoryId,
+    CurrencyCode currencyCode,
+  ) {
+    showDialog<void>(
+      context: context,
+      builder: (_) => AddEnvelopeDialog(
+        categoryId: categoryId,
+        budgetId: budgetId,
+        currencyCode: currencyCode,
+      ),
+    );
+  }
+
+  void _showEditEnvelopeDialog(
+    BuildContext context,
+    Envelope envelope,
+    String categoryId,
+    CurrencyCode currencyCode,
+  ) {
+    showDialog<void>(
+      context: context,
+      builder: (_) => EditEnvelopeDialog(
+        envelope: envelope,
+        categoryId: categoryId,
+        budgetId: budgetId,
+        currencyCode: currencyCode,
+      ),
+    );
+  }
+
+  Future<void> _confirmDeleteCategory(
+    BuildContext context,
+    WidgetRef ref,
+    String categoryId,
+    String categoryName,
+  ) async {
+    final l10n = AppLocalizations.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.deleteConfirmTitle),
+        content: Text('${l10n.deleteConfirmMessage}\n\n"$categoryName"'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l10n.dialogCancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            style: FilledButton.styleFrom(
+              backgroundColor: colorScheme.error,
+              foregroundColor: colorScheme.onError,
+            ),
+            child: Text(l10n.deleteConfirmButton),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !context.mounted) return;
+
+    try {
+      await ref
+          .read(categoryActionsProvider.notifier)
+          .deleteCategory(categoryId: categoryId, budgetId: budgetId);
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.deleteSuccess)));
+      }
+    } on Exception catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.deleteError),
+            backgroundColor: colorScheme.error,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _confirmDeleteEnvelope(
+    BuildContext context,
+    WidgetRef ref,
+    String envelopeId,
+    String categoryId,
+    String envelopeName,
+  ) async {
+    final l10n = AppLocalizations.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.deleteConfirmTitle),
+        content: Text('${l10n.deleteConfirmMessage}\n\n"$envelopeName"'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l10n.dialogCancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            style: FilledButton.styleFrom(
+              backgroundColor: colorScheme.error,
+              foregroundColor: colorScheme.onError,
+            ),
+            child: Text(l10n.deleteConfirmButton),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !context.mounted) return;
+
+    try {
+      await ref
+          .read(envelopeActionsProvider.notifier)
+          .deleteEnvelope(
+            envelopeId: envelopeId,
+            categoryId: categoryId,
+            budgetId: budgetId,
+          );
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.deleteSuccess)));
+      }
+    } on Exception catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.deleteError),
+            backgroundColor: colorScheme.error,
+          ),
+        );
+      }
+    }
   }
 }

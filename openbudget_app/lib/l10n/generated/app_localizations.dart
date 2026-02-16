@@ -124,11 +124,155 @@ abstract class AppLocalizations {
   /// **'Sign In'**
   String get loginButton;
 
+  /// No description provided for @loginLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Signing In...'**
+  String get loginLoading;
+
   /// No description provided for @loginCreateAccount.
   ///
   /// In en, this message translates to:
   /// **'Create Account'**
   String get loginCreateAccount;
+
+  /// No description provided for @registerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Account'**
+  String get registerTitle;
+
+  /// No description provided for @registerStepEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email to get started'**
+  String get registerStepEmail;
+
+  /// No description provided for @registerStepCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the verification code sent to your email'**
+  String get registerStepCode;
+
+  /// No description provided for @registerStepPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a password for your account'**
+  String get registerStepPassword;
+
+  /// No description provided for @registerSendCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Verification Code'**
+  String get registerSendCode;
+
+  /// No description provided for @registerCodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification Code'**
+  String get registerCodeLabel;
+
+  /// No description provided for @registerVerifyCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify Code'**
+  String get registerVerifyCode;
+
+  /// No description provided for @registerConfirmPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Password'**
+  String get registerConfirmPassword;
+
+  /// No description provided for @registerCreateAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Account'**
+  String get registerCreateAccount;
+
+  /// No description provided for @registerSubmitting.
+  ///
+  /// In en, this message translates to:
+  /// **'Please wait...'**
+  String get registerSubmitting;
+
+  /// No description provided for @registerAlreadyHaveAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Already have an account? Sign In'**
+  String get registerAlreadyHaveAccount;
+
+  /// No description provided for @registerEmailRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your email address'**
+  String get registerEmailRequired;
+
+  /// No description provided for @registerEmailError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not start registration. Please try again.'**
+  String get registerEmailError;
+
+  /// No description provided for @registerCodeRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter the verification code'**
+  String get registerCodeRequired;
+
+  /// No description provided for @registerCodeError.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid verification code. Please try again.'**
+  String get registerCodeError;
+
+  /// No description provided for @registerPasswordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a password'**
+  String get registerPasswordRequired;
+
+  /// No description provided for @registerPasswordMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match'**
+  String get registerPasswordMismatch;
+
+  /// No description provided for @homeLogout.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign Out'**
+  String get homeLogout;
+
+  /// No description provided for @homeNoBudgets.
+  ///
+  /// In en, this message translates to:
+  /// **'No Budgets Yet'**
+  String get homeNoBudgets;
+
+  /// No description provided for @homeCreateBudget.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Your First Budget'**
+  String get homeCreateBudget;
+
+  /// No description provided for @homeLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load budgets'**
+  String get homeLoadError;
+
+  /// No description provided for @homeRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get homeRetry;
+
+  /// No description provided for @homeBudgetCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 budget} other{{count} budgets}}'**
+  String homeBudgetCount(int count);
 
   /// No description provided for @createBudgetTitle.
   ///
@@ -165,6 +309,264 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add your first envelope category to start budgeting'**
   String get budgetEmptySubtitle;
+
+  /// No description provided for @budgetReadyToAssign.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to Assign'**
+  String get budgetReadyToAssign;
+
+  /// No description provided for @budgetColumnBudgeted.
+  ///
+  /// In en, this message translates to:
+  /// **'Budgeted'**
+  String get budgetColumnBudgeted;
+
+  /// No description provided for @budgetColumnSpent.
+  ///
+  /// In en, this message translates to:
+  /// **'Spent'**
+  String get budgetColumnSpent;
+
+  /// No description provided for @budgetColumnAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Available'**
+  String get budgetColumnAvailable;
+
+  /// No description provided for @budgetAddCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Category'**
+  String get budgetAddCategory;
+
+  /// No description provided for @budgetAddEnvelope.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Envelope'**
+  String get budgetAddEnvelope;
+
+  /// No description provided for @budgetAddIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Income'**
+  String get budgetAddIncome;
+
+  /// No description provided for @budgetAddExpense.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Expense'**
+  String get budgetAddExpense;
+
+  /// No description provided for @budgetCategoryTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get budgetCategoryTotal;
+
+  /// No description provided for @budgetCategoryNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Category Name'**
+  String get budgetCategoryNameLabel;
+
+  /// No description provided for @budgetEnvelopeNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Envelope Name'**
+  String get budgetEnvelopeNameLabel;
+
+  /// No description provided for @budgetEnvelopeAmountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Budgeted Amount'**
+  String get budgetEnvelopeAmountLabel;
+
+  /// No description provided for @budgetLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load budget details'**
+  String get budgetLoadError;
+
+  /// No description provided for @dialogSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get dialogSave;
+
+  /// No description provided for @dialogSaving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving...'**
+  String get dialogSaving;
+
+  /// No description provided for @dialogCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get dialogCancel;
+
+  /// No description provided for @transactionAddIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Income'**
+  String get transactionAddIncome;
+
+  /// No description provided for @transactionAddExpense.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Expense'**
+  String get transactionAddExpense;
+
+  /// No description provided for @transactionDescriptionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get transactionDescriptionLabel;
+
+  /// No description provided for @transactionAmountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get transactionAmountLabel;
+
+  /// No description provided for @transactionSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Transaction'**
+  String get transactionSave;
+
+  /// No description provided for @transactionSubmitting.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving...'**
+  String get transactionSubmitting;
+
+  /// No description provided for @transactionUnassigned.
+  ///
+  /// In en, this message translates to:
+  /// **'Unassigned'**
+  String get transactionUnassigned;
+
+  /// No description provided for @transactionListTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Transactions'**
+  String get transactionListTitle;
+
+  /// No description provided for @transactionLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load transactions'**
+  String get transactionLoadError;
+
+  /// No description provided for @transactionEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No transactions yet'**
+  String get transactionEmpty;
+
+  /// No description provided for @createBudgetCreating.
+  ///
+  /// In en, this message translates to:
+  /// **'Creating...'**
+  String get createBudgetCreating;
+
+  /// No description provided for @createBudgetSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget created successfully'**
+  String get createBudgetSuccess;
+
+  /// No description provided for @createBudgetError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not create budget. Please try again.'**
+  String get createBudgetError;
+
+  /// No description provided for @budgetCategoryCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Category created'**
+  String get budgetCategoryCreated;
+
+  /// No description provided for @budgetEnvelopeCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Envelope created'**
+  String get budgetEnvelopeCreated;
+
+  /// No description provided for @budgetCategoryCreateError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not create category'**
+  String get budgetCategoryCreateError;
+
+  /// No description provided for @budgetEnvelopeCreateError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not create envelope'**
+  String get budgetEnvelopeCreateError;
+
+  /// No description provided for @transactionSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction saved'**
+  String get transactionSuccess;
+
+  /// No description provided for @transactionError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save transaction. Please try again.'**
+  String get transactionError;
+
+  /// No description provided for @deleteConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get deleteConfirmTitle;
+
+  /// No description provided for @deleteConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this?'**
+  String get deleteConfirmMessage;
+
+  /// No description provided for @deleteConfirmButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get deleteConfirmButton;
+
+  /// No description provided for @deleteSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted successfully'**
+  String get deleteSuccess;
+
+  /// No description provided for @deleteError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not delete. Please try again.'**
+  String get deleteError;
+
+  /// No description provided for @editEnvelopeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Envelope'**
+  String get editEnvelopeTitle;
+
+  /// No description provided for @editEnvelopeSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Envelope updated'**
+  String get editEnvelopeSaved;
+
+  /// No description provided for @editEnvelopeError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not update envelope'**
+  String get editEnvelopeError;
 }
 
 class _AppLocalizationsDelegate

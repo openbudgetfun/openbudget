@@ -12,6 +12,8 @@ resolution: workspace
 dependencies:
   flutter:
     sdk: flutter
+  flutter_hooks: ^0.21.0
+  google_fonts: ^8.0.1
   openbudget_core:
     path: ../openbudget_core
   openbudget_wired:

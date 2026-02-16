@@ -1,0 +1,103 @@
+import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/envelope_actions_provider.dart';
+import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
+import 'package:openbudget_client/openbudget_client.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+part 'transaction_actions_provider.g.dart';
+
+@Riverpod(keepAlive: true)
+class TransactionActions extends _$TransactionActions {
+  @override
+  AsyncValue<void> build() {
+    return const AsyncValue.data(null);
+  }
+
+  Future<Transaction> addIncome({
+    required String description,
+    required int amountCents,
+    required String currencyCode,
+    required String budgetId,
+    required DateTime date,
+  }) async {
+    state = const AsyncValue.loading();
+    final client = ref.read(serverpodClientProvider);
+    try {
+      final transaction = await client.transaction.create(
+        description,
+        amountCents.abs(),
+        currencyCode,
+        // Serverpod API requires UuidValue which is experimental in uuid package.
+        // ignore: experimental_member_use
+        UuidValue.fromString(budgetId),
+        date,
+      );
+      if (ref.mounted) {
+        ref
+          ..invalidate(transactionListProvider(budgetId))
+          ..invalidate(budgetSummaryProvider(budgetId));
+        state = const AsyncValue.data(null);
+      }
+      return transaction;
+    } on Exception catch (e, st) {
+      if (ref.mounted) {
+        state = AsyncValue.error(e, st);
+      }
+      rethrow;
+    }
+  }
+
+  Future<Transaction> addExpense({
+    required String description,
+    required int amountCents,
+    required String currencyCode,
+    required String budgetId,
+    required DateTime date,
+    String? envelopeId,
+    String? categoryId,
+  }) async {
+    state = const AsyncValue.loading();
+    final client = ref.read(serverpodClientProvider);
+    try {
+      final transaction = await client.transaction.create(
+        description,
+        -amountCents.abs(),
+        currencyCode,
+        // Serverpod API requires UuidValue which is experimental in uuid package.
+        // ignore: experimental_member_use
+        UuidValue.fromString(budgetId),
+        date,
+        envelopeId: envelopeId != null
+            // Serverpod API requires UuidValue which is experimental in uuid package.
+            // ignore: experimental_member_use
+            ? UuidValue.fromString(envelopeId)
+            : null,
+      );
+
+      if (envelopeId != null && categoryId != null && ref.mounted) {
+        await ref
+            .read(envelopeActionsProvider.notifier)
+            .updateEnvelope(
+              envelopeId: envelopeId,
+              categoryId: categoryId,
+              budgetId: budgetId,
+              spentAmountCents: amountCents.abs(),
+            );
+      }
+
+      if (ref.mounted) {
+        ref
+          ..invalidate(transactionListProvider(budgetId))
+          ..invalidate(budgetSummaryProvider(budgetId));
+        state = const AsyncValue.data(null);
+      }
+      return transaction;
+    } on Exception catch (e, st) {
+      if (ref.mounted) {
+        state = AsyncValue.error(e, st);
+      }
+      rethrow;
+    }
+  }
+}

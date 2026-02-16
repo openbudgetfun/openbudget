@@ -1,3 +1,8 @@
+/// Hand-drawn wired UI components for OpenBudget.
+///
+/// This library is deprecated and will be removed in a future release.
+/// Use Material 3 widgets from `openbudget_ui` instead.
+@Deprecated('Use Material 3 widgets from openbudget_ui instead')
 library;
 
 export 'src/canvas/wired_canvas.dart';

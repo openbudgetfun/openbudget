@@ -18,17 +18,15 @@ class WiredCard extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.transparent,
-      padding: EdgeInsets.zero,
-      margin: EdgeInsets.zero,
-      height: height,
-      child: Stack(
-        children: [
-          WiredCanvas(
+    final stack = Stack(
+      children: [
+        Positioned.fill(
+          child: WiredCanvas(
             painter: WiredRectangleBase(),
             fillerType: fill ? RoughFilter.hachureFiller : RoughFilter.noFiller,
           ),
+        ),
+        if (height != null)
           Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -40,9 +38,24 @@ class WiredCard extends HookWidget {
                 ),
               ),
             ],
+          )
+        else
+          Card(
+            color: Colors.transparent,
+            shadowColor: Colors.transparent,
+            child: child,
           ),
-        ],
-      ),
+      ],
+    );
+
+    final content = height != null ? stack : IntrinsicHeight(child: stack);
+
+    return Container(
+      color: Colors.transparent,
+      padding: EdgeInsets.zero,
+      margin: EdgeInsets.zero,
+      height: height,
+      child: content,
     );
   }
 }
