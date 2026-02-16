@@ -658,6 +658,24 @@ abstract class AppLocalizations {
   /// **'Categories reordered'**
   String get budgetReorderSuccess;
 
+  /// No description provided for @budgetSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search envelopes...'**
+  String get budgetSearchHint;
+
+  /// No description provided for @budgetSearchNoResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching envelopes'**
+  String get budgetSearchNoResults;
+
+  /// No description provided for @budgetSearchResultCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 match} other{{count} matches}}'**
+  String budgetSearchResultCount(int count);
+
   /// No description provided for @budgetViewAccounts.
   ///
   /// In en, this message translates to:
@@ -825,6 +843,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No transactions this month'**
   String get envelopeNoActivity;
+
+  /// No description provided for @envelopeNoteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a note for this envelope (optional)'**
+  String get envelopeNoteHint;
+
+  /// No description provided for @envelopeNoteLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get envelopeNoteLabel;
 
   /// No description provided for @envelopeReorderHint.
   ///
