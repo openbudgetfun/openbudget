@@ -216,23 +216,11 @@ class TransactionListScreen extends HookConsumerWidget {
                   child: RefreshIndicator(
                     onRefresh: () async =>
                         ref.invalidate(transactionListProvider(budgetId)),
-                    child: ListView.builder(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: SpacingTokens.md,
-                      ),
-                      itemCount: filtered.length,
-                      itemBuilder: (context, index) {
-                        final tx = filtered[index];
-                        final isSplit = childParentIds.contains(
-                          tx.id?.toString(),
-                        );
-                        return _TransactionTile(
-                          transaction: tx,
-                          budgetId: budgetId,
-                          currencyCode: currency,
-                          isSplit: isSplit,
-                        );
-                      },
+                    child: _GroupedTransactionList(
+                      transactions: filtered,
+                      childParentIds: childParentIds,
+                      budgetId: budgetId,
+                      currencyCode: currency,
                     ),
                   ),
                 ),
@@ -431,17 +419,8 @@ class _TransactionTile extends HookConsumerWidget {
               ],
             ],
           ),
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                _formatDate(transaction.transactionDate),
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
-              ),
-              if (transaction.memo != null && transaction.memo!.isNotEmpty)
-                Text(
+          subtitle: transaction.memo != null && transaction.memo!.isNotEmpty
+              ? Text(
                   transaction.memo!,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: colorScheme.onSurfaceVariant,
@@ -449,9 +428,8 @@ class _TransactionTile extends HookConsumerWidget {
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                ),
-            ],
-          ),
+                )
+              : null,
           trailing: Text(
             formatCents(transaction.amountCents, currencyCode),
             style: theme.textTheme.titleSmall?.copyWith(
@@ -555,8 +533,130 @@ class _TransactionTile extends HookConsumerWidget {
       ),
     );
   }
+}
 
-  String _formatDate(DateTime date) {
-    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+class _GroupedTransactionList extends HookWidget {
+  const _GroupedTransactionList({
+    required this.transactions,
+    required this.childParentIds,
+    required this.budgetId,
+    required this.currencyCode,
+  });
+
+  final List<Transaction> transactions;
+  final Set<String> childParentIds;
+  final String budgetId;
+  final CurrencyCode currencyCode;
+
+  @override
+  Widget build(BuildContext context) {
+    final groups = useMemoized(() {
+      final map = <String, List<Transaction>>{};
+      for (final tx in transactions) {
+        final key = _dateKey(tx.transactionDate);
+        (map[key] ??= []).add(tx);
+      }
+      return map;
+    }, [transactions]);
+
+    final dateKeys = groups.keys.toList();
+    final items = <_ListItem>[];
+
+    for (final key in dateKeys) {
+      final txList = groups[key]!;
+      items.add(_ListItem.header(date: txList.first.transactionDate));
+      for (final tx in txList) {
+        items.add(_ListItem.transaction(transaction: tx));
+      }
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(horizontal: SpacingTokens.md),
+      itemCount: items.length,
+      itemBuilder: (context, index) {
+        final item = items[index];
+        if (item.isHeader) {
+          return _DateHeader(date: item.date!);
+        }
+        final tx = item.transaction!;
+        final isSplit = childParentIds.contains(tx.id?.toString());
+        return _TransactionTile(
+          transaction: tx,
+          budgetId: budgetId,
+          currencyCode: currencyCode,
+          isSplit: isSplit,
+        );
+      },
+    );
+  }
+
+  String _dateKey(DateTime date) =>
+      '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+}
+
+class _ListItem {
+  _ListItem.header({required this.date}) : isHeader = true, transaction = null;
+
+  _ListItem.transaction({required this.transaction})
+    : isHeader = false,
+      date = null;
+
+  final bool isHeader;
+  final DateTime? date;
+  final Transaction? transaction;
+}
+
+class _DateHeader extends HookWidget {
+  const _DateHeader({required this.date});
+
+  final DateTime date;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final dateOnly = DateTime(date.year, date.month, date.day);
+    final difference = today.difference(dateOnly).inDays;
+
+    final label = switch (difference) {
+      0 => l10n.transactionDateToday,
+      1 => l10n.transactionDateYesterday,
+      _ => _formatFullDate(date, l10n),
+    };
+
+    return Padding(
+      padding: const EdgeInsets.only(
+        top: SpacingTokens.md,
+        bottom: SpacingTokens.xs,
+      ),
+      child: Text(
+        label,
+        style: theme.textTheme.labelLarge?.copyWith(
+          color: colorScheme.onSurfaceVariant,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+
+  String _formatFullDate(DateTime date, AppLocalizations l10n) {
+    final monthNames = [
+      l10n.budgetMonthJanuary,
+      l10n.budgetMonthFebruary,
+      l10n.budgetMonthMarch,
+      l10n.budgetMonthApril,
+      l10n.budgetMonthMay,
+      l10n.budgetMonthJune,
+      l10n.budgetMonthJuly,
+      l10n.budgetMonthAugust,
+      l10n.budgetMonthSeptember,
+      l10n.budgetMonthOctober,
+      l10n.budgetMonthNovember,
+      l10n.budgetMonthDecember,
+    ];
+    return '${monthNames[date.month - 1]} ${date.day}, ${date.year}';
   }
 }

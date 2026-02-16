@@ -1989,6 +1989,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Dark'**
   String get themeDark;
+
+  /// No description provided for @transactionDateToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get transactionDateToday;
+
+  /// No description provided for @transactionDateYesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get transactionDateYesterday;
 }
 
 class _AppLocalizationsDelegate
