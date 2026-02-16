@@ -1561,9 +1561,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get undoAction => 'Undo';
 
   @override
-  String get undoDeleteSuccess => 'Transaction restored';
+  String get undoDeleteSuccess => 'Restored successfully';
 
   @override
-  String get undoDeleteError =>
-      'Could not restore transaction. Please try again.';
+  String get undoDeleteError => 'Could not restore. Please try again.';
 }

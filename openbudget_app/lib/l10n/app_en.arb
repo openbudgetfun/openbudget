@@ -626,6 +626,6 @@
   "transactionRulesAutoAssigned": "Auto-assigned by rule",
   "transferToAccount": "To Account",
   "undoAction": "Undo",
-  "undoDeleteSuccess": "Transaction restored",
-  "undoDeleteError": "Could not restore transaction. Please try again."
+  "undoDeleteSuccess": "Restored successfully",
+  "undoDeleteError": "Could not restore. Please try again."
 }

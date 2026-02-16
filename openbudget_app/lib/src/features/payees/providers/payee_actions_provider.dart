@@ -94,7 +94,7 @@ class PayeeActions extends _$PayeeActions {
     }
   }
 
-  Future<void> deletePayee({
+  Future<Payee> deletePayee({
     required String payeeId,
     required String budgetId,
   }) async {
@@ -103,11 +103,43 @@ class PayeeActions extends _$PayeeActions {
     try {
       // Serverpod API requires UuidValue which is experimental in uuid package.
       // ignore: experimental_member_use
-      await client.payee.delete(UuidValue.fromString(payeeId));
+      final deleted = await client.payee.delete(
+        // Serverpod API requires UuidValue which is experimental in uuid package.
+        // ignore: experimental_member_use
+        UuidValue.fromString(payeeId),
+      );
       if (ref.mounted) {
         ref.invalidate(payeeListProvider(budgetId));
         state = const AsyncValue.data(null);
       }
+      return deleted;
+    } on Exception catch (e, st) {
+      if (ref.mounted) {
+        state = AsyncValue.error(e, st);
+      }
+      rethrow;
+    }
+  }
+
+  /// Recreates a previously deleted payee for undo support.
+  Future<Payee> undoDeletePayee({
+    required Payee deletedPayee,
+    required String budgetId,
+  }) async {
+    state = const AsyncValue.loading();
+    final client = ref.read(serverpodClientProvider);
+    try {
+      final restored = await client.payee.create(
+        deletedPayee.name,
+        // Serverpod API requires UuidValue which is experimental in uuid package.
+        // ignore: experimental_member_use
+        UuidValue.fromString(budgetId),
+      );
+      if (ref.mounted) {
+        ref.invalidate(payeeListProvider(budgetId));
+        state = const AsyncValue.data(null);
+      }
+      return restored;
     } on Exception catch (e, st) {
       if (ref.mounted) {
         state = AsyncValue.error(e, st);

@@ -2701,13 +2701,13 @@ abstract class AppLocalizations {
   /// No description provided for @undoDeleteSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Transaction restored'**
+  /// **'Restored successfully'**
   String get undoDeleteSuccess;
 
   /// No description provided for @undoDeleteError.
   ///
   /// In en, this message translates to:
-  /// **'Could not restore transaction. Please try again.'**
+  /// **'Could not restore. Please try again.'**
   String get undoDeleteError;
 }
 
