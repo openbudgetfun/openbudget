@@ -1060,6 +1060,12 @@ abstract class AppLocalizations {
   /// **'Activity'**
   String get envelopeActivityTitle;
 
+  /// No description provided for @envelopeCarryover.
+  ///
+  /// In en, this message translates to:
+  /// **'Carried over: {amount}'**
+  String envelopeCarryover(String amount);
+
   /// No description provided for @envelopeNoActivity.
   ///
   /// In en, this message translates to:

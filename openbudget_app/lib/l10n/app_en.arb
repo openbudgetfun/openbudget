@@ -360,6 +360,14 @@
   "editEnvelopeSaved": "Envelope updated",
   "editEnvelopeTitle": "Edit Envelope",
   "envelopeActivityTitle": "Activity",
+  "envelopeCarryover": "Carried over: {amount}",
+  "@envelopeCarryover": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "envelopeNoActivity": "No transactions this month",
   "envelopeNoteHint": "Add a note for this envelope (optional)",
   "envelopeNoteLabel": "Note",

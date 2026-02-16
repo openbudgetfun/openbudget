@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_goals_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
@@ -30,10 +31,12 @@ class EnvelopeRow extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final budgeted =
         monthlyData?.allocatedCents ?? envelope.budgetedAmountCents;
     final spent = monthlyData?.spentCents ?? envelope.spentAmountCents;
     final available = monthlyData?.availableCents ?? (budgeted - spent);
+    final carryover = monthlyData?.carryoverCents ?? 0;
     final availableColor = available > 0
         ? ColorTokens.secondary
         : available < 0
@@ -70,10 +73,36 @@ class EnvelopeRow extends HookConsumerWidget {
                   const SizedBox(width: SpacingTokens.xs),
                 Expanded(
                   flex: 4,
-                  child: Text(
-                    envelope.name,
-                    style: theme.textTheme.bodyMedium,
-                    overflow: TextOverflow.ellipsis,
+                  child: Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          envelope.name,
+                          style: theme.textTheme.bodyMedium,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (carryover != 0)
+                        Tooltip(
+                          message: l10n.envelopeCarryover(
+                            formatCents(carryover, currencyCode),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.only(
+                              left: SpacingTokens.xs,
+                            ),
+                            child: Icon(
+                              carryover > 0
+                                  ? Icons.arrow_forward_rounded
+                                  : Icons.arrow_back_rounded,
+                              size: 12,
+                              color: carryover > 0
+                                  ? ColorTokens.secondary
+                                  : ColorTokens.error,
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                 ),
                 Expanded(
