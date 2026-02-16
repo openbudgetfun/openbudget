@@ -1055,4 +1055,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsVersion => 'OpenBudget v1.0.0';
+
+  @override
+  String homeBudgetAccounts(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count accounts',
+      one: '1 account',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get homeBudgetTotalBalance => 'Total Balance';
 }

@@ -1923,6 +1923,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'OpenBudget v1.0.0'**
   String get settingsVersion;
+
+  /// No description provided for @homeBudgetAccounts.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 account} other{{count} accounts}}'**
+  String homeBudgetAccounts(int count);
+
+  /// No description provided for @homeBudgetTotalBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Balance'**
+  String get homeBudgetTotalBalance;
 }
 
 class _AppLocalizationsDelegate
