@@ -15,6 +15,7 @@ import 'package:openbudget_app/src/features/recurring/screens/recurring_list_scr
 import 'package:openbudget_app/src/features/reports/screens/reports_screen.dart';
 import 'package:openbudget_app/src/features/transactions/screens/add_expense_screen.dart';
 import 'package:openbudget_app/src/features/transactions/screens/add_income_screen.dart';
+import 'package:openbudget_app/src/features/transactions/screens/import_transactions_screen.dart';
 import 'package:openbudget_app/src/features/transactions/screens/split_expense_screen.dart';
 import 'package:openbudget_app/src/features/transactions/screens/transaction_list_screen.dart';
 import 'package:openbudget_app/src/features/transfers/screens/create_transfer_screen.dart';
@@ -158,6 +159,14 @@ GoRouter appRouter(Ref ref) {
         builder: (context, state) {
           final id = state.pathParameters['id']!;
           return SplitExpenseScreen(budgetId: id);
+        },
+      ),
+      GoRoute(
+        name: importTransactionsRoute,
+        path: importTransactionsPath,
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return ImportTransactionsScreen(budgetId: id);
         },
       ),
     ],

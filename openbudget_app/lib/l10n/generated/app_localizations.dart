@@ -1473,6 +1473,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Overspent: {amount}'**
   String budgetOverspentWarning(String amount);
+
+  /// No description provided for @importTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import Transactions'**
+  String get importTitle;
+
+  /// No description provided for @importInstructions.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste CSV data with columns for date, description, and amount. Headers are auto-detected.'**
+  String get importInstructions;
+
+  /// No description provided for @importCsvLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'CSV Data'**
+  String get importCsvLabel;
+
+  /// No description provided for @importCsvHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Date,Description,Amount\n2026-01-15,Grocery Store,-45.50\n2026-01-16,Paycheck,2500.00'**
+  String get importCsvHint;
+
+  /// No description provided for @importPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview'**
+  String get importPreview;
+
+  /// No description provided for @importPreviewCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 transaction to import} other{{count} transactions to import}}'**
+  String importPreviewCount(int count);
+
+  /// No description provided for @importButton.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Import 1 Transaction} other{Import {count} Transactions}}'**
+  String importButton(int count);
+
+  /// No description provided for @importImporting.
+  ///
+  /// In en, this message translates to:
+  /// **'Importing...'**
+  String get importImporting;
+
+  /// No description provided for @importSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 transaction imported} other{{count} transactions imported}}'**
+  String importSuccess(int count);
+
+  /// No description provided for @importError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not import transactions. Please try again.'**
+  String get importError;
+
+  /// No description provided for @importMoreRows.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{...and 1 more row} other{...and {count} more rows}}'**
+  String importMoreRows(int count);
 }
 
 class _AppLocalizationsDelegate

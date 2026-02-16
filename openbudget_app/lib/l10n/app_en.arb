@@ -271,5 +271,44 @@
         "type": "String"
       }
     }
+  },
+  "importTitle": "Import Transactions",
+  "importInstructions": "Paste CSV data with columns for date, description, and amount. Headers are auto-detected.",
+  "importCsvLabel": "CSV Data",
+  "importCsvHint": "Date,Description,Amount\n2026-01-15,Grocery Store,-45.50\n2026-01-16,Paycheck,2500.00",
+  "importPreview": "Preview",
+  "importPreviewCount": "{count, plural, =1{1 transaction to import} other{{count} transactions to import}}",
+  "@importPreviewCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importButton": "{count, plural, =1{Import 1 Transaction} other{Import {count} Transactions}}",
+  "@importButton": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importImporting": "Importing...",
+  "importSuccess": "{count, plural, =1{1 transaction imported} other{{count} transactions imported}}",
+  "@importSuccess": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importError": "Could not import transactions. Please try again.",
+  "importMoreRows": "{count, plural, =1{...and 1 more row} other{...and {count} more rows}}",
+  "@importMoreRows": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }

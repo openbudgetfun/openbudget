@@ -25,10 +25,12 @@ import '../recurring_transactions/recurring_transaction_endpoint.dart' as _i12;
 import '../transactions/transaction_endpoint.dart' as _i13;
 import 'package:openbudget_server/src/generated/transactions/split_item.dart'
     as _i14;
-import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
+import 'package:openbudget_server/src/generated/transactions/import_row.dart'
     as _i15;
-import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
+import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
     as _i16;
+import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
+    as _i17;
 
 class Endpoints extends _i1.EndpointDispatch {
   @override
@@ -1611,6 +1613,39 @@ class Endpoints extends _i1.EndpointDispatch {
                 params['parentTransactionId'],
               ),
         ),
+        'bulkImport': _i1.MethodConnector(
+          name: 'bulkImport',
+          params: {
+            'budgetId': _i1.ParameterDescription(
+              name: 'budgetId',
+              type: _i1.getType<_i1.UuidValue>(),
+              nullable: false,
+            ),
+            'currencyCode': _i1.ParameterDescription(
+              name: 'currencyCode',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'rows': _i1.ParameterDescription(
+              name: 'rows',
+              type: _i1.getType<List<_i15.ImportRow>>(),
+              nullable: false,
+            ),
+            'accountId': _i1.ParameterDescription(
+              name: 'accountId',
+              type: _i1.getType<_i1.UuidValue?>(),
+              nullable: true,
+            ),
+          },
+          call: (_i1.Session session, Map<String, dynamic> params) async =>
+              (endpoints['transaction'] as _i13.TransactionEndpoint).bulkImport(
+                session,
+                params['budgetId'],
+                params['currencyCode'],
+                params['rows'],
+                accountId: params['accountId'],
+              ),
+        ),
         'delete': _i1.MethodConnector(
           name: 'delete',
           params: {
@@ -1628,9 +1663,9 @@ class Endpoints extends _i1.EndpointDispatch {
         ),
       },
     );
-    modules['serverpod_auth_idp'] = _i15.Endpoints()
+    modules['serverpod_auth_idp'] = _i16.Endpoints()
       ..initializeEndpoints(server);
-    modules['serverpod_auth_core'] = _i16.Endpoints()
+    modules['serverpod_auth_core'] = _i17.Endpoints()
       ..initializeEndpoints(server);
   }
 }

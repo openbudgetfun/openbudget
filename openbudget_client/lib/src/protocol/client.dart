@@ -31,7 +31,9 @@ import 'package:openbudget_client/src/protocol/transactions/transaction.dart'
     as _i13;
 import 'package:openbudget_client/src/protocol/transactions/split_item.dart'
     as _i14;
-import 'protocol.dart' as _i15;
+import 'package:openbudget_client/src/protocol/transactions/import_row.dart'
+    as _i15;
+import 'protocol.dart' as _i16;
 
 /// API surface for account operations.
 ///
@@ -901,6 +903,21 @@ class EndpointTransaction extends _i1.EndpointRef {
     {'parentTransactionId': parentTransactionId},
   );
 
+  /// Bulk creates transactions from imported data.
+  ///
+  /// Returns the count of successfully created transactions.
+  _i2.Future<int> bulkImport(
+    _i1.UuidValue budgetId,
+    String currencyCode,
+    List<_i15.ImportRow> rows, {
+    _i1.UuidValue? accountId,
+  }) => caller.callServerEndpoint<int>('transaction', 'bulkImport', {
+    'budgetId': budgetId,
+    'currencyCode': currencyCode,
+    'rows': rows,
+    'accountId': accountId,
+  });
+
   /// Deletes a transaction by ID.
   _i2.Future<_i13.Transaction> delete(_i1.UuidValue transactionId) =>
       caller.callServerEndpoint<_i13.Transaction>('transaction', 'delete', {
@@ -934,7 +951,7 @@ class Client extends _i1.ServerpodClientShared {
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
          host,
-         _i15.Protocol(),
+         _i16.Protocol(),
          securityContext: securityContext,
          streamingConnectionTimeout: streamingConnectionTimeout,
          connectionTimeout: connectionTimeout,

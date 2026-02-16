@@ -24,25 +24,28 @@ import 'envelopes/envelope.dart' as _i9;
 import 'monthly_allocations/monthly_allocation.dart' as _i10;
 import 'payees/payee.dart' as _i11;
 import 'recurring_transactions/recurring_transaction.dart' as _i12;
-import 'transactions/split_item.dart' as _i13;
-import 'transactions/transaction.dart' as _i14;
-import 'package:openbudget_server/src/generated/accounts/account.dart' as _i15;
-import 'package:openbudget_server/src/generated/budgets/budget.dart' as _i16;
+import 'transactions/import_row.dart' as _i13;
+import 'transactions/split_item.dart' as _i14;
+import 'transactions/transaction.dart' as _i15;
+import 'package:openbudget_server/src/generated/accounts/account.dart' as _i16;
+import 'package:openbudget_server/src/generated/budgets/budget.dart' as _i17;
 import 'package:openbudget_server/src/generated/categories/category.dart'
-    as _i17;
-import 'package:openbudget_server/src/generated/envelope_goals/envelope_goal.dart'
     as _i18;
-import 'package:openbudget_server/src/generated/envelopes/envelope.dart'
+import 'package:openbudget_server/src/generated/envelope_goals/envelope_goal.dart'
     as _i19;
-import 'package:openbudget_server/src/generated/monthly_allocations/monthly_allocation.dart'
+import 'package:openbudget_server/src/generated/envelopes/envelope.dart'
     as _i20;
-import 'package:openbudget_server/src/generated/payees/payee.dart' as _i21;
+import 'package:openbudget_server/src/generated/monthly_allocations/monthly_allocation.dart'
+    as _i21;
+import 'package:openbudget_server/src/generated/payees/payee.dart' as _i22;
 import 'package:openbudget_server/src/generated/recurring_transactions/recurring_transaction.dart'
-    as _i22;
-import 'package:openbudget_server/src/generated/transactions/transaction.dart'
     as _i23;
-import 'package:openbudget_server/src/generated/transactions/split_item.dart'
+import 'package:openbudget_server/src/generated/transactions/transaction.dart'
     as _i24;
+import 'package:openbudget_server/src/generated/transactions/split_item.dart'
+    as _i25;
+import 'package:openbudget_server/src/generated/transactions/import_row.dart'
+    as _i26;
 export 'accounts/account.dart';
 export 'budgets/budget.dart';
 export 'categories/category.dart';
@@ -51,6 +54,7 @@ export 'envelopes/envelope.dart';
 export 'monthly_allocations/monthly_allocation.dart';
 export 'payees/payee.dart';
 export 'recurring_transactions/recurring_transaction.dart';
+export 'transactions/import_row.dart';
 export 'transactions/split_item.dart';
 export 'transactions/transaction.dart';
 
@@ -1247,11 +1251,14 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == _i12.RecurringTransaction) {
       return _i12.RecurringTransaction.fromJson(data) as T;
     }
-    if (t == _i13.SplitItem) {
-      return _i13.SplitItem.fromJson(data) as T;
+    if (t == _i13.ImportRow) {
+      return _i13.ImportRow.fromJson(data) as T;
     }
-    if (t == _i14.Transaction) {
-      return _i14.Transaction.fromJson(data) as T;
+    if (t == _i14.SplitItem) {
+      return _i14.SplitItem.fromJson(data) as T;
+    }
+    if (t == _i15.Transaction) {
+      return _i15.Transaction.fromJson(data) as T;
     }
     if (t == _i1.getType<_i5.Account?>()) {
       return (data != null ? _i5.Account.fromJson(data) : null) as T;
@@ -1278,27 +1285,30 @@ class Protocol extends _i1.SerializationManagerServer {
       return (data != null ? _i12.RecurringTransaction.fromJson(data) : null)
           as T;
     }
-    if (t == _i1.getType<_i13.SplitItem?>()) {
-      return (data != null ? _i13.SplitItem.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i13.ImportRow?>()) {
+      return (data != null ? _i13.ImportRow.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i14.Transaction?>()) {
-      return (data != null ? _i14.Transaction.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i14.SplitItem?>()) {
+      return (data != null ? _i14.SplitItem.fromJson(data) : null) as T;
     }
-    if (t == List<_i15.Account>) {
-      return (data as List).map((e) => deserialize<_i15.Account>(e)).toList()
+    if (t == _i1.getType<_i15.Transaction?>()) {
+      return (data != null ? _i15.Transaction.fromJson(data) : null) as T;
+    }
+    if (t == List<_i16.Account>) {
+      return (data as List).map((e) => deserialize<_i16.Account>(e)).toList()
           as T;
     }
-    if (t == List<_i16.Budget>) {
-      return (data as List).map((e) => deserialize<_i16.Budget>(e)).toList()
+    if (t == List<_i17.Budget>) {
+      return (data as List).map((e) => deserialize<_i17.Budget>(e)).toList()
           as T;
     }
-    if (t == List<_i17.Category>) {
-      return (data as List).map((e) => deserialize<_i17.Category>(e)).toList()
+    if (t == List<_i18.Category>) {
+      return (data as List).map((e) => deserialize<_i18.Category>(e)).toList()
           as T;
     }
-    if (t == List<_i18.EnvelopeGoal>) {
+    if (t == List<_i19.EnvelopeGoal>) {
       return (data as List)
-              .map((e) => deserialize<_i18.EnvelopeGoal>(e))
+              .map((e) => deserialize<_i19.EnvelopeGoal>(e))
               .toList()
           as T;
     }
@@ -1306,34 +1316,38 @@ class Protocol extends _i1.SerializationManagerServer {
       return (data as List).map((e) => deserialize<_i1.UuidValue>(e)).toList()
           as T;
     }
-    if (t == List<_i19.Envelope>) {
-      return (data as List).map((e) => deserialize<_i19.Envelope>(e)).toList()
+    if (t == List<_i20.Envelope>) {
+      return (data as List).map((e) => deserialize<_i20.Envelope>(e)).toList()
           as T;
     }
-    if (t == List<_i20.MonthlyAllocation>) {
+    if (t == List<_i21.MonthlyAllocation>) {
       return (data as List)
-              .map((e) => deserialize<_i20.MonthlyAllocation>(e))
+              .map((e) => deserialize<_i21.MonthlyAllocation>(e))
               .toList()
           as T;
     }
-    if (t == List<_i21.Payee>) {
-      return (data as List).map((e) => deserialize<_i21.Payee>(e)).toList()
+    if (t == List<_i22.Payee>) {
+      return (data as List).map((e) => deserialize<_i22.Payee>(e)).toList()
           as T;
     }
-    if (t == List<_i22.RecurringTransaction>) {
+    if (t == List<_i23.RecurringTransaction>) {
       return (data as List)
-              .map((e) => deserialize<_i22.RecurringTransaction>(e))
+              .map((e) => deserialize<_i23.RecurringTransaction>(e))
               .toList()
           as T;
     }
-    if (t == List<_i23.Transaction>) {
+    if (t == List<_i24.Transaction>) {
       return (data as List)
-              .map((e) => deserialize<_i23.Transaction>(e))
+              .map((e) => deserialize<_i24.Transaction>(e))
               .toList()
           as T;
     }
-    if (t == List<_i24.SplitItem>) {
-      return (data as List).map((e) => deserialize<_i24.SplitItem>(e)).toList()
+    if (t == List<_i25.SplitItem>) {
+      return (data as List).map((e) => deserialize<_i25.SplitItem>(e)).toList()
+          as T;
+    }
+    if (t == List<_i26.ImportRow>) {
+      return (data as List).map((e) => deserialize<_i26.ImportRow>(e)).toList()
           as T;
     }
     try {
@@ -1358,8 +1372,9 @@ class Protocol extends _i1.SerializationManagerServer {
       _i10.MonthlyAllocation => 'MonthlyAllocation',
       _i11.Payee => 'Payee',
       _i12.RecurringTransaction => 'RecurringTransaction',
-      _i13.SplitItem => 'SplitItem',
-      _i14.Transaction => 'Transaction',
+      _i13.ImportRow => 'ImportRow',
+      _i14.SplitItem => 'SplitItem',
+      _i15.Transaction => 'Transaction',
       _ => null,
     };
   }
@@ -1390,9 +1405,11 @@ class Protocol extends _i1.SerializationManagerServer {
         return 'Payee';
       case _i12.RecurringTransaction():
         return 'RecurringTransaction';
-      case _i13.SplitItem():
+      case _i13.ImportRow():
+        return 'ImportRow';
+      case _i14.SplitItem():
         return 'SplitItem';
-      case _i14.Transaction():
+      case _i15.Transaction():
         return 'Transaction';
     }
     className = _i2.Protocol().getClassNameForObject(data);
@@ -1440,11 +1457,14 @@ class Protocol extends _i1.SerializationManagerServer {
     if (dataClassName == 'RecurringTransaction') {
       return deserialize<_i12.RecurringTransaction>(data['data']);
     }
+    if (dataClassName == 'ImportRow') {
+      return deserialize<_i13.ImportRow>(data['data']);
+    }
     if (dataClassName == 'SplitItem') {
-      return deserialize<_i13.SplitItem>(data['data']);
+      return deserialize<_i14.SplitItem>(data['data']);
     }
     if (dataClassName == 'Transaction') {
-      return deserialize<_i14.Transaction>(data['data']);
+      return deserialize<_i15.Transaction>(data['data']);
     }
     if (dataClassName.startsWith('serverpod.')) {
       data['className'] = dataClassName.substring(10);
@@ -1498,8 +1518,8 @@ class Protocol extends _i1.SerializationManagerServer {
         return _i11.Payee.t;
       case _i12.RecurringTransaction:
         return _i12.RecurringTransaction.t;
-      case _i14.Transaction:
-        return _i14.Transaction.t;
+      case _i15.Transaction:
+        return _i15.Transaction.t;
     }
     return null;
   }

@@ -755,4 +755,71 @@ class AppLocalizationsEn extends AppLocalizations {
   String budgetOverspentWarning(String amount) {
     return 'Overspent: $amount';
   }
+
+  @override
+  String get importTitle => 'Import Transactions';
+
+  @override
+  String get importInstructions =>
+      'Paste CSV data with columns for date, description, and amount. Headers are auto-detected.';
+
+  @override
+  String get importCsvLabel => 'CSV Data';
+
+  @override
+  String get importCsvHint =>
+      'Date,Description,Amount\n2026-01-15,Grocery Store,-45.50\n2026-01-16,Paycheck,2500.00';
+
+  @override
+  String get importPreview => 'Preview';
+
+  @override
+  String importPreviewCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count transactions to import',
+      one: '1 transaction to import',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String importButton(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Import $count Transactions',
+      one: 'Import 1 Transaction',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get importImporting => 'Importing...';
+
+  @override
+  String importSuccess(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count transactions imported',
+      one: '1 transaction imported',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get importError => 'Could not import transactions. Please try again.';
+
+  @override
+  String importMoreRows(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '...and $count more rows',
+      one: '...and 1 more row',
+    );
+    return '$_temp0';
+  }
 }

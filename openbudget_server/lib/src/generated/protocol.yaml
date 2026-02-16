@@ -71,4 +71,5 @@ transaction:
   - ageOfMoney:
   - createSplit:
   - listSplits:
+  - bulkImport:
   - delete:
