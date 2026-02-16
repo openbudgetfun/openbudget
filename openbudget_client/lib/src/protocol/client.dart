@@ -17,23 +17,25 @@ import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart'
     as _i4;
 import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
     as _i5;
-import 'package:openbudget_client/src/protocol/budgets/budget.dart' as _i6;
-import 'package:openbudget_client/src/protocol/categories/category.dart' as _i7;
-import 'package:openbudget_client/src/protocol/envelope_goals/envelope_goal.dart'
-    as _i8;
-import 'package:openbudget_client/src/protocol/envelopes/envelope.dart' as _i9;
+import 'package:openbudget_client/src/protocol/budget_templates/budget_template.dart'
+    as _i6;
 import 'package:openbudget_client/src/protocol/monthly_allocations/monthly_allocation.dart'
+    as _i7;
+import 'package:openbudget_client/src/protocol/budgets/budget.dart' as _i8;
+import 'package:openbudget_client/src/protocol/categories/category.dart' as _i9;
+import 'package:openbudget_client/src/protocol/envelope_goals/envelope_goal.dart'
     as _i10;
-import 'package:openbudget_client/src/protocol/payees/payee.dart' as _i11;
+import 'package:openbudget_client/src/protocol/envelopes/envelope.dart' as _i11;
+import 'package:openbudget_client/src/protocol/payees/payee.dart' as _i12;
 import 'package:openbudget_client/src/protocol/recurring_transactions/recurring_transaction.dart'
-    as _i12;
-import 'package:openbudget_client/src/protocol/transactions/transaction.dart'
     as _i13;
-import 'package:openbudget_client/src/protocol/transactions/split_item.dart'
+import 'package:openbudget_client/src/protocol/transactions/transaction.dart'
     as _i14;
-import 'package:openbudget_client/src/protocol/transactions/import_row.dart'
+import 'package:openbudget_client/src/protocol/transactions/split_item.dart'
     as _i15;
-import 'protocol.dart' as _i16;
+import 'package:openbudget_client/src/protocol/transactions/import_row.dart'
+    as _i16;
+import 'protocol.dart' as _i17;
 
 /// API surface for account operations.
 ///
@@ -303,6 +305,62 @@ class EndpointJwtRefresh extends _i5.EndpointRefreshJwtTokens {
   );
 }
 
+/// API surface for budget template operations.
+///
+/// All methods require authentication.
+/// {@category Endpoint}
+class EndpointBudgetTemplate extends _i1.EndpointRef {
+  EndpointBudgetTemplate(_i1.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'budgetTemplate';
+
+  /// Saves a new template from the allocations of a given month.
+  _i2.Future<_i6.BudgetTemplate> saveFromMonth(
+    _i1.UuidValue budgetId,
+    String name,
+    int year,
+    int month,
+  ) => caller.callServerEndpoint<_i6.BudgetTemplate>(
+    'budgetTemplate',
+    'saveFromMonth',
+    {'budgetId': budgetId, 'name': name, 'year': year, 'month': month},
+  );
+
+  /// Lists all templates for a budget.
+  _i2.Future<List<_i6.BudgetTemplate>> list(_i1.UuidValue budgetId) =>
+      caller.callServerEndpoint<List<_i6.BudgetTemplate>>(
+        'budgetTemplate',
+        'list',
+        {'budgetId': budgetId},
+      );
+
+  /// Applies a template to a target month.
+  _i2.Future<List<_i7.MonthlyAllocation>> applyToMonth(
+    _i1.UuidValue templateId,
+    _i1.UuidValue budgetId,
+    int year,
+    int month,
+  ) => caller.callServerEndpoint<List<_i7.MonthlyAllocation>>(
+    'budgetTemplate',
+    'applyToMonth',
+    {
+      'templateId': templateId,
+      'budgetId': budgetId,
+      'year': year,
+      'month': month,
+    },
+  );
+
+  /// Deletes a template by ID.
+  _i2.Future<_i6.BudgetTemplate> delete(_i1.UuidValue templateId) =>
+      caller.callServerEndpoint<_i6.BudgetTemplate>(
+        'budgetTemplate',
+        'delete',
+        {'templateId': templateId},
+      );
+}
+
 /// API surface for budget operations.
 ///
 /// All methods require authentication.
@@ -314,34 +372,34 @@ class EndpointBudget extends _i1.EndpointRef {
   String get name => 'budget';
 
   /// Creates a new budget for the authenticated user.
-  _i2.Future<_i6.Budget> create(String name, String currencyCode) =>
-      caller.callServerEndpoint<_i6.Budget>('budget', 'create', {
+  _i2.Future<_i8.Budget> create(String name, String currencyCode) =>
+      caller.callServerEndpoint<_i8.Budget>('budget', 'create', {
         'name': name,
         'currencyCode': currencyCode,
       });
 
   /// Lists all budgets for the authenticated user.
-  _i2.Future<List<_i6.Budget>> list() =>
-      caller.callServerEndpoint<List<_i6.Budget>>('budget', 'list', {});
+  _i2.Future<List<_i8.Budget>> list() =>
+      caller.callServerEndpoint<List<_i8.Budget>>('budget', 'list', {});
 
   /// Gets a single budget by ID, verifying ownership.
-  _i2.Future<_i6.Budget> get(_i1.UuidValue budgetId) => caller
-      .callServerEndpoint<_i6.Budget>('budget', 'get', {'budgetId': budgetId});
+  _i2.Future<_i8.Budget> get(_i1.UuidValue budgetId) => caller
+      .callServerEndpoint<_i8.Budget>('budget', 'get', {'budgetId': budgetId});
 
   /// Updates a budget by ID, verifying ownership.
-  _i2.Future<_i6.Budget> update(
+  _i2.Future<_i8.Budget> update(
     _i1.UuidValue budgetId, {
     String? name,
     String? currencyCode,
-  }) => caller.callServerEndpoint<_i6.Budget>('budget', 'update', {
+  }) => caller.callServerEndpoint<_i8.Budget>('budget', 'update', {
     'budgetId': budgetId,
     'name': name,
     'currencyCode': currencyCode,
   });
 
   /// Deletes a budget by ID, verifying ownership.
-  _i2.Future<_i6.Budget> delete(_i1.UuidValue budgetId) =>
-      caller.callServerEndpoint<_i6.Budget>('budget', 'delete', {
+  _i2.Future<_i8.Budget> delete(_i1.UuidValue budgetId) =>
+      caller.callServerEndpoint<_i8.Budget>('budget', 'delete', {
         'budgetId': budgetId,
       });
 
@@ -367,9 +425,9 @@ class EndpointBudgetStream extends _i1.EndpointRef {
   /// Client sends [UuidValue] budget IDs, server responds with the current
   /// [Budget] state for each requested ID. Ownership is verified on each
   /// request.
-  _i2.Stream<_i6.Budget> budgetUpdates(
+  _i2.Stream<_i8.Budget> budgetUpdates(
     _i2.Stream<_i1.UuidValue> budgetIdStream,
-  ) => caller.callStreamingServerEndpoint<_i2.Stream<_i6.Budget>, _i6.Budget>(
+  ) => caller.callStreamingServerEndpoint<_i2.Stream<_i8.Budget>, _i8.Budget>(
     'budgetStream',
     'budgetUpdates',
     {},
@@ -388,34 +446,34 @@ class EndpointCategory extends _i1.EndpointRef {
   String get name => 'category';
 
   /// Creates a new category within a budget.
-  _i2.Future<_i7.Category> create(
+  _i2.Future<_i9.Category> create(
     String name,
     _i1.UuidValue budgetId,
     int sortOrder,
-  ) => caller.callServerEndpoint<_i7.Category>('category', 'create', {
+  ) => caller.callServerEndpoint<_i9.Category>('category', 'create', {
     'name': name,
     'budgetId': budgetId,
     'sortOrder': sortOrder,
   });
 
   /// Lists all categories for a budget.
-  _i2.Future<List<_i7.Category>> list(_i1.UuidValue budgetId) =>
-      caller.callServerEndpoint<List<_i7.Category>>('category', 'list', {
+  _i2.Future<List<_i9.Category>> list(_i1.UuidValue budgetId) =>
+      caller.callServerEndpoint<List<_i9.Category>>('category', 'list', {
         'budgetId': budgetId,
       });
 
   /// Gets a single category by ID.
-  _i2.Future<_i7.Category> get(_i1.UuidValue categoryId) =>
-      caller.callServerEndpoint<_i7.Category>('category', 'get', {
+  _i2.Future<_i9.Category> get(_i1.UuidValue categoryId) =>
+      caller.callServerEndpoint<_i9.Category>('category', 'get', {
         'categoryId': categoryId,
       });
 
   /// Updates a category by ID.
-  _i2.Future<_i7.Category> update(
+  _i2.Future<_i9.Category> update(
     _i1.UuidValue categoryId, {
     String? name,
     int? sortOrder,
-  }) => caller.callServerEndpoint<_i7.Category>('category', 'update', {
+  }) => caller.callServerEndpoint<_i9.Category>('category', 'update', {
     'categoryId': categoryId,
     'name': name,
     'sortOrder': sortOrder,
@@ -425,17 +483,17 @@ class EndpointCategory extends _i1.EndpointRef {
   ///
   /// The [categoryIds] list defines the new sort order: the first ID gets
   /// sort order 0, the second gets 1, etc.
-  _i2.Future<List<_i7.Category>> reorder(
+  _i2.Future<List<_i9.Category>> reorder(
     _i1.UuidValue budgetId,
     List<_i1.UuidValue> categoryIds,
-  ) => caller.callServerEndpoint<List<_i7.Category>>('category', 'reorder', {
+  ) => caller.callServerEndpoint<List<_i9.Category>>('category', 'reorder', {
     'budgetId': budgetId,
     'categoryIds': categoryIds,
   });
 
   /// Deletes a category by ID.
-  _i2.Future<_i7.Category> delete(_i1.UuidValue categoryId) =>
-      caller.callServerEndpoint<_i7.Category>('category', 'delete', {
+  _i2.Future<_i9.Category> delete(_i1.UuidValue categoryId) =>
+      caller.callServerEndpoint<_i9.Category>('category', 'delete', {
         'categoryId': categoryId,
       });
 }
@@ -451,13 +509,13 @@ class EndpointEnvelopeGoal extends _i1.EndpointRef {
   String get name => 'envelopeGoal';
 
   /// Creates or updates a goal for an envelope.
-  _i2.Future<_i8.EnvelopeGoal> upsert(
+  _i2.Future<_i10.EnvelopeGoal> upsert(
     _i1.UuidValue envelopeId,
     String goalType,
     int targetAmountCents, {
     DateTime? targetDate,
     int? monthlyFundingCents,
-  }) => caller.callServerEndpoint<_i8.EnvelopeGoal>('envelopeGoal', 'upsert', {
+  }) => caller.callServerEndpoint<_i10.EnvelopeGoal>('envelopeGoal', 'upsert', {
     'envelopeId': envelopeId,
     'goalType': goalType,
     'targetAmountCents': targetAmountCents,
@@ -466,25 +524,25 @@ class EndpointEnvelopeGoal extends _i1.EndpointRef {
   });
 
   /// Gets the goal for an envelope.
-  _i2.Future<_i8.EnvelopeGoal?> getForEnvelope(_i1.UuidValue envelopeId) =>
-      caller.callServerEndpoint<_i8.EnvelopeGoal?>(
+  _i2.Future<_i10.EnvelopeGoal?> getForEnvelope(_i1.UuidValue envelopeId) =>
+      caller.callServerEndpoint<_i10.EnvelopeGoal?>(
         'envelopeGoal',
         'getForEnvelope',
         {'envelopeId': envelopeId},
       );
 
   /// Lists all goals for a set of envelope IDs.
-  _i2.Future<List<_i8.EnvelopeGoal>> listForEnvelopes(
+  _i2.Future<List<_i10.EnvelopeGoal>> listForEnvelopes(
     List<_i1.UuidValue> envelopeIds,
-  ) => caller.callServerEndpoint<List<_i8.EnvelopeGoal>>(
+  ) => caller.callServerEndpoint<List<_i10.EnvelopeGoal>>(
     'envelopeGoal',
     'listForEnvelopes',
     {'envelopeIds': envelopeIds},
   );
 
   /// Deletes a goal by ID.
-  _i2.Future<_i8.EnvelopeGoal> delete(_i1.UuidValue goalId) =>
-      caller.callServerEndpoint<_i8.EnvelopeGoal>('envelopeGoal', 'delete', {
+  _i2.Future<_i10.EnvelopeGoal> delete(_i1.UuidValue goalId) =>
+      caller.callServerEndpoint<_i10.EnvelopeGoal>('envelopeGoal', 'delete', {
         'goalId': goalId,
       });
 }
@@ -500,12 +558,12 @@ class EndpointEnvelope extends _i1.EndpointRef {
   String get name => 'envelope';
 
   /// Creates a new envelope within a category.
-  _i2.Future<_i9.Envelope> create(
+  _i2.Future<_i11.Envelope> create(
     String name,
     _i1.UuidValue categoryId,
     int budgetedAmountCents,
     String currencyCode,
-  ) => caller.callServerEndpoint<_i9.Envelope>('envelope', 'create', {
+  ) => caller.callServerEndpoint<_i11.Envelope>('envelope', 'create', {
     'name': name,
     'categoryId': categoryId,
     'budgetedAmountCents': budgetedAmountCents,
@@ -513,24 +571,24 @@ class EndpointEnvelope extends _i1.EndpointRef {
   });
 
   /// Lists all envelopes for a category.
-  _i2.Future<List<_i9.Envelope>> list(_i1.UuidValue categoryId) =>
-      caller.callServerEndpoint<List<_i9.Envelope>>('envelope', 'list', {
+  _i2.Future<List<_i11.Envelope>> list(_i1.UuidValue categoryId) =>
+      caller.callServerEndpoint<List<_i11.Envelope>>('envelope', 'list', {
         'categoryId': categoryId,
       });
 
   /// Gets a single envelope by ID.
-  _i2.Future<_i9.Envelope> get(_i1.UuidValue envelopeId) =>
-      caller.callServerEndpoint<_i9.Envelope>('envelope', 'get', {
+  _i2.Future<_i11.Envelope> get(_i1.UuidValue envelopeId) =>
+      caller.callServerEndpoint<_i11.Envelope>('envelope', 'get', {
         'envelopeId': envelopeId,
       });
 
   /// Updates an envelope by ID.
-  _i2.Future<_i9.Envelope> update(
+  _i2.Future<_i11.Envelope> update(
     _i1.UuidValue envelopeId, {
     String? name,
     int? budgetedAmountCents,
     int? spentAmountCents,
-  }) => caller.callServerEndpoint<_i9.Envelope>('envelope', 'update', {
+  }) => caller.callServerEndpoint<_i11.Envelope>('envelope', 'update', {
     'envelopeId': envelopeId,
     'name': name,
     'budgetedAmountCents': budgetedAmountCents,
@@ -538,8 +596,8 @@ class EndpointEnvelope extends _i1.EndpointRef {
   });
 
   /// Deletes an envelope by ID.
-  _i2.Future<_i9.Envelope> delete(_i1.UuidValue envelopeId) =>
-      caller.callServerEndpoint<_i9.Envelope>('envelope', 'delete', {
+  _i2.Future<_i11.Envelope> delete(_i1.UuidValue envelopeId) =>
+      caller.callServerEndpoint<_i11.Envelope>('envelope', 'delete', {
         'envelopeId': envelopeId,
       });
 }
@@ -555,14 +613,14 @@ class EndpointMonthlyAllocation extends _i1.EndpointRef {
   String get name => 'monthlyAllocation';
 
   /// Creates or updates an allocation for an envelope in a given month.
-  _i2.Future<_i10.MonthlyAllocation> upsert(
+  _i2.Future<_i7.MonthlyAllocation> upsert(
     _i1.UuidValue envelopeId,
     _i1.UuidValue budgetId,
     int year,
     int month,
     int allocatedCents, {
     required int carryoverCents,
-  }) => caller.callServerEndpoint<_i10.MonthlyAllocation>(
+  }) => caller.callServerEndpoint<_i7.MonthlyAllocation>(
     'monthlyAllocation',
     'upsert',
     {
@@ -576,25 +634,25 @@ class EndpointMonthlyAllocation extends _i1.EndpointRef {
   );
 
   /// Lists all allocations for a budget in a given month.
-  _i2.Future<List<_i10.MonthlyAllocation>> list(
+  _i2.Future<List<_i7.MonthlyAllocation>> list(
     _i1.UuidValue budgetId,
     int year,
     int month,
-  ) => caller.callServerEndpoint<List<_i10.MonthlyAllocation>>(
+  ) => caller.callServerEndpoint<List<_i7.MonthlyAllocation>>(
     'monthlyAllocation',
     'list',
     {'budgetId': budgetId, 'year': year, 'month': month},
   );
 
   /// Moves money between two envelopes in the same budget and month.
-  _i2.Future<List<_i10.MonthlyAllocation>> moveMoney(
+  _i2.Future<List<_i7.MonthlyAllocation>> moveMoney(
     _i1.UuidValue fromEnvelopeId,
     _i1.UuidValue toEnvelopeId,
     _i1.UuidValue budgetId,
     int year,
     int month,
     int amountCents,
-  ) => caller.callServerEndpoint<List<_i10.MonthlyAllocation>>(
+  ) => caller.callServerEndpoint<List<_i7.MonthlyAllocation>>(
     'monthlyAllocation',
     'moveMoney',
     {
@@ -608,8 +666,8 @@ class EndpointMonthlyAllocation extends _i1.EndpointRef {
   );
 
   /// Deletes a monthly allocation by ID.
-  _i2.Future<_i10.MonthlyAllocation> delete(_i1.UuidValue allocationId) =>
-      caller.callServerEndpoint<_i10.MonthlyAllocation>(
+  _i2.Future<_i7.MonthlyAllocation> delete(_i1.UuidValue allocationId) =>
+      caller.callServerEndpoint<_i7.MonthlyAllocation>(
         'monthlyAllocation',
         'delete',
         {'allocationId': allocationId},
@@ -627,25 +685,25 @@ class EndpointPayee extends _i1.EndpointRef {
   String get name => 'payee';
 
   /// Creates a new payee within a budget.
-  _i2.Future<_i11.Payee> create(String name, _i1.UuidValue budgetId) =>
-      caller.callServerEndpoint<_i11.Payee>('payee', 'create', {
+  _i2.Future<_i12.Payee> create(String name, _i1.UuidValue budgetId) =>
+      caller.callServerEndpoint<_i12.Payee>('payee', 'create', {
         'name': name,
         'budgetId': budgetId,
       });
 
   /// Lists all payees for a budget.
-  _i2.Future<List<_i11.Payee>> list(_i1.UuidValue budgetId) =>
-      caller.callServerEndpoint<List<_i11.Payee>>('payee', 'list', {
+  _i2.Future<List<_i12.Payee>> list(_i1.UuidValue budgetId) =>
+      caller.callServerEndpoint<List<_i12.Payee>>('payee', 'list', {
         'budgetId': budgetId,
       });
 
   /// Gets a single payee by ID.
-  _i2.Future<_i11.Payee> get(_i1.UuidValue payeeId) => caller
-      .callServerEndpoint<_i11.Payee>('payee', 'get', {'payeeId': payeeId});
+  _i2.Future<_i12.Payee> get(_i1.UuidValue payeeId) => caller
+      .callServerEndpoint<_i12.Payee>('payee', 'get', {'payeeId': payeeId});
 
   /// Updates a payee by ID.
-  _i2.Future<_i11.Payee> update(_i1.UuidValue payeeId, {String? name}) =>
-      caller.callServerEndpoint<_i11.Payee>('payee', 'update', {
+  _i2.Future<_i12.Payee> update(_i1.UuidValue payeeId, {String? name}) =>
+      caller.callServerEndpoint<_i12.Payee>('payee', 'update', {
         'payeeId': payeeId,
         'name': name,
       });
@@ -661,8 +719,8 @@ class EndpointPayee extends _i1.EndpointRef {
   );
 
   /// Deletes a payee by ID.
-  _i2.Future<_i11.Payee> delete(_i1.UuidValue payeeId) => caller
-      .callServerEndpoint<_i11.Payee>('payee', 'delete', {'payeeId': payeeId});
+  _i2.Future<_i12.Payee> delete(_i1.UuidValue payeeId) => caller
+      .callServerEndpoint<_i12.Payee>('payee', 'delete', {'payeeId': payeeId});
 }
 
 /// API surface for recurring transaction operations.
@@ -676,7 +734,7 @@ class EndpointRecurringTransaction extends _i1.EndpointRef {
   String get name => 'recurringTransaction';
 
   /// Creates a new recurring transaction.
-  _i2.Future<_i12.RecurringTransaction> create(
+  _i2.Future<_i13.RecurringTransaction> create(
     String description,
     int amountCents,
     String currencyCode,
@@ -687,7 +745,7 @@ class EndpointRecurringTransaction extends _i1.EndpointRef {
     _i1.UuidValue? accountId,
     _i1.UuidValue? payeeId,
     DateTime? endDate,
-  }) => caller.callServerEndpoint<_i12.RecurringTransaction>(
+  }) => caller.callServerEndpoint<_i13.RecurringTransaction>(
     'recurringTransaction',
     'create',
     {
@@ -705,26 +763,26 @@ class EndpointRecurringTransaction extends _i1.EndpointRef {
   );
 
   /// Lists recurring transactions for a budget.
-  _i2.Future<List<_i12.RecurringTransaction>> list(
+  _i2.Future<List<_i13.RecurringTransaction>> list(
     _i1.UuidValue budgetId, {
     bool? activeOnly,
-  }) => caller.callServerEndpoint<List<_i12.RecurringTransaction>>(
+  }) => caller.callServerEndpoint<List<_i13.RecurringTransaction>>(
     'recurringTransaction',
     'list',
     {'budgetId': budgetId, 'activeOnly': activeOnly},
   );
 
   /// Gets a recurring transaction by ID.
-  _i2.Future<_i12.RecurringTransaction> get(
+  _i2.Future<_i13.RecurringTransaction> get(
     _i1.UuidValue recurringTransactionId,
-  ) => caller.callServerEndpoint<_i12.RecurringTransaction>(
+  ) => caller.callServerEndpoint<_i13.RecurringTransaction>(
     'recurringTransaction',
     'get',
     {'recurringTransactionId': recurringTransactionId},
   );
 
   /// Updates a recurring transaction.
-  _i2.Future<_i12.RecurringTransaction> update(
+  _i2.Future<_i13.RecurringTransaction> update(
     _i1.UuidValue recurringTransactionId, {
     String? description,
     int? amountCents,
@@ -735,7 +793,7 @@ class EndpointRecurringTransaction extends _i1.EndpointRef {
     DateTime? nextOccurrence,
     DateTime? endDate,
     bool? isActive,
-  }) => caller.callServerEndpoint<_i12.RecurringTransaction>(
+  }) => caller.callServerEndpoint<_i13.RecurringTransaction>(
     'recurringTransaction',
     'update',
     {
@@ -753,9 +811,9 @@ class EndpointRecurringTransaction extends _i1.EndpointRef {
   );
 
   /// Deletes a recurring transaction.
-  _i2.Future<_i12.RecurringTransaction> delete(
+  _i2.Future<_i13.RecurringTransaction> delete(
     _i1.UuidValue recurringTransactionId,
-  ) => caller.callServerEndpoint<_i12.RecurringTransaction>(
+  ) => caller.callServerEndpoint<_i13.RecurringTransaction>(
     'recurringTransaction',
     'delete',
     {'recurringTransactionId': recurringTransactionId},
@@ -763,9 +821,9 @@ class EndpointRecurringTransaction extends _i1.EndpointRef {
 
   /// Skips the next occurrence of a recurring transaction by advancing the
   /// schedule without creating a transaction.
-  _i2.Future<_i12.RecurringTransaction> skipOccurrence(
+  _i2.Future<_i13.RecurringTransaction> skipOccurrence(
     _i1.UuidValue recurringTransactionId,
-  ) => caller.callServerEndpoint<_i12.RecurringTransaction>(
+  ) => caller.callServerEndpoint<_i13.RecurringTransaction>(
     'recurringTransaction',
     'skipOccurrence',
     {'recurringTransactionId': recurringTransactionId},
@@ -797,7 +855,7 @@ class EndpointTransaction extends _i1.EndpointRef {
   String get name => 'transaction';
 
   /// Creates a new transaction within a budget.
-  _i2.Future<_i13.Transaction> create(
+  _i2.Future<_i14.Transaction> create(
     String description,
     int amountCents,
     String currencyCode,
@@ -806,7 +864,7 @@ class EndpointTransaction extends _i1.EndpointRef {
     _i1.UuidValue? envelopeId,
     _i1.UuidValue? payeeId,
     String? memo,
-  }) => caller.callServerEndpoint<_i13.Transaction>('transaction', 'create', {
+  }) => caller.callServerEndpoint<_i14.Transaction>('transaction', 'create', {
     'description': description,
     'amountCents': amountCents,
     'currencyCode': currencyCode,
@@ -818,30 +876,30 @@ class EndpointTransaction extends _i1.EndpointRef {
   });
 
   /// Lists all transactions for a budget.
-  _i2.Future<List<_i13.Transaction>> list(_i1.UuidValue budgetId) =>
-      caller.callServerEndpoint<List<_i13.Transaction>>('transaction', 'list', {
+  _i2.Future<List<_i14.Transaction>> list(_i1.UuidValue budgetId) =>
+      caller.callServerEndpoint<List<_i14.Transaction>>('transaction', 'list', {
         'budgetId': budgetId,
       });
 
   /// Lists transactions for a budget within a specific month.
-  _i2.Future<List<_i13.Transaction>> listByMonth(
+  _i2.Future<List<_i14.Transaction>> listByMonth(
     _i1.UuidValue budgetId,
     int year,
     int month,
-  ) => caller.callServerEndpoint<List<_i13.Transaction>>(
+  ) => caller.callServerEndpoint<List<_i14.Transaction>>(
     'transaction',
     'listByMonth',
     {'budgetId': budgetId, 'year': year, 'month': month},
   );
 
   /// Gets a single transaction by ID.
-  _i2.Future<_i13.Transaction> get(_i1.UuidValue transactionId) =>
-      caller.callServerEndpoint<_i13.Transaction>('transaction', 'get', {
+  _i2.Future<_i14.Transaction> get(_i1.UuidValue transactionId) =>
+      caller.callServerEndpoint<_i14.Transaction>('transaction', 'get', {
         'transactionId': transactionId,
       });
 
   /// Updates a transaction by ID.
-  _i2.Future<_i13.Transaction> update(
+  _i2.Future<_i14.Transaction> update(
     _i1.UuidValue transactionId, {
     String? description,
     int? amountCents,
@@ -849,7 +907,7 @@ class EndpointTransaction extends _i1.EndpointRef {
     _i1.UuidValue? payeeId,
     DateTime? transactionDate,
     String? memo,
-  }) => caller.callServerEndpoint<_i13.Transaction>('transaction', 'update', {
+  }) => caller.callServerEndpoint<_i14.Transaction>('transaction', 'update', {
     'transactionId': transactionId,
     'description': description,
     'amountCents': amountCents,
@@ -860,7 +918,7 @@ class EndpointTransaction extends _i1.EndpointRef {
   });
 
   /// Creates a transfer between two accounts.
-  _i2.Future<List<_i13.Transaction>> transfer(
+  _i2.Future<List<_i14.Transaction>> transfer(
     String description,
     int amountCents,
     String currencyCode,
@@ -869,7 +927,7 @@ class EndpointTransaction extends _i1.EndpointRef {
     _i1.UuidValue toAccountId,
     DateTime transactionDate,
   ) => caller
-      .callServerEndpoint<List<_i13.Transaction>>('transaction', 'transfer', {
+      .callServerEndpoint<List<_i14.Transaction>>('transaction', 'transfer', {
         'description': description,
         'amountCents': amountCents,
         'currencyCode': currencyCode,
@@ -880,18 +938,18 @@ class EndpointTransaction extends _i1.EndpointRef {
       });
 
   /// Lists transactions for a specific account.
-  _i2.Future<List<_i13.Transaction>> listByAccount(
+  _i2.Future<List<_i14.Transaction>> listByAccount(
     _i1.UuidValue accountId,
     _i1.UuidValue budgetId,
-  ) => caller.callServerEndpoint<List<_i13.Transaction>>(
+  ) => caller.callServerEndpoint<List<_i14.Transaction>>(
     'transaction',
     'listByAccount',
     {'accountId': accountId, 'budgetId': budgetId},
   );
 
   /// Toggles the cleared status of a transaction.
-  _i2.Future<_i13.Transaction> toggleCleared(_i1.UuidValue transactionId) =>
-      caller.callServerEndpoint<_i13.Transaction>(
+  _i2.Future<_i14.Transaction> toggleCleared(_i1.UuidValue transactionId) =>
+      caller.callServerEndpoint<_i14.Transaction>(
         'transaction',
         'toggleCleared',
         {'transactionId': transactionId},
@@ -916,16 +974,16 @@ class EndpointTransaction extends _i1.EndpointRef {
       });
 
   /// Creates a split transaction with multiple envelope assignments.
-  _i2.Future<List<_i13.Transaction>> createSplit(
+  _i2.Future<List<_i14.Transaction>> createSplit(
     String description,
     int totalAmountCents,
     String currencyCode,
     _i1.UuidValue budgetId,
     DateTime transactionDate,
-    List<_i14.SplitItem> splits, {
+    List<_i15.SplitItem> splits, {
     _i1.UuidValue? payeeId,
     _i1.UuidValue? accountId,
-  }) => caller.callServerEndpoint<List<_i13.Transaction>>(
+  }) => caller.callServerEndpoint<List<_i14.Transaction>>(
     'transaction',
     'createSplit',
     {
@@ -941,9 +999,9 @@ class EndpointTransaction extends _i1.EndpointRef {
   );
 
   /// Lists the sub-transactions (splits) for a parent transaction.
-  _i2.Future<List<_i13.Transaction>> listSplits(
+  _i2.Future<List<_i14.Transaction>> listSplits(
     _i1.UuidValue parentTransactionId,
-  ) => caller.callServerEndpoint<List<_i13.Transaction>>(
+  ) => caller.callServerEndpoint<List<_i14.Transaction>>(
     'transaction',
     'listSplits',
     {'parentTransactionId': parentTransactionId},
@@ -955,7 +1013,7 @@ class EndpointTransaction extends _i1.EndpointRef {
   _i2.Future<int> bulkImport(
     _i1.UuidValue budgetId,
     String currencyCode,
-    List<_i15.ImportRow> rows, {
+    List<_i16.ImportRow> rows, {
     _i1.UuidValue? accountId,
   }) => caller.callServerEndpoint<int>('transaction', 'bulkImport', {
     'budgetId': budgetId,
@@ -965,11 +1023,11 @@ class EndpointTransaction extends _i1.EndpointRef {
   });
 
   /// Finds potential duplicate transactions with the same amount near a date.
-  _i2.Future<List<_i13.Transaction>> findDuplicates(
+  _i2.Future<List<_i14.Transaction>> findDuplicates(
     _i1.UuidValue budgetId,
     int amountCents,
     DateTime transactionDate,
-  ) => caller.callServerEndpoint<List<_i13.Transaction>>(
+  ) => caller.callServerEndpoint<List<_i14.Transaction>>(
     'transaction',
     'findDuplicates',
     {
@@ -980,8 +1038,8 @@ class EndpointTransaction extends _i1.EndpointRef {
   );
 
   /// Deletes a transaction by ID.
-  _i2.Future<_i13.Transaction> delete(_i1.UuidValue transactionId) =>
-      caller.callServerEndpoint<_i13.Transaction>('transaction', 'delete', {
+  _i2.Future<_i14.Transaction> delete(_i1.UuidValue transactionId) =>
+      caller.callServerEndpoint<_i14.Transaction>('transaction', 'delete', {
         'transactionId': transactionId,
       });
 }
@@ -1012,7 +1070,7 @@ class Client extends _i1.ServerpodClientShared {
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
          host,
-         _i16.Protocol(),
+         _i17.Protocol(),
          securityContext: securityContext,
          streamingConnectionTimeout: streamingConnectionTimeout,
          connectionTimeout: connectionTimeout,
@@ -1024,6 +1082,7 @@ class Client extends _i1.ServerpodClientShared {
     account = EndpointAccount(this);
     emailIdp = EndpointEmailIdp(this);
     jwtRefresh = EndpointJwtRefresh(this);
+    budgetTemplate = EndpointBudgetTemplate(this);
     budget = EndpointBudget(this);
     budgetStream = EndpointBudgetStream(this);
     category = EndpointCategory(this);
@@ -1041,6 +1100,8 @@ class Client extends _i1.ServerpodClientShared {
   late final EndpointEmailIdp emailIdp;
 
   late final EndpointJwtRefresh jwtRefresh;
+
+  late final EndpointBudgetTemplate budgetTemplate;
 
   late final EndpointBudget budget;
 
@@ -1067,6 +1128,7 @@ class Client extends _i1.ServerpodClientShared {
     'account': account,
     'emailIdp': emailIdp,
     'jwtRefresh': jwtRefresh,
+    'budgetTemplate': budgetTemplate,
     'budget': budget,
     'budgetStream': budgetStream,
     'category': category,

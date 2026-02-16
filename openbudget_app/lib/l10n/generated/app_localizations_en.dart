@@ -1196,6 +1196,48 @@ class AppLocalizationsEn extends AppLocalizations {
       'Could not export budget data. Please try again.';
 
   @override
+  String get templateTitle => 'Budget Templates';
+
+  @override
+  String get templateSaveButton => 'Save Current Month as Template';
+
+  @override
+  String get templateNameLabel => 'Template Name';
+
+  @override
+  String get templateNameHint => 'e.g. Standard Month';
+
+  @override
+  String get templateSaveSuccess => 'Template saved';
+
+  @override
+  String get templateSaveError => 'Could not save template. Please try again.';
+
+  @override
+  String get templateApplyButton => 'Apply';
+
+  @override
+  String get templateApplySuccess => 'Template applied to current month';
+
+  @override
+  String get templateApplyError =>
+      'Could not apply template. Please try again.';
+
+  @override
+  String get templateDeleteSuccess => 'Template deleted';
+
+  @override
+  String get templateDeleteError =>
+      'Could not delete template. Please try again.';
+
+  @override
+  String get templateEmptyTitle => 'No Templates';
+
+  @override
+  String get templateEmptySubtitle =>
+      'Save your current month allocations as a template to quickly set up future months.';
+
+  @override
   String duplicateWarning(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

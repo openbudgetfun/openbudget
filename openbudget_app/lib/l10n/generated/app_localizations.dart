@@ -2128,6 +2128,84 @@ abstract class AppLocalizations {
   /// **'Could not export budget data. Please try again.'**
   String get settingsExportError;
 
+  /// No description provided for @templateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget Templates'**
+  String get templateTitle;
+
+  /// No description provided for @templateSaveButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Current Month as Template'**
+  String get templateSaveButton;
+
+  /// No description provided for @templateNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Template Name'**
+  String get templateNameLabel;
+
+  /// No description provided for @templateNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Standard Month'**
+  String get templateNameHint;
+
+  /// No description provided for @templateSaveSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Template saved'**
+  String get templateSaveSuccess;
+
+  /// No description provided for @templateSaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save template. Please try again.'**
+  String get templateSaveError;
+
+  /// No description provided for @templateApplyButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get templateApplyButton;
+
+  /// No description provided for @templateApplySuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Template applied to current month'**
+  String get templateApplySuccess;
+
+  /// No description provided for @templateApplyError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not apply template. Please try again.'**
+  String get templateApplyError;
+
+  /// No description provided for @templateDeleteSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Template deleted'**
+  String get templateDeleteSuccess;
+
+  /// No description provided for @templateDeleteError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not delete template. Please try again.'**
+  String get templateDeleteError;
+
+  /// No description provided for @templateEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No Templates'**
+  String get templateEmptyTitle;
+
+  /// No description provided for @templateEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Save your current month allocations as a template to quickly set up future months.'**
+  String get templateEmptySubtitle;
+
   /// No description provided for @duplicateWarning.
   ///
   /// In en, this message translates to:

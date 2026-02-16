@@ -13,6 +13,7 @@ import 'package:openbudget_app/src/features/budget/providers/monthly_allocation_
 import 'package:openbudget_app/src/features/budget/providers/selected_month_provider.dart';
 import 'package:openbudget_app/src/features/budget/screens/add_category_dialog.dart';
 import 'package:openbudget_app/src/features/budget/screens/add_envelope_dialog.dart';
+import 'package:openbudget_app/src/features/budget/screens/budget_template_dialog.dart';
 import 'package:openbudget_app/src/features/budget/screens/edit_category_dialog.dart';
 import 'package:openbudget_app/src/features/budget/screens/edit_envelope_dialog.dart';
 import 'package:openbudget_app/src/features/budget/screens/envelope_activity_sheet.dart';
@@ -112,6 +113,14 @@ class BudgetDetailScreen extends HookConsumerWidget {
                   icon: const Icon(Icons.swap_vert_rounded),
                   tooltip: l10n.budgetReorderCategories,
                   onPressed: () => isReordering.value = true,
+                ),
+                IconButton(
+                  icon: const Icon(Icons.bookmark_border_rounded),
+                  tooltip: l10n.templateTitle,
+                  onPressed: () => showDialog<void>(
+                    context: context,
+                    builder: (_) => BudgetTemplateDialog(budgetId: budgetId),
+                  ),
                 ),
                 IconButton(
                   icon: const Icon(Icons.account_balance_rounded),

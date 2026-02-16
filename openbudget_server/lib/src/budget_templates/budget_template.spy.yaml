@@ -1,0 +1,15 @@
+### A saved allocation template that can be applied to any month.
+class: BudgetTemplate
+table: budget_template
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  budgetId: UuidValue, relation(parent=budget)
+  ### User-chosen name for the template (e.g. "Standard Month").
+  name: String
+  ### JSON-encoded map of envelope ID → allocated cents.
+  allocationData: String
+  createdAt: DateTime, default=now
+  updatedAt: DateTime, default=now
+indexes:
+  budget_template_budget_idx:
+    fields: budgetId
