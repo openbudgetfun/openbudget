@@ -5,6 +5,7 @@ import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/category_actions_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/credit_card_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/envelope_actions_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/monthly_allocation_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/selected_month_provider.dart';
@@ -14,6 +15,7 @@ import 'package:openbudget_app/src/features/budget/screens/edit_envelope_dialog.
 import 'package:openbudget_app/src/features/budget/screens/move_money_dialog.dart';
 import 'package:openbudget_app/src/features/budget/widgets/budget_header.dart';
 import 'package:openbudget_app/src/features/budget/widgets/category_group.dart';
+import 'package:openbudget_app/src/features/budget/widgets/credit_card_section.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
@@ -28,6 +30,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final summaryAsync = ref.watch(budgetMonthlySummaryProvider(budgetId));
+    final ccPayments = ref.watch(creditCardPaymentsProvider(budgetId));
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
@@ -135,6 +138,13 @@ class BudgetDetailScreen extends HookConsumerWidget {
                   month: summary.month,
                 ),
                 const SizedBox(height: SpacingTokens.md),
+                if (ccPayments.hasValue && ccPayments.value!.isNotEmpty) ...[
+                  CreditCardSection(
+                    payments: ccPayments.value!,
+                    currencyCode: currencyCode,
+                  ),
+                  const SizedBox(height: SpacingTokens.md),
+                ],
                 if (summary.categories.isEmpty)
                   Center(
                     child: Padding(

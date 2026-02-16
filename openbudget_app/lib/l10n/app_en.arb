@@ -188,5 +188,7 @@
   "moveMoneyButton": "Move",
   "moveMoneySuccess": "Money moved between envelopes",
   "moveMoneyError": "Could not move money. Please try again.",
-  "moveMoneySameError": "Cannot move money to the same envelope"
+  "moveMoneySameError": "Cannot move money to the same envelope",
+  "creditCardPaymentsTitle": "Credit Card Payments",
+  "creditCardSpentThisMonth": "Spent this month"
 }
