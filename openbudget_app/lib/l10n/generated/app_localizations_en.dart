@@ -327,4 +327,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get budgetViewAccounts => 'Accounts';
+
+  @override
+  String get transactionEditTitle => 'Edit Transaction';
+
+  @override
+  String get transactionEditSuccess => 'Transaction updated';
+
+  @override
+  String get transactionEditError =>
+      'Could not update transaction. Please try again.';
 }

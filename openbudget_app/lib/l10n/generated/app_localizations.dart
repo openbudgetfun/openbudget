@@ -705,6 +705,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Accounts'**
   String get budgetViewAccounts;
+
+  /// No description provided for @transactionEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Transaction'**
+  String get transactionEditTitle;
+
+  /// No description provided for @transactionEditSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction updated'**
+  String get transactionEditSuccess;
+
+  /// No description provided for @transactionEditError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not update transaction. Please try again.'**
+  String get transactionEditError;
 }
 
 class _AppLocalizationsDelegate
