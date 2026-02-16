@@ -36,3 +36,5 @@ const netWorthRoute = 'netWorth';
 const netWorthPath = '/budgets/:id/net-worth';
 const spendingTrendsRoute = 'spendingTrends';
 const spendingTrendsPath = '/budgets/:id/reports/trends';
+const settingsRoute = 'settings';
+const settingsPath = '/budgets/:id/settings';

@@ -1018,4 +1018,41 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get budgetDeleteError => 'Could not delete budget. Please try again.';
+
+  @override
+  String get settingsTitle => 'Settings';
+
+  @override
+  String get settingsLoadError => 'Could not load settings';
+
+  @override
+  String get settingsBudgetSection => 'Budget';
+
+  @override
+  String get settingsBudgetName => 'Budget Name';
+
+  @override
+  String get settingsCurrency => 'Currency';
+
+  @override
+  String get settingsNavigationSection => 'Quick Access';
+
+  @override
+  String get settingsAccountSection => 'Account';
+
+  @override
+  String get settingsRenameBudget => 'Rename Budget';
+
+  @override
+  String get settingsRenameSuccess => 'Budget renamed';
+
+  @override
+  String get settingsRenameError =>
+      'Could not rename budget. Please try again.';
+
+  @override
+  String get settingsLogoutConfirm => 'Are you sure you want to sign out?';
+
+  @override
+  String get settingsVersion => 'OpenBudget v1.0.0';
 }
