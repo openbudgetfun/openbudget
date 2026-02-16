@@ -47,6 +47,29 @@ class TransactionService {
     );
   }
 
+  /// Lists transactions for a budget within a specific month.
+  static Future<List<Transaction>> listForBudgetMonth(
+    Session session, {
+    required UuidValue budgetId,
+    required int year,
+    required int month,
+  }) async {
+    await BudgetService.getById(session, budgetId: budgetId);
+
+    final start = DateTime(year, month);
+    final end = DateTime(year, month + 1);
+
+    return Transaction.db.find(
+      session,
+      where: (t) =>
+          t.budgetId.equals(budgetId) &
+          (t.transactionDate >= start) &
+          (t.transactionDate < end),
+      orderBy: (t) => t.transactionDate,
+      orderDescending: true,
+    );
+  }
+
   /// Fetches a single transaction, verifying budget ownership.
   static Future<Transaction> getById(
     Session session, {

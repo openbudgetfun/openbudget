@@ -3,6 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/envelope_actions_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/monthly_allocation_provider.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
@@ -11,12 +12,16 @@ class AddEnvelopeDialog extends HookConsumerWidget {
     required this.categoryId,
     required this.budgetId,
     required this.currencyCode,
+    required this.year,
+    required this.month,
     super.key,
   });
 
   final String categoryId;
   final String budgetId;
   final CurrencyCode currencyCode;
+  final int year;
+  final int month;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -107,7 +112,7 @@ class AddEnvelopeDialog extends HookConsumerWidget {
     final messenger = ScaffoldMessenger.of(context);
     final colorScheme = Theme.of(context).colorScheme;
     try {
-      await ref
+      final envelope = await ref
           .read(envelopeActionsProvider.notifier)
           .createEnvelope(
             name: name,
@@ -115,6 +120,15 @@ class AddEnvelopeDialog extends HookConsumerWidget {
             budgetedAmountCents: amountCents,
             currencyCode: currencyCode.code,
             budgetId: budgetId,
+          );
+      await ref
+          .read(monthlyAllocationActionsProvider.notifier)
+          .upsertAllocation(
+            envelopeId: envelope.id?.toString() ?? '',
+            budgetId: budgetId,
+            year: year,
+            month: month,
+            allocatedCents: amountCents,
           );
       messenger.showSnackBar(
         SnackBar(content: Text(l10n.budgetEnvelopeCreated)),

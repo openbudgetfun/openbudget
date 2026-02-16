@@ -99,14 +99,21 @@ class CategoryGroup extends HookConsumerWidget {
             ),
           ),
           const Divider(),
-          ...envelopes.map(
-            (envelope) => EnvelopeRow(
+          ...envelopes.asMap().entries.map((entry) {
+            final envelope = entry.value;
+            final monthlyData =
+                categoryWithEnvelopes.monthlyEnvelopes.isNotEmpty &&
+                    entry.key < categoryWithEnvelopes.monthlyEnvelopes.length
+                ? categoryWithEnvelopes.monthlyEnvelopes[entry.key]
+                : null;
+            return EnvelopeRow(
               envelope: envelope,
               currencyCode: currencyCode,
+              monthlyData: monthlyData,
               onTap: () => onEditEnvelope(envelope),
               onLongPress: () => onDeleteEnvelope(envelope),
-            ),
-          ),
+            );
+          }),
           if (envelopes.isNotEmpty) const Divider(),
           Padding(
             padding: const EdgeInsets.symmetric(

@@ -6,6 +6,8 @@ import 'package:openbudget_app/src/features/budget/providers/budget_detail_provi
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/category_actions_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/envelope_actions_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/monthly_allocation_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/selected_month_provider.dart';
 import 'package:openbudget_app/src/features/budget/screens/add_category_dialog.dart';
 import 'package:openbudget_app/src/features/budget/screens/add_envelope_dialog.dart';
 import 'package:openbudget_app/src/features/budget/screens/edit_envelope_dialog.dart';
@@ -24,7 +26,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final summaryAsync = ref.watch(budgetSummaryProvider(budgetId));
+    final summaryAsync = ref.watch(budgetMonthlySummaryProvider(budgetId));
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
@@ -89,11 +91,27 @@ class BudgetDetailScreen extends HookConsumerWidget {
           ),
           body: RefreshIndicator(
             onRefresh: () async {
+              final selectedMonth = ref.read(selectedMonthProvider(budgetId));
               ref
                 ..invalidate(budgetDetailProvider(budgetId))
                 ..invalidate(categoryListProvider(budgetId))
                 ..invalidate(transactionListProvider(budgetId))
-                ..invalidate(budgetSummaryProvider(budgetId));
+                ..invalidate(budgetSummaryProvider(budgetId))
+                ..invalidate(budgetMonthlySummaryProvider(budgetId))
+                ..invalidate(
+                  monthlyAllocationsProvider(
+                    budgetId,
+                    selectedMonth.year,
+                    selectedMonth.month,
+                  ),
+                )
+                ..invalidate(
+                  monthlyTransactionsProvider(
+                    budgetId,
+                    selectedMonth.year,
+                    selectedMonth.month,
+                  ),
+                );
             },
             child: ListView(
               padding: const EdgeInsets.all(SpacingTokens.md),
@@ -101,6 +119,9 @@ class BudgetDetailScreen extends HookConsumerWidget {
                 BudgetHeader(
                   readyToAssignCents: summary.readyToAssignCents,
                   currencyCode: currencyCode,
+                  budgetId: budgetId,
+                  year: summary.year,
+                  month: summary.month,
                 ),
                 const SizedBox(height: SpacingTokens.md),
                 if (summary.categories.isEmpty)
@@ -143,6 +164,8 @@ class BudgetDetailScreen extends HookConsumerWidget {
                         context,
                         catWithEnvelopes.category.id?.toString() ?? '',
                         currencyCode,
+                        year: summary.year,
+                        month: summary.month,
                       ),
                       onDeleteCategory: () => _confirmDeleteCategory(
                         context,
@@ -155,6 +178,8 @@ class BudgetDetailScreen extends HookConsumerWidget {
                         envelope,
                         catWithEnvelopes.category.id?.toString() ?? '',
                         currencyCode,
+                        year: summary.year,
+                        month: summary.month,
                       ),
                       onDeleteEnvelope: (envelope) => _confirmDeleteEnvelope(
                         context,
@@ -226,14 +251,18 @@ class BudgetDetailScreen extends HookConsumerWidget {
   void _showAddEnvelopeDialog(
     BuildContext context,
     String categoryId,
-    CurrencyCode currencyCode,
-  ) {
+    CurrencyCode currencyCode, {
+    required int year,
+    required int month,
+  }) {
     showDialog<void>(
       context: context,
       builder: (_) => AddEnvelopeDialog(
         categoryId: categoryId,
         budgetId: budgetId,
         currencyCode: currencyCode,
+        year: year,
+        month: month,
       ),
     );
   }
@@ -242,8 +271,10 @@ class BudgetDetailScreen extends HookConsumerWidget {
     BuildContext context,
     Envelope envelope,
     String categoryId,
-    CurrencyCode currencyCode,
-  ) {
+    CurrencyCode currencyCode, {
+    required int year,
+    required int month,
+  }) {
     showDialog<void>(
       context: context,
       builder: (_) => EditEnvelopeDialog(
@@ -251,6 +282,8 @@ class BudgetDetailScreen extends HookConsumerWidget {
         categoryId: categoryId,
         budgetId: budgetId,
         currencyCode: currencyCode,
+        year: year,
+        month: month,
       ),
     );
   }

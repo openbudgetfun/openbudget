@@ -111,5 +111,19 @@
   "budgetViewAccounts": "Accounts",
   "transactionEditTitle": "Edit Transaction",
   "transactionEditSuccess": "Transaction updated",
-  "transactionEditError": "Could not update transaction. Please try again."
+  "transactionEditError": "Could not update transaction. Please try again.",
+  "budgetMonthJanuary": "January",
+  "budgetMonthFebruary": "February",
+  "budgetMonthMarch": "March",
+  "budgetMonthApril": "April",
+  "budgetMonthMay": "May",
+  "budgetMonthJune": "June",
+  "budgetMonthJuly": "July",
+  "budgetMonthAugust": "August",
+  "budgetMonthSeptember": "September",
+  "budgetMonthOctober": "October",
+  "budgetMonthNovember": "November",
+  "budgetMonthDecember": "December",
+  "budgetAllocationUpdated": "Allocation updated",
+  "budgetAllocationError": "Could not update allocation"
 }

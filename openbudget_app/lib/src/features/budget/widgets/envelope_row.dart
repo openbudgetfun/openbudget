@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
@@ -11,6 +12,7 @@ class EnvelopeRow extends HookConsumerWidget {
     required this.currencyCode,
     required this.onTap,
     required this.onLongPress,
+    this.monthlyData,
     super.key,
   });
 
@@ -18,10 +20,14 @@ class EnvelopeRow extends HookConsumerWidget {
   final CurrencyCode currencyCode;
   final VoidCallback onTap;
   final VoidCallback onLongPress;
+  final MonthlyEnvelopeData? monthlyData;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final available = envelope.budgetedAmountCents - envelope.spentAmountCents;
+    final budgeted =
+        monthlyData?.allocatedCents ?? envelope.budgetedAmountCents;
+    final spent = monthlyData?.spentCents ?? envelope.spentAmountCents;
+    final available = monthlyData?.availableCents ?? (budgeted - spent);
     final availableColor = available > 0
         ? ColorTokens.secondary
         : available < 0
@@ -51,7 +57,7 @@ class EnvelopeRow extends HookConsumerWidget {
             Expanded(
               flex: 3,
               child: Text(
-                formatCents(envelope.budgetedAmountCents, currencyCode),
+                formatCents(budgeted, currencyCode),
                 textAlign: TextAlign.right,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -61,14 +67,12 @@ class EnvelopeRow extends HookConsumerWidget {
             Expanded(
               flex: 3,
               child: Text(
-                formatCents(envelope.spentAmountCents, currencyCode),
+                formatCents(spent, currencyCode),
                 textAlign: TextAlign.right,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: envelope.spentAmountCents > 0
-                      ? ColorTokens.error
-                      : null,
+                  color: spent > 0 ? ColorTokens.error : null,
                 ),
               ),
             ),
