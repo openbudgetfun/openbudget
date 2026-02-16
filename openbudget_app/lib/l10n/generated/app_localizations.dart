@@ -1143,6 +1143,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cannot move money to the same envelope'**
   String get moveMoneySameError;
+
+  /// No description provided for @creditCardPaymentsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Credit Card Payments'**
+  String get creditCardPaymentsTitle;
+
+  /// No description provided for @creditCardSpentThisMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Spent this month'**
+  String get creditCardSpentThisMonth;
 }
 
 class _AppLocalizationsDelegate
