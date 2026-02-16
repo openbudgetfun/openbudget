@@ -1174,6 +1174,18 @@ abstract class AppLocalizations {
   /// **'{count, plural, =1{1 budget} other{{count} budgets}}'**
   String homeBudgetCount(int count);
 
+  /// No description provided for @homeBudgetOverspent.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 overspent} other{{count} overspent}}'**
+  String homeBudgetOverspent(int count);
+
+  /// No description provided for @homeBudgetReadyToAssign.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} to assign'**
+  String homeBudgetReadyToAssign(String amount);
+
   /// No description provided for @homeBudgetTotalBalance.
   ///
   /// In en, this message translates to:

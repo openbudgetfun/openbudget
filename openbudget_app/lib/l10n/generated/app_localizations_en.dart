@@ -654,6 +654,22 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String homeBudgetOverspent(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count overspent',
+      one: '1 overspent',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String homeBudgetReadyToAssign(String amount) {
+    return '$amount to assign';
+  }
+
+  @override
   String get homeBudgetTotalBalance => 'Total Balance';
 
   @override
