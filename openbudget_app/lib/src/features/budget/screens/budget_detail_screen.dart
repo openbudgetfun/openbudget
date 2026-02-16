@@ -172,8 +172,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
                 ),
                 IconButton(
                   icon: Badge(
-                    isLabelVisible:
-                        !showHidden.value && hiddenCount > 0,
+                    isLabelVisible: !showHidden.value && hiddenCount > 0,
                     label: Text('$hiddenCount'),
                     child: Icon(
                       showHidden.value
@@ -184,8 +183,8 @@ class BudgetDetailScreen extends HookConsumerWidget {
                   tooltip: showHidden.value
                       ? l10n.budgetShowHidden
                       : hiddenCount > 0
-                          ? l10n.budgetHiddenCount(hiddenCount)
-                          : l10n.budgetShowHidden,
+                      ? l10n.budgetHiddenCount(hiddenCount)
+                      : l10n.budgetShowHidden,
                   onPressed: () => showHidden.value = !showHidden.value,
                 ),
                 IconButton(
