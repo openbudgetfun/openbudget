@@ -1069,4 +1069,35 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homeBudgetTotalBalance => 'Total Balance';
+
+  @override
+  String get payeeSearchHint => 'Search payees...';
+
+  @override
+  String get payeeSearchNoResults => 'No matching payees';
+
+  @override
+  String payeeSearchResultCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count payees',
+      one: '1 payee',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get transactionExportCsv => 'Copy as CSV';
+
+  @override
+  String transactionExportSuccess(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count transactions copied to clipboard',
+      one: '1 transaction copied to clipboard',
+    );
+    return '$_temp0';
+  }
 }

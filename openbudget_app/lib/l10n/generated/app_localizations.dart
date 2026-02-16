@@ -1935,6 +1935,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Total Balance'**
   String get homeBudgetTotalBalance;
+
+  /// No description provided for @payeeSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search payees...'**
+  String get payeeSearchHint;
+
+  /// No description provided for @payeeSearchNoResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching payees'**
+  String get payeeSearchNoResults;
+
+  /// No description provided for @payeeSearchResultCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 payee} other{{count} payees}}'**
+  String payeeSearchResultCount(int count);
+
+  /// No description provided for @transactionExportCsv.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy as CSV'**
+  String get transactionExportCsv;
+
+  /// No description provided for @transactionExportSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 transaction copied to clipboard} other{{count} transactions copied to clipboard}}'**
+  String transactionExportSuccess(int count);
 }
 
 class _AppLocalizationsDelegate

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -52,6 +53,22 @@ class TransactionListScreen extends HookConsumerWidget {
           onPressed: () => context.go('/budgets/$budgetId'),
         ),
         title: Text(l10n.transactionListTitle),
+        actions: [
+          transactionsAsync.whenOrNull(
+                data: (txs) => txs.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.copy_rounded),
+                        tooltip: l10n.transactionExportCsv,
+                        onPressed: () => _exportToCsv(
+                          context,
+                          txs,
+                          currency,
+                        ),
+                      )
+                    : null,
+              ) ??
+              const SizedBox.shrink(),
+        ],
       ),
       body: transactionsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -228,6 +245,50 @@ class TransactionListScreen extends HookConsumerWidget {
         },
       ),
     );
+  }
+
+  void _exportToCsv(
+    BuildContext context,
+    List<Transaction> transactions,
+    CurrencyCode currency,
+  ) {
+    final l10n = AppLocalizations.of(context);
+    final buffer = StringBuffer();
+    buffer.writeln('Date,Description,Amount,Memo,Status');
+
+    final topLevel =
+        transactions.where((tx) => tx.parentTransactionId == null).toList()
+          ..sort((a, b) => b.transactionDate.compareTo(a.transactionDate));
+
+    for (final tx in topLevel) {
+      final date = _formatDateIso(tx.transactionDate);
+      final desc = _escapeCsv(tx.description);
+      final amount = formatCents(tx.amountCents, currency);
+      final memo = _escapeCsv(tx.memo ?? '');
+      final status = tx.reconciled
+          ? 'Reconciled'
+          : tx.cleared
+              ? 'Cleared'
+              : 'Uncleared';
+      buffer.writeln('$date,$desc,$amount,$memo,$status');
+    }
+
+    Clipboard.setData(ClipboardData(text: buffer.toString()));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(l10n.transactionExportSuccess(topLevel.length)),
+      ),
+    );
+  }
+
+  static String _formatDateIso(DateTime date) =>
+      '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+
+  static String _escapeCsv(String value) {
+    if (value.contains(',') || value.contains('"') || value.contains('\n')) {
+      return '"${value.replaceAll('"', '""')}"';
+    }
+    return value;
   }
 }
 

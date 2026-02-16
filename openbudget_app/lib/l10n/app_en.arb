@@ -418,5 +418,24 @@
       }
     }
   },
-  "homeBudgetTotalBalance": "Total Balance"
+  "homeBudgetTotalBalance": "Total Balance",
+  "payeeSearchHint": "Search payees...",
+  "payeeSearchNoResults": "No matching payees",
+  "payeeSearchResultCount": "{count, plural, =1{1 payee} other{{count} payees}}",
+  "@payeeSearchResultCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "transactionExportCsv": "Copy as CSV",
+  "transactionExportSuccess": "{count, plural, =1{1 transaction copied to clipboard} other{{count} transactions copied to clipboard}}",
+  "@transactionExportSuccess": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

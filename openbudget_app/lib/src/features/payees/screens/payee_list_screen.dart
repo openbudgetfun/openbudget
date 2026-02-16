@@ -19,6 +19,14 @@ class PayeeListScreen extends HookConsumerWidget {
     final payeesAsync = ref.watch(payeeListProvider(budgetId));
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final searchController = useTextEditingController();
+    final searchQuery = useState('');
+
+    useEffect(() {
+      void listener() => searchQuery.value = searchController.text;
+      searchController.addListener(listener);
+      return () => searchController.removeListener(listener);
+    }, [searchController]);
 
     return Scaffold(
       appBar: AppBar(
@@ -91,15 +99,80 @@ class PayeeListScreen extends HookConsumerWidget {
             );
           }
 
+          final query = searchQuery.value.toLowerCase();
+          final filtered = query.isEmpty
+              ? payees
+              : payees
+                    .where((p) => p.name.toLowerCase().contains(query))
+                    .toList();
+
           return RefreshIndicator(
             onRefresh: () async => ref.invalidate(payeeListProvider(budgetId)),
-            child: ListView.builder(
-              padding: const EdgeInsets.all(SpacingTokens.md),
-              itemCount: payees.length,
-              itemBuilder: (context, index) {
-                final payee = payees[index];
-                return _PayeeTile(payee: payee, budgetId: budgetId);
-              },
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    SpacingTokens.md,
+                    SpacingTokens.md,
+                    SpacingTokens.md,
+                    SpacingTokens.sm,
+                  ),
+                  child: TextField(
+                    controller: searchController,
+                    decoration: InputDecoration(
+                      hintText: l10n.payeeSearchHint,
+                      prefixIcon: const Icon(Icons.search_rounded),
+                      suffixIcon: searchQuery.value.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear_rounded),
+                              onPressed: searchController.clear,
+                            )
+                          : null,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(RadiusTokens.md),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: SpacingTokens.md,
+                        vertical: SpacingTokens.sm,
+                      ),
+                    ),
+                  ),
+                ),
+                if (query.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: SpacingTokens.md,
+                    ),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        l10n.payeeSearchResultCount(filtered.length),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                  ),
+                Expanded(
+                  child: filtered.isEmpty
+                      ? Center(
+                          child: Text(
+                            l10n.payeeSearchNoResults,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        )
+                      : ListView.builder(
+                          padding: const EdgeInsets.all(SpacingTokens.md),
+                          itemCount: filtered.length,
+                          itemBuilder: (context, index) {
+                            final payee = filtered[index];
+                            return _PayeeTile(payee: payee, budgetId: budgetId);
+                          },
+                        ),
+                ),
+              ],
             ),
           );
         },
