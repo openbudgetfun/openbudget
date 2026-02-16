@@ -178,10 +178,22 @@ abstract class AppLocalizations {
   /// **'Delete Account'**
   String get accountDeleteTitle;
 
+  /// No description provided for @accountBalanceCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'Cleared'**
+  String get accountBalanceCleared;
+
+  /// No description provided for @accountBalanceUncleared.
+  ///
+  /// In en, this message translates to:
+  /// **'Uncleared'**
+  String get accountBalanceUncleared;
+
   /// No description provided for @accountDetailBalance.
   ///
   /// In en, this message translates to:
-  /// **'Balance'**
+  /// **'Working Balance'**
   String get accountDetailBalance;
 
   /// No description provided for @accountDetailSearchHint.

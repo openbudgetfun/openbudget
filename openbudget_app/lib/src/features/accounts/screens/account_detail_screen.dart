@@ -94,53 +94,10 @@ class AccountDetailScreen extends HookConsumerWidget {
       body: Column(
         children: [
           if (accountData != null)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(SpacingTokens.md),
-              color: colorScheme.primaryContainer.withAlpha(50),
-              child: Column(
-                children: [
-                  Text(
-                    l10n.accountDetailBalance,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(height: SpacingTokens.xs),
-                  Text(
-                    formatCents(accountData.balanceCents, currencyCode),
-                    style: theme.textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: accountData.balanceCents >= 0
-                          ? colorScheme.primary
-                          : colorScheme.error,
-                    ),
-                  ),
-                  const SizedBox(height: SpacingTokens.xs),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _StatusChip(
-                        icon: Icons.circle_outlined,
-                        label: l10n.transactionUncleared,
-                        color: colorScheme.outline,
-                      ),
-                      const SizedBox(width: SpacingTokens.sm),
-                      _StatusChip(
-                        icon: Icons.check_circle_outline,
-                        label: l10n.transactionCleared,
-                        color: ColorTokens.secondary,
-                      ),
-                      const SizedBox(width: SpacingTokens.sm),
-                      _StatusChip(
-                        icon: Icons.lock_outline_rounded,
-                        label: l10n.transactionReconciled,
-                        color: colorScheme.primary,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+            _BalanceHeader(
+              accountData: accountData,
+              currencyCode: currencyCode,
+              transactions: txnAsync.whenOrNull(data: (txns) => txns),
             ),
           // Status filter chips.
           Padding(
@@ -384,26 +341,122 @@ class AccountDetailScreen extends HookConsumerWidget {
   }
 }
 
-class _StatusChip extends HookWidget {
-  const _StatusChip({
+class _BalanceHeader extends HookWidget {
+  const _BalanceHeader({
+    required this.accountData,
+    required this.currencyCode,
+    this.transactions,
+  });
+
+  final Account accountData;
+  final CurrencyCode currencyCode;
+  final List<Transaction>? transactions;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    var clearedCents = 0;
+    var unclearedCents = 0;
+    if (transactions != null) {
+      for (final txn in transactions!) {
+        if (txn.reconciled || txn.cleared) {
+          clearedCents += txn.amountCents;
+        } else {
+          unclearedCents += txn.amountCents;
+        }
+      }
+    }
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(SpacingTokens.md),
+      color: colorScheme.primaryContainer.withAlpha(50),
+      child: Column(
+        children: [
+          Text(
+            l10n.accountDetailBalance,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: SpacingTokens.xs),
+          Text(
+            formatCents(accountData.balanceCents, currencyCode),
+            style: theme.textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: accountData.balanceCents >= 0
+                  ? colorScheme.primary
+                  : colorScheme.error,
+            ),
+          ),
+          if (transactions != null) ...[
+            const SizedBox(height: SpacingTokens.sm),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _BalanceChip(
+                  icon: Icons.check_circle_outline,
+                  label: l10n.accountBalanceCleared,
+                  amount: formatCents(clearedCents, currencyCode),
+                  color: ColorTokens.secondary,
+                ),
+                const SizedBox(width: SpacingTokens.lg),
+                _BalanceChip(
+                  icon: Icons.circle_outlined,
+                  label: l10n.accountBalanceUncleared,
+                  amount: formatCents(unclearedCents, currencyCode),
+                  color: colorScheme.outline,
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _BalanceChip extends HookWidget {
+  const _BalanceChip({
     required this.icon,
     required this.label,
+    required this.amount,
     required this.color,
   });
 
   final IconData icon;
   final String label;
+  final String amount;
   final Color color;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Row(
+    return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 14, color: color),
-        const SizedBox(width: 4),
-        Text(label, style: theme.textTheme.labelSmall?.copyWith(color: color)),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 12, color: color),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: theme.textTheme.labelSmall?.copyWith(color: color),
+            ),
+          ],
+        ),
+        const SizedBox(height: 2),
+        Text(
+          amount,
+          style: theme.textTheme.bodySmall?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: color,
+          ),
+        ),
       ],
     );
   }
