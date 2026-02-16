@@ -662,6 +662,17 @@ class AppLocalizationsEn extends AppLocalizations {
       'Could not update recurring transaction. Please try again.';
 
   @override
+  String ageOfMoneyLabel(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'Age of Money: $days days',
+      one: 'Age of Money: 1 day',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get quickBudgetTitle => 'Quick Budget';
 
   @override
