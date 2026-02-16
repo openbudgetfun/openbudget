@@ -766,6 +766,24 @@ abstract class AppLocalizations {
   /// **'Ready to Assign'**
   String get budgetReadyToAssign;
 
+  /// No description provided for @budgetTotalIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get budgetTotalIncome;
+
+  /// No description provided for @budgetTotalBudgeted.
+  ///
+  /// In en, this message translates to:
+  /// **'Budgeted'**
+  String get budgetTotalBudgeted;
+
+  /// No description provided for @budgetTotalActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity'**
+  String get budgetTotalActivity;
+
   /// No description provided for @budgetReorderCategories.
   ///
   /// In en, this message translates to:
