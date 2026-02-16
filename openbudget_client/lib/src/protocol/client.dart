@@ -588,11 +588,13 @@ class EndpointEnvelope extends _i1.EndpointRef {
     String? name,
     int? budgetedAmountCents,
     int? spentAmountCents,
+    String? note,
   }) => caller.callServerEndpoint<_i11.Envelope>('envelope', 'update', {
     'envelopeId': envelopeId,
     'name': name,
     'budgetedAmountCents': budgetedAmountCents,
     'spentAmountCents': spentAmountCents,
+    'note': note,
   });
 
   /// Reorders envelopes within a category.

@@ -35,6 +35,7 @@ class EditEnvelopeDialog extends HookConsumerWidget {
     final amountController = useTextEditingController(
       text: _formatInitialAmount(envelope.budgetedAmountCents, currencyCode),
     );
+    final noteController = useTextEditingController(text: envelope.note ?? '');
     final isSubmitting = useState(false);
 
     return AlertDialog(
@@ -67,8 +68,21 @@ class EditEnvelopeDialog extends HookConsumerWidget {
                     ref,
                     nameController,
                     amountController,
+                    noteController,
                     isSubmitting,
                   ),
+          ),
+          const SizedBox(height: SpacingTokens.md),
+          TextField(
+            controller: noteController,
+            decoration: InputDecoration(
+              labelText: l10n.envelopeNoteLabel,
+              hintText: l10n.envelopeNoteHint,
+              prefixIcon: const Icon(Icons.note_outlined),
+            ),
+            maxLines: 3,
+            minLines: 1,
+            textInputAction: TextInputAction.newline,
           ),
           const SizedBox(height: SpacingTokens.md),
           OutlinedButton.icon(
@@ -94,6 +108,7 @@ class EditEnvelopeDialog extends HookConsumerWidget {
                   ref,
                   nameController,
                   amountController,
+                  noteController,
                   isSubmitting,
                 ),
           child: isSubmitting.value
@@ -113,6 +128,7 @@ class EditEnvelopeDialog extends HookConsumerWidget {
     WidgetRef ref,
     TextEditingController nameController,
     TextEditingController amountController,
+    TextEditingController noteController,
     ValueNotifier<bool> isSubmitting,
   ) async {
     final l10n = AppLocalizations.of(context);
@@ -122,6 +138,7 @@ class EditEnvelopeDialog extends HookConsumerWidget {
     final amountText = amountController.text.trim();
     final amount = double.tryParse(amountText) ?? 0;
     final amountCents = (amount * _pow10(currencyCode.decimals)).round();
+    final note = noteController.text.trim();
 
     isSubmitting.value = true;
     final navigator = Navigator.of(context);
@@ -136,6 +153,7 @@ class EditEnvelopeDialog extends HookConsumerWidget {
             budgetId: budgetId,
             name: name,
             budgetedAmountCents: amountCents,
+            note: note.isEmpty ? null : note,
           );
       await ref
           .read(monthlyAllocationActionsProvider.notifier)

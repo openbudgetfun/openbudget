@@ -826,6 +826,18 @@ abstract class AppLocalizations {
   /// **'No transactions this month'**
   String get envelopeNoActivity;
 
+  /// No description provided for @envelopeNoteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a note for this envelope (optional)'**
+  String get envelopeNoteHint;
+
+  /// No description provided for @envelopeNoteLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get envelopeNoteLabel;
+
   /// No description provided for @envelopeReorderHint.
   ///
   /// In en, this message translates to:

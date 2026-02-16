@@ -53,6 +53,7 @@ class EnvelopeActions extends _$EnvelopeActions {
     String? name,
     int? budgetedAmountCents,
     int? spentAmountCents,
+    String? note,
   }) async {
     state = const AsyncValue.loading();
     final client = ref.read(serverpodClientProvider);
@@ -64,6 +65,7 @@ class EnvelopeActions extends _$EnvelopeActions {
         name: name,
         budgetedAmountCents: budgetedAmountCents,
         spentAmountCents: spentAmountCents,
+        note: note,
       );
       if (ref.mounted) {
         ref

@@ -22,6 +22,7 @@ abstract class Envelope implements _i1.SerializableModel {
     required this.spentAmountCents,
     required this.currencyCode,
     required this.sortOrder,
+    this.note,
     DateTime? createdAt,
   }) : createdAt = createdAt ?? DateTime.now();
 
@@ -33,6 +34,7 @@ abstract class Envelope implements _i1.SerializableModel {
     required int spentAmountCents,
     required String currencyCode,
     required int sortOrder,
+    String? note,
     DateTime? createdAt,
   }) = _EnvelopeImpl;
 
@@ -49,6 +51,7 @@ abstract class Envelope implements _i1.SerializableModel {
       spentAmountCents: jsonSerialization['spentAmountCents'] as int,
       currencyCode: jsonSerialization['currencyCode'] as String,
       sortOrder: jsonSerialization['sortOrder'] as int,
+      note: jsonSerialization['note'] as String?,
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
@@ -76,6 +79,9 @@ abstract class Envelope implements _i1.SerializableModel {
   /// Display order within the parent category.
   int sortOrder;
 
+  /// Optional user-facing note providing context for the envelope.
+  String? note;
+
   DateTime createdAt;
 
   /// Returns a shallow copy of this [Envelope]
@@ -89,6 +95,7 @@ abstract class Envelope implements _i1.SerializableModel {
     int? spentAmountCents,
     String? currencyCode,
     int? sortOrder,
+    String? note,
     DateTime? createdAt,
   });
   @override
@@ -102,6 +109,7 @@ abstract class Envelope implements _i1.SerializableModel {
       'spentAmountCents': spentAmountCents,
       'currencyCode': currencyCode,
       'sortOrder': sortOrder,
+      if (note != null) 'note': note,
       'createdAt': createdAt.toJson(),
     };
   }
@@ -123,6 +131,7 @@ class _EnvelopeImpl extends Envelope {
     required int spentAmountCents,
     required String currencyCode,
     required int sortOrder,
+    String? note,
     DateTime? createdAt,
   }) : super._(
          id: id,
@@ -132,6 +141,7 @@ class _EnvelopeImpl extends Envelope {
          spentAmountCents: spentAmountCents,
          currencyCode: currencyCode,
          sortOrder: sortOrder,
+         note: note,
          createdAt: createdAt,
        );
 
@@ -147,6 +157,7 @@ class _EnvelopeImpl extends Envelope {
     int? spentAmountCents,
     String? currencyCode,
     int? sortOrder,
+    Object? note = _Undefined,
     DateTime? createdAt,
   }) {
     return Envelope(
@@ -157,6 +168,7 @@ class _EnvelopeImpl extends Envelope {
       spentAmountCents: spentAmountCents ?? this.spentAmountCents,
       currencyCode: currencyCode ?? this.currencyCode,
       sortOrder: sortOrder ?? this.sortOrder,
+      note: note is String? ? note : this.note,
       createdAt: createdAt ?? this.createdAt,
     );
   }

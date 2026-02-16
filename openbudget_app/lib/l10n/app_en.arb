@@ -262,6 +262,8 @@
   "editEnvelopeTitle": "Edit Envelope",
   "envelopeActivityTitle": "Activity",
   "envelopeNoActivity": "No transactions this month",
+  "envelopeNoteHint": "Add a note for this envelope (optional)",
+  "envelopeNoteLabel": "Note",
   "envelopeReorderHint": "Long press an envelope to reorder within category",
   "goalAmountLabel": "Target Amount",
   "goalDateLabel": "Target Date",

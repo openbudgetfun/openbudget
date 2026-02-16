@@ -71,6 +71,7 @@ class EnvelopeService {
     String? name,
     int? budgetedAmountCents,
     int? spentAmountCents,
+    String? note,
   }) async {
     final envelope = await getById(session, envelopeId: envelopeId);
 
@@ -78,6 +79,7 @@ class EnvelopeService {
       name: name ?? envelope.name,
       budgetedAmountCents: budgetedAmountCents ?? envelope.budgetedAmountCents,
       spentAmountCents: spentAmountCents ?? envelope.spentAmountCents,
+      note: note ?? envelope.note,
     );
     return Envelope.db.updateRow(session, updated);
   }

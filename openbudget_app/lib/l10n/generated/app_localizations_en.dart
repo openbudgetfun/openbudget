@@ -420,6 +420,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get envelopeNoActivity => 'No transactions this month';
 
   @override
+  String get envelopeNoteHint => 'Add a note for this envelope (optional)';
+
+  @override
+  String get envelopeNoteLabel => 'Note';
+
+  @override
   String get envelopeReorderHint =>
       'Long press an envelope to reorder within category';
 

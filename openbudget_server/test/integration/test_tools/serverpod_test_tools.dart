@@ -1557,6 +1557,7 @@ class _EnvelopeEndpoint {
     String? name,
     int? budgetedAmountCents,
     int? spentAmountCents,
+    String? note,
   }) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
@@ -1574,6 +1575,7 @@ class _EnvelopeEndpoint {
             'name': name,
             'budgetedAmountCents': budgetedAmountCents,
             'spentAmountCents': spentAmountCents,
+            'note': note,
           }),
           serializationManager: _serializationManager,
         );
