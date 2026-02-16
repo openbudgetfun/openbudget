@@ -108,13 +108,27 @@ class EnvelopeRow extends HookConsumerWidget {
                     color: availableColor.withAlpha(25),
                     borderRadius: BorderRadius.circular(4),
                   ),
-                  child: Text(
-                    formatCents(available, currencyCode),
-                    maxLines: 1,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: availableColor,
-                      fontWeight: FontWeight.w600,
-                    ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (available < 0)
+                        Padding(
+                          padding: const EdgeInsets.only(right: 3),
+                          child: Icon(
+                            Icons.warning_amber_rounded,
+                            size: 12,
+                            color: availableColor,
+                          ),
+                        ),
+                      Text(
+                        formatCents(available, currencyCode),
+                        maxLines: 1,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: availableColor,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],

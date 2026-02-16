@@ -1467,6 +1467,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Running Balance'**
   String get accountRunningBalance;
+
+  /// No description provided for @budgetOverspentWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Overspent: {amount}'**
+  String budgetOverspentWarning(String amount);
 }
 
 class _AppLocalizationsDelegate

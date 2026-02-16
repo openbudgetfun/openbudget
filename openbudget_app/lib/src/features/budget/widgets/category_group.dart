@@ -175,17 +175,45 @@ class CategoryGroup extends HookConsumerWidget {
                   ),
                 ),
                 const SizedBox(width: SpacingTokens.xs),
-                Text(
-                  formatCents(
-                    categoryWithEnvelopes.totalAvailableCents,
-                    currencyCode,
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
                   ),
-                  maxLines: 1,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.bold,
+                  decoration: BoxDecoration(
                     color: _availableColor(
                       categoryWithEnvelopes.totalAvailableCents,
-                    ),
+                    ).withAlpha(20),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (categoryWithEnvelopes.totalAvailableCents < 0)
+                        Padding(
+                          padding: const EdgeInsets.only(right: 3),
+                          child: Icon(
+                            Icons.warning_amber_rounded,
+                            size: 12,
+                            color: _availableColor(
+                              categoryWithEnvelopes.totalAvailableCents,
+                            ),
+                          ),
+                        ),
+                      Text(
+                        formatCents(
+                          categoryWithEnvelopes.totalAvailableCents,
+                          currencyCode,
+                        ),
+                        maxLines: 1,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: _availableColor(
+                            categoryWithEnvelopes.totalAvailableCents,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],

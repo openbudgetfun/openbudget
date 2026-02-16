@@ -14,6 +14,7 @@ class BudgetHeader extends HookConsumerWidget {
     required this.budgetId,
     required this.year,
     required this.month,
+    this.totalOverspentCents = 0,
     super.key,
   });
 
@@ -22,6 +23,7 @@ class BudgetHeader extends HookConsumerWidget {
   final String budgetId;
   final int year;
   final int month;
+  final int totalOverspentCents;
 
   static const _monthNames = [
     'January',
@@ -116,6 +118,39 @@ class BudgetHeader extends HookConsumerWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
+          if (totalOverspentCents > 0) ...[
+            const SizedBox(height: SpacingTokens.sm),
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: SpacingTokens.sm,
+                vertical: SpacingTokens.xs,
+              ),
+              decoration: BoxDecoration(
+                color: ColorTokens.error.withAlpha(20),
+                borderRadius: BorderRadius.circular(RadiusTokens.sm),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.warning_amber_rounded,
+                    size: 16,
+                    color: ColorTokens.error,
+                  ),
+                  const SizedBox(width: SpacingTokens.xs),
+                  Text(
+                    l10n.budgetOverspentWarning(
+                      formatCents(totalOverspentCents, currencyCode),
+                    ),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: ColorTokens.error,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
           if (ageOfMoneyAsync.hasValue && ageOfMoneyAsync.value != null) ...[
             const SizedBox(height: SpacingTokens.sm),
             Row(

@@ -750,4 +750,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get accountRunningBalance => 'Running Balance';
+
+  @override
+  String budgetOverspentWarning(String amount) {
+    return 'Overspent: $amount';
+  }
 }
