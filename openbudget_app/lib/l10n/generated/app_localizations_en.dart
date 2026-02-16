@@ -145,6 +145,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountTypeSavings => 'Savings';
 
   @override
+  String get accountNetWorth => 'Net Worth';
+
+  @override
+  String get accountTotalAssets => 'Assets';
+
+  @override
+  String get accountTotalLiabilities => 'Liabilities';
+
+  @override
   String ageOfMoneyLabel(int days) {
     String _temp0 = intl.Intl.pluralLogic(
       days,

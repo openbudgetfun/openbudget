@@ -358,6 +358,24 @@ abstract class AppLocalizations {
   /// **'Savings'**
   String get accountTypeSavings;
 
+  /// No description provided for @accountNetWorth.
+  ///
+  /// In en, this message translates to:
+  /// **'Net Worth'**
+  String get accountNetWorth;
+
+  /// No description provided for @accountTotalAssets.
+  ///
+  /// In en, this message translates to:
+  /// **'Assets'**
+  String get accountTotalAssets;
+
+  /// No description provided for @accountTotalLiabilities.
+  ///
+  /// In en, this message translates to:
+  /// **'Liabilities'**
+  String get accountTotalLiabilities;
+
   /// No description provided for @ageOfMoneyLabel.
   ///
   /// In en, this message translates to:
