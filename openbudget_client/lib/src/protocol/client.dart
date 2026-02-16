@@ -10,25 +10,107 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'package:serverpod_client/serverpod_client.dart' as _i1;
+import 'dart:async' as _i2;
+import 'package:openbudget_client/src/protocol/accounts/account.dart' as _i3;
 import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart'
-    as _i1;
-import 'package:serverpod_client/serverpod_client.dart' as _i2;
-import 'dart:async' as _i3;
-import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
     as _i4;
-import 'package:openbudget_client/src/protocol/budgets/budget.dart' as _i5;
-import 'package:openbudget_client/src/protocol/categories/category.dart' as _i6;
-import 'package:openbudget_client/src/protocol/envelopes/envelope.dart' as _i7;
+import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
+    as _i5;
+import 'package:openbudget_client/src/protocol/budgets/budget.dart' as _i6;
+import 'package:openbudget_client/src/protocol/categories/category.dart' as _i7;
+import 'package:openbudget_client/src/protocol/envelopes/envelope.dart' as _i8;
 import 'package:openbudget_client/src/protocol/transactions/transaction.dart'
-    as _i8;
-import 'protocol.dart' as _i9;
+    as _i9;
+import 'protocol.dart' as _i10;
+
+/// API surface for account operations.
+///
+/// All methods require authentication.
+/// {@category Endpoint}
+class EndpointAccount extends _i1.EndpointRef {
+  EndpointAccount(_i1.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'account';
+
+  /// Creates a new account within a budget.
+  _i2.Future<_i3.Account> create(
+    String name,
+    String accountType,
+    int balanceCents,
+    String currencyCode,
+    _i1.UuidValue budgetId, {
+    required bool onBudget,
+    required int sortOrder,
+  }) => caller.callServerEndpoint<_i3.Account>(
+    'account',
+    'create',
+    {
+      'name': name,
+      'accountType': accountType,
+      'balanceCents': balanceCents,
+      'currencyCode': currencyCode,
+      'budgetId': budgetId,
+      'onBudget': onBudget,
+      'sortOrder': sortOrder,
+    },
+  );
+
+  /// Lists all accounts for a budget.
+  _i2.Future<List<_i3.Account>> list(_i1.UuidValue budgetId) =>
+      caller.callServerEndpoint<List<_i3.Account>>(
+        'account',
+        'list',
+        {'budgetId': budgetId},
+      );
+
+  /// Gets a single account by ID.
+  _i2.Future<_i3.Account> get(_i1.UuidValue accountId) =>
+      caller.callServerEndpoint<_i3.Account>(
+        'account',
+        'get',
+        {'accountId': accountId},
+      );
+
+  /// Updates an account by ID.
+  _i2.Future<_i3.Account> update(
+    _i1.UuidValue accountId, {
+    String? name,
+    String? accountType,
+    int? balanceCents,
+    bool? onBudget,
+    int? sortOrder,
+    bool? isClosed,
+  }) => caller.callServerEndpoint<_i3.Account>(
+    'account',
+    'update',
+    {
+      'accountId': accountId,
+      'name': name,
+      'accountType': accountType,
+      'balanceCents': balanceCents,
+      'onBudget': onBudget,
+      'sortOrder': sortOrder,
+      'isClosed': isClosed,
+    },
+  );
+
+  /// Deletes an account by ID.
+  _i2.Future<_i3.Account> delete(_i1.UuidValue accountId) =>
+      caller.callServerEndpoint<_i3.Account>(
+        'account',
+        'delete',
+        {'accountId': accountId},
+      );
+}
 
 /// By extending [EmailIdpBaseEndpoint], the email identity provider endpoints
 /// are made available on the server and enable the corresponding sign-in widget
 /// on the client.
 /// {@category Endpoint}
-class EndpointEmailIdp extends _i1.EndpointEmailIdpBase {
-  EndpointEmailIdp(_i2.EndpointCaller caller) : super(caller);
+class EndpointEmailIdp extends _i4.EndpointEmailIdpBase {
+  EndpointEmailIdp(_i1.EndpointCaller caller) : super(caller);
 
   @override
   String get name => 'emailIdp';
@@ -43,13 +125,17 @@ class EndpointEmailIdp extends _i1.EndpointEmailIdpBase {
   ///
   /// Throws an [AuthUserBlockedException] if the auth user is blocked.
   @override
-  _i3.Future<_i4.AuthSuccess> login({
+  _i2.Future<_i5.AuthSuccess> login({
     required String email,
     required String password,
-  }) => caller.callServerEndpoint<_i4.AuthSuccess>('emailIdp', 'login', {
-    'email': email,
-    'password': password,
-  });
+  }) => caller.callServerEndpoint<_i5.AuthSuccess>(
+    'emailIdp',
+    'login',
+    {
+      'email': email,
+      'password': password,
+    },
+  );
 
   /// Starts the registration for a new user account with an email-based login
   /// associated to it.
@@ -62,8 +148,8 @@ class EndpointEmailIdp extends _i1.EndpointEmailIdpBase {
   /// registration. If the email is already registered, the returned ID will not
   /// be valid.
   @override
-  _i3.Future<_i2.UuidValue> startRegistration({required String email}) =>
-      caller.callServerEndpoint<_i2.UuidValue>(
+  _i2.Future<_i1.UuidValue> startRegistration({required String email}) =>
+      caller.callServerEndpoint<_i1.UuidValue>(
         'emailIdp',
         'startRegistration',
         {'email': email},
@@ -80,14 +166,17 @@ class EndpointEmailIdp extends _i1.EndpointEmailIdpBase {
   /// - [EmailAccountRequestExceptionReason.invalid] if no request exists
   ///   for the given [accountRequestId] or [verificationCode] is invalid.
   @override
-  _i3.Future<String> verifyRegistrationCode({
-    required _i2.UuidValue accountRequestId,
+  _i2.Future<String> verifyRegistrationCode({
+    required _i1.UuidValue accountRequestId,
     required String verificationCode,
-  }) =>
-      caller.callServerEndpoint<String>('emailIdp', 'verifyRegistrationCode', {
-        'accountRequestId': accountRequestId,
-        'verificationCode': verificationCode,
-      });
+  }) => caller.callServerEndpoint<String>(
+    'emailIdp',
+    'verifyRegistrationCode',
+    {
+      'accountRequestId': accountRequestId,
+      'verificationCode': verificationCode,
+    },
+  );
 
   /// Completes a new account registration, creating a new auth user with a
   /// profile and attaching the given email account to it.
@@ -104,13 +193,16 @@ class EndpointEmailIdp extends _i1.EndpointEmailIdpBase {
   ///
   /// Returns a session for the newly created user.
   @override
-  _i3.Future<_i4.AuthSuccess> finishRegistration({
+  _i2.Future<_i5.AuthSuccess> finishRegistration({
     required String registrationToken,
     required String password,
-  }) => caller.callServerEndpoint<_i4.AuthSuccess>(
+  }) => caller.callServerEndpoint<_i5.AuthSuccess>(
     'emailIdp',
     'finishRegistration',
-    {'registrationToken': registrationToken, 'password': password},
+    {
+      'registrationToken': registrationToken,
+      'password': password,
+    },
   );
 
   /// Requests a password reset for [email].
@@ -127,8 +219,8 @@ class EndpointEmailIdp extends _i1.EndpointEmailIdpBase {
   ///   made too many attempts trying to request a password reset.
   ///
   @override
-  _i3.Future<_i2.UuidValue> startPasswordReset({required String email}) =>
-      caller.callServerEndpoint<_i2.UuidValue>(
+  _i2.Future<_i1.UuidValue> startPasswordReset({required String email}) =>
+      caller.callServerEndpoint<_i1.UuidValue>(
         'emailIdp',
         'startPasswordReset',
         {'email': email},
@@ -149,14 +241,17 @@ class EndpointEmailIdp extends _i1.EndpointEmailIdpBase {
   /// should be overridden to return credentials for the next step instead
   /// of the credentials for setting the password.
   @override
-  _i3.Future<String> verifyPasswordResetCode({
-    required _i2.UuidValue passwordResetRequestId,
+  _i2.Future<String> verifyPasswordResetCode({
+    required _i1.UuidValue passwordResetRequestId,
     required String verificationCode,
-  }) =>
-      caller.callServerEndpoint<String>('emailIdp', 'verifyPasswordResetCode', {
-        'passwordResetRequestId': passwordResetRequestId,
-        'verificationCode': verificationCode,
-      });
+  }) => caller.callServerEndpoint<String>(
+    'emailIdp',
+    'verifyPasswordResetCode',
+    {
+      'passwordResetRequestId': passwordResetRequestId,
+      'verificationCode': verificationCode,
+    },
+  );
 
   /// Completes a password reset request by setting a new password.
   ///
@@ -173,24 +268,31 @@ class EndpointEmailIdp extends _i1.EndpointEmailIdpBase {
   ///
   /// Throws an [AuthUserBlockedException] if the auth user is blocked.
   @override
-  _i3.Future<void> finishPasswordReset({
+  _i2.Future<void> finishPasswordReset({
     required String finishPasswordResetToken,
     required String newPassword,
-  }) => caller.callServerEndpoint<void>('emailIdp', 'finishPasswordReset', {
-    'finishPasswordResetToken': finishPasswordResetToken,
-    'newPassword': newPassword,
-  });
+  }) => caller.callServerEndpoint<void>(
+    'emailIdp',
+    'finishPasswordReset',
+    {
+      'finishPasswordResetToken': finishPasswordResetToken,
+      'newPassword': newPassword,
+    },
+  );
 
   @override
-  _i3.Future<bool> hasAccount() =>
-      caller.callServerEndpoint<bool>('emailIdp', 'hasAccount', {});
+  _i2.Future<bool> hasAccount() => caller.callServerEndpoint<bool>(
+    'emailIdp',
+    'hasAccount',
+    {},
+  );
 }
 
 /// By extending [RefreshJwtTokensEndpoint], the JWT token refresh endpoint
 /// is made available on the server and enables automatic token refresh on the client.
 /// {@category Endpoint}
-class EndpointJwtRefresh extends _i4.EndpointRefreshJwtTokens {
-  EndpointJwtRefresh(_i2.EndpointCaller caller) : super(caller);
+class EndpointJwtRefresh extends _i5.EndpointRefreshJwtTokens {
+  EndpointJwtRefresh(_i1.EndpointCaller caller) : super(caller);
 
   @override
   String get name => 'jwtRefresh';
@@ -214,9 +316,9 @@ class EndpointJwtRefresh extends _i4.EndpointRefreshJwtTokens {
   /// This endpoint is unauthenticated, meaning the client won't include any
   /// authentication information with the call.
   @override
-  _i3.Future<_i4.AuthSuccess> refreshAccessToken({
+  _i2.Future<_i5.AuthSuccess> refreshAccessToken({
     required String refreshToken,
-  }) => caller.callServerEndpoint<_i4.AuthSuccess>(
+  }) => caller.callServerEndpoint<_i5.AuthSuccess>(
     'jwtRefresh',
     'refreshAccessToken',
     {'refreshToken': refreshToken},
@@ -228,51 +330,71 @@ class EndpointJwtRefresh extends _i4.EndpointRefreshJwtTokens {
 ///
 /// All methods require authentication.
 /// {@category Endpoint}
-class EndpointBudget extends _i2.EndpointRef {
-  EndpointBudget(_i2.EndpointCaller caller) : super(caller);
+class EndpointBudget extends _i1.EndpointRef {
+  EndpointBudget(_i1.EndpointCaller caller) : super(caller);
 
   @override
   String get name => 'budget';
 
   /// Creates a new budget for the authenticated user.
-  _i3.Future<_i5.Budget> create(String name, String currencyCode) =>
-      caller.callServerEndpoint<_i5.Budget>('budget', 'create', {
-        'name': name,
-        'currencyCode': currencyCode,
-      });
+  _i2.Future<_i6.Budget> create(
+    String name,
+    String currencyCode,
+  ) => caller.callServerEndpoint<_i6.Budget>(
+    'budget',
+    'create',
+    {
+      'name': name,
+      'currencyCode': currencyCode,
+    },
+  );
 
   /// Lists all budgets for the authenticated user.
-  _i3.Future<List<_i5.Budget>> list() =>
-      caller.callServerEndpoint<List<_i5.Budget>>('budget', 'list', {});
+  _i2.Future<List<_i6.Budget>> list() =>
+      caller.callServerEndpoint<List<_i6.Budget>>(
+        'budget',
+        'list',
+        {},
+      );
 
   /// Gets a single budget by ID, verifying ownership.
-  _i3.Future<_i5.Budget> get(_i2.UuidValue budgetId) => caller
-      .callServerEndpoint<_i5.Budget>('budget', 'get', {'budgetId': budgetId});
+  _i2.Future<_i6.Budget> get(_i1.UuidValue budgetId) =>
+      caller.callServerEndpoint<_i6.Budget>(
+        'budget',
+        'get',
+        {'budgetId': budgetId},
+      );
 
   /// Updates a budget by ID, verifying ownership.
-  _i3.Future<_i5.Budget> update(
-    _i2.UuidValue budgetId, {
+  _i2.Future<_i6.Budget> update(
+    _i1.UuidValue budgetId, {
     String? name,
     String? currencyCode,
-  }) => caller.callServerEndpoint<_i5.Budget>('budget', 'update', {
-    'budgetId': budgetId,
-    'name': name,
-    'currencyCode': currencyCode,
-  });
+  }) => caller.callServerEndpoint<_i6.Budget>(
+    'budget',
+    'update',
+    {
+      'budgetId': budgetId,
+      'name': name,
+      'currencyCode': currencyCode,
+    },
+  );
 
   /// Deletes a budget by ID, verifying ownership.
-  _i3.Future<_i5.Budget> delete(_i2.UuidValue budgetId) =>
-      caller.callServerEndpoint<_i5.Budget>('budget', 'delete', {
-        'budgetId': budgetId,
-      });
+  _i2.Future<_i6.Budget> delete(_i1.UuidValue budgetId) =>
+      caller.callServerEndpoint<_i6.Budget>(
+        'budget',
+        'delete',
+        {'budgetId': budgetId},
+      );
 }
 
 /// Streaming endpoint for real-time budget updates.
 ///
 /// Client sends budget IDs, server streams back the current budget state.
 /// {@category Endpoint}
-class EndpointBudgetStream extends _i2.EndpointRef {
-  EndpointBudgetStream(_i2.EndpointCaller caller) : super(caller);
+class EndpointBudgetStream extends _i1.EndpointRef {
+  EndpointBudgetStream(_i1.EndpointCaller caller) : super(caller);
 
   @override
   String get name => 'budgetStream';
@@ -282,9 +404,9 @@ class EndpointBudgetStream extends _i2.EndpointRef {
   /// Client sends [UuidValue] budget IDs, server responds with the current
   /// [Budget] state for each requested ID. Ownership is verified on each
   /// request.
-  _i3.Stream<_i5.Budget> budgetUpdates(
-    _i3.Stream<_i2.UuidValue> budgetIdStream,
-  ) => caller.callStreamingServerEndpoint<_i3.Stream<_i5.Budget>, _i5.Budget>(
+  _i2.Stream<_i6.Budget> budgetUpdates(
+    _i2.Stream<_i1.UuidValue> budgetIdStream,
+  ) => caller.callStreamingServerEndpoint<_i2.Stream<_i6.Budget>, _i6.Budget>(
     'budgetStream',
     'budgetUpdates',
     {},
@@ -296,181 +418,223 @@ class EndpointBudgetStream extends _i2.EndpointRef {
 ///
 /// All methods require authentication.
 /// {@category Endpoint}
-class EndpointCategory extends _i2.EndpointRef {
-  EndpointCategory(_i2.EndpointCaller caller) : super(caller);
+class EndpointCategory extends _i1.EndpointRef {
+  EndpointCategory(_i1.EndpointCaller caller) : super(caller);
 
   @override
   String get name => 'category';
 
   /// Creates a new category within a budget.
-  _i3.Future<_i6.Category> create(
+  _i2.Future<_i7.Category> create(
     String name,
-    _i2.UuidValue budgetId,
+    _i1.UuidValue budgetId,
     int sortOrder,
-  ) => caller.callServerEndpoint<_i6.Category>('category', 'create', {
-    'name': name,
-    'budgetId': budgetId,
-    'sortOrder': sortOrder,
-  });
+  ) => caller.callServerEndpoint<_i7.Category>(
+    'category',
+    'create',
+    {
+      'name': name,
+      'budgetId': budgetId,
+      'sortOrder': sortOrder,
+    },
+  );
 
   /// Lists all categories for a budget.
-  _i3.Future<List<_i6.Category>> list(_i2.UuidValue budgetId) =>
-      caller.callServerEndpoint<List<_i6.Category>>('category', 'list', {
-        'budgetId': budgetId,
-      });
+  _i2.Future<List<_i7.Category>> list(_i1.UuidValue budgetId) =>
+      caller.callServerEndpoint<List<_i7.Category>>(
+        'category',
+        'list',
+        {'budgetId': budgetId},
+      );
 
   /// Gets a single category by ID.
-  _i3.Future<_i6.Category> get(_i2.UuidValue categoryId) =>
-      caller.callServerEndpoint<_i6.Category>('category', 'get', {
-        'categoryId': categoryId,
-      });
+  _i2.Future<_i7.Category> get(_i1.UuidValue categoryId) =>
+      caller.callServerEndpoint<_i7.Category>(
+        'category',
+        'get',
+        {'categoryId': categoryId},
+      );
 
   /// Updates a category by ID.
-  _i3.Future<_i6.Category> update(
-    _i2.UuidValue categoryId, {
+  _i2.Future<_i7.Category> update(
+    _i1.UuidValue categoryId, {
     String? name,
     int? sortOrder,
-  }) => caller.callServerEndpoint<_i6.Category>('category', 'update', {
-    'categoryId': categoryId,
-    'name': name,
-    'sortOrder': sortOrder,
-  });
+  }) => caller.callServerEndpoint<_i7.Category>(
+    'category',
+    'update',
+    {
+      'categoryId': categoryId,
+      'name': name,
+      'sortOrder': sortOrder,
+    },
+  );
 
   /// Deletes a category by ID.
-  _i3.Future<_i6.Category> delete(_i2.UuidValue categoryId) =>
-      caller.callServerEndpoint<_i6.Category>('category', 'delete', {
-        'categoryId': categoryId,
-      });
+  _i2.Future<_i7.Category> delete(_i1.UuidValue categoryId) =>
+      caller.callServerEndpoint<_i7.Category>(
+        'category',
+        'delete',
+        {'categoryId': categoryId},
+      );
 }
 
 /// API surface for envelope operations.
 ///
 /// All methods require authentication.
 /// {@category Endpoint}
-class EndpointEnvelope extends _i2.EndpointRef {
-  EndpointEnvelope(_i2.EndpointCaller caller) : super(caller);
+class EndpointEnvelope extends _i1.EndpointRef {
+  EndpointEnvelope(_i1.EndpointCaller caller) : super(caller);
 
   @override
   String get name => 'envelope';
 
   /// Creates a new envelope within a category.
-  _i3.Future<_i7.Envelope> create(
+  _i2.Future<_i8.Envelope> create(
     String name,
-    _i2.UuidValue categoryId,
+    _i1.UuidValue categoryId,
     int budgetedAmountCents,
     String currencyCode,
-  ) => caller.callServerEndpoint<_i7.Envelope>('envelope', 'create', {
-    'name': name,
-    'categoryId': categoryId,
-    'budgetedAmountCents': budgetedAmountCents,
-    'currencyCode': currencyCode,
-  });
+  ) => caller.callServerEndpoint<_i8.Envelope>(
+    'envelope',
+    'create',
+    {
+      'name': name,
+      'categoryId': categoryId,
+      'budgetedAmountCents': budgetedAmountCents,
+      'currencyCode': currencyCode,
+    },
+  );
 
   /// Lists all envelopes for a category.
-  _i3.Future<List<_i7.Envelope>> list(_i2.UuidValue categoryId) =>
-      caller.callServerEndpoint<List<_i7.Envelope>>('envelope', 'list', {
-        'categoryId': categoryId,
-      });
+  _i2.Future<List<_i8.Envelope>> list(_i1.UuidValue categoryId) =>
+      caller.callServerEndpoint<List<_i8.Envelope>>(
+        'envelope',
+        'list',
+        {'categoryId': categoryId},
+      );
 
   /// Gets a single envelope by ID.
-  _i3.Future<_i7.Envelope> get(_i2.UuidValue envelopeId) =>
-      caller.callServerEndpoint<_i7.Envelope>('envelope', 'get', {
-        'envelopeId': envelopeId,
-      });
+  _i2.Future<_i8.Envelope> get(_i1.UuidValue envelopeId) =>
+      caller.callServerEndpoint<_i8.Envelope>(
+        'envelope',
+        'get',
+        {'envelopeId': envelopeId},
+      );
 
   /// Updates an envelope by ID.
-  _i3.Future<_i7.Envelope> update(
-    _i2.UuidValue envelopeId, {
+  _i2.Future<_i8.Envelope> update(
+    _i1.UuidValue envelopeId, {
     String? name,
     int? budgetedAmountCents,
     int? spentAmountCents,
-  }) => caller.callServerEndpoint<_i7.Envelope>('envelope', 'update', {
-    'envelopeId': envelopeId,
-    'name': name,
-    'budgetedAmountCents': budgetedAmountCents,
-    'spentAmountCents': spentAmountCents,
-  });
+  }) => caller.callServerEndpoint<_i8.Envelope>(
+    'envelope',
+    'update',
+    {
+      'envelopeId': envelopeId,
+      'name': name,
+      'budgetedAmountCents': budgetedAmountCents,
+      'spentAmountCents': spentAmountCents,
+    },
+  );
 
   /// Deletes an envelope by ID.
-  _i3.Future<_i7.Envelope> delete(_i2.UuidValue envelopeId) =>
-      caller.callServerEndpoint<_i7.Envelope>('envelope', 'delete', {
-        'envelopeId': envelopeId,
-      });
+  _i2.Future<_i8.Envelope> delete(_i1.UuidValue envelopeId) =>
+      caller.callServerEndpoint<_i8.Envelope>(
+        'envelope',
+        'delete',
+        {'envelopeId': envelopeId},
+      );
 }
 
 /// API surface for transaction operations.
 ///
 /// All methods require authentication.
 /// {@category Endpoint}
-class EndpointTransaction extends _i2.EndpointRef {
-  EndpointTransaction(_i2.EndpointCaller caller) : super(caller);
+class EndpointTransaction extends _i1.EndpointRef {
+  EndpointTransaction(_i1.EndpointCaller caller) : super(caller);
 
   @override
   String get name => 'transaction';
 
   /// Creates a new transaction within a budget.
-  _i3.Future<_i8.Transaction> create(
+  _i2.Future<_i9.Transaction> create(
     String description,
     int amountCents,
     String currencyCode,
-    _i2.UuidValue budgetId,
+    _i1.UuidValue budgetId,
     DateTime transactionDate, {
-    _i2.UuidValue? envelopeId,
-  }) => caller.callServerEndpoint<_i8.Transaction>('transaction', 'create', {
-    'description': description,
-    'amountCents': amountCents,
-    'currencyCode': currencyCode,
-    'budgetId': budgetId,
-    'transactionDate': transactionDate,
-    'envelopeId': envelopeId,
-  });
+    _i1.UuidValue? envelopeId,
+  }) => caller.callServerEndpoint<_i9.Transaction>(
+    'transaction',
+    'create',
+    {
+      'description': description,
+      'amountCents': amountCents,
+      'currencyCode': currencyCode,
+      'budgetId': budgetId,
+      'transactionDate': transactionDate,
+      'envelopeId': envelopeId,
+    },
+  );
 
   /// Lists all transactions for a budget.
-  _i3.Future<List<_i8.Transaction>> list(_i2.UuidValue budgetId) =>
-      caller.callServerEndpoint<List<_i8.Transaction>>('transaction', 'list', {
-        'budgetId': budgetId,
-      });
+  _i2.Future<List<_i9.Transaction>> list(_i1.UuidValue budgetId) =>
+      caller.callServerEndpoint<List<_i9.Transaction>>(
+        'transaction',
+        'list',
+        {'budgetId': budgetId},
+      );
 
   /// Gets a single transaction by ID.
-  _i3.Future<_i8.Transaction> get(_i2.UuidValue transactionId) =>
-      caller.callServerEndpoint<_i8.Transaction>('transaction', 'get', {
-        'transactionId': transactionId,
-      });
+  _i2.Future<_i9.Transaction> get(_i1.UuidValue transactionId) =>
+      caller.callServerEndpoint<_i9.Transaction>(
+        'transaction',
+        'get',
+        {'transactionId': transactionId},
+      );
 
   /// Updates a transaction by ID.
-  _i3.Future<_i8.Transaction> update(
-    _i2.UuidValue transactionId, {
+  _i2.Future<_i9.Transaction> update(
+    _i1.UuidValue transactionId, {
     String? description,
     int? amountCents,
-    _i2.UuidValue? envelopeId,
+    _i1.UuidValue? envelopeId,
     DateTime? transactionDate,
-  }) => caller.callServerEndpoint<_i8.Transaction>('transaction', 'update', {
-    'transactionId': transactionId,
-    'description': description,
-    'amountCents': amountCents,
-    'envelopeId': envelopeId,
-    'transactionDate': transactionDate,
-  });
+  }) => caller.callServerEndpoint<_i9.Transaction>(
+    'transaction',
+    'update',
+    {
+      'transactionId': transactionId,
+      'description': description,
+      'amountCents': amountCents,
+      'envelopeId': envelopeId,
+      'transactionDate': transactionDate,
+    },
+  );
 
   /// Deletes a transaction by ID.
-  _i3.Future<_i8.Transaction> delete(_i2.UuidValue transactionId) =>
-      caller.callServerEndpoint<_i8.Transaction>('transaction', 'delete', {
-        'transactionId': transactionId,
-      });
+  _i2.Future<_i9.Transaction> delete(_i1.UuidValue transactionId) =>
+      caller.callServerEndpoint<_i9.Transaction>(
+        'transaction',
+        'delete',
+        {'transactionId': transactionId},
+      );
 }
 
 class Modules {
   Modules(Client client) {
-    serverpod_auth_idp = _i1.Caller(client);
-    serverpod_auth_core = _i4.Caller(client);
+    serverpod_auth_idp = _i4.Caller(client);
+    serverpod_auth_core = _i5.Caller(client);
   }
 
-  late final _i1.Caller serverpod_auth_idp;
+  late final _i4.Caller serverpod_auth_idp;
 
-  late final _i4.Caller serverpod_auth_core;
+  late final _i5.Caller serverpod_auth_core;
 }
 
-class Client extends _i2.ServerpodClientShared {
+class Client extends _i1.ServerpodClientShared {
   Client(
     String host, {
     dynamic securityContext,
@@ -480,12 +644,17 @@ class Client extends _i2.ServerpodClientShared {
     super.authenticationKeyManager,
     Duration? streamingConnectionTimeout,
     Duration? connectionTimeout,
-    Function(_i2.MethodCallContext, Object, StackTrace)? onFailedCall,
-    Function(_i2.MethodCallContext)? onSucceededCall,
+    Function(
+      _i1.MethodCallContext,
+      Object,
+      StackTrace,
+    )?
+    onFailedCall,
+    Function(_i1.MethodCallContext)? onSucceededCall,
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
          host,
-         _i9.Protocol(),
+         _i10.Protocol(),
          securityContext: securityContext,
          streamingConnectionTimeout: streamingConnectionTimeout,
          connectionTimeout: connectionTimeout,
@@ -494,6 +663,7 @@ class Client extends _i2.ServerpodClientShared {
          disconnectStreamsOnLostInternetConnection:
              disconnectStreamsOnLostInternetConnection,
        ) {
+    account = EndpointAccount(this);
     emailIdp = EndpointEmailIdp(this);
     jwtRefresh = EndpointJwtRefresh(this);
     budget = EndpointBudget(this);
@@ -503,6 +673,8 @@ class Client extends _i2.ServerpodClientShared {
     transaction = EndpointTransaction(this);
     modules = Modules(this);
   }
+
+  late final EndpointAccount account;
 
   late final EndpointEmailIdp emailIdp;
 
@@ -521,7 +693,8 @@ class Client extends _i2.ServerpodClientShared {
   late final Modules modules;
 
   @override
-  Map<String, _i2.EndpointRef> get endpointRefLookup => {
+  Map<String, _i1.EndpointRef> get endpointRefLookup => {
+    'account': account,
     'emailIdp': emailIdp,
     'jwtRefresh': jwtRefresh,
     'budget': budget,
@@ -532,7 +705,7 @@ class Client extends _i2.ServerpodClientShared {
   };
 
   @override
-  Map<String, _i2.ModuleEndpointCaller> get moduleLookup => {
+  Map<String, _i1.ModuleEndpointCaller> get moduleLookup => {
     'serverpod_auth_idp': modules.serverpod_auth_idp,
     'serverpod_auth_core': modules.serverpod_auth_core,
   };

@@ -257,4 +257,74 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get editEnvelopeError => 'Could not update envelope';
+
+  @override
+  String get accountListTitle => 'Accounts';
+
+  @override
+  String get accountLoadError => 'Could not load accounts';
+
+  @override
+  String get accountEmptyTitle => 'No Accounts Yet';
+
+  @override
+  String get accountEmptySubtitle => 'Add your first account to track balances';
+
+  @override
+  String get accountAddTitle => 'Add Account';
+
+  @override
+  String get accountAddButton => 'Add Account';
+
+  @override
+  String get accountNameLabel => 'Account Name';
+
+  @override
+  String get accountTypeLabel => 'Account Type';
+
+  @override
+  String get accountBalanceLabel => 'Starting Balance';
+
+  @override
+  String get accountOnBudgetLabel => 'On Budget';
+
+  @override
+  String get accountOnBudgetHint => 'Include in budget calculations';
+
+  @override
+  String get accountTypeChecking => 'Checking';
+
+  @override
+  String get accountTypeSavings => 'Savings';
+
+  @override
+  String get accountTypeCreditCard => 'Credit Card';
+
+  @override
+  String get accountTypeCash => 'Cash';
+
+  @override
+  String get accountTypeInvestment => 'Investment';
+
+  @override
+  String get accountTypeOther => 'Other';
+
+  @override
+  String get accountOnBudget => 'Budget Accounts';
+
+  @override
+  String get accountOffBudget => 'Tracking Accounts';
+
+  @override
+  String get accountClosed => 'Closed Accounts';
+
+  @override
+  String get accountCreateSuccess => 'Account created';
+
+  @override
+  String get accountCreateError =>
+      'Could not create account. Please try again.';
+
+  @override
+  String get budgetViewAccounts => 'Accounts';
 }

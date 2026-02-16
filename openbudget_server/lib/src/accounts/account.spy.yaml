@@ -1,0 +1,23 @@
+### A financial account within a budget (checking, savings, credit card, cash, etc.).
+class: Account
+table: account
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  name: String
+  ### Account type: checking, savings, creditCard, cash, investment, other.
+  accountType: String
+  ### Current balance in integer cents.
+  balanceCents: int
+  ### ISO 4217 currency code.
+  currencyCode: String
+  budgetId: UuidValue, relation(parent=budget)
+  ### Whether this account is included in the budget's "on budget" calculations.
+  onBudget: bool
+  ### Sort order for display.
+  sortOrder: int
+  ### Whether this account has been closed/archived.
+  isClosed: bool
+  createdAt: DateTime, default=now
+indexes:
+  account_budget_idx:
+    fields: budgetId

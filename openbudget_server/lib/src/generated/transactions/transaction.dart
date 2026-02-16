@@ -22,6 +22,7 @@ abstract class Transaction
     required this.currencyCode,
     this.envelopeId,
     required this.budgetId,
+    this.accountId,
     required this.transactionDate,
     DateTime? createdAt,
   }) : createdAt = createdAt ?? DateTime.now();
@@ -33,6 +34,7 @@ abstract class Transaction
     required String currencyCode,
     _i1.UuidValue? envelopeId,
     required _i1.UuidValue budgetId,
+    _i1.UuidValue? accountId,
     required DateTime transactionDate,
     DateTime? createdAt,
   }) = _TransactionImpl;
@@ -53,6 +55,9 @@ abstract class Transaction
       budgetId: _i1.UuidValueJsonExtension.fromJson(
         jsonSerialization['budgetId'],
       ),
+      accountId: jsonSerialization['accountId'] == null
+          ? null
+          : _i1.UuidValueJsonExtension.fromJson(jsonSerialization['accountId']),
       transactionDate: _i1.DateTimeJsonExtension.fromJson(
         jsonSerialization['transactionDate'],
       ),
@@ -81,6 +86,9 @@ abstract class Transaction
 
   _i1.UuidValue budgetId;
 
+  /// The account this transaction belongs to (optional for backwards compat).
+  _i1.UuidValue? accountId;
+
   DateTime transactionDate;
 
   DateTime createdAt;
@@ -98,6 +106,7 @@ abstract class Transaction
     String? currencyCode,
     _i1.UuidValue? envelopeId,
     _i1.UuidValue? budgetId,
+    _i1.UuidValue? accountId,
     DateTime? transactionDate,
     DateTime? createdAt,
   });
@@ -111,6 +120,7 @@ abstract class Transaction
       'currencyCode': currencyCode,
       if (envelopeId != null) 'envelopeId': envelopeId?.toJson(),
       'budgetId': budgetId.toJson(),
+      if (accountId != null) 'accountId': accountId?.toJson(),
       'transactionDate': transactionDate.toJson(),
       'createdAt': createdAt.toJson(),
     };
@@ -126,6 +136,7 @@ abstract class Transaction
       'currencyCode': currencyCode,
       if (envelopeId != null) 'envelopeId': envelopeId?.toJson(),
       'budgetId': budgetId.toJson(),
+      if (accountId != null) 'accountId': accountId?.toJson(),
       'transactionDate': transactionDate.toJson(),
       'createdAt': createdAt.toJson(),
     };
@@ -171,6 +182,7 @@ class _TransactionImpl extends Transaction {
     required String currencyCode,
     _i1.UuidValue? envelopeId,
     required _i1.UuidValue budgetId,
+    _i1.UuidValue? accountId,
     required DateTime transactionDate,
     DateTime? createdAt,
   }) : super._(
@@ -180,6 +192,7 @@ class _TransactionImpl extends Transaction {
          currencyCode: currencyCode,
          envelopeId: envelopeId,
          budgetId: budgetId,
+         accountId: accountId,
          transactionDate: transactionDate,
          createdAt: createdAt,
        );
@@ -195,6 +208,7 @@ class _TransactionImpl extends Transaction {
     String? currencyCode,
     Object? envelopeId = _Undefined,
     _i1.UuidValue? budgetId,
+    Object? accountId = _Undefined,
     DateTime? transactionDate,
     DateTime? createdAt,
   }) {
@@ -205,6 +219,7 @@ class _TransactionImpl extends Transaction {
       currencyCode: currencyCode ?? this.currencyCode,
       envelopeId: envelopeId is _i1.UuidValue? ? envelopeId : this.envelopeId,
       budgetId: budgetId ?? this.budgetId,
+      accountId: accountId is _i1.UuidValue? ? accountId : this.accountId,
       transactionDate: transactionDate ?? this.transactionDate,
       createdAt: createdAt ?? this.createdAt,
     );
@@ -214,39 +229,90 @@ class _TransactionImpl extends Transaction {
 class TransactionUpdateTable extends _i1.UpdateTable<TransactionTable> {
   TransactionUpdateTable(super.table);
 
-  _i1.ColumnValue<String, String> description(String value) =>
-      _i1.ColumnValue(table.description, value);
+  _i1.ColumnValue<String, String> description(String value) => _i1.ColumnValue(
+    table.description,
+    value,
+  );
 
-  _i1.ColumnValue<int, int> amountCents(int value) =>
-      _i1.ColumnValue(table.amountCents, value);
+  _i1.ColumnValue<int, int> amountCents(int value) => _i1.ColumnValue(
+    table.amountCents,
+    value,
+  );
 
-  _i1.ColumnValue<String, String> currencyCode(String value) =>
-      _i1.ColumnValue(table.currencyCode, value);
+  _i1.ColumnValue<String, String> currencyCode(String value) => _i1.ColumnValue(
+    table.currencyCode,
+    value,
+  );
 
   _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> envelopeId(
     _i1.UuidValue? value,
-  ) => _i1.ColumnValue(table.envelopeId, value);
+  ) => _i1.ColumnValue(
+    table.envelopeId,
+    value,
+  );
 
   _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> budgetId(_i1.UuidValue value) =>
-      _i1.ColumnValue(table.budgetId, value);
+      _i1.ColumnValue(
+        table.budgetId,
+        value,
+      );
+
+  _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> accountId(
+    _i1.UuidValue? value,
+  ) => _i1.ColumnValue(
+    table.accountId,
+    value,
+  );
 
   _i1.ColumnValue<DateTime, DateTime> transactionDate(DateTime value) =>
-      _i1.ColumnValue(table.transactionDate, value);
+      _i1.ColumnValue(
+        table.transactionDate,
+        value,
+      );
 
   _i1.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
-      _i1.ColumnValue(table.createdAt, value);
+      _i1.ColumnValue(
+        table.createdAt,
+        value,
+      );
 }
 
 class TransactionTable extends _i1.Table<_i1.UuidValue?> {
   TransactionTable({super.tableRelation}) : super(tableName: 'transaction') {
     updateTable = TransactionUpdateTable(this);
-    description = _i1.ColumnString('description', this);
-    amountCents = _i1.ColumnInt('amountCents', this);
-    currencyCode = _i1.ColumnString('currencyCode', this);
-    envelopeId = _i1.ColumnUuid('envelopeId', this);
-    budgetId = _i1.ColumnUuid('budgetId', this);
-    transactionDate = _i1.ColumnDateTime('transactionDate', this);
-    createdAt = _i1.ColumnDateTime('createdAt', this, hasDefault: true);
+    description = _i1.ColumnString(
+      'description',
+      this,
+    );
+    amountCents = _i1.ColumnInt(
+      'amountCents',
+      this,
+    );
+    currencyCode = _i1.ColumnString(
+      'currencyCode',
+      this,
+    );
+    envelopeId = _i1.ColumnUuid(
+      'envelopeId',
+      this,
+    );
+    budgetId = _i1.ColumnUuid(
+      'budgetId',
+      this,
+    );
+    accountId = _i1.ColumnUuid(
+      'accountId',
+      this,
+    );
+    transactionDate = _i1.ColumnDateTime(
+      'transactionDate',
+      this,
+    );
+    createdAt = _i1.ColumnDateTime(
+      'createdAt',
+      this,
+      hasDefault: true,
+    );
   }
 
   late final TransactionUpdateTable updateTable;
@@ -263,6 +329,9 @@ class TransactionTable extends _i1.Table<_i1.UuidValue?> {
 
   late final _i1.ColumnUuid budgetId;
 
+  /// The account this transaction belongs to (optional for backwards compat).
+  late final _i1.ColumnUuid accountId;
+
   late final _i1.ColumnDateTime transactionDate;
 
   late final _i1.ColumnDateTime createdAt;
@@ -275,6 +344,7 @@ class TransactionTable extends _i1.Table<_i1.UuidValue?> {
     currencyCode,
     envelopeId,
     budgetId,
+    accountId,
     transactionDate,
     createdAt,
   ];
@@ -398,7 +468,10 @@ class TransactionRepository {
     _i1.UuidValue id, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.findById<Transaction>(id, transaction: transaction);
+    return session.db.findById<Transaction>(
+      id,
+      transaction: transaction,
+    );
   }
 
   /// Inserts all [Transaction]s in the list and returns the inserted rows.
@@ -412,7 +485,10 @@ class TransactionRepository {
     List<Transaction> rows, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.insert<Transaction>(rows, transaction: transaction);
+    return session.db.insert<Transaction>(
+      rows,
+      transaction: transaction,
+    );
   }
 
   /// Inserts a single [Transaction] and returns the inserted row.
@@ -423,7 +499,10 @@ class TransactionRepository {
     Transaction row, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.insertRow<Transaction>(row, transaction: transaction);
+    return session.db.insertRow<Transaction>(
+      row,
+      transaction: transaction,
+    );
   }
 
   /// Updates all [Transaction]s in the list and returns the updated rows. If
@@ -508,7 +587,10 @@ class TransactionRepository {
     List<Transaction> rows, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.delete<Transaction>(rows, transaction: transaction);
+    return session.db.delete<Transaction>(
+      rows,
+      transaction: transaction,
+    );
   }
 
   /// Deletes a single [Transaction].
@@ -517,7 +599,10 @@ class TransactionRepository {
     Transaction row, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.deleteRow<Transaction>(row, transaction: transaction);
+    return session.db.deleteRow<Transaction>(
+      row,
+      transaction: transaction,
+    );
   }
 
   /// Deletes all rows matching the [where] expression.

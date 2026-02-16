@@ -14,3 +14,7 @@ const addExpenseRoute = 'addExpense';
 const addExpensePath = '/budgets/:id/expenses/add';
 const transactionListRoute = 'transactionList';
 const transactionListPath = '/budgets/:id/transactions';
+const accountListRoute = 'accountList';
+const accountListPath = '/budgets/:id/accounts';
+const addAccountRoute = 'addAccount';
+const addAccountPath = '/budgets/:id/accounts/add';

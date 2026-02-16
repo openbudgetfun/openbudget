@@ -10,6 +10,8 @@ fields:
   currencyCode: String
   envelopeId: UuidValue?, relation(parent=envelope)
   budgetId: UuidValue, relation(parent=budget)
+  ### The account this transaction belongs to (optional for backwards compat).
+  accountId: UuidValue?, relation(parent=account)
   transactionDate: DateTime
   createdAt: DateTime, default=now
 indexes:
@@ -17,5 +19,7 @@ indexes:
     fields: envelopeId
   transaction_budget_idx:
     fields: budgetId
+  transaction_account_idx:
+    fields: accountId
   transaction_date_idx:
     fields: transactionDate

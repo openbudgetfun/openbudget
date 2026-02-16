@@ -21,6 +21,7 @@ abstract class Transaction implements _i1.SerializableModel {
     required this.currencyCode,
     this.envelopeId,
     required this.budgetId,
+    this.accountId,
     required this.transactionDate,
     DateTime? createdAt,
   }) : createdAt = createdAt ?? DateTime.now();
@@ -32,6 +33,7 @@ abstract class Transaction implements _i1.SerializableModel {
     required String currencyCode,
     _i1.UuidValue? envelopeId,
     required _i1.UuidValue budgetId,
+    _i1.UuidValue? accountId,
     required DateTime transactionDate,
     DateTime? createdAt,
   }) = _TransactionImpl;
@@ -52,6 +54,9 @@ abstract class Transaction implements _i1.SerializableModel {
       budgetId: _i1.UuidValueJsonExtension.fromJson(
         jsonSerialization['budgetId'],
       ),
+      accountId: jsonSerialization['accountId'] == null
+          ? null
+          : _i1.UuidValueJsonExtension.fromJson(jsonSerialization['accountId']),
       transactionDate: _i1.DateTimeJsonExtension.fromJson(
         jsonSerialization['transactionDate'],
       ),
@@ -78,6 +83,9 @@ abstract class Transaction implements _i1.SerializableModel {
 
   _i1.UuidValue budgetId;
 
+  /// The account this transaction belongs to (optional for backwards compat).
+  _i1.UuidValue? accountId;
+
   DateTime transactionDate;
 
   DateTime createdAt;
@@ -92,6 +100,7 @@ abstract class Transaction implements _i1.SerializableModel {
     String? currencyCode,
     _i1.UuidValue? envelopeId,
     _i1.UuidValue? budgetId,
+    _i1.UuidValue? accountId,
     DateTime? transactionDate,
     DateTime? createdAt,
   });
@@ -105,6 +114,7 @@ abstract class Transaction implements _i1.SerializableModel {
       'currencyCode': currencyCode,
       if (envelopeId != null) 'envelopeId': envelopeId?.toJson(),
       'budgetId': budgetId.toJson(),
+      if (accountId != null) 'accountId': accountId?.toJson(),
       'transactionDate': transactionDate.toJson(),
       'createdAt': createdAt.toJson(),
     };
@@ -126,6 +136,7 @@ class _TransactionImpl extends Transaction {
     required String currencyCode,
     _i1.UuidValue? envelopeId,
     required _i1.UuidValue budgetId,
+    _i1.UuidValue? accountId,
     required DateTime transactionDate,
     DateTime? createdAt,
   }) : super._(
@@ -135,6 +146,7 @@ class _TransactionImpl extends Transaction {
          currencyCode: currencyCode,
          envelopeId: envelopeId,
          budgetId: budgetId,
+         accountId: accountId,
          transactionDate: transactionDate,
          createdAt: createdAt,
        );
@@ -150,6 +162,7 @@ class _TransactionImpl extends Transaction {
     String? currencyCode,
     Object? envelopeId = _Undefined,
     _i1.UuidValue? budgetId,
+    Object? accountId = _Undefined,
     DateTime? transactionDate,
     DateTime? createdAt,
   }) {
@@ -160,6 +173,7 @@ class _TransactionImpl extends Transaction {
       currencyCode: currencyCode ?? this.currencyCode,
       envelopeId: envelopeId is _i1.UuidValue? ? envelopeId : this.envelopeId,
       budgetId: budgetId ?? this.budgetId,
+      accountId: accountId is _i1.UuidValue? ? accountId : this.accountId,
       transactionDate: transactionDate ?? this.transactionDate,
       createdAt: createdAt ?? this.createdAt,
     );
