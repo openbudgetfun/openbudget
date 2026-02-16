@@ -346,6 +346,54 @@ abstract class AppLocalizations {
   /// **'Auto-Assign'**
   String get autoAssignTitle;
 
+  /// No description provided for @bulkAssignEnvelope.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign Envelope'**
+  String get bulkAssignEnvelope;
+
+  /// No description provided for @bulkAssignError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not assign envelope. Please try again.'**
+  String get bulkAssignError;
+
+  /// No description provided for @bulkAssignSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 transaction updated} other{{count} transactions updated}}'**
+  String bulkAssignSuccess(int count);
+
+  /// No description provided for @bulkSelectAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Select All'**
+  String get bulkSelectAll;
+
+  /// No description provided for @bulkCancelSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get bulkCancelSelection;
+
+  /// No description provided for @bulkDeselectAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Deselect All'**
+  String get bulkDeselectAll;
+
+  /// No description provided for @bulkSelectEnvelope.
+  ///
+  /// In en, this message translates to:
+  /// **'Select an envelope to assign'**
+  String get bulkSelectEnvelope;
+
+  /// No description provided for @bulkSelectedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 selected} other{{count} selected}}'**
+  String bulkSelectedCount(int count);
+
   /// No description provided for @budgetAddCategory.
   ///
   /// In en, this message translates to:

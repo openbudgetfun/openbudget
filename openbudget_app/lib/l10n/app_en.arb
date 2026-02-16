@@ -1,5 +1,19 @@
 {
   "@@locale": "en",
+  "@bulkAssignSuccess": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@bulkSelectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "@comparisonMonths": {
     "placeholders": {
       "count": {
@@ -220,6 +234,14 @@
   "autoAssignNothingToAssign": "All envelopes with goals are fully funded!",
   "autoAssignSuccess": "{count, plural, =1{Auto-assigned to 1 envelope} other{Auto-assigned to {count} envelopes}}",
   "autoAssignTitle": "Auto-Assign",
+  "bulkAssignEnvelope": "Assign Envelope",
+  "bulkAssignError": "Could not assign envelope. Please try again.",
+  "bulkAssignSuccess": "{count, plural, =1{1 transaction updated} other{{count} transactions updated}}",
+  "bulkSelectAll": "Select All",
+  "bulkCancelSelection": "Cancel",
+  "bulkDeselectAll": "Deselect All",
+  "bulkSelectEnvelope": "Select an envelope to assign",
+  "bulkSelectedCount": "{count, plural, =1{1 selected} other{{count} selected}}",
   "budgetAddCategory": "Add Category",
   "budgetAddEnvelope": "Add Envelope",
   "budgetAddExpense": "Add Expense",
