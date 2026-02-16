@@ -50,6 +50,8 @@ class AddCategoryDialog extends HookConsumerWidget {
                         final name = nameController.text.trim();
                         if (name.isEmpty) return;
                         isSubmitting.value = true;
+                        final navigator = Navigator.of(context);
+                        final messenger = ScaffoldMessenger.of(context);
                         try {
                           await ref
                               .read(categoryActionsProvider.notifier)
@@ -58,24 +60,20 @@ class AddCategoryDialog extends HookConsumerWidget {
                                 budgetId: budgetId,
                                 sortOrder: nextSortOrder,
                               );
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(l10n.budgetCategoryCreated),
-                              ),
-                            );
-                            Navigator.of(context).pop();
-                          }
+                          messenger.showSnackBar(
+                            SnackBar(
+                              content: Text(l10n.budgetCategoryCreated),
+                            ),
+                          );
+                          navigator.pop();
                         } on Exception catch (_) {
                           isSubmitting.value = false;
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(l10n.budgetCategoryCreateError),
-                                backgroundColor: ColorTokens.error,
-                              ),
-                            );
-                          }
+                          messenger.showSnackBar(
+                            SnackBar(
+                              content: Text(l10n.budgetCategoryCreateError),
+                              backgroundColor: ColorTokens.error,
+                            ),
+                          );
                         }
                       },
                 child: Text(

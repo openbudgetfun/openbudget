@@ -6,7 +6,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'envelope_actions_provider.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 class EnvelopeActions extends _$EnvelopeActions {
   @override
   AsyncValue<void> build() {
@@ -31,13 +31,17 @@ class EnvelopeActions extends _$EnvelopeActions {
         budgetedAmountCents,
         currencyCode,
       );
-      ref
-        ..invalidate(envelopeListProvider(categoryId))
-        ..invalidate(budgetSummaryProvider(budgetId));
-      state = const AsyncValue.data(null);
+      if (ref.mounted) {
+        ref
+          ..invalidate(envelopeListProvider(categoryId))
+          ..invalidate(budgetSummaryProvider(budgetId));
+        state = const AsyncValue.data(null);
+      }
       return envelope;
     } on Exception catch (e, st) {
-      state = AsyncValue.error(e, st);
+      if (ref.mounted) {
+        state = AsyncValue.error(e, st);
+      }
       rethrow;
     }
   }
@@ -61,12 +65,16 @@ class EnvelopeActions extends _$EnvelopeActions {
         budgetedAmountCents: budgetedAmountCents,
         spentAmountCents: spentAmountCents,
       );
-      ref
-        ..invalidate(envelopeListProvider(categoryId))
-        ..invalidate(budgetSummaryProvider(budgetId));
-      state = const AsyncValue.data(null);
+      if (ref.mounted) {
+        ref
+          ..invalidate(envelopeListProvider(categoryId))
+          ..invalidate(budgetSummaryProvider(budgetId));
+        state = const AsyncValue.data(null);
+      }
     } on Exception catch (e, st) {
-      state = AsyncValue.error(e, st);
+      if (ref.mounted) {
+        state = AsyncValue.error(e, st);
+      }
     }
   }
 
@@ -81,12 +89,16 @@ class EnvelopeActions extends _$EnvelopeActions {
       // Serverpod API requires UuidValue which is experimental in uuid package.
       // ignore: experimental_member_use
       await client.envelope.delete(UuidValue.fromString(envelopeId));
-      ref
-        ..invalidate(envelopeListProvider(categoryId))
-        ..invalidate(budgetSummaryProvider(budgetId));
-      state = const AsyncValue.data(null);
+      if (ref.mounted) {
+        ref
+          ..invalidate(envelopeListProvider(categoryId))
+          ..invalidate(budgetSummaryProvider(budgetId));
+        state = const AsyncValue.data(null);
+      }
     } on Exception catch (e, st) {
-      state = AsyncValue.error(e, st);
+      if (ref.mounted) {
+        state = AsyncValue.error(e, st);
+      }
     }
   }
 }

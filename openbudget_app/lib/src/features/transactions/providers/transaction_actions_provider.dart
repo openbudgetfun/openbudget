@@ -7,7 +7,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'transaction_actions_provider.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 class TransactionActions extends _$TransactionActions {
   @override
   AsyncValue<void> build() {
@@ -33,13 +33,17 @@ class TransactionActions extends _$TransactionActions {
         UuidValue.fromString(budgetId),
         date,
       );
-      ref
-        ..invalidate(transactionListProvider(budgetId))
-        ..invalidate(budgetSummaryProvider(budgetId));
-      state = const AsyncValue.data(null);
+      if (ref.mounted) {
+        ref
+          ..invalidate(transactionListProvider(budgetId))
+          ..invalidate(budgetSummaryProvider(budgetId));
+        state = const AsyncValue.data(null);
+      }
       return transaction;
     } on Exception catch (e, st) {
-      state = AsyncValue.error(e, st);
+      if (ref.mounted) {
+        state = AsyncValue.error(e, st);
+      }
       rethrow;
     }
   }
@@ -71,7 +75,7 @@ class TransactionActions extends _$TransactionActions {
             : null,
       );
 
-      if (envelopeId != null && categoryId != null) {
+      if (envelopeId != null && categoryId != null && ref.mounted) {
         await ref
             .read(envelopeActionsProvider.notifier)
             .updateEnvelope(
@@ -82,13 +86,17 @@ class TransactionActions extends _$TransactionActions {
             );
       }
 
-      ref
-        ..invalidate(transactionListProvider(budgetId))
-        ..invalidate(budgetSummaryProvider(budgetId));
-      state = const AsyncValue.data(null);
+      if (ref.mounted) {
+        ref
+          ..invalidate(transactionListProvider(budgetId))
+          ..invalidate(budgetSummaryProvider(budgetId));
+        state = const AsyncValue.data(null);
+      }
       return transaction;
     } on Exception catch (e, st) {
-      state = AsyncValue.error(e, st);
+      if (ref.mounted) {
+        state = AsyncValue.error(e, st);
+      }
       rethrow;
     }
   }

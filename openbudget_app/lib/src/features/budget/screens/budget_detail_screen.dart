@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
+import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/category_actions_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/envelope_actions_provider.dart';
@@ -67,8 +68,13 @@ class BudgetDetailScreen extends HookConsumerWidget {
             ],
           ),
           body: RefreshIndicator(
-            onRefresh: () async =>
-                ref.invalidate(budgetSummaryProvider(budgetId)),
+            onRefresh: () async {
+              ref
+                ..invalidate(budgetDetailProvider(budgetId))
+                ..invalidate(categoryListProvider(budgetId))
+                ..invalidate(transactionListProvider(budgetId))
+                ..invalidate(budgetSummaryProvider(budgetId));
+            },
             child: ListView(
               padding: const EdgeInsets.all(16),
               children: [

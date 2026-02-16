@@ -6,7 +6,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'category_actions_provider.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 class CategoryActions extends _$CategoryActions {
   @override
   AsyncValue<void> build() {
@@ -28,13 +28,17 @@ class CategoryActions extends _$CategoryActions {
         UuidValue.fromString(budgetId),
         sortOrder,
       );
-      ref
-        ..invalidate(categoryListProvider(budgetId))
-        ..invalidate(budgetSummaryProvider(budgetId));
-      state = const AsyncValue.data(null);
+      if (ref.mounted) {
+        ref
+          ..invalidate(categoryListProvider(budgetId))
+          ..invalidate(budgetSummaryProvider(budgetId));
+        state = const AsyncValue.data(null);
+      }
       return category;
     } on Exception catch (e, st) {
-      state = AsyncValue.error(e, st);
+      if (ref.mounted) {
+        state = AsyncValue.error(e, st);
+      }
       rethrow;
     }
   }
@@ -49,12 +53,16 @@ class CategoryActions extends _$CategoryActions {
       // Serverpod API requires UuidValue which is experimental in uuid package.
       // ignore: experimental_member_use
       await client.category.delete(UuidValue.fromString(categoryId));
-      ref
-        ..invalidate(categoryListProvider(budgetId))
-        ..invalidate(budgetSummaryProvider(budgetId));
-      state = const AsyncValue.data(null);
+      if (ref.mounted) {
+        ref
+          ..invalidate(categoryListProvider(budgetId))
+          ..invalidate(budgetSummaryProvider(budgetId));
+        state = const AsyncValue.data(null);
+      }
     } on Exception catch (e, st) {
-      state = AsyncValue.error(e, st);
+      if (ref.mounted) {
+        state = AsyncValue.error(e, st);
+      }
     }
   }
 }

@@ -20,7 +20,7 @@ final class CategoryActionsProvider
         argument: null,
         retry: null,
         name: r'categoryActionsProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -41,7 +41,7 @@ final class CategoryActionsProvider
   }
 }
 
-String _$categoryActionsHash() => r'07214a044a715d0a01b86ce4e30829798c25fc7e';
+String _$categoryActionsHash() => r'4213fec94314c74497af254cbcd29e30e373baad';
 
 abstract class _$CategoryActions extends $Notifier<AsyncValue<void>> {
   AsyncValue<void> build();

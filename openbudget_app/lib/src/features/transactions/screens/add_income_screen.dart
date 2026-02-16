@@ -78,6 +78,8 @@ class AddIncomeScreen extends HookConsumerWidget {
                                   (amount * _pow10(currency.decimals)).round();
 
                               isSubmitting.value = true;
+                              final messenger = ScaffoldMessenger.of(context);
+                              final router = GoRouter.of(context);
                               try {
                                 await ref
                                     .read(transactionActionsProvider.notifier)
@@ -88,24 +90,20 @@ class AddIncomeScreen extends HookConsumerWidget {
                                       budgetId: budgetId,
                                       date: DateTime.now(),
                                     );
-                                if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(l10n.transactionSuccess),
-                                    ),
-                                  );
-                                  context.go('/budgets/$budgetId');
-                                }
+                                messenger.showSnackBar(
+                                  SnackBar(
+                                    content: Text(l10n.transactionSuccess),
+                                  ),
+                                );
+                                router.go('/budgets/$budgetId');
                               } on Exception catch (_) {
                                 isSubmitting.value = false;
-                                if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(l10n.transactionError),
-                                      backgroundColor: ColorTokens.error,
-                                    ),
-                                  );
-                                }
+                                messenger.showSnackBar(
+                                  SnackBar(
+                                    content: Text(l10n.transactionError),
+                                    backgroundColor: ColorTokens.error,
+                                  ),
+                                );
                               }
                             },
                       child: Text(

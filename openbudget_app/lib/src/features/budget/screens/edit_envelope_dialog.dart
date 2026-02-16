@@ -70,6 +70,8 @@ class EditEnvelopeDialog extends HookConsumerWidget {
                             (amount * _pow10(currencyCode.decimals)).round();
 
                         isSubmitting.value = true;
+                        final navigator = Navigator.of(context);
+                        final messenger = ScaffoldMessenger.of(context);
                         try {
                           await ref
                               .read(envelopeActionsProvider.notifier)
@@ -80,22 +82,18 @@ class EditEnvelopeDialog extends HookConsumerWidget {
                                 name: name,
                                 budgetedAmountCents: amountCents,
                               );
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(l10n.editEnvelopeSaved)),
-                            );
-                            Navigator.of(context).pop();
-                          }
+                          messenger.showSnackBar(
+                            SnackBar(content: Text(l10n.editEnvelopeSaved)),
+                          );
+                          navigator.pop();
                         } on Exception catch (_) {
                           isSubmitting.value = false;
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(l10n.editEnvelopeError),
-                                backgroundColor: ColorTokens.error,
-                              ),
-                            );
-                          }
+                          messenger.showSnackBar(
+                            SnackBar(
+                              content: Text(l10n.editEnvelopeError),
+                              backgroundColor: ColorTokens.error,
+                            ),
+                          );
                         }
                       },
                 child: Text(

@@ -21,30 +21,39 @@ class BudgetHeader extends HookConsumerWidget {
     final color = readyToAssignCents > 0
         ? ColorTokens.secondary
         : readyToAssignCents < 0
-        ? ColorTokens.error
-        : ColorTokens.tertiary;
+            ? ColorTokens.error
+            : ColorTokens.tertiary;
+    final bgColor = readyToAssignCents > 0
+        ? ColorTokens.secondary.withAlpha(20)
+        : readyToAssignCents < 0
+            ? ColorTokens.error.withAlpha(20)
+            : ColorTokens.tertiary.withAlpha(20);
 
-    return WiredCard(
-      height: 90,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              l10n.budgetReadyToAssign,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              formatCents(readyToAssignCents, currencyCode),
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                color: color,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
+    return Container(
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withAlpha(80)),
+      ),
+      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            l10n.budgetReadyToAssign,
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  color: color.withAlpha(200),
+                ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            formatCents(readyToAssignCents, currencyCode),
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  color: color,
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+        ],
       ),
     );
   }

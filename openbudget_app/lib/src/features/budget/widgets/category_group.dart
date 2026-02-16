@@ -42,40 +42,56 @@ class CategoryGroup extends HookConsumerWidget {
             onLongPress: onDeleteCategory,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              color: ColorTokens.primary.withAlpha(25),
+              color: ColorTokens.primary.withAlpha(30),
               child: Row(
                 children: [
                   Expanded(
-                    flex: 3,
+                    flex: 4,
                     child: Text(
-                      category.name,
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                      category.name.toUpperCase(),
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.5,
+                          ),
                     ),
                   ),
                   Expanded(
-                    flex: 2,
+                    flex: 3,
                     child: Text(
                       l10n.budgetColumnBudgeted,
                       textAlign: TextAlign.right,
-                      style: Theme.of(context).textTheme.labelSmall,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withAlpha(150),
+                          ),
                     ),
                   ),
                   Expanded(
-                    flex: 2,
+                    flex: 3,
                     child: Text(
                       l10n.budgetColumnSpent,
                       textAlign: TextAlign.right,
-                      style: Theme.of(context).textTheme.labelSmall,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withAlpha(150),
+                          ),
                     ),
                   ),
                   Expanded(
-                    flex: 2,
+                    flex: 3,
                     child: Text(
                       l10n.budgetColumnAvailable,
                       textAlign: TextAlign.right,
-                      style: Theme.of(context).textTheme.labelSmall,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withAlpha(150),
+                          ),
                     ),
                   ),
                 ],
@@ -93,63 +109,65 @@ class CategoryGroup extends HookConsumerWidget {
           ),
           if (envelopes.isNotEmpty) const WiredDivider(),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             child: Row(
               children: [
-                const SizedBox(width: 16),
+                const SizedBox(width: 4),
                 Expanded(
-                  flex: 3,
+                  flex: 4,
                   child: Text(
                     l10n.budgetCategoryTotal,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
                 ),
                 Expanded(
-                  flex: 2,
+                  flex: 3,
                   child: Text(
                     formatCents(
                       categoryWithEnvelopes.totalBudgetedCents,
                       currencyCode,
                     ),
                     textAlign: TextAlign.right,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
                 ),
                 Expanded(
-                  flex: 2,
+                  flex: 3,
                   child: Text(
                     formatCents(
                       categoryWithEnvelopes.totalSpentCents,
                       currencyCode,
                     ),
                     textAlign: TextAlign.right,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: categoryWithEnvelopes.totalSpentCents > 0
-                          ? ColorTokens.error
-                          : null,
-                    ),
+                          fontWeight: FontWeight.bold,
+                          color: categoryWithEnvelopes.totalSpentCents > 0
+                              ? ColorTokens.error
+                              : null,
+                        ),
                   ),
                 ),
-                Expanded(
-                  flex: 2,
-                  child: Text(
-                    formatCents(
-                      categoryWithEnvelopes.totalAvailableCents,
-                      currencyCode,
-                    ),
-                    textAlign: TextAlign.right,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: _availableColor(
-                        categoryWithEnvelopes.totalAvailableCents,
-                      ),
-                    ),
+                const SizedBox(width: 4),
+                Text(
+                  formatCents(
+                    categoryWithEnvelopes.totalAvailableCents,
+                    currencyCode,
                   ),
+                  maxLines: 1,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: _availableColor(
+                          categoryWithEnvelopes.totalAvailableCents,
+                        ),
+                      ),
                 ),
               ],
             ),
