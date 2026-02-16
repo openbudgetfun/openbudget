@@ -10,6 +10,8 @@ import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
+enum _StatusFilter { all, uncleared, cleared, reconciled }
+
 class AccountDetailScreen extends HookConsumerWidget {
   const AccountDetailScreen({
     required this.budgetId,
@@ -30,6 +32,11 @@ class AccountDetailScreen extends HookConsumerWidget {
       accountTransactionsProvider(budgetId, accountId),
     );
 
+    final isSearching = useState(false);
+    final searchQuery = useState('');
+    final searchController = useTextEditingController();
+    final statusFilter = useState(_StatusFilter.all);
+
     final accountData = accountsAsync
         .whenData(
           (accounts) =>
@@ -49,8 +56,30 @@ class AccountDetailScreen extends HookConsumerWidget {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.go('/budgets/$budgetId/accounts'),
         ),
-        title: Text(accountData?.name ?? l10n.accountListTitle),
+        title: isSearching.value
+            ? TextField(
+                controller: searchController,
+                autofocus: true,
+                decoration: InputDecoration(
+                  hintText: l10n.accountDetailSearchHint,
+                  border: InputBorder.none,
+                ),
+                onChanged: (value) => searchQuery.value = value,
+              )
+            : Text(accountData?.name ?? l10n.accountListTitle),
         actions: [
+          IconButton(
+            icon: Icon(
+              isSearching.value ? Icons.close_rounded : Icons.search_rounded,
+            ),
+            onPressed: () {
+              isSearching.value = !isSearching.value;
+              if (!isSearching.value) {
+                searchController.clear();
+                searchQuery.value = '';
+              }
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.check_circle_outline_rounded),
             tooltip: l10n.reconcileButton,
@@ -111,6 +140,32 @@ class AccountDetailScreen extends HookConsumerWidget {
                 ],
               ),
             ),
+          // Status filter chips.
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: SpacingTokens.md,
+              vertical: SpacingTokens.sm,
+            ),
+            child: Row(
+              children: [
+                for (final filter in _StatusFilter.values) ...[
+                  if (filter != _StatusFilter.values.first)
+                    const SizedBox(width: SpacingTokens.xs),
+                  ChoiceChip(
+                    label: Text(switch (filter) {
+                      _StatusFilter.all => l10n.accountFilterAll,
+                      _StatusFilter.uncleared => l10n.accountFilterUncleared,
+                      _StatusFilter.cleared => l10n.accountFilterCleared,
+                      _StatusFilter.reconciled => l10n.accountFilterReconciled,
+                    }),
+                    selected: statusFilter.value == filter,
+                    onSelected: (_) => statusFilter.value = filter,
+                    visualDensity: VisualDensity.compact,
+                  ),
+                ],
+              ],
+            ),
+          ),
           Expanded(
             child: txnAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
@@ -123,10 +178,36 @@ class AccountDetailScreen extends HookConsumerWidget {
                 ),
               ),
               data: (transactions) {
-                if (transactions.isEmpty) {
+                // Apply search filter.
+                var filtered = transactions;
+                if (searchQuery.value.isNotEmpty) {
+                  final query = searchQuery.value.toLowerCase();
+                  filtered = filtered
+                      .where(
+                        (t) =>
+                            t.description.toLowerCase().contains(query) ||
+                            (t.memo?.toLowerCase().contains(query) ?? false),
+                      )
+                      .toList();
+                }
+
+                // Apply status filter.
+                filtered = switch (statusFilter.value) {
+                  _StatusFilter.all => filtered,
+                  _StatusFilter.uncleared =>
+                    filtered.where((t) => !t.cleared && !t.reconciled).toList(),
+                  _StatusFilter.cleared =>
+                    filtered.where((t) => t.cleared && !t.reconciled).toList(),
+                  _StatusFilter.reconciled =>
+                    filtered.where((t) => t.reconciled).toList(),
+                };
+
+                if (filtered.isEmpty) {
                   return Center(
                     child: Text(
-                      l10n.transactionEmpty,
+                      searchQuery.value.isNotEmpty
+                          ? l10n.transactionNoResults
+                          : l10n.transactionEmpty,
                       style: theme.textTheme.bodyLarge?.copyWith(
                         color: colorScheme.onSurfaceVariant,
                       ),
@@ -134,18 +215,17 @@ class AccountDetailScreen extends HookConsumerWidget {
                   );
                 }
 
-                // Compute running balances. Transactions are newest-first.
-                // Current balance = starting balance + sum of all txn amounts.
+                // Compute running balances on full list, then map to filtered.
                 final startingBalance = accountData?.balanceCents ?? 0;
                 final totalTxnAmount = transactions.fold<int>(
                   0,
                   (sum, t) => sum + t.amountCents,
                 );
                 final currentBalance = startingBalance + totalTxnAmount;
-                final runningBalances = <int>[];
+                final balanceMap = <String, int>{};
                 var balance = currentBalance;
                 for (var i = 0; i < transactions.length; i++) {
-                  runningBalances.add(balance);
+                  balanceMap[transactions[i].id?.toString() ?? '$i'] = balance;
                   balance -= transactions[i].amountCents;
                 }
 
@@ -159,13 +239,15 @@ class AccountDetailScreen extends HookConsumerWidget {
                     padding: const EdgeInsets.symmetric(
                       vertical: SpacingTokens.sm,
                     ),
-                    itemCount: transactions.length,
+                    itemCount: filtered.length,
                     itemBuilder: (context, index) {
-                      final txn = transactions[index];
+                      final txn = filtered[index];
+                      final runningBalance =
+                          balanceMap[txn.id?.toString() ?? '$index'] ?? 0;
                       return _TransactionRow(
                         transaction: txn,
                         currencyCode: currencyCode,
-                        runningBalanceCents: runningBalances[index],
+                        runningBalanceCents: runningBalance,
                         onToggleCleared: txn.reconciled
                             ? null
                             : () => _toggleCleared(context, ref, txn),

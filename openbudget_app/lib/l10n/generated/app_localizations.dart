@@ -184,6 +184,36 @@ abstract class AppLocalizations {
   /// **'Balance'**
   String get accountDetailBalance;
 
+  /// No description provided for @accountDetailSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search transactions...'**
+  String get accountDetailSearchHint;
+
+  /// No description provided for @accountFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get accountFilterAll;
+
+  /// No description provided for @accountFilterUncleared.
+  ///
+  /// In en, this message translates to:
+  /// **'Uncleared'**
+  String get accountFilterUncleared;
+
+  /// No description provided for @accountFilterCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'Cleared'**
+  String get accountFilterCleared;
+
+  /// No description provided for @accountFilterReconciled.
+  ///
+  /// In en, this message translates to:
+  /// **'Reconciled'**
+  String get accountFilterReconciled;
+
   /// No description provided for @accountEditError.
   ///
   /// In en, this message translates to:
