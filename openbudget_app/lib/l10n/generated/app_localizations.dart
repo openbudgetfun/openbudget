@@ -1636,6 +1636,72 @@ abstract class AppLocalizations {
   /// **'Start Date'**
   String get recurringStartDate;
 
+  /// No description provided for @scheduledCalendarTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule Calendar'**
+  String get scheduledCalendarTitle;
+
+  /// No description provided for @scheduledCalendarLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load calendar data'**
+  String get scheduledCalendarLoadError;
+
+  /// No description provided for @scheduledCalendarNoEvents.
+  ///
+  /// In en, this message translates to:
+  /// **'No scheduled transactions on this day'**
+  String get scheduledCalendarNoEvents;
+
+  /// No description provided for @scheduledCalendarSelectDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a day to see scheduled transactions'**
+  String get scheduledCalendarSelectDay;
+
+  /// No description provided for @scheduledCalendarMon.
+  ///
+  /// In en, this message translates to:
+  /// **'Mon'**
+  String get scheduledCalendarMon;
+
+  /// No description provided for @scheduledCalendarTue.
+  ///
+  /// In en, this message translates to:
+  /// **'Tue'**
+  String get scheduledCalendarTue;
+
+  /// No description provided for @scheduledCalendarWed.
+  ///
+  /// In en, this message translates to:
+  /// **'Wed'**
+  String get scheduledCalendarWed;
+
+  /// No description provided for @scheduledCalendarThu.
+  ///
+  /// In en, this message translates to:
+  /// **'Thu'**
+  String get scheduledCalendarThu;
+
+  /// No description provided for @scheduledCalendarFri.
+  ///
+  /// In en, this message translates to:
+  /// **'Fri'**
+  String get scheduledCalendarFri;
+
+  /// No description provided for @scheduledCalendarSat.
+  ///
+  /// In en, this message translates to:
+  /// **'Sat'**
+  String get scheduledCalendarSat;
+
+  /// No description provided for @scheduledCalendarSun.
+  ///
+  /// In en, this message translates to:
+  /// **'Sun'**
+  String get scheduledCalendarSun;
+
   /// No description provided for @registerAlreadyHaveAccount.
   ///
   /// In en, this message translates to:

@@ -11,6 +11,7 @@ import 'package:openbudget_app/src/features/budget/screens/budget_detail_screen.
 import 'package:openbudget_app/src/features/budget/screens/create_budget_screen.dart';
 import 'package:openbudget_app/src/features/home/screens/home_screen.dart';
 import 'package:openbudget_app/src/features/payees/screens/payee_list_screen.dart';
+import 'package:openbudget_app/src/features/recurring/screens/recurring_calendar_screen.dart';
 import 'package:openbudget_app/src/features/recurring/screens/recurring_list_screen.dart';
 import 'package:openbudget_app/src/features/reports/screens/category_trends_screen.dart';
 import 'package:openbudget_app/src/features/reports/screens/multi_month_comparison_screen.dart';
@@ -213,6 +214,14 @@ GoRouter appRouter(Ref ref) {
         builder: (context, state) {
           final id = state.pathParameters['id']!;
           return MultiMonthComparisonScreen(budgetId: id);
+        },
+      ),
+      GoRoute(
+        name: recurringCalendarRoute,
+        path: recurringCalendarPath,
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return RecurringCalendarScreen(budgetId: id);
         },
       ),
       GoRoute(

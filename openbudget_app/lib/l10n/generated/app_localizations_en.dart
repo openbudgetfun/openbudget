@@ -960,6 +960,41 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recurringStartDate => 'Start Date';
 
   @override
+  String get scheduledCalendarTitle => 'Schedule Calendar';
+
+  @override
+  String get scheduledCalendarLoadError => 'Could not load calendar data';
+
+  @override
+  String get scheduledCalendarNoEvents =>
+      'No scheduled transactions on this day';
+
+  @override
+  String get scheduledCalendarSelectDay =>
+      'Tap a day to see scheduled transactions';
+
+  @override
+  String get scheduledCalendarMon => 'Mon';
+
+  @override
+  String get scheduledCalendarTue => 'Tue';
+
+  @override
+  String get scheduledCalendarWed => 'Wed';
+
+  @override
+  String get scheduledCalendarThu => 'Thu';
+
+  @override
+  String get scheduledCalendarFri => 'Fri';
+
+  @override
+  String get scheduledCalendarSat => 'Sat';
+
+  @override
+  String get scheduledCalendarSun => 'Sun';
+
+  @override
   String get registerAlreadyHaveAccount => 'Already have an account? Sign In';
 
   @override
