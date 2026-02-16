@@ -966,4 +966,29 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get transactionMemoHint => 'Add a note (optional)';
+
+  @override
+  String get accountEditTitle => 'Edit Account';
+
+  @override
+  String get accountEditSuccess => 'Account updated';
+
+  @override
+  String get accountEditError => 'Could not update account. Please try again.';
+
+  @override
+  String get accountCloseButton => 'Close Account';
+
+  @override
+  String get accountCloseConfirm =>
+      'Close this account? It will be moved to Closed Accounts.';
+
+  @override
+  String get accountCloseSuccess => 'Account closed';
+
+  @override
+  String get accountReopenButton => 'Reopen Account';
+
+  @override
+  String get accountReopenSuccess => 'Account reopened';
 }

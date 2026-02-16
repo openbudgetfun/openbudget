@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
+import 'package:openbudget_app/src/features/accounts/screens/edit_account_dialog.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
@@ -241,25 +242,51 @@ class _AccountTile extends HookWidget {
       margin: const EdgeInsets.only(bottom: SpacingTokens.xs),
       child: ListTile(
         onTap: () => context.go('/budgets/$budgetId/accounts/${account.id}'),
+        onLongPress: () => showDialog<void>(
+          context: context,
+          builder: (_) =>
+              EditAccountDialog(account: account, budgetId: budgetId),
+        ),
         leading: CircleAvatar(
           backgroundColor: colorScheme.secondaryContainer,
           child: Icon(icon, color: colorScheme.onSecondaryContainer, size: 20),
         ),
-        title: Text(account.name, style: theme.textTheme.titleMedium),
+        title: Row(
+          children: [
+            Flexible(
+              child: Text(account.name, style: theme.textTheme.titleMedium),
+            ),
+            if (account.isClosed) ...[
+              const SizedBox(width: SpacingTokens.xs),
+              Icon(
+                Icons.lock_outline_rounded,
+                size: 16,
+                color: colorScheme.outline,
+              ),
+            ],
+          ],
+        ),
         subtitle: Text(
           _labelForType(account.accountType),
           style: theme.textTheme.bodySmall?.copyWith(
             color: colorScheme.onSurfaceVariant,
           ),
         ),
-        trailing: Text(
-          formatCents(account.balanceCents, currency),
-          style: theme.textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: account.balanceCents >= 0
-                ? colorScheme.primary
-                : colorScheme.error,
-          ),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              formatCents(account.balanceCents, currency),
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: account.balanceCents >= 0
+                    ? colorScheme.primary
+                    : colorScheme.error,
+              ),
+            ),
+            const SizedBox(width: SpacingTokens.xs),
+            Icon(Icons.edit_outlined, size: 16, color: colorScheme.outline),
+          ],
         ),
       ),
     );

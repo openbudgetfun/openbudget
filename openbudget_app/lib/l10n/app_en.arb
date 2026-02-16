@@ -374,5 +374,13 @@
   "budgetReorderSuccess": "Categories reordered",
   "budgetReorderError": "Could not reorder categories",
   "transactionMemoLabel": "Memo",
-  "transactionMemoHint": "Add a note (optional)"
+  "transactionMemoHint": "Add a note (optional)",
+  "accountEditTitle": "Edit Account",
+  "accountEditSuccess": "Account updated",
+  "accountEditError": "Could not update account. Please try again.",
+  "accountCloseButton": "Close Account",
+  "accountCloseConfirm": "Close this account? It will be moved to Closed Accounts.",
+  "accountCloseSuccess": "Account closed",
+  "accountReopenButton": "Reopen Account",
+  "accountReopenSuccess": "Account reopened"
 }
