@@ -117,12 +117,32 @@ class AccountListScreen extends HookConsumerWidget {
               .toList();
           final closed = accountList.where((a) => a.isClosed).toList();
 
+          final allOpen =
+              accountList.where((a) => !a.isClosed).toList();
+          final assets = allOpen
+              .where((a) => a.balanceCents >= 0)
+              .fold<int>(0, (sum, a) => sum + a.balanceCents);
+          final liabilities = allOpen
+              .where((a) => a.balanceCents < 0)
+              .fold<int>(0, (sum, a) => sum + a.balanceCents);
+          final netWorth = assets + liabilities;
+          final summaryCurrency = allOpen.isNotEmpty
+              ? _parseCurrency(allOpen.first.currencyCode)
+              : CurrencyCode.usd;
+
           return RefreshIndicator(
             onRefresh: () async =>
                 ref.invalidate(accountListProvider(budgetId)),
             child: ListView(
               padding: const EdgeInsets.all(SpacingTokens.md),
               children: [
+                _NetWorthCard(
+                  assets: assets,
+                  liabilities: liabilities,
+                  netWorth: netWorth,
+                  currencyCode: summaryCurrency,
+                ),
+                const SizedBox(height: SpacingTokens.md),
                 if (onBudget.isNotEmpty) ...[
                   _SectionHeader(
                     title: l10n.accountOnBudget,
@@ -318,4 +338,111 @@ class _AccountTile extends HookWidget {
         'investment' => l10n.accountTypeInvestment,
         _ => l10n.accountTypeOther,
       };
+}
+
+class _NetWorthCard extends HookWidget {
+  const _NetWorthCard({
+    required this.assets,
+    required this.liabilities,
+    required this.netWorth,
+    required this.currencyCode,
+  });
+
+  final int assets;
+  final int liabilities;
+  final int netWorth;
+  final CurrencyCode currencyCode;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(SpacingTokens.md),
+        child: Column(
+          children: [
+            Text(
+              l10n.accountNetWorth,
+              style: theme.textTheme.labelMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: SpacingTokens.xs),
+            Text(
+              formatCents(netWorth, currencyCode),
+              style: theme.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: netWorth >= 0 ? colorScheme.primary : colorScheme.error,
+              ),
+            ),
+            const SizedBox(height: SpacingTokens.sm),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _NetWorthMetric(
+                  label: l10n.accountTotalAssets,
+                  amount: assets,
+                  currencyCode: currencyCode,
+                  color: ColorTokens.secondary,
+                ),
+                Container(
+                  width: 1,
+                  height: 24,
+                  color: colorScheme.outlineVariant,
+                ),
+                _NetWorthMetric(
+                  label: l10n.accountTotalLiabilities,
+                  amount: liabilities,
+                  currencyCode: currencyCode,
+                  color: ColorTokens.error,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _NetWorthMetric extends HookWidget {
+  const _NetWorthMetric({
+    required this.label,
+    required this.amount,
+    required this.currencyCode,
+    required this.color,
+  });
+
+  final String label;
+  final int amount;
+  final CurrencyCode currencyCode;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          label,
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          formatCents(amount, currencyCode),
+          style: theme.textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: color,
+          ),
+        ),
+      ],
+    );
+  }
 }
