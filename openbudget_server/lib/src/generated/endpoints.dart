@@ -23,10 +23,12 @@ import '../monthly_allocations/monthly_allocation_endpoint.dart' as _i10;
 import '../payees/payee_endpoint.dart' as _i11;
 import '../recurring_transactions/recurring_transaction_endpoint.dart' as _i12;
 import '../transactions/transaction_endpoint.dart' as _i13;
-import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
+import 'package:openbudget_server/src/generated/transactions/split_item.dart'
     as _i14;
-import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
+import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
     as _i15;
+import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
+    as _i16;
 
 class Endpoints extends _i1.EndpointDispatch {
   @override
@@ -1515,6 +1517,79 @@ class Endpoints extends _i1.EndpointDispatch {
                 params['budgetId'],
               ),
         ),
+        'createSplit': _i1.MethodConnector(
+          name: 'createSplit',
+          params: {
+            'description': _i1.ParameterDescription(
+              name: 'description',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'totalAmountCents': _i1.ParameterDescription(
+              name: 'totalAmountCents',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'currencyCode': _i1.ParameterDescription(
+              name: 'currencyCode',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'budgetId': _i1.ParameterDescription(
+              name: 'budgetId',
+              type: _i1.getType<_i1.UuidValue>(),
+              nullable: false,
+            ),
+            'transactionDate': _i1.ParameterDescription(
+              name: 'transactionDate',
+              type: _i1.getType<DateTime>(),
+              nullable: false,
+            ),
+            'splits': _i1.ParameterDescription(
+              name: 'splits',
+              type: _i1.getType<List<_i14.SplitItem>>(),
+              nullable: false,
+            ),
+            'payeeId': _i1.ParameterDescription(
+              name: 'payeeId',
+              type: _i1.getType<_i1.UuidValue?>(),
+              nullable: true,
+            ),
+            'accountId': _i1.ParameterDescription(
+              name: 'accountId',
+              type: _i1.getType<_i1.UuidValue?>(),
+              nullable: true,
+            ),
+          },
+          call: (_i1.Session session, Map<String, dynamic> params) async =>
+              (endpoints['transaction'] as _i13.TransactionEndpoint)
+                  .createSplit(
+                    session,
+                    params['description'],
+                    params['totalAmountCents'],
+                    params['currencyCode'],
+                    params['budgetId'],
+                    params['transactionDate'],
+                    params['splits'],
+                    payeeId: params['payeeId'],
+                    accountId: params['accountId'],
+                  ),
+        ),
+        'listSplits': _i1.MethodConnector(
+          name: 'listSplits',
+          params: {
+            'parentTransactionId': _i1.ParameterDescription(
+              name: 'parentTransactionId',
+              type: _i1.getType<_i1.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call: (_i1.Session session, Map<String, dynamic> params) async =>
+              (endpoints['transaction'] as _i13.TransactionEndpoint).listSplits(
+                session,
+                params['parentTransactionId'],
+              ),
+        ),
         'delete': _i1.MethodConnector(
           name: 'delete',
           params: {
@@ -1532,9 +1607,9 @@ class Endpoints extends _i1.EndpointDispatch {
         ),
       },
     );
-    modules['serverpod_auth_idp'] = _i14.Endpoints()
+    modules['serverpod_auth_idp'] = _i15.Endpoints()
       ..initializeEndpoints(server);
-    modules['serverpod_auth_core'] = _i15.Endpoints()
+    modules['serverpod_auth_core'] = _i16.Endpoints()
       ..initializeEndpoints(server);
   }
 }

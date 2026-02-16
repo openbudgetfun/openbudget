@@ -30,6 +30,8 @@ import 'package:openbudget_server/src/generated/recurring_transactions/recurring
     as _i12;
 import 'package:openbudget_server/src/generated/transactions/transaction.dart'
     as _i13;
+import 'package:openbudget_server/src/generated/transactions/split_item.dart'
+    as _i14;
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:openbudget_server/src/generated/endpoints.dart';
 export 'package:serverpod_test/serverpod_test_public_exports.dart';
@@ -2309,6 +2311,86 @@ class _TransactionEndpoint {
                   _localCallContext.arguments,
                 )
                 as _i3.Future<int?>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<List<_i13.Transaction>> createSplit(
+    _i1.TestSessionBuilder sessionBuilder,
+    String description,
+    int totalAmountCents,
+    String currencyCode,
+    _i2.UuidValue budgetId,
+    DateTime transactionDate,
+    List<_i14.SplitItem> splits, {
+    _i2.UuidValue? payeeId,
+    _i2.UuidValue? accountId,
+  }) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'transaction',
+            method: 'createSplit',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'transaction',
+          methodName: 'createSplit',
+          parameters: _i1.testObjectToJson({
+            'description': description,
+            'totalAmountCents': totalAmountCents,
+            'currencyCode': currencyCode,
+            'budgetId': budgetId,
+            'transactionDate': transactionDate,
+            'splits': splits,
+            'payeeId': payeeId,
+            'accountId': accountId,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<List<_i13.Transaction>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<List<_i13.Transaction>> listSplits(
+    _i1.TestSessionBuilder sessionBuilder,
+    _i2.UuidValue parentTransactionId,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'transaction',
+            method: 'listSplits',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'transaction',
+          methodName: 'listSplits',
+          parameters: _i1.testObjectToJson({
+            'parentTransactionId': parentTransactionId,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<List<_i13.Transaction>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();

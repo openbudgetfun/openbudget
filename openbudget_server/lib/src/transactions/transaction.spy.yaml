@@ -17,6 +17,8 @@ fields:
   transactionDate: DateTime
   ### If this transaction is part of a transfer, this links to the paired transaction.
   transferPairId: UuidValue?
+  ### If this is a split sub-transaction, links to the parent transaction.
+  parentTransactionId: UuidValue?
   ### Whether this transaction has been cleared by the user.
   cleared: bool, default=false
   ### Whether this transaction has been reconciled.
@@ -33,3 +35,5 @@ indexes:
     fields: payeeId
   transaction_date_idx:
     fields: transactionDate
+  transaction_parent_idx:
+    fields: parentTransactionId

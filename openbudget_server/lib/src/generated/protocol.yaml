@@ -68,4 +68,6 @@ transaction:
   - toggleCleared:
   - reconcileAccount:
   - ageOfMoney:
+  - createSplit:
+  - listSplits:
   - delete:

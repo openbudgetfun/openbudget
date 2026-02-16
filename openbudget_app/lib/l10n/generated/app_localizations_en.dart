@@ -689,4 +689,52 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get quickBudgetError => 'Could not load budget suggestions';
+
+  @override
+  String get splitTransactionTitle => 'Split Transaction';
+
+  @override
+  String get splitAddSplit => 'Add Split';
+
+  @override
+  String get splitRemoveSplit => 'Remove';
+
+  @override
+  String get splitEnvelopeLabel => 'Envelope';
+
+  @override
+  String get splitAmountLabel => 'Amount';
+
+  @override
+  String get splitMemoLabel => 'Memo (optional)';
+
+  @override
+  String get splitRemainingLabel => 'Remaining to assign';
+
+  @override
+  String get splitMismatchError => 'Split amounts must equal the total';
+
+  @override
+  String get splitMinimumError => 'At least two splits are required';
+
+  @override
+  String get splitSaveSuccess => 'Split transaction saved';
+
+  @override
+  String get splitSaveError =>
+      'Could not save split transaction. Please try again.';
+
+  @override
+  String get splitLabel => 'Split';
+
+  @override
+  String splitCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count splits',
+      one: '1 split',
+    );
+    return '$_temp0';
+  }
 }

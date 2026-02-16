@@ -1365,6 +1365,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not load budget suggestions'**
   String get quickBudgetError;
+
+  /// No description provided for @splitTransactionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Split Transaction'**
+  String get splitTransactionTitle;
+
+  /// No description provided for @splitAddSplit.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Split'**
+  String get splitAddSplit;
+
+  /// No description provided for @splitRemoveSplit.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get splitRemoveSplit;
+
+  /// No description provided for @splitEnvelopeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Envelope'**
+  String get splitEnvelopeLabel;
+
+  /// No description provided for @splitAmountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get splitAmountLabel;
+
+  /// No description provided for @splitMemoLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Memo (optional)'**
+  String get splitMemoLabel;
+
+  /// No description provided for @splitRemainingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining to assign'**
+  String get splitRemainingLabel;
+
+  /// No description provided for @splitMismatchError.
+  ///
+  /// In en, this message translates to:
+  /// **'Split amounts must equal the total'**
+  String get splitMismatchError;
+
+  /// No description provided for @splitMinimumError.
+  ///
+  /// In en, this message translates to:
+  /// **'At least two splits are required'**
+  String get splitMinimumError;
+
+  /// No description provided for @splitSaveSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Split transaction saved'**
+  String get splitSaveSuccess;
+
+  /// No description provided for @splitSaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save split transaction. Please try again.'**
+  String get splitSaveError;
+
+  /// No description provided for @splitLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Split'**
+  String get splitLabel;
+
+  /// No description provided for @splitCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 split} other{{count} splits}}'**
+  String splitCount(int count);
 }
 
 class _AppLocalizationsDelegate

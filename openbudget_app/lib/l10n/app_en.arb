@@ -239,5 +239,25 @@
   "quickBudgetSpentLastMonth": "Spent Last Month",
   "quickBudgetAverageBudgeted": "Average Budgeted",
   "quickBudgetAverageSpent": "Average Spent",
-  "quickBudgetError": "Could not load budget suggestions"
+  "quickBudgetError": "Could not load budget suggestions",
+  "splitTransactionTitle": "Split Transaction",
+  "splitAddSplit": "Add Split",
+  "splitRemoveSplit": "Remove",
+  "splitEnvelopeLabel": "Envelope",
+  "splitAmountLabel": "Amount",
+  "splitMemoLabel": "Memo (optional)",
+  "splitRemainingLabel": "Remaining to assign",
+  "splitMismatchError": "Split amounts must equal the total",
+  "splitMinimumError": "At least two splits are required",
+  "splitSaveSuccess": "Split transaction saved",
+  "splitSaveError": "Could not save split transaction. Please try again.",
+  "splitLabel": "Split",
+  "splitCount": "{count, plural, =1{1 split} other{{count} splits}}",
+  "@splitCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }
