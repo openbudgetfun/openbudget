@@ -138,9 +138,56 @@ class EnvelopeRow extends HookConsumerWidget {
                 goal: goal!,
                 budgetedCents: budgeted,
                 availableCents: available,
-              ),
+              )
+            else if (budgeted > 0)
+              _SpendingProgressBar(budgetedCents: budgeted, spentCents: spent),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _SpendingProgressBar extends HookWidget {
+  const _SpendingProgressBar({
+    required this.budgetedCents,
+    required this.spentCents,
+  });
+
+  final int budgetedCents;
+  final int spentCents;
+
+  @override
+  Widget build(BuildContext context) {
+    final ratio = budgetedCents > 0 ? spentCents / budgetedCents : 0.0;
+    final clampedRatio = ratio.clamp(0.0, 1.0);
+
+    final Color barColor;
+    if (ratio > 1.0) {
+      barColor = ColorTokens.error;
+    } else if (ratio >= 0.8) {
+      barColor = ColorTokens.tertiary;
+    } else {
+      barColor = ColorTokens.secondary;
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 4),
+      child: Row(
+        children: [
+          const SizedBox(width: SpacingTokens.xs),
+          Expanded(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(2),
+              child: LinearProgressIndicator(
+                value: clampedRatio,
+                minHeight: 3,
+                backgroundColor: barColor.withAlpha(30),
+                valueColor: AlwaysStoppedAnimation<Color>(barColor),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
