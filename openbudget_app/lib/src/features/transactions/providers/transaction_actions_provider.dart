@@ -56,6 +56,7 @@ class TransactionActions extends _$TransactionActions {
     String? description,
     int? amountCents,
     String? envelopeId,
+    String? payeeId,
     DateTime? transactionDate,
     String? memo,
   }) async {
@@ -72,6 +73,11 @@ class TransactionActions extends _$TransactionActions {
             // Serverpod API requires UuidValue which is experimental in uuid package.
             // ignore: experimental_member_use
             ? UuidValue.fromString(envelopeId)
+            : null,
+        payeeId: payeeId != null
+            // Serverpod API requires UuidValue which is experimental in uuid package.
+            // ignore: experimental_member_use
+            ? UuidValue.fromString(payeeId)
             : null,
         transactionDate: transactionDate,
         memo: memo,
