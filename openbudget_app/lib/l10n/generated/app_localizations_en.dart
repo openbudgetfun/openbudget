@@ -38,6 +38,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountCreateSuccess => 'Account created';
 
   @override
+  String get accountDeleteButton => 'Delete Permanently';
+
+  @override
+  String get accountDeleteConfirm =>
+      'Permanently delete this account? This cannot be undone and all associated transactions will be lost.';
+
+  @override
+  String get accountDeleteError =>
+      'Could not delete account. Please try again.';
+
+  @override
+  String get accountDeleteSuccess => 'Account deleted';
+
+  @override
+  String get accountDeleteTitle => 'Delete Account';
+
+  @override
   String get accountDetailBalance => 'Balance';
 
   @override

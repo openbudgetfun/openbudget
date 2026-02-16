@@ -33,7 +33,7 @@ final class AccountActionsProvider
   AccountActions create() => AccountActions();
 }
 
-String _$accountActionsHash() => r'a14863828715a12395dc03a7c33b6c5fb4715c95';
+String _$accountActionsHash() => r'2581d1219d856c6d4759f68be9e5dc2ab801fb0e';
 
 abstract class _$AccountActions extends $AsyncNotifier<void> {
   FutureOr<void> build();
