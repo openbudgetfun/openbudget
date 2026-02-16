@@ -747,4 +747,7 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get payeeAutoEnvelopeHint =>
       'Envelope auto-suggested from last transaction with this payee';
+
+  @override
+  String get accountRunningBalance => 'Running Balance';
 }
