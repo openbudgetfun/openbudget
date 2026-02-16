@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:openbudget_app/src/features/accounts/screens/account_list_screen.dart';
+import 'package:openbudget_app/src/features/accounts/screens/add_account_screen.dart';
 import 'package:openbudget_app/src/features/auth/providers/auth_provider.dart';
 import 'package:openbudget_app/src/features/auth/providers/auth_state.dart';
 import 'package:openbudget_app/src/features/auth/screens/login_screen.dart';
@@ -85,6 +87,22 @@ GoRouter appRouter(Ref ref) {
         builder: (context, state) {
           final id = state.pathParameters['id']!;
           return TransactionListScreen(budgetId: id);
+        },
+      ),
+      GoRoute(
+        name: accountListRoute,
+        path: accountListPath,
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return AccountListScreen(budgetId: id);
+        },
+      ),
+      GoRoute(
+        name: addAccountRoute,
+        path: addAccountPath,
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return AddAccountScreen(budgetId: id);
         },
       ),
     ],

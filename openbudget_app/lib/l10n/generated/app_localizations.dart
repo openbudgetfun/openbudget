@@ -567,6 +567,144 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not update envelope'**
   String get editEnvelopeError;
+
+  /// No description provided for @accountListTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Accounts'**
+  String get accountListTitle;
+
+  /// No description provided for @accountLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load accounts'**
+  String get accountLoadError;
+
+  /// No description provided for @accountEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No Accounts Yet'**
+  String get accountEmptyTitle;
+
+  /// No description provided for @accountEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your first account to track balances'**
+  String get accountEmptySubtitle;
+
+  /// No description provided for @accountAddTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Account'**
+  String get accountAddTitle;
+
+  /// No description provided for @accountAddButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Account'**
+  String get accountAddButton;
+
+  /// No description provided for @accountNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Name'**
+  String get accountNameLabel;
+
+  /// No description provided for @accountTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Type'**
+  String get accountTypeLabel;
+
+  /// No description provided for @accountBalanceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Starting Balance'**
+  String get accountBalanceLabel;
+
+  /// No description provided for @accountOnBudgetLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'On Budget'**
+  String get accountOnBudgetLabel;
+
+  /// No description provided for @accountOnBudgetHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Include in budget calculations'**
+  String get accountOnBudgetHint;
+
+  /// No description provided for @accountTypeChecking.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking'**
+  String get accountTypeChecking;
+
+  /// No description provided for @accountTypeSavings.
+  ///
+  /// In en, this message translates to:
+  /// **'Savings'**
+  String get accountTypeSavings;
+
+  /// No description provided for @accountTypeCreditCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Credit Card'**
+  String get accountTypeCreditCard;
+
+  /// No description provided for @accountTypeCash.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash'**
+  String get accountTypeCash;
+
+  /// No description provided for @accountTypeInvestment.
+  ///
+  /// In en, this message translates to:
+  /// **'Investment'**
+  String get accountTypeInvestment;
+
+  /// No description provided for @accountTypeOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get accountTypeOther;
+
+  /// No description provided for @accountOnBudget.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget Accounts'**
+  String get accountOnBudget;
+
+  /// No description provided for @accountOffBudget.
+  ///
+  /// In en, this message translates to:
+  /// **'Tracking Accounts'**
+  String get accountOffBudget;
+
+  /// No description provided for @accountClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed Accounts'**
+  String get accountClosed;
+
+  /// No description provided for @accountCreateSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Account created'**
+  String get accountCreateSuccess;
+
+  /// No description provided for @accountCreateError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not create account. Please try again.'**
+  String get accountCreateError;
+
+  /// No description provided for @budgetViewAccounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Accounts'**
+  String get budgetViewAccounts;
 }
 
 class _AppLocalizationsDelegate

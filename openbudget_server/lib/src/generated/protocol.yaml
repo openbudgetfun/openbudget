@@ -1,3 +1,9 @@
+account:
+  - create:
+  - list:
+  - get:
+  - update:
+  - delete:
 emailIdp:
   - login:
   - startRegistration:

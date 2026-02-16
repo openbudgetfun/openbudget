@@ -76,6 +76,11 @@ class BudgetDetailScreen extends HookConsumerWidget {
             title: Text(summary.budget.name),
             actions: [
               IconButton(
+                icon: const Icon(Icons.account_balance_rounded),
+                tooltip: l10n.budgetViewAccounts,
+                onPressed: () => context.go('/budgets/$budgetId/accounts'),
+              ),
+              IconButton(
                 icon: const Icon(Icons.receipt_long_rounded),
                 tooltip: l10n.transactionListTitle,
                 onPressed: () => context.go('/budgets/$budgetId/transactions'),
