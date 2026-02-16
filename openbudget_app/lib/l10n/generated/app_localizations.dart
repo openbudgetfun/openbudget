@@ -2049,6 +2049,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Back to Today'**
   String get budgetGoToToday;
+
+  /// No description provided for @categoryTrendsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Category Trends'**
+  String get categoryTrendsTitle;
+
+  /// No description provided for @categoryTrendsLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load category trends'**
+  String get categoryTrendsLoadError;
+
+  /// No description provided for @categoryTrendsEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No Category Data'**
+  String get categoryTrendsEmptyTitle;
+
+  /// No description provided for @categoryTrendsEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add categorized transactions to see spending trends by category'**
+  String get categoryTrendsEmptySubtitle;
 }
 
 class _AppLocalizationsDelegate

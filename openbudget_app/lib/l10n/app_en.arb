@@ -458,5 +458,9 @@
       }
     }
   },
-  "budgetGoToToday": "Back to Today"
+  "budgetGoToToday": "Back to Today",
+  "categoryTrendsTitle": "Category Trends",
+  "categoryTrendsLoadError": "Could not load category trends",
+  "categoryTrendsEmptyTitle": "No Category Data",
+  "categoryTrendsEmptySubtitle": "Add categorized transactions to see spending trends by category"
 }

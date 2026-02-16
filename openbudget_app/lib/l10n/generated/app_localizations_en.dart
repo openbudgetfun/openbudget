@@ -1151,4 +1151,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get budgetGoToToday => 'Back to Today';
+
+  @override
+  String get categoryTrendsTitle => 'Category Trends';
+
+  @override
+  String get categoryTrendsLoadError => 'Could not load category trends';
+
+  @override
+  String get categoryTrendsEmptyTitle => 'No Category Data';
+
+  @override
+  String get categoryTrendsEmptySubtitle =>
+      'Add categorized transactions to see spending trends by category';
 }
