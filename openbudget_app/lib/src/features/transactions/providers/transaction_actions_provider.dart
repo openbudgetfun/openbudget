@@ -163,6 +163,37 @@ class TransactionActions extends _$TransactionActions {
     }
   }
 
+  /// Assigns an envelope to multiple transactions at once.
+  Future<int> bulkAssignEnvelope({
+    required List<String> transactionIds,
+    required String envelopeId,
+    required String budgetId,
+  }) async {
+    final client = ref.read(serverpodClientProvider);
+    var count = 0;
+    for (final txId in transactionIds) {
+      try {
+        await client.transaction.update(
+          // Serverpod API requires UuidValue which is experimental in uuid package.
+          // ignore: experimental_member_use
+          UuidValue.fromString(txId),
+          // Serverpod API requires UuidValue which is experimental in uuid package.
+          // ignore: experimental_member_use
+          envelopeId: UuidValue.fromString(envelopeId),
+        );
+        count++;
+      } on Exception catch (_) {
+        // Continue with other transactions on individual failure.
+      }
+    }
+    if (ref.mounted) {
+      ref
+        ..invalidate(transactionListProvider(budgetId))
+        ..invalidate(budgetSummaryProvider(budgetId));
+    }
+    return count;
+  }
+
   Future<Transaction> addExpense({
     required String description,
     required int amountCents,

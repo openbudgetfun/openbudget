@@ -162,6 +162,46 @@ class AppLocalizationsEn extends AppLocalizations {
   String get autoAssignTitle => 'Auto-Assign';
 
   @override
+  String get bulkAssignEnvelope => 'Assign Envelope';
+
+  @override
+  String get bulkAssignError => 'Could not assign envelope. Please try again.';
+
+  @override
+  String bulkAssignSuccess(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count transactions updated',
+      one: '1 transaction updated',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get bulkSelectAll => 'Select All';
+
+  @override
+  String get bulkCancelSelection => 'Cancel';
+
+  @override
+  String get bulkDeselectAll => 'Deselect All';
+
+  @override
+  String get bulkSelectEnvelope => 'Select an envelope to assign';
+
+  @override
+  String bulkSelectedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count selected',
+      one: '1 selected',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get budgetAddCategory => 'Add Category';
 
   @override

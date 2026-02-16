@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
 import 'package:openbudget_app/src/features/transactions/providers/transaction_actions_provider.dart';
 import 'package:openbudget_app/src/features/transactions/screens/edit_transaction_dialog.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
@@ -30,6 +31,8 @@ class TransactionListScreen extends HookConsumerWidget {
     final searchController = useTextEditingController();
     final searchQuery = useState('');
     final filter = useState(TransactionFilter.all);
+    final selectionMode = useState(false);
+    final selectedIds = useState(<String>{});
 
     useEffect(() {
       void listener() => searchQuery.value = searchController.text;
@@ -47,25 +50,70 @@ class TransactionListScreen extends HookConsumerWidget {
         CurrencyCode.usd;
 
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/budgets/$budgetId'),
-        ),
-        title: Text(l10n.transactionListTitle),
-        actions: [
-          transactionsAsync.whenOrNull(
-                data: (txs) => txs.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.copy_rounded),
-                        tooltip: l10n.transactionExportCsv,
-                        onPressed: () => _exportToCsv(context, txs, currency),
-                      )
-                    : null,
-              ) ??
-              const SizedBox.shrink(),
-        ],
-      ),
+      appBar: selectionMode.value
+          ? AppBar(
+              leading: IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () {
+                  selectionMode.value = false;
+                  selectedIds.value = {};
+                },
+              ),
+              title: Text(l10n.bulkSelectedCount(selectedIds.value.length)),
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.select_all_rounded),
+                  tooltip: l10n.bulkSelectAll,
+                  onPressed: () {
+                    final allIds =
+                        transactionsAsync.whenOrNull(
+                          data: (txs) => txs
+                              .where((tx) => tx.parentTransactionId == null)
+                              .map((tx) => tx.id?.toString() ?? '')
+                              .where((id) => id.isNotEmpty)
+                              .toSet(),
+                        ) ??
+                        <String>{};
+                    selectedIds.value = allIds;
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.deselect_rounded),
+                  tooltip: l10n.bulkDeselectAll,
+                  onPressed: () => selectedIds.value = {},
+                ),
+              ],
+            )
+          : AppBar(
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () => context.go('/budgets/$budgetId'),
+              ),
+              title: Text(l10n.transactionListTitle),
+              actions: [
+                transactionsAsync.whenOrNull(
+                      data: (txs) => txs.isNotEmpty
+                          ? Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.checklist_rounded),
+                                  tooltip: l10n.bulkAssignEnvelope,
+                                  onPressed: () => selectionMode.value = true,
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.copy_rounded),
+                                  tooltip: l10n.transactionExportCsv,
+                                  onPressed: () =>
+                                      _exportToCsv(context, txs, currency),
+                                ),
+                              ],
+                            )
+                          : null,
+                    ) ??
+                    const SizedBox.shrink(),
+              ],
+            ),
       body: transactionsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(
@@ -221,6 +269,17 @@ class TransactionListScreen extends HookConsumerWidget {
                       childParentIds: childParentIds,
                       budgetId: budgetId,
                       currencyCode: currency,
+                      selectionMode: selectionMode.value,
+                      selectedIds: selectedIds.value,
+                      onToggleSelection: (id) {
+                        final current = Set<String>.of(selectedIds.value);
+                        if (current.contains(id)) {
+                          current.remove(id);
+                        } else {
+                          current.add(id);
+                        }
+                        selectedIds.value = current;
+                      },
                     ),
                   ),
                 ),
@@ -228,7 +287,111 @@ class TransactionListScreen extends HookConsumerWidget {
           );
         },
       ),
+      bottomNavigationBar: selectionMode.value && selectedIds.value.isNotEmpty
+          ? SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(SpacingTokens.md),
+                child: FilledButton.icon(
+                  onPressed: () => _showEnvelopePicker(
+                    context,
+                    ref,
+                    selectedIds.value,
+                    selectionMode,
+                    selectedIds,
+                  ),
+                  icon: const Icon(Icons.mail_outlined),
+                  label: Text(l10n.bulkAssignEnvelope),
+                ),
+              ),
+            )
+          : null,
     );
+  }
+
+  Future<void> _showEnvelopePicker(
+    BuildContext context,
+    WidgetRef ref,
+    Set<String> ids,
+    ValueNotifier<bool> selectionMode,
+    ValueNotifier<Set<String>> selectedIds,
+  ) async {
+    final l10n = AppLocalizations.of(context);
+    final summaryAsync = ref.read(budgetSummaryProvider(budgetId));
+    if (!summaryAsync.hasValue) return;
+
+    final summary = summaryAsync.value!;
+    final envelopeItems = <(String, String)>[];
+    for (final catEnv in summary.categories) {
+      for (final envelope in catEnv.envelopes) {
+        final id = envelope.id?.toString() ?? '';
+        if (id.isNotEmpty) {
+          envelopeItems.add((id, '${catEnv.category.name} / ${envelope.name}'));
+        }
+      }
+    }
+
+    final selectedEnvelope = await showModalBottomSheet<String>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(SpacingTokens.md),
+              child: Text(
+                l10n.bulkSelectEnvelope,
+                style: Theme.of(ctx).textTheme.titleMedium,
+              ),
+            ),
+            const Divider(height: 1),
+            Flexible(
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: envelopeItems.length,
+                itemBuilder: (ctx, index) {
+                  final (id, label) = envelopeItems[index];
+                  return ListTile(
+                    leading: const Icon(Icons.mail_outlined),
+                    title: Text(label),
+                    onTap: () => Navigator.of(ctx).pop(id),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (selectedEnvelope == null || !context.mounted) return;
+
+    final messenger = ScaffoldMessenger.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
+    try {
+      final count = await ref
+          .read(transactionActionsProvider.notifier)
+          .bulkAssignEnvelope(
+            transactionIds: ids.toList(),
+            envelopeId: selectedEnvelope,
+            budgetId: budgetId,
+          );
+      selectionMode.value = false;
+      selectedIds.value = {};
+      if (context.mounted) {
+        messenger.showSnackBar(
+          SnackBar(content: Text(l10n.bulkAssignSuccess(count))),
+        );
+      }
+    } on Exception catch (_) {
+      if (context.mounted) {
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(l10n.bulkAssignError),
+            backgroundColor: colorScheme.error,
+          ),
+        );
+      }
+    }
   }
 
   void _exportToCsv(
@@ -324,12 +487,18 @@ class _TransactionTile extends HookConsumerWidget {
     required this.budgetId,
     required this.currencyCode,
     this.isSplit = false,
+    this.selectionMode = false,
+    this.isSelected = false,
+    this.onToggleSelection,
   });
 
   final Transaction transaction;
   final String budgetId;
   final CurrencyCode currencyCode;
   final bool isSplit;
+  final bool selectionMode;
+  final bool isSelected;
+  final VoidCallback? onToggleSelection;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -360,29 +529,25 @@ class _TransactionTile extends HookConsumerWidget {
 
     final flagColor = _flagColorFromString(transaction.flagColor);
 
-    return Dismissible(
-      key: ValueKey(transaction.id),
-      direction: DismissDirection.endToStart,
-      background: Container(
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: SpacingTokens.lg),
-        margin: const EdgeInsets.only(bottom: SpacingTokens.sm),
-        decoration: BoxDecoration(
-          color: colorScheme.error,
-          borderRadius: BorderRadius.circular(RadiusTokens.md),
-        ),
-        child: Icon(Icons.delete_rounded, color: colorScheme.onError),
-      ),
-      confirmDismiss: (_) => _confirmDelete(context, l10n, colorScheme),
-      onDismissed: (_) => _deleteTransaction(context, ref, l10n, colorScheme),
-      child: Card(
-        margin: const EdgeInsets.only(bottom: SpacingTokens.sm),
-        child: ListTile(
-          onTap: () => _showEditDialog(context),
-          onLongPress: () => _showFlagMenu(context, ref, l10n),
-          leading: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
+    final card = Card(
+      margin: const EdgeInsets.only(bottom: SpacingTokens.sm),
+      color: isSelected ? colorScheme.primaryContainer.withAlpha(80) : null,
+      child: ListTile(
+        onTap: selectionMode
+            ? onToggleSelection
+            : () => _showEditDialog(context),
+        onLongPress: selectionMode
+            ? null
+            : () => _showFlagMenu(context, ref, l10n),
+        leading: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (selectionMode)
+              Checkbox(
+                value: isSelected,
+                onChanged: (_) => onToggleSelection?.call(),
+              )
+            else ...[
               if (flagColor != null)
                 Container(
                   width: 4,
@@ -406,64 +571,81 @@ class _TransactionTile extends HookConsumerWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: SpacingTokens.xs),
-              CircleAvatar(
-                backgroundColor: color.withAlpha(25),
-                child: Icon(icon, color: color, size: 20),
-              ),
             ],
-          ),
-          title: Row(
-            children: [
-              Flexible(
-                child: Text(
-                  transaction.description,
-                  style: theme.textTheme.bodyMedium,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              if (isSplit) ...[
-                const SizedBox(width: SpacingTokens.xs),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 6,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: colorScheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Text(
-                    l10n.splitLabel,
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: colorScheme.onPrimaryContainer,
-                      fontSize: 10,
-                    ),
-                  ),
-                ),
-              ],
-            ],
-          ),
-          subtitle: transaction.memo != null && transaction.memo!.isNotEmpty
-              ? Text(
-                  transaction.memo!,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                    fontStyle: FontStyle.italic,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                )
-              : null,
-          trailing: Text(
-            formatCents(transaction.amountCents, currencyCode),
-            style: theme.textTheme.titleSmall?.copyWith(
-              color: color,
-              fontWeight: FontWeight.bold,
+            const SizedBox(width: SpacingTokens.xs),
+            CircleAvatar(
+              backgroundColor: color.withAlpha(25),
+              child: Icon(icon, color: color, size: 20),
             ),
+          ],
+        ),
+        title: Row(
+          children: [
+            Flexible(
+              child: Text(
+                transaction.description,
+                style: theme.textTheme.bodyMedium,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            if (isSplit) ...[
+              const SizedBox(width: SpacingTokens.xs),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  l10n.splitLabel,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: colorScheme.onPrimaryContainer,
+                    fontSize: 10,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+        subtitle: transaction.memo != null && transaction.memo!.isNotEmpty
+            ? Text(
+                transaction.memo!,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                  fontStyle: FontStyle.italic,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              )
+            : null,
+        trailing: Text(
+          formatCents(transaction.amountCents, currencyCode),
+          style: theme.textTheme.titleSmall?.copyWith(
+            color: color,
+            fontWeight: FontWeight.bold,
           ),
         ),
       ),
+    );
+
+    if (selectionMode) return card;
+
+    return Dismissible(
+      key: ValueKey(transaction.id),
+      direction: DismissDirection.endToStart,
+      background: Container(
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: SpacingTokens.lg),
+        margin: const EdgeInsets.only(bottom: SpacingTokens.sm),
+        decoration: BoxDecoration(
+          color: colorScheme.error,
+          borderRadius: BorderRadius.circular(RadiusTokens.md),
+        ),
+        child: Icon(Icons.delete_rounded, color: colorScheme.onError),
+      ),
+      confirmDismiss: (_) => _confirmDelete(context, l10n, colorScheme),
+      onDismissed: (_) => _deleteTransaction(context, ref, l10n, colorScheme),
+      child: card,
     );
   }
 
@@ -679,12 +861,18 @@ class _GroupedTransactionList extends HookWidget {
     required this.childParentIds,
     required this.budgetId,
     required this.currencyCode,
+    this.selectionMode = false,
+    this.selectedIds = const {},
+    this.onToggleSelection,
   });
 
   final List<Transaction> transactions;
   final Set<String> childParentIds;
   final String budgetId;
   final CurrencyCode currencyCode;
+  final bool selectionMode;
+  final Set<String> selectedIds;
+  final ValueChanged<String>? onToggleSelection;
 
   @override
   Widget build(BuildContext context) {
@@ -717,12 +905,18 @@ class _GroupedTransactionList extends HookWidget {
           return _DateHeader(date: item.date!);
         }
         final tx = item.transaction!;
-        final isSplit = childParentIds.contains(tx.id?.toString());
+        final txId = tx.id?.toString() ?? '';
+        final isSplit = childParentIds.contains(txId);
         return _TransactionTile(
           transaction: tx,
           budgetId: budgetId,
           currencyCode: currencyCode,
           isSplit: isSplit,
+          selectionMode: selectionMode,
+          isSelected: selectedIds.contains(txId),
+          onToggleSelection: txId.isNotEmpty
+              ? () => onToggleSelection?.call(txId)
+              : null,
         );
       },
     );
