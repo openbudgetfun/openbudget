@@ -267,7 +267,7 @@ class _AccountTile extends HookWidget {
           ],
         ),
         subtitle: Text(
-          _labelForType(account.accountType),
+          _labelForType(account.accountType, AppLocalizations.of(context)),
           style: theme.textTheme.bodySmall?.copyWith(
             color: colorScheme.onSurfaceVariant,
           ),
@@ -309,20 +309,13 @@ class _AccountTile extends HookWidget {
     }
   }
 
-  static String _labelForType(String type) {
-    switch (type) {
-      case 'checking':
-        return 'Checking';
-      case 'savings':
-        return 'Savings';
-      case 'creditCard':
-        return 'Credit Card';
-      case 'cash':
-        return 'Cash';
-      case 'investment':
-        return 'Investment';
-      default:
-        return 'Other';
-    }
-  }
+  static String _labelForType(String type, AppLocalizations l10n) =>
+      switch (type) {
+        'checking' => l10n.accountTypeChecking,
+        'savings' => l10n.accountTypeSavings,
+        'creditCard' => l10n.accountTypeCreditCard,
+        'cash' => l10n.accountTypeCash,
+        'investment' => l10n.accountTypeInvestment,
+        _ => l10n.accountTypeOther,
+      };
 }
