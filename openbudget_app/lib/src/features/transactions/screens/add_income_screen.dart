@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
+import 'package:openbudget_app/src/features/payees/providers/payee_list_provider.dart';
+import 'package:openbudget_app/src/features/transactions/providers/duplicate_check_provider.dart';
 import 'package:openbudget_app/src/features/transactions/providers/transaction_actions_provider.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -20,9 +22,56 @@ class AddIncomeScreen extends HookConsumerWidget {
     final amountController = useTextEditingController();
     final memoController = useTextEditingController();
     final isSubmitting = useState(false);
+    final selectedDate = useState(DateTime.now());
+    final selectedPayeeId = useState<String?>(null);
+    final duplicateCount = useState(0);
     final budgetAsync = ref.watch(budgetDetailProvider(budgetId));
+    final payeesAsync = ref.watch(payeeListProvider(budgetId));
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+
+    Future<void> checkDuplicates() async {
+      final budget = budgetAsync.value;
+      if (budget == null) return;
+      final amountText = amountController.text.trim();
+      final amount = double.tryParse(amountText) ?? 0;
+      if (amount <= 0) {
+        duplicateCount.value = 0;
+        return;
+      }
+      final currency = CurrencyCode.values.firstWhere(
+        (c) => c.code == budget.currencyCode,
+        orElse: () => CurrencyCode.usd,
+      );
+      final amountCents = (amount * _pow10(currency.decimals)).round();
+      try {
+        final duplicates = await ref.read(
+          duplicateCheckProvider(
+            budgetId,
+            amountCents,
+            selectedDate.value,
+          ).future,
+        );
+        duplicateCount.value = duplicates.length;
+      } on Exception catch (_) {
+        duplicateCount.value = 0;
+      }
+    }
+
+    // Build payee dropdown items.
+    final payeeItems = <DropdownMenuItem<String>>[
+      DropdownMenuItem<String>(value: '', child: Text(l10n.payeeNone)),
+    ];
+    if (payeesAsync.hasValue) {
+      for (final payee in payeesAsync.value!) {
+        payeeItems.add(
+          DropdownMenuItem<String>(
+            value: payee.id?.toString() ?? '',
+            child: Text(payee.name),
+          ),
+        );
+      }
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -75,16 +124,56 @@ class AddIncomeScreen extends HookConsumerWidget {
                       textInputAction: TextInputAction.next,
                     ),
                     const SizedBox(height: SpacingTokens.md),
-                    TextField(
-                      controller: amountController,
+                    Focus(
+                      onFocusChange: (hasFocus) {
+                        if (!hasFocus) checkDuplicates();
+                      },
+                      child: TextField(
+                        controller: amountController,
+                        decoration: InputDecoration(
+                          labelText: l10n.transactionAmountLabel,
+                          prefixIcon: const Icon(Icons.attach_money_rounded),
+                        ),
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        textInputAction: TextInputAction.next,
+                      ),
+                    ),
+                    const SizedBox(height: SpacingTokens.md),
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: const Icon(Icons.calendar_today_rounded),
+                      title: Text(
+                        '${selectedDate.value.year}-'
+                        '${selectedDate.value.month.toString().padLeft(2, '0')}-'
+                        '${selectedDate.value.day.toString().padLeft(2, '0')}',
+                      ),
+                      onTap: () async {
+                        final picked = await showDatePicker(
+                          context: context,
+                          initialDate: selectedDate.value,
+                          firstDate: DateTime(2000),
+                          lastDate: DateTime(2100),
+                        );
+                        if (picked != null) {
+                          selectedDate.value = picked;
+                          await checkDuplicates();
+                        }
+                      },
+                    ),
+                    const SizedBox(height: SpacingTokens.md),
+                    DropdownButtonFormField<String>(
+                      initialValue: selectedPayeeId.value ?? '',
+                      items: payeeItems,
+                      onChanged: (value) {
+                        selectedPayeeId.value =
+                            (value != null && value.isNotEmpty) ? value : null;
+                      },
                       decoration: InputDecoration(
-                        labelText: l10n.transactionAmountLabel,
-                        prefixIcon: const Icon(Icons.attach_money_rounded),
+                        labelText: l10n.payeeLabel,
+                        prefixIcon: const Icon(Icons.person_outlined),
                       ),
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      textInputAction: TextInputAction.next,
                     ),
                     const SizedBox(height: SpacingTokens.md),
                     TextField(
@@ -97,6 +186,34 @@ class AddIncomeScreen extends HookConsumerWidget {
                       maxLines: 2,
                       textInputAction: TextInputAction.done,
                     ),
+                    if (duplicateCount.value > 0)
+                      Padding(
+                        padding: const EdgeInsets.only(top: SpacingTokens.sm),
+                        child: Card(
+                          color: colorScheme.errorContainer,
+                          child: Padding(
+                            padding: const EdgeInsets.all(SpacingTokens.sm),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.warning_amber_rounded,
+                                  color: colorScheme.onErrorContainer,
+                                  size: 20,
+                                ),
+                                const SizedBox(width: SpacingTokens.sm),
+                                Expanded(
+                                  child: Text(
+                                    l10n.duplicateWarning(duplicateCount.value),
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: colorScheme.onErrorContainer,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
                     const SizedBox(height: SpacingTokens.lg),
                     FilledButton(
                       onPressed: isSubmitting.value
@@ -132,7 +249,7 @@ class AddIncomeScreen extends HookConsumerWidget {
                                       amountCents: amountCents,
                                       currencyCode: budget.currencyCode,
                                       budgetId: budgetId,
-                                      date: DateTime.now(),
+                                      date: selectedDate.value,
                                       memo: memoText.isEmpty ? null : memoText,
                                     );
                                 messenger.showSnackBar(
