@@ -59,11 +59,7 @@ class TransactionListScreen extends HookConsumerWidget {
                     ? IconButton(
                         icon: const Icon(Icons.copy_rounded),
                         tooltip: l10n.transactionExportCsv,
-                        onPressed: () => _exportToCsv(
-                          context,
-                          txs,
-                          currency,
-                        ),
+                        onPressed: () => _exportToCsv(context, txs, currency),
                       )
                     : null,
               ) ??
@@ -253,8 +249,8 @@ class TransactionListScreen extends HookConsumerWidget {
     CurrencyCode currency,
   ) {
     final l10n = AppLocalizations.of(context);
-    final buffer = StringBuffer();
-    buffer.writeln('Date,Description,Amount,Memo,Status');
+    final buffer = StringBuffer()
+      ..writeln('Date,Description,Amount,Memo,Status');
 
     final topLevel =
         transactions.where((tx) => tx.parentTransactionId == null).toList()
@@ -268,16 +264,14 @@ class TransactionListScreen extends HookConsumerWidget {
       final status = tx.reconciled
           ? 'Reconciled'
           : tx.cleared
-              ? 'Cleared'
-              : 'Uncleared';
+          ? 'Cleared'
+          : 'Uncleared';
       buffer.writeln('$date,$desc,$amount,$memo,$status');
     }
 
     Clipboard.setData(ClipboardData(text: buffer.toString()));
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(l10n.transactionExportSuccess(topLevel.length)),
-      ),
+      SnackBar(content: Text(l10n.transactionExportSuccess(topLevel.length))),
     );
   }
 
