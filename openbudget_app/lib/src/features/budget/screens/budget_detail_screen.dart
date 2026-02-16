@@ -42,6 +42,9 @@ class BudgetDetailScreen extends HookConsumerWidget {
     final dueCountAsync = ref.watch(recurringDueCountProvider(budgetId));
     final isPosting = useState(false);
     final isReordering = useState(false);
+    final searchController = useTextEditingController();
+    final searchQuery = useState('');
+    final isSearching = useState(false);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
@@ -109,6 +112,21 @@ class BudgetDetailScreen extends HookConsumerWidget {
                   child: Text(l10n.budgetReorderDone),
                 )
               else ...[
+                IconButton(
+                  icon: Icon(
+                    isSearching.value
+                        ? Icons.search_off_rounded
+                        : Icons.search_rounded,
+                  ),
+                  tooltip: l10n.budgetSearchHint,
+                  onPressed: () {
+                    isSearching.value = !isSearching.value;
+                    if (!isSearching.value) {
+                      searchController.clear();
+                      searchQuery.value = '';
+                    }
+                  },
+                ),
                 IconButton(
                   icon: const Icon(Icons.swap_vert_rounded),
                   tooltip: l10n.budgetReorderCategories,
@@ -187,12 +205,6 @@ class BudgetDetailScreen extends HookConsumerWidget {
                   year: summary.year,
                   month: summary.month,
                   totalOverspentCents: totalOverspentCents,
-                  onCopyLastMonth: () => _copyPreviousMonth(
-                    context,
-                    ref,
-                    year: summary.year,
-                    month: summary.month,
-                  ),
                 ),
                 const SizedBox(height: SpacingTokens.md),
                 if (dueCountAsync.hasValue && dueCountAsync.value! > 0)
@@ -205,6 +217,34 @@ class BudgetDetailScreen extends HookConsumerWidget {
                   CreditCardSection(
                     payments: ccPayments.value!,
                     currencyCode: currencyCode,
+                  ),
+                  const SizedBox(height: SpacingTokens.md),
+                ],
+                if (isSearching.value) ...[
+                  TextField(
+                    controller: searchController,
+                    onChanged: (value) => searchQuery.value = value,
+                    decoration: InputDecoration(
+                      hintText: l10n.budgetSearchHint,
+                      prefixIcon: const Icon(Icons.search_rounded, size: 20),
+                      suffixIcon: searchQuery.value.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear_rounded, size: 18),
+                              onPressed: () {
+                                searchController.clear();
+                                searchQuery.value = '';
+                              },
+                            )
+                          : null,
+                      isDense: true,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: SpacingTokens.md,
+                        vertical: SpacingTokens.sm,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(RadiusTokens.md),
+                      ),
+                    ),
                   ),
                   const SizedBox(height: SpacingTokens.md),
                 ],
@@ -238,13 +278,45 @@ class BudgetDetailScreen extends HookConsumerWidget {
                       ),
                     ),
                   ),
+                if (isSearching.value &&
+                    searchQuery.value.isNotEmpty &&
+                    _filterCategories(
+                      summary.categories,
+                      searchQuery.value,
+                    ).isEmpty)
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: SpacingTokens.xl,
+                      ),
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.search_off_rounded,
+                            size: 48,
+                            color: colorScheme.outlineVariant,
+                          ),
+                          const SizedBox(height: SpacingTokens.md),
+                          Text(
+                            l10n.budgetSearchNoResults,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 if (isReordering.value && summary.categories.isNotEmpty)
                   _ReorderableCategoryList(
                     categories: summary.categories,
                     budgetId: budgetId,
                   ),
                 if (!isReordering.value)
-                  ...summary.categories.map(
+                  ..._filterCategories(
+                    summary.categories,
+                    searchQuery.value,
+                  ).map(
                     (catWithEnvelopes) => Padding(
                       padding: const EdgeInsets.only(bottom: SpacingTokens.md),
                       child: CategoryGroup(
@@ -391,58 +463,55 @@ class BudgetDetailScreen extends HookConsumerWidget {
     );
   }
 
-  Future<void> _copyPreviousMonth(
-    BuildContext context,
-    WidgetRef ref, {
-    required int year,
-    required int month,
-  }) async {
-    final l10n = AppLocalizations.of(context);
-    final colorScheme = Theme.of(context).colorScheme;
+  List<CategoryWithEnvelopes> _filterCategories(
+    List<CategoryWithEnvelopes> categories,
+    String query,
+  ) {
+    if (query.isEmpty) return categories;
 
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.budgetCopyLastMonth),
-        content: Text(l10n.budgetCopyLastMonthConfirm),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(l10n.dialogCancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text(l10n.budgetCopyLastMonth),
-          ),
-        ],
-      ),
-    );
+    final lowerQuery = query.toLowerCase();
+    final filtered = <CategoryWithEnvelopes>[];
 
-    if (confirmed != true || !context.mounted) return;
+    for (final cat in categories) {
+      // Check if category name matches.
+      final categoryMatches = cat.category.name.toLowerCase().contains(
+        lowerQuery,
+      );
 
-    try {
-      await ref
-          .read(monthlyAllocationActionsProvider.notifier)
-          .copyPreviousMonth(
-            budgetId: budgetId,
-            currentYear: year,
-            currentMonth: month,
-          );
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.budgetCopyLastMonthSuccess)),
-        );
+      // Filter matching envelopes.
+      final matchingEnvelopeIndices = <int>[];
+      for (var i = 0; i < cat.envelopes.length; i++) {
+        if (cat.envelopes[i].name.toLowerCase().contains(lowerQuery)) {
+          matchingEnvelopeIndices.add(i);
+        }
       }
-    } on Exception catch (_) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.budgetCopyLastMonthError),
-            backgroundColor: colorScheme.error,
-          ),
-        );
+
+      if (categoryMatches || matchingEnvelopeIndices.isNotEmpty) {
+        if (categoryMatches) {
+          // Show all envelopes when category name matches.
+          filtered.add(cat);
+        } else {
+          // Only show matching envelopes.
+          filtered.add(
+            CategoryWithEnvelopes(
+              category: cat.category,
+              envelopes: matchingEnvelopeIndices
+                  .map((i) => cat.envelopes[i])
+                  .toList(),
+              monthlyEnvelopes: matchingEnvelopeIndices
+                  .where((i) => i < cat.monthlyEnvelopes.length)
+                  .map((i) => cat.monthlyEnvelopes[i])
+                  .toList(),
+              totalBudgetedCents: cat.totalBudgetedCents,
+              totalSpentCents: cat.totalSpentCents,
+              totalAvailableCents: cat.totalAvailableCents,
+            ),
+          );
+        }
       }
     }
+
+    return filtered;
   }
 
   void _showEnvelopeActivity(

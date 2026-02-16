@@ -327,6 +327,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get budgetReorderSuccess => 'Categories reordered';
 
   @override
+  String get budgetSearchHint => 'Search envelopes...';
+
+  @override
+  String get budgetSearchNoResults => 'No matching envelopes';
+
+  @override
+  String budgetSearchResultCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count matches',
+      one: '1 match',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get budgetViewAccounts => 'Accounts';
 
   @override
@@ -418,6 +435,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get envelopeNoActivity => 'No transactions this month';
+
+  @override
+  String get envelopeNoteHint => 'Add a note for this envelope (optional)';
+
+  @override
+  String get envelopeNoteLabel => 'Note';
 
   @override
   String get envelopeReorderHint =>

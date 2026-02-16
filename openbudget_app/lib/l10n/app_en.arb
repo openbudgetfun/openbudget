@@ -35,6 +35,13 @@
       }
     }
   },
+  "@budgetSearchResultCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "@duplicateWarning": {
     "placeholders": {
       "count": {
@@ -234,6 +241,9 @@
   "budgetReorderError": "Could not reorder categories",
   "budgetReorderHint": "Drag to reorder categories",
   "budgetReorderSuccess": "Categories reordered",
+  "budgetSearchHint": "Search envelopes...",
+  "budgetSearchNoResults": "No matching envelopes",
+  "budgetSearchResultCount": "{count, plural, =1{1 match} other{{count} matches}}",
   "budgetViewAccounts": "Accounts",
   "categoryTrendsEmptySubtitle": "Add categorized transactions to see spending trends by category",
   "categoryTrendsEmptyTitle": "No Category Data",
@@ -262,6 +272,8 @@
   "editEnvelopeTitle": "Edit Envelope",
   "envelopeActivityTitle": "Activity",
   "envelopeNoActivity": "No transactions this month",
+  "envelopeNoteHint": "Add a note for this envelope (optional)",
+  "envelopeNoteLabel": "Note",
   "envelopeReorderHint": "Long press an envelope to reorder within category",
   "goalAmountLabel": "Target Amount",
   "goalDateLabel": "Target Date",
