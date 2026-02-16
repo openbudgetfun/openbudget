@@ -2043,6 +2043,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 transaction} other{{count} transactions}}'**
   String spendingByPayeeTransactionCount(int count);
+
+  /// No description provided for @budgetGoToToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Today'**
+  String get budgetGoToToday;
 }
 
 class _AppLocalizationsDelegate
