@@ -1323,6 +1323,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not update recurring transaction. Please try again.'**
   String get recurringEditError;
+
+  /// No description provided for @ageOfMoneyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{days, plural, =1{Age of Money: 1 day} other{Age of Money: {days} days}}'**
+  String ageOfMoneyLabel(int days);
 }
 
 class _AppLocalizationsDelegate

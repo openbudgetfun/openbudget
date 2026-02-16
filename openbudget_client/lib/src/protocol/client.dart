@@ -846,6 +846,15 @@ class EndpointTransaction extends _i1.EndpointRef {
     'budgetId': budgetId,
   });
 
+  /// Calculates the "Age of Money" for a budget.
+  ///
+  /// Returns the average days between income and spending, or null if
+  /// there is insufficient data.
+  _i2.Future<int?> ageOfMoney(_i1.UuidValue budgetId) =>
+      caller.callServerEndpoint<int?>('transaction', 'ageOfMoney', {
+        'budgetId': budgetId,
+      });
+
   /// Deletes a transaction by ID.
   _i2.Future<_i13.Transaction> delete(_i1.UuidValue transactionId) =>
       caller.callServerEndpoint<_i13.Transaction>('transaction', 'delete', {

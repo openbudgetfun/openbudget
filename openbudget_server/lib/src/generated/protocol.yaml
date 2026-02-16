@@ -67,4 +67,5 @@ transaction:
   - listByAccount:
   - toggleCleared:
   - reconcileAccount:
+  - ageOfMoney:
   - delete:
