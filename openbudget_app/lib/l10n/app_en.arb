@@ -409,5 +409,14 @@
   "settingsRenameSuccess": "Budget renamed",
   "settingsRenameError": "Could not rename budget. Please try again.",
   "settingsLogoutConfirm": "Are you sure you want to sign out?",
-  "settingsVersion": "OpenBudget v1.0.0"
+  "settingsVersion": "OpenBudget v1.0.0",
+  "homeBudgetAccounts": "{count, plural, =1{1 account} other{{count} accounts}}",
+  "@homeBudgetAccounts": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeBudgetTotalBalance": "Total Balance"
 }

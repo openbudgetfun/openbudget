@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
+import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
 import 'package:openbudget_app/src/features/auth/providers/auth_provider.dart';
 import 'package:openbudget_app/src/features/home/providers/budget_actions_provider.dart';
 import 'package:openbudget_app/src/features/home/providers/budget_list_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
+import 'package:openbudget_app/src/utils/currency_formatter.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 class HomeScreen extends HookConsumerWidget {
@@ -94,38 +98,16 @@ class HomeScreen extends HookConsumerWidget {
               itemCount: budgetList.length,
               itemBuilder: (context, index) {
                 final budget = budgetList[index];
-                return Card(
-                  margin: const EdgeInsets.only(bottom: SpacingTokens.sm),
-                  child: ListTile(
-                    onTap: () => context.go('/budgets/${budget.id}'),
-                    onLongPress: () => _confirmDeleteBudget(
-                      context,
-                      ref,
-                      budget.id?.toString() ?? '',
-                      budget.name,
-                    ),
-                    leading: CircleAvatar(
-                      backgroundColor: colorScheme.primaryContainer,
-                      child: Icon(
-                        Icons.account_balance_wallet_rounded,
-                        color: colorScheme.onPrimaryContainer,
-                        size: 20,
-                      ),
-                    ),
-                    title: Text(
-                      budget.name,
-                      style: theme.textTheme.titleMedium,
-                    ),
-                    subtitle: Text(
-                      budget.currencyCode,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                    trailing: Icon(
-                      Icons.chevron_right_rounded,
-                      color: colorScheme.onSurfaceVariant,
-                    ),
+                return _BudgetCard(
+                  budgetId: budget.id?.toString() ?? '',
+                  budgetName: budget.name,
+                  currencyCode: budget.currencyCode,
+                  onTap: () => context.go('/budgets/${budget.id}'),
+                  onLongPress: () => _confirmDeleteBudget(
+                    context,
+                    ref,
+                    budget.id?.toString() ?? '',
+                    budget.name,
                   ),
                 );
               },
@@ -196,5 +178,147 @@ class HomeScreen extends HookConsumerWidget {
         );
       }
     }
+  }
+}
+
+class _BudgetCard extends HookConsumerWidget {
+  const _BudgetCard({
+    required this.budgetId,
+    required this.budgetName,
+    required this.currencyCode,
+    required this.onTap,
+    required this.onLongPress,
+  });
+
+  final String budgetId;
+  final String budgetName;
+  final String currencyCode;
+  final VoidCallback onTap;
+  final VoidCallback onLongPress;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final accountsAsync = ref.watch(accountListProvider(budgetId));
+
+    final currency = CurrencyCode.values.firstWhere(
+      (c) => c.code == currencyCode,
+      orElse: () => CurrencyCode.usd,
+    );
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: SpacingTokens.md),
+      child: InkWell(
+        onTap: onTap,
+        onLongPress: onLongPress,
+        borderRadius: BorderRadius.circular(RadiusTokens.md),
+        child: Padding(
+          padding: const EdgeInsets.all(SpacingTokens.md),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  CircleAvatar(
+                    backgroundColor: colorScheme.primaryContainer,
+                    child: Icon(
+                      Icons.account_balance_wallet_rounded,
+                      color: colorScheme.onPrimaryContainer,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: SpacingTokens.md),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(budgetName, style: theme.textTheme.titleMedium),
+                        Text(
+                          currencyCode,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ],
+              ),
+              accountsAsync.whenOrNull(
+                    data: (accounts) {
+                      if (accounts.isEmpty) return null;
+
+                      final activeAccounts = accounts
+                          .where((a) => !a.isClosed)
+                          .toList();
+                      final totalBalance = activeAccounts.fold<int>(
+                        0,
+                        (sum, a) => sum + a.balanceCents,
+                      );
+
+                      return Padding(
+                        padding: const EdgeInsets.only(top: SpacingTokens.md),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: _SummaryChip(
+                                icon: Icons.account_balance_rounded,
+                                label: l10n.homeBudgetAccounts(
+                                  activeAccounts.length,
+                                ),
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                            Text(
+                              formatCents(totalBalance, currency),
+                              style: theme.textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: totalBalance >= 0
+                                    ? ColorTokens.secondary
+                                    : ColorTokens.error,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ) ??
+                  const SizedBox.shrink(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SummaryChip extends HookWidget {
+  const _SummaryChip({
+    required this.icon,
+    required this.label,
+    required this.color,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 14, color: color),
+        const SizedBox(width: SpacingTokens.xs),
+        Text(label, style: theme.textTheme.bodySmall?.copyWith(color: color)),
+      ],
+    );
   }
 }
