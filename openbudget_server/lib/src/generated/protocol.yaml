@@ -70,6 +70,13 @@ recurringTransaction:
   - skipOccurrence:
   - postDue:
   - countDue:
+transactionRule:
+  - create:
+  - list:
+  - get:
+  - update:
+  - findMatchingEnvelope:
+  - delete:
 transaction:
   - create:
   - list:

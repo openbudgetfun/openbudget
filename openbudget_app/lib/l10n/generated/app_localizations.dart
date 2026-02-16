@@ -2512,6 +2512,90 @@ abstract class AppLocalizations {
   /// **'Transfer'**
   String get transferTitle;
 
+  /// No description provided for @transactionRulesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction Rules'**
+  String get transactionRulesTitle;
+
+  /// No description provided for @transactionRulesEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No Rules Yet'**
+  String get transactionRulesEmptyTitle;
+
+  /// No description provided for @transactionRulesEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create rules to auto-assign envelopes when you select a payee'**
+  String get transactionRulesEmptySubtitle;
+
+  /// No description provided for @transactionRulesLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load transaction rules'**
+  String get transactionRulesLoadError;
+
+  /// No description provided for @transactionRulesAddButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Rule'**
+  String get transactionRulesAddButton;
+
+  /// No description provided for @transactionRulesPayeeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'When payee is'**
+  String get transactionRulesPayeeLabel;
+
+  /// No description provided for @transactionRulesEnvelopeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign to envelope'**
+  String get transactionRulesEnvelopeLabel;
+
+  /// No description provided for @transactionRulesCreateError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not create rule. Please try again.'**
+  String get transactionRulesCreateError;
+
+  /// No description provided for @transactionRulesCreateSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Rule created'**
+  String get transactionRulesCreateSuccess;
+
+  /// No description provided for @transactionRulesDeleteError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not delete rule. Please try again.'**
+  String get transactionRulesDeleteError;
+
+  /// No description provided for @transactionRulesDeleteSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Rule deleted'**
+  String get transactionRulesDeleteSuccess;
+
+  /// No description provided for @transactionRulesToggleError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not update rule. Please try again.'**
+  String get transactionRulesToggleError;
+
+  /// No description provided for @transactionRulesDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Disabled'**
+  String get transactionRulesDisabled;
+
+  /// No description provided for @transactionRulesAutoAssigned.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-assigned by rule'**
+  String get transactionRulesAutoAssigned;
+
   /// No description provided for @transferToAccount.
   ///
   /// In en, this message translates to:

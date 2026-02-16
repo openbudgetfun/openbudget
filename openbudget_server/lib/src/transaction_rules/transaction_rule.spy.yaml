@@ -1,0 +1,19 @@
+### A rule that auto-assigns an envelope when a specific payee is used.
+class: TransactionRule
+table: transaction_rule
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  budgetId: UuidValue, relation(parent=budget)
+  ### The payee this rule matches against.
+  payeeId: UuidValue, relation(parent=payee)
+  ### The envelope to auto-assign when this rule matches.
+  targetEnvelopeId: UuidValue, relation(parent=envelope)
+  ### Whether this rule is active.
+  enabled: bool, default=true
+  createdAt: DateTime, default=now
+indexes:
+  transaction_rule_budget_idx:
+    fields: budgetId
+  transaction_rule_payee_budget_idx:
+    fields: budgetId, payeeId
+    unique: true

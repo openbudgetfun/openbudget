@@ -7,6 +7,7 @@ import 'package:openbudget_app/src/features/budget/providers/budget_detail_provi
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
 import 'package:openbudget_app/src/features/payees/providers/payee_last_envelope_provider.dart';
 import 'package:openbudget_app/src/features/payees/providers/payee_list_provider.dart';
+import 'package:openbudget_app/src/features/transaction_rules/providers/rule_match_provider.dart';
 import 'package:openbudget_app/src/features/transactions/providers/duplicate_check_provider.dart';
 import 'package:openbudget_app/src/features/transactions/providers/transaction_actions_provider.dart';
 import 'package:openbudget_core/openbudget_core.dart';
@@ -27,6 +28,7 @@ class AddExpenseScreen extends HookConsumerWidget {
     final selectedEnvelopeId = useState<String?>(null);
     final selectedCategoryId = useState<String?>(null);
     final selectedPayeeId = useState<String?>(null);
+    final autoAssignedByRule = useState(false);
     final duplicateCount = useState(0);
     final budgetAsync = ref.watch(budgetDetailProvider(budgetId));
     final summaryAsync = ref.watch(budgetSummaryProvider(budgetId));
@@ -179,9 +181,21 @@ class AddExpenseScreen extends HookConsumerWidget {
                       onChanged: (value) async {
                         final payId = value ?? '';
                         selectedPayeeId.value = payId.isEmpty ? null : payId;
+                        autoAssignedByRule.value = false;
 
-                        // Auto-suggest last-used envelope for this payee.
                         if (payId.isNotEmpty) {
+                          // Check transaction rules first.
+                          final ruleEnvelope = await ref.read(
+                            ruleMatchEnvelopeProvider(payId, budgetId).future,
+                          );
+                          if (ruleEnvelope != null) {
+                            selectedEnvelopeId.value = ruleEnvelope;
+                            updateCategoryForEnvelope(ruleEnvelope);
+                            autoAssignedByRule.value = true;
+                            return;
+                          }
+
+                          // Fall back to last-used envelope.
                           final lastEnvelope = await ref.read(
                             payeeLastEnvelopeProvider(payId, budgetId).future,
                           );
@@ -217,9 +231,13 @@ class AddExpenseScreen extends HookConsumerWidget {
                       Padding(
                         padding: const EdgeInsets.only(top: SpacingTokens.xs),
                         child: Text(
-                          l10n.payeeAutoEnvelopeHint,
+                          autoAssignedByRule.value
+                              ? l10n.transactionRulesAutoAssigned
+                              : l10n.payeeAutoEnvelopeHint,
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
+                            color: autoAssignedByRule.value
+                                ? colorScheme.primary
+                                : colorScheme.onSurfaceVariant,
                             fontStyle: FontStyle.italic,
                           ),
                         ),

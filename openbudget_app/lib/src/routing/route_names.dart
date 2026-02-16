@@ -44,5 +44,7 @@ const multiMonthComparisonRoute = 'multiMonthComparison';
 const multiMonthComparisonPath = '/budgets/:id/reports/comparison';
 const recurringCalendarRoute = 'recurringCalendar';
 const recurringCalendarPath = '/budgets/:id/recurring/calendar';
+const transactionRulesRoute = 'transactionRules';
+const transactionRulesPath = '/budgets/:id/rules';
 const settingsRoute = 'settings';
 const settingsPath = '/budgets/:id/settings';
