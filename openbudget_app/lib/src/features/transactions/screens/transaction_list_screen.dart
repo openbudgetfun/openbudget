@@ -306,6 +306,18 @@ class _FilterChip extends HookWidget {
   }
 }
 
+Color? _flagColorFromString(String? flagColor) {
+  return switch (flagColor) {
+    'red' => Colors.red,
+    'orange' => Colors.orange,
+    'yellow' => Colors.amber,
+    'green' => Colors.green,
+    'blue' => Colors.blue,
+    'purple' => Colors.purple,
+    _ => null,
+  };
+}
+
 class _TransactionTile extends HookConsumerWidget {
   const _TransactionTile({
     required this.transaction,
@@ -346,6 +358,8 @@ class _TransactionTile extends HookConsumerWidget {
         ? l10n.transactionCleared
         : l10n.transactionUncleared;
 
+    final flagColor = _flagColorFromString(transaction.flagColor);
+
     return Dismissible(
       key: ValueKey(transaction.id),
       direction: DismissDirection.endToStart,
@@ -365,9 +379,20 @@ class _TransactionTile extends HookConsumerWidget {
         margin: const EdgeInsets.only(bottom: SpacingTokens.sm),
         child: ListTile(
           onTap: () => _showEditDialog(context),
+          onLongPress: () => _showFlagMenu(context, ref, l10n),
           leading: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
+              if (flagColor != null)
+                Container(
+                  width: 4,
+                  height: 36,
+                  margin: const EdgeInsets.only(right: SpacingTokens.xs),
+                  decoration: BoxDecoration(
+                    color: flagColor,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
               Tooltip(
                 message: statusTooltip,
                 child: InkWell(
@@ -523,6 +548,91 @@ class _TransactionTile extends HookConsumerWidget {
     }
   }
 
+  void _showFlagMenu(
+    BuildContext context,
+    WidgetRef ref,
+    AppLocalizations l10n,
+  ) {
+    final flags = <(String, String, Color)>[
+      ('red', l10n.transactionFlagRed, Colors.red),
+      ('orange', l10n.transactionFlagOrange, Colors.orange),
+      ('yellow', l10n.transactionFlagYellow, Colors.amber),
+      ('green', l10n.transactionFlagGreen, Colors.green),
+      ('blue', l10n.transactionFlagBlue, Colors.blue),
+      ('purple', l10n.transactionFlagPurple, Colors.purple),
+    ];
+
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(SpacingTokens.md),
+              child: Text(
+                l10n.transactionFlagTitle,
+                style: Theme.of(ctx).textTheme.titleMedium,
+              ),
+            ),
+            Wrap(
+              spacing: SpacingTokens.md,
+              runSpacing: SpacingTokens.sm,
+              alignment: WrapAlignment.center,
+              children: [
+                for (final (value, label, color) in flags)
+                  _FlagChip(
+                    label: label,
+                    color: color,
+                    selected: transaction.flagColor == value,
+                    onTap: () {
+                      Navigator.of(ctx).pop();
+                      _setFlag(context, ref, l10n, flagColor: value);
+                    },
+                  ),
+              ],
+            ),
+            if (transaction.flagColor != null) ...[
+              const Divider(),
+              ListTile(
+                leading: const Icon(Icons.flag_outlined),
+                title: Text(l10n.transactionFlagClear),
+                onTap: () {
+                  Navigator.of(ctx).pop();
+                  _setFlag(context, ref, l10n);
+                },
+              ),
+            ],
+            const SizedBox(height: SpacingTokens.sm),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _setFlag(
+    BuildContext context,
+    WidgetRef ref,
+    AppLocalizations l10n, {
+    String? flagColor,
+  }) async {
+    try {
+      await ref
+          .read(transactionActionsProvider.notifier)
+          .setFlag(
+            transactionId: transaction.id?.toString() ?? '',
+            budgetId: budgetId,
+            flagColor: flagColor,
+          );
+    } on Exception catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.transactionEditError)));
+      }
+    }
+  }
+
   void _showEditDialog(BuildContext context) {
     showDialog<void>(
       context: context,
@@ -531,6 +641,34 @@ class _TransactionTile extends HookConsumerWidget {
         budgetId: budgetId,
         currencyCode: currencyCode,
       ),
+    );
+  }
+}
+
+class _FlagChip extends HookWidget {
+  const _FlagChip({
+    required this.label,
+    required this.color,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final Color color;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return ActionChip(
+      avatar: Icon(
+        selected ? Icons.flag_rounded : Icons.flag_outlined,
+        color: color,
+        size: 18,
+      ),
+      label: Text(label),
+      side: selected ? BorderSide(color: color, width: 2) : null,
+      onPressed: onTap,
     );
   }
 }

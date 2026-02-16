@@ -1678,6 +1678,11 @@ class Endpoints extends _i1.EndpointDispatch {
               type: _i1.getType<String?>(),
               nullable: true,
             ),
+            'flagColor': _i1.ParameterDescription(
+              name: 'flagColor',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
           },
           call: (_i1.Session session, Map<String, dynamic> params) async =>
               (endpoints['transaction'] as _i14.TransactionEndpoint).update(
@@ -1689,6 +1694,28 @@ class Endpoints extends _i1.EndpointDispatch {
                 payeeId: params['payeeId'],
                 transactionDate: params['transactionDate'],
                 memo: params['memo'],
+                flagColor: params['flagColor'],
+              ),
+        ),
+        'setFlag': _i1.MethodConnector(
+          name: 'setFlag',
+          params: {
+            'transactionId': _i1.ParameterDescription(
+              name: 'transactionId',
+              type: _i1.getType<_i1.UuidValue>(),
+              nullable: false,
+            ),
+            'flagColor': _i1.ParameterDescription(
+              name: 'flagColor',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+          },
+          call: (_i1.Session session, Map<String, dynamic> params) async =>
+              (endpoints['transaction'] as _i14.TransactionEndpoint).setFlag(
+                session,
+                params['transactionId'],
+                flagColor: params['flagColor'],
               ),
         ),
         'transfer': _i1.MethodConnector(

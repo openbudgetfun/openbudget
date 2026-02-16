@@ -1223,6 +1223,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String get transactionAddExpense => 'Add Expense';
 
   @override
+  String get transactionFlagTitle => 'Set Flag';
+
+  @override
+  String get transactionFlagRed => 'Red';
+
+  @override
+  String get transactionFlagOrange => 'Orange';
+
+  @override
+  String get transactionFlagYellow => 'Yellow';
+
+  @override
+  String get transactionFlagGreen => 'Green';
+
+  @override
+  String get transactionFlagBlue => 'Blue';
+
+  @override
+  String get transactionFlagPurple => 'Purple';
+
+  @override
+  String get transactionFlagClear => 'Clear Flag';
+
+  @override
   String get transactionAddIncome => 'Add Income';
 
   @override

@@ -2122,6 +2122,54 @@ abstract class AppLocalizations {
   /// **'Add Expense'**
   String get transactionAddExpense;
 
+  /// No description provided for @transactionFlagTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set Flag'**
+  String get transactionFlagTitle;
+
+  /// No description provided for @transactionFlagRed.
+  ///
+  /// In en, this message translates to:
+  /// **'Red'**
+  String get transactionFlagRed;
+
+  /// No description provided for @transactionFlagOrange.
+  ///
+  /// In en, this message translates to:
+  /// **'Orange'**
+  String get transactionFlagOrange;
+
+  /// No description provided for @transactionFlagYellow.
+  ///
+  /// In en, this message translates to:
+  /// **'Yellow'**
+  String get transactionFlagYellow;
+
+  /// No description provided for @transactionFlagGreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Green'**
+  String get transactionFlagGreen;
+
+  /// No description provided for @transactionFlagBlue.
+  ///
+  /// In en, this message translates to:
+  /// **'Blue'**
+  String get transactionFlagBlue;
+
+  /// No description provided for @transactionFlagPurple.
+  ///
+  /// In en, this message translates to:
+  /// **'Purple'**
+  String get transactionFlagPurple;
+
+  /// No description provided for @transactionFlagClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Flag'**
+  String get transactionFlagClear;
+
   /// No description provided for @transactionAddIncome.
   ///
   /// In en, this message translates to:

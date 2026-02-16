@@ -941,6 +941,7 @@ class EndpointTransaction extends _i1.EndpointRef {
     _i1.UuidValue? payeeId,
     DateTime? transactionDate,
     String? memo,
+    String? flagColor,
   }) => caller.callServerEndpoint<_i14.Transaction>('transaction', 'update', {
     'transactionId': transactionId,
     'description': description,
@@ -949,6 +950,16 @@ class EndpointTransaction extends _i1.EndpointRef {
     'payeeId': payeeId,
     'transactionDate': transactionDate,
     'memo': memo,
+    'flagColor': flagColor,
+  });
+
+  /// Sets or clears the flag color on a transaction.
+  _i2.Future<_i14.Transaction> setFlag(
+    _i1.UuidValue transactionId, {
+    String? flagColor,
+  }) => caller.callServerEndpoint<_i14.Transaction>('transaction', 'setFlag', {
+    'transactionId': transactionId,
+    'flagColor': flagColor,
   });
 
   /// Creates a transfer between two accounts.

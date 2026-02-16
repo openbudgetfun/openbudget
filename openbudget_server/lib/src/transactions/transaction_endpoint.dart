@@ -69,6 +69,7 @@ class TransactionEndpoint extends Endpoint {
     UuidValue? payeeId,
     DateTime? transactionDate,
     String? memo,
+    String? flagColor,
   }) async {
     return TransactionService.update(
       session,
@@ -79,6 +80,20 @@ class TransactionEndpoint extends Endpoint {
       payeeId: payeeId,
       transactionDate: transactionDate,
       memo: memo,
+      flagColor: flagColor,
+    );
+  }
+
+  /// Sets or clears the flag color on a transaction.
+  Future<Transaction> setFlag(
+    Session session,
+    UuidValue transactionId, {
+    String? flagColor,
+  }) async {
+    return TransactionService.setFlag(
+      session,
+      transactionId: transactionId,
+      flagColor: flagColor,
     );
   }
 
