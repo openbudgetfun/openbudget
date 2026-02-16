@@ -2097,6 +2097,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not skip occurrence. Please try again.'**
   String get recurringSkipError;
+
+  /// No description provided for @settingsDataSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Data'**
+  String get settingsDataSection;
+
+  /// No description provided for @settingsExportData.
+  ///
+  /// In en, this message translates to:
+  /// **'Export Budget'**
+  String get settingsExportData;
+
+  /// No description provided for @settingsExportDataHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy all budget data as JSON to clipboard'**
+  String get settingsExportDataHint;
+
+  /// No description provided for @settingsExportSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget data copied to clipboard'**
+  String get settingsExportSuccess;
+
+  /// No description provided for @settingsExportError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not export budget data. Please try again.'**
+  String get settingsExportError;
 }
 
 class _AppLocalizationsDelegate

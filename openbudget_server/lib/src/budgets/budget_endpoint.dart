@@ -51,4 +51,9 @@ class BudgetEndpoint extends Endpoint {
   Future<Budget> delete(Session session, UuidValue budgetId) async {
     return BudgetService.delete(session, budgetId: budgetId);
   }
+
+  /// Exports all budget data as a JSON string for data portability.
+  Future<String> exportData(Session session, UuidValue budgetId) async {
+    return BudgetService.exportData(session, budgetId: budgetId);
+  }
 }

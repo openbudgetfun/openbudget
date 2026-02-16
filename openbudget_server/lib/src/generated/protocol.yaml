@@ -21,6 +21,7 @@ budget:
   - get:
   - update:
   - delete:
+  - exportData:
 budgetStream:
   - budgetUpdates:
 category:

@@ -1177,4 +1177,21 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get recurringSkipError =>
       'Could not skip occurrence. Please try again.';
+
+  @override
+  String get settingsDataSection => 'Data';
+
+  @override
+  String get settingsExportData => 'Export Budget';
+
+  @override
+  String get settingsExportDataHint =>
+      'Copy all budget data as JSON to clipboard';
+
+  @override
+  String get settingsExportSuccess => 'Budget data copied to clipboard';
+
+  @override
+  String get settingsExportError =>
+      'Could not export budget data. Please try again.';
 }

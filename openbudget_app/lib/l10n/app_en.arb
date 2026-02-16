@@ -466,5 +466,10 @@
   "recurringDueLabel": "Due now",
   "recurringSkipButton": "Skip",
   "recurringSkipSuccess": "Occurrence skipped",
-  "recurringSkipError": "Could not skip occurrence. Please try again."
+  "recurringSkipError": "Could not skip occurrence. Please try again.",
+  "settingsDataSection": "Data",
+  "settingsExportData": "Export Budget",
+  "settingsExportDataHint": "Copy all budget data as JSON to clipboard",
+  "settingsExportSuccess": "Budget data copied to clipboard",
+  "settingsExportError": "Could not export budget data. Please try again."
 }
