@@ -115,6 +115,13 @@
       }
     }
   },
+  "@recurringAutoPosted": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "@recurringDueBanner": {
     "placeholders": {
       "count": {
@@ -372,6 +379,7 @@
   "reconcileTitle": "Reconcile Account",
   "recurringAddButton": "Add Recurring",
   "recurringAddTitle": "Add Recurring Transaction",
+  "recurringAutoPosted": "{count, plural, =1{1 scheduled transaction auto-posted} other{{count} scheduled transactions auto-posted}}",
   "recurringCreateError": "Could not create recurring transaction. Please try again.",
   "recurringCreateSuccess": "Recurring transaction created",
   "recurringDueBanner": "{count, plural, =1{1 scheduled transaction is due} other{{count} scheduled transactions are due}}",

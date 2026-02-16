@@ -41,12 +41,42 @@ class BudgetDetailScreen extends HookConsumerWidget {
     final goalsAsync = ref.watch(budgetGoalsProvider(budgetId));
     final dueCountAsync = ref.watch(recurringDueCountProvider(budgetId));
     final isPosting = useState(false);
+    final hasAutoPosted = useState(false);
     final isReordering = useState(false);
     final searchController = useTextEditingController();
     final searchQuery = useState('');
     final isSearching = useState(false);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+
+    // Auto-post due recurring transactions when the budget opens.
+    useEffect(() {
+      if (hasAutoPosted.value) return null;
+      if (!dueCountAsync.hasValue || dueCountAsync.value! <= 0) return null;
+      if (!summaryAsync.hasValue) return null;
+
+      hasAutoPosted.value = true;
+
+      Future.microtask(() async {
+        isPosting.value = true;
+        try {
+          final count = await ref
+              .read(recurringAutoPostActionsProvider.notifier)
+              .postDue(budgetId: budgetId);
+          if (context.mounted && count > 0) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(l10n.recurringAutoPosted(count))),
+            );
+          }
+        } on Exception catch (_) {
+          hasAutoPosted.value = false;
+        } finally {
+          isPosting.value = false;
+        }
+      });
+
+      return null;
+    }, [dueCountAsync, summaryAsync]);
 
     return summaryAsync.when(
       loading: () => Scaffold(
