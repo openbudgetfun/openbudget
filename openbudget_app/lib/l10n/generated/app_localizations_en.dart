@@ -55,7 +55,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountDeleteTitle => 'Delete Account';
 
   @override
-  String get accountDetailBalance => 'Balance';
+  String get accountBalanceCleared => 'Cleared';
+
+  @override
+  String get accountBalanceUncleared => 'Uncleared';
+
+  @override
+  String get accountDetailBalance => 'Working Balance';
 
   @override
   String get accountDetailSearchHint => 'Search transactions...';
