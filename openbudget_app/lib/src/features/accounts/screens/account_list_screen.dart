@@ -9,11 +9,10 @@ import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
-CurrencyCode _parseCurrency(String code) =>
-    CurrencyCode.values.firstWhere(
-      (c) => c.code == code,
-      orElse: () => CurrencyCode.usd,
-    );
+CurrencyCode _parseCurrency(String code) => CurrencyCode.values.firstWhere(
+  (c) => c.code == code,
+  orElse: () => CurrencyCode.usd,
+);
 
 class AccountListScreen extends HookConsumerWidget {
   const AccountListScreen({required this.budgetId, super.key});
@@ -41,18 +40,21 @@ class AccountListScreen extends HookConsumerWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.error_outline_rounded,
-                  size: 48, color: colorScheme.error),
+              Icon(
+                Icons.error_outline_rounded,
+                size: 48,
+                color: colorScheme.error,
+              ),
               const SizedBox(height: SpacingTokens.md),
               Text(
                 l10n.accountLoadError,
-                style: theme.textTheme.bodyLarge
-                    ?.copyWith(color: colorScheme.error),
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: colorScheme.error,
+                ),
               ),
               const SizedBox(height: SpacingTokens.md),
               FilledButton.icon(
-                onPressed: () =>
-                    ref.invalidate(accountListProvider(budgetId)),
+                onPressed: () => ref.invalidate(accountListProvider(budgetId)),
                 icon: const Icon(Icons.refresh_rounded),
                 label: Text(l10n.homeRetry),
               ),
@@ -67,8 +69,11 @@ class AccountListScreen extends HookConsumerWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.account_balance_rounded,
-                        size: 64, color: colorScheme.outlineVariant),
+                    Icon(
+                      Icons.account_balance_rounded,
+                      size: 64,
+                      color: colorScheme.outlineVariant,
+                    ),
                     const SizedBox(height: SpacingTokens.lg),
                     Text(
                       l10n.accountEmptyTitle,
@@ -96,10 +101,12 @@ class AccountListScreen extends HookConsumerWidget {
             );
           }
 
-          final onBudget =
-              accountList.where((a) => a.onBudget && !a.isClosed).toList();
-          final offBudget =
-              accountList.where((a) => !a.onBudget && !a.isClosed).toList();
+          final onBudget = accountList
+              .where((a) => a.onBudget && !a.isClosed)
+              .toList();
+          final offBudget = accountList
+              .where((a) => !a.onBudget && !a.isClosed)
+              .toList();
           final closed = accountList.where((a) => a.isClosed).toList();
 
           return RefreshIndicator(
@@ -112,39 +119,45 @@ class AccountListScreen extends HookConsumerWidget {
                   _SectionHeader(
                     title: l10n.accountOnBudget,
                     total: onBudget.fold<int>(
-                        0, (sum, a) => sum + a.balanceCents),
+                      0,
+                      (sum, a) => sum + a.balanceCents,
+                    ),
                     currencyCode: onBudget.first.currencyCode,
                   ),
-                  ...onBudget.map((account) => _AccountTile(
-                        account: account,
-                        budgetId: budgetId,
-                      )),
+                  ...onBudget.map(
+                    (account) =>
+                        _AccountTile(account: account, budgetId: budgetId),
+                  ),
                   const SizedBox(height: SpacingTokens.md),
                 ],
                 if (offBudget.isNotEmpty) ...[
                   _SectionHeader(
                     title: l10n.accountOffBudget,
                     total: offBudget.fold<int>(
-                        0, (sum, a) => sum + a.balanceCents),
+                      0,
+                      (sum, a) => sum + a.balanceCents,
+                    ),
                     currencyCode: offBudget.first.currencyCode,
                   ),
-                  ...offBudget.map((account) => _AccountTile(
-                        account: account,
-                        budgetId: budgetId,
-                      )),
+                  ...offBudget.map(
+                    (account) =>
+                        _AccountTile(account: account, budgetId: budgetId),
+                  ),
                   const SizedBox(height: SpacingTokens.md),
                 ],
                 if (closed.isNotEmpty) ...[
                   _SectionHeader(
                     title: l10n.accountClosed,
-                    total:
-                        closed.fold<int>(0, (sum, a) => sum + a.balanceCents),
+                    total: closed.fold<int>(
+                      0,
+                      (sum, a) => sum + a.balanceCents,
+                    ),
                     currencyCode: closed.first.currencyCode,
                   ),
-                  ...closed.map((account) => _AccountTile(
-                        account: account,
-                        budgetId: budgetId,
-                      )),
+                  ...closed.map(
+                    (account) =>
+                        _AccountTile(account: account, budgetId: budgetId),
+                  ),
                 ],
               ],
             ),
@@ -222,14 +235,14 @@ class _AccountTile extends HookWidget {
       child: ListTile(
         leading: CircleAvatar(
           backgroundColor: colorScheme.secondaryContainer,
-          child:
-              Icon(icon, color: colorScheme.onSecondaryContainer, size: 20),
+          child: Icon(icon, color: colorScheme.onSecondaryContainer, size: 20),
         ),
         title: Text(account.name, style: theme.textTheme.titleMedium),
         subtitle: Text(
           _labelForType(account.accountType),
-          style: theme.textTheme.bodySmall
-              ?.copyWith(color: colorScheme.onSurfaceVariant),
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: colorScheme.onSurfaceVariant,
+          ),
         ),
         trailing: Text(
           formatCents(account.balanceCents, currency),

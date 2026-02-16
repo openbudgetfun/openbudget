@@ -58,8 +58,7 @@ class AddAccountScreen extends HookConsumerWidget {
                         height: 48,
                         decoration: BoxDecoration(
                           color: theme.colorScheme.primaryContainer,
-                          borderRadius:
-                              BorderRadius.circular(RadiusTokens.md),
+                          borderRadius: BorderRadius.circular(RadiusTokens.md),
                         ),
                         child: Icon(
                           Icons.account_balance_rounded,
@@ -70,8 +69,9 @@ class AddAccountScreen extends HookConsumerWidget {
                     const SizedBox(height: SpacingTokens.md),
                     Text(
                       l10n.accountAddTitle,
-                      style: theme.textTheme.titleLarge
-                          ?.copyWith(fontWeight: FontWeight.bold),
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: SpacingTokens.lg),
@@ -107,8 +107,7 @@ class AddAccountScreen extends HookConsumerWidget {
                       controller: balanceController,
                       decoration: InputDecoration(
                         labelText: l10n.accountBalanceLabel,
-                        prefixIcon:
-                            const Icon(Icons.attach_money_rounded),
+                        prefixIcon: const Icon(Icons.attach_money_rounded),
                       ),
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
@@ -129,58 +128,47 @@ class AddAccountScreen extends HookConsumerWidget {
                           ? null
                           : () async {
                               final name = nameController.text.trim();
-                              final balanceText =
-                                  balanceController.text.trim();
-                              final balance =
-                                  double.tryParse(balanceText) ?? 0;
+                              final balanceText = balanceController.text.trim();
+                              final balance = double.tryParse(balanceText) ?? 0;
                               if (name.isEmpty) return;
 
                               final budget = budgetAsync.value;
                               if (budget == null) return;
 
-                              final currency =
-                                  CurrencyCode.values.firstWhere(
+                              final currency = CurrencyCode.values.firstWhere(
                                 (c) => c.code == budget.currencyCode,
                                 orElse: () => CurrencyCode.usd,
                               );
                               final balanceCents =
-                                  (balance * _pow10(currency.decimals))
-                                      .round();
+                                  (balance * _pow10(currency.decimals)).round();
 
                               isSubmitting.value = true;
-                              final messenger =
-                                  ScaffoldMessenger.of(context);
+                              final messenger = ScaffoldMessenger.of(context);
                               final router = GoRouter.of(context);
                               try {
                                 await ref
-                                    .read(
-                                        accountActionsProvider.notifier)
+                                    .read(accountActionsProvider.notifier)
                                     .createAccount(
                                       name: name,
                                       accountType: selectedType.value,
                                       balanceCents: balanceCents,
-                                      currencyCode:
-                                          budget.currencyCode,
+                                      currencyCode: budget.currencyCode,
                                       budgetId: budgetId,
                                       onBudget: onBudget.value,
                                       sortOrder: 0,
                                     );
                                 messenger.showSnackBar(
                                   SnackBar(
-                                    content: Text(
-                                        l10n.accountCreateSuccess),
+                                    content: Text(l10n.accountCreateSuccess),
                                   ),
                                 );
-                                router.go(
-                                    '/budgets/$budgetId/accounts');
+                                router.go('/budgets/$budgetId/accounts');
                               } on Exception catch (_) {
                                 isSubmitting.value = false;
                                 messenger.showSnackBar(
                                   SnackBar(
-                                    content: Text(
-                                        l10n.accountCreateError),
-                                    backgroundColor:
-                                        theme.colorScheme.error,
+                                    content: Text(l10n.accountCreateError),
+                                    backgroundColor: theme.colorScheme.error,
                                   ),
                                 );
                               }
@@ -189,8 +177,7 @@ class AddAccountScreen extends HookConsumerWidget {
                           ? const SizedBox(
                               height: 20,
                               width: 20,
-                              child: CircularProgressIndicator(
-                                  strokeWidth: 2),
+                              child: CircularProgressIndicator(strokeWidth: 2),
                             )
                           : Text(l10n.accountAddButton),
                     ),

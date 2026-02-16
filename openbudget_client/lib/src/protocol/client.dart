@@ -43,35 +43,27 @@ class EndpointAccount extends _i1.EndpointRef {
     _i1.UuidValue budgetId, {
     required bool onBudget,
     required int sortOrder,
-  }) => caller.callServerEndpoint<_i3.Account>(
-    'account',
-    'create',
-    {
-      'name': name,
-      'accountType': accountType,
-      'balanceCents': balanceCents,
-      'currencyCode': currencyCode,
-      'budgetId': budgetId,
-      'onBudget': onBudget,
-      'sortOrder': sortOrder,
-    },
-  );
+  }) => caller.callServerEndpoint<_i3.Account>('account', 'create', {
+    'name': name,
+    'accountType': accountType,
+    'balanceCents': balanceCents,
+    'currencyCode': currencyCode,
+    'budgetId': budgetId,
+    'onBudget': onBudget,
+    'sortOrder': sortOrder,
+  });
 
   /// Lists all accounts for a budget.
   _i2.Future<List<_i3.Account>> list(_i1.UuidValue budgetId) =>
-      caller.callServerEndpoint<List<_i3.Account>>(
-        'account',
-        'list',
-        {'budgetId': budgetId},
-      );
+      caller.callServerEndpoint<List<_i3.Account>>('account', 'list', {
+        'budgetId': budgetId,
+      });
 
   /// Gets a single account by ID.
   _i2.Future<_i3.Account> get(_i1.UuidValue accountId) =>
-      caller.callServerEndpoint<_i3.Account>(
-        'account',
-        'get',
-        {'accountId': accountId},
-      );
+      caller.callServerEndpoint<_i3.Account>('account', 'get', {
+        'accountId': accountId,
+      });
 
   /// Updates an account by ID.
   _i2.Future<_i3.Account> update(
@@ -82,27 +74,21 @@ class EndpointAccount extends _i1.EndpointRef {
     bool? onBudget,
     int? sortOrder,
     bool? isClosed,
-  }) => caller.callServerEndpoint<_i3.Account>(
-    'account',
-    'update',
-    {
-      'accountId': accountId,
-      'name': name,
-      'accountType': accountType,
-      'balanceCents': balanceCents,
-      'onBudget': onBudget,
-      'sortOrder': sortOrder,
-      'isClosed': isClosed,
-    },
-  );
+  }) => caller.callServerEndpoint<_i3.Account>('account', 'update', {
+    'accountId': accountId,
+    'name': name,
+    'accountType': accountType,
+    'balanceCents': balanceCents,
+    'onBudget': onBudget,
+    'sortOrder': sortOrder,
+    'isClosed': isClosed,
+  });
 
   /// Deletes an account by ID.
   _i2.Future<_i3.Account> delete(_i1.UuidValue accountId) =>
-      caller.callServerEndpoint<_i3.Account>(
-        'account',
-        'delete',
-        {'accountId': accountId},
-      );
+      caller.callServerEndpoint<_i3.Account>('account', 'delete', {
+        'accountId': accountId,
+      });
 }
 
 /// By extending [EmailIdpBaseEndpoint], the email identity provider endpoints
@@ -128,14 +114,10 @@ class EndpointEmailIdp extends _i4.EndpointEmailIdpBase {
   _i2.Future<_i5.AuthSuccess> login({
     required String email,
     required String password,
-  }) => caller.callServerEndpoint<_i5.AuthSuccess>(
-    'emailIdp',
-    'login',
-    {
-      'email': email,
-      'password': password,
-    },
-  );
+  }) => caller.callServerEndpoint<_i5.AuthSuccess>('emailIdp', 'login', {
+    'email': email,
+    'password': password,
+  });
 
   /// Starts the registration for a new user account with an email-based login
   /// associated to it.
@@ -169,14 +151,11 @@ class EndpointEmailIdp extends _i4.EndpointEmailIdpBase {
   _i2.Future<String> verifyRegistrationCode({
     required _i1.UuidValue accountRequestId,
     required String verificationCode,
-  }) => caller.callServerEndpoint<String>(
-    'emailIdp',
-    'verifyRegistrationCode',
-    {
-      'accountRequestId': accountRequestId,
-      'verificationCode': verificationCode,
-    },
-  );
+  }) =>
+      caller.callServerEndpoint<String>('emailIdp', 'verifyRegistrationCode', {
+        'accountRequestId': accountRequestId,
+        'verificationCode': verificationCode,
+      });
 
   /// Completes a new account registration, creating a new auth user with a
   /// profile and attaching the given email account to it.
@@ -199,10 +178,7 @@ class EndpointEmailIdp extends _i4.EndpointEmailIdpBase {
   }) => caller.callServerEndpoint<_i5.AuthSuccess>(
     'emailIdp',
     'finishRegistration',
-    {
-      'registrationToken': registrationToken,
-      'password': password,
-    },
+    {'registrationToken': registrationToken, 'password': password},
   );
 
   /// Requests a password reset for [email].
@@ -244,14 +220,11 @@ class EndpointEmailIdp extends _i4.EndpointEmailIdpBase {
   _i2.Future<String> verifyPasswordResetCode({
     required _i1.UuidValue passwordResetRequestId,
     required String verificationCode,
-  }) => caller.callServerEndpoint<String>(
-    'emailIdp',
-    'verifyPasswordResetCode',
-    {
-      'passwordResetRequestId': passwordResetRequestId,
-      'verificationCode': verificationCode,
-    },
-  );
+  }) =>
+      caller.callServerEndpoint<String>('emailIdp', 'verifyPasswordResetCode', {
+        'passwordResetRequestId': passwordResetRequestId,
+        'verificationCode': verificationCode,
+      });
 
   /// Completes a password reset request by setting a new password.
   ///
@@ -271,21 +244,14 @@ class EndpointEmailIdp extends _i4.EndpointEmailIdpBase {
   _i2.Future<void> finishPasswordReset({
     required String finishPasswordResetToken,
     required String newPassword,
-  }) => caller.callServerEndpoint<void>(
-    'emailIdp',
-    'finishPasswordReset',
-    {
-      'finishPasswordResetToken': finishPasswordResetToken,
-      'newPassword': newPassword,
-    },
-  );
+  }) => caller.callServerEndpoint<void>('emailIdp', 'finishPasswordReset', {
+    'finishPasswordResetToken': finishPasswordResetToken,
+    'newPassword': newPassword,
+  });
 
   @override
-  _i2.Future<bool> hasAccount() => caller.callServerEndpoint<bool>(
-    'emailIdp',
-    'hasAccount',
-    {},
-  );
+  _i2.Future<bool> hasAccount() =>
+      caller.callServerEndpoint<bool>('emailIdp', 'hasAccount', {});
 }
 
 /// By extending [RefreshJwtTokensEndpoint], the JWT token refresh endpoint
@@ -337,56 +303,36 @@ class EndpointBudget extends _i1.EndpointRef {
   String get name => 'budget';
 
   /// Creates a new budget for the authenticated user.
-  _i2.Future<_i6.Budget> create(
-    String name,
-    String currencyCode,
-  ) => caller.callServerEndpoint<_i6.Budget>(
-    'budget',
-    'create',
-    {
-      'name': name,
-      'currencyCode': currencyCode,
-    },
-  );
+  _i2.Future<_i6.Budget> create(String name, String currencyCode) =>
+      caller.callServerEndpoint<_i6.Budget>('budget', 'create', {
+        'name': name,
+        'currencyCode': currencyCode,
+      });
 
   /// Lists all budgets for the authenticated user.
   _i2.Future<List<_i6.Budget>> list() =>
-      caller.callServerEndpoint<List<_i6.Budget>>(
-        'budget',
-        'list',
-        {},
-      );
+      caller.callServerEndpoint<List<_i6.Budget>>('budget', 'list', {});
 
   /// Gets a single budget by ID, verifying ownership.
-  _i2.Future<_i6.Budget> get(_i1.UuidValue budgetId) =>
-      caller.callServerEndpoint<_i6.Budget>(
-        'budget',
-        'get',
-        {'budgetId': budgetId},
-      );
+  _i2.Future<_i6.Budget> get(_i1.UuidValue budgetId) => caller
+      .callServerEndpoint<_i6.Budget>('budget', 'get', {'budgetId': budgetId});
 
   /// Updates a budget by ID, verifying ownership.
   _i2.Future<_i6.Budget> update(
     _i1.UuidValue budgetId, {
     String? name,
     String? currencyCode,
-  }) => caller.callServerEndpoint<_i6.Budget>(
-    'budget',
-    'update',
-    {
-      'budgetId': budgetId,
-      'name': name,
-      'currencyCode': currencyCode,
-    },
-  );
+  }) => caller.callServerEndpoint<_i6.Budget>('budget', 'update', {
+    'budgetId': budgetId,
+    'name': name,
+    'currencyCode': currencyCode,
+  });
 
   /// Deletes a budget by ID, verifying ownership.
   _i2.Future<_i6.Budget> delete(_i1.UuidValue budgetId) =>
-      caller.callServerEndpoint<_i6.Budget>(
-        'budget',
-        'delete',
-        {'budgetId': budgetId},
-      );
+      caller.callServerEndpoint<_i6.Budget>('budget', 'delete', {
+        'budgetId': budgetId,
+      });
 }
 
 /// Streaming endpoint for real-time budget updates.
@@ -429,54 +375,40 @@ class EndpointCategory extends _i1.EndpointRef {
     String name,
     _i1.UuidValue budgetId,
     int sortOrder,
-  ) => caller.callServerEndpoint<_i7.Category>(
-    'category',
-    'create',
-    {
-      'name': name,
-      'budgetId': budgetId,
-      'sortOrder': sortOrder,
-    },
-  );
+  ) => caller.callServerEndpoint<_i7.Category>('category', 'create', {
+    'name': name,
+    'budgetId': budgetId,
+    'sortOrder': sortOrder,
+  });
 
   /// Lists all categories for a budget.
   _i2.Future<List<_i7.Category>> list(_i1.UuidValue budgetId) =>
-      caller.callServerEndpoint<List<_i7.Category>>(
-        'category',
-        'list',
-        {'budgetId': budgetId},
-      );
+      caller.callServerEndpoint<List<_i7.Category>>('category', 'list', {
+        'budgetId': budgetId,
+      });
 
   /// Gets a single category by ID.
   _i2.Future<_i7.Category> get(_i1.UuidValue categoryId) =>
-      caller.callServerEndpoint<_i7.Category>(
-        'category',
-        'get',
-        {'categoryId': categoryId},
-      );
+      caller.callServerEndpoint<_i7.Category>('category', 'get', {
+        'categoryId': categoryId,
+      });
 
   /// Updates a category by ID.
   _i2.Future<_i7.Category> update(
     _i1.UuidValue categoryId, {
     String? name,
     int? sortOrder,
-  }) => caller.callServerEndpoint<_i7.Category>(
-    'category',
-    'update',
-    {
-      'categoryId': categoryId,
-      'name': name,
-      'sortOrder': sortOrder,
-    },
-  );
+  }) => caller.callServerEndpoint<_i7.Category>('category', 'update', {
+    'categoryId': categoryId,
+    'name': name,
+    'sortOrder': sortOrder,
+  });
 
   /// Deletes a category by ID.
   _i2.Future<_i7.Category> delete(_i1.UuidValue categoryId) =>
-      caller.callServerEndpoint<_i7.Category>(
-        'category',
-        'delete',
-        {'categoryId': categoryId},
-      );
+      caller.callServerEndpoint<_i7.Category>('category', 'delete', {
+        'categoryId': categoryId,
+      });
 }
 
 /// API surface for envelope operations.
@@ -495,32 +427,24 @@ class EndpointEnvelope extends _i1.EndpointRef {
     _i1.UuidValue categoryId,
     int budgetedAmountCents,
     String currencyCode,
-  ) => caller.callServerEndpoint<_i8.Envelope>(
-    'envelope',
-    'create',
-    {
-      'name': name,
-      'categoryId': categoryId,
-      'budgetedAmountCents': budgetedAmountCents,
-      'currencyCode': currencyCode,
-    },
-  );
+  ) => caller.callServerEndpoint<_i8.Envelope>('envelope', 'create', {
+    'name': name,
+    'categoryId': categoryId,
+    'budgetedAmountCents': budgetedAmountCents,
+    'currencyCode': currencyCode,
+  });
 
   /// Lists all envelopes for a category.
   _i2.Future<List<_i8.Envelope>> list(_i1.UuidValue categoryId) =>
-      caller.callServerEndpoint<List<_i8.Envelope>>(
-        'envelope',
-        'list',
-        {'categoryId': categoryId},
-      );
+      caller.callServerEndpoint<List<_i8.Envelope>>('envelope', 'list', {
+        'categoryId': categoryId,
+      });
 
   /// Gets a single envelope by ID.
   _i2.Future<_i8.Envelope> get(_i1.UuidValue envelopeId) =>
-      caller.callServerEndpoint<_i8.Envelope>(
-        'envelope',
-        'get',
-        {'envelopeId': envelopeId},
-      );
+      caller.callServerEndpoint<_i8.Envelope>('envelope', 'get', {
+        'envelopeId': envelopeId,
+      });
 
   /// Updates an envelope by ID.
   _i2.Future<_i8.Envelope> update(
@@ -528,24 +452,18 @@ class EndpointEnvelope extends _i1.EndpointRef {
     String? name,
     int? budgetedAmountCents,
     int? spentAmountCents,
-  }) => caller.callServerEndpoint<_i8.Envelope>(
-    'envelope',
-    'update',
-    {
-      'envelopeId': envelopeId,
-      'name': name,
-      'budgetedAmountCents': budgetedAmountCents,
-      'spentAmountCents': spentAmountCents,
-    },
-  );
+  }) => caller.callServerEndpoint<_i8.Envelope>('envelope', 'update', {
+    'envelopeId': envelopeId,
+    'name': name,
+    'budgetedAmountCents': budgetedAmountCents,
+    'spentAmountCents': spentAmountCents,
+  });
 
   /// Deletes an envelope by ID.
   _i2.Future<_i8.Envelope> delete(_i1.UuidValue envelopeId) =>
-      caller.callServerEndpoint<_i8.Envelope>(
-        'envelope',
-        'delete',
-        {'envelopeId': envelopeId},
-      );
+      caller.callServerEndpoint<_i8.Envelope>('envelope', 'delete', {
+        'envelopeId': envelopeId,
+      });
 }
 
 /// API surface for transaction operations.
@@ -566,34 +484,26 @@ class EndpointTransaction extends _i1.EndpointRef {
     _i1.UuidValue budgetId,
     DateTime transactionDate, {
     _i1.UuidValue? envelopeId,
-  }) => caller.callServerEndpoint<_i9.Transaction>(
-    'transaction',
-    'create',
-    {
-      'description': description,
-      'amountCents': amountCents,
-      'currencyCode': currencyCode,
-      'budgetId': budgetId,
-      'transactionDate': transactionDate,
-      'envelopeId': envelopeId,
-    },
-  );
+  }) => caller.callServerEndpoint<_i9.Transaction>('transaction', 'create', {
+    'description': description,
+    'amountCents': amountCents,
+    'currencyCode': currencyCode,
+    'budgetId': budgetId,
+    'transactionDate': transactionDate,
+    'envelopeId': envelopeId,
+  });
 
   /// Lists all transactions for a budget.
   _i2.Future<List<_i9.Transaction>> list(_i1.UuidValue budgetId) =>
-      caller.callServerEndpoint<List<_i9.Transaction>>(
-        'transaction',
-        'list',
-        {'budgetId': budgetId},
-      );
+      caller.callServerEndpoint<List<_i9.Transaction>>('transaction', 'list', {
+        'budgetId': budgetId,
+      });
 
   /// Gets a single transaction by ID.
   _i2.Future<_i9.Transaction> get(_i1.UuidValue transactionId) =>
-      caller.callServerEndpoint<_i9.Transaction>(
-        'transaction',
-        'get',
-        {'transactionId': transactionId},
-      );
+      caller.callServerEndpoint<_i9.Transaction>('transaction', 'get', {
+        'transactionId': transactionId,
+      });
 
   /// Updates a transaction by ID.
   _i2.Future<_i9.Transaction> update(
@@ -602,25 +512,19 @@ class EndpointTransaction extends _i1.EndpointRef {
     int? amountCents,
     _i1.UuidValue? envelopeId,
     DateTime? transactionDate,
-  }) => caller.callServerEndpoint<_i9.Transaction>(
-    'transaction',
-    'update',
-    {
-      'transactionId': transactionId,
-      'description': description,
-      'amountCents': amountCents,
-      'envelopeId': envelopeId,
-      'transactionDate': transactionDate,
-    },
-  );
+  }) => caller.callServerEndpoint<_i9.Transaction>('transaction', 'update', {
+    'transactionId': transactionId,
+    'description': description,
+    'amountCents': amountCents,
+    'envelopeId': envelopeId,
+    'transactionDate': transactionDate,
+  });
 
   /// Deletes a transaction by ID.
   _i2.Future<_i9.Transaction> delete(_i1.UuidValue transactionId) =>
-      caller.callServerEndpoint<_i9.Transaction>(
-        'transaction',
-        'delete',
-        {'transactionId': transactionId},
-      );
+      caller.callServerEndpoint<_i9.Transaction>('transaction', 'delete', {
+        'transactionId': transactionId,
+      });
 }
 
 class Modules {
@@ -644,12 +548,7 @@ class Client extends _i1.ServerpodClientShared {
     super.authenticationKeyManager,
     Duration? streamingConnectionTimeout,
     Duration? connectionTimeout,
-    Function(
-      _i1.MethodCallContext,
-      Object,
-      StackTrace,
-    )?
-    onFailedCall,
+    Function(_i1.MethodCallContext, Object, StackTrace)? onFailedCall,
     Function(_i1.MethodCallContext)? onSucceededCall,
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
