@@ -16,6 +16,7 @@ class TransactionService {
     required UuidValue budgetId,
     required DateTime transactionDate,
     UuidValue? envelopeId,
+    UuidValue? payeeId,
   }) async {
     // Verify the user owns this budget.
     await BudgetService.getById(session, budgetId: budgetId);
@@ -26,6 +27,7 @@ class TransactionService {
       currencyCode: currencyCode,
       envelopeId: envelopeId,
       budgetId: budgetId,
+      payeeId: payeeId,
       transactionDate: transactionDate,
       createdAt: DateTime.now(),
     );
@@ -92,6 +94,7 @@ class TransactionService {
     String? description,
     int? amountCents,
     UuidValue? envelopeId,
+    UuidValue? payeeId,
     DateTime? transactionDate,
   }) async {
     final transaction = await getById(session, transactionId: transactionId);
@@ -100,6 +103,7 @@ class TransactionService {
       description: description ?? transaction.description,
       amountCents: amountCents ?? transaction.amountCents,
       envelopeId: envelopeId ?? transaction.envelopeId,
+      payeeId: payeeId ?? transaction.payeeId,
       transactionDate: transactionDate ?? transaction.transactionDate,
     );
     return Transaction.db.updateRow(session, updated);

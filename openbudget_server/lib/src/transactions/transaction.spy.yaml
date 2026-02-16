@@ -12,6 +12,8 @@ fields:
   budgetId: UuidValue, relation(parent=budget)
   ### The account this transaction belongs to (optional for backwards compat).
   accountId: UuidValue?, relation(parent=account)
+  ### The payee associated with this transaction.
+  payeeId: UuidValue?, relation(parent=payee)
   transactionDate: DateTime
   createdAt: DateTime, default=now
 indexes:
@@ -21,5 +23,7 @@ indexes:
     fields: budgetId
   transaction_account_idx:
     fields: accountId
+  transaction_payee_idx:
+    fields: payeeId
   transaction_date_idx:
     fields: transactionDate

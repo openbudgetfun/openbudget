@@ -23,8 +23,9 @@ import 'package:openbudget_server/src/generated/categories/category.dart'
 import 'package:openbudget_server/src/generated/envelopes/envelope.dart' as _i8;
 import 'package:openbudget_server/src/generated/monthly_allocations/monthly_allocation.dart'
     as _i9;
+import 'package:openbudget_server/src/generated/payees/payee.dart' as _i10;
 import 'package:openbudget_server/src/generated/transactions/transaction.dart'
-    as _i10;
+    as _i11;
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:openbudget_server/src/generated/endpoints.dart';
 export 'package:serverpod_test/serverpod_test_public_exports.dart';
@@ -148,6 +149,8 @@ class TestEndpoints {
 
   late final _MonthlyAllocationEndpoint monthlyAllocation;
 
+  late final _PayeeEndpoint payee;
+
   late final _TransactionEndpoint transaction;
 }
 
@@ -169,6 +172,7 @@ class _InternalTestEndpoints extends TestEndpoints
       endpoints,
       serializationManager,
     );
+    payee = _PayeeEndpoint(endpoints, serializationManager);
     transaction = _TransactionEndpoint(endpoints, serializationManager);
   }
 }
@@ -1361,6 +1365,174 @@ class _MonthlyAllocationEndpoint {
   }
 }
 
+class _PayeeEndpoint {
+  _PayeeEndpoint(this._endpointDispatch, this._serializationManager);
+
+  final _i2.EndpointDispatch _endpointDispatch;
+
+  final _i2.SerializationManager _serializationManager;
+
+  _i3.Future<_i10.Payee> create(
+    _i1.TestSessionBuilder sessionBuilder,
+    String name,
+    _i2.UuidValue budgetId,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'payee',
+            method: 'create',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'payee',
+          methodName: 'create',
+          parameters: _i1.testObjectToJson({
+            'name': name,
+            'budgetId': budgetId,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<_i10.Payee>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<List<_i10.Payee>> list(
+    _i1.TestSessionBuilder sessionBuilder,
+    _i2.UuidValue budgetId,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'payee',
+            method: 'list',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'payee',
+          methodName: 'list',
+          parameters: _i1.testObjectToJson({'budgetId': budgetId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<List<_i10.Payee>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<_i10.Payee> get(
+    _i1.TestSessionBuilder sessionBuilder,
+    _i2.UuidValue payeeId,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'payee',
+            method: 'get',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'payee',
+          methodName: 'get',
+          parameters: _i1.testObjectToJson({'payeeId': payeeId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<_i10.Payee>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<_i10.Payee> update(
+    _i1.TestSessionBuilder sessionBuilder,
+    _i2.UuidValue payeeId, {
+    String? name,
+  }) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'payee',
+            method: 'update',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'payee',
+          methodName: 'update',
+          parameters: _i1.testObjectToJson({'payeeId': payeeId, 'name': name}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<_i10.Payee>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<_i10.Payee> delete(
+    _i1.TestSessionBuilder sessionBuilder,
+    _i2.UuidValue payeeId,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'payee',
+            method: 'delete',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'payee',
+          methodName: 'delete',
+          parameters: _i1.testObjectToJson({'payeeId': payeeId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<_i10.Payee>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+}
+
 class _TransactionEndpoint {
   _TransactionEndpoint(this._endpointDispatch, this._serializationManager);
 
@@ -1368,7 +1540,7 @@ class _TransactionEndpoint {
 
   final _i2.SerializationManager _serializationManager;
 
-  _i3.Future<_i10.Transaction> create(
+  _i3.Future<_i11.Transaction> create(
     _i1.TestSessionBuilder sessionBuilder,
     String description,
     int amountCents,
@@ -1376,6 +1548,7 @@ class _TransactionEndpoint {
     _i2.UuidValue budgetId,
     DateTime transactionDate, {
     _i2.UuidValue? envelopeId,
+    _i2.UuidValue? payeeId,
   }) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
@@ -1395,6 +1568,7 @@ class _TransactionEndpoint {
             'budgetId': budgetId,
             'transactionDate': transactionDate,
             'envelopeId': envelopeId,
+            'payeeId': payeeId,
           }),
           serializationManager: _serializationManager,
         );
@@ -1403,7 +1577,7 @@ class _TransactionEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i10.Transaction>);
+                as _i3.Future<_i11.Transaction>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1411,7 +1585,7 @@ class _TransactionEndpoint {
     });
   }
 
-  _i3.Future<List<_i10.Transaction>> list(
+  _i3.Future<List<_i11.Transaction>> list(
     _i1.TestSessionBuilder sessionBuilder,
     _i2.UuidValue budgetId,
   ) async {
@@ -1434,7 +1608,7 @@ class _TransactionEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<List<_i10.Transaction>>);
+                as _i3.Future<List<_i11.Transaction>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1442,7 +1616,7 @@ class _TransactionEndpoint {
     });
   }
 
-  _i3.Future<List<_i10.Transaction>> listByMonth(
+  _i3.Future<List<_i11.Transaction>> listByMonth(
     _i1.TestSessionBuilder sessionBuilder,
     _i2.UuidValue budgetId,
     int year,
@@ -1471,7 +1645,7 @@ class _TransactionEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<List<_i10.Transaction>>);
+                as _i3.Future<List<_i11.Transaction>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1479,7 +1653,7 @@ class _TransactionEndpoint {
     });
   }
 
-  _i3.Future<_i10.Transaction> get(
+  _i3.Future<_i11.Transaction> get(
     _i1.TestSessionBuilder sessionBuilder,
     _i2.UuidValue transactionId,
   ) async {
@@ -1502,7 +1676,7 @@ class _TransactionEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i10.Transaction>);
+                as _i3.Future<_i11.Transaction>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1510,12 +1684,13 @@ class _TransactionEndpoint {
     });
   }
 
-  _i3.Future<_i10.Transaction> update(
+  _i3.Future<_i11.Transaction> update(
     _i1.TestSessionBuilder sessionBuilder,
     _i2.UuidValue transactionId, {
     String? description,
     int? amountCents,
     _i2.UuidValue? envelopeId,
+    _i2.UuidValue? payeeId,
     DateTime? transactionDate,
   }) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
@@ -1534,6 +1709,7 @@ class _TransactionEndpoint {
             'description': description,
             'amountCents': amountCents,
             'envelopeId': envelopeId,
+            'payeeId': payeeId,
             'transactionDate': transactionDate,
           }),
           serializationManager: _serializationManager,
@@ -1543,7 +1719,7 @@ class _TransactionEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i10.Transaction>);
+                as _i3.Future<_i11.Transaction>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1551,7 +1727,7 @@ class _TransactionEndpoint {
     });
   }
 
-  _i3.Future<_i10.Transaction> delete(
+  _i3.Future<_i11.Transaction> delete(
     _i1.TestSessionBuilder sessionBuilder,
     _i2.UuidValue transactionId,
   ) async {
@@ -1574,7 +1750,7 @@ class _TransactionEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i10.Transaction>);
+                as _i3.Future<_i11.Transaction>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();

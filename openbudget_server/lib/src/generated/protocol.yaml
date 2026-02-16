@@ -39,6 +39,12 @@ monthlyAllocation:
   - upsert:
   - list:
   - delete:
+payee:
+  - create:
+  - list:
+  - get:
+  - update:
+  - delete:
 transaction:
   - create:
   - list:

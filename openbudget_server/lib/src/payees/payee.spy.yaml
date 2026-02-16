@@ -1,0 +1,14 @@
+### A payee (merchant or person) associated with transactions in a budget.
+class: Payee
+table: payee
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  name: String
+  budgetId: UuidValue, relation(parent=budget)
+  createdAt: DateTime, default=now
+indexes:
+  payee_budget_idx:
+    fields: budgetId
+  payee_name_budget_idx:
+    fields: budgetId, name
+    unique: true

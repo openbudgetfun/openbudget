@@ -18,6 +18,7 @@ class TransactionEndpoint extends Endpoint {
     UuidValue budgetId,
     DateTime transactionDate, {
     UuidValue? envelopeId,
+    UuidValue? payeeId,
   }) async {
     return TransactionService.create(
       session,
@@ -27,6 +28,7 @@ class TransactionEndpoint extends Endpoint {
       budgetId: budgetId,
       transactionDate: transactionDate,
       envelopeId: envelopeId,
+      payeeId: payeeId,
     );
   }
 
@@ -62,6 +64,7 @@ class TransactionEndpoint extends Endpoint {
     String? description,
     int? amountCents,
     UuidValue? envelopeId,
+    UuidValue? payeeId,
     DateTime? transactionDate,
   }) async {
     return TransactionService.update(
@@ -70,6 +73,7 @@ class TransactionEndpoint extends Endpoint {
       description: description,
       amountCents: amountCents,
       envelopeId: envelopeId,
+      payeeId: payeeId,
       transactionDate: transactionDate,
     );
   }

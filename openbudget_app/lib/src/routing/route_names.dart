@@ -18,3 +18,5 @@ const accountListRoute = 'accountList';
 const accountListPath = '/budgets/:id/accounts';
 const addAccountRoute = 'addAccount';
 const addAccountPath = '/budgets/:id/accounts/add';
+const payeeListRoute = 'payeeList';
+const payeeListPath = '/budgets/:id/payees';
