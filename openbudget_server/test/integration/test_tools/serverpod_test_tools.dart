@@ -169,62 +169,29 @@ class _InternalTestEndpoints extends TestEndpoints
     _i2.SerializationManager serializationManager,
     _i2.EndpointDispatch endpoints,
   ) {
-    account = _AccountEndpoint(
-      endpoints,
-      serializationManager,
-    );
-    emailIdp = _EmailIdpEndpoint(
-      endpoints,
-      serializationManager,
-    );
-    jwtRefresh = _JwtRefreshEndpoint(
-      endpoints,
-      serializationManager,
-    );
-    budget = _BudgetEndpoint(
-      endpoints,
-      serializationManager,
-    );
-    budgetStream = _BudgetStreamEndpoint(
-      endpoints,
-      serializationManager,
-    );
-    category = _CategoryEndpoint(
-      endpoints,
-      serializationManager,
-    );
-    envelopeGoal = _EnvelopeGoalEndpoint(
-      endpoints,
-      serializationManager,
-    );
-    envelope = _EnvelopeEndpoint(
-      endpoints,
-      serializationManager,
-    );
+    account = _AccountEndpoint(endpoints, serializationManager);
+    emailIdp = _EmailIdpEndpoint(endpoints, serializationManager);
+    jwtRefresh = _JwtRefreshEndpoint(endpoints, serializationManager);
+    budget = _BudgetEndpoint(endpoints, serializationManager);
+    budgetStream = _BudgetStreamEndpoint(endpoints, serializationManager);
+    category = _CategoryEndpoint(endpoints, serializationManager);
+    envelopeGoal = _EnvelopeGoalEndpoint(endpoints, serializationManager);
+    envelope = _EnvelopeEndpoint(endpoints, serializationManager);
     monthlyAllocation = _MonthlyAllocationEndpoint(
       endpoints,
       serializationManager,
     );
-    payee = _PayeeEndpoint(
-      endpoints,
-      serializationManager,
-    );
+    payee = _PayeeEndpoint(endpoints, serializationManager);
     recurringTransaction = _RecurringTransactionEndpoint(
       endpoints,
       serializationManager,
     );
-    transaction = _TransactionEndpoint(
-      endpoints,
-      serializationManager,
-    );
+    transaction = _TransactionEndpoint(endpoints, serializationManager);
   }
 }
 
 class _AccountEndpoint {
-  _AccountEndpoint(
-    this._endpointDispatch,
-    this._serializationManager,
-  );
+  _AccountEndpoint(this._endpointDispatch, this._serializationManager);
 
   final _i2.EndpointDispatch _endpointDispatch;
 
@@ -415,10 +382,7 @@ class _AccountEndpoint {
 }
 
 class _EmailIdpEndpoint {
-  _EmailIdpEndpoint(
-    this._endpointDispatch,
-    this._serializationManager,
-  );
+  _EmailIdpEndpoint(this._endpointDispatch, this._serializationManager);
 
   final _i2.EndpointDispatch _endpointDispatch;
 
@@ -691,10 +655,7 @@ class _EmailIdpEndpoint {
 }
 
 class _JwtRefreshEndpoint {
-  _JwtRefreshEndpoint(
-    this._endpointDispatch,
-    this._serializationManager,
-  );
+  _JwtRefreshEndpoint(this._endpointDispatch, this._serializationManager);
 
   final _i2.EndpointDispatch _endpointDispatch;
 
@@ -733,10 +694,7 @@ class _JwtRefreshEndpoint {
 }
 
 class _BudgetEndpoint {
-  _BudgetEndpoint(
-    this._endpointDispatch,
-    this._serializationManager,
-  );
+  _BudgetEndpoint(this._endpointDispatch, this._serializationManager);
 
   final _i2.EndpointDispatch _endpointDispatch;
 
@@ -908,10 +866,7 @@ class _BudgetEndpoint {
 }
 
 class _BudgetStreamEndpoint {
-  _BudgetStreamEndpoint(
-    this._endpointDispatch,
-    this._serializationManager,
-  );
+  _BudgetStreamEndpoint(this._endpointDispatch, this._serializationManager);
 
   final _i2.EndpointDispatch _endpointDispatch;
 
@@ -922,39 +877,33 @@ class _BudgetStreamEndpoint {
     _i3.Stream<_i2.UuidValue> budgetIdStream,
   ) {
     var _localTestStreamManager = _i1.TestStreamManager<_i6.Budget>();
-    _i1.callStreamFunctionAndHandleExceptions(
-      () async {
-        var _localUniqueSession =
-            (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
-              endpoint: 'budgetStream',
-              method: 'budgetUpdates',
-            );
-        var _localCallContext = await _endpointDispatch
-            .getMethodStreamCallContext(
-              createSessionCallback: (_) => _localUniqueSession,
-              endpointPath: 'budgetStream',
-              methodName: 'budgetUpdates',
-              arguments: {},
-              requestedInputStreams: ['budgetIdStream'],
-              serializationManager: _serializationManager,
-            );
-        await _localTestStreamManager.callStreamMethod(
-          _localCallContext,
-          _localUniqueSession,
-          {'budgetIdStream': budgetIdStream},
-        );
-      },
-      _localTestStreamManager.outputStreamController,
-    );
+    _i1.callStreamFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'budgetStream',
+            method: 'budgetUpdates',
+          );
+      var _localCallContext = await _endpointDispatch
+          .getMethodStreamCallContext(
+            createSessionCallback: (_) => _localUniqueSession,
+            endpointPath: 'budgetStream',
+            methodName: 'budgetUpdates',
+            arguments: {},
+            requestedInputStreams: ['budgetIdStream'],
+            serializationManager: _serializationManager,
+          );
+      await _localTestStreamManager.callStreamMethod(
+        _localCallContext,
+        _localUniqueSession,
+        {'budgetIdStream': budgetIdStream},
+      );
+    }, _localTestStreamManager.outputStreamController);
     return _localTestStreamManager.outputStreamController.stream;
   }
 }
 
 class _CategoryEndpoint {
-  _CategoryEndpoint(
-    this._endpointDispatch,
-    this._serializationManager,
-  );
+  _CategoryEndpoint(this._endpointDispatch, this._serializationManager);
 
   final _i2.EndpointDispatch _endpointDispatch;
 
@@ -1129,10 +1078,7 @@ class _CategoryEndpoint {
 }
 
 class _EnvelopeGoalEndpoint {
-  _EnvelopeGoalEndpoint(
-    this._endpointDispatch,
-    this._serializationManager,
-  );
+  _EnvelopeGoalEndpoint(this._endpointDispatch, this._serializationManager);
 
   final _i2.EndpointDispatch _endpointDispatch;
 
@@ -1274,10 +1220,7 @@ class _EnvelopeGoalEndpoint {
 }
 
 class _EnvelopeEndpoint {
-  _EnvelopeEndpoint(
-    this._endpointDispatch,
-    this._serializationManager,
-  );
+  _EnvelopeEndpoint(this._endpointDispatch, this._serializationManager);
 
   final _i2.EndpointDispatch _endpointDispatch;
 
@@ -1621,10 +1564,7 @@ class _MonthlyAllocationEndpoint {
 }
 
 class _PayeeEndpoint {
-  _PayeeEndpoint(
-    this._endpointDispatch,
-    this._serializationManager,
-  );
+  _PayeeEndpoint(this._endpointDispatch, this._serializationManager);
 
   final _i2.EndpointDispatch _endpointDispatch;
 
@@ -1743,10 +1683,7 @@ class _PayeeEndpoint {
           createSessionCallback: (_) => _localUniqueSession,
           endpointPath: 'payee',
           methodName: 'update',
-          parameters: _i1.testObjectToJson({
-            'payeeId': payeeId,
-            'name': name,
-          }),
+          parameters: _i1.testObjectToJson({'payeeId': payeeId, 'name': name}),
           serializationManager: _serializationManager,
         );
         var _localReturnValue =
@@ -2009,10 +1946,7 @@ class _RecurringTransactionEndpoint {
 }
 
 class _TransactionEndpoint {
-  _TransactionEndpoint(
-    this._endpointDispatch,
-    this._serializationManager,
-  );
+  _TransactionEndpoint(this._endpointDispatch, this._serializationManager);
 
   final _i2.EndpointDispatch _endpointDispatch;
 
