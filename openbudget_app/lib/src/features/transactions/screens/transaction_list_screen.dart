@@ -6,6 +6,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
+import 'package:openbudget_app/src/features/payees/providers/payee_list_provider.dart';
 import 'package:openbudget_app/src/features/transactions/providers/transaction_actions_provider.dart';
 import 'package:openbudget_app/src/features/transactions/screens/edit_transaction_dialog.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
@@ -147,6 +148,26 @@ class TransactionListScreen extends HookConsumerWidget {
           ),
         ),
         data: (transactions) {
+          // Build payee and envelope name lookup maps.
+          final payeeAsync = ref.watch(payeeListProvider(budgetId));
+          final summaryAsync = ref.watch(budgetSummaryProvider(budgetId));
+          final payeeMap = <String, String>{};
+          if (payeeAsync.hasValue) {
+            for (final payee in payeeAsync.value!) {
+              final id = payee.id?.toString();
+              if (id != null) payeeMap[id] = payee.name;
+            }
+          }
+          final envelopeMap = <String, String>{};
+          if (summaryAsync.hasValue && summaryAsync.value != null) {
+            for (final cat in summaryAsync.value!.categories) {
+              for (final env in cat.envelopes) {
+                final id = env.id?.toString();
+                if (id != null) envelopeMap[id] = env.name;
+              }
+            }
+          }
+
           // Filter out child split transactions (they have parentTransactionId).
           final childParentIds = transactions
               .where((tx) => tx.parentTransactionId != null)
@@ -343,6 +364,8 @@ class TransactionListScreen extends HookConsumerWidget {
                       childParentIds: childParentIds,
                       budgetId: budgetId,
                       currencyCode: currency,
+                      payeeMap: payeeMap,
+                      envelopeMap: envelopeMap,
                       selectionMode: selectionMode.value,
                       selectedIds: selectedIds.value,
                       onToggleSelection: (id) {
@@ -662,6 +685,8 @@ class _TransactionTile extends HookConsumerWidget {
     required this.budgetId,
     required this.currencyCode,
     this.isSplit = false,
+    this.payeeName,
+    this.envelopeName,
     this.selectionMode = false,
     this.isSelected = false,
     this.onToggleSelection,
@@ -671,6 +696,8 @@ class _TransactionTile extends HookConsumerWidget {
   final String budgetId;
   final CurrencyCode currencyCode;
   final bool isSplit;
+  final String? payeeName;
+  final String? envelopeName;
   final bool selectionMode;
   final bool isSelected;
   final VoidCallback? onToggleSelection;
@@ -782,17 +809,7 @@ class _TransactionTile extends HookConsumerWidget {
             ],
           ],
         ),
-        subtitle: transaction.memo != null && transaction.memo!.isNotEmpty
-            ? Text(
-                transaction.memo!,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                  fontStyle: FontStyle.italic,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              )
-            : null,
+        subtitle: _buildSubtitle(theme, colorScheme),
         trailing: Text(
           formatCents(transaction.amountCents, currencyCode),
           style: theme.textTheme.titleSmall?.copyWith(
@@ -821,6 +838,45 @@ class _TransactionTile extends HookConsumerWidget {
       confirmDismiss: (_) => _confirmDelete(context, l10n, colorScheme),
       onDismissed: (_) => _deleteTransaction(context, ref, l10n, colorScheme),
       child: card,
+    );
+  }
+
+  Widget? _buildSubtitle(ThemeData theme, ColorScheme colorScheme) {
+    final parts = <String>[];
+    if (payeeName != null && payeeName!.isNotEmpty) {
+      parts.add(payeeName!);
+    }
+    if (envelopeName != null && envelopeName!.isNotEmpty) {
+      parts.add(envelopeName!);
+    }
+    final hasMemo = transaction.memo != null && transaction.memo!.isNotEmpty;
+
+    if (parts.isEmpty && !hasMemo) return null;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (parts.isNotEmpty)
+          Text(
+            parts.join(' \u2022 '),
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        if (hasMemo)
+          Text(
+            transaction.memo!,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+              fontStyle: FontStyle.italic,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+      ],
     );
   }
 
@@ -1073,6 +1129,8 @@ class _GroupedTransactionList extends HookWidget {
     required this.childParentIds,
     required this.budgetId,
     required this.currencyCode,
+    this.payeeMap = const {},
+    this.envelopeMap = const {},
     this.selectionMode = false,
     this.selectedIds = const {},
     this.onToggleSelection,
@@ -1082,6 +1140,8 @@ class _GroupedTransactionList extends HookWidget {
   final Set<String> childParentIds;
   final String budgetId;
   final CurrencyCode currencyCode;
+  final Map<String, String> payeeMap;
+  final Map<String, String> envelopeMap;
   final bool selectionMode;
   final Set<String> selectedIds;
   final ValueChanged<String>? onToggleSelection;
@@ -1119,11 +1179,19 @@ class _GroupedTransactionList extends HookWidget {
         final tx = item.transaction!;
         final txId = tx.id?.toString() ?? '';
         final isSplit = childParentIds.contains(txId);
+        final payeeName = tx.payeeId != null
+            ? payeeMap[tx.payeeId.toString()]
+            : null;
+        final envelopeName = tx.envelopeId != null
+            ? envelopeMap[tx.envelopeId.toString()]
+            : null;
         return _TransactionTile(
           transaction: tx,
           budgetId: budgetId,
           currencyCode: currencyCode,
           isSplit: isSplit,
+          payeeName: payeeName,
+          envelopeName: envelopeName,
           selectionMode: selectionMode,
           isSelected: selectedIds.contains(txId),
           onToggleSelection: txId.isNotEmpty
