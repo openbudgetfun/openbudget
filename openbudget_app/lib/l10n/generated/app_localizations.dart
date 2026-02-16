@@ -2001,6 +2001,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Yesterday'**
   String get transactionDateYesterday;
+
+  /// No description provided for @spendingByPayeeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Spending by Payee'**
+  String get spendingByPayeeTitle;
+
+  /// No description provided for @spendingByPayeeEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No Payee Data'**
+  String get spendingByPayeeEmptyTitle;
+
+  /// No description provided for @spendingByPayeeEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add expense transactions to see spending by payee'**
+  String get spendingByPayeeEmptySubtitle;
+
+  /// No description provided for @spendingByPayeeTotalSpent.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Spent'**
+  String get spendingByPayeeTotalSpent;
+
+  /// No description provided for @spendingByPayeePayeeCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Payees'**
+  String get spendingByPayeePayeeCount;
+
+  /// No description provided for @spendingByPayeeBreakdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Spending Breakdown'**
+  String get spendingByPayeeBreakdown;
+
+  /// No description provided for @spendingByPayeeTransactionCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 transaction} other{{count} transactions}}'**
+  String spendingByPayeeTransactionCount(int count);
 }
 
 class _AppLocalizationsDelegate
