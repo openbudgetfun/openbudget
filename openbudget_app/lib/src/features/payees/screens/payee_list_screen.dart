@@ -219,6 +219,7 @@ class _PayeeTile extends HookConsumerWidget {
         margin: const EdgeInsets.only(bottom: SpacingTokens.sm),
         child: ListTile(
           onTap: () => _showEditDialog(context),
+          onLongPress: () => _showPayeeMenu(context, ref),
           leading: CircleAvatar(
             backgroundColor: colorScheme.primaryContainer,
             child: Icon(
@@ -228,8 +229,46 @@ class _PayeeTile extends HookConsumerWidget {
             ),
           ),
           title: Text(payee.name, style: theme.textTheme.bodyMedium),
+          trailing: const Icon(Icons.chevron_right_rounded, size: 20),
         ),
       ),
+    );
+  }
+
+  void _showPayeeMenu(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.edit_rounded),
+              title: Text(l10n.payeeEditTitle),
+              onTap: () {
+                Navigator.of(ctx).pop();
+                _showEditDialog(context);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.merge_rounded),
+              title: Text(l10n.payeeMergeTitle),
+              onTap: () {
+                Navigator.of(ctx).pop();
+                _showMergeDialog(context);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showMergeDialog(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (_) => _MergePayeeDialog(sourcePayee: payee, budgetId: budgetId),
     );
   }
 
@@ -450,6 +489,120 @@ class _EditPayeeDialog extends HookConsumerWidget {
       messenger.showSnackBar(
         SnackBar(
           content: Text(l10n.payeeEditError),
+          backgroundColor: colorScheme.error,
+        ),
+      );
+    }
+  }
+}
+
+class _MergePayeeDialog extends HookConsumerWidget {
+  const _MergePayeeDialog({required this.sourcePayee, required this.budgetId});
+
+  final Payee sourcePayee;
+  final String budgetId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final payeesAsync = ref.watch(payeeListProvider(budgetId));
+    final selectedTargetId = useState<String?>(null);
+    final isSubmitting = useState(false);
+
+    final targetPayees =
+        payeesAsync.whenOrNull(
+          data: (payees) => payees
+              .where((p) => p.id?.toString() != sourcePayee.id?.toString())
+              .toList(),
+        ) ??
+        <Payee>[];
+
+    return AlertDialog(
+      title: Text(l10n.payeeMergeTitle),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '"${sourcePayee.name}"',
+            style: Theme.of(
+              context,
+            ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: SpacingTokens.sm),
+          Text(l10n.payeeMergeInto),
+          const SizedBox(height: SpacingTokens.sm),
+          DropdownButtonFormField<String>(
+            initialValue: selectedTargetId.value,
+            decoration: InputDecoration(
+              prefixIcon: const Icon(Icons.store_rounded),
+              labelText: l10n.payeeLabel,
+            ),
+            items: targetPayees
+                .map(
+                  (p) => DropdownMenuItem(
+                    value: p.id?.toString() ?? '',
+                    child: Text(p.name),
+                  ),
+                )
+                .toList(),
+            onChanged: (v) => selectedTargetId.value = v,
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(l10n.dialogCancel),
+        ),
+        FilledButton(
+          onPressed: isSubmitting.value || selectedTargetId.value == null
+              ? null
+              : () => _submit(
+                  context,
+                  ref,
+                  selectedTargetId.value!,
+                  isSubmitting,
+                ),
+          child: isSubmitting.value
+              ? const SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : Text(l10n.payeeMergeButton),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _submit(
+    BuildContext context,
+    WidgetRef ref,
+    String targetPayeeId,
+    ValueNotifier<bool> isSubmitting,
+  ) async {
+    final l10n = AppLocalizations.of(context);
+    isSubmitting.value = true;
+    final navigator = Navigator.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
+
+    try {
+      await ref
+          .read(payeeActionsProvider.notifier)
+          .mergePayees(
+            sourcePayeeId: sourcePayee.id?.toString() ?? '',
+            targetPayeeId: targetPayeeId,
+            budgetId: budgetId,
+          );
+      messenger.showSnackBar(SnackBar(content: Text(l10n.payeeMergeSuccess)));
+      navigator.pop();
+    } on Exception catch (_) {
+      isSubmitting.value = false;
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(l10n.payeeMergeError),
           backgroundColor: colorScheme.error,
         ),
       );

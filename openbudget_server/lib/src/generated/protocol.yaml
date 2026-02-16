@@ -60,6 +60,7 @@ payee:
   - get:
   - update:
   - lastUsedEnvelopeId:
+  - merge:
   - delete:
 recurringTransaction:
   - create:
