@@ -11,6 +11,8 @@ fields:
   spentAmountCents: int
   ### ISO 4217 currency code.
   currencyCode: String
+  ### Display order within the parent category.
+  sortOrder: int
   createdAt: DateTime, default=now
 indexes:
   envelope_category_idx:

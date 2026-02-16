@@ -293,6 +293,22 @@ class BudgetDetailScreen extends HookConsumerWidget {
                               monthlyData: monthlyData,
                               goal: goal,
                             ),
+                        onReorderEnvelopes: (envelopeIds) async {
+                          try {
+                            await ref
+                                .read(envelopeActionsProvider.notifier)
+                                .reorderEnvelopes(
+                                  categoryId:
+                                      catWithEnvelopes.category.id
+                                          ?.toString() ??
+                                      '',
+                                  budgetId: budgetId,
+                                  envelopeIds: envelopeIds,
+                                );
+                          } on Exception catch (_) {
+                            // Handled by provider re-fetch.
+                          }
+                        },
                       ),
                     ),
                   ),

@@ -75,7 +75,10 @@ class Protocol extends _i1.SerializationManager {
   }
 
   @override
-  T deserialize<T>(dynamic data, [Type? t]) {
+  T deserialize<T>(
+    dynamic data, [
+    Type? t,
+  ]) {
     t ??= T;
 
     final dataClassName = getClassNameFromObjectJson(data);
@@ -202,6 +205,9 @@ class Protocol extends _i1.SerializationManager {
     if (t == List<_i20.Envelope>) {
       return (data as List).map((e) => deserialize<_i20.Envelope>(e)).toList()
           as T;
+    }
+    if (t == List<String>) {
+      return (data as List).map((e) => deserialize<String>(e)).toList() as T;
     }
     if (t == List<_i21.Payee>) {
       return (data as List).map((e) => deserialize<_i21.Payee>(e)).toList()

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
@@ -19,6 +20,7 @@ class CategoryGroup extends HookConsumerWidget {
     required this.onDeleteEnvelope,
     this.onQuickBudget,
     this.onShowActivity,
+    this.onReorderEnvelopes,
     this.goalsMap = const {},
     super.key,
   });
@@ -33,6 +35,7 @@ class CategoryGroup extends HookConsumerWidget {
   final void Function(Envelope envelope)? onQuickBudget;
   final void Function(Envelope envelope, MonthlyEnvelopeData?, EnvelopeGoal?)?
   onShowActivity;
+  final void Function(List<String> envelopeIds)? onReorderEnvelopes;
   final Map<String, EnvelopeGoal> goalsMap;
 
   @override
@@ -42,6 +45,13 @@ class CategoryGroup extends HookConsumerWidget {
     final envelopes = categoryWithEnvelopes.envelopes;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final isReorderingEnvelopes = useState(false);
+    final orderedEnvelopes = useState(List.of(envelopes));
+
+    useEffect(() {
+      orderedEnvelopes.value = List.of(envelopes);
+      return null;
+    }, [envelopes]);
 
     return Card(
       child: Column(
@@ -49,8 +59,12 @@ class CategoryGroup extends HookConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           GestureDetector(
-            onTap: onEditCategory,
-            onLongPress: onDeleteCategory,
+            onTap: isReorderingEnvelopes.value
+                ? () => isReorderingEnvelopes.value = false
+                : onEditCategory,
+            onLongPress: onReorderEnvelopes != null && envelopes.length > 1
+                ? () => isReorderingEnvelopes.value = true
+                : onDeleteCategory,
             child: Container(
               padding: const EdgeInsets.symmetric(
                 horizontal: SpacingTokens.md,
@@ -109,29 +123,104 @@ class CategoryGroup extends HookConsumerWidget {
             ),
           ),
           const Divider(),
-          ...envelopes.asMap().entries.map((entry) {
-            final envelope = entry.value;
-            final envelopeId = envelope.id?.toString() ?? '';
-            final monthlyData =
-                categoryWithEnvelopes.monthlyEnvelopes.isNotEmpty &&
-                    entry.key < categoryWithEnvelopes.monthlyEnvelopes.length
-                ? categoryWithEnvelopes.monthlyEnvelopes[entry.key]
-                : null;
-            final envelopeGoal = goalsMap[envelopeId];
-            return EnvelopeRow(
-              envelope: envelope,
-              currencyCode: currencyCode,
-              monthlyData: monthlyData,
-              goal: envelopeGoal,
-              onTap: onShowActivity != null
-                  ? () => onShowActivity!(envelope, monthlyData, envelopeGoal)
-                  : () => onEditEnvelope(envelope),
-              onLongPress: () => onEditEnvelope(envelope),
-              onQuickBudget: onQuickBudget != null
-                  ? () => onQuickBudget!(envelope)
-                  : null,
-            );
-          }),
+          if (isReorderingEnvelopes.value) ...[
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: SpacingTokens.md,
+                vertical: SpacingTokens.xs,
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.info_outline_rounded,
+                    size: 14,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: SpacingTokens.xs),
+                  Expanded(
+                    child: Text(
+                      l10n.envelopeReorderHint,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () => isReorderingEnvelopes.value = false,
+                    child: Text(l10n.budgetReorderDone),
+                  ),
+                ],
+              ),
+            ),
+            ...orderedEnvelopes.value.asMap().entries.map((entry) {
+              final index = entry.key;
+              final envelope = entry.value;
+              return ListTile(
+                key: ValueKey(envelope.id),
+                dense: true,
+                leading: Icon(
+                  Icons.drag_handle_rounded,
+                  color: colorScheme.onSurfaceVariant,
+                ),
+                title: Text(
+                  envelope.name,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.arrow_upward_rounded),
+                      onPressed: index > 0
+                          ? () => _swapEnvelopes(
+                              orderedEnvelopes,
+                              index,
+                              index - 1,
+                            )
+                          : null,
+                      iconSize: 20,
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.arrow_downward_rounded),
+                      onPressed: index < orderedEnvelopes.value.length - 1
+                          ? () => _swapEnvelopes(
+                              orderedEnvelopes,
+                              index,
+                              index + 1,
+                            )
+                          : null,
+                      iconSize: 20,
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ] else
+            ...envelopes.asMap().entries.map((entry) {
+              final envelope = entry.value;
+              final envelopeId = envelope.id?.toString() ?? '';
+              final monthlyData =
+                  categoryWithEnvelopes.monthlyEnvelopes.isNotEmpty &&
+                      entry.key < categoryWithEnvelopes.monthlyEnvelopes.length
+                  ? categoryWithEnvelopes.monthlyEnvelopes[entry.key]
+                  : null;
+              final envelopeGoal = goalsMap[envelopeId];
+              return EnvelopeRow(
+                envelope: envelope,
+                currencyCode: currencyCode,
+                monthlyData: monthlyData,
+                goal: envelopeGoal,
+                onTap: onShowActivity != null
+                    ? () => onShowActivity!(envelope, monthlyData, envelopeGoal)
+                    : () => onEditEnvelope(envelope),
+                onLongPress: () => onEditEnvelope(envelope),
+                onQuickBudget: onQuickBudget != null
+                    ? () => onQuickBudget!(envelope)
+                    : null,
+              );
+            }),
           if (envelopes.isNotEmpty) const Divider(),
           Padding(
             padding: const EdgeInsets.symmetric(
@@ -245,6 +334,24 @@ class CategoryGroup extends HookConsumerWidget {
         ],
       ),
     );
+  }
+
+  void _swapEnvelopes(
+    ValueNotifier<List<Envelope>> orderedEnvelopes,
+    int from,
+    int to,
+  ) {
+    final list = List.of(orderedEnvelopes.value);
+    final item = list.removeAt(from);
+    list.insert(to, item);
+    orderedEnvelopes.value = list;
+
+    final envelopeIds = list
+        .map((e) => e.id?.toString() ?? '')
+        .where((id) => id.isNotEmpty)
+        .toList();
+
+    onReorderEnvelopes?.call(envelopeIds);
   }
 
   Color _availableColor(int cents) {

@@ -1196,6 +1196,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Could not export budget data. Please try again.';
 
   @override
+  String get envelopeReorderHint =>
+      'Long press an envelope to reorder within category';
+
+  @override
   String get templateTitle => 'Budget Templates';
 
   @override
