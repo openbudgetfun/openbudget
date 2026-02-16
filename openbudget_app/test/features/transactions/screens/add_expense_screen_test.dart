@@ -58,12 +58,11 @@ void main() {
     ),
   ];
 
-  BudgetSummary makeSummary({
-    List<CategoryWithEnvelopes>? categories,
-  }) =>
+  BudgetSummary makeSummary({List<CategoryWithEnvelopes>? categories}) =>
       BudgetSummary(
         budget: makeBudget(),
-        categories: categories ??
+        categories:
+            categories ??
             [
               CategoryWithEnvelopes(
                 category: Category(
@@ -248,9 +247,7 @@ void main() {
       expect(find.text('Coffee Shop'), findsOneWidget);
     });
 
-    testWidgets('renders empty payee dropdown when no payees', (
-      tester,
-    ) async {
+    testWidgets('renders empty payee dropdown when no payees', (tester) async {
       await tester.pumpWidget(buildSubject(payees: []));
       await tester.pumpAndSettle();
 
