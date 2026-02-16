@@ -662,31 +662,50 @@ class AppLocalizationsEn extends AppLocalizations {
       'Could not update recurring transaction. Please try again.';
 
   @override
-  String ageOfMoneyLabel(int days) {
+  String get splitTransactionTitle => 'Split Transaction';
+
+  @override
+  String get splitAddSplit => 'Add Split';
+
+  @override
+  String get splitRemoveSplit => 'Remove';
+
+  @override
+  String get splitEnvelopeLabel => 'Envelope';
+
+  @override
+  String get splitAmountLabel => 'Amount';
+
+  @override
+  String get splitMemoLabel => 'Memo (optional)';
+
+  @override
+  String get splitRemainingLabel => 'Remaining to assign';
+
+  @override
+  String get splitMismatchError => 'Split amounts must equal the total';
+
+  @override
+  String get splitMinimumError => 'At least two splits are required';
+
+  @override
+  String get splitSaveSuccess => 'Split transaction saved';
+
+  @override
+  String get splitSaveError =>
+      'Could not save split transaction. Please try again.';
+
+  @override
+  String get splitLabel => 'Split';
+
+  @override
+  String splitCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
-      days,
+      count,
       locale: localeName,
-      other: 'Age of Money: $days days',
-      one: 'Age of Money: 1 day',
+      other: '$count splits',
+      one: '1 split',
     );
     return '$_temp0';
   }
-
-  @override
-  String get quickBudgetTitle => 'Quick Budget';
-
-  @override
-  String get quickBudgetLastMonth => 'Budgeted Last Month';
-
-  @override
-  String get quickBudgetSpentLastMonth => 'Spent Last Month';
-
-  @override
-  String get quickBudgetAverageBudgeted => 'Average Budgeted';
-
-  @override
-  String get quickBudgetAverageSpent => 'Average Spent';
-
-  @override
-  String get quickBudgetError => 'Could not load budget suggestions';
 }

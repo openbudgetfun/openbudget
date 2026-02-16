@@ -29,7 +29,9 @@ import 'package:openbudget_client/src/protocol/recurring_transactions/recurring_
     as _i12;
 import 'package:openbudget_client/src/protocol/transactions/transaction.dart'
     as _i13;
-import 'protocol.dart' as _i14;
+import 'package:openbudget_client/src/protocol/transactions/split_item.dart'
+    as _i14;
+import 'protocol.dart' as _i15;
 
 /// API surface for account operations.
 ///
@@ -846,14 +848,39 @@ class EndpointTransaction extends _i1.EndpointRef {
     'budgetId': budgetId,
   });
 
-  /// Calculates the "Age of Money" for a budget.
-  ///
-  /// Returns the average days between income and spending, or null if
-  /// there is insufficient data.
-  _i2.Future<int?> ageOfMoney(_i1.UuidValue budgetId) =>
-      caller.callServerEndpoint<int?>('transaction', 'ageOfMoney', {
-        'budgetId': budgetId,
-      });
+  /// Creates a split transaction with multiple envelope assignments.
+  _i2.Future<List<_i13.Transaction>> createSplit(
+    String description,
+    int totalAmountCents,
+    String currencyCode,
+    _i1.UuidValue budgetId,
+    DateTime transactionDate,
+    List<_i14.SplitItem> splits, {
+    _i1.UuidValue? payeeId,
+    _i1.UuidValue? accountId,
+  }) => caller.callServerEndpoint<List<_i13.Transaction>>(
+    'transaction',
+    'createSplit',
+    {
+      'description': description,
+      'totalAmountCents': totalAmountCents,
+      'currencyCode': currencyCode,
+      'budgetId': budgetId,
+      'transactionDate': transactionDate,
+      'splits': splits,
+      'payeeId': payeeId,
+      'accountId': accountId,
+    },
+  );
+
+  /// Lists the sub-transactions (splits) for a parent transaction.
+  _i2.Future<List<_i13.Transaction>> listSplits(
+    _i1.UuidValue parentTransactionId,
+  ) => caller.callServerEndpoint<List<_i13.Transaction>>(
+    'transaction',
+    'listSplits',
+    {'parentTransactionId': parentTransactionId},
+  );
 
   /// Deletes a transaction by ID.
   _i2.Future<_i13.Transaction> delete(_i1.UuidValue transactionId) =>
@@ -888,7 +915,7 @@ class Client extends _i1.ServerpodClientShared {
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
          host,
-         _i14.Protocol(),
+         _i15.Protocol(),
          securityContext: securityContext,
          streamingConnectionTimeout: streamingConnectionTimeout,
          connectionTimeout: connectionTimeout,

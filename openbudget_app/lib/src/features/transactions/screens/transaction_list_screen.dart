@@ -75,7 +75,15 @@ class TransactionListScreen extends HookConsumerWidget {
           ),
         ),
         data: (transactions) {
-          final sorted = List.of(transactions)
+          // Filter out child split transactions (they have parentTransactionId).
+          final childParentIds = transactions
+              .where((tx) => tx.parentTransactionId != null)
+              .map((tx) => tx.parentTransactionId.toString())
+              .toSet();
+          final topLevel = transactions
+              .where((tx) => tx.parentTransactionId == null)
+              .toList();
+          final sorted = List.of(topLevel)
             ..sort((a, b) => b.transactionDate.compareTo(a.transactionDate));
 
           final query = searchQuery.value.toLowerCase();
@@ -202,10 +210,14 @@ class TransactionListScreen extends HookConsumerWidget {
                       itemCount: filtered.length,
                       itemBuilder: (context, index) {
                         final tx = filtered[index];
+                        final isSplit = childParentIds.contains(
+                          tx.id?.toString(),
+                        );
                         return _TransactionTile(
                           transaction: tx,
                           budgetId: budgetId,
                           currencyCode: currency,
+                          isSplit: isSplit,
                         );
                       },
                     ),
@@ -256,11 +268,13 @@ class _TransactionTile extends HookConsumerWidget {
     required this.transaction,
     required this.budgetId,
     required this.currencyCode,
+    this.isSplit = false,
   });
 
   final Transaction transaction;
   final String budgetId;
   final CurrencyCode currencyCode;
+  final bool isSplit;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -296,10 +310,36 @@ class _TransactionTile extends HookConsumerWidget {
             backgroundColor: color.withAlpha(25),
             child: Icon(icon, color: color, size: 20),
           ),
-          title: Text(
-            transaction.description,
-            style: theme.textTheme.bodyMedium,
-            overflow: TextOverflow.ellipsis,
+          title: Row(
+            children: [
+              Flexible(
+                child: Text(
+                  transaction.description,
+                  style: theme.textTheme.bodyMedium,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              if (isSplit) ...[
+                const SizedBox(width: SpacingTokens.xs),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    l10n.splitLabel,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: colorScheme.onPrimaryContainer,
+                      fontSize: 10,
+                    ),
+                  ),
+                ),
+              ],
+            ],
           ),
           subtitle: Text(
             _formatDate(transaction.transactionDate),

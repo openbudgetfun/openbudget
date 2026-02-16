@@ -26,6 +26,7 @@ abstract class Transaction
     this.payeeId,
     required this.transactionDate,
     this.transferPairId,
+    this.parentTransactionId,
     bool? cleared,
     bool? reconciled,
     DateTime? createdAt,
@@ -44,6 +45,7 @@ abstract class Transaction
     _i1.UuidValue? payeeId,
     required DateTime transactionDate,
     _i1.UuidValue? transferPairId,
+    _i1.UuidValue? parentTransactionId,
     bool? cleared,
     bool? reconciled,
     DateTime? createdAt,
@@ -78,6 +80,11 @@ abstract class Transaction
           ? null
           : _i1.UuidValueJsonExtension.fromJson(
               jsonSerialization['transferPairId'],
+            ),
+      parentTransactionId: jsonSerialization['parentTransactionId'] == null
+          ? null
+          : _i1.UuidValueJsonExtension.fromJson(
+              jsonSerialization['parentTransactionId'],
             ),
       cleared: jsonSerialization['cleared'] as bool?,
       reconciled: jsonSerialization['reconciled'] as bool?,
@@ -117,6 +124,9 @@ abstract class Transaction
   /// If this transaction is part of a transfer, this links to the paired transaction.
   _i1.UuidValue? transferPairId;
 
+  /// If this is a split sub-transaction, links to the parent transaction.
+  _i1.UuidValue? parentTransactionId;
+
   /// Whether this transaction has been cleared by the user.
   bool cleared;
 
@@ -142,6 +152,7 @@ abstract class Transaction
     _i1.UuidValue? payeeId,
     DateTime? transactionDate,
     _i1.UuidValue? transferPairId,
+    _i1.UuidValue? parentTransactionId,
     bool? cleared,
     bool? reconciled,
     DateTime? createdAt,
@@ -160,6 +171,8 @@ abstract class Transaction
       if (payeeId != null) 'payeeId': payeeId?.toJson(),
       'transactionDate': transactionDate.toJson(),
       if (transferPairId != null) 'transferPairId': transferPairId?.toJson(),
+      if (parentTransactionId != null)
+        'parentTransactionId': parentTransactionId?.toJson(),
       'cleared': cleared,
       'reconciled': reconciled,
       'createdAt': createdAt.toJson(),
@@ -180,6 +193,8 @@ abstract class Transaction
       if (payeeId != null) 'payeeId': payeeId?.toJson(),
       'transactionDate': transactionDate.toJson(),
       if (transferPairId != null) 'transferPairId': transferPairId?.toJson(),
+      if (parentTransactionId != null)
+        'parentTransactionId': parentTransactionId?.toJson(),
       'cleared': cleared,
       'reconciled': reconciled,
       'createdAt': createdAt.toJson(),
@@ -230,6 +245,7 @@ class _TransactionImpl extends Transaction {
     _i1.UuidValue? payeeId,
     required DateTime transactionDate,
     _i1.UuidValue? transferPairId,
+    _i1.UuidValue? parentTransactionId,
     bool? cleared,
     bool? reconciled,
     DateTime? createdAt,
@@ -244,6 +260,7 @@ class _TransactionImpl extends Transaction {
          payeeId: payeeId,
          transactionDate: transactionDate,
          transferPairId: transferPairId,
+         parentTransactionId: parentTransactionId,
          cleared: cleared,
          reconciled: reconciled,
          createdAt: createdAt,
@@ -264,6 +281,7 @@ class _TransactionImpl extends Transaction {
     Object? payeeId = _Undefined,
     DateTime? transactionDate,
     Object? transferPairId = _Undefined,
+    Object? parentTransactionId = _Undefined,
     bool? cleared,
     bool? reconciled,
     DateTime? createdAt,
@@ -281,6 +299,9 @@ class _TransactionImpl extends Transaction {
       transferPairId: transferPairId is _i1.UuidValue?
           ? transferPairId
           : this.transferPairId,
+      parentTransactionId: parentTransactionId is _i1.UuidValue?
+          ? parentTransactionId
+          : this.parentTransactionId,
       cleared: cleared ?? this.cleared,
       reconciled: reconciled ?? this.reconciled,
       createdAt: createdAt ?? this.createdAt,
@@ -321,6 +342,10 @@ class TransactionUpdateTable extends _i1.UpdateTable<TransactionTable> {
     _i1.UuidValue? value,
   ) => _i1.ColumnValue(table.transferPairId, value);
 
+  _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> parentTransactionId(
+    _i1.UuidValue? value,
+  ) => _i1.ColumnValue(table.parentTransactionId, value);
+
   _i1.ColumnValue<bool, bool> cleared(bool value) =>
       _i1.ColumnValue(table.cleared, value);
 
@@ -343,6 +368,7 @@ class TransactionTable extends _i1.Table<_i1.UuidValue?> {
     payeeId = _i1.ColumnUuid('payeeId', this);
     transactionDate = _i1.ColumnDateTime('transactionDate', this);
     transferPairId = _i1.ColumnUuid('transferPairId', this);
+    parentTransactionId = _i1.ColumnUuid('parentTransactionId', this);
     cleared = _i1.ColumnBool('cleared', this, hasDefault: true);
     reconciled = _i1.ColumnBool('reconciled', this, hasDefault: true);
     createdAt = _i1.ColumnDateTime('createdAt', this, hasDefault: true);
@@ -373,6 +399,9 @@ class TransactionTable extends _i1.Table<_i1.UuidValue?> {
   /// If this transaction is part of a transfer, this links to the paired transaction.
   late final _i1.ColumnUuid transferPairId;
 
+  /// If this is a split sub-transaction, links to the parent transaction.
+  late final _i1.ColumnUuid parentTransactionId;
+
   /// Whether this transaction has been cleared by the user.
   late final _i1.ColumnBool cleared;
 
@@ -393,6 +422,7 @@ class TransactionTable extends _i1.Table<_i1.UuidValue?> {
     payeeId,
     transactionDate,
     transferPairId,
+    parentTransactionId,
     cleared,
     reconciled,
     createdAt,

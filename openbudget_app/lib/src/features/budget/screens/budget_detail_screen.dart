@@ -98,11 +98,6 @@ class BudgetDetailScreen extends HookConsumerWidget {
                 onPressed: () => context.go('/budgets/$budgetId/reports'),
               ),
               IconButton(
-                icon: const Icon(Icons.repeat_rounded),
-                tooltip: l10n.recurringListTitle,
-                onPressed: () => context.go('/budgets/$budgetId/recurring'),
-              ),
-              IconButton(
                 icon: const Icon(Icons.receipt_long_rounded),
                 tooltip: l10n.transactionListTitle,
                 onPressed: () => context.go('/budgets/$budgetId/transactions'),
@@ -264,6 +259,13 @@ class BudgetDetailScreen extends HookConsumerWidget {
                       icon: const Icon(Icons.arrow_upward_rounded),
                       label: Text(l10n.budgetAddExpense),
                     ),
+                  ),
+                  const SizedBox(width: SpacingTokens.sm),
+                  IconButton.filled(
+                    onPressed: () =>
+                        context.go('/budgets/$budgetId/expenses/split'),
+                    icon: const Icon(Icons.call_split_rounded),
+                    tooltip: l10n.splitTransactionTitle,
                   ),
                   const SizedBox(width: SpacingTokens.sm),
                   IconButton.filled(

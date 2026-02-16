@@ -67,7 +67,7 @@ final class AccountTransactionsProvider
 }
 
 String _$accountTransactionsHash() =>
-    r'2a1ca5c04e5d941f0941740e91c58c1bad6becb7';
+    r'e2cddc59621da74e34daaa3df1ff85be86264976';
 
 final class AccountTransactionsFamily extends $Family
     with
@@ -119,7 +119,7 @@ final class AccountTransactionActionsProvider
 }
 
 String _$accountTransactionActionsHash() =>
-    r'a87aa2f42326e011477e0a2fc35741fab5082f93';
+    r'69cc39d03f25ce3e3da3bb931b24bf391bd37b12';
 
 abstract class _$AccountTransactionActions extends $AsyncNotifier<void> {
   FutureOr<void> build();

@@ -146,6 +146,42 @@ class TransactionEndpoint extends Endpoint {
     return TransactionService.ageOfMoney(session, budgetId: budgetId);
   }
 
+  /// Creates a split transaction with multiple envelope assignments.
+  Future<List<Transaction>> createSplit(
+    Session session,
+    String description,
+    int totalAmountCents,
+    String currencyCode,
+    UuidValue budgetId,
+    DateTime transactionDate,
+    List<SplitItem> splits, {
+    UuidValue? payeeId,
+    UuidValue? accountId,
+  }) async {
+    return TransactionService.createSplit(
+      session,
+      description: description,
+      totalAmountCents: totalAmountCents,
+      currencyCode: currencyCode,
+      budgetId: budgetId,
+      transactionDate: transactionDate,
+      splits: splits,
+      payeeId: payeeId,
+      accountId: accountId,
+    );
+  }
+
+  /// Lists the sub-transactions (splits) for a parent transaction.
+  Future<List<Transaction>> listSplits(
+    Session session,
+    UuidValue parentTransactionId,
+  ) async {
+    return TransactionService.listSplits(
+      session,
+      parentTransactionId: parentTransactionId,
+    );
+  }
+
   /// Deletes a transaction by ID.
   Future<Transaction> delete(Session session, UuidValue transactionId) async {
     return TransactionService.delete(session, transactionId: transactionId);

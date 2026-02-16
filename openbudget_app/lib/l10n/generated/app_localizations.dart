@@ -1324,47 +1324,83 @@ abstract class AppLocalizations {
   /// **'Could not update recurring transaction. Please try again.'**
   String get recurringEditError;
 
-  /// No description provided for @ageOfMoneyLabel.
+  /// No description provided for @splitTransactionTitle.
   ///
   /// In en, this message translates to:
-  /// **'{days, plural, =1{Age of Money: 1 day} other{Age of Money: {days} days}}'**
-  String ageOfMoneyLabel(int days);
+  /// **'Split Transaction'**
+  String get splitTransactionTitle;
 
-  /// No description provided for @quickBudgetTitle.
+  /// No description provided for @splitAddSplit.
   ///
   /// In en, this message translates to:
-  /// **'Quick Budget'**
-  String get quickBudgetTitle;
+  /// **'Add Split'**
+  String get splitAddSplit;
 
-  /// No description provided for @quickBudgetLastMonth.
+  /// No description provided for @splitRemoveSplit.
   ///
   /// In en, this message translates to:
-  /// **'Budgeted Last Month'**
-  String get quickBudgetLastMonth;
+  /// **'Remove'**
+  String get splitRemoveSplit;
 
-  /// No description provided for @quickBudgetSpentLastMonth.
+  /// No description provided for @splitEnvelopeLabel.
   ///
   /// In en, this message translates to:
-  /// **'Spent Last Month'**
-  String get quickBudgetSpentLastMonth;
+  /// **'Envelope'**
+  String get splitEnvelopeLabel;
 
-  /// No description provided for @quickBudgetAverageBudgeted.
+  /// No description provided for @splitAmountLabel.
   ///
   /// In en, this message translates to:
-  /// **'Average Budgeted'**
-  String get quickBudgetAverageBudgeted;
+  /// **'Amount'**
+  String get splitAmountLabel;
 
-  /// No description provided for @quickBudgetAverageSpent.
+  /// No description provided for @splitMemoLabel.
   ///
   /// In en, this message translates to:
-  /// **'Average Spent'**
-  String get quickBudgetAverageSpent;
+  /// **'Memo (optional)'**
+  String get splitMemoLabel;
 
-  /// No description provided for @quickBudgetError.
+  /// No description provided for @splitRemainingLabel.
   ///
   /// In en, this message translates to:
-  /// **'Could not load budget suggestions'**
-  String get quickBudgetError;
+  /// **'Remaining to assign'**
+  String get splitRemainingLabel;
+
+  /// No description provided for @splitMismatchError.
+  ///
+  /// In en, this message translates to:
+  /// **'Split amounts must equal the total'**
+  String get splitMismatchError;
+
+  /// No description provided for @splitMinimumError.
+  ///
+  /// In en, this message translates to:
+  /// **'At least two splits are required'**
+  String get splitMinimumError;
+
+  /// No description provided for @splitSaveSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Split transaction saved'**
+  String get splitSaveSuccess;
+
+  /// No description provided for @splitSaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save split transaction. Please try again.'**
+  String get splitSaveError;
+
+  /// No description provided for @splitLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Split'**
+  String get splitLabel;
+
+  /// No description provided for @splitCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 split} other{{count} splits}}'**
+  String splitCount(int count);
 }
 
 class _AppLocalizationsDelegate

@@ -272,6 +272,82 @@ class TransactionService {
     return (sum / recentAges.length).round();
   }
 
+  /// Creates a split transaction: a parent with multiple sub-transactions.
+  ///
+  /// The parent holds the total amount (no envelope). Each split has its own
+  /// envelope and amount. The sum of split amounts must equal the parent.
+  static Future<List<Transaction>> createSplit(
+    Session session, {
+    required String description,
+    required int totalAmountCents,
+    required String currencyCode,
+    required UuidValue budgetId,
+    required DateTime transactionDate,
+    required List<SplitItem> splits,
+    UuidValue? payeeId,
+    UuidValue? accountId,
+  }) async {
+    await BudgetService.getById(session, budgetId: budgetId);
+
+    // Validate split amounts sum to total.
+    final splitSum = splits.fold<int>(0, (sum, s) => sum + s.amountCents.abs());
+    if (splitSum != totalAmountCents.abs()) {
+      throw ValidationException(
+        'Split amounts must equal total: $splitSum != ${totalAmountCents.abs()}',
+      );
+    }
+
+    // Create parent transaction (no envelope).
+    final parent = Transaction(
+      description: description,
+      amountCents: totalAmountCents,
+      currencyCode: currencyCode,
+      budgetId: budgetId,
+      payeeId: payeeId,
+      accountId: accountId,
+      transactionDate: transactionDate,
+      createdAt: DateTime.now(),
+    );
+    final savedParent = await Transaction.db.insertRow(session, parent);
+
+    final results = <Transaction>[savedParent];
+
+    // Create child split transactions.
+    for (final split in splits) {
+      final child = Transaction(
+        description: split.memo ?? description,
+        amountCents: totalAmountCents.isNegative
+            ? -split.amountCents.abs()
+            : split.amountCents.abs(),
+        currencyCode: currencyCode,
+        budgetId: budgetId,
+        envelopeId: split.envelopeId,
+        payeeId: payeeId,
+        accountId: accountId,
+        parentTransactionId: savedParent.id,
+        transactionDate: transactionDate,
+        createdAt: DateTime.now(),
+      );
+      final saved = await Transaction.db.insertRow(session, child);
+      results.add(saved);
+    }
+
+    return results;
+  }
+
+  /// Lists the sub-transactions (splits) for a parent transaction.
+  static Future<List<Transaction>> listSplits(
+    Session session, {
+    required UuidValue parentTransactionId,
+  }) async {
+    final parent = await getById(session, transactionId: parentTransactionId);
+    return Transaction.db.find(
+      session,
+      where: (t) => t.parentTransactionId.equals(parent.id),
+      orderBy: (t) => t.createdAt,
+    );
+  }
+
   /// Deletes a transaction, verifying budget ownership.
   static Future<Transaction> delete(
     Session session, {

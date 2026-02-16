@@ -1,0 +1,9 @@
+### A single split within a split transaction.
+class: SplitItem
+fields:
+  ### Amount in integer cents for this split.
+  amountCents: int
+  ### The envelope to assign this split to.
+  envelopeId: UuidValue?
+  ### Optional memo for this specific split.
+  memo: String?
