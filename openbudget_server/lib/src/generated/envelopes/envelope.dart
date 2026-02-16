@@ -24,8 +24,10 @@ abstract class Envelope
     required this.currencyCode,
     required this.sortOrder,
     this.note,
+    bool? isHidden,
     DateTime? createdAt,
-  }) : createdAt = createdAt ?? DateTime.now();
+  }) : isHidden = isHidden ?? false,
+       createdAt = createdAt ?? DateTime.now();
 
   factory Envelope({
     _i1.UuidValue? id,
@@ -36,6 +38,7 @@ abstract class Envelope
     required String currencyCode,
     required int sortOrder,
     String? note,
+    bool? isHidden,
     DateTime? createdAt,
   }) = _EnvelopeImpl;
 
@@ -53,6 +56,7 @@ abstract class Envelope
       currencyCode: jsonSerialization['currencyCode'] as String,
       sortOrder: jsonSerialization['sortOrder'] as int,
       note: jsonSerialization['note'] as String?,
+      isHidden: jsonSerialization['isHidden'] as bool?,
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
@@ -85,6 +89,9 @@ abstract class Envelope
   /// Optional user-facing note providing context for the envelope.
   String? note;
 
+  /// Whether this envelope is hidden from the default budget view.
+  bool? isHidden;
+
   DateTime createdAt;
 
   @override
@@ -102,6 +109,7 @@ abstract class Envelope
     String? currencyCode,
     int? sortOrder,
     String? note,
+    bool? isHidden,
     DateTime? createdAt,
   });
   @override
@@ -116,6 +124,7 @@ abstract class Envelope
       'currencyCode': currencyCode,
       'sortOrder': sortOrder,
       if (note != null) 'note': note,
+      if (isHidden != null) 'isHidden': isHidden,
       'createdAt': createdAt.toJson(),
     };
   }
@@ -132,6 +141,7 @@ abstract class Envelope
       'currencyCode': currencyCode,
       'sortOrder': sortOrder,
       if (note != null) 'note': note,
+      if (isHidden != null) 'isHidden': isHidden,
       'createdAt': createdAt.toJson(),
     };
   }
@@ -178,6 +188,7 @@ class _EnvelopeImpl extends Envelope {
     required String currencyCode,
     required int sortOrder,
     String? note,
+    bool? isHidden,
     DateTime? createdAt,
   }) : super._(
          id: id,
@@ -188,6 +199,7 @@ class _EnvelopeImpl extends Envelope {
          currencyCode: currencyCode,
          sortOrder: sortOrder,
          note: note,
+         isHidden: isHidden,
          createdAt: createdAt,
        );
 
@@ -204,6 +216,7 @@ class _EnvelopeImpl extends Envelope {
     String? currencyCode,
     int? sortOrder,
     Object? note = _Undefined,
+    Object? isHidden = _Undefined,
     DateTime? createdAt,
   }) {
     return Envelope(
@@ -215,6 +228,7 @@ class _EnvelopeImpl extends Envelope {
       currencyCode: currencyCode ?? this.currencyCode,
       sortOrder: sortOrder ?? this.sortOrder,
       note: note is String? ? note : this.note,
+      isHidden: isHidden is bool? ? isHidden : this.isHidden,
       createdAt: createdAt ?? this.createdAt,
     );
   }
@@ -245,6 +259,9 @@ class EnvelopeUpdateTable extends _i1.UpdateTable<EnvelopeTable> {
   _i1.ColumnValue<String, String> note(String? value) =>
       _i1.ColumnValue(table.note, value);
 
+  _i1.ColumnValue<bool, bool> isHidden(bool? value) =>
+      _i1.ColumnValue(table.isHidden, value);
+
   _i1.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
       _i1.ColumnValue(table.createdAt, value);
 }
@@ -259,6 +276,7 @@ class EnvelopeTable extends _i1.Table<_i1.UuidValue?> {
     currencyCode = _i1.ColumnString('currencyCode', this);
     sortOrder = _i1.ColumnInt('sortOrder', this);
     note = _i1.ColumnString('note', this);
+    isHidden = _i1.ColumnBool('isHidden', this, hasDefault: true);
     createdAt = _i1.ColumnDateTime('createdAt', this, hasDefault: true);
   }
 
@@ -283,6 +301,9 @@ class EnvelopeTable extends _i1.Table<_i1.UuidValue?> {
   /// Optional user-facing note providing context for the envelope.
   late final _i1.ColumnString note;
 
+  /// Whether this envelope is hidden from the default budget view.
+  late final _i1.ColumnBool isHidden;
+
   late final _i1.ColumnDateTime createdAt;
 
   @override
@@ -295,6 +316,7 @@ class EnvelopeTable extends _i1.Table<_i1.UuidValue?> {
     currencyCode,
     sortOrder,
     note,
+    isHidden,
     createdAt,
   ];
 }

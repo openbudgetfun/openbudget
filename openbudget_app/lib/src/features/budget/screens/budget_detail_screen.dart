@@ -43,6 +43,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
     final isPosting = useState(false);
     final hasAutoPosted = useState(false);
     final isReordering = useState(false);
+    final showHidden = useState(false);
     final searchController = useTextEditingController();
     final searchQuery = useState('');
     final isSearching = useState(false);
@@ -156,6 +157,15 @@ class BudgetDetailScreen extends HookConsumerWidget {
                       searchQuery.value = '';
                     }
                   },
+                ),
+                IconButton(
+                  icon: Icon(
+                    showHidden.value
+                        ? Icons.visibility_rounded
+                        : Icons.visibility_off_rounded,
+                  ),
+                  tooltip: l10n.budgetShowHidden,
+                  onPressed: () => showHidden.value = !showHidden.value,
                 ),
                 IconButton(
                   icon: const Icon(Icons.swap_vert_rounded),
@@ -313,6 +323,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
                     _filterCategories(
                       summary.categories,
                       searchQuery.value,
+                      showHidden: showHidden.value,
                     ).isEmpty)
                   Center(
                     child: Padding(
@@ -346,6 +357,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
                   ..._filterCategories(
                     summary.categories,
                     searchQuery.value,
+                    showHidden: showHidden.value,
                   ).map(
                     (catWithEnvelopes) => Padding(
                       padding: const EdgeInsets.only(bottom: SpacingTokens.md),
@@ -417,6 +429,41 @@ class BudgetDetailScreen extends HookConsumerWidget {
                             // Handled by provider re-fetch.
                           }
                         },
+                        showHidden: showHidden.value,
+                        onToggleHideCategory: ({required isHidden}) async {
+                          try {
+                            await ref
+                                .read(categoryActionsProvider.notifier)
+                                .toggleHidden(
+                                  categoryId:
+                                      catWithEnvelopes.category.id
+                                          ?.toString() ??
+                                      '',
+                                  budgetId: budgetId,
+                                  isHidden: isHidden,
+                                );
+                          } on Exception catch (_) {
+                            // Handled by provider re-fetch.
+                          }
+                        },
+                        onToggleHideEnvelope:
+                            (envelope, {required isHidden}) async {
+                              try {
+                                await ref
+                                    .read(envelopeActionsProvider.notifier)
+                                    .toggleHidden(
+                                      envelopeId: envelope.id?.toString() ?? '',
+                                      categoryId:
+                                          catWithEnvelopes.category.id
+                                              ?.toString() ??
+                                          '',
+                                      budgetId: budgetId,
+                                      isHidden: isHidden,
+                                    );
+                              } on Exception catch (_) {
+                                // Handled by provider re-fetch.
+                              }
+                            },
                       ),
                     ),
                   ),
@@ -495,14 +542,49 @@ class BudgetDetailScreen extends HookConsumerWidget {
 
   List<CategoryWithEnvelopes> _filterCategories(
     List<CategoryWithEnvelopes> categories,
-    String query,
-  ) {
-    if (query.isEmpty) return categories;
+    String query, {
+    required bool showHidden,
+  }) {
+    var result = categories;
+
+    // Filter hidden categories and envelopes.
+    if (!showHidden) {
+      final visible = <CategoryWithEnvelopes>[];
+      for (final cat in result) {
+        if (cat.category.isHidden ?? false) continue;
+
+        final visibleEnvelopeIndices = <int>[];
+        for (var i = 0; i < cat.envelopes.length; i++) {
+          if (!(cat.envelopes[i].isHidden ?? false)) {
+            visibleEnvelopeIndices.add(i);
+          }
+        }
+
+        visible.add(
+          CategoryWithEnvelopes(
+            category: cat.category,
+            envelopes: visibleEnvelopeIndices
+                .map((i) => cat.envelopes[i])
+                .toList(),
+            monthlyEnvelopes: visibleEnvelopeIndices
+                .where((i) => i < cat.monthlyEnvelopes.length)
+                .map((i) => cat.monthlyEnvelopes[i])
+                .toList(),
+            totalBudgetedCents: cat.totalBudgetedCents,
+            totalSpentCents: cat.totalSpentCents,
+            totalAvailableCents: cat.totalAvailableCents,
+          ),
+        );
+      }
+      result = visible;
+    }
+
+    if (query.isEmpty) return result;
 
     final lowerQuery = query.toLowerCase();
     final filtered = <CategoryWithEnvelopes>[];
 
-    for (final cat in categories) {
+    for (final cat in result) {
       // Check if category name matches.
       final categoryMatches = cat.category.name.toLowerCase().contains(
         lowerQuery,

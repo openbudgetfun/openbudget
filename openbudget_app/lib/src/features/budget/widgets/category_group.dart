@@ -21,6 +21,9 @@ class CategoryGroup extends HookConsumerWidget {
     this.onQuickBudget,
     this.onShowActivity,
     this.onReorderEnvelopes,
+    this.onToggleHideCategory,
+    this.onToggleHideEnvelope,
+    this.showHidden = false,
     this.goalsMap = const {},
     super.key,
   });
@@ -36,6 +39,10 @@ class CategoryGroup extends HookConsumerWidget {
   final void Function(Envelope envelope, MonthlyEnvelopeData?, EnvelopeGoal?)?
   onShowActivity;
   final void Function(List<String> envelopeIds)? onReorderEnvelopes;
+  final void Function({required bool isHidden})? onToggleHideCategory;
+  final void Function(Envelope envelope, {required bool isHidden})?
+  onToggleHideEnvelope;
+  final bool showHidden;
   final Map<String, EnvelopeGoal> goalsMap;
 
   @override
@@ -62,63 +69,72 @@ class CategoryGroup extends HookConsumerWidget {
             onTap: isReorderingEnvelopes.value
                 ? () => isReorderingEnvelopes.value = false
                 : onEditCategory,
-            onLongPress: onReorderEnvelopes != null && envelopes.length > 1
-                ? () => isReorderingEnvelopes.value = true
-                : onDeleteCategory,
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: SpacingTokens.md,
-                vertical: SpacingTokens.sm + SpacingTokens.xs,
-              ),
-              decoration: BoxDecoration(
-                color: colorScheme.primaryContainer.withAlpha(80),
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(RadiusTokens.md),
+            onLongPress: () => _showCategoryMenu(context),
+            child: Opacity(
+              opacity: (category.isHidden ?? false) ? 0.5 : 1.0,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: SpacingTokens.md,
+                  vertical: SpacingTokens.sm + SpacingTokens.xs,
                 ),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    flex: 4,
-                    child: Text(
-                      category.name.toUpperCase(),
-                      style: theme.textTheme.labelLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
+                decoration: BoxDecoration(
+                  color: colorScheme.primaryContainer.withAlpha(80),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(RadiusTokens.md),
                   ),
-                  Expanded(
-                    flex: 3,
-                    child: Text(
-                      l10n.budgetColumnBudgeted,
-                      textAlign: TextAlign.right,
-                      style: theme.textTheme.labelSmall?.copyWith(
+                ),
+                child: Row(
+                  children: [
+                    if (category.isHidden ?? false) ...[
+                      Icon(
+                        Icons.visibility_off_rounded,
+                        size: 14,
                         color: colorScheme.onSurfaceVariant,
                       ),
-                    ),
-                  ),
-                  Expanded(
-                    flex: 3,
-                    child: Text(
-                      l10n.budgetColumnSpent,
-                      textAlign: TextAlign.right,
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
+                      const SizedBox(width: SpacingTokens.xs),
+                    ],
+                    Expanded(
+                      flex: 4,
+                      child: Text(
+                        category.name.toUpperCase(),
+                        style: theme.textTheme.labelLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.5,
+                        ),
                       ),
                     ),
-                  ),
-                  Expanded(
-                    flex: 3,
-                    child: Text(
-                      l10n.budgetColumnAvailable,
-                      textAlign: TextAlign.right,
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
+                    Expanded(
+                      flex: 3,
+                      child: Text(
+                        l10n.budgetColumnBudgeted,
+                        textAlign: TextAlign.right,
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                    Expanded(
+                      flex: 3,
+                      child: Text(
+                        l10n.budgetColumnSpent,
+                        textAlign: TextAlign.right,
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      flex: 3,
+                      child: Text(
+                        l10n.budgetColumnAvailable,
+                        textAlign: TextAlign.right,
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -207,18 +223,22 @@ class CategoryGroup extends HookConsumerWidget {
                   ? categoryWithEnvelopes.monthlyEnvelopes[entry.key]
                   : null;
               final envelopeGoal = goalsMap[envelopeId];
-              return EnvelopeRow(
-                envelope: envelope,
-                currencyCode: currencyCode,
-                monthlyData: monthlyData,
-                goal: envelopeGoal,
-                onTap: onShowActivity != null
-                    ? () => onShowActivity!(envelope, monthlyData, envelopeGoal)
-                    : () => onEditEnvelope(envelope),
-                onLongPress: () => onEditEnvelope(envelope),
-                onQuickBudget: onQuickBudget != null
-                    ? () => onQuickBudget!(envelope)
-                    : null,
+              return Opacity(
+                opacity: (envelope.isHidden ?? false) ? 0.5 : 1.0,
+                child: EnvelopeRow(
+                  envelope: envelope,
+                  currencyCode: currencyCode,
+                  monthlyData: monthlyData,
+                  goal: envelopeGoal,
+                  onTap: onShowActivity != null
+                      ? () =>
+                            onShowActivity!(envelope, monthlyData, envelopeGoal)
+                      : () => onEditEnvelope(envelope),
+                  onLongPress: () => _showEnvelopeMenu(context, envelope),
+                  onQuickBudget: onQuickBudget != null
+                      ? () => onQuickBudget!(envelope)
+                      : null,
+                ),
               );
             }),
           if (envelopes.isNotEmpty) const Divider(),
@@ -332,6 +352,136 @@ class CategoryGroup extends HookConsumerWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showCategoryMenu(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final category = categoryWithEnvelopes.category;
+    final isHidden = category.isHidden ?? false;
+
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.edit_rounded),
+              title: Text(l10n.budgetEditCategoryTitle),
+              onTap: () {
+                Navigator.of(ctx).pop();
+                onEditCategory();
+              },
+            ),
+            if (onReorderEnvelopes != null &&
+                categoryWithEnvelopes.envelopes.length > 1)
+              ListTile(
+                leading: const Icon(Icons.swap_vert_rounded),
+                title: Text(l10n.envelopeReorderHint),
+                onTap: () {
+                  Navigator.of(ctx).pop();
+                  // Trigger reorder mode handled by parent.
+                },
+              ),
+            if (onToggleHideCategory != null)
+              ListTile(
+                leading: Icon(
+                  isHidden
+                      ? Icons.visibility_rounded
+                      : Icons.visibility_off_rounded,
+                ),
+                title: Text(
+                  isHidden
+                      ? l10n.budgetUnhideCategory
+                      : l10n.budgetHideCategory,
+                ),
+                onTap: () {
+                  Navigator.of(ctx).pop();
+                  onToggleHideCategory!(isHidden: !isHidden);
+                },
+              ),
+            ListTile(
+              leading: const Icon(
+                Icons.delete_rounded,
+                color: ColorTokens.error,
+              ),
+              title: Text(
+                l10n.deleteConfirmButton,
+                style: const TextStyle(color: ColorTokens.error),
+              ),
+              onTap: () {
+                Navigator.of(ctx).pop();
+                onDeleteCategory();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showEnvelopeMenu(BuildContext context, Envelope envelope) {
+    final l10n = AppLocalizations.of(context);
+    final isHidden = envelope.isHidden ?? false;
+
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.edit_rounded),
+              title: Text(l10n.editEnvelopeTitle),
+              onTap: () {
+                Navigator.of(ctx).pop();
+                onEditEnvelope(envelope);
+              },
+            ),
+            if (onQuickBudget != null)
+              ListTile(
+                leading: const Icon(Icons.flash_on_rounded),
+                title: Text(l10n.quickBudgetTitle),
+                onTap: () {
+                  Navigator.of(ctx).pop();
+                  onQuickBudget!(envelope);
+                },
+              ),
+            if (onToggleHideEnvelope != null)
+              ListTile(
+                leading: Icon(
+                  isHidden
+                      ? Icons.visibility_rounded
+                      : Icons.visibility_off_rounded,
+                ),
+                title: Text(
+                  isHidden
+                      ? l10n.budgetUnhideEnvelope
+                      : l10n.budgetHideEnvelope,
+                ),
+                onTap: () {
+                  Navigator.of(ctx).pop();
+                  onToggleHideEnvelope!(envelope, isHidden: !isHidden);
+                },
+              ),
+            ListTile(
+              leading: const Icon(
+                Icons.delete_rounded,
+                color: ColorTokens.error,
+              ),
+              title: Text(
+                l10n.deleteConfirmButton,
+                style: const TextStyle(color: ColorTokens.error),
+              ),
+              onTap: () {
+                Navigator.of(ctx).pop();
+                onDeleteEnvelope(envelope);
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

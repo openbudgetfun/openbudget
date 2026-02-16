@@ -40,12 +40,14 @@ class CategoryEndpoint extends Endpoint {
     UuidValue categoryId, {
     String? name,
     int? sortOrder,
+    bool? isHidden,
   }) async {
     return CategoryService.update(
       session,
       categoryId: categoryId,
       name: name,
       sortOrder: sortOrder,
+      isHidden: isHidden,
     );
   }
 

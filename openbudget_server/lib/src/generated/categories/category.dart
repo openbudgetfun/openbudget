@@ -20,14 +20,17 @@ abstract class Category
     required this.name,
     required this.budgetId,
     required this.sortOrder,
+    bool? isHidden,
     DateTime? createdAt,
-  }) : createdAt = createdAt ?? DateTime.now();
+  }) : isHidden = isHidden ?? false,
+       createdAt = createdAt ?? DateTime.now();
 
   factory Category({
     _i1.UuidValue? id,
     required String name,
     required _i1.UuidValue budgetId,
     required int sortOrder,
+    bool? isHidden,
     DateTime? createdAt,
   }) = _CategoryImpl;
 
@@ -41,6 +44,7 @@ abstract class Category
         jsonSerialization['budgetId'],
       ),
       sortOrder: jsonSerialization['sortOrder'] as int,
+      isHidden: jsonSerialization['isHidden'] as bool?,
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
@@ -60,6 +64,9 @@ abstract class Category
 
   int sortOrder;
 
+  /// Whether this category is hidden from the default budget view.
+  bool? isHidden;
+
   DateTime createdAt;
 
   @override
@@ -73,6 +80,7 @@ abstract class Category
     String? name,
     _i1.UuidValue? budgetId,
     int? sortOrder,
+    bool? isHidden,
     DateTime? createdAt,
   });
   @override
@@ -83,6 +91,7 @@ abstract class Category
       'name': name,
       'budgetId': budgetId.toJson(),
       'sortOrder': sortOrder,
+      if (isHidden != null) 'isHidden': isHidden,
       'createdAt': createdAt.toJson(),
     };
   }
@@ -95,6 +104,7 @@ abstract class Category
       'name': name,
       'budgetId': budgetId.toJson(),
       'sortOrder': sortOrder,
+      if (isHidden != null) 'isHidden': isHidden,
       'createdAt': createdAt.toJson(),
     };
   }
@@ -137,12 +147,14 @@ class _CategoryImpl extends Category {
     required String name,
     required _i1.UuidValue budgetId,
     required int sortOrder,
+    bool? isHidden,
     DateTime? createdAt,
   }) : super._(
          id: id,
          name: name,
          budgetId: budgetId,
          sortOrder: sortOrder,
+         isHidden: isHidden,
          createdAt: createdAt,
        );
 
@@ -155,6 +167,7 @@ class _CategoryImpl extends Category {
     String? name,
     _i1.UuidValue? budgetId,
     int? sortOrder,
+    Object? isHidden = _Undefined,
     DateTime? createdAt,
   }) {
     return Category(
@@ -162,6 +175,7 @@ class _CategoryImpl extends Category {
       name: name ?? this.name,
       budgetId: budgetId ?? this.budgetId,
       sortOrder: sortOrder ?? this.sortOrder,
+      isHidden: isHidden is bool? ? isHidden : this.isHidden,
       createdAt: createdAt ?? this.createdAt,
     );
   }
@@ -179,6 +193,9 @@ class CategoryUpdateTable extends _i1.UpdateTable<CategoryTable> {
   _i1.ColumnValue<int, int> sortOrder(int value) =>
       _i1.ColumnValue(table.sortOrder, value);
 
+  _i1.ColumnValue<bool, bool> isHidden(bool? value) =>
+      _i1.ColumnValue(table.isHidden, value);
+
   _i1.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
       _i1.ColumnValue(table.createdAt, value);
 }
@@ -189,6 +206,7 @@ class CategoryTable extends _i1.Table<_i1.UuidValue?> {
     name = _i1.ColumnString('name', this);
     budgetId = _i1.ColumnUuid('budgetId', this);
     sortOrder = _i1.ColumnInt('sortOrder', this);
+    isHidden = _i1.ColumnBool('isHidden', this, hasDefault: true);
     createdAt = _i1.ColumnDateTime('createdAt', this, hasDefault: true);
   }
 
@@ -200,10 +218,20 @@ class CategoryTable extends _i1.Table<_i1.UuidValue?> {
 
   late final _i1.ColumnInt sortOrder;
 
+  /// Whether this category is hidden from the default budget view.
+  late final _i1.ColumnBool isHidden;
+
   late final _i1.ColumnDateTime createdAt;
 
   @override
-  List<_i1.Column> get columns => [id, name, budgetId, sortOrder, createdAt];
+  List<_i1.Column> get columns => [
+    id,
+    name,
+    budgetId,
+    sortOrder,
+    isHidden,
+    createdAt,
+  ];
 }
 
 class CategoryInclude extends _i1.IncludeObject {

@@ -23,8 +23,10 @@ abstract class Envelope implements _i1.SerializableModel {
     required this.currencyCode,
     required this.sortOrder,
     this.note,
+    bool? isHidden,
     DateTime? createdAt,
-  }) : createdAt = createdAt ?? DateTime.now();
+  }) : isHidden = isHidden ?? false,
+       createdAt = createdAt ?? DateTime.now();
 
   factory Envelope({
     _i1.UuidValue? id,
@@ -35,6 +37,7 @@ abstract class Envelope implements _i1.SerializableModel {
     required String currencyCode,
     required int sortOrder,
     String? note,
+    bool? isHidden,
     DateTime? createdAt,
   }) = _EnvelopeImpl;
 
@@ -52,6 +55,7 @@ abstract class Envelope implements _i1.SerializableModel {
       currencyCode: jsonSerialization['currencyCode'] as String,
       sortOrder: jsonSerialization['sortOrder'] as int,
       note: jsonSerialization['note'] as String?,
+      isHidden: jsonSerialization['isHidden'] as bool?,
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
@@ -82,6 +86,9 @@ abstract class Envelope implements _i1.SerializableModel {
   /// Optional user-facing note providing context for the envelope.
   String? note;
 
+  /// Whether this envelope is hidden from the default budget view.
+  bool? isHidden;
+
   DateTime createdAt;
 
   /// Returns a shallow copy of this [Envelope]
@@ -96,6 +103,7 @@ abstract class Envelope implements _i1.SerializableModel {
     String? currencyCode,
     int? sortOrder,
     String? note,
+    bool? isHidden,
     DateTime? createdAt,
   });
   @override
@@ -110,6 +118,7 @@ abstract class Envelope implements _i1.SerializableModel {
       'currencyCode': currencyCode,
       'sortOrder': sortOrder,
       if (note != null) 'note': note,
+      if (isHidden != null) 'isHidden': isHidden,
       'createdAt': createdAt.toJson(),
     };
   }
@@ -132,6 +141,7 @@ class _EnvelopeImpl extends Envelope {
     required String currencyCode,
     required int sortOrder,
     String? note,
+    bool? isHidden,
     DateTime? createdAt,
   }) : super._(
          id: id,
@@ -142,6 +152,7 @@ class _EnvelopeImpl extends Envelope {
          currencyCode: currencyCode,
          sortOrder: sortOrder,
          note: note,
+         isHidden: isHidden,
          createdAt: createdAt,
        );
 
@@ -158,6 +169,7 @@ class _EnvelopeImpl extends Envelope {
     String? currencyCode,
     int? sortOrder,
     Object? note = _Undefined,
+    Object? isHidden = _Undefined,
     DateTime? createdAt,
   }) {
     return Envelope(
@@ -169,6 +181,7 @@ class _EnvelopeImpl extends Envelope {
       currencyCode: currencyCode ?? this.currencyCode,
       sortOrder: sortOrder ?? this.sortOrder,
       note: note is String? ? note : this.note,
+      isHidden: isHidden is bool? ? isHidden : this.isHidden,
       createdAt: createdAt ?? this.createdAt,
     );
   }

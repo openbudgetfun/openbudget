@@ -19,14 +19,17 @@ abstract class Category implements _i1.SerializableModel {
     required this.name,
     required this.budgetId,
     required this.sortOrder,
+    bool? isHidden,
     DateTime? createdAt,
-  }) : createdAt = createdAt ?? DateTime.now();
+  }) : isHidden = isHidden ?? false,
+       createdAt = createdAt ?? DateTime.now();
 
   factory Category({
     _i1.UuidValue? id,
     required String name,
     required _i1.UuidValue budgetId,
     required int sortOrder,
+    bool? isHidden,
     DateTime? createdAt,
   }) = _CategoryImpl;
 
@@ -40,6 +43,7 @@ abstract class Category implements _i1.SerializableModel {
         jsonSerialization['budgetId'],
       ),
       sortOrder: jsonSerialization['sortOrder'] as int,
+      isHidden: jsonSerialization['isHidden'] as bool?,
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
@@ -57,6 +61,9 @@ abstract class Category implements _i1.SerializableModel {
 
   int sortOrder;
 
+  /// Whether this category is hidden from the default budget view.
+  bool? isHidden;
+
   DateTime createdAt;
 
   /// Returns a shallow copy of this [Category]
@@ -67,6 +74,7 @@ abstract class Category implements _i1.SerializableModel {
     String? name,
     _i1.UuidValue? budgetId,
     int? sortOrder,
+    bool? isHidden,
     DateTime? createdAt,
   });
   @override
@@ -77,6 +85,7 @@ abstract class Category implements _i1.SerializableModel {
       'name': name,
       'budgetId': budgetId.toJson(),
       'sortOrder': sortOrder,
+      if (isHidden != null) 'isHidden': isHidden,
       'createdAt': createdAt.toJson(),
     };
   }
@@ -95,12 +104,14 @@ class _CategoryImpl extends Category {
     required String name,
     required _i1.UuidValue budgetId,
     required int sortOrder,
+    bool? isHidden,
     DateTime? createdAt,
   }) : super._(
          id: id,
          name: name,
          budgetId: budgetId,
          sortOrder: sortOrder,
+         isHidden: isHidden,
          createdAt: createdAt,
        );
 
@@ -113,6 +124,7 @@ class _CategoryImpl extends Category {
     String? name,
     _i1.UuidValue? budgetId,
     int? sortOrder,
+    Object? isHidden = _Undefined,
     DateTime? createdAt,
   }) {
     return Category(
@@ -120,6 +132,7 @@ class _CategoryImpl extends Category {
       name: name ?? this.name,
       budgetId: budgetId ?? this.budgetId,
       sortOrder: sortOrder ?? this.sortOrder,
+      isHidden: isHidden is bool? ? isHidden : this.isHidden,
       createdAt: createdAt ?? this.createdAt,
     );
   }

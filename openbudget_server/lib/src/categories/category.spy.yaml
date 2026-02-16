@@ -6,6 +6,8 @@ fields:
   name: String
   budgetId: UuidValue, relation(parent=budget)
   sortOrder: int
+  ### Whether this category is hidden from the default budget view.
+  isHidden: bool?, default=false
   createdAt: DateTime, default=now
 indexes:
   category_budget_idx:

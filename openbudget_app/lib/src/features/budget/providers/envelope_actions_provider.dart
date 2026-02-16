@@ -80,6 +80,35 @@ class EnvelopeActions extends _$EnvelopeActions {
     }
   }
 
+  Future<void> toggleHidden({
+    required String envelopeId,
+    required String categoryId,
+    required String budgetId,
+    required bool isHidden,
+  }) async {
+    state = const AsyncValue.loading();
+    final client = ref.read(serverpodClientProvider);
+    try {
+      await client.envelope.update(
+        // Serverpod API requires UuidValue which is experimental in uuid package.
+        // ignore: experimental_member_use
+        UuidValue.fromString(envelopeId),
+        isHidden: isHidden,
+      );
+      if (ref.mounted) {
+        ref
+          ..invalidate(envelopeListProvider(categoryId))
+          ..invalidate(budgetSummaryProvider(budgetId))
+          ..invalidate(budgetMonthlySummaryProvider(budgetId));
+        state = const AsyncValue.data(null);
+      }
+    } on Exception catch (e, st) {
+      if (ref.mounted) {
+        state = AsyncValue.error(e, st);
+      }
+    }
+  }
+
   Future<void> reorderEnvelopes({
     required String categoryId,
     required String budgetId,

@@ -473,10 +473,12 @@ class EndpointCategory extends _i1.EndpointRef {
     _i1.UuidValue categoryId, {
     String? name,
     int? sortOrder,
+    bool? isHidden,
   }) => caller.callServerEndpoint<_i9.Category>('category', 'update', {
     'categoryId': categoryId,
     'name': name,
     'sortOrder': sortOrder,
+    'isHidden': isHidden,
   });
 
   /// Batch-reorders categories by their new position.
@@ -589,12 +591,14 @@ class EndpointEnvelope extends _i1.EndpointRef {
     int? budgetedAmountCents,
     int? spentAmountCents,
     String? note,
+    bool? isHidden,
   }) => caller.callServerEndpoint<_i11.Envelope>('envelope', 'update', {
     'envelopeId': envelopeId,
     'name': name,
     'budgetedAmountCents': budgetedAmountCents,
     'spentAmountCents': spentAmountCents,
     'note': note,
+    'isHidden': isHidden,
   });
 
   /// Reorders envelopes within a category.
