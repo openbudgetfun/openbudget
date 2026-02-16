@@ -372,5 +372,7 @@
   "budgetReorderDone": "Done",
   "budgetReorderHint": "Drag to reorder categories",
   "budgetReorderSuccess": "Categories reordered",
-  "budgetReorderError": "Could not reorder categories"
+  "budgetReorderError": "Could not reorder categories",
+  "transactionMemoLabel": "Memo",
+  "transactionMemoHint": "Add a note (optional)"
 }

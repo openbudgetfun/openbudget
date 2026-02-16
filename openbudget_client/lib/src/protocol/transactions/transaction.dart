@@ -26,6 +26,7 @@ abstract class Transaction implements _i1.SerializableModel {
     required this.transactionDate,
     this.transferPairId,
     this.parentTransactionId,
+    this.memo,
     bool? cleared,
     bool? reconciled,
     DateTime? createdAt,
@@ -45,6 +46,7 @@ abstract class Transaction implements _i1.SerializableModel {
     required DateTime transactionDate,
     _i1.UuidValue? transferPairId,
     _i1.UuidValue? parentTransactionId,
+    String? memo,
     bool? cleared,
     bool? reconciled,
     DateTime? createdAt,
@@ -85,6 +87,7 @@ abstract class Transaction implements _i1.SerializableModel {
           : _i1.UuidValueJsonExtension.fromJson(
               jsonSerialization['parentTransactionId'],
             ),
+      memo: jsonSerialization['memo'] as String?,
       cleared: jsonSerialization['cleared'] as bool?,
       reconciled: jsonSerialization['reconciled'] as bool?,
       createdAt: jsonSerialization['createdAt'] == null
@@ -124,6 +127,9 @@ abstract class Transaction implements _i1.SerializableModel {
   /// If this is a split sub-transaction, links to the parent transaction.
   _i1.UuidValue? parentTransactionId;
 
+  /// Optional user memo or note for additional context.
+  String? memo;
+
   /// Whether this transaction has been cleared by the user.
   bool cleared;
 
@@ -147,6 +153,7 @@ abstract class Transaction implements _i1.SerializableModel {
     DateTime? transactionDate,
     _i1.UuidValue? transferPairId,
     _i1.UuidValue? parentTransactionId,
+    String? memo,
     bool? cleared,
     bool? reconciled,
     DateTime? createdAt,
@@ -167,6 +174,7 @@ abstract class Transaction implements _i1.SerializableModel {
       if (transferPairId != null) 'transferPairId': transferPairId?.toJson(),
       if (parentTransactionId != null)
         'parentTransactionId': parentTransactionId?.toJson(),
+      if (memo != null) 'memo': memo,
       'cleared': cleared,
       'reconciled': reconciled,
       'createdAt': createdAt.toJson(),
@@ -194,6 +202,7 @@ class _TransactionImpl extends Transaction {
     required DateTime transactionDate,
     _i1.UuidValue? transferPairId,
     _i1.UuidValue? parentTransactionId,
+    String? memo,
     bool? cleared,
     bool? reconciled,
     DateTime? createdAt,
@@ -209,6 +218,7 @@ class _TransactionImpl extends Transaction {
          transactionDate: transactionDate,
          transferPairId: transferPairId,
          parentTransactionId: parentTransactionId,
+         memo: memo,
          cleared: cleared,
          reconciled: reconciled,
          createdAt: createdAt,
@@ -230,6 +240,7 @@ class _TransactionImpl extends Transaction {
     DateTime? transactionDate,
     Object? transferPairId = _Undefined,
     Object? parentTransactionId = _Undefined,
+    Object? memo = _Undefined,
     bool? cleared,
     bool? reconciled,
     DateTime? createdAt,
@@ -250,6 +261,7 @@ class _TransactionImpl extends Transaction {
       parentTransactionId: parentTransactionId is _i1.UuidValue?
           ? parentTransactionId
           : this.parentTransactionId,
+      memo: memo is String? ? memo : this.memo,
       cleared: cleared ?? this.cleared,
       reconciled: reconciled ?? this.reconciled,
       createdAt: createdAt ?? this.createdAt,

@@ -1350,6 +1350,11 @@ class Endpoints extends _i1.EndpointDispatch {
               type: _i1.getType<_i1.UuidValue?>(),
               nullable: true,
             ),
+            'memo': _i1.ParameterDescription(
+              name: 'memo',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
           },
           call: (_i1.Session session, Map<String, dynamic> params) async =>
               (endpoints['transaction'] as _i13.TransactionEndpoint).create(
@@ -1361,6 +1366,7 @@ class Endpoints extends _i1.EndpointDispatch {
                 params['transactionDate'],
                 envelopeId: params['envelopeId'],
                 payeeId: params['payeeId'],
+                memo: params['memo'],
               ),
         ),
         'list': _i1.MethodConnector(
@@ -1454,6 +1460,11 @@ class Endpoints extends _i1.EndpointDispatch {
               type: _i1.getType<DateTime?>(),
               nullable: true,
             ),
+            'memo': _i1.ParameterDescription(
+              name: 'memo',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
           },
           call: (_i1.Session session, Map<String, dynamic> params) async =>
               (endpoints['transaction'] as _i13.TransactionEndpoint).update(
@@ -1464,6 +1475,7 @@ class Endpoints extends _i1.EndpointDispatch {
                 envelopeId: params['envelopeId'],
                 payeeId: params['payeeId'],
                 transactionDate: params['transactionDate'],
+                memo: params['memo'],
               ),
         ),
         'transfer': _i1.MethodConnector(

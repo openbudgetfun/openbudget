@@ -1040,6 +1040,12 @@ class Protocol extends _i1.SerializationManagerServer {
           dartType: 'UuidValue?',
         ),
         _i2.ColumnDefinition(
+          name: 'memo',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
           name: 'cleared',
           columnType: _i2.ColumnType.boolean,
           isNullable: false,

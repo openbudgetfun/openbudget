@@ -2097,6 +2097,7 @@ class _TransactionEndpoint {
     DateTime transactionDate, {
     _i2.UuidValue? envelopeId,
     _i2.UuidValue? payeeId,
+    String? memo,
   }) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
@@ -2117,6 +2118,7 @@ class _TransactionEndpoint {
             'transactionDate': transactionDate,
             'envelopeId': envelopeId,
             'payeeId': payeeId,
+            'memo': memo,
           }),
           serializationManager: _serializationManager,
         );
@@ -2240,6 +2242,7 @@ class _TransactionEndpoint {
     _i2.UuidValue? envelopeId,
     _i2.UuidValue? payeeId,
     DateTime? transactionDate,
+    String? memo,
   }) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
@@ -2259,6 +2262,7 @@ class _TransactionEndpoint {
             'envelopeId': envelopeId,
             'payeeId': payeeId,
             'transactionDate': transactionDate,
+            'memo': memo,
           }),
           serializationManager: _serializationManager,
         );

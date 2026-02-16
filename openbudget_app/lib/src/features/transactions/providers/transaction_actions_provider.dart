@@ -20,6 +20,7 @@ class TransactionActions extends _$TransactionActions {
     required String currencyCode,
     required String budgetId,
     required DateTime date,
+    String? memo,
   }) async {
     state = const AsyncValue.loading();
     final client = ref.read(serverpodClientProvider);
@@ -32,6 +33,7 @@ class TransactionActions extends _$TransactionActions {
         // ignore: experimental_member_use
         UuidValue.fromString(budgetId),
         date,
+        memo: memo,
       );
       if (ref.mounted) {
         ref
@@ -55,6 +57,7 @@ class TransactionActions extends _$TransactionActions {
     int? amountCents,
     String? envelopeId,
     DateTime? transactionDate,
+    String? memo,
   }) async {
     state = const AsyncValue.loading();
     final client = ref.read(serverpodClientProvider);
@@ -71,6 +74,7 @@ class TransactionActions extends _$TransactionActions {
             ? UuidValue.fromString(envelopeId)
             : null,
         transactionDate: transactionDate,
+        memo: memo,
       );
       if (ref.mounted) {
         ref
@@ -143,6 +147,7 @@ class TransactionActions extends _$TransactionActions {
     String? envelopeId,
     String? categoryId,
     String? payeeId,
+    String? memo,
   }) async {
     state = const AsyncValue.loading();
     final client = ref.read(serverpodClientProvider);
@@ -165,6 +170,7 @@ class TransactionActions extends _$TransactionActions {
             // ignore: experimental_member_use
             ? UuidValue.fromString(payeeId)
             : null,
+        memo: memo,
       );
 
       if (envelopeId != null && categoryId != null && ref.mounted) {

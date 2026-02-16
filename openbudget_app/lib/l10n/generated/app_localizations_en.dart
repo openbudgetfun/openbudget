@@ -960,4 +960,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get budgetReorderError => 'Could not reorder categories';
+
+  @override
+  String get transactionMemoLabel => 'Memo';
+
+  @override
+  String get transactionMemoHint => 'Add a note (optional)';
 }

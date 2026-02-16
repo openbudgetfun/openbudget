@@ -1743,6 +1743,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not reorder categories'**
   String get budgetReorderError;
+
+  /// No description provided for @transactionMemoLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Memo'**
+  String get transactionMemoLabel;
+
+  /// No description provided for @transactionMemoHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a note (optional)'**
+  String get transactionMemoHint;
 }
 
 class _AppLocalizationsDelegate
