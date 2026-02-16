@@ -1120,6 +1120,12 @@ abstract class AppLocalizations {
   /// **'Long press an envelope to reorder within category'**
   String get envelopeReorderHint;
 
+  /// No description provided for @envelopeUnderfunded.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} needed'**
+  String envelopeUnderfunded(String amount);
+
   /// No description provided for @goalAmountLabel.
   ///
   /// In en, this message translates to:
