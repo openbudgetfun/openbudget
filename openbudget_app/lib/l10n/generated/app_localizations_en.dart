@@ -613,6 +613,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Long press an envelope to reorder within category';
 
   @override
+  String envelopeUnderfunded(String amount) {
+    return '$amount needed';
+  }
+
+  @override
   String get goalAmountLabel => 'Target Amount';
 
   @override

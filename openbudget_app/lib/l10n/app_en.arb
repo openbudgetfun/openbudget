@@ -377,6 +377,14 @@
   "envelopeNoteHint": "Add a note for this envelope (optional)",
   "envelopeNoteLabel": "Note",
   "envelopeReorderHint": "Long press an envelope to reorder within category",
+  "envelopeUnderfunded": "{amount} needed",
+  "@envelopeUnderfunded": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "goalAmountLabel": "Target Amount",
   "goalDateLabel": "Target Date",
   "goalDateSelect": "Select a date",

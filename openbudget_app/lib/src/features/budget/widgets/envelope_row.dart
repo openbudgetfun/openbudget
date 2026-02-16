@@ -195,6 +195,7 @@ class EnvelopeRow extends HookConsumerWidget {
                 goal: goal!,
                 budgetedCents: budgeted,
                 availableCents: available,
+                currencyCode: currencyCode,
               )
             else if (budgeted > 0)
               _SpendingProgressBar(budgetedCents: budgeted, spentCents: spent),
@@ -255,14 +256,18 @@ class _GoalProgressBar extends HookWidget {
     required this.goal,
     required this.budgetedCents,
     required this.availableCents,
+    required this.currencyCode,
   });
 
   final EnvelopeGoal goal;
   final int budgetedCents;
   final int availableCents;
+  final CurrencyCode currencyCode;
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
     final progress = computeFundingProgress(
       goal: goal,
       budgetedCents: budgetedCents,
@@ -303,6 +308,14 @@ class _GoalProgressBar extends HookWidget {
           if (underfunded > 0) ...[
             const SizedBox(width: SpacingTokens.xs),
             Icon(Icons.warning_amber_rounded, size: 12, color: barColor),
+            const SizedBox(width: 2),
+            Text(
+              l10n.envelopeUnderfunded(formatCents(underfunded, currencyCode)),
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: barColor,
+                fontSize: 10,
+              ),
+            ),
           ],
         ],
       ),
