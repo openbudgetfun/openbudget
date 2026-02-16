@@ -17,6 +17,9 @@ class BudgetHeader extends HookConsumerWidget {
     required this.year,
     required this.month,
     this.totalOverspentCents = 0,
+    this.totalIncomeCents = 0,
+    this.totalBudgetedCents = 0,
+    this.totalActivityCents = 0,
     this.onCopyLastMonth,
     super.key,
   });
@@ -27,6 +30,9 @@ class BudgetHeader extends HookConsumerWidget {
   final int year;
   final int month;
   final int totalOverspentCents;
+  final int totalIncomeCents;
+  final int totalBudgetedCents;
+  final int totalActivityCents;
   final VoidCallback? onCopyLastMonth;
 
   @override
@@ -129,6 +135,35 @@ class BudgetHeader extends HookConsumerWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
+          if (totalIncomeCents != 0 ||
+              totalBudgetedCents != 0 ||
+              totalActivityCents != 0) ...[
+            const SizedBox(height: SpacingTokens.sm),
+            Divider(color: color.withAlpha(40), height: 1),
+            const SizedBox(height: SpacingTokens.sm),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _SummaryColumn(
+                  label: l10n.budgetTotalIncome,
+                  value: formatCents(totalIncomeCents, currencyCode),
+                  valueColor: ColorTokens.secondary,
+                  theme: theme,
+                ),
+                _SummaryColumn(
+                  label: l10n.budgetTotalBudgeted,
+                  value: formatCents(totalBudgetedCents, currencyCode),
+                  theme: theme,
+                ),
+                _SummaryColumn(
+                  label: l10n.budgetTotalActivity,
+                  value: formatCents(-totalActivityCents, currencyCode),
+                  valueColor: totalActivityCents > 0 ? ColorTokens.error : null,
+                  theme: theme,
+                ),
+              ],
+            ),
+          ],
           if (totalOverspentCents > 0) ...[
             const SizedBox(height: SpacingTokens.sm),
             Container(
@@ -392,6 +427,43 @@ class _MonthPickerDialog extends HookWidget {
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
           child: Text(l10n.dialogCancel),
+        ),
+      ],
+    );
+  }
+}
+
+class _SummaryColumn extends HookWidget {
+  const _SummaryColumn({
+    required this.label,
+    required this.value,
+    required this.theme,
+    this.valueColor,
+  });
+
+  final String label;
+  final String value;
+  final ThemeData theme;
+  final Color? valueColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          label,
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          value,
+          style: theme.textTheme.bodySmall?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: valueColor,
+          ),
         ),
       ],
     );

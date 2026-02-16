@@ -407,6 +407,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get budgetReadyToAssign => 'Ready to Assign';
 
   @override
+  String get budgetTotalIncome => 'Income';
+
+  @override
+  String get budgetTotalBudgeted => 'Budgeted';
+
+  @override
+  String get budgetTotalActivity => 'Activity';
+
+  @override
   String get budgetReorderCategories => 'Reorder Categories';
 
   @override
