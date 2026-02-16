@@ -901,4 +901,23 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get envelopeNoActivity => 'No transactions this month';
+
+  @override
+  String get netWorthTitle => 'Net Worth';
+
+  @override
+  String get netWorthAssets => 'Assets';
+
+  @override
+  String get netWorthLiabilities => 'Liabilities';
+
+  @override
+  String get netWorthLoadError => 'Could not load net worth data';
+
+  @override
+  String get netWorthEmptyTitle => 'No Accounts Yet';
+
+  @override
+  String get netWorthEmptySubtitle =>
+      'Add accounts to see your net worth breakdown';
 }

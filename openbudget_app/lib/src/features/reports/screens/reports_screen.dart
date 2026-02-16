@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/reports/providers/spending_report_provider.dart';
+import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
@@ -25,7 +27,19 @@ class ReportsScreen extends HookConsumerWidget {
     );
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.reportsTitle)),
+      appBar: AppBar(
+        title: Text(l10n.reportsTitle),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.account_balance_wallet_rounded),
+            tooltip: l10n.netWorthTitle,
+            onPressed: () => context.pushNamed(
+              netWorthRoute,
+              pathParameters: {'id': budgetId},
+            ),
+          ),
+        ],
+      ),
       body: Column(
         children: [
           Padding(

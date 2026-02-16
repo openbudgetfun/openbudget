@@ -32,3 +32,5 @@ const splitExpenseRoute = 'splitExpense';
 const splitExpensePath = '/budgets/:id/expenses/split';
 const importTransactionsRoute = 'importTransactions';
 const importTransactionsPath = '/budgets/:id/import';
+const netWorthRoute = 'netWorth';
+const netWorthPath = '/budgets/:id/net-worth';
