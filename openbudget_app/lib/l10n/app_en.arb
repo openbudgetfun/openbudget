@@ -385,5 +385,17 @@
   "accountCloseConfirm": "Close this account? It will be moved to Closed Accounts.",
   "accountCloseSuccess": "Account closed",
   "accountReopenButton": "Reopen Account",
-  "accountReopenSuccess": "Account reopened"
+  "accountReopenSuccess": "Account reopened",
+  "budgetDeleteTitle": "Delete Budget",
+  "budgetDeleteConfirm": "Delete \"{name}\"? This will permanently remove the budget and all its data.",
+  "@budgetDeleteConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetDeleteButton": "Delete",
+  "budgetDeleteSuccess": "Budget deleted",
+  "budgetDeleteError": "Could not delete budget. Please try again."
 }

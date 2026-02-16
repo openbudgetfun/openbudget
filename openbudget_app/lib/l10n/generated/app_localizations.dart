@@ -1821,6 +1821,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Account reopened'**
   String get accountReopenSuccess;
+
+  /// No description provided for @budgetDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Budget'**
+  String get budgetDeleteTitle;
+
+  /// No description provided for @budgetDeleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete \"{name}\"? This will permanently remove the budget and all its data.'**
+  String budgetDeleteConfirm(String name);
+
+  /// No description provided for @budgetDeleteButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get budgetDeleteButton;
+
+  /// No description provided for @budgetDeleteSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget deleted'**
+  String get budgetDeleteSuccess;
+
+  /// No description provided for @budgetDeleteError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not delete budget. Please try again.'**
+  String get budgetDeleteError;
 }
 
 class _AppLocalizationsDelegate
