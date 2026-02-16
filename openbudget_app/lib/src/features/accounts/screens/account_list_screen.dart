@@ -117,8 +117,7 @@ class AccountListScreen extends HookConsumerWidget {
               .toList();
           final closed = accountList.where((a) => a.isClosed).toList();
 
-          final allOpen =
-              accountList.where((a) => !a.isClosed).toList();
+          final allOpen = accountList.where((a) => !a.isClosed).toList();
           final assets = allOpen
               .where((a) => a.balanceCents >= 0)
               .fold<int>(0, (sum, a) => sum + a.balanceCents);
