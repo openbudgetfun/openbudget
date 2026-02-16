@@ -126,7 +126,7 @@ class EnvelopeActions extends _$EnvelopeActions {
     }
   }
 
-  Future<void> deleteEnvelope({
+  Future<Envelope> deleteEnvelope({
     required String envelopeId,
     required String categoryId,
     required String budgetId,
@@ -136,17 +136,55 @@ class EnvelopeActions extends _$EnvelopeActions {
     try {
       // Serverpod API requires UuidValue which is experimental in uuid package.
       // ignore: experimental_member_use
-      await client.envelope.delete(UuidValue.fromString(envelopeId));
+      final deleted = await client.envelope.delete(
+        // Serverpod API requires UuidValue which is experimental in uuid package.
+        // ignore: experimental_member_use
+        UuidValue.fromString(envelopeId),
+      );
       if (ref.mounted) {
         ref
           ..invalidate(envelopeListProvider(categoryId))
           ..invalidate(budgetSummaryProvider(budgetId));
         state = const AsyncValue.data(null);
       }
+      return deleted;
     } on Exception catch (e, st) {
       if (ref.mounted) {
         state = AsyncValue.error(e, st);
       }
+      rethrow;
+    }
+  }
+
+  /// Recreates a previously deleted envelope for undo support.
+  Future<Envelope> undoDeleteEnvelope({
+    required Envelope deletedEnvelope,
+    required String categoryId,
+    required String budgetId,
+  }) async {
+    state = const AsyncValue.loading();
+    final client = ref.read(serverpodClientProvider);
+    try {
+      final restored = await client.envelope.create(
+        deletedEnvelope.name,
+        // Serverpod API requires UuidValue which is experimental in uuid package.
+        // ignore: experimental_member_use
+        UuidValue.fromString(categoryId),
+        deletedEnvelope.budgetedAmountCents,
+        deletedEnvelope.currencyCode,
+      );
+      if (ref.mounted) {
+        ref
+          ..invalidate(envelopeListProvider(categoryId))
+          ..invalidate(budgetSummaryProvider(budgetId));
+        state = const AsyncValue.data(null);
+      }
+      return restored;
+    } on Exception catch (e, st) {
+      if (ref.mounted) {
+        state = AsyncValue.error(e, st);
+      }
+      rethrow;
     }
   }
 }

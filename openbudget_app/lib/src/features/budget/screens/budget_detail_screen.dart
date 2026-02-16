@@ -785,13 +785,20 @@ class BudgetDetailScreen extends HookConsumerWidget {
     if (confirmed != true || !context.mounted) return;
 
     try {
-      await ref
+      final deleted = await ref
           .read(categoryActionsProvider.notifier)
           .deleteCategory(categoryId: categoryId, budgetId: budgetId);
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(l10n.deleteSuccess)));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.deleteSuccess),
+            action: SnackBarAction(
+              label: l10n.undoAction,
+              onPressed: () => _undoDeleteCategory(context, ref, deleted, l10n),
+            ),
+            duration: const Duration(seconds: 5),
+          ),
+        );
       }
     } on Exception catch (_) {
       if (context.mounted) {
@@ -799,6 +806,33 @@ class BudgetDetailScreen extends HookConsumerWidget {
           SnackBar(
             content: Text(l10n.deleteError),
             backgroundColor: colorScheme.error,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _undoDeleteCategory(
+    BuildContext context,
+    WidgetRef ref,
+    Category deleted,
+    AppLocalizations l10n,
+  ) async {
+    try {
+      await ref
+          .read(categoryActionsProvider.notifier)
+          .undoDeleteCategory(deletedCategory: deleted, budgetId: budgetId);
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.undoDeleteSuccess)));
+      }
+    } on Exception catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.undoDeleteError),
+            backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
       }
@@ -869,7 +903,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
     if (confirmed != true || !context.mounted) return;
 
     try {
-      await ref
+      final deleted = await ref
           .read(envelopeActionsProvider.notifier)
           .deleteEnvelope(
             envelopeId: envelopeId,
@@ -877,9 +911,17 @@ class BudgetDetailScreen extends HookConsumerWidget {
             budgetId: budgetId,
           );
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(l10n.deleteSuccess)));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.deleteSuccess),
+            action: SnackBarAction(
+              label: l10n.undoAction,
+              onPressed: () =>
+                  _undoDeleteEnvelope(context, ref, deleted, categoryId, l10n),
+            ),
+            duration: const Duration(seconds: 5),
+          ),
+        );
       }
     } on Exception catch (_) {
       if (context.mounted) {
@@ -887,6 +929,38 @@ class BudgetDetailScreen extends HookConsumerWidget {
           SnackBar(
             content: Text(l10n.deleteError),
             backgroundColor: colorScheme.error,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _undoDeleteEnvelope(
+    BuildContext context,
+    WidgetRef ref,
+    Envelope deleted,
+    String categoryId,
+    AppLocalizations l10n,
+  ) async {
+    try {
+      await ref
+          .read(envelopeActionsProvider.notifier)
+          .undoDeleteEnvelope(
+            deletedEnvelope: deleted,
+            categoryId: categoryId,
+            budgetId: budgetId,
+          );
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.undoDeleteSuccess)));
+      }
+    } on Exception catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.undoDeleteError),
+            backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
       }

@@ -41,7 +41,7 @@ final class EnvelopeActionsProvider
   }
 }
 
-String _$envelopeActionsHash() => r'e4040801102a8ad57fb13d295006e97a31b54029';
+String _$envelopeActionsHash() => r'cbbabed2d04f2e2dd6b671630a8b714421763c75';
 
 abstract class _$EnvelopeActions extends $Notifier<AsyncValue<void>> {
   AsyncValue<void> build();
