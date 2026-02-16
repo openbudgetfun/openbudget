@@ -101,13 +101,21 @@ class EditAccountDialog extends HookConsumerWidget {
             style: TextButton.styleFrom(foregroundColor: colorScheme.error),
             child: Text(l10n.accountCloseButton),
           ),
-        if (account.isClosed)
+        if (account.isClosed) ...[
+          TextButton(
+            onPressed: isSubmitting.value
+                ? null
+                : () => _deleteAccountPermanently(context, ref),
+            style: TextButton.styleFrom(foregroundColor: colorScheme.error),
+            child: Text(l10n.accountDeleteButton),
+          ),
           TextButton(
             onPressed: isSubmitting.value
                 ? null
                 : () => _reopenAccount(context, ref),
             child: Text(l10n.accountReopenButton),
           ),
+        ],
         FilledButton(
           onPressed: isSubmitting.value
               ? null
@@ -232,5 +240,86 @@ class EditAccountDialog extends HookConsumerWidget {
         );
       }
     }
+  }
+
+  Future<void> _deleteAccountPermanently(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
+    final l10n = AppLocalizations.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.accountDeleteTitle),
+        content: Text(l10n.accountDeleteConfirm),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l10n.dialogCancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            style: FilledButton.styleFrom(
+              backgroundColor: colorScheme.error,
+              foregroundColor: colorScheme.onError,
+            ),
+            child: Text(l10n.accountDeleteButton),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !context.mounted) return;
+
+    final navigator = Navigator.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      final deleted = await ref
+          .read(accountActionsProvider.notifier)
+          .deleteAccount(
+            accountId: account.id?.toString() ?? '',
+            budgetId: budgetId,
+          );
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(l10n.accountDeleteSuccess),
+          action: SnackBarAction(
+            label: l10n.undoAction,
+            onPressed: () => _undoDelete(messenger, ref, deleted, l10n),
+          ),
+          duration: const Duration(seconds: 5),
+        ),
+      );
+      navigator.pop();
+    } on Exception catch (_) {
+      if (context.mounted) {
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(l10n.accountDeleteError),
+            backgroundColor: colorScheme.error,
+          ),
+        );
+      }
+    }
+  }
+
+  void _undoDelete(
+    ScaffoldMessengerState messenger,
+    WidgetRef ref,
+    Account deleted,
+    AppLocalizations l10n,
+  ) {
+    ref
+        .read(accountActionsProvider.notifier)
+        .undoDeleteAccount(deletedAccount: deleted, budgetId: budgetId)
+        .then((_) {
+          messenger.showSnackBar(
+            SnackBar(content: Text(l10n.undoDeleteSuccess)),
+          );
+        })
+        .catchError((_) {
+          messenger.showSnackBar(SnackBar(content: Text(l10n.undoDeleteError)));
+        });
   }
 }

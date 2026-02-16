@@ -61,14 +61,37 @@ class AccountActions extends _$AccountActions {
     return account;
   }
 
-  Future<void> deleteAccount({
+  Future<Account> deleteAccount({
     required String accountId,
     required String budgetId,
   }) async {
     final client = ref.read(serverpodClientProvider);
-    // Serverpod API requires UuidValue which is experimental in uuid package.
-    // ignore: experimental_member_use
-    await client.account.delete(UuidValue.fromString(accountId));
+    final deleted = await client.account.delete(
+      // Serverpod API requires UuidValue which is experimental in uuid package.
+      // ignore: experimental_member_use
+      UuidValue.fromString(accountId),
+    );
     ref.invalidate(accountListProvider(budgetId));
+    return deleted;
+  }
+
+  Future<Account> undoDeleteAccount({
+    required Account deletedAccount,
+    required String budgetId,
+  }) async {
+    final client = ref.read(serverpodClientProvider);
+    final restored = await client.account.create(
+      deletedAccount.name,
+      deletedAccount.accountType,
+      deletedAccount.balanceCents,
+      deletedAccount.currencyCode,
+      // Serverpod API requires UuidValue which is experimental in uuid package.
+      // ignore: experimental_member_use
+      UuidValue.fromString(budgetId),
+      onBudget: deletedAccount.onBudget,
+      sortOrder: deletedAccount.sortOrder,
+    );
+    ref.invalidate(accountListProvider(budgetId));
+    return restored;
   }
 }

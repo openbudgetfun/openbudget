@@ -148,6 +148,36 @@ abstract class AppLocalizations {
   /// **'Account created'**
   String get accountCreateSuccess;
 
+  /// No description provided for @accountDeleteButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Permanently'**
+  String get accountDeleteButton;
+
+  /// No description provided for @accountDeleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Permanently delete this account? This cannot be undone and all associated transactions will be lost.'**
+  String get accountDeleteConfirm;
+
+  /// No description provided for @accountDeleteError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not delete account. Please try again.'**
+  String get accountDeleteError;
+
+  /// No description provided for @accountDeleteSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Account deleted'**
+  String get accountDeleteSuccess;
+
+  /// No description provided for @accountDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Account'**
+  String get accountDeleteTitle;
+
   /// No description provided for @accountDetailBalance.
   ///
   /// In en, this message translates to:
