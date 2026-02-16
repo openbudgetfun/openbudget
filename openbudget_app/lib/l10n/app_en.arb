@@ -285,6 +285,7 @@
   "budgetEnvelopeNameLabel": "Envelope Name",
   "budgetHiddenCount": "{count, plural, =1{1 hidden} other{{count} hidden}}",
   "budgetGoToToday": "Back to Today",
+  "budgetMonthPickerTitle": "Jump to Month",
   "budgetHideCategory": "Hide Category",
   "budgetHideEnvelope": "Hide Envelope",
   "budgetHiddenLabel": "Hidden",
