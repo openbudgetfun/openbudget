@@ -1112,4 +1112,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get themeDark => 'Dark';
+
+  @override
+  String get transactionDateToday => 'Today';
+
+  @override
+  String get transactionDateYesterday => 'Yesterday';
 }

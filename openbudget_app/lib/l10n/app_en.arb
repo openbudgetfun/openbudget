@@ -441,5 +441,8 @@
   "themeTitle": "Appearance",
   "themeSystem": "System",
   "themeLight": "Light",
-  "themeDark": "Dark"
+  "themeDark": "Dark",
+  "transactionDateToday": "Today",
+  "transactionDateYesterday": "Yesterday"
+
 }
