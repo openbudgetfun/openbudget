@@ -353,5 +353,11 @@
   },
   "autoAssignError": "Could not auto-assign. Please try again.",
   "envelopeActivityTitle": "Activity",
-  "envelopeNoActivity": "No transactions this month"
+  "envelopeNoActivity": "No transactions this month",
+  "netWorthTitle": "Net Worth",
+  "netWorthAssets": "Assets",
+  "netWorthLiabilities": "Liabilities",
+  "netWorthLoadError": "Could not load net worth data",
+  "netWorthEmptyTitle": "No Accounts Yet",
+  "netWorthEmptySubtitle": "Add accounts to see your net worth breakdown"
 }

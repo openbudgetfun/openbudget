@@ -1629,6 +1629,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No transactions this month'**
   String get envelopeNoActivity;
+
+  /// No description provided for @netWorthTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Net Worth'**
+  String get netWorthTitle;
+
+  /// No description provided for @netWorthAssets.
+  ///
+  /// In en, this message translates to:
+  /// **'Assets'**
+  String get netWorthAssets;
+
+  /// No description provided for @netWorthLiabilities.
+  ///
+  /// In en, this message translates to:
+  /// **'Liabilities'**
+  String get netWorthLiabilities;
+
+  /// No description provided for @netWorthLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load net worth data'**
+  String get netWorthLoadError;
+
+  /// No description provided for @netWorthEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No Accounts Yet'**
+  String get netWorthEmptyTitle;
+
+  /// No description provided for @netWorthEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add accounts to see your net worth breakdown'**
+  String get netWorthEmptySubtitle;
 }
 
 class _AppLocalizationsDelegate

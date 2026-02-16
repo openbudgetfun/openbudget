@@ -12,6 +12,7 @@ import 'package:openbudget_app/src/features/budget/screens/create_budget_screen.
 import 'package:openbudget_app/src/features/home/screens/home_screen.dart';
 import 'package:openbudget_app/src/features/payees/screens/payee_list_screen.dart';
 import 'package:openbudget_app/src/features/recurring/screens/recurring_list_screen.dart';
+import 'package:openbudget_app/src/features/reports/screens/net_worth_screen.dart';
 import 'package:openbudget_app/src/features/reports/screens/reports_screen.dart';
 import 'package:openbudget_app/src/features/transactions/screens/add_expense_screen.dart';
 import 'package:openbudget_app/src/features/transactions/screens/add_income_screen.dart';
@@ -167,6 +168,14 @@ GoRouter appRouter(Ref ref) {
         builder: (context, state) {
           final id = state.pathParameters['id']!;
           return ImportTransactionsScreen(budgetId: id);
+        },
+      ),
+      GoRoute(
+        name: netWorthRoute,
+        path: netWorthPath,
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return NetWorthScreen(budgetId: id);
         },
       ),
     ],
