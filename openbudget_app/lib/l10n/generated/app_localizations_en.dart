@@ -557,4 +557,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get moveMoneySameError => 'Cannot move money to the same envelope';
+
+  @override
+  String get creditCardPaymentsTitle => 'Credit Card Payments';
+
+  @override
+  String get creditCardSpentThisMonth => 'Spent this month';
 }
