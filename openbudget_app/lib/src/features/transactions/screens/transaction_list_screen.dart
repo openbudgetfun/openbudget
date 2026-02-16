@@ -287,6 +287,22 @@ class _TransactionTile extends HookConsumerWidget {
         ? Icons.arrow_downward_rounded
         : Icons.arrow_upward_rounded;
 
+    final statusIcon = transaction.reconciled
+        ? Icons.lock_outline_rounded
+        : transaction.cleared
+        ? Icons.check_circle_outline
+        : Icons.circle_outlined;
+    final statusColor = transaction.reconciled
+        ? colorScheme.primary
+        : transaction.cleared
+        ? ColorTokens.secondary
+        : colorScheme.outline;
+    final statusTooltip = transaction.reconciled
+        ? l10n.transactionReconciled
+        : transaction.cleared
+        ? l10n.transactionCleared
+        : l10n.transactionUncleared;
+
     return Dismissible(
       key: ValueKey(transaction.id),
       direction: DismissDirection.endToStart,
@@ -306,9 +322,28 @@ class _TransactionTile extends HookConsumerWidget {
         margin: const EdgeInsets.only(bottom: SpacingTokens.sm),
         child: ListTile(
           onTap: () => _showEditDialog(context),
-          leading: CircleAvatar(
-            backgroundColor: color.withAlpha(25),
-            child: Icon(icon, color: color, size: 20),
+          leading: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Tooltip(
+                message: statusTooltip,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(RadiusTokens.xl),
+                  onTap: transaction.reconciled
+                      ? null
+                      : () => _toggleCleared(context, ref, l10n),
+                  child: Padding(
+                    padding: const EdgeInsets.all(4),
+                    child: Icon(statusIcon, size: 20, color: statusColor),
+                  ),
+                ),
+              ),
+              const SizedBox(width: SpacingTokens.xs),
+              CircleAvatar(
+                backgroundColor: color.withAlpha(25),
+                child: Icon(icon, color: color, size: 20),
+              ),
+            ],
           ),
           title: Row(
             children: [
@@ -357,6 +392,27 @@ class _TransactionTile extends HookConsumerWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _toggleCleared(
+    BuildContext context,
+    WidgetRef ref,
+    AppLocalizations l10n,
+  ) async {
+    try {
+      await ref
+          .read(transactionActionsProvider.notifier)
+          .toggleCleared(
+            transactionId: transaction.id?.toString() ?? '',
+            budgetId: budgetId,
+          );
+    } on Exception catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.transactionEditError)));
+      }
+    }
   }
 
   Future<bool?> _confirmDelete(
