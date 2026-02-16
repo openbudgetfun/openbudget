@@ -43,6 +43,7 @@ envelope:
 monthlyAllocation:
   - upsert:
   - list:
+  - moveMoney:
   - delete:
 payee:
   - create:

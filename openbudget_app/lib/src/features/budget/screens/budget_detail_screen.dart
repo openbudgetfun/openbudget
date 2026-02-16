@@ -11,6 +11,7 @@ import 'package:openbudget_app/src/features/budget/providers/selected_month_prov
 import 'package:openbudget_app/src/features/budget/screens/add_category_dialog.dart';
 import 'package:openbudget_app/src/features/budget/screens/add_envelope_dialog.dart';
 import 'package:openbudget_app/src/features/budget/screens/edit_envelope_dialog.dart';
+import 'package:openbudget_app/src/features/budget/screens/move_money_dialog.dart';
 import 'package:openbudget_app/src/features/budget/widgets/budget_header.dart';
 import 'package:openbudget_app/src/features/budget/widgets/category_group.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
@@ -241,12 +242,40 @@ class BudgetDetailScreen extends HookConsumerWidget {
                       label: Text(l10n.budgetAddExpense),
                     ),
                   ),
+                  const SizedBox(width: SpacingTokens.sm),
+                  IconButton.filled(
+                    onPressed: () => _showMoveMoneyDialog(
+                      context,
+                      summary.categories,
+                      year: summary.year,
+                      month: summary.month,
+                    ),
+                    icon: const Icon(Icons.swap_horiz_rounded),
+                    tooltip: l10n.moveMoneyTitle,
+                  ),
                 ],
               ),
             ),
           ),
         );
       },
+    );
+  }
+
+  void _showMoveMoneyDialog(
+    BuildContext context,
+    List<CategoryWithEnvelopes> categories, {
+    required int year,
+    required int month,
+  }) {
+    showDialog<void>(
+      context: context,
+      builder: (_) => MoveMoneyDialog(
+        budgetId: budgetId,
+        year: year,
+        month: month,
+        categories: categories,
+      ),
     );
   }
 

@@ -536,4 +536,25 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get reportsEmptySubtitle =>
       'Add transactions to see spending reports for this month';
+
+  @override
+  String get moveMoneyTitle => 'Move Money';
+
+  @override
+  String get moveMoneyFrom => 'From Envelope';
+
+  @override
+  String get moveMoneyTo => 'To Envelope';
+
+  @override
+  String get moveMoneyButton => 'Move';
+
+  @override
+  String get moveMoneySuccess => 'Money moved between envelopes';
+
+  @override
+  String get moveMoneyError => 'Could not move money. Please try again.';
+
+  @override
+  String get moveMoneySameError => 'Cannot move money to the same envelope';
 }

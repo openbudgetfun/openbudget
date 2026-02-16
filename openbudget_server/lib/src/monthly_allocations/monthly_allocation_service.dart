@@ -72,6 +72,65 @@ class MonthlyAllocationService {
     );
   }
 
+  /// Moves money between two envelopes in the same budget and month.
+  ///
+  /// Decreases the source envelope allocation and increases the target.
+  static Future<List<MonthlyAllocation>> moveMoney(
+    Session session, {
+    required UuidValue fromEnvelopeId,
+    required UuidValue toEnvelopeId,
+    required UuidValue budgetId,
+    required int year,
+    required int month,
+    required int amountCents,
+  }) async {
+    await BudgetService.getById(session, budgetId: budgetId);
+    await EnvelopeService.getById(session, envelopeId: fromEnvelopeId);
+    await EnvelopeService.getById(session, envelopeId: toEnvelopeId);
+
+    // Get or create source allocation.
+    final fromExisting = await MonthlyAllocation.db.findFirstRow(
+      session,
+      where: (t) =>
+          t.envelopeId.equals(fromEnvelopeId) &
+          t.year.equals(year) &
+          t.month.equals(month),
+    );
+
+    final fromAllocated = (fromExisting?.allocatedCents ?? 0) - amountCents;
+    final updatedFrom = await upsert(
+      session,
+      envelopeId: fromEnvelopeId,
+      budgetId: budgetId,
+      year: year,
+      month: month,
+      allocatedCents: fromAllocated,
+      carryoverCents: fromExisting?.carryoverCents ?? 0,
+    );
+
+    // Get or create target allocation.
+    final toExisting = await MonthlyAllocation.db.findFirstRow(
+      session,
+      where: (t) =>
+          t.envelopeId.equals(toEnvelopeId) &
+          t.year.equals(year) &
+          t.month.equals(month),
+    );
+
+    final toAllocated = (toExisting?.allocatedCents ?? 0) + amountCents;
+    final updatedTo = await upsert(
+      session,
+      envelopeId: toEnvelopeId,
+      budgetId: budgetId,
+      year: year,
+      month: month,
+      allocatedCents: toAllocated,
+      carryoverCents: toExisting?.carryoverCents ?? 0,
+    );
+
+    return [updatedFrom, updatedTo];
+  }
+
   /// Deletes an allocation by ID, verifying ownership.
   static Future<MonthlyAllocation> delete(
     Session session, {

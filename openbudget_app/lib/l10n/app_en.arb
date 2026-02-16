@@ -181,5 +181,12 @@
   "reportsTransactions": "Transactions",
   "reportsSpendingByCategory": "Spending by Category",
   "reportsEmptyTitle": "No Data Yet",
-  "reportsEmptySubtitle": "Add transactions to see spending reports for this month"
+  "reportsEmptySubtitle": "Add transactions to see spending reports for this month",
+  "moveMoneyTitle": "Move Money",
+  "moveMoneyFrom": "From Envelope",
+  "moveMoneyTo": "To Envelope",
+  "moveMoneyButton": "Move",
+  "moveMoneySuccess": "Money moved between envelopes",
+  "moveMoneyError": "Could not move money. Please try again.",
+  "moveMoneySameError": "Cannot move money to the same envelope"
 }

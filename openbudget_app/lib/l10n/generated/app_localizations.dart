@@ -1101,6 +1101,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add transactions to see spending reports for this month'**
   String get reportsEmptySubtitle;
+
+  /// No description provided for @moveMoneyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Move Money'**
+  String get moveMoneyTitle;
+
+  /// No description provided for @moveMoneyFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'From Envelope'**
+  String get moveMoneyFrom;
+
+  /// No description provided for @moveMoneyTo.
+  ///
+  /// In en, this message translates to:
+  /// **'To Envelope'**
+  String get moveMoneyTo;
+
+  /// No description provided for @moveMoneyButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Move'**
+  String get moveMoneyButton;
+
+  /// No description provided for @moveMoneySuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Money moved between envelopes'**
+  String get moveMoneySuccess;
+
+  /// No description provided for @moveMoneyError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not move money. Please try again.'**
+  String get moveMoneyError;
+
+  /// No description provided for @moveMoneySameError.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot move money to the same envelope'**
+  String get moveMoneySameError;
 }
 
 class _AppLocalizationsDelegate
