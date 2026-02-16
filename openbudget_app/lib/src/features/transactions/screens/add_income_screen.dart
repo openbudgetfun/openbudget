@@ -174,6 +174,7 @@ class AddIncomeScreen extends HookConsumerWidget {
                         labelText: l10n.payeeLabel,
                         prefixIcon: const Icon(Icons.person_outlined),
                       ),
+                      isExpanded: true,
                     ),
                     const SizedBox(height: SpacingTokens.md),
                     TextField(
