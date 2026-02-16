@@ -90,6 +90,45 @@ class MonthlyAllocationActions extends _$MonthlyAllocationActions {
     }
   }
 
+  Future<List<MonthlyAllocation>> copyPreviousMonth({
+    required String budgetId,
+    required int currentYear,
+    required int currentMonth,
+  }) async {
+    state = const AsyncValue.loading();
+    final client = ref.read(serverpodClientProvider);
+
+    // Calculate previous month.
+    final prevYear = currentMonth == 1 ? currentYear - 1 : currentYear;
+    final prevMonth = currentMonth == 1 ? 12 : currentMonth - 1;
+
+    try {
+      final result = await client.monthlyAllocation.copyMonth(
+        // Serverpod API requires UuidValue which is experimental in uuid package.
+        // ignore: experimental_member_use
+        UuidValue.fromString(budgetId),
+        prevYear,
+        prevMonth,
+        currentYear,
+        currentMonth,
+      );
+      if (ref.mounted) {
+        ref
+          ..invalidate(
+            monthlyAllocationsProvider(budgetId, currentYear, currentMonth),
+          )
+          ..invalidate(budgetMonthlySummaryProvider(budgetId));
+        state = const AsyncValue.data(null);
+      }
+      return result;
+    } on Exception catch (e, st) {
+      if (ref.mounted) {
+        state = AsyncValue.error(e, st);
+      }
+      rethrow;
+    }
+  }
+
   Future<MonthlyAllocation> upsertAllocation({
     required String envelopeId,
     required String budgetId,

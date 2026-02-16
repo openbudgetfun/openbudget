@@ -120,7 +120,7 @@ final class BudgetTemplateActionsProvider
 }
 
 String _$budgetTemplateActionsHash() =>
-    r'99ee15a269a726522c60e792d7e17f3695d1fade';
+    r'f499f908e5aa8be80360e07566bc9c33e239d738';
 
 abstract class _$BudgetTemplateActions extends $Notifier<void> {
   void build();

@@ -72,6 +72,42 @@ class MonthlyAllocationService {
     );
   }
 
+  /// Copies all allocations from a source month to a target month.
+  ///
+  /// Existing allocations in the target month are overwritten.
+  static Future<List<MonthlyAllocation>> copyMonth(
+    Session session, {
+    required UuidValue budgetId,
+    required int sourceYear,
+    required int sourceMonth,
+    required int targetYear,
+    required int targetMonth,
+  }) async {
+    await BudgetService.getById(session, budgetId: budgetId);
+
+    final sourceAllocations = await listForBudgetMonth(
+      session,
+      budgetId: budgetId,
+      year: sourceYear,
+      month: sourceMonth,
+    );
+
+    final results = <MonthlyAllocation>[];
+    for (final alloc in sourceAllocations) {
+      final copied = await upsert(
+        session,
+        envelopeId: alloc.envelopeId,
+        budgetId: budgetId,
+        year: targetYear,
+        month: targetMonth,
+        allocatedCents: alloc.allocatedCents,
+      );
+      results.add(copied);
+    }
+
+    return results;
+  }
+
   /// Moves money between two envelopes in the same budget and month.
   ///
   /// Decreases the source envelope allocation and increases the target.
