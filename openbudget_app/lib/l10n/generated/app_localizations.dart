@@ -2542,17 +2542,47 @@ abstract class AppLocalizations {
   /// **'All'**
   String get transactionFilterAll;
 
+  /// No description provided for @transactionFilterCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'Cleared'**
+  String get transactionFilterCleared;
+
   /// No description provided for @transactionFilterExpense.
   ///
   /// In en, this message translates to:
   /// **'Expense'**
   String get transactionFilterExpense;
 
+  /// No description provided for @transactionFilterFlagged.
+  ///
+  /// In en, this message translates to:
+  /// **'Flagged'**
+  String get transactionFilterFlagged;
+
   /// No description provided for @transactionFilterIncome.
   ///
   /// In en, this message translates to:
   /// **'Income'**
   String get transactionFilterIncome;
+
+  /// No description provided for @transactionFilterReconciled.
+  ///
+  /// In en, this message translates to:
+  /// **'Reconciled'**
+  String get transactionFilterReconciled;
+
+  /// No description provided for @transactionFilterStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get transactionFilterStatus;
+
+  /// No description provided for @transactionFilterUncleared.
+  ///
+  /// In en, this message translates to:
+  /// **'Uncleared'**
+  String get transactionFilterUncleared;
 
   /// No description provided for @transactionListTitle.
   ///
