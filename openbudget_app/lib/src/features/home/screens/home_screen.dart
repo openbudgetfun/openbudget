@@ -5,6 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
 import 'package:openbudget_app/src/features/auth/providers/auth_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
 import 'package:openbudget_app/src/features/home/providers/budget_actions_provider.dart';
 import 'package:openbudget_app/src/features/home/providers/budget_list_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
@@ -208,6 +209,7 @@ class _BudgetCard extends HookConsumerWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final accountsAsync = ref.watch(accountListProvider(budgetId));
+    final summaryAsync = ref.watch(budgetSummaryProvider(budgetId));
 
     final currency = CurrencyCode.values.firstWhere(
       (c) => c.code == currencyCode,
@@ -290,6 +292,79 @@ class _BudgetCard extends HookConsumerWidget {
                                     : ColorTokens.error,
                               ),
                             ),
+                          ],
+                        ),
+                      );
+                    },
+                  ) ??
+                  const SizedBox.shrink(),
+              summaryAsync.whenOrNull(
+                    data: (summary) {
+                      final readyToAssign = summary.readyToAssignCents;
+                      var overspentCount = 0;
+                      for (final cat in summary.categories) {
+                        for (final env in cat.envelopes) {
+                          final idx = cat.envelopes.indexOf(env);
+                          final available = idx < cat.monthlyEnvelopes.length
+                              ? cat.monthlyEnvelopes[idx].availableCents
+                              : (env.budgetedAmountCents -
+                                    env.spentAmountCents);
+                          if (available < 0) overspentCount++;
+                        }
+                      }
+
+                      return Padding(
+                        padding: const EdgeInsets.only(top: SpacingTokens.sm),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.assignment_rounded,
+                                    size: 14,
+                                    color: readyToAssign > 0
+                                        ? ColorTokens.secondary
+                                        : readyToAssign < 0
+                                        ? ColorTokens.error
+                                        : colorScheme.onSurfaceVariant,
+                                  ),
+                                  const SizedBox(width: SpacingTokens.xs),
+                                  Text(
+                                    l10n.homeBudgetReadyToAssign(
+                                      formatCents(readyToAssign, currency),
+                                    ),
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: readyToAssign > 0
+                                          ? ColorTokens.secondary
+                                          : readyToAssign < 0
+                                          ? ColorTokens.error
+                                          : colorScheme.onSurfaceVariant,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            if (overspentCount > 0)
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(
+                                    Icons.warning_amber_rounded,
+                                    size: 14,
+                                    color: ColorTokens.error,
+                                  ),
+                                  const SizedBox(width: 2),
+                                  Text(
+                                    l10n.homeBudgetOverspent(overspentCount),
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: ColorTokens.error,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
                           ],
                         ),
                       );

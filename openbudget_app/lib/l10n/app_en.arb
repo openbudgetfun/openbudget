@@ -379,6 +379,22 @@
   "goalTypeMonthly": "Monthly",
   "homeBudgetAccounts": "{count, plural, =1{1 account} other{{count} accounts}}",
   "homeBudgetCount": "{count, plural, =1{1 budget} other{{count} budgets}}",
+  "homeBudgetOverspent": "{count, plural, =1{1 overspent} other{{count} overspent}}",
+  "@homeBudgetOverspent": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeBudgetReadyToAssign": "{amount} to assign",
+  "@homeBudgetReadyToAssign": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "homeBudgetTotalBalance": "Total Balance",
   "homeCreateBudget": "Create Your First Budget",
   "homeLoadError": "Could not load budgets",
