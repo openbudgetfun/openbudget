@@ -2476,10 +2476,22 @@ abstract class AppLocalizations {
   /// **'Save Transaction'**
   String get transactionSave;
 
+  /// No description provided for @transactionDateRangeFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Date range'**
+  String get transactionDateRangeFilter;
+
+  /// No description provided for @transactionDateRangeClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear date filter'**
+  String get transactionDateRangeClear;
+
   /// No description provided for @transactionSearchHint.
   ///
   /// In en, this message translates to:
-  /// **'Search transactions...'**
+  /// **'Search description or memo...'**
   String get transactionSearchHint;
 
   /// No description provided for @transactionSubmitting.
