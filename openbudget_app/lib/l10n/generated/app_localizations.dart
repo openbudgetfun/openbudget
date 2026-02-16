@@ -1587,6 +1587,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not auto-assign. Please try again.'**
   String get autoAssignError;
+
+  /// No description provided for @envelopeActivityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity'**
+  String get envelopeActivityTitle;
+
+  /// No description provided for @envelopeNoActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'No transactions this month'**
+  String get envelopeNoActivity;
 }
 
 class _AppLocalizationsDelegate

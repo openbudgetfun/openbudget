@@ -74,7 +74,7 @@ final class AutoAssignProposalProvider
 }
 
 String _$autoAssignProposalHash() =>
-    r'bec744d92ce12e8af1b8465bbc5e267d2a7f6ad2';
+    r'1f3cbe112382e1fca9f467d99660eb290ed0718b';
 
 /// Computes an auto-assign proposal that distributes Ready to Assign money
 /// across underfunded envelopes based on their goals.

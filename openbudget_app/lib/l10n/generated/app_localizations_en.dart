@@ -863,4 +863,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get autoAssignError => 'Could not auto-assign. Please try again.';
+
+  @override
+  String get envelopeActivityTitle => 'Activity';
+
+  @override
+  String get envelopeNoActivity => 'No transactions this month';
 }
