@@ -58,6 +58,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountDetailBalance => 'Balance';
 
   @override
+  String get accountDetailSearchHint => 'Search transactions...';
+
+  @override
+  String get accountFilterAll => 'All';
+
+  @override
+  String get accountFilterUncleared => 'Uncleared';
+
+  @override
+  String get accountFilterCleared => 'Cleared';
+
+  @override
+  String get accountFilterReconciled => 'Reconciled';
+
+  @override
   String get accountEditError => 'Could not update account. Please try again.';
 
   @override
