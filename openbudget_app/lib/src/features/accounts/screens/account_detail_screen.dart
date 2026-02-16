@@ -132,6 +132,21 @@ class AccountDetailScreen extends HookConsumerWidget {
                   );
                 }
 
+                // Compute running balances. Transactions are newest-first.
+                // Current balance = starting balance + sum of all txn amounts.
+                final startingBalance = accountData?.balanceCents ?? 0;
+                final totalTxnAmount = transactions.fold<int>(
+                  0,
+                  (sum, t) => sum + t.amountCents,
+                );
+                final currentBalance = startingBalance + totalTxnAmount;
+                final runningBalances = <int>[];
+                var balance = currentBalance;
+                for (var i = 0; i < transactions.length; i++) {
+                  runningBalances.add(balance);
+                  balance -= transactions[i].amountCents;
+                }
+
                 return RefreshIndicator(
                   onRefresh: () async {
                     ref.invalidate(
@@ -148,6 +163,7 @@ class AccountDetailScreen extends HookConsumerWidget {
                       return _TransactionRow(
                         transaction: txn,
                         currencyCode: currencyCode,
+                        runningBalanceCents: runningBalances[index],
                         onToggleCleared: txn.reconciled
                             ? null
                             : () => _toggleCleared(context, ref, txn),
@@ -260,11 +276,13 @@ class _TransactionRow extends HookWidget {
   const _TransactionRow({
     required this.transaction,
     required this.currencyCode,
+    required this.runningBalanceCents,
     this.onToggleCleared,
   });
 
   final Transaction transaction;
   final CurrencyCode currencyCode;
+  final int runningBalanceCents;
   final VoidCallback? onToggleCleared;
 
   @override
@@ -313,12 +331,25 @@ class _TransactionRow extends HookWidget {
                 ],
               ),
             ),
-            Text(
-              formatCents(transaction.amountCents, currencyCode),
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: isInflow ? ColorTokens.secondary : colorScheme.error,
-              ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  formatCents(transaction.amountCents, currencyCode),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: isInflow ? ColorTokens.secondary : colorScheme.error,
+                  ),
+                ),
+                Text(
+                  formatCents(runningBalanceCents, currencyCode),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: runningBalanceCents >= 0
+                        ? colorScheme.onSurfaceVariant
+                        : colorScheme.error,
+                  ),
+                ),
+              ],
             ),
           ],
         ),

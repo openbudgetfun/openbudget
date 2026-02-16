@@ -1461,6 +1461,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Envelope auto-suggested from last transaction with this payee'**
   String get payeeAutoEnvelopeHint;
+
+  /// No description provided for @accountRunningBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Running Balance'**
+  String get accountRunningBalance;
 }
 
 class _AppLocalizationsDelegate

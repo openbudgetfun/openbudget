@@ -262,5 +262,6 @@
   },
   "payeeNone": "No Payee",
   "payeeLabel": "Payee",
-  "payeeAutoEnvelopeHint": "Envelope auto-suggested from last transaction with this payee"
+  "payeeAutoEnvelopeHint": "Envelope auto-suggested from last transaction with this payee",
+  "accountRunningBalance": "Running Balance"
 }
