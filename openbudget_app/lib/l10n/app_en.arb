@@ -84,6 +84,13 @@
       }
     }
   },
+  "@homeNetWorthAccounts": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "@homeBudgetCount": {
     "placeholders": {
       "count": {
@@ -376,6 +383,8 @@
   "homeCreateBudget": "Create Your First Budget",
   "homeLoadError": "Could not load budgets",
   "homeLogout": "Sign Out",
+  "homeNetWorthLabel": "Net Worth",
+  "homeNetWorthAccounts": "{count, plural, =1{1 account} other{{count} accounts}}",
   "homeNoBudgets": "No Budgets Yet",
   "homeRetry": "Retry",
   "importButton": "{count, plural, =1{Import 1 Transaction} other{Import {count} Transactions}}",

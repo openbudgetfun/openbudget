@@ -666,6 +666,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeLogout => 'Sign Out';
 
   @override
+  String get homeNetWorthLabel => 'Net Worth';
+
+  @override
+  String homeNetWorthAccounts(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count accounts',
+      one: '1 account',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get homeNoBudgets => 'No Budgets Yet';
 
   @override
