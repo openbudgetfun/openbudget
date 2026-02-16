@@ -1324,11 +1324,41 @@ abstract class AppLocalizations {
   /// **'Could not update recurring transaction. Please try again.'**
   String get recurringEditError;
 
-  /// No description provided for @ageOfMoneyLabel.
+  /// No description provided for @quickBudgetTitle.
   ///
   /// In en, this message translates to:
-  /// **'{days, plural, =1{Age of Money: 1 day} other{Age of Money: {days} days}}'**
-  String ageOfMoneyLabel(int days);
+  /// **'Quick Budget'**
+  String get quickBudgetTitle;
+
+  /// No description provided for @quickBudgetLastMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Budgeted Last Month'**
+  String get quickBudgetLastMonth;
+
+  /// No description provided for @quickBudgetSpentLastMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Spent Last Month'**
+  String get quickBudgetSpentLastMonth;
+
+  /// No description provided for @quickBudgetAverageBudgeted.
+  ///
+  /// In en, this message translates to:
+  /// **'Average Budgeted'**
+  String get quickBudgetAverageBudgeted;
+
+  /// No description provided for @quickBudgetAverageSpent.
+  ///
+  /// In en, this message translates to:
+  /// **'Average Spent'**
+  String get quickBudgetAverageSpent;
+
+  /// No description provided for @quickBudgetError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load budget suggestions'**
+  String get quickBudgetError;
 }
 
 class _AppLocalizationsDelegate

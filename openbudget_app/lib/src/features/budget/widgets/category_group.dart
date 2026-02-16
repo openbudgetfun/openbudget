@@ -16,6 +16,7 @@ class CategoryGroup extends HookConsumerWidget {
     required this.onDeleteCategory,
     required this.onEditEnvelope,
     required this.onDeleteEnvelope,
+    this.onQuickBudget,
     super.key,
   });
 
@@ -25,6 +26,7 @@ class CategoryGroup extends HookConsumerWidget {
   final VoidCallback onDeleteCategory;
   final void Function(Envelope envelope) onEditEnvelope;
   final void Function(Envelope envelope) onDeleteEnvelope;
+  final void Function(Envelope envelope)? onQuickBudget;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -112,6 +114,9 @@ class CategoryGroup extends HookConsumerWidget {
               monthlyData: monthlyData,
               onTap: () => onEditEnvelope(envelope),
               onLongPress: () => onDeleteEnvelope(envelope),
+              onQuickBudget: onQuickBudget != null
+                  ? () => onQuickBudget!(envelope)
+                  : null,
             );
           }),
           if (envelopes.isNotEmpty) const Divider(),

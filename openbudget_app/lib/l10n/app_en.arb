@@ -233,5 +233,11 @@
         "type": "int"
       }
     }
-  }
+  },
+  "quickBudgetTitle": "Quick Budget",
+  "quickBudgetLastMonth": "Budgeted Last Month",
+  "quickBudgetSpentLastMonth": "Spent Last Month",
+  "quickBudgetAverageBudgeted": "Average Budgeted",
+  "quickBudgetAverageSpent": "Average Spent",
+  "quickBudgetError": "Could not load budget suggestions"
 }

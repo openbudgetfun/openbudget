@@ -13,6 +13,7 @@ class EnvelopeRow extends HookConsumerWidget {
     required this.onTap,
     required this.onLongPress,
     this.monthlyData,
+    this.onQuickBudget,
     super.key,
   });
 
@@ -21,6 +22,7 @@ class EnvelopeRow extends HookConsumerWidget {
   final VoidCallback onTap;
   final VoidCallback onLongPress;
   final MonthlyEnvelopeData? monthlyData;
+  final VoidCallback? onQuickBudget;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -45,7 +47,20 @@ class EnvelopeRow extends HookConsumerWidget {
         ),
         child: Row(
           children: [
-            const SizedBox(width: SpacingTokens.xs),
+            if (onQuickBudget != null)
+              GestureDetector(
+                onTap: onQuickBudget,
+                child: Padding(
+                  padding: const EdgeInsets.only(right: SpacingTokens.xs),
+                  child: Icon(
+                    Icons.bolt_rounded,
+                    size: 16,
+                    color: theme.colorScheme.primary.withAlpha(150),
+                  ),
+                ),
+              )
+            else
+              const SizedBox(width: SpacingTokens.xs),
             Expanded(
               flex: 4,
               child: Text(
