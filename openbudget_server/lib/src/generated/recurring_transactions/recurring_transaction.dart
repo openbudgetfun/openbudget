@@ -302,65 +302,140 @@ class RecurringTransactionUpdateTable
     extends _i1.UpdateTable<RecurringTransactionTable> {
   RecurringTransactionUpdateTable(super.table);
 
-  _i1.ColumnValue<String, String> description(String value) =>
-      _i1.ColumnValue(table.description, value);
+  _i1.ColumnValue<String, String> description(String value) => _i1.ColumnValue(
+    table.description,
+    value,
+  );
 
-  _i1.ColumnValue<int, int> amountCents(int value) =>
-      _i1.ColumnValue(table.amountCents, value);
+  _i1.ColumnValue<int, int> amountCents(int value) => _i1.ColumnValue(
+    table.amountCents,
+    value,
+  );
 
-  _i1.ColumnValue<String, String> currencyCode(String value) =>
-      _i1.ColumnValue(table.currencyCode, value);
+  _i1.ColumnValue<String, String> currencyCode(String value) => _i1.ColumnValue(
+    table.currencyCode,
+    value,
+  );
 
   _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> envelopeId(
     _i1.UuidValue? value,
-  ) => _i1.ColumnValue(table.envelopeId, value);
+  ) => _i1.ColumnValue(
+    table.envelopeId,
+    value,
+  );
 
   _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> budgetId(_i1.UuidValue value) =>
-      _i1.ColumnValue(table.budgetId, value);
+      _i1.ColumnValue(
+        table.budgetId,
+        value,
+      );
 
   _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> accountId(
     _i1.UuidValue? value,
-  ) => _i1.ColumnValue(table.accountId, value);
+  ) => _i1.ColumnValue(
+    table.accountId,
+    value,
+  );
 
   _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> payeeId(_i1.UuidValue? value) =>
-      _i1.ColumnValue(table.payeeId, value);
+      _i1.ColumnValue(
+        table.payeeId,
+        value,
+      );
 
-  _i1.ColumnValue<String, String> frequency(String value) =>
-      _i1.ColumnValue(table.frequency, value);
+  _i1.ColumnValue<String, String> frequency(String value) => _i1.ColumnValue(
+    table.frequency,
+    value,
+  );
 
   _i1.ColumnValue<DateTime, DateTime> nextOccurrence(DateTime value) =>
-      _i1.ColumnValue(table.nextOccurrence, value);
+      _i1.ColumnValue(
+        table.nextOccurrence,
+        value,
+      );
 
   _i1.ColumnValue<DateTime, DateTime> endDate(DateTime? value) =>
-      _i1.ColumnValue(table.endDate, value);
+      _i1.ColumnValue(
+        table.endDate,
+        value,
+      );
 
-  _i1.ColumnValue<bool, bool> isActive(bool value) =>
-      _i1.ColumnValue(table.isActive, value);
+  _i1.ColumnValue<bool, bool> isActive(bool value) => _i1.ColumnValue(
+    table.isActive,
+    value,
+  );
 
   _i1.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
-      _i1.ColumnValue(table.createdAt, value);
+      _i1.ColumnValue(
+        table.createdAt,
+        value,
+      );
 
   _i1.ColumnValue<DateTime, DateTime> updatedAt(DateTime value) =>
-      _i1.ColumnValue(table.updatedAt, value);
+      _i1.ColumnValue(
+        table.updatedAt,
+        value,
+      );
 }
 
 class RecurringTransactionTable extends _i1.Table<_i1.UuidValue?> {
   RecurringTransactionTable({super.tableRelation})
     : super(tableName: 'recurring_transaction') {
     updateTable = RecurringTransactionUpdateTable(this);
-    description = _i1.ColumnString('description', this);
-    amountCents = _i1.ColumnInt('amountCents', this);
-    currencyCode = _i1.ColumnString('currencyCode', this);
-    envelopeId = _i1.ColumnUuid('envelopeId', this);
-    budgetId = _i1.ColumnUuid('budgetId', this);
-    accountId = _i1.ColumnUuid('accountId', this);
-    payeeId = _i1.ColumnUuid('payeeId', this);
-    frequency = _i1.ColumnString('frequency', this);
-    nextOccurrence = _i1.ColumnDateTime('nextOccurrence', this);
-    endDate = _i1.ColumnDateTime('endDate', this);
-    isActive = _i1.ColumnBool('isActive', this);
-    createdAt = _i1.ColumnDateTime('createdAt', this, hasDefault: true);
-    updatedAt = _i1.ColumnDateTime('updatedAt', this, hasDefault: true);
+    description = _i1.ColumnString(
+      'description',
+      this,
+    );
+    amountCents = _i1.ColumnInt(
+      'amountCents',
+      this,
+    );
+    currencyCode = _i1.ColumnString(
+      'currencyCode',
+      this,
+    );
+    envelopeId = _i1.ColumnUuid(
+      'envelopeId',
+      this,
+    );
+    budgetId = _i1.ColumnUuid(
+      'budgetId',
+      this,
+    );
+    accountId = _i1.ColumnUuid(
+      'accountId',
+      this,
+    );
+    payeeId = _i1.ColumnUuid(
+      'payeeId',
+      this,
+    );
+    frequency = _i1.ColumnString(
+      'frequency',
+      this,
+    );
+    nextOccurrence = _i1.ColumnDateTime(
+      'nextOccurrence',
+      this,
+    );
+    endDate = _i1.ColumnDateTime(
+      'endDate',
+      this,
+    );
+    isActive = _i1.ColumnBool(
+      'isActive',
+      this,
+    );
+    createdAt = _i1.ColumnDateTime(
+      'createdAt',
+      this,
+      hasDefault: true,
+    );
+    updatedAt = _i1.ColumnDateTime(
+      'updatedAt',
+      this,
+      hasDefault: true,
+    );
   }
 
   late final RecurringTransactionUpdateTable updateTable;

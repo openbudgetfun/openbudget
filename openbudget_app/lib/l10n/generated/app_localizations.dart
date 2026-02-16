@@ -2073,6 +2073,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add categorized transactions to see spending trends by category'**
   String get categoryTrendsEmptySubtitle;
+
+  /// No description provided for @recurringDueLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Due now'**
+  String get recurringDueLabel;
+
+  /// No description provided for @recurringSkipButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get recurringSkipButton;
+
+  /// No description provided for @recurringSkipSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Occurrence skipped'**
+  String get recurringSkipSuccess;
+
+  /// No description provided for @recurringSkipError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not skip occurrence. Please try again.'**
+  String get recurringSkipError;
 }
 
 class _AppLocalizationsDelegate

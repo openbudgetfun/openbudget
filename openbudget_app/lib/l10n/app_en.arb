@@ -462,5 +462,9 @@
   "categoryTrendsTitle": "Category Trends",
   "categoryTrendsLoadError": "Could not load category trends",
   "categoryTrendsEmptyTitle": "No Category Data",
-  "categoryTrendsEmptySubtitle": "Add categorized transactions to see spending trends by category"
+  "categoryTrendsEmptySubtitle": "Add categorized transactions to see spending trends by category",
+  "recurringDueLabel": "Due now",
+  "recurringSkipButton": "Skip",
+  "recurringSkipSuccess": "Occurrence skipped",
+  "recurringSkipError": "Could not skip occurrence. Please try again."
 }

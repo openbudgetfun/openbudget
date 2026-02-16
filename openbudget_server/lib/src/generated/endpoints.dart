@@ -36,24 +36,78 @@ class Endpoints extends _i1.EndpointDispatch {
   @override
   void initializeEndpoints(_i1.Server server) {
     var endpoints = <String, _i1.Endpoint>{
-      'account': _i2.AccountEndpoint()..initialize(server, 'account', null),
-      'emailIdp': _i3.EmailIdpEndpoint()..initialize(server, 'emailIdp', null),
+      'account': _i2.AccountEndpoint()
+        ..initialize(
+          server,
+          'account',
+          null,
+        ),
+      'emailIdp': _i3.EmailIdpEndpoint()
+        ..initialize(
+          server,
+          'emailIdp',
+          null,
+        ),
       'jwtRefresh': _i4.JwtRefreshEndpoint()
-        ..initialize(server, 'jwtRefresh', null),
-      'budget': _i5.BudgetEndpoint()..initialize(server, 'budget', null),
+        ..initialize(
+          server,
+          'jwtRefresh',
+          null,
+        ),
+      'budget': _i5.BudgetEndpoint()
+        ..initialize(
+          server,
+          'budget',
+          null,
+        ),
       'budgetStream': _i6.BudgetStreamEndpoint()
-        ..initialize(server, 'budgetStream', null),
-      'category': _i7.CategoryEndpoint()..initialize(server, 'category', null),
+        ..initialize(
+          server,
+          'budgetStream',
+          null,
+        ),
+      'category': _i7.CategoryEndpoint()
+        ..initialize(
+          server,
+          'category',
+          null,
+        ),
       'envelopeGoal': _i8.EnvelopeGoalEndpoint()
-        ..initialize(server, 'envelopeGoal', null),
-      'envelope': _i9.EnvelopeEndpoint()..initialize(server, 'envelope', null),
+        ..initialize(
+          server,
+          'envelopeGoal',
+          null,
+        ),
+      'envelope': _i9.EnvelopeEndpoint()
+        ..initialize(
+          server,
+          'envelope',
+          null,
+        ),
       'monthlyAllocation': _i10.MonthlyAllocationEndpoint()
-        ..initialize(server, 'monthlyAllocation', null),
-      'payee': _i11.PayeeEndpoint()..initialize(server, 'payee', null),
+        ..initialize(
+          server,
+          'monthlyAllocation',
+          null,
+        ),
+      'payee': _i11.PayeeEndpoint()
+        ..initialize(
+          server,
+          'payee',
+          null,
+        ),
       'recurringTransaction': _i12.RecurringTransactionEndpoint()
-        ..initialize(server, 'recurringTransaction', null),
+        ..initialize(
+          server,
+          'recurringTransaction',
+          null,
+        ),
       'transaction': _i13.TransactionEndpoint()
-        ..initialize(server, 'transaction', null),
+        ..initialize(
+          server,
+          'transaction',
+          null,
+        ),
     };
     connectors['account'] = _i1.EndpointConnector(
       name: 'account',
@@ -98,8 +152,11 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['account'] as _i2.AccountEndpoint).create(
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['account'] as _i2.AccountEndpoint).create(
                 session,
                 params['name'],
                 params['accountType'],
@@ -119,8 +176,11 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['account'] as _i2.AccountEndpoint).list(
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['account'] as _i2.AccountEndpoint).list(
                 session,
                 params['budgetId'],
               ),
@@ -134,8 +194,11 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['account'] as _i2.AccountEndpoint).get(
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['account'] as _i2.AccountEndpoint).get(
                 session,
                 params['accountId'],
               ),
@@ -179,8 +242,11 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: true,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['account'] as _i2.AccountEndpoint).update(
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['account'] as _i2.AccountEndpoint).update(
                 session,
                 params['accountId'],
                 name: params['name'],
@@ -200,8 +266,11 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['account'] as _i2.AccountEndpoint).delete(
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['account'] as _i2.AccountEndpoint).delete(
                 session,
                 params['accountId'],
               ),
@@ -226,8 +295,11 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['emailIdp'] as _i3.EmailIdpEndpoint).login(
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['emailIdp'] as _i3.EmailIdpEndpoint).login(
                 session,
                 email: params['email'],
                 password: params['password'],
@@ -242,11 +314,15 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['emailIdp'] as _i3.EmailIdpEndpoint).startRegistration(
-                session,
-                email: params['email'],
-              ),
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['emailIdp'] as _i3.EmailIdpEndpoint)
+                  .startRegistration(
+                    session,
+                    email: params['email'],
+                  ),
         ),
         'verifyRegistrationCode': _i1.MethodConnector(
           name: 'verifyRegistrationCode',
@@ -262,8 +338,11 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['emailIdp'] as _i3.EmailIdpEndpoint)
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['emailIdp'] as _i3.EmailIdpEndpoint)
                   .verifyRegistrationCode(
                     session,
                     accountRequestId: params['accountRequestId'],
@@ -284,8 +363,11 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['emailIdp'] as _i3.EmailIdpEndpoint)
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['emailIdp'] as _i3.EmailIdpEndpoint)
                   .finishRegistration(
                     session,
                     registrationToken: params['registrationToken'],
@@ -301,9 +383,15 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['emailIdp'] as _i3.EmailIdpEndpoint)
-                  .startPasswordReset(session, email: params['email']),
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['emailIdp'] as _i3.EmailIdpEndpoint)
+                  .startPasswordReset(
+                    session,
+                    email: params['email'],
+                  ),
         ),
         'verifyPasswordResetCode': _i1.MethodConnector(
           name: 'verifyPasswordResetCode',
@@ -319,8 +407,11 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['emailIdp'] as _i3.EmailIdpEndpoint)
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['emailIdp'] as _i3.EmailIdpEndpoint)
                   .verifyPasswordResetCode(
                     session,
                     passwordResetRequestId: params['passwordResetRequestId'],
@@ -341,8 +432,11 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['emailIdp'] as _i3.EmailIdpEndpoint)
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['emailIdp'] as _i3.EmailIdpEndpoint)
                   .finishPasswordReset(
                     session,
                     finishPasswordResetToken:
@@ -353,10 +447,12 @@ class Endpoints extends _i1.EndpointDispatch {
         'hasAccount': _i1.MethodConnector(
           name: 'hasAccount',
           params: {},
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['emailIdp'] as _i3.EmailIdpEndpoint).hasAccount(
-                session,
-              ),
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['emailIdp'] as _i3.EmailIdpEndpoint)
+                  .hasAccount(session),
         ),
       },
     );
@@ -373,8 +469,11 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['jwtRefresh'] as _i4.JwtRefreshEndpoint)
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['jwtRefresh'] as _i4.JwtRefreshEndpoint)
                   .refreshAccessToken(
                     session,
                     refreshToken: params['refreshToken'],
@@ -400,8 +499,11 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['budget'] as _i5.BudgetEndpoint).create(
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['budget'] as _i5.BudgetEndpoint).create(
                 session,
                 params['name'],
                 params['currencyCode'],
@@ -410,8 +512,12 @@ class Endpoints extends _i1.EndpointDispatch {
         'list': _i1.MethodConnector(
           name: 'list',
           params: {},
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['budget'] as _i5.BudgetEndpoint).list(session),
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['budget'] as _i5.BudgetEndpoint).list(session),
         ),
         'get': _i1.MethodConnector(
           name: 'get',
@@ -422,8 +528,11 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['budget'] as _i5.BudgetEndpoint).get(
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['budget'] as _i5.BudgetEndpoint).get(
                 session,
                 params['budgetId'],
               ),
@@ -447,8 +556,11 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: true,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['budget'] as _i5.BudgetEndpoint).update(
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['budget'] as _i5.BudgetEndpoint).update(
                 session,
                 params['budgetId'],
                 name: params['name'],
@@ -464,8 +576,11 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['budget'] as _i5.BudgetEndpoint).delete(
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['budget'] as _i5.BudgetEndpoint).delete(
                 session,
                 params['budgetId'],
               ),
@@ -522,8 +637,11 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['category'] as _i7.CategoryEndpoint).create(
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['category'] as _i7.CategoryEndpoint).create(
                 session,
                 params['name'],
                 params['budgetId'],
@@ -539,8 +657,11 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['category'] as _i7.CategoryEndpoint).list(
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['category'] as _i7.CategoryEndpoint).list(
                 session,
                 params['budgetId'],
               ),
@@ -554,8 +675,11 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['category'] as _i7.CategoryEndpoint).get(
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['category'] as _i7.CategoryEndpoint).get(
                 session,
                 params['categoryId'],
               ),
@@ -579,8 +703,11 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: true,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['category'] as _i7.CategoryEndpoint).update(
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['category'] as _i7.CategoryEndpoint).update(
                 session,
                 params['categoryId'],
                 name: params['name'],
@@ -601,12 +728,16 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['category'] as _i7.CategoryEndpoint).reorder(
-                session,
-                params['budgetId'],
-                params['categoryIds'],
-              ),
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['category'] as _i7.CategoryEndpoint).reorder(
+                    session,
+                    params['budgetId'],
+                    params['categoryIds'],
+                  ),
         ),
         'delete': _i1.MethodConnector(
           name: 'delete',
@@ -617,8 +748,11 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['category'] as _i7.CategoryEndpoint).delete(
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['category'] as _i7.CategoryEndpoint).delete(
                 session,
                 params['categoryId'],
               ),
@@ -658,15 +792,19 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: true,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['envelopeGoal'] as _i8.EnvelopeGoalEndpoint).upsert(
-                session,
-                params['envelopeId'],
-                params['goalType'],
-                params['targetAmountCents'],
-                targetDate: params['targetDate'],
-                monthlyFundingCents: params['monthlyFundingCents'],
-              ),
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['envelopeGoal'] as _i8.EnvelopeGoalEndpoint)
+                  .upsert(
+                    session,
+                    params['envelopeId'],
+                    params['goalType'],
+                    params['targetAmountCents'],
+                    targetDate: params['targetDate'],
+                    monthlyFundingCents: params['monthlyFundingCents'],
+                  ),
         ),
         'getForEnvelope': _i1.MethodConnector(
           name: 'getForEnvelope',
@@ -677,9 +815,15 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['envelopeGoal'] as _i8.EnvelopeGoalEndpoint)
-                  .getForEnvelope(session, params['envelopeId']),
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['envelopeGoal'] as _i8.EnvelopeGoalEndpoint)
+                  .getForEnvelope(
+                    session,
+                    params['envelopeId'],
+                  ),
         ),
         'listForEnvelopes': _i1.MethodConnector(
           name: 'listForEnvelopes',
@@ -690,9 +834,15 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['envelopeGoal'] as _i8.EnvelopeGoalEndpoint)
-                  .listForEnvelopes(session, params['envelopeIds']),
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['envelopeGoal'] as _i8.EnvelopeGoalEndpoint)
+                  .listForEnvelopes(
+                    session,
+                    params['envelopeIds'],
+                  ),
         ),
         'delete': _i1.MethodConnector(
           name: 'delete',
@@ -703,11 +853,15 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['envelopeGoal'] as _i8.EnvelopeGoalEndpoint).delete(
-                session,
-                params['goalId'],
-              ),
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['envelopeGoal'] as _i8.EnvelopeGoalEndpoint)
+                  .delete(
+                    session,
+                    params['goalId'],
+                  ),
         ),
       },
     );
@@ -739,8 +893,11 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['envelope'] as _i9.EnvelopeEndpoint).create(
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['envelope'] as _i9.EnvelopeEndpoint).create(
                 session,
                 params['name'],
                 params['categoryId'],
@@ -757,8 +914,11 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['envelope'] as _i9.EnvelopeEndpoint).list(
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['envelope'] as _i9.EnvelopeEndpoint).list(
                 session,
                 params['categoryId'],
               ),
@@ -772,8 +932,11 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['envelope'] as _i9.EnvelopeEndpoint).get(
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['envelope'] as _i9.EnvelopeEndpoint).get(
                 session,
                 params['envelopeId'],
               ),
@@ -802,8 +965,11 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: true,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['envelope'] as _i9.EnvelopeEndpoint).update(
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['envelope'] as _i9.EnvelopeEndpoint).update(
                 session,
                 params['envelopeId'],
                 name: params['name'],
@@ -820,8 +986,11 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['envelope'] as _i9.EnvelopeEndpoint).delete(
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['envelope'] as _i9.EnvelopeEndpoint).delete(
                 session,
                 params['envelopeId'],
               ),
@@ -866,17 +1035,22 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['monthlyAllocation'] as _i10.MonthlyAllocationEndpoint)
-                  .upsert(
-                    session,
-                    params['envelopeId'],
-                    params['budgetId'],
-                    params['year'],
-                    params['month'],
-                    params['allocatedCents'],
-                    carryoverCents: params['carryoverCents'],
-                  ),
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['monthlyAllocation']
+                          as _i10.MonthlyAllocationEndpoint)
+                      .upsert(
+                        session,
+                        params['envelopeId'],
+                        params['budgetId'],
+                        params['year'],
+                        params['month'],
+                        params['allocatedCents'],
+                        carryoverCents: params['carryoverCents'],
+                      ),
         ),
         'list': _i1.MethodConnector(
           name: 'list',
@@ -897,14 +1071,19 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['monthlyAllocation'] as _i10.MonthlyAllocationEndpoint)
-                  .list(
-                    session,
-                    params['budgetId'],
-                    params['year'],
-                    params['month'],
-                  ),
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['monthlyAllocation']
+                          as _i10.MonthlyAllocationEndpoint)
+                      .list(
+                        session,
+                        params['budgetId'],
+                        params['year'],
+                        params['month'],
+                      ),
         ),
         'moveMoney': _i1.MethodConnector(
           name: 'moveMoney',
@@ -940,17 +1119,22 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['monthlyAllocation'] as _i10.MonthlyAllocationEndpoint)
-                  .moveMoney(
-                    session,
-                    params['fromEnvelopeId'],
-                    params['toEnvelopeId'],
-                    params['budgetId'],
-                    params['year'],
-                    params['month'],
-                    params['amountCents'],
-                  ),
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['monthlyAllocation']
+                          as _i10.MonthlyAllocationEndpoint)
+                      .moveMoney(
+                        session,
+                        params['fromEnvelopeId'],
+                        params['toEnvelopeId'],
+                        params['budgetId'],
+                        params['year'],
+                        params['month'],
+                        params['amountCents'],
+                      ),
         ),
         'delete': _i1.MethodConnector(
           name: 'delete',
@@ -961,9 +1145,17 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['monthlyAllocation'] as _i10.MonthlyAllocationEndpoint)
-                  .delete(session, params['allocationId']),
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['monthlyAllocation']
+                          as _i10.MonthlyAllocationEndpoint)
+                      .delete(
+                        session,
+                        params['allocationId'],
+                      ),
         ),
       },
     );
@@ -985,8 +1177,11 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['payee'] as _i11.PayeeEndpoint).create(
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['payee'] as _i11.PayeeEndpoint).create(
                 session,
                 params['name'],
                 params['budgetId'],
@@ -1001,8 +1196,11 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['payee'] as _i11.PayeeEndpoint).list(
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['payee'] as _i11.PayeeEndpoint).list(
                 session,
                 params['budgetId'],
               ),
@@ -1016,8 +1214,11 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['payee'] as _i11.PayeeEndpoint).get(
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['payee'] as _i11.PayeeEndpoint).get(
                 session,
                 params['payeeId'],
               ),
@@ -1036,8 +1237,11 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: true,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['payee'] as _i11.PayeeEndpoint).update(
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['payee'] as _i11.PayeeEndpoint).update(
                 session,
                 params['payeeId'],
                 name: params['name'],
@@ -1057,12 +1261,16 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['payee'] as _i11.PayeeEndpoint).lastUsedEnvelopeId(
-                session,
-                params['payeeId'],
-                params['budgetId'],
-              ),
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['payee'] as _i11.PayeeEndpoint).lastUsedEnvelopeId(
+                    session,
+                    params['payeeId'],
+                    params['budgetId'],
+                  ),
         ),
         'delete': _i1.MethodConnector(
           name: 'delete',
@@ -1073,8 +1281,11 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['payee'] as _i11.PayeeEndpoint).delete(
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['payee'] as _i11.PayeeEndpoint).delete(
                 session,
                 params['payeeId'],
               ),
@@ -1139,22 +1350,26 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: true,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['recurringTransaction']
-                      as _i12.RecurringTransactionEndpoint)
-                  .create(
-                    session,
-                    params['description'],
-                    params['amountCents'],
-                    params['currencyCode'],
-                    params['budgetId'],
-                    params['frequency'],
-                    params['nextOccurrence'],
-                    envelopeId: params['envelopeId'],
-                    accountId: params['accountId'],
-                    payeeId: params['payeeId'],
-                    endDate: params['endDate'],
-                  ),
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['recurringTransaction']
+                          as _i12.RecurringTransactionEndpoint)
+                      .create(
+                        session,
+                        params['description'],
+                        params['amountCents'],
+                        params['currencyCode'],
+                        params['budgetId'],
+                        params['frequency'],
+                        params['nextOccurrence'],
+                        envelopeId: params['envelopeId'],
+                        accountId: params['accountId'],
+                        payeeId: params['payeeId'],
+                        endDate: params['endDate'],
+                      ),
         ),
         'list': _i1.MethodConnector(
           name: 'list',
@@ -1170,14 +1385,18 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: true,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['recurringTransaction']
-                      as _i12.RecurringTransactionEndpoint)
-                  .list(
-                    session,
-                    params['budgetId'],
-                    activeOnly: params['activeOnly'],
-                  ),
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['recurringTransaction']
+                          as _i12.RecurringTransactionEndpoint)
+                      .list(
+                        session,
+                        params['budgetId'],
+                        activeOnly: params['activeOnly'],
+                      ),
         ),
         'get': _i1.MethodConnector(
           name: 'get',
@@ -1188,10 +1407,17 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['recurringTransaction']
-                      as _i12.RecurringTransactionEndpoint)
-                  .get(session, params['recurringTransactionId']),
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['recurringTransaction']
+                          as _i12.RecurringTransactionEndpoint)
+                      .get(
+                        session,
+                        params['recurringTransactionId'],
+                      ),
         ),
         'update': _i1.MethodConnector(
           name: 'update',
@@ -1247,22 +1473,26 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: true,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['recurringTransaction']
-                      as _i12.RecurringTransactionEndpoint)
-                  .update(
-                    session,
-                    params['recurringTransactionId'],
-                    description: params['description'],
-                    amountCents: params['amountCents'],
-                    envelopeId: params['envelopeId'],
-                    accountId: params['accountId'],
-                    payeeId: params['payeeId'],
-                    frequency: params['frequency'],
-                    nextOccurrence: params['nextOccurrence'],
-                    endDate: params['endDate'],
-                    isActive: params['isActive'],
-                  ),
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['recurringTransaction']
+                          as _i12.RecurringTransactionEndpoint)
+                      .update(
+                        session,
+                        params['recurringTransactionId'],
+                        description: params['description'],
+                        amountCents: params['amountCents'],
+                        envelopeId: params['envelopeId'],
+                        accountId: params['accountId'],
+                        payeeId: params['payeeId'],
+                        frequency: params['frequency'],
+                        nextOccurrence: params['nextOccurrence'],
+                        endDate: params['endDate'],
+                        isActive: params['isActive'],
+                      ),
         ),
         'delete': _i1.MethodConnector(
           name: 'delete',
@@ -1273,10 +1503,38 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['recurringTransaction']
-                      as _i12.RecurringTransactionEndpoint)
-                  .delete(session, params['recurringTransactionId']),
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['recurringTransaction']
+                          as _i12.RecurringTransactionEndpoint)
+                      .delete(
+                        session,
+                        params['recurringTransactionId'],
+                      ),
+        ),
+        'skipOccurrence': _i1.MethodConnector(
+          name: 'skipOccurrence',
+          params: {
+            'recurringTransactionId': _i1.ParameterDescription(
+              name: 'recurringTransactionId',
+              type: _i1.getType<_i1.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['recurringTransaction']
+                          as _i12.RecurringTransactionEndpoint)
+                      .skipOccurrence(
+                        session,
+                        params['recurringTransactionId'],
+                      ),
         ),
         'postDue': _i1.MethodConnector(
           name: 'postDue',
@@ -1287,10 +1545,17 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['recurringTransaction']
-                      as _i12.RecurringTransactionEndpoint)
-                  .postDue(session, params['budgetId']),
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['recurringTransaction']
+                          as _i12.RecurringTransactionEndpoint)
+                      .postDue(
+                        session,
+                        params['budgetId'],
+                      ),
         ),
         'countDue': _i1.MethodConnector(
           name: 'countDue',
@@ -1301,10 +1566,17 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['recurringTransaction']
-                      as _i12.RecurringTransactionEndpoint)
-                  .countDue(session, params['budgetId']),
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['recurringTransaction']
+                          as _i12.RecurringTransactionEndpoint)
+                      .countDue(
+                        session,
+                        params['budgetId'],
+                      ),
         ),
       },
     );
@@ -1356,18 +1628,22 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: true,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['transaction'] as _i13.TransactionEndpoint).create(
-                session,
-                params['description'],
-                params['amountCents'],
-                params['currencyCode'],
-                params['budgetId'],
-                params['transactionDate'],
-                envelopeId: params['envelopeId'],
-                payeeId: params['payeeId'],
-                memo: params['memo'],
-              ),
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['transaction'] as _i13.TransactionEndpoint).create(
+                    session,
+                    params['description'],
+                    params['amountCents'],
+                    params['currencyCode'],
+                    params['budgetId'],
+                    params['transactionDate'],
+                    envelopeId: params['envelopeId'],
+                    payeeId: params['payeeId'],
+                    memo: params['memo'],
+                  ),
         ),
         'list': _i1.MethodConnector(
           name: 'list',
@@ -1378,11 +1654,15 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['transaction'] as _i13.TransactionEndpoint).list(
-                session,
-                params['budgetId'],
-              ),
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['transaction'] as _i13.TransactionEndpoint).list(
+                    session,
+                    params['budgetId'],
+                  ),
         ),
         'listByMonth': _i1.MethodConnector(
           name: 'listByMonth',
@@ -1403,8 +1683,11 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['transaction'] as _i13.TransactionEndpoint)
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['transaction'] as _i13.TransactionEndpoint)
                   .listByMonth(
                     session,
                     params['budgetId'],
@@ -1421,11 +1704,15 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['transaction'] as _i13.TransactionEndpoint).get(
-                session,
-                params['transactionId'],
-              ),
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['transaction'] as _i13.TransactionEndpoint).get(
+                    session,
+                    params['transactionId'],
+                  ),
         ),
         'update': _i1.MethodConnector(
           name: 'update',
@@ -1466,17 +1753,21 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: true,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['transaction'] as _i13.TransactionEndpoint).update(
-                session,
-                params['transactionId'],
-                description: params['description'],
-                amountCents: params['amountCents'],
-                envelopeId: params['envelopeId'],
-                payeeId: params['payeeId'],
-                transactionDate: params['transactionDate'],
-                memo: params['memo'],
-              ),
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['transaction'] as _i13.TransactionEndpoint).update(
+                    session,
+                    params['transactionId'],
+                    description: params['description'],
+                    amountCents: params['amountCents'],
+                    envelopeId: params['envelopeId'],
+                    payeeId: params['payeeId'],
+                    transactionDate: params['transactionDate'],
+                    memo: params['memo'],
+                  ),
         ),
         'transfer': _i1.MethodConnector(
           name: 'transfer',
@@ -1517,17 +1808,21 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['transaction'] as _i13.TransactionEndpoint).transfer(
-                session,
-                params['description'],
-                params['amountCents'],
-                params['currencyCode'],
-                params['budgetId'],
-                params['fromAccountId'],
-                params['toAccountId'],
-                params['transactionDate'],
-              ),
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['transaction'] as _i13.TransactionEndpoint)
+                  .transfer(
+                    session,
+                    params['description'],
+                    params['amountCents'],
+                    params['currencyCode'],
+                    params['budgetId'],
+                    params['fromAccountId'],
+                    params['toAccountId'],
+                    params['transactionDate'],
+                  ),
         ),
         'listByAccount': _i1.MethodConnector(
           name: 'listByAccount',
@@ -1543,8 +1838,11 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['transaction'] as _i13.TransactionEndpoint)
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['transaction'] as _i13.TransactionEndpoint)
                   .listByAccount(
                     session,
                     params['accountId'],
@@ -1560,9 +1858,15 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['transaction'] as _i13.TransactionEndpoint)
-                  .toggleCleared(session, params['transactionId']),
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['transaction'] as _i13.TransactionEndpoint)
+                  .toggleCleared(
+                    session,
+                    params['transactionId'],
+                  ),
         ),
         'reconcileAccount': _i1.MethodConnector(
           name: 'reconcileAccount',
@@ -1578,8 +1882,11 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['transaction'] as _i13.TransactionEndpoint)
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['transaction'] as _i13.TransactionEndpoint)
                   .reconcileAccount(
                     session,
                     params['accountId'],
@@ -1595,11 +1902,15 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['transaction'] as _i13.TransactionEndpoint).ageOfMoney(
-                session,
-                params['budgetId'],
-              ),
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['transaction'] as _i13.TransactionEndpoint)
+                  .ageOfMoney(
+                    session,
+                    params['budgetId'],
+                  ),
         ),
         'createSplit': _i1.MethodConnector(
           name: 'createSplit',
@@ -1645,8 +1956,11 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: true,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['transaction'] as _i13.TransactionEndpoint)
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['transaction'] as _i13.TransactionEndpoint)
                   .createSplit(
                     session,
                     params['description'],
@@ -1668,11 +1982,15 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['transaction'] as _i13.TransactionEndpoint).listSplits(
-                session,
-                params['parentTransactionId'],
-              ),
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['transaction'] as _i13.TransactionEndpoint)
+                  .listSplits(
+                    session,
+                    params['parentTransactionId'],
+                  ),
         ),
         'bulkImport': _i1.MethodConnector(
           name: 'bulkImport',
@@ -1698,14 +2016,18 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: true,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['transaction'] as _i13.TransactionEndpoint).bulkImport(
-                session,
-                params['budgetId'],
-                params['currencyCode'],
-                params['rows'],
-                accountId: params['accountId'],
-              ),
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['transaction'] as _i13.TransactionEndpoint)
+                  .bulkImport(
+                    session,
+                    params['budgetId'],
+                    params['currencyCode'],
+                    params['rows'],
+                    accountId: params['accountId'],
+                  ),
         ),
         'delete': _i1.MethodConnector(
           name: 'delete',
@@ -1716,11 +2038,15 @@ class Endpoints extends _i1.EndpointDispatch {
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['transaction'] as _i13.TransactionEndpoint).delete(
-                session,
-                params['transactionId'],
-              ),
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['transaction'] as _i13.TransactionEndpoint).delete(
+                    session,
+                    params['transactionId'],
+                  ),
         ),
       },
     );

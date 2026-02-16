@@ -41,7 +41,7 @@ final class RecurringActionsProvider
   }
 }
 
-String _$recurringActionsHash() => r'408c9560f098cffe5cc4c176d5f5f0c5e33cf5d0';
+String _$recurringActionsHash() => r'7c9fd93135c6779bb492d6acda33805f094d6f7c';
 
 abstract class _$RecurringActions extends $Notifier<AsyncValue<void>> {
   AsyncValue<void> build();

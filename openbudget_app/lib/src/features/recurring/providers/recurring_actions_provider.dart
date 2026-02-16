@@ -103,6 +103,31 @@ class RecurringActions extends _$RecurringActions {
     }
   }
 
+  Future<RecurringTransaction> skipOccurrence({
+    required String recurringId,
+    required String budgetId,
+  }) async {
+    state = const AsyncValue.loading();
+    final client = ref.read(serverpodClientProvider);
+    try {
+      final recurring = await client.recurringTransaction.skipOccurrence(
+        // Serverpod API requires UuidValue which is experimental in uuid package.
+        // ignore: experimental_member_use
+        UuidValue.fromString(recurringId),
+      );
+      if (ref.mounted) {
+        ref.invalidate(recurringListProvider(budgetId));
+        state = const AsyncValue.data(null);
+      }
+      return recurring;
+    } on Exception catch (e, st) {
+      if (ref.mounted) {
+        state = AsyncValue.error(e, st);
+      }
+      rethrow;
+    }
+  }
+
   Future<void> deleteRecurring({
     required String recurringId,
     required String budgetId,

@@ -59,6 +59,7 @@ recurringTransaction:
   - get:
   - update:
   - delete:
+  - skipOccurrence:
   - postDue:
   - countDue:
 transaction:
