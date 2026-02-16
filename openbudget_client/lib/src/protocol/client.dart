@@ -755,6 +755,16 @@ class EndpointRecurringTransaction extends _i1.EndpointRef {
     {'recurringTransactionId': recurringTransactionId},
   );
 
+  /// Skips the next occurrence of a recurring transaction by advancing the
+  /// schedule without creating a transaction.
+  _i2.Future<_i12.RecurringTransaction> skipOccurrence(
+    _i1.UuidValue recurringTransactionId,
+  ) => caller.callServerEndpoint<_i12.RecurringTransaction>(
+    'recurringTransaction',
+    'skipOccurrence',
+    {'recurringTransactionId': recurringTransactionId},
+  );
+
   /// Posts all due recurring transactions for a budget, creating actual
   /// transactions and advancing the schedule. Returns the count of created
   /// transactions.

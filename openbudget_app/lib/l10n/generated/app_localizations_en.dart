@@ -1164,4 +1164,17 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get categoryTrendsEmptySubtitle =>
       'Add categorized transactions to see spending trends by category';
+
+  @override
+  String get recurringDueLabel => 'Due now';
+
+  @override
+  String get recurringSkipButton => 'Skip';
+
+  @override
+  String get recurringSkipSuccess => 'Occurrence skipped';
+
+  @override
+  String get recurringSkipError =>
+      'Could not skip occurrence. Please try again.';
 }

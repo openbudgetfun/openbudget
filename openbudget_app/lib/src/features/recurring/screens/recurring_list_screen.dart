@@ -102,6 +102,7 @@ class RecurringListScreen extends HookConsumerWidget {
                   onEdit: () => _showEditDialog(context, item),
                   onDelete: () => _confirmDelete(context, ref, item),
                   onToggle: () => _toggleActive(ref, item),
+                  onSkip: () => _skipOccurrence(context, ref, item),
                 );
               },
             ),
@@ -183,6 +184,39 @@ class RecurringListScreen extends HookConsumerWidget {
     }
   }
 
+  Future<void> _skipOccurrence(
+    BuildContext context,
+    WidgetRef ref,
+    RecurringTransaction recurring,
+  ) async {
+    final l10n = AppLocalizations.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
+    final messenger = ScaffoldMessenger.of(context);
+
+    try {
+      await ref
+          .read(recurringActionsProvider.notifier)
+          .skipOccurrence(
+            recurringId: recurring.id?.toString() ?? '',
+            budgetId: budgetId,
+          );
+      if (context.mounted) {
+        messenger.showSnackBar(
+          SnackBar(content: Text(l10n.recurringSkipSuccess)),
+        );
+      }
+    } on Exception catch (_) {
+      if (context.mounted) {
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(l10n.recurringSkipError),
+            backgroundColor: colorScheme.error,
+          ),
+        );
+      }
+    }
+  }
+
   Future<void> _toggleActive(
     WidgetRef ref,
     RecurringTransaction recurring,
@@ -204,6 +238,7 @@ class _RecurringTile extends HookWidget {
     required this.onEdit,
     required this.onDelete,
     required this.onToggle,
+    required this.onSkip,
   });
 
   final RecurringTransaction recurring;
@@ -211,6 +246,7 @@ class _RecurringTile extends HookWidget {
   final VoidCallback onEdit;
   final VoidCallback onDelete;
   final VoidCallback onToggle;
+  final VoidCallback onSkip;
 
   @override
   Widget build(BuildContext context) {
@@ -236,6 +272,7 @@ class _RecurringTile extends HookWidget {
     };
 
     final nextDate = recurring.nextOccurrence;
+    final isDue = recurring.isActive && !nextDate.isAfter(DateTime.now());
     final dateStr =
         '${nextDate.year}-${nextDate.month.toString().padLeft(2, '0')}-${nextDate.day.toString().padLeft(2, '0')}';
 
@@ -253,39 +290,84 @@ class _RecurringTile extends HookWidget {
         return false;
       },
       child: Card(
-        child: ListTile(
-          leading: Icon(
-            recurring.isActive ? Icons.repeat_rounded : Icons.repeat_rounded,
-            color: recurring.isActive
-                ? colorScheme.primary
-                : colorScheme.outlineVariant,
-          ),
-          title: Text(
-            recurring.description,
-            style: TextStyle(
-              decoration: recurring.isActive
-                  ? null
-                  : TextDecoration.lineThrough,
-            ),
-          ),
-          subtitle: Text(
-            '$frequencyLabel \u2022 ${l10n.recurringNextDate}: $dateStr',
-          ),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                isIncome ? '+$formattedAmount' : '-$formattedAmount',
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: isIncome ? colorScheme.primary : colorScheme.error,
-                  fontWeight: FontWeight.w600,
+        child: Column(
+          children: [
+            ListTile(
+              leading: Icon(
+                recurring.isActive
+                    ? Icons.repeat_rounded
+                    : Icons.repeat_rounded,
+                color: recurring.isActive
+                    ? colorScheme.primary
+                    : colorScheme.outlineVariant,
+              ),
+              title: Text(
+                recurring.description,
+                style: TextStyle(
+                  decoration: recurring.isActive
+                      ? null
+                      : TextDecoration.lineThrough,
                 ),
               ),
-              const SizedBox(width: SpacingTokens.xs),
-              Switch(value: recurring.isActive, onChanged: (_) => onToggle()),
-            ],
-          ),
-          onTap: onEdit,
+              subtitle: Text(
+                '$frequencyLabel \u2022 ${l10n.recurringNextDate}: $dateStr',
+              ),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    isIncome ? '+$formattedAmount' : '-$formattedAmount',
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: isIncome ? colorScheme.primary : colorScheme.error,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(width: SpacingTokens.xs),
+                  Switch(
+                    value: recurring.isActive,
+                    onChanged: (_) => onToggle(),
+                  ),
+                ],
+              ),
+              onTap: onEdit,
+            ),
+            if (isDue)
+              Padding(
+                padding: const EdgeInsets.only(
+                  left: SpacingTokens.md,
+                  right: SpacingTokens.md,
+                  bottom: SpacingTokens.sm,
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.schedule_rounded,
+                      size: 16,
+                      color: colorScheme.tertiary,
+                    ),
+                    const SizedBox(width: SpacingTokens.xs),
+                    Expanded(
+                      child: Text(
+                        l10n.recurringDueLabel,
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: colorScheme.tertiary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    TextButton.icon(
+                      onPressed: onSkip,
+                      icon: const Icon(Icons.skip_next_rounded, size: 18),
+                      label: Text(l10n.recurringSkipButton),
+                      style: TextButton.styleFrom(
+                        foregroundColor: colorScheme.onSurfaceVariant,
+                        visualDensity: VisualDensity.compact,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
         ),
       ),
     );

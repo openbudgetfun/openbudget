@@ -189,6 +189,36 @@ class RecurringTransactionService {
     return count;
   }
 
+  /// Skips the next occurrence of a recurring transaction by advancing
+  /// `nextOccurrence` without creating a transaction.
+  ///
+  /// Returns the updated recurring transaction with the new next date.
+  /// If the next date would be past `endDate`, the recurring is deactivated.
+  static Future<RecurringTransaction> skipOccurrence(
+    Session session, {
+    required UuidValue recurringTransactionId,
+  }) async {
+    final recurring = await getById(
+      session,
+      recurringTransactionId: recurringTransactionId,
+    );
+
+    final nextDate = calculateNextOccurrence(
+      recurring.frequency,
+      recurring.nextOccurrence,
+    );
+
+    final shouldDeactivate =
+        recurring.endDate != null && nextDate.isAfter(recurring.endDate!);
+
+    final updated = recurring.copyWith(
+      nextOccurrence: nextDate,
+      isActive: !shouldDeactivate,
+      updatedAt: DateTime.now(),
+    );
+    return RecurringTransaction.db.updateRow(session, updated);
+  }
+
   /// Counts active recurring transactions that are due (nextOccurrence <= now).
   static Future<int> countDue(
     Session session, {

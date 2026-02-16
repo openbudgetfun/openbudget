@@ -102,6 +102,18 @@ class RecurringTransactionEndpoint extends Endpoint {
     );
   }
 
+  /// Skips the next occurrence of a recurring transaction by advancing the
+  /// schedule without creating a transaction.
+  Future<RecurringTransaction> skipOccurrence(
+    Session session,
+    UuidValue recurringTransactionId,
+  ) async {
+    return RecurringTransactionService.skipOccurrence(
+      session,
+      recurringTransactionId: recurringTransactionId,
+    );
+  }
+
   /// Posts all due recurring transactions for a budget, creating actual
   /// transactions and advancing the schedule. Returns the count of created
   /// transactions.

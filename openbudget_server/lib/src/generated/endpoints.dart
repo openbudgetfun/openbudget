@@ -1278,6 +1278,20 @@ class Endpoints extends _i1.EndpointDispatch {
                       as _i12.RecurringTransactionEndpoint)
                   .delete(session, params['recurringTransactionId']),
         ),
+        'skipOccurrence': _i1.MethodConnector(
+          name: 'skipOccurrence',
+          params: {
+            'recurringTransactionId': _i1.ParameterDescription(
+              name: 'recurringTransactionId',
+              type: _i1.getType<_i1.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call: (_i1.Session session, Map<String, dynamic> params) async =>
+              (endpoints['recurringTransaction']
+                      as _i12.RecurringTransactionEndpoint)
+                  .skipOccurrence(session, params['recurringTransactionId']),
+        ),
         'postDue': _i1.MethodConnector(
           name: 'postDue',
           params: {
