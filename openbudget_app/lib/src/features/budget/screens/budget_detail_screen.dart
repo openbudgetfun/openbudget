@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/budget_goals_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/category_actions_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/credit_card_provider.dart';
@@ -32,6 +33,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final summaryAsync = ref.watch(budgetMonthlySummaryProvider(budgetId));
     final ccPayments = ref.watch(creditCardPaymentsProvider(budgetId));
+    final goalsAsync = ref.watch(budgetGoalsProvider(budgetId));
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
@@ -73,6 +75,9 @@ class BudgetDetailScreen extends HookConsumerWidget {
           (c) => c.code == summary.budget.currencyCode,
           orElse: () => CurrencyCode.usd,
         );
+        final goalsMap = goalsAsync.hasValue
+            ? goalsAsync.value!
+            : <String, EnvelopeGoal>{};
 
         return Scaffold(
           appBar: AppBar(
@@ -113,6 +118,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
                 ..invalidate(transactionListProvider(budgetId))
                 ..invalidate(budgetSummaryProvider(budgetId))
                 ..invalidate(budgetMonthlySummaryProvider(budgetId))
+                ..invalidate(budgetGoalsProvider(budgetId))
                 ..invalidate(
                   monthlyAllocationsProvider(
                     budgetId,
@@ -182,6 +188,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
                     child: CategoryGroup(
                       categoryWithEnvelopes: catWithEnvelopes,
                       currencyCode: currencyCode,
+                      goalsMap: goalsMap,
                       onAddEnvelope: () => _showAddEnvelopeDialog(
                         context,
                         catWithEnvelopes.category.id?.toString() ?? '',
