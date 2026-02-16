@@ -30,3 +30,5 @@ const recurringListRoute = 'recurringList';
 const recurringListPath = '/budgets/:id/recurring';
 const splitExpenseRoute = 'splitExpense';
 const splitExpensePath = '/budgets/:id/expenses/split';
+const importTransactionsRoute = 'importTransactions';
+const importTransactionsPath = '/budgets/:id/import';

@@ -182,6 +182,25 @@ class TransactionEndpoint extends Endpoint {
     );
   }
 
+  /// Bulk creates transactions from imported data.
+  ///
+  /// Returns the count of successfully created transactions.
+  Future<int> bulkImport(
+    Session session,
+    UuidValue budgetId,
+    String currencyCode,
+    List<ImportRow> rows, {
+    UuidValue? accountId,
+  }) async {
+    return TransactionService.bulkCreate(
+      session,
+      budgetId: budgetId,
+      currencyCode: currencyCode,
+      rows: rows,
+      accountId: accountId,
+    );
+  }
+
   /// Deletes a transaction by ID.
   Future<Transaction> delete(Session session, UuidValue transactionId) async {
     return TransactionService.delete(session, transactionId: transactionId);

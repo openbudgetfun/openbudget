@@ -1,0 +1,6 @@
+### A single row of data for bulk transaction import.
+class: ImportRow
+fields:
+  description: String
+  amountCents: int
+  transactionDate: DateTime

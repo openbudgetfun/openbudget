@@ -285,6 +285,12 @@ class BudgetDetailScreen extends HookConsumerWidget {
                   ),
                   const SizedBox(width: SpacingTokens.sm),
                   IconButton.filled(
+                    onPressed: () => context.go('/budgets/$budgetId/import'),
+                    icon: const Icon(Icons.upload_file_rounded),
+                    tooltip: l10n.importTitle,
+                  ),
+                  const SizedBox(width: SpacingTokens.sm),
+                  IconButton.filled(
                     onPressed: () => _showMoveMoneyDialog(
                       context,
                       summary.categories,

@@ -348,6 +348,37 @@ class TransactionService {
     );
   }
 
+  /// Bulk creates transactions from import data.
+  ///
+  /// All transactions are created within a single budget, verified once.
+  /// Returns the count of successfully created transactions.
+  static Future<int> bulkCreate(
+    Session session, {
+    required UuidValue budgetId,
+    required String currencyCode,
+    required List<ImportRow> rows,
+    UuidValue? accountId,
+  }) async {
+    await BudgetService.getById(session, budgetId: budgetId);
+
+    var count = 0;
+    for (final row in rows) {
+      final transaction = Transaction(
+        description: row.description,
+        amountCents: row.amountCents,
+        currencyCode: currencyCode,
+        budgetId: budgetId,
+        accountId: accountId,
+        transactionDate: row.transactionDate,
+        createdAt: DateTime.now(),
+      );
+      await Transaction.db.insertRow(session, transaction);
+      count++;
+    }
+
+    return count;
+  }
+
   /// Deletes a transaction, verifying budget ownership.
   static Future<Transaction> delete(
     Session session, {
