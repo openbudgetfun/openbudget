@@ -48,6 +48,69 @@ class TransactionActions extends _$TransactionActions {
     }
   }
 
+  Future<Transaction> updateTransaction({
+    required String transactionId,
+    required String budgetId,
+    String? description,
+    int? amountCents,
+    String? envelopeId,
+    DateTime? transactionDate,
+  }) async {
+    state = const AsyncValue.loading();
+    final client = ref.read(serverpodClientProvider);
+    try {
+      final transaction = await client.transaction.update(
+        // Serverpod API requires UuidValue which is experimental in uuid package.
+        // ignore: experimental_member_use
+        UuidValue.fromString(transactionId),
+        description: description,
+        amountCents: amountCents,
+        envelopeId: envelopeId != null
+            // Serverpod API requires UuidValue which is experimental in uuid package.
+            // ignore: experimental_member_use
+            ? UuidValue.fromString(envelopeId)
+            : null,
+        transactionDate: transactionDate,
+      );
+      if (ref.mounted) {
+        ref
+          ..invalidate(transactionListProvider(budgetId))
+          ..invalidate(budgetSummaryProvider(budgetId));
+        state = const AsyncValue.data(null);
+      }
+      return transaction;
+    } on Exception catch (e, st) {
+      if (ref.mounted) {
+        state = AsyncValue.error(e, st);
+      }
+      rethrow;
+    }
+  }
+
+  Future<void> deleteTransaction({
+    required String transactionId,
+    required String budgetId,
+  }) async {
+    state = const AsyncValue.loading();
+    final client = ref.read(serverpodClientProvider);
+    try {
+      // Serverpod API requires UuidValue which is experimental in uuid package.
+      // ignore: experimental_member_use
+      await client.transaction.delete(UuidValue.fromString(transactionId));
+      if (ref.mounted) {
+        ref
+          ..invalidate(transactionListProvider(budgetId))
+          ..invalidate(budgetSummaryProvider(budgetId));
+        state = const AsyncValue.data(null);
+      }
+    } on Exception catch (e, st) {
+      if (ref.mounted) {
+        state = AsyncValue.error(e, st);
+      }
+      rethrow;
+    }
+  }
+
   Future<Transaction> addExpense({
     required String description,
     required int amountCents,

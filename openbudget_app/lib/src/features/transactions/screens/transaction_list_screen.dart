@@ -3,7 +3,10 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
+import 'package:openbudget_app/src/features/transactions/providers/transaction_actions_provider.dart';
+import 'package:openbudget_app/src/features/transactions/screens/edit_transaction_dialog.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
+import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
@@ -92,45 +95,155 @@ class TransactionListScreen extends HookConsumerWidget {
               itemCount: sorted.length,
               itemBuilder: (context, index) {
                 final tx = sorted[index];
-                final isIncome = tx.amountCents > 0;
-                final color = isIncome
-                    ? ColorTokens.secondary
-                    : ColorTokens.error;
-                final icon = isIncome
-                    ? Icons.arrow_downward_rounded
-                    : Icons.arrow_upward_rounded;
-
-                return Card(
-                  margin: const EdgeInsets.only(bottom: SpacingTokens.sm),
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: color.withAlpha(25),
-                      child: Icon(icon, color: color, size: 20),
-                    ),
-                    title: Text(
-                      tx.description,
-                      style: theme.textTheme.bodyMedium,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    subtitle: Text(
-                      _formatDate(tx.transactionDate),
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                    trailing: Text(
-                      formatCents(tx.amountCents, currency),
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        color: color,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
+                return _TransactionTile(
+                  transaction: tx,
+                  budgetId: budgetId,
+                  currencyCode: currency,
                 );
               },
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+class _TransactionTile extends HookConsumerWidget {
+  const _TransactionTile({
+    required this.transaction,
+    required this.budgetId,
+    required this.currencyCode,
+  });
+
+  final Transaction transaction;
+  final String budgetId;
+  final CurrencyCode currencyCode;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isIncome = transaction.amountCents > 0;
+    final color = isIncome ? ColorTokens.secondary : ColorTokens.error;
+    final icon = isIncome
+        ? Icons.arrow_downward_rounded
+        : Icons.arrow_upward_rounded;
+
+    return Dismissible(
+      key: ValueKey(transaction.id),
+      direction: DismissDirection.endToStart,
+      background: Container(
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: SpacingTokens.lg),
+        margin: const EdgeInsets.only(bottom: SpacingTokens.sm),
+        decoration: BoxDecoration(
+          color: colorScheme.error,
+          borderRadius: BorderRadius.circular(RadiusTokens.md),
+        ),
+        child: Icon(Icons.delete_rounded, color: colorScheme.onError),
+      ),
+      confirmDismiss: (_) => _confirmDelete(context, l10n, colorScheme),
+      onDismissed: (_) => _deleteTransaction(context, ref, l10n, colorScheme),
+      child: Card(
+        margin: const EdgeInsets.only(bottom: SpacingTokens.sm),
+        child: ListTile(
+          onTap: () => _showEditDialog(context),
+          leading: CircleAvatar(
+            backgroundColor: color.withAlpha(25),
+            child: Icon(icon, color: color, size: 20),
+          ),
+          title: Text(
+            transaction.description,
+            style: theme.textTheme.bodyMedium,
+            overflow: TextOverflow.ellipsis,
+          ),
+          subtitle: Text(
+            _formatDate(transaction.transactionDate),
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
+          trailing: Text(
+            formatCents(transaction.amountCents, currencyCode),
+            style: theme.textTheme.titleSmall?.copyWith(
+              color: color,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<bool?> _confirmDelete(
+    BuildContext context,
+    AppLocalizations l10n,
+    ColorScheme colorScheme,
+  ) async {
+    return showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.deleteConfirmTitle),
+        content: Text(
+          '${l10n.deleteConfirmMessage}\n\n"${transaction.description}"',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l10n.dialogCancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            style: FilledButton.styleFrom(
+              backgroundColor: colorScheme.error,
+              foregroundColor: colorScheme.onError,
+            ),
+            child: Text(l10n.deleteConfirmButton),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _deleteTransaction(
+    BuildContext context,
+    WidgetRef ref,
+    AppLocalizations l10n,
+    ColorScheme colorScheme,
+  ) async {
+    try {
+      await ref
+          .read(transactionActionsProvider.notifier)
+          .deleteTransaction(
+            transactionId: transaction.id?.toString() ?? '',
+            budgetId: budgetId,
+          );
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.deleteSuccess)));
+      }
+    } on Exception catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.deleteError),
+            backgroundColor: colorScheme.error,
+          ),
+        );
+      }
+    }
+  }
+
+  void _showEditDialog(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (_) => EditTransactionDialog(
+        transaction: transaction,
+        budgetId: budgetId,
+        currencyCode: currencyCode,
       ),
     );
   }

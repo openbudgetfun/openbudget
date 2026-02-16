@@ -108,5 +108,8 @@
   "accountClosed": "Closed Accounts",
   "accountCreateSuccess": "Account created",
   "accountCreateError": "Could not create account. Please try again.",
-  "budgetViewAccounts": "Accounts"
+  "budgetViewAccounts": "Accounts",
+  "transactionEditTitle": "Edit Transaction",
+  "transactionEditSuccess": "Transaction updated",
+  "transactionEditError": "Could not update transaction. Please try again."
 }
