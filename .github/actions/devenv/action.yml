@@ -27,23 +27,24 @@ runs:
       run: mkdir -p .fvm && ln -s "$FLUTTER_ROOT" .fvm/flutter_sdk
       shell: bash
 
-    # ── Nix / devenv (provides dprint, nixfmt, shfmt, dartfmt) ───────────
+    # ── Nix / devenv ────────────────────────────────────────────────────
     - name: install nix
-      uses: DeterminateSystems/nix-installer-action@v17
-
-    - name: cache nix store
-      uses: actions/cache@v4
+      uses: cachix/install-nix-action@v31
       with:
-        path: |
-          /nix/store
-          ~/.nix-profile
-          ~/.local/state/nix/profiles
-        key: ${{ runner.os }}-nix-${{ inputs.cache-version }}-${{ hashFiles('devenv.nix', 'devenv.lock', 'devenv.yaml') }}
-        restore-keys: |
-          ${{ runner.os }}-nix-${{ inputs.cache-version }}-
+        extra_nix_config: |
+          accept-flake-config = true
+
+    - name: setup cachix
+      uses: cachix/cachix-action@v15
+      with:
+        name: devenv
 
     - name: install devenv
-      run: nix profile add --accept-flake-config nixpkgs#devenv
+      run: nix profile add nixpkgs#devenv
+      shell: bash
+
+    - name: build devenv shell
+      run: devenv shell --command true
       shell: bash
 
     # ── Dependency caching ───────────────────────────────────────────────
