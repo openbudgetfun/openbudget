@@ -29,15 +29,13 @@ runs:
 
     # ── Nix / devenv (provides dprint, nixfmt, shfmt, dartfmt) ───────────
     - name: install nix
-      uses: cachix/install-nix-action@v31
-      with:
-        github_access_token: ${{ inputs.github-token }}
+      uses: DeterminateSystems/nix-installer-action@v17
 
-    - name: setup nix environment
-      run: |
-        nix profile add --accept-flake-config nixpkgs#cachix
-        cachix use devenv
-        nix profile add nixpkgs#devenv
+    - name: cache nix store
+      uses: DeterminateSystems/magic-nix-cache-action@v9
+
+    - name: install devenv
+      run: nix profile add --accept-flake-config nixpkgs#devenv
       shell: bash
 
     # ── Dependency caching ───────────────────────────────────────────────

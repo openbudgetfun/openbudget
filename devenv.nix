@@ -6,6 +6,9 @@
   ...
 }:
 
+let
+  isCI = builtins.getEnv "CI" != "";
+in
 {
   packages =
     with pkgs;
@@ -23,8 +26,9 @@
       coreutils
     ];
 
+  # Android SDK is large — skip in CI where it's not needed.
   android = {
-    enable = true;
+    enable = !isCI;
   };
 
   dotenv.disableHint = true;
@@ -32,8 +36,9 @@
   # Rely on the global sdk for now as the nix apple sdk is not working for me.
   apple.sdk = null;
 
+  # In CI, Docker containers provide postgres and redis.
   services.postgres = {
-    enable = true;
+    enable = !isCI;
     package = pkgs.postgresql_16;
     listen_addresses = "127.0.0.1";
     port = 8090;
@@ -48,7 +53,7 @@
   };
 
   services.redis = {
-    enable = true;
+    enable = !isCI;
     port = 8091;
   };
 
