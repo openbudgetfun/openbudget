@@ -9,6 +9,9 @@ environment:
 
 resolution: workspace
 
+flutter:
+  uses-material-design: true
+
 dependencies:
   flutter:
     sdk: flutter
