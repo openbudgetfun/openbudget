@@ -32,7 +32,15 @@ runs:
       uses: DeterminateSystems/nix-installer-action@v17
 
     - name: cache nix store
-      uses: DeterminateSystems/magic-nix-cache-action@v9
+      uses: actions/cache@v4
+      with:
+        path: |
+          /nix/store
+          ~/.nix-profile
+          ~/.local/state/nix/profiles
+        key: ${{ runner.os }}-nix-${{ inputs.cache-version }}-${{ hashFiles('devenv.nix', 'devenv.lock', 'devenv.yaml') }}
+        restore-keys: |
+          ${{ runner.os }}-nix-${{ inputs.cache-version }}-
 
     - name: install devenv
       run: nix profile add --accept-flake-config nixpkgs#devenv

@@ -13,14 +13,16 @@ in
   packages =
     with pkgs;
     [
-      curl
       dprint
-      eget
       fvm
       libiconv
       nixfmt
-      nushell
       shfmt
+    ]
+    ++ lib.optionals (!isCI) [
+      curl
+      eget
+      nushell
     ]
     ++ lib.optionals stdenv.isDarwin [
       coreutils
