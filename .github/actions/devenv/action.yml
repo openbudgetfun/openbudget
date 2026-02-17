@@ -23,6 +23,10 @@ runs:
       with:
         flutter-version: ${{ steps.fvm.outputs.FLUTTER_VERSION }}
 
+    - name: link fvm sdk path
+      run: mkdir -p .fvm && ln -s "$FLUTTER_ROOT" .fvm/flutter_sdk
+      shell: bash
+
     # ── Nix tools (dprint, nixfmt, shfmt for formatting) ────────────────
     - name: install nix
       uses: DeterminateSystems/nix-installer-action@v17
