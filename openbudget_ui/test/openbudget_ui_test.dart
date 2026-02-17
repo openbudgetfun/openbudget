@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 void main() {
+  setUpAll(() {
+    GoogleFonts.config.allowRuntimeFetching = false;
+  });
+
   group('OpenBudgetTheme', () {
-    test('light theme uses Material 3', () {
+    testWidgets('light theme uses Material 3', (tester) async {
       final theme = OpenBudgetTheme.light;
       expect(theme.useMaterial3, isTrue);
       expect(theme.brightness, Brightness.light);
     });
 
-    test('dark theme uses Material 3', () {
+    testWidgets('dark theme uses Material 3', (tester) async {
       final theme = OpenBudgetTheme.dark;
       expect(theme.useMaterial3, isTrue);
       expect(theme.brightness, Brightness.dark);

@@ -27,15 +27,12 @@ runs:
       run: mkdir -p .fvm && ln -s "$FLUTTER_ROOT" .fvm/flutter_sdk
       shell: bash
 
-    # ── Nix / devenv (provides dprint, nixfmt, shfmt, dartfmt) ───────────
+    # ── Nix tools (dprint, nixfmt, shfmt for formatting) ────────────────
     - name: install nix
       uses: DeterminateSystems/nix-installer-action@v17
 
-    - name: cache nix store
-      uses: DeterminateSystems/magic-nix-cache-action@v9
-
-    - name: install devenv
-      run: nix profile add --accept-flake-config nixpkgs#devenv
+    - name: install nix tools
+      run: nix profile install nixpkgs#dprint nixpkgs#nixfmt nixpkgs#shfmt
       shell: bash
 
     # ── Dependency caching ───────────────────────────────────────────────
@@ -48,5 +45,9 @@ runs:
           ${{ runner.os }}-pub-${{ inputs.cache-version }}-
 
     - name: resolve dependencies
-      run: dart pub get
-      shell: devenv shell -- bash -e {0}
+      run: flutter pub get
+      shell: bash
+
+    - name: activate melos
+      run: dart pub global activate melos
+      shell: bash

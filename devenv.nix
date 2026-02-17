@@ -13,14 +13,16 @@ in
   packages =
     with pkgs;
     [
-      curl
       dprint
-      eget
       fvm
       libiconv
       nixfmt
-      nushell
       shfmt
+    ]
+    ++ lib.optionals (!isCI) [
+      curl
+      eget
+      nushell
     ]
     ++ lib.optionals stdenv.isDarwin [
       coreutils
@@ -140,7 +142,8 @@ in
     "test:all" = {
       exec = ''
         set -e
-        melos run test --no-select
+        melos run test:flutter --no-select
+        melos exec --scope="openbudget_core" -- dart test
       '';
       description = "Run tests in all packages.";
     };

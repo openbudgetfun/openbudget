@@ -20,8 +20,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: lint analyze
-        run: lint:analyze
-        shell: devenv shell -- bash -e {0}
+        run: melos run analyze --no-select
 
   test:
     runs-on: blacksmith-2vcpu-ubuntu-2404
@@ -31,9 +30,10 @@ jobs:
       - uses: ./.github/actions/devenv
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: run tests
-        run: test:all
-        shell: devenv shell -- bash -e {0}
+      - name: run flutter tests
+        run: melos run test:flutter --no-select
+      - name: run dart tests
+        run: melos exec --scope="openbudget_core" -- dart test
 
   server-test:
     runs-on: blacksmith-2vcpu-ubuntu-2404
@@ -86,7 +86,6 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: run server tests
         run: melos exec --scope="openbudget_server" -- dart test
-        shell: devenv shell -- bash -e {0}
 
   format:
     runs-on: blacksmith-2vcpu-ubuntu-2404
@@ -98,10 +97,8 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: check dart formatting
         run: dart format --set-exit-if-changed .
-        shell: devenv shell -- bash -e {0}
       - name: check dprint formatting
         run: dprint check
-        shell: devenv shell -- bash -e {0}
 
   integration-test:
     runs-on: blacksmith-2vcpu-ubuntu-2404
@@ -123,7 +120,6 @@ jobs:
               echo "::endgroup::"
             done
           '
-        shell: devenv shell -- bash -e {0}
 
   no-stateful-or-stateless:
     name: Ban StatefulWidget and StatelessWidget
