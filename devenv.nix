@@ -106,14 +106,14 @@
       '';
       description = "Run flutter commands from the openbudget_app directory.";
     };
-    "tool:melos" = {
+    "melos" = {
       exec = ''
         set -e
         dart run melos $@
       '';
       description = "Run the melos cli.";
     };
-    "tool:serverpod" = {
+    "serverpod" = {
       exec = ''
         set -e
         dart run serverpod $@
@@ -135,14 +135,14 @@
     "test:all" = {
       exec = ''
         set -e
-        tool:melos run test --no-select
+        melos run test --no-select
       '';
       description = "Run tests in all packages.";
     };
     "test:flutter" = {
       exec = ''
         set -e
-        tool:melos run test:flutter --no-select
+        melos run test:flutter --no-select
       '';
       description = "Run Flutter tests only.";
     };
@@ -159,7 +159,7 @@
     "lint:analyze" = {
       exec = ''
         set -e
-        tool:melos run analyze --no-select
+        melos run analyze --no-select
       '';
       description = "Run dart analyze across all packages.";
     };
@@ -181,7 +181,7 @@
     "format:all" = {
       exec = ''
         set -e
-        tool:melos run format
+        melos run format
         dprint fmt --config "$DEVENV_ROOT/dprint.json"
       '';
       description = "Format all code (Dart and non-Dart).";
@@ -220,21 +220,21 @@
     "runner:build" = {
       exec = ''
         set -e
-        tool:melos run generate
+        melos run generate
       '';
       description = "Run build_runner code generation.";
     };
     "runner:watch" = {
       exec = ''
         set -e
-        tool:melos run generate:watch
+        melos run generate:watch
       '';
       description = "Run build_runner in watch mode.";
     };
     "runner:serverpod" = {
       exec = ''
         set -e
-        tool:melos run serverpod:generate
+        melos run serverpod:generate
       '';
       description = "Run Serverpod code generation.";
     };
@@ -243,7 +243,7 @@
     "clean:all" = {
       exec = ''
         set -e
-        tool:melos run clean --no-select
+        melos run clean --no-select
       '';
       description = "Clean all Flutter packages.";
     };
