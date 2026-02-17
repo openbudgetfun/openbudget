@@ -40,8 +40,13 @@ runs:
         restore-keys: |
           ${{ runner.os }}-pub-${{ inputs.cache-version }}-
 
-    - name: install flutter and resolve dependencies
+    - name: install flutter sdk
       run: |
         fvm install
-        dart pub get
+        fvm flutter precache
+        fvm flutter --version
+      shell: devenv shell -- bash -e {0}
+
+    - name: resolve dependencies
+      run: dart pub get
       shell: devenv shell -- bash -e {0}
