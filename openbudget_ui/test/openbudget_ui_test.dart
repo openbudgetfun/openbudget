@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   group('OpenBudgetTheme', () {
     test('light theme uses Material 3', () {
       final theme = OpenBudgetTheme.light;
