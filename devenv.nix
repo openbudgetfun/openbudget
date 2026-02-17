@@ -69,6 +69,7 @@
 
   scripts = {
     # ── Core toolchain wrappers ──────────────────────────────────────────
+    # `flutter` and `dart` intentionally shadow system commands via fvm.
     "flutter" = {
       exec = ''
         set -e
@@ -90,6 +91,13 @@
       '';
       description = "Run flutter commands.";
     };
+    "dart" = {
+      exec = ''
+        set -e
+        fvm dart $@
+      '';
+      description = "Run dart commands.";
+    };
     "flutter:app" = {
       exec = ''
         set -e
@@ -98,21 +106,14 @@
       '';
       description = "Run flutter commands from the openbudget_app directory.";
     };
-    "dart" = {
-      exec = ''
-        set -e
-        fvm dart $@
-      '';
-      description = "Run dart commands.";
-    };
-    "melos" = {
+    "tool:melos" = {
       exec = ''
         set -e
         dart run melos $@
       '';
       description = "Run the melos cli.";
     };
-    "serverpod" = {
+    "tool:serverpod" = {
       exec = ''
         set -e
         dart run serverpod $@
@@ -134,14 +135,14 @@
     "test:all" = {
       exec = ''
         set -e
-        melos run test --no-select
+        tool:melos run test --no-select
       '';
       description = "Run tests in all packages.";
     };
     "test:flutter" = {
       exec = ''
         set -e
-        melos run test:flutter --no-select
+        tool:melos run test:flutter --no-select
       '';
       description = "Run Flutter tests only.";
     };
@@ -155,17 +156,32 @@
     };
 
     # ── Analysis & formatting ────────────────────────────────────────────
-    "analyze" = {
+    "lint:analyze" = {
       exec = ''
         set -e
-        melos run analyze --no-select
+        tool:melos run analyze --no-select
       '';
       description = "Run dart analyze across all packages.";
     };
-    "format" = {
+    "lint:all" = {
       exec = ''
         set -e
-        melos run format
+        format:check
+        lint:analyze
+      '';
+      description = "Lint all project files.";
+    };
+    "lint:format" = {
+      exec = ''
+        set -e
+        dprint check
+      '';
+      description = "Check all formatting is correct.";
+    };
+    "format:all" = {
+      exec = ''
+        set -e
+        tool:melos run format
         dprint fmt --config "$DEVENV_ROOT/dprint.json"
       '';
       description = "Format all code (Dart and non-Dart).";
@@ -177,25 +193,18 @@
       '';
       description = "Check that all non-Dart formatting is correct.";
     };
-    "lint:all" = {
+    "format:dart" = {
       exec = ''
         set -e
-        format:check
-        analyze
+        dart format -o show $@ | head -n -1
       '';
-      description = "Lint all project files.";
-    };
-    "lint:format" = {
-      exec = ''
-        set -e
-        dprint check
-      '';
-      description = "Check all formatting is correct.";
+      description = "The dart format executable for formatting the workspace.";
+      binary = "bash";
     };
     "fix:all" = {
       exec = ''
         set -e
-        format
+        format:all
       '';
       description = "Fix all fixable lint issues.";
     };
@@ -206,43 +215,35 @@
       '';
       description = "Fix formatting for entire project.";
     };
-    "dartfmt" = {
-      exec = ''
-        set -e
-        dart format -o show $@ | head -n -1
-      '';
-      description = "The `dart format` executable for formatting the workspace.";
-      binary = "bash";
-    };
 
     # ── Code generation ──────────────────────────────────────────────────
     "runner:build" = {
       exec = ''
         set -e
-        melos run generate
+        tool:melos run generate
       '';
       description = "Run build_runner code generation.";
     };
     "runner:watch" = {
       exec = ''
         set -e
-        melos run generate:watch
+        tool:melos run generate:watch
       '';
       description = "Run build_runner in watch mode.";
     };
     "runner:serverpod" = {
       exec = ''
         set -e
-        melos run serverpod:generate
+        tool:melos run serverpod:generate
       '';
       description = "Run Serverpod code generation.";
     };
 
     # ── Utilities ────────────────────────────────────────────────────────
-    "clean" = {
+    "clean:all" = {
       exec = ''
         set -e
-        melos run clean --no-select
+        tool:melos run clean --no-select
       '';
       description = "Clean all Flutter packages.";
     };
