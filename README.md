@@ -91,10 +91,10 @@ flutter:app test               # Run app tests only
 ### Analysis and Formatting
 
 ```bash
-analyze                        # Lint all packages
-format                         # Format all code (Dart + JSON/YAML/Markdown)
-format:check                   # Check non-Dart formatting without fixing
+lint:analyze                   # Lint all packages
 lint:all                       # Run all linting (format check + analyze)
+format:all                     # Format all code (Dart + JSON/YAML/Markdown)
+format:check                   # Check non-Dart formatting without fixing
 ```
 
 ### Code Generation
@@ -108,7 +108,7 @@ runner:watch                   # Generate code in watch mode
 ### Utilities
 
 ```bash
-clean                          # Clean all packages
+clean:all                      # Clean all packages
 update:deps                    # Update all dependencies
 ```
 
