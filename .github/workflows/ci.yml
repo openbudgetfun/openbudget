@@ -13,31 +13,29 @@ concurrency:
 jobs:
   analyze:
     runs-on: blacksmith-2vcpu-ubuntu-2404
-    timeout-minutes: 60
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/devenv
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: lint analyze
-        run: lint:analyze
-        shell: devenv shell -- bash -e {0}
+        run: dart run melos run analyze --no-select
 
   test:
     runs-on: blacksmith-2vcpu-ubuntu-2404
-    timeout-minutes: 60
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/devenv
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: run tests
-        run: test:all
-        shell: devenv shell -- bash -e {0}
+        run: dart run melos run test --no-select
 
   server-test:
     runs-on: blacksmith-2vcpu-ubuntu-2404
-    timeout-minutes: 60
+    timeout-minutes: 30
     services:
       postgres:
         image: pgvector/pgvector:pg16
@@ -85,12 +83,11 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: run server tests
-        run: melos exec --scope="openbudget_server" -- dart test
-        shell: devenv shell -- bash -e {0}
+        run: dart run melos exec --scope="openbudget_server" -- dart test
 
   format:
     runs-on: blacksmith-2vcpu-ubuntu-2404
-    timeout-minutes: 60
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/devenv
@@ -98,14 +95,12 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: check dart formatting
         run: dart format --set-exit-if-changed .
-        shell: devenv shell -- bash -e {0}
       - name: check dprint formatting
         run: dprint check
-        shell: devenv shell -- bash -e {0}
 
   integration-test:
     runs-on: blacksmith-2vcpu-ubuntu-2404
-    timeout-minutes: 60
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - name: install linux desktop dependencies
@@ -123,7 +118,6 @@ jobs:
               echo "::endgroup::"
             done
           '
-        shell: devenv shell -- bash -e {0}
 
   no-stateful-or-stateless:
     name: Ban StatefulWidget and StatelessWidget

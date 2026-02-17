@@ -23,24 +23,12 @@ runs:
       with:
         flutter-version: ${{ steps.fvm.outputs.FLUTTER_VERSION }}
 
-    - name: link fvm sdk path
-      run: mkdir -p .fvm && ln -s "$FLUTTER_ROOT" .fvm/flutter_sdk
-      shell: bash
-
-    # ── Nix / devenv (provides dprint, nixfmt, shfmt, dartfmt) ───────────
+    # ── Nix tools (dprint, nixfmt, shfmt for formatting) ────────────────
     - name: install nix
       uses: DeterminateSystems/nix-installer-action@v17
-      with:
-        extra-conf: |
-          extra-substituters = https://devenv.cachix.org
-          extra-trusted-public-keys = devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw=
 
-    - name: install devenv
-      run: nix profile add --accept-flake-config nixpkgs#devenv
-      shell: bash
-
-    - name: build devenv shell
-      run: devenv shell -- true
+    - name: install nix tools
+      run: nix profile install nixpkgs#dprint nixpkgs#nixfmt nixpkgs#shfmt
       shell: bash
 
     # ── Dependency caching ───────────────────────────────────────────────
@@ -54,4 +42,4 @@ runs:
 
     - name: resolve dependencies
       run: flutter pub get
-      shell: devenv shell -- bash -e {0}
+      shell: bash
