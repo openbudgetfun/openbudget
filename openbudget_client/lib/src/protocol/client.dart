@@ -619,6 +619,24 @@ class EndpointEnvelope extends _i1.EndpointRef {
       });
 }
 
+/// Endpoint for receiving log entries from Flutter clients.
+///
+/// Only active in dev mode. In production this endpoint no-ops.
+/// {@category Endpoint}
+class EndpointLogIngest extends _i1.EndpointRef {
+  EndpointLogIngest(_i1.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'logIngest';
+
+  /// Accepts a JSON array of [LogEntry] objects and writes them to the
+  /// shared dev log file.
+  _i2.Future<void> ingest(String entriesJson) =>
+      caller.callServerEndpoint<void>('logIngest', 'ingest', {
+        'entriesJson': entriesJson,
+      });
+}
+
 /// API surface for monthly allocation operations.
 ///
 /// All methods require authentication.
@@ -1238,6 +1256,7 @@ class Client extends _i1.ServerpodClientShared {
     category = EndpointCategory(this);
     envelopeGoal = EndpointEnvelopeGoal(this);
     envelope = EndpointEnvelope(this);
+    logIngest = EndpointLogIngest(this);
     monthlyAllocation = EndpointMonthlyAllocation(this);
     payee = EndpointPayee(this);
     recurringTransaction = EndpointRecurringTransaction(this);
@@ -1264,6 +1283,8 @@ class Client extends _i1.ServerpodClientShared {
 
   late final EndpointEnvelope envelope;
 
+  late final EndpointLogIngest logIngest;
+
   late final EndpointMonthlyAllocation monthlyAllocation;
 
   late final EndpointPayee payee;
@@ -1287,6 +1308,7 @@ class Client extends _i1.ServerpodClientShared {
     'category': category,
     'envelopeGoal': envelopeGoal,
     'envelope': envelope,
+    'logIngest': logIngest,
     'monthlyAllocation': monthlyAllocation,
     'payee': payee,
     'recurringTransaction': recurringTransaction,

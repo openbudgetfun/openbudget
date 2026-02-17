@@ -1,3 +1,4 @@
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_server/src/budgets/budget_service.dart';
 import 'package:openbudget_server/src/exceptions/exceptions.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
@@ -7,6 +8,8 @@ import 'package:serverpod/serverpod.dart' hide Transaction;
 ///
 /// All methods verify budget ownership before operating on transactions.
 class TransactionService {
+  static final _log = ObLogger('TransactionService');
+
   /// Creates a transaction within a budget, verifying ownership.
   static Future<Transaction> create(
     Session session, {
@@ -19,7 +22,7 @@ class TransactionService {
     UuidValue? payeeId,
     String? memo,
   }) async {
-    // Verify the user owns this budget.
+    _log.info('Creating transaction desc=$description amount=$amountCents');
     await BudgetService.getById(session, budgetId: budgetId);
 
     final transaction = Transaction(
@@ -140,6 +143,9 @@ class TransactionService {
     required UuidValue toAccountId,
     required DateTime transactionDate,
   }) async {
+    _log.info(
+      'Creating transfer from=$fromAccountId to=$toAccountId amount=$amountCents',
+    );
     await BudgetService.getById(session, budgetId: budgetId);
 
     final outflow = Transaction(
@@ -362,6 +368,9 @@ class TransactionService {
     UuidValue? payeeId,
     UuidValue? accountId,
   }) async {
+    _log.info(
+      'Creating split transaction desc=$description splits=${splits.length}',
+    );
     await BudgetService.getById(session, budgetId: budgetId);
 
     // Validate split amounts sum to total.
@@ -434,6 +443,7 @@ class TransactionService {
     required List<ImportRow> rows,
     UuidValue? accountId,
   }) async {
+    _log.info('Bulk creating ${rows.length} transactions for budget=$budgetId');
     await BudgetService.getById(session, budgetId: budgetId);
 
     var count = 0;
@@ -487,6 +497,7 @@ class TransactionService {
     Session session, {
     required UuidValue transactionId,
   }) async {
+    _log.info('Deleting transaction id=$transactionId');
     final transaction = await getById(session, transactionId: transactionId);
     return Transaction.db.deleteRow(session, transaction);
   }

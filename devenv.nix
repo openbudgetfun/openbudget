@@ -193,7 +193,7 @@
       '';
       description = "Check that all non-Dart formatting is correct.";
     };
-    "format:dart" = {
+    "dartfmt" = {
       exec = ''
         set -e
         dart format -o show $@ | head -n -1

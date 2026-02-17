@@ -1,0 +1,33 @@
+import 'dart:convert';
+
+import 'package:openbudget_core/openbudget_core.dart';
+import 'package:openbudget_server/src/logging/server_logging.dart';
+import 'package:serverpod/serverpod.dart';
+
+/// Endpoint for receiving log entries from Flutter clients.
+///
+/// Only active in dev mode. In production this endpoint no-ops.
+class LogIngestEndpoint extends Endpoint {
+  @override
+  bool get requireLogin => false;
+
+  /// Accepts a JSON array of [LogEntry] objects and writes them to the
+  /// shared dev log file.
+  Future<void> ingest(Session session, String entriesJson) async {
+    final handler = devFileLogHandler;
+    if (handler == null) return;
+
+    try {
+      final decoded = jsonDecode(entriesJson);
+      if (decoded is! List) return;
+
+      for (final item in decoded) {
+        if (item is! Map<String, dynamic>) continue;
+        final entry = LogEntry.fromJson(item);
+        handler.writeEntry(entry);
+      }
+    } on Object {
+      // Never crash for logging.
+    }
+  }
+}

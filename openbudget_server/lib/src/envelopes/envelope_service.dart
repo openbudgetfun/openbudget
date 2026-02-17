@@ -1,3 +1,4 @@
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_server/src/categories/category_service.dart';
 import 'package:openbudget_server/src/exceptions/exceptions.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
@@ -7,6 +8,8 @@ import 'package:serverpod/serverpod.dart';
 ///
 /// All methods verify category (and thus budget) ownership before operating.
 class EnvelopeService {
+  static final _log = ObLogger('EnvelopeService');
+
   /// Creates an envelope within a category, verifying ownership.
   static Future<Envelope> create(
     Session session, {
@@ -16,7 +19,7 @@ class EnvelopeService {
     required String currencyCode,
     int? sortOrder,
   }) async {
-    // Verify the user owns the parent category's budget.
+    _log.info('Creating envelope name=$name category=$categoryId');
     await CategoryService.getById(session, categoryId: categoryId);
 
     // Auto-assign sort order if not provided.
@@ -40,6 +43,7 @@ class EnvelopeService {
     Session session, {
     required UuidValue categoryId,
   }) async {
+    _log.info('Listing envelopes for category=$categoryId');
     await CategoryService.getById(session, categoryId: categoryId);
 
     return Envelope.db.find(
@@ -74,6 +78,7 @@ class EnvelopeService {
     String? note,
     bool? isHidden,
   }) async {
+    _log.info('Updating envelope id=$envelopeId');
     final envelope = await getById(session, envelopeId: envelopeId);
 
     final updated = envelope.copyWith(
@@ -109,6 +114,7 @@ class EnvelopeService {
     Session session, {
     required UuidValue envelopeId,
   }) async {
+    _log.info('Deleting envelope id=$envelopeId');
     final envelope = await getById(session, envelopeId: envelopeId);
     return Envelope.db.deleteRow(session, envelope);
   }

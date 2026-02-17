@@ -187,30 +187,60 @@ class _BudgetImpl extends Budget {
 class BudgetUpdateTable extends _i1.UpdateTable<BudgetTable> {
   BudgetUpdateTable(super.table);
 
-  _i1.ColumnValue<String, String> name(String value) =>
-      _i1.ColumnValue(table.name, value);
+  _i1.ColumnValue<String, String> name(String value) => _i1.ColumnValue(
+    table.name,
+    value,
+  );
 
-  _i1.ColumnValue<String, String> currencyCode(String value) =>
-      _i1.ColumnValue(table.currencyCode, value);
+  _i1.ColumnValue<String, String> currencyCode(String value) => _i1.ColumnValue(
+    table.currencyCode,
+    value,
+  );
 
   _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> ownerId(_i1.UuidValue value) =>
-      _i1.ColumnValue(table.ownerId, value);
+      _i1.ColumnValue(
+        table.ownerId,
+        value,
+      );
 
   _i1.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
-      _i1.ColumnValue(table.createdAt, value);
+      _i1.ColumnValue(
+        table.createdAt,
+        value,
+      );
 
   _i1.ColumnValue<DateTime, DateTime> updatedAt(DateTime value) =>
-      _i1.ColumnValue(table.updatedAt, value);
+      _i1.ColumnValue(
+        table.updatedAt,
+        value,
+      );
 }
 
 class BudgetTable extends _i1.Table<_i1.UuidValue?> {
   BudgetTable({super.tableRelation}) : super(tableName: 'budget') {
     updateTable = BudgetUpdateTable(this);
-    name = _i1.ColumnString('name', this);
-    currencyCode = _i1.ColumnString('currencyCode', this);
-    ownerId = _i1.ColumnUuid('ownerId', this);
-    createdAt = _i1.ColumnDateTime('createdAt', this, hasDefault: true);
-    updatedAt = _i1.ColumnDateTime('updatedAt', this, hasDefault: true);
+    name = _i1.ColumnString(
+      'name',
+      this,
+    );
+    currencyCode = _i1.ColumnString(
+      'currencyCode',
+      this,
+    );
+    ownerId = _i1.ColumnUuid(
+      'ownerId',
+      this,
+    );
+    createdAt = _i1.ColumnDateTime(
+      'createdAt',
+      this,
+      hasDefault: true,
+    );
+    updatedAt = _i1.ColumnDateTime(
+      'updatedAt',
+      this,
+      hasDefault: true,
+    );
   }
 
   late final BudgetUpdateTable updateTable;
@@ -356,7 +386,10 @@ class BudgetRepository {
     _i1.UuidValue id, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.findById<Budget>(id, transaction: transaction);
+    return session.db.findById<Budget>(
+      id,
+      transaction: transaction,
+    );
   }
 
   /// Inserts all [Budget]s in the list and returns the inserted rows.
@@ -370,7 +403,10 @@ class BudgetRepository {
     List<Budget> rows, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.insert<Budget>(rows, transaction: transaction);
+    return session.db.insert<Budget>(
+      rows,
+      transaction: transaction,
+    );
   }
 
   /// Inserts a single [Budget] and returns the inserted row.
@@ -381,7 +417,10 @@ class BudgetRepository {
     Budget row, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.insertRow<Budget>(row, transaction: transaction);
+    return session.db.insertRow<Budget>(
+      row,
+      transaction: transaction,
+    );
   }
 
   /// Updates all [Budget]s in the list and returns the updated rows. If
@@ -466,7 +505,10 @@ class BudgetRepository {
     List<Budget> rows, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.delete<Budget>(rows, transaction: transaction);
+    return session.db.delete<Budget>(
+      rows,
+      transaction: transaction,
+    );
   }
 
   /// Deletes a single [Budget].
@@ -475,7 +517,10 @@ class BudgetRepository {
     Budget row, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.deleteRow<Budget>(row, transaction: transaction);
+    return session.db.deleteRow<Budget>(
+      row,
+      transaction: transaction,
+    );
   }
 
   /// Deletes all rows matching the [where] expression.

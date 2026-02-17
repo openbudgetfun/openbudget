@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:openbudget_server/src/auth/email_sender.dart';
 import 'package:openbudget_server/src/generated/endpoints.dart';
 import 'package:openbudget_server/src/generated/protocol.dart' hide Transaction;
+import 'package:openbudget_server/src/logging/server_logging.dart';
 import 'package:openbudget_server/src/web/routes/app_config_route.dart';
 import 'package:openbudget_server/src/web/routes/root.dart';
 import 'package:serverpod/serverpod.dart';
@@ -14,6 +15,9 @@ final EmailSender _emailSender = ConsoleEmailSender();
 
 /// The starting point of the Serverpod server.
 Future<void> run(List<String> args) async {
+  // Initialize logging before anything else.
+  initServerLogging();
+
   // Initialize Serverpod and connect it with your generated code.
   final pod = Serverpod(args, Protocol(), Endpoints())
     ..initializeAuthServices(

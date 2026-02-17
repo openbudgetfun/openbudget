@@ -1,3 +1,4 @@
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_server/src/budgets/budget_service.dart';
 import 'package:openbudget_server/src/exceptions/exceptions.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
@@ -7,12 +8,15 @@ import 'package:serverpod/serverpod.dart' hide Transaction;
 ///
 /// All methods verify budget ownership before operating.
 class PayeeService {
+  static final _log = ObLogger('PayeeService');
+
   /// Creates a payee within a budget, verifying ownership.
   static Future<Payee> create(
     Session session, {
     required String name,
     required UuidValue budgetId,
   }) async {
+    _log.info('Creating payee name=$name budget=$budgetId');
     await BudgetService.getById(session, budgetId: budgetId);
 
     final payee = Payee(
@@ -97,6 +101,7 @@ class PayeeService {
     required UuidValue sourcePayeeId,
     required UuidValue targetPayeeId,
   }) async {
+    _log.info('Merging payee source=$sourcePayeeId target=$targetPayeeId');
     final sourcePayee = await getById(session, payeeId: sourcePayeeId);
     final targetPayee = await getById(session, payeeId: targetPayeeId);
 
@@ -157,6 +162,7 @@ class PayeeService {
     Session session, {
     required UuidValue payeeId,
   }) async {
+    _log.info('Deleting payee id=$payeeId');
     final payee = await getById(session, payeeId: payeeId);
     return Payee.db.deleteRow(session, payee);
   }

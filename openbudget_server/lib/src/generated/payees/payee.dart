@@ -129,7 +129,12 @@ class _PayeeImpl extends Payee {
     required String name,
     required _i1.UuidValue budgetId,
     DateTime? createdAt,
-  }) : super._(id: id, name: name, budgetId: budgetId, createdAt: createdAt);
+  }) : super._(
+         id: id,
+         name: name,
+         budgetId: budgetId,
+         createdAt: createdAt,
+       );
 
   /// Returns a shallow copy of this [Payee]
   /// with some or all fields replaced by the given arguments.
@@ -153,22 +158,40 @@ class _PayeeImpl extends Payee {
 class PayeeUpdateTable extends _i1.UpdateTable<PayeeTable> {
   PayeeUpdateTable(super.table);
 
-  _i1.ColumnValue<String, String> name(String value) =>
-      _i1.ColumnValue(table.name, value);
+  _i1.ColumnValue<String, String> name(String value) => _i1.ColumnValue(
+    table.name,
+    value,
+  );
 
   _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> budgetId(_i1.UuidValue value) =>
-      _i1.ColumnValue(table.budgetId, value);
+      _i1.ColumnValue(
+        table.budgetId,
+        value,
+      );
 
   _i1.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
-      _i1.ColumnValue(table.createdAt, value);
+      _i1.ColumnValue(
+        table.createdAt,
+        value,
+      );
 }
 
 class PayeeTable extends _i1.Table<_i1.UuidValue?> {
   PayeeTable({super.tableRelation}) : super(tableName: 'payee') {
     updateTable = PayeeUpdateTable(this);
-    name = _i1.ColumnString('name', this);
-    budgetId = _i1.ColumnUuid('budgetId', this);
-    createdAt = _i1.ColumnDateTime('createdAt', this, hasDefault: true);
+    name = _i1.ColumnString(
+      'name',
+      this,
+    );
+    budgetId = _i1.ColumnUuid(
+      'budgetId',
+      this,
+    );
+    createdAt = _i1.ColumnDateTime(
+      'createdAt',
+      this,
+      hasDefault: true,
+    );
   }
 
   late final PayeeUpdateTable updateTable;
@@ -180,7 +203,12 @@ class PayeeTable extends _i1.Table<_i1.UuidValue?> {
   late final _i1.ColumnDateTime createdAt;
 
   @override
-  List<_i1.Column> get columns => [id, name, budgetId, createdAt];
+  List<_i1.Column> get columns => [
+    id,
+    name,
+    budgetId,
+    createdAt,
+  ];
 }
 
 class PayeeInclude extends _i1.IncludeObject {
@@ -301,7 +329,10 @@ class PayeeRepository {
     _i1.UuidValue id, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.findById<Payee>(id, transaction: transaction);
+    return session.db.findById<Payee>(
+      id,
+      transaction: transaction,
+    );
   }
 
   /// Inserts all [Payee]s in the list and returns the inserted rows.
@@ -315,7 +346,10 @@ class PayeeRepository {
     List<Payee> rows, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.insert<Payee>(rows, transaction: transaction);
+    return session.db.insert<Payee>(
+      rows,
+      transaction: transaction,
+    );
   }
 
   /// Inserts a single [Payee] and returns the inserted row.
@@ -326,7 +360,10 @@ class PayeeRepository {
     Payee row, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.insertRow<Payee>(row, transaction: transaction);
+    return session.db.insertRow<Payee>(
+      row,
+      transaction: transaction,
+    );
   }
 
   /// Updates all [Payee]s in the list and returns the updated rows. If
@@ -411,7 +448,10 @@ class PayeeRepository {
     List<Payee> rows, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.delete<Payee>(rows, transaction: transaction);
+    return session.db.delete<Payee>(
+      rows,
+      transaction: transaction,
+    );
   }
 
   /// Deletes a single [Payee].
@@ -420,7 +460,10 @@ class PayeeRepository {
     Payee row, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.deleteRow<Payee>(row, transaction: transaction);
+    return session.db.deleteRow<Payee>(
+      row,
+      transaction: transaction,
+    );
   }
 
   /// Deletes all rows matching the [where] expression.

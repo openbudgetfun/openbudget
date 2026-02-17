@@ -27,6 +27,7 @@ import 'package:openbudget_app/src/features/transactions/screens/import_transact
 import 'package:openbudget_app/src/features/transactions/screens/split_expense_screen.dart';
 import 'package:openbudget_app/src/features/transactions/screens/transaction_list_screen.dart';
 import 'package:openbudget_app/src/features/transfers/screens/create_transfer_screen.dart';
+import 'package:openbudget_app/src/logging/navigation_observer.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -41,6 +42,7 @@ GoRouter appRouter(Ref ref) {
 
   return GoRouter(
     initialLocation: loginPath,
+    observers: [LoggingNavigationObserver()],
     redirect: (context, state) {
       final location = state.matchedLocation;
       final isAuthRoute = location == loginPath || location == registerPath;

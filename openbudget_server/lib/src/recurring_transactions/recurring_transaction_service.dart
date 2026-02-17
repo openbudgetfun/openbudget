@@ -1,3 +1,4 @@
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_server/src/budgets/budget_service.dart';
 import 'package:openbudget_server/src/exceptions/exceptions.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
@@ -7,6 +8,8 @@ import 'package:serverpod/serverpod.dart' hide Transaction;
 ///
 /// All methods verify budget ownership before operating.
 class RecurringTransactionService {
+  static final _log = ObLogger('RecurringTransactionService');
+
   /// Creates a recurring transaction, verifying budget ownership.
   static Future<RecurringTransaction> create(
     Session session, {
@@ -21,6 +24,9 @@ class RecurringTransactionService {
     UuidValue? payeeId,
     DateTime? endDate,
   }) async {
+    _log.info(
+      'Creating recurring transaction desc=$description freq=$frequency',
+    );
     await BudgetService.getById(session, budgetId: budgetId);
 
     final recurring = RecurringTransaction(
@@ -120,6 +126,7 @@ class RecurringTransactionService {
     Session session, {
     required UuidValue recurringTransactionId,
   }) async {
+    _log.info('Deleting recurring transaction id=$recurringTransactionId');
     final recurring = await getById(
       session,
       recurringTransactionId: recurringTransactionId,
@@ -138,6 +145,7 @@ class RecurringTransactionService {
     Session session, {
     required UuidValue budgetId,
   }) async {
+    _log.info('Posting due recurring transactions for budget=$budgetId');
     await BudgetService.getById(session, budgetId: budgetId);
 
     final now = DateTime.now();

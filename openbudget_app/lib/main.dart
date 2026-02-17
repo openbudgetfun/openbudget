@@ -1,14 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
+import 'package:openbudget_app/src/analytics/analytics_provider.dart';
+import 'package:openbudget_app/src/logging/app_logging.dart';
+import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
 import 'package:openbudget_app/src/providers/theme_mode_provider.dart';
 import 'package:openbudget_app/src/routing/app_router.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  runApp(const ProviderScope(child: OpenBudgetApp()));
+  final container = ProviderContainer();
+  initAppLogging(container.read(serverpodClientProvider));
+
+  // Initialize PostHog analytics (no-ops in debug mode).
+  await container.read(analyticsProvider).init();
+
+  runApp(
+    UncontrolledProviderScope(
+      container: container,
+      child: const OpenBudgetApp(),
+    ),
+  );
 }
 
 class OpenBudgetApp extends HookConsumerWidget {

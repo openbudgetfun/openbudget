@@ -1,3 +1,4 @@
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_server/src/budgets/budget_service.dart';
 import 'package:openbudget_server/src/exceptions/exceptions.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
@@ -7,6 +8,8 @@ import 'package:serverpod/serverpod.dart';
 ///
 /// All methods verify budget ownership before operating on categories.
 class CategoryService {
+  static final _log = ObLogger('CategoryService');
+
   /// Creates a category within a budget, verifying ownership.
   static Future<Category> create(
     Session session, {
@@ -14,7 +17,7 @@ class CategoryService {
     required UuidValue budgetId,
     required int sortOrder,
   }) async {
-    // Verify the user owns this budget.
+    _log.info('Creating category name=$name budget=$budgetId');
     await BudgetService.getById(session, budgetId: budgetId);
 
     final category = Category(
@@ -31,6 +34,7 @@ class CategoryService {
     Session session, {
     required UuidValue budgetId,
   }) async {
+    _log.info('Listing categories for budget=$budgetId');
     await BudgetService.getById(session, budgetId: budgetId);
 
     return Category.db.find(
@@ -63,6 +67,7 @@ class CategoryService {
     int? sortOrder,
     bool? isHidden,
   }) async {
+    _log.info('Updating category id=$categoryId');
     final category = await getById(session, categoryId: categoryId);
 
     final updated = category.copyWith(
@@ -96,6 +101,7 @@ class CategoryService {
     Session session, {
     required UuidValue categoryId,
   }) async {
+    _log.info('Deleting category id=$categoryId');
     final category = await getById(session, categoryId: categoryId);
     return Category.db.deleteRow(session, category);
   }
