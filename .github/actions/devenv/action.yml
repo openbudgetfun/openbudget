@@ -47,3 +47,7 @@ runs:
     - name: resolve dependencies
       run: flutter pub get
       shell: bash
+
+    - name: activate melos
+      run: dart pub global activate melos
+      shell: bash

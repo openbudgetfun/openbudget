@@ -21,7 +21,7 @@
         "exts": ["sh", "bash"]
       },
       {
-        "command": "dart format -o show {{file_path}}",
+        "command": "dart format -o show {{file_path}} | head -n -1",
         "exts": ["dart"]
       }
     ]

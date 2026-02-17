@@ -20,7 +20,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: lint analyze
-        run: dart run melos run analyze --no-select
+        run: melos run analyze --no-select
 
   test:
     runs-on: blacksmith-2vcpu-ubuntu-2404
@@ -31,7 +31,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: run tests
-        run: dart run melos run test --no-select
+        run: melos run test --no-select
 
   server-test:
     runs-on: blacksmith-2vcpu-ubuntu-2404
@@ -83,7 +83,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: run server tests
-        run: dart run melos exec --scope="openbudget_server" -- dart test
+        run: melos exec --scope="openbudget_server" -- dart test
 
   format:
     runs-on: blacksmith-2vcpu-ubuntu-2404
