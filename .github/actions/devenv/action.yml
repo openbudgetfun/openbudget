@@ -44,7 +44,7 @@ runs:
       shell: bash
 
     - name: build devenv shell
-      run: devenv shell --command true
+      run: devenv shell -- true
       shell: bash
 
     # ── Dependency caching ───────────────────────────────────────────────
