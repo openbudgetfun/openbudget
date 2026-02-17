@@ -30,8 +30,10 @@ jobs:
       - uses: ./.github/actions/devenv
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: run tests
-        run: melos run test --no-select
+      - name: run flutter tests
+        run: melos run test:flutter --no-select
+      - name: run dart tests
+        run: melos exec --scope="openbudget_core" -- dart test
 
   server-test:
     runs-on: blacksmith-2vcpu-ubuntu-2404
