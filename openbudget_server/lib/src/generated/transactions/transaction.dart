@@ -338,160 +338,74 @@ class _TransactionImpl extends Transaction {
 class TransactionUpdateTable extends _i1.UpdateTable<TransactionTable> {
   TransactionUpdateTable(super.table);
 
-  _i1.ColumnValue<String, String> description(String value) => _i1.ColumnValue(
-    table.description,
-    value,
-  );
+  _i1.ColumnValue<String, String> description(String value) =>
+      _i1.ColumnValue(table.description, value);
 
-  _i1.ColumnValue<int, int> amountCents(int value) => _i1.ColumnValue(
-    table.amountCents,
-    value,
-  );
+  _i1.ColumnValue<int, int> amountCents(int value) =>
+      _i1.ColumnValue(table.amountCents, value);
 
-  _i1.ColumnValue<String, String> currencyCode(String value) => _i1.ColumnValue(
-    table.currencyCode,
-    value,
-  );
+  _i1.ColumnValue<String, String> currencyCode(String value) =>
+      _i1.ColumnValue(table.currencyCode, value);
 
   _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> envelopeId(
     _i1.UuidValue? value,
-  ) => _i1.ColumnValue(
-    table.envelopeId,
-    value,
-  );
+  ) => _i1.ColumnValue(table.envelopeId, value);
 
   _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> budgetId(_i1.UuidValue value) =>
-      _i1.ColumnValue(
-        table.budgetId,
-        value,
-      );
+      _i1.ColumnValue(table.budgetId, value);
 
   _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> accountId(
     _i1.UuidValue? value,
-  ) => _i1.ColumnValue(
-    table.accountId,
-    value,
-  );
+  ) => _i1.ColumnValue(table.accountId, value);
 
   _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> payeeId(_i1.UuidValue? value) =>
-      _i1.ColumnValue(
-        table.payeeId,
-        value,
-      );
+      _i1.ColumnValue(table.payeeId, value);
 
   _i1.ColumnValue<DateTime, DateTime> transactionDate(DateTime value) =>
-      _i1.ColumnValue(
-        table.transactionDate,
-        value,
-      );
+      _i1.ColumnValue(table.transactionDate, value);
 
   _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> transferPairId(
     _i1.UuidValue? value,
-  ) => _i1.ColumnValue(
-    table.transferPairId,
-    value,
-  );
+  ) => _i1.ColumnValue(table.transferPairId, value);
 
   _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> parentTransactionId(
     _i1.UuidValue? value,
-  ) => _i1.ColumnValue(
-    table.parentTransactionId,
-    value,
-  );
+  ) => _i1.ColumnValue(table.parentTransactionId, value);
 
-  _i1.ColumnValue<String, String> memo(String? value) => _i1.ColumnValue(
-    table.memo,
-    value,
-  );
+  _i1.ColumnValue<String, String> memo(String? value) =>
+      _i1.ColumnValue(table.memo, value);
 
-  _i1.ColumnValue<bool, bool> cleared(bool value) => _i1.ColumnValue(
-    table.cleared,
-    value,
-  );
+  _i1.ColumnValue<bool, bool> cleared(bool value) =>
+      _i1.ColumnValue(table.cleared, value);
 
-  _i1.ColumnValue<bool, bool> reconciled(bool value) => _i1.ColumnValue(
-    table.reconciled,
-    value,
-  );
+  _i1.ColumnValue<bool, bool> reconciled(bool value) =>
+      _i1.ColumnValue(table.reconciled, value);
 
-  _i1.ColumnValue<String, String> flagColor(String? value) => _i1.ColumnValue(
-    table.flagColor,
-    value,
-  );
+  _i1.ColumnValue<String, String> flagColor(String? value) =>
+      _i1.ColumnValue(table.flagColor, value);
 
   _i1.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
-      _i1.ColumnValue(
-        table.createdAt,
-        value,
-      );
+      _i1.ColumnValue(table.createdAt, value);
 }
 
 class TransactionTable extends _i1.Table<_i1.UuidValue?> {
   TransactionTable({super.tableRelation}) : super(tableName: 'transaction') {
     updateTable = TransactionUpdateTable(this);
-    description = _i1.ColumnString(
-      'description',
-      this,
-    );
-    amountCents = _i1.ColumnInt(
-      'amountCents',
-      this,
-    );
-    currencyCode = _i1.ColumnString(
-      'currencyCode',
-      this,
-    );
-    envelopeId = _i1.ColumnUuid(
-      'envelopeId',
-      this,
-    );
-    budgetId = _i1.ColumnUuid(
-      'budgetId',
-      this,
-    );
-    accountId = _i1.ColumnUuid(
-      'accountId',
-      this,
-    );
-    payeeId = _i1.ColumnUuid(
-      'payeeId',
-      this,
-    );
-    transactionDate = _i1.ColumnDateTime(
-      'transactionDate',
-      this,
-    );
-    transferPairId = _i1.ColumnUuid(
-      'transferPairId',
-      this,
-    );
-    parentTransactionId = _i1.ColumnUuid(
-      'parentTransactionId',
-      this,
-    );
-    memo = _i1.ColumnString(
-      'memo',
-      this,
-    );
-    cleared = _i1.ColumnBool(
-      'cleared',
-      this,
-      hasDefault: true,
-    );
-    reconciled = _i1.ColumnBool(
-      'reconciled',
-      this,
-      hasDefault: true,
-    );
-    flagColor = _i1.ColumnString(
-      'flagColor',
-      this,
-    );
-    createdAt = _i1.ColumnDateTime(
-      'createdAt',
-      this,
-      hasDefault: true,
-    );
+    description = _i1.ColumnString('description', this);
+    amountCents = _i1.ColumnInt('amountCents', this);
+    currencyCode = _i1.ColumnString('currencyCode', this);
+    envelopeId = _i1.ColumnUuid('envelopeId', this);
+    budgetId = _i1.ColumnUuid('budgetId', this);
+    accountId = _i1.ColumnUuid('accountId', this);
+    payeeId = _i1.ColumnUuid('payeeId', this);
+    transactionDate = _i1.ColumnDateTime('transactionDate', this);
+    transferPairId = _i1.ColumnUuid('transferPairId', this);
+    parentTransactionId = _i1.ColumnUuid('parentTransactionId', this);
+    memo = _i1.ColumnString('memo', this);
+    cleared = _i1.ColumnBool('cleared', this, hasDefault: true);
+    reconciled = _i1.ColumnBool('reconciled', this, hasDefault: true);
+    flagColor = _i1.ColumnString('flagColor', this);
+    createdAt = _i1.ColumnDateTime('createdAt', this, hasDefault: true);
   }
 
   late final TransactionUpdateTable updateTable;
@@ -675,10 +589,7 @@ class TransactionRepository {
     _i1.UuidValue id, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.findById<Transaction>(
-      id,
-      transaction: transaction,
-    );
+    return session.db.findById<Transaction>(id, transaction: transaction);
   }
 
   /// Inserts all [Transaction]s in the list and returns the inserted rows.
@@ -692,10 +603,7 @@ class TransactionRepository {
     List<Transaction> rows, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.insert<Transaction>(
-      rows,
-      transaction: transaction,
-    );
+    return session.db.insert<Transaction>(rows, transaction: transaction);
   }
 
   /// Inserts a single [Transaction] and returns the inserted row.
@@ -706,10 +614,7 @@ class TransactionRepository {
     Transaction row, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.insertRow<Transaction>(
-      row,
-      transaction: transaction,
-    );
+    return session.db.insertRow<Transaction>(row, transaction: transaction);
   }
 
   /// Updates all [Transaction]s in the list and returns the updated rows. If
@@ -794,10 +699,7 @@ class TransactionRepository {
     List<Transaction> rows, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.delete<Transaction>(
-      rows,
-      transaction: transaction,
-    );
+    return session.db.delete<Transaction>(rows, transaction: transaction);
   }
 
   /// Deletes a single [Transaction].
@@ -806,10 +708,7 @@ class TransactionRepository {
     Transaction row, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.deleteRow<Transaction>(
-      row,
-      transaction: transaction,
-    );
+    return session.db.deleteRow<Transaction>(row, transaction: transaction);
   }
 
   /// Deletes all rows matching the [where] expression.

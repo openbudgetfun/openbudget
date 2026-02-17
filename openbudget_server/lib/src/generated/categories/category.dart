@@ -184,59 +184,30 @@ class _CategoryImpl extends Category {
 class CategoryUpdateTable extends _i1.UpdateTable<CategoryTable> {
   CategoryUpdateTable(super.table);
 
-  _i1.ColumnValue<String, String> name(String value) => _i1.ColumnValue(
-    table.name,
-    value,
-  );
+  _i1.ColumnValue<String, String> name(String value) =>
+      _i1.ColumnValue(table.name, value);
 
   _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> budgetId(_i1.UuidValue value) =>
-      _i1.ColumnValue(
-        table.budgetId,
-        value,
-      );
+      _i1.ColumnValue(table.budgetId, value);
 
-  _i1.ColumnValue<int, int> sortOrder(int value) => _i1.ColumnValue(
-    table.sortOrder,
-    value,
-  );
+  _i1.ColumnValue<int, int> sortOrder(int value) =>
+      _i1.ColumnValue(table.sortOrder, value);
 
-  _i1.ColumnValue<bool, bool> isHidden(bool? value) => _i1.ColumnValue(
-    table.isHidden,
-    value,
-  );
+  _i1.ColumnValue<bool, bool> isHidden(bool? value) =>
+      _i1.ColumnValue(table.isHidden, value);
 
   _i1.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
-      _i1.ColumnValue(
-        table.createdAt,
-        value,
-      );
+      _i1.ColumnValue(table.createdAt, value);
 }
 
 class CategoryTable extends _i1.Table<_i1.UuidValue?> {
   CategoryTable({super.tableRelation}) : super(tableName: 'category') {
     updateTable = CategoryUpdateTable(this);
-    name = _i1.ColumnString(
-      'name',
-      this,
-    );
-    budgetId = _i1.ColumnUuid(
-      'budgetId',
-      this,
-    );
-    sortOrder = _i1.ColumnInt(
-      'sortOrder',
-      this,
-    );
-    isHidden = _i1.ColumnBool(
-      'isHidden',
-      this,
-      hasDefault: true,
-    );
-    createdAt = _i1.ColumnDateTime(
-      'createdAt',
-      this,
-      hasDefault: true,
-    );
+    name = _i1.ColumnString('name', this);
+    budgetId = _i1.ColumnUuid('budgetId', this);
+    sortOrder = _i1.ColumnInt('sortOrder', this);
+    isHidden = _i1.ColumnBool('isHidden', this, hasDefault: true);
+    createdAt = _i1.ColumnDateTime('createdAt', this, hasDefault: true);
   }
 
   late final CategoryUpdateTable updateTable;
@@ -381,10 +352,7 @@ class CategoryRepository {
     _i1.UuidValue id, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.findById<Category>(
-      id,
-      transaction: transaction,
-    );
+    return session.db.findById<Category>(id, transaction: transaction);
   }
 
   /// Inserts all [Category]s in the list and returns the inserted rows.
@@ -398,10 +366,7 @@ class CategoryRepository {
     List<Category> rows, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.insert<Category>(
-      rows,
-      transaction: transaction,
-    );
+    return session.db.insert<Category>(rows, transaction: transaction);
   }
 
   /// Inserts a single [Category] and returns the inserted row.
@@ -412,10 +377,7 @@ class CategoryRepository {
     Category row, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.insertRow<Category>(
-      row,
-      transaction: transaction,
-    );
+    return session.db.insertRow<Category>(row, transaction: transaction);
   }
 
   /// Updates all [Category]s in the list and returns the updated rows. If
@@ -500,10 +462,7 @@ class CategoryRepository {
     List<Category> rows, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.delete<Category>(
-      rows,
-      transaction: transaction,
-    );
+    return session.db.delete<Category>(rows, transaction: transaction);
   }
 
   /// Deletes a single [Category].
@@ -512,10 +471,7 @@ class CategoryRepository {
     Category row, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.deleteRow<Category>(
-      row,
-      transaction: transaction,
-    );
+    return session.db.deleteRow<Category>(row, transaction: transaction);
   }
 
   /// Deletes all rows matching the [where] expression.

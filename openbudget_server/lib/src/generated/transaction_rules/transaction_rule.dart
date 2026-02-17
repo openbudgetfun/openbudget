@@ -191,62 +191,31 @@ class TransactionRuleUpdateTable extends _i1.UpdateTable<TransactionRuleTable> {
   TransactionRuleUpdateTable(super.table);
 
   _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> budgetId(_i1.UuidValue value) =>
-      _i1.ColumnValue(
-        table.budgetId,
-        value,
-      );
+      _i1.ColumnValue(table.budgetId, value);
 
   _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> payeeId(_i1.UuidValue value) =>
-      _i1.ColumnValue(
-        table.payeeId,
-        value,
-      );
+      _i1.ColumnValue(table.payeeId, value);
 
   _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> targetEnvelopeId(
     _i1.UuidValue value,
-  ) => _i1.ColumnValue(
-    table.targetEnvelopeId,
-    value,
-  );
+  ) => _i1.ColumnValue(table.targetEnvelopeId, value);
 
-  _i1.ColumnValue<bool, bool> enabled(bool value) => _i1.ColumnValue(
-    table.enabled,
-    value,
-  );
+  _i1.ColumnValue<bool, bool> enabled(bool value) =>
+      _i1.ColumnValue(table.enabled, value);
 
   _i1.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
-      _i1.ColumnValue(
-        table.createdAt,
-        value,
-      );
+      _i1.ColumnValue(table.createdAt, value);
 }
 
 class TransactionRuleTable extends _i1.Table<_i1.UuidValue?> {
   TransactionRuleTable({super.tableRelation})
     : super(tableName: 'transaction_rule') {
     updateTable = TransactionRuleUpdateTable(this);
-    budgetId = _i1.ColumnUuid(
-      'budgetId',
-      this,
-    );
-    payeeId = _i1.ColumnUuid(
-      'payeeId',
-      this,
-    );
-    targetEnvelopeId = _i1.ColumnUuid(
-      'targetEnvelopeId',
-      this,
-    );
-    enabled = _i1.ColumnBool(
-      'enabled',
-      this,
-      hasDefault: true,
-    );
-    createdAt = _i1.ColumnDateTime(
-      'createdAt',
-      this,
-      hasDefault: true,
-    );
+    budgetId = _i1.ColumnUuid('budgetId', this);
+    payeeId = _i1.ColumnUuid('payeeId', this);
+    targetEnvelopeId = _i1.ColumnUuid('targetEnvelopeId', this);
+    enabled = _i1.ColumnBool('enabled', this, hasDefault: true);
+    createdAt = _i1.ColumnDateTime('createdAt', this, hasDefault: true);
   }
 
   late final TransactionRuleUpdateTable updateTable;
@@ -393,10 +362,7 @@ class TransactionRuleRepository {
     _i1.UuidValue id, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.findById<TransactionRule>(
-      id,
-      transaction: transaction,
-    );
+    return session.db.findById<TransactionRule>(id, transaction: transaction);
   }
 
   /// Inserts all [TransactionRule]s in the list and returns the inserted rows.
@@ -410,10 +376,7 @@ class TransactionRuleRepository {
     List<TransactionRule> rows, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.insert<TransactionRule>(
-      rows,
-      transaction: transaction,
-    );
+    return session.db.insert<TransactionRule>(rows, transaction: transaction);
   }
 
   /// Inserts a single [TransactionRule] and returns the inserted row.
@@ -424,10 +387,7 @@ class TransactionRuleRepository {
     TransactionRule row, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.insertRow<TransactionRule>(
-      row,
-      transaction: transaction,
-    );
+    return session.db.insertRow<TransactionRule>(row, transaction: transaction);
   }
 
   /// Updates all [TransactionRule]s in the list and returns the updated rows. If
@@ -514,10 +474,7 @@ class TransactionRuleRepository {
     List<TransactionRule> rows, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.delete<TransactionRule>(
-      rows,
-      transaction: transaction,
-    );
+    return session.db.delete<TransactionRule>(rows, transaction: transaction);
   }
 
   /// Deletes a single [TransactionRule].
@@ -526,10 +483,7 @@ class TransactionRuleRepository {
     TransactionRule row, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.deleteRow<TransactionRule>(
-      row,
-      transaction: transaction,
-    );
+    return session.db.deleteRow<TransactionRule>(row, transaction: transaction);
   }
 
   /// Deletes all rows matching the [where] expression.
