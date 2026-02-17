@@ -1,0 +1,47 @@
+name: devenv
+description: "Setup development environment with devenv"
+inputs:
+  github-token:
+    description: Provide a github token
+    required: true
+  cache-version:
+    description: The version of the cache to use.
+    required: false
+    default: "v1"
+
+runs:
+  using: composite
+  steps:
+    - name: install nix
+      uses: cachix/install-nix-action@v31
+      with:
+        github_access_token: ${{ inputs.github-token }}
+
+    - name: setup nix environment
+      run: |
+        nix profile add --accept-flake-config nixpkgs#cachix
+        cachix use devenv
+        nix profile add nixpkgs#devenv
+      shell: bash
+
+    - name: cache fvm flutter sdk
+      uses: actions/cache@v4
+      with:
+        path: ~/fvm/versions
+        key: ${{ runner.os }}-fvm-${{ inputs.cache-version }}-${{ hashFiles('.fvmrc') }}
+        restore-keys: |
+          ${{ runner.os }}-fvm-${{ inputs.cache-version }}-
+
+    - name: cache pub dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.pub-cache
+        key: ${{ runner.os }}-pub-${{ inputs.cache-version }}-${{ hashFiles('**/pubspec.yaml', '**/pubspec.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-pub-${{ inputs.cache-version }}-
+
+    - name: install flutter and resolve dependencies
+      run: |
+        fvm install
+        dart pub get
+      shell: devenv shell -- bash -e {0}

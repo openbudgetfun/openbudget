@@ -6,43 +6,38 @@ on:
   pull_request:
     branches: [main]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 jobs:
   analyze:
     runs-on: blacksmith-2vcpu-ubuntu-2404
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-      - name: Read Flutter version
-        id: fvm
-        run: echo "FLUTTER_VERSION=$(jq -r '.flutter' .fvmrc)" >> "$GITHUB_OUTPUT"
-      - uses: subosito/flutter-action@v2
+      - uses: ./.github/actions/devenv
         with:
-          flutter-version: ${{ steps.fvm.outputs.FLUTTER_VERSION }}
-      - name: Link FVM SDK path
-        run: mkdir -p .fvm && ln -s "$FLUTTER_ROOT" .fvm/flutter_sdk
-      - run: dart pub get
-      - run: dart pub global activate melos
-      - run: melos run analyze
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: lint analyze
+        run: lint:analyze
+        shell: devenv shell -- bash -e {0}
 
   test:
     runs-on: blacksmith-2vcpu-ubuntu-2404
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-      - name: Read Flutter version
-        id: fvm
-        run: echo "FLUTTER_VERSION=$(jq -r '.flutter' .fvmrc)" >> "$GITHUB_OUTPUT"
-      - uses: subosito/flutter-action@v2
+      - uses: ./.github/actions/devenv
         with:
-          flutter-version: ${{ steps.fvm.outputs.FLUTTER_VERSION }}
-      - name: Link FVM SDK path
-        run: mkdir -p .fvm && ln -s "$FLUTTER_ROOT" .fvm/flutter_sdk
-      - run: dart pub get
-      - run: dart pub global activate melos
-      - run: melos exec --scope="openbudget_app" -- flutter test
-      - run: melos exec --scope="openbudget_wired" -- flutter test
-      - run: melos exec --scope="openbudget_core" -- dart test
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: run tests
+        run: test:all
+        shell: devenv shell -- bash -e {0}
 
   server-test:
     runs-on: blacksmith-2vcpu-ubuntu-2404
+    timeout-minutes: 30
     services:
       postgres:
         image: pgvector/pgvector:pg16
@@ -59,7 +54,7 @@ jobs:
           --health-retries 5
     steps:
       - uses: actions/checkout@v4
-      - name: Start Redis with password
+      - name: start redis
         run: |
           docker run -d --name redis-test \
             --network host \
@@ -68,7 +63,7 @@ jobs:
           for i in $(seq 1 10); do
             redis-cli -p 9091 -a changeme ping 2>/dev/null && break || sleep 1
           done
-      - name: Create test passwords
+      - name: create test passwords
         run: |
           cat > openbudget_server/config/passwords.yaml << 'EOF'
           development:
@@ -86,49 +81,39 @@ jobs:
             jwtHmacSha512PrivateKey: 'ci-jwt-key-must-be-long-enough-32chars'
             jwtRefreshTokenHashPepper: 'ci-jwt-refresh-pepper'
           EOF
-      - name: Read Flutter version
-        id: fvm
-        run: echo "FLUTTER_VERSION=$(jq -r '.flutter' .fvmrc)" >> "$GITHUB_OUTPUT"
-      - uses: subosito/flutter-action@v2
+      - uses: ./.github/actions/devenv
         with:
-          flutter-version: ${{ steps.fvm.outputs.FLUTTER_VERSION }}
-      - name: Link FVM SDK path
-        run: mkdir -p .fvm && ln -s "$FLUTTER_ROOT" .fvm/flutter_sdk
-      - run: dart pub get
-      - run: dart pub global activate melos
-      - run: melos exec --scope="openbudget_server" -- dart test
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: run server tests
+        run: melos exec --scope="openbudget_server" -- dart test
+        shell: devenv shell -- bash -e {0}
 
   format:
     runs-on: blacksmith-2vcpu-ubuntu-2404
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-      - name: Read Flutter version
-        id: fvm
-        run: echo "FLUTTER_VERSION=$(jq -r '.flutter' .fvmrc)" >> "$GITHUB_OUTPUT"
-      - uses: subosito/flutter-action@v2
+      - uses: ./.github/actions/devenv
         with:
-          flutter-version: ${{ steps.fvm.outputs.FLUTTER_VERSION }}
-      - name: Link FVM SDK path
-        run: mkdir -p .fvm && ln -s "$FLUTTER_ROOT" .fvm/flutter_sdk
-      - run: dart pub get
-      - run: dart format --set-exit-if-changed .
-      - uses: dprint/check@v2.2
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: check dart formatting
+        run: dart format --set-exit-if-changed .
+        shell: devenv shell -- bash -e {0}
+      - name: check dprint formatting
+        run: dprint check
+        shell: devenv shell -- bash -e {0}
 
   integration-test:
     runs-on: blacksmith-2vcpu-ubuntu-2404
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-      - name: Read Flutter version
-        id: fvm
-        run: echo "FLUTTER_VERSION=$(jq -r '.flutter' .fvmrc)" >> "$GITHUB_OUTPUT"
-      - uses: subosito/flutter-action@v2
+      - name: install linux desktop dependencies
+        run: sudo apt-get update && sudo apt-get install -y libgtk-3-dev libx11-dev pkg-config cmake ninja-build libblkid-dev libwebkit2gtk-4.1-dev libsecret-1-dev
+      - uses: ./.github/actions/devenv
         with:
-          flutter-version: ${{ steps.fvm.outputs.FLUTTER_VERSION }}
-      - name: Link FVM SDK path
-        run: mkdir -p .fvm && ln -s "$FLUTTER_ROOT" .fvm/flutter_sdk
-      - run: sudo apt-get update && sudo apt-get install -y libgtk-3-dev libx11-dev pkg-config cmake ninja-build libblkid-dev libwebkit2gtk-4.1-dev libsecret-1-dev
-      - run: dart pub get
-      - name: Run integration tests
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: run integration tests
         working-directory: openbudget_app
         run: |
           xvfb-run bash -c '
@@ -138,13 +123,14 @@ jobs:
               echo "::endgroup::"
             done
           '
+        shell: devenv shell -- bash -e {0}
 
   no-stateful-or-stateless:
     name: Ban StatefulWidget and StatelessWidget
     runs-on: blacksmith-2vcpu-ubuntu-2404
     steps:
       - uses: actions/checkout@v4
-      - name: Check for banned widget types
+      - name: check for banned widget types
         run: |
           VIOLATIONS=$(grep -rn 'extends StatefulWidget\|extends StatelessWidget' \
             --include='*.dart' \
@@ -170,12 +156,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - name: Check for native dependency changes
+      - name: check for native dependency changes
         run: |
           BASE=${{ github.event.pull_request.base.sha }}
 
-          # Files that indicate native dependency changes
           NATIVE_FILES=(
             "openbudget_app/ios/Podfile"
             "openbudget_app/ios/Podfile.lock"
@@ -198,7 +182,6 @@ jobs:
             fi
           done
 
-          # Also check if pubspec.yaml added/changed any plugin dependencies
           if git diff "$BASE"...HEAD -- openbudget_app/pubspec.yaml | grep -E '^\+.*:' | grep -vE '^\+\+\+|^\+\s*#|^\+\s*$|path:|sdk:' | head -20; then
             echo "::notice::App pubspec.yaml dependencies changed — review for native plugins"
           fi
@@ -214,10 +197,8 @@ jobs:
     runs-on: blacksmith-2vcpu-ubuntu-2404
     steps:
       - uses: actions/checkout@v4
-      - name: Check for unpinned dependencies
+      - name: check for unpinned dependencies
         run: |
-          # Extract dependency lines from openbudget_app/pubspec.yaml
-          # Skip path deps, sdk deps, and 'any'
           VIOLATIONS=$(sed -n '/^dependencies:/,/^[^ ]/p' openbudget_app/pubspec.yaml \
             | grep -E ':\s*[\^>~]' \
             | grep -v '^\s*#' \
@@ -240,10 +221,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Install gitleaks
+      - name: install gitleaks
         run: |
           GITLEAKS_VERSION=8.24.3
           curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" \
             | tar xz -C /usr/local/bin gitleaks
-      - name: Run gitleaks
+      - name: run gitleaks
         run: gitleaks detect --source . --verbose --redact --config .gitleaks.toml
