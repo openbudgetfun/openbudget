@@ -48,5 +48,5 @@ runs:
           ${{ runner.os }}-pub-${{ inputs.cache-version }}-
 
     - name: resolve dependencies
-      run: dart pub get
+      run: flutter pub get
       shell: devenv shell -- bash -e {0}
