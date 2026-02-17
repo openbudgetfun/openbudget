@@ -52,7 +52,23 @@
     port = 8091;
   };
 
+  processes = {
+    "server:all" = {
+      exec = ''
+        cd "$DEVENV_ROOT/openbudget_server"
+        dart bin/main.dart --apply-migrations
+      '';
+      process-compose = {
+        depends_on = {
+          "devenv-up-postgres".condition = "process_healthy";
+          "devenv-up-redis".condition = "process_healthy";
+        };
+      };
+    };
+  };
+
   scripts = {
+    # ── Core toolchain wrappers ──────────────────────────────────────────
     "flutter" = {
       exec = ''
         set -e
@@ -73,6 +89,14 @@
         fvm flutter $@
       '';
       description = "Run flutter commands.";
+    };
+    "flutter:app" = {
+      exec = ''
+        set -e
+        cd "$DEVENV_ROOT/openbudget_app"
+        flutter $@
+      '';
+      description = "Run flutter commands from the openbudget_app directory.";
     };
     "dart" = {
       exec = ''
@@ -95,33 +119,69 @@
       '';
       description = "Run the serverpod cli.";
     };
-    "update:deps" = {
+
+    # ── Services ─────────────────────────────────────────────────────────
+    "server:start" = {
       exec = ''
         set -e
-        devenv update
-        flutter pub upgrade
+        cd "$DEVENV_ROOT/openbudget_server"
+        dart bin/main.dart --apply-migrations
       '';
-      description = "Update all project dependencies.";
+      description = "Start the Serverpod development server.";
     };
-    "fix:all" = {
+
+    # ── Testing ──────────────────────────────────────────────────────────
+    "test:all" = {
       exec = ''
         set -e
-        fix:format
+        melos run test --no-select
       '';
-      description = "Fix all fixable lint issues.";
+      description = "Run tests in all packages.";
     };
-    "fix:format" = {
+    "test:flutter" = {
       exec = ''
         set -e
+        melos run test:flutter --no-select
+      '';
+      description = "Run Flutter tests only.";
+    };
+    "test:integration" = {
+      exec = ''
+        set -e
+        cd "$DEVENV_ROOT/openbudget_app"
+        flutter test integration_test
+      '';
+      description = "Run Patrol integration tests.";
+    };
+
+    # ── Analysis & formatting ────────────────────────────────────────────
+    "analyze" = {
+      exec = ''
+        set -e
+        melos run analyze --no-select
+      '';
+      description = "Run dart analyze across all packages.";
+    };
+    "format" = {
+      exec = ''
+        set -e
+        melos run format
         dprint fmt --config "$DEVENV_ROOT/dprint.json"
       '';
-      description = "Fix formatting for entire project.";
+      description = "Format all code (Dart and non-Dart).";
+    };
+    "format:check" = {
+      exec = ''
+        set -e
+        dprint check --config "$DEVENV_ROOT/dprint.json"
+      '';
+      description = "Check that all non-Dart formatting is correct.";
     };
     "lint:all" = {
       exec = ''
         set -e
-        lint:format
-        melos analyze
+        format:check
+        analyze
       '';
       description = "Lint all project files.";
     };
@@ -132,6 +192,20 @@
       '';
       description = "Check all formatting is correct.";
     };
+    "fix:all" = {
+      exec = ''
+        set -e
+        format
+      '';
+      description = "Fix all fixable lint issues.";
+    };
+    "fix:format" = {
+      exec = ''
+        set -e
+        dprint fmt --config "$DEVENV_ROOT/dprint.json"
+      '';
+      description = "Fix formatting for entire project.";
+    };
     "dartfmt" = {
       exec = ''
         set -e
@@ -140,6 +214,8 @@
       description = "The `dart format` executable for formatting the workspace.";
       binary = "bash";
     };
+
+    # ── Code generation ──────────────────────────────────────────────────
     "runner:build" = {
       exec = ''
         set -e
@@ -154,13 +230,29 @@
       '';
       description = "Run build_runner in watch mode.";
     };
-    "server:start" = {
+    "runner:serverpod" = {
       exec = ''
         set -e
-        cd "$DEVENV_ROOT/openbudget_server"
-        dart bin/main.dart --apply-migrations
+        melos run serverpod:generate
       '';
-      description = "Start the Serverpod development server.";
+      description = "Run Serverpod code generation.";
+    };
+
+    # ── Utilities ────────────────────────────────────────────────────────
+    "clean" = {
+      exec = ''
+        set -e
+        melos run clean --no-select
+      '';
+      description = "Clean all Flutter packages.";
+    };
+    "update:deps" = {
+      exec = ''
+        set -e
+        devenv update
+        flutter pub upgrade
+      '';
+      description = "Update all project dependencies.";
     };
   };
 }
