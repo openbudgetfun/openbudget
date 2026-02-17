@@ -48,6 +48,8 @@ envelope:
   - update:
   - reorder:
   - delete:
+logIngest:
+  - ingest:
 monthlyAllocation:
   - upsert:
   - list:

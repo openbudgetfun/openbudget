@@ -67,6 +67,9 @@ build/
 # Shorebird
 .shorebird/
 
+# Temp / dev logs
+.temp/
+
 # Lock files — only keep pubspec.lock for the app package
 pubspec.lock
 !openbudget_app/pubspec.lock

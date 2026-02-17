@@ -1,3 +1,4 @@
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_server/src/budgets/budget_service.dart';
 import 'package:openbudget_server/src/envelopes/envelope_service.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
@@ -7,6 +8,8 @@ import 'package:serverpod/serverpod.dart';
 ///
 /// All methods verify budget ownership before operating.
 class MonthlyAllocationService {
+  static final _log = ObLogger('MonthlyAllocationService');
+
   /// Upserts an allocation for an envelope in a given month.
   ///
   /// If an allocation already exists for the envelope/year/month, it is
@@ -20,7 +23,9 @@ class MonthlyAllocationService {
     required int allocatedCents,
     int carryoverCents = 0,
   }) async {
-    // Verify ownership.
+    _log.info(
+      'Upserting allocation envelope=$envelopeId year=$year month=$month',
+    );
     await BudgetService.getById(session, budgetId: budgetId);
     await EnvelopeService.getById(session, envelopeId: envelopeId);
 
@@ -61,6 +66,7 @@ class MonthlyAllocationService {
     required int year,
     required int month,
   }) async {
+    _log.info('Listing allocations budget=$budgetId year=$year month=$month');
     await BudgetService.getById(session, budgetId: budgetId);
 
     return MonthlyAllocation.db.find(
@@ -83,6 +89,9 @@ class MonthlyAllocationService {
     required int targetYear,
     required int targetMonth,
   }) async {
+    _log.info(
+      'Copying allocations $sourceYear/$sourceMonth -> $targetYear/$targetMonth',
+    );
     await BudgetService.getById(session, budgetId: budgetId);
 
     final sourceAllocations = await listForBudgetMonth(
@@ -120,6 +129,9 @@ class MonthlyAllocationService {
     required int month,
     required int amountCents,
   }) async {
+    _log.info(
+      'Moving $amountCents cents from=$fromEnvelopeId to=$toEnvelopeId',
+    );
     await BudgetService.getById(session, budgetId: budgetId);
     await EnvelopeService.getById(session, envelopeId: fromEnvelopeId);
     await EnvelopeService.getById(session, envelopeId: toEnvelopeId);

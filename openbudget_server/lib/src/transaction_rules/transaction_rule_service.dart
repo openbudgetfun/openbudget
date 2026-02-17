@@ -1,3 +1,4 @@
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_server/src/budgets/budget_service.dart';
 import 'package:openbudget_server/src/exceptions/exceptions.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
@@ -8,6 +9,8 @@ import 'package:serverpod/serverpod.dart';
 /// Transaction rules auto-assign an envelope when a specific payee is used.
 /// Each payee can have at most one rule per budget (unique constraint).
 class TransactionRuleService {
+  static final _log = ObLogger('TransactionRuleService');
+
   /// Creates a transaction rule, verifying budget ownership.
   static Future<TransactionRule> create(
     Session session, {
@@ -15,6 +18,7 @@ class TransactionRuleService {
     required UuidValue payeeId,
     required UuidValue targetEnvelopeId,
   }) async {
+    _log.info('Creating rule payee=$payeeId envelope=$targetEnvelopeId');
     await BudgetService.getById(session, budgetId: budgetId);
 
     final rule = TransactionRule(
@@ -97,6 +101,7 @@ class TransactionRuleService {
     Session session, {
     required UuidValue ruleId,
   }) async {
+    _log.info('Deleting rule id=$ruleId');
     final rule = await getById(session, ruleId: ruleId);
     return TransactionRule.db.deleteRow(session, rule);
   }

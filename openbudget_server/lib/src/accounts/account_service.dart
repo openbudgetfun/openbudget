@@ -1,3 +1,4 @@
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_server/src/budgets/budget_service.dart';
 import 'package:openbudget_server/src/exceptions/exceptions.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
@@ -7,6 +8,8 @@ import 'package:serverpod/serverpod.dart';
 ///
 /// All methods verify budget ownership before operating on accounts.
 class AccountService {
+  static final _log = ObLogger('AccountService');
+
   /// Creates an account within a budget, verifying ownership.
   static Future<Account> create(
     Session session, {
@@ -18,6 +21,7 @@ class AccountService {
     required bool onBudget,
     required int sortOrder,
   }) async {
+    _log.info('Creating account name=$name type=$accountType budget=$budgetId');
     await BudgetService.getById(session, budgetId: budgetId);
 
     final account = Account(
@@ -30,7 +34,9 @@ class AccountService {
       sortOrder: sortOrder,
       isClosed: false,
     );
-    return Account.db.insertRow(session, account);
+    final created = await Account.db.insertRow(session, account);
+    _log.info('Account created id=${created.id}');
+    return created;
   }
 
   /// Lists all accounts for a budget, verifying ownership.
@@ -38,6 +44,7 @@ class AccountService {
     Session session, {
     required UuidValue budgetId,
   }) async {
+    _log.info('Listing accounts for budget=$budgetId');
     await BudgetService.getById(session, budgetId: budgetId);
 
     return Account.db.find(
@@ -72,6 +79,7 @@ class AccountService {
     int? sortOrder,
     bool? isClosed,
   }) async {
+    _log.info('Updating account id=$accountId');
     final account = await getById(session, accountId: accountId);
 
     final updated = account.copyWith(
@@ -90,6 +98,7 @@ class AccountService {
     Session session, {
     required UuidValue accountId,
   }) async {
+    _log.info('Deleting account id=$accountId');
     final account = await getById(session, accountId: accountId);
     return Account.db.deleteRow(session, account);
   }

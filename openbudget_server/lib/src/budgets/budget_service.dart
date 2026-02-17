@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_server/src/exceptions/exceptions.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart' hide Transaction;
@@ -8,6 +9,8 @@ import 'package:serverpod/serverpod.dart' hide Transaction;
 ///
 /// All methods require an authenticated session.
 class BudgetService {
+  static final _log = ObLogger('BudgetService');
+
   /// Returns the authenticated user's ID as a [UuidValue], or throws.
   static UuidValue _requireUserId(Session session) {
     final userIdentifier = session.authenticated?.userIdentifier;
@@ -21,6 +24,7 @@ class BudgetService {
     required String name,
     required String currencyCode,
   }) async {
+    _log.info('Creating budget name=$name currency=$currencyCode');
     final userId = _requireUserId(session);
 
     final budget = Budget(
@@ -28,19 +32,24 @@ class BudgetService {
       currencyCode: currencyCode,
       ownerId: userId,
     );
-    return Budget.db.insertRow(session, budget);
+    final created = await Budget.db.insertRow(session, budget);
+    _log.info('Budget created id=${created.id}');
+    return created;
   }
 
   /// Lists all budgets for the authenticated user.
   static Future<List<Budget>> listForUser(Session session) async {
+    _log.info('Listing budgets for user');
     final userId = _requireUserId(session);
 
-    return Budget.db.find(
+    final budgets = await Budget.db.find(
       session,
       where: (t) => t.ownerId.equals(userId),
       orderBy: (t) => t.createdAt,
       orderDescending: true,
     );
+    _log.info('Found ${budgets.length} budgets');
+    return budgets;
   }
 
   /// Fetches a single budget, verifying ownership.
@@ -64,6 +73,7 @@ class BudgetService {
     String? name,
     String? currencyCode,
   }) async {
+    _log.info('Updating budget id=$budgetId');
     final budget = await getById(session, budgetId: budgetId);
 
     final updated = budget.copyWith(
@@ -79,6 +89,7 @@ class BudgetService {
     Session session, {
     required UuidValue budgetId,
   }) async {
+    _log.info('Deleting budget id=$budgetId');
     final budget = await getById(session, budgetId: budgetId);
     return Budget.db.deleteRow(session, budget);
   }
@@ -91,6 +102,7 @@ class BudgetService {
     Session session, {
     required UuidValue budgetId,
   }) async {
+    _log.info('Exporting data for budget id=$budgetId');
     final budget = await getById(session, budgetId: budgetId);
 
     final categories = await Category.db.find(

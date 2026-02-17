@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_server/src/budgets/budget_service.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:openbudget_server/src/monthly_allocations/monthly_allocation_service.dart';
@@ -10,6 +11,8 @@ import 'package:serverpod/serverpod.dart';
 /// Templates store a snapshot of envelope allocations that can be applied
 /// to any month.
 class BudgetTemplateService {
+  static final _log = ObLogger('BudgetTemplateService');
+
   /// Saves a new template from the current allocations of a given month.
   static Future<BudgetTemplate> saveFromMonth(
     Session session, {
@@ -18,6 +21,7 @@ class BudgetTemplateService {
     required int year,
     required int month,
   }) async {
+    _log.info('Saving template name=$name from $year/$month');
     await BudgetService.getById(session, budgetId: budgetId);
 
     final allocations = await MonthlyAllocationService.listForBudgetMonth(
@@ -67,6 +71,7 @@ class BudgetTemplateService {
     required int year,
     required int month,
   }) async {
+    _log.info('Applying template=$templateId to $year/$month');
     final template = await BudgetTemplate.db.findById(session, templateId);
     if (template == null) {
       throw Exception('Budget template not found');
@@ -98,6 +103,7 @@ class BudgetTemplateService {
     Session session, {
     required UuidValue templateId,
   }) async {
+    _log.info('Deleting template id=$templateId');
     final template = await BudgetTemplate.db.findById(session, templateId);
     if (template == null) {
       throw Exception('Budget template not found');
