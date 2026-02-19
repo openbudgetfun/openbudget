@@ -161,14 +161,15 @@ void main() {
       expect(find.text('Add Category'), findsOneWidget);
     });
 
-    testWidgets('shows bottom navigation bar with action buttons', (
+    testWidgets('does not show old bottom action bar', (
       tester,
     ) async {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
-      expect(find.text('Add Income'), findsOneWidget);
-      expect(find.text('Add Expense'), findsOneWidget);
+      // Bottom action bar removed in favor of shell tab navigation
+      expect(find.text('Add Income'), findsNothing);
+      expect(find.text('Add Expense'), findsNothing);
     });
   });
 }

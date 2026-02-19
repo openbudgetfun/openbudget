@@ -48,15 +48,15 @@ class BudgetHeader extends HookConsumerWidget {
         ? ColorTokens.error
         : ColorTokens.tertiary;
     final bgColor = readyToAssignCents > 0
-        ? ColorTokens.secondary.withAlpha(20)
+        ? ColorTokens.secondary.withAlpha(30)
         : readyToAssignCents < 0
-        ? ColorTokens.error.withAlpha(20)
-        : ColorTokens.tertiary.withAlpha(20);
+            ? ColorTokens.error.withAlpha(20)
+            : ColorTokens.tertiary.withAlpha(20);
 
     return Container(
       decoration: BoxDecoration(
         color: bgColor,
-        borderRadius: BorderRadius.circular(RadiusTokens.md),
+        borderRadius: BorderRadius.circular(RadiusTokens.xl),
         border: Border.all(color: color.withAlpha(80)),
       ),
       padding: const EdgeInsets.symmetric(
@@ -130,7 +130,7 @@ class BudgetHeader extends HookConsumerWidget {
           const SizedBox(height: SpacingTokens.xs),
           Text(
             formatCents(readyToAssignCents, currencyCode),
-            style: theme.textTheme.headlineMedium?.copyWith(
+            style: theme.textTheme.headlineLarge?.copyWith(
               color: color,
               fontWeight: FontWeight.bold,
             ),
@@ -198,21 +198,20 @@ class BudgetHeader extends HookConsumerWidget {
             ),
           ],
           if (readyToAssignCents > 0) ...[
-            const SizedBox(height: SpacingTokens.sm),
+            const SizedBox(height: SpacingTokens.md),
             FilledButton.icon(
               onPressed: () => _showAutoAssignDialog(context),
-              icon: const Icon(Icons.auto_fix_high_rounded, size: 16),
-              label: Text(l10n.autoAssignButton),
+              icon: const Icon(Icons.auto_fix_high_rounded, size: 18),
+              label: Text(l10n.budgetAssignMoney),
               style: FilledButton.styleFrom(
                 backgroundColor: ColorTokens.secondary,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(
-                  horizontal: SpacingTokens.md,
-                  vertical: SpacingTokens.xs,
+                  horizontal: SpacingTokens.lg,
+                  vertical: SpacingTokens.sm,
                 ),
-                minimumSize: Size.zero,
-                textStyle: theme.textTheme.labelMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
+                textStyle: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ),

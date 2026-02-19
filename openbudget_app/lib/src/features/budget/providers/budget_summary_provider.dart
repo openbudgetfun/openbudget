@@ -1,47 +1,94 @@
-import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:equatable/equatable.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/monthly_allocation_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/selected_month_provider.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-part 'budget_summary_provider.freezed.dart';
 part 'budget_summary_provider.g.dart';
 
-@freezed
-sealed class MonthlyEnvelopeData with _$MonthlyEnvelopeData {
-  const factory MonthlyEnvelopeData({
-    required Envelope envelope,
-    required int allocatedCents,
-    required int spentCents,
-    required int availableCents,
-    required int carryoverCents,
-  }) = _MonthlyEnvelopeData;
+class MonthlyEnvelopeData extends Equatable {
+  const MonthlyEnvelopeData({
+    required this.envelope,
+    required this.allocatedCents,
+    required this.spentCents,
+    required this.availableCents,
+    required this.carryoverCents,
+  });
+
+  final Envelope envelope;
+  final int allocatedCents;
+  final int spentCents;
+  final int availableCents;
+  final int carryoverCents;
+
+  @override
+  List<Object?> get props => [
+    envelope,
+    allocatedCents,
+    spentCents,
+    availableCents,
+    carryoverCents,
+  ];
 }
 
-@freezed
-sealed class CategoryWithEnvelopes with _$CategoryWithEnvelopes {
-  const factory CategoryWithEnvelopes({
-    required Category category,
-    required List<Envelope> envelopes,
-    required List<MonthlyEnvelopeData> monthlyEnvelopes,
-    required int totalBudgetedCents,
-    required int totalSpentCents,
-    required int totalAvailableCents,
-  }) = _CategoryWithEnvelopes;
+class CategoryWithEnvelopes extends Equatable {
+  const CategoryWithEnvelopes({
+    required this.category,
+    required this.envelopes,
+    required this.monthlyEnvelopes,
+    required this.totalBudgetedCents,
+    required this.totalSpentCents,
+    required this.totalAvailableCents,
+  });
+
+  final Category category;
+  final List<Envelope> envelopes;
+  final List<MonthlyEnvelopeData> monthlyEnvelopes;
+  final int totalBudgetedCents;
+  final int totalSpentCents;
+  final int totalAvailableCents;
+
+  @override
+  List<Object?> get props => [
+    category,
+    envelopes,
+    monthlyEnvelopes,
+    totalBudgetedCents,
+    totalSpentCents,
+    totalAvailableCents,
+  ];
 }
 
-@freezed
-sealed class BudgetSummary with _$BudgetSummary {
-  const factory BudgetSummary({
-    required Budget budget,
-    required List<CategoryWithEnvelopes> categories,
-    required int totalIncomeCents,
-    required int totalBudgetedCents,
-    required int readyToAssignCents,
-    required int year,
-    required int month,
-  }) = _BudgetSummary;
+class BudgetSummary extends Equatable {
+  const BudgetSummary({
+    required this.budget,
+    required this.categories,
+    required this.totalIncomeCents,
+    required this.totalBudgetedCents,
+    required this.readyToAssignCents,
+    required this.year,
+    required this.month,
+  });
+
+  final Budget budget;
+  final List<CategoryWithEnvelopes> categories;
+  final int totalIncomeCents;
+  final int totalBudgetedCents;
+  final int readyToAssignCents;
+  final int year;
+  final int month;
+
+  @override
+  List<Object?> get props => [
+    budget,
+    categories,
+    totalIncomeCents,
+    totalBudgetedCents,
+    readyToAssignCents,
+    year,
+    month,
+  ];
 }
 
 @riverpod

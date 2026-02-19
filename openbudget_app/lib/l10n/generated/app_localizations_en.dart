@@ -319,6 +319,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bulkMarkUncleared => 'Mark Uncleared';
 
   @override
+  String get budgetAssignMoney => 'Assign Money';
+
+  @override
   String get budgetAddCategory => 'Add Category';
 
   @override
@@ -662,12 +665,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String get editEnvelopeTitle => 'Edit Envelope';
 
   @override
+  String get envelopeActionEditEnvelope => 'Edit Envelope';
+
+  @override
+  String get envelopeActionMoveMoney => 'Move Money';
+
+  @override
+  String get envelopeActionSetGoal => 'Set Goal';
+
+  @override
   String get envelopeActivityTitle => 'Activity';
+
+  @override
+  String get envelopeAssigned => 'Assigned';
+
+  @override
+  String get envelopeAvailable => 'Available';
 
   @override
   String envelopeCarryover(String amount) {
     return 'Carried over: $amount';
   }
+
+  @override
+  String get envelopeFromLastMonth => 'From Last Month';
 
   @override
   String get envelopeNoActivity => 'No transactions this month';
@@ -1767,4 +1788,49 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get transactionSortDescription => 'Description (A-Z)';
+
+  @override
+  String get tabPlan => 'Plan';
+
+  @override
+  String get tabAccounts => 'Accounts';
+
+  @override
+  String get tabAdd => 'Add';
+
+  @override
+  String get tabReflect => 'Reflect';
+
+  @override
+  String get tabMore => 'More';
+
+  @override
+  String get addTransactionSheetTitle => 'Add Transaction';
+
+  @override
+  String get addTransactionIncome => 'Add Income';
+
+  @override
+  String get addTransactionExpense => 'Add Expense';
+
+  @override
+  String get addTransactionTransfer => 'Transfer';
+
+  @override
+  String get moreScreenTitle => 'More';
+
+  @override
+  String get moreRecurring => 'Recurring Transactions';
+
+  @override
+  String get morePayees => 'Payees';
+
+  @override
+  String get moreRules => 'Transaction Rules';
+
+  @override
+  String get moreImport => 'Import Transactions';
+
+  @override
+  String get moreSettings => 'Settings';
 }

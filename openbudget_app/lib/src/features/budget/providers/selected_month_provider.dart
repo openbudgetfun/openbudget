@@ -1,13 +1,16 @@
-import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:equatable/equatable.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-part 'selected_month_provider.freezed.dart';
 part 'selected_month_provider.g.dart';
 
-@freezed
-sealed class BudgetMonth with _$BudgetMonth {
-  const factory BudgetMonth({required int year, required int month}) =
-      _BudgetMonth;
+class BudgetMonth extends Equatable {
+  const BudgetMonth({required this.year, required this.month});
+
+  final int year;
+  final int month;
+
+  @override
+  List<Object?> get props => [year, month];
 }
 
 @riverpod

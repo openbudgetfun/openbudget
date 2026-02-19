@@ -17,7 +17,6 @@ import 'package:openbudget_app/src/features/budget/screens/budget_template_dialo
 import 'package:openbudget_app/src/features/budget/screens/edit_category_dialog.dart';
 import 'package:openbudget_app/src/features/budget/screens/edit_envelope_dialog.dart';
 import 'package:openbudget_app/src/features/budget/screens/envelope_activity_sheet.dart';
-import 'package:openbudget_app/src/features/budget/screens/move_money_dialog.dart';
 import 'package:openbudget_app/src/features/budget/screens/quick_budget_dialog.dart';
 import 'package:openbudget_app/src/features/budget/widgets/budget_header.dart';
 import 'package:openbudget_app/src/features/budget/widgets/category_group.dart';
@@ -199,32 +198,6 @@ class BudgetDetailScreen extends HookConsumerWidget {
                     context: context,
                     builder: (_) => BudgetTemplateDialog(budgetId: budgetId),
                   ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.account_balance_rounded),
-                  tooltip: l10n.budgetViewAccounts,
-                  onPressed: () => context.go('/budgets/$budgetId/accounts'),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.store_rounded),
-                  tooltip: l10n.payeeListTitle,
-                  onPressed: () => context.go('/budgets/$budgetId/payees'),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.bar_chart_rounded),
-                  tooltip: l10n.reportsTitle,
-                  onPressed: () => context.go('/budgets/$budgetId/reports'),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.receipt_long_rounded),
-                  tooltip: l10n.transactionListTitle,
-                  onPressed: () =>
-                      context.go('/budgets/$budgetId/transactions'),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.settings_rounded),
-                  tooltip: l10n.settingsTitle,
-                  onPressed: () => context.go('/budgets/$budgetId/settings'),
                 ),
               ],
             ],
@@ -440,6 +413,12 @@ class BudgetDetailScreen extends HookConsumerWidget {
                               context,
                               envelope,
                               currencyCode,
+                              categories: summary.categories,
+                              categoryId:
+                                  catWithEnvelopes.category.id?.toString() ??
+                                      '',
+                              year: summary.year,
+                              month: summary.month,
                               monthlyData: monthlyData,
                               goal: goal,
                             ),
@@ -510,66 +489,6 @@ class BudgetDetailScreen extends HookConsumerWidget {
                 ),
                 const SizedBox(height: SpacingTokens.xxl),
               ],
-            ),
-          ),
-          bottomNavigationBar: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: SpacingTokens.md,
-                vertical: SpacingTokens.sm,
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: FilledButton.icon(
-                      onPressed: () =>
-                          context.go('/budgets/$budgetId/income/add'),
-                      icon: const Icon(Icons.arrow_downward_rounded),
-                      label: Text(l10n.budgetAddIncome),
-                    ),
-                  ),
-                  const SizedBox(width: SpacingTokens.sm),
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () =>
-                          context.go('/budgets/$budgetId/expenses/add'),
-                      icon: const Icon(Icons.arrow_upward_rounded),
-                      label: Text(l10n.budgetAddExpense),
-                    ),
-                  ),
-                  const SizedBox(width: SpacingTokens.sm),
-                  IconButton.filled(
-                    onPressed: () =>
-                        context.go('/budgets/$budgetId/expenses/split'),
-                    icon: const Icon(Icons.call_split_rounded),
-                    tooltip: l10n.splitTransactionTitle,
-                  ),
-                  const SizedBox(width: SpacingTokens.sm),
-                  IconButton.filled(
-                    onPressed: () => context.go('/budgets/$budgetId/import'),
-                    icon: const Icon(Icons.upload_file_rounded),
-                    tooltip: l10n.importTitle,
-                  ),
-                  const SizedBox(width: SpacingTokens.sm),
-                  IconButton.filled(
-                    onPressed: () =>
-                        context.go('/budgets/$budgetId/transfers/create'),
-                    icon: const Icon(Icons.sync_alt_rounded),
-                    tooltip: l10n.transferTitle,
-                  ),
-                  const SizedBox(width: SpacingTokens.sm),
-                  IconButton.filled(
-                    onPressed: () => _showMoveMoneyDialog(
-                      context,
-                      summary.categories,
-                      year: summary.year,
-                      month: summary.month,
-                    ),
-                    icon: const Icon(Icons.swap_horiz_rounded),
-                    tooltip: l10n.moveMoneyTitle,
-                  ),
-                ],
-              ),
             ),
           ),
         );
@@ -667,6 +586,10 @@ class BudgetDetailScreen extends HookConsumerWidget {
     BuildContext context,
     Envelope envelope,
     CurrencyCode currencyCode, {
+    required List<CategoryWithEnvelopes> categories,
+    required String categoryId,
+    required int year,
+    required int month,
     MonthlyEnvelopeData? monthlyData,
     EnvelopeGoal? goal,
   }) {
@@ -683,25 +606,12 @@ class BudgetDetailScreen extends HookConsumerWidget {
         envelope: envelope,
         budgetId: budgetId,
         currencyCode: currencyCode,
-        monthlyData: monthlyData,
-        goal: goal,
-      ),
-    );
-  }
-
-  void _showMoveMoneyDialog(
-    BuildContext context,
-    List<CategoryWithEnvelopes> categories, {
-    required int year,
-    required int month,
-  }) {
-    showDialog<void>(
-      context: context,
-      builder: (_) => MoveMoneyDialog(
-        budgetId: budgetId,
+        categories: categories,
+        categoryId: categoryId,
         year: year,
         month: month,
-        categories: categories,
+        monthlyData: monthlyData,
+        goal: goal,
       ),
     );
   }

@@ -29,10 +29,7 @@ class AccountListScreen extends HookConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/budgets/$budgetId'),
-        ),
+        automaticallyImplyLeading: false,
         title: Text(l10n.accountListTitle),
         actions: [
           IconButton(

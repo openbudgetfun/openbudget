@@ -1,18 +1,23 @@
-import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:equatable/equatable.dart';
 import 'package:openbudget_app/src/features/recurring/providers/recurring_list_provider.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-part 'recurring_calendar_provider.freezed.dart';
 part 'recurring_calendar_provider.g.dart';
 
-@freezed
-sealed class ScheduledOccurrence with _$ScheduledOccurrence {
-  const factory ScheduledOccurrence({
-    required RecurringTransaction recurring,
-    required DateTime date,
-    required bool isDue,
-  }) = _ScheduledOccurrence;
+class ScheduledOccurrence extends Equatable {
+  const ScheduledOccurrence({
+    required this.recurring,
+    required this.date,
+    required this.isDue,
+  });
+
+  final RecurringTransaction recurring;
+  final DateTime date;
+  final bool isDue;
+
+  @override
+  List<Object?> get props => [recurring, date, isDue];
 }
 
 /// Generates future occurrences for all active recurring transactions

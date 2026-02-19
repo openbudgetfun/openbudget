@@ -32,7 +32,7 @@ class PayeeListScreen extends HookConsumerWidget {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/budgets/$budgetId'),
+          onPressed: () => context.go('/budgets/$budgetId/more'),
         ),
         title: Text(l10n.payeeListTitle),
         actions: [

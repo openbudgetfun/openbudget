@@ -10,7 +10,7 @@ class AuthNotifier extends _$AuthNotifier {
   @override
   AuthState build() {
     _tryRestore();
-    return const AuthState.loading();
+    return const AuthLoading();
   }
 
   Future<void> _tryRestore() async {
@@ -19,20 +19,20 @@ class AuthNotifier extends _$AuthNotifier {
       await client.auth.initialize();
       if (!ref.mounted) return;
       if (client.auth.isAuthenticated) {
-        state = AuthState.authenticated(
+        state = Authenticated(
           userId: client.auth.authInfo!.authUserId.toString(),
         );
       } else {
-        state = const AuthState.unauthenticated();
+        state = const Unauthenticated();
       }
     } on Exception catch (_) {
       if (!ref.mounted) return;
-      state = const AuthState.unauthenticated();
+      state = const Unauthenticated();
     }
   }
 
   Future<void> login({required String email, required String password}) async {
-    state = const AuthState.loading();
+    state = const AuthLoading();
     final client = ref.read(serverpodClientProvider);
     try {
       final authSuccess = await client.emailIdp.login(
@@ -41,12 +41,12 @@ class AuthNotifier extends _$AuthNotifier {
       );
       await client.auth.updateSignedInUser(authSuccess);
       if (!ref.mounted) return;
-      state = AuthState.authenticated(
+      state = Authenticated(
         userId: authSuccess.authUserId.toString(),
       );
     } on Exception catch (e) {
       if (!ref.mounted) return;
-      state = AuthState.error(message: _friendlyError(e));
+      state = AuthError(message: _friendlyError(e));
     }
   }
 
@@ -75,7 +75,7 @@ class AuthNotifier extends _$AuthNotifier {
     required String registrationToken,
     required String password,
   }) async {
-    state = const AuthState.loading();
+    state = const AuthLoading();
     final client = ref.read(serverpodClientProvider);
     try {
       final authSuccess = await client.emailIdp.finishRegistration(
@@ -84,12 +84,12 @@ class AuthNotifier extends _$AuthNotifier {
       );
       await client.auth.updateSignedInUser(authSuccess);
       if (!ref.mounted) return;
-      state = AuthState.authenticated(
+      state = Authenticated(
         userId: authSuccess.authUserId.toString(),
       );
     } on Exception catch (e) {
       if (!ref.mounted) return;
-      state = AuthState.error(message: _friendlyError(e));
+      state = AuthError(message: _friendlyError(e));
     }
   }
 
@@ -97,7 +97,7 @@ class AuthNotifier extends _$AuthNotifier {
     final client = ref.read(serverpodClientProvider);
     await client.auth.signOutDevice();
     if (!ref.mounted) return;
-    state = const AuthState.unauthenticated();
+    state = const Unauthenticated();
   }
 
   String _friendlyError(Exception e) {

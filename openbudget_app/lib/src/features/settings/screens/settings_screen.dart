@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/auth/providers/auth_provider.dart';
@@ -66,18 +67,18 @@ class SettingsScreen extends HookConsumerWidget {
                     leading: const Icon(Icons.repeat_rounded),
                     title: Text(l10n.recurringListTitle),
                     trailing: const Icon(Icons.chevron_right_rounded),
-                    onTap: () => Navigator.of(
-                      context,
-                    ).pushNamed('/budgets/$budgetId/recurring'),
+                    onTap: () => context.go(
+                      '/budgets/$budgetId/more/recurring',
+                    ),
                   ),
                   const Divider(height: 1),
                   ListTile(
                     leading: const Icon(Icons.rule_rounded),
                     title: Text(l10n.transactionRulesTitle),
                     trailing: const Icon(Icons.chevron_right_rounded),
-                    onTap: () => Navigator.of(
-                      context,
-                    ).pushNamed('/budgets/$budgetId/rules'),
+                    onTap: () => context.go(
+                      '/budgets/$budgetId/more/rules',
+                    ),
                   ),
                 ],
               ),

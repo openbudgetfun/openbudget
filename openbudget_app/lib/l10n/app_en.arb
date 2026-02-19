@@ -304,6 +304,7 @@
   },
   "bulkMarkCleared": "Mark Cleared",
   "bulkMarkUncleared": "Mark Uncleared",
+  "budgetAssignMoney": "Assign Money",
   "budgetAddCategory": "Add Category",
   "budgetAddEnvelope": "Add Envelope",
   "budgetAddExpense": "Add Expense",
@@ -404,7 +405,12 @@
   "editEnvelopeError": "Could not update envelope",
   "editEnvelopeSaved": "Envelope updated",
   "editEnvelopeTitle": "Edit Envelope",
+  "envelopeActionEditEnvelope": "Edit Envelope",
+  "envelopeActionMoveMoney": "Move Money",
+  "envelopeActionSetGoal": "Set Goal",
   "envelopeActivityTitle": "Activity",
+  "envelopeAssigned": "Assigned",
+  "envelopeAvailable": "Available",
   "envelopeCarryover": "Carried over: {amount}",
   "@envelopeCarryover": {
     "placeholders": {
@@ -413,6 +419,7 @@
       }
     }
   },
+  "envelopeFromLastMonth": "From Last Month",
   "envelopeNoActivity": "No transactions this month",
   "envelopeNoteHint": "Add a note for this envelope (optional)",
   "envelopeNoteLabel": "Note",
@@ -738,5 +745,20 @@
   "transactionSortDateAsc": "Date (oldest first)",
   "transactionSortAmountDesc": "Amount (highest first)",
   "transactionSortAmountAsc": "Amount (lowest first)",
-  "transactionSortDescription": "Description (A-Z)"
+  "transactionSortDescription": "Description (A-Z)",
+  "tabPlan": "Plan",
+  "tabAccounts": "Accounts",
+  "tabAdd": "Add",
+  "tabReflect": "Reflect",
+  "tabMore": "More",
+  "addTransactionSheetTitle": "Add Transaction",
+  "addTransactionIncome": "Add Income",
+  "addTransactionExpense": "Add Expense",
+  "addTransactionTransfer": "Transfer",
+  "moreScreenTitle": "More",
+  "moreRecurring": "Recurring Transactions",
+  "morePayees": "Payees",
+  "moreRules": "Transaction Rules",
+  "moreImport": "Import Transactions",
+  "moreSettings": "Settings"
 }
