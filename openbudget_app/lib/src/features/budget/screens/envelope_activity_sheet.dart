@@ -6,6 +6,9 @@ import 'package:openbudget_app/src/features/budget/providers/budget_goals_provid
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/monthly_allocation_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/selected_month_provider.dart';
+import 'package:openbudget_app/src/features/budget/screens/edit_envelope_dialog.dart';
+import 'package:openbudget_app/src/features/budget/screens/move_money_dialog.dart';
+import 'package:openbudget_app/src/features/budget/screens/set_goal_dialog.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
@@ -16,6 +19,10 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
     required this.envelope,
     required this.budgetId,
     required this.currencyCode,
+    required this.categories,
+    required this.categoryId,
+    required this.year,
+    required this.month,
     this.monthlyData,
     this.goal,
     super.key,
@@ -24,6 +31,10 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
   final Envelope envelope;
   final String budgetId;
   final CurrencyCode currencyCode;
+  final List<CategoryWithEnvelopes> categories;
+  final String categoryId;
+  final int year;
+  final int month;
   final MonthlyEnvelopeData? monthlyData;
   final EnvelopeGoal? goal;
 
@@ -41,6 +52,7 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
       ),
     );
 
+    final carryover = monthlyData?.carryoverCents ?? 0;
     final budgeted =
         monthlyData?.allocatedCents ?? envelope.budgetedAmountCents;
     final spent = monthlyData?.spentCents ?? envelope.spentAmountCents;
@@ -48,11 +60,11 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
     final availableColor = available > 0
         ? ColorTokens.secondary
         : available < 0
-        ? ColorTokens.error
-        : ColorTokens.tertiary;
+            ? ColorTokens.error
+            : ColorTokens.tertiary;
 
     return DraggableScrollableSheet(
-      initialChildSize: 0.6,
+      initialChildSize: 0.7,
       minChildSize: 0.3,
       maxChildSize: 0.9,
       expand: false,
@@ -69,20 +81,72 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
-            // Header
+            // Header: Name + Available pill
             Padding(
-              padding: const EdgeInsets.all(SpacingTokens.md),
+              padding: const EdgeInsets.fromLTRB(
+                SpacingTokens.md,
+                SpacingTokens.md,
+                SpacingTokens.md,
+                0,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    envelope.name,
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                  // Row 1: Envelope name + Available pill
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          envelope.name,
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: SpacingTokens.sm),
+                      _AvailablePill(
+                        amount: formatCents(available, currencyCode),
+                        color: availableColor,
+                      ),
+                    ],
                   ),
+                  // Note (if present)
+                  if (envelope.note != null &&
+                      envelope.note!.isNotEmpty) ...[
+                    const SizedBox(height: SpacingTokens.sm),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          Icons.note_outlined,
+                          size: 14,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: SpacingTokens.xs),
+                        Expanded(
+                          child: Text(
+                            envelope.note!,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                  const SizedBox(height: SpacingTokens.md),
+                  // Balance breakdown grid (2x2)
+                  _BalanceGrid(
+                    carryover: carryover,
+                    assigned: budgeted,
+                    activity: spent,
+                    available: available,
+                    currencyCode: currencyCode,
+                    availableColor: availableColor,
+                  ),
+                  // Goal progress bar (if goal set)
                   if (goal != null) ...[
-                    const SizedBox(height: SpacingTokens.xs),
+                    const SizedBox(height: SpacingTokens.md),
                     _GoalSummary(
                       goal: goal!,
                       budgetedCents: budgeted,
@@ -90,60 +154,12 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
                       currencyCode: currencyCode,
                     ),
                   ],
-                  if (envelope.note != null && envelope.note!.isNotEmpty) ...[
-                    const SizedBox(height: SpacingTokens.sm),
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(SpacingTokens.sm),
-                      decoration: BoxDecoration(
-                        color: colorScheme.surfaceContainerHighest.withAlpha(
-                          80,
-                        ),
-                        borderRadius: BorderRadius.circular(RadiusTokens.sm),
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(
-                            Icons.note_outlined,
-                            size: 16,
-                            color: colorScheme.onSurfaceVariant,
-                          ),
-                          const SizedBox(width: SpacingTokens.xs),
-                          Expanded(
-                            child: Text(
-                              envelope.note!,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
                   const SizedBox(height: SpacingTokens.md),
-                  // Budget summary row
-                  Row(
-                    children: [
-                      _SummaryChip(
-                        label: l10n.budgetColumnBudgeted,
-                        amount: formatCents(budgeted, currencyCode),
-                        color: ColorTokens.primary,
-                      ),
-                      const SizedBox(width: SpacingTokens.sm),
-                      _SummaryChip(
-                        label: l10n.budgetColumnSpent,
-                        amount: formatCents(spent, currencyCode),
-                        color: ColorTokens.error,
-                      ),
-                      const SizedBox(width: SpacingTokens.sm),
-                      _SummaryChip(
-                        label: l10n.budgetColumnAvailable,
-                        amount: formatCents(available, currencyCode),
-                        color: availableColor,
-                      ),
-                    ],
+                  // Action button row
+                  _ActionButtonRow(
+                    onMoveMoney: () => _showMoveMoney(context),
+                    onSetGoal: () => _showSetGoal(context),
+                    onEditEnvelope: () => _showEditEnvelope(context),
                   ),
                   const SizedBox(height: SpacingTokens.md),
                   Text(
@@ -159,19 +175,21 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
             // Transaction list
             Expanded(
               child: transactionsAsync.when(
-                loading: () => const Center(child: CircularProgressIndicator()),
+                loading: () =>
+                    const Center(child: CircularProgressIndicator()),
                 error: (_, __) =>
                     Center(child: Text(l10n.transactionLoadError)),
                 data: (allTransactions) {
                   final envelopeId = envelope.id?.toString();
-                  final transactions =
-                      allTransactions
-                          .where((t) => t.envelopeId?.toString() == envelopeId)
-                          .toList()
-                        ..sort(
-                          (a, b) =>
-                              b.transactionDate.compareTo(a.transactionDate),
-                        );
+                  final transactions = allTransactions
+                      .where(
+                        (t) => t.envelopeId?.toString() == envelopeId,
+                      )
+                      .toList()
+                    ..sort(
+                      (a, b) =>
+                          b.transactionDate.compareTo(a.transactionDate),
+                    );
 
                   if (transactions.isEmpty) {
                     return Center(
@@ -224,7 +242,8 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
                             const SizedBox(width: SpacingTokens.sm),
                             Expanded(
                               child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                                crossAxisAlignment:
+                                    CrossAxisAlignment.start,
                                 children: [
                                   Text(
                                     tx.description,
@@ -233,16 +252,22 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
                                   ),
                                   Text(
                                     _formatDate(tx.transactionDate),
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: colorScheme.onSurfaceVariant,
+                                    style: theme.textTheme.bodySmall
+                                        ?.copyWith(
+                                      color:
+                                          colorScheme.onSurfaceVariant,
                                     ),
                                   ),
                                 ],
                               ),
                             ),
                             Text(
-                              formatCents(tx.amountCents, currencyCode),
-                              style: theme.textTheme.bodyMedium?.copyWith(
+                              formatCents(
+                                tx.amountCents,
+                                currencyCode,
+                              ),
+                              style:
+                                  theme.textTheme.bodyMedium?.copyWith(
                                 fontWeight: FontWeight.w600,
                                 color: color,
                               ),
@@ -261,8 +286,200 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
     );
   }
 
+  void _showMoveMoney(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (_) => MoveMoneyDialog(
+        budgetId: budgetId,
+        year: year,
+        month: month,
+        categories: categories,
+      ),
+    );
+  }
+
+  void _showSetGoal(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (_) => SetGoalDialog(
+        envelopeId: envelope.id?.toString() ?? '',
+        budgetId: budgetId,
+        currencyCode: currencyCode,
+        existingGoal: goal,
+      ),
+    );
+  }
+
+  void _showEditEnvelope(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (_) => EditEnvelopeDialog(
+        envelope: envelope,
+        categoryId: categoryId,
+        budgetId: budgetId,
+        currencyCode: currencyCode,
+        year: year,
+        month: month,
+      ),
+    );
+  }
+
   String _formatDate(DateTime date) {
     return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+  }
+}
+
+class _AvailablePill extends HookWidget {
+  const _AvailablePill({required this.amount, required this.color});
+
+  final String amount;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: SpacingTokens.md,
+        vertical: SpacingTokens.xs,
+      ),
+      decoration: BoxDecoration(
+        color: color.withAlpha(25),
+        borderRadius: BorderRadius.circular(RadiusTokens.xl),
+        border: Border.all(color: color.withAlpha(60)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            amount,
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+          Text(
+            l10n.envelopeAvailable,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: color.withAlpha(180),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BalanceGrid extends HookWidget {
+  const _BalanceGrid({
+    required this.carryover,
+    required this.assigned,
+    required this.activity,
+    required this.available,
+    required this.currencyCode,
+    required this.availableColor,
+  });
+
+  final int carryover;
+  final int assigned;
+  final int activity;
+  final int available;
+  final CurrencyCode currencyCode;
+  final Color availableColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.all(SpacingTokens.sm),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest.withAlpha(60),
+        borderRadius: BorderRadius.circular(RadiusTokens.md),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: _BalanceGridCell(
+                  label: l10n.envelopeFromLastMonth,
+                  amount: formatCents(carryover, currencyCode),
+                  color: colorScheme.onSurface,
+                ),
+              ),
+              const SizedBox(width: SpacingTokens.sm),
+              Expanded(
+                child: _BalanceGridCell(
+                  label: l10n.envelopeAssigned,
+                  amount: formatCents(assigned, currencyCode),
+                  color: ColorTokens.primary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: SpacingTokens.sm),
+          Row(
+            children: [
+              Expanded(
+                child: _BalanceGridCell(
+                  label: l10n.envelopeActivityTitle,
+                  amount: formatCents(activity, currencyCode),
+                  color: ColorTokens.error,
+                ),
+              ),
+              const SizedBox(width: SpacingTokens.sm),
+              Expanded(
+                child: _BalanceGridCell(
+                  label: l10n.envelopeAvailable,
+                  amount: formatCents(available, currencyCode),
+                  color: availableColor,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BalanceGridCell extends HookWidget {
+  const _BalanceGridCell({
+    required this.label,
+    required this.amount,
+    required this.color,
+  });
+
+  final String label;
+  final String amount;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          amount,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: color,
+          ),
+        ),
+      ],
+    );
   }
 }
 
@@ -353,46 +570,86 @@ class _GoalSummary extends HookWidget {
   }
 }
 
-class _SummaryChip extends HookWidget {
-  const _SummaryChip({
-    required this.label,
-    required this.amount,
-    required this.color,
+class _ActionButtonRow extends HookWidget {
+  const _ActionButtonRow({
+    required this.onMoveMoney,
+    required this.onSetGoal,
+    required this.onEditEnvelope,
   });
 
+  final VoidCallback onMoveMoney;
+  final VoidCallback onSetGoal;
+  final VoidCallback onEditEnvelope;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Row(
+      children: [
+        Expanded(
+          child: _ActionButton(
+            icon: Icons.swap_horiz_rounded,
+            label: l10n.envelopeActionMoveMoney,
+            onTap: onMoveMoney,
+          ),
+        ),
+        const SizedBox(width: SpacingTokens.sm),
+        Expanded(
+          child: _ActionButton(
+            icon: Icons.flag_rounded,
+            label: l10n.envelopeActionSetGoal,
+            onTap: onSetGoal,
+          ),
+        ),
+        const SizedBox(width: SpacingTokens.sm),
+        Expanded(
+          child: _ActionButton(
+            icon: Icons.edit_rounded,
+            label: l10n.envelopeActionEditEnvelope,
+            onTap: onEditEnvelope,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ActionButton extends HookWidget {
+  const _ActionButton({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  final IconData icon;
   final String label;
-  final String amount;
-  final Color color;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Expanded(
+    final colorScheme = theme.colorScheme;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(RadiusTokens.sm),
       child: Container(
-        padding: const EdgeInsets.symmetric(
-          vertical: SpacingTokens.xs,
-          horizontal: SpacingTokens.sm,
-        ),
+        padding: const EdgeInsets.symmetric(vertical: SpacingTokens.sm),
         decoration: BoxDecoration(
-          color: color.withAlpha(15),
+          border: Border.all(color: colorScheme.outlineVariant),
           borderRadius: BorderRadius.circular(RadiusTokens.sm),
-          border: Border.all(color: color.withAlpha(40)),
         ),
         child: Column(
           children: [
+            Icon(icon, size: 20, color: colorScheme.primary),
+            const SizedBox(height: 4),
             Text(
               label,
               style: theme.textTheme.labelSmall?.copyWith(
-                color: color.withAlpha(180),
+                color: colorScheme.primary,
               ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              amount,
-              style: theme.textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),
