@@ -1,31 +1,50 @@
-import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:equatable/equatable.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_goals_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/monthly_allocation_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/selected_month_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-part 'auto_assign_provider.freezed.dart';
 part 'auto_assign_provider.g.dart';
 
-@freezed
-sealed class AutoAssignItem with _$AutoAssignItem {
-  const factory AutoAssignItem({
-    required String envelopeId,
-    required String envelopeName,
-    required int currentAllocatedCents,
-    required int proposedAllocatedCents,
-    required int addedCents,
-  }) = _AutoAssignItem;
+class AutoAssignItem extends Equatable {
+  const AutoAssignItem({
+    required this.envelopeId,
+    required this.envelopeName,
+    required this.currentAllocatedCents,
+    required this.proposedAllocatedCents,
+    required this.addedCents,
+  });
+
+  final String envelopeId;
+  final String envelopeName;
+  final int currentAllocatedCents;
+  final int proposedAllocatedCents;
+  final int addedCents;
+
+  @override
+  List<Object?> get props => [
+    envelopeId,
+    envelopeName,
+    currentAllocatedCents,
+    proposedAllocatedCents,
+    addedCents,
+  ];
 }
 
-@freezed
-sealed class AutoAssignProposal with _$AutoAssignProposal {
-  const factory AutoAssignProposal({
-    required List<AutoAssignItem> items,
-    required int totalToAssignCents,
-    required int totalAssignedCents,
-  }) = _AutoAssignProposal;
+class AutoAssignProposal extends Equatable {
+  const AutoAssignProposal({
+    required this.items,
+    required this.totalToAssignCents,
+    required this.totalAssignedCents,
+  });
+
+  final List<AutoAssignItem> items;
+  final int totalToAssignCents;
+  final int totalAssignedCents;
+
+  @override
+  List<Object?> get props => [items, totalToAssignCents, totalAssignedCents];
 }
 
 /// Computes an auto-assign proposal that distributes Ready to Assign money

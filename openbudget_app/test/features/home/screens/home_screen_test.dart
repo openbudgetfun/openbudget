@@ -52,7 +52,7 @@ Account _makeAccount({
 BudgetSummary _emptySummary(Budget budget) {
   return BudgetSummary(
     budget: budget,
-    categories: [],
+    categories: const [],
     totalIncomeCents: 0,
     totalBudgetedCents: 0,
     readyToAssignCents: 0,
@@ -246,7 +246,7 @@ void main() {
             budgetSummaryProvider.overrideWith(
               (ref, budgetId) async => BudgetSummary(
                 budget: budget,
-                categories: [],
+                categories: const [],
                 totalIncomeCents: 300000,
                 totalBudgetedCents: 100000,
                 readyToAssignCents: 200000,

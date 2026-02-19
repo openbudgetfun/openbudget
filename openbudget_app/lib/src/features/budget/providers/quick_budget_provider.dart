@@ -1,18 +1,29 @@
-import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:equatable/equatable.dart';
 import 'package:openbudget_app/src/features/budget/providers/monthly_allocation_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-part 'quick_budget_provider.freezed.dart';
 part 'quick_budget_provider.g.dart';
 
-@freezed
-sealed class QuickBudgetSuggestion with _$QuickBudgetSuggestion {
-  const factory QuickBudgetSuggestion({
-    required int budgetedLastMonth,
-    required int spentLastMonth,
-    required int averageBudgeted,
-    required int averageSpent,
-  }) = _QuickBudgetSuggestion;
+class QuickBudgetSuggestion extends Equatable {
+  const QuickBudgetSuggestion({
+    required this.budgetedLastMonth,
+    required this.spentLastMonth,
+    required this.averageBudgeted,
+    required this.averageSpent,
+  });
+
+  final int budgetedLastMonth;
+  final int spentLastMonth;
+  final int averageBudgeted;
+  final int averageSpent;
+
+  @override
+  List<Object?> get props => [
+    budgetedLastMonth,
+    spentLastMonth,
+    averageBudgeted,
+    averageSpent,
+  ];
 }
 
 /// Computes quick-budget suggestions for an envelope based on historical data.

@@ -1,54 +1,86 @@
-import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:equatable/equatable.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/monthly_allocation_provider.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-part 'multi_month_comparison_provider.freezed.dart';
 part 'multi_month_comparison_provider.g.dart';
 
-@freezed
-sealed class MonthColumn with _$MonthColumn {
-  const factory MonthColumn({
-    required int year,
-    required int month,
-    required int totalBudgetedCents,
-    required int totalSpentCents,
-    required int totalAvailableCents,
-    required int totalIncomeCents,
-  }) = _MonthColumn;
+class MonthColumn extends Equatable {
+  const MonthColumn({
+    required this.year,
+    required this.month,
+    required this.totalBudgetedCents,
+    required this.totalSpentCents,
+    required this.totalAvailableCents,
+    required this.totalIncomeCents,
+  });
+
+  final int year;
+  final int month;
+  final int totalBudgetedCents;
+  final int totalSpentCents;
+  final int totalAvailableCents;
+  final int totalIncomeCents;
+
+  @override
+  List<Object?> get props => [
+    year,
+    month,
+    totalBudgetedCents,
+    totalSpentCents,
+    totalAvailableCents,
+    totalIncomeCents,
+  ];
 }
 
-@freezed
-sealed class EnvelopeComparison with _$EnvelopeComparison {
-  const factory EnvelopeComparison({
-    required Envelope envelope,
+class EnvelopeComparison extends Equatable {
+  const EnvelopeComparison({
+    required this.envelope,
+    required this.monthData,
+  });
 
-    /// Keyed by "year-month" string, each entry holds
-    /// [budgeted, spent, available].
-    required Map<String, List<int>> monthData,
-  }) = _EnvelopeComparison;
+  final Envelope envelope;
+
+  /// Keyed by "year-month" string, each entry holds
+  /// [budgeted, spent, available].
+  final Map<String, List<int>> monthData;
+
+  @override
+  List<Object?> get props => [envelope, monthData];
 }
 
-@freezed
-sealed class CategoryComparison with _$CategoryComparison {
-  const factory CategoryComparison({
-    required Category category,
-    required List<EnvelopeComparison> envelopes,
+class CategoryComparison extends Equatable {
+  const CategoryComparison({
+    required this.category,
+    required this.envelopes,
+    required this.monthTotals,
+  });
 
-    /// Keyed by "year-month" string, each entry holds
-    /// [budgeted, spent, available].
-    required Map<String, List<int>> monthTotals,
-  }) = _CategoryComparison;
+  final Category category;
+  final List<EnvelopeComparison> envelopes;
+
+  /// Keyed by "year-month" string, each entry holds
+  /// [budgeted, spent, available].
+  final Map<String, List<int>> monthTotals;
+
+  @override
+  List<Object?> get props => [category, envelopes, monthTotals];
 }
 
-@freezed
-sealed class MultiMonthComparison with _$MultiMonthComparison {
-  const factory MultiMonthComparison({
-    required Budget budget,
-    required List<MonthColumn> months,
-    required List<CategoryComparison> categories,
-  }) = _MultiMonthComparison;
+class MultiMonthComparison extends Equatable {
+  const MultiMonthComparison({
+    required this.budget,
+    required this.months,
+    required this.categories,
+  });
+
+  final Budget budget;
+  final List<MonthColumn> months;
+  final List<CategoryComparison> categories;
+
+  @override
+  List<Object?> get props => [budget, months, categories];
 }
 
 /// Fetches budget data for [monthCount] consecutive months ending at the

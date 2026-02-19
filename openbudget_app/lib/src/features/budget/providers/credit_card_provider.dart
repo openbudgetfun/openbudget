@@ -1,20 +1,25 @@
-import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:equatable/equatable.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/monthly_allocation_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/selected_month_provider.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-part 'credit_card_provider.freezed.dart';
 part 'credit_card_provider.g.dart';
 
-@freezed
-sealed class CreditCardPaymentInfo with _$CreditCardPaymentInfo {
-  const factory CreditCardPaymentInfo({
-    required Account account,
-    required int spentCents,
-    required int paymentCents,
-  }) = _CreditCardPaymentInfo;
+class CreditCardPaymentInfo extends Equatable {
+  const CreditCardPaymentInfo({
+    required this.account,
+    required this.spentCents,
+    required this.paymentCents,
+  });
+
+  final Account account;
+  final int spentCents;
+  final int paymentCents;
+
+  @override
+  List<Object?> get props => [account, spentCents, paymentCents];
 }
 
 /// Computes credit card payment information for all credit card accounts
