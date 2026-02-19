@@ -556,6 +556,12 @@ abstract class AppLocalizations {
   /// **'Mark Uncleared'**
   String get bulkMarkUncleared;
 
+  /// No description provided for @budgetAssignMoney.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign Money'**
+  String get budgetAssignMoney;
+
   /// No description provided for @budgetAddCategory.
   ///
   /// In en, this message translates to:
@@ -1156,17 +1162,53 @@ abstract class AppLocalizations {
   /// **'Edit Envelope'**
   String get editEnvelopeTitle;
 
+  /// No description provided for @envelopeActionEditEnvelope.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Envelope'**
+  String get envelopeActionEditEnvelope;
+
+  /// No description provided for @envelopeActionMoveMoney.
+  ///
+  /// In en, this message translates to:
+  /// **'Move Money'**
+  String get envelopeActionMoveMoney;
+
+  /// No description provided for @envelopeActionSetGoal.
+  ///
+  /// In en, this message translates to:
+  /// **'Set Goal'**
+  String get envelopeActionSetGoal;
+
   /// No description provided for @envelopeActivityTitle.
   ///
   /// In en, this message translates to:
   /// **'Activity'**
   String get envelopeActivityTitle;
 
+  /// No description provided for @envelopeAssigned.
+  ///
+  /// In en, this message translates to:
+  /// **'Assigned'**
+  String get envelopeAssigned;
+
+  /// No description provided for @envelopeAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Available'**
+  String get envelopeAvailable;
+
   /// No description provided for @envelopeCarryover.
   ///
   /// In en, this message translates to:
   /// **'Carried over: {amount}'**
   String envelopeCarryover(String amount);
+
+  /// No description provided for @envelopeFromLastMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'From Last Month'**
+  String get envelopeFromLastMonth;
 
   /// No description provided for @envelopeNoActivity.
   ///
@@ -2997,6 +3039,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Description (A-Z)'**
   String get transactionSortDescription;
+
+  /// No description provided for @tabPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan'**
+  String get tabPlan;
+
+  /// No description provided for @tabAccounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Accounts'**
+  String get tabAccounts;
+
+  /// No description provided for @tabAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get tabAdd;
+
+  /// No description provided for @tabReflect.
+  ///
+  /// In en, this message translates to:
+  /// **'Reflect'**
+  String get tabReflect;
+
+  /// No description provided for @tabMore.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get tabMore;
+
+  /// No description provided for @addTransactionSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Transaction'**
+  String get addTransactionSheetTitle;
+
+  /// No description provided for @addTransactionIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Income'**
+  String get addTransactionIncome;
+
+  /// No description provided for @addTransactionExpense.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Expense'**
+  String get addTransactionExpense;
+
+  /// No description provided for @addTransactionTransfer.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer'**
+  String get addTransactionTransfer;
+
+  /// No description provided for @moreScreenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get moreScreenTitle;
+
+  /// No description provided for @moreRecurring.
+  ///
+  /// In en, this message translates to:
+  /// **'Recurring Transactions'**
+  String get moreRecurring;
+
+  /// No description provided for @morePayees.
+  ///
+  /// In en, this message translates to:
+  /// **'Payees'**
+  String get morePayees;
+
+  /// No description provided for @moreRules.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction Rules'**
+  String get moreRules;
+
+  /// No description provided for @moreImport.
+  ///
+  /// In en, this message translates to:
+  /// **'Import Transactions'**
+  String get moreImport;
+
+  /// No description provided for @moreSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get moreSettings;
 }
 
 class _AppLocalizationsDelegate
