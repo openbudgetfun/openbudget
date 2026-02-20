@@ -135,9 +135,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            recurringListProvider.overrideWith(
-              (ref, budgetId) async => items,
-            ),
+            recurringListProvider.overrideWith((ref, budgetId) async => items),
           ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,
@@ -165,9 +163,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            recurringListProvider.overrideWith(
-              (ref, budgetId) async => items,
-            ),
+            recurringListProvider.overrideWith((ref, budgetId) async => items),
           ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,
@@ -196,9 +192,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            recurringListProvider.overrideWith(
-              (ref, budgetId) async => items,
-            ),
+            recurringListProvider.overrideWith((ref, budgetId) async => items),
           ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,
@@ -298,9 +292,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            recurringListProvider.overrideWith(
-              (ref, budgetId) async => items,
-            ),
+            recurringListProvider.overrideWith((ref, budgetId) async => items),
           ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,

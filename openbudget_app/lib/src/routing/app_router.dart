@@ -93,10 +93,11 @@ GoRouter appRouter(Ref ref) {
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
           // Extract budgetId from path params or URL
-          final id = state.pathParameters['id'] ??
-              RegExp('/budgets/([^/]+)')
-                  .firstMatch(state.matchedLocation)
-                  ?.group(1) ??
+          final id =
+              state.pathParameters['id'] ??
+              RegExp(
+                '/budgets/([^/]+)',
+              ).firstMatch(state.matchedLocation)?.group(1) ??
               '';
           return BudgetShellScreen(
             navigationShell: navigationShell,

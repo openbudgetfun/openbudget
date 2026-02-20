@@ -24,36 +24,31 @@ class MoreScreen extends HookWidget {
                 _MoreTile(
                   icon: Icons.repeat_rounded,
                   label: l10n.moreRecurring,
-                  onTap: () =>
-                      context.go('/budgets/$budgetId/more/recurring'),
+                  onTap: () => context.go('/budgets/$budgetId/more/recurring'),
                 ),
                 const Divider(height: 1),
                 _MoreTile(
                   icon: Icons.people_outline_rounded,
                   label: l10n.morePayees,
-                  onTap: () =>
-                      context.go('/budgets/$budgetId/more/payees'),
+                  onTap: () => context.go('/budgets/$budgetId/more/payees'),
                 ),
                 const Divider(height: 1),
                 _MoreTile(
                   icon: Icons.rule_rounded,
                   label: l10n.moreRules,
-                  onTap: () =>
-                      context.go('/budgets/$budgetId/more/rules'),
+                  onTap: () => context.go('/budgets/$budgetId/more/rules'),
                 ),
                 const Divider(height: 1),
                 _MoreTile(
                   icon: Icons.file_upload_outlined,
                   label: l10n.moreImport,
-                  onTap: () =>
-                      context.go('/budgets/$budgetId/more/import'),
+                  onTap: () => context.go('/budgets/$budgetId/more/import'),
                 ),
                 const Divider(height: 1),
                 _MoreTile(
                   icon: Icons.settings_outlined,
                   label: l10n.moreSettings,
-                  onTap: () =>
-                      context.go('/budgets/$budgetId/more/settings'),
+                  onTap: () => context.go('/budgets/$budgetId/more/settings'),
                 ),
               ],
             ),

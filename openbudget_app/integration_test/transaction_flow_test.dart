@@ -18,8 +18,9 @@ void main() {
     await createBudgetPage.createBudget(TestData.budgetName);
   }
 
-  testWidgets('tapping Add Expense navigates to add expense screen',
-      (tester) async {
+  testWidgets('tapping Add Expense navigates to add expense screen', (
+    tester,
+  ) async {
     await navigateToBudgetShell(tester);
 
     final shell = BudgetShellPage(tester);
@@ -36,8 +37,9 @@ void main() {
     expect(find.text('Add Expense'), findsOneWidget);
   });
 
-  testWidgets('tapping Add Income navigates to add income screen',
-      (tester) async {
+  testWidgets('tapping Add Income navigates to add income screen', (
+    tester,
+  ) async {
     await navigateToBudgetShell(tester);
 
     final shell = BudgetShellPage(tester);
@@ -54,8 +56,9 @@ void main() {
     expect(find.text('Add Income'), findsOneWidget);
   });
 
-  testWidgets('add transaction sheet shows all three action tiles',
-      (tester) async {
+  testWidgets('add transaction sheet shows all three action tiles', (
+    tester,
+  ) async {
     await navigateToBudgetShell(tester);
 
     final shell = BudgetShellPage(tester);

@@ -32,8 +32,9 @@ void main() {
     expect(accountsPage.addAccountButton, findsOneWidget);
   });
 
-  testWidgets('tapping Add Account button navigates to add account screen',
-      (tester) async {
+  testWidgets('tapping Add Account button navigates to add account screen', (
+    tester,
+  ) async {
     await navigateToBudgetShell(tester);
 
     final shell = BudgetShellPage(tester);
