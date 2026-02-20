@@ -1189,6 +1189,17 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String recurringTotalCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count recurring transactions',
+      one: '1 recurring transaction',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get recurringPosting => 'Posting...';
 
   @override
@@ -1754,7 +1765,21 @@ class AppLocalizationsEn extends AppLocalizations {
       'Could not update rule. Please try again.';
 
   @override
+  String get transactionRulesEnabled => 'Enabled';
+
+  @override
   String get transactionRulesDisabled => 'Disabled';
+
+  @override
+  String transactionRulesTotalCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count total',
+      one: '1 total',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get transactionRulesAutoAssigned => 'Auto-assigned by rule';

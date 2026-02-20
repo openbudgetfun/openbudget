@@ -171,6 +171,13 @@
       }
     }
   },
+  "@recurringTotalCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "@spendingByPayeeTransactionCount": {
     "placeholders": {
       "count": {
@@ -193,6 +200,13 @@
     }
   },
   "@transactionResultCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@transactionRulesTotalCount": {
     "placeholders": {
       "count": {
         "type": "int"
@@ -564,6 +578,7 @@
   "recurringPostDue": "Post Now",
   "recurringPostError": "Could not post scheduled transactions. Please try again.",
   "recurringPostSuccess": "{count, plural, =1{1 transaction posted} other{{count} transactions posted}}",
+  "recurringTotalCount": "{count, plural, =1{1 recurring transaction} other{{count} recurring transactions}}",
   "recurringPosting": "Posting...",
   "recurringSkipButton": "Skip",
   "recurringSkipError": "Could not skip occurrence. Please try again.",
@@ -734,7 +749,9 @@
   "transactionRulesDeleteError": "Could not delete rule. Please try again.",
   "transactionRulesDeleteSuccess": "Rule deleted",
   "transactionRulesToggleError": "Could not update rule. Please try again.",
+  "transactionRulesEnabled": "Enabled",
   "transactionRulesDisabled": "Disabled",
+  "transactionRulesTotalCount": "{count, plural, =1{1 total} other{{count} total}}",
   "transactionRulesAutoAssigned": "Auto-assigned by rule",
   "transferToAccount": "To Account",
   "undoAction": "Undo",

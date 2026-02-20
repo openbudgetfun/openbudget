@@ -7,10 +7,14 @@ import 'package:openbudget_app/src/features/budget/providers/budget_detail_provi
 import 'package:openbudget_app/src/features/recurring/providers/recurring_actions_provider.dart';
 import 'package:openbudget_app/src/features/recurring/providers/recurring_list_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
+import 'package:openbudget_app/src/theme/ynab_palette.dart';
 import 'package:openbudget_app/src/utils/currency_code_utils.dart';
+import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
+
+enum RecurringViewFilter { all, expenses, income, due }
 
 class RecurringListScreen extends HookConsumerWidget {
   const RecurringListScreen({required this.budgetId, super.key});
@@ -24,6 +28,7 @@ class RecurringListScreen extends HookConsumerWidget {
     final budgetAsync = ref.watch(budgetDetailProvider(budgetId));
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final viewFilter = useState(RecurringViewFilter.all);
     final budgetCurrency =
         budgetAsync.whenOrNull(
           data: (budget) => parseCurrencyCode(budget.currencyCode),
@@ -31,7 +36,11 @@ class RecurringListScreen extends HookConsumerWidget {
         CurrencyCode.usd;
 
     return Scaffold(
+      backgroundColor: YnabPalette.appBackground,
       appBar: AppBar(
+        backgroundColor: YnabPalette.appBackground,
+        surfaceTintColor: Colors.transparent,
+        scrolledUnderElevation: 0,
         title: Text(l10n.recurringListTitle),
         actions: [
           IconButton(
@@ -73,56 +82,173 @@ class RecurringListScreen extends HookConsumerWidget {
         data: (items) {
           if (items.isEmpty) {
             return Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.repeat_rounded,
-                    size: 48,
-                    color: colorScheme.outlineVariant,
+              child: Card(
+                margin: const EdgeInsets.all(SpacingTokens.lg),
+                color: YnabPalette.surface,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(RadiusTokens.md),
+                  side: const BorderSide(color: YnabPalette.divider),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(SpacingTokens.lg),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.repeat_rounded,
+                        size: 48,
+                        color: colorScheme.outlineVariant,
+                      ),
+                      const SizedBox(height: SpacingTokens.md),
+                      Text(
+                        l10n.recurringEmptyTitle,
+                        style: theme.textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: SpacingTokens.sm),
+                      Text(
+                        l10n.recurringEmptySubtitle,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: SpacingTokens.lg),
+                      FilledButton.icon(
+                        onPressed: () =>
+                            _showAddDialog(context, budgetCurrency),
+                        icon: const Icon(Icons.add),
+                        label: Text(l10n.recurringAddButton),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: SpacingTokens.md),
-                  Text(
-                    l10n.recurringEmptyTitle,
-                    style: theme.textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: SpacingTokens.sm),
-                  Text(
-                    l10n.recurringEmptySubtitle,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: SpacingTokens.lg),
-                  FilledButton.icon(
-                    onPressed: () => _showAddDialog(context, budgetCurrency),
-                    icon: const Icon(Icons.add),
-                    label: Text(l10n.recurringAddButton),
-                  ),
-                ],
+                ),
               ),
             );
           }
+
+          final now = DateTime.now();
+          final activeItems = items.where((item) => item.isActive).toList();
+          final dueCount = activeItems.where((item) {
+            final dueDate = DateTime(
+              item.nextOccurrence.year,
+              item.nextOccurrence.month,
+              item.nextOccurrence.day,
+            );
+            final today = DateTime(now.year, now.month, now.day);
+            return !dueDate.isAfter(today);
+          }).length;
+          final expenseTotals = aggregateCentsByCurrency(
+            activeItems.where((item) => item.amountCents < 0),
+            currencyCodeOf: (item) => item.currencyCode,
+            amountCentsOf: (item) => item.amountCents.abs(),
+          );
+          final incomeTotals = aggregateCentsByCurrency(
+            activeItems.where((item) => item.amountCents > 0),
+            currencyCodeOf: (item) => item.currencyCode,
+            amountCentsOf: (item) => item.amountCents,
+          );
+          final filteredItems = items.where((item) {
+            return switch (viewFilter.value) {
+              RecurringViewFilter.all => true,
+              RecurringViewFilter.expenses => item.amountCents < 0,
+              RecurringViewFilter.income => item.amountCents > 0,
+              RecurringViewFilter.due =>
+                item.isActive && !item.nextOccurrence.isAfter(now),
+            };
+          }).toList();
 
           return RefreshIndicator(
             onRefresh: () async {
               ref.invalidate(recurringListProvider(budgetId));
             },
-            child: ListView.builder(
+            child: ListView(
               padding: const EdgeInsets.all(SpacingTokens.md),
-              itemCount: items.length,
-              itemBuilder: (context, index) {
-                final item = items[index];
-                return _RecurringTile(
-                  recurring: item,
-                  budgetId: budgetId,
-                  onEdit: () => _showEditDialog(context, item),
-                  onDelete: () => _confirmDelete(context, ref, item),
-                  onToggle: () => _toggleActive(ref, item),
-                  onSkip: () => _skipOccurrence(context, ref, item),
-                );
-              },
+              children: [
+                _RecurringSummaryCard(
+                  totalItems: items.length,
+                  dueCount: dueCount,
+                  totalExpenses: expenseTotals.isEmpty
+                      ? formatCents(0, budgetCurrency)
+                      : formatCurrencyBreakdown(
+                          expenseTotals,
+                          includeCurrencyCode: expenseTotals.length > 1,
+                        ),
+                  totalIncome: incomeTotals.isEmpty
+                      ? formatCents(0, budgetCurrency)
+                      : formatCurrencyBreakdown(
+                          incomeTotals,
+                          includeCurrencyCode: incomeTotals.length > 1,
+                        ),
+                ),
+                const SizedBox(height: SpacingTokens.md),
+                SizedBox(
+                  height: 36,
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    children: [
+                      _RecurringFilterChip(
+                        label: l10n.transactionFilterAll,
+                        selected: viewFilter.value == RecurringViewFilter.all,
+                        onTap: () => viewFilter.value = RecurringViewFilter.all,
+                      ),
+                      const SizedBox(width: SpacingTokens.sm),
+                      _RecurringFilterChip(
+                        label: l10n.transactionFilterExpense,
+                        selected:
+                            viewFilter.value == RecurringViewFilter.expenses,
+                        onTap: () =>
+                            viewFilter.value = RecurringViewFilter.expenses,
+                        color: YnabPalette.negative,
+                      ),
+                      const SizedBox(width: SpacingTokens.sm),
+                      _RecurringFilterChip(
+                        label: l10n.transactionFilterIncome,
+                        selected:
+                            viewFilter.value == RecurringViewFilter.income,
+                        onTap: () =>
+                            viewFilter.value = RecurringViewFilter.income,
+                        color: YnabPalette.progressGreen,
+                      ),
+                      const SizedBox(width: SpacingTokens.sm),
+                      _RecurringFilterChip(
+                        label: l10n.recurringDueLabel,
+                        selected: viewFilter.value == RecurringViewFilter.due,
+                        onTap: () => viewFilter.value = RecurringViewFilter.due,
+                        color: YnabPalette.accentBlue,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: SpacingTokens.md),
+                if (filteredItems.isEmpty)
+                  Card(
+                    margin: EdgeInsets.zero,
+                    color: YnabPalette.surface,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(RadiusTokens.md),
+                      side: const BorderSide(color: YnabPalette.divider),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(SpacingTokens.md),
+                      child: Text(
+                        l10n.transactionNoResults,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: YnabPalette.mutedText,
+                        ),
+                      ),
+                    ),
+                  ),
+                ...filteredItems.map(
+                  (item) => _RecurringTile(
+                    recurring: item,
+                    budgetId: budgetId,
+                    onEdit: () => _showEditDialog(context, item),
+                    onDelete: () => _confirmDelete(context, ref, item),
+                    onToggle: () => _toggleActive(ref, item),
+                    onSkip: () => _skipOccurrence(context, ref, item),
+                  ),
+                ),
+              ],
             ),
           );
         },
@@ -250,6 +376,184 @@ class RecurringListScreen extends HookConsumerWidget {
   }
 }
 
+class _RecurringSummaryCard extends HookWidget {
+  const _RecurringSummaryCard({
+    required this.totalItems,
+    required this.dueCount,
+    required this.totalExpenses,
+    required this.totalIncome,
+  });
+
+  final int totalItems;
+  final int dueCount;
+  final String totalExpenses;
+  final String totalIncome;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+
+    return Card(
+      margin: EdgeInsets.zero,
+      color: YnabPalette.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(RadiusTokens.md),
+        side: const BorderSide(color: YnabPalette.divider),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(SpacingTokens.md),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(SpacingTokens.md),
+              decoration: BoxDecoration(
+                color: YnabPalette.accentPurple,
+                borderRadius: BorderRadius.circular(RadiusTokens.md),
+              ),
+              child: Column(
+                children: [
+                  Text(
+                    l10n.recurringListTitle,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: SpacingTokens.xs),
+                  Text(
+                    l10n.recurringTotalCount(totalItems),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: YnabPalette.mutedText,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: SpacingTokens.md),
+            Row(
+              children: [
+                Expanded(
+                  child: _SummaryMetric(
+                    label: l10n.transactionFilterExpense,
+                    value: totalExpenses,
+                    color: YnabPalette.negative,
+                  ),
+                ),
+                const SizedBox(width: SpacingTokens.sm),
+                Expanded(
+                  child: _SummaryMetric(
+                    label: l10n.transactionFilterIncome,
+                    value: totalIncome,
+                    color: YnabPalette.progressGreen,
+                  ),
+                ),
+                const SizedBox(width: SpacingTokens.sm),
+                Expanded(
+                  child: _SummaryMetric(
+                    label: l10n.recurringDueLabel,
+                    value: '$dueCount',
+                    color: YnabPalette.accentBlue,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SummaryMetric extends HookWidget {
+  const _SummaryMetric({
+    required this.label,
+    required this.value,
+    required this.color,
+  });
+
+  final String label;
+  final String value;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: SpacingTokens.sm,
+        vertical: SpacingTokens.xs,
+      ),
+      decoration: BoxDecoration(
+        color: color.withAlpha(28),
+        borderRadius: BorderRadius.circular(RadiusTokens.sm),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: YnabPalette.mutedText,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: color,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RecurringFilterChip extends HookWidget {
+  const _RecurringFilterChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+    this.color,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final chipColor = color ?? YnabPalette.accentBlue;
+    return ChoiceChip(
+      label: Text(label),
+      selected: selected,
+      onSelected: (_) => onTap(),
+      backgroundColor: YnabPalette.surface,
+      selectedColor: chipColor.withAlpha(26),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(RadiusTokens.sm),
+        side: BorderSide(
+          color: selected ? chipColor.withAlpha(130) : YnabPalette.divider,
+        ),
+      ),
+      labelStyle: theme.textTheme.labelMedium?.copyWith(
+        color: selected ? chipColor : YnabPalette.mutedText,
+        fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+      ),
+      visualDensity: VisualDensity.compact,
+      showCheckmark: false,
+    );
+  }
+}
+
 class _RecurringTile extends HookWidget {
   const _RecurringTile({
     required this.recurring,
@@ -271,7 +575,6 @@ class _RecurringTile extends HookWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
     final currency = CurrencyCode.values.firstWhere(
       (c) => c.code == recurring.currencyCode,
       orElse: () => CurrencyCode.usd,
@@ -301,50 +604,86 @@ class _RecurringTile extends HookWidget {
       background: Container(
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: SpacingTokens.md),
-        color: colorScheme.error,
-        child: Icon(Icons.delete, color: colorScheme.onError),
+        decoration: BoxDecoration(
+          color: YnabPalette.negative,
+          borderRadius: BorderRadius.circular(RadiusTokens.md),
+        ),
+        child: const Icon(Icons.delete, color: Colors.white),
       ),
       confirmDismiss: (_) async {
         onDelete();
         return false;
       },
       child: Card(
+        margin: const EdgeInsets.only(bottom: SpacingTokens.sm),
+        color: YnabPalette.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(RadiusTokens.md),
+          side: const BorderSide(color: YnabPalette.divider),
+        ),
         child: Column(
           children: [
             ListTile(
-              leading: Icon(
-                recurring.isActive
-                    ? Icons.repeat_rounded
-                    : Icons.repeat_rounded,
-                color: recurring.isActive
-                    ? colorScheme.primary
-                    : colorScheme.outlineVariant,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: SpacingTokens.md,
+                vertical: SpacingTokens.xs,
+              ),
+              leading: CircleAvatar(
+                radius: 18,
+                backgroundColor: recurring.isActive
+                    ? YnabPalette.accentPurple.withAlpha(90)
+                    : YnabPalette.surfaceMuted,
+                child: Icon(
+                  Icons.repeat_rounded,
+                  color: recurring.isActive
+                      ? YnabPalette.accentBlue
+                      : YnabPalette.mutedText,
+                  size: 18,
+                ),
               ),
               title: Text(
                 recurring.description,
-                style: TextStyle(
+                style: theme.textTheme.titleMedium?.copyWith(
                   decoration: recurring.isActive
-                      ? null
+                      ? TextDecoration.none
                       : TextDecoration.lineThrough,
                 ),
               ),
               subtitle: Text(
                 '$frequencyLabel \u2022 ${l10n.recurringNextDate}: $dateStr',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: YnabPalette.mutedText,
+                ),
               ),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    isIncome ? '+$formattedAmount' : '-$formattedAmount',
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      color: isIncome ? colorScheme.primary : colorScheme.error,
-                      fontWeight: FontWeight.w600,
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: SpacingTokens.sm,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isIncome
+                          ? YnabPalette.progressGreen.withAlpha(26)
+                          : YnabPalette.negative.withAlpha(18),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Text(
+                      isIncome ? '+$formattedAmount' : '-$formattedAmount',
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        color: isIncome
+                            ? YnabPalette.progressGreen
+                            : YnabPalette.negative,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
                   const SizedBox(width: SpacingTokens.xs),
-                  Switch(
+                  Switch.adaptive(
                     value: recurring.isActive,
                     onChanged: (_) => onToggle(),
+                    activeTrackColor: YnabPalette.accentBlue,
                   ),
                 ],
               ),
@@ -359,18 +698,18 @@ class _RecurringTile extends HookWidget {
                 ),
                 child: Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.schedule_rounded,
                       size: 16,
-                      color: colorScheme.tertiary,
+                      color: YnabPalette.accentBlue,
                     ),
                     const SizedBox(width: SpacingTokens.xs),
                     Expanded(
                       child: Text(
                         l10n.recurringDueLabel,
                         style: theme.textTheme.labelSmall?.copyWith(
-                          color: colorScheme.tertiary,
-                          fontWeight: FontWeight.w600,
+                          color: YnabPalette.accentBlue,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                     ),
@@ -379,7 +718,7 @@ class _RecurringTile extends HookWidget {
                       icon: const Icon(Icons.skip_next_rounded, size: 18),
                       label: Text(l10n.recurringSkipButton),
                       style: TextButton.styleFrom(
-                        foregroundColor: colorScheme.onSurfaceVariant,
+                        foregroundColor: YnabPalette.mutedText,
                         visualDensity: VisualDensity.compact,
                       ),
                     ),
