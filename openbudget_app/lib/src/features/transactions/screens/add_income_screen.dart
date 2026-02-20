@@ -7,6 +7,7 @@ import 'package:openbudget_app/src/features/budget/providers/budget_detail_provi
 import 'package:openbudget_app/src/features/payees/providers/payee_list_provider.dart';
 import 'package:openbudget_app/src/features/transactions/providers/duplicate_check_provider.dart';
 import 'package:openbudget_app/src/features/transactions/providers/transaction_actions_provider.dart';
+import 'package:openbudget_app/src/theme/ynab_palette.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
@@ -29,6 +30,8 @@ class AddIncomeScreen extends HookConsumerWidget {
     final payeesAsync = ref.watch(payeeListProvider(budgetId));
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+
+    useValueListenable(amountController);
 
     Future<void> checkDuplicates() async {
       final budget = budgetAsync.value;
@@ -58,7 +61,6 @@ class AddIncomeScreen extends HookConsumerWidget {
       }
     }
 
-    // Build payee dropdown items.
     final payeeItems = <DropdownMenuItem<String>>[
       DropdownMenuItem<String>(value: '', child: Text(l10n.payeeNone)),
     ];
@@ -73,217 +75,404 @@ class AddIncomeScreen extends HookConsumerWidget {
       }
     }
 
+    final amountText = amountController.text.trim();
+    final amountValue = double.tryParse(amountText) ?? 0;
+    final formattedAmount = amountValue == 0
+        ? r'$0.00'
+        : r'$' + amountValue.toStringAsFixed(2);
+
     return Scaffold(
+      backgroundColor: YnabPalette.appBackground,
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+        backgroundColor: YnabPalette.appBackground,
+        surfaceTintColor: Colors.transparent,
+        scrolledUnderElevation: 0,
+        leadingWidth: 90,
+        leading: TextButton.icon(
           onPressed: () => context.go('/budgets/$budgetId'),
+          icon: const Icon(Icons.arrow_back, size: 16),
+          label: Text(l10n.dialogCancel),
         ),
-        title: Text(l10n.transactionAddIncome),
+        title: Text(l10n.addTransactionSheetTitle),
       ),
       body: Center(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(SpacingTokens.xl),
+          padding: const EdgeInsets.fromLTRB(
+            SpacingTokens.md,
+            SpacingTokens.sm,
+            SpacingTokens.md,
+            SpacingTokens.xl,
+          ),
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 400),
-            child: Card(
-              child: Padding(
-                padding: const EdgeInsets.all(SpacingTokens.lg),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Center(
-                      child: Container(
-                        width: 48,
-                        height: 48,
+            constraints: const BoxConstraints(maxWidth: 420),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(SpacingTokens.md),
+                  decoration: BoxDecoration(
+                    color: YnabPalette.accentGreen,
+                    borderRadius: BorderRadius.circular(RadiusTokens.md),
+                  ),
+                  child: Column(
+                    children: [
+                      Container(
                         decoration: BoxDecoration(
-                          color: ColorTokens.secondary.withAlpha(30),
-                          borderRadius: BorderRadius.circular(RadiusTokens.md),
+                          color: Colors.white.withAlpha(120),
+                          borderRadius: BorderRadius.circular(RadiusTokens.sm),
                         ),
-                        child: const Icon(
-                          Icons.arrow_downward_rounded,
-                          color: ColorTokens.secondary,
+                        padding: const EdgeInsets.all(2),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: _ModeChip(
+                                label: l10n.addTransactionExpense,
+                                icon: Icons.arrow_upward_rounded,
+                                selected: false,
+                                color: YnabPalette.mutedText,
+                              ),
+                            ),
+                            Expanded(
+                              child: _ModeChip(
+                                label: l10n.addTransactionIncome,
+                                icon: Icons.arrow_downward_rounded,
+                                selected: true,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ),
-                    const SizedBox(height: SpacingTokens.md),
-                    Text(
-                      l10n.transactionAddIncome,
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: SpacingTokens.lg),
-                    TextField(
-                      controller: descriptionController,
-                      decoration: InputDecoration(
-                        labelText: l10n.transactionDescriptionLabel,
-                        prefixIcon: const Icon(Icons.description_outlined),
-                      ),
-                      textInputAction: TextInputAction.next,
-                    ),
-                    const SizedBox(height: SpacingTokens.md),
-                    Focus(
-                      onFocusChange: (hasFocus) {
-                        if (!hasFocus) checkDuplicates();
-                      },
-                      child: TextField(
-                        controller: amountController,
-                        decoration: InputDecoration(
-                          labelText: l10n.transactionAmountLabel,
-                          prefixIcon: const Icon(Icons.attach_money_rounded),
-                        ),
-                        keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true,
-                        ),
-                        textInputAction: TextInputAction.next,
-                      ),
-                    ),
-                    const SizedBox(height: SpacingTokens.md),
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: const Icon(Icons.calendar_today_rounded),
-                      title: Text(
-                        '${selectedDate.value.year}-'
-                        '${selectedDate.value.month.toString().padLeft(2, '0')}-'
-                        '${selectedDate.value.day.toString().padLeft(2, '0')}',
-                      ),
-                      onTap: () async {
-                        final picked = await showDatePicker(
-                          context: context,
-                          initialDate: selectedDate.value,
-                          firstDate: DateTime(2000),
-                          lastDate: DateTime(2100),
-                        );
-                        if (picked != null) {
-                          selectedDate.value = picked;
-                          await checkDuplicates();
-                        }
-                      },
-                    ),
-                    const SizedBox(height: SpacingTokens.md),
-                    DropdownButtonFormField<String>(
-                      initialValue: selectedPayeeId.value ?? '',
-                      items: payeeItems,
-                      onChanged: (value) {
-                        selectedPayeeId.value =
-                            (value != null && value.isNotEmpty) ? value : null;
-                      },
-                      decoration: InputDecoration(
-                        labelText: l10n.payeeLabel,
-                        prefixIcon: const Icon(Icons.person_outlined),
-                      ),
-                      isExpanded: true,
-                    ),
-                    const SizedBox(height: SpacingTokens.md),
-                    TextField(
-                      controller: memoController,
-                      decoration: InputDecoration(
-                        labelText: l10n.transactionMemoLabel,
-                        prefixIcon: const Icon(Icons.note_outlined),
-                        hintText: l10n.transactionMemoHint,
-                      ),
-                      maxLines: 2,
-                      textInputAction: TextInputAction.done,
-                    ),
-                    if (duplicateCount.value > 0)
-                      Padding(
-                        padding: const EdgeInsets.only(top: SpacingTokens.sm),
-                        child: Card(
-                          color: colorScheme.errorContainer,
-                          child: Padding(
-                            padding: const EdgeInsets.all(SpacingTokens.sm),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.warning_amber_rounded,
-                                  color: colorScheme.onErrorContainer,
-                                  size: 20,
-                                ),
-                                const SizedBox(width: SpacingTokens.sm),
-                                Expanded(
-                                  child: Text(
-                                    l10n.duplicateWarning(duplicateCount.value),
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: colorScheme.onErrorContainer,
-                                    ),
-                                  ),
-                                ),
-                              ],
+                      const SizedBox(height: SpacingTokens.md),
+                      Focus(
+                        onFocusChange: (hasFocus) {
+                          if (!hasFocus) {
+                            checkDuplicates();
+                          }
+                        },
+                        child: TextField(
+                          controller: amountController,
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                          textAlign: TextAlign.center,
+                          style: theme.textTheme.displaySmall?.copyWith(
+                            fontWeight: FontWeight.w800,
+                            color: Colors.black,
+                          ),
+                          decoration: InputDecoration(
+                            labelText: l10n.transactionAmountLabel,
+                            prefixIcon: const Icon(Icons.attach_money_rounded),
+                            border: InputBorder.none,
+                            isDense: true,
+                            contentPadding: EdgeInsets.zero,
+                            hintText: r'$0.00',
+                            hintStyle: theme.textTheme.displaySmall?.copyWith(
+                              color: Colors.black.withAlpha(120),
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                         ),
                       ),
-                    const SizedBox(height: SpacingTokens.lg),
-                    FilledButton(
-                      onPressed: isSubmitting.value
-                          ? null
-                          : () async {
-                              final description = descriptionController.text
-                                  .trim();
-                              final amountText = amountController.text.trim();
-                              final amount = double.tryParse(amountText) ?? 0;
-                              if (description.isEmpty || amount <= 0) {
-                                return;
-                              }
-
-                              final budget = budgetAsync.value;
-                              if (budget == null) return;
-
-                              final currency = CurrencyCode.values.firstWhere(
-                                (c) => c.code == budget.currencyCode,
-                                orElse: () => CurrencyCode.usd,
-                              );
-                              final amountCents =
-                                  (amount * _pow10(currency.decimals)).round();
-
-                              isSubmitting.value = true;
-                              final messenger = ScaffoldMessenger.of(context);
-                              final router = GoRouter.of(context);
-                              try {
-                                final memoText = memoController.text.trim();
-                                await ref
-                                    .read(transactionActionsProvider.notifier)
-                                    .addIncome(
-                                      description: description,
-                                      amountCents: amountCents,
-                                      currencyCode: budget.currencyCode,
-                                      budgetId: budgetId,
-                                      date: selectedDate.value,
-                                      memo: memoText.isEmpty ? null : memoText,
-                                    );
-                                messenger.showSnackBar(
-                                  SnackBar(
-                                    content: Text(l10n.transactionSuccess),
-                                  ),
-                                );
-                                router.go('/budgets/$budgetId');
-                              } on Exception catch (_) {
-                                isSubmitting.value = false;
-                                messenger.showSnackBar(
-                                  SnackBar(
-                                    content: Text(l10n.transactionError),
-                                    backgroundColor: colorScheme.error,
-                                  ),
-                                );
-                              }
-                            },
-                      child: isSubmitting.value
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : Text(l10n.transactionSave),
-                    ),
-                  ],
+                      const SizedBox(height: SpacingTokens.xs),
+                      Text(
+                        l10n.transactionAddIncome,
+                        style: theme.textTheme.labelLarge?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      if (amountText.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 2),
+                          child: Text(
+                            formattedAmount,
+                            style: theme.textTheme.labelMedium?.copyWith(
+                              color: Colors.black.withAlpha(150),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
-              ),
+                const SizedBox(height: SpacingTokens.md),
+                Card(
+                  color: YnabPalette.surface,
+                  margin: EdgeInsets.zero,
+                  child: Padding(
+                    padding: const EdgeInsets.all(SpacingTokens.md),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        DropdownButtonFormField<String>(
+                          initialValue: selectedPayeeId.value ?? '',
+                          items: payeeItems,
+                          onChanged: (value) {
+                            selectedPayeeId.value =
+                                (value != null && value.isNotEmpty)
+                                ? value
+                                : null;
+                          },
+                          decoration: InputDecoration(
+                            labelText: l10n.payeeLabel,
+                            prefixIcon: const Icon(Icons.person_outlined),
+                          ),
+                          isExpanded: true,
+                        ),
+                        const SizedBox(height: SpacingTokens.sm),
+                        const _ReadOnlyRow(
+                          icon: Icons.savings_rounded,
+                          label: 'Category',
+                          value: 'Ready to Assign',
+                        ),
+                        const SizedBox(height: SpacingTokens.sm),
+                        _ReadOnlyRow(
+                          icon: Icons.account_balance_rounded,
+                          label: 'Account',
+                          value:
+                              budgetAsync.value?.name ?? l10n.accountListTitle,
+                        ),
+                        const SizedBox(height: SpacingTokens.sm),
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: const Icon(Icons.calendar_today_rounded),
+                          title: const Text('Date'),
+                          subtitle: Text(_formatDate(selectedDate.value)),
+                          onTap: () async {
+                            final picked = await showDatePicker(
+                              context: context,
+                              initialDate: selectedDate.value,
+                              firstDate: DateTime(2000),
+                              lastDate: DateTime(2100),
+                            );
+                            if (picked != null) {
+                              selectedDate.value = picked;
+                              await checkDuplicates();
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: SpacingTokens.md),
+                Card(
+                  color: YnabPalette.surface,
+                  margin: EdgeInsets.zero,
+                  child: Padding(
+                    padding: const EdgeInsets.all(SpacingTokens.md),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        TextField(
+                          controller: descriptionController,
+                          decoration: InputDecoration(
+                            labelText: l10n.transactionDescriptionLabel,
+                            prefixIcon: const Icon(Icons.description_outlined),
+                          ),
+                          textInputAction: TextInputAction.next,
+                        ),
+                        const SizedBox(height: SpacingTokens.sm),
+                        TextField(
+                          controller: memoController,
+                          decoration: InputDecoration(
+                            labelText: l10n.transactionMemoLabel,
+                            prefixIcon: const Icon(Icons.note_outlined),
+                            hintText: l10n.transactionMemoHint,
+                          ),
+                          maxLines: 2,
+                          textInputAction: TextInputAction.done,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                if (duplicateCount.value > 0)
+                  Padding(
+                    padding: const EdgeInsets.only(top: SpacingTokens.sm),
+                    child: Card(
+                      color: colorScheme.errorContainer,
+                      child: Padding(
+                        padding: const EdgeInsets.all(SpacingTokens.sm),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.warning_amber_rounded,
+                              color: colorScheme.onErrorContainer,
+                              size: 20,
+                            ),
+                            const SizedBox(width: SpacingTokens.sm),
+                            Expanded(
+                              child: Text(
+                                l10n.duplicateWarning(duplicateCount.value),
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: colorScheme.onErrorContainer,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                const SizedBox(height: SpacingTokens.md),
+                FilledButton.icon(
+                  onPressed: isSubmitting.value
+                      ? null
+                      : () async {
+                          final description = descriptionController.text.trim();
+                          final amountText = amountController.text.trim();
+                          final amount = double.tryParse(amountText) ?? 0;
+                          if (description.isEmpty || amount <= 0) {
+                            return;
+                          }
+
+                          final budget = budgetAsync.value;
+                          if (budget == null) return;
+
+                          final currency = CurrencyCode.values.firstWhere(
+                            (c) => c.code == budget.currencyCode,
+                            orElse: () => CurrencyCode.usd,
+                          );
+                          final amountCents =
+                              (amount * _pow10(currency.decimals)).round();
+
+                          isSubmitting.value = true;
+                          final messenger = ScaffoldMessenger.of(context);
+                          final router = GoRouter.of(context);
+                          try {
+                            final memoText = memoController.text.trim();
+                            await ref
+                                .read(transactionActionsProvider.notifier)
+                                .addIncome(
+                                  description: description,
+                                  amountCents: amountCents,
+                                  currencyCode: budget.currencyCode,
+                                  budgetId: budgetId,
+                                  date: selectedDate.value,
+                                  memo: memoText.isEmpty ? null : memoText,
+                                );
+                            messenger.showSnackBar(
+                              SnackBar(content: Text(l10n.transactionSuccess)),
+                            );
+                            router.go('/budgets/$budgetId');
+                          } on Exception catch (_) {
+                            isSubmitting.value = false;
+                            messenger.showSnackBar(
+                              SnackBar(
+                                content: Text(l10n.transactionError),
+                                backgroundColor: colorScheme.error,
+                              ),
+                            );
+                          }
+                        },
+                  icon: isSubmitting.value
+                      ? const SizedBox(
+                          height: 18,
+                          width: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.check_circle_rounded, size: 18),
+                  label: Text(l10n.transactionSave),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: YnabPalette.accentBlue,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ],
             ),
           ),
         ),
       ),
+    );
+  }
+
+  static String _formatDate(DateTime date) {
+    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+  }
+}
+
+class _ModeChip extends HookWidget {
+  const _ModeChip({
+    required this.label,
+    required this.icon,
+    required this.selected,
+    required this.color,
+  });
+
+  final String label;
+  final IconData icon;
+  final bool selected;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      decoration: BoxDecoration(
+        color: selected ? Colors.white : Colors.transparent,
+        borderRadius: BorderRadius.circular(RadiusTokens.sm),
+      ),
+      padding: const EdgeInsets.symmetric(vertical: SpacingTokens.sm),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: 16, color: color),
+          const SizedBox(width: 4),
+          Flexible(
+            child: Text(
+              label,
+              style: theme.textTheme.labelMedium?.copyWith(
+                color: color,
+                fontWeight: FontWeight.w700,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ReadOnlyRow extends HookWidget {
+  const _ReadOnlyRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Row(
+      children: [
+        Icon(icon, size: 20, color: YnabPalette.accentBlue),
+        const SizedBox(width: SpacingTokens.sm),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: YnabPalette.mutedText,
+                ),
+              ),
+              Text(
+                value,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
