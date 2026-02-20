@@ -126,6 +126,38 @@ void main() {
     expect(find.text('Add Income'), findsNWidgets(2));
   });
 
+  testWidgets('expense screen mode switch routes to income screen', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_buildApp());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Open Add Sheet'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Add Expense'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Add Income').first);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Add Income'), findsNWidgets(2));
+  });
+
+  testWidgets('income screen mode switch routes to expense screen', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_buildApp());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Open Add Sheet'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Add Income'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Add Expense').first);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Add Expense'), findsNWidgets(2));
+  });
+
   testWidgets('add transaction sheet routes to transfer', (tester) async {
     await tester.pumpWidget(_buildApp());
     await tester.pumpAndSettle();

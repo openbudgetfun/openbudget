@@ -7,6 +7,7 @@ import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
+import 'package:openbudget_app/src/features/budget/widgets/add_transaction_sheet.dart';
 import 'package:openbudget_app/src/features/payees/providers/payee_list_provider.dart';
 import 'package:openbudget_app/src/features/transactions/providers/transaction_actions_provider.dart';
 import 'package:openbudget_app/src/features/transactions/screens/edit_transaction_dialog.dart';
@@ -429,6 +430,14 @@ class TransactionListScreen extends HookConsumerWidget {
             ],
           );
         },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => showModalBottomSheet<void>(
+          context: context,
+          isScrollControlled: true,
+          builder: (_) => AddTransactionSheet(budgetId: budgetId),
+        ),
+        child: const Icon(Icons.add),
       ),
       bottomNavigationBar: selectionMode.value && selectedIds.value.isNotEmpty
           ? SafeArea(

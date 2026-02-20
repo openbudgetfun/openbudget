@@ -238,6 +238,27 @@ void main() {
       expect(find.byIcon(Icons.copy_rounded), findsOneWidget);
     });
 
+    testWidgets('shows add transaction FAB', (tester) async {
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      expect(find.byType(FloatingActionButton), findsOneWidget);
+      expect(find.byIcon(Icons.add), findsOneWidget);
+    });
+
+    testWidgets('tapping add FAB opens add transaction sheet', (tester) async {
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byType(FloatingActionButton));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Add Transaction'), findsOneWidget);
+      expect(find.text('Add Income'), findsOneWidget);
+      expect(find.text('Add Expense'), findsOneWidget);
+      expect(find.text('Transfer'), findsOneWidget);
+    });
+
     testWidgets('hides app bar actions when transactions empty', (
       tester,
     ) async {
