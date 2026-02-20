@@ -1,40 +1,92 @@
 import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
+import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_client/openbudget_client.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'net_worth_provider.g.dart';
 
-/// Computes net worth from all accounts in a budget.
+/// Computes net worth from all active accounts in a budget.
 @riverpod
 Future<NetWorthData> netWorth(Ref ref, String budgetId) async {
   final accounts = await ref.watch(accountListProvider(budgetId).future);
+  final activeAccounts = accounts.where((account) => !account.isClosed);
 
-  var totalAssets = 0;
-  var totalLiabilities = 0;
-  final assetAccounts = <Account>[];
-  final liabilityAccounts = <Account>[];
+  final byCurrency = <CurrencyCode, _CurrencyAccumulator>{};
 
-  for (final account in accounts) {
-    if (account.isClosed) continue;
+  for (final account in activeAccounts) {
+    final currency = parseCurrencyCode(account.currencyCode);
+    final bucket = byCurrency.putIfAbsent(currency, _CurrencyAccumulator.new);
 
     if (account.accountType == 'creditCard') {
-      // Credit card balances are liabilities (typically negative).
-      totalLiabilities += account.balanceCents;
-      liabilityAccounts.add(account);
+      bucket.totalLiabilities += account.balanceCents;
+      bucket.liabilityAccounts.add(account);
     } else {
-      totalAssets += account.balanceCents;
-      assetAccounts.add(account);
+      bucket.totalAssets += account.balanceCents;
+      bucket.assetAccounts.add(account);
     }
   }
+
+  final breakdown =
+      byCurrency.entries
+          .map(
+            (entry) => CurrencyNetWorthData(
+              currency: entry.key,
+              totalAssets: entry.value.totalAssets,
+              totalLiabilities: entry.value.totalLiabilities,
+              assetAccounts: List<Account>.unmodifiable(
+                entry.value.assetAccounts,
+              ),
+              liabilityAccounts: List<Account>.unmodifiable(
+                entry.value.liabilityAccounts,
+              ),
+            ),
+          )
+          .toList()
+        ..sort((a, b) => a.currency.code.compareTo(b.currency.code));
+
+  final totalAssets = breakdown.fold<int>(
+    0,
+    (sum, data) => sum + data.totalAssets,
+  );
+  final totalLiabilities = breakdown.fold<int>(
+    0,
+    (sum, data) => sum + data.totalLiabilities,
+  );
 
   return NetWorthData(
     totalAssets: totalAssets,
     totalLiabilities: totalLiabilities,
     netWorth: totalAssets + totalLiabilities,
-    assetAccounts: assetAccounts,
-    liabilityAccounts: liabilityAccounts,
-    currencyCode: accounts.isNotEmpty ? accounts.first.currencyCode : 'USD',
+    assetAccounts: List<Account>.unmodifiable(
+      breakdown.expand((entry) => entry.assetAccounts),
+    ),
+    liabilityAccounts: List<Account>.unmodifiable(
+      breakdown.expand((entry) => entry.liabilityAccounts),
+    ),
+    currencyCode: breakdown.isNotEmpty
+        ? breakdown.first.currency.code
+        : CurrencyCode.usd.code,
+    currencyBreakdown: List<CurrencyNetWorthData>.unmodifiable(breakdown),
   );
+}
+
+class CurrencyNetWorthData {
+  const CurrencyNetWorthData({
+    required this.currency,
+    required this.totalAssets,
+    required this.totalLiabilities,
+    required this.assetAccounts,
+    required this.liabilityAccounts,
+  });
+
+  final CurrencyCode currency;
+  final int totalAssets;
+  final int totalLiabilities;
+  final List<Account> assetAccounts;
+  final List<Account> liabilityAccounts;
+
+  int get netWorth => totalAssets + totalLiabilities;
 }
 
 class NetWorthData {
@@ -45,6 +97,7 @@ class NetWorthData {
     required this.assetAccounts,
     required this.liabilityAccounts,
     required this.currencyCode,
+    required this.currencyBreakdown,
   });
 
   final int totalAssets;
@@ -53,4 +106,14 @@ class NetWorthData {
   final List<Account> assetAccounts;
   final List<Account> liabilityAccounts;
   final String currencyCode;
+  final List<CurrencyNetWorthData> currencyBreakdown;
+
+  bool get hasMultipleCurrencies => currencyBreakdown.length > 1;
+}
+
+class _CurrencyAccumulator {
+  int totalAssets = 0;
+  int totalLiabilities = 0;
+  final assetAccounts = <Account>[];
+  final liabilityAccounts = <Account>[];
 }

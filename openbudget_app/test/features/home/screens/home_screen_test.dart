@@ -33,6 +33,7 @@ Account _makeAccount({
   String name = 'Checking',
   int balanceCents = 100000,
   String budgetIdStr = _budgetIdStr,
+  String currencyCode = 'USD',
   bool isClosed = false,
   bool onBudget = true,
   String accountType = 'checking',
@@ -41,7 +42,7 @@ Account _makeAccount({
     name: name,
     accountType: accountType,
     balanceCents: balanceCents,
-    currencyCode: 'USD',
+    currencyCode: currencyCode,
     budgetId: UuidValue.fromString(budgetIdStr),
     onBudget: onBudget,
     sortOrder: 0,
@@ -365,6 +366,72 @@ void main() {
 
       expect(find.text('Net Worth'), findsOneWidget);
       expect(find.text('2 accounts'), findsAny);
+    });
+
+    testWidgets('renders multi-currency net worth summary', (tester) async {
+      final budget = _makeBudget(id: _budgetIdStr);
+      final accounts = [
+        _makeAccount(name: 'USD Checking'),
+        _makeAccount(name: 'EUR Savings', currencyCode: 'EUR'),
+      ];
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            budgetListProvider.overrideWith((ref) async => [budget]),
+            accountListProvider.overrideWith((ref, budgetId) async => accounts),
+            budgetSummaryProvider.overrideWith(
+              (ref, budgetId) async => _emptySummary(budget),
+            ),
+          ],
+          child: MaterialApp(
+            theme: OpenBudgetTheme.light,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: const HomeScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('USD'), findsWidgets);
+      expect(find.textContaining('EUR'), findsWidgets);
+    });
+
+    testWidgets('renders multi-currency balances on budget card', (
+      tester,
+    ) async {
+      final budget = _makeBudget(id: _budgetIdStr);
+      final accounts = [
+        _makeAccount(name: 'USD Checking', balanceCents: 50000),
+        _makeAccount(
+          name: 'EUR Savings',
+          balanceCents: 50000,
+          currencyCode: 'EUR',
+        ),
+      ];
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            budgetListProvider.overrideWith((ref) async => [budget]),
+            accountListProvider.overrideWith((ref, budgetId) async => accounts),
+            budgetSummaryProvider.overrideWith(
+              (ref, budgetId) async => _emptySummary(budget),
+            ),
+          ],
+          child: MaterialApp(
+            theme: OpenBudgetTheme.light,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: const HomeScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('USD'), findsWidgets);
+      expect(find.textContaining('EUR'), findsWidgets);
     });
 
     testWidgets('excludes closed accounts from net worth', (tester) async {

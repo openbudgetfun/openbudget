@@ -20,6 +20,7 @@ Account _makeAccount({
   String name = 'Checking',
   String accountType = 'checking',
   int balanceCents = 100000,
+  String currencyCode = 'USD',
   bool onBudget = true,
   bool isClosed = false,
   int sortOrder = 0,
@@ -28,7 +29,7 @@ Account _makeAccount({
     name: name,
     accountType: accountType,
     balanceCents: balanceCents,
-    currencyCode: 'USD',
+    currencyCode: currencyCode,
     budgetId: _budgetUuid,
     onBudget: onBudget,
     sortOrder: sortOrder,
@@ -310,6 +311,40 @@ void main() {
       expect(find.text('On Budget Account'), findsOneWidget);
       expect(find.text('Off Budget Account'), findsOneWidget);
       expect(find.text('Closed Account'), findsOneWidget);
+    });
+
+    testWidgets('renders multi-currency totals in headers and net worth', (
+      tester,
+    ) async {
+      final accounts = [
+        _makeAccount(name: 'USD Checking'),
+        _makeAccount(
+          name: 'EUR Checking',
+          balanceCents: 200000,
+          currencyCode: 'EUR',
+          sortOrder: 1,
+        ),
+      ];
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            accountListProvider.overrideWith((ref, budgetId) async => accounts),
+          ],
+          child: MaterialApp(
+            theme: OpenBudgetTheme.light,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: const AccountListScreen(budgetId: _budgetId),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('USD'), findsWidgets);
+      expect(find.textContaining('EUR'), findsWidgets);
+      expect(find.text('USD Checking'), findsOneWidget);
+      expect(find.text('EUR Checking'), findsOneWidget);
     });
 
     testWidgets('always shows FAB add button', (tester) async {
