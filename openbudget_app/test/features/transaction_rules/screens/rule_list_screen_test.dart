@@ -27,22 +27,11 @@ final _categoryUuid = UuidValue.fromString(
 );
 
 Budget _makeBudget() {
-  return Budget(
-    name: 'Test Budget',
-    currencyCode: 'USD',
-    ownerId: _ownerUuid,
-  );
+  return Budget(name: 'Test Budget', currencyCode: 'USD', ownerId: _ownerUuid);
 }
 
-Payee _makePayee({
-  String name = 'Test Payee',
-  UuidValue? id,
-}) {
-  return Payee(
-    id: id ?? _payeeUuid,
-    name: name,
-    budgetId: _budgetUuid,
-  );
+Payee _makePayee({String name = 'Test Payee', UuidValue? id}) {
+  return Payee(id: id ?? _payeeUuid, name: name, budgetId: _budgetUuid);
 }
 
 TransactionRule _makeRule({
@@ -60,10 +49,7 @@ TransactionRule _makeRule({
   );
 }
 
-Envelope _makeEnvelope({
-  String name = 'Groceries',
-  UuidValue? id,
-}) {
+Envelope _makeEnvelope({String name = 'Groceries', UuidValue? id}) {
   return Envelope(
     id: id ?? _envelopeUuid,
     name: name,
@@ -154,9 +140,7 @@ void main() {
               (ref, budgetId) =>
                   throw Exception('Could not load transaction rules'),
             ),
-            payeeListProvider.overrideWith(
-              (ref, budgetId) async => <Payee>[],
-            ),
+            payeeListProvider.overrideWith((ref, budgetId) async => <Payee>[]),
             budgetSummaryProvider.overrideWith(
               (ref, budgetId) async => _makeEmptySummary(),
             ),
@@ -181,9 +165,7 @@ void main() {
             ruleListProvider.overrideWith(
               (ref, budgetId) async => <TransactionRule>[],
             ),
-            payeeListProvider.overrideWith(
-              (ref, budgetId) async => <Payee>[],
-            ),
+            payeeListProvider.overrideWith((ref, budgetId) async => <Payee>[]),
             budgetSummaryProvider.overrideWith(
               (ref, budgetId) async => _makeEmptySummary(),
             ),
@@ -215,9 +197,7 @@ void main() {
             ruleListProvider.overrideWith(
               (ref, budgetId) async => <TransactionRule>[],
             ),
-            payeeListProvider.overrideWith(
-              (ref, budgetId) async => <Payee>[],
-            ),
+            payeeListProvider.overrideWith((ref, budgetId) async => <Payee>[]),
             budgetSummaryProvider.overrideWith(
               (ref, budgetId) async => _makeEmptySummary(),
             ),
@@ -245,12 +225,8 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            ruleListProvider.overrideWith(
-              (ref, budgetId) async => [rule],
-            ),
-            payeeListProvider.overrideWith(
-              (ref, budgetId) async => [payee],
-            ),
+            ruleListProvider.overrideWith((ref, budgetId) async => [rule]),
+            payeeListProvider.overrideWith((ref, budgetId) async => [payee]),
             budgetSummaryProvider.overrideWith(
               (ref, budgetId) async => _makeEmptySummary(),
             ),
@@ -279,12 +255,8 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            ruleListProvider.overrideWith(
-              (ref, budgetId) async => [rule],
-            ),
-            payeeListProvider.overrideWith(
-              (ref, budgetId) async => [payee],
-            ),
+            ruleListProvider.overrideWith((ref, budgetId) async => [rule]),
+            payeeListProvider.overrideWith((ref, budgetId) async => [payee]),
             budgetSummaryProvider.overrideWith(
               (ref, budgetId) async => _makeSummaryWithEnvelope(),
             ),
@@ -309,9 +281,7 @@ void main() {
             ruleListProvider.overrideWith(
               (ref, budgetId) async => <TransactionRule>[],
             ),
-            payeeListProvider.overrideWith(
-              (ref, budgetId) async => <Payee>[],
-            ),
+            payeeListProvider.overrideWith((ref, budgetId) async => <Payee>[]),
             budgetSummaryProvider.overrideWith(
               (ref, budgetId) async => _makeEmptySummary(),
             ),
@@ -353,9 +323,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            ruleListProvider.overrideWith(
-              (ref, budgetId) async => rules,
-            ),
+            ruleListProvider.overrideWith((ref, budgetId) async => rules),
             payeeListProvider.overrideWith(
               (ref, budgetId) async => [payee1, payee2],
             ),
@@ -387,12 +355,8 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            ruleListProvider.overrideWith(
-              (ref, budgetId) async => [rule],
-            ),
-            payeeListProvider.overrideWith(
-              (ref, budgetId) async => [payee],
-            ),
+            ruleListProvider.overrideWith((ref, budgetId) async => [rule]),
+            payeeListProvider.overrideWith((ref, budgetId) async => [payee]),
             budgetSummaryProvider.overrideWith(
               (ref, budgetId) async => _makeEmptySummary(),
             ),

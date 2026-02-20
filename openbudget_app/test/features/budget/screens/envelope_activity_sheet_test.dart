@@ -156,11 +156,7 @@ void main() {
     });
 
     testWidgets('renders available pill with amount', (tester) async {
-      await tester.pumpWidget(
-        buildSubject(
-          monthlyData: _makeMonthlyData(),
-        ),
-      );
+      await tester.pumpWidget(buildSubject(monthlyData: _makeMonthlyData()));
       await tester.pumpAndSettle();
 
       // The available pill should show the formatted amount
@@ -168,9 +164,7 @@ void main() {
     });
 
     testWidgets('renders balance grid with four cells', (tester) async {
-      await tester.pumpWidget(
-        buildSubject(monthlyData: _makeMonthlyData()),
-      );
+      await tester.pumpWidget(buildSubject(monthlyData: _makeMonthlyData()));
       await tester.pumpAndSettle();
 
       expect(find.text('From Last Month'), findsOneWidget);
@@ -179,8 +173,9 @@ void main() {
       expect(find.text('Available'), findsAtLeast(1));
     });
 
-    testWidgets('renders action buttons: Move Money, Set Goal, Edit Envelope',
-        (tester) async {
+    testWidgets('renders action buttons: Move Money, Set Goal, Edit Envelope', (
+      tester,
+    ) async {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
@@ -220,9 +215,7 @@ void main() {
         _makeTransaction(description: 'Salary', amountCents: 150000),
       ];
 
-      await tester.pumpWidget(
-        buildSubject(transactions: transactions),
-      );
+      await tester.pumpWidget(buildSubject(transactions: transactions));
       await tester.pumpAndSettle();
 
       expect(find.text('Whole Foods'), findsOneWidget);
@@ -231,10 +224,7 @@ void main() {
 
     testWidgets('renders goal progress when goal is set', (tester) async {
       await tester.pumpWidget(
-        buildSubject(
-          monthlyData: _makeMonthlyData(),
-          goal: _makeGoal(),
-        ),
+        buildSubject(monthlyData: _makeMonthlyData(), goal: _makeGoal()),
       );
       await tester.pumpAndSettle();
 
@@ -253,9 +243,7 @@ void main() {
 
     testWidgets('renders note when envelope has a note', (tester) async {
       await tester.pumpWidget(
-        buildSubject(
-          envelope: _makeEnvelope(note: 'Weekly grocery budget'),
-        ),
+        buildSubject(envelope: _makeEnvelope(note: 'Weekly grocery budget')),
       );
       await tester.pumpAndSettle();
 
@@ -263,8 +251,9 @@ void main() {
       expect(find.byIcon(Icons.note_outlined), findsOneWidget);
     });
 
-    testWidgets('does not render note when envelope has no note',
-        (tester) async {
+    testWidgets('does not render note when envelope has no note', (
+      tester,
+    ) async {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 

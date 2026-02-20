@@ -60,8 +60,8 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
     final availableColor = available > 0
         ? ColorTokens.secondary
         : available < 0
-            ? ColorTokens.error
-            : ColorTokens.tertiary;
+        ? ColorTokens.error
+        : ColorTokens.tertiary;
 
     return DraggableScrollableSheet(
       initialChildSize: 0.7,
@@ -111,8 +111,7 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
                     ],
                   ),
                   // Note (if present)
-                  if (envelope.note != null &&
-                      envelope.note!.isNotEmpty) ...[
+                  if (envelope.note != null && envelope.note!.isNotEmpty) ...[
                     const SizedBox(height: SpacingTokens.sm),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -175,21 +174,19 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
             // Transaction list
             Expanded(
               child: transactionsAsync.when(
-                loading: () =>
-                    const Center(child: CircularProgressIndicator()),
+                loading: () => const Center(child: CircularProgressIndicator()),
                 error: (_, __) =>
                     Center(child: Text(l10n.transactionLoadError)),
                 data: (allTransactions) {
                   final envelopeId = envelope.id?.toString();
-                  final transactions = allTransactions
-                      .where(
-                        (t) => t.envelopeId?.toString() == envelopeId,
-                      )
-                      .toList()
-                    ..sort(
-                      (a, b) =>
-                          b.transactionDate.compareTo(a.transactionDate),
-                    );
+                  final transactions =
+                      allTransactions
+                          .where((t) => t.envelopeId?.toString() == envelopeId)
+                          .toList()
+                        ..sort(
+                          (a, b) =>
+                              b.transactionDate.compareTo(a.transactionDate),
+                        );
 
                   if (transactions.isEmpty) {
                     return Center(
@@ -242,8 +239,7 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
                             const SizedBox(width: SpacingTokens.sm),
                             Expanded(
                               child: Column(
-                                crossAxisAlignment:
-                                    CrossAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
                                     tx.description,
@@ -252,22 +248,16 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
                                   ),
                                   Text(
                                     _formatDate(tx.transactionDate),
-                                    style: theme.textTheme.bodySmall
-                                        ?.copyWith(
-                                      color:
-                                          colorScheme.onSurfaceVariant,
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: colorScheme.onSurfaceVariant,
                                     ),
                                   ),
                                 ],
                               ),
                             ),
                             Text(
-                              formatCents(
-                                tx.amountCents,
-                                currencyCode,
-                              ),
-                              style:
-                                  theme.textTheme.bodyMedium?.copyWith(
+                              formatCents(tx.amountCents, currencyCode),
+                              style: theme.textTheme.bodyMedium?.copyWith(
                                 fontWeight: FontWeight.w600,
                                 color: color,
                               ),

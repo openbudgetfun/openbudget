@@ -16,15 +16,8 @@ final _budgetUuid = UuidValue.fromString(
   '00000000-0000-0000-0000-000000000010',
 );
 
-Payee _makePayee({
-  String name = 'Grocery Store',
-  UuidValue? id,
-}) {
-  return Payee(
-    id: id,
-    name: name,
-    budgetId: _budgetUuid,
-  );
+Payee _makePayee({String name = 'Grocery Store', UuidValue? id}) {
+  return Payee(id: id, name: name, budgetId: _budgetUuid);
 }
 
 void main() {
@@ -75,9 +68,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            payeeListProvider.overrideWith(
-              (ref, budgetId) async => <Payee>[],
-            ),
+            payeeListProvider.overrideWith((ref, budgetId) async => <Payee>[]),
           ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,
@@ -117,9 +108,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            payeeListProvider.overrideWith(
-              (ref, budgetId) async => payees,
-            ),
+            payeeListProvider.overrideWith((ref, budgetId) async => payees),
           ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,
@@ -147,9 +136,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            payeeListProvider.overrideWith(
-              (ref, budgetId) async => payees,
-            ),
+            payeeListProvider.overrideWith((ref, budgetId) async => payees),
           ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,
@@ -169,9 +156,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            payeeListProvider.overrideWith(
-              (ref, budgetId) async => <Payee>[],
-            ),
+            payeeListProvider.overrideWith((ref, budgetId) async => <Payee>[]),
           ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,
@@ -190,9 +175,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            payeeListProvider.overrideWith(
-              (ref, budgetId) async => <Payee>[],
-            ),
+            payeeListProvider.overrideWith((ref, budgetId) async => <Payee>[]),
           ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,
@@ -223,9 +206,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            payeeListProvider.overrideWith(
-              (ref, budgetId) async => payees,
-            ),
+            payeeListProvider.overrideWith((ref, budgetId) async => payees),
           ],
           child: MaterialApp(
             theme: OpenBudgetTheme.light,

@@ -41,9 +41,7 @@ class AuthNotifier extends _$AuthNotifier {
       );
       await client.auth.updateSignedInUser(authSuccess);
       if (!ref.mounted) return;
-      state = Authenticated(
-        userId: authSuccess.authUserId.toString(),
-      );
+      state = Authenticated(userId: authSuccess.authUserId.toString());
     } on Exception catch (e) {
       if (!ref.mounted) return;
       state = AuthError(message: _friendlyError(e));
@@ -84,9 +82,7 @@ class AuthNotifier extends _$AuthNotifier {
       );
       await client.auth.updateSignedInUser(authSuccess);
       if (!ref.mounted) return;
-      state = Authenticated(
-        userId: authSuccess.authUserId.toString(),
-      );
+      state = Authenticated(userId: authSuccess.authUserId.toString());
     } on Exception catch (e) {
       if (!ref.mounted) return;
       state = AuthError(message: _friendlyError(e));

@@ -50,8 +50,8 @@ class BudgetHeader extends HookConsumerWidget {
     final bgColor = readyToAssignCents > 0
         ? ColorTokens.secondary.withAlpha(30)
         : readyToAssignCents < 0
-            ? ColorTokens.error.withAlpha(20)
-            : ColorTokens.tertiary.withAlpha(20);
+        ? ColorTokens.error.withAlpha(20)
+        : ColorTokens.tertiary.withAlpha(20);
 
     return Container(
       decoration: BoxDecoration(

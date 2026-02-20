@@ -416,7 +416,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
                               categories: summary.categories,
                               categoryId:
                                   catWithEnvelopes.category.id?.toString() ??
-                                      '',
+                                  '',
                               year: summary.year,
                               month: summary.month,
                               monthlyData: monthlyData,
