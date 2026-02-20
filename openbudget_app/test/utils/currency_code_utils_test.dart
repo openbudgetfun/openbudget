@@ -10,11 +10,7 @@ void main() {
     });
 
     test('aggregateCentsByCurrency sums values per currency', () {
-      final rows = [
-        ('USD', 100),
-        ('EUR', 200),
-        ('USD', -40),
-      ];
+      final rows = [('USD', 100), ('EUR', 200), ('USD', -40)];
       final totals = aggregateCentsByCurrency(
         rows,
         currencyCodeOf: (row) => row.$1,
