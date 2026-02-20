@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
+import 'package:openbudget_app/src/theme/ynab_palette.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 class AddTransactionSheet extends HookWidget {
@@ -13,7 +14,6 @@ class AddTransactionSheet extends HookWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
 
     return SafeArea(
       child: SingleChildScrollView(
@@ -28,7 +28,7 @@ class AddTransactionSheet extends HookWidget {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: colorScheme.outlineVariant,
+                color: YnabPalette.divider,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -36,14 +36,14 @@ class AddTransactionSheet extends HookWidget {
             Text(
               l10n.addTransactionSheetTitle,
               style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w800,
               ),
             ),
             const SizedBox(height: SpacingTokens.lg),
             _ActionTile(
               icon: Icons.arrow_downward_rounded,
               label: l10n.addTransactionIncome,
-              color: ColorTokens.secondary,
+              color: YnabPalette.progressGreen,
               onTap: () {
                 Navigator.of(context).pop();
                 context.go('/budgets/$budgetId/income/add');
@@ -53,7 +53,7 @@ class AddTransactionSheet extends HookWidget {
             _ActionTile(
               icon: Icons.arrow_upward_rounded,
               label: l10n.addTransactionExpense,
-              color: ColorTokens.error,
+              color: YnabPalette.negative,
               onTap: () {
                 Navigator.of(context).pop();
                 context.go('/budgets/$budgetId/expenses/add');
@@ -63,7 +63,7 @@ class AddTransactionSheet extends HookWidget {
             _ActionTile(
               icon: Icons.swap_horiz_rounded,
               label: l10n.addTransactionTransfer,
-              color: ColorTokens.primary,
+              color: YnabPalette.accentBlue,
               onTap: () {
                 Navigator.of(context).pop();
                 context.go('/budgets/$budgetId/transfer');
@@ -93,25 +93,29 @@ class _ActionTile extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
 
     return Card(
       margin: EdgeInsets.zero,
+      color: YnabPalette.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(RadiusTokens.md),
+        side: const BorderSide(color: YnabPalette.divider),
+      ),
       child: ListTile(
         onTap: onTap,
         leading: CircleAvatar(
-          backgroundColor: color.withAlpha(20),
+          backgroundColor: color.withAlpha(18),
           child: Icon(icon, color: color),
         ),
         title: Text(
           label,
           style: theme.textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w700,
           ),
         ),
-        trailing: Icon(
+        trailing: const Icon(
           Icons.chevron_right_rounded,
-          color: colorScheme.onSurfaceVariant,
+          color: YnabPalette.mutedText,
         ),
       ),
     );

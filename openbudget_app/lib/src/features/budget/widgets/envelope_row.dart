@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_goals_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
+import 'package:openbudget_app/src/theme/ynab_palette.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
@@ -49,10 +50,11 @@ class EnvelopeRow extends HookConsumerWidget {
       onLongPress: onLongPress,
       child: Padding(
         padding: const EdgeInsets.symmetric(
-          horizontal: SpacingTokens.sm + SpacingTokens.xs,
+          horizontal: SpacingTokens.md,
           vertical: SpacingTokens.sm,
         ),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
             Row(
@@ -60,19 +62,18 @@ class EnvelopeRow extends HookConsumerWidget {
                 if (onQuickBudget != null)
                   GestureDetector(
                     onTap: onQuickBudget,
-                    child: Padding(
-                      padding: const EdgeInsets.only(right: SpacingTokens.xs),
+                    child: const Padding(
+                      padding: EdgeInsets.only(right: SpacingTokens.xs),
                       child: Icon(
                         Icons.bolt_rounded,
                         size: 16,
-                        color: theme.colorScheme.primary.withAlpha(150),
+                        color: YnabPalette.accentBlue,
                       ),
                     ),
                   )
                 else
                   const SizedBox(width: SpacingTokens.xs),
                 Expanded(
-                  flex: 4,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
@@ -82,7 +83,9 @@ class EnvelopeRow extends HookConsumerWidget {
                           Flexible(
                             child: Text(
                               envelope.name,
-                              style: theme.textTheme.bodyMedium,
+                              style: theme.textTheme.bodyLarge?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
@@ -101,8 +104,8 @@ class EnvelopeRow extends HookConsumerWidget {
                                       : Icons.arrow_back_rounded,
                                   size: 12,
                                   color: carryover > 0
-                                      ? ColorTokens.secondary
-                                      : ColorTokens.error,
+                                      ? YnabPalette.progressGreen
+                                      : YnabPalette.negative,
                                 ),
                               ),
                             ),
@@ -111,17 +114,17 @@ class EnvelopeRow extends HookConsumerWidget {
                       if (envelope.note != null && envelope.note!.isNotEmpty)
                         Row(
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.sticky_note_2_outlined,
                               size: 10,
-                              color: theme.colorScheme.onSurfaceVariant,
+                              color: YnabPalette.mutedText,
                             ),
                             const SizedBox(width: 2),
                             Flexible(
                               child: Text(
                                 envelope.note!,
                                 style: theme.textTheme.labelSmall?.copyWith(
-                                  color: theme.colorScheme.onSurfaceVariant,
+                                  color: YnabPalette.mutedText,
                                   fontStyle: FontStyle.italic,
                                 ),
                                 maxLines: 1,
@@ -133,63 +136,27 @@ class EnvelopeRow extends HookConsumerWidget {
                     ],
                   ),
                 ),
-                Expanded(
-                  flex: 3,
-                  child: Text(
-                    formatCents(budgeted, currencyCode),
-                    textAlign: TextAlign.right,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodySmall,
-                  ),
-                ),
-                Expanded(
-                  flex: 3,
-                  child: Text(
-                    formatCents(spent, currencyCode),
-                    textAlign: TextAlign.right,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: spent > 0 ? ColorTokens.error : null,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: SpacingTokens.xs),
                 Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 6,
-                    vertical: 2,
+                    horizontal: SpacingTokens.sm + 2,
+                    vertical: SpacingTokens.xs,
                   ),
                   decoration: BoxDecoration(
-                    color: availableColor.withAlpha(25),
-                    borderRadius: BorderRadius.circular(4),
+                    color: availableColor.withAlpha(18),
+                    borderRadius: BorderRadius.circular(999),
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (available < 0)
-                        Padding(
-                          padding: const EdgeInsets.only(right: 3),
-                          child: Icon(
-                            Icons.warning_amber_rounded,
-                            size: 12,
-                            color: availableColor,
-                          ),
-                        ),
-                      Text(
-                        formatCents(available, currencyCode),
-                        maxLines: 1,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: availableColor,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
+                  child: Text(
+                    formatCents(available, currencyCode),
+                    maxLines: 1,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      color: availableColor,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
               ],
             ),
+            const SizedBox(height: SpacingTokens.xs),
             if (goal != null)
               _GoalProgressBar(
                 goal: goal!,
@@ -199,6 +166,18 @@ class EnvelopeRow extends HookConsumerWidget {
               )
             else if (budgeted > 0)
               _SpendingProgressBar(budgetedCents: budgeted, spentCents: spent),
+            if (goal == null && budgeted > 0) ...[
+              const SizedBox(height: 3),
+              Text(
+                available < 0 ? 'Overspent' : 'Funded',
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: available < 0
+                      ? YnabPalette.negative
+                      : YnabPalette.mutedText,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
           ],
         ),
       ),
@@ -222,11 +201,11 @@ class _SpendingProgressBar extends HookWidget {
 
     final Color barColor;
     if (ratio > 1.0) {
-      barColor = ColorTokens.error;
+      barColor = YnabPalette.negative;
     } else if (ratio >= 0.8) {
       barColor = ColorTokens.tertiary;
     } else {
-      barColor = ColorTokens.secondary;
+      barColor = YnabPalette.progressGreen;
     }
 
     return Padding(
@@ -239,7 +218,7 @@ class _SpendingProgressBar extends HookWidget {
               borderRadius: BorderRadius.circular(2),
               child: LinearProgressIndicator(
                 value: clampedRatio,
-                minHeight: 3,
+                minHeight: 4,
                 backgroundColor: barColor.withAlpha(30),
                 valueColor: AlwaysStoppedAnimation<Color>(barColor),
               ),
@@ -282,11 +261,11 @@ class _GoalProgressBar extends HookWidget {
 
     final Color barColor;
     if (progress >= 1.0) {
-      barColor = ColorTokens.secondary;
+      barColor = YnabPalette.progressGreen;
     } else if (progress >= 0.5) {
       barColor = ColorTokens.tertiary;
     } else {
-      barColor = ColorTokens.error;
+      barColor = YnabPalette.negative;
     }
 
     return Padding(
@@ -299,7 +278,7 @@ class _GoalProgressBar extends HookWidget {
               borderRadius: BorderRadius.circular(2),
               child: LinearProgressIndicator(
                 value: clampedProgress,
-                minHeight: 3,
+                minHeight: 4,
                 backgroundColor: barColor.withAlpha(30),
                 valueColor: AlwaysStoppedAnimation<Color>(barColor),
               ),

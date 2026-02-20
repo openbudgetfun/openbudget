@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
 import 'package:openbudget_app/src/features/budget/widgets/envelope_row.dart';
+import 'package:openbudget_app/src/theme/ynab_palette.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
@@ -51,7 +52,6 @@ class CategoryGroup extends HookConsumerWidget {
     final category = categoryWithEnvelopes.category;
     final envelopes = categoryWithEnvelopes.envelopes;
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
     final isReorderingEnvelopes = useState(false);
     final orderedEnvelopes = useState(List.of(envelopes));
 
@@ -61,6 +61,12 @@ class CategoryGroup extends HookConsumerWidget {
     }, [envelopes]);
 
     return Card(
+      margin: EdgeInsets.zero,
+      color: YnabPalette.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(RadiusTokens.md),
+        side: const BorderSide(color: YnabPalette.divider),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
@@ -77,68 +83,59 @@ class CategoryGroup extends HookConsumerWidget {
                   horizontal: SpacingTokens.md,
                   vertical: SpacingTokens.sm + SpacingTokens.xs,
                 ),
-                decoration: BoxDecoration(
-                  color: colorScheme.primaryContainer.withAlpha(80),
-                  borderRadius: const BorderRadius.vertical(
+                decoration: const BoxDecoration(
+                  color: YnabPalette.surfaceMuted,
+                  borderRadius: BorderRadius.vertical(
                     top: Radius.circular(RadiusTokens.md),
                   ),
                 ),
                 child: Row(
                   children: [
                     if (category.isHidden ?? false) ...[
-                      Icon(
+                      const Icon(
                         Icons.visibility_off_rounded,
                         size: 14,
-                        color: colorScheme.onSurfaceVariant,
+                        color: YnabPalette.mutedText,
                       ),
                       const SizedBox(width: SpacingTokens.xs),
                     ],
                     Expanded(
-                      flex: 4,
                       child: Text(
-                        category.name.toUpperCase(),
-                        style: theme.textTheme.labelLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 0.5,
+                        category.name,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                     ),
-                    Expanded(
-                      flex: 3,
-                      child: Text(
-                        l10n.budgetColumnBudgeted,
-                        textAlign: TextAlign.right,
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
+                    const SizedBox(width: SpacingTokens.sm),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          l10n.budgetColumnAvailable,
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: YnabPalette.mutedText,
+                          ),
                         ),
-                      ),
-                    ),
-                    Expanded(
-                      flex: 3,
-                      child: Text(
-                        l10n.budgetColumnSpent,
-                        textAlign: TextAlign.right,
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
+                        Text(
+                          formatCents(
+                            categoryWithEnvelopes.totalAvailableCents,
+                            currencyCode,
+                          ),
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: _availableColor(
+                              categoryWithEnvelopes.totalAvailableCents,
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                    Expanded(
-                      flex: 3,
-                      child: Text(
-                        l10n.budgetColumnAvailable,
-                        textAlign: TextAlign.right,
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                      ),
+                      ],
                     ),
                   ],
                 ),
               ),
             ),
           ),
-          const Divider(),
           if (isReorderingEnvelopes.value) ...[
             Padding(
               padding: const EdgeInsets.symmetric(
@@ -147,17 +144,17 @@ class CategoryGroup extends HookConsumerWidget {
               ),
               child: Row(
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.info_outline_rounded,
                     size: 14,
-                    color: colorScheme.onSurfaceVariant,
+                    color: YnabPalette.mutedText,
                   ),
                   const SizedBox(width: SpacingTokens.xs),
                   Expanded(
                     child: Text(
                       l10n.envelopeReorderHint,
                       style: theme.textTheme.labelSmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
+                        color: YnabPalette.mutedText,
                       ),
                     ),
                   ),
@@ -174,9 +171,9 @@ class CategoryGroup extends HookConsumerWidget {
               return ListTile(
                 key: ValueKey(envelope.id),
                 dense: true,
-                leading: Icon(
+                leading: const Icon(
                   Icons.drag_handle_rounded,
-                  color: colorScheme.onSurfaceVariant,
+                  color: YnabPalette.mutedText,
                 ),
                 title: Text(
                   envelope.name,
@@ -214,7 +211,7 @@ class CategoryGroup extends HookConsumerWidget {
               );
             }),
           ] else
-            ...envelopes.asMap().entries.map((entry) {
+            ...envelopes.asMap().entries.expand((entry) sync* {
               final envelope = entry.value;
               final envelopeId = envelope.id?.toString() ?? '';
               final monthlyData =
@@ -223,7 +220,7 @@ class CategoryGroup extends HookConsumerWidget {
                   ? categoryWithEnvelopes.monthlyEnvelopes[entry.key]
                   : null;
               final envelopeGoal = goalsMap[envelopeId];
-              return Opacity(
+              yield Opacity(
                 opacity: (envelope.isHidden ?? false) ? 0.5 : 1.0,
                 child: EnvelopeRow(
                   envelope: envelope,
@@ -240,115 +237,46 @@ class CategoryGroup extends HookConsumerWidget {
                       : null,
                 ),
               );
+              if (entry.key < envelopes.length - 1) {
+                yield const Divider(height: 1, color: YnabPalette.divider);
+              }
             }),
-          if (envelopes.isNotEmpty) const Divider(),
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: SpacingTokens.sm + SpacingTokens.xs,
-              vertical: SpacingTokens.sm + 2,
+          Container(
+            padding: const EdgeInsets.fromLTRB(
+              SpacingTokens.md,
+              SpacingTokens.sm,
+              SpacingTokens.md,
+              SpacingTokens.md,
+            ),
+            decoration: const BoxDecoration(
+              border: Border(top: BorderSide(color: YnabPalette.divider)),
             ),
             child: Row(
               children: [
-                const SizedBox(width: SpacingTokens.xs),
                 Expanded(
-                  flex: 4,
                   child: Text(
                     l10n.budgetCategoryTotal,
                     style: theme.textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.bold,
+                      color: YnabPalette.mutedText,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
-                Expanded(
-                  flex: 3,
-                  child: Text(
-                    formatCents(
-                      categoryWithEnvelopes.totalBudgetedCents,
-                      currencyCode,
+                OutlinedButton.icon(
+                  onPressed: onAddEnvelope,
+                  icon: const Icon(Icons.add, size: 16),
+                  label: Text(l10n.budgetAddEnvelope),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: YnabPalette.accentBlue,
+                    side: const BorderSide(color: YnabPalette.divider),
+                    backgroundColor: YnabPalette.surfaceMuted,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: SpacingTokens.sm,
+                      vertical: SpacingTokens.xs,
                     ),
-                    textAlign: TextAlign.right,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  flex: 3,
-                  child: Text(
-                    formatCents(
-                      categoryWithEnvelopes.totalSpentCents,
-                      currencyCode,
-                    ),
-                    textAlign: TextAlign.right,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: categoryWithEnvelopes.totalSpentCents > 0
-                          ? ColorTokens.error
-                          : null,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: SpacingTokens.xs),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 6,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: _availableColor(
-                      categoryWithEnvelopes.totalAvailableCents,
-                    ).withAlpha(20),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (categoryWithEnvelopes.totalAvailableCents < 0)
-                        Padding(
-                          padding: const EdgeInsets.only(right: 3),
-                          child: Icon(
-                            Icons.warning_amber_rounded,
-                            size: 12,
-                            color: _availableColor(
-                              categoryWithEnvelopes.totalAvailableCents,
-                            ),
-                          ),
-                        ),
-                      Text(
-                        formatCents(
-                          categoryWithEnvelopes.totalAvailableCents,
-                          currencyCode,
-                        ),
-                        maxLines: 1,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: _availableColor(
-                            categoryWithEnvelopes.totalAvailableCents,
-                          ),
-                        ),
-                      ),
-                    ],
                   ),
                 ),
               ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(
-              left: SpacingTokens.md,
-              bottom: SpacingTokens.sm,
-            ),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: TextButton.icon(
-                onPressed: onAddEnvelope,
-                icon: const Icon(Icons.add, size: 18),
-                label: Text(l10n.budgetAddEnvelope),
-              ),
             ),
           ),
         ],
@@ -505,8 +433,8 @@ class CategoryGroup extends HookConsumerWidget {
   }
 
   Color _availableColor(int cents) {
-    if (cents > 0) return ColorTokens.secondary;
-    if (cents < 0) return ColorTokens.error;
-    return ColorTokens.tertiary;
+    if (cents > 0) return YnabPalette.progressGreen;
+    if (cents < 0) return YnabPalette.negative;
+    return YnabPalette.mutedText;
   }
 }

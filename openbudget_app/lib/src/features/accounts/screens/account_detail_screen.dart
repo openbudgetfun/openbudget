@@ -7,6 +7,7 @@ import 'package:openbudget_app/src/features/accounts/providers/account_list_prov
 import 'package:openbudget_app/src/features/accounts/providers/account_transactions_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
 import 'package:openbudget_app/src/features/payees/providers/payee_list_provider.dart';
+import 'package:openbudget_app/src/theme/ynab_palette.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
@@ -53,7 +54,11 @@ class AccountDetailScreen extends HookConsumerWidget {
         : CurrencyCode.usd;
 
     return Scaffold(
+      backgroundColor: YnabPalette.appBackground,
       appBar: AppBar(
+        backgroundColor: YnabPalette.appBackground,
+        surfaceTintColor: Colors.transparent,
+        scrolledUnderElevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.go('/budgets/$budgetId/accounts'),
@@ -68,7 +73,12 @@ class AccountDetailScreen extends HookConsumerWidget {
                 ),
                 onChanged: (value) => searchQuery.value = value,
               )
-            : Text(accountData?.name ?? l10n.accountListTitle),
+            : Text(
+                accountData?.name ?? l10n.accountListTitle,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
         actions: [
           IconButton(
             icon: Icon(
@@ -99,17 +109,16 @@ class AccountDetailScreen extends HookConsumerWidget {
               currencyCode: currencyCode,
               transactions: txnAsync.whenOrNull(data: (txns) => txns),
             ),
-          // Status filter chips.
           Padding(
             padding: const EdgeInsets.symmetric(
               horizontal: SpacingTokens.md,
               vertical: SpacingTokens.sm,
             ),
-            child: Row(
+            child: Wrap(
+              spacing: SpacingTokens.xs,
+              runSpacing: SpacingTokens.xs,
               children: [
-                for (final filter in _StatusFilter.values) ...[
-                  if (filter != _StatusFilter.values.first)
-                    const SizedBox(width: SpacingTokens.xs),
+                for (final filter in _StatusFilter.values)
                   ChoiceChip(
                     label: Text(switch (filter) {
                       _StatusFilter.all => l10n.accountFilterAll,
@@ -120,8 +129,12 @@ class AccountDetailScreen extends HookConsumerWidget {
                     selected: statusFilter.value == filter,
                     onSelected: (_) => statusFilter.value = filter,
                     visualDensity: VisualDensity.compact,
+                    selectedColor: YnabPalette.accentPurple,
+                    side: const BorderSide(color: YnabPalette.divider),
+                    labelStyle: theme.textTheme.labelMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ],
               ],
             ),
           ),
@@ -188,7 +201,7 @@ class AccountDetailScreen extends HookConsumerWidget {
                           ? l10n.transactionNoResults
                           : l10n.transactionEmpty,
                       style: theme.textTheme.bodyLarge?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
+                        color: YnabPalette.mutedText,
                       ),
                     ),
                   );
@@ -215,12 +228,22 @@ class AccountDetailScreen extends HookConsumerWidget {
                     );
                   },
                   child: ListView.builder(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: SpacingTokens.sm,
+                    padding: const EdgeInsets.fromLTRB(
+                      SpacingTokens.md,
+                      SpacingTokens.xs,
+                      SpacingTokens.md,
+                      SpacingTokens.lg,
                     ),
                     itemCount: filtered.length,
                     itemBuilder: (context, index) {
                       final txn = filtered[index];
+                      final prevTxn = index > 0 ? filtered[index - 1] : null;
+                      final showDateHeader =
+                          prevTxn == null ||
+                          !_isSameDay(
+                            prevTxn.transactionDate,
+                            txn.transactionDate,
+                          );
                       final runningBalance =
                           balanceMap[txn.id?.toString() ?? '$index'] ?? 0;
                       final payeeName = txn.payeeId != null
@@ -229,15 +252,34 @@ class AccountDetailScreen extends HookConsumerWidget {
                       final envelopeName = txn.envelopeId != null
                           ? envelopeMap[txn.envelopeId.toString()]
                           : null;
-                      return _TransactionRow(
-                        transaction: txn,
-                        currencyCode: currencyCode,
-                        runningBalanceCents: runningBalance,
-                        payeeName: payeeName,
-                        envelopeName: envelopeName,
-                        onToggleCleared: txn.reconciled
-                            ? null
-                            : () => _toggleCleared(context, ref, txn),
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          if (showDateHeader)
+                            Padding(
+                              padding: EdgeInsets.only(
+                                top: index == 0 ? 0 : SpacingTokens.md,
+                                bottom: SpacingTokens.xs,
+                              ),
+                              child: Text(
+                                _formatDayHeader(txn.transactionDate),
+                                style: theme.textTheme.titleSmall?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  color: YnabPalette.mutedText,
+                                ),
+                              ),
+                            ),
+                          _TransactionRow(
+                            transaction: txn,
+                            currencyCode: currencyCode,
+                            runningBalanceCents: runningBalance,
+                            payeeName: payeeName,
+                            envelopeName: envelopeName,
+                            onToggleCleared: txn.reconciled
+                                ? null
+                                : () => _toggleCleared(context, ref, txn),
+                          ),
+                        ],
                       );
                     },
                   ),
@@ -248,6 +290,14 @@ class AccountDetailScreen extends HookConsumerWidget {
         ],
       ),
     );
+  }
+
+  static bool _isSameDay(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
+  }
+
+  static String _formatDayHeader(DateTime date) {
+    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }
 
   Future<void> _toggleCleared(
@@ -356,7 +406,6 @@ class _BalanceHeader extends HookWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
 
     var clearedCents = 0;
     var unclearedCents = 0;
@@ -371,25 +420,35 @@ class _BalanceHeader extends HookWidget {
     }
 
     return Container(
-      width: double.infinity,
+      margin: const EdgeInsets.fromLTRB(
+        SpacingTokens.md,
+        SpacingTokens.sm,
+        SpacingTokens.md,
+        SpacingTokens.xs,
+      ),
       padding: const EdgeInsets.all(SpacingTokens.md),
-      color: colorScheme.primaryContainer.withAlpha(50),
+      decoration: BoxDecoration(
+        color: YnabPalette.surface,
+        borderRadius: BorderRadius.circular(RadiusTokens.md),
+        border: Border.all(color: YnabPalette.divider),
+      ),
       child: Column(
         children: [
           Text(
             l10n.accountDetailBalance,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: colorScheme.onSurfaceVariant,
+              color: YnabPalette.mutedText,
+              fontWeight: FontWeight.w600,
             ),
           ),
           const SizedBox(height: SpacingTokens.xs),
           Text(
             formatCents(accountData.balanceCents, currencyCode),
-            style: theme.textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.bold,
+            style: theme.textTheme.headlineLarge?.copyWith(
+              fontWeight: FontWeight.w800,
               color: accountData.balanceCents >= 0
-                  ? colorScheme.primary
-                  : colorScheme.error,
+                  ? YnabPalette.progressGreen
+                  : YnabPalette.negative,
             ),
           ),
           if (transactions != null) ...[
@@ -401,14 +460,14 @@ class _BalanceHeader extends HookWidget {
                   icon: Icons.check_circle_outline,
                   label: l10n.accountBalanceCleared,
                   amount: formatCents(clearedCents, currencyCode),
-                  color: ColorTokens.secondary,
+                  color: YnabPalette.progressGreen,
                 ),
                 const SizedBox(width: SpacingTokens.lg),
                 _BalanceChip(
                   icon: Icons.circle_outlined,
                   label: l10n.accountBalanceUncleared,
                   amount: formatCents(unclearedCents, currencyCode),
-                  color: colorScheme.outline,
+                  color: YnabPalette.mutedText,
                 ),
               ],
             ),
@@ -435,29 +494,39 @@ class _BalanceChip extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 12, color: color),
-            const SizedBox(width: 4),
-            Text(
-              label,
-              style: theme.textTheme.labelSmall?.copyWith(color: color),
-            ),
-          ],
-        ),
-        const SizedBox(height: 2),
-        Text(
-          amount,
-          style: theme.textTheme.bodySmall?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: color,
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: SpacingTokens.sm,
+        vertical: 6,
+      ),
+      decoration: BoxDecoration(
+        color: color.withAlpha(12),
+        borderRadius: BorderRadius.circular(RadiusTokens.sm),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 12, color: color),
+              const SizedBox(width: 4),
+              Text(
+                label,
+                style: theme.textTheme.labelSmall?.copyWith(color: color),
+              ),
+            ],
           ),
-        ),
-      ],
+          const SizedBox(height: 2),
+          Text(
+            amount,
+            style: theme.textTheme.bodySmall?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: color,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -491,7 +560,6 @@ class _TransactionRow extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
     final isInflow = transaction.amountCents > 0;
 
     final statusIcon = transaction.reconciled
@@ -500,77 +568,101 @@ class _TransactionRow extends HookWidget {
         ? Icons.check_circle_outline
         : Icons.circle_outlined;
     final statusColor = transaction.reconciled
-        ? colorScheme.primary
+        ? YnabPalette.accentBlue
         : transaction.cleared
-        ? ColorTokens.secondary
-        : colorScheme.outline;
+        ? YnabPalette.progressGreen
+        : YnabPalette.mutedText;
 
     return InkWell(
       onTap: onToggleCleared,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: SpacingTokens.md,
-          vertical: SpacingTokens.sm,
+      borderRadius: BorderRadius.circular(RadiusTokens.sm),
+      child: Ink(
+        decoration: BoxDecoration(
+          color: YnabPalette.surface,
+          borderRadius: BorderRadius.circular(RadiusTokens.sm),
+          border: Border.all(color: YnabPalette.divider),
         ),
-        child: Row(
-          children: [
-            Icon(statusIcon, size: 20, color: statusColor),
-            const SizedBox(width: SpacingTokens.sm),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    transaction.description,
-                    style: theme.textTheme.bodyMedium,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  Text(
-                    _formatDate(transaction.transactionDate),
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  if (_detailLine.isNotEmpty)
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: SpacingTokens.md,
+            vertical: SpacingTokens.sm,
+          ),
+          child: Row(
+            children: [
+              Icon(statusIcon, size: 18, color: statusColor),
+              const SizedBox(width: SpacingTokens.sm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                     Text(
-                      _detailLine,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
+                      transaction.description,
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
                       ),
-                      maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
+                    if (_detailLine.isNotEmpty)
+                      Text(
+                        _detailLine,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: YnabPalette.mutedText,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    if (transaction.memo != null &&
+                        transaction.memo!.trim().isNotEmpty)
+                      Container(
+                        margin: const EdgeInsets.only(top: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: SpacingTokens.sm,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: YnabPalette.surfaceMuted,
+                          borderRadius: BorderRadius.circular(RadiusTokens.sm),
+                        ),
+                        child: Text(
+                          transaction.memo!,
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: YnabPalette.mutedText,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: SpacingTokens.sm),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    formatCents(transaction.amountCents, currencyCode),
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: isInflow
+                          ? YnabPalette.progressGreen
+                          : YnabPalette.negative,
+                    ),
+                  ),
+                  Text(
+                    formatCents(runningBalanceCents, currencyCode),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: runningBalanceCents >= 0
+                          ? YnabPalette.mutedText
+                          : YnabPalette.negative,
+                    ),
+                  ),
                 ],
               ),
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  formatCents(transaction.amountCents, currencyCode),
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: isInflow ? ColorTokens.secondary : colorScheme.error,
-                  ),
-                ),
-                Text(
-                  formatCents(runningBalanceCents, currencyCode),
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: runningBalanceCents >= 0
-                        ? colorScheme.onSurfaceVariant
-                        : colorScheme.error,
-                  ),
-                ),
-              ],
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
-  }
-
-  static String _formatDate(DateTime date) {
-    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }
 }
 

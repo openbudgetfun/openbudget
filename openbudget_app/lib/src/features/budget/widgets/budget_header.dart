@@ -5,6 +5,7 @@ import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/age_of_money_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/selected_month_provider.dart';
 import 'package:openbudget_app/src/features/budget/screens/auto_assign_dialog.dart';
+import 'package:openbudget_app/src/theme/ynab_palette.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -42,216 +43,289 @@ class BudgetHeader extends HookConsumerWidget {
     final ageOfMoneyAsync = ref.watch(ageOfMoneyProvider(budgetId));
     final now = DateTime.now();
     final isCurrentMonth = year == now.year && month == now.month;
-    final color = readyToAssignCents > 0
-        ? ColorTokens.secondary
-        : readyToAssignCents < 0
-        ? ColorTokens.error
-        : ColorTokens.tertiary;
-    final bgColor = readyToAssignCents > 0
-        ? ColorTokens.secondary.withAlpha(30)
-        : readyToAssignCents < 0
-        ? ColorTokens.error.withAlpha(20)
-        : ColorTokens.tertiary.withAlpha(20);
+    final readyCardColor = readyToAssignCents >= 0
+        ? YnabPalette.accentGreen
+        : YnabPalette.negative.withAlpha(35);
+    final readyTextColor = readyToAssignCents >= 0
+        ? Colors.black
+        : YnabPalette.negative;
 
     return Container(
       decoration: BoxDecoration(
-        color: bgColor,
+        color: YnabPalette.surface,
         borderRadius: BorderRadius.circular(RadiusTokens.xl),
-        border: Border.all(color: color.withAlpha(80)),
-      ),
-      padding: const EdgeInsets.symmetric(
-        vertical: SpacingTokens.lg - 4,
-        horizontal: SpacingTokens.md,
+        border: Border.all(color: YnabPalette.divider),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.chevron_left),
-                onPressed: () => ref
-                    .read(selectedMonthProvider(budgetId).notifier)
-                    .goToPreviousMonth(),
-                iconSize: 28,
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+          Container(
+            decoration: const BoxDecoration(
+              color: YnabPalette.accentPurple,
+              borderRadius: BorderRadius.vertical(
+                top: Radius.circular(RadiusTokens.xl),
               ),
-              GestureDetector(
-                onTap: isCurrentMonth
-                    ? null
-                    : () => ref
-                          .read(selectedMonthProvider(budgetId).notifier)
-                          .setMonth(now.year, now.month),
-                onLongPress: () => _showMonthPicker(context, ref, l10n),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: SpacingTokens.sm,
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        '${_localizedMonth(l10n, month)} $year',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      if (!isCurrentMonth)
-                        Text(
-                          l10n.budgetGoToToday,
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: theme.colorScheme.primary,
-                          ),
-                        ),
-                    ],
+            ),
+            padding: const EdgeInsets.fromLTRB(
+              SpacingTokens.md,
+              SpacingTokens.sm,
+              SpacingTokens.md,
+              SpacingTokens.md,
+            ),
+            child: Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.chevron_left),
+                  onPressed: () => ref
+                      .read(selectedMonthProvider(budgetId).notifier)
+                      .goToPreviousMonth(),
+                  iconSize: 24,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(
+                    minWidth: 36,
+                    minHeight: 36,
                   ),
                 ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.chevron_right),
-                onPressed: () => ref
-                    .read(selectedMonthProvider(budgetId).notifier)
-                    .goToNextMonth(),
-                iconSize: 28,
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
-              ),
-            ],
-          ),
-          const SizedBox(height: SpacingTokens.sm),
-          Text(
-            l10n.budgetReadyToAssign,
-            style: theme.textTheme.titleSmall?.copyWith(
-              color: color.withAlpha(200),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: isCurrentMonth
+                        ? null
+                        : () => ref
+                              .read(selectedMonthProvider(budgetId).notifier)
+                              .setMonth(now.year, now.month),
+                    onLongPress: () => _showMonthPicker(context, ref, l10n),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: SpacingTokens.xs,
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            '${_localizedMonth(l10n, month)} $year',
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                            textAlign: TextAlign.center,
+                          ),
+                          if (!isCurrentMonth)
+                            Text(
+                              l10n.budgetGoToToday,
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: YnabPalette.accentBlue,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.chevron_right),
+                  onPressed: () => ref
+                      .read(selectedMonthProvider(budgetId).notifier)
+                      .goToNextMonth(),
+                  iconSize: 24,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(
+                    minWidth: 36,
+                    minHeight: 36,
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: SpacingTokens.xs),
-          Text(
-            formatCents(readyToAssignCents, currencyCode),
-            style: theme.textTheme.headlineLarge?.copyWith(
-              color: color,
-              fontWeight: FontWeight.bold,
+          Padding(
+            padding: const EdgeInsets.all(SpacingTokens.md),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: readyCardColor,
+                borderRadius: BorderRadius.circular(RadiusTokens.md),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: SpacingTokens.md,
+                  vertical: SpacingTokens.sm + 2,
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        formatCents(readyToAssignCents, currencyCode),
+                        style: theme.textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          color: readyTextColor,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: SpacingTokens.sm),
+                    Text(
+                      l10n.budgetReadyToAssign,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: readyTextColor,
+                      ),
+                    ),
+                    Icon(Icons.chevron_right_rounded, color: readyTextColor),
+                  ],
+                ),
+              ),
             ),
           ),
           if (totalIncomeCents != 0 ||
               totalBudgetedCents != 0 ||
               totalActivityCents != 0) ...[
-            const SizedBox(height: SpacingTokens.sm),
-            Divider(color: color.withAlpha(40), height: 1),
-            const SizedBox(height: SpacingTokens.sm),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _SummaryColumn(
-                  label: l10n.budgetTotalIncome,
-                  value: formatCents(totalIncomeCents, currencyCode),
-                  valueColor: ColorTokens.secondary,
-                  theme: theme,
-                ),
-                _SummaryColumn(
-                  label: l10n.budgetTotalBudgeted,
-                  value: formatCents(totalBudgetedCents, currencyCode),
-                  theme: theme,
-                ),
-                _SummaryColumn(
-                  label: l10n.budgetTotalActivity,
-                  value: formatCents(-totalActivityCents, currencyCode),
-                  valueColor: totalActivityCents > 0 ? ColorTokens.error : null,
-                  theme: theme,
-                ),
-              ],
-            ),
-          ],
-          if (totalOverspentCents > 0) ...[
-            const SizedBox(height: SpacingTokens.sm),
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: SpacingTokens.sm,
-                vertical: SpacingTokens.xs,
-              ),
-              decoration: BoxDecoration(
-                color: ColorTokens.error.withAlpha(20),
-                borderRadius: BorderRadius.circular(RadiusTokens.sm),
-              ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: SpacingTokens.md),
               child: Row(
-                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Icon(
-                    Icons.warning_amber_rounded,
-                    size: 16,
-                    color: ColorTokens.error,
+                  _SummaryColumn(
+                    label: l10n.budgetTotalIncome,
+                    value: formatCents(totalIncomeCents, currencyCode),
+                    valueColor: YnabPalette.progressGreen,
+                    theme: theme,
                   ),
-                  const SizedBox(width: SpacingTokens.xs),
-                  Text(
-                    l10n.budgetOverspentWarning(
-                      formatCents(totalOverspentCents, currencyCode),
-                    ),
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: ColorTokens.error,
-                      fontWeight: FontWeight.w600,
-                    ),
+                  _SummaryColumn(
+                    label: l10n.budgetTotalBudgeted,
+                    value: formatCents(totalBudgetedCents, currencyCode),
+                    theme: theme,
+                  ),
+                  _SummaryColumn(
+                    label: l10n.budgetTotalActivity,
+                    value: formatCents(-totalActivityCents, currencyCode),
+                    valueColor: totalActivityCents > 0
+                        ? YnabPalette.negative
+                        : YnabPalette.progressGreen,
+                    theme: theme,
                   ),
                 ],
               ),
             ),
           ],
-          if (readyToAssignCents > 0) ...[
-            const SizedBox(height: SpacingTokens.md),
-            FilledButton.icon(
-              onPressed: () => _showAutoAssignDialog(context),
-              icon: const Icon(Icons.auto_fix_high_rounded, size: 18),
-              label: Text(l10n.budgetAssignMoney),
-              style: FilledButton.styleFrom(
-                backgroundColor: ColorTokens.secondary,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: SpacingTokens.lg,
-                  vertical: SpacingTokens.sm,
-                ),
-                textStyle: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+          if (totalOverspentCents > 0) ...[
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                SpacingTokens.md,
+                SpacingTokens.sm,
+                SpacingTokens.md,
+                0,
               ),
-            ),
-          ],
-          if (onCopyLastMonth != null) ...[
-            const SizedBox(height: SpacingTokens.sm),
-            OutlinedButton.icon(
-              onPressed: onCopyLastMonth,
-              icon: const Icon(Icons.content_copy_rounded, size: 16),
-              label: Text(l10n.budgetCopyLastMonth),
-              style: OutlinedButton.styleFrom(
+              child: Container(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: SpacingTokens.md,
+                  horizontal: SpacingTokens.sm,
                   vertical: SpacingTokens.xs,
                 ),
-                minimumSize: Size.zero,
-                textStyle: theme.textTheme.labelMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
+                decoration: BoxDecoration(
+                  color: YnabPalette.negative.withAlpha(18),
+                  borderRadius: BorderRadius.circular(RadiusTokens.sm),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.warning_amber_rounded,
+                      size: 16,
+                      color: YnabPalette.negative,
+                    ),
+                    const SizedBox(width: SpacingTokens.xs),
+                    Flexible(
+                      child: Text(
+                        l10n.budgetOverspentWarning(
+                          formatCents(totalOverspentCents, currencyCode),
+                        ),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: YnabPalette.negative,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
           ],
-          if (ageOfMoneyAsync.hasValue && ageOfMoneyAsync.value != null) ...[
-            const SizedBox(height: SpacingTokens.sm),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              SpacingTokens.md,
+              SpacingTokens.sm,
+              SpacingTokens.md,
+              SpacingTokens.sm,
+            ),
+            child: Wrap(
+              spacing: SpacingTokens.sm,
+              runSpacing: SpacingTokens.xs,
               children: [
-                Icon(
-                  Icons.hourglass_bottom_rounded,
-                  size: 16,
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-                const SizedBox(width: SpacingTokens.xs),
-                Text(
-                  l10n.ageOfMoneyLabel(ageOfMoneyAsync.value!),
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
+                if (readyToAssignCents > 0)
+                  FilledButton.icon(
+                    onPressed: () => _showAutoAssignDialog(context),
+                    icon: const Icon(Icons.auto_fix_high_rounded, size: 18),
+                    label: Text(l10n.budgetAssignMoney),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: YnabPalette.accentBlue,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: SpacingTokens.md,
+                        vertical: SpacingTokens.sm,
+                      ),
+                      textStyle: theme.textTheme.labelLarge?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ),
-                ),
+                if (onCopyLastMonth != null)
+                  OutlinedButton.icon(
+                    onPressed: onCopyLastMonth,
+                    icon: const Icon(Icons.content_copy_rounded, size: 16),
+                    label: Text(l10n.budgetCopyLastMonth),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: YnabPalette.accentBlue,
+                      side: const BorderSide(color: YnabPalette.divider),
+                      backgroundColor: YnabPalette.surfaceMuted,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: SpacingTokens.md,
+                        vertical: SpacingTokens.sm,
+                      ),
+                      minimumSize: Size.zero,
+                      textStyle: theme.textTheme.labelLarge?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
               ],
+            ),
+          ),
+          if (ageOfMoneyAsync.hasValue && ageOfMoneyAsync.value != null) ...[
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                SpacingTokens.md,
+                0,
+                SpacingTokens.md,
+                SpacingTokens.md,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.hourglass_bottom_rounded,
+                    size: 16,
+                    color: YnabPalette.mutedText,
+                  ),
+                  const SizedBox(width: SpacingTokens.xs),
+                  Text(
+                    l10n.ageOfMoneyLabel(ageOfMoneyAsync.value!),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: YnabPalette.mutedText,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ],
@@ -453,7 +527,7 @@ class _SummaryColumn extends HookWidget {
         Text(
           label,
           style: theme.textTheme.labelSmall?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
+            color: YnabPalette.mutedText,
           ),
         ),
         const SizedBox(height: 2),

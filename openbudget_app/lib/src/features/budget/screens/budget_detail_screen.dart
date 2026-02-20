@@ -23,6 +23,8 @@ import 'package:openbudget_app/src/features/budget/widgets/category_group.dart';
 import 'package:openbudget_app/src/features/budget/widgets/credit_card_section.dart';
 import 'package:openbudget_app/src/features/recurring/providers/recurring_auto_post_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
+import 'package:openbudget_app/src/theme/ynab_palette.dart';
+import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -46,6 +48,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
     final searchController = useTextEditingController();
     final searchQuery = useState('');
     final isSearching = useState(false);
+    final showSpotlight = useState(false);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
@@ -139,14 +142,28 @@ class BudgetDetailScreen extends HookConsumerWidget {
             if (env.isHidden ?? false) hiddenCount++;
           }
         }
+        final filteredCategories = _filterCategories(
+          summary.categories,
+          searchQuery.value,
+          showHidden: showHidden.value,
+        );
 
         return Scaffold(
+          backgroundColor: YnabPalette.appBackground,
           appBar: AppBar(
+            backgroundColor: YnabPalette.appBackground,
+            surfaceTintColor: Colors.transparent,
+            scrolledUnderElevation: 0,
             leading: IconButton(
               icon: const Icon(Icons.arrow_back),
               onPressed: () => context.go(homePath),
             ),
-            title: Text(summary.budget.name),
+            title: Text(
+              summary.budget.name,
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
             actions: [
               if (isReordering.value)
                 TextButton(
@@ -231,6 +248,11 @@ class BudgetDetailScreen extends HookConsumerWidget {
             child: ListView(
               padding: const EdgeInsets.all(SpacingTokens.md),
               children: [
+                _BudgetViewToggle(
+                  showSpotlight: showSpotlight.value,
+                  onChanged: (value) => showSpotlight.value = value,
+                ),
+                const SizedBox(height: SpacingTokens.sm),
                 BudgetHeader(
                   readyToAssignCents: summary.readyToAssignCents,
                   currencyCode: currencyCode,
@@ -263,7 +285,15 @@ class BudgetDetailScreen extends HookConsumerWidget {
                   ),
                   const SizedBox(height: SpacingTokens.md),
                 ],
-                if (isSearching.value) ...[
+                if (showSpotlight.value)
+                  _SpotlightSummaryCard(
+                    totalIncomeCents: summary.totalIncomeCents,
+                    totalBudgetedCents: summary.totalBudgetedCents,
+                    totalActivityCents: totalActivityCents,
+                    totalOverspentCents: totalOverspentCents,
+                    currencyCode: currencyCode,
+                  ),
+                if (!showSpotlight.value && isSearching.value) ...[
                   TextField(
                     controller: searchController,
                     onChanged: (value) => searchQuery.value = value,
@@ -291,7 +321,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
                   ),
                   const SizedBox(height: SpacingTokens.md),
                 ],
-                if (summary.categories.isEmpty)
+                if (!showSpotlight.value && summary.categories.isEmpty)
                   Center(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
@@ -321,13 +351,10 @@ class BudgetDetailScreen extends HookConsumerWidget {
                       ),
                     ),
                   ),
-                if (isSearching.value &&
+                if (!showSpotlight.value &&
+                    isSearching.value &&
                     searchQuery.value.isNotEmpty &&
-                    _filterCategories(
-                      summary.categories,
-                      searchQuery.value,
-                      showHidden: showHidden.value,
-                    ).isEmpty)
+                    filteredCategories.isEmpty)
                   Center(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
@@ -351,17 +378,15 @@ class BudgetDetailScreen extends HookConsumerWidget {
                       ),
                     ),
                   ),
-                if (isReordering.value && summary.categories.isNotEmpty)
+                if (!showSpotlight.value &&
+                    isReordering.value &&
+                    summary.categories.isNotEmpty)
                   _ReorderableCategoryList(
                     categories: summary.categories,
                     budgetId: budgetId,
                   ),
-                if (!isReordering.value)
-                  ..._filterCategories(
-                    summary.categories,
-                    searchQuery.value,
-                    showHidden: showHidden.value,
-                  ).map(
+                if (!showSpotlight.value && !isReordering.value)
+                  ...filteredCategories.map(
                     (catWithEnvelopes) => Padding(
                       padding: const EdgeInsets.only(bottom: SpacingTokens.md),
                       child: CategoryGroup(
@@ -476,17 +501,19 @@ class BudgetDetailScreen extends HookConsumerWidget {
                       ),
                     ),
                   ),
-                const SizedBox(height: SpacingTokens.sm),
-                Center(
-                  child: OutlinedButton.icon(
-                    onPressed: () => _showAddCategoryDialog(
-                      context,
-                      summary.categories.length,
+                if (!showSpotlight.value) ...[
+                  const SizedBox(height: SpacingTokens.sm),
+                  Center(
+                    child: OutlinedButton.icon(
+                      onPressed: () => _showAddCategoryDialog(
+                        context,
+                        summary.categories.length,
+                      ),
+                      icon: const Icon(Icons.add),
+                      label: Text(l10n.budgetAddCategory),
                     ),
-                    icon: const Icon(Icons.add),
-                    label: Text(l10n.budgetAddCategory),
                   ),
-                ),
+                ],
                 const SizedBox(height: SpacingTokens.xxl),
               ],
             ),
@@ -966,6 +993,191 @@ class BudgetDetailScreen extends HookConsumerWidget {
         );
       }
     }
+  }
+}
+
+class _BudgetViewToggle extends HookWidget {
+  const _BudgetViewToggle({
+    required this.showSpotlight,
+    required this.onChanged,
+  });
+
+  final bool showSpotlight;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: YnabPalette.surfaceMuted,
+        borderRadius: BorderRadius.circular(RadiusTokens.md),
+        border: Border.all(color: YnabPalette.divider),
+      ),
+      padding: const EdgeInsets.all(2),
+      child: Row(
+        children: [
+          Expanded(
+            child: _ToggleButton(
+              label: 'Categories',
+              selected: !showSpotlight,
+              onTap: () => onChanged(false),
+              theme: theme,
+            ),
+          ),
+          Expanded(
+            child: _ToggleButton(
+              label: 'Spotlight',
+              selected: showSpotlight,
+              onTap: () => onChanged(true),
+              theme: theme,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ToggleButton extends HookWidget {
+  const _ToggleButton({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+    required this.theme,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+  final ThemeData theme;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: selected ? YnabPalette.surface : Colors.transparent,
+      borderRadius: BorderRadius.circular(RadiusTokens.sm),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(RadiusTokens.sm),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: SpacingTokens.sm),
+          child: Center(
+            child: Text(
+              label,
+              style: theme.textTheme.labelLarge?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: selected ? Colors.black : YnabPalette.mutedText,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SpotlightSummaryCard extends HookWidget {
+  const _SpotlightSummaryCard({
+    required this.totalIncomeCents,
+    required this.totalBudgetedCents,
+    required this.totalActivityCents,
+    required this.totalOverspentCents,
+    required this.currencyCode,
+  });
+
+  final int totalIncomeCents;
+  final int totalBudgetedCents;
+  final int totalActivityCents;
+  final int totalOverspentCents;
+  final CurrencyCode currencyCode;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.all(SpacingTokens.md),
+      decoration: BoxDecoration(
+        color: YnabPalette.surface,
+        borderRadius: BorderRadius.circular(RadiusTokens.md),
+        border: Border.all(color: YnabPalette.divider),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Spotlight',
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: SpacingTokens.sm),
+          _SpotlightRow(
+            label: 'Income',
+            value: formatCents(totalIncomeCents, currencyCode),
+            valueColor: YnabPalette.progressGreen,
+          ),
+          _SpotlightRow(
+            label: 'Budgeted',
+            value: formatCents(totalBudgetedCents, currencyCode),
+          ),
+          _SpotlightRow(
+            label: 'Spent',
+            value: formatCents(totalActivityCents, currencyCode),
+            valueColor: totalActivityCents > 0
+                ? YnabPalette.negative
+                : YnabPalette.mutedText,
+          ),
+          _SpotlightRow(
+            label: 'Overspent',
+            value: formatCents(totalOverspentCents, currencyCode),
+            valueColor: totalOverspentCents > 0
+                ? YnabPalette.negative
+                : YnabPalette.mutedText,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SpotlightRow extends HookWidget {
+  const _SpotlightRow({
+    required this.label,
+    required this.value,
+    this.valueColor,
+  });
+
+  final String label;
+  final String value;
+  final Color? valueColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: YnabPalette.mutedText,
+              ),
+            ),
+          ),
+          Text(
+            value,
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: valueColor,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
