@@ -7,6 +7,7 @@ import 'package:openbudget_app/src/features/accounts/providers/account_list_prov
 import 'package:openbudget_app/src/features/accounts/providers/account_transactions_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
 import 'package:openbudget_app/src/features/payees/providers/payee_list_provider.dart';
+import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/theme/ynab_palette.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_client/openbudget_client.dart';
@@ -61,7 +62,10 @@ class AccountDetailScreen extends HookConsumerWidget {
         scrolledUnderElevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/budgets/$budgetId/accounts'),
+          onPressed: () => context.goNamed(
+            accountListRoute,
+            pathParameters: {'id': budgetId},
+          ),
         ),
         title: isSearching.value
             ? TextField(
@@ -720,7 +724,7 @@ class _ReconcileDialog extends HookWidget {
             onChanged: (value) {
               final parsed = double.tryParse(value);
               enteredCents.value = parsed != null
-                  ? (parsed * 100).round()
+                  ? (parsed * _pow10(currencyCode.decimals)).round()
                   : null;
             },
           ),
@@ -769,5 +773,13 @@ class _ReconcileDialog extends HookWidget {
         ),
       ],
     );
+  }
+
+  double _pow10(int exponent) {
+    var result = 1.0;
+    for (var i = 0; i < exponent; i++) {
+      result *= 10;
+    }
+    return result;
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
+import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/theme/ynab_palette.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
@@ -46,7 +47,10 @@ class AddTransactionSheet extends HookWidget {
               color: YnabPalette.progressGreen,
               onTap: () {
                 Navigator.of(context).pop();
-                context.go('/budgets/$budgetId/income/add');
+                context.goNamed(
+                  addIncomeRoute,
+                  pathParameters: {'id': budgetId},
+                );
               },
             ),
             const SizedBox(height: SpacingTokens.sm),
@@ -56,7 +60,10 @@ class AddTransactionSheet extends HookWidget {
               color: YnabPalette.negative,
               onTap: () {
                 Navigator.of(context).pop();
-                context.go('/budgets/$budgetId/expenses/add');
+                context.goNamed(
+                  addExpenseRoute,
+                  pathParameters: {'id': budgetId},
+                );
               },
             ),
             const SizedBox(height: SpacingTokens.sm),
@@ -66,7 +73,10 @@ class AddTransactionSheet extends HookWidget {
               color: YnabPalette.accentBlue,
               onTap: () {
                 Navigator.of(context).pop();
-                context.go('/budgets/$budgetId/transfer');
+                context.goNamed(
+                  createTransferRoute,
+                  pathParameters: {'id': budgetId},
+                );
               },
             ),
             const SizedBox(height: SpacingTokens.md),

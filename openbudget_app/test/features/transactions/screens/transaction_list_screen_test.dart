@@ -35,6 +35,7 @@ void main() {
     required String id,
     required String description,
     required int amountCents,
+    String currencyCode = 'USD',
     DateTime? date,
     bool cleared = false,
     bool reconciled = false,
@@ -48,7 +49,7 @@ void main() {
     id: UuidValue.fromString(id),
     description: description,
     amountCents: amountCents,
-    currencyCode: 'USD',
+    currencyCode: currencyCode,
     budgetId: UuidValue.fromString('00000000-0000-0000-0000-000000000001'),
     transactionDate: date ?? DateTime(2026, 2, 15),
     cleared: cleared,
@@ -163,6 +164,34 @@ void main() {
       expect(find.text('Monthly Salary'), findsOneWidget);
       expect(find.text('Coffee Shop'), findsOneWidget);
       expect(find.text('Gas Station'), findsOneWidget);
+    });
+
+    testWidgets('renders per-transaction currencies in amount labels', (
+      tester,
+    ) async {
+      final mixedCurrencyTransactions = [
+        makeTx(
+          id: '00000000-0000-0000-0000-000000000021',
+          description: 'USD Expense',
+          amountCents: -5000,
+          date: DateTime(2026, 2, 15),
+        ),
+        makeTx(
+          id: '00000000-0000-0000-0000-000000000022',
+          description: 'EUR Income',
+          amountCents: 123456,
+          currencyCode: 'EUR',
+          date: DateTime(2026, 2, 15),
+        ),
+      ];
+
+      await tester.pumpWidget(
+        buildSubject(transactions: mixedCurrencyTransactions),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining(r'-$50.00'), findsOneWidget);
+      expect(find.textContaining('€1,234.56'), findsOneWidget);
     });
 
     testWidgets('shows search field', (tester) async {

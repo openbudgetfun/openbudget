@@ -9,6 +9,7 @@ import 'package:openbudget_app/src/features/budget/providers/budget_detail_provi
 import 'package:openbudget_app/src/features/settings/providers/budget_export_provider.dart';
 import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
 import 'package:openbudget_app/src/providers/theme_mode_provider.dart';
+import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
@@ -67,15 +68,20 @@ class SettingsScreen extends HookConsumerWidget {
                     leading: const Icon(Icons.repeat_rounded),
                     title: Text(l10n.recurringListTitle),
                     trailing: const Icon(Icons.chevron_right_rounded),
-                    onTap: () =>
-                        context.go('/budgets/$budgetId/more/recurring'),
+                    onTap: () => context.goNamed(
+                      recurringListRoute,
+                      pathParameters: {'id': budgetId},
+                    ),
                   ),
                   const Divider(height: 1),
                   ListTile(
                     leading: const Icon(Icons.rule_rounded),
                     title: Text(l10n.transactionRulesTitle),
                     trailing: const Icon(Icons.chevron_right_rounded),
-                    onTap: () => context.go('/budgets/$budgetId/more/rules'),
+                    onTap: () => context.goNamed(
+                      transactionRulesRoute,
+                      pathParameters: {'id': budgetId},
+                    ),
                   ),
                 ],
               ),

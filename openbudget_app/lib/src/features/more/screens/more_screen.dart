@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
+import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 class MoreScreen extends HookWidget {
@@ -24,31 +25,46 @@ class MoreScreen extends HookWidget {
                 _MoreTile(
                   icon: Icons.repeat_rounded,
                   label: l10n.moreRecurring,
-                  onTap: () => context.go('/budgets/$budgetId/more/recurring'),
+                  onTap: () => context.goNamed(
+                    recurringListRoute,
+                    pathParameters: {'id': budgetId},
+                  ),
                 ),
                 const Divider(height: 1),
                 _MoreTile(
                   icon: Icons.people_outline_rounded,
                   label: l10n.morePayees,
-                  onTap: () => context.go('/budgets/$budgetId/more/payees'),
+                  onTap: () => context.goNamed(
+                    payeeListRoute,
+                    pathParameters: {'id': budgetId},
+                  ),
                 ),
                 const Divider(height: 1),
                 _MoreTile(
                   icon: Icons.rule_rounded,
                   label: l10n.moreRules,
-                  onTap: () => context.go('/budgets/$budgetId/more/rules'),
+                  onTap: () => context.goNamed(
+                    transactionRulesRoute,
+                    pathParameters: {'id': budgetId},
+                  ),
                 ),
                 const Divider(height: 1),
                 _MoreTile(
                   icon: Icons.file_upload_outlined,
                   label: l10n.moreImport,
-                  onTap: () => context.go('/budgets/$budgetId/more/import'),
+                  onTap: () => context.goNamed(
+                    importTransactionsRoute,
+                    pathParameters: {'id': budgetId},
+                  ),
                 ),
                 const Divider(height: 1),
                 _MoreTile(
                   icon: Icons.settings_outlined,
                   label: l10n.moreSettings,
-                  onTap: () => context.go('/budgets/$budgetId/more/settings'),
+                  onTap: () => context.goNamed(
+                    settingsRoute,
+                    pathParameters: {'id': budgetId},
+                  ),
                 ),
               ],
             ),

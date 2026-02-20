@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
+import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/monthly_allocation_provider.dart';
+import 'package:openbudget_app/src/utils/currency_code_utils.dart';
+import 'package:openbudget_app/src/utils/currency_formatter.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 class MoveMoneyDialog extends HookConsumerWidget {
@@ -27,6 +31,12 @@ class MoveMoneyDialog extends HookConsumerWidget {
     final fromEnvelopeId = useState<String?>(null);
     final toEnvelopeId = useState<String?>(null);
     final isSubmitting = useState(false);
+    final budgetAsync = ref.watch(budgetDetailProvider(budgetId));
+    final currency =
+        budgetAsync.whenOrNull(
+          data: (budget) => parseCurrencyCode(budget.currencyCode),
+        ) ??
+        CurrencyCode.usd;
 
     // Build a flat list of envelopes with category labels.
     final envelopeItems = <DropdownMenuItem<String>>[];
@@ -71,8 +81,9 @@ class MoveMoneyDialog extends HookConsumerWidget {
             TextField(
               controller: amountController,
               decoration: InputDecoration(
-                labelText: l10n.transactionAmountLabel,
-                prefixIcon: const Icon(Icons.attach_money),
+                labelText: '${l10n.transactionAmountLabel} (${currency.code})',
+                prefixText: '${currency.symbol} ',
+                hintText: formatCents(0, currency),
               ),
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
@@ -95,6 +106,7 @@ class MoveMoneyDialog extends HookConsumerWidget {
                   amountController,
                   fromEnvelopeId,
                   toEnvelopeId,
+                  currency,
                   isSubmitting,
                 ),
           child: isSubmitting.value
@@ -115,6 +127,7 @@ class MoveMoneyDialog extends HookConsumerWidget {
     TextEditingController amountController,
     ValueNotifier<String?> fromEnvelopeId,
     ValueNotifier<String?> toEnvelopeId,
+    CurrencyCode currency,
     ValueNotifier<bool> isSubmitting,
   ) async {
     final l10n = AppLocalizations.of(context);
@@ -135,7 +148,7 @@ class MoveMoneyDialog extends HookConsumerWidget {
     final amount = double.tryParse(amountController.text.trim()) ?? 0;
     if (amount <= 0) return;
 
-    final amountCents = (amount * 100).round();
+    final amountCents = (amount * _pow10(currency.decimals)).round();
     isSubmitting.value = true;
 
     try {
@@ -160,5 +173,13 @@ class MoveMoneyDialog extends HookConsumerWidget {
         ),
       );
     }
+  }
+
+  double _pow10(int exponent) {
+    var result = 1.0;
+    for (var i = 0; i < exponent; i++) {
+      result *= 10;
+    }
+    return result;
   }
 }

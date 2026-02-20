@@ -3,6 +3,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
@@ -12,6 +13,7 @@ import 'package:openbudget_app/src/features/payees/providers/payee_last_envelope
 import 'package:openbudget_app/src/features/payees/providers/payee_list_provider.dart';
 import 'package:openbudget_app/src/features/transaction_rules/providers/rule_match_provider.dart';
 import 'package:openbudget_app/src/features/transactions/screens/add_expense_screen.dart';
+import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
@@ -37,10 +39,10 @@ void main() {
     '00000000-0000-0000-0000-000000000031',
   );
 
-  Budget makeBudget() => Budget(
+  Budget makeBudget({String currencyCode = 'USD'}) => Budget(
     id: budgetUuid,
     name: 'My Budget',
-    currencyCode: 'USD',
+    currencyCode: currencyCode,
     ownerId: ownerUuid,
     createdAt: DateTime(2026),
   );
@@ -137,6 +139,61 @@ void main() {
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: const AddExpenseScreen(budgetId: budgetId),
+      ),
+    );
+  }
+
+  Widget buildRoutedSubject({
+    Budget? budget,
+    List<Payee>? payees,
+    BudgetSummary? summary,
+    String? Function(Ref, (String, String))? ruleMatchOverride,
+    String? Function(Ref, (String, String))? payeeLastEnvelopeOverride,
+  }) {
+    final router = GoRouter(
+      initialLocation: '/budgets/$budgetId/expenses/add',
+      routes: [
+        GoRoute(
+          name: planRoute,
+          path: planPath,
+          builder: (_, _) =>
+              const Scaffold(body: Center(child: Text('Plan Route'))),
+        ),
+        GoRoute(
+          name: addExpenseRoute,
+          path: addExpensePath,
+          builder: (context, state) =>
+              AddExpenseScreen(budgetId: state.pathParameters['id']!),
+        ),
+      ],
+    );
+
+    return ProviderScope(
+      overrides: [
+        budgetDetailProvider.overrideWith(
+          (ref, id) async => budget ?? makeBudget(),
+        ),
+        payeeListProvider.overrideWith(
+          (ref, id) async => payees ?? makePayees(),
+        ),
+        budgetSummaryProvider.overrideWith(
+          (ref, id) async => summary ?? makeSummary(),
+        ),
+        ruleMatchEnvelopeProvider.overrideWith(
+          (ref, args) async =>
+              ruleMatchOverride != null ? ruleMatchOverride(ref, args) : null,
+        ),
+        payeeLastEnvelopeProvider.overrideWith(
+          (ref, args) async => payeeLastEnvelopeOverride != null
+              ? payeeLastEnvelopeOverride(ref, args)
+              : null,
+        ),
+      ],
+      child: MaterialApp.router(
+        theme: OpenBudgetTheme.light,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        routerConfig: router,
       ),
     );
   }
@@ -314,6 +371,17 @@ void main() {
       expect(find.text('42.50'), findsOneWidget);
     });
 
+    testWidgets('shows negative amount hint in budget currency', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        buildSubject(budget: makeBudget(currencyCode: 'JPY')),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('-¥0'), findsAtLeast(1));
+    });
+
     testWidgets('can enter memo text', (tester) async {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
@@ -349,6 +417,16 @@ void main() {
         ),
         findsNothing,
       );
+    });
+
+    testWidgets('cancel navigates back to plan route', (tester) async {
+      await tester.pumpWidget(buildRoutedSubject());
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.widgetWithText(TextButton, 'Cancel'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Plan Route'), findsOneWidget);
     });
   });
 }

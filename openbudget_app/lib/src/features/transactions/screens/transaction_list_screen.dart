@@ -10,9 +10,10 @@ import 'package:openbudget_app/src/features/budget/providers/budget_summary_prov
 import 'package:openbudget_app/src/features/payees/providers/payee_list_provider.dart';
 import 'package:openbudget_app/src/features/transactions/providers/transaction_actions_provider.dart';
 import 'package:openbudget_app/src/features/transactions/screens/edit_transaction_dialog.dart';
+import 'package:openbudget_app/src/routing/route_names.dart';
+import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_client/openbudget_client.dart';
-import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 enum TransactionFilter { all, income, expense }
@@ -30,7 +31,6 @@ class TransactionListScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final transactionsAsync = ref.watch(transactionListProvider(budgetId));
-    final budgetAsync = ref.watch(budgetDetailProvider(budgetId));
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
@@ -50,15 +50,6 @@ class TransactionListScreen extends HookConsumerWidget {
       searchController.addListener(listener);
       return () => searchController.removeListener(listener);
     }, [searchController]);
-
-    final currency =
-        budgetAsync.whenOrNull(
-          data: (budget) => CurrencyCode.values.firstWhere(
-            (c) => c.code == budget.currencyCode,
-            orElse: () => CurrencyCode.usd,
-          ),
-        ) ??
-        CurrencyCode.usd;
 
     return Scaffold(
       appBar: selectionMode.value
@@ -98,7 +89,10 @@ class TransactionListScreen extends HookConsumerWidget {
           : AppBar(
               leading: IconButton(
                 icon: const Icon(Icons.arrow_back),
-                onPressed: () => context.go('/budgets/$budgetId'),
+                onPressed: () => context.goNamed(
+                  planRoute,
+                  pathParameters: {'id': budgetId},
+                ),
               ),
               title: Text(l10n.transactionListTitle),
               actions: [
@@ -121,8 +115,7 @@ class TransactionListScreen extends HookConsumerWidget {
                                 IconButton(
                                   icon: const Icon(Icons.copy_rounded),
                                   tooltip: l10n.transactionExportCsv,
-                                  onPressed: () =>
-                                      _exportToCsv(context, txs, currency),
+                                  onPressed: () => _exportToCsv(context, txs),
                                 ),
                               ],
                             )
@@ -416,7 +409,6 @@ class TransactionListScreen extends HookConsumerWidget {
                       transactions: filtered,
                       childParentIds: childParentIds,
                       budgetId: budgetId,
-                      currencyCode: currency,
                       payeeMap: payeeMap,
                       envelopeMap: envelopeMap,
                       accountMap: accountMap,
@@ -837,11 +829,7 @@ class TransactionListScreen extends HookConsumerWidget {
     }
   }
 
-  void _exportToCsv(
-    BuildContext context,
-    List<Transaction> transactions,
-    CurrencyCode currency,
-  ) {
+  void _exportToCsv(BuildContext context, List<Transaction> transactions) {
     final l10n = AppLocalizations.of(context);
     final buffer = StringBuffer()
       ..writeln('Date,Description,Amount,Memo,Status');
@@ -853,6 +841,7 @@ class TransactionListScreen extends HookConsumerWidget {
     for (final tx in topLevel) {
       final date = _formatDateIso(tx.transactionDate);
       final desc = _escapeCsv(tx.description);
+      final currency = parseCurrencyCode(tx.currencyCode);
       final amount = formatCents(tx.amountCents, currency);
       final memo = _escapeCsv(tx.memo ?? '');
       final status = tx.reconciled
@@ -1229,7 +1218,6 @@ class _TransactionTile extends HookConsumerWidget {
   const _TransactionTile({
     required this.transaction,
     required this.budgetId,
-    required this.currencyCode,
     this.isSplit = false,
     this.payeeName,
     this.envelopeName,
@@ -1241,7 +1229,6 @@ class _TransactionTile extends HookConsumerWidget {
 
   final Transaction transaction;
   final String budgetId;
-  final CurrencyCode currencyCode;
   final bool isSplit;
   final String? payeeName;
   final String? envelopeName;
@@ -1260,6 +1247,7 @@ class _TransactionTile extends HookConsumerWidget {
     final icon = isIncome
         ? Icons.arrow_downward_rounded
         : Icons.arrow_upward_rounded;
+    final transactionCurrency = parseCurrencyCode(transaction.currencyCode);
 
     final statusIcon = transaction.reconciled
         ? Icons.lock_outline_rounded
@@ -1359,7 +1347,7 @@ class _TransactionTile extends HookConsumerWidget {
         ),
         subtitle: _buildSubtitle(theme, colorScheme),
         trailing: Text(
-          formatCents(transaction.amountCents, currencyCode),
+          formatCents(transaction.amountCents, transactionCurrency),
           style: theme.textTheme.titleSmall?.copyWith(
             color: color,
             fontWeight: FontWeight.bold,
@@ -1640,7 +1628,7 @@ class _TransactionTile extends HookConsumerWidget {
       builder: (_) => EditTransactionDialog(
         transaction: transaction,
         budgetId: budgetId,
-        currencyCode: currencyCode,
+        currencyCode: parseCurrencyCode(transaction.currencyCode),
       ),
     );
   }
@@ -1679,7 +1667,6 @@ class _GroupedTransactionList extends HookWidget {
     required this.transactions,
     required this.childParentIds,
     required this.budgetId,
-    required this.currencyCode,
     this.payeeMap = const {},
     this.envelopeMap = const {},
     this.accountMap = const {},
@@ -1691,7 +1678,6 @@ class _GroupedTransactionList extends HookWidget {
   final List<Transaction> transactions;
   final Set<String> childParentIds;
   final String budgetId;
-  final CurrencyCode currencyCode;
   final Map<String, String> payeeMap;
   final Map<String, String> envelopeMap;
   final Map<String, String> accountMap;
@@ -1744,7 +1730,6 @@ class _GroupedTransactionList extends HookWidget {
         return _TransactionTile(
           transaction: tx,
           budgetId: budgetId,
-          currencyCode: currencyCode,
           isSplit: isSplit,
           payeeName: payeeName,
           envelopeName: envelopeName,

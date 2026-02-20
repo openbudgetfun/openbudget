@@ -3,12 +3,14 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
 import 'package:openbudget_app/src/features/payees/providers/payee_list_provider.dart';
 import 'package:openbudget_app/src/features/transactions/screens/add_income_screen.dart';
+import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
@@ -19,10 +21,10 @@ void main() {
 
   const budgetId = 'test-budget-1';
 
-  Budget makeBudget() => Budget(
+  Budget makeBudget({String currencyCode = 'USD'}) => Budget(
     id: UuidValue.fromString('00000000-0000-0000-0000-000000000001'),
     name: 'My Budget',
-    currencyCode: 'USD',
+    currencyCode: currencyCode,
     ownerId: UuidValue.fromString('00000000-0000-0000-0000-000000000099'),
     createdAt: DateTime(2026),
   );
@@ -55,6 +57,43 @@ void main() {
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: const AddIncomeScreen(budgetId: budgetId),
+      ),
+    );
+  }
+
+  Widget buildRoutedSubject({Budget? budget, List<Payee>? payees}) {
+    final router = GoRouter(
+      initialLocation: '/budgets/$budgetId/income/add',
+      routes: [
+        GoRoute(
+          name: planRoute,
+          path: planPath,
+          builder: (_, _) =>
+              const Scaffold(body: Center(child: Text('Plan Route'))),
+        ),
+        GoRoute(
+          name: addIncomeRoute,
+          path: addIncomePath,
+          builder: (context, state) =>
+              AddIncomeScreen(budgetId: state.pathParameters['id']!),
+        ),
+      ],
+    );
+
+    return ProviderScope(
+      overrides: [
+        budgetDetailProvider.overrideWith(
+          (ref, id) async => budget ?? makeBudget(),
+        ),
+        payeeListProvider.overrideWith(
+          (ref, id) async => payees ?? makePayees(),
+        ),
+      ],
+      child: MaterialApp.router(
+        theme: OpenBudgetTheme.light,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        routerConfig: router,
       ),
     );
   }
@@ -219,6 +258,15 @@ void main() {
       expect(find.text('5000'), findsOneWidget);
     });
 
+    testWidgets('shows amount hint in budget currency', (tester) async {
+      await tester.pumpWidget(
+        buildSubject(budget: makeBudget(currencyCode: 'JPY')),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('¥0'), findsAtLeast(1));
+    });
+
     testWidgets('can enter memo text', (tester) async {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
@@ -250,6 +298,16 @@ void main() {
 
       // The Focus widget wrapping the amount field exists.
       expect(find.byType(Focus), findsWidgets);
+    });
+
+    testWidgets('cancel navigates back to plan route', (tester) async {
+      await tester.pumpWidget(buildRoutedSubject());
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.widgetWithText(TextButton, 'Cancel'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Plan Route'), findsOneWidget);
     });
   });
 }

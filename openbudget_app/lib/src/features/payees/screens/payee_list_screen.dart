@@ -5,6 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/payees/providers/payee_actions_provider.dart';
 import 'package:openbudget_app/src/features/payees/providers/payee_list_provider.dart';
+import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
@@ -32,7 +33,8 @@ class PayeeListScreen extends HookConsumerWidget {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/budgets/$budgetId/more'),
+          onPressed: () =>
+              context.goNamed(moreRoute, pathParameters: {'id': budgetId}),
         ),
         title: Text(l10n.payeeListTitle),
         actions: [

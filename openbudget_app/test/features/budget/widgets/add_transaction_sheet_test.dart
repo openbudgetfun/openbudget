@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/widgets/add_transaction_sheet.dart';
+import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 void main() {
@@ -22,6 +24,54 @@ void main() {
         // showModalBottomSheet to avoid layout overflow in tests.
         body: AddTransactionSheet(budgetId: budgetId),
       ),
+    );
+  }
+
+  Widget buildRoutingSubject() {
+    final router = GoRouter(
+      initialLocation: '/host',
+      routes: [
+        GoRoute(
+          path: '/host',
+          builder: (context, state) => Scaffold(
+            body: Center(
+              child: FilledButton(
+                onPressed: () => showModalBottomSheet<void>(
+                  context: context,
+                  isScrollControlled: true,
+                  builder: (_) => const AddTransactionSheet(budgetId: budgetId),
+                ),
+                child: const Text('Open Add Sheet'),
+              ),
+            ),
+          ),
+        ),
+        GoRoute(
+          name: addIncomeRoute,
+          path: addIncomePath,
+          builder: (_, _) =>
+              const Scaffold(body: Center(child: Text('Income Route'))),
+        ),
+        GoRoute(
+          name: addExpenseRoute,
+          path: addExpensePath,
+          builder: (_, _) =>
+              const Scaffold(body: Center(child: Text('Expense Route'))),
+        ),
+        GoRoute(
+          name: createTransferRoute,
+          path: createTransferPath,
+          builder: (_, _) =>
+              const Scaffold(body: Center(child: Text('Transfer Route'))),
+        ),
+      ],
+    );
+
+    return MaterialApp.router(
+      theme: OpenBudgetTheme.light,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      routerConfig: router,
     );
   }
 
@@ -58,6 +108,48 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byIcon(Icons.chevron_right_rounded), findsNWidgets(3));
+    });
+
+    testWidgets('navigates to add income route from sheet action', (
+      tester,
+    ) async {
+      await tester.pumpWidget(buildRoutingSubject());
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Open Add Sheet'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Add Income'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Income Route'), findsOneWidget);
+    });
+
+    testWidgets('navigates to add expense route from sheet action', (
+      tester,
+    ) async {
+      await tester.pumpWidget(buildRoutingSubject());
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Open Add Sheet'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Add Expense'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Expense Route'), findsOneWidget);
+    });
+
+    testWidgets('navigates to transfer route from sheet action', (
+      tester,
+    ) async {
+      await tester.pumpWidget(buildRoutingSubject());
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Open Add Sheet'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Transfer'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Transfer Route'), findsOneWidget);
     });
   });
 }

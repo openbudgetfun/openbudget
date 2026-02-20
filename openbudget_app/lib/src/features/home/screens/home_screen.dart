@@ -83,7 +83,7 @@ class HomeScreen extends HookConsumerWidget {
                     ),
                     const SizedBox(height: SpacingTokens.lg),
                     FilledButton.icon(
-                      onPressed: () => context.go(createBudgetPath),
+                      onPressed: () => context.goNamed(createBudgetRoute),
                       icon: const Icon(Icons.add),
                       label: Text(l10n.homeCreateBudget),
                     ),
@@ -110,7 +110,11 @@ class HomeScreen extends HookConsumerWidget {
                     budgetId: budget.id?.toString() ?? '',
                     budgetName: budget.name,
                     currencyCode: budget.currencyCode,
-                    onTap: () => context.go('/budgets/${budget.id}'),
+                    onTap: () {
+                      final id = budget.id?.toString();
+                      if (id == null || id.isEmpty) return;
+                      context.goNamed(planRoute, pathParameters: {'id': id});
+                    },
                     onLongPress: () => _confirmDeleteBudget(
                       context,
                       ref,
@@ -126,7 +130,7 @@ class HomeScreen extends HookConsumerWidget {
       floatingActionButton: budgets.maybeWhen(
         data: (list) => list.isNotEmpty
             ? FloatingActionButton(
-                onPressed: () => context.go(createBudgetPath),
+                onPressed: () => context.goNamed(createBudgetRoute),
                 child: const Icon(Icons.add),
               )
             : null,

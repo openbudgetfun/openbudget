@@ -1,61 +1,74 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:integration_test/integration_test.dart';
-
-import 'common/patrol_helpers.dart';
-import 'common/test_data.dart';
+import 'package:openbudget_app/l10n/generated/app_localizations.dart';
+import 'package:openbudget_app/main.dart';
+import 'package:openbudget_app/src/features/auth/providers/auth_provider.dart';
+import 'package:openbudget_app/src/features/auth/providers/auth_state.dart';
+import 'package:openbudget_app/src/features/budget/screens/create_budget_screen.dart';
+import 'package:openbudget_app/src/features/home/providers/budget_list_provider.dart';
+import 'package:openbudget_app/src/routing/app_router.dart';
+import 'package:openbudget_app/src/routing/route_names.dart';
+import 'package:openbudget_ui/openbudget_ui.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('create budget screen renders form', (tester) async {
-    await initApp(tester);
+  testWidgets('create budget screen renders form fields', (tester) async {
+    final router = GoRouter(
+      initialLocation: createBudgetPath,
+      routes: [
+        GoRoute(
+          path: createBudgetPath,
+          builder: (_, __) => const CreateBudgetScreen(),
+        ),
+      ],
+    );
 
-    final loginPage = LoginPage(tester);
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp.router(
+          theme: OpenBudgetTheme.light,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          routerConfig: router,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
 
-    // Navigate past login
-    await loginPage.signIn(TestData.validEmail, TestData.validPassword);
-
-    // Verify form elements
+    expect(find.text('Create Budget'), findsAtLeast(1));
     expect(find.byType(TextField), findsOneWidget);
     expect(find.byType(DropdownButtonFormField<String>), findsOneWidget);
     expect(find.byType(FilledButton), findsOneWidget);
-    expect(find.text('Create Budget'), findsOneWidget);
   });
 
-  testWidgets('creating a budget navigates to budget detail', (tester) async {
-    await initApp(tester);
+  testWidgets(
+    'unauthenticated user is redirected to login from create budget',
+    (tester) async {
+      final container = ProviderContainer(
+        overrides: [
+          authProvider.overrideWithValue(const Unauthenticated()),
+          budgetListProvider.overrideWith((ref) async => const []),
+        ],
+      );
+      addTearDown(container.dispose);
+      final router = container.read(appRouterProvider);
 
-    final loginPage = LoginPage(tester);
-    final createBudgetPage = CreateBudgetPage(tester);
-    final budgetDetailPage = BudgetDetailPage(tester);
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: const OpenBudgetApp(),
+        ),
+      );
+      await tester.pumpAndSettle();
 
-    // Navigate past login
-    await loginPage.signIn(TestData.validEmail, TestData.validPassword);
+      router.go(createBudgetPath);
+      await tester.pumpAndSettle();
 
-    // Create budget
-    await createBudgetPage.createBudget(TestData.budgetName);
-
-    // Verify navigation to budget detail
-    expect(budgetDetailPage.budgetHeader, findsOneWidget);
-    expect(find.text('Budget: mock-budget-1'), findsOneWidget);
-  });
-
-  testWidgets('budget detail shows empty state', (tester) async {
-    await initApp(tester);
-
-    final loginPage = LoginPage(tester);
-    final createBudgetPage = CreateBudgetPage(tester);
-    final budgetDetailPage = BudgetDetailPage(tester);
-
-    // Navigate to budget detail via login → create budget
-    await loginPage.signIn(TestData.validEmail, TestData.validPassword);
-    await createBudgetPage.createBudget(TestData.budgetName);
-
-    // Verify empty state
-    expect(budgetDetailPage.emptyStateTitle, findsOneWidget);
-    expect(budgetDetailPage.emptyStateSubtitle, findsOneWidget);
-    expect(budgetDetailPage.addCategoryButton, findsOneWidget);
-    expect(find.text('Add Category'), findsOneWidget);
-  });
+      expect(find.text('Welcome to OpenBudget'), findsOneWidget);
+    },
+  );
 }

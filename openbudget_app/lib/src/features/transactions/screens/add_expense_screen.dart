@@ -10,7 +10,10 @@ import 'package:openbudget_app/src/features/payees/providers/payee_list_provider
 import 'package:openbudget_app/src/features/transaction_rules/providers/rule_match_provider.dart';
 import 'package:openbudget_app/src/features/transactions/providers/duplicate_check_provider.dart';
 import 'package:openbudget_app/src/features/transactions/providers/transaction_actions_provider.dart';
+import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/theme/ynab_palette.dart';
+import 'package:openbudget_app/src/utils/currency_code_utils.dart';
+import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
@@ -37,6 +40,11 @@ class AddExpenseScreen extends HookConsumerWidget {
     final payeesAsync = ref.watch(payeeListProvider(budgetId));
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final budgetCurrency =
+        budgetAsync.whenOrNull(
+          data: (budget) => parseCurrencyCode(budget.currencyCode),
+        ) ??
+        CurrencyCode.usd;
 
     useValueListenable(amountController);
 
@@ -49,11 +57,7 @@ class AddExpenseScreen extends HookConsumerWidget {
         duplicateCount.value = 0;
         return;
       }
-      final currency = CurrencyCode.values.firstWhere(
-        (c) => c.code == budget.currencyCode,
-        orElse: () => CurrencyCode.usd,
-      );
-      final amountCents = (amount * _pow10(currency.decimals)).round();
+      final amountCents = (amount * _pow10(budgetCurrency.decimals)).round();
       try {
         final duplicates = await ref.read(
           duplicateCheckProvider(
@@ -117,9 +121,11 @@ class AddExpenseScreen extends HookConsumerWidget {
 
     final amountText = amountController.text.trim();
     final amountValue = double.tryParse(amountText) ?? 0;
+    final amountCentsPreview = (amountValue * _pow10(budgetCurrency.decimals))
+        .round();
     final formattedAmount = amountValue == 0
-        ? r'-$0.00'
-        : r'-$' + amountValue.toStringAsFixed(2);
+        ? '-${formatCents(0, budgetCurrency)}'
+        : formatCents(-amountCentsPreview, budgetCurrency);
 
     return Scaffold(
       backgroundColor: YnabPalette.appBackground,
@@ -129,7 +135,8 @@ class AddExpenseScreen extends HookConsumerWidget {
         scrolledUnderElevation: 0,
         leadingWidth: 90,
         leading: TextButton.icon(
-          onPressed: () => context.go('/budgets/$budgetId'),
+          onPressed: () =>
+              context.goNamed(planRoute, pathParameters: {'id': budgetId}),
           icon: const Icon(Icons.arrow_back, size: 16),
           label: Text(l10n.dialogCancel),
         ),
@@ -207,7 +214,7 @@ class AddExpenseScreen extends HookConsumerWidget {
                             border: InputBorder.none,
                             isDense: true,
                             contentPadding: EdgeInsets.zero,
-                            hintText: r'-$0.00',
+                            hintText: '-${formatCents(0, budgetCurrency)}',
                             hintStyle: theme.textTheme.displaySmall?.copyWith(
                               color: YnabPalette.negative.withAlpha(120),
                               fontWeight: FontWeight.w700,
@@ -425,12 +432,9 @@ class AddExpenseScreen extends HookConsumerWidget {
                           final budget = budgetAsync.value;
                           if (budget == null) return;
 
-                          final currency = CurrencyCode.values.firstWhere(
-                            (c) => c.code == budget.currencyCode,
-                            orElse: () => CurrencyCode.usd,
-                          );
                           final amountCents =
-                              (amount * _pow10(currency.decimals)).round();
+                              (amount * _pow10(budgetCurrency.decimals))
+                                  .round();
 
                           isSubmitting.value = true;
                           final messenger = ScaffoldMessenger.of(context);
@@ -442,7 +446,7 @@ class AddExpenseScreen extends HookConsumerWidget {
                                 .addExpense(
                                   description: description,
                                   amountCents: amountCents,
-                                  currencyCode: budget.currencyCode,
+                                  currencyCode: budgetCurrency.code,
                                   budgetId: budgetId,
                                   date: selectedDate.value,
                                   envelopeId: selectedEnvelopeId.value,
@@ -453,7 +457,10 @@ class AddExpenseScreen extends HookConsumerWidget {
                             messenger.showSnackBar(
                               SnackBar(content: Text(l10n.transactionSuccess)),
                             );
-                            router.go('/budgets/$budgetId');
+                            router.goNamed(
+                              planRoute,
+                              pathParameters: {'id': budgetId},
+                            );
                           } on Exception catch (_) {
                             isSubmitting.value = false;
                             messenger.showSnackBar(

@@ -6,6 +6,9 @@ import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
 import 'package:openbudget_app/src/features/transactions/providers/split_transaction_provider.dart';
+import 'package:openbudget_app/src/routing/route_names.dart';
+import 'package:openbudget_app/src/utils/currency_code_utils.dart';
+import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -25,6 +28,11 @@ class SplitExpenseScreen extends HookConsumerWidget {
     final summaryAsync = ref.watch(budgetSummaryProvider(budgetId));
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final budgetCurrency =
+        budgetAsync.whenOrNull(
+          data: (budget) => parseCurrencyCode(budget.currencyCode),
+        ) ??
+        CurrencyCode.usd;
 
     // Dynamic list of splits
     final splitControllers = useState<List<_SplitData>>([
@@ -52,12 +60,15 @@ class SplitExpenseScreen extends HookConsumerWidget {
       return sum + (double.tryParse(split.amountController.text.trim()) ?? 0);
     });
     final remaining = totalAmount - splitTotal;
+    final remainingCents = (remaining * _pow10(budgetCurrency.decimals))
+        .round();
 
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/budgets/$budgetId'),
+          onPressed: () =>
+              context.goNamed(planRoute, pathParameters: {'id': budgetId}),
         ),
         title: Text(l10n.splitTransactionTitle),
       ),
@@ -142,7 +153,7 @@ class SplitExpenseScreen extends HookConsumerWidget {
                             ),
                           ),
                           Text(
-                            remaining.toStringAsFixed(2),
+                            formatCents(remainingCents, budgetCurrency),
                             style: theme.textTheme.bodyMedium?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: remaining.abs() < 0.005
@@ -284,7 +295,10 @@ class SplitExpenseScreen extends HookConsumerWidget {
                                     content: Text(l10n.splitSaveSuccess),
                                   ),
                                 );
-                                router.go('/budgets/$budgetId');
+                                router.goNamed(
+                                  planRoute,
+                                  pathParameters: {'id': budgetId},
+                                );
                               } on Exception catch (_) {
                                 isSubmitting.value = false;
                                 messenger.showSnackBar(
