@@ -35,10 +35,7 @@ class MonthColumn extends Equatable {
 }
 
 class EnvelopeComparison extends Equatable {
-  const EnvelopeComparison({
-    required this.envelope,
-    required this.monthData,
-  });
+  const EnvelopeComparison({required this.envelope, required this.monthData});
 
   final Envelope envelope;
 

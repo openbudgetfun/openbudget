@@ -161,9 +161,7 @@ void main() {
       expect(find.text('Add Category'), findsOneWidget);
     });
 
-    testWidgets('does not show old bottom action bar', (
-      tester,
-    ) async {
+    testWidgets('does not show old bottom action bar', (tester) async {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 

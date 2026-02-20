@@ -30,9 +30,8 @@ void main() {
               routes: [
                 GoRoute(
                   path: '/plan',
-                  builder: (_, __) => const Scaffold(
-                    body: Center(child: Text('Plan Tab')),
-                  ),
+                  builder: (_, __) =>
+                      const Scaffold(body: Center(child: Text('Plan Tab'))),
                 ),
               ],
             ),
@@ -40,9 +39,8 @@ void main() {
               routes: [
                 GoRoute(
                   path: '/accounts',
-                  builder: (_, __) => const Scaffold(
-                    body: Center(child: Text('Accounts Tab')),
-                  ),
+                  builder: (_, __) =>
+                      const Scaffold(body: Center(child: Text('Accounts Tab'))),
                 ),
               ],
             ),
@@ -50,9 +48,8 @@ void main() {
               routes: [
                 GoRoute(
                   path: '/reflect',
-                  builder: (_, __) => const Scaffold(
-                    body: Center(child: Text('Reflect Tab')),
-                  ),
+                  builder: (_, __) =>
+                      const Scaffold(body: Center(child: Text('Reflect Tab'))),
                 ),
               ],
             ),
@@ -60,9 +57,8 @@ void main() {
               routes: [
                 GoRoute(
                   path: '/more',
-                  builder: (_, __) => const Scaffold(
-                    body: Center(child: Text('More Tab')),
-                  ),
+                  builder: (_, __) =>
+                      const Scaffold(body: Center(child: Text('More Tab'))),
                 ),
               ],
             ),
