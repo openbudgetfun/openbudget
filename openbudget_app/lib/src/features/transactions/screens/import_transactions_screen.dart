@@ -5,6 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
 import 'package:openbudget_app/src/features/transactions/providers/import_transactions_provider.dart';
+import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -35,7 +36,8 @@ class ImportTransactionsScreen extends HookConsumerWidget {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/budgets/$budgetId/more'),
+          onPressed: () =>
+              context.goNamed(moreRoute, pathParameters: {'id': budgetId}),
         ),
         title: Text(l10n.importTitle),
       ),
@@ -244,7 +246,7 @@ class ImportTransactionsScreen extends HookConsumerWidget {
       messenger.showSnackBar(
         SnackBar(content: Text(l10n.importSuccess(count))),
       );
-      router.go('/budgets/$budgetId');
+      router.goNamed(planRoute, pathParameters: {'id': budgetId});
     } on Exception catch (_) {
       isSubmitting.value = false;
       messenger.showSnackBar(

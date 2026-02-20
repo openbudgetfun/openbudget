@@ -5,8 +5,47 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
 import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
+import 'package:openbudget_app/src/utils/currency_code_utils.dart';
+import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_client/openbudget_client.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
+
+@visibleForTesting
+Account? findTransferAccountById(List<Account> accounts, String? accountId) =>
+    accounts
+        .where((account) => account.id?.toString() == accountId)
+        .firstOrNull;
+
+@visibleForTesting
+List<Account> transferDestinationAccounts(
+  List<Account> accounts, {
+  required String? fromAccountId,
+}) {
+  final fromAccount = findTransferAccountById(accounts, fromAccountId);
+  if (fromAccount == null) return accounts;
+
+  return accounts
+      .where((account) => account.currencyCode == fromAccount.currencyCode)
+      .toList();
+}
+
+@visibleForTesting
+CurrencyCode transferCurrency(
+  List<Account> accounts, {
+  required String? fromAccountId,
+}) {
+  final fromAccount = findTransferAccountById(accounts, fromAccountId);
+  return fromAccount == null
+      ? CurrencyCode.usd
+      : parseCurrencyCode(fromAccount.currencyCode);
+}
+
+@visibleForTesting
+int parseTransferAmountCents(String amountText, CurrencyCode currency) {
+  final amount = double.tryParse(amountText.trim()) ?? 0;
+  return (amount * _pow10(currency.decimals)).round();
+}
 
 class CreateTransferScreen extends HookConsumerWidget {
   const CreateTransferScreen({required this.budgetId, super.key});
@@ -40,6 +79,17 @@ class CreateTransferScreen extends HookConsumerWidget {
           ),
         ),
         data: (accounts) {
+          final selectedCurrency = transferCurrency(
+            accounts,
+            fromAccountId: fromAccountId.value,
+          );
+          final zeroAmountHint = formatCents(0, selectedCurrency);
+
+          final toAccountOptions = transferDestinationAccounts(
+            accounts,
+            fromAccountId: fromAccountId.value,
+          );
+
           if (accounts.length < 2) {
             return Center(
               child: Padding(
@@ -77,11 +127,23 @@ class CreateTransferScreen extends HookConsumerWidget {
                     .map(
                       (a) => DropdownMenuItem(
                         value: a.id?.toString(),
-                        child: Text(a.name),
+                        child: Text('${a.name} (${a.currencyCode})'),
                       ),
                     )
                     .toList(),
-                onChanged: (v) => fromAccountId.value = v,
+                onChanged: (v) {
+                  fromAccountId.value = v;
+                  final from = findTransferAccountById(accounts, v);
+                  final currentTo = findTransferAccountById(
+                    accounts,
+                    toAccountId.value,
+                  );
+                  if (from != null &&
+                      currentTo != null &&
+                      from.currencyCode != currentTo.currencyCode) {
+                    toAccountId.value = null;
+                  }
+                },
               ),
               const SizedBox(height: SpacingTokens.md),
               DropdownButtonFormField<String>(
@@ -90,11 +152,11 @@ class CreateTransferScreen extends HookConsumerWidget {
                   labelText: l10n.transferToAccount,
                   prefixIcon: const Icon(Icons.arrow_downward_rounded),
                 ),
-                items: accounts
+                items: toAccountOptions
                     .map(
                       (a) => DropdownMenuItem(
                         value: a.id?.toString(),
-                        child: Text(a.name),
+                        child: Text('${a.name} (${a.currencyCode})'),
                       ),
                     )
                     .toList(),
@@ -104,8 +166,10 @@ class CreateTransferScreen extends HookConsumerWidget {
               TextField(
                 controller: amountController,
                 decoration: InputDecoration(
-                  labelText: l10n.transactionAmountLabel,
-                  prefixIcon: const Icon(Icons.attach_money),
+                  labelText:
+                      '${l10n.transactionAmountLabel} (${selectedCurrency.code})',
+                  prefixText: '${selectedCurrency.symbol} ',
+                  hintText: zeroAmountHint,
                 ),
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
@@ -148,6 +212,7 @@ class CreateTransferScreen extends HookConsumerWidget {
                         ref,
                         descController,
                         amountController,
+                        accounts,
                         fromAccountId,
                         toAccountId,
                         selectedDate,
@@ -174,6 +239,7 @@ class CreateTransferScreen extends HookConsumerWidget {
     WidgetRef ref,
     TextEditingController descController,
     TextEditingController amountController,
+    List<Account> accounts,
     ValueNotifier<String?> fromAccountId,
     ValueNotifier<String?> toAccountId,
     ValueNotifier<DateTime> selectedDate,
@@ -184,6 +250,9 @@ class CreateTransferScreen extends HookConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     if (fromAccountId.value == null || toAccountId.value == null) return;
+    final fromAccount = findTransferAccountById(accounts, fromAccountId.value);
+    final toAccount = findTransferAccountById(accounts, toAccountId.value);
+    if (fromAccount == null || toAccount == null) return;
     if (fromAccountId.value == toAccountId.value) {
       messenger.showSnackBar(
         SnackBar(
@@ -194,10 +263,24 @@ class CreateTransferScreen extends HookConsumerWidget {
       return;
     }
 
-    final amount = double.tryParse(amountController.text.trim()) ?? 0;
-    if (amount <= 0) return;
+    if (fromAccount.currencyCode != toAccount.currencyCode) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            '${l10n.transferError} (${fromAccount.currencyCode} -> ${toAccount.currencyCode})',
+          ),
+          backgroundColor: colorScheme.error,
+        ),
+      );
+      return;
+    }
 
-    final amountCents = (amount * 100).round();
+    final currency = parseCurrencyCode(fromAccount.currencyCode);
+    final amountCents = parseTransferAmountCents(
+      amountController.text,
+      currency,
+    );
+    if (amountCents <= 0) return;
     isSubmitting.value = true;
 
     try {
@@ -205,7 +288,7 @@ class CreateTransferScreen extends HookConsumerWidget {
       await client.transaction.transfer(
         descController.text.trim(),
         amountCents,
-        'USD',
+        currency.code,
         // Serverpod API requires UuidValue which is experimental in uuid package.
         // ignore: experimental_member_use
         UuidValue.fromString(budgetId),
@@ -230,4 +313,12 @@ class CreateTransferScreen extends HookConsumerWidget {
       );
     }
   }
+}
+
+double _pow10(int exponent) {
+  var result = 1.0;
+  for (var i = 0; i < exponent; i++) {
+    result *= 10;
+  }
+  return result;
 }

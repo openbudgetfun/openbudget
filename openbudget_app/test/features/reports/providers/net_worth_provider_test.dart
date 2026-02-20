@@ -62,6 +62,9 @@ void main() {
 
     expect(data.hasMultipleCurrencies, isTrue);
     expect(data.currencyBreakdown.length, 2);
+    expect(data.totalAssets, 0);
+    expect(data.totalLiabilities, 0);
+    expect(data.netWorth, 0);
 
     final usd = data.currencyBreakdown.firstWhere(
       (entry) => entry.currency == CurrencyCode.usd,
@@ -75,5 +78,36 @@ void main() {
     expect(eur.totalAssets, 120000);
     expect(eur.totalLiabilities, -30000);
     expect(eur.netWorth, 90000);
+  });
+
+  test('keeps aggregate totals for single-currency budgets', () async {
+    final container = ProviderContainer(
+      overrides: [
+        accountListProvider.overrideWith(
+          (ref, id) async => [
+            makeAccount(
+              name: 'Main Checking',
+              balanceCents: 150000,
+              currencyCode: 'USD',
+            ),
+            makeAccount(
+              name: 'Credit Card',
+              balanceCents: -25000,
+              currencyCode: 'USD',
+              accountType: 'creditCard',
+            ),
+          ],
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    final data = await container.read(netWorthProvider(budgetId).future);
+
+    expect(data.hasMultipleCurrencies, isFalse);
+    expect(data.currencyBreakdown.length, 1);
+    expect(data.totalAssets, 150000);
+    expect(data.totalLiabilities, -25000);
+    expect(data.netWorth, 125000);
   });
 }

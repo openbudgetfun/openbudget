@@ -45,19 +45,15 @@ Future<NetWorthData> netWorth(Ref ref, String budgetId) async {
           .toList()
         ..sort((a, b) => a.currency.code.compareTo(b.currency.code));
 
-  final totalAssets = breakdown.fold<int>(
-    0,
-    (sum, data) => sum + data.totalAssets,
-  );
-  final totalLiabilities = breakdown.fold<int>(
-    0,
-    (sum, data) => sum + data.totalLiabilities,
-  );
+  final primaryTotals = breakdown.length == 1 ? breakdown.first : null;
+
+  final totalAssets = primaryTotals?.totalAssets ?? 0;
+  final totalLiabilities = primaryTotals?.totalLiabilities ?? 0;
 
   return NetWorthData(
     totalAssets: totalAssets,
     totalLiabilities: totalLiabilities,
-    netWorth: totalAssets + totalLiabilities,
+    netWorth: primaryTotals?.netWorth ?? 0,
     assetAccounts: List<Account>.unmodifiable(
       breakdown.expand((entry) => entry.assetAccounts),
     ),

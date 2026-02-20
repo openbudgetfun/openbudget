@@ -1,90 +1,168 @@
-import 'package:flutter_test/flutter_test.dart';
-import 'package:integration_test/integration_test.dart';
+// Serverpod's UuidValue.fromString is marked experimental.
+// ignore_for_file: experimental_member_use
 
-import 'common/patrol_helpers.dart';
-import 'common/test_data.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:integration_test/integration_test.dart';
+import 'package:openbudget_app/l10n/generated/app_localizations.dart';
+import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
+import 'package:openbudget_app/src/features/budget/widgets/add_transaction_sheet.dart';
+import 'package:openbudget_app/src/features/payees/providers/payee_list_provider.dart';
+import 'package:openbudget_app/src/features/transactions/screens/add_expense_screen.dart';
+import 'package:openbudget_app/src/features/transactions/screens/add_income_screen.dart';
+import 'package:openbudget_app/src/routing/route_names.dart';
+import 'package:openbudget_client/openbudget_client.dart';
+import 'package:openbudget_ui/openbudget_ui.dart';
+
+const _budgetId = 'test-budget-id';
+final _budgetUuid = UuidValue.fromString(
+  '00000000-0000-0000-0000-000000000010',
+);
+final _ownerUuid = UuidValue.fromString('00000000-0000-0000-0000-000000000099');
+
+Budget _makeBudget() => Budget(
+  id: _budgetUuid,
+  name: 'OpenBudget',
+  currencyCode: 'USD',
+  ownerId: _ownerUuid,
+  createdAt: DateTime(2026),
+);
+
+BudgetSummary _makeSummary() => BudgetSummary(
+  budget: _makeBudget(),
+  categories: const [],
+  totalIncomeCents: 0,
+  totalBudgetedCents: 0,
+  readyToAssignCents: 0,
+  year: 2026,
+  month: 9,
+);
+
+Widget _buildApp() {
+  final router = GoRouter(
+    initialLocation: '/budgets/$_budgetId/plan',
+    routes: [
+      GoRoute(
+        name: planRoute,
+        path: planPath,
+        builder: (context, state) => Scaffold(
+          appBar: AppBar(title: const Text('Plan Route')),
+          body: Center(
+            child: FilledButton(
+              onPressed: () => showModalBottomSheet<void>(
+                context: context,
+                isScrollControlled: true,
+                builder: (_) =>
+                    AddTransactionSheet(budgetId: state.pathParameters['id']!),
+              ),
+              child: const Text('Open Add Sheet'),
+            ),
+          ),
+        ),
+      ),
+      GoRoute(
+        name: addIncomeRoute,
+        path: addIncomePath,
+        builder: (context, state) =>
+            AddIncomeScreen(budgetId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        name: addExpenseRoute,
+        path: addExpensePath,
+        builder: (context, state) =>
+            AddExpenseScreen(budgetId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        name: createTransferRoute,
+        path: createTransferPath,
+        builder: (_, _) =>
+            const Scaffold(body: Center(child: Text('Transfer Route'))),
+      ),
+    ],
+  );
+
+  return ProviderScope(
+    overrides: [
+      budgetDetailProvider.overrideWith((ref, id) async => _makeBudget()),
+      budgetSummaryProvider.overrideWith((ref, id) async => _makeSummary()),
+      payeeListProvider.overrideWith((ref, id) async => const []),
+    ],
+    child: MaterialApp.router(
+      theme: OpenBudgetTheme.light,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      routerConfig: router,
+    ),
+  );
+}
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  /// Helper that logs in and creates a budget so the shell is visible.
-  Future<void> navigateToBudgetShell(WidgetTester tester) async {
-    await initApp(tester);
+  testWidgets('add transaction sheet routes to add expense', (tester) async {
+    await tester.pumpWidget(_buildApp());
+    await tester.pumpAndSettle();
 
-    final loginPage = LoginPage(tester);
-    final createBudgetPage = CreateBudgetPage(tester);
+    await tester.tap(find.text('Open Add Sheet'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Add Expense'));
+    await tester.pumpAndSettle();
 
-    await loginPage.signIn(TestData.validEmail, TestData.validPassword);
-    await createBudgetPage.createBudget(TestData.budgetName);
-  }
-
-  testWidgets('tapping Add Expense navigates to add expense screen', (
-    tester,
-  ) async {
-    await navigateToBudgetShell(tester);
-
-    final shell = BudgetShellPage(tester);
-    final addSheet = AddTransactionSheetPage(tester);
-
-    // Open add transaction sheet
-    await shell.tapAddTab();
-    expect(addSheet.sheetTitle, findsOneWidget);
-
-    // Tap Add Expense
-    await addSheet.tapExpense();
-
-    // Should navigate to the Add Expense screen
-    expect(find.text('Add Expense'), findsOneWidget);
+    expect(find.text('Add Expense'), findsNWidgets(2));
   });
 
-  testWidgets('tapping Add Income navigates to add income screen', (
-    tester,
-  ) async {
-    await navigateToBudgetShell(tester);
+  testWidgets('add transaction sheet routes to add income', (tester) async {
+    await tester.pumpWidget(_buildApp());
+    await tester.pumpAndSettle();
 
-    final shell = BudgetShellPage(tester);
-    final addSheet = AddTransactionSheetPage(tester);
+    await tester.tap(find.text('Open Add Sheet'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Add Income'));
+    await tester.pumpAndSettle();
 
-    // Open add transaction sheet
-    await shell.tapAddTab();
-    expect(addSheet.sheetTitle, findsOneWidget);
-
-    // Tap Add Income
-    await addSheet.tapIncome();
-
-    // Should navigate to the Add Income screen
-    expect(find.text('Add Income'), findsOneWidget);
+    expect(find.text('Add Income'), findsNWidgets(2));
   });
 
-  testWidgets('add transaction sheet shows all three action tiles', (
-    tester,
-  ) async {
-    await navigateToBudgetShell(tester);
+  testWidgets('add transaction sheet routes to transfer', (tester) async {
+    await tester.pumpWidget(_buildApp());
+    await tester.pumpAndSettle();
 
-    final shell = BudgetShellPage(tester);
-    final addSheet = AddTransactionSheetPage(tester);
+    await tester.tap(find.text('Open Add Sheet'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Transfer'));
+    await tester.pumpAndSettle();
 
-    await shell.tapAddTab();
-
-    expect(addSheet.incomeIcon, findsOneWidget);
-    expect(addSheet.expenseIcon, findsOneWidget);
-    // Transfer icon may appear in multiple places (accounts tab bar action)
-    expect(addSheet.transferIcon, findsAtLeast(1));
+    expect(find.text('Transfer Route'), findsOneWidget);
   });
 
-  testWidgets('tapping Transfer navigates to transfer screen', (tester) async {
-    await navigateToBudgetShell(tester);
+  testWidgets('cancel from add expense returns to plan route', (tester) async {
+    await tester.pumpWidget(_buildApp());
+    await tester.pumpAndSettle();
 
-    final shell = BudgetShellPage(tester);
-    final addSheet = AddTransactionSheetPage(tester);
+    await tester.tap(find.text('Open Add Sheet'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Add Expense'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(TextButton, 'Cancel'));
+    await tester.pumpAndSettle();
 
-    await shell.tapAddTab();
+    expect(find.text('Plan Route'), findsOneWidget);
+  });
 
-    // Tap Transfer — the text "Transfer" may appear in multiple places,
-    // so we tap the one inside the sheet.
-    await addSheet.tapTransfer();
+  testWidgets('cancel from add income returns to plan route', (tester) async {
+    await tester.pumpWidget(_buildApp());
+    await tester.pumpAndSettle();
 
-    // Should navigate to the Transfer screen
-    expect(find.text('Transfer'), findsAtLeast(1));
+    await tester.tap(find.text('Open Add Sheet'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Add Income'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(TextButton, 'Cancel'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Plan Route'), findsOneWidget);
   });
 }

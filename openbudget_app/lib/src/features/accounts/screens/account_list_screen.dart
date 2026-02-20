@@ -5,6 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
 import 'package:openbudget_app/src/features/accounts/screens/edit_account_dialog.dart';
+import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_client/openbudget_client.dart';
@@ -31,7 +32,10 @@ class AccountListScreen extends HookConsumerWidget {
           IconButton(
             icon: const Icon(Icons.swap_horiz_rounded),
             tooltip: l10n.transferTitle,
-            onPressed: () => context.go('/budgets/$budgetId/transfer'),
+            onPressed: () => context.goNamed(
+              createTransferRoute,
+              pathParameters: {'id': budgetId},
+            ),
           ),
         ],
       ),
@@ -91,8 +95,10 @@ class AccountListScreen extends HookConsumerWidget {
                     ),
                     const SizedBox(height: SpacingTokens.lg),
                     FilledButton.icon(
-                      onPressed: () =>
-                          context.go('/budgets/$budgetId/accounts/add'),
+                      onPressed: () => context.goNamed(
+                        addAccountRoute,
+                        pathParameters: {'id': budgetId},
+                      ),
                       icon: const Icon(Icons.add),
                       label: Text(l10n.accountAddButton),
                     ),
@@ -162,7 +168,8 @@ class AccountListScreen extends HookConsumerWidget {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => context.go('/budgets/$budgetId/accounts/add'),
+        onPressed: () =>
+            context.goNamed(addAccountRoute, pathParameters: {'id': budgetId}),
         child: const Icon(Icons.add),
       ),
     );
@@ -240,11 +247,17 @@ class _AccountTile extends HookWidget {
     final colorScheme = theme.colorScheme;
     final icon = _iconForType(account.accountType);
     final currency = parseCurrencyCode(account.currencyCode);
+    final accountId = account.id?.toString();
 
     return Card(
       margin: const EdgeInsets.only(bottom: SpacingTokens.xs),
       child: ListTile(
-        onTap: () => context.go('/budgets/$budgetId/accounts/${account.id}'),
+        onTap: accountId == null
+            ? null
+            : () => context.goNamed(
+                accountDetailRoute,
+                pathParameters: {'id': budgetId, 'accountId': accountId},
+              ),
         onLongPress: () => showDialog<void>(
           context: context,
           builder: (_) =>

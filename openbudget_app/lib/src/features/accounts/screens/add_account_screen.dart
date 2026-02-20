@@ -5,6 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_actions_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
+import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -52,7 +53,10 @@ class AddAccountScreen extends HookConsumerWidget {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/budgets/$budgetId/accounts'),
+          onPressed: () => context.goNamed(
+            accountListRoute,
+            pathParameters: {'id': budgetId},
+          ),
         ),
         title: Text(l10n.accountAddTitle),
       ),
@@ -199,7 +203,10 @@ class AddAccountScreen extends HookConsumerWidget {
                                     content: Text(l10n.accountCreateSuccess),
                                   ),
                                 );
-                                router.go('/budgets/$budgetId/accounts');
+                                router.goNamed(
+                                  accountListRoute,
+                                  pathParameters: {'id': budgetId},
+                                );
                               } on Exception catch (_) {
                                 isSubmitting.value = false;
                                 messenger.showSnackBar(

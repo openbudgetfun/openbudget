@@ -3,11 +3,13 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
 import 'package:openbudget_app/src/features/accounts/screens/account_list_screen.dart';
+import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
@@ -17,6 +19,7 @@ final _budgetUuid = UuidValue.fromString(
 );
 
 Account _makeAccount({
+  UuidValue? id,
   String name = 'Checking',
   String accountType = 'checking',
   int balanceCents = 100000,
@@ -26,6 +29,7 @@ Account _makeAccount({
   int sortOrder = 0,
 }) {
   return Account(
+    id: id,
     name: name,
     accountType: accountType,
     balanceCents: balanceCents,
@@ -34,6 +38,53 @@ Account _makeAccount({
     onBudget: onBudget,
     sortOrder: sortOrder,
     isClosed: isClosed,
+  );
+}
+
+Widget _buildRoutedSubject({required List<Account> accounts}) {
+  final router = GoRouter(
+    initialLocation: '/budgets/$_budgetId/accounts',
+    routes: [
+      GoRoute(
+        name: accountListRoute,
+        path: accountListPath,
+        builder: (context, state) =>
+            AccountListScreen(budgetId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        name: addAccountRoute,
+        path: addAccountPath,
+        builder: (_, _) =>
+            const Scaffold(body: Center(child: Text('Add Account Route'))),
+      ),
+      GoRoute(
+        name: createTransferRoute,
+        path: createTransferPath,
+        builder: (_, _) =>
+            const Scaffold(body: Center(child: Text('Transfer Route'))),
+      ),
+      GoRoute(
+        name: accountDetailRoute,
+        path: accountDetailPath,
+        builder: (context, state) => Scaffold(
+          body: Center(
+            child: Text('Account Detail ${state.pathParameters['accountId']!}'),
+          ),
+        ),
+      ),
+    ],
+  );
+
+  return ProviderScope(
+    overrides: [
+      accountListProvider.overrideWith((ref, budgetId) async => accounts),
+    ],
+    child: MaterialApp.router(
+      theme: OpenBudgetTheme.light,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      routerConfig: router,
+    ),
   );
 }
 
@@ -366,6 +417,61 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(FloatingActionButton), findsOneWidget);
+    });
+
+    testWidgets('empty-state Add Account button navigates to add account', (
+      tester,
+    ) async {
+      await tester.pumpWidget(_buildRoutedSubject(accounts: const []));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Add Account'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Add Account Route'), findsOneWidget);
+    });
+
+    testWidgets('FAB navigates to add account route', (tester) async {
+      await tester.pumpWidget(
+        _buildRoutedSubject(accounts: [_makeAccount(name: 'Daily')]),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byType(FloatingActionButton));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Add Account Route'), findsOneWidget);
+    });
+
+    testWidgets('transfer action navigates to transfer route', (tester) async {
+      await tester.pumpWidget(
+        _buildRoutedSubject(accounts: [_makeAccount(name: 'Daily')]),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.swap_horiz_rounded));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Transfer Route'), findsOneWidget);
+    });
+
+    testWidgets('tapping account row navigates to account detail route', (
+      tester,
+    ) async {
+      final accountId = UuidValue.fromString(
+        '00000000-0000-0000-0000-000000000111',
+      );
+      await tester.pumpWidget(
+        _buildRoutedSubject(
+          accounts: [_makeAccount(name: 'Daily Account', id: accountId)],
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Daily Account'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Account Detail $accountId'), findsOneWidget);
     });
   });
 }

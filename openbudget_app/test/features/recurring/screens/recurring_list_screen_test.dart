@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
+import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
 import 'package:openbudget_app/src/features/recurring/providers/recurring_list_provider.dart';
 import 'package:openbudget_app/src/features/recurring/screens/recurring_list_screen.dart';
 import 'package:openbudget_client/openbudget_client.dart';
@@ -14,6 +15,15 @@ import 'package:openbudget_ui/openbudget_ui.dart';
 const _budgetId = 'test-budget-id';
 final _budgetUuid = UuidValue.fromString(
   '00000000-0000-0000-0000-000000000010',
+);
+final _ownerUuid = UuidValue.fromString('00000000-0000-0000-0000-000000000011');
+
+Budget _makeBudget() => Budget(
+  id: _budgetUuid,
+  name: 'Test Budget',
+  currencyCode: 'USD',
+  ownerId: _ownerUuid,
+  createdAt: DateTime(2026),
 );
 
 RecurringTransaction _makeRecurring({
@@ -64,6 +74,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+            budgetDetailProvider.overrideWith((ref, id) async => _makeBudget()),
             recurringListProvider.overrideWith(
               (ref, budgetId) =>
                   throw Exception('Could not load recurring transactions'),
@@ -90,6 +101,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+            budgetDetailProvider.overrideWith((ref, id) async => _makeBudget()),
             recurringListProvider.overrideWith(
               (ref, budgetId) async => <RecurringTransaction>[],
             ),
@@ -135,6 +147,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+            budgetDetailProvider.overrideWith((ref, id) async => _makeBudget()),
             recurringListProvider.overrideWith((ref, budgetId) async => items),
           ],
           child: MaterialApp(
@@ -163,6 +176,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+            budgetDetailProvider.overrideWith((ref, id) async => _makeBudget()),
             recurringListProvider.overrideWith((ref, budgetId) async => items),
           ],
           child: MaterialApp(
@@ -192,6 +206,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+            budgetDetailProvider.overrideWith((ref, id) async => _makeBudget()),
             recurringListProvider.overrideWith((ref, budgetId) async => items),
           ],
           child: MaterialApp(
@@ -213,6 +228,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+            budgetDetailProvider.overrideWith((ref, id) async => _makeBudget()),
             recurringListProvider.overrideWith(
               (ref, budgetId) async => <RecurringTransaction>[],
             ),
@@ -234,6 +250,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+            budgetDetailProvider.overrideWith((ref, id) async => _makeBudget()),
             recurringListProvider.overrideWith(
               (ref, budgetId) async => <RecurringTransaction>[],
             ),
@@ -257,6 +274,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+            budgetDetailProvider.overrideWith((ref, id) async => _makeBudget()),
             recurringListProvider.overrideWith(
               (ref, budgetId) async => <RecurringTransaction>[],
             ),
@@ -292,6 +310,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+            budgetDetailProvider.overrideWith((ref, id) async => _makeBudget()),
             recurringListProvider.overrideWith((ref, budgetId) async => items),
           ],
           child: MaterialApp(

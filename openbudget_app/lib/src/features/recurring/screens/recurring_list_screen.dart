@@ -3,9 +3,11 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
+import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
 import 'package:openbudget_app/src/features/recurring/providers/recurring_actions_provider.dart';
 import 'package:openbudget_app/src/features/recurring/providers/recurring_list_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
+import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -19,8 +21,14 @@ class RecurringListScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final recurringAsync = ref.watch(recurringListProvider(budgetId));
+    final budgetAsync = ref.watch(budgetDetailProvider(budgetId));
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final budgetCurrency =
+        budgetAsync.whenOrNull(
+          data: (budget) => parseCurrencyCode(budget.currencyCode),
+        ) ??
+        CurrencyCode.usd;
 
     return Scaffold(
       appBar: AppBar(
@@ -37,7 +45,7 @@ class RecurringListScreen extends HookConsumerWidget {
           IconButton(
             icon: const Icon(Icons.add),
             tooltip: l10n.recurringAddButton,
-            onPressed: () => _showAddDialog(context),
+            onPressed: () => _showAddDialog(context, budgetCurrency),
           ),
         ],
       ),
@@ -88,7 +96,7 @@ class RecurringListScreen extends HookConsumerWidget {
                   ),
                   const SizedBox(height: SpacingTokens.lg),
                   FilledButton.icon(
-                    onPressed: () => _showAddDialog(context),
+                    onPressed: () => _showAddDialog(context, budgetCurrency),
                     icon: const Icon(Icons.add),
                     label: Text(l10n.recurringAddButton),
                   ),
@@ -122,10 +130,11 @@ class RecurringListScreen extends HookConsumerWidget {
     );
   }
 
-  void _showAddDialog(BuildContext context) {
+  void _showAddDialog(BuildContext context, CurrencyCode currencyCode) {
     showDialog<void>(
       context: context,
-      builder: (_) => _AddRecurringDialog(budgetId: budgetId),
+      builder: (_) =>
+          _AddRecurringDialog(budgetId: budgetId, currencyCode: currencyCode),
     );
   }
 
@@ -385,9 +394,13 @@ class _RecurringTile extends HookWidget {
 }
 
 class _AddRecurringDialog extends HookConsumerWidget {
-  const _AddRecurringDialog({required this.budgetId});
+  const _AddRecurringDialog({
+    required this.budgetId,
+    required this.currencyCode,
+  });
 
   final String budgetId;
+  final CurrencyCode currencyCode;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -419,7 +432,9 @@ class _AddRecurringDialog extends HookConsumerWidget {
             TextField(
               controller: amountController,
               decoration: InputDecoration(
-                labelText: l10n.transactionAmountLabel,
+                labelText:
+                    '${l10n.transactionAmountLabel} (${currencyCode.code})',
+                prefixText: '${currencyCode.symbol} ',
               ),
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
@@ -510,6 +525,7 @@ class _AddRecurringDialog extends HookConsumerWidget {
                   frequency,
                   nextDate,
                   isExpense,
+                  currencyCode,
                   isSubmitting,
                 ),
           child: isSubmitting.value
@@ -532,6 +548,7 @@ class _AddRecurringDialog extends HookConsumerWidget {
     ValueNotifier<String> frequency,
     ValueNotifier<DateTime> nextDate,
     ValueNotifier<bool> isExpense,
+    CurrencyCode currencyCode,
     ValueNotifier<bool> isSubmitting,
   ) async {
     final l10n = AppLocalizations.of(context);
@@ -541,7 +558,7 @@ class _AddRecurringDialog extends HookConsumerWidget {
     final amount = double.tryParse(amountController.text.trim()) ?? 0;
     if (amount <= 0) return;
 
-    final amountCents = (amount * 100).round();
+    final amountCents = (amount * _pow10(currencyCode.decimals)).round();
     final signedCents = isExpense.value ? -amountCents : amountCents;
 
     isSubmitting.value = true;
@@ -554,7 +571,7 @@ class _AddRecurringDialog extends HookConsumerWidget {
           .createRecurring(
             description: description,
             amountCents: signedCents,
-            currencyCode: 'USD',
+            currencyCode: currencyCode.code,
             budgetId: budgetId,
             frequency: frequency.value,
             nextOccurrence: nextDate.value,
@@ -587,9 +604,12 @@ class _EditRecurringDialog extends HookConsumerWidget {
     final descController = useTextEditingController(
       text: recurring.description,
     );
+    final currency = parseCurrencyCode(recurring.currencyCode);
     final amountCents = recurring.amountCents.abs();
     final amountController = useTextEditingController(
-      text: (amountCents / 100).toStringAsFixed(2),
+      text: (amountCents / _pow10(currency.decimals)).toStringAsFixed(
+        currency.decimals,
+      ),
     );
     final frequency = useState(recurring.frequency);
     final nextDate = useState(recurring.nextOccurrence);
@@ -614,7 +634,8 @@ class _EditRecurringDialog extends HookConsumerWidget {
             TextField(
               controller: amountController,
               decoration: InputDecoration(
-                labelText: l10n.transactionAmountLabel,
+                labelText: '${l10n.transactionAmountLabel} (${currency.code})',
+                prefixText: '${currency.symbol} ',
               ),
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
@@ -688,6 +709,7 @@ class _EditRecurringDialog extends HookConsumerWidget {
                   amountController,
                   frequency,
                   nextDate,
+                  currency,
                   isSubmitting,
                 ),
           child: isSubmitting.value
@@ -709,6 +731,7 @@ class _EditRecurringDialog extends HookConsumerWidget {
     TextEditingController amountController,
     ValueNotifier<String> frequency,
     ValueNotifier<DateTime> nextDate,
+    CurrencyCode currency,
     ValueNotifier<bool> isSubmitting,
   ) async {
     final l10n = AppLocalizations.of(context);
@@ -718,7 +741,7 @@ class _EditRecurringDialog extends HookConsumerWidget {
     final amount = double.tryParse(amountController.text.trim()) ?? 0;
     if (amount <= 0) return;
 
-    final amountCents = (amount * 100).round();
+    final amountCents = (amount * _pow10(currency.decimals)).round();
     final isExpense = recurring.amountCents < 0;
     final signedCents = isExpense ? -amountCents : amountCents;
 

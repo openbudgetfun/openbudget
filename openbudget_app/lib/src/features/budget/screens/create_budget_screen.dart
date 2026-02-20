@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_provider.dart';
+import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
@@ -112,7 +113,10 @@ class CreateBudgetScreen extends HookConsumerWidget {
                                           ),
                                         ),
                                       );
-                                      context.go('/budgets/$budgetId');
+                                      context.goNamed(
+                                        planRoute,
+                                        pathParameters: {'id': budgetId},
+                                      );
                                     }
                                   } on Exception catch (_) {
                                     isSubmitting.value = false;
