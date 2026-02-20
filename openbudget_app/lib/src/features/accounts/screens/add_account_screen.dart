@@ -5,6 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_actions_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
+import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
@@ -22,7 +23,21 @@ class AddAccountScreen extends HookConsumerWidget {
     final selectedType = useState('checking');
     final onBudget = useState(true);
     final budgetAsync = ref.watch(budgetDetailProvider(budgetId));
+    final selectedCurrency = useState(CurrencyCode.usd);
+    final didHydrateBudgetCurrency = useState(false);
     final theme = Theme.of(context);
+    final budgetCurrencyCode = budgetAsync.whenOrNull(
+      data: (budget) => budget.currencyCode,
+    );
+
+    useEffect(() {
+      if (didHydrateBudgetCurrency.value || budgetCurrencyCode == null) {
+        return null;
+      }
+      selectedCurrency.value = parseCurrencyCode(budgetCurrencyCode);
+      didHydrateBudgetCurrency.value = true;
+      return null;
+    }, [budgetCurrencyCode]);
 
     final accountTypes = [
       ('checking', l10n.accountTypeChecking, Icons.account_balance_rounded),
@@ -116,6 +131,28 @@ class AddAccountScreen extends HookConsumerWidget {
                       textInputAction: TextInputAction.done,
                     ),
                     const SizedBox(height: SpacingTokens.md),
+                    DropdownButtonFormField<String>(
+                      initialValue: selectedCurrency.value.code,
+                      items: CurrencyCode.values
+                          .map(
+                            (currency) => DropdownMenuItem(
+                              value: currency.code,
+                              child: Text(
+                                '${currency.code} (${currency.symbol})',
+                              ),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (value) {
+                        if (value == null) return;
+                        selectedCurrency.value = parseCurrencyCode(value);
+                      },
+                      decoration: InputDecoration(
+                        labelText: l10n.settingsCurrency,
+                        prefixIcon: const Icon(Icons.language_rounded),
+                      ),
+                    ),
+                    const SizedBox(height: SpacingTokens.md),
                     SwitchListTile(
                       title: Text(l10n.accountOnBudgetLabel),
                       subtitle: Text(l10n.accountOnBudgetHint),
@@ -135,12 +172,12 @@ class AddAccountScreen extends HookConsumerWidget {
                               final budget = budgetAsync.value;
                               if (budget == null) return;
 
-                              final currency = CurrencyCode.values.firstWhere(
-                                (c) => c.code == budget.currencyCode,
-                                orElse: () => CurrencyCode.usd,
-                              );
                               final balanceCents =
-                                  (balance * _pow10(currency.decimals)).round();
+                                  (balance *
+                                          _pow10(
+                                            selectedCurrency.value.decimals,
+                                          ))
+                                      .round();
 
                               isSubmitting.value = true;
                               final messenger = ScaffoldMessenger.of(context);
@@ -152,7 +189,7 @@ class AddAccountScreen extends HookConsumerWidget {
                                       name: name,
                                       accountType: selectedType.value,
                                       balanceCents: balanceCents,
-                                      currencyCode: budget.currencyCode,
+                                      currencyCode: selectedCurrency.value.code,
                                       budgetId: budgetId,
                                       onBudget: onBudget.value,
                                       sortOrder: 0,

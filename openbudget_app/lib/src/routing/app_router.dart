@@ -60,12 +60,6 @@ GoRouter appRouter(Ref ref) {
       if (!isAuthenticated && !isAuthRoute) return loginPath;
       if (isAuthenticated && isAuthRoute) return homePath;
 
-      // Redirect /budgets/:id to /budgets/:id/plan
-      final budgetMatch = RegExp(r'^/budgets/([^/]+)$').firstMatch(location);
-      if (budgetMatch != null) {
-        return '/budgets/${budgetMatch.group(1)}/plan';
-      }
-
       return null;
     },
     routes: [
@@ -89,236 +83,241 @@ GoRouter appRouter(Ref ref) {
         path: createBudgetPath,
         builder: (context, state) => const CreateBudgetScreen(),
       ),
-      // Budget shell with bottom tab navigation
-      StatefulShellRoute.indexedStack(
-        builder: (context, state, navigationShell) {
-          // Extract budgetId from path params or URL
-          final id =
-              state.pathParameters['id'] ??
-              RegExp(
-                '/budgets/([^/]+)',
-              ).firstMatch(state.matchedLocation)?.group(1) ??
-              '';
-          return BudgetShellScreen(
-            navigationShell: navigationShell,
-            budgetId: id,
-          );
+      GoRoute(
+        name: budgetDetailRoute,
+        path: budgetDetailPath,
+        redirect: (context, state) {
+          final id = state.pathParameters['id'];
+          if (id == null || id.isEmpty) return homePath;
+          return '/budgets/$id/plan';
         },
-        branches: [
-          // Branch 0: Plan (budget detail)
-          StatefulShellBranch(
-            navigatorKey: _shellNavigatorKeys[0],
-            routes: [
-              GoRoute(
-                name: planRoute,
-                path: planPath,
-                builder: (context, state) {
-                  final id = state.pathParameters['id']!;
-                  return BudgetDetailScreen(budgetId: id);
-                },
-              ),
-            ],
-          ),
-          // Branch 1: Accounts
-          StatefulShellBranch(
-            navigatorKey: _shellNavigatorKeys[1],
-            routes: [
-              GoRoute(
-                name: accountListRoute,
-                path: accountListPath,
-                builder: (context, state) {
-                  final id = state.pathParameters['id']!;
-                  return AccountListScreen(budgetId: id);
-                },
+        routes: [
+          // Budget shell with bottom tab navigation.
+          StatefulShellRoute.indexedStack(
+            builder: (context, state, navigationShell) {
+              final id = state.pathParameters['id']!;
+              return BudgetShellScreen(
+                navigationShell: navigationShell,
+                budgetId: id,
+              );
+            },
+            branches: [
+              // Branch 0: Plan (budget detail)
+              StatefulShellBranch(
+                navigatorKey: _shellNavigatorKeys[0],
                 routes: [
                   GoRoute(
-                    name: addAccountRoute,
-                    path: 'add',
+                    name: planRoute,
+                    path: 'plan',
                     builder: (context, state) {
                       final id = state.pathParameters['id']!;
-                      return AddAccountScreen(budgetId: id);
-                    },
-                  ),
-                  GoRoute(
-                    name: accountDetailRoute,
-                    path: ':accountId',
-                    builder: (context, state) {
-                      final id = state.pathParameters['id']!;
-                      final accountId = state.pathParameters['accountId']!;
-                      return AccountDetailScreen(
-                        budgetId: id,
-                        accountId: accountId,
-                      );
+                      return BudgetDetailScreen(budgetId: id);
                     },
                   ),
                 ],
               ),
-            ],
-          ),
-          // Branch 2: Reflect (reports)
-          StatefulShellBranch(
-            navigatorKey: _shellNavigatorKeys[2],
-            routes: [
-              GoRoute(
-                name: reportsRoute,
-                path: reflectPath,
-                builder: (context, state) {
-                  final id = state.pathParameters['id']!;
-                  return ReportsScreen(budgetId: id);
-                },
+              // Branch 1: Accounts
+              StatefulShellBranch(
+                navigatorKey: _shellNavigatorKeys[1],
                 routes: [
                   GoRoute(
-                    name: spendingTrendsRoute,
-                    path: 'trends',
+                    name: accountListRoute,
+                    path: 'accounts',
                     builder: (context, state) {
                       final id = state.pathParameters['id']!;
-                      return SpendingTrendsScreen(budgetId: id);
-                    },
-                  ),
-                  GoRoute(
-                    name: spendingByPayeeRoute,
-                    path: 'payees',
-                    builder: (context, state) {
-                      final id = state.pathParameters['id']!;
-                      return SpendingByPayeeScreen(budgetId: id);
-                    },
-                  ),
-                  GoRoute(
-                    name: categoryTrendsRoute,
-                    path: 'category-trends',
-                    builder: (context, state) {
-                      final id = state.pathParameters['id']!;
-                      return CategoryTrendsScreen(budgetId: id);
-                    },
-                  ),
-                  GoRoute(
-                    name: multiMonthComparisonRoute,
-                    path: 'comparison',
-                    builder: (context, state) {
-                      final id = state.pathParameters['id']!;
-                      return MultiMonthComparisonScreen(budgetId: id);
-                    },
-                  ),
-                  GoRoute(
-                    name: netWorthRoute,
-                    path: 'net-worth',
-                    builder: (context, state) {
-                      final id = state.pathParameters['id']!;
-                      return NetWorthScreen(budgetId: id);
-                    },
-                  ),
-                ],
-              ),
-            ],
-          ),
-          // Branch 3: More
-          StatefulShellBranch(
-            navigatorKey: _shellNavigatorKeys[3],
-            routes: [
-              GoRoute(
-                name: moreRoute,
-                path: morePath,
-                builder: (context, state) {
-                  final id = state.pathParameters['id']!;
-                  return MoreScreen(budgetId: id);
-                },
-                routes: [
-                  GoRoute(
-                    name: recurringListRoute,
-                    path: 'recurring',
-                    builder: (context, state) {
-                      final id = state.pathParameters['id']!;
-                      return RecurringListScreen(budgetId: id);
+                      return AccountListScreen(budgetId: id);
                     },
                     routes: [
                       GoRoute(
-                        name: recurringCalendarRoute,
-                        path: 'calendar',
+                        name: addAccountRoute,
+                        path: 'add',
                         builder: (context, state) {
                           final id = state.pathParameters['id']!;
-                          return RecurringCalendarScreen(budgetId: id);
+                          return AddAccountScreen(budgetId: id);
+                        },
+                      ),
+                      GoRoute(
+                        name: accountDetailRoute,
+                        path: ':accountId',
+                        builder: (context, state) {
+                          final id = state.pathParameters['id']!;
+                          final accountId = state.pathParameters['accountId']!;
+                          return AccountDetailScreen(
+                            budgetId: id,
+                            accountId: accountId,
+                          );
                         },
                       ),
                     ],
                   ),
+                ],
+              ),
+              // Branch 2: Reflect (reports)
+              StatefulShellBranch(
+                navigatorKey: _shellNavigatorKeys[2],
+                routes: [
                   GoRoute(
-                    name: payeeListRoute,
-                    path: 'payees',
+                    name: reportsRoute,
+                    path: 'reflect',
                     builder: (context, state) {
                       final id = state.pathParameters['id']!;
-                      return PayeeListScreen(budgetId: id);
+                      return ReportsScreen(budgetId: id);
                     },
+                    routes: [
+                      GoRoute(
+                        name: spendingTrendsRoute,
+                        path: 'trends',
+                        builder: (context, state) {
+                          final id = state.pathParameters['id']!;
+                          return SpendingTrendsScreen(budgetId: id);
+                        },
+                      ),
+                      GoRoute(
+                        name: spendingByPayeeRoute,
+                        path: 'payees',
+                        builder: (context, state) {
+                          final id = state.pathParameters['id']!;
+                          return SpendingByPayeeScreen(budgetId: id);
+                        },
+                      ),
+                      GoRoute(
+                        name: categoryTrendsRoute,
+                        path: 'category-trends',
+                        builder: (context, state) {
+                          final id = state.pathParameters['id']!;
+                          return CategoryTrendsScreen(budgetId: id);
+                        },
+                      ),
+                      GoRoute(
+                        name: multiMonthComparisonRoute,
+                        path: 'comparison',
+                        builder: (context, state) {
+                          final id = state.pathParameters['id']!;
+                          return MultiMonthComparisonScreen(budgetId: id);
+                        },
+                      ),
+                      GoRoute(
+                        name: netWorthRoute,
+                        path: 'net-worth',
+                        builder: (context, state) {
+                          final id = state.pathParameters['id']!;
+                          return NetWorthScreen(budgetId: id);
+                        },
+                      ),
+                    ],
                   ),
+                ],
+              ),
+              // Branch 3: More
+              StatefulShellBranch(
+                navigatorKey: _shellNavigatorKeys[3],
+                routes: [
                   GoRoute(
-                    name: transactionRulesRoute,
-                    path: 'rules',
+                    name: moreRoute,
+                    path: 'more',
                     builder: (context, state) {
                       final id = state.pathParameters['id']!;
-                      return RuleListScreen(budgetId: id);
+                      return MoreScreen(budgetId: id);
                     },
-                  ),
-                  GoRoute(
-                    name: importTransactionsRoute,
-                    path: 'import',
-                    builder: (context, state) {
-                      final id = state.pathParameters['id']!;
-                      return ImportTransactionsScreen(budgetId: id);
-                    },
-                  ),
-                  GoRoute(
-                    name: settingsRoute,
-                    path: 'settings',
-                    builder: (context, state) {
-                      final id = state.pathParameters['id']!;
-                      return SettingsScreen(budgetId: id);
-                    },
+                    routes: [
+                      GoRoute(
+                        name: recurringListRoute,
+                        path: 'recurring',
+                        builder: (context, state) {
+                          final id = state.pathParameters['id']!;
+                          return RecurringListScreen(budgetId: id);
+                        },
+                        routes: [
+                          GoRoute(
+                            name: recurringCalendarRoute,
+                            path: 'calendar',
+                            builder: (context, state) {
+                              final id = state.pathParameters['id']!;
+                              return RecurringCalendarScreen(budgetId: id);
+                            },
+                          ),
+                        ],
+                      ),
+                      GoRoute(
+                        name: payeeListRoute,
+                        path: 'payees',
+                        builder: (context, state) {
+                          final id = state.pathParameters['id']!;
+                          return PayeeListScreen(budgetId: id);
+                        },
+                      ),
+                      GoRoute(
+                        name: transactionRulesRoute,
+                        path: 'rules',
+                        builder: (context, state) {
+                          final id = state.pathParameters['id']!;
+                          return RuleListScreen(budgetId: id);
+                        },
+                      ),
+                      GoRoute(
+                        name: importTransactionsRoute,
+                        path: 'import',
+                        builder: (context, state) {
+                          final id = state.pathParameters['id']!;
+                          return ImportTransactionsScreen(budgetId: id);
+                        },
+                      ),
+                      GoRoute(
+                        name: settingsRoute,
+                        path: 'settings',
+                        builder: (context, state) {
+                          final id = state.pathParameters['id']!;
+                          return SettingsScreen(budgetId: id);
+                        },
+                      ),
+                    ],
                   ),
                 ],
               ),
             ],
           ),
+          // Routes outside the shell (full-screen overlays).
+          GoRoute(
+            name: addIncomeRoute,
+            path: 'income/add',
+            builder: (context, state) {
+              final id = state.pathParameters['id']!;
+              return AddIncomeScreen(budgetId: id);
+            },
+          ),
+          GoRoute(
+            name: addExpenseRoute,
+            path: 'expenses/add',
+            builder: (context, state) {
+              final id = state.pathParameters['id']!;
+              return AddExpenseScreen(budgetId: id);
+            },
+          ),
+          GoRoute(
+            name: transactionListRoute,
+            path: 'transactions',
+            builder: (context, state) {
+              final id = state.pathParameters['id']!;
+              return TransactionListScreen(budgetId: id);
+            },
+          ),
+          GoRoute(
+            name: createTransferRoute,
+            path: 'transfer',
+            builder: (context, state) {
+              final id = state.pathParameters['id']!;
+              return CreateTransferScreen(budgetId: id);
+            },
+          ),
+          GoRoute(
+            name: splitExpenseRoute,
+            path: 'expenses/split',
+            builder: (context, state) {
+              final id = state.pathParameters['id']!;
+              return SplitExpenseScreen(budgetId: id);
+            },
+          ),
         ],
-      ),
-      // Routes outside the shell (full-screen overlays)
-      GoRoute(
-        name: addIncomeRoute,
-        path: addIncomePath,
-        builder: (context, state) {
-          final id = state.pathParameters['id']!;
-          return AddIncomeScreen(budgetId: id);
-        },
-      ),
-      GoRoute(
-        name: addExpenseRoute,
-        path: addExpensePath,
-        builder: (context, state) {
-          final id = state.pathParameters['id']!;
-          return AddExpenseScreen(budgetId: id);
-        },
-      ),
-      GoRoute(
-        name: transactionListRoute,
-        path: transactionListPath,
-        builder: (context, state) {
-          final id = state.pathParameters['id']!;
-          return TransactionListScreen(budgetId: id);
-        },
-      ),
-      GoRoute(
-        name: createTransferRoute,
-        path: createTransferPath,
-        builder: (context, state) {
-          final id = state.pathParameters['id']!;
-          return CreateTransferScreen(budgetId: id);
-        },
-      ),
-      GoRoute(
-        name: splitExpenseRoute,
-        path: splitExpensePath,
-        builder: (context, state) {
-          final id = state.pathParameters['id']!;
-          return SplitExpenseScreen(budgetId: id);
-        },
       ),
     ],
     errorBuilder: (context, state) =>

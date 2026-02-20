@@ -5,15 +5,11 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
 import 'package:openbudget_app/src/features/accounts/screens/edit_account_dialog.dart';
+import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
-
-CurrencyCode _parseCurrency(String code) => CurrencyCode.values.firstWhere(
-  (c) => c.code == code,
-  orElse: () => CurrencyCode.usd,
-);
 
 class AccountListScreen extends HookConsumerWidget {
   const AccountListScreen({required this.budgetId, super.key});
@@ -115,16 +111,10 @@ class AccountListScreen extends HookConsumerWidget {
           final closed = accountList.where((a) => a.isClosed).toList();
 
           final allOpen = accountList.where((a) => !a.isClosed).toList();
-          final assets = allOpen
-              .where((a) => a.balanceCents >= 0)
-              .fold<int>(0, (sum, a) => sum + a.balanceCents);
-          final liabilities = allOpen
-              .where((a) => a.balanceCents < 0)
-              .fold<int>(0, (sum, a) => sum + a.balanceCents);
-          final netWorth = assets + liabilities;
-          final summaryCurrency = allOpen.isNotEmpty
-              ? _parseCurrency(allOpen.first.currencyCode)
-              : CurrencyCode.usd;
+          final netWorthByCurrency = _computeNetWorthByCurrency(allOpen);
+          final onBudgetTotals = _sumBalancesByCurrency(onBudget);
+          final offBudgetTotals = _sumBalancesByCurrency(offBudget);
+          final closedTotals = _sumBalancesByCurrency(closed);
 
           return RefreshIndicator(
             onRefresh: () async =>
@@ -132,21 +122,12 @@ class AccountListScreen extends HookConsumerWidget {
             child: ListView(
               padding: const EdgeInsets.all(SpacingTokens.md),
               children: [
-                _NetWorthCard(
-                  assets: assets,
-                  liabilities: liabilities,
-                  netWorth: netWorth,
-                  currencyCode: summaryCurrency,
-                ),
+                _NetWorthCard(totalsByCurrency: netWorthByCurrency),
                 const SizedBox(height: SpacingTokens.md),
                 if (onBudget.isNotEmpty) ...[
                   _SectionHeader(
                     title: l10n.accountOnBudget,
-                    total: onBudget.fold<int>(
-                      0,
-                      (sum, a) => sum + a.balanceCents,
-                    ),
-                    currencyCode: onBudget.first.currencyCode,
+                    totalsByCurrency: onBudgetTotals,
                   ),
                   ...onBudget.map(
                     (account) =>
@@ -157,11 +138,7 @@ class AccountListScreen extends HookConsumerWidget {
                 if (offBudget.isNotEmpty) ...[
                   _SectionHeader(
                     title: l10n.accountOffBudget,
-                    total: offBudget.fold<int>(
-                      0,
-                      (sum, a) => sum + a.balanceCents,
-                    ),
-                    currencyCode: offBudget.first.currencyCode,
+                    totalsByCurrency: offBudgetTotals,
                   ),
                   ...offBudget.map(
                     (account) =>
@@ -172,11 +149,7 @@ class AccountListScreen extends HookConsumerWidget {
                 if (closed.isNotEmpty) ...[
                   _SectionHeader(
                     title: l10n.accountClosed,
-                    total: closed.fold<int>(
-                      0,
-                      (sum, a) => sum + a.balanceCents,
-                    ),
-                    currencyCode: closed.first.currencyCode,
+                    totalsByCurrency: closedTotals,
                   ),
                   ...closed.map(
                     (account) =>
@@ -197,21 +170,26 @@ class AccountListScreen extends HookConsumerWidget {
 }
 
 class _SectionHeader extends HookWidget {
-  const _SectionHeader({
-    required this.title,
-    required this.total,
-    required this.currencyCode,
-  });
+  const _SectionHeader({required this.title, required this.totalsByCurrency});
 
   final String title;
-  final int total;
-  final String currencyCode;
+  final Map<CurrencyCode, int> totalsByCurrency;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final currency = _parseCurrency(currencyCode);
+    final hasSingleCurrency = totalsByCurrency.length == 1;
+    final singleTotal = hasSingleCurrency ? totalsByCurrency.values.first : 0;
+    final totalLabel = formatCurrencyBreakdown(
+      totalsByCurrency,
+      includeCurrencyCode: !hasSingleCurrency,
+    );
+    final labelColor = hasSingleCurrency
+        ? singleTotal >= 0
+              ? colorScheme.primary
+              : colorScheme.error
+        : colorScheme.onSurfaceVariant;
 
     return Padding(
       padding: const EdgeInsets.symmetric(
@@ -220,19 +198,28 @@ class _SectionHeader extends HookWidget {
       ),
       child: Row(
         children: [
-          Text(
-            title,
-            style: theme.textTheme.titleSmall?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-              fontWeight: FontWeight.w600,
+          Expanded(
+            child: Text(
+              title,
+              style: theme.textTheme.titleSmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w600,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
-          const Spacer(),
-          Text(
-            formatCents(total, currency),
-            style: theme.textTheme.titleSmall?.copyWith(
-              color: total >= 0 ? colorScheme.primary : colorScheme.error,
-              fontWeight: FontWeight.w600,
+          const SizedBox(width: SpacingTokens.sm),
+          Flexible(
+            child: Text(
+              totalLabel,
+              style: theme.textTheme.titleSmall?.copyWith(
+                color: labelColor,
+                fontWeight: FontWeight.w600,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.end,
             ),
           ),
         ],
@@ -252,7 +239,7 @@ class _AccountTile extends HookWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final icon = _iconForType(account.accountType);
-    final currency = _parseCurrency(account.currencyCode);
+    final currency = parseCurrencyCode(account.currencyCode);
 
     return Card(
       margin: const EdgeInsets.only(bottom: SpacingTokens.xs),
@@ -337,28 +324,31 @@ class _AccountTile extends HookWidget {
 }
 
 class _NetWorthCard extends HookWidget {
-  const _NetWorthCard({
-    required this.assets,
-    required this.liabilities,
-    required this.netWorth,
-    required this.currencyCode,
-  });
+  const _NetWorthCard({required this.totalsByCurrency});
 
-  final int assets;
-  final int liabilities;
-  final int netWorth;
-  final CurrencyCode currencyCode;
+  final List<_NetWorthTotals> totalsByCurrency;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final isSingleCurrency = totalsByCurrency.length == 1;
+    final overallLabel = isSingleCurrency
+        ? formatCents(
+            totalsByCurrency.first.netWorth,
+            totalsByCurrency.first.currency,
+          )
+        : formatCurrencyBreakdown({
+            for (final totals in totalsByCurrency)
+              totals.currency: totals.netWorth,
+          });
 
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(SpacingTokens.md),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
               l10n.accountNetWorth,
@@ -368,37 +358,117 @@ class _NetWorthCard extends HookWidget {
             ),
             const SizedBox(height: SpacingTokens.xs),
             Text(
-              formatCents(netWorth, currencyCode),
+              overallLabel,
               style: theme.textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: netWorth >= 0 ? colorScheme.primary : colorScheme.error,
+                color: isSingleCurrency && totalsByCurrency.first.netWorth < 0
+                    ? colorScheme.error
+                    : colorScheme.primary,
               ),
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: SpacingTokens.sm),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _NetWorthMetric(
-                  label: l10n.accountTotalAssets,
-                  amount: assets,
-                  currencyCode: currencyCode,
-                  color: ColorTokens.secondary,
-                ),
-                Container(
-                  width: 1,
-                  height: 24,
-                  color: colorScheme.outlineVariant,
-                ),
-                _NetWorthMetric(
-                  label: l10n.accountTotalLiabilities,
-                  amount: liabilities,
-                  currencyCode: currencyCode,
-                  color: ColorTokens.error,
-                ),
-              ],
-            ),
+            if (isSingleCurrency)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _NetWorthMetric(
+                    label: l10n.accountTotalAssets,
+                    amount: totalsByCurrency.first.assets,
+                    currencyCode: totalsByCurrency.first.currency,
+                    color: ColorTokens.secondary,
+                  ),
+                  Container(
+                    width: 1,
+                    height: 24,
+                    color: colorScheme.outlineVariant,
+                  ),
+                  _NetWorthMetric(
+                    label: l10n.accountTotalLiabilities,
+                    amount: totalsByCurrency.first.liabilities,
+                    currencyCode: totalsByCurrency.first.currency,
+                    color: ColorTokens.error,
+                  ),
+                ],
+              )
+            else
+              Column(
+                children: [
+                  for (var i = 0; i < totalsByCurrency.length; i++) ...[
+                    _NetWorthCurrencyRow(totals: totalsByCurrency[i]),
+                    if (i < totalsByCurrency.length - 1)
+                      const SizedBox(height: SpacingTokens.xs),
+                  ],
+                ],
+              ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _NetWorthCurrencyRow extends HookWidget {
+  const _NetWorthCurrencyRow({required this.totals});
+
+  final _NetWorthTotals totals;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
+    final netColor = totals.netWorth >= 0
+        ? ColorTokens.secondary
+        : ColorTokens.error;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: SpacingTokens.sm,
+        vertical: SpacingTokens.xs,
+      ),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(RadiusTokens.sm),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Text(
+                totals.currency.code,
+                style: theme.textTheme.labelMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const Spacer(),
+              Text(
+                formatCents(totals.netWorth, totals.currency),
+                style: theme.textTheme.labelLarge?.copyWith(
+                  color: netColor,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 2),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  '${l10n.accountTotalAssets}: ${formatCents(totals.assets, totals.currency)}',
+                  style: theme.textTheme.bodySmall,
+                ),
+              ),
+              Expanded(
+                child: Text(
+                  '${l10n.accountTotalLiabilities}: ${formatCents(totals.liabilities, totals.currency)}',
+                  style: theme.textTheme.bodySmall,
+                  textAlign: TextAlign.end,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -441,4 +511,62 @@ class _NetWorthMetric extends HookWidget {
       ],
     );
   }
+}
+
+class _NetWorthTotals {
+  const _NetWorthTotals({
+    required this.currency,
+    required this.assets,
+    required this.liabilities,
+  });
+
+  final CurrencyCode currency;
+  final int assets;
+  final int liabilities;
+
+  int get netWorth => assets + liabilities;
+}
+
+List<_NetWorthTotals> _computeNetWorthByCurrency(Iterable<Account> accounts) {
+  final assets = <CurrencyCode, int>{};
+  final liabilities = <CurrencyCode, int>{};
+
+  for (final account in accounts) {
+    final currency = parseCurrencyCode(account.currencyCode);
+    if (account.balanceCents >= 0) {
+      assets[currency] = (assets[currency] ?? 0) + account.balanceCents;
+      continue;
+    }
+    liabilities[currency] = (liabilities[currency] ?? 0) + account.balanceCents;
+  }
+
+  final allCurrencies = {...assets.keys, ...liabilities.keys}.toList()
+    ..sort((a, b) => a.code.compareTo(b.code));
+
+  if (allCurrencies.isEmpty) {
+    return const [
+      _NetWorthTotals(currency: CurrencyCode.usd, assets: 0, liabilities: 0),
+    ];
+  }
+
+  return allCurrencies
+      .map(
+        (currency) => _NetWorthTotals(
+          currency: currency,
+          assets: assets[currency] ?? 0,
+          liabilities: liabilities[currency] ?? 0,
+        ),
+      )
+      .toList();
+}
+
+Map<CurrencyCode, int> _sumBalancesByCurrency(Iterable<Account> accounts) {
+  final totals = aggregateCentsByCurrency(
+    accounts,
+    currencyCodeOf: (account) => account.currencyCode,
+    amountCentsOf: (account) => account.balanceCents,
+  );
+  final sorted = totals.entries.toList()
+    ..sort((a, b) => a.key.code.compareTo(b.key.code));
+  return {for (final entry in sorted) entry.key: entry.value};
 }

@@ -3,6 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/reports/providers/net_worth_provider.dart';
+import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
@@ -44,13 +45,21 @@ class NetWorthScreen extends HookConsumerWidget {
           ),
         ),
         data: (data) {
-          final currency = CurrencyCode.values.firstWhere(
-            (c) => c.code == data.currencyCode,
-            orElse: () => CurrencyCode.usd,
-          );
-          final netWorthColor = data.netWorth >= 0
+          final primaryBreakdown = data.currencyBreakdown.firstOrNull;
+          final primaryCurrency =
+              primaryBreakdown?.currency ?? CurrencyCode.usd;
+          final primaryNetWorth = primaryBreakdown?.netWorth ?? 0;
+          final netWorthColor = data.hasMultipleCurrencies
+              ? colorScheme.primary
+              : primaryNetWorth >= 0
               ? ColorTokens.secondary
               : ColorTokens.error;
+          final heroAmountLabel = data.hasMultipleCurrencies
+              ? formatCurrencyBreakdown({
+                  for (final breakdown in data.currencyBreakdown)
+                    breakdown.currency: breakdown.netWorth,
+                })
+              : formatCents(primaryNetWorth, primaryCurrency);
 
           return ListView(
             padding: const EdgeInsets.all(SpacingTokens.md),
@@ -73,37 +82,58 @@ class NetWorthScreen extends HookConsumerWidget {
                     ),
                     const SizedBox(height: SpacingTokens.xs),
                     Text(
-                      formatCents(data.netWorth, currency),
+                      heroAmountLabel,
                       style: theme.textTheme.headlineLarge?.copyWith(
                         color: netWorthColor,
                         fontWeight: FontWeight.bold,
                       ),
+                      textAlign: TextAlign.center,
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: SpacingTokens.md),
 
-              // Assets vs Liabilities summary row
-              Row(
-                children: [
-                  Expanded(
-                    child: _SummaryChip(
-                      label: l10n.netWorthAssets,
-                      amount: formatCents(data.totalAssets, currency),
-                      color: ColorTokens.secondary,
+              // Assets vs liabilities summary rows.
+              if (!data.hasMultipleCurrencies)
+                Row(
+                  children: [
+                    Expanded(
+                      child: _SummaryChip(
+                        label: l10n.netWorthAssets,
+                        amount: formatCents(
+                          primaryBreakdown?.totalAssets ?? 0,
+                          primaryCurrency,
+                        ),
+                        color: ColorTokens.secondary,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: SpacingTokens.sm),
-                  Expanded(
-                    child: _SummaryChip(
-                      label: l10n.netWorthLiabilities,
-                      amount: formatCents(data.totalLiabilities, currency),
-                      color: ColorTokens.error,
+                    const SizedBox(width: SpacingTokens.sm),
+                    Expanded(
+                      child: _SummaryChip(
+                        label: l10n.netWorthLiabilities,
+                        amount: formatCents(
+                          primaryBreakdown?.totalLiabilities ?? 0,
+                          primaryCurrency,
+                        ),
+                        color: ColorTokens.error,
+                      ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                )
+              else
+                Column(
+                  children: [
+                    for (final breakdown in data.currencyBreakdown) ...[
+                      _CurrencySummaryRow(
+                        currency: breakdown.currency,
+                        assets: breakdown.totalAssets,
+                        liabilities: breakdown.totalLiabilities,
+                      ),
+                      const SizedBox(height: SpacingTokens.xs),
+                    ],
+                  ],
+                ),
               const SizedBox(height: SpacingTokens.lg),
 
               // Asset accounts
@@ -119,10 +149,7 @@ class NetWorthScreen extends HookConsumerWidget {
                   child: Column(
                     children: [
                       for (var i = 0; i < data.assetAccounts.length; i++) ...[
-                        _AccountTile(
-                          account: data.assetAccounts[i],
-                          currency: currency,
-                        ),
+                        _AccountTile(account: data.assetAccounts[i]),
                         if (i < data.assetAccounts.length - 1)
                           const Divider(height: 1),
                       ],
@@ -149,10 +176,7 @@ class NetWorthScreen extends HookConsumerWidget {
                         i < data.liabilityAccounts.length;
                         i++
                       ) ...[
-                        _AccountTile(
-                          account: data.liabilityAccounts[i],
-                          currency: currency,
-                        ),
+                        _AccountTile(account: data.liabilityAccounts[i]),
                         if (i < data.liabilityAccounts.length - 1)
                           const Divider(height: 1),
                       ],
@@ -247,15 +271,86 @@ class _SummaryChip extends HookWidget {
   }
 }
 
+class _CurrencySummaryRow extends HookWidget {
+  const _CurrencySummaryRow({
+    required this.currency,
+    required this.assets,
+    required this.liabilities,
+  });
+
+  final CurrencyCode currency;
+  final int assets;
+  final int liabilities;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: SpacingTokens.md,
+        vertical: SpacingTokens.sm,
+      ),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(RadiusTokens.sm),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Text(
+                currency.code,
+                style: theme.textTheme.labelLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const Spacer(),
+              Text(
+                formatCents(assets + liabilities, currency),
+                style: theme.textTheme.labelLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: assets + liabilities >= 0
+                      ? ColorTokens.secondary
+                      : ColorTokens.error,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 2),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  '${l10n.netWorthAssets}: ${formatCents(assets, currency)}',
+                  style: theme.textTheme.bodySmall,
+                ),
+              ),
+              Expanded(
+                child: Text(
+                  '${l10n.netWorthLiabilities}: ${formatCents(liabilities, currency)}',
+                  style: theme.textTheme.bodySmall,
+                  textAlign: TextAlign.end,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _AccountTile extends HookWidget {
-  const _AccountTile({required this.account, required this.currency});
+  const _AccountTile({required this.account});
 
   final Account account;
-  final CurrencyCode currency;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final currency = parseCurrencyCode(account.currencyCode);
     final balanceColor = account.balanceCents >= 0
         ? ColorTokens.secondary
         : ColorTokens.error;

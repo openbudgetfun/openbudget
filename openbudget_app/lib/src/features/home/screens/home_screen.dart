@@ -9,6 +9,7 @@ import 'package:openbudget_app/src/features/budget/providers/budget_summary_prov
 import 'package:openbudget_app/src/features/home/providers/budget_actions_provider.dart';
 import 'package:openbudget_app/src/features/home/providers/budget_list_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
+import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -265,10 +266,21 @@ class _BudgetCard extends HookConsumerWidget {
                       final activeAccounts = accounts
                           .where((a) => !a.isClosed)
                           .toList();
-                      final totalBalance = activeAccounts.fold<int>(
-                        0,
-                        (sum, a) => sum + a.balanceCents,
+                      final totalsByCurrency = aggregateCentsByCurrency(
+                        activeAccounts,
+                        currencyCodeOf: (account) => account.currencyCode,
+                        amountCentsOf: (account) => account.balanceCents,
                       );
+                      final hasSingleCurrency = totalsByCurrency.length <= 1;
+                      final singleCurrency = hasSingleCurrency
+                          ? (totalsByCurrency.keys.firstOrNull ?? currency)
+                          : currency;
+                      final singleTotal = hasSingleCurrency
+                          ? (totalsByCurrency.values.firstOrNull ?? 0)
+                          : 0;
+                      final totalLabel = hasSingleCurrency
+                          ? formatCents(singleTotal, singleCurrency)
+                          : formatCurrencyBreakdown(totalsByCurrency);
 
                       return Padding(
                         padding: const EdgeInsets.only(top: SpacingTokens.md),
@@ -283,13 +295,21 @@ class _BudgetCard extends HookConsumerWidget {
                                 color: colorScheme.onSurfaceVariant,
                               ),
                             ),
-                            Text(
-                              formatCents(totalBalance, currency),
-                              style: theme.textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: totalBalance >= 0
-                                    ? ColorTokens.secondary
-                                    : ColorTokens.error,
+                            const SizedBox(width: SpacingTokens.sm),
+                            Flexible(
+                              child: Text(
+                                totalLabel,
+                                style: theme.textTheme.titleSmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: hasSingleCurrency
+                                      ? singleTotal >= 0
+                                            ? ColorTokens.secondary
+                                            : ColorTokens.error
+                                      : colorScheme.onSurfaceVariant,
+                                ),
+                                textAlign: TextAlign.end,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
                           ],
@@ -390,7 +410,7 @@ class _NetWorthSummary extends HookConsumerWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    var totalBalanceCents = 0;
+    final totalsByCurrency = <CurrencyCode, int>{};
     var totalAccounts = 0;
     var loaded = false;
 
@@ -400,7 +420,9 @@ class _NetWorthSummary extends HookConsumerWidget {
         loaded = true;
         final active = accountsAsync.value!.where((a) => !a.isClosed);
         for (final account in active) {
-          totalBalanceCents += account.balanceCents;
+          final currency = parseCurrencyCode(account.currencyCode);
+          totalsByCurrency[currency] =
+              (totalsByCurrency[currency] ?? 0) + account.balanceCents;
           totalAccounts++;
         }
       }
@@ -408,7 +430,17 @@ class _NetWorthSummary extends HookConsumerWidget {
 
     if (!loaded) return const SizedBox.shrink();
 
-    final isPositive = totalBalanceCents >= 0;
+    final isSingleCurrency = totalsByCurrency.length <= 1;
+    final singleTotal = isSingleCurrency
+        ? (totalsByCurrency.values.firstOrNull ?? 0)
+        : 0;
+    final isPositive = !isSingleCurrency || singleTotal >= 0;
+    final totalLabel = isSingleCurrency
+        ? formatCents(
+            singleTotal,
+            totalsByCurrency.keys.firstOrNull ?? CurrencyCode.usd,
+          )
+        : formatCurrencyBreakdown(totalsByCurrency);
 
     return Container(
       width: double.infinity,
@@ -459,11 +491,12 @@ class _NetWorthSummary extends HookConsumerWidget {
           ),
           const SizedBox(height: SpacingTokens.xs),
           Text(
-            formatCents(totalBalanceCents, CurrencyCode.usd),
+            totalLabel,
             style: theme.textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.bold,
               color: isPositive ? ColorTokens.secondary : ColorTokens.error,
             ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),

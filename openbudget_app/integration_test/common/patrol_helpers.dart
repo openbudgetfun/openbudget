@@ -3,6 +3,23 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/main.dart';
 
+Future<void> waitForFinder(
+  WidgetTester tester,
+  Finder finder, {
+  Duration timeout = const Duration(seconds: 10),
+}) async {
+  const step = Duration(milliseconds: 200);
+  var elapsed = Duration.zero;
+  while (elapsed < timeout) {
+    await tester.pump(step);
+    if (finder.evaluate().isNotEmpty) {
+      return;
+    }
+    elapsed += step;
+  }
+  throw StateError('Timed out waiting for finder: $finder');
+}
+
 /// Pumps the full OpenBudget app inside a [ProviderScope] and waits for it
 /// to settle.
 Future<void> initApp(WidgetTester tester) async {
@@ -43,8 +60,8 @@ class CreateBudgetPage {
   Future<void> createBudget(String name) async {
     await tester.enterText(nameField, name);
     await tester.tap(createButton);
-    // Wait for async create (300ms) + GoRouter navigation.
-    await tester.pump(const Duration(seconds: 1));
+    // Wait for async create + GoRouter navigation into the budget shell.
+    await waitForFinder(tester, find.byType(NavigationBar));
     await tester.pumpAndSettle();
   }
 }
@@ -69,11 +86,18 @@ class BudgetShellPage {
   final WidgetTester tester;
 
   Finder get navigationBar => find.byType(NavigationBar);
-  Finder get planTab => find.text('Plan');
-  Finder get accountsTab => find.text('Accounts');
-  Finder get addTab => find.text('Add');
-  Finder get reflectTab => find.text('Reflect');
-  Finder get moreTab => find.text('More');
+  Finder get planTab =>
+      _destination(Icons.savings_rounded, Icons.savings_outlined);
+  Finder get accountsTab => _destination(
+    Icons.account_balance_rounded,
+    Icons.account_balance_outlined,
+  );
+  Finder get addTab =>
+      _destination(Icons.add_circle_rounded, Icons.add_circle_outline_rounded);
+  Finder get reflectTab =>
+      _destination(Icons.bar_chart_rounded, Icons.bar_chart_outlined);
+  Finder get moreTab =>
+      _destination(Icons.more_horiz_rounded, Icons.more_horiz_rounded);
 
   Future<void> tapPlanTab() async {
     await tester.tap(planTab);
@@ -98,6 +122,29 @@ class BudgetShellPage {
   Future<void> tapMoreTab() async {
     await tester.tap(moreTab);
     await tester.pumpAndSettle();
+  }
+
+  Finder _destination(IconData selectedIcon, IconData unselectedIcon) {
+    final selected = find.descendant(
+      of: navigationBar,
+      matching: find.byIcon(selectedIcon),
+    );
+    if (selected.evaluate().isNotEmpty) {
+      return selected.first;
+    }
+    final unselected = find.descendant(
+      of: navigationBar,
+      matching: find.byIcon(unselectedIcon),
+    );
+    if (unselected.evaluate().isNotEmpty) {
+      return unselected.first;
+    }
+    return find
+        .descendant(
+          of: navigationBar,
+          matching: find.byType(NavigationDestination),
+        )
+        .first;
   }
 }
 
