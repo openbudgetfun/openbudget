@@ -133,12 +133,18 @@ class AddExpenseScreen extends HookConsumerWidget {
         backgroundColor: YnabPalette.appBackground,
         surfaceTintColor: Colors.transparent,
         scrolledUnderElevation: 0,
-        leadingWidth: 90,
-        leading: TextButton.icon(
-          onPressed: () =>
-              context.goNamed(planRoute, pathParameters: {'id': budgetId}),
-          icon: const Icon(Icons.arrow_back, size: 16),
-          label: Text(l10n.dialogCancel),
+        leadingWidth: 88,
+        leading: Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton(
+            onPressed: () =>
+                context.goNamed(planRoute, pathParameters: {'id': budgetId}),
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: SpacingTokens.sm),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: Text(l10n.dialogCancel),
+          ),
         ),
         title: Text(l10n.addTransactionSheetTitle),
       ),

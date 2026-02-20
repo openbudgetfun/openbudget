@@ -293,88 +293,88 @@ class TransactionListScreen extends HookConsumerWidget {
                   horizontal: SpacingTokens.md,
                   vertical: SpacingTokens.sm,
                 ),
-                child: SizedBox(
-                  height: 36,
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: ListView(
-                          scrollDirection: Axis.horizontal,
-                          children: [
-                            _FilterChip(
-                              label: l10n.transactionFilterAll,
-                              selected: filter.value == TransactionFilter.all,
-                              onSelected: () =>
-                                  filter.value = TransactionFilter.all,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    SizedBox(
+                      height: 36,
+                      child: ListView(
+                        scrollDirection: Axis.horizontal,
+                        children: [
+                          _FilterChip(
+                            label: l10n.transactionFilterAll,
+                            selected: filter.value == TransactionFilter.all,
+                            onSelected: () =>
+                                filter.value = TransactionFilter.all,
+                          ),
+                          const SizedBox(width: SpacingTokens.sm),
+                          _FilterChip(
+                            label: l10n.transactionFilterIncome,
+                            selected: filter.value == TransactionFilter.income,
+                            onSelected: () =>
+                                filter.value = TransactionFilter.income,
+                            color: ColorTokens.secondary,
+                          ),
+                          const SizedBox(width: SpacingTokens.sm),
+                          _FilterChip(
+                            label: l10n.transactionFilterExpense,
+                            selected: filter.value == TransactionFilter.expense,
+                            onSelected: () =>
+                                filter.value = TransactionFilter.expense,
+                            color: ColorTokens.error,
+                          ),
+                          const SizedBox(width: SpacingTokens.sm),
+                          _FilterChip(
+                            label: dateRangeStart.value != null
+                                ? _formatShortDate(dateRangeStart.value!)
+                                : l10n.transactionDateRangeFilter,
+                            selected: dateRangeStart.value != null,
+                            onSelected: () => _pickDateRange(
+                              context,
+                              dateRangeStart,
+                              dateRangeEnd,
+                              transactions,
                             ),
-                            const SizedBox(width: SpacingTokens.sm),
-                            _FilterChip(
-                              label: l10n.transactionFilterIncome,
-                              selected:
-                                  filter.value == TransactionFilter.income,
-                              onSelected: () =>
-                                  filter.value = TransactionFilter.income,
-                              color: ColorTokens.secondary,
-                            ),
-                            const SizedBox(width: SpacingTokens.sm),
-                            _FilterChip(
-                              label: l10n.transactionFilterExpense,
-                              selected:
-                                  filter.value == TransactionFilter.expense,
-                              onSelected: () =>
-                                  filter.value = TransactionFilter.expense,
-                              color: ColorTokens.error,
-                            ),
-                            const SizedBox(width: SpacingTokens.sm),
-                            _FilterChip(
-                              label: dateRangeStart.value != null
-                                  ? _formatShortDate(dateRangeStart.value!)
-                                  : l10n.transactionDateRangeFilter,
-                              selected: dateRangeStart.value != null,
-                              onSelected: () => _pickDateRange(
-                                context,
-                                dateRangeStart,
-                                dateRangeEnd,
-                                transactions,
+                          ),
+                          if (dateRangeStart.value != null) ...[
+                            IconButton(
+                              icon: const Icon(Icons.clear, size: 16),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(
+                                minWidth: 24,
+                                minHeight: 24,
                               ),
-                            ),
-                            if (dateRangeStart.value != null) ...[
-                              IconButton(
-                                icon: const Icon(Icons.clear, size: 16),
-                                padding: EdgeInsets.zero,
-                                constraints: const BoxConstraints(
-                                  minWidth: 24,
-                                  minHeight: 24,
-                                ),
-                                tooltip: l10n.transactionDateRangeClear,
-                                onPressed: () {
-                                  dateRangeStart.value = null;
-                                  dateRangeEnd.value = null;
-                                },
-                              ),
-                            ],
-                            const SizedBox(width: SpacingTokens.sm),
-                            _FlagFilterChip(
-                              selectedFlag: flagFilter.value,
-                              onSelected: (flag) => flagFilter.value = flag,
-                            ),
-                            const SizedBox(width: SpacingTokens.sm),
-                            _StatusFilterChip(
-                              value: statusFilter.value,
-                              onSelected: (v) => statusFilter.value = v,
+                              tooltip: l10n.transactionDateRangeClear,
+                              onPressed: () {
+                                dateRangeStart.value = null;
+                                dateRangeEnd.value = null;
+                              },
                             ),
                           ],
-                        ),
+                          const SizedBox(width: SpacingTokens.sm),
+                          _FlagFilterChip(
+                            selectedFlag: flagFilter.value,
+                            onSelected: (flag) => flagFilter.value = flag,
+                          ),
+                          const SizedBox(width: SpacingTokens.sm),
+                          _StatusFilterChip(
+                            value: statusFilter.value,
+                            onSelected: (v) => statusFilter.value = v,
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: SpacingTokens.sm),
-                      Text(
+                    ),
+                    const SizedBox(height: SpacingTokens.xs),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Text(
                         l10n.transactionResultCount(filtered.length),
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: colorScheme.onSurfaceVariant,
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
               if (filtered.isEmpty)

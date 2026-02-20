@@ -6,7 +6,10 @@ import 'package:openbudget_app/src/features/budget/providers/budget_summary_prov
 import 'package:openbudget_app/src/features/payees/providers/payee_list_provider.dart';
 import 'package:openbudget_app/src/features/transaction_rules/providers/rule_actions_provider.dart';
 import 'package:openbudget_app/src/features/transaction_rules/providers/rule_list_provider.dart';
+import 'package:openbudget_app/src/theme/ynab_palette.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
+
+enum RuleViewFilter { all, enabled, disabled }
 
 class RuleListScreen extends HookConsumerWidget {
   const RuleListScreen({required this.budgetId, super.key});
@@ -18,6 +21,7 @@ class RuleListScreen extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final viewFilter = useState(RuleViewFilter.all);
     final rulesAsync = ref.watch(ruleListProvider(budgetId));
     final payeesAsync = ref.watch(payeeListProvider(budgetId));
     final summaryAsync = ref.watch(budgetSummaryProvider(budgetId));
@@ -44,9 +48,17 @@ class RuleListScreen extends HookConsumerWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.transactionRulesTitle)),
+      backgroundColor: YnabPalette.appBackground,
+      appBar: AppBar(
+        backgroundColor: YnabPalette.appBackground,
+        surfaceTintColor: Colors.transparent,
+        scrolledUnderElevation: 0,
+        title: Text(l10n.transactionRulesTitle),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showAddRuleDialog(context, ref),
+        backgroundColor: YnabPalette.accentBlue,
+        foregroundColor: Colors.white,
         child: const Icon(Icons.add),
       ),
       body: rulesAsync.when(
@@ -62,95 +74,129 @@ class RuleListScreen extends HookConsumerWidget {
         data: (rules) {
           if (rules.isEmpty) {
             return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(SpacingTokens.xl),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.rule_rounded,
-                      size: 64,
-                      color: colorScheme.onSurfaceVariant.withAlpha(100),
-                    ),
-                    const SizedBox(height: SpacingTokens.md),
-                    Text(
-                      l10n.transactionRulesEmptyTitle,
-                      style: theme.textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: SpacingTokens.xs),
-                    Text(
-                      l10n.transactionRulesEmptySubtitle,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
+              child: Card(
+                margin: const EdgeInsets.all(SpacingTokens.lg),
+                color: YnabPalette.surface,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(RadiusTokens.md),
+                  side: const BorderSide(color: YnabPalette.divider),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(SpacingTokens.lg),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.rule_rounded,
+                        size: 64,
+                        color: colorScheme.onSurfaceVariant.withAlpha(100),
                       ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
+                      const SizedBox(height: SpacingTokens.md),
+                      Text(
+                        l10n.transactionRulesEmptyTitle,
+                        style: theme.textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: SpacingTokens.xs),
+                      Text(
+                        l10n.transactionRulesEmptySubtitle,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             );
           }
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(SpacingTokens.md),
-            itemCount: rules.length,
-            itemBuilder: (context, index) {
-              final rule = rules[index];
-              final ruleId = rule.id?.toString() ?? '';
-              final payeeName =
-                  payeeNames[rule.payeeId.toString()] ?? 'Unknown';
-              final envelopeName =
-                  envelopeNames[rule.targetEnvelopeId.toString()] ?? 'Unknown';
+          final enabledCount = rules.where((rule) => rule.enabled).length;
+          final disabledCount = rules.length - enabledCount;
+          final filteredRules = rules.where((rule) {
+            return switch (viewFilter.value) {
+              RuleViewFilter.all => true,
+              RuleViewFilter.enabled => rule.enabled,
+              RuleViewFilter.disabled => !rule.enabled,
+            };
+          }).toList();
 
-              return Card(
-                child: ListTile(
-                  leading: Icon(
-                    Icons.rule_rounded,
-                    color: rule.enabled
-                        ? colorScheme.primary
-                        : colorScheme.onSurfaceVariant,
-                  ),
-                  title: Text(payeeName),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(envelopeName),
-                      if (!rule.enabled)
-                        Text(
-                          l10n.transactionRulesDisabled,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: colorScheme.error,
-                            fontStyle: FontStyle.italic,
-                          ),
-                        ),
-                    ],
-                  ),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Switch(
-                        value: rule.enabled,
-                        onChanged: (enabled) => _toggleRule(
-                          context,
-                          ref,
-                          ruleId: ruleId,
-                          enabled: enabled,
-                        ),
-                      ),
-                      IconButton(
-                        icon: Icon(
-                          Icons.delete_outline,
-                          color: colorScheme.error,
-                        ),
-                        onPressed: () =>
-                            _deleteRule(context, ref, ruleId: ruleId),
-                      ),
-                    ],
-                  ),
-                  isThreeLine: !rule.enabled,
+          return ListView(
+            padding: const EdgeInsets.all(SpacingTokens.md),
+            children: [
+              _RuleSummaryCard(
+                totalRules: rules.length,
+                enabledRules: enabledCount,
+                disabledRules: disabledCount,
+              ),
+              const SizedBox(height: SpacingTokens.md),
+              SizedBox(
+                height: 36,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  children: [
+                    _RuleFilterChip(
+                      label: l10n.transactionFilterAll,
+                      selected: viewFilter.value == RuleViewFilter.all,
+                      onTap: () => viewFilter.value = RuleViewFilter.all,
+                    ),
+                    const SizedBox(width: SpacingTokens.sm),
+                    _RuleFilterChip(
+                      label: l10n.transactionRulesEnabled,
+                      selected: viewFilter.value == RuleViewFilter.enabled,
+                      onTap: () => viewFilter.value = RuleViewFilter.enabled,
+                      color: YnabPalette.progressGreen,
+                    ),
+                    const SizedBox(width: SpacingTokens.sm),
+                    _RuleFilterChip(
+                      label: l10n.transactionRulesDisabled,
+                      selected: viewFilter.value == RuleViewFilter.disabled,
+                      onTap: () => viewFilter.value = RuleViewFilter.disabled,
+                      color: YnabPalette.negative,
+                    ),
+                  ],
                 ),
-              );
-            },
+              ),
+              const SizedBox(height: SpacingTokens.md),
+              if (filteredRules.isEmpty)
+                Card(
+                  margin: EdgeInsets.zero,
+                  color: YnabPalette.surface,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(RadiusTokens.md),
+                    side: const BorderSide(color: YnabPalette.divider),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(SpacingTokens.md),
+                    child: Text(
+                      l10n.transactionNoResults,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: YnabPalette.mutedText,
+                      ),
+                    ),
+                  ),
+                ),
+              ...filteredRules.map((rule) {
+                final ruleId = rule.id?.toString() ?? '';
+                final payeeName =
+                    payeeNames[rule.payeeId.toString()] ?? 'Unknown';
+                final envelopeName =
+                    envelopeNames[rule.targetEnvelopeId.toString()] ??
+                    'Unknown';
+                return _RuleTile(
+                  payeeName: payeeName,
+                  envelopeName: envelopeName,
+                  enabled: rule.enabled,
+                  onToggle: (enabled) => _toggleRule(
+                    context,
+                    ref,
+                    ruleId: ruleId,
+                    enabled: enabled,
+                  ),
+                  onDelete: () => _deleteRule(context, ref, ruleId: ruleId),
+                );
+              }),
+            ],
           );
         },
       ),
@@ -260,6 +306,255 @@ class RuleListScreen extends HookConsumerWidget {
         ),
       );
     }
+  }
+}
+
+class _RuleSummaryCard extends HookWidget {
+  const _RuleSummaryCard({
+    required this.totalRules,
+    required this.enabledRules,
+    required this.disabledRules,
+  });
+
+  final int totalRules;
+  final int enabledRules;
+  final int disabledRules;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    return Card(
+      margin: EdgeInsets.zero,
+      color: YnabPalette.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(RadiusTokens.md),
+        side: const BorderSide(color: YnabPalette.divider),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(SpacingTokens.md),
+        child: Column(
+          children: [
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(SpacingTokens.md),
+              decoration: BoxDecoration(
+                color: YnabPalette.accentPurple,
+                borderRadius: BorderRadius.circular(RadiusTokens.md),
+              ),
+              child: Column(
+                children: [
+                  Text(
+                    l10n.transactionRulesTitle,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: SpacingTokens.xs),
+                  Text(
+                    l10n.transactionRulesTotalCount(totalRules),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: YnabPalette.mutedText,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: SpacingTokens.md),
+            Row(
+              children: [
+                Expanded(
+                  child: _RuleMetric(
+                    label: l10n.transactionRulesEnabled,
+                    value: '$enabledRules',
+                    color: YnabPalette.progressGreen,
+                  ),
+                ),
+                const SizedBox(width: SpacingTokens.sm),
+                Expanded(
+                  child: _RuleMetric(
+                    label: l10n.transactionRulesDisabled,
+                    value: '$disabledRules',
+                    color: YnabPalette.negative,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RuleMetric extends HookWidget {
+  const _RuleMetric({
+    required this.label,
+    required this.value,
+    required this.color,
+  });
+
+  final String label;
+  final String value;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: SpacingTokens.sm,
+        vertical: SpacingTokens.xs,
+      ),
+      decoration: BoxDecoration(
+        color: color.withAlpha(26),
+        borderRadius: BorderRadius.circular(RadiusTokens.sm),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: YnabPalette.mutedText,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            value,
+            style: theme.textTheme.titleSmall?.copyWith(
+              color: color,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RuleFilterChip extends HookWidget {
+  const _RuleFilterChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+    this.color,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final chipColor = color ?? YnabPalette.accentBlue;
+    return ChoiceChip(
+      label: Text(label),
+      selected: selected,
+      onSelected: (_) => onTap(),
+      backgroundColor: YnabPalette.surface,
+      selectedColor: chipColor.withAlpha(24),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(RadiusTokens.sm),
+        side: BorderSide(
+          color: selected ? chipColor.withAlpha(130) : YnabPalette.divider,
+        ),
+      ),
+      labelStyle: theme.textTheme.labelMedium?.copyWith(
+        color: selected ? chipColor : YnabPalette.mutedText,
+        fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+      ),
+      showCheckmark: false,
+      visualDensity: VisualDensity.compact,
+    );
+  }
+}
+
+class _RuleTile extends HookWidget {
+  const _RuleTile({
+    required this.payeeName,
+    required this.envelopeName,
+    required this.enabled,
+    required this.onToggle,
+    required this.onDelete,
+  });
+
+  final String payeeName;
+  final String envelopeName;
+  final bool enabled;
+  final ValueChanged<bool> onToggle;
+  final VoidCallback onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    return Card(
+      margin: const EdgeInsets.only(bottom: SpacingTokens.sm),
+      color: YnabPalette.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(RadiusTokens.md),
+        side: const BorderSide(color: YnabPalette.divider),
+      ),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: SpacingTokens.md,
+          vertical: SpacingTokens.xs,
+        ),
+        leading: CircleAvatar(
+          backgroundColor: enabled
+              ? YnabPalette.accentPurple.withAlpha(90)
+              : YnabPalette.surfaceMuted,
+          child: Icon(
+            Icons.rule_rounded,
+            color: enabled ? YnabPalette.accentBlue : YnabPalette.mutedText,
+            size: 18,
+          ),
+        ),
+        title: Text(payeeName, style: theme.textTheme.titleMedium),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              envelopeName,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: YnabPalette.mutedText,
+              ),
+            ),
+            if (!enabled)
+              Text(
+                l10n.transactionRulesDisabled,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: YnabPalette.negative,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+          ],
+        ),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Switch.adaptive(
+              value: enabled,
+              onChanged: onToggle,
+              activeTrackColor: YnabPalette.accentBlue,
+            ),
+            IconButton(
+              icon: const Icon(Icons.delete_outline),
+              color: YnabPalette.negative,
+              onPressed: onDelete,
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 

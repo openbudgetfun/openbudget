@@ -371,7 +371,94 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Disabled'), findsOneWidget);
+      expect(find.text('Disabled'), findsWidgets);
+    });
+
+    testWidgets('renders summary card and filter chips', (tester) async {
+      final payee = _makePayee(name: 'Amazon');
+      final rules = [
+        _makeRule(
+          id: UuidValue.fromString('00000000-0000-0000-0000-000000000101'),
+          payeeId: payee.id,
+        ),
+        _makeRule(
+          id: UuidValue.fromString('00000000-0000-0000-0000-000000000102'),
+          payeeId: payee.id,
+          enabled: false,
+        ),
+      ];
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            ruleListProvider.overrideWith((ref, budgetId) async => rules),
+            payeeListProvider.overrideWith((ref, budgetId) async => [payee]),
+            budgetSummaryProvider.overrideWith(
+              (ref, budgetId) async => _makeEmptySummary(),
+            ),
+          ],
+          child: MaterialApp(
+            theme: OpenBudgetTheme.light,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: const RuleListScreen(budgetId: _budgetId),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Enabled'), findsWidgets);
+      expect(find.text('Disabled'), findsWidgets);
+      expect(find.widgetWithText(ChoiceChip, 'All'), findsOneWidget);
+    });
+
+    testWidgets('filters by disabled rules chip', (tester) async {
+      final payeeEnabled = _makePayee(
+        name: 'Enabled Payee',
+        id: UuidValue.fromString('00000000-0000-0000-0000-000000000111'),
+      );
+      final payeeDisabled = _makePayee(
+        name: 'Disabled Payee',
+        id: UuidValue.fromString('00000000-0000-0000-0000-000000000112'),
+      );
+      final rules = [
+        _makeRule(
+          id: UuidValue.fromString('00000000-0000-0000-0000-000000000121'),
+          payeeId: payeeEnabled.id,
+        ),
+        _makeRule(
+          id: UuidValue.fromString('00000000-0000-0000-0000-000000000122'),
+          payeeId: payeeDisabled.id,
+          enabled: false,
+        ),
+      ];
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            ruleListProvider.overrideWith((ref, budgetId) async => rules),
+            payeeListProvider.overrideWith(
+              (ref, budgetId) async => [payeeEnabled, payeeDisabled],
+            ),
+            budgetSummaryProvider.overrideWith(
+              (ref, budgetId) async => _makeEmptySummary(),
+            ),
+          ],
+          child: MaterialApp(
+            theme: OpenBudgetTheme.light,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: const RuleListScreen(budgetId: _budgetId),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.widgetWithText(ChoiceChip, 'Disabled'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Disabled Payee'), findsOneWidget);
+      expect(find.text('Enabled Payee'), findsNothing);
     });
   });
 }

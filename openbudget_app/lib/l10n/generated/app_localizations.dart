@@ -1948,6 +1948,12 @@ abstract class AppLocalizations {
   /// **'{count, plural, =1{1 transaction posted} other{{count} transactions posted}}'**
   String recurringPostSuccess(int count);
 
+  /// No description provided for @recurringTotalCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 recurring transaction} other{{count} recurring transactions}}'**
+  String recurringTotalCount(int count);
+
   /// No description provided for @recurringPosting.
   ///
   /// In en, this message translates to:
@@ -2968,11 +2974,23 @@ abstract class AppLocalizations {
   /// **'Could not update rule. Please try again.'**
   String get transactionRulesToggleError;
 
+  /// No description provided for @transactionRulesEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Enabled'**
+  String get transactionRulesEnabled;
+
   /// No description provided for @transactionRulesDisabled.
   ///
   /// In en, this message translates to:
   /// **'Disabled'**
   String get transactionRulesDisabled;
+
+  /// No description provided for @transactionRulesTotalCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 total} other{{count} total}}'**
+  String transactionRulesTotalCount(int count);
 
   /// No description provided for @transactionRulesAutoAssigned.
   ///

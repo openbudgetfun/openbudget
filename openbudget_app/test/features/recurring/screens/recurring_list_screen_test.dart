@@ -29,6 +29,7 @@ Budget _makeBudget() => Budget(
 RecurringTransaction _makeRecurring({
   String description = 'Netflix Subscription',
   int amountCents = -1499,
+  String currencyCode = 'USD',
   String frequency = 'monthly',
   DateTime? nextOccurrence,
   bool isActive = true,
@@ -38,7 +39,7 @@ RecurringTransaction _makeRecurring({
     id: id,
     description: description,
     amountCents: amountCents,
-    currencyCode: 'USD',
+    currencyCode: currencyCode,
     budgetId: _budgetUuid,
     frequency: frequency,
     nextOccurrence: nextOccurrence ?? DateTime(2099, 12, 31),
@@ -324,6 +325,121 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(Switch), findsWidgets);
+    });
+
+    testWidgets('renders summary card and filter chips', (tester) async {
+      final items = [
+        _makeRecurring(
+          description: 'Rent',
+          amountCents: -150000,
+          nextOccurrence: DateTime(2020),
+          id: UuidValue.fromString('00000000-0000-0000-0000-000000000061'),
+        ),
+        _makeRecurring(
+          description: 'Salary',
+          amountCents: 500000,
+          nextOccurrence: DateTime(2099),
+          id: UuidValue.fromString('00000000-0000-0000-0000-000000000062'),
+        ),
+      ];
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            budgetDetailProvider.overrideWith((ref, id) async => _makeBudget()),
+            recurringListProvider.overrideWith((ref, budgetId) async => items),
+          ],
+          child: MaterialApp(
+            theme: OpenBudgetTheme.light,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: const RecurringListScreen(budgetId: _budgetId),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Expense'), findsWidgets);
+      expect(find.text('Income'), findsWidgets);
+      expect(find.byType(ChoiceChip), findsWidgets);
+    });
+
+    testWidgets('shows multi-currency totals in summary card', (tester) async {
+      final items = [
+        _makeRecurring(
+          description: 'Rent',
+          amountCents: -280000,
+          id: UuidValue.fromString('00000000-0000-0000-0000-000000000081'),
+        ),
+        _makeRecurring(
+          description: 'Insurance',
+          amountCents: -50000,
+          currencyCode: 'EUR',
+          id: UuidValue.fromString('00000000-0000-0000-0000-000000000082'),
+        ),
+        _makeRecurring(
+          description: 'Salary',
+          amountCents: 800000,
+          currencyCode: 'EUR',
+          id: UuidValue.fromString('00000000-0000-0000-0000-000000000083'),
+        ),
+      ];
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            budgetDetailProvider.overrideWith((ref, id) async => _makeBudget()),
+            recurringListProvider.overrideWith((ref, budgetId) async => items),
+          ],
+          child: MaterialApp(
+            theme: OpenBudgetTheme.light,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: const RecurringListScreen(budgetId: _budgetId),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('USD'), findsWidgets);
+      expect(find.textContaining('EUR'), findsWidgets);
+    });
+
+    testWidgets('filters recurring list by selected chip', (tester) async {
+      final items = [
+        _makeRecurring(
+          description: 'Rent',
+          amountCents: -150000,
+          id: UuidValue.fromString('00000000-0000-0000-0000-000000000071'),
+        ),
+        _makeRecurring(
+          description: 'Salary',
+          amountCents: 500000,
+          id: UuidValue.fromString('00000000-0000-0000-0000-000000000072'),
+        ),
+      ];
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            budgetDetailProvider.overrideWith((ref, id) async => _makeBudget()),
+            recurringListProvider.overrideWith((ref, budgetId) async => items),
+          ],
+          child: MaterialApp(
+            theme: OpenBudgetTheme.light,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: const RecurringListScreen(budgetId: _budgetId),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.widgetWithText(ChoiceChip, 'Income'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Salary'), findsOneWidget);
+      expect(find.text('Rent'), findsNothing);
     });
   });
 }

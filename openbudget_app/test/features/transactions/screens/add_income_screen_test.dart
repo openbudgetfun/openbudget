@@ -193,11 +193,11 @@ void main() {
       expect(find.byIcon(Icons.arrow_downward_rounded), findsOneWidget);
     });
 
-    testWidgets('shows back button', (tester) async {
+    testWidgets('shows cancel button', (tester) async {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
-      expect(find.byIcon(Icons.arrow_back), findsOneWidget);
+      expect(find.widgetWithText(TextButton, 'Cancel'), findsOneWidget);
     });
 
     testWidgets('renders payee dropdown items when payees available', (
