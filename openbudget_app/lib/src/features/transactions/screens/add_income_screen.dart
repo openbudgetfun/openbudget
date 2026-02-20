@@ -137,6 +137,10 @@ class AddIncomeScreen extends HookConsumerWidget {
                                 icon: Icons.arrow_upward_rounded,
                                 selected: false,
                                 color: YnabPalette.mutedText,
+                                onTap: () => context.goNamed(
+                                  addExpenseRoute,
+                                  pathParameters: {'id': budgetId},
+                                ),
                               ),
                             ),
                             Expanded(
@@ -404,38 +408,47 @@ class _ModeChip extends HookWidget {
     required this.icon,
     required this.selected,
     required this.color,
+    this.onTap,
   });
 
   final String label;
   final IconData icon;
   final bool selected;
   final Color color;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Container(
-      decoration: BoxDecoration(
-        color: selected ? Colors.white : Colors.transparent,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
         borderRadius: BorderRadius.circular(RadiusTokens.sm),
-      ),
-      padding: const EdgeInsets.symmetric(vertical: SpacingTokens.sm),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 16, color: color),
-          const SizedBox(width: 4),
-          Flexible(
-            child: Text(
-              label,
-              style: theme.textTheme.labelMedium?.copyWith(
-                color: color,
-                fontWeight: FontWeight.w700,
-              ),
-              overflow: TextOverflow.ellipsis,
-            ),
+        onTap: onTap,
+        child: Container(
+          decoration: BoxDecoration(
+            color: selected ? Colors.white : Colors.transparent,
+            borderRadius: BorderRadius.circular(RadiusTokens.sm),
           ),
-        ],
+          padding: const EdgeInsets.symmetric(vertical: SpacingTokens.sm),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 16, color: color),
+              const SizedBox(width: 4),
+              Flexible(
+                child: Text(
+                  label,
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    color: color,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

@@ -165,6 +165,12 @@ void main() {
           builder: (context, state) =>
               AddExpenseScreen(budgetId: state.pathParameters['id']!),
         ),
+        GoRoute(
+          name: addIncomeRoute,
+          path: addIncomePath,
+          builder: (_, _) =>
+              const Scaffold(body: Center(child: Text('Add Income Route'))),
+        ),
       ],
     );
 
@@ -427,6 +433,18 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Plan Route'), findsOneWidget);
+    });
+
+    testWidgets('tapping Add Income mode navigates to add income route', (
+      tester,
+    ) async {
+      await tester.pumpWidget(buildRoutedSubject());
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Add Income').first);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Add Income Route'), findsOneWidget);
     });
   });
 }
