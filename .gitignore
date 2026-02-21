@@ -70,6 +70,7 @@ build/
 # Temp / dev logs
 .temp/
 .tmp/
+.screenshots/
 
 # Lock files — only keep pubspec.lock for the app package
 pubspec.lock
