@@ -15,6 +15,7 @@ in
     [
       dprint
       fvm
+      gitleaks
       libiconv
       nixfmt
       shfmt
@@ -34,6 +35,15 @@ in
   };
 
   dotenv.disableHint = true;
+
+  git-hooks.hooks.secrets = {
+    enable = true;
+    name = "secrets";
+    description = "Scan staged changes for leaked secrets with gitleaks.";
+    entry = "${pkgs.gitleaks}/bin/gitleaks git --staged --verbose --redact --config .gitleaks.toml";
+    pass_filenames = false;
+    stages = [ "pre-commit" ];
+  };
 
   # Rely on the global sdk for now as the nix apple sdk is not working for me.
   apple.sdk = null;
