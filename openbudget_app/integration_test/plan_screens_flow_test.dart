@@ -204,6 +204,10 @@ void main() {
 
     await tester.tap(find.text('Utilities'));
     await tester.pumpAndSettle();
+    await _captureScreenshot(binding, 'plan-inline-editor-screen');
+    await tester.pump(const Duration(seconds: 1));
+    await tester.tap(find.text('Details'));
+    await tester.pumpAndSettle();
     await _captureScreenshot(binding, 'category-detail-screen');
     await tester.pump(const Duration(seconds: 1));
     expect(find.text('Balance'), findsOneWidget);

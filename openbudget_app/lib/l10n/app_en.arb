@@ -322,6 +322,7 @@
   "budgetAddCategory": "Add Category",
   "budgetAddEnvelope": "Add Envelope",
   "budgetCollapseExpand": "Collapse/Expand",
+  "budgetInlineEditorDetails": "Details",
   "budgetAddExpense": "Add Expense",
   "budgetAddIncome": "Add Income",
   "budgetSpotlightAddPriorities": "Add Priorities",

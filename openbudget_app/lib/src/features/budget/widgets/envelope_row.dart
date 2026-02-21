@@ -22,6 +22,7 @@ class EnvelopeRow extends HookConsumerWidget {
     this.goal,
     this.hideAmounts = false,
     this.hideProgressBars = false,
+    this.isSelected = false,
     super.key,
   });
 
@@ -34,6 +35,7 @@ class EnvelopeRow extends HookConsumerWidget {
   final EnvelopeGoal? goal;
   final bool hideAmounts;
   final bool hideProgressBars;
+  final bool isSelected;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -54,170 +56,178 @@ class EnvelopeRow extends HookConsumerWidget {
         available != 0;
     final theme = Theme.of(context);
 
-    return InkWell(
-      onTap: onTap,
-      onLongPress: onLongPress,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: SpacingTokens.md,
-          vertical: SpacingTokens.sm,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              children: [
-                if (onQuickBudget != null)
-                  GestureDetector(
-                    onTap: onQuickBudget,
-                    child: const Padding(
-                      padding: EdgeInsets.only(right: SpacingTokens.xs),
-                      child: Icon(
-                        Icons.bolt_rounded,
-                        size: 16,
-                        color: OpenBudgetPalette.accentBlue,
+    return Material(
+      color: isSelected
+          ? OpenBudgetPalette.accentPurple.withAlpha(85)
+          : Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        onLongPress: onLongPress,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: SpacingTokens.md,
+            vertical: SpacingTokens.sm,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                children: [
+                  if (onQuickBudget != null)
+                    GestureDetector(
+                      onTap: onQuickBudget,
+                      child: const Padding(
+                        padding: EdgeInsets.only(right: SpacingTokens.xs),
+                        child: Icon(
+                          Icons.bolt_rounded,
+                          size: 16,
+                          color: OpenBudgetPalette.accentBlue,
+                        ),
                       ),
-                    ),
-                  )
-                else
-                  const SizedBox(width: SpacingTokens.xs),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Row(
-                        children: [
-                          Flexible(
-                            child: Text(
-                              envelope.name,
-                              style: theme.textTheme.bodyLarge?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          if (carryover != 0)
-                            Tooltip(
-                              message: l10n.envelopeCarryover(
-                                hideAmounts
-                                    ? hiddenAmountPlaceholder
-                                    : formatCents(carryover, currencyCode),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.only(
-                                  left: SpacingTokens.xs,
-                                ),
-                                child: Icon(
-                                  carryover > 0
-                                      ? Icons.arrow_forward_rounded
-                                      : Icons.arrow_back_rounded,
-                                  size: 12,
-                                  color: carryover > 0
-                                      ? OpenBudgetPalette.progressGreen
-                                      : OpenBudgetPalette.negative,
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                      if (envelope.note != null && envelope.note!.isNotEmpty)
+                    )
+                  else
+                    const SizedBox(width: SpacingTokens.xs),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
                         Row(
                           children: [
-                            const Icon(
-                              Icons.sticky_note_2_outlined,
-                              size: 10,
-                              color: OpenBudgetPalette.mutedText,
-                            ),
-                            const SizedBox(width: 2),
                             Flexible(
                               child: Text(
-                                envelope.note!,
-                                style: theme.textTheme.labelSmall?.copyWith(
-                                  color: OpenBudgetPalette.mutedText,
-                                  fontStyle: FontStyle.italic,
+                                envelope.name,
+                                style: theme.textTheme.bodyLarge?.copyWith(
+                                  fontWeight: FontWeight.w600,
                                 ),
-                                maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
+                            if (carryover != 0)
+                              Tooltip(
+                                message: l10n.envelopeCarryover(
+                                  hideAmounts
+                                      ? hiddenAmountPlaceholder
+                                      : formatCents(carryover, currencyCode),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.only(
+                                    left: SpacingTokens.xs,
+                                  ),
+                                  child: Icon(
+                                    carryover > 0
+                                        ? Icons.arrow_forward_rounded
+                                        : Icons.arrow_back_rounded,
+                                    size: 12,
+                                    color: carryover > 0
+                                        ? OpenBudgetPalette.progressGreen
+                                        : OpenBudgetPalette.negative,
+                                  ),
+                                ),
+                              ),
                           ],
                         ),
-                    ],
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: SpacingTokens.sm + 2,
-                    vertical: SpacingTokens.xs,
-                  ),
-                  decoration: BoxDecoration(
-                    color: availableColor.withAlpha(18),
-                    borderRadius: BorderRadius.circular(999),
-                    border: shouldDifferentiateWithoutColor
-                        ? Border.all(
-                            color: availableColor.withAlpha(160),
-                            width: 1.5,
-                          )
-                        : null,
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (shouldDifferentiateWithoutColor) ...[
-                        Icon(
-                          available < 0
-                              ? Icons.remove_rounded
-                              : Icons.add_rounded,
-                          size: 12,
-                          color: availableColor,
-                        ),
-                        const SizedBox(width: 2),
+                        if (envelope.note != null && envelope.note!.isNotEmpty)
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.sticky_note_2_outlined,
+                                size: 10,
+                                color: OpenBudgetPalette.mutedText,
+                              ),
+                              const SizedBox(width: 2),
+                              Flexible(
+                                child: Text(
+                                  envelope.note!,
+                                  style: theme.textTheme.labelSmall?.copyWith(
+                                    color: OpenBudgetPalette.mutedText,
+                                    fontStyle: FontStyle.italic,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
                       ],
-                      Text(
-                        hideAmounts
-                            ? hiddenAmountPlaceholder
-                            : formatCents(available, currencyCode),
-                        maxLines: 1,
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          color: availableColor,
-                          fontWeight: FontWeight.w700,
-                          decoration:
-                              shouldDifferentiateWithoutColor && available < 0
-                              ? TextDecoration.underline
-                              : null,
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: SpacingTokens.sm + 2,
+                      vertical: SpacingTokens.xs,
+                    ),
+                    decoration: BoxDecoration(
+                      color: availableColor.withAlpha(18),
+                      borderRadius: BorderRadius.circular(999),
+                      border: shouldDifferentiateWithoutColor
+                          ? Border.all(
+                              color: availableColor.withAlpha(160),
+                              width: 1.5,
+                            )
+                          : null,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (shouldDifferentiateWithoutColor) ...[
+                          Icon(
+                            available < 0
+                                ? Icons.remove_rounded
+                                : Icons.add_rounded,
+                            size: 12,
+                            color: availableColor,
+                          ),
+                          const SizedBox(width: 2),
+                        ],
+                        Text(
+                          hideAmounts
+                              ? hiddenAmountPlaceholder
+                              : formatCents(available, currencyCode),
+                          maxLines: 1,
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            color: availableColor,
+                            fontWeight: FontWeight.w700,
+                            decoration:
+                                shouldDifferentiateWithoutColor && available < 0
+                                ? TextDecoration.underline
+                                : null,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: SpacingTokens.xs),
+              if (goal != null && !hideProgressBars)
+                _GoalProgressBar(
+                  goal: goal!,
+                  budgetedCents: budgeted,
+                  availableCents: available,
+                  currencyCode: currencyCode,
+                  hideAmounts: hideAmounts,
+                )
+              else if (budgeted > 0 && !hideProgressBars)
+                _SpendingProgressBar(
+                  budgetedCents: budgeted,
+                  spentCents: spent,
+                ),
+              if (goal == null && budgeted > 0) ...[
+                const SizedBox(height: 3),
+                Text(
+                  available < 0 ? 'Overspent' : 'Funded',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: available < 0
+                        ? OpenBudgetPalette.negative
+                        : OpenBudgetPalette.mutedText,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ],
-            ),
-            const SizedBox(height: SpacingTokens.xs),
-            if (goal != null && !hideProgressBars)
-              _GoalProgressBar(
-                goal: goal!,
-                budgetedCents: budgeted,
-                availableCents: available,
-                currencyCode: currencyCode,
-                hideAmounts: hideAmounts,
-              )
-            else if (budgeted > 0 && !hideProgressBars)
-              _SpendingProgressBar(budgetedCents: budgeted, spentCents: spent),
-            if (goal == null && budgeted > 0) ...[
-              const SizedBox(height: 3),
-              Text(
-                available < 0 ? 'Overspent' : 'Funded',
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: available < 0
-                      ? OpenBudgetPalette.negative
-                      : OpenBudgetPalette.mutedText,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
             ],
-          ],
+          ),
         ),
       ),
     );

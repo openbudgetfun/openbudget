@@ -29,6 +29,7 @@ class CategoryGroup extends HookConsumerWidget {
     this.showHidden = false,
     this.collapsed = false,
     this.goalsMap = const {},
+    this.selectedEnvelopeId,
     super.key,
   });
 
@@ -50,6 +51,7 @@ class CategoryGroup extends HookConsumerWidget {
   final bool showHidden;
   final bool collapsed;
   final Map<String, EnvelopeGoal> goalsMap;
+  final String? selectedEnvelopeId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -244,6 +246,7 @@ class CategoryGroup extends HookConsumerWidget {
                 child: EnvelopeRow(
                   envelope: envelope,
                   currencyCode: currencyCode,
+                  isSelected: selectedEnvelopeId == envelopeId,
                   monthlyData: monthlyData,
                   goal: envelopeGoal,
                   hideAmounts: hideAmounts,

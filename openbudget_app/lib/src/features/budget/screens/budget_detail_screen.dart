@@ -17,6 +17,7 @@ import 'package:openbudget_app/src/features/budget/screens/auto_assign_dialog.da
 import 'package:openbudget_app/src/features/budget/screens/budget_template_dialog.dart';
 import 'package:openbudget_app/src/features/budget/screens/edit_category_dialog.dart';
 import 'package:openbudget_app/src/features/budget/screens/edit_envelope_dialog.dart';
+import 'package:openbudget_app/src/features/budget/screens/move_money_dialog.dart';
 import 'package:openbudget_app/src/features/budget/screens/quick_budget_dialog.dart';
 import 'package:openbudget_app/src/features/budget/widgets/budget_header.dart';
 import 'package:openbudget_app/src/features/budget/widgets/category_group.dart';
@@ -62,6 +63,8 @@ class BudgetDetailScreen extends HookConsumerWidget {
     final isSearching = useState(false);
     final showSpotlight = useState(false);
     final onboardingComplete = useState(false);
+    final selectedEditor = useState<_InlineEditorSelection?>(null);
+    final editorInput = useState('');
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final hideAmounts = ref.watch(hideAmountsProvider);
@@ -287,6 +290,8 @@ class BudgetDetailScreen extends HookConsumerWidget {
                   tooltip: l10n.budgetSearchHint,
                   onPressed: () {
                     isSearching.value = !isSearching.value;
+                    selectedEditor.value = null;
+                    editorInput.value = '';
                     if (!isSearching.value) {
                       searchController.clear();
                       searchQuery.value = '';
@@ -326,6 +331,106 @@ class BudgetDetailScreen extends HookConsumerWidget {
               ],
             ],
           ),
+          bottomNavigationBar:
+              !showSpotlight.value && selectedEditor.value != null
+              ? _InlineAmountEditor(
+                  inputValue: editorInput.value,
+                  amountLabel: hideAmounts
+                      ? hiddenAmountPlaceholder
+                      : formatCents(
+                          _parseEditorCents(editorInput.value) ??
+                              (selectedEditor
+                                      .value!
+                                      .monthlyData
+                                      ?.allocatedCents ??
+                                  selectedEditor
+                                      .value!
+                                      .envelope
+                                      .budgetedAmountCents),
+                          currencyCode,
+                        ),
+                  onAutoAssign: () => _showQuickBudgetDialog(
+                    context,
+                    selectedEditor.value!.envelope,
+                    currencyCode,
+                    year: summary.year,
+                    month: summary.month,
+                  ),
+                  onMoveMoney: () => showDialog<void>(
+                    context: context,
+                    builder: (_) => MoveMoneyDialog(
+                      budgetId: budgetId,
+                      year: summary.year,
+                      month: summary.month,
+                      categories: summary.categories,
+                    ),
+                  ),
+                  onDetails: () {
+                    final envelopeId =
+                        selectedEditor.value!.envelope.id?.toString() ?? '';
+                    final categoryId = selectedEditor.value!.categoryId;
+                    if (envelopeId.isEmpty || categoryId.isEmpty) return;
+                    selectedEditor.value = null;
+                    editorInput.value = '';
+                    context.pushNamed(
+                      categoryDetailRoute,
+                      pathParameters: {
+                        'id': budgetId,
+                        'categoryId': categoryId,
+                        'envelopeId': envelopeId,
+                      },
+                    );
+                  },
+                  onDigit: (digit) {
+                    if (editorInput.value.length >= 9) return;
+                    editorInput.value = '${editorInput.value}$digit';
+                  },
+                  onBackspace: () {
+                    if (editorInput.value.isEmpty) return;
+                    editorInput.value = editorInput.value.substring(
+                      0,
+                      editorInput.value.length - 1,
+                    );
+                  },
+                  onNegative: () {
+                    if (editorInput.value.isEmpty) return;
+                    editorInput.value = editorInput.value.startsWith('-')
+                        ? editorInput.value.substring(1)
+                        : '-${editorInput.value}';
+                  },
+                  onPositive: () {
+                    if (editorInput.value.startsWith('-')) {
+                      editorInput.value = editorInput.value.substring(1);
+                    }
+                  },
+                  onCancel: () {
+                    selectedEditor.value = null;
+                    editorInput.value = '';
+                  },
+                  onApply: () => _applyInlineAllocation(
+                    context: context,
+                    ref: ref,
+                    selection: selectedEditor.value!,
+                    year: summary.year,
+                    month: summary.month,
+                    input: editorInput.value,
+                    closeEditor: false,
+                  ),
+                  onDone: () => _applyInlineAllocation(
+                    context: context,
+                    ref: ref,
+                    selection: selectedEditor.value!,
+                    year: summary.year,
+                    month: summary.month,
+                    input: editorInput.value,
+                    closeEditor: true,
+                    onCloseEditor: () {
+                      selectedEditor.value = null;
+                      editorInput.value = '';
+                    },
+                  ),
+                )
+              : null,
           body: RefreshIndicator(
             onRefresh: () async {
               final selectedMonth = ref.read(selectedMonthProvider(budgetId));
@@ -357,7 +462,13 @@ class BudgetDetailScreen extends HookConsumerWidget {
               children: [
                 _BudgetViewToggle(
                   showSpotlight: showSpotlight.value,
-                  onChanged: (value) => showSpotlight.value = value,
+                  onChanged: (value) {
+                    showSpotlight.value = value;
+                    if (value) {
+                      selectedEditor.value = null;
+                      editorInput.value = '';
+                    }
+                  },
                 ),
                 const SizedBox(height: SpacingTokens.sm),
                 if (showBudgetHeader)
@@ -577,14 +688,18 @@ class BudgetDetailScreen extends HookConsumerWidget {
                           if (categoryId.isEmpty || envelopeId.isEmpty) {
                             return;
                           }
-                          context.pushNamed(
-                            categoryDetailRoute,
-                            pathParameters: {
-                              'id': budgetId,
-                              'categoryId': categoryId,
-                              'envelopeId': envelopeId,
-                            },
+                          if (selectedEditor.value?.envelope.id?.toString() ==
+                              envelopeId) {
+                            selectedEditor.value = null;
+                            editorInput.value = '';
+                            return;
+                          }
+                          selectedEditor.value = _InlineEditorSelection(
+                            categoryId: categoryId,
+                            envelope: envelope,
+                            monthlyData: monthlyData,
                           );
+                          editorInput.value = '';
                         })(),
                         onReorderEnvelopes: (envelopeIds) async {
                           try {
@@ -603,6 +718,8 @@ class BudgetDetailScreen extends HookConsumerWidget {
                           }
                         },
                         showHidden: showHidden.value,
+                        selectedEnvelopeId: selectedEditor.value?.envelope.id
+                            ?.toString(),
                         onToggleHideCategory: ({required isHidden}) async {
                           try {
                             await ref
@@ -746,6 +863,68 @@ class BudgetDetailScreen extends HookConsumerWidget {
     }
 
     return filtered;
+  }
+
+  int? _parseEditorCents(String value) {
+    if (value.isEmpty || value == '-') return null;
+    final isNegative = value.startsWith('-');
+    final digits = value.replaceAll('-', '');
+    final dollars = int.tryParse(digits);
+    if (dollars == null) return null;
+    final cents = dollars * 100;
+    return isNegative ? -cents : cents;
+  }
+
+  Future<void> _applyInlineAllocation({
+    required BuildContext context,
+    required WidgetRef ref,
+    required _InlineEditorSelection selection,
+    required int year,
+    required int month,
+    required String input,
+    required bool closeEditor,
+    VoidCallback? onCloseEditor,
+  }) async {
+    final allocatedCents = _parseEditorCents(input);
+    if (allocatedCents == null) {
+      if (closeEditor) onCloseEditor?.call();
+      return;
+    }
+
+    final envelopeId = selection.envelope.id?.toString() ?? '';
+    if (envelopeId.isEmpty) {
+      if (closeEditor) onCloseEditor?.call();
+      return;
+    }
+
+    final l10n = AppLocalizations.of(context);
+    try {
+      await ref
+          .read(monthlyAllocationActionsProvider.notifier)
+          .upsertAllocation(
+            envelopeId: envelopeId,
+            budgetId: budgetId,
+            year: year,
+            month: month,
+            allocatedCents: allocatedCents,
+          );
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.budgetAllocationUpdated)));
+      }
+    } on Exception catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.budgetAllocationError),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    } finally {
+      if (closeEditor) onCloseEditor?.call();
+    }
   }
 
   _PlanOnboardingType? _resolveOnboardingType({
@@ -1619,6 +1798,192 @@ class _SpotlightPriorityIcon extends HookWidget {
           border: Border.all(color: OpenBudgetPalette.divider),
         ),
         child: Icon(icon, color: OpenBudgetPalette.accentBlue),
+      ),
+    );
+  }
+}
+
+class _InlineEditorSelection {
+  const _InlineEditorSelection({
+    required this.categoryId,
+    required this.envelope,
+    this.monthlyData,
+  });
+
+  final String categoryId;
+  final Envelope envelope;
+  final MonthlyEnvelopeData? monthlyData;
+}
+
+class _InlineAmountEditor extends HookWidget {
+  const _InlineAmountEditor({
+    required this.inputValue,
+    required this.amountLabel,
+    required this.onAutoAssign,
+    required this.onMoveMoney,
+    required this.onDetails,
+    required this.onDigit,
+    required this.onBackspace,
+    required this.onNegative,
+    required this.onPositive,
+    required this.onApply,
+    required this.onCancel,
+    required this.onDone,
+  });
+
+  final String inputValue;
+  final String amountLabel;
+  final VoidCallback onAutoAssign;
+  final VoidCallback onMoveMoney;
+  final VoidCallback onDetails;
+  final ValueChanged<String> onDigit;
+  final VoidCallback onBackspace;
+  final VoidCallback onNegative;
+  final VoidCallback onPositive;
+  final VoidCallback onApply;
+  final VoidCallback onCancel;
+  final VoidCallback onDone;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final canApply = inputValue.isNotEmpty && inputValue != '-';
+
+    Widget key(
+      String label, {
+      VoidCallback? onPressed,
+      bool primary = false,
+      bool accent = false,
+      Widget? child,
+    }) {
+      return Expanded(
+        child: Padding(
+          padding: const EdgeInsets.all(SpacingTokens.xs),
+          child: FilledButton(
+            onPressed: onPressed,
+            style: FilledButton.styleFrom(
+              backgroundColor: primary
+                  ? OpenBudgetPalette.accentBlue
+                  : OpenBudgetPalette.surface,
+              foregroundColor: primary
+                  ? Colors.white
+                  : accent
+                  ? OpenBudgetPalette.accentBlue
+                  : Colors.black87,
+              side: primary
+                  ? BorderSide.none
+                  : const BorderSide(color: OpenBudgetPalette.divider),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(RadiusTokens.sm),
+              ),
+              minimumSize: const Size.fromHeight(48),
+              elevation: 0,
+            ),
+            child: child ?? Text(label),
+          ),
+        ),
+      );
+    }
+
+    return DecoratedBox(
+      decoration: const BoxDecoration(
+        color: OpenBudgetPalette.surfaceMuted,
+        border: Border(top: BorderSide(color: OpenBudgetPalette.divider)),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            SpacingTokens.sm,
+            SpacingTokens.xs,
+            SpacingTokens.sm,
+            SpacingTokens.sm,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: SpacingTokens.xs),
+                child: Text(
+                  amountLabel,
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: OpenBudgetPalette.accentBlue,
+                  ),
+                ),
+              ),
+              Row(
+                children: [
+                  key(
+                    l10n.autoAssignButton,
+                    onPressed: onAutoAssign,
+                    child: Text(
+                      l10n.autoAssignButton,
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  key(
+                    l10n.envelopeActionMoveMoney,
+                    onPressed: onMoveMoney,
+                    child: Text(
+                      l10n.envelopeActionMoveMoney,
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  key(
+                    l10n.budgetInlineEditorDetails,
+                    onPressed: onDetails,
+                    child: Text(
+                      l10n.budgetInlineEditorDetails,
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  key('7', onPressed: () => onDigit('7'), accent: true),
+                  key('8', onPressed: () => onDigit('8'), accent: true),
+                  key('9', onPressed: () => onDigit('9'), accent: true),
+                  key('-', onPressed: onNegative, accent: true),
+                ],
+              ),
+              Row(
+                children: [
+                  key('4', onPressed: () => onDigit('4'), accent: true),
+                  key('5', onPressed: () => onDigit('5'), accent: true),
+                  key('6', onPressed: () => onDigit('6'), accent: true),
+                  key('+', onPressed: onPositive, accent: true),
+                ],
+              ),
+              Row(
+                children: [
+                  key('1', onPressed: () => onDigit('1'), accent: true),
+                  key('2', onPressed: () => onDigit('2'), accent: true),
+                  key('3', onPressed: () => onDigit('3'), accent: true),
+                  key('=', onPressed: canApply ? onApply : null, accent: true),
+                ],
+              ),
+              Row(
+                children: [
+                  key(
+                    'x',
+                    onPressed: onCancel,
+                    child: const Icon(Icons.close_rounded),
+                  ),
+                  key('0', onPressed: () => onDigit('0'), accent: true),
+                  key(
+                    '',
+                    onPressed: onBackspace,
+                    child: const Icon(Icons.backspace_outlined),
+                  ),
+                  key(l10n.dialogDone, onPressed: onDone, primary: true),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

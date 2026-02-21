@@ -331,6 +331,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get budgetCollapseExpand => 'Collapse/Expand';
 
   @override
+  String get budgetInlineEditorDetails => 'Details';
+
+  @override
   String get budgetAddExpense => 'Add Expense';
 
   @override

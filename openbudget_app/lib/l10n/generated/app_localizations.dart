@@ -580,6 +580,12 @@ abstract class AppLocalizations {
   /// **'Collapse/Expand'**
   String get budgetCollapseExpand;
 
+  /// No description provided for @budgetInlineEditorDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get budgetInlineEditorDetails;
+
   /// No description provided for @budgetAddExpense.
   ///
   /// In en, this message translates to:
