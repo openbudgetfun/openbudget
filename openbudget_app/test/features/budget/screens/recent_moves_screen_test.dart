@@ -135,8 +135,9 @@ void main() {
             amountCents: 3000,
           );
       await tester.pumpAndSettle();
+      await _dismissCoachmarkIfVisible(tester);
 
-      expect(find.text('Recent Moves'), findsOneWidget);
+      expect(find.text('Recent Moves'), findsWidgets);
       expect(find.text('All'), findsOneWidget);
       expect(find.text('Moved'), findsOneWidget);
       expect(find.text('Assigned'), findsOneWidget);
@@ -195,10 +196,18 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
+      await _dismissCoachmarkIfVisible(tester);
 
       expect(find.text('Moves'), findsOneWidget);
       expect(find.textContaining('Groceries'), findsWidgets);
       expect(find.textContaining('to'), findsWidgets);
     });
   });
+}
+
+Future<void> _dismissCoachmarkIfVisible(WidgetTester tester) async {
+  final gotIt = find.text('Got It!');
+  if (gotIt.evaluate().isEmpty) return;
+  await tester.tap(gotIt);
+  await tester.pumpAndSettle();
 }

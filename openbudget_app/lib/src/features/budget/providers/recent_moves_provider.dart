@@ -85,3 +85,25 @@ final recentMovesForBudgetProvider =
       final allEvents = ref.watch(recentMovesProvider);
       return allEvents[budgetId] ?? const <RecentMoveEvent>[];
     });
+
+class RecentMovesIntroNotifier extends Notifier<Set<String>> {
+  @override
+  Set<String> build() => {};
+
+  void markSeen(String budgetId) {
+    state = {...state, budgetId};
+  }
+}
+
+final recentMovesIntroSeenSetProvider =
+    NotifierProvider<RecentMovesIntroNotifier, Set<String>>(
+      RecentMovesIntroNotifier.new,
+    );
+
+final recentMovesIntroSeenProvider = Provider.family<bool, String>((
+  ref,
+  budgetId,
+) {
+  final seen = ref.watch(recentMovesIntroSeenSetProvider);
+  return seen.contains(budgetId);
+});

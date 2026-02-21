@@ -80,7 +80,7 @@ BudgetSummary _makeSummary() {
 }
 
 void main() {
-  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets('opens recent moves and category detail from plan', (
     tester,
@@ -153,9 +153,21 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+    await binding.takeScreenshot('plan-screen');
 
-    await tester.tap(find.byIcon(Icons.history_rounded));
+    await tester.tap(find.byIcon(Icons.more_horiz_rounded));
     await tester.pumpAndSettle();
+    expect(find.text('Hide Amounts'), findsOneWidget);
+    await binding.takeScreenshot('plan-menu');
+
+    await tester.tap(find.text('Recent Moves'));
+    await tester.pumpAndSettle();
+    final gotIt = find.text('Got It!');
+    if (gotIt.evaluate().isNotEmpty) {
+      await tester.tap(gotIt);
+      await tester.pumpAndSettle();
+    }
+    await binding.takeScreenshot('recent-moves-screen');
     expect(find.text('Recent Moves'), findsOneWidget);
 
     await tester.tap(find.text('Done'));
@@ -163,6 +175,7 @@ void main() {
 
     await tester.tap(find.text('Utilities'));
     await tester.pumpAndSettle();
+    await binding.takeScreenshot('category-detail-screen');
     expect(find.text('Balance'), findsOneWidget);
     expect(find.text('Rename Envelope'), findsOneWidget);
   });

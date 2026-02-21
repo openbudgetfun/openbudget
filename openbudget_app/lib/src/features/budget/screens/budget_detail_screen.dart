@@ -29,6 +29,8 @@ import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
+enum _PlanMenuAction { recentMoves, hideProgressBars, hideAmounts, settings }
+
 class BudgetDetailScreen extends HookConsumerWidget {
   const BudgetDetailScreen({required this.budgetId, super.key});
 
@@ -52,6 +54,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final hideAmounts = ref.watch(hideAmountsProvider);
+    final hideProgressBars = ref.watch(hideProgressBarsProvider);
 
     // Auto-post due recurring transactions when the budget opens.
     useEffect(() {
@@ -155,9 +158,72 @@ class BudgetDetailScreen extends HookConsumerWidget {
             backgroundColor: OpenBudgetPalette.appBackground,
             surfaceTintColor: Colors.transparent,
             scrolledUnderElevation: 0,
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () => context.go(homePath),
+            leading: PopupMenuButton<_PlanMenuAction>(
+              icon: const Icon(Icons.more_horiz_rounded),
+              onSelected: (action) => switch (action) {
+                _PlanMenuAction.recentMoves => context.pushNamed(
+                  recentMovesRoute,
+                  pathParameters: {'id': budgetId},
+                ),
+                _PlanMenuAction.hideProgressBars =>
+                  ref
+                      .read(hideProgressBarsProvider.notifier)
+                      .setHideProgressBars(value: !hideProgressBars),
+                _PlanMenuAction.hideAmounts =>
+                  ref
+                      .read(hideAmountsProvider.notifier)
+                      .setHideAmounts(value: !hideAmounts),
+                _PlanMenuAction.settings => context.goNamed(
+                  settingsRoute,
+                  pathParameters: {'id': budgetId},
+                ),
+              },
+              itemBuilder: (context) => [
+                PopupMenuItem<_PlanMenuAction>(
+                  value: _PlanMenuAction.recentMoves,
+                  child: Row(
+                    children: [
+                      const Icon(Icons.history_rounded, size: 18),
+                      const SizedBox(width: SpacingTokens.sm),
+                      Text(l10n.recentMovesTitle),
+                    ],
+                  ),
+                ),
+                const PopupMenuDivider(),
+                CheckedPopupMenuItem<_PlanMenuAction>(
+                  value: _PlanMenuAction.hideProgressBars,
+                  checked: hideProgressBars,
+                  child: Row(
+                    children: [
+                      const Icon(Icons.linear_scale_rounded, size: 18),
+                      const SizedBox(width: SpacingTokens.sm),
+                      Text(l10n.settingsHideProgressBars),
+                    ],
+                  ),
+                ),
+                CheckedPopupMenuItem<_PlanMenuAction>(
+                  value: _PlanMenuAction.hideAmounts,
+                  checked: hideAmounts,
+                  child: Row(
+                    children: [
+                      const Icon(Icons.visibility_off_rounded, size: 18),
+                      const SizedBox(width: SpacingTokens.sm),
+                      Text(l10n.settingsHideAmounts),
+                    ],
+                  ),
+                ),
+                const PopupMenuDivider(),
+                PopupMenuItem<_PlanMenuAction>(
+                  value: _PlanMenuAction.settings,
+                  child: Row(
+                    children: [
+                      const Icon(Icons.settings_outlined, size: 18),
+                      const SizedBox(width: SpacingTokens.sm),
+                      Text(l10n.settingsTitle),
+                    ],
+                  ),
+                ),
+              ],
             ),
             title: Text(
               summary.budget.name,

@@ -1182,6 +1182,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recentMovesTitle => 'Recent Moves';
 
   @override
+  String get recentMovesCoachTitle => 'Recent Moves';
+
+  @override
+  String get recentMovesCoachBody =>
+      'OpenBudget keeps a 34-day history of assignments and money moves for each plan.';
+
+  @override
+  String get recentMovesCoachHint =>
+      'Tap any blue category chip to view move details for that category.';
+
+  @override
+  String get recentMovesCoachGotIt => 'Got It!';
+
+  @override
   String get recentMovesUnnamedEnvelope => 'Unnamed Envelope';
 
   @override

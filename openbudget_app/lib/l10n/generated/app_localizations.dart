@@ -2002,6 +2002,30 @@ abstract class AppLocalizations {
   /// **'Recent Moves'**
   String get recentMovesTitle;
 
+  /// No description provided for @recentMovesCoachTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Moves'**
+  String get recentMovesCoachTitle;
+
+  /// No description provided for @recentMovesCoachBody.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenBudget keeps a 34-day history of assignments and money moves for each plan.'**
+  String get recentMovesCoachBody;
+
+  /// No description provided for @recentMovesCoachHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap any blue category chip to view move details for that category.'**
+  String get recentMovesCoachHint;
+
+  /// No description provided for @recentMovesCoachGotIt.
+  ///
+  /// In en, this message translates to:
+  /// **'Got It!'**
+  String get recentMovesCoachGotIt;
+
   /// No description provided for @recentMovesUnnamedEnvelope.
   ///
   /// In en, this message translates to:

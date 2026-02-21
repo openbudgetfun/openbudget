@@ -26,7 +26,23 @@ class RecentMovesScreen extends HookConsumerWidget {
     final selectedTab = useState(_RecentMovesTab.all);
     final summaryAsync = ref.watch(budgetMonthlySummaryProvider(budgetId));
     final allEvents = ref.watch(recentMovesForBudgetProvider(budgetId));
+    final introSeen = ref.watch(recentMovesIntroSeenProvider(budgetId));
     final hideAmounts = ref.watch(hideAmountsProvider);
+
+    useEffect(() {
+      if (introSeen || allEvents.isEmpty) return null;
+
+      Future.microtask(() async {
+        if (!context.mounted) return;
+        ref.read(recentMovesIntroSeenSetProvider.notifier).markSeen(budgetId);
+        await showDialog<void>(
+          context: context,
+          builder: (_) => const _RecentMovesIntroDialog(),
+        );
+      });
+
+      return null;
+    }, [introSeen, allEvents.isEmpty]);
 
     return Scaffold(
       backgroundColor: OpenBudgetPalette.appBackground,
@@ -134,6 +150,78 @@ class RecentMovesScreen extends HookConsumerWidget {
       }
     }
     return map;
+  }
+}
+
+class _RecentMovesIntroDialog extends HookWidget {
+  const _RecentMovesIntroDialog();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(RadiusTokens.lg),
+      ),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 320),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: SpacingTokens.lg),
+              decoration: BoxDecoration(
+                color: OpenBudgetPalette.accentBlue.withAlpha(34),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(RadiusTokens.lg),
+                ),
+              ),
+              child: const Icon(
+                Icons.savings_rounded,
+                size: 48,
+                color: OpenBudgetPalette.accentBlue,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(SpacingTokens.md),
+              child: Column(
+                children: [
+                  Text(
+                    l10n.recentMovesCoachTitle,
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: SpacingTokens.sm),
+                  Text(
+                    l10n.recentMovesCoachBody,
+                    style: theme.textTheme.bodyMedium,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: SpacingTokens.sm),
+                  Text(
+                    l10n.recentMovesCoachHint,
+                    style: theme.textTheme.bodyMedium,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: SpacingTokens.md),
+                  FilledButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    style: FilledButton.styleFrom(
+                      minimumSize: const Size.fromHeight(44),
+                    ),
+                    child: Text(l10n.recentMovesCoachGotIt),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
@@ -477,18 +565,32 @@ class _RecentMovesList extends HookWidget {
     final yesterday = today.subtract(const Duration(days: 1));
 
     if (day == today) {
-      return '${l10n.transactionDateToday}\n${_formatDate(day)}';
+      return '${l10n.transactionDateToday}\n${_formatDate(l10n, day)}';
     }
     if (day == yesterday) {
-      return '${l10n.transactionDateYesterday}\n${_formatDate(day)}';
+      return '${l10n.transactionDateYesterday}\n${_formatDate(l10n, day)}';
     }
-    return _formatDate(day);
+    return _formatDate(l10n, day);
   }
 
-  String _formatDate(DateTime day) {
-    final month = day.month.toString().padLeft(2, '0');
-    final date = day.day.toString().padLeft(2, '0');
-    return '${day.year}-$month-$date';
+  String _formatDate(AppLocalizations l10n, DateTime day) {
+    final monthName = switch (day.month) {
+      1 => l10n.budgetMonthJanuary,
+      2 => l10n.budgetMonthFebruary,
+      3 => l10n.budgetMonthMarch,
+      4 => l10n.budgetMonthApril,
+      5 => l10n.budgetMonthMay,
+      6 => l10n.budgetMonthJune,
+      7 => l10n.budgetMonthJuly,
+      8 => l10n.budgetMonthAugust,
+      9 => l10n.budgetMonthSeptember,
+      10 => l10n.budgetMonthOctober,
+      11 => l10n.budgetMonthNovember,
+      12 => l10n.budgetMonthDecember,
+      _ => '',
+    };
+    final dayPart = day.day.toString().padLeft(2, '0');
+    return '$monthName $dayPart, ${day.year}';
   }
 }
 
