@@ -27,7 +27,7 @@ void main() {
       await tester.pumpWidget(buildSubject());
       await tester.pump();
 
-      expect(find.text('Welcome, new YNABer!'), findsOneWidget);
+      expect(find.text('Welcome, new OpenBudgeter!'), findsOneWidget);
       expect(find.text('Plan Currency'), findsOneWidget);
       expect(find.text('US Dollar'), findsOneWidget);
       expect(find.byType(TextField), findsNothing);

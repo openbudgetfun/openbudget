@@ -3,7 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
-import 'package:openbudget_app/src/theme/ynab_palette.dart';
+import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 class AddTransactionSheet extends HookWidget {
@@ -29,7 +29,7 @@ class AddTransactionSheet extends HookWidget {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: YnabPalette.divider,
+                color: OpenBudgetPalette.divider,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -44,7 +44,7 @@ class AddTransactionSheet extends HookWidget {
             _ActionTile(
               icon: Icons.arrow_downward_rounded,
               label: l10n.addTransactionIncome,
-              color: YnabPalette.progressGreen,
+              color: OpenBudgetPalette.progressGreen,
               onTap: () {
                 Navigator.of(context).pop();
                 context.goNamed(
@@ -57,7 +57,7 @@ class AddTransactionSheet extends HookWidget {
             _ActionTile(
               icon: Icons.arrow_upward_rounded,
               label: l10n.addTransactionExpense,
-              color: YnabPalette.negative,
+              color: OpenBudgetPalette.negative,
               onTap: () {
                 Navigator.of(context).pop();
                 context.goNamed(
@@ -70,7 +70,7 @@ class AddTransactionSheet extends HookWidget {
             _ActionTile(
               icon: Icons.swap_horiz_rounded,
               label: l10n.addTransactionTransfer,
-              color: YnabPalette.accentBlue,
+              color: OpenBudgetPalette.accentBlue,
               onTap: () {
                 Navigator.of(context).pop();
                 context.goNamed(
@@ -106,10 +106,10 @@ class _ActionTile extends HookWidget {
 
     return Card(
       margin: EdgeInsets.zero,
-      color: YnabPalette.surface,
+      color: OpenBudgetPalette.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(RadiusTokens.md),
-        side: const BorderSide(color: YnabPalette.divider),
+        side: const BorderSide(color: OpenBudgetPalette.divider),
       ),
       child: ListTile(
         onTap: onTap,
@@ -125,7 +125,7 @@ class _ActionTile extends HookWidget {
         ),
         trailing: const Icon(
           Icons.chevron_right_rounded,
-          color: YnabPalette.mutedText,
+          color: OpenBudgetPalette.mutedText,
         ),
       ),
     );

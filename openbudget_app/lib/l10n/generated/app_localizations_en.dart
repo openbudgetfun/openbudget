@@ -624,7 +624,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get createBudgetPlanCurrency => 'Plan Currency';
 
   @override
-  String get createBudgetWelcomeTitle => 'Welcome, new YNABer!';
+  String get createBudgetWelcomeTitle => 'Welcome, new OpenBudgeter!';
 
   @override
   String get createBudgetWelcomeSubtitle =>
@@ -1549,7 +1549,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsTermsOfService => 'Terms of Service';
 
   @override
-  String get settingsTogether => 'YNAB Together';
+  String get settingsTogether => 'OpenBudget Together';
 
   @override
   String get settingsTitle => 'Settings';

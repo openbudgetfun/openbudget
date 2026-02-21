@@ -11,7 +11,7 @@ import 'package:openbudget_app/src/features/transaction_rules/providers/rule_mat
 import 'package:openbudget_app/src/features/transactions/providers/duplicate_check_provider.dart';
 import 'package:openbudget_app/src/features/transactions/providers/transaction_actions_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
-import 'package:openbudget_app/src/theme/ynab_palette.dart';
+import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_core/openbudget_core.dart';
@@ -128,9 +128,9 @@ class AddExpenseScreen extends HookConsumerWidget {
         : formatCents(-amountCentsPreview, budgetCurrency);
 
     return Scaffold(
-      backgroundColor: YnabPalette.appBackground,
+      backgroundColor: OpenBudgetPalette.appBackground,
       appBar: AppBar(
-        backgroundColor: YnabPalette.appBackground,
+        backgroundColor: OpenBudgetPalette.appBackground,
         surfaceTintColor: Colors.transparent,
         scrolledUnderElevation: 0,
         leadingWidth: 88,
@@ -164,15 +164,15 @@ class AddExpenseScreen extends HookConsumerWidget {
                 Container(
                   padding: const EdgeInsets.all(SpacingTokens.md),
                   decoration: BoxDecoration(
-                    color: YnabPalette.surface,
+                    color: OpenBudgetPalette.surface,
                     borderRadius: BorderRadius.circular(RadiusTokens.md),
-                    border: Border.all(color: YnabPalette.divider),
+                    border: Border.all(color: OpenBudgetPalette.divider),
                   ),
                   child: Column(
                     children: [
                       Container(
                         decoration: BoxDecoration(
-                          color: YnabPalette.surfaceMuted,
+                          color: OpenBudgetPalette.surfaceMuted,
                           borderRadius: BorderRadius.circular(RadiusTokens.sm),
                         ),
                         padding: const EdgeInsets.all(2),
@@ -183,7 +183,7 @@ class AddExpenseScreen extends HookConsumerWidget {
                                 label: l10n.addTransactionExpense,
                                 icon: Icons.arrow_upward_rounded,
                                 selected: true,
-                                color: YnabPalette.negative,
+                                color: OpenBudgetPalette.negative,
                               ),
                             ),
                             Expanded(
@@ -191,7 +191,7 @@ class AddExpenseScreen extends HookConsumerWidget {
                                 label: l10n.addTransactionIncome,
                                 icon: Icons.arrow_downward_rounded,
                                 selected: false,
-                                color: YnabPalette.mutedText,
+                                color: OpenBudgetPalette.mutedText,
                                 onTap: () => context.goNamed(
                                   addIncomeRoute,
                                   pathParameters: {'id': budgetId},
@@ -216,7 +216,7 @@ class AddExpenseScreen extends HookConsumerWidget {
                           textAlign: TextAlign.center,
                           style: theme.textTheme.displaySmall?.copyWith(
                             fontWeight: FontWeight.w800,
-                            color: YnabPalette.negative,
+                            color: OpenBudgetPalette.negative,
                           ),
                           decoration: InputDecoration(
                             labelText: l10n.transactionAmountLabel,
@@ -226,7 +226,7 @@ class AddExpenseScreen extends HookConsumerWidget {
                             contentPadding: EdgeInsets.zero,
                             hintText: '-${formatCents(0, budgetCurrency)}',
                             hintStyle: theme.textTheme.displaySmall?.copyWith(
-                              color: YnabPalette.negative.withAlpha(120),
+                              color: OpenBudgetPalette.negative.withAlpha(120),
                               fontWeight: FontWeight.w700,
                             ),
                           ),
@@ -237,7 +237,7 @@ class AddExpenseScreen extends HookConsumerWidget {
                         l10n.transactionAddExpense,
                         style: theme.textTheme.labelLarge?.copyWith(
                           fontWeight: FontWeight.w700,
-                          color: YnabPalette.negative,
+                          color: OpenBudgetPalette.negative,
                         ),
                       ),
                       if (amountText.isNotEmpty)
@@ -246,7 +246,7 @@ class AddExpenseScreen extends HookConsumerWidget {
                           child: Text(
                             formattedAmount,
                             style: theme.textTheme.labelMedium?.copyWith(
-                              color: YnabPalette.mutedText,
+                              color: OpenBudgetPalette.mutedText,
                             ),
                           ),
                         ),
@@ -255,7 +255,7 @@ class AddExpenseScreen extends HookConsumerWidget {
                 ),
                 const SizedBox(height: SpacingTokens.md),
                 Card(
-                  color: YnabPalette.surface,
+                  color: OpenBudgetPalette.surface,
                   margin: EdgeInsets.zero,
                   child: Padding(
                     padding: const EdgeInsets.all(SpacingTokens.md),
@@ -361,15 +361,15 @@ class AddExpenseScreen extends HookConsumerWidget {
                           : l10n.payeeAutoEnvelopeHint,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: autoAssignedByRule.value
-                            ? YnabPalette.accentBlue
-                            : YnabPalette.mutedText,
+                            ? OpenBudgetPalette.accentBlue
+                            : OpenBudgetPalette.mutedText,
                         fontStyle: FontStyle.italic,
                       ),
                     ),
                   ),
                 const SizedBox(height: SpacingTokens.md),
                 Card(
-                  color: YnabPalette.surface,
+                  color: OpenBudgetPalette.surface,
                   margin: EdgeInsets.zero,
                   child: Padding(
                     padding: const EdgeInsets.all(SpacingTokens.md),
@@ -490,7 +490,7 @@ class AddExpenseScreen extends HookConsumerWidget {
                       : const Icon(Icons.check_circle_rounded, size: 18),
                   label: Text(l10n.transactionSave),
                   style: FilledButton.styleFrom(
-                    backgroundColor: YnabPalette.accentBlue,
+                    backgroundColor: OpenBudgetPalette.accentBlue,
                     foregroundColor: Colors.white,
                   ),
                 ),
@@ -575,7 +575,7 @@ class _ReadOnlyRow extends HookWidget {
     final theme = Theme.of(context);
     return Row(
       children: [
-        Icon(icon, size: 20, color: YnabPalette.accentBlue),
+        Icon(icon, size: 20, color: OpenBudgetPalette.accentBlue),
         const SizedBox(width: SpacingTokens.sm),
         Expanded(
           child: Column(
@@ -584,7 +584,7 @@ class _ReadOnlyRow extends HookWidget {
               Text(
                 label,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: YnabPalette.mutedText,
+                  color: OpenBudgetPalette.mutedText,
                 ),
               ),
               Text(

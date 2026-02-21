@@ -5,7 +5,7 @@ import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_goals_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
 import 'package:openbudget_app/src/features/settings/providers/display_options_provider.dart';
-import 'package:openbudget_app/src/theme/ynab_palette.dart';
+import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
@@ -72,7 +72,7 @@ class EnvelopeRow extends HookConsumerWidget {
                       child: Icon(
                         Icons.bolt_rounded,
                         size: 16,
-                        color: YnabPalette.accentBlue,
+                        color: OpenBudgetPalette.accentBlue,
                       ),
                     ),
                   )
@@ -109,8 +109,8 @@ class EnvelopeRow extends HookConsumerWidget {
                                       : Icons.arrow_back_rounded,
                                   size: 12,
                                   color: carryover > 0
-                                      ? YnabPalette.progressGreen
-                                      : YnabPalette.negative,
+                                      ? OpenBudgetPalette.progressGreen
+                                      : OpenBudgetPalette.negative,
                                 ),
                               ),
                             ),
@@ -122,14 +122,14 @@ class EnvelopeRow extends HookConsumerWidget {
                             const Icon(
                               Icons.sticky_note_2_outlined,
                               size: 10,
-                              color: YnabPalette.mutedText,
+                              color: OpenBudgetPalette.mutedText,
                             ),
                             const SizedBox(width: 2),
                             Flexible(
                               child: Text(
                                 envelope.note!,
                                 style: theme.textTheme.labelSmall?.copyWith(
-                                  color: YnabPalette.mutedText,
+                                  color: OpenBudgetPalette.mutedText,
                                   fontStyle: FontStyle.italic,
                                 ),
                                 maxLines: 1,
@@ -202,8 +202,8 @@ class EnvelopeRow extends HookConsumerWidget {
                 available < 0 ? 'Overspent' : 'Funded',
                 style: theme.textTheme.labelSmall?.copyWith(
                   color: available < 0
-                      ? YnabPalette.negative
-                      : YnabPalette.mutedText,
+                      ? OpenBudgetPalette.negative
+                      : OpenBudgetPalette.mutedText,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -231,11 +231,11 @@ class _SpendingProgressBar extends HookWidget {
 
     final Color barColor;
     if (ratio > 1.0) {
-      barColor = YnabPalette.negative;
+      barColor = OpenBudgetPalette.negative;
     } else if (ratio >= 0.8) {
       barColor = ColorTokens.tertiary;
     } else {
-      barColor = YnabPalette.progressGreen;
+      barColor = OpenBudgetPalette.progressGreen;
     }
 
     return Padding(
@@ -291,11 +291,11 @@ class _GoalProgressBar extends HookWidget {
 
     final Color barColor;
     if (progress >= 1.0) {
-      barColor = YnabPalette.progressGreen;
+      barColor = OpenBudgetPalette.progressGreen;
     } else if (progress >= 0.5) {
       barColor = ColorTokens.tertiary;
     } else {
-      barColor = YnabPalette.negative;
+      barColor = OpenBudgetPalette.negative;
     }
 
     return Padding(

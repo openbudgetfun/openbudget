@@ -1,0 +1,21 @@
+flutter_launcher_icons:
+  image_path: assets/branding/logos/ob_primary_light_1024.png
+  image_path_ios: assets/branding/logos/ob_primary_light_1024.png
+  image_path_ios_dark_transparent: assets/branding/logos/ob_primary_dark_1024.png
+  image_path_ios_tinted_grayscale: assets/branding/logos/ob_primary_light_1024.png
+  desaturate_tinted_to_grayscale_ios: true
+  remove_alpha_ios: false
+  android: true
+  ios: true
+  web:
+    generate: true
+    image_path: assets/branding/logos/ob_primary_light_1024.png
+    background_color: '#F2F7FF'
+    theme_color: '#2C4BAA'
+  windows:
+    generate: true
+    image_path: assets/branding/logos/ob_primary_light_1024.png
+    icon_size: 256
+  macos:
+    generate: true
+    image_path: assets/branding/logos/ob_primary_light_1024.png

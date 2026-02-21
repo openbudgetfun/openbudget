@@ -39,7 +39,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Welcome, new YNABer!'), findsOneWidget);
+    expect(find.text('Welcome, new OpenBudgeter!'), findsOneWidget);
     expect(find.text('Plan Currency'), findsOneWidget);
     expect(find.text('US Dollar'), findsOneWidget);
     expect(find.byType(FilledButton), findsOneWidget);

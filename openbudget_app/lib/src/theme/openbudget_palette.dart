@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-/// Shared color constants for YNAB-inspired app surfaces.
-abstract final class YnabPalette {
+/// Shared color constants for OpenBudget app surfaces.
+abstract final class OpenBudgetPalette {
   static const Color appBackground = Color(0xFFF1EEE6);
   static const Color surface = Color(0xFFFFFFFF);
   static const Color surfaceMuted = Color(0xFFF6F4EE);

@@ -7,7 +7,7 @@ import 'package:openbudget_app/src/features/budget/providers/budget_detail_provi
 import 'package:openbudget_app/src/features/recurring/providers/recurring_actions_provider.dart';
 import 'package:openbudget_app/src/features/recurring/providers/recurring_list_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
-import 'package:openbudget_app/src/theme/ynab_palette.dart';
+import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_client/openbudget_client.dart';
@@ -36,9 +36,9 @@ class RecurringListScreen extends HookConsumerWidget {
         CurrencyCode.usd;
 
     return Scaffold(
-      backgroundColor: YnabPalette.appBackground,
+      backgroundColor: OpenBudgetPalette.appBackground,
       appBar: AppBar(
-        backgroundColor: YnabPalette.appBackground,
+        backgroundColor: OpenBudgetPalette.appBackground,
         surfaceTintColor: Colors.transparent,
         scrolledUnderElevation: 0,
         title: Text(l10n.recurringListTitle),
@@ -84,10 +84,10 @@ class RecurringListScreen extends HookConsumerWidget {
             return Center(
               child: Card(
                 margin: const EdgeInsets.all(SpacingTokens.lg),
-                color: YnabPalette.surface,
+                color: OpenBudgetPalette.surface,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(RadiusTokens.md),
-                  side: const BorderSide(color: YnabPalette.divider),
+                  side: const BorderSide(color: OpenBudgetPalette.divider),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(SpacingTokens.lg),
@@ -198,7 +198,7 @@ class RecurringListScreen extends HookConsumerWidget {
                             viewFilter.value == RecurringViewFilter.expenses,
                         onTap: () =>
                             viewFilter.value = RecurringViewFilter.expenses,
-                        color: YnabPalette.negative,
+                        color: OpenBudgetPalette.negative,
                       ),
                       const SizedBox(width: SpacingTokens.sm),
                       _RecurringFilterChip(
@@ -207,14 +207,14 @@ class RecurringListScreen extends HookConsumerWidget {
                             viewFilter.value == RecurringViewFilter.income,
                         onTap: () =>
                             viewFilter.value = RecurringViewFilter.income,
-                        color: YnabPalette.progressGreen,
+                        color: OpenBudgetPalette.progressGreen,
                       ),
                       const SizedBox(width: SpacingTokens.sm),
                       _RecurringFilterChip(
                         label: l10n.recurringDueLabel,
                         selected: viewFilter.value == RecurringViewFilter.due,
                         onTap: () => viewFilter.value = RecurringViewFilter.due,
-                        color: YnabPalette.accentBlue,
+                        color: OpenBudgetPalette.accentBlue,
                       ),
                     ],
                   ),
@@ -223,17 +223,17 @@ class RecurringListScreen extends HookConsumerWidget {
                 if (filteredItems.isEmpty)
                   Card(
                     margin: EdgeInsets.zero,
-                    color: YnabPalette.surface,
+                    color: OpenBudgetPalette.surface,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(RadiusTokens.md),
-                      side: const BorderSide(color: YnabPalette.divider),
+                      side: const BorderSide(color: OpenBudgetPalette.divider),
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(SpacingTokens.md),
                       child: Text(
                         l10n.transactionNoResults,
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          color: YnabPalette.mutedText,
+                          color: OpenBudgetPalette.mutedText,
                         ),
                       ),
                     ),
@@ -396,10 +396,10 @@ class _RecurringSummaryCard extends HookWidget {
 
     return Card(
       margin: EdgeInsets.zero,
-      color: YnabPalette.surface,
+      color: OpenBudgetPalette.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(RadiusTokens.md),
-        side: const BorderSide(color: YnabPalette.divider),
+        side: const BorderSide(color: OpenBudgetPalette.divider),
       ),
       child: Padding(
         padding: const EdgeInsets.all(SpacingTokens.md),
@@ -409,7 +409,7 @@ class _RecurringSummaryCard extends HookWidget {
             Container(
               padding: const EdgeInsets.all(SpacingTokens.md),
               decoration: BoxDecoration(
-                color: YnabPalette.accentPurple,
+                color: OpenBudgetPalette.accentPurple,
                 borderRadius: BorderRadius.circular(RadiusTokens.md),
               ),
               child: Column(
@@ -424,7 +424,7 @@ class _RecurringSummaryCard extends HookWidget {
                   Text(
                     l10n.recurringTotalCount(totalItems),
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: YnabPalette.mutedText,
+                      color: OpenBudgetPalette.mutedText,
                     ),
                   ),
                 ],
@@ -437,7 +437,7 @@ class _RecurringSummaryCard extends HookWidget {
                   child: _SummaryMetric(
                     label: l10n.transactionFilterExpense,
                     value: totalExpenses,
-                    color: YnabPalette.negative,
+                    color: OpenBudgetPalette.negative,
                   ),
                 ),
                 const SizedBox(width: SpacingTokens.sm),
@@ -445,7 +445,7 @@ class _RecurringSummaryCard extends HookWidget {
                   child: _SummaryMetric(
                     label: l10n.transactionFilterIncome,
                     value: totalIncome,
-                    color: YnabPalette.progressGreen,
+                    color: OpenBudgetPalette.progressGreen,
                   ),
                 ),
                 const SizedBox(width: SpacingTokens.sm),
@@ -453,7 +453,7 @@ class _RecurringSummaryCard extends HookWidget {
                   child: _SummaryMetric(
                     label: l10n.recurringDueLabel,
                     value: '$dueCount',
-                    color: YnabPalette.accentBlue,
+                    color: OpenBudgetPalette.accentBlue,
                   ),
                 ),
               ],
@@ -496,7 +496,7 @@ class _SummaryMetric extends HookWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: theme.textTheme.labelSmall?.copyWith(
-              color: YnabPalette.mutedText,
+              color: OpenBudgetPalette.mutedText,
             ),
           ),
           const SizedBox(height: 2),
@@ -531,21 +531,23 @@ class _RecurringFilterChip extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final chipColor = color ?? YnabPalette.accentBlue;
+    final chipColor = color ?? OpenBudgetPalette.accentBlue;
     return ChoiceChip(
       label: Text(label),
       selected: selected,
       onSelected: (_) => onTap(),
-      backgroundColor: YnabPalette.surface,
+      backgroundColor: OpenBudgetPalette.surface,
       selectedColor: chipColor.withAlpha(26),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(RadiusTokens.sm),
         side: BorderSide(
-          color: selected ? chipColor.withAlpha(130) : YnabPalette.divider,
+          color: selected
+              ? chipColor.withAlpha(130)
+              : OpenBudgetPalette.divider,
         ),
       ),
       labelStyle: theme.textTheme.labelMedium?.copyWith(
-        color: selected ? chipColor : YnabPalette.mutedText,
+        color: selected ? chipColor : OpenBudgetPalette.mutedText,
         fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
       ),
       visualDensity: VisualDensity.compact,
@@ -605,7 +607,7 @@ class _RecurringTile extends HookWidget {
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: SpacingTokens.md),
         decoration: BoxDecoration(
-          color: YnabPalette.negative,
+          color: OpenBudgetPalette.negative,
           borderRadius: BorderRadius.circular(RadiusTokens.md),
         ),
         child: const Icon(Icons.delete, color: Colors.white),
@@ -616,10 +618,10 @@ class _RecurringTile extends HookWidget {
       },
       child: Card(
         margin: const EdgeInsets.only(bottom: SpacingTokens.sm),
-        color: YnabPalette.surface,
+        color: OpenBudgetPalette.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(RadiusTokens.md),
-          side: const BorderSide(color: YnabPalette.divider),
+          side: const BorderSide(color: OpenBudgetPalette.divider),
         ),
         child: Column(
           children: [
@@ -631,13 +633,13 @@ class _RecurringTile extends HookWidget {
               leading: CircleAvatar(
                 radius: 18,
                 backgroundColor: recurring.isActive
-                    ? YnabPalette.accentPurple.withAlpha(90)
-                    : YnabPalette.surfaceMuted,
+                    ? OpenBudgetPalette.accentPurple.withAlpha(90)
+                    : OpenBudgetPalette.surfaceMuted,
                 child: Icon(
                   Icons.repeat_rounded,
                   color: recurring.isActive
-                      ? YnabPalette.accentBlue
-                      : YnabPalette.mutedText,
+                      ? OpenBudgetPalette.accentBlue
+                      : OpenBudgetPalette.mutedText,
                   size: 18,
                 ),
               ),
@@ -652,7 +654,7 @@ class _RecurringTile extends HookWidget {
               subtitle: Text(
                 '$frequencyLabel \u2022 ${l10n.recurringNextDate}: $dateStr',
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: YnabPalette.mutedText,
+                  color: OpenBudgetPalette.mutedText,
                 ),
               ),
               trailing: Row(
@@ -665,16 +667,16 @@ class _RecurringTile extends HookWidget {
                     ),
                     decoration: BoxDecoration(
                       color: isIncome
-                          ? YnabPalette.progressGreen.withAlpha(26)
-                          : YnabPalette.negative.withAlpha(18),
+                          ? OpenBudgetPalette.progressGreen.withAlpha(26)
+                          : OpenBudgetPalette.negative.withAlpha(18),
                       borderRadius: BorderRadius.circular(999),
                     ),
                     child: Text(
                       isIncome ? '+$formattedAmount' : '-$formattedAmount',
                       style: theme.textTheme.labelLarge?.copyWith(
                         color: isIncome
-                            ? YnabPalette.progressGreen
-                            : YnabPalette.negative,
+                            ? OpenBudgetPalette.progressGreen
+                            : OpenBudgetPalette.negative,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -683,7 +685,7 @@ class _RecurringTile extends HookWidget {
                   Switch.adaptive(
                     value: recurring.isActive,
                     onChanged: (_) => onToggle(),
-                    activeTrackColor: YnabPalette.accentBlue,
+                    activeTrackColor: OpenBudgetPalette.accentBlue,
                   ),
                 ],
               ),
@@ -701,14 +703,14 @@ class _RecurringTile extends HookWidget {
                     const Icon(
                       Icons.schedule_rounded,
                       size: 16,
-                      color: YnabPalette.accentBlue,
+                      color: OpenBudgetPalette.accentBlue,
                     ),
                     const SizedBox(width: SpacingTokens.xs),
                     Expanded(
                       child: Text(
                         l10n.recurringDueLabel,
                         style: theme.textTheme.labelSmall?.copyWith(
-                          color: YnabPalette.accentBlue,
+                          color: OpenBudgetPalette.accentBlue,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -718,7 +720,7 @@ class _RecurringTile extends HookWidget {
                       icon: const Icon(Icons.skip_next_rounded, size: 18),
                       label: Text(l10n.recurringSkipButton),
                       style: TextButton.styleFrom(
-                        foregroundColor: YnabPalette.mutedText,
+                        foregroundColor: OpenBudgetPalette.mutedText,
                         visualDensity: VisualDensity.compact,
                       ),
                     ),

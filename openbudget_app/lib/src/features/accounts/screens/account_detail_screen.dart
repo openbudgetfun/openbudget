@@ -8,7 +8,7 @@ import 'package:openbudget_app/src/features/accounts/providers/account_transacti
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
 import 'package:openbudget_app/src/features/payees/providers/payee_list_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
-import 'package:openbudget_app/src/theme/ynab_palette.dart';
+import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
@@ -55,9 +55,9 @@ class AccountDetailScreen extends HookConsumerWidget {
         : CurrencyCode.usd;
 
     return Scaffold(
-      backgroundColor: YnabPalette.appBackground,
+      backgroundColor: OpenBudgetPalette.appBackground,
       appBar: AppBar(
-        backgroundColor: YnabPalette.appBackground,
+        backgroundColor: OpenBudgetPalette.appBackground,
         surfaceTintColor: Colors.transparent,
         scrolledUnderElevation: 0,
         leading: IconButton(
@@ -133,8 +133,8 @@ class AccountDetailScreen extends HookConsumerWidget {
                     selected: statusFilter.value == filter,
                     onSelected: (_) => statusFilter.value = filter,
                     visualDensity: VisualDensity.compact,
-                    selectedColor: YnabPalette.accentPurple,
-                    side: const BorderSide(color: YnabPalette.divider),
+                    selectedColor: OpenBudgetPalette.accentPurple,
+                    side: const BorderSide(color: OpenBudgetPalette.divider),
                     labelStyle: theme.textTheme.labelMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
@@ -205,7 +205,7 @@ class AccountDetailScreen extends HookConsumerWidget {
                           ? l10n.transactionNoResults
                           : l10n.transactionEmpty,
                       style: theme.textTheme.bodyLarge?.copyWith(
-                        color: YnabPalette.mutedText,
+                        color: OpenBudgetPalette.mutedText,
                       ),
                     ),
                   );
@@ -269,7 +269,7 @@ class AccountDetailScreen extends HookConsumerWidget {
                                 _formatDayHeader(txn.transactionDate),
                                 style: theme.textTheme.titleSmall?.copyWith(
                                   fontWeight: FontWeight.w700,
-                                  color: YnabPalette.mutedText,
+                                  color: OpenBudgetPalette.mutedText,
                                 ),
                               ),
                             ),
@@ -432,16 +432,16 @@ class _BalanceHeader extends HookWidget {
       ),
       padding: const EdgeInsets.all(SpacingTokens.md),
       decoration: BoxDecoration(
-        color: YnabPalette.surface,
+        color: OpenBudgetPalette.surface,
         borderRadius: BorderRadius.circular(RadiusTokens.md),
-        border: Border.all(color: YnabPalette.divider),
+        border: Border.all(color: OpenBudgetPalette.divider),
       ),
       child: Column(
         children: [
           Text(
             l10n.accountDetailBalance,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: YnabPalette.mutedText,
+              color: OpenBudgetPalette.mutedText,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -451,8 +451,8 @@ class _BalanceHeader extends HookWidget {
             style: theme.textTheme.headlineLarge?.copyWith(
               fontWeight: FontWeight.w800,
               color: accountData.balanceCents >= 0
-                  ? YnabPalette.progressGreen
-                  : YnabPalette.negative,
+                  ? OpenBudgetPalette.progressGreen
+                  : OpenBudgetPalette.negative,
             ),
           ),
           if (transactions != null) ...[
@@ -464,14 +464,14 @@ class _BalanceHeader extends HookWidget {
                   icon: Icons.check_circle_outline,
                   label: l10n.accountBalanceCleared,
                   amount: formatCents(clearedCents, currencyCode),
-                  color: YnabPalette.progressGreen,
+                  color: OpenBudgetPalette.progressGreen,
                 ),
                 const SizedBox(width: SpacingTokens.lg),
                 _BalanceChip(
                   icon: Icons.circle_outlined,
                   label: l10n.accountBalanceUncleared,
                   amount: formatCents(unclearedCents, currencyCode),
-                  color: YnabPalette.mutedText,
+                  color: OpenBudgetPalette.mutedText,
                 ),
               ],
             ),
@@ -572,19 +572,19 @@ class _TransactionRow extends HookWidget {
         ? Icons.check_circle_outline
         : Icons.circle_outlined;
     final statusColor = transaction.reconciled
-        ? YnabPalette.accentBlue
+        ? OpenBudgetPalette.accentBlue
         : transaction.cleared
-        ? YnabPalette.progressGreen
-        : YnabPalette.mutedText;
+        ? OpenBudgetPalette.progressGreen
+        : OpenBudgetPalette.mutedText;
 
     return InkWell(
       onTap: onToggleCleared,
       borderRadius: BorderRadius.circular(RadiusTokens.sm),
       child: Ink(
         decoration: BoxDecoration(
-          color: YnabPalette.surface,
+          color: OpenBudgetPalette.surface,
           borderRadius: BorderRadius.circular(RadiusTokens.sm),
-          border: Border.all(color: YnabPalette.divider),
+          border: Border.all(color: OpenBudgetPalette.divider),
         ),
         child: Padding(
           padding: const EdgeInsets.symmetric(
@@ -610,7 +610,7 @@ class _TransactionRow extends HookWidget {
                       Text(
                         _detailLine,
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: YnabPalette.mutedText,
+                          color: OpenBudgetPalette.mutedText,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -624,13 +624,13 @@ class _TransactionRow extends HookWidget {
                           vertical: 2,
                         ),
                         decoration: BoxDecoration(
-                          color: YnabPalette.surfaceMuted,
+                          color: OpenBudgetPalette.surfaceMuted,
                           borderRadius: BorderRadius.circular(RadiusTokens.sm),
                         ),
                         child: Text(
                           transaction.memo!,
                           style: theme.textTheme.labelSmall?.copyWith(
-                            color: YnabPalette.mutedText,
+                            color: OpenBudgetPalette.mutedText,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -648,16 +648,16 @@ class _TransactionRow extends HookWidget {
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w700,
                       color: isInflow
-                          ? YnabPalette.progressGreen
-                          : YnabPalette.negative,
+                          ? OpenBudgetPalette.progressGreen
+                          : OpenBudgetPalette.negative,
                     ),
                   ),
                   Text(
                     formatCents(runningBalanceCents, currencyCode),
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: runningBalanceCents >= 0
-                          ? YnabPalette.mutedText
-                          : YnabPalette.negative,
+                          ? OpenBudgetPalette.mutedText
+                          : OpenBudgetPalette.negative,
                     ),
                   ),
                 ],

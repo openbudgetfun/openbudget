@@ -1,11 +1,14 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/auth/providers/auth_provider.dart';
 import 'package:openbudget_app/src/features/auth/providers/auth_state.dart';
-import 'package:openbudget_app/src/theme/ynab_palette.dart';
+import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
+import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
+import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
 
 class LoginScreen extends HookConsumerWidget {
   const LoginScreen({super.key});
@@ -17,6 +20,7 @@ class LoginScreen extends HookConsumerWidget {
     final passwordController = useTextEditingController();
     useListenable(emailController);
     useListenable(passwordController);
+
     final authState = ref.watch(authProvider);
     final isLoading = authState is AuthLoading;
     final errorMessage = authState is AuthError ? authState.message : null;
@@ -26,6 +30,21 @@ class LoginScreen extends HookConsumerWidget {
         !isLoading &&
         emailController.text.trim().isNotEmpty &&
         passwordController.text.isNotEmpty;
+
+    final client = ref.watch(serverpodClientProvider);
+    final supportsSocialSignIn =
+        kIsWeb ||
+        switch (theme.platform) {
+          TargetPlatform.android || TargetPlatform.iOS => true,
+          _ => false,
+        };
+    final showGoogleSignIn =
+        supportsSocialSignIn && const bool.hasEnvironment('GOOGLE_CLIENT_ID');
+    final showAppleSignIn =
+        supportsSocialSignIn &&
+        const bool.hasEnvironment('APPLE_SERVICE_IDENTIFIER') &&
+        const bool.hasEnvironment('APPLE_REDIRECT_URI');
+    final showSocialSection = showGoogleSignIn || showAppleSignIn;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F4F2),
@@ -39,50 +58,71 @@ class LoginScreen extends HookConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const SizedBox(height: SpacingTokens.xxl),
-                  const _YnabMark(key: Key('login-ynab-mark')),
+                  const _OpenBudgetMark(key: Key('login-openbudget-mark')),
                   const SizedBox(height: SpacingTokens.xl + SpacingTokens.sm),
-                  _LoginProviderButton(
-                    icon: const Icon(Icons.apple_rounded, size: 22),
-                    label: l10n.loginContinueWithApple,
-                    onPressed: () =>
-                        _showUnavailable(context, l10n.loginContinueWithApple),
-                  ),
-                  const SizedBox(height: SpacingTokens.sm),
-                  _LoginProviderButton(
-                    icon: Text(
-                      'G',
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        color: const Color(0xFFDB4437),
-                        fontWeight: FontWeight.w700,
+                  if (showSocialSection) ...[
+                    if (showAppleSignIn)
+                      AppleSignInWidget(
+                        client: client,
+                        minimumWidth: 320,
+                        onAuthenticated: () {
+                          ref
+                              .read(authProvider.notifier)
+                              .syncExternalAuthState();
+                        },
+                        onError: (error) {
+                          ref
+                              .read(authProvider.notifier)
+                              .setExternalAuthError(error);
+                        },
                       ),
-                    ),
-                    label: l10n.loginContinueWithGoogle,
-                    onPressed: () =>
-                        _showUnavailable(context, l10n.loginContinueWithGoogle),
-                  ),
-                  const SizedBox(height: SpacingTokens.md),
-                  Row(
-                    children: [
-                      const Expanded(
-                        child: Divider(color: YnabPalette.divider, height: 1),
+                    if (showAppleSignIn && showGoogleSignIn)
+                      const SizedBox(height: SpacingTokens.sm),
+                    if (showGoogleSignIn)
+                      GoogleSignInWidget(
+                        client: client,
+                        minimumWidth: 320,
+                        onAuthenticated: () {
+                          ref
+                              .read(authProvider.notifier)
+                              .syncExternalAuthState();
+                        },
+                        onError: (error) {
+                          ref
+                              .read(authProvider.notifier)
+                              .setExternalAuthError(error);
+                        },
                       ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: SpacingTokens.md,
-                        ),
-                        child: Text(
-                          l10n.loginOrSeparator,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: YnabPalette.mutedText,
+                    const SizedBox(height: SpacingTokens.md),
+                    Row(
+                      children: [
+                        const Expanded(
+                          child: Divider(
+                            color: OpenBudgetPalette.divider,
+                            height: 1,
                           ),
                         ),
-                      ),
-                      const Expanded(
-                        child: Divider(color: YnabPalette.divider, height: 1),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: SpacingTokens.md),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: SpacingTokens.md,
+                          ),
+                          child: Text(
+                            l10n.loginOrSeparator,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: OpenBudgetPalette.mutedText,
+                            ),
+                          ),
+                        ),
+                        const Expanded(
+                          child: Divider(
+                            color: OpenBudgetPalette.divider,
+                            height: 1,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: SpacingTokens.md),
+                  ],
                   if (errorMessage != null) ...[
                     Container(
                       padding: const EdgeInsets.all(SpacingTokens.sm),
@@ -118,7 +158,7 @@ class LoginScreen extends HookConsumerWidget {
                         obscurePassword.value
                             ? Icons.visibility_outlined
                             : Icons.visibility_off_outlined,
-                        color: YnabPalette.mutedText,
+                        color: OpenBudgetPalette.mutedText,
                       ),
                     ),
                     onSubmitted: canLogin
@@ -134,10 +174,10 @@ class LoginScreen extends HookConsumerWidget {
                     style: FilledButton.styleFrom(
                       elevation: 0,
                       minimumSize: const Size.fromHeight(48),
-                      backgroundColor: YnabPalette.accentBlue,
+                      backgroundColor: OpenBudgetPalette.accentBlue,
                       foregroundColor: Colors.white,
-                      disabledBackgroundColor: YnabPalette.divider,
-                      disabledForegroundColor: YnabPalette.mutedText,
+                      disabledBackgroundColor: OpenBudgetPalette.divider,
+                      disabledForegroundColor: OpenBudgetPalette.mutedText,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(RadiusTokens.sm),
                       ),
@@ -157,7 +197,7 @@ class LoginScreen extends HookConsumerWidget {
                     child: Text(
                       l10n.loginForgotPassword,
                       style: theme.textTheme.titleMedium?.copyWith(
-                        color: YnabPalette.accentBlue,
+                        color: OpenBudgetPalette.accentBlue,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -192,49 +232,14 @@ class LoginScreen extends HookConsumerWidget {
   }
 }
 
-class _LoginProviderButton extends HookWidget {
-  const _LoginProviderButton({
-    required this.icon,
-    required this.label,
-    required this.onPressed,
-  });
-
-  final Widget icon;
-  final String label;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return TextButton.icon(
-      onPressed: onPressed,
-      style: TextButton.styleFrom(
-        backgroundColor: YnabPalette.surfaceMuted,
-        foregroundColor: theme.colorScheme.onSurface,
-        minimumSize: const Size.fromHeight(50),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(RadiusTokens.sm),
-        ),
-      ),
-      icon: icon,
-      label: Text(
-        label,
-        style: theme.textTheme.titleMedium?.copyWith(
-          fontWeight: FontWeight.w700,
-        ),
-      ),
-    );
-  }
-}
-
-class _YnabMark extends HookWidget {
-  const _YnabMark({super.key});
+class _OpenBudgetMark extends HookWidget {
+  const _OpenBudgetMark({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const Icon(
-      Icons.park_rounded,
-      color: YnabPalette.accentBlue,
+      Icons.account_balance_wallet_rounded,
+      color: OpenBudgetPalette.accentBlue,
       size: 96,
     );
   }
@@ -271,10 +276,10 @@ class _LoginTextField extends HookWidget {
       decoration: InputDecoration(
         hintText: hintText,
         hintStyle: theme.textTheme.bodyLarge?.copyWith(
-          color: YnabPalette.mutedText,
+          color: OpenBudgetPalette.mutedText,
         ),
         filled: true,
-        fillColor: YnabPalette.surfaceMuted,
+        fillColor: OpenBudgetPalette.surfaceMuted,
         suffixIcon: suffixIcon,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(RadiusTokens.sm),
@@ -286,7 +291,7 @@ class _LoginTextField extends HookWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(RadiusTokens.sm),
-          borderSide: const BorderSide(color: YnabPalette.divider),
+          borderSide: const BorderSide(color: OpenBudgetPalette.divider),
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: SpacingTokens.md,

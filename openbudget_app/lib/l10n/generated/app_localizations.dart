@@ -1099,7 +1099,7 @@ abstract class AppLocalizations {
   /// No description provided for @createBudgetWelcomeTitle.
   ///
   /// In en, this message translates to:
-  /// **'Welcome, new YNABer!'**
+  /// **'Welcome, new OpenBudgeter!'**
   String get createBudgetWelcomeTitle;
 
   /// No description provided for @createBudgetWelcomeSubtitle.
@@ -2611,7 +2611,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsTogether.
   ///
   /// In en, this message translates to:
-  /// **'YNAB Together'**
+  /// **'OpenBudget Together'**
   String get settingsTogether;
 
   /// No description provided for @settingsTitle.

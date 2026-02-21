@@ -6,7 +6,7 @@ import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/settings/providers/display_options_provider.dart';
 import 'package:openbudget_app/src/providers/theme_mode_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
-import 'package:openbudget_app/src/theme/ynab_palette.dart';
+import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 class DisplayOptionsScreen extends HookConsumerWidget {
@@ -22,9 +22,9 @@ class DisplayOptionsScreen extends HookConsumerWidget {
     final currentBalanceStyle = ref.watch(balanceStyleProvider);
 
     return Scaffold(
-      backgroundColor: YnabPalette.appBackground,
+      backgroundColor: OpenBudgetPalette.appBackground,
       appBar: AppBar(
-        backgroundColor: YnabPalette.appBackground,
+        backgroundColor: OpenBudgetPalette.appBackground,
         surfaceTintColor: Colors.transparent,
         automaticallyImplyLeading: false,
         centerTitle: true,
@@ -144,7 +144,7 @@ class DisplayOptionsScreen extends HookConsumerWidget {
           Text(
             l10n.settingsDisplayOptionsHint,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: YnabPalette.mutedText,
+              color: OpenBudgetPalette.mutedText,
             ),
           ),
         ],
@@ -162,9 +162,9 @@ class _SettingsCard extends HookWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: YnabPalette.surface,
+        color: OpenBudgetPalette.surface,
         borderRadius: BorderRadius.circular(RadiusTokens.md),
-        border: Border.all(color: YnabPalette.divider),
+        border: Border.all(color: OpenBudgetPalette.divider),
       ),
       child: child,
     );
@@ -211,7 +211,7 @@ class _SelectionTile extends HookWidget {
       onTap: onTap,
       title: Text(label),
       leading: selected
-          ? const Icon(Icons.check_rounded, color: YnabPalette.accentBlue)
+          ? const Icon(Icons.check_rounded, color: OpenBudgetPalette.accentBlue)
           : const SizedBox(width: 24),
     );
   }
@@ -235,7 +235,7 @@ class _BalanceStyleTile extends HookWidget {
     return ListTile(
       onTap: onTap,
       leading: selected
-          ? const Icon(Icons.check_rounded, color: YnabPalette.accentBlue)
+          ? const Icon(Icons.check_rounded, color: OpenBudgetPalette.accentBlue)
           : const SizedBox(width: 24),
       title: Text(label),
       subtitle: Padding(

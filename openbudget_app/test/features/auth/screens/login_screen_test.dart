@@ -23,13 +23,13 @@ void main() {
   }
 
   group('LoginScreen', () {
-    testWidgets('renders ynab-style login actions and fields', (tester) async {
+    testWidgets('renders OpenBudget login fields', (tester) async {
       await tester.pumpWidget(buildSubject());
       await tester.pump();
 
-      expect(find.byKey(const Key('login-ynab-mark')), findsOneWidget);
-      expect(find.text('Continue with Apple'), findsOneWidget);
-      expect(find.text('Continue with Google'), findsOneWidget);
+      expect(find.byKey(const Key('login-openbudget-mark')), findsOneWidget);
+      expect(find.text('Continue with Apple'), findsNothing);
+      expect(find.text('Continue with Google'), findsNothing);
       expect(find.text('Forgot Password?'), findsOneWidget);
       expect(find.byType(TextField), findsNWidgets(2));
     });

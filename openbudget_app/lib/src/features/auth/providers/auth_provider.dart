@@ -96,10 +96,55 @@ class AuthNotifier extends _$AuthNotifier {
     state = const Unauthenticated();
   }
 
+  /// Syncs auth state after a successful external OAuth flow.
+  Future<void> syncExternalAuthState() async {
+    final client = ref.read(serverpodClientProvider);
+    try {
+      await client.auth.initialize();
+      if (!ref.mounted) return;
+
+      final authInfo = client.auth.authInfo;
+      if (authInfo == null) {
+        state = const AuthError(
+          message: 'Could not complete sign-in. Please try again.',
+        );
+        return;
+      }
+
+      state = Authenticated(userId: authInfo.authUserId.toString());
+    } on Exception catch (e) {
+      if (!ref.mounted) return;
+      state = AuthError(message: _friendlyExternalAuthError(e));
+    }
+  }
+
+  /// Maps external OAuth errors into user-facing auth errors.
+  void setExternalAuthError(Object error) {
+    if (!ref.mounted) return;
+    state = AuthError(message: _friendlyExternalAuthError(error));
+  }
+
   String _friendlyError(Exception e) {
     if (e is ServerpodClientException) {
       return e.message;
     }
     return 'An unexpected error occurred. Please try again.';
+  }
+
+  String _friendlyExternalAuthError(Object error) {
+    if (error.runtimeType.toString() == 'UserFacingException') {
+      return error.toString();
+    }
+    if (error is ServerpodClientException) return error.message;
+    if (error is ArgumentError) {
+      return 'OAuth configuration is missing. Check app environment values.';
+    }
+
+    final text = error.toString().toLowerCase();
+    if (text.contains('cancelled') || text.contains('canceled')) {
+      return 'Sign-in was canceled.';
+    }
+
+    return 'Could not complete social sign-in. Please try again.';
   }
 }
