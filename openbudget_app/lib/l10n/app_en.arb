@@ -321,6 +321,7 @@
   "budgetAssignMoney": "Assign Money",
   "budgetAddCategory": "Add Category",
   "budgetAddEnvelope": "Add Envelope",
+  "budgetCollapseExpand": "Collapse/Expand",
   "budgetAddExpense": "Add Expense",
   "budgetAddIncome": "Add Income",
   "budgetAllocationError": "Could not update allocation",

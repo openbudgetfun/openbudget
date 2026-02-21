@@ -25,7 +25,9 @@ class CategoryGroup extends HookConsumerWidget {
     this.onReorderEnvelopes,
     this.onToggleHideCategory,
     this.onToggleHideEnvelope,
+    this.onToggleCollapsed,
     this.showHidden = false,
+    this.collapsed = false,
     this.goalsMap = const {},
     super.key,
   });
@@ -44,7 +46,9 @@ class CategoryGroup extends HookConsumerWidget {
   final void Function({required bool isHidden})? onToggleHideCategory;
   final void Function(Envelope envelope, {required bool isHidden})?
   onToggleHideEnvelope;
+  final VoidCallback? onToggleCollapsed;
   final bool showHidden;
+  final bool collapsed;
   final Map<String, EnvelopeGoal> goalsMap;
 
   @override
@@ -77,7 +81,7 @@ class CategoryGroup extends HookConsumerWidget {
           GestureDetector(
             onTap: isReorderingEnvelopes.value
                 ? () => isReorderingEnvelopes.value = false
-                : onEditCategory,
+                : onToggleCollapsed ?? onEditCategory,
             onLongPress: () => _showCategoryMenu(context),
             child: Opacity(
               opacity: (category.isHidden ?? false) ? 0.5 : 1.0,
@@ -94,6 +98,14 @@ class CategoryGroup extends HookConsumerWidget {
                 ),
                 child: Row(
                   children: [
+                    Icon(
+                      collapsed
+                          ? Icons.chevron_right_rounded
+                          : Icons.expand_more_rounded,
+                      size: 18,
+                      color: OpenBudgetPalette.mutedText,
+                    ),
+                    const SizedBox(width: SpacingTokens.xs),
                     if (category.isHidden ?? false) ...[
                       const Icon(
                         Icons.visibility_off_rounded,
@@ -141,7 +153,9 @@ class CategoryGroup extends HookConsumerWidget {
               ),
             ),
           ),
-          if (isReorderingEnvelopes.value) ...[
+          if (collapsed)
+            const SizedBox.shrink()
+          else if (isReorderingEnvelopes.value) ...[
             Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: SpacingTokens.md,
@@ -251,44 +265,47 @@ class CategoryGroup extends HookConsumerWidget {
                 );
               }
             }),
-          Container(
-            padding: const EdgeInsets.fromLTRB(
-              SpacingTokens.md,
-              SpacingTokens.sm,
-              SpacingTokens.md,
-              SpacingTokens.md,
-            ),
-            decoration: const BoxDecoration(
-              border: Border(top: BorderSide(color: OpenBudgetPalette.divider)),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    l10n.budgetCategoryTotal,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: OpenBudgetPalette.mutedText,
-                      fontWeight: FontWeight.w600,
+          if (!collapsed)
+            Container(
+              padding: const EdgeInsets.fromLTRB(
+                SpacingTokens.md,
+                SpacingTokens.sm,
+                SpacingTokens.md,
+                SpacingTokens.md,
+              ),
+              decoration: const BoxDecoration(
+                border: Border(
+                  top: BorderSide(color: OpenBudgetPalette.divider),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      l10n.budgetCategoryTotal,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: OpenBudgetPalette.mutedText,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
-                ),
-                OutlinedButton.icon(
-                  onPressed: onAddEnvelope,
-                  icon: const Icon(Icons.add, size: 16),
-                  label: Text(l10n.budgetAddEnvelope),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: OpenBudgetPalette.accentBlue,
-                    side: const BorderSide(color: OpenBudgetPalette.divider),
-                    backgroundColor: OpenBudgetPalette.surfaceMuted,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: SpacingTokens.sm,
-                      vertical: SpacingTokens.xs,
+                  OutlinedButton.icon(
+                    onPressed: onAddEnvelope,
+                    icon: const Icon(Icons.add, size: 16),
+                    label: Text(l10n.budgetAddEnvelope),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: OpenBudgetPalette.accentBlue,
+                      side: const BorderSide(color: OpenBudgetPalette.divider),
+                      backgroundColor: OpenBudgetPalette.surfaceMuted,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: SpacingTokens.sm,
+                        vertical: SpacingTokens.xs,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
         ],
       ),
     );

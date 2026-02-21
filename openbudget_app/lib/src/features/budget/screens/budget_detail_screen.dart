@@ -29,7 +29,13 @@ import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
-enum _PlanMenuAction { recentMoves, hideProgressBars, hideAmounts, settings }
+enum _PlanMenuAction {
+  recentMoves,
+  collapseExpand,
+  hideProgressBars,
+  hideAmounts,
+  settings,
+}
 
 class BudgetDetailScreen extends HookConsumerWidget {
   const BudgetDetailScreen({required this.budgetId, super.key});
@@ -47,6 +53,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
     final hasAutoPosted = useState(false);
     final isReordering = useState(false);
     final showHidden = useState(false);
+    final collapseCategories = useState(false);
     final searchController = useTextEditingController();
     final searchQuery = useState('');
     final isSearching = useState(false);
@@ -165,6 +172,8 @@ class BudgetDetailScreen extends HookConsumerWidget {
                   recentMovesRoute,
                   pathParameters: {'id': budgetId},
                 ),
+                _PlanMenuAction.collapseExpand =>
+                  collapseCategories.value = !collapseCategories.value,
                 _PlanMenuAction.hideProgressBars =>
                   ref
                       .read(hideProgressBarsProvider.notifier)
@@ -179,6 +188,17 @@ class BudgetDetailScreen extends HookConsumerWidget {
                 ),
               },
               itemBuilder: (context) => [
+                PopupMenuItem<_PlanMenuAction>(
+                  value: _PlanMenuAction.collapseExpand,
+                  child: Row(
+                    children: [
+                      const Icon(Icons.unfold_more_rounded, size: 18),
+                      const SizedBox(width: SpacingTokens.sm),
+                      Text(l10n.budgetCollapseExpand),
+                    ],
+                  ),
+                ),
+                const PopupMenuDivider(),
                 PopupMenuItem<_PlanMenuAction>(
                   value: _PlanMenuAction.recentMoves,
                   child: Row(
@@ -468,6 +488,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
                       child: CategoryGroup(
                         categoryWithEnvelopes: catWithEnvelopes,
                         currencyCode: currencyCode,
+                        collapsed: collapseCategories.value,
                         goalsMap: goalsMap,
                         onAddEnvelope: () => _showAddEnvelopeDialog(
                           context,

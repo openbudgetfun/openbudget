@@ -160,6 +160,18 @@ void main() {
     expect(find.text('Hide Amounts'), findsOneWidget);
     await binding.takeScreenshot('plan-menu');
 
+    await tester.tap(find.text('Collapse/Expand'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Auto-pay every month'), findsNothing);
+
+    await tester.tap(find.byIcon(Icons.more_horiz_rounded));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Collapse/Expand'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Auto-pay every month'), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.more_horiz_rounded));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Recent Moves'));
     await tester.pumpAndSettle();
     final gotIt = find.text('Got It!');

@@ -574,6 +574,12 @@ abstract class AppLocalizations {
   /// **'Add Envelope'**
   String get budgetAddEnvelope;
 
+  /// No description provided for @budgetCollapseExpand.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse/Expand'**
+  String get budgetCollapseExpand;
+
   /// No description provided for @budgetAddExpense.
   ///
   /// In en, this message translates to:

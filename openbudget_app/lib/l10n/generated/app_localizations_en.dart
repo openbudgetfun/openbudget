@@ -328,6 +328,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get budgetAddEnvelope => 'Add Envelope';
 
   @override
+  String get budgetCollapseExpand => 'Collapse/Expand';
+
+  @override
   String get budgetAddExpense => 'Add Expense';
 
   @override
