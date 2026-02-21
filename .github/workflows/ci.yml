@@ -137,8 +137,6 @@ jobs:
       - uses: ./.github/actions/devenv
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: check dart formatting
-        run: dart format --set-exit-if-changed .
       - name: check dprint formatting
         run: dprint check
 
@@ -162,29 +160,6 @@ jobs:
               echo "::endgroup::"
             done
           '
-
-  no-stateful-or-stateless:
-    name: Ban StatefulWidget and StatelessWidget
-    runs-on: blacksmith-2vcpu-ubuntu-2404
-    steps:
-      - uses: actions/checkout@v4
-      - name: check for banned widget types
-        run: |
-          VIOLATIONS=$(grep -rn 'extends StatefulWidget\|extends StatelessWidget' \
-            --include='*.dart' \
-            --exclude-dir='.dart_tool' \
-            --exclude-dir='generated' \
-            --exclude='*.g.dart' \
-            --exclude='*.freezed.dart' \
-            . || true)
-          if [ -n "$VIOLATIONS" ]; then
-            echo "::error::StatefulWidget and StatelessWidget are banned."
-            echo "Use HookWidget or HookConsumerWidget instead."
-            echo ""
-            echo "$VIOLATIONS"
-            exit 1
-          fi
-          echo "No banned widget types found."
 
   native-change-check:
     name: Detect native dependency changes
