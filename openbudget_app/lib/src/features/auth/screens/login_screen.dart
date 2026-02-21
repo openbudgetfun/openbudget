@@ -5,6 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/auth/providers/auth_provider.dart';
 import 'package:openbudget_app/src/features/auth/providers/auth_state.dart';
+import 'package:openbudget_app/src/features/settings/providers/display_options_provider.dart';
 import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
 import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -232,15 +233,16 @@ class LoginScreen extends HookConsumerWidget {
   }
 }
 
-class _OpenBudgetMark extends HookWidget {
+class _OpenBudgetMark extends HookConsumerWidget {
   const _OpenBudgetMark({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return const Icon(
-      Icons.account_balance_wallet_rounded,
-      color: OpenBudgetPalette.accentBlue,
-      size: 96,
+  Widget build(BuildContext context, WidgetRef ref) {
+    final appIconStyle = ref.watch(appIconStyleProvider);
+    return SizedBox(
+      height: 96,
+      width: 96,
+      child: Image.asset(appIconStyle.previewAssetPath, fit: BoxFit.contain),
     );
   }
 }

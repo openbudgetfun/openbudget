@@ -92,6 +92,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      expect(find.text('App Icon'), findsOneWidget);
       expect(find.text('Display Options'), findsOneWidget);
       expect(find.text('Recurring Transactions'), findsOneWidget);
       expect(find.text('Payees'), findsOneWidget);
@@ -106,6 +107,13 @@ void main() {
 
       expect(find.text('Data'), findsOneWidget);
       expect(find.text('Export Budget'), findsOneWidget);
+
+      await tester.scrollUntilVisible(
+        find.text('Account Settings'),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+
       expect(find.text('Account Settings'), findsOneWidget);
       expect(find.text('OpenBudget Together'), findsOneWidget);
       expect(find.text('Manage Bank Connections'), findsOneWidget);

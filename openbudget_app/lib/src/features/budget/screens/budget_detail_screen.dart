@@ -22,6 +22,7 @@ import 'package:openbudget_app/src/features/budget/widgets/budget_header.dart';
 import 'package:openbudget_app/src/features/budget/widgets/category_group.dart';
 import 'package:openbudget_app/src/features/budget/widgets/credit_card_section.dart';
 import 'package:openbudget_app/src/features/recurring/providers/recurring_auto_post_provider.dart';
+import 'package:openbudget_app/src/features/settings/providers/display_options_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
@@ -51,6 +52,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
     final showSpotlight = useState(false);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final hideAmounts = ref.watch(hideAmountsProvider);
 
     // Auto-post due recurring transactions when the budget opens.
     useEffect(() {
@@ -292,6 +294,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
                     totalActivityCents: totalActivityCents,
                     totalOverspentCents: totalOverspentCents,
                     currencyCode: currencyCode,
+                    hideAmounts: hideAmounts,
                   ),
                 if (!showSpotlight.value && isSearching.value) ...[
                   TextField(
@@ -1085,6 +1088,7 @@ class _SpotlightSummaryCard extends HookWidget {
     required this.totalActivityCents,
     required this.totalOverspentCents,
     required this.currencyCode,
+    required this.hideAmounts,
   });
 
   final int totalIncomeCents;
@@ -1092,6 +1096,7 @@ class _SpotlightSummaryCard extends HookWidget {
   final int totalActivityCents;
   final int totalOverspentCents;
   final CurrencyCode currencyCode;
+  final bool hideAmounts;
 
   @override
   Widget build(BuildContext context) {
@@ -1115,23 +1120,31 @@ class _SpotlightSummaryCard extends HookWidget {
           const SizedBox(height: SpacingTokens.sm),
           _SpotlightRow(
             label: 'Income',
-            value: formatCents(totalIncomeCents, currencyCode),
+            value: hideAmounts
+                ? hiddenAmountPlaceholder
+                : formatCents(totalIncomeCents, currencyCode),
             valueColor: OpenBudgetPalette.progressGreen,
           ),
           _SpotlightRow(
             label: 'Budgeted',
-            value: formatCents(totalBudgetedCents, currencyCode),
+            value: hideAmounts
+                ? hiddenAmountPlaceholder
+                : formatCents(totalBudgetedCents, currencyCode),
           ),
           _SpotlightRow(
             label: 'Spent',
-            value: formatCents(totalActivityCents, currencyCode),
+            value: hideAmounts
+                ? hiddenAmountPlaceholder
+                : formatCents(totalActivityCents, currencyCode),
             valueColor: totalActivityCents > 0
                 ? OpenBudgetPalette.negative
                 : OpenBudgetPalette.mutedText,
           ),
           _SpotlightRow(
             label: 'Overspent',
-            value: formatCents(totalOverspentCents, currencyCode),
+            value: hideAmounts
+                ? hiddenAmountPlaceholder
+                : formatCents(totalOverspentCents, currencyCode),
             valueColor: totalOverspentCents > 0
                 ? OpenBudgetPalette.negative
                 : OpenBudgetPalette.mutedText,

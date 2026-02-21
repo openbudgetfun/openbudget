@@ -1386,6 +1386,31 @@ class AppLocalizationsEn extends AppLocalizations {
       'Update login credentials or account security';
 
   @override
+  String get settingsAppIcon => 'App Icon';
+
+  @override
+  String get settingsAppIconHint =>
+      'Applies instantly to OpenBudget in-app branding previews.';
+
+  @override
+  String get settingsAppIconPrimary => 'Primary';
+
+  @override
+  String get settingsAppIconV1 => 'Classic';
+
+  @override
+  String get settingsAppIconV2 => 'Compass';
+
+  @override
+  String get settingsAppIconV3 => 'Sprout';
+
+  @override
+  String get settingsAppIconV4 => 'Ledger';
+
+  @override
+  String get settingsAppIconV5 => 'Arrow';
+
+  @override
   String get settingsAppSection => 'App';
 
   @override
@@ -1458,7 +1483,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsDisplayOptionsHint =>
-      'Display options are applied instantly and affect all budget amount pills.';
+      'Display options are applied instantly across OpenBudget screens.';
 
   @override
   String get settingsExportData => 'Export Budget';
@@ -1528,6 +1553,23 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsPlanSettings => 'Plan Settings';
+
+  @override
+  String get settingsPrivacySection => 'Privacy';
+
+  @override
+  String get settingsHideAmounts => 'Hide Amounts';
+
+  @override
+  String get settingsHideAmountsHint =>
+      'Conceal balances and transaction amounts.';
+
+  @override
+  String get settingsHideProgressBars => 'Hide Progress Bars';
+
+  @override
+  String get settingsHideProgressBarsHint =>
+      'Hide spending and funding progress visuals.';
 
   @override
   String get settingsRenameBudget => 'Rename Budget';

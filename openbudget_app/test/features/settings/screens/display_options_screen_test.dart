@@ -34,6 +34,9 @@ void main() {
       expect(find.text('Balance Style'), findsOneWidget);
       expect(find.text('Default'), findsOneWidget);
       expect(find.text('Differentiate Without Color'), findsOneWidget);
+      expect(find.text('Privacy'), findsOneWidget);
+      expect(find.text('Hide Amounts'), findsOneWidget);
+      expect(find.text('Hide Progress Bars'), findsOneWidget);
     });
 
     testWidgets('updates providers when selections change', (tester) async {
@@ -59,11 +62,25 @@ void main() {
       await tester.tap(find.text('Differentiate Without Color'));
       await tester.pumpAndSettle();
 
+      final hideAmountsSwitch = tester.widget<SwitchListTile>(
+        find.widgetWithText(SwitchListTile, 'Hide Amounts'),
+      );
+      hideAmountsSwitch.onChanged?.call(true);
+      await tester.pumpAndSettle();
+
+      final hideProgressBarsSwitch = tester.widget<SwitchListTile>(
+        find.widgetWithText(SwitchListTile, 'Hide Progress Bars'),
+      );
+      hideProgressBarsSwitch.onChanged?.call(true);
+      await tester.pumpAndSettle();
+
       expect(container.read(themeModeProvider), ThemeMode.dark);
       expect(
         container.read(balanceStyleProvider),
         BalanceStyle.differentiateWithoutColor,
       );
+      expect(container.read(hideAmountsProvider), isTrue);
+      expect(container.read(hideProgressBarsProvider), isTrue);
     });
   });
 }

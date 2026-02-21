@@ -20,6 +20,8 @@ class DisplayOptionsScreen extends HookConsumerWidget {
     final theme = Theme.of(context);
     final currentThemeMode = ref.watch(themeModeProvider);
     final currentBalanceStyle = ref.watch(balanceStyleProvider);
+    final hideAmounts = ref.watch(hideAmountsProvider);
+    final hideProgressBars = ref.watch(hideProgressBarsProvider);
 
     return Scaffold(
       backgroundColor: OpenBudgetPalette.appBackground,
@@ -136,6 +138,31 @@ class DisplayOptionsScreen extends HookConsumerWidget {
                   preview: const _BalanceStylePreview(
                     style: BalanceStyle.differentiateWithoutColor,
                   ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: SpacingTokens.lg),
+          _SectionLabel(label: l10n.settingsPrivacySection),
+          _SettingsCard(
+            child: Column(
+              children: [
+                _ToggleTile(
+                  label: l10n.settingsHideAmounts,
+                  subtitle: l10n.settingsHideAmountsHint,
+                  value: hideAmounts,
+                  onChanged: (value) => ref
+                      .read(hideAmountsProvider.notifier)
+                      .setHideAmounts(value: value),
+                ),
+                const Divider(height: 1),
+                _ToggleTile(
+                  label: l10n.settingsHideProgressBars,
+                  subtitle: l10n.settingsHideProgressBarsHint,
+                  value: hideProgressBars,
+                  onChanged: (value) => ref
+                      .read(hideProgressBarsProvider.notifier)
+                      .setHideProgressBars(value: value),
                 ),
               ],
             ),
@@ -274,6 +301,32 @@ class _BalanceStylePreview extends HookWidget {
           textColor: Color(0xFF234700),
         ),
       ],
+    );
+  }
+}
+
+class _ToggleTile extends HookWidget {
+  const _ToggleTile({
+    required this.label,
+    required this.subtitle,
+    required this.value,
+    required this.onChanged,
+  });
+
+  final String label;
+  final String subtitle;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return SwitchListTile(
+      value: value,
+      onChanged: onChanged,
+      title: Text(label),
+      subtitle: Text(subtitle),
+      activeThumbColor: OpenBudgetPalette.accentBlue,
+      contentPadding: const EdgeInsets.symmetric(horizontal: SpacingTokens.sm),
     );
   }
 }

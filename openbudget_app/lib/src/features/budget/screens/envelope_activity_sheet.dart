@@ -9,6 +9,7 @@ import 'package:openbudget_app/src/features/budget/providers/selected_month_prov
 import 'package:openbudget_app/src/features/budget/screens/edit_envelope_dialog.dart';
 import 'package:openbudget_app/src/features/budget/screens/move_money_dialog.dart';
 import 'package:openbudget_app/src/features/budget/screens/set_goal_dialog.dart';
+import 'package:openbudget_app/src/features/settings/providers/display_options_provider.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
@@ -44,6 +45,8 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final selectedMonth = ref.watch(selectedMonthProvider(budgetId));
+    final hideAmounts = ref.watch(hideAmountsProvider);
+    final hideProgressBars = ref.watch(hideProgressBarsProvider);
     final transactionsAsync = ref.watch(
       monthlyTransactionsProvider(
         budgetId,
@@ -105,7 +108,9 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
                       ),
                       const SizedBox(width: SpacingTokens.sm),
                       _AvailablePill(
-                        amount: formatCents(available, currencyCode),
+                        amount: hideAmounts
+                            ? hiddenAmountPlaceholder
+                            : formatCents(available, currencyCode),
                         color: availableColor,
                       ),
                     ],
@@ -142,6 +147,7 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
                     available: available,
                     currencyCode: currencyCode,
                     availableColor: availableColor,
+                    hideAmounts: hideAmounts,
                   ),
                   // Goal progress bar (if goal set)
                   if (goal != null) ...[
@@ -151,6 +157,8 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
                       budgetedCents: budgeted,
                       availableCents: available,
                       currencyCode: currencyCode,
+                      hideAmounts: hideAmounts,
+                      hideProgressBars: hideProgressBars,
                     ),
                   ],
                   const SizedBox(height: SpacingTokens.md),
@@ -256,7 +264,9 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
                               ),
                             ),
                             Text(
-                              formatCents(tx.amountCents, currencyCode),
+                              hideAmounts
+                                  ? hiddenAmountPlaceholder
+                                  : formatCents(tx.amountCents, currencyCode),
                               style: theme.textTheme.bodyMedium?.copyWith(
                                 fontWeight: FontWeight.w600,
                                 color: color,
@@ -369,6 +379,7 @@ class _BalanceGrid extends HookWidget {
     required this.available,
     required this.currencyCode,
     required this.availableColor,
+    required this.hideAmounts,
   });
 
   final int carryover;
@@ -377,6 +388,7 @@ class _BalanceGrid extends HookWidget {
   final int available;
   final CurrencyCode currencyCode;
   final Color availableColor;
+  final bool hideAmounts;
 
   @override
   Widget build(BuildContext context) {
@@ -397,7 +409,9 @@ class _BalanceGrid extends HookWidget {
               Expanded(
                 child: _BalanceGridCell(
                   label: l10n.envelopeFromLastMonth,
-                  amount: formatCents(carryover, currencyCode),
+                  amount: hideAmounts
+                      ? hiddenAmountPlaceholder
+                      : formatCents(carryover, currencyCode),
                   color: colorScheme.onSurface,
                 ),
               ),
@@ -405,7 +419,9 @@ class _BalanceGrid extends HookWidget {
               Expanded(
                 child: _BalanceGridCell(
                   label: l10n.envelopeAssigned,
-                  amount: formatCents(assigned, currencyCode),
+                  amount: hideAmounts
+                      ? hiddenAmountPlaceholder
+                      : formatCents(assigned, currencyCode),
                   color: ColorTokens.primary,
                 ),
               ),
@@ -417,7 +433,9 @@ class _BalanceGrid extends HookWidget {
               Expanded(
                 child: _BalanceGridCell(
                   label: l10n.envelopeActivityTitle,
-                  amount: formatCents(activity, currencyCode),
+                  amount: hideAmounts
+                      ? hiddenAmountPlaceholder
+                      : formatCents(activity, currencyCode),
                   color: ColorTokens.error,
                 ),
               ),
@@ -425,7 +443,9 @@ class _BalanceGrid extends HookWidget {
               Expanded(
                 child: _BalanceGridCell(
                   label: l10n.envelopeAvailable,
-                  amount: formatCents(available, currencyCode),
+                  amount: hideAmounts
+                      ? hiddenAmountPlaceholder
+                      : formatCents(available, currencyCode),
                   color: availableColor,
                 ),
               ),
@@ -479,12 +499,16 @@ class _GoalSummary extends HookWidget {
     required this.budgetedCents,
     required this.availableCents,
     required this.currencyCode,
+    required this.hideAmounts,
+    required this.hideProgressBars,
   });
 
   final EnvelopeGoal goal;
   final int budgetedCents;
   final int availableCents;
   final CurrencyCode currencyCode;
+  final bool hideAmounts;
+  final bool hideProgressBars;
 
   @override
   Widget build(BuildContext context) {
@@ -512,11 +536,11 @@ class _GoalSummary extends HookWidget {
 
     final goalLabel = switch (goal.goalType) {
       'target_balance' =>
-        'Target: ${formatCents(goal.targetAmountCents, currencyCode)}',
+        'Target: ${hideAmounts ? hiddenAmountPlaceholder : formatCents(goal.targetAmountCents, currencyCode)}',
       'monthly_funding' =>
-        'Monthly: ${formatCents(goal.monthlyFundingCents ?? goal.targetAmountCents, currencyCode)}',
+        'Monthly: ${hideAmounts ? hiddenAmountPlaceholder : formatCents(goal.monthlyFundingCents ?? goal.targetAmountCents, currencyCode)}',
       'target_by_date' =>
-        'Target: ${formatCents(goal.targetAmountCents, currencyCode)}${goal.targetDate != null ? ' by ${goal.targetDate!.year}-${goal.targetDate!.month.toString().padLeft(2, '0')}' : ''}',
+        'Target: ${hideAmounts ? hiddenAmountPlaceholder : formatCents(goal.targetAmountCents, currencyCode)}${goal.targetDate != null ? ' by ${goal.targetDate!.year}-${goal.targetDate!.month.toString().padLeft(2, '0')}' : ''}',
       _ => '',
     };
 
@@ -537,7 +561,7 @@ class _GoalSummary extends HookWidget {
             if (underfunded > 0) ...[
               const Spacer(),
               Text(
-                '${formatCents(underfunded, currencyCode)} needed',
+                '${hideAmounts ? hiddenAmountPlaceholder : formatCents(underfunded, currencyCode)} needed',
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: ColorTokens.error,
                 ),
@@ -545,16 +569,18 @@ class _GoalSummary extends HookWidget {
             ],
           ],
         ),
-        const SizedBox(height: 4),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(3),
-          child: LinearProgressIndicator(
-            value: clampedProgress,
-            minHeight: 6,
-            backgroundColor: barColor.withAlpha(30),
-            valueColor: AlwaysStoppedAnimation<Color>(barColor),
+        if (!hideProgressBars) ...[
+          const SizedBox(height: 4),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(3),
+            child: LinearProgressIndicator(
+              value: clampedProgress,
+              minHeight: 6,
+              backgroundColor: barColor.withAlpha(30),
+              valueColor: AlwaysStoppedAnimation<Color>(barColor),
+            ),
           ),
-        ),
+        ],
       ],
     );
   }

@@ -8,6 +8,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
 import 'package:openbudget_app/src/features/budget/widgets/envelope_row.dart';
+import 'package:openbudget_app/src/features/settings/providers/display_options_provider.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -65,6 +66,8 @@ void main() {
     MonthlyEnvelopeData? monthlyData,
     EnvelopeGoal? goal,
     VoidCallback? onQuickBudget,
+    bool hideAmounts = false,
+    bool hideProgressBars = false,
   }) {
     return ProviderScope(
       child: MaterialApp(
@@ -80,6 +83,8 @@ void main() {
             monthlyData: monthlyData,
             goal: goal,
             onQuickBudget: onQuickBudget,
+            hideAmounts: hideAmounts,
+            hideProgressBars: hideProgressBars,
           ),
         ),
       ),
@@ -206,6 +211,29 @@ void main() {
 
       // Should show underfunded text
       expect(find.textContaining('needed'), findsOneWidget);
+    });
+
+    testWidgets('obscures amount text when hide amounts is enabled', (
+      tester,
+    ) async {
+      final envelope = makeEnvelope();
+      await tester.pumpWidget(
+        buildSubject(envelope: envelope, hideAmounts: true),
+      );
+      await tester.pump();
+
+      expect(find.text(hiddenAmountPlaceholder), findsOneWidget);
+    });
+
+    testWidgets('hides progress bars when toggle is enabled', (tester) async {
+      final envelope = makeEnvelope(spentAmountCents: 25000);
+
+      await tester.pumpWidget(
+        buildSubject(envelope: envelope, hideProgressBars: true),
+      );
+      await tester.pump();
+
+      expect(find.byType(LinearProgressIndicator), findsNothing);
     });
   });
 }

@@ -65,5 +65,7 @@ const planSettingsRoute = 'planSettings';
 const planSettingsPath = '/budgets/:id/more/settings/plan';
 const currencySettingsRoute = 'currencySettings';
 const currencySettingsPath = '/budgets/:id/more/settings/plan/currency';
+const appIconRoute = 'appIcon';
+const appIconPath = '/budgets/:id/more/settings/app-icon';
 const displayOptionsRoute = 'displayOptions';
 const displayOptionsPath = '/budgets/:id/more/settings/display';

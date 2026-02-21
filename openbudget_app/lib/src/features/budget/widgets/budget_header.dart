@@ -5,6 +5,7 @@ import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/age_of_money_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/selected_month_provider.dart';
 import 'package:openbudget_app/src/features/budget/screens/auto_assign_dialog.dart';
+import 'package:openbudget_app/src/features/settings/providers/display_options_provider.dart';
 import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_core/openbudget_core.dart';
@@ -41,6 +42,7 @@ class BudgetHeader extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final ageOfMoneyAsync = ref.watch(ageOfMoneyProvider(budgetId));
+    final hideAmounts = ref.watch(hideAmountsProvider);
     final now = DateTime.now();
     final isCurrentMonth = year == now.year && month == now.month;
     final readyCardColor = readyToAssignCents >= 0
@@ -157,7 +159,9 @@ class BudgetHeader extends HookConsumerWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        formatCents(readyToAssignCents, currencyCode),
+                        hideAmounts
+                            ? hiddenAmountPlaceholder
+                            : formatCents(readyToAssignCents, currencyCode),
                         style: theme.textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.w800,
                           color: readyTextColor,
@@ -188,18 +192,24 @@ class BudgetHeader extends HookConsumerWidget {
                 children: [
                   _SummaryColumn(
                     label: l10n.budgetTotalIncome,
-                    value: formatCents(totalIncomeCents, currencyCode),
+                    value: hideAmounts
+                        ? hiddenAmountPlaceholder
+                        : formatCents(totalIncomeCents, currencyCode),
                     valueColor: OpenBudgetPalette.progressGreen,
                     theme: theme,
                   ),
                   _SummaryColumn(
                     label: l10n.budgetTotalBudgeted,
-                    value: formatCents(totalBudgetedCents, currencyCode),
+                    value: hideAmounts
+                        ? hiddenAmountPlaceholder
+                        : formatCents(totalBudgetedCents, currencyCode),
                     theme: theme,
                   ),
                   _SummaryColumn(
                     label: l10n.budgetTotalActivity,
-                    value: formatCents(-totalActivityCents, currencyCode),
+                    value: hideAmounts
+                        ? hiddenAmountPlaceholder
+                        : formatCents(-totalActivityCents, currencyCode),
                     valueColor: totalActivityCents > 0
                         ? OpenBudgetPalette.negative
                         : OpenBudgetPalette.progressGreen,
@@ -238,7 +248,9 @@ class BudgetHeader extends HookConsumerWidget {
                     Flexible(
                       child: Text(
                         l10n.budgetOverspentWarning(
-                          formatCents(totalOverspentCents, currencyCode),
+                          hideAmounts
+                              ? hiddenAmountPlaceholder
+                              : formatCents(totalOverspentCents, currencyCode),
                         ),
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: OpenBudgetPalette.negative,

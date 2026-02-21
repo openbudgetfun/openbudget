@@ -116,6 +116,15 @@ class SettingsScreen extends HookConsumerWidget {
               child: Column(
                 children: [
                   _SettingsTile(
+                    icon: Icons.apps_rounded,
+                    label: l10n.settingsAppIcon,
+                    onTap: () => context.goNamed(
+                      appIconRoute,
+                      pathParameters: {'id': budgetId},
+                    ),
+                  ),
+                  const Divider(height: 1),
+                  _SettingsTile(
                     icon: Icons.tune_rounded,
                     label: l10n.settingsDisplayOptions,
                     onTap: () => context.goNamed(

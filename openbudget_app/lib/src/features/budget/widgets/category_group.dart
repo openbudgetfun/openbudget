@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
 import 'package:openbudget_app/src/features/budget/widgets/envelope_row.dart';
+import 'package:openbudget_app/src/features/settings/providers/display_options_provider.dart';
 import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_client/openbudget_client.dart';
@@ -52,6 +53,8 @@ class CategoryGroup extends HookConsumerWidget {
     final category = categoryWithEnvelopes.category;
     final envelopes = categoryWithEnvelopes.envelopes;
     final theme = Theme.of(context);
+    final hideAmounts = ref.watch(hideAmountsProvider);
+    final hideProgressBars = ref.watch(hideProgressBarsProvider);
     final isReorderingEnvelopes = useState(false);
     final orderedEnvelopes = useState(List.of(envelopes));
 
@@ -118,10 +121,12 @@ class CategoryGroup extends HookConsumerWidget {
                           ),
                         ),
                         Text(
-                          formatCents(
-                            categoryWithEnvelopes.totalAvailableCents,
-                            currencyCode,
-                          ),
+                          hideAmounts
+                              ? hiddenAmountPlaceholder
+                              : formatCents(
+                                  categoryWithEnvelopes.totalAvailableCents,
+                                  currencyCode,
+                                ),
                           style: theme.textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.w700,
                             color: _availableColor(
@@ -227,6 +232,8 @@ class CategoryGroup extends HookConsumerWidget {
                   currencyCode: currencyCode,
                   monthlyData: monthlyData,
                   goal: envelopeGoal,
+                  hideAmounts: hideAmounts,
+                  hideProgressBars: hideProgressBars,
                   onTap: onShowActivity != null
                       ? () =>
                             onShowActivity!(envelope, monthlyData, envelopeGoal)

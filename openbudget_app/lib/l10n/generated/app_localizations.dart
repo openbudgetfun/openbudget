@@ -2302,6 +2302,54 @@ abstract class AppLocalizations {
   /// **'Update login credentials or account security'**
   String get settingsAccountSettingsHint;
 
+  /// No description provided for @settingsAppIcon.
+  ///
+  /// In en, this message translates to:
+  /// **'App Icon'**
+  String get settingsAppIcon;
+
+  /// No description provided for @settingsAppIconHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Applies instantly to OpenBudget in-app branding previews.'**
+  String get settingsAppIconHint;
+
+  /// No description provided for @settingsAppIconPrimary.
+  ///
+  /// In en, this message translates to:
+  /// **'Primary'**
+  String get settingsAppIconPrimary;
+
+  /// No description provided for @settingsAppIconV1.
+  ///
+  /// In en, this message translates to:
+  /// **'Classic'**
+  String get settingsAppIconV1;
+
+  /// No description provided for @settingsAppIconV2.
+  ///
+  /// In en, this message translates to:
+  /// **'Compass'**
+  String get settingsAppIconV2;
+
+  /// No description provided for @settingsAppIconV3.
+  ///
+  /// In en, this message translates to:
+  /// **'Sprout'**
+  String get settingsAppIconV3;
+
+  /// No description provided for @settingsAppIconV4.
+  ///
+  /// In en, this message translates to:
+  /// **'Ledger'**
+  String get settingsAppIconV4;
+
+  /// No description provided for @settingsAppIconV5.
+  ///
+  /// In en, this message translates to:
+  /// **'Arrow'**
+  String get settingsAppIconV5;
+
   /// No description provided for @settingsAppSection.
   ///
   /// In en, this message translates to:
@@ -2437,7 +2485,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsDisplayOptionsHint.
   ///
   /// In en, this message translates to:
-  /// **'Display options are applied instantly and affect all budget amount pills.'**
+  /// **'Display options are applied instantly across OpenBudget screens.'**
   String get settingsDisplayOptionsHint;
 
   /// No description provided for @settingsExportData.
@@ -2571,6 +2619,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Plan Settings'**
   String get settingsPlanSettings;
+
+  /// No description provided for @settingsPrivacySection.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy'**
+  String get settingsPrivacySection;
+
+  /// No description provided for @settingsHideAmounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide Amounts'**
+  String get settingsHideAmounts;
+
+  /// No description provided for @settingsHideAmountsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Conceal balances and transaction amounts.'**
+  String get settingsHideAmountsHint;
+
+  /// No description provided for @settingsHideProgressBars.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide Progress Bars'**
+  String get settingsHideProgressBars;
+
+  /// No description provided for @settingsHideProgressBarsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide spending and funding progress visuals.'**
+  String get settingsHideProgressBarsHint;
 
   /// No description provided for @settingsRenameBudget.
   ///

@@ -20,6 +20,8 @@ class EnvelopeRow extends HookConsumerWidget {
     this.monthlyData,
     this.onQuickBudget,
     this.goal,
+    this.hideAmounts = false,
+    this.hideProgressBars = false,
     super.key,
   });
 
@@ -30,6 +32,8 @@ class EnvelopeRow extends HookConsumerWidget {
   final MonthlyEnvelopeData? monthlyData;
   final VoidCallback? onQuickBudget;
   final EnvelopeGoal? goal;
+  final bool hideAmounts;
+  final bool hideProgressBars;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -97,7 +101,9 @@ class EnvelopeRow extends HookConsumerWidget {
                           if (carryover != 0)
                             Tooltip(
                               message: l10n.envelopeCarryover(
-                                formatCents(carryover, currencyCode),
+                                hideAmounts
+                                    ? hiddenAmountPlaceholder
+                                    : formatCents(carryover, currencyCode),
                               ),
                               child: Padding(
                                 padding: const EdgeInsets.only(
@@ -170,7 +176,9 @@ class EnvelopeRow extends HookConsumerWidget {
                         const SizedBox(width: 2),
                       ],
                       Text(
-                        formatCents(available, currencyCode),
+                        hideAmounts
+                            ? hiddenAmountPlaceholder
+                            : formatCents(available, currencyCode),
                         maxLines: 1,
                         style: theme.textTheme.titleSmall?.copyWith(
                           color: availableColor,
@@ -187,14 +195,15 @@ class EnvelopeRow extends HookConsumerWidget {
               ],
             ),
             const SizedBox(height: SpacingTokens.xs),
-            if (goal != null)
+            if (goal != null && !hideProgressBars)
               _GoalProgressBar(
                 goal: goal!,
                 budgetedCents: budgeted,
                 availableCents: available,
                 currencyCode: currencyCode,
+                hideAmounts: hideAmounts,
               )
-            else if (budgeted > 0)
+            else if (budgeted > 0 && !hideProgressBars)
               _SpendingProgressBar(budgetedCents: budgeted, spentCents: spent),
             if (goal == null && budgeted > 0) ...[
               const SizedBox(height: 3),
@@ -266,12 +275,14 @@ class _GoalProgressBar extends HookWidget {
     required this.budgetedCents,
     required this.availableCents,
     required this.currencyCode,
+    required this.hideAmounts,
   });
 
   final EnvelopeGoal goal;
   final int budgetedCents;
   final int availableCents;
   final CurrencyCode currencyCode;
+  final bool hideAmounts;
 
   @override
   Widget build(BuildContext context) {
@@ -319,7 +330,11 @@ class _GoalProgressBar extends HookWidget {
             Icon(Icons.warning_amber_rounded, size: 12, color: barColor),
             const SizedBox(width: 2),
             Text(
-              l10n.envelopeUnderfunded(formatCents(underfunded, currencyCode)),
+              l10n.envelopeUnderfunded(
+                hideAmounts
+                    ? hiddenAmountPlaceholder
+                    : formatCents(underfunded, currencyCode),
+              ),
               style: theme.textTheme.labelSmall?.copyWith(
                 color: barColor,
                 fontSize: 10,
