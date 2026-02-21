@@ -104,8 +104,26 @@ void main() {
         scrollable: find.byType(Scrollable).first,
       );
 
+      expect(find.text('Data'), findsOneWidget);
       expect(find.text('Export Budget'), findsOneWidget);
-      expect(find.text('Sign Out'), findsOneWidget);
+      expect(find.text('Account Settings'), findsOneWidget);
+      expect(find.text('YNAB Together'), findsOneWidget);
+      expect(find.text('Manage Bank Connections'), findsOneWidget);
+      expect(find.text('Log Out'), findsOneWidget);
+
+      await tester.scrollUntilVisible(
+        find.text('Terms of Service'),
+        400,
+        scrollable: find.byType(Scrollable).first,
+      );
+
+      expect(find.text('Misc'), findsOneWidget);
+      expect(find.text('Write a Review'), findsOneWidget);
+      expect(find.text('Send in Diagnostics'), findsOneWidget);
+      expect(find.text('Privacy Policy'), findsOneWidget);
+      expect(find.text('California Privacy Policy'), findsOneWidget);
+      expect(find.text('Your Privacy Choices'), findsOneWidget);
+      expect(find.text('Terms of Service'), findsOneWidget);
     });
   });
 }

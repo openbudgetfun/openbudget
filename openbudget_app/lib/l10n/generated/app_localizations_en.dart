@@ -639,6 +639,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dialogCancel => 'Cancel';
 
   @override
+  String get dialogDone => 'Done';
+
+  @override
   String get dialogSave => 'Save';
 
   @override
@@ -885,7 +888,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get importTitle => 'Import Transactions';
 
   @override
-  String get loginButton => 'Sign In';
+  String get loginButton => 'Log In';
+
+  @override
+  String get loginContinueWithApple => 'Continue with Apple';
+
+  @override
+  String get loginContinueWithGoogle => 'Continue with Google';
 
   @override
   String get loginCreateAccount => 'Create Account';
@@ -894,10 +903,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loginEmailLabel => 'Email';
 
   @override
+  String get loginForgotPassword => 'Forgot Password?';
+
+  @override
   String get loginLoading => 'Signing In...';
 
   @override
+  String get loginOrSeparator => 'or';
+
+  @override
   String get loginPasswordLabel => 'Password';
+
+  @override
+  String loginProviderUnavailable(String provider) {
+    return '$provider is not available yet.';
+  }
 
   @override
   String get loginTitle => 'Welcome to OpenBudget';
@@ -1336,6 +1356,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsAccountSection => 'Account';
 
   @override
+  String get settingsAccountEmail => 'openbudget.user@email.com';
+
+  @override
+  String get settingsAccountSettings => 'Account Settings';
+
+  @override
+  String get settingsAccountSettingsHint =>
+      'Update login credentials or account security';
+
+  @override
   String get settingsAppSection => 'App';
 
   @override
@@ -1352,6 +1382,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsBudgetSection => 'Budget';
+
+  @override
+  String get settingsCaliforniaPrivacyPolicy => 'California Privacy Policy';
+
+  @override
+  String settingsComingSoon(String featureName) {
+    return '$featureName is coming soon.';
+  }
 
   @override
   String get settingsCurrencyPlacement => 'Currency Placement';
@@ -1427,13 +1465,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsFreshStart => 'Make a Fresh Start';
 
   @override
+  String get settingsLastSynced => 'App last synced: 2026-02-21T02:00:00Z';
+
+  @override
+  String get settingsLegal => 'Legal';
+
+  @override
   String get settingsLoadError => 'Could not load settings';
 
   @override
-  String get settingsLoggedInAs => 'Signed in';
+  String get settingsLoggedInAs => 'Logged in as';
+
+  @override
+  String get settingsLogOut => 'Log Out';
 
   @override
   String get settingsLogoutConfirm => 'Are you sure you want to sign out?';
+
+  @override
+  String get settingsManageBankConnections => 'Manage Bank Connections';
+
+  @override
+  String get settingsMiscSection => 'Misc';
 
   @override
   String get settingsNavigationSection => 'Quick Access';
@@ -1467,10 +1520,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsRenameSuccess => 'Budget renamed';
 
   @override
+  String get settingsPrivacyPolicy => 'Privacy Policy';
+
+  @override
+  String get settingsSendDiagnostics => 'Send in Diagnostics';
+
+  @override
+  String get settingsTermsOfService => 'Terms of Service';
+
+  @override
+  String get settingsTogether => 'YNAB Together';
+
+  @override
   String get settingsTitle => 'Settings';
 
   @override
-  String get settingsVersion => 'OpenBudget v1.0.0';
+  String get settingsVersion => 'App Version 1.0.0 (1)';
+
+  @override
+  String get settingsWriteAReview => 'Write a Review';
+
+  @override
+  String get settingsYourPrivacyChoices => 'Your Privacy Choices';
 
   @override
   String get spendingByPayeeBreakdown => 'Spending Breakdown';

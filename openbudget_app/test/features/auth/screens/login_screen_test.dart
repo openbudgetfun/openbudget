@@ -23,19 +23,24 @@ void main() {
   }
 
   group('LoginScreen', () {
-    testWidgets('renders email and password fields', (tester) async {
+    testWidgets('renders ynab-style login actions and fields', (tester) async {
       await tester.pumpWidget(buildSubject());
       await tester.pump();
 
-      expect(find.text('Welcome to OpenBudget'), findsOneWidget);
+      expect(find.text('Continue with Apple'), findsOneWidget);
+      expect(find.text('Continue with Google'), findsOneWidget);
+      expect(find.text('Forgot Password?'), findsOneWidget);
       expect(find.byType(TextField), findsNWidgets(2));
     });
 
-    testWidgets('renders sign-in button', (tester) async {
+    testWidgets('login button starts disabled when form is empty', (
+      tester,
+    ) async {
       await tester.pumpWidget(buildSubject());
       await tester.pump(const Duration(milliseconds: 500));
 
-      expect(find.byType(FilledButton), findsOneWidget);
+      final button = tester.widget<FilledButton>(find.byType(FilledButton));
+      expect(button.onPressed, isNull);
     });
 
     testWidgets('can enter email and password text', (tester) async {
