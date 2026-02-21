@@ -615,6 +615,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get createBudgetTitle => 'Create Budget';
 
   @override
+  String get createBudgetDefaultName => 'My Plan';
+
+  @override
+  String get createBudgetPersonalize => 'Personalize Your Plan';
+
+  @override
+  String get createBudgetPlanCurrency => 'Plan Currency';
+
+  @override
+  String get createBudgetWelcomeTitle => 'Welcome, new YNABer!';
+
+  @override
+  String get createBudgetWelcomeSubtitle =>
+      'We\'ll show you how to give every dollar a job so you can spend without second-guessing.';
+
+  @override
+  String get createBudgetWelcomeBody =>
+      'First, let\'s make sure your categories are in tip-top shape.';
+
+  @override
   String get creditCardPaymentsTitle => 'Credit Card Payments';
 
   @override

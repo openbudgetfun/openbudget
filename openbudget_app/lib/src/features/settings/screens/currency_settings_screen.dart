@@ -3,12 +3,14 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
 import 'package:openbudget_app/src/features/settings/providers/display_options_provider.dart';
 import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
+import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/theme/ynab_palette.dart';
 import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_client/openbudget_client.dart';
@@ -34,7 +36,42 @@ class CurrencySettingsScreen extends HookConsumerWidget {
       appBar: AppBar(
         backgroundColor: YnabPalette.appBackground,
         surfaceTintColor: Colors.transparent,
-        title: Text(l10n.settingsCurrency),
+        automaticallyImplyLeading: false,
+        centerTitle: true,
+        leadingWidth: 92,
+        leading: TextButton(
+          onPressed: () => context.goNamed(
+            planSettingsRoute,
+            pathParameters: {'id': budgetId},
+          ),
+          child: Text(
+            l10n.dialogCancel,
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: theme.colorScheme.onSurface,
+            ),
+          ),
+        ),
+        title: Text(
+          l10n.settingsCurrency,
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => context.goNamed(
+              planSettingsRoute,
+              pathParameters: {'id': budgetId},
+            ),
+            child: Text(
+              l10n.dialogDone,
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: theme.colorScheme.onSurface,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
       ),
       body: budgetAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -59,6 +96,7 @@ class CurrencySettingsScreen extends HookConsumerWidget {
                       title: l10n.settingsCurrency,
                       value:
                           '${selectedCurrency.displayName} - ${selectedCurrency.code}',
+                      isNavigation: true,
                       onTap: () =>
                           _selectCurrency(context, ref, selectedCurrency),
                     ),
@@ -237,11 +275,13 @@ class _SettingsTile extends HookWidget {
     required this.title,
     required this.value,
     required this.onTap,
+    this.isNavigation = false,
   });
 
   final String title;
   final String value;
   final VoidCallback onTap;
+  final bool isNavigation;
 
   @override
   Widget build(BuildContext context) {
@@ -255,7 +295,10 @@ class _SettingsTile extends HookWidget {
           fontWeight: FontWeight.w500,
         ),
       ),
-      trailing: const Icon(Icons.chevron_right_rounded),
+      trailing: Icon(
+        isNavigation ? Icons.chevron_right_rounded : Icons.unfold_more_rounded,
+        color: YnabPalette.mutedText,
+      ),
     );
   }
 }

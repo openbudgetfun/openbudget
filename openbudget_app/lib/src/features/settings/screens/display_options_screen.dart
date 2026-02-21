@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/settings/providers/display_options_provider.dart';
 import 'package:openbudget_app/src/providers/theme_mode_provider.dart';
+import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/theme/ynab_palette.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 class DisplayOptionsScreen extends HookConsumerWidget {
-  const DisplayOptionsScreen({super.key});
+  const DisplayOptionsScreen({required this.budgetId, super.key});
+
+  final String budgetId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -22,7 +26,55 @@ class DisplayOptionsScreen extends HookConsumerWidget {
       appBar: AppBar(
         backgroundColor: YnabPalette.appBackground,
         surfaceTintColor: Colors.transparent,
-        title: Text(l10n.settingsDisplayOptions),
+        automaticallyImplyLeading: false,
+        centerTitle: true,
+        leadingWidth: 120,
+        leading: TextButton(
+          onPressed: () =>
+              context.goNamed(settingsRoute, pathParameters: {'id': budgetId}),
+          style: TextButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: SpacingTokens.xs),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                Icons.chevron_left_rounded,
+                size: 20,
+                color: theme.colorScheme.onSurface,
+              ),
+              Flexible(
+                child: Text(
+                  l10n.settingsTitle,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        title: Text(
+          l10n.settingsDisplayOptions,
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => context.goNamed(
+              settingsRoute,
+              pathParameters: {'id': budgetId},
+            ),
+            child: Text(
+              l10n.dialogDone,
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: theme.colorScheme.onSurface,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
       ),
       body: ListView(
         padding: const EdgeInsets.all(SpacingTokens.md),
@@ -158,10 +210,9 @@ class _SelectionTile extends HookWidget {
     return ListTile(
       onTap: onTap,
       title: Text(label),
-      leading: Icon(
-        selected ? Icons.check_rounded : Icons.circle_outlined,
-        color: selected ? YnabPalette.accentBlue : YnabPalette.mutedText,
-      ),
+      leading: selected
+          ? const Icon(Icons.check_rounded, color: YnabPalette.accentBlue)
+          : const SizedBox(width: 24),
     );
   }
 }
@@ -183,10 +234,9 @@ class _BalanceStyleTile extends HookWidget {
   Widget build(BuildContext context) {
     return ListTile(
       onTap: onTap,
-      leading: Icon(
-        selected ? Icons.check_rounded : Icons.circle_outlined,
-        color: selected ? YnabPalette.accentBlue : YnabPalette.mutedText,
-      ),
+      leading: selected
+          ? const Icon(Icons.check_rounded, color: YnabPalette.accentBlue)
+          : const SizedBox(width: 24),
       title: Text(label),
       subtitle: Padding(
         padding: const EdgeInsets.only(top: SpacingTokens.xs),

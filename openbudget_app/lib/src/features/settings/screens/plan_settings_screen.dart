@@ -36,7 +36,40 @@ class PlanSettingsScreen extends HookConsumerWidget {
       appBar: AppBar(
         backgroundColor: YnabPalette.appBackground,
         surfaceTintColor: Colors.transparent,
-        title: Text(l10n.settingsPlanSettings),
+        automaticallyImplyLeading: false,
+        centerTitle: true,
+        leadingWidth: 92,
+        leading: TextButton(
+          onPressed: () =>
+              context.goNamed(settingsRoute, pathParameters: {'id': budgetId}),
+          child: Text(
+            l10n.dialogCancel,
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: theme.colorScheme.onSurface,
+            ),
+          ),
+        ),
+        title: Text(
+          l10n.settingsPlanSettings,
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => context.goNamed(
+              settingsRoute,
+              pathParameters: {'id': budgetId},
+            ),
+            child: Text(
+              l10n.dialogDone,
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: theme.colorScheme.onSurface,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
       ),
       body: budgetAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -62,7 +95,6 @@ class PlanSettingsScreen extends HookConsumerWidget {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  trailing: const Icon(Icons.edit_outlined),
                   onTap: () => _showRenameBudgetDialog(context, ref, budget),
                 ),
               ),
@@ -73,6 +105,7 @@ class PlanSettingsScreen extends HookConsumerWidget {
                     _SettingChoiceTile(
                       title: l10n.settingsCurrency,
                       value: '${currency.displayName} - ${currency.code}',
+                      isNavigation: true,
                       onTap: () => context.goNamed(
                         currencySettingsRoute,
                         pathParameters: {'id': budgetId},
@@ -105,8 +138,13 @@ class PlanSettingsScreen extends HookConsumerWidget {
               FilledButton(
                 onPressed: () => _confirmDeletePlan(context, ref, budget),
                 style: FilledButton.styleFrom(
-                  backgroundColor: YnabPalette.negative.withAlpha(30),
+                  minimumSize: const Size.fromHeight(52),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(RadiusTokens.md),
+                  ),
+                  backgroundColor: YnabPalette.negative.withAlpha(24),
                   foregroundColor: YnabPalette.negative,
+                  elevation: 0,
                 ),
                 child: Text(l10n.settingsDeletePlan),
               ),
@@ -347,11 +385,13 @@ class _SettingChoiceTile extends HookWidget {
     required this.title,
     required this.value,
     required this.onTap,
+    this.isNavigation = false,
   });
 
   final String title;
   final String value;
   final VoidCallback onTap;
+  final bool isNavigation;
 
   @override
   Widget build(BuildContext context) {
@@ -365,7 +405,10 @@ class _SettingChoiceTile extends HookWidget {
           fontWeight: FontWeight.w500,
         ),
       ),
-      trailing: const Icon(Icons.chevron_right_rounded),
+      trailing: Icon(
+        isNavigation ? Icons.chevron_right_rounded : Icons.unfold_more_rounded,
+        color: YnabPalette.mutedText,
+      ),
     );
   }
 }

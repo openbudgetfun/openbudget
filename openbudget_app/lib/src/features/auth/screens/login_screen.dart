@@ -38,13 +38,9 @@ class LoginScreen extends HookConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const SizedBox(height: SpacingTokens.xl),
-                  const Icon(
-                    Icons.park_rounded,
-                    color: YnabPalette.accentBlue,
-                    size: 88,
-                  ),
-                  const SizedBox(height: SpacingTokens.xl),
+                  const SizedBox(height: SpacingTokens.xxl),
+                  const _YnabMark(key: Key('login-ynab-mark')),
+                  const SizedBox(height: SpacingTokens.xl + SpacingTokens.sm),
                   _LoginProviderButton(
                     icon: const Icon(Icons.apple_rounded, size: 22),
                     label: l10n.loginContinueWithApple,
@@ -215,7 +211,7 @@ class _LoginProviderButton extends HookWidget {
       style: TextButton.styleFrom(
         backgroundColor: YnabPalette.surfaceMuted,
         foregroundColor: theme.colorScheme.onSurface,
-        minimumSize: const Size.fromHeight(46),
+        minimumSize: const Size.fromHeight(50),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(RadiusTokens.sm),
         ),
@@ -227,6 +223,19 @@ class _LoginProviderButton extends HookWidget {
           fontWeight: FontWeight.w700,
         ),
       ),
+    );
+  }
+}
+
+class _YnabMark extends HookWidget {
+  const _YnabMark({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Icon(
+      Icons.park_rounded,
+      color: YnabPalette.accentBlue,
+      size: 96,
     );
   }
 }

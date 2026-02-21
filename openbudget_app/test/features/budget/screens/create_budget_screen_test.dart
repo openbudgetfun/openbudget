@@ -23,34 +23,36 @@ void main() {
   }
 
   group('CreateBudgetScreen', () {
-    testWidgets('renders budget name input and currency selector', (
-      tester,
-    ) async {
+    testWidgets('renders welcome onboarding layout', (tester) async {
       await tester.pumpWidget(buildSubject());
       await tester.pump();
 
-      // Title appears in AppBar and as heading
-      expect(find.text('Create Budget'), findsNWidgets(2));
-      expect(find.byType(TextField), findsOneWidget);
-      expect(find.byType(DropdownButtonFormField<String>), findsOneWidget);
+      expect(find.text('Welcome, new YNABer!'), findsOneWidget);
+      expect(find.text('Plan Currency'), findsOneWidget);
+      expect(find.text('US Dollar'), findsOneWidget);
+      expect(find.byType(TextField), findsNothing);
+      expect(find.byType(DropdownButtonFormField<String>), findsNothing);
     });
 
-    testWidgets('renders create button', (tester) async {
+    testWidgets('renders personalize action button', (tester) async {
       await tester.pumpWidget(buildSubject());
       await tester.pump();
 
-      expect(find.text('Create'), findsOneWidget);
+      expect(find.text('Personalize Your Plan'), findsOneWidget);
       expect(find.byType(FilledButton), findsOneWidget);
     });
 
-    testWidgets('can enter budget name', (tester) async {
+    testWidgets('opens currency selector from plan currency row', (
+      tester,
+    ) async {
       await tester.pumpWidget(buildSubject());
-      await tester.pump();
+      await tester.pumpAndSettle();
 
-      await tester.enterText(find.byType(TextField), 'My Budget');
-      await tester.pump();
+      await tester.ensureVisible(find.text('Plan Currency'));
+      await tester.tap(find.text('Plan Currency'));
+      await tester.pumpAndSettle();
 
-      expect(find.text('My Budget'), findsOneWidget);
+      expect(find.text('US Dollar (USD)'), findsWidgets);
     });
   });
 }

@@ -16,7 +16,7 @@ import 'package:openbudget_ui/openbudget_ui.dart';
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('create budget screen renders form fields', (tester) async {
+  testWidgets('create budget screen renders onboarding layout', (tester) async {
     final router = GoRouter(
       initialLocation: createBudgetPath,
       routes: [
@@ -39,9 +39,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Create Budget'), findsAtLeast(1));
-    expect(find.byType(TextField), findsOneWidget);
-    expect(find.byType(DropdownButtonFormField<String>), findsOneWidget);
+    expect(find.text('Welcome, new YNABer!'), findsOneWidget);
+    expect(find.text('Plan Currency'), findsOneWidget);
+    expect(find.text('US Dollar'), findsOneWidget);
     expect(find.byType(FilledButton), findsOneWidget);
   });
 
@@ -68,7 +68,7 @@ void main() {
       router.go(createBudgetPath);
       await tester.pumpAndSettle();
 
-      expect(find.text('Welcome to OpenBudget'), findsOneWidget);
+      expect(find.text('Continue with Apple'), findsOneWidget);
     },
   );
 }

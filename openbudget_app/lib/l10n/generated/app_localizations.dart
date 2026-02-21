@@ -1078,6 +1078,42 @@ abstract class AppLocalizations {
   /// **'Create Budget'**
   String get createBudgetTitle;
 
+  /// No description provided for @createBudgetDefaultName.
+  ///
+  /// In en, this message translates to:
+  /// **'My Plan'**
+  String get createBudgetDefaultName;
+
+  /// No description provided for @createBudgetPersonalize.
+  ///
+  /// In en, this message translates to:
+  /// **'Personalize Your Plan'**
+  String get createBudgetPersonalize;
+
+  /// No description provided for @createBudgetPlanCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan Currency'**
+  String get createBudgetPlanCurrency;
+
+  /// No description provided for @createBudgetWelcomeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome, new YNABer!'**
+  String get createBudgetWelcomeTitle;
+
+  /// No description provided for @createBudgetWelcomeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ll show you how to give every dollar a job so you can spend without second-guessing.'**
+  String get createBudgetWelcomeSubtitle;
+
+  /// No description provided for @createBudgetWelcomeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'First, let\'s make sure your categories are in tip-top shape.'**
+  String get createBudgetWelcomeBody;
+
   /// No description provided for @creditCardPaymentsTitle.
   ///
   /// In en, this message translates to:

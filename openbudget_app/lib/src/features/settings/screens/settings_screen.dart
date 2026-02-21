@@ -28,14 +28,8 @@ class SettingsScreen extends HookConsumerWidget {
       appBar: AppBar(
         backgroundColor: YnabPalette.appBackground,
         surfaceTintColor: Colors.transparent,
-        centerTitle: true,
         automaticallyImplyLeading: false,
-        title: Text(
-          l10n.settingsTitle,
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.w700,
-          ),
-        ),
+        title: const SizedBox.shrink(),
         actions: [
           TextButton(
             onPressed: () =>
@@ -63,6 +57,13 @@ class SettingsScreen extends HookConsumerWidget {
         data: (budget) => ListView(
           padding: const EdgeInsets.all(SpacingTokens.md),
           children: [
+            Text(
+              l10n.settingsTitle,
+              style: theme.textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: SpacingTokens.lg),
             _SectionTitle(title: l10n.settingsCurrentPlan),
             Padding(
               padding: const EdgeInsets.only(

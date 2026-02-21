@@ -27,6 +27,7 @@ void main() {
       await tester.pumpWidget(buildSubject());
       await tester.pump();
 
+      expect(find.byKey(const Key('login-ynab-mark')), findsOneWidget);
       expect(find.text('Continue with Apple'), findsOneWidget);
       expect(find.text('Continue with Google'), findsOneWidget);
       expect(find.text('Forgot Password?'), findsOneWidget);

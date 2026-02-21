@@ -295,7 +295,8 @@ GoRouter appRouter(Ref ref) {
                             name: displayOptionsRoute,
                             path: 'display',
                             builder: (context, state) {
-                              return const DisplayOptionsScreen();
+                              final id = state.pathParameters['id']!;
+                              return DisplayOptionsScreen(budgetId: id);
                             },
                           ),
                         ],

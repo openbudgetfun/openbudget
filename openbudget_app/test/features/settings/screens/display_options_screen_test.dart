@@ -21,7 +21,7 @@ void main() {
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const DisplayOptionsScreen(),
+            home: const DisplayOptionsScreen(budgetId: 'test-budget-id'),
           ),
         ),
       );
@@ -47,7 +47,7 @@ void main() {
             theme: OpenBudgetTheme.light,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const DisplayOptionsScreen(),
+            home: const DisplayOptionsScreen(budgetId: 'test-budget-id'),
           ),
         ),
       );
