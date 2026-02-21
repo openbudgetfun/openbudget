@@ -60,10 +60,9 @@ in
   };
 
   processes = {
-    "server:all" = {
+    "server:up" = {
       exec = ''
-        cd "$DEVENV_ROOT/openbudget_server"
-        dart bin/main.dart --apply-migrations
+        server:start
       '';
       process-compose = {
         depends_on = {
