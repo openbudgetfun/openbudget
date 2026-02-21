@@ -11,7 +11,7 @@ import 'package:openbudget_app/src/features/budget/providers/budget_summary_prov
 import 'package:openbudget_app/src/features/settings/providers/display_options_provider.dart';
 import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
-import 'package:openbudget_app/src/theme/ynab_palette.dart';
+import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
@@ -32,9 +32,9 @@ class CurrencySettingsScreen extends HookConsumerWidget {
     final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      backgroundColor: YnabPalette.appBackground,
+      backgroundColor: OpenBudgetPalette.appBackground,
       appBar: AppBar(
-        backgroundColor: YnabPalette.appBackground,
+        backgroundColor: OpenBudgetPalette.appBackground,
         surfaceTintColor: Colors.transparent,
         automaticallyImplyLeading: false,
         centerTitle: true,
@@ -261,9 +261,9 @@ class _SettingsCard extends HookWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: YnabPalette.surface,
+        color: OpenBudgetPalette.surface,
         borderRadius: BorderRadius.circular(RadiusTokens.md),
-        border: Border.all(color: YnabPalette.divider),
+        border: Border.all(color: OpenBudgetPalette.divider),
       ),
       child: child,
     );
@@ -297,7 +297,7 @@ class _SettingsTile extends HookWidget {
       ),
       trailing: Icon(
         isNavigation ? Icons.chevron_right_rounded : Icons.unfold_more_rounded,
-        color: YnabPalette.mutedText,
+        color: OpenBudgetPalette.mutedText,
       ),
     );
   }

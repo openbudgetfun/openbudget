@@ -5,7 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
-import 'package:openbudget_app/src/theme/ynab_palette.dart';
+import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
@@ -107,10 +107,10 @@ class CreateBudgetScreen extends HookConsumerWidget {
                     style: FilledButton.styleFrom(
                       elevation: 0,
                       minimumSize: const Size.fromHeight(52),
-                      backgroundColor: YnabPalette.accentBlue,
+                      backgroundColor: OpenBudgetPalette.accentBlue,
                       foregroundColor: Colors.white,
-                      disabledBackgroundColor: YnabPalette.divider,
-                      disabledForegroundColor: YnabPalette.mutedText,
+                      disabledBackgroundColor: OpenBudgetPalette.divider,
+                      disabledForegroundColor: OpenBudgetPalette.mutedText,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(RadiusTokens.sm),
                       ),
@@ -241,7 +241,7 @@ class _PlanCurrencyRow extends HookWidget {
           vertical: SpacingTokens.sm + 2,
         ),
         decoration: BoxDecoration(
-          color: YnabPalette.divider.withAlpha(55),
+          color: OpenBudgetPalette.divider.withAlpha(55),
           borderRadius: BorderRadius.circular(RadiusTokens.sm),
         ),
         child: Row(
@@ -253,7 +253,7 @@ class _PlanCurrencyRow extends HookWidget {
                   Text(
                     label,
                     style: theme.textTheme.titleMedium?.copyWith(
-                      color: YnabPalette.mutedText,
+                      color: OpenBudgetPalette.mutedText,
                     ),
                   ),
                   Text(
@@ -266,7 +266,7 @@ class _PlanCurrencyRow extends HookWidget {
                 ],
               ),
             ),
-            const Icon(Icons.edit_rounded, color: YnabPalette.mutedText),
+            const Icon(Icons.edit_rounded, color: OpenBudgetPalette.mutedText),
           ],
         ),
       ),

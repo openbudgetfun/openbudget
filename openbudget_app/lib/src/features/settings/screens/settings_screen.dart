@@ -8,7 +8,7 @@ import 'package:openbudget_app/src/features/auth/providers/auth_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
 import 'package:openbudget_app/src/features/settings/providers/budget_export_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
-import 'package:openbudget_app/src/theme/ynab_palette.dart';
+import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 class SettingsScreen extends HookConsumerWidget {
@@ -24,9 +24,9 @@ class SettingsScreen extends HookConsumerWidget {
     final budgetAsync = ref.watch(budgetDetailProvider(budgetId));
 
     return Scaffold(
-      backgroundColor: YnabPalette.appBackground,
+      backgroundColor: OpenBudgetPalette.appBackground,
       appBar: AppBar(
-        backgroundColor: YnabPalette.appBackground,
+        backgroundColor: OpenBudgetPalette.appBackground,
         surfaceTintColor: Colors.transparent,
         automaticallyImplyLeading: false,
         title: const SizedBox.shrink(),
@@ -190,7 +190,7 @@ class SettingsScreen extends HookConsumerWidget {
                         Text(
                           l10n.settingsLoggedInAs,
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: YnabPalette.mutedText,
+                            color: OpenBudgetPalette.mutedText,
                           ),
                         ),
                         const SizedBox(height: 2),
@@ -300,7 +300,7 @@ class SettingsScreen extends HookConsumerWidget {
               child: Text(
                 l10n.settingsVersion,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: YnabPalette.mutedText,
+                  color: OpenBudgetPalette.mutedText,
                 ),
               ),
             ),
@@ -309,7 +309,7 @@ class SettingsScreen extends HookConsumerWidget {
               child: Text(
                 l10n.settingsLastSynced,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: YnabPalette.mutedText,
+                  color: OpenBudgetPalette.mutedText,
                 ),
               ),
             ),
@@ -423,7 +423,7 @@ class _SectionTitle extends HookWidget {
       child: Text(
         title,
         style: theme.textTheme.labelSmall?.copyWith(
-          color: YnabPalette.mutedText,
+          color: OpenBudgetPalette.mutedText,
           fontWeight: FontWeight.w600,
         ),
       ),
@@ -440,9 +440,9 @@ class _SettingsCard extends HookWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: YnabPalette.surface,
+        color: OpenBudgetPalette.surface,
         borderRadius: BorderRadius.circular(RadiusTokens.md),
-        border: Border.all(color: YnabPalette.divider),
+        border: Border.all(color: OpenBudgetPalette.divider),
       ),
       child: child,
     );
@@ -467,19 +467,19 @@ class _SettingsTile extends HookWidget {
     final theme = Theme.of(context);
 
     return ListTile(
-      leading: Icon(icon, color: YnabPalette.mutedText),
+      leading: Icon(icon, color: OpenBudgetPalette.mutedText),
       title: Text(label, style: theme.textTheme.bodyLarge),
       subtitle: subtitle == null
           ? null
           : Text(
               subtitle!,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: YnabPalette.mutedText,
+                color: OpenBudgetPalette.mutedText,
               ),
             ),
       trailing: const Icon(
         Icons.chevron_right_rounded,
-        color: YnabPalette.mutedText,
+        color: OpenBudgetPalette.mutedText,
       ),
       onTap: onTap,
     );
