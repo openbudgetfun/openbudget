@@ -1336,16 +1336,71 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsAccountSection => 'Account';
 
   @override
+  String get settingsAppSection => 'App';
+
+  @override
+  String get settingsBalanceStyle => 'Balance Style';
+
+  @override
+  String get settingsBalanceStyleAccessible => 'Differentiate Without Color';
+
+  @override
+  String get settingsBalanceStyleDefault => 'Default';
+
+  @override
   String get settingsBudgetName => 'Budget Name';
 
   @override
   String get settingsBudgetSection => 'Budget';
 
   @override
+  String get settingsCurrencyPlacement => 'Currency Placement';
+
+  @override
+  String get settingsCurrencyPlacementAfter => 'After Amount (123,456.78\$)';
+
+  @override
+  String get settingsCurrencyPlacementBefore => 'Before Amount (\$123,456.78)';
+
+  @override
+  String get settingsCurrencyUpdateError =>
+      'Could not update plan currency. Please try again.';
+
+  @override
+  String settingsCurrencyUpdated(String currencyCode) {
+    return 'Plan currency updated to $currencyCode';
+  }
+
+  @override
   String get settingsCurrency => 'Currency';
 
   @override
   String get settingsDataSection => 'Data';
+
+  @override
+  String get settingsCurrentPlan => 'Current Plan';
+
+  @override
+  String get settingsDateFormat => 'Date Format';
+
+  @override
+  String get settingsDateFormatDayMonthYear => '30/12/2025';
+
+  @override
+  String get settingsDateFormatMonthDayYear => '12/30/2025';
+
+  @override
+  String get settingsDateFormatYearMonthDay => '2025-12-30';
+
+  @override
+  String get settingsDeletePlan => 'Delete Plan';
+
+  @override
+  String get settingsDisplayOptions => 'Display Options';
+
+  @override
+  String get settingsDisplayOptionsHint =>
+      'Display options are applied instantly and affect all budget amount pills.';
 
   @override
   String get settingsExportData => 'Export Budget';
@@ -1362,13 +1417,44 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsExportSuccess => 'Budget data copied to clipboard';
 
   @override
+  String get settingsFreshStartButton => 'Create New Plan';
+
+  @override
+  String get settingsFreshStartHint =>
+      'Create a new plan from scratch while keeping your existing plan intact.';
+
+  @override
+  String get settingsFreshStart => 'Make a Fresh Start';
+
+  @override
   String get settingsLoadError => 'Could not load settings';
+
+  @override
+  String get settingsLoggedInAs => 'Signed in';
 
   @override
   String get settingsLogoutConfirm => 'Are you sure you want to sign out?';
 
   @override
   String get settingsNavigationSection => 'Quick Access';
+
+  @override
+  String get settingsNewPlan => 'New Plan';
+
+  @override
+  String get settingsNumberFormat => 'Number Format';
+
+  @override
+  String get settingsNumberFormatEuropean => '123.456,78';
+
+  @override
+  String get settingsNumberFormatStandard => '123,456.78';
+
+  @override
+  String get settingsOpenPlan => 'Open Plan';
+
+  @override
+  String get settingsPlanSettings => 'Plan Settings';
 
   @override
   String get settingsRenameBudget => 'Rename Budget';

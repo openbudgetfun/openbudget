@@ -1,0 +1,265 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:openbudget_app/l10n/generated/app_localizations.dart';
+import 'package:openbudget_app/src/features/settings/providers/display_options_provider.dart';
+import 'package:openbudget_app/src/providers/theme_mode_provider.dart';
+import 'package:openbudget_app/src/theme/ynab_palette.dart';
+import 'package:openbudget_ui/openbudget_ui.dart';
+
+class DisplayOptionsScreen extends HookConsumerWidget {
+  const DisplayOptionsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final currentThemeMode = ref.watch(themeModeProvider);
+    final currentBalanceStyle = ref.watch(balanceStyleProvider);
+
+    return Scaffold(
+      backgroundColor: YnabPalette.appBackground,
+      appBar: AppBar(
+        backgroundColor: YnabPalette.appBackground,
+        surfaceTintColor: Colors.transparent,
+        title: Text(l10n.settingsDisplayOptions),
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(SpacingTokens.md),
+        children: [
+          _SectionLabel(label: l10n.themeTitle),
+          _SettingsCard(
+            child: Column(
+              children: [
+                _SelectionTile(
+                  label: l10n.themeLight,
+                  selected: currentThemeMode == ThemeMode.light,
+                  onTap: () => ref
+                      .read(themeModeProvider.notifier)
+                      .setThemeMode(ThemeMode.light),
+                ),
+                const Divider(height: 1),
+                _SelectionTile(
+                  label: l10n.themeDark,
+                  selected: currentThemeMode == ThemeMode.dark,
+                  onTap: () => ref
+                      .read(themeModeProvider.notifier)
+                      .setThemeMode(ThemeMode.dark),
+                ),
+                const Divider(height: 1),
+                _SelectionTile(
+                  label: l10n.themeSystem,
+                  selected: currentThemeMode == ThemeMode.system,
+                  onTap: () => ref
+                      .read(themeModeProvider.notifier)
+                      .setThemeMode(ThemeMode.system),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: SpacingTokens.lg),
+          _SectionLabel(label: l10n.settingsBalanceStyle),
+          _SettingsCard(
+            child: Column(
+              children: [
+                _BalanceStyleTile(
+                  label: l10n.settingsBalanceStyleDefault,
+                  selected: currentBalanceStyle == BalanceStyle.standard,
+                  onTap: () => ref
+                      .read(balanceStyleProvider.notifier)
+                      .setBalanceStyle(BalanceStyle.standard),
+                  preview: const _BalanceStylePreview(
+                    style: BalanceStyle.standard,
+                  ),
+                ),
+                const Divider(height: 1),
+                _BalanceStyleTile(
+                  label: l10n.settingsBalanceStyleAccessible,
+                  selected:
+                      currentBalanceStyle ==
+                      BalanceStyle.differentiateWithoutColor,
+                  onTap: () => ref
+                      .read(balanceStyleProvider.notifier)
+                      .setBalanceStyle(BalanceStyle.differentiateWithoutColor),
+                  preview: const _BalanceStylePreview(
+                    style: BalanceStyle.differentiateWithoutColor,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: SpacingTokens.lg),
+          Text(
+            l10n.settingsDisplayOptionsHint,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: YnabPalette.mutedText,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SettingsCard extends HookWidget {
+  const _SettingsCard({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: YnabPalette.surface,
+        borderRadius: BorderRadius.circular(RadiusTokens.md),
+        border: Border.all(color: YnabPalette.divider),
+      ),
+      child: child,
+    );
+  }
+}
+
+class _SectionLabel extends HookWidget {
+  const _SectionLabel({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(
+        left: SpacingTokens.xs,
+        bottom: SpacingTokens.xs,
+      ),
+      child: Text(
+        label,
+        style: theme.textTheme.titleSmall?.copyWith(
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+}
+
+class _SelectionTile extends HookWidget {
+  const _SelectionTile({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      onTap: onTap,
+      title: Text(label),
+      leading: Icon(
+        selected ? Icons.check_rounded : Icons.circle_outlined,
+        color: selected ? YnabPalette.accentBlue : YnabPalette.mutedText,
+      ),
+    );
+  }
+}
+
+class _BalanceStyleTile extends HookWidget {
+  const _BalanceStyleTile({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+    required this.preview,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+  final Widget preview;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      onTap: onTap,
+      leading: Icon(
+        selected ? Icons.check_rounded : Icons.circle_outlined,
+        color: selected ? YnabPalette.accentBlue : YnabPalette.mutedText,
+      ),
+      title: Text(label),
+      subtitle: Padding(
+        padding: const EdgeInsets.only(top: SpacingTokens.xs),
+        child: preview,
+      ),
+    );
+  }
+}
+
+class _BalanceStylePreview extends HookWidget {
+  const _BalanceStylePreview({required this.style});
+
+  final BalanceStyle style;
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: SpacingTokens.xs,
+      runSpacing: SpacingTokens.xs,
+      children: [
+        _SampleBalancePill(
+          label: r'-$10.00',
+          color: const Color(0xFFF5B2B6),
+          textColor: const Color(0xFF5E1C23),
+          emphasize: style == BalanceStyle.differentiateWithoutColor,
+        ),
+        const _SampleBalancePill(
+          label: r'$10.00',
+          color: Color(0xFFE8C743),
+          textColor: Color(0xFF4B3A00),
+        ),
+        const _SampleBalancePill(
+          label: r'$10.00',
+          color: Color(0xFFA6DC57),
+          textColor: Color(0xFF234700),
+        ),
+      ],
+    );
+  }
+}
+
+class _SampleBalancePill extends HookWidget {
+  const _SampleBalancePill({
+    required this.label,
+    required this.color,
+    required this.textColor,
+    this.emphasize = false,
+  });
+
+  final String label;
+  final Color color;
+  final Color textColor;
+  final bool emphasize;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(999),
+        border: emphasize
+            ? Border.all(color: const Color(0xFFC23043), width: 1.5)
+            : null,
+      ),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+          color: textColor,
+          fontWeight: FontWeight.w700,
+          decoration: emphasize ? TextDecoration.underline : null,
+        ),
+      ),
+    );
+  }
+}

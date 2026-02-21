@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_goals_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
+import 'package:openbudget_app/src/features/settings/providers/display_options_provider.dart';
 import 'package:openbudget_app/src/theme/ynab_palette.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_client/openbudget_client.dart';
@@ -38,11 +39,15 @@ class EnvelopeRow extends HookConsumerWidget {
     final spent = monthlyData?.spentCents ?? envelope.spentAmountCents;
     final available = monthlyData?.availableCents ?? (budgeted - spent);
     final carryover = monthlyData?.carryoverCents ?? 0;
+    final balanceStyle = ref.watch(balanceStyleProvider);
     final availableColor = available > 0
         ? ColorTokens.secondary
         : available < 0
         ? ColorTokens.error
         : ColorTokens.tertiary;
+    final shouldDifferentiateWithoutColor =
+        balanceStyle == BalanceStyle.differentiateWithoutColor &&
+        available != 0;
     final theme = Theme.of(context);
 
     return InkWell(
@@ -144,14 +149,39 @@ class EnvelopeRow extends HookConsumerWidget {
                   decoration: BoxDecoration(
                     color: availableColor.withAlpha(18),
                     borderRadius: BorderRadius.circular(999),
+                    border: shouldDifferentiateWithoutColor
+                        ? Border.all(
+                            color: availableColor.withAlpha(160),
+                            width: 1.5,
+                          )
+                        : null,
                   ),
-                  child: Text(
-                    formatCents(available, currencyCode),
-                    maxLines: 1,
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      color: availableColor,
-                      fontWeight: FontWeight.w700,
-                    ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (shouldDifferentiateWithoutColor) ...[
+                        Icon(
+                          available < 0
+                              ? Icons.remove_rounded
+                              : Icons.add_rounded,
+                          size: 12,
+                          color: availableColor,
+                        ),
+                        const SizedBox(width: 2),
+                      ],
+                      Text(
+                        formatCents(available, currencyCode),
+                        maxLines: 1,
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          color: availableColor,
+                          fontWeight: FontWeight.w700,
+                          decoration:
+                              shouldDifferentiateWithoutColor && available < 0
+                              ? TextDecoration.underline
+                              : null,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
