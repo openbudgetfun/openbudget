@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/auth/providers/auth_provider.dart';
 import 'package:openbudget_app/src/features/auth/providers/auth_state.dart';
-import 'package:openbudget_app/src/routing/route_names.dart';
+import 'package:openbudget_app/src/theme/ynab_palette.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 class LoginScreen extends HookConsumerWidget {
@@ -16,123 +15,159 @@ class LoginScreen extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final emailController = useTextEditingController();
     final passwordController = useTextEditingController();
+    useListenable(emailController);
+    useListenable(passwordController);
     final authState = ref.watch(authProvider);
     final isLoading = authState is AuthLoading;
     final errorMessage = authState is AuthError ? authState.message : null;
+    final obscurePassword = useState(true);
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final canLogin =
+        !isLoading &&
+        emailController.text.trim().isNotEmpty &&
+        passwordController.text.isNotEmpty;
 
     return Scaffold(
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(SpacingTokens.xl),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 400),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  width: 80,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    color: colorScheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(RadiusTokens.xl),
+      backgroundColor: const Color(0xFFF5F4F2),
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(SpacingTokens.md),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 400),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const SizedBox(height: SpacingTokens.xl),
+                  const Icon(
+                    Icons.park_rounded,
+                    color: YnabPalette.accentBlue,
+                    size: 88,
                   ),
-                  child: Icon(
-                    Icons.account_balance_wallet_rounded,
-                    size: 40,
-                    color: colorScheme.onPrimaryContainer,
+                  const SizedBox(height: SpacingTokens.xl),
+                  _LoginProviderButton(
+                    icon: const Icon(Icons.apple_rounded, size: 22),
+                    label: l10n.loginContinueWithApple,
+                    onPressed: () =>
+                        _showUnavailable(context, l10n.loginContinueWithApple),
                   ),
-                ),
-                const SizedBox(height: SpacingTokens.lg),
-                Text(
-                  l10n.loginTitle,
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
+                  const SizedBox(height: SpacingTokens.sm),
+                  _LoginProviderButton(
+                    icon: Text(
+                      'G',
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        color: const Color(0xFFDB4437),
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    label: l10n.loginContinueWithGoogle,
+                    onPressed: () =>
+                        _showUnavailable(context, l10n.loginContinueWithGoogle),
                   ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: SpacingTokens.xl),
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(SpacingTokens.lg),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        if (errorMessage != null) ...[
-                          Container(
-                            padding: const EdgeInsets.all(SpacingTokens.sm),
-                            decoration: BoxDecoration(
-                              color: colorScheme.errorContainer,
-                              borderRadius: BorderRadius.circular(
-                                RadiusTokens.sm,
-                              ),
-                            ),
-                            child: Text(
-                              errorMessage,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: colorScheme.onErrorContainer,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                          const SizedBox(height: SpacingTokens.md),
-                        ],
-                        TextField(
-                          controller: emailController,
-                          decoration: InputDecoration(
-                            labelText: l10n.loginEmailLabel,
-                            prefixIcon: const Icon(Icons.email_outlined),
-                          ),
-                          keyboardType: TextInputType.emailAddress,
-                          textInputAction: TextInputAction.next,
+                  const SizedBox(height: SpacingTokens.md),
+                  Row(
+                    children: [
+                      const Expanded(
+                        child: Divider(color: YnabPalette.divider, height: 1),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: SpacingTokens.md,
                         ),
-                        const SizedBox(height: SpacingTokens.md),
-                        TextField(
-                          controller: passwordController,
-                          decoration: InputDecoration(
-                            labelText: l10n.loginPasswordLabel,
-                            prefixIcon: const Icon(Icons.lock_outlined),
+                        child: Text(
+                          l10n.loginOrSeparator,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: YnabPalette.mutedText,
                           ),
-                          obscureText: true,
-                          textInputAction: TextInputAction.done,
-                          onSubmitted: isLoading
-                              ? null
-                              : (_) => _login(
-                                  ref,
-                                  emailController,
-                                  passwordController,
-                                ),
                         ),
-                        const SizedBox(height: SpacingTokens.lg),
-                        FilledButton(
-                          onPressed: isLoading
-                              ? null
-                              : () => _login(
-                                  ref,
-                                  emailController,
-                                  passwordController,
-                                ),
-                          child: isLoading
-                              ? const SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              : Text(l10n.loginButton),
+                      ),
+                      const Expanded(
+                        child: Divider(color: YnabPalette.divider, height: 1),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: SpacingTokens.md),
+                  if (errorMessage != null) ...[
+                    Container(
+                      padding: const EdgeInsets.all(SpacingTokens.sm),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.errorContainer,
+                        borderRadius: BorderRadius.circular(RadiusTokens.sm),
+                      ),
+                      child: Text(
+                        errorMessage,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onErrorContainer,
                         ),
-                      ],
+                      ),
+                    ),
+                    const SizedBox(height: SpacingTokens.md),
+                  ],
+                  _LoginTextField(
+                    controller: emailController,
+                    hintText: l10n.loginEmailLabel,
+                    keyboardType: TextInputType.emailAddress,
+                    textInputAction: TextInputAction.next,
+                  ),
+                  const SizedBox(height: SpacingTokens.sm),
+                  _LoginTextField(
+                    controller: passwordController,
+                    hintText: l10n.loginPasswordLabel,
+                    obscureText: obscurePassword.value,
+                    textInputAction: TextInputAction.done,
+                    suffixIcon: IconButton(
+                      onPressed: () =>
+                          obscurePassword.value = !obscurePassword.value,
+                      icon: Icon(
+                        obscurePassword.value
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
+                        color: YnabPalette.mutedText,
+                      ),
+                    ),
+                    onSubmitted: canLogin
+                        ? (_) =>
+                              _login(ref, emailController, passwordController)
+                        : null,
+                  ),
+                  const SizedBox(height: SpacingTokens.md),
+                  FilledButton(
+                    onPressed: canLogin
+                        ? () => _login(ref, emailController, passwordController)
+                        : null,
+                    style: FilledButton.styleFrom(
+                      elevation: 0,
+                      minimumSize: const Size.fromHeight(48),
+                      backgroundColor: YnabPalette.accentBlue,
+                      foregroundColor: Colors.white,
+                      disabledBackgroundColor: YnabPalette.divider,
+                      disabledForegroundColor: YnabPalette.mutedText,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(RadiusTokens.sm),
+                      ),
+                    ),
+                    child: isLoading
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : Text(l10n.loginButton),
+                  ),
+                  const SizedBox(height: SpacingTokens.sm),
+                  TextButton(
+                    onPressed: () =>
+                        _showUnavailable(context, l10n.loginForgotPassword),
+                    child: Text(
+                      l10n.loginForgotPassword,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: YnabPalette.accentBlue,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: SpacingTokens.lg),
-                TextButton(
-                  onPressed: () => context.go(registerPath),
-                  child: Text(l10n.loginCreateAccount),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -151,5 +186,104 @@ class LoginScreen extends HookConsumerWidget {
           email: emailController.text.trim(),
           password: passwordController.text,
         );
+  }
+
+  void _showUnavailable(BuildContext context, String provider) {
+    final l10n = AppLocalizations.of(context);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.loginProviderUnavailable(provider))),
+    );
+  }
+}
+
+class _LoginProviderButton extends HookWidget {
+  const _LoginProviderButton({
+    required this.icon,
+    required this.label,
+    required this.onPressed,
+  });
+
+  final Widget icon;
+  final String label;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return TextButton.icon(
+      onPressed: onPressed,
+      style: TextButton.styleFrom(
+        backgroundColor: YnabPalette.surfaceMuted,
+        foregroundColor: theme.colorScheme.onSurface,
+        minimumSize: const Size.fromHeight(46),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(RadiusTokens.sm),
+        ),
+      ),
+      icon: icon,
+      label: Text(
+        label,
+        style: theme.textTheme.titleMedium?.copyWith(
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+}
+
+class _LoginTextField extends HookWidget {
+  const _LoginTextField({
+    required this.controller,
+    required this.hintText,
+    this.keyboardType,
+    this.textInputAction,
+    this.obscureText = false,
+    this.suffixIcon,
+    this.onSubmitted,
+  });
+
+  final TextEditingController controller;
+  final String hintText;
+  final TextInputType? keyboardType;
+  final TextInputAction? textInputAction;
+  final bool obscureText;
+  final Widget? suffixIcon;
+  final ValueChanged<String>? onSubmitted;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return TextField(
+      controller: controller,
+      keyboardType: keyboardType,
+      textInputAction: textInputAction,
+      obscureText: obscureText,
+      onSubmitted: onSubmitted,
+      decoration: InputDecoration(
+        hintText: hintText,
+        hintStyle: theme.textTheme.bodyLarge?.copyWith(
+          color: YnabPalette.mutedText,
+        ),
+        filled: true,
+        fillColor: YnabPalette.surfaceMuted,
+        suffixIcon: suffixIcon,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(RadiusTokens.sm),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(RadiusTokens.sm),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(RadiusTokens.sm),
+          borderSide: const BorderSide(color: YnabPalette.divider),
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: SpacingTokens.md,
+          vertical: SpacingTokens.md,
+        ),
+      ),
+    );
   }
 }

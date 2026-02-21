@@ -1126,6 +1126,12 @@ abstract class AppLocalizations {
   /// **'Cancel'**
   String get dialogCancel;
 
+  /// No description provided for @dialogDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get dialogDone;
+
   /// No description provided for @dialogSave.
   ///
   /// In en, this message translates to:
@@ -1459,8 +1465,20 @@ abstract class AppLocalizations {
   /// No description provided for @loginButton.
   ///
   /// In en, this message translates to:
-  /// **'Sign In'**
+  /// **'Log In'**
   String get loginButton;
+
+  /// No description provided for @loginContinueWithApple.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue with Apple'**
+  String get loginContinueWithApple;
+
+  /// No description provided for @loginContinueWithGoogle.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue with Google'**
+  String get loginContinueWithGoogle;
 
   /// No description provided for @loginCreateAccount.
   ///
@@ -1474,17 +1492,35 @@ abstract class AppLocalizations {
   /// **'Email'**
   String get loginEmailLabel;
 
+  /// No description provided for @loginForgotPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot Password?'**
+  String get loginForgotPassword;
+
   /// No description provided for @loginLoading.
   ///
   /// In en, this message translates to:
   /// **'Signing In...'**
   String get loginLoading;
 
+  /// No description provided for @loginOrSeparator.
+  ///
+  /// In en, this message translates to:
+  /// **'or'**
+  String get loginOrSeparator;
+
   /// No description provided for @loginPasswordLabel.
   ///
   /// In en, this message translates to:
   /// **'Password'**
   String get loginPasswordLabel;
+
+  /// No description provided for @loginProviderUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'{provider} is not available yet.'**
+  String loginProviderUnavailable(String provider);
 
   /// No description provided for @loginTitle.
   ///
@@ -2212,6 +2248,24 @@ abstract class AppLocalizations {
   /// **'Account'**
   String get settingsAccountSection;
 
+  /// No description provided for @settingsAccountEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'openbudget.user@email.com'**
+  String get settingsAccountEmail;
+
+  /// No description provided for @settingsAccountSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Settings'**
+  String get settingsAccountSettings;
+
+  /// No description provided for @settingsAccountSettingsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Update login credentials or account security'**
+  String get settingsAccountSettingsHint;
+
   /// No description provided for @settingsAppSection.
   ///
   /// In en, this message translates to:
@@ -2247,6 +2301,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Budget'**
   String get settingsBudgetSection;
+
+  /// No description provided for @settingsCaliforniaPrivacyPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'California Privacy Policy'**
+  String get settingsCaliforniaPrivacyPolicy;
+
+  /// No description provided for @settingsComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'{featureName} is coming soon.'**
+  String settingsComingSoon(String featureName);
 
   /// No description provided for @settingsCurrencyPlacement.
   ///
@@ -2380,6 +2446,18 @@ abstract class AppLocalizations {
   /// **'Make a Fresh Start'**
   String get settingsFreshStart;
 
+  /// No description provided for @settingsLastSynced.
+  ///
+  /// In en, this message translates to:
+  /// **'App last synced: 2026-02-21T02:00:00Z'**
+  String get settingsLastSynced;
+
+  /// No description provided for @settingsLegal.
+  ///
+  /// In en, this message translates to:
+  /// **'Legal'**
+  String get settingsLegal;
+
   /// No description provided for @settingsLoadError.
   ///
   /// In en, this message translates to:
@@ -2389,14 +2467,32 @@ abstract class AppLocalizations {
   /// No description provided for @settingsLoggedInAs.
   ///
   /// In en, this message translates to:
-  /// **'Signed in'**
+  /// **'Logged in as'**
   String get settingsLoggedInAs;
+
+  /// No description provided for @settingsLogOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Log Out'**
+  String get settingsLogOut;
 
   /// No description provided for @settingsLogoutConfirm.
   ///
   /// In en, this message translates to:
   /// **'Are you sure you want to sign out?'**
   String get settingsLogoutConfirm;
+
+  /// No description provided for @settingsManageBankConnections.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Bank Connections'**
+  String get settingsManageBankConnections;
+
+  /// No description provided for @settingsMiscSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Misc'**
+  String get settingsMiscSection;
 
   /// No description provided for @settingsNavigationSection.
   ///
@@ -2458,6 +2554,30 @@ abstract class AppLocalizations {
   /// **'Budget renamed'**
   String get settingsRenameSuccess;
 
+  /// No description provided for @settingsPrivacyPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get settingsPrivacyPolicy;
+
+  /// No description provided for @settingsSendDiagnostics.
+  ///
+  /// In en, this message translates to:
+  /// **'Send in Diagnostics'**
+  String get settingsSendDiagnostics;
+
+  /// No description provided for @settingsTermsOfService.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms of Service'**
+  String get settingsTermsOfService;
+
+  /// No description provided for @settingsTogether.
+  ///
+  /// In en, this message translates to:
+  /// **'YNAB Together'**
+  String get settingsTogether;
+
   /// No description provided for @settingsTitle.
   ///
   /// In en, this message translates to:
@@ -2467,8 +2587,20 @@ abstract class AppLocalizations {
   /// No description provided for @settingsVersion.
   ///
   /// In en, this message translates to:
-  /// **'OpenBudget v1.0.0'**
+  /// **'App Version 1.0.0 (1)'**
   String get settingsVersion;
+
+  /// No description provided for @settingsWriteAReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Write a Review'**
+  String get settingsWriteAReview;
+
+  /// No description provided for @settingsYourPrivacyChoices.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Privacy Choices'**
+  String get settingsYourPrivacyChoices;
 
   /// No description provided for @spendingByPayeeBreakdown.
   ///

@@ -28,7 +28,27 @@ class SettingsScreen extends HookConsumerWidget {
       appBar: AppBar(
         backgroundColor: YnabPalette.appBackground,
         surfaceTintColor: Colors.transparent,
-        title: Text(l10n.settingsTitle),
+        centerTitle: true,
+        automaticallyImplyLeading: false,
+        title: Text(
+          l10n.settingsTitle,
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () =>
+                context.goNamed(moreRoute, pathParameters: {'id': budgetId}),
+            child: Text(
+              l10n.dialogDone,
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: theme.colorScheme.onSurface,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
       ),
       body: budgetAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -142,30 +162,134 @@ class SettingsScreen extends HookConsumerWidget {
               ),
             ),
             const SizedBox(height: SpacingTokens.lg),
+            _SectionTitle(title: l10n.settingsDataSection),
+            _SettingsCard(
+              child: _SettingsTile(
+                icon: Icons.download_rounded,
+                label: l10n.settingsExportData,
+                subtitle: l10n.settingsExportDataHint,
+                onTap: () => _exportBudgetData(context, ref),
+              ),
+            ),
+            const SizedBox(height: SpacingTokens.lg),
             _SectionTitle(title: l10n.settingsAccountSection),
             _SettingsCard(
               child: Column(
                 children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      SpacingTokens.md,
+                      SpacingTokens.md,
+                      SpacingTokens.md,
+                      SpacingTokens.sm,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.settingsLoggedInAs,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: YnabPalette.mutedText,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          l10n.settingsAccountEmail,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Divider(height: 1),
                   _SettingsTile(
-                    icon: Icons.download_rounded,
-                    label: l10n.settingsExportData,
-                    subtitle: l10n.settingsExportDataHint,
-                    onTap: () => _exportBudgetData(context, ref),
+                    icon: Icons.person_rounded,
+                    label: l10n.settingsAccountSettings,
+                    subtitle: l10n.settingsAccountSettingsHint,
+                    onTap: () =>
+                        _showComingSoon(context, l10n.settingsAccountSettings),
+                  ),
+                  const Divider(height: 1),
+                  _SettingsTile(
+                    icon: Icons.diversity_1_rounded,
+                    label: l10n.settingsTogether,
+                    onTap: () =>
+                        _showComingSoon(context, l10n.settingsTogether),
+                  ),
+                  const Divider(height: 1),
+                  _SettingsTile(
+                    icon: Icons.account_balance_rounded,
+                    label: l10n.settingsManageBankConnections,
+                    onTap: () => _showComingSoon(
+                      context,
+                      l10n.settingsManageBankConnections,
+                    ),
                   ),
                   const Divider(height: 1),
                   _SettingsTile(
                     icon: Icons.logout_rounded,
-                    iconColor: colorScheme.error,
-                    label: l10n.homeLogout,
-                    labelColor: colorScheme.error,
-                    showChevron: false,
-                    subtitle: l10n.settingsLoggedInAs,
-                    subtitleColor: colorScheme.onSurfaceVariant,
-                    trailing: Icon(
-                      Icons.logout_rounded,
-                      color: colorScheme.error,
-                    ),
+                    label: l10n.settingsLogOut,
                     onTap: () => _confirmLogout(context, ref),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: SpacingTokens.lg),
+            _SectionTitle(title: l10n.settingsMiscSection),
+            _SettingsCard(
+              child: Column(
+                children: [
+                  _SettingsTile(
+                    icon: Icons.favorite_rounded,
+                    label: l10n.settingsWriteAReview,
+                    onTap: () =>
+                        _showComingSoon(context, l10n.settingsWriteAReview),
+                  ),
+                  const Divider(height: 1),
+                  _SettingsTile(
+                    icon: Icons.near_me_rounded,
+                    label: l10n.settingsSendDiagnostics,
+                    onTap: () =>
+                        _showComingSoon(context, l10n.settingsSendDiagnostics),
+                  ),
+                  const Divider(height: 1),
+                  _SettingsTile(
+                    icon: Icons.description_outlined,
+                    label: l10n.settingsLegal,
+                    onTap: () => _showComingSoon(context, l10n.settingsLegal),
+                  ),
+                  const Divider(height: 1),
+                  _SettingsTile(
+                    icon: Icons.description_outlined,
+                    label: l10n.settingsPrivacyPolicy,
+                    onTap: () =>
+                        _showComingSoon(context, l10n.settingsPrivacyPolicy),
+                  ),
+                  const Divider(height: 1),
+                  _SettingsTile(
+                    icon: Icons.description_outlined,
+                    label: l10n.settingsCaliforniaPrivacyPolicy,
+                    onTap: () => _showComingSoon(
+                      context,
+                      l10n.settingsCaliforniaPrivacyPolicy,
+                    ),
+                  ),
+                  const Divider(height: 1),
+                  _SettingsTile(
+                    icon: Icons.description_outlined,
+                    label: l10n.settingsYourPrivacyChoices,
+                    onTap: () => _showComingSoon(
+                      context,
+                      l10n.settingsYourPrivacyChoices,
+                    ),
+                  ),
+                  const Divider(height: 1),
+                  _SettingsTile(
+                    icon: Icons.description_outlined,
+                    label: l10n.settingsTermsOfService,
+                    onTap: () =>
+                        _showComingSoon(context, l10n.settingsTermsOfService),
                   ),
                 ],
               ),
@@ -174,6 +298,15 @@ class SettingsScreen extends HookConsumerWidget {
             Center(
               child: Text(
                 l10n.settingsVersion,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: YnabPalette.mutedText,
+                ),
+              ),
+            ),
+            const SizedBox(height: SpacingTokens.xs),
+            Center(
+              child: Text(
+                l10n.settingsLastSynced,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: YnabPalette.mutedText,
                 ),
@@ -218,7 +351,7 @@ class SettingsScreen extends HookConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(l10n.homeLogout),
+        title: Text(l10n.settingsLogOut),
         content: Text(l10n.settingsLogoutConfirm),
         actions: [
           TextButton(
@@ -231,7 +364,7 @@ class SettingsScreen extends HookConsumerWidget {
               backgroundColor: colorScheme.error,
               foregroundColor: colorScheme.onError,
             ),
-            child: Text(l10n.homeLogout),
+            child: Text(l10n.settingsLogOut),
           ),
         ],
       ),
@@ -263,6 +396,13 @@ class SettingsScreen extends HookConsumerWidget {
 
     if (confirmed != true || !context.mounted) return;
     context.goNamed(createBudgetRoute);
+  }
+
+  void _showComingSoon(BuildContext context, String featureName) {
+    final l10n = AppLocalizations.of(context);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.settingsComingSoon(featureName))),
+    );
   }
 }
 
@@ -314,49 +454,32 @@ class _SettingsTile extends HookWidget {
     required this.label,
     required this.onTap,
     this.subtitle,
-    this.trailing,
-    this.iconColor,
-    this.labelColor,
-    this.subtitleColor,
-    this.showChevron = true,
   });
 
   final IconData icon;
   final String label;
   final VoidCallback onTap;
   final String? subtitle;
-  final Widget? trailing;
-  final Color? iconColor;
-  final Color? labelColor;
-  final Color? subtitleColor;
-  final bool showChevron;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
     return ListTile(
-      leading: Icon(icon, color: iconColor ?? YnabPalette.mutedText),
-      title: Text(
-        label,
-        style: theme.textTheme.bodyLarge?.copyWith(color: labelColor),
-      ),
+      leading: Icon(icon, color: YnabPalette.mutedText),
+      title: Text(label, style: theme.textTheme.bodyLarge),
       subtitle: subtitle == null
           ? null
           : Text(
               subtitle!,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: subtitleColor ?? YnabPalette.mutedText,
+                color: YnabPalette.mutedText,
               ),
             ),
-      trailing:
-          trailing ??
-          (showChevron
-              ? const Icon(
-                  Icons.chevron_right_rounded,
-                  color: YnabPalette.mutedText,
-                )
-              : null),
+      trailing: const Icon(
+        Icons.chevron_right_rounded,
+        color: YnabPalette.mutedText,
+      ),
       onTap: onTap,
     );
   }
