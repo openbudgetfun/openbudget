@@ -368,19 +368,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get categoryDetailDeleteConfirm =>
-      'Delete this envelope and its budget history?';
+      'Delete this category and its budget history?';
 
   @override
-  String get categoryDetailDeleteEnvelope => 'Delete Envelope';
+  String get categoryDetailDeleteEnvelope => 'Delete Category';
 
   @override
-  String get categoryDetailEditEnvelope => 'Rename Envelope';
+  String get categoryDetailEditEnvelope => 'Rename Category';
 
   @override
-  String get categoryDetailHideEnvelope => 'Hide Envelope';
+  String get categoryDetailHideEnvelope => 'Hide Category';
 
   @override
   String get categoryDetailNotesTitle => 'Notes';
+
+  @override
+  String get categoryDetailSnoozeGoal => 'Snooze for this month';
 
   @override
   String get categoryDetailTargetMet => 'You\'ve met your target!';
@@ -392,7 +395,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get categoryDetailToGo => 'To Go';
 
   @override
-  String get categoryDetailUnhideEnvelope => 'Unhide Envelope';
+  String get categoryDetailUnhideEnvelope => 'Unhide Category';
 
   @override
   String get budgetColumnAvailable => 'Available';

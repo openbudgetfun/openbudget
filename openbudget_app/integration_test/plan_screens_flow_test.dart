@@ -177,6 +177,6 @@ void main() {
     await tester.pumpAndSettle();
     await binding.takeScreenshot('category-detail-screen');
     expect(find.text('Balance'), findsOneWidget);
-    expect(find.text('Rename Envelope'), findsOneWidget);
+    expect(find.text('Rename Category'), findsOneWidget);
   });
 }

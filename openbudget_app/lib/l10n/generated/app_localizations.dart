@@ -649,25 +649,25 @@ abstract class AppLocalizations {
   /// No description provided for @categoryDetailDeleteConfirm.
   ///
   /// In en, this message translates to:
-  /// **'Delete this envelope and its budget history?'**
+  /// **'Delete this category and its budget history?'**
   String get categoryDetailDeleteConfirm;
 
   /// No description provided for @categoryDetailDeleteEnvelope.
   ///
   /// In en, this message translates to:
-  /// **'Delete Envelope'**
+  /// **'Delete Category'**
   String get categoryDetailDeleteEnvelope;
 
   /// No description provided for @categoryDetailEditEnvelope.
   ///
   /// In en, this message translates to:
-  /// **'Rename Envelope'**
+  /// **'Rename Category'**
   String get categoryDetailEditEnvelope;
 
   /// No description provided for @categoryDetailHideEnvelope.
   ///
   /// In en, this message translates to:
-  /// **'Hide Envelope'**
+  /// **'Hide Category'**
   String get categoryDetailHideEnvelope;
 
   /// No description provided for @categoryDetailNotesTitle.
@@ -675,6 +675,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Notes'**
   String get categoryDetailNotesTitle;
+
+  /// No description provided for @categoryDetailSnoozeGoal.
+  ///
+  /// In en, this message translates to:
+  /// **'Snooze for this month'**
+  String get categoryDetailSnoozeGoal;
 
   /// No description provided for @categoryDetailTargetMet.
   ///
@@ -697,7 +703,7 @@ abstract class AppLocalizations {
   /// No description provided for @categoryDetailUnhideEnvelope.
   ///
   /// In en, this message translates to:
-  /// **'Unhide Envelope'**
+  /// **'Unhide Category'**
   String get categoryDetailUnhideEnvelope;
 
   /// No description provided for @budgetColumnAvailable.

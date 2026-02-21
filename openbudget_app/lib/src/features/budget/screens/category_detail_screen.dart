@@ -36,6 +36,7 @@ class CategoryDetailScreen extends HookConsumerWidget {
     final goalsAsync = ref.watch(budgetGoalsProvider(budgetId));
     final hideAmounts = ref.watch(hideAmountsProvider);
     final hideProgressBars = ref.watch(hideProgressBarsProvider);
+    final isSnoozed = useState(false);
 
     return Scaffold(
       backgroundColor: OpenBudgetPalette.appBackground,
@@ -185,7 +186,7 @@ class CategoryDetailScreen extends HookConsumerWidget {
                     ),
                   ),
                 )
-              else
+              else ...[
                 _GoalCard(
                   goal: goal,
                   budgetedCents: assigned,
@@ -207,6 +208,22 @@ class CategoryDetailScreen extends HookConsumerWidget {
                     goal,
                   ),
                 ),
+                const SizedBox(height: SpacingTokens.sm),
+                _Card(
+                  child: SwitchListTile(
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: SpacingTokens.md,
+                    ),
+                    value: isSnoozed.value,
+                    onChanged: (value) => isSnoozed.value = value,
+                    title: Text(l10n.categoryDetailSnoozeGoal),
+                    secondary: const Icon(
+                      Icons.snooze_rounded,
+                      color: OpenBudgetPalette.mutedText,
+                    ),
+                  ),
+                ),
+              ],
               const SizedBox(height: SpacingTokens.lg),
               _SectionTitle(title: l10n.categoryDetailNotesTitle),
               _Card(

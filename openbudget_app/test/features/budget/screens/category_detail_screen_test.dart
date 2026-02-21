@@ -120,9 +120,10 @@ void main() {
     await tester.drag(find.byType(ListView), const Offset(0, -500));
     await tester.pumpAndSettle();
 
+    expect(find.text('Snooze for this month'), findsOneWidget);
     expect(find.text('Notes'), findsOneWidget);
-    expect(find.text('Rename Envelope'), findsOneWidget);
-    expect(find.text('Hide Envelope'), findsOneWidget);
-    expect(find.text('Delete Envelope'), findsOneWidget);
+    expect(find.text('Rename Category'), findsOneWidget);
+    expect(find.text('Hide Category'), findsOneWidget);
+    expect(find.text('Delete Category'), findsOneWidget);
   });
 }
