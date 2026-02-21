@@ -337,6 +337,77 @@ class AppLocalizationsEn extends AppLocalizations {
   String get budgetAddIncome => 'Add Income';
 
   @override
+  String get budgetSpotlightAddPriorities => 'Add Priorities';
+
+  @override
+  String get budgetSpotlightAssigned => 'Assigned';
+
+  @override
+  String get budgetSpotlightAssign => 'Assign';
+
+  @override
+  String get budgetSpotlightEdit => 'Edit';
+
+  @override
+  String get budgetSpotlightReflect => 'Reflect';
+
+  @override
+  String get budgetSpotlightSpent => 'Spent';
+
+  @override
+  String get budgetSpotlightSummarySuffix => 'Summary';
+
+  @override
+  String get budgetSpotlightTopPriorities => 'Top Priorities';
+
+  @override
+  String get budgetSpotlightTopPrioritiesHint =>
+      'Keep your focus categories front and center for this month.';
+
+  @override
+  String get budgetSpotlightTotalTargets => 'Total Targets';
+
+  @override
+  String get budgetSpotlightUnderfunded => 'Underfunded';
+
+  @override
+  String get budgetOnboardingAddAccountsTitle =>
+      'Start working with real numbers';
+
+  @override
+  String get budgetOnboardingAddAccountsBody =>
+      'Every dollar needs a real account balance. Add your account balances to see what you\'re working with.';
+
+  @override
+  String get budgetOnboardingAddAccountsCta => 'Add Accounts';
+
+  @override
+  String budgetOnboardingAssignMoneyTitle(String amount) {
+    return 'Assign Your $amount';
+  }
+
+  @override
+  String get budgetOnboardingAssignMoneyBody =>
+      'This is money in your OpenBudget accounts. Give it a job before payday.';
+
+  @override
+  String get budgetOnboardingAssignMoneyPrompt =>
+      'Start by asking yourself what this money needs to do before you get paid again.';
+
+  @override
+  String get budgetOnboardingAddAnotherAccount => 'Add Another Account';
+
+  @override
+  String get budgetOnboardingFinishTitle => 'Spend with confidence and clarity';
+
+  @override
+  String get budgetOnboardingFinishBody =>
+      'Intentional spending reduces stress, regret, and second-guessing.';
+
+  @override
+  String get budgetOnboardingFinishCta => 'Finish Onboarding';
+
+  @override
   String get budgetAllocationError => 'Could not update allocation';
 
   @override

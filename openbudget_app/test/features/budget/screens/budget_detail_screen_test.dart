@@ -143,10 +143,12 @@ void main() {
     });
 
     testWidgets('shows empty state when no categories', (tester) async {
-      await tester.pumpWidget(buildSubject());
+      await tester.pumpWidget(
+        buildSubject(summary: makeSummary(readyToAssignCents: 0)),
+      );
       await tester.pumpAndSettle();
 
-      expect(find.byIcon(Icons.category_rounded), findsOneWidget);
+      expect(find.text('No Categories Yet'), findsOneWidget);
     });
 
     testWidgets('shows Add Category button', (tester) async {
@@ -168,6 +170,73 @@ void main() {
       // Bottom action bar removed in favor of shell tab navigation
       expect(find.text('Add Income'), findsNothing);
       expect(find.text('Add Expense'), findsNothing);
+    });
+
+    testWidgets('shows add accounts onboarding card when there is no income', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        buildSubject(
+          summary: makeSummary(
+            readyToAssignCents: 0,
+            totalIncomeCents: 0,
+            totalBudgetedCents: 0,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Start working with real numbers'), findsOneWidget);
+      expect(find.text('Add Accounts'), findsOneWidget);
+      expect(find.text('Copy Last Month'), findsNothing);
+    });
+
+    testWidgets(
+      'shows assign money onboarding card when money is ready but unassigned',
+      (tester) async {
+        await tester.pumpWidget(
+          buildSubject(
+            summary: makeSummary(
+              readyToAssignCents: 5000000,
+              totalIncomeCents: 5000000,
+              totalBudgetedCents: 0,
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.textContaining('Assign Your'), findsOneWidget);
+        expect(find.text('Assign Money'), findsOneWidget);
+        expect(find.text('Add Another Account'), findsOneWidget);
+      },
+    );
+
+    testWidgets('shows finish onboarding card when budgeting has started', (
+      tester,
+    ) async {
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      expect(find.text('Spend with confidence and clarity'), findsOneWidget);
+      expect(find.text('Finish Onboarding'), findsOneWidget);
+    });
+
+    testWidgets('renders spotlight priorities and summary cards', (
+      tester,
+    ) async {
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Spotlight'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Top Priorities'), findsOneWidget);
+      expect(find.text('Add Priorities'), findsOneWidget);
+      expect(find.text('February Summary'), findsOneWidget);
+      expect(find.text('Total Targets'), findsOneWidget);
+      expect(find.text('Underfunded'), findsOneWidget);
+      expect(find.text('Assigned'), findsOneWidget);
+      expect(find.text('Spent'), findsOneWidget);
     });
   });
 }

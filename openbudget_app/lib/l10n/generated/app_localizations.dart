@@ -592,6 +592,132 @@ abstract class AppLocalizations {
   /// **'Add Income'**
   String get budgetAddIncome;
 
+  /// No description provided for @budgetSpotlightAddPriorities.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Priorities'**
+  String get budgetSpotlightAddPriorities;
+
+  /// No description provided for @budgetSpotlightAssigned.
+  ///
+  /// In en, this message translates to:
+  /// **'Assigned'**
+  String get budgetSpotlightAssigned;
+
+  /// No description provided for @budgetSpotlightAssign.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign'**
+  String get budgetSpotlightAssign;
+
+  /// No description provided for @budgetSpotlightEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get budgetSpotlightEdit;
+
+  /// No description provided for @budgetSpotlightReflect.
+  ///
+  /// In en, this message translates to:
+  /// **'Reflect'**
+  String get budgetSpotlightReflect;
+
+  /// No description provided for @budgetSpotlightSpent.
+  ///
+  /// In en, this message translates to:
+  /// **'Spent'**
+  String get budgetSpotlightSpent;
+
+  /// No description provided for @budgetSpotlightSummarySuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'Summary'**
+  String get budgetSpotlightSummarySuffix;
+
+  /// No description provided for @budgetSpotlightTopPriorities.
+  ///
+  /// In en, this message translates to:
+  /// **'Top Priorities'**
+  String get budgetSpotlightTopPriorities;
+
+  /// No description provided for @budgetSpotlightTopPrioritiesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep your focus categories front and center for this month.'**
+  String get budgetSpotlightTopPrioritiesHint;
+
+  /// No description provided for @budgetSpotlightTotalTargets.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Targets'**
+  String get budgetSpotlightTotalTargets;
+
+  /// No description provided for @budgetSpotlightUnderfunded.
+  ///
+  /// In en, this message translates to:
+  /// **'Underfunded'**
+  String get budgetSpotlightUnderfunded;
+
+  /// No description provided for @budgetOnboardingAddAccountsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start working with real numbers'**
+  String get budgetOnboardingAddAccountsTitle;
+
+  /// No description provided for @budgetOnboardingAddAccountsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Every dollar needs a real account balance. Add your account balances to see what you\'re working with.'**
+  String get budgetOnboardingAddAccountsBody;
+
+  /// No description provided for @budgetOnboardingAddAccountsCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Accounts'**
+  String get budgetOnboardingAddAccountsCta;
+
+  /// No description provided for @budgetOnboardingAssignMoneyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign Your {amount}'**
+  String budgetOnboardingAssignMoneyTitle(String amount);
+
+  /// No description provided for @budgetOnboardingAssignMoneyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This is money in your OpenBudget accounts. Give it a job before payday.'**
+  String get budgetOnboardingAssignMoneyBody;
+
+  /// No description provided for @budgetOnboardingAssignMoneyPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Start by asking yourself what this money needs to do before you get paid again.'**
+  String get budgetOnboardingAssignMoneyPrompt;
+
+  /// No description provided for @budgetOnboardingAddAnotherAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Another Account'**
+  String get budgetOnboardingAddAnotherAccount;
+
+  /// No description provided for @budgetOnboardingFinishTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Spend with confidence and clarity'**
+  String get budgetOnboardingFinishTitle;
+
+  /// No description provided for @budgetOnboardingFinishBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Intentional spending reduces stress, regret, and second-guessing.'**
+  String get budgetOnboardingFinishBody;
+
+  /// No description provided for @budgetOnboardingFinishCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish Onboarding'**
+  String get budgetOnboardingFinishCta;
+
   /// No description provided for @budgetAllocationError.
   ///
   /// In en, this message translates to:

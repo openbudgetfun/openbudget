@@ -324,6 +324,34 @@
   "budgetCollapseExpand": "Collapse/Expand",
   "budgetAddExpense": "Add Expense",
   "budgetAddIncome": "Add Income",
+  "budgetSpotlightAddPriorities": "Add Priorities",
+  "budgetSpotlightAssigned": "Assigned",
+  "budgetSpotlightAssign": "Assign",
+  "budgetSpotlightEdit": "Edit",
+  "budgetSpotlightReflect": "Reflect",
+  "budgetSpotlightSpent": "Spent",
+  "budgetSpotlightSummarySuffix": "Summary",
+  "budgetSpotlightTopPriorities": "Top Priorities",
+  "budgetSpotlightTopPrioritiesHint": "Keep your focus categories front and center for this month.",
+  "budgetSpotlightTotalTargets": "Total Targets",
+  "budgetSpotlightUnderfunded": "Underfunded",
+  "budgetOnboardingAddAccountsTitle": "Start working with real numbers",
+  "budgetOnboardingAddAccountsBody": "Every dollar needs a real account balance. Add your account balances to see what you're working with.",
+  "budgetOnboardingAddAccountsCta": "Add Accounts",
+  "budgetOnboardingAssignMoneyTitle": "Assign Your {amount}",
+  "@budgetOnboardingAssignMoneyTitle": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetOnboardingAssignMoneyBody": "This is money in your OpenBudget accounts. Give it a job before payday.",
+  "budgetOnboardingAssignMoneyPrompt": "Start by asking yourself what this money needs to do before you get paid again.",
+  "budgetOnboardingAddAnotherAccount": "Add Another Account",
+  "budgetOnboardingFinishTitle": "Spend with confidence and clarity",
+  "budgetOnboardingFinishBody": "Intentional spending reduces stress, regret, and second-guessing.",
+  "budgetOnboardingFinishCta": "Finish Onboarding",
   "budgetAllocationError": "Could not update allocation",
   "budgetAllocationUpdated": "Allocation updated",
   "budgetCategoryCreateError": "Could not create category",

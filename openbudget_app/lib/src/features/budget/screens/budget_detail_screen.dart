@@ -13,6 +13,7 @@ import 'package:openbudget_app/src/features/budget/providers/monthly_allocation_
 import 'package:openbudget_app/src/features/budget/providers/selected_month_provider.dart';
 import 'package:openbudget_app/src/features/budget/screens/add_category_dialog.dart';
 import 'package:openbudget_app/src/features/budget/screens/add_envelope_dialog.dart';
+import 'package:openbudget_app/src/features/budget/screens/auto_assign_dialog.dart';
 import 'package:openbudget_app/src/features/budget/screens/budget_template_dialog.dart';
 import 'package:openbudget_app/src/features/budget/screens/edit_category_dialog.dart';
 import 'package:openbudget_app/src/features/budget/screens/edit_envelope_dialog.dart';
@@ -37,6 +38,8 @@ enum _PlanMenuAction {
   settings,
 }
 
+enum _PlanOnboardingType { addAccounts, assignMoney, finish }
+
 class BudgetDetailScreen extends HookConsumerWidget {
   const BudgetDetailScreen({required this.budgetId, super.key});
 
@@ -58,6 +61,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
     final searchQuery = useState('');
     final isSearching = useState(false);
     final showSpotlight = useState(false);
+    final onboardingComplete = useState(false);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final hideAmounts = ref.watch(hideAmountsProvider);
@@ -158,6 +162,14 @@ class BudgetDetailScreen extends HookConsumerWidget {
           searchQuery.value,
           showHidden: showHidden.value,
         );
+        final onboardingType = _resolveOnboardingType(
+          summary: summary,
+          onboardingComplete: onboardingComplete.value,
+        );
+        final showBudgetHeader =
+            showSpotlight.value ||
+            onboardingType == null ||
+            onboardingType == _PlanOnboardingType.finish;
 
         return Scaffold(
           backgroundColor: OpenBudgetPalette.appBackground,
@@ -348,25 +360,54 @@ class BudgetDetailScreen extends HookConsumerWidget {
                   onChanged: (value) => showSpotlight.value = value,
                 ),
                 const SizedBox(height: SpacingTokens.sm),
-                BudgetHeader(
-                  readyToAssignCents: summary.readyToAssignCents,
-                  currencyCode: currencyCode,
-                  budgetId: budgetId,
-                  year: summary.year,
-                  month: summary.month,
-                  totalOverspentCents: totalOverspentCents,
-                  totalIncomeCents: summary.totalIncomeCents,
-                  totalBudgetedCents: summary.totalBudgetedCents,
-                  totalActivityCents: totalActivityCents,
-                  onCopyLastMonth: () => _confirmCopyLastMonth(
-                    context,
-                    ref,
-                    budgetId,
-                    summary.year,
-                    summary.month,
+                if (showBudgetHeader)
+                  BudgetHeader(
+                    readyToAssignCents: summary.readyToAssignCents,
+                    currencyCode: currencyCode,
+                    budgetId: budgetId,
+                    year: summary.year,
+                    month: summary.month,
+                    totalOverspentCents: totalOverspentCents,
+                    totalIncomeCents: summary.totalIncomeCents,
+                    totalBudgetedCents: summary.totalBudgetedCents,
+                    totalActivityCents: totalActivityCents,
+                    onCopyLastMonth: () => _confirmCopyLastMonth(
+                      context,
+                      ref,
+                      budgetId,
+                      summary.year,
+                      summary.month,
+                    ),
                   ),
-                ),
                 const SizedBox(height: SpacingTokens.md),
+                if (!showSpotlight.value && onboardingType != null) ...[
+                  _PlanOnboardingCard(
+                    type: onboardingType,
+                    readyToAssign: hideAmounts
+                        ? hiddenAmountPlaceholder
+                        : formatCents(summary.readyToAssignCents, currencyCode),
+                    onPrimaryAction: () => switch (onboardingType) {
+                      _PlanOnboardingType.addAccounts => context.goNamed(
+                        accountListRoute,
+                        pathParameters: {'id': budgetId},
+                      ),
+                      _PlanOnboardingType.assignMoney => _showAutoAssignDialog(
+                        context,
+                        currencyCode,
+                      ),
+                      _PlanOnboardingType.finish =>
+                        onboardingComplete.value = true,
+                    },
+                    onSecondaryAction:
+                        onboardingType == _PlanOnboardingType.assignMoney
+                        ? () => context.goNamed(
+                            accountListRoute,
+                            pathParameters: {'id': budgetId},
+                          )
+                        : null,
+                  ),
+                  const SizedBox(height: SpacingTokens.md),
+                ],
                 if (dueCountAsync.hasValue && dueCountAsync.value! > 0)
                   _DueBanner(
                     count: dueCountAsync.value!,
@@ -381,11 +422,10 @@ class BudgetDetailScreen extends HookConsumerWidget {
                   const SizedBox(height: SpacingTokens.md),
                 ],
                 if (showSpotlight.value)
-                  _SpotlightSummaryCard(
-                    totalIncomeCents: summary.totalIncomeCents,
-                    totalBudgetedCents: summary.totalBudgetedCents,
+                  _SpotlightOverview(
+                    summary: summary,
+                    goalsMap: goalsMap,
                     totalActivityCents: totalActivityCents,
-                    totalOverspentCents: totalOverspentCents,
                     currencyCode: currencyCode,
                     hideAmounts: hideAmounts,
                   ),
@@ -706,6 +746,29 @@ class BudgetDetailScreen extends HookConsumerWidget {
     }
 
     return filtered;
+  }
+
+  _PlanOnboardingType? _resolveOnboardingType({
+    required BudgetSummary summary,
+    required bool onboardingComplete,
+  }) {
+    if (onboardingComplete) return null;
+    if (summary.totalIncomeCents <= 0) return _PlanOnboardingType.addAccounts;
+    if (summary.totalBudgetedCents <= 0 && summary.readyToAssignCents > 0) {
+      return _PlanOnboardingType.assignMoney;
+    }
+    if (summary.totalBudgetedCents > 0 && summary.readyToAssignCents > 0) {
+      return _PlanOnboardingType.finish;
+    }
+    return null;
+  }
+
+  void _showAutoAssignDialog(BuildContext context, CurrencyCode currencyCode) {
+    showDialog<void>(
+      context: context,
+      builder: (_) =>
+          AutoAssignDialog(budgetId: budgetId, currencyCode: currencyCode),
+    );
   }
 
   void _showQuickBudgetDialog(
@@ -1061,6 +1124,123 @@ class BudgetDetailScreen extends HookConsumerWidget {
   }
 }
 
+class _PlanOnboardingCard extends HookWidget {
+  const _PlanOnboardingCard({
+    required this.type,
+    required this.readyToAssign,
+    required this.onPrimaryAction,
+    this.onSecondaryAction,
+  });
+
+  final _PlanOnboardingType type;
+  final String readyToAssign;
+  final VoidCallback onPrimaryAction;
+  final VoidCallback? onSecondaryAction;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final (
+      backgroundColor,
+      iconData,
+      title,
+      body,
+      prompt,
+      primaryLabel,
+    ) = switch (type) {
+      _PlanOnboardingType.addAccounts => (
+        OpenBudgetPalette.accentPurple.withAlpha(70),
+        Icons.account_balance_rounded,
+        l10n.budgetOnboardingAddAccountsTitle,
+        l10n.budgetOnboardingAddAccountsBody,
+        null,
+        l10n.budgetOnboardingAddAccountsCta,
+      ),
+      _PlanOnboardingType.assignMoney => (
+        OpenBudgetPalette.accentGreen,
+        Icons.mail_rounded,
+        l10n.budgetOnboardingAssignMoneyTitle(readyToAssign),
+        l10n.budgetOnboardingAssignMoneyBody,
+        l10n.budgetOnboardingAssignMoneyPrompt,
+        l10n.budgetAssignMoney,
+      ),
+      _PlanOnboardingType.finish => (
+        OpenBudgetPalette.accentPurple.withAlpha(70),
+        Icons.auto_awesome_rounded,
+        l10n.budgetOnboardingFinishTitle,
+        l10n.budgetOnboardingFinishBody,
+        null,
+        l10n.budgetOnboardingFinishCta,
+      ),
+    };
+
+    final primaryButtonColor = type == _PlanOnboardingType.assignMoney
+        ? const Color(0xFF3F7A1C)
+        : OpenBudgetPalette.accentBlue;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(SpacingTokens.md),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(RadiusTokens.lg),
+        border: Border.all(color: OpenBudgetPalette.divider),
+      ),
+      child: Column(
+        children: [
+          Icon(iconData, size: 42, color: OpenBudgetPalette.accentBlue),
+          const SizedBox(height: SpacingTokens.sm),
+          Text(
+            title,
+            style: theme.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.w800,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: SpacingTokens.xs),
+          Text(
+            body,
+            style: theme.textTheme.bodyLarge?.copyWith(color: Colors.black87),
+            textAlign: TextAlign.center,
+          ),
+          if (prompt != null) ...[
+            const SizedBox(height: SpacingTokens.sm),
+            Text(
+              prompt,
+              style: theme.textTheme.bodyLarge?.copyWith(color: Colors.black87),
+              textAlign: TextAlign.center,
+            ),
+          ],
+          const SizedBox(height: SpacingTokens.md),
+          FilledButton(
+            onPressed: onPrimaryAction,
+            style: FilledButton.styleFrom(
+              minimumSize: const Size.fromHeight(44),
+              backgroundColor: primaryButtonColor,
+              foregroundColor: Colors.white,
+            ),
+            child: Text(primaryLabel),
+          ),
+          if (onSecondaryAction != null) ...[
+            const SizedBox(height: SpacingTokens.sm),
+            OutlinedButton(
+              onPressed: onSecondaryAction,
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size.fromHeight(42),
+                side: const BorderSide(color: OpenBudgetPalette.divider),
+                backgroundColor: OpenBudgetPalette.surface,
+                foregroundColor: OpenBudgetPalette.accentBlue,
+              ),
+              child: Text(l10n.budgetOnboardingAddAnotherAccount),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
 class _BudgetViewToggle extends HookWidget {
   const _BudgetViewToggle({
     required this.showSpotlight,
@@ -1143,114 +1323,302 @@ class _ToggleButton extends HookWidget {
   }
 }
 
-class _SpotlightSummaryCard extends HookWidget {
-  const _SpotlightSummaryCard({
-    required this.totalIncomeCents,
-    required this.totalBudgetedCents,
+class _SpotlightOverview extends HookWidget {
+  const _SpotlightOverview({
+    required this.summary,
+    required this.goalsMap,
     required this.totalActivityCents,
-    required this.totalOverspentCents,
     required this.currencyCode,
     required this.hideAmounts,
   });
 
-  final int totalIncomeCents;
-  final int totalBudgetedCents;
+  final BudgetSummary summary;
+  final Map<String, EnvelopeGoal> goalsMap;
   final int totalActivityCents;
-  final int totalOverspentCents;
   final CurrencyCode currencyCode;
   final bool hideAmounts;
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    return Container(
-      padding: const EdgeInsets.all(SpacingTokens.md),
+    var totalTargetsCents = 0;
+    var totalUnderfundedCents = 0;
+
+    for (final categoryWithEnvelopes in summary.categories) {
+      for (
+        var index = 0;
+        index < categoryWithEnvelopes.envelopes.length;
+        index++
+      ) {
+        final envelope = categoryWithEnvelopes.envelopes[index];
+        final envelopeId = envelope.id?.toString();
+        if (envelopeId == null) continue;
+
+        final goal = goalsMap[envelopeId];
+        if (goal == null) continue;
+
+        final monthlyData =
+            index < categoryWithEnvelopes.monthlyEnvelopes.length
+            ? categoryWithEnvelopes.monthlyEnvelopes[index]
+            : null;
+        final budgetedCents =
+            monthlyData?.allocatedCents ?? envelope.budgetedAmountCents;
+        final spentCents = monthlyData?.spentCents ?? envelope.spentAmountCents;
+        final availableCents =
+            monthlyData?.availableCents ?? (budgetedCents - spentCents);
+
+        final targetCents = switch (goal.goalType) {
+          'monthly_funding' =>
+            goal.monthlyFundingCents ?? goal.targetAmountCents,
+          _ => goal.targetAmountCents,
+        };
+
+        totalTargetsCents += targetCents;
+        totalUnderfundedCents += computeUnderfundedCents(
+          goal: goal,
+          budgetedCents: budgetedCents,
+          availableCents: availableCents,
+        );
+      }
+    }
+
+    final summaryTitle =
+        '${_monthLabel(l10n, summary.month)} ${l10n.budgetSpotlightSummarySuffix}';
+
+    return Column(
+      children: [
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(SpacingTokens.md),
+          decoration: BoxDecoration(
+            color: OpenBudgetPalette.surface,
+            borderRadius: BorderRadius.circular(RadiusTokens.md),
+            border: Border.all(color: OpenBudgetPalette.divider),
+          ),
+          child: Column(
+            children: [
+              const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _SpotlightPriorityIcon(
+                    icon: Icons.shopping_basket_rounded,
+                    rotation: -0.12,
+                  ),
+                  SizedBox(width: SpacingTokens.sm),
+                  _SpotlightPriorityIcon(
+                    icon: Icons.directions_bus_rounded,
+                    rotation: 0.08,
+                  ),
+                  SizedBox(width: SpacingTokens.sm),
+                  _SpotlightPriorityIcon(
+                    icon: Icons.local_florist_rounded,
+                    rotation: -0.08,
+                  ),
+                ],
+              ),
+              const SizedBox(height: SpacingTokens.md),
+              Text(
+                l10n.budgetSpotlightTopPriorities,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: SpacingTokens.xs),
+              Text(
+                l10n.budgetSpotlightTopPrioritiesHint,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: OpenBudgetPalette.mutedText,
+                ),
+              ),
+              const SizedBox(height: SpacingTokens.md),
+              FilledButton.tonal(
+                onPressed: () {},
+                child: Text(l10n.budgetSpotlightAddPriorities),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: SpacingTokens.md),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(SpacingTokens.md),
+          decoration: BoxDecoration(
+            color: OpenBudgetPalette.surface,
+            borderRadius: BorderRadius.circular(RadiusTokens.md),
+            border: Border.all(color: OpenBudgetPalette.divider),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                summaryTitle,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: SpacingTokens.sm),
+              Row(
+                children: [
+                  Expanded(
+                    child: _SpotlightMetricTile(
+                      icon: Icons.track_changes_rounded,
+                      label: l10n.budgetSpotlightTotalTargets,
+                      value: hideAmounts
+                          ? hiddenAmountPlaceholder
+                          : formatCents(totalTargetsCents, currencyCode),
+                      actionLabel: l10n.budgetSpotlightEdit,
+                    ),
+                  ),
+                  const SizedBox(width: SpacingTokens.sm),
+                  Expanded(
+                    child: _SpotlightMetricTile(
+                      icon: Icons.pie_chart_rounded,
+                      label: l10n.budgetSpotlightUnderfunded,
+                      value: hideAmounts
+                          ? hiddenAmountPlaceholder
+                          : formatCents(totalUnderfundedCents, currencyCode),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: SpacingTokens.sm),
+              Row(
+                children: [
+                  Expanded(
+                    child: _SpotlightMetricTile(
+                      icon: Icons.fact_check_rounded,
+                      label: l10n.budgetSpotlightAssigned,
+                      value: hideAmounts
+                          ? hiddenAmountPlaceholder
+                          : formatCents(
+                              summary.totalBudgetedCents,
+                              currencyCode,
+                            ),
+                      actionLabel: l10n.budgetSpotlightAssign,
+                    ),
+                  ),
+                  const SizedBox(width: SpacingTokens.sm),
+                  Expanded(
+                    child: _SpotlightMetricTile(
+                      icon: Icons.payments_outlined,
+                      label: l10n.budgetSpotlightSpent,
+                      value: hideAmounts
+                          ? hiddenAmountPlaceholder
+                          : formatCents(totalActivityCents, currencyCode),
+                      actionLabel: l10n.budgetSpotlightReflect,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _monthLabel(AppLocalizations l10n, int month) => switch (month) {
+    1 => l10n.budgetMonthJanuary,
+    2 => l10n.budgetMonthFebruary,
+    3 => l10n.budgetMonthMarch,
+    4 => l10n.budgetMonthApril,
+    5 => l10n.budgetMonthMay,
+    6 => l10n.budgetMonthJune,
+    7 => l10n.budgetMonthJuly,
+    8 => l10n.budgetMonthAugust,
+    9 => l10n.budgetMonthSeptember,
+    10 => l10n.budgetMonthOctober,
+    11 => l10n.budgetMonthNovember,
+    12 => l10n.budgetMonthDecember,
+    _ => '',
+  };
+}
+
+class _SpotlightMetricTile extends HookWidget {
+  const _SpotlightMetricTile({
+    required this.icon,
+    required this.label,
+    required this.value,
+    this.actionLabel,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+  final String? actionLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return DecoratedBox(
       decoration: BoxDecoration(
-        color: OpenBudgetPalette.surface,
+        color: OpenBudgetPalette.surfaceMuted,
         borderRadius: BorderRadius.circular(RadiusTokens.md),
         border: Border.all(color: OpenBudgetPalette.divider),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Spotlight',
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w700,
+      child: Padding(
+        padding: const EdgeInsets.all(SpacingTokens.sm),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(icon, size: 18, color: OpenBudgetPalette.accentBlue),
+                const SizedBox(width: SpacingTokens.xs),
+                Expanded(
+                  child: Text(
+                    label,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: OpenBudgetPalette.mutedText,
+                    ),
+                  ),
+                ),
+                if (actionLabel != null)
+                  Text(
+                    actionLabel!,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: OpenBudgetPalette.accentBlue,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+              ],
             ),
-          ),
-          const SizedBox(height: SpacingTokens.sm),
-          _SpotlightRow(
-            label: 'Income',
-            value: hideAmounts
-                ? hiddenAmountPlaceholder
-                : formatCents(totalIncomeCents, currencyCode),
-            valueColor: OpenBudgetPalette.progressGreen,
-          ),
-          _SpotlightRow(
-            label: 'Budgeted',
-            value: hideAmounts
-                ? hiddenAmountPlaceholder
-                : formatCents(totalBudgetedCents, currencyCode),
-          ),
-          _SpotlightRow(
-            label: 'Spent',
-            value: hideAmounts
-                ? hiddenAmountPlaceholder
-                : formatCents(totalActivityCents, currencyCode),
-            valueColor: totalActivityCents > 0
-                ? OpenBudgetPalette.negative
-                : OpenBudgetPalette.mutedText,
-          ),
-          _SpotlightRow(
-            label: 'Overspent',
-            value: hideAmounts
-                ? hiddenAmountPlaceholder
-                : formatCents(totalOverspentCents, currencyCode),
-            valueColor: totalOverspentCents > 0
-                ? OpenBudgetPalette.negative
-                : OpenBudgetPalette.mutedText,
-          ),
-        ],
+            const SizedBox(height: SpacingTokens.xs),
+            Text(
+              value,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-class _SpotlightRow extends HookWidget {
-  const _SpotlightRow({
-    required this.label,
-    required this.value,
-    this.valueColor,
-  });
+class _SpotlightPriorityIcon extends HookWidget {
+  const _SpotlightPriorityIcon({required this.icon, required this.rotation});
 
-  final String label;
-  final String value;
-  final Color? valueColor;
+  final IconData icon;
+  final double rotation;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              label,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: OpenBudgetPalette.mutedText,
-              ),
-            ),
-          ),
-          Text(
-            value,
-            style: theme.textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: valueColor,
-            ),
-          ),
-        ],
+    return Transform.rotate(
+      angle: rotation,
+      child: Container(
+        width: 56,
+        height: 56,
+        decoration: BoxDecoration(
+          color: OpenBudgetPalette.accentBlue.withAlpha(26),
+          borderRadius: BorderRadius.circular(RadiusTokens.md),
+          border: Border.all(color: OpenBudgetPalette.divider),
+        ),
+        child: Icon(icon, color: OpenBudgetPalette.accentBlue),
       ),
     );
   }

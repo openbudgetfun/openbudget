@@ -1,3 +1,5 @@
+import 'dart:io';
+
 // Serverpod's UuidValue.fromString is marked experimental.
 // ignore_for_file: experimental_member_use
 
@@ -153,12 +155,26 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await binding.takeScreenshot('plan-screen');
+    expect(find.text('Finish Onboarding'), findsOneWidget);
+    await _captureScreenshot(binding, 'plan-screen');
+    await tester.pump(const Duration(seconds: 1));
+    await tester.tap(find.text('Finish Onboarding'));
+    await tester.pumpAndSettle();
+    expect(find.text('Finish Onboarding'), findsNothing);
+    await _captureScreenshot(binding, 'plan-screen-onboarding-dismissed');
+    await tester.pump(const Duration(seconds: 1));
+    await tester.tap(find.text('Spotlight'));
+    await tester.pumpAndSettle();
+    await _captureScreenshot(binding, 'spotlight-screen');
+    await tester.pump(const Duration(seconds: 1));
+    await tester.tap(find.text('Categories'));
+    await tester.pumpAndSettle();
 
     await tester.tap(find.byIcon(Icons.more_horiz_rounded));
     await tester.pumpAndSettle();
     expect(find.text('Hide Amounts'), findsOneWidget);
-    await binding.takeScreenshot('plan-menu');
+    await _captureScreenshot(binding, 'plan-menu');
+    await tester.pump(const Duration(seconds: 1));
 
     await tester.tap(find.text('Collapse/Expand'));
     await tester.pumpAndSettle();
@@ -179,7 +195,8 @@ void main() {
       await tester.tap(gotIt);
       await tester.pumpAndSettle();
     }
-    await binding.takeScreenshot('recent-moves-screen');
+    await _captureScreenshot(binding, 'recent-moves-screen');
+    await tester.pump(const Duration(seconds: 1));
     expect(find.text('Recent Moves'), findsOneWidget);
 
     await tester.tap(find.text('Done'));
@@ -187,8 +204,29 @@ void main() {
 
     await tester.tap(find.text('Utilities'));
     await tester.pumpAndSettle();
-    await binding.takeScreenshot('category-detail-screen');
+    await _captureScreenshot(binding, 'category-detail-screen');
+    await tester.pump(const Duration(seconds: 1));
     expect(find.text('Balance'), findsOneWidget);
     expect(find.text('Rename Category'), findsOneWidget);
   });
+}
+
+Future<void> _captureScreenshot(
+  IntegrationTestWidgetsFlutterBinding binding,
+  String name,
+) async {
+  final bytes = await binding.takeScreenshot(name);
+  if (bytes.isEmpty) return;
+
+  final screenshotDir = Directory(
+    '${Directory.systemTemp.path}/openbudget_screenshots/runtime',
+  );
+  if (!screenshotDir.existsSync()) {
+    screenshotDir.createSync(recursive: true);
+  }
+  final screenshotPath = '${screenshotDir.path}/$name.png';
+  File(screenshotPath).writeAsBytesSync(bytes);
+  // Expose location in test logs for host-side collection.
+  // ignore: avoid_print
+  print('Saved screenshot: $screenshotPath');
 }
