@@ -45,6 +45,24 @@ in
     stages = [ "pre-commit" ];
   };
 
+  git-hooks.hooks.format = {
+    enable = true;
+    name = "format";
+    description = "Format files with dprint before commit.";
+    entry = "${pkgs.dprint}/bin/dprint fmt --allow-no-files";
+    stages = [ "pre-commit" ];
+  };
+
+  git-hooks.hooks.lint = {
+    enable = true;
+    name = "lint";
+    description = "Run linting and formatting checks on every commit.";
+    entry = "bash -lc 'PATH=.devenv/profile/bin:$PATH melos run analyze --no-select'";
+    pass_filenames = false;
+    always_run = true;
+    stages = [ "pre-commit" ];
+  };
+
   # Rely on the global sdk for now as the nix apple sdk is not working for me.
   apple.sdk = null;
 
