@@ -8,7 +8,7 @@ import 'package:openbudget_app/src/features/payees/providers/payee_list_provider
 import 'package:openbudget_app/src/features/transactions/providers/duplicate_check_provider.dart';
 import 'package:openbudget_app/src/features/transactions/providers/transaction_actions_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
-import 'package:openbudget_app/src/theme/ynab_palette.dart';
+import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_core/openbudget_core.dart';
@@ -88,9 +88,9 @@ class AddIncomeScreen extends HookConsumerWidget {
         : formatCents(amountCentsPreview, budgetCurrency);
 
     return Scaffold(
-      backgroundColor: YnabPalette.appBackground,
+      backgroundColor: OpenBudgetPalette.appBackground,
       appBar: AppBar(
-        backgroundColor: YnabPalette.appBackground,
+        backgroundColor: OpenBudgetPalette.appBackground,
         surfaceTintColor: Colors.transparent,
         scrolledUnderElevation: 0,
         leadingWidth: 88,
@@ -124,7 +124,7 @@ class AddIncomeScreen extends HookConsumerWidget {
                 Container(
                   padding: const EdgeInsets.all(SpacingTokens.md),
                   decoration: BoxDecoration(
-                    color: YnabPalette.accentGreen,
+                    color: OpenBudgetPalette.accentGreen,
                     borderRadius: BorderRadius.circular(RadiusTokens.md),
                   ),
                   child: Column(
@@ -142,7 +142,7 @@ class AddIncomeScreen extends HookConsumerWidget {
                                 label: l10n.addTransactionExpense,
                                 icon: Icons.arrow_upward_rounded,
                                 selected: false,
-                                color: YnabPalette.mutedText,
+                                color: OpenBudgetPalette.mutedText,
                                 onTap: () => context.goNamed(
                                   addExpenseRoute,
                                   pathParameters: {'id': budgetId},
@@ -213,7 +213,7 @@ class AddIncomeScreen extends HookConsumerWidget {
                 ),
                 const SizedBox(height: SpacingTokens.md),
                 Card(
-                  color: YnabPalette.surface,
+                  color: OpenBudgetPalette.surface,
                   margin: EdgeInsets.zero,
                   child: Padding(
                     padding: const EdgeInsets.all(SpacingTokens.md),
@@ -273,7 +273,7 @@ class AddIncomeScreen extends HookConsumerWidget {
                 ),
                 const SizedBox(height: SpacingTokens.md),
                 Card(
-                  color: YnabPalette.surface,
+                  color: OpenBudgetPalette.surface,
                   margin: EdgeInsets.zero,
                   child: Padding(
                     padding: const EdgeInsets.all(SpacingTokens.md),
@@ -391,7 +391,7 @@ class AddIncomeScreen extends HookConsumerWidget {
                       : const Icon(Icons.check_circle_rounded, size: 18),
                   label: Text(l10n.transactionSave),
                   style: FilledButton.styleFrom(
-                    backgroundColor: YnabPalette.accentBlue,
+                    backgroundColor: OpenBudgetPalette.accentBlue,
                     foregroundColor: Colors.white,
                   ),
                 ),
@@ -476,7 +476,7 @@ class _ReadOnlyRow extends HookWidget {
     final theme = Theme.of(context);
     return Row(
       children: [
-        Icon(icon, size: 20, color: YnabPalette.accentBlue),
+        Icon(icon, size: 20, color: OpenBudgetPalette.accentBlue),
         const SizedBox(width: SpacingTokens.sm),
         Expanded(
           child: Column(
@@ -485,7 +485,7 @@ class _ReadOnlyRow extends HookWidget {
               Text(
                 label,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: YnabPalette.mutedText,
+                  color: OpenBudgetPalette.mutedText,
                 ),
               ),
               Text(

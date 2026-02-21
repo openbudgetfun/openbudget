@@ -6,7 +6,7 @@ import 'package:openbudget_app/src/features/budget/providers/budget_summary_prov
 import 'package:openbudget_app/src/features/payees/providers/payee_list_provider.dart';
 import 'package:openbudget_app/src/features/transaction_rules/providers/rule_actions_provider.dart';
 import 'package:openbudget_app/src/features/transaction_rules/providers/rule_list_provider.dart';
-import 'package:openbudget_app/src/theme/ynab_palette.dart';
+import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 enum RuleViewFilter { all, enabled, disabled }
@@ -48,16 +48,16 @@ class RuleListScreen extends HookConsumerWidget {
     }
 
     return Scaffold(
-      backgroundColor: YnabPalette.appBackground,
+      backgroundColor: OpenBudgetPalette.appBackground,
       appBar: AppBar(
-        backgroundColor: YnabPalette.appBackground,
+        backgroundColor: OpenBudgetPalette.appBackground,
         surfaceTintColor: Colors.transparent,
         scrolledUnderElevation: 0,
         title: Text(l10n.transactionRulesTitle),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showAddRuleDialog(context, ref),
-        backgroundColor: YnabPalette.accentBlue,
+        backgroundColor: OpenBudgetPalette.accentBlue,
         foregroundColor: Colors.white,
         child: const Icon(Icons.add),
       ),
@@ -76,10 +76,10 @@ class RuleListScreen extends HookConsumerWidget {
             return Center(
               child: Card(
                 margin: const EdgeInsets.all(SpacingTokens.lg),
-                color: YnabPalette.surface,
+                color: OpenBudgetPalette.surface,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(RadiusTokens.md),
-                  side: const BorderSide(color: YnabPalette.divider),
+                  side: const BorderSide(color: OpenBudgetPalette.divider),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(SpacingTokens.lg),
@@ -145,14 +145,14 @@ class RuleListScreen extends HookConsumerWidget {
                       label: l10n.transactionRulesEnabled,
                       selected: viewFilter.value == RuleViewFilter.enabled,
                       onTap: () => viewFilter.value = RuleViewFilter.enabled,
-                      color: YnabPalette.progressGreen,
+                      color: OpenBudgetPalette.progressGreen,
                     ),
                     const SizedBox(width: SpacingTokens.sm),
                     _RuleFilterChip(
                       label: l10n.transactionRulesDisabled,
                       selected: viewFilter.value == RuleViewFilter.disabled,
                       onTap: () => viewFilter.value = RuleViewFilter.disabled,
-                      color: YnabPalette.negative,
+                      color: OpenBudgetPalette.negative,
                     ),
                   ],
                 ),
@@ -161,17 +161,17 @@ class RuleListScreen extends HookConsumerWidget {
               if (filteredRules.isEmpty)
                 Card(
                   margin: EdgeInsets.zero,
-                  color: YnabPalette.surface,
+                  color: OpenBudgetPalette.surface,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(RadiusTokens.md),
-                    side: const BorderSide(color: YnabPalette.divider),
+                    side: const BorderSide(color: OpenBudgetPalette.divider),
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(SpacingTokens.md),
                     child: Text(
                       l10n.transactionNoResults,
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: YnabPalette.mutedText,
+                        color: OpenBudgetPalette.mutedText,
                       ),
                     ),
                   ),
@@ -326,10 +326,10 @@ class _RuleSummaryCard extends HookWidget {
     final theme = Theme.of(context);
     return Card(
       margin: EdgeInsets.zero,
-      color: YnabPalette.surface,
+      color: OpenBudgetPalette.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(RadiusTokens.md),
-        side: const BorderSide(color: YnabPalette.divider),
+        side: const BorderSide(color: OpenBudgetPalette.divider),
       ),
       child: Padding(
         padding: const EdgeInsets.all(SpacingTokens.md),
@@ -339,7 +339,7 @@ class _RuleSummaryCard extends HookWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(SpacingTokens.md),
               decoration: BoxDecoration(
-                color: YnabPalette.accentPurple,
+                color: OpenBudgetPalette.accentPurple,
                 borderRadius: BorderRadius.circular(RadiusTokens.md),
               ),
               child: Column(
@@ -354,7 +354,7 @@ class _RuleSummaryCard extends HookWidget {
                   Text(
                     l10n.transactionRulesTotalCount(totalRules),
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: YnabPalette.mutedText,
+                      color: OpenBudgetPalette.mutedText,
                     ),
                   ),
                 ],
@@ -367,7 +367,7 @@ class _RuleSummaryCard extends HookWidget {
                   child: _RuleMetric(
                     label: l10n.transactionRulesEnabled,
                     value: '$enabledRules',
-                    color: YnabPalette.progressGreen,
+                    color: OpenBudgetPalette.progressGreen,
                   ),
                 ),
                 const SizedBox(width: SpacingTokens.sm),
@@ -375,7 +375,7 @@ class _RuleSummaryCard extends HookWidget {
                   child: _RuleMetric(
                     label: l10n.transactionRulesDisabled,
                     value: '$disabledRules',
-                    color: YnabPalette.negative,
+                    color: OpenBudgetPalette.negative,
                   ),
                 ),
               ],
@@ -418,7 +418,7 @@ class _RuleMetric extends HookWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: theme.textTheme.labelSmall?.copyWith(
-              color: YnabPalette.mutedText,
+              color: OpenBudgetPalette.mutedText,
             ),
           ),
           const SizedBox(height: 2),
@@ -451,21 +451,23 @@ class _RuleFilterChip extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final chipColor = color ?? YnabPalette.accentBlue;
+    final chipColor = color ?? OpenBudgetPalette.accentBlue;
     return ChoiceChip(
       label: Text(label),
       selected: selected,
       onSelected: (_) => onTap(),
-      backgroundColor: YnabPalette.surface,
+      backgroundColor: OpenBudgetPalette.surface,
       selectedColor: chipColor.withAlpha(24),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(RadiusTokens.sm),
         side: BorderSide(
-          color: selected ? chipColor.withAlpha(130) : YnabPalette.divider,
+          color: selected
+              ? chipColor.withAlpha(130)
+              : OpenBudgetPalette.divider,
         ),
       ),
       labelStyle: theme.textTheme.labelMedium?.copyWith(
-        color: selected ? chipColor : YnabPalette.mutedText,
+        color: selected ? chipColor : OpenBudgetPalette.mutedText,
         fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
       ),
       showCheckmark: false,
@@ -495,10 +497,10 @@ class _RuleTile extends HookWidget {
     final theme = Theme.of(context);
     return Card(
       margin: const EdgeInsets.only(bottom: SpacingTokens.sm),
-      color: YnabPalette.surface,
+      color: OpenBudgetPalette.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(RadiusTokens.md),
-        side: const BorderSide(color: YnabPalette.divider),
+        side: const BorderSide(color: OpenBudgetPalette.divider),
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(
@@ -507,11 +509,13 @@ class _RuleTile extends HookWidget {
         ),
         leading: CircleAvatar(
           backgroundColor: enabled
-              ? YnabPalette.accentPurple.withAlpha(90)
-              : YnabPalette.surfaceMuted,
+              ? OpenBudgetPalette.accentPurple.withAlpha(90)
+              : OpenBudgetPalette.surfaceMuted,
           child: Icon(
             Icons.rule_rounded,
-            color: enabled ? YnabPalette.accentBlue : YnabPalette.mutedText,
+            color: enabled
+                ? OpenBudgetPalette.accentBlue
+                : OpenBudgetPalette.mutedText,
             size: 18,
           ),
         ),
@@ -525,14 +529,14 @@ class _RuleTile extends HookWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: YnabPalette.mutedText,
+                color: OpenBudgetPalette.mutedText,
               ),
             ),
             if (!enabled)
               Text(
                 l10n.transactionRulesDisabled,
                 style: theme.textTheme.labelSmall?.copyWith(
-                  color: YnabPalette.negative,
+                  color: OpenBudgetPalette.negative,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -544,11 +548,11 @@ class _RuleTile extends HookWidget {
             Switch.adaptive(
               value: enabled,
               onChanged: onToggle,
-              activeTrackColor: YnabPalette.accentBlue,
+              activeTrackColor: OpenBudgetPalette.accentBlue,
             ),
             IconButton(
               icon: const Icon(Icons.delete_outline),
-              color: YnabPalette.negative,
+              color: OpenBudgetPalette.negative,
               onPressed: onDelete,
             ),
           ],

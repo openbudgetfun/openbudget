@@ -4,6 +4,9 @@ account:
   - get:
   - update:
   - delete:
+appleIdp:
+  - login:
+  - hasAccount:
 emailIdp:
   - login:
   - startRegistration:
@@ -12,6 +15,9 @@ emailIdp:
   - startPasswordReset:
   - verifyPasswordResetCode:
   - finishPasswordReset:
+  - hasAccount:
+googleIdp:
+  - login:
   - hasAccount:
 jwtRefresh:
   - refreshAccessToken:

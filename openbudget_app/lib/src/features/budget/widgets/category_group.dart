@@ -4,7 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
 import 'package:openbudget_app/src/features/budget/widgets/envelope_row.dart';
-import 'package:openbudget_app/src/theme/ynab_palette.dart';
+import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
@@ -62,10 +62,10 @@ class CategoryGroup extends HookConsumerWidget {
 
     return Card(
       margin: EdgeInsets.zero,
-      color: YnabPalette.surface,
+      color: OpenBudgetPalette.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(RadiusTokens.md),
-        side: const BorderSide(color: YnabPalette.divider),
+        side: const BorderSide(color: OpenBudgetPalette.divider),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -84,7 +84,7 @@ class CategoryGroup extends HookConsumerWidget {
                   vertical: SpacingTokens.sm + SpacingTokens.xs,
                 ),
                 decoration: const BoxDecoration(
-                  color: YnabPalette.surfaceMuted,
+                  color: OpenBudgetPalette.surfaceMuted,
                   borderRadius: BorderRadius.vertical(
                     top: Radius.circular(RadiusTokens.md),
                   ),
@@ -95,7 +95,7 @@ class CategoryGroup extends HookConsumerWidget {
                       const Icon(
                         Icons.visibility_off_rounded,
                         size: 14,
-                        color: YnabPalette.mutedText,
+                        color: OpenBudgetPalette.mutedText,
                       ),
                       const SizedBox(width: SpacingTokens.xs),
                     ],
@@ -114,7 +114,7 @@ class CategoryGroup extends HookConsumerWidget {
                         Text(
                           l10n.budgetColumnAvailable,
                           style: theme.textTheme.labelSmall?.copyWith(
-                            color: YnabPalette.mutedText,
+                            color: OpenBudgetPalette.mutedText,
                           ),
                         ),
                         Text(
@@ -147,14 +147,14 @@ class CategoryGroup extends HookConsumerWidget {
                   const Icon(
                     Icons.info_outline_rounded,
                     size: 14,
-                    color: YnabPalette.mutedText,
+                    color: OpenBudgetPalette.mutedText,
                   ),
                   const SizedBox(width: SpacingTokens.xs),
                   Expanded(
                     child: Text(
                       l10n.envelopeReorderHint,
                       style: theme.textTheme.labelSmall?.copyWith(
-                        color: YnabPalette.mutedText,
+                        color: OpenBudgetPalette.mutedText,
                       ),
                     ),
                   ),
@@ -173,7 +173,7 @@ class CategoryGroup extends HookConsumerWidget {
                 dense: true,
                 leading: const Icon(
                   Icons.drag_handle_rounded,
-                  color: YnabPalette.mutedText,
+                  color: OpenBudgetPalette.mutedText,
                 ),
                 title: Text(
                   envelope.name,
@@ -238,7 +238,10 @@ class CategoryGroup extends HookConsumerWidget {
                 ),
               );
               if (entry.key < envelopes.length - 1) {
-                yield const Divider(height: 1, color: YnabPalette.divider);
+                yield const Divider(
+                  height: 1,
+                  color: OpenBudgetPalette.divider,
+                );
               }
             }),
           Container(
@@ -249,7 +252,7 @@ class CategoryGroup extends HookConsumerWidget {
               SpacingTokens.md,
             ),
             decoration: const BoxDecoration(
-              border: Border(top: BorderSide(color: YnabPalette.divider)),
+              border: Border(top: BorderSide(color: OpenBudgetPalette.divider)),
             ),
             child: Row(
               children: [
@@ -257,7 +260,7 @@ class CategoryGroup extends HookConsumerWidget {
                   child: Text(
                     l10n.budgetCategoryTotal,
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: YnabPalette.mutedText,
+                      color: OpenBudgetPalette.mutedText,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -267,9 +270,9 @@ class CategoryGroup extends HookConsumerWidget {
                   icon: const Icon(Icons.add, size: 16),
                   label: Text(l10n.budgetAddEnvelope),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: YnabPalette.accentBlue,
-                    side: const BorderSide(color: YnabPalette.divider),
-                    backgroundColor: YnabPalette.surfaceMuted,
+                    foregroundColor: OpenBudgetPalette.accentBlue,
+                    side: const BorderSide(color: OpenBudgetPalette.divider),
+                    backgroundColor: OpenBudgetPalette.surfaceMuted,
                     padding: const EdgeInsets.symmetric(
                       horizontal: SpacingTokens.sm,
                       vertical: SpacingTokens.xs,
@@ -433,8 +436,8 @@ class CategoryGroup extends HookConsumerWidget {
   }
 
   Color _availableColor(int cents) {
-    if (cents > 0) return YnabPalette.progressGreen;
-    if (cents < 0) return YnabPalette.negative;
-    return YnabPalette.mutedText;
+    if (cents > 0) return OpenBudgetPalette.progressGreen;
+    if (cents < 0) return OpenBudgetPalette.negative;
+    return OpenBudgetPalette.mutedText;
   }
 }

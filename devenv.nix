@@ -255,6 +255,24 @@ in
       '';
       description = "Run Serverpod code generation.";
     };
+    "icons:generate" = {
+      exec = ''
+        set -e
+        cd "$DEVENV_ROOT/openbudget_app"
+        flutter pub get
+        dart run flutter_launcher_icons -f flutter_launcher_icons.yaml
+      '';
+      description = "Regenerate launcher icons from openbudget_app/flutter_launcher_icons.yaml after updating the primary OpenBudget logo PNG.";
+    };
+    "splash:generate" = {
+      exec = ''
+        set -e
+        cd "$DEVENV_ROOT/openbudget_app"
+        flutter pub get
+        dart run flutter_native_splash:create --path=flutter_native_splash.yaml
+      '';
+      description = "Regenerate native splash assets from openbudget_app/flutter_native_splash.yaml for light and dark logo variants.";
+    };
 
     # ── Utilities ────────────────────────────────────────────────────────
     "clean:all" = {

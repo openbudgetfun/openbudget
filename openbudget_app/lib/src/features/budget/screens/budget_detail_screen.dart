@@ -23,7 +23,7 @@ import 'package:openbudget_app/src/features/budget/widgets/category_group.dart';
 import 'package:openbudget_app/src/features/budget/widgets/credit_card_section.dart';
 import 'package:openbudget_app/src/features/recurring/providers/recurring_auto_post_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
-import 'package:openbudget_app/src/theme/ynab_palette.dart';
+import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
@@ -149,9 +149,9 @@ class BudgetDetailScreen extends HookConsumerWidget {
         );
 
         return Scaffold(
-          backgroundColor: YnabPalette.appBackground,
+          backgroundColor: OpenBudgetPalette.appBackground,
           appBar: AppBar(
-            backgroundColor: YnabPalette.appBackground,
+            backgroundColor: OpenBudgetPalette.appBackground,
             surfaceTintColor: Colors.transparent,
             scrolledUnderElevation: 0,
             leading: IconButton(
@@ -1011,9 +1011,9 @@ class _BudgetViewToggle extends HookWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: YnabPalette.surfaceMuted,
+        color: OpenBudgetPalette.surfaceMuted,
         borderRadius: BorderRadius.circular(RadiusTokens.md),
-        border: Border.all(color: YnabPalette.divider),
+        border: Border.all(color: OpenBudgetPalette.divider),
       ),
       padding: const EdgeInsets.all(2),
       child: Row(
@@ -1056,7 +1056,7 @@ class _ToggleButton extends HookWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: selected ? YnabPalette.surface : Colors.transparent,
+      color: selected ? OpenBudgetPalette.surface : Colors.transparent,
       borderRadius: BorderRadius.circular(RadiusTokens.sm),
       child: InkWell(
         onTap: onTap,
@@ -1068,7 +1068,7 @@ class _ToggleButton extends HookWidget {
               label,
               style: theme.textTheme.labelLarge?.copyWith(
                 fontWeight: FontWeight.w700,
-                color: selected ? Colors.black : YnabPalette.mutedText,
+                color: selected ? Colors.black : OpenBudgetPalette.mutedText,
               ),
             ),
           ),
@@ -1099,9 +1099,9 @@ class _SpotlightSummaryCard extends HookWidget {
     return Container(
       padding: const EdgeInsets.all(SpacingTokens.md),
       decoration: BoxDecoration(
-        color: YnabPalette.surface,
+        color: OpenBudgetPalette.surface,
         borderRadius: BorderRadius.circular(RadiusTokens.md),
-        border: Border.all(color: YnabPalette.divider),
+        border: Border.all(color: OpenBudgetPalette.divider),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1116,7 +1116,7 @@ class _SpotlightSummaryCard extends HookWidget {
           _SpotlightRow(
             label: 'Income',
             value: formatCents(totalIncomeCents, currencyCode),
-            valueColor: YnabPalette.progressGreen,
+            valueColor: OpenBudgetPalette.progressGreen,
           ),
           _SpotlightRow(
             label: 'Budgeted',
@@ -1126,15 +1126,15 @@ class _SpotlightSummaryCard extends HookWidget {
             label: 'Spent',
             value: formatCents(totalActivityCents, currencyCode),
             valueColor: totalActivityCents > 0
-                ? YnabPalette.negative
-                : YnabPalette.mutedText,
+                ? OpenBudgetPalette.negative
+                : OpenBudgetPalette.mutedText,
           ),
           _SpotlightRow(
             label: 'Overspent',
             value: formatCents(totalOverspentCents, currencyCode),
             valueColor: totalOverspentCents > 0
-                ? YnabPalette.negative
-                : YnabPalette.mutedText,
+                ? OpenBudgetPalette.negative
+                : OpenBudgetPalette.mutedText,
           ),
         ],
       ),
@@ -1164,7 +1164,7 @@ class _SpotlightRow extends HookWidget {
             child: Text(
               label,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: YnabPalette.mutedText,
+                color: OpenBudgetPalette.mutedText,
               ),
             ),
           ),

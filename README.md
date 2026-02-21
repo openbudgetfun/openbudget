@@ -58,6 +58,10 @@ openbudget/
 └── devenv.nix                # Development environment config
 ```
 
+## Branding
+
+Branding rules and naming constraints are documented in `docs/branding.md`.
+
 ## Commands
 
 All commands run from the repo root. No need to `cd` into subdirectories.

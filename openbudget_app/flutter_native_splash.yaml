@@ -1,0 +1,16 @@
+flutter_native_splash:
+  color: '#F2F7FF'
+  color_dark: '#050A13'
+  image: assets/branding/logos/ob_primary_light_1024.png
+  image_dark: assets/branding/logos/ob_primary_dark_1024.png
+  android: true
+  ios: true
+  web: true
+  fullscreen: true
+  android_12:
+    color: '#F2F7FF'
+    color_dark: '#050A13'
+    image: assets/branding/logos/ob_primary_light_1024.png
+    image_dark: assets/branding/logos/ob_primary_dark_1024.png
+    icon_background_color: '#F2F7FF'
+    icon_background_color_dark: '#050A13'
