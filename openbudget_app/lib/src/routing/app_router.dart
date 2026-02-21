@@ -21,6 +21,9 @@ import 'package:openbudget_app/src/features/reports/screens/net_worth_screen.dar
 import 'package:openbudget_app/src/features/reports/screens/reports_screen.dart';
 import 'package:openbudget_app/src/features/reports/screens/spending_by_payee_screen.dart';
 import 'package:openbudget_app/src/features/reports/screens/spending_trends_screen.dart';
+import 'package:openbudget_app/src/features/settings/screens/currency_settings_screen.dart';
+import 'package:openbudget_app/src/features/settings/screens/display_options_screen.dart';
+import 'package:openbudget_app/src/features/settings/screens/plan_settings_screen.dart';
 import 'package:openbudget_app/src/features/settings/screens/settings_screen.dart';
 import 'package:openbudget_app/src/features/transaction_rules/screens/rule_list_screen.dart';
 import 'package:openbudget_app/src/features/transactions/screens/add_expense_screen.dart';
@@ -269,6 +272,33 @@ GoRouter appRouter(Ref ref) {
                           final id = state.pathParameters['id']!;
                           return SettingsScreen(budgetId: id);
                         },
+                        routes: [
+                          GoRoute(
+                            name: planSettingsRoute,
+                            path: 'plan',
+                            builder: (context, state) {
+                              final id = state.pathParameters['id']!;
+                              return PlanSettingsScreen(budgetId: id);
+                            },
+                            routes: [
+                              GoRoute(
+                                name: currencySettingsRoute,
+                                path: 'currency',
+                                builder: (context, state) {
+                                  final id = state.pathParameters['id']!;
+                                  return CurrencySettingsScreen(budgetId: id);
+                                },
+                              ),
+                            ],
+                          ),
+                          GoRoute(
+                            name: displayOptionsRoute,
+                            path: 'display',
+                            builder: (context, state) {
+                              return const DisplayOptionsScreen();
+                            },
+                          ),
+                        ],
                       ),
                     ],
                   ),

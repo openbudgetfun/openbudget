@@ -2212,6 +2212,30 @@ abstract class AppLocalizations {
   /// **'Account'**
   String get settingsAccountSection;
 
+  /// No description provided for @settingsAppSection.
+  ///
+  /// In en, this message translates to:
+  /// **'App'**
+  String get settingsAppSection;
+
+  /// No description provided for @settingsBalanceStyle.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance Style'**
+  String get settingsBalanceStyle;
+
+  /// No description provided for @settingsBalanceStyleAccessible.
+  ///
+  /// In en, this message translates to:
+  /// **'Differentiate Without Color'**
+  String get settingsBalanceStyleAccessible;
+
+  /// No description provided for @settingsBalanceStyleDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Default'**
+  String get settingsBalanceStyleDefault;
+
   /// No description provided for @settingsBudgetName.
   ///
   /// In en, this message translates to:
@@ -2224,6 +2248,36 @@ abstract class AppLocalizations {
   /// **'Budget'**
   String get settingsBudgetSection;
 
+  /// No description provided for @settingsCurrencyPlacement.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency Placement'**
+  String get settingsCurrencyPlacement;
+
+  /// No description provided for @settingsCurrencyPlacementAfter.
+  ///
+  /// In en, this message translates to:
+  /// **'After Amount (123,456.78\$)'**
+  String get settingsCurrencyPlacementAfter;
+
+  /// No description provided for @settingsCurrencyPlacementBefore.
+  ///
+  /// In en, this message translates to:
+  /// **'Before Amount (\$123,456.78)'**
+  String get settingsCurrencyPlacementBefore;
+
+  /// No description provided for @settingsCurrencyUpdateError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not update plan currency. Please try again.'**
+  String get settingsCurrencyUpdateError;
+
+  /// No description provided for @settingsCurrencyUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan currency updated to {currencyCode}'**
+  String settingsCurrencyUpdated(String currencyCode);
+
   /// No description provided for @settingsCurrency.
   ///
   /// In en, this message translates to:
@@ -2235,6 +2289,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Data'**
   String get settingsDataSection;
+
+  /// No description provided for @settingsCurrentPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Plan'**
+  String get settingsCurrentPlan;
+
+  /// No description provided for @settingsDateFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Date Format'**
+  String get settingsDateFormat;
+
+  /// No description provided for @settingsDateFormatDayMonthYear.
+  ///
+  /// In en, this message translates to:
+  /// **'30/12/2025'**
+  String get settingsDateFormatDayMonthYear;
+
+  /// No description provided for @settingsDateFormatMonthDayYear.
+  ///
+  /// In en, this message translates to:
+  /// **'12/30/2025'**
+  String get settingsDateFormatMonthDayYear;
+
+  /// No description provided for @settingsDateFormatYearMonthDay.
+  ///
+  /// In en, this message translates to:
+  /// **'2025-12-30'**
+  String get settingsDateFormatYearMonthDay;
+
+  /// No description provided for @settingsDeletePlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Plan'**
+  String get settingsDeletePlan;
+
+  /// No description provided for @settingsDisplayOptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Display Options'**
+  String get settingsDisplayOptions;
+
+  /// No description provided for @settingsDisplayOptionsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Display options are applied instantly and affect all budget amount pills.'**
+  String get settingsDisplayOptionsHint;
 
   /// No description provided for @settingsExportData.
   ///
@@ -2260,11 +2362,35 @@ abstract class AppLocalizations {
   /// **'Budget data copied to clipboard'**
   String get settingsExportSuccess;
 
+  /// No description provided for @settingsFreshStartButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Create New Plan'**
+  String get settingsFreshStartButton;
+
+  /// No description provided for @settingsFreshStartHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a new plan from scratch while keeping your existing plan intact.'**
+  String get settingsFreshStartHint;
+
+  /// No description provided for @settingsFreshStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Make a Fresh Start'**
+  String get settingsFreshStart;
+
   /// No description provided for @settingsLoadError.
   ///
   /// In en, this message translates to:
   /// **'Could not load settings'**
   String get settingsLoadError;
+
+  /// No description provided for @settingsLoggedInAs.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed in'**
+  String get settingsLoggedInAs;
 
   /// No description provided for @settingsLogoutConfirm.
   ///
@@ -2277,6 +2403,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Quick Access'**
   String get settingsNavigationSection;
+
+  /// No description provided for @settingsNewPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'New Plan'**
+  String get settingsNewPlan;
+
+  /// No description provided for @settingsNumberFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Number Format'**
+  String get settingsNumberFormat;
+
+  /// No description provided for @settingsNumberFormatEuropean.
+  ///
+  /// In en, this message translates to:
+  /// **'123.456,78'**
+  String get settingsNumberFormatEuropean;
+
+  /// No description provided for @settingsNumberFormatStandard.
+  ///
+  /// In en, this message translates to:
+  /// **'123,456.78'**
+  String get settingsNumberFormatStandard;
+
+  /// No description provided for @settingsOpenPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Plan'**
+  String get settingsOpenPlan;
+
+  /// No description provided for @settingsPlanSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan Settings'**
+  String get settingsPlanSettings;
 
   /// No description provided for @settingsRenameBudget.
   ///
