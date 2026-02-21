@@ -10,8 +10,8 @@ flutter_launcher_icons:
   web:
     generate: true
     image_path: assets/branding/logos/ob_primary_light_1024.png
-    background_color: '#F2F7FF'
-    theme_color: '#2C4BAA'
+    background_color: "#F2F7FF"
+    theme_color: "#2C4BAA"
   windows:
     generate: true
     image_path: assets/branding/logos/ob_primary_light_1024.png
