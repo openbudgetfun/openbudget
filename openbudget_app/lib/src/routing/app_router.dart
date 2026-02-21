@@ -9,7 +9,9 @@ import 'package:openbudget_app/src/features/auth/screens/login_screen.dart';
 import 'package:openbudget_app/src/features/auth/screens/register_screen.dart';
 import 'package:openbudget_app/src/features/budget/screens/budget_detail_screen.dart';
 import 'package:openbudget_app/src/features/budget/screens/budget_shell_screen.dart';
+import 'package:openbudget_app/src/features/budget/screens/category_detail_screen.dart';
 import 'package:openbudget_app/src/features/budget/screens/create_budget_screen.dart';
+import 'package:openbudget_app/src/features/budget/screens/recent_moves_screen.dart';
 import 'package:openbudget_app/src/features/home/screens/home_screen.dart';
 import 'package:openbudget_app/src/features/more/screens/more_screen.dart';
 import 'package:openbudget_app/src/features/payees/screens/payee_list_screen.dart';
@@ -117,6 +119,47 @@ GoRouter appRouter(Ref ref) {
                       final id = state.pathParameters['id']!;
                       return BudgetDetailScreen(budgetId: id);
                     },
+                    routes: [
+                      GoRoute(
+                        name: recentMovesRoute,
+                        path: 'recent-moves',
+                        builder: (context, state) {
+                          final id = state.pathParameters['id']!;
+                          return RecentMovesScreen(budgetId: id);
+                        },
+                        routes: [
+                          GoRoute(
+                            name: envelopeMovesRoute,
+                            path: ':envelopeId',
+                            builder: (context, state) {
+                              final id = state.pathParameters['id']!;
+                              final envelopeId =
+                                  state.pathParameters['envelopeId']!;
+                              return EnvelopeMovesScreen(
+                                budgetId: id,
+                                envelopeId: envelopeId,
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                      GoRoute(
+                        name: categoryDetailRoute,
+                        path: 'category/:categoryId/envelope/:envelopeId',
+                        builder: (context, state) {
+                          final id = state.pathParameters['id']!;
+                          final categoryId =
+                              state.pathParameters['categoryId']!;
+                          final envelopeId =
+                              state.pathParameters['envelopeId']!;
+                          return CategoryDetailScreen(
+                            budgetId: id,
+                            categoryId: categoryId,
+                            envelopeId: envelopeId,
+                          );
+                        },
+                      ),
+                    ],
                   ),
                 ],
               ),

@@ -329,6 +329,26 @@
   "budgetCategoryCreated": "Category created",
   "budgetCategoryNameLabel": "Category Name",
   "budgetCategoryTotal": "Total",
+  "categoryDetailAmountToAssignThisMonth": "Amount to Assign This Month",
+  "categoryDetailAssignedSoFar": "Assigned So Far",
+  "categoryDetailAssignMore": "Assign {amount} more to meet your target",
+  "@categoryDetailAssignMore": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "categoryDetailBalanceTitle": "Balance",
+  "categoryDetailDeleteConfirm": "Delete this envelope and its budget history?",
+  "categoryDetailDeleteEnvelope": "Delete Envelope",
+  "categoryDetailEditEnvelope": "Rename Envelope",
+  "categoryDetailHideEnvelope": "Hide Envelope",
+  "categoryDetailNotesTitle": "Notes",
+  "categoryDetailTargetMet": "You've met your target!",
+  "categoryDetailTargetTitle": "Target",
+  "categoryDetailToGo": "To Go",
+  "categoryDetailUnhideEnvelope": "Unhide Envelope",
   "budgetColumnAvailable": "Available",
   "budgetColumnBudgeted": "Budgeted",
   "budgetColumnSpent": "Spent",
@@ -570,6 +590,25 @@
   "reconcileDifference": "Difference",
   "reconcileError": "Could not reconcile account. Please try again.",
   "reconcileMessage": "Mark all cleared transactions as reconciled? This locks them from further editing.",
+  "recentMovesArrowLabel": "to",
+  "recentMovesDetailTitle": "Moves",
+  "recentMovesEmptySubtitle": "Moves and assignments will appear here as you budget.",
+  "recentMovesEmptyTitle": "No recent moves yet",
+  "recentMovesNoEnvelopeHistory": "No move history for {envelopeName}",
+  "@recentMovesNoEnvelopeHistory": {
+    "placeholders": {
+      "envelopeName": {
+        "type": "String"
+      }
+    }
+  },
+  "recentMovesNoEnvelopeHistoryHint": "This envelope has not been part of a recorded move yet.",
+  "recentMovesReadyToAssign": "Ready to Assign",
+  "recentMovesTabAll": "All",
+  "recentMovesTabAssigned": "Assigned",
+  "recentMovesTabMoved": "Moved",
+  "recentMovesTitle": "Recent Moves",
+  "recentMovesUnnamedEnvelope": "Unnamed Envelope",
   "reconcileSuccess": "{count, plural, =0{No transactions to reconcile} =1{1 transaction reconciled} other{{count} transactions reconciled}}",
   "reconcileSuccessWithAdjustment": "{count, plural, =0{Reconciled with {adjustment} adjustment} =1{1 transaction reconciled with {adjustment} adjustment} other{{count} transactions reconciled with {adjustment} adjustment}}",
   "reconcileTitle": "Reconcile Account",

@@ -16,7 +16,6 @@ import 'package:openbudget_app/src/features/budget/screens/add_envelope_dialog.d
 import 'package:openbudget_app/src/features/budget/screens/budget_template_dialog.dart';
 import 'package:openbudget_app/src/features/budget/screens/edit_category_dialog.dart';
 import 'package:openbudget_app/src/features/budget/screens/edit_envelope_dialog.dart';
-import 'package:openbudget_app/src/features/budget/screens/envelope_activity_sheet.dart';
 import 'package:openbudget_app/src/features/budget/screens/quick_budget_dialog.dart';
 import 'package:openbudget_app/src/features/budget/widgets/budget_header.dart';
 import 'package:openbudget_app/src/features/budget/widgets/category_group.dart';
@@ -173,6 +172,14 @@ class BudgetDetailScreen extends HookConsumerWidget {
                   child: Text(l10n.budgetReorderDone),
                 )
               else ...[
+                IconButton(
+                  icon: const Icon(Icons.history_rounded),
+                  tooltip: l10n.recentMovesTitle,
+                  onPressed: () => context.pushNamed(
+                    recentMovesRoute,
+                    pathParameters: {'id': budgetId},
+                  ),
+                ),
                 IconButton(
                   icon: Icon(
                     isSearching.value
@@ -436,20 +443,22 @@ class BudgetDetailScreen extends HookConsumerWidget {
                           year: summary.year,
                           month: summary.month,
                         ),
-                        onShowActivity: (envelope, monthlyData, goal) =>
-                            _showEnvelopeActivity(
-                              context,
-                              envelope,
-                              currencyCode,
-                              categories: summary.categories,
-                              categoryId:
-                                  catWithEnvelopes.category.id?.toString() ??
-                                  '',
-                              year: summary.year,
-                              month: summary.month,
-                              monthlyData: monthlyData,
-                              goal: goal,
-                            ),
+                        onShowActivity: (envelope, monthlyData, goal) => (() {
+                          final categoryId =
+                              catWithEnvelopes.category.id?.toString() ?? '';
+                          final envelopeId = envelope.id?.toString() ?? '';
+                          if (categoryId.isEmpty || envelopeId.isEmpty) {
+                            return;
+                          }
+                          context.pushNamed(
+                            categoryDetailRoute,
+                            pathParameters: {
+                              'id': budgetId,
+                              'categoryId': categoryId,
+                              'envelopeId': envelopeId,
+                            },
+                          );
+                        })(),
                         onReorderEnvelopes: (envelopeIds) async {
                           try {
                             await ref
@@ -610,40 +619,6 @@ class BudgetDetailScreen extends HookConsumerWidget {
     }
 
     return filtered;
-  }
-
-  void _showEnvelopeActivity(
-    BuildContext context,
-    Envelope envelope,
-    CurrencyCode currencyCode, {
-    required List<CategoryWithEnvelopes> categories,
-    required String categoryId,
-    required int year,
-    required int month,
-    MonthlyEnvelopeData? monthlyData,
-    EnvelopeGoal? goal,
-  }) {
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(RadiusTokens.lg),
-        ),
-      ),
-      builder: (_) => EnvelopeActivitySheet(
-        envelope: envelope,
-        budgetId: budgetId,
-        currencyCode: currencyCode,
-        categories: categories,
-        categoryId: categoryId,
-        year: year,
-        month: month,
-        monthlyData: monthlyData,
-        goal: goal,
-      ),
-    );
   }
 
   void _showQuickBudgetDialog(

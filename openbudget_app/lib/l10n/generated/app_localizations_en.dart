@@ -352,6 +352,49 @@ class AppLocalizationsEn extends AppLocalizations {
   String get budgetCategoryTotal => 'Total';
 
   @override
+  String get categoryDetailAmountToAssignThisMonth =>
+      'Amount to Assign This Month';
+
+  @override
+  String get categoryDetailAssignedSoFar => 'Assigned So Far';
+
+  @override
+  String categoryDetailAssignMore(String amount) {
+    return 'Assign $amount more to meet your target';
+  }
+
+  @override
+  String get categoryDetailBalanceTitle => 'Balance';
+
+  @override
+  String get categoryDetailDeleteConfirm =>
+      'Delete this envelope and its budget history?';
+
+  @override
+  String get categoryDetailDeleteEnvelope => 'Delete Envelope';
+
+  @override
+  String get categoryDetailEditEnvelope => 'Rename Envelope';
+
+  @override
+  String get categoryDetailHideEnvelope => 'Hide Envelope';
+
+  @override
+  String get categoryDetailNotesTitle => 'Notes';
+
+  @override
+  String get categoryDetailTargetMet => 'You\'ve met your target!';
+
+  @override
+  String get categoryDetailTargetTitle => 'Target';
+
+  @override
+  String get categoryDetailToGo => 'To Go';
+
+  @override
+  String get categoryDetailUnhideEnvelope => 'Unhide Envelope';
+
+  @override
   String get budgetColumnAvailable => 'Available';
 
   @override
@@ -1100,6 +1143,46 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get reconcileMessage =>
       'Mark all cleared transactions as reconciled? This locks them from further editing.';
+
+  @override
+  String get recentMovesArrowLabel => 'to';
+
+  @override
+  String get recentMovesDetailTitle => 'Moves';
+
+  @override
+  String get recentMovesEmptySubtitle =>
+      'Moves and assignments will appear here as you budget.';
+
+  @override
+  String get recentMovesEmptyTitle => 'No recent moves yet';
+
+  @override
+  String recentMovesNoEnvelopeHistory(String envelopeName) {
+    return 'No move history for $envelopeName';
+  }
+
+  @override
+  String get recentMovesNoEnvelopeHistoryHint =>
+      'This envelope has not been part of a recorded move yet.';
+
+  @override
+  String get recentMovesReadyToAssign => 'Ready to Assign';
+
+  @override
+  String get recentMovesTabAll => 'All';
+
+  @override
+  String get recentMovesTabAssigned => 'Assigned';
+
+  @override
+  String get recentMovesTabMoved => 'Moved';
+
+  @override
+  String get recentMovesTitle => 'Recent Moves';
+
+  @override
+  String get recentMovesUnnamedEnvelope => 'Unnamed Envelope';
 
   @override
   String reconcileSuccess(int count) {

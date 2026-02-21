@@ -24,6 +24,13 @@ const createTransferRoute = 'createTransfer';
 const createTransferPath = '/budgets/:id/transfer';
 const splitExpenseRoute = 'splitExpense';
 const splitExpensePath = '/budgets/:id/expenses/split';
+const recentMovesRoute = 'recentMoves';
+const recentMovesPath = '/budgets/:id/plan/recent-moves';
+const envelopeMovesRoute = 'envelopeMoves';
+const envelopeMovesPath = '/budgets/:id/plan/recent-moves/:envelopeId';
+const categoryDetailRoute = 'categoryDetail';
+const categoryDetailPath =
+    '/budgets/:id/plan/category/:categoryId/envelope/:envelopeId';
 
 // Shell tab branches
 const budgetShellRoute = 'budgetShell';

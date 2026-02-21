@@ -1,4 +1,5 @@
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/recent_moves_provider.dart';
 import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -77,6 +78,14 @@ class MonthlyAllocationActions extends _$MonthlyAllocationActions {
       );
       if (ref.mounted) {
         ref
+            .read(recentMovesProvider.notifier)
+            .recordMove(
+              budgetId: budgetId,
+              fromEnvelopeId: fromEnvelopeId,
+              toEnvelopeId: toEnvelopeId,
+              amountCents: amountCents,
+            );
+        ref
           ..invalidate(monthlyAllocationsProvider(budgetId, year, month))
           ..invalidate(budgetMonthlySummaryProvider(budgetId));
         state = const AsyncValue.data(null);
@@ -153,6 +162,13 @@ class MonthlyAllocationActions extends _$MonthlyAllocationActions {
         carryoverCents: carryoverCents,
       );
       if (ref.mounted) {
+        ref
+            .read(recentMovesProvider.notifier)
+            .recordAssigned(
+              budgetId: budgetId,
+              envelopeId: envelopeId,
+              amountCents: allocatedCents,
+            );
         ref
           ..invalidate(monthlyAllocationsProvider(budgetId, year, month))
           ..invalidate(budgetMonthlySummaryProvider(budgetId));

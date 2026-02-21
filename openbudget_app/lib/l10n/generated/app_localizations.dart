@@ -622,6 +622,84 @@ abstract class AppLocalizations {
   /// **'Total'**
   String get budgetCategoryTotal;
 
+  /// No description provided for @categoryDetailAmountToAssignThisMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount to Assign This Month'**
+  String get categoryDetailAmountToAssignThisMonth;
+
+  /// No description provided for @categoryDetailAssignedSoFar.
+  ///
+  /// In en, this message translates to:
+  /// **'Assigned So Far'**
+  String get categoryDetailAssignedSoFar;
+
+  /// No description provided for @categoryDetailAssignMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign {amount} more to meet your target'**
+  String categoryDetailAssignMore(String amount);
+
+  /// No description provided for @categoryDetailBalanceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance'**
+  String get categoryDetailBalanceTitle;
+
+  /// No description provided for @categoryDetailDeleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this envelope and its budget history?'**
+  String get categoryDetailDeleteConfirm;
+
+  /// No description provided for @categoryDetailDeleteEnvelope.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Envelope'**
+  String get categoryDetailDeleteEnvelope;
+
+  /// No description provided for @categoryDetailEditEnvelope.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename Envelope'**
+  String get categoryDetailEditEnvelope;
+
+  /// No description provided for @categoryDetailHideEnvelope.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide Envelope'**
+  String get categoryDetailHideEnvelope;
+
+  /// No description provided for @categoryDetailNotesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get categoryDetailNotesTitle;
+
+  /// No description provided for @categoryDetailTargetMet.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve met your target!'**
+  String get categoryDetailTargetMet;
+
+  /// No description provided for @categoryDetailTargetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Target'**
+  String get categoryDetailTargetTitle;
+
+  /// No description provided for @categoryDetailToGo.
+  ///
+  /// In en, this message translates to:
+  /// **'To Go'**
+  String get categoryDetailToGo;
+
+  /// No description provided for @categoryDetailUnhideEnvelope.
+  ///
+  /// In en, this message translates to:
+  /// **'Unhide Envelope'**
+  String get categoryDetailUnhideEnvelope;
+
   /// No description provided for @budgetColumnAvailable.
   ///
   /// In en, this message translates to:
@@ -1857,6 +1935,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Mark all cleared transactions as reconciled? This locks them from further editing.'**
   String get reconcileMessage;
+
+  /// No description provided for @recentMovesArrowLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'to'**
+  String get recentMovesArrowLabel;
+
+  /// No description provided for @recentMovesDetailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Moves'**
+  String get recentMovesDetailTitle;
+
+  /// No description provided for @recentMovesEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Moves and assignments will appear here as you budget.'**
+  String get recentMovesEmptySubtitle;
+
+  /// No description provided for @recentMovesEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No recent moves yet'**
+  String get recentMovesEmptyTitle;
+
+  /// No description provided for @recentMovesNoEnvelopeHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'No move history for {envelopeName}'**
+  String recentMovesNoEnvelopeHistory(String envelopeName);
+
+  /// No description provided for @recentMovesNoEnvelopeHistoryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'This envelope has not been part of a recorded move yet.'**
+  String get recentMovesNoEnvelopeHistoryHint;
+
+  /// No description provided for @recentMovesReadyToAssign.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to Assign'**
+  String get recentMovesReadyToAssign;
+
+  /// No description provided for @recentMovesTabAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get recentMovesTabAll;
+
+  /// No description provided for @recentMovesTabAssigned.
+  ///
+  /// In en, this message translates to:
+  /// **'Assigned'**
+  String get recentMovesTabAssigned;
+
+  /// No description provided for @recentMovesTabMoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Moved'**
+  String get recentMovesTabMoved;
+
+  /// No description provided for @recentMovesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Moves'**
+  String get recentMovesTitle;
+
+  /// No description provided for @recentMovesUnnamedEnvelope.
+  ///
+  /// In en, this message translates to:
+  /// **'Unnamed Envelope'**
+  String get recentMovesUnnamedEnvelope;
 
   /// No description provided for @reconcileSuccess.
   ///
