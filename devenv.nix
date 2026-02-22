@@ -36,38 +36,42 @@ in
 
   dotenv.disableHint = true;
 
-  git-hooks.hooks = {
-    "secrets:commit" = {
-      enable = true;
-      name = "secrets:commit";
-      description = "Scan staged changes for leaked secrets with gitleaks.";
-      entry = "${pkgs.gitleaks}/bin/gitleaks protect --staged --verbose --redact --config .gitleaks.toml";
-      pass_filenames = false;
-      stages = [ "pre-commit" ];
-    };
-    "secrets:push" = {
-      enable = true;
-      name = "secrets:push";
-      description = "Check entire git history for leaked secrets with gitleaks.";
-      entry = "${pkgs.gitleaks}/bin/gitleaks detect --verbose --redact --config .gitleaks.toml";
-      pass_filenames = false;
-      stages = [ "pre-push" ];
-    };
-    format = {
-      enable = true;
-      name = "format";
-      description = "Format files with dprint before commit.";
-      entry = "${pkgs.dprint}/bin/dprint fmt --allow-no-files";
-      stages = [ "pre-commit" ];
-    };
-    lint = {
-      enable = true;
-      name = "lint";
-      description = "Run linting and formatting checks on every commit.";
-      entry = "${config.env.DEVENV_PROFILE}/bin/dart analyze --fatal-infos";
-      pass_filenames = true;
-      always_run = true;
-      stages = [ "pre-commit" ];
+  git-hooks = {
+    package = pkgs.prek;
+
+    hooks = {
+      "secrets:commit" = {
+        enable = true;
+        name = "secrets:commit";
+        description = "Scan staged changes for leaked secrets with gitleaks.";
+        entry = "${pkgs.gitleaks}/bin/gitleaks protect --staged --verbose --redact --config .gitleaks.toml";
+        pass_filenames = false;
+        stages = [ "pre-commit" ];
+      };
+      "secrets:push" = {
+        enable = true;
+        name = "secrets:push";
+        description = "Check entire git history for leaked secrets with gitleaks.";
+        entry = "${pkgs.gitleaks}/bin/gitleaks detect --verbose --redact --config .gitleaks.toml";
+        pass_filenames = false;
+        stages = [ "pre-push" ];
+      };
+      format = {
+        enable = true;
+        name = "format";
+        description = "Format files with dprint before commit.";
+        entry = "${pkgs.dprint}/bin/dprint fmt --allow-no-files";
+        stages = [ "pre-commit" ];
+      };
+      lint = {
+        enable = true;
+        name = "lint";
+        description = "Run linting and formatting checks on every commit.";
+        entry = "${config.env.DEVENV_PROFILE}/bin/dart analyze --fatal-infos";
+        pass_filenames = true;
+        always_run = true;
+        stages = [ "pre-commit" ];
+      };
     };
   };
 
