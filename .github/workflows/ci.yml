@@ -22,7 +22,7 @@ jobs:
 
       - name: lint analyze
         run: lint:analyze
-        shell: devenv shell -c -- bash -e {0}
+        shell: devenv shell -- bash -e {0}
 
   test:
     runs-on: blacksmith-2vcpu-ubuntu-2404
@@ -35,11 +35,11 @@ jobs:
 
       - name: run flutter tests
         run: melos run test:flutter --no-select
-        shell: devenv shell -c -- bash -e {0}
+        shell: devenv shell -- bash -e {0}
 
       - name: run dart tests
         run: melos exec --scope="openbudget_core" -- dart test
-        shell: devenv shell -c -- bash -e {0}
+        shell: devenv shell -- bash -e {0}
 
   server-test:
     runs-on: blacksmith-2vcpu-ubuntu-2404
@@ -92,7 +92,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: run server tests
         run: melos exec --scope="openbudget_server" -- dart test
-        shell: devenv shell -c -- bash -e {0}
+        shell: devenv shell -- bash -e {0}
 
   format:
     runs-on: blacksmith-2vcpu-ubuntu-2404
@@ -104,7 +104,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: check dprint formatting
         run: lint:format
-        shell: devenv shell -c -- bash -e {0}
+        shell: devenv shell -- bash -e {0}
 
   integration-test:
     runs-on: blacksmith-2vcpu-ubuntu-2404
@@ -128,7 +128,7 @@ jobs:
               echo "::endgroup::"
             done
           '
-        shell: devenv shell -c -- bash -e {0}
+        shell: devenv shell -- bash -e {0}
 
   native-change-check:
     name: Detect native dependency changes
