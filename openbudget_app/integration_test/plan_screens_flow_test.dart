@@ -4,36 +4,40 @@ import 'dart:io';
 // ignore_for_file: experimental_member_use
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_goals_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/credit_card_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/recent_moves_provider.dart';
 import 'package:openbudget_app/src/features/budget/screens/budget_detail_screen.dart';
 import 'package:openbudget_app/src/features/budget/screens/category_detail_screen.dart';
 import 'package:openbudget_app/src/features/budget/screens/recent_moves_screen.dart';
 import 'package:openbudget_app/src/features/recurring/providers/recurring_auto_post_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
-import 'package:openbudget_ui/openbudget_ui.dart';
 
 const _budgetId = '00000000-0000-0000-0000-000000000901';
 const _categoryId = '00000000-0000-0000-0000-000000000902';
-const _envelopeId = '00000000-0000-0000-0000-000000000903';
+const _utilitiesEnvelopeId = '00000000-0000-0000-0000-000000000903';
+const _storageEnvelopeId = '00000000-0000-0000-0000-000000000905';
 
 BudgetSummary _makeSummary() {
   final budgetUuid = UuidValue.fromString(_budgetId);
   final categoryUuid = UuidValue.fromString(_categoryId);
-  final envelopeUuid = UuidValue.fromString(_envelopeId);
+  final utilitiesEnvelopeUuid = UuidValue.fromString(_utilitiesEnvelopeId);
+  final storageEnvelopeUuid = UuidValue.fromString(_storageEnvelopeId);
   final ownerUuid = UuidValue.fromString(
     '00000000-0000-0000-0000-000000000904',
   );
 
-  final envelope = Envelope(
-    id: envelopeUuid,
+  final utilitiesEnvelope = Envelope(
+    id: utilitiesEnvelopeUuid,
     name: 'Utilities',
     categoryId: categoryUuid,
     budgetedAmountCents: 6000,
@@ -41,6 +45,15 @@ BudgetSummary _makeSummary() {
     currencyCode: 'USD',
     sortOrder: 0,
     note: 'Auto-pay every month',
+  );
+  final storageEnvelope = Envelope(
+    id: storageEnvelopeUuid,
+    name: 'Self storage',
+    categoryId: categoryUuid,
+    budgetedAmountCents: 0,
+    spentAmountCents: 0,
+    currencyCode: 'USD',
+    sortOrder: 1,
   );
 
   return BudgetSummary(
@@ -58,13 +71,20 @@ BudgetSummary _makeSummary() {
           budgetId: budgetUuid,
           sortOrder: 0,
         ),
-        envelopes: [envelope],
+        envelopes: [utilitiesEnvelope, storageEnvelope],
         monthlyEnvelopes: [
           MonthlyEnvelopeData(
-            envelope: envelope,
+            envelope: utilitiesEnvelope,
             allocatedCents: 6000,
             spentCents: 0,
             availableCents: 6000,
+            carryoverCents: 0,
+          ),
+          MonthlyEnvelopeData(
+            envelope: storageEnvelope,
+            allocatedCents: 0,
+            spentCents: 0,
+            availableCents: 0,
             carryoverCents: 0,
           ),
         ],
@@ -82,6 +102,7 @@ BudgetSummary _makeSummary() {
 }
 
 void main() {
+  GoogleFonts.config.allowRuntimeFetching = false;
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets('opens recent moves and category detail from plan', (
@@ -147,7 +168,7 @@ void main() {
       UncontrolledProviderScope(
         container: container,
         child: MaterialApp.router(
-          theme: OpenBudgetTheme.light,
+          theme: ThemeData.light(useMaterial3: true),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           routerConfig: router,
@@ -156,6 +177,22 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.text('Finish Onboarding'), findsOneWidget);
+    container
+        .read(recentMovesProvider.notifier)
+        .recordAssigned(
+          budgetId: _budgetId,
+          envelopeId: _utilitiesEnvelopeId,
+          amountCents: 6000,
+        );
+    container
+        .read(recentMovesProvider.notifier)
+        .recordMove(
+          budgetId: _budgetId,
+          fromEnvelopeId: _storageEnvelopeId,
+          toEnvelopeId: _utilitiesEnvelopeId,
+          amountCents: 3000,
+        );
+    await tester.pumpAndSettle();
     await _captureScreenshot(binding, 'plan-screen');
     await tester.pump(const Duration(seconds: 1));
     await tester.tap(find.text('Finish Onboarding'));
@@ -197,6 +234,16 @@ void main() {
     }
     await _captureScreenshot(binding, 'recent-moves-screen');
     await tester.pump(const Duration(seconds: 1));
+    await tester.tap(find.text('Moved'));
+    await tester.pumpAndSettle();
+    await _captureScreenshot(binding, 'recent-moves-moved-screen');
+    await tester.pump(const Duration(seconds: 1));
+    await tester.tap(find.text('Utilities').first);
+    await tester.pumpAndSettle();
+    await _captureScreenshot(binding, 'envelope-moves-screen');
+    await tester.pump(const Duration(seconds: 1));
+    await tester.tap(find.text('Done'));
+    await tester.pumpAndSettle();
     expect(find.text('Recent Moves'), findsOneWidget);
 
     await tester.tap(find.text('Done'));
@@ -219,7 +266,16 @@ Future<void> _captureScreenshot(
   IntegrationTestWidgetsFlutterBinding binding,
   String name,
 ) async {
-  final bytes = await binding.takeScreenshot(name);
+  List<int> bytes;
+  try {
+    bytes = await binding.takeScreenshot(name);
+  } on MissingPluginException {
+    // Some test runtimes (for example flutter-tester) don't expose screenshot
+    // capture. Keep test assertions focused on behavior in those environments.
+    // ignore: avoid_print
+    print('Skipping screenshot capture for $name: plugin unavailable');
+    return;
+  }
   if (bytes.isEmpty) return;
 
   final screenshotDir = Directory(

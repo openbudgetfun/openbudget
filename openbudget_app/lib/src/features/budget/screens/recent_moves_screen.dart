@@ -293,8 +293,6 @@ class EnvelopeMovesScreen extends HookConsumerWidget {
             }
           }
 
-          final envelopeName =
-              envelopeNames[envelopeId] ?? l10n.recentMovesUnnamedEnvelope;
           final events =
               allEvents
                   .where(
@@ -307,78 +305,53 @@ class EnvelopeMovesScreen extends HookConsumerWidget {
 
           if (events.isEmpty) {
             return _EmptyMovesState(
-              title: l10n.recentMovesNoEnvelopeHistory(envelopeName),
+              title: l10n.recentMovesNoEnvelopeHistory(
+                envelopeNames[envelopeId] ?? l10n.recentMovesUnnamedEnvelope,
+              ),
               subtitle: l10n.recentMovesNoEnvelopeHistoryHint,
             );
           }
 
-          return ListView.separated(
-            padding: const EdgeInsets.symmetric(vertical: SpacingTokens.sm),
-            itemCount: events.length + 1,
-            separatorBuilder: (_, __) => const Divider(height: 1),
-            itemBuilder: (context, index) {
-              if (index == 0) {
-                return Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    SpacingTokens.md,
-                    SpacingTokens.sm,
-                    SpacingTokens.md,
-                    SpacingTokens.sm,
+          final groupedByDay = <DateTime, List<RecentMoveEvent>>{};
+          for (final event in events) {
+            final day = DateTime(
+              event.occurredAt.year,
+              event.occurredAt.month,
+              event.occurredAt.day,
+            );
+            groupedByDay.putIfAbsent(day, () => []).add(event);
+          }
+          final sortedDays = groupedByDay.keys.toList()
+            ..sort((a, b) => b.compareTo(a));
+
+          return ListView(
+            padding: const EdgeInsets.only(bottom: SpacingTokens.md),
+            children: [
+              for (final day in sortedDays) ...[
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: SpacingTokens.md,
+                    vertical: SpacingTokens.sm,
                   ),
+                  color: OpenBudgetPalette.surfaceMuted,
                   child: Text(
-                    envelopeName,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
+                    _formatLongDate(l10n, day),
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                );
-              }
-
-              final event = events[index - 1];
-              final fromName = event.fromEnvelopeId != null
-                  ? envelopeNames[event.fromEnvelopeId!] ??
-                        l10n.recentMovesUnnamedEnvelope
-                  : l10n.recentMovesReadyToAssign;
-              final toName =
-                  envelopeNames[event.toEnvelopeId] ??
-                  l10n.recentMovesUnnamedEnvelope;
-
-              final signedAmount = switch (event.type) {
-                RecentMoveType.assigned => event.amountCents,
-                RecentMoveType.moved =>
-                  event.toEnvelopeId == envelopeId
-                      ? event.amountCents
-                      : -event.amountCents,
-              };
-
-              final amountText = hideAmounts
-                  ? hiddenAmountPlaceholder
-                  : formatCents(signedAmount, currencyCode);
-
-              return ListTile(
-                title: Text(
-                  '$fromName ${l10n.recentMovesArrowLabel} $toName',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
                 ),
-                subtitle: Text(
-                  _formatLongDate(l10n, event.occurredAt),
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: OpenBudgetPalette.mutedText,
+                for (final event in groupedByDay[day]!)
+                  _EnvelopeMoveRow(
+                    event: event,
+                    envelopeId: envelopeId,
+                    envelopeNames: envelopeNames,
+                    currencyCode: currencyCode,
+                    hideAmounts: hideAmounts,
                   ),
-                ),
-                trailing: Text(
-                  amountText,
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: signedAmount >= 0
-                        ? OpenBudgetPalette.progressGreen
-                        : OpenBudgetPalette.negative,
-                  ),
-                ),
-              );
-            },
+              ],
+            ],
           );
         },
       ),
@@ -659,6 +632,105 @@ class _RecentMoveRow extends HookWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _EnvelopeMoveRow extends HookWidget {
+  const _EnvelopeMoveRow({
+    required this.event,
+    required this.envelopeId,
+    required this.envelopeNames,
+    required this.currencyCode,
+    required this.hideAmounts,
+  });
+
+  final RecentMoveEvent event;
+  final String envelopeId;
+  final Map<String, String> envelopeNames;
+  final CurrencyCode currencyCode;
+  final bool hideAmounts;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+
+    final fromName = event.fromEnvelopeId != null
+        ? envelopeNames[event.fromEnvelopeId!] ??
+              l10n.recentMovesUnnamedEnvelope
+        : l10n.recentMovesReadyToAssign;
+    final toName =
+        envelopeNames[event.toEnvelopeId] ?? l10n.recentMovesUnnamedEnvelope;
+
+    final signedAmount = switch (event.type) {
+      RecentMoveType.assigned => event.amountCents,
+      RecentMoveType.moved =>
+        event.toEnvelopeId == envelopeId
+            ? event.amountCents
+            : -event.amountCents,
+    };
+    final amountText = hideAmounts
+        ? hiddenAmountPlaceholder
+        : formatCents(signedAmount, currencyCode);
+
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+            SpacingTokens.md,
+            SpacingTokens.md,
+            SpacingTokens.md,
+            SpacingTokens.md,
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: fromName,
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const WidgetSpan(
+                        alignment: PlaceholderAlignment.middle,
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 6),
+                          child: Icon(
+                            Icons.arrow_forward_rounded,
+                            size: 16,
+                            color: OpenBudgetPalette.mutedText,
+                          ),
+                        ),
+                      ),
+                      TextSpan(
+                        text: toName,
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: SpacingTokens.sm),
+              Text(
+                amountText,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: signedAmount >= 0
+                      ? OpenBudgetPalette.progressGreen
+                      : OpenBudgetPalette.negative,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const Divider(height: 1),
+      ],
     );
   }
 }

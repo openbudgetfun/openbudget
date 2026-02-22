@@ -200,7 +200,7 @@ void main() {
 
       expect(find.text('Moves'), findsOneWidget);
       expect(find.textContaining('Groceries'), findsWidgets);
-      expect(find.textContaining('to'), findsWidgets);
+      expect(find.byIcon(Icons.arrow_forward_rounded), findsWidgets);
     });
   });
 }
