@@ -111,9 +111,6 @@ jobs:
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
-      - name: install linux desktop dependencies
-        run: sudo apt-get update && sudo apt-get install -y libgtk-3-dev libx11-dev pkg-config cmake ninja-build libblkid-dev libwebkit2gtk-4.1-dev libsecret-1-dev
-
       - uses: ./.github/actions/devenv
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -121,20 +118,18 @@ jobs:
       - name: run integration tests
         run: |
           cd openbudget_app
-          xvfb-run bash -c '
-            set -u
-            failed=0
+          set -u
+          failed=0
 
-            for f in integration_test/*_test.dart; do
-              echo "::group::Running $f"
-              if ! flutter test "$f" -d linux; then
-                failed=1
-              fi
-              echo "::endgroup::"
-            done
+          for f in integration_test/*_test.dart; do
+            echo "::group::Running $f"
+            if ! flutter test "$f" -d flutter-tester; then
+              failed=1
+            fi
+            echo "::endgroup::"
+          done
 
-            exit "$failed"
-          '
+          exit "$failed"
         shell: devenv shell -- bash -e {0}
 
   native-change-check:
