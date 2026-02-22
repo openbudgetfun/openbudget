@@ -39,10 +39,6 @@ melos:
         dependsOn: flutter
         dirExists: test
 
-    format:
-      description: Format all Dart code.
-      run: dart format .
-
     generate:
       description: Run build_runner in all packages that use it.
       exec: dart run build_runner build --delete-conflicting-outputs
@@ -72,15 +68,3 @@ melos:
     upgrade:
       description: Upgrade dependencies in all packages.
       exec: dart pub upgrade
-
-    publish:
-      description: Publish all publishable packages to pub.dev.
-      exec: dart pub publish --force
-      packageFilters:
-        noPrivate: true
-
-    publish:dry:
-      description: Dry-run publish for all publishable packages.
-      exec: dart pub publish --dry-run
-      packageFilters:
-        noPrivate: true

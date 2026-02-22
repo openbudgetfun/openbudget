@@ -14,16 +14,12 @@ in
     with pkgs;
     [
       dprint
+      eget
       fvm
       gitleaks
       libiconv
       nixfmt
       shfmt
-    ]
-    ++ lib.optionals (!isCI) [
-      curl
-      eget
-      nushell
     ]
     ++ lib.optionals stdenv.isDarwin [
       coreutils
@@ -34,57 +30,72 @@ in
     enable = !isCI;
   };
 
+  env = {
+    EGET_CONFIG = "${config.env.DEVENV_ROOT}/.eget/.eget.toml";
+  };
+
   dotenv.disableHint = true;
 
-  git-hooks.hooks.secrets = {
-    enable = true;
-    name = "secrets";
-    description = "Scan staged changes for leaked secrets with gitleaks.";
-    entry = "${pkgs.gitleaks}/bin/gitleaks git --staged --verbose --redact --config .gitleaks.toml";
-    pass_filenames = false;
-    stages = [ "pre-commit" ];
-  };
-
-  git-hooks.hooks.format = {
-    enable = true;
-    name = "format";
-    description = "Format files with dprint before commit.";
-    entry = "${pkgs.dprint}/bin/dprint fmt --allow-no-files";
-    stages = [ "pre-commit" ];
-  };
-
-  git-hooks.hooks.lint = {
-    enable = true;
-    name = "lint";
-    description = "Run linting and formatting checks on every commit.";
-    entry = "bash -lc 'PATH=.devenv/profile/bin:$PATH melos run analyze --no-select'";
-    pass_filenames = false;
-    always_run = true;
-    stages = [ "pre-commit" ];
+  git-hooks.hooks = {
+    "secrets:commit" = {
+      enable = true;
+      name = "secrets:commit";
+      description = "Scan staged changes for leaked secrets with gitleaks.";
+      entry = "${pkgs.gitleaks}/bin/gitleaks protect --staged --verbose --redact --config .gitleaks.toml";
+      pass_filenames = false;
+      stages = [ "pre-commit" ];
+    };
+    "secrets:push" = {
+      enable = true;
+      name = "secrets:push";
+      description = "Check entire git history for leaked secrets with gitleaks.";
+      entry = "${pkgs.gitleaks}/bin/gitleaks detect --verbose --redact --config .gitleaks.toml";
+      pass_filenames = false;
+      stages = [ "pre-push" ];
+    };
+    format = {
+      enable = true;
+      name = "format";
+      description = "Format files with dprint before commit.";
+      entry = "${pkgs.dprint}/bin/dprint fmt --allow-no-files";
+      stages = [ "pre-commit" ];
+    };
+    lint = {
+      enable = true;
+      name = "lint";
+      description = "Run linting and formatting checks on every commit.";
+      entry = "${config.env.DEVENV_PROFILE}/bin/dart analyze --fatal-infos";
+      pass_filenames = true;
+      always_run = true;
+      stages = [ "pre-commit" ];
+    };
   };
 
   # Rely on the global sdk for now as the nix apple sdk is not working for me.
   apple.sdk = null;
 
-  # In CI, Docker containers provide postgres and redis.
-  services.postgres = {
-    enable = !isCI;
-    package = pkgs.postgresql_16;
-    listen_addresses = "127.0.0.1";
-    port = 8090;
-    initialDatabases = [
-      { name = "openbudget"; }
-      { name = "openbudget_test"; }
-    ];
-    settings = {
-      log_connections = true;
-      log_statement = "all";
+  services = {
+    # In CI, Docker containers provide postgres.
+    postgres = {
+      enable = !isCI;
+      package = pkgs.postgresql_16;
+      listen_addresses = "127.0.0.1";
+      port = 8090;
+      initialDatabases = [
+        { name = "openbudget"; }
+        { name = "openbudget_test"; }
+      ];
+      settings = {
+        log_connections = true;
+        log_statement = "all";
+      };
     };
-  };
 
-  services.redis = {
-    enable = !isCI;
-    port = 8091;
+    # In CI, Docker containers provide redis.
+    redis = {
+      enable = !isCI;
+      port = 8091;
+    };
   };
 
   processes = {
@@ -102,8 +113,6 @@ in
   };
 
   scripts = {
-    # ── Core toolchain wrappers ──────────────────────────────────────────
-    # `flutter` and `dart` intentionally shadow system commands via fvm.
     "flutter" = {
       exec = ''
         set -e
@@ -140,6 +149,14 @@ in
       '';
       description = "Run flutter commands from the openbudget_app directory.";
     };
+    "knope" = {
+      exec = ''
+        set -e
+        $DEVENV_ROOT/.eget/bin/knope $@
+      '';
+      description = "The knope executable for changeset and release management.";
+      binary = "bash";
+    };
     "melos" = {
       exec = ''
         set -e
@@ -154,8 +171,38 @@ in
       '';
       description = "Run the serverpod cli.";
     };
-
-    # ── Services ─────────────────────────────────────────────────────────
+    "install:all" = {
+      exec = ''
+        set -e
+        install:eget
+        install:dart
+      '';
+      description = "Run all install scripts.";
+      binary = "bash";
+    };
+    "install:dart" = {
+      exec = ''
+        set -e
+        dart pub get
+        flutter pub get
+      '';
+      description = "Install dart dependencies";
+      binary = "bash";
+    };
+    "install:eget" = {
+      exec = ''
+        HASH=$(nix hash path --base32 ./.eget/.eget.toml)
+        echo "HASH: $HASH"
+        if [ ! -f ./.eget/bin/hash ] || [ "$HASH" != "$(cat ./.eget/bin/hash)" ]; then
+          echo "Updating eget binaries"
+          eget -D --to "$DEVENV_ROOT/.eget/bin"
+          echo "$HASH" > ./.eget/bin/hash
+        else
+          echo "eget binaries are up to date"
+        fi
+      '';
+      description = "Install github binaries with eget.";
+    };
     "server:start" = {
       exec = ''
         set -e
@@ -164,8 +211,6 @@ in
       '';
       description = "Start the Serverpod development server.";
     };
-
-    # ── Testing ──────────────────────────────────────────────────────────
     "test:all" = {
       exec = ''
         set -e
@@ -189,8 +234,6 @@ in
       '';
       description = "Run Patrol integration tests.";
     };
-
-    # ── Analysis & formatting ────────────────────────────────────────────
     "lint:analyze" = {
       exec = ''
         set -e
@@ -201,7 +244,7 @@ in
     "lint:all" = {
       exec = ''
         set -e
-        format:check
+        lint:format
         lint:analyze
       '';
       description = "Lint all project files.";
@@ -212,21 +255,6 @@ in
         dprint check
       '';
       description = "Check all formatting is correct.";
-    };
-    "format:all" = {
-      exec = ''
-        set -e
-        melos run format
-        dprint fmt --config "$DEVENV_ROOT/dprint.json"
-      '';
-      description = "Format all code (Dart and non-Dart).";
-    };
-    "format:check" = {
-      exec = ''
-        set -e
-        dprint check --config "$DEVENV_ROOT/dprint.json"
-      '';
-      description = "Check that all non-Dart formatting is correct.";
     };
     "dartfmt" = {
       exec = ''
@@ -250,8 +278,6 @@ in
       '';
       description = "Fix formatting for entire project.";
     };
-
-    # ── Code generation ──────────────────────────────────────────────────
     "runner:build" = {
       exec = ''
         set -e
@@ -291,8 +317,6 @@ in
       '';
       description = "Regenerate native splash assets from openbudget_app/flutter_native_splash.yaml for light and dark logo variants.";
     };
-
-    # ── Utilities ────────────────────────────────────────────────────────
     "clean:all" = {
       exec = ''
         set -e
