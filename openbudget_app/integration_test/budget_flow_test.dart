@@ -68,7 +68,9 @@ void main() {
       router.go(createBudgetPath);
       await tester.pumpAndSettle();
 
-      expect(find.text('Continue with Apple'), findsOneWidget);
+      expect(find.byKey(const Key('login-openbudget-mark')), findsOneWidget);
+      expect(find.text('Log In'), findsOneWidget);
+      expect(find.byType(TextField), findsNWidgets(2));
     },
   );
 }

@@ -11,9 +11,9 @@ import 'package:openbudget_app/src/features/auth/screens/register_screen.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
-Widget _buildAuthApp() {
+Widget _buildAuthApp({String initialLocation = loginPath}) {
   final router = GoRouter(
-    initialLocation: loginPath,
+    initialLocation: initialLocation,
     routes: [
       GoRoute(path: loginPath, builder: (_, __) => const LoginScreen()),
       GoRoute(path: registerPath, builder: (_, __) => const RegisterScreen()),
@@ -38,15 +38,13 @@ void main() {
     await tester.pumpWidget(_buildAuthApp());
     await tester.pumpAndSettle();
 
-    expect(find.text('Welcome to OpenBudget'), findsOneWidget);
+    expect(find.byKey(const Key('login-openbudget-mark')), findsOneWidget);
+    expect(find.text('Log In'), findsOneWidget);
     expect(find.byType(TextField), findsNWidgets(2));
   });
 
-  testWidgets('login flow can navigate to register screen', (tester) async {
-    await tester.pumpWidget(_buildAuthApp());
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.byType(TextButton));
+  testWidgets('register screen renders on auth flow launch', (tester) async {
+    await tester.pumpWidget(_buildAuthApp(initialLocation: registerPath));
     await tester.pumpAndSettle();
 
     expect(find.text('Create Account'), findsOneWidget);
@@ -56,14 +54,13 @@ void main() {
   testWidgets('register flow can navigate back to login screen', (
     tester,
   ) async {
-    await tester.pumpWidget(_buildAuthApp());
+    await tester.pumpWidget(_buildAuthApp(initialLocation: registerPath));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byType(TextButton));
-    await tester.pumpAndSettle();
     await tester.tap(find.text('Already have an account? Sign In'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Welcome to OpenBudget'), findsOneWidget);
+    expect(find.byKey(const Key('login-openbudget-mark')), findsOneWidget);
+    expect(find.text('Log In'), findsOneWidget);
   });
 }

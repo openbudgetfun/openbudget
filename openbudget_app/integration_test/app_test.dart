@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:integration_test/integration_test.dart';
@@ -32,7 +33,9 @@ void main() {
 
   testWidgets('unauthenticated app launch shows login screen', (tester) async {
     await _pumpApp(tester, authState: const Unauthenticated());
-    expect(find.text('Welcome to OpenBudget'), findsOneWidget);
+    expect(find.byKey(const Key('login-openbudget-mark')), findsOneWidget);
+    expect(find.text('Log In'), findsOneWidget);
+    expect(find.byType(TextField), findsNWidgets(2));
   });
 
   testWidgets('authenticated app launch shows home empty state', (

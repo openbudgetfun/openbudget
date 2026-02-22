@@ -151,7 +151,11 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('Differentiate Without Color'));
       await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Hide Amounts'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Hide Amounts'));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Hide Progress Bars'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Hide Progress Bars'));
       await tester.pumpAndSettle();
