@@ -122,11 +122,18 @@ jobs:
         run: |
           cd openbudget_app
           xvfb-run bash -c '
+            set -u
+            failed=0
+
             for f in integration_test/*_test.dart; do
               echo "::group::Running $f"
-              flutter test "$f" -d linux
+              if ! flutter test "$f" -d linux; then
+                failed=1
+              fi
               echo "::endgroup::"
             done
+
+            exit "$failed"
           '
         shell: devenv shell -- bash -e {0}
 
