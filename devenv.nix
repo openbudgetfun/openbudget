@@ -17,18 +17,12 @@ in
       eget
       fvm
       gitleaks
-      libiconv
       nixfmt
       shfmt
     ]
     ++ lib.optionals stdenv.isDarwin [
       coreutils
     ];
-
-  # Android SDK is large — skip in CI where it's not needed.
-  android = {
-    enable = !isCI;
-  };
 
   env = {
     EGET_CONFIG = "${config.env.DEVENV_ROOT}/.eget/.eget.toml";
@@ -187,7 +181,6 @@ in
     "install:dart" = {
       exec = ''
         set -e
-        dart pub get
         flutter pub get
       '';
       description = "Install dart dependencies";
