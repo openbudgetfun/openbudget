@@ -47,6 +47,7 @@ class AccountDetailScreen extends HookConsumerWidget {
     final statusFilter = useState(_StatusFilter.all);
     final hideReconciled = useState(false);
     final loanDetailTab = useState(_LoanDetailTab.overview);
+    final loanMonthlyTargetCents = useState<int?>(null);
 
     final accountData = accountsAsync
         .whenData(
@@ -177,6 +178,10 @@ class AccountDetailScreen extends HookConsumerWidget {
                 accountData: accountData,
                 transactions: transactions,
                 currencyCode: currencyCode,
+                monthlyTargetCents: loanMonthlyTargetCents.value,
+                onMonthlyTargetChanged: (cents) {
+                  loanMonthlyTargetCents.value = cents;
+                },
                 selectedTab: loanDetailTab.value,
                 onTabChanged: (tab) => loanDetailTab.value = tab,
               ),
@@ -851,6 +856,8 @@ class _LoanAccountDetailBody extends StatelessWidget {
     required this.accountData,
     required this.transactions,
     required this.currencyCode,
+    required this.monthlyTargetCents,
+    required this.onMonthlyTargetChanged,
     required this.selectedTab,
     required this.onTabChanged,
   });
@@ -858,6 +865,8 @@ class _LoanAccountDetailBody extends StatelessWidget {
   final Account accountData;
   final List<Transaction> transactions;
   final CurrencyCode currencyCode;
+  final int? monthlyTargetCents;
+  final ValueChanged<int> onMonthlyTargetChanged;
   final _LoanDetailTab selectedTab;
   final ValueChanged<_LoanDetailTab> onTabChanged;
 
@@ -896,9 +905,9 @@ class _LoanAccountDetailBody extends StatelessWidget {
             1.0,
           );
     final paidOffPercent = (paidOffRatio * 100).toStringAsFixed(1);
-    final monthlyPaymentBaseline = paidThisMonthCents > 0
-        ? paidThisMonthCents
-        : 35000;
+    final monthlyPaymentBaseline =
+        monthlyTargetCents ??
+        (paidThisMonthCents > 0 ? paidThisMonthCents : 35000);
     final monthsToPayoff = currentDebtCents == 0
         ? 0
         : (currentDebtCents / monthlyPaymentBaseline).ceil();
@@ -1049,15 +1058,20 @@ class _LoanAccountDetailBody extends StatelessWidget {
                             ),
                             const SizedBox(height: SpacingTokens.md),
                             FilledButton(
-                              onPressed: () =>
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text(
-                                        'Loan target editing is coming soon to OpenBudget.',
-                                      ),
-                                    ),
-                                  ),
-                              child: const Text('Create Target'),
+                              onPressed: () async {
+                                final newTarget = await _showLoanTargetDialog(
+                                  context,
+                                  currencyCode: currencyCode,
+                                  monthlyTargetCents: monthlyTargetCents,
+                                );
+                                if (newTarget == null) return;
+                                onMonthlyTargetChanged(newTarget);
+                              },
+                              child: Text(
+                                monthlyTargetCents == null
+                                    ? 'Create Target'
+                                    : 'Edit Target',
+                              ),
                             ),
                           ],
                         ),
@@ -1441,6 +1455,57 @@ class _LoanActivityRow extends StatelessWidget {
       ),
     );
   }
+}
+
+int _pow10Int(int exponent) {
+  var result = 1;
+  for (var i = 0; i < exponent; i++) {
+    result *= 10;
+  }
+  return result;
+}
+
+Future<int?> _showLoanTargetDialog(
+  BuildContext context, {
+  required CurrencyCode currencyCode,
+  required int? monthlyTargetCents,
+}) async {
+  final factor = _pow10Int(currencyCode.decimals);
+  final controller = TextEditingController(
+    text: monthlyTargetCents == null
+        ? ''
+        : (monthlyTargetCents / factor).toStringAsFixed(currencyCode.decimals),
+  );
+
+  return showDialog<int>(
+    context: context,
+    builder: (dialogContext) => AlertDialog(
+      title: const Text('Loan Target'),
+      content: TextField(
+        controller: controller,
+        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+        decoration: InputDecoration(
+          labelText: 'Monthly payment',
+          prefixText: '${currencyCode.symbol} ',
+          border: const OutlineInputBorder(),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(dialogContext).pop(),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: () {
+            final value = double.tryParse(controller.text.trim());
+            if (value == null || value <= 0) return;
+            Navigator.of(dialogContext).pop((value * factor).round());
+          },
+          child: const Text('Save'),
+        ),
+      ],
+    ),
+  );
 }
 
 class _ReconcileDialog extends HookWidget {

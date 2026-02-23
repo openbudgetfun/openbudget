@@ -1,6 +1,6 @@
 # OpenBudget UI Migration Tracker (from `~/Downloads/ynab-ui`)
 
-Last updated: 2026-02-23 (accounts/settings/loan parity + transaction coverage)
+Last updated: 2026-02-23 (accounts/settings/loan target parity + transaction coverage)
 
 ## Scope
 
@@ -10,7 +10,7 @@ Last updated: 2026-02-23 (accounts/settings/loan parity + transaction coverage)
 
 ## Progress Snapshot
 
-- Overall migration progress: **~90%**
+- Overall migration progress: **~91%**
 - Core plan/settings/auth/navigation flows: **implemented**
 - Advanced accounts/transactions/reports flows: **in progress**
 
@@ -36,6 +36,7 @@ Last updated: 2026-02-23 (accounts/settings/loan parity + transaction coverage)
   - [x] Top-right quick actions (add + overflow menu)
   - [x] In-list add-account CTA
   - [x] Loan account detail tabs (overview + activity)
+  - [x] Loan target create/edit interaction on loan detail screen
 - [x] Plan menu actions:
   - [x] Undo last move
   - [x] Route transitions after menu dismissal (prevents popup overlay artifacts)
@@ -104,6 +105,7 @@ Last updated: 2026-02-23 (accounts/settings/loan parity + transaction coverage)
 - [x] Integration coverage for add-account wizard/search flow
 - [x] Integration coverage for account detail overflow actions and uncleared filtering
 - [x] Integration coverage for loan account overview/activity tabs
+- [x] Integration coverage for loan target create/edit interaction
 - [x] Integration coverage for closed-account edit actions (delete/reopen visibility)
 - [x] Integration coverage for account reconcile confirmation prompt (Yes/No/Cancel)
 - [x] Integration coverage for transaction list filters + edit/flag interactions

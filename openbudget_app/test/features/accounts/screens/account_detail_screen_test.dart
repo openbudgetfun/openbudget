@@ -270,6 +270,16 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Create Target'), findsOneWidget);
 
+      await tester.tap(find.text('Create Target'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField).last, '400');
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Edit Target'), findsOneWidget);
+      expect(find.text(r'$400.00'), findsWidgets);
+
       await tester.tap(find.text('Activity'));
       await tester.pumpAndSettle();
 

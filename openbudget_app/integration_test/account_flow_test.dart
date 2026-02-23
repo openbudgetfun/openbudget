@@ -432,6 +432,19 @@ void main() {
     expect(find.text('Overview'), findsOneWidget);
     expect(find.text('Activity'), findsOneWidget);
     expect(find.text('Loan Payoff Overview'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Create Target'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Create Target'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField).last, '600');
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+    await tester.pumpAndSettle();
+    expect(find.text('Edit Target'), findsOneWidget);
 
     await tester.tap(find.text('Activity'));
     await tester.pumpAndSettle();
