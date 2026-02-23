@@ -218,6 +218,7 @@ void main() {
     await tester.tap(find.byIcon(Icons.more_horiz_rounded));
     await tester.pumpAndSettle();
     await _tapPopupMenuItem(tester, 'Recent Moves');
+    expect(find.text('Hide Progress Bars', skipOffstage: false), findsNothing);
     await _dismissCoachmarkIfVisible(tester);
     expect(find.text('Ready to Assign'), findsOneWidget);
     expect(find.text('Self storage'), findsNothing);

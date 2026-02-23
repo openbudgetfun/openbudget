@@ -72,6 +72,12 @@ class BudgetDetailScreen extends HookConsumerWidget {
     final hideAmounts = ref.watch(hideAmountsProvider);
     final hideProgressBars = ref.watch(hideProgressBarsProvider);
     final recentMoves = ref.watch(recentMovesForBudgetProvider(budgetId));
+    void navigateAfterMenuClose(VoidCallback callback) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!context.mounted) return;
+        callback();
+      });
+    }
 
     // Auto-post due recurring transactions when the budget opens.
     useEffect(() {
@@ -190,10 +196,12 @@ class BudgetDetailScreen extends HookConsumerWidget {
                   ref
                       .read(recentMovesProvider.notifier)
                       .undoLast(budgetId: budgetId),
-                _PlanMenuAction.recentMoves => context.pushNamed(
-                  recentMovesRoute,
-                  pathParameters: {'id': budgetId},
-                ),
+                _PlanMenuAction.recentMoves => navigateAfterMenuClose(() {
+                  context.pushNamed(
+                    recentMovesRoute,
+                    pathParameters: {'id': budgetId},
+                  );
+                }),
                 _PlanMenuAction.collapseExpand =>
                   collapseCategories.value = !collapseCategories.value,
                 _PlanMenuAction.hideProgressBars =>
@@ -204,10 +212,12 @@ class BudgetDetailScreen extends HookConsumerWidget {
                   ref
                       .read(hideAmountsProvider.notifier)
                       .setHideAmounts(value: !hideAmounts),
-                _PlanMenuAction.settings => context.goNamed(
-                  settingsRoute,
-                  pathParameters: {'id': budgetId},
-                ),
+                _PlanMenuAction.settings => navigateAfterMenuClose(() {
+                  context.goNamed(
+                    settingsRoute,
+                    pathParameters: {'id': budgetId},
+                  );
+                }),
               },
               itemBuilder: (context) => [
                 PopupMenuItem<_PlanMenuAction>(
