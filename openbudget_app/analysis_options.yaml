@@ -1,1 +1,1 @@
-include: package:openbudget_lints/analysis_options.yaml
+include: ../analysis_options.yaml
