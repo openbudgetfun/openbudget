@@ -248,6 +248,10 @@ class EnvelopeMovesScreen extends HookConsumerWidget {
       appBar: AppBar(
         backgroundColor: OpenBudgetPalette.appBackground,
         surfaceTintColor: Colors.transparent,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_rounded),
+          onPressed: () => context.pop(),
+        ),
         centerTitle: true,
         title: Text(
           l10n.recentMovesDetailTitle,
