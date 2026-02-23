@@ -66,6 +66,25 @@ class RecentMovesNotifier extends Notifier<Map<String, List<RecentMoveEvent>>> {
     );
   }
 
+  bool undoLast({required String budgetId}) {
+    final current = state[budgetId];
+    if (current == null || current.isEmpty) {
+      return false;
+    }
+
+    final remaining = current.length > 1
+        ? current.sublist(1)
+        : const <RecentMoveEvent>[];
+    final next = Map<String, List<RecentMoveEvent>>.from(state);
+    if (remaining.isEmpty) {
+      next.remove(budgetId);
+    } else {
+      next[budgetId] = remaining;
+    }
+    state = next;
+    return true;
+  }
+
   void _insert({required String budgetId, required RecentMoveEvent event}) {
     final current = state[budgetId] ?? const <RecentMoveEvent>[];
     state = {

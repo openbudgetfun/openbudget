@@ -2,7 +2,7 @@
 set -euo pipefail
 
 if [ "$#" -eq 0 ]; then
-  exit 0
+	exit 0
 fi
 
 # dart format appends a trailing summary line when using -o show.

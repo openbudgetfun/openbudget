@@ -1,6 +1,6 @@
 # OpenBudget UI Migration Tracker (from `~/Downloads/ynab-ui`)
 
-Last updated: 2026-02-23
+Last updated: 2026-02-23 (late)
 
 ## Scope
 
@@ -10,7 +10,7 @@ Last updated: 2026-02-23
 
 ## Progress Snapshot
 
-- Overall migration progress: **~62%**
+- Overall migration progress: **~68%**
 - Core plan/settings/auth/navigation flows: **implemented**
 - Advanced accounts/transactions/reports flows: **in progress**
 
@@ -25,6 +25,7 @@ Last updated: 2026-02-23
 - [x] Plan screen categories tab baseline structure
 - [x] Plan screen spotlight tab baseline structure
 - [x] Plan menu actions:
+  - [x] Undo last move
   - [x] Collapse/Expand category groups
   - [x] Hide progress bars
   - [x] Hide amounts
@@ -49,6 +50,7 @@ Last updated: 2026-02-23
 - [ ] Recent Moves interaction polish:
   - [x] Destination chip navigation
   - [x] Source chip navigation
+  - [x] Undo integration from plan menu
   - [ ] Additional visual parity polish for row spacing/typography
 - [ ] Plan menu behavior polish for mobile transitions
 
@@ -82,5 +84,6 @@ Last updated: 2026-02-23
 
 - [x] Widget tests for major migrated screens
 - [x] Integration flow coverage for plan/settings/auth/more/navigation
+- [x] Integration coverage for Undo + recent-moves source chip drilldown
 - [x] Integration CI configured to fail on any individual integration test failure
 - [ ] Expand integration tests for remaining pending batches above

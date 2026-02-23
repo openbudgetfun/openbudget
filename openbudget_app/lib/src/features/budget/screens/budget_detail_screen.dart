@@ -10,6 +10,7 @@ import 'package:openbudget_app/src/features/budget/providers/category_actions_pr
 import 'package:openbudget_app/src/features/budget/providers/credit_card_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/envelope_actions_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/monthly_allocation_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/recent_moves_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/selected_month_provider.dart';
 import 'package:openbudget_app/src/features/budget/screens/add_category_dialog.dart';
 import 'package:openbudget_app/src/features/budget/screens/add_envelope_dialog.dart';
@@ -32,6 +33,7 @@ import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 enum _PlanMenuAction {
+  undoLastMove,
   recentMoves,
   collapseExpand,
   hideProgressBars,
@@ -69,6 +71,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
     final colorScheme = theme.colorScheme;
     final hideAmounts = ref.watch(hideAmountsProvider);
     final hideProgressBars = ref.watch(hideProgressBarsProvider);
+    final recentMoves = ref.watch(recentMovesForBudgetProvider(budgetId));
 
     // Auto-post due recurring transactions when the budget opens.
     useEffect(() {
@@ -183,6 +186,10 @@ class BudgetDetailScreen extends HookConsumerWidget {
             leading: PopupMenuButton<_PlanMenuAction>(
               icon: const Icon(Icons.more_horiz_rounded),
               onSelected: (action) => switch (action) {
+                _PlanMenuAction.undoLastMove =>
+                  ref
+                      .read(recentMovesProvider.notifier)
+                      .undoLast(budgetId: budgetId),
                 _PlanMenuAction.recentMoves => context.pushNamed(
                   recentMovesRoute,
                   pathParameters: {'id': budgetId},
@@ -204,23 +211,34 @@ class BudgetDetailScreen extends HookConsumerWidget {
               },
               itemBuilder: (context) => [
                 PopupMenuItem<_PlanMenuAction>(
-                  value: _PlanMenuAction.collapseExpand,
-                  child: Row(
-                    children: [
-                      const Icon(Icons.unfold_more_rounded, size: 18),
-                      const SizedBox(width: SpacingTokens.sm),
-                      Text(l10n.budgetCollapseExpand),
-                    ],
-                  ),
-                ),
-                const PopupMenuDivider(),
-                PopupMenuItem<_PlanMenuAction>(
                   value: _PlanMenuAction.recentMoves,
                   child: Row(
                     children: [
                       const Icon(Icons.history_rounded, size: 18),
                       const SizedBox(width: SpacingTokens.sm),
                       Text(l10n.recentMovesTitle),
+                    ],
+                  ),
+                ),
+                PopupMenuItem<_PlanMenuAction>(
+                  value: _PlanMenuAction.undoLastMove,
+                  enabled: recentMoves.isNotEmpty,
+                  child: Row(
+                    children: [
+                      const Icon(Icons.undo_rounded, size: 18),
+                      const SizedBox(width: SpacingTokens.sm),
+                      Text(l10n.undoAction),
+                    ],
+                  ),
+                ),
+                const PopupMenuDivider(),
+                PopupMenuItem<_PlanMenuAction>(
+                  value: _PlanMenuAction.collapseExpand,
+                  child: Row(
+                    children: [
+                      const Icon(Icons.unfold_more_rounded, size: 18),
+                      const SizedBox(width: SpacingTokens.sm),
+                      Text(l10n.budgetCollapseExpand),
                     ],
                   ),
                 ),

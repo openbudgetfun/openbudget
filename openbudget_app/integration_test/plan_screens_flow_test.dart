@@ -214,6 +214,28 @@ void main() {
     await _captureScreenshot(binding, 'plan-menu');
     await tester.pump(const Duration(seconds: 1));
 
+    await _tapPopupMenuItem(tester, 'Undo');
+    await tester.tap(find.byIcon(Icons.more_horiz_rounded));
+    await tester.pumpAndSettle();
+    await _tapPopupMenuItem(tester, 'Recent Moves');
+    await _dismissCoachmarkIfVisible(tester);
+    expect(find.text('Ready to Assign'), findsOneWidget);
+    expect(find.text('Self storage'), findsNothing);
+    await tester.tap(find.text('Done'));
+    await tester.pumpAndSettle();
+
+    container
+        .read(recentMovesProvider.notifier)
+        .recordMove(
+          budgetId: _budgetId,
+          fromEnvelopeId: _storageEnvelopeId,
+          toEnvelopeId: _utilitiesEnvelopeId,
+          amountCents: 3000,
+        );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byIcon(Icons.more_horiz_rounded));
+    await tester.pumpAndSettle();
     await _tapPopupMenuItem(tester, 'Hide Progress Bars');
     expect(find.byType(LinearProgressIndicator), findsNothing);
 
@@ -245,11 +267,7 @@ void main() {
     await tester.tap(find.byIcon(Icons.more_horiz_rounded));
     await tester.pumpAndSettle();
     await _tapPopupMenuItem(tester, 'Recent Moves');
-    final gotIt = find.text('Got It!');
-    if (gotIt.evaluate().isNotEmpty) {
-      await tester.tap(gotIt);
-      await tester.pumpAndSettle();
-    }
+    await _dismissCoachmarkIfVisible(tester);
     await _captureScreenshot(binding, 'recent-moves-screen');
     await tester.pump(const Duration(seconds: 1));
     await tester.tap(find.text('Moved'));
@@ -331,5 +349,12 @@ Future<void> _tapPopupMenuItem(WidgetTester tester, String label) async {
   } else {
     await tester.tap(textFinder.first, warnIfMissed: false);
   }
+  await tester.pumpAndSettle();
+}
+
+Future<void> _dismissCoachmarkIfVisible(WidgetTester tester) async {
+  final gotIt = find.text('Got It!');
+  if (gotIt.evaluate().isEmpty) return;
+  await tester.tap(gotIt.first);
   await tester.pumpAndSettle();
 }
