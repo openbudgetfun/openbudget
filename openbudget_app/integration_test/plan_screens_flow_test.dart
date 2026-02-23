@@ -14,6 +14,7 @@ import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_goals_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/credit_card_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/monthly_allocation_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/recent_moves_provider.dart';
 import 'package:openbudget_app/src/features/budget/screens/budget_detail_screen.dart';
 import 'package:openbudget_app/src/features/budget/screens/category_detail_screen.dart';
@@ -26,6 +27,7 @@ const _budgetId = '00000000-0000-0000-0000-000000000901';
 const _categoryId = '00000000-0000-0000-0000-000000000902';
 const _utilitiesEnvelopeId = '00000000-0000-0000-0000-000000000903';
 const _storageEnvelopeId = '00000000-0000-0000-0000-000000000905';
+const _accountId = '00000000-0000-0000-0000-000000000906';
 
 BudgetSummary _makeSummary() {
   final budgetUuid = UuidValue.fromString(_budgetId);
@@ -101,6 +103,23 @@ BudgetSummary _makeSummary() {
   );
 }
 
+List<Transaction> _makeMonthlyTransactions() {
+  return [
+    Transaction(
+      id: UuidValue.fromString('00000000-0000-0000-0000-000000000907'),
+      description: 'Landlord',
+      amountCents: -10000,
+      currencyCode: 'USD',
+      budgetId: UuidValue.fromString(_budgetId),
+      accountId: UuidValue.fromString(_accountId),
+      envelopeId: UuidValue.fromString(_utilitiesEnvelopeId),
+      transactionDate: DateTime(2026, 2, 22),
+      cleared: false,
+      reconciled: false,
+    ),
+  ];
+}
+
 void main() {
   GoogleFonts.config.allowRuntimeFetching = false;
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -115,6 +134,9 @@ void main() {
         }),
         budgetGoalsProvider.overrideWith((ref, _) async => {}),
         creditCardPaymentsProvider.overrideWith((ref, _) async => const []),
+        monthlyTransactionsProvider.overrideWith(
+          (ref, _) async => _makeMonthlyTransactions(),
+        ),
         recurringDueCountProvider.overrideWith((ref, _) async => 0),
       ],
     );
@@ -198,6 +220,24 @@ void main() {
     await tester.tap(find.text('Finish Onboarding'));
     await tester.pumpAndSettle();
     expect(find.text('Finish Onboarding'), findsNothing);
+    expect(find.text('Review 1 transaction'), findsOneWidget);
+    await tester.tap(find.text('Review 1 transaction'));
+    await tester.pumpAndSettle();
+    expect(find.text('1 New Transaction'), findsOneWidget);
+    await _captureScreenshot(binding, 'review-transactions-screen');
+    await tester.pump(const Duration(seconds: 1));
+
+    await tester.tap(find.text('Landlord'));
+    await tester.pumpAndSettle();
+    expect(find.text('1 Selected'), findsOneWidget);
+    await tester.tap(find.text('Approve'));
+    await tester.pumpAndSettle();
+    expect(find.text('No Transactions'), findsOneWidget);
+    expect(find.text("You're All Done!"), findsOneWidget);
+    await _captureScreenshot(binding, 'review-transactions-empty-screen');
+    await tester.pump(const Duration(seconds: 1));
+    await tester.tap(find.text('Done'));
+    await tester.pumpAndSettle();
     await _captureScreenshot(binding, 'plan-screen-onboarding-dismissed');
     await tester.pump(const Duration(seconds: 1));
     await tester.tap(find.text('Spotlight'));

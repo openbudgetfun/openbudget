@@ -20,6 +20,7 @@ import 'package:openbudget_app/src/features/budget/screens/edit_category_dialog.
 import 'package:openbudget_app/src/features/budget/screens/edit_envelope_dialog.dart';
 import 'package:openbudget_app/src/features/budget/screens/move_money_dialog.dart';
 import 'package:openbudget_app/src/features/budget/screens/quick_budget_dialog.dart';
+import 'package:openbudget_app/src/features/budget/screens/review_transactions_sheet.dart';
 import 'package:openbudget_app/src/features/budget/widgets/budget_header.dart';
 import 'package:openbudget_app/src/features/budget/widgets/category_group.dart';
 import 'package:openbudget_app/src/features/budget/widgets/credit_card_section.dart';
@@ -178,6 +179,20 @@ class BudgetDetailScreen extends HookConsumerWidget {
           summary: summary,
           onboardingComplete: onboardingComplete.value,
         );
+        final reviewTransactionCount = ref
+            .watch(
+              monthlyTransactionsProvider(
+                budgetId,
+                summary.year,
+                summary.month,
+              ),
+            )
+            .when(
+              data: (transactions) =>
+                  transactions.where((t) => !t.cleared && !t.reconciled).length,
+              loading: () => 0,
+              error: (_, __) => 0,
+            );
         final showBudgetHeader =
             showSpotlight.value ||
             onboardingType == null ||
@@ -546,6 +561,18 @@ class BudgetDetailScreen extends HookConsumerWidget {
                         : null,
                   ),
                   const SizedBox(height: SpacingTokens.md),
+                ],
+                if (!showSpotlight.value && reviewTransactionCount > 0) ...[
+                  _ReviewTransactionsBanner(
+                    count: reviewTransactionCount,
+                    onTap: () => showReviewTransactionsSheet(
+                      context,
+                      budgetId: budgetId,
+                      year: summary.year,
+                      month: summary.month,
+                    ),
+                  ),
+                  const SizedBox(height: SpacingTokens.sm),
                 ],
                 if (dueCountAsync.hasValue && dueCountAsync.value! > 0)
                   _DueBanner(
@@ -2091,6 +2118,70 @@ class _DueBanner extends HookWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ReviewTransactionsBanner extends HookWidget {
+  const _ReviewTransactionsBanner({required this.count, required this.onTap});
+
+  final int count;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final title = count == 1
+        ? 'Review 1 transaction'
+        : 'Review $count transactions';
+
+    return Material(
+      color: OpenBudgetPalette.surface,
+      borderRadius: BorderRadius.circular(RadiusTokens.md),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(RadiusTokens.md),
+        child: Ink(
+          padding: const EdgeInsets.symmetric(
+            horizontal: SpacingTokens.md,
+            vertical: SpacingTokens.sm,
+          ),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(RadiusTokens.md),
+            border: Border.all(color: OpenBudgetPalette.divider),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 20,
+                height: 20,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE8E3FF),
+                  borderRadius: BorderRadius.circular(RadiusTokens.sm),
+                ),
+                child: Text(
+                  '$count',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: OpenBudgetPalette.accentBlue,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              const SizedBox(width: SpacingTokens.sm),
+              Expanded(
+                child: Text(
+                  title,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              const Icon(Icons.chevron_right_rounded),
+            ],
+          ),
         ),
       ),
     );
