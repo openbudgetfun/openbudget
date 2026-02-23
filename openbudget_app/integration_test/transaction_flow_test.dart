@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:integration_test/integration_test.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
@@ -17,6 +16,7 @@ import 'package:openbudget_app/src/features/transactions/screens/add_income_scre
 import 'package:openbudget_app/src/features/transactions/screens/transaction_list_screen.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
+import 'package:patrol/patrol.dart';
 
 const _budgetId = 'test-budget-id';
 final _budgetUuid = UuidValue.fromString(
@@ -176,9 +176,8 @@ Widget _buildTransactionListApp({required List<Transaction> transactions}) {
 }
 
 void main() {
-  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
-
-  testWidgets('add transaction sheet routes to add expense', (tester) async {
+  patrolWidgetTest('add transaction sheet routes to add expense', ($) async {
+    final tester = $.tester;
     await tester.pumpWidget(_buildApp());
     await tester.pumpAndSettle();
 
@@ -190,7 +189,8 @@ void main() {
     expect(find.text('Add Expense'), findsNWidgets(2));
   });
 
-  testWidgets('add transaction sheet routes to add income', (tester) async {
+  patrolWidgetTest('add transaction sheet routes to add income', ($) async {
+    final tester = $.tester;
     await tester.pumpWidget(_buildApp());
     await tester.pumpAndSettle();
 
@@ -202,9 +202,10 @@ void main() {
     expect(find.text('Add Income'), findsNWidgets(2));
   });
 
-  testWidgets('expense screen mode switch routes to income screen', (
-    tester,
+  patrolWidgetTest('expense screen mode switch routes to income screen', (
+    $,
   ) async {
+    final tester = $.tester;
     await tester.pumpWidget(_buildApp());
     await tester.pumpAndSettle();
 
@@ -218,9 +219,10 @@ void main() {
     expect(find.text('Add Income'), findsNWidgets(2));
   });
 
-  testWidgets('income screen mode switch routes to expense screen', (
-    tester,
+  patrolWidgetTest('income screen mode switch routes to expense screen', (
+    $,
   ) async {
+    final tester = $.tester;
     await tester.pumpWidget(_buildApp());
     await tester.pumpAndSettle();
 
@@ -234,7 +236,8 @@ void main() {
     expect(find.text('Add Expense'), findsNWidgets(2));
   });
 
-  testWidgets('add transaction sheet routes to transfer', (tester) async {
+  patrolWidgetTest('add transaction sheet routes to transfer', ($) async {
+    final tester = $.tester;
     await tester.pumpWidget(_buildApp());
     await tester.pumpAndSettle();
 
@@ -246,7 +249,8 @@ void main() {
     expect(find.text('Transfer Route'), findsOneWidget);
   });
 
-  testWidgets('cancel from add expense returns to plan route', (tester) async {
+  patrolWidgetTest('cancel from add expense returns to plan route', ($) async {
+    final tester = $.tester;
     await tester.pumpWidget(_buildApp());
     await tester.pumpAndSettle();
 
@@ -260,7 +264,8 @@ void main() {
     expect(find.text('Plan Route'), findsOneWidget);
   });
 
-  testWidgets('cancel from add income returns to plan route', (tester) async {
+  patrolWidgetTest('cancel from add income returns to plan route', ($) async {
+    final tester = $.tester;
     await tester.pumpWidget(_buildApp());
     await tester.pumpAndSettle();
 
@@ -274,9 +279,10 @@ void main() {
     expect(find.text('Plan Route'), findsOneWidget);
   });
 
-  testWidgets('transaction list status filter shows only uncleared rows', (
-    tester,
+  patrolWidgetTest('transaction list status filter shows only uncleared rows', (
+    $,
   ) async {
+    final tester = $.tester;
     await tester.pumpWidget(
       _buildTransactionListApp(
         transactions: [
@@ -308,7 +314,8 @@ void main() {
     expect(find.text('Rent'), findsNothing);
   });
 
-  testWidgets('tapping transaction row opens edit dialog', (tester) async {
+  patrolWidgetTest('tapping transaction row opens edit dialog', ($) async {
+    final tester = $.tester;
     await tester.pumpWidget(
       _buildTransactionListApp(
         transactions: [
@@ -328,9 +335,10 @@ void main() {
     expect(find.text('Edit Transaction'), findsOneWidget);
   });
 
-  testWidgets('long press transaction row opens flag action sheet', (
-    tester,
+  patrolWidgetTest('long press transaction row opens flag action sheet', (
+    $,
   ) async {
+    final tester = $.tester;
     await tester.pumpWidget(
       _buildTransactionListApp(
         transactions: [

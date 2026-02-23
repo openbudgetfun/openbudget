@@ -22,11 +22,14 @@ import 'package:openbudget_app/src/features/budget/screens/recent_moves_screen.d
 import 'package:openbudget_app/src/features/recurring/providers/recurring_auto_post_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
+import 'package:patrol/patrol.dart';
 
 const _budgetId = '00000000-0000-0000-0000-000000000901';
 const _categoryId = '00000000-0000-0000-0000-000000000902';
+const _categoryTwoId = '00000000-0000-0000-0000-000000000908';
 const _utilitiesEnvelopeId = '00000000-0000-0000-0000-000000000903';
 const _storageEnvelopeId = '00000000-0000-0000-0000-000000000905';
+const _groceriesEnvelopeId = '00000000-0000-0000-0000-000000000909';
 const _accountId = '00000000-0000-0000-0000-000000000906';
 
 BudgetSummary _makeSummary() {
@@ -177,6 +180,94 @@ BudgetSummary _makeOverspentSummary() {
   );
 }
 
+BudgetSummary _makeReorderSummary() {
+  final budgetUuid = UuidValue.fromString(_budgetId);
+  final billsCategoryUuid = UuidValue.fromString(_categoryId);
+  final groceriesCategoryUuid = UuidValue.fromString(_categoryTwoId);
+  final utilitiesEnvelopeUuid = UuidValue.fromString(_utilitiesEnvelopeId);
+  final groceriesEnvelopeUuid = UuidValue.fromString(_groceriesEnvelopeId);
+  final ownerUuid = UuidValue.fromString(
+    '00000000-0000-0000-0000-000000000904',
+  );
+
+  final utilitiesEnvelope = Envelope(
+    id: utilitiesEnvelopeUuid,
+    name: 'Utilities',
+    categoryId: billsCategoryUuid,
+    budgetedAmountCents: 6000,
+    spentAmountCents: 0,
+    currencyCode: 'USD',
+    sortOrder: 0,
+  );
+  final groceriesEnvelope = Envelope(
+    id: groceriesEnvelopeUuid,
+    name: 'Food',
+    categoryId: groceriesCategoryUuid,
+    budgetedAmountCents: 3000,
+    spentAmountCents: 0,
+    currencyCode: 'USD',
+    sortOrder: 0,
+  );
+
+  return BudgetSummary(
+    budget: Budget(
+      id: budgetUuid,
+      name: 'Family Plan',
+      currencyCode: 'USD',
+      ownerId: ownerUuid,
+    ),
+    categories: [
+      CategoryWithEnvelopes(
+        category: Category(
+          id: billsCategoryUuid,
+          name: 'Housing',
+          budgetId: budgetUuid,
+          sortOrder: 0,
+        ),
+        envelopes: [utilitiesEnvelope],
+        monthlyEnvelopes: [
+          MonthlyEnvelopeData(
+            envelope: utilitiesEnvelope,
+            allocatedCents: 6000,
+            spentCents: 0,
+            availableCents: 6000,
+            carryoverCents: 0,
+          ),
+        ],
+        totalBudgetedCents: 6000,
+        totalSpentCents: 0,
+        totalAvailableCents: 6000,
+      ),
+      CategoryWithEnvelopes(
+        category: Category(
+          id: groceriesCategoryUuid,
+          name: 'Groceries Group',
+          budgetId: budgetUuid,
+          sortOrder: 1,
+        ),
+        envelopes: [groceriesEnvelope],
+        monthlyEnvelopes: [
+          MonthlyEnvelopeData(
+            envelope: groceriesEnvelope,
+            allocatedCents: 3000,
+            spentCents: 0,
+            availableCents: 3000,
+            carryoverCents: 0,
+          ),
+        ],
+        totalBudgetedCents: 3000,
+        totalSpentCents: 0,
+        totalAvailableCents: 3000,
+      ),
+    ],
+    totalIncomeCents: 20000,
+    totalBudgetedCents: 9000,
+    readyToAssignCents: 11000,
+    year: 2026,
+    month: 2,
+  );
+}
+
 List<Transaction> _makeMonthlyTransactions() {
   return [
     Transaction(
@@ -196,11 +287,11 @@ List<Transaction> _makeMonthlyTransactions() {
 
 void main() {
   GoogleFonts.config.allowRuntimeFetching = false;
-  final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('opens recent moves and category detail from plan', (
-    tester,
+  patrolWidgetTest('opens recent moves and category detail from plan', (
+    $,
   ) async {
+    final tester = $.tester;
     final container = ProviderContainer(
       overrides: [
         budgetMonthlySummaryProvider.overrideWith((ref, _) async {
@@ -289,7 +380,7 @@ void main() {
           amountCents: 3000,
         );
     await tester.pumpAndSettle();
-    await _captureScreenshot(binding, 'plan-screen');
+    await _captureScreenshot(tester, 'plan-screen');
     await tester.pump(const Duration(seconds: 1));
     await tester.tap(find.text('Finish Onboarding'));
     await tester.pumpAndSettle();
@@ -298,7 +389,7 @@ void main() {
     await tester.tap(find.text('Review 1 transaction'));
     await tester.pumpAndSettle();
     expect(find.text('1 New Transaction'), findsOneWidget);
-    await _captureScreenshot(binding, 'review-transactions-screen');
+    await _captureScreenshot(tester, 'review-transactions-screen');
     await tester.pump(const Duration(seconds: 1));
 
     await tester.tap(find.text('Landlord'));
@@ -308,15 +399,15 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('No Transactions'), findsOneWidget);
     expect(find.text("You're All Done!"), findsOneWidget);
-    await _captureScreenshot(binding, 'review-transactions-empty-screen');
+    await _captureScreenshot(tester, 'review-transactions-empty-screen');
     await tester.pump(const Duration(seconds: 1));
     await tester.tap(find.text('Done'));
     await tester.pumpAndSettle();
-    await _captureScreenshot(binding, 'plan-screen-onboarding-dismissed');
+    await _captureScreenshot(tester, 'plan-screen-onboarding-dismissed');
     await tester.pump(const Duration(seconds: 1));
     await tester.tap(find.text('Spotlight'));
     await tester.pumpAndSettle();
-    await _captureScreenshot(binding, 'spotlight-screen');
+    await _captureScreenshot(tester, 'spotlight-screen');
     await tester.pump(const Duration(seconds: 1));
     await tester.tap(find.text('Categories'));
     await tester.pumpAndSettle();
@@ -325,7 +416,7 @@ void main() {
     await tester.tap(find.byIcon(Icons.more_horiz_rounded));
     await tester.pumpAndSettle();
     expect(find.text('Hide Amounts'), findsOneWidget);
-    await _captureScreenshot(binding, 'plan-menu');
+    await _captureScreenshot(tester, 'plan-menu');
     await tester.pump(const Duration(seconds: 1));
 
     await _tapPopupMenuItem(tester, 'Undo');
@@ -383,11 +474,11 @@ void main() {
     await tester.pumpAndSettle();
     await _tapPopupMenuItem(tester, 'Recent Moves');
     await _dismissCoachmarkIfVisible(tester);
-    await _captureScreenshot(binding, 'recent-moves-screen');
+    await _captureScreenshot(tester, 'recent-moves-screen');
     await tester.pump(const Duration(seconds: 1));
     await tester.tap(find.text('Moved'));
     await tester.pumpAndSettle();
-    await _captureScreenshot(binding, 'recent-moves-moved-screen');
+    await _captureScreenshot(tester, 'recent-moves-moved-screen');
     await tester.pump(const Duration(seconds: 1));
     await tester.tap(find.text('Self storage').first);
     await tester.pumpAndSettle();
@@ -398,7 +489,7 @@ void main() {
 
     await tester.tap(find.text('Utilities').first);
     await tester.pumpAndSettle();
-    await _captureScreenshot(binding, 'envelope-moves-screen');
+    await _captureScreenshot(tester, 'envelope-moves-screen');
     await tester.pump(const Duration(seconds: 1));
     await tester.tap(find.text('Done'));
     await tester.pumpAndSettle();
@@ -409,11 +500,11 @@ void main() {
 
     await tester.tap(find.text('Utilities'));
     await tester.pumpAndSettle();
-    await _captureScreenshot(binding, 'plan-inline-editor-screen');
+    await _captureScreenshot(tester, 'plan-inline-editor-screen');
     await tester.pump(const Duration(seconds: 1));
     await tester.tap(find.text('Details'));
     await tester.pumpAndSettle();
-    await _captureScreenshot(binding, 'category-detail-screen');
+    await _captureScreenshot(tester, 'category-detail-screen');
     await tester.pump(const Duration(seconds: 1));
     expect(find.text('Balance'), findsOneWidget);
     expect(find.text('Set Goal'), findsOneWidget);
@@ -439,9 +530,10 @@ void main() {
     expect(find.text('Rename Category'), findsOneWidget);
   });
 
-  testWidgets('opens overspending coverage sheet from plan banner', (
-    tester,
+  patrolWidgetTest('opens overspending coverage sheet from plan banner', (
+    $,
   ) async {
+    final tester = $.tester;
     final container = ProviderContainer(
       overrides: [
         budgetMonthlySummaryProvider.overrideWith((ref, _) async {
@@ -492,12 +584,87 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Cover 1 overspent category'), findsOneWidget);
   });
+
+  patrolWidgetTest('reorder mode moves categories and exits cleanly', (
+    $,
+  ) async {
+    final tester = $.tester;
+    final container = ProviderContainer(
+      overrides: [
+        budgetMonthlySummaryProvider.overrideWith((ref, _) async {
+          return _makeReorderSummary();
+        }),
+        budgetGoalsProvider.overrideWith((ref, _) async => {}),
+        creditCardPaymentsProvider.overrideWith((ref, _) async => const []),
+        monthlyTransactionsProvider.overrideWith((ref, _) async => const []),
+        recurringDueCountProvider.overrideWith((ref, _) async => 0),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    final router = GoRouter(
+      initialLocation: '/budgets/$_budgetId/plan',
+      routes: [
+        GoRoute(
+          name: planRoute,
+          path: '/budgets/:id/plan',
+          builder: (context, state) =>
+              BudgetDetailScreen(budgetId: state.pathParameters['id']!),
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp.router(
+          theme: ThemeData.light(useMaterial3: true),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          routerConfig: router,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byIcon(Icons.swap_vert_rounded));
+    await tester.pumpAndSettle();
+    expect(find.widgetWithText(TextButton, 'Done'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Groceries Group'),
+      240,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+
+    final housingBefore = tester.getTopLeft(find.text('Housing')).dy;
+    final groceriesBefore = tester.getTopLeft(find.text('Groceries Group')).dy;
+    expect(housingBefore, lessThan(groceriesBefore));
+
+    await tester.tap(find.byIcon(Icons.arrow_upward_rounded).last);
+    await tester.pumpAndSettle();
+
+    final housingAfter = tester.getTopLeft(find.text('Housing')).dy;
+    final groceriesAfter = tester.getTopLeft(find.text('Groceries Group')).dy;
+    expect(groceriesAfter, lessThan(housingAfter));
+
+    await tester.tap(find.widgetWithText(TextButton, 'Done'));
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.swap_vert_rounded), findsOneWidget);
+  });
 }
 
-Future<void> _captureScreenshot(
-  IntegrationTestWidgetsFlutterBinding binding,
-  String name,
-) async {
+Future<void> _captureScreenshot(WidgetTester tester, String name) async {
+  final binding = tester.binding;
+  if (binding is! IntegrationTestWidgetsFlutterBinding) {
+    // Logging here keeps the CI output explicit when screenshot capture is not
+    // supported by the active test binding.
+    // ignore: avoid_print
+    print('Skipping screenshot capture for $name: unsupported test binding');
+    return;
+  }
+
   List<int> bytes;
   try {
     bytes = await binding.takeScreenshot(name);

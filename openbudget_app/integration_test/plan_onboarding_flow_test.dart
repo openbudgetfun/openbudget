@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:integration_test/integration_test.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_goals_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
@@ -12,6 +11,7 @@ import 'package:openbudget_app/src/features/budget/screens/budget_detail_screen.
 import 'package:openbudget_app/src/features/recurring/providers/recurring_auto_post_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
+import 'package:patrol/patrol.dart';
 
 // Serverpod's UuidValue.fromString is marked experimental.
 // ignore_for_file: experimental_member_use
@@ -45,11 +45,11 @@ BudgetSummary _makeSummary({
 
 void main() {
   GoogleFonts.config.allowRuntimeFetching = false;
-  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('add accounts onboarding CTA routes to add account screen', (
-    tester,
+  patrolWidgetTest('add accounts onboarding CTA routes to add account screen', (
+    $,
   ) async {
+    final tester = $.tester;
     final container = ProviderContainer(
       overrides: [
         budgetMonthlySummaryProvider.overrideWith((ref, _) async {
@@ -103,9 +103,10 @@ void main() {
     expect(find.text('Add Account Screen'), findsOneWidget);
   });
 
-  testWidgets(
+  patrolWidgetTest(
     'assign money onboarding secondary CTA routes to add account screen',
-    (tester) async {
+    ($) async {
+      final tester = $.tester;
       final container = ProviderContainer(
         overrides: [
           budgetMonthlySummaryProvider.overrideWith((ref, _) async {

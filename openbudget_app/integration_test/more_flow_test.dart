@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:integration_test/integration_test.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
@@ -17,6 +16,7 @@ import 'package:openbudget_app/src/features/transaction_rules/providers/rule_lis
 import 'package:openbudget_app/src/features/transaction_rules/screens/rule_list_screen.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
+import 'package:patrol/patrol.dart';
 
 const _budgetId = 'test-budget-id';
 final _budgetUuid = UuidValue.fromString(
@@ -167,11 +167,10 @@ Widget _buildApp() {
 }
 
 void main() {
-  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
-
-  testWidgets('navigates from More to recurring and opens add dialog', (
-    tester,
+  patrolWidgetTest('navigates from More to recurring and opens add dialog', (
+    $,
   ) async {
+    final tester = $.tester;
     await tester.pumpWidget(_buildApp());
     await tester.pumpAndSettle();
 
@@ -186,9 +185,10 @@ void main() {
     expect(find.byType(AlertDialog), findsOneWidget);
   });
 
-  testWidgets('navigates from More to rules and opens add rule dialog', (
-    tester,
+  patrolWidgetTest('navigates from More to rules and opens add rule dialog', (
+    $,
   ) async {
+    final tester = $.tester;
     await tester.pumpWidget(_buildApp());
     await tester.pumpAndSettle();
 

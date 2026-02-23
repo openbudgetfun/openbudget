@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:integration_test/integration_test.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/main.dart';
 import 'package:openbudget_app/src/features/auth/providers/auth_provider.dart';
@@ -11,11 +10,11 @@ import 'package:openbudget_app/src/features/budget/screens/create_budget_screen.
 import 'package:openbudget_app/src/features/home/providers/budget_list_provider.dart';
 import 'package:openbudget_app/src/routing/app_router.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
+import 'package:patrol/patrol.dart';
 
 void main() {
-  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
-
-  testWidgets('create budget screen renders onboarding layout', (tester) async {
+  patrolWidgetTest('create budget screen renders onboarding layout', ($) async {
+    final tester = $.tester;
     final router = GoRouter(
       initialLocation: createBudgetPath,
       routes: [
@@ -44,9 +43,10 @@ void main() {
     expect(find.byType(FilledButton), findsOneWidget);
   });
 
-  testWidgets(
+  patrolWidgetTest(
     'unauthenticated user is redirected to login from create budget',
-    (tester) async {
+    ($) async {
+      final tester = $.tester;
       final container = ProviderContainer(
         overrides: [
           authProvider.overrideWithValue(const Unauthenticated()),

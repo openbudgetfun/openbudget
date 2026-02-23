@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:integration_test/integration_test.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_goals_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
@@ -14,6 +13,7 @@ import 'package:openbudget_app/src/features/recurring/providers/recurring_auto_p
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
+import 'package:patrol/patrol.dart';
 
 // Serverpod's UuidValue.fromString is marked experimental.
 // ignore_for_file: experimental_member_use
@@ -83,9 +83,9 @@ BudgetSummary _makeSummaryForMonth(BudgetMonth month) {
 
 void main() {
   GoogleFonts.config.allowRuntimeFetching = false;
-  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('switching months updates plan header values', (tester) async {
+  patrolWidgetTest('switching months updates plan header values', ($) async {
+    final tester = $.tester;
     final container = ProviderContainer(
       overrides: [
         budgetMonthlySummaryProvider.overrideWith((ref, budgetId) async {

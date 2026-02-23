@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:integration_test/integration_test.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
 import 'package:openbudget_app/src/features/settings/providers/display_options_provider.dart';
@@ -19,6 +18,7 @@ import 'package:openbudget_app/src/features/settings/screens/settings_screen.dar
 import 'package:openbudget_app/src/providers/theme_mode_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
+import 'package:patrol/patrol.dart';
 
 const _budgetId = 'test-budget-id';
 final _ownerUuid = UuidValue.fromString('00000000-0000-0000-0000-000000000311');
@@ -28,11 +28,10 @@ Budget _makeBudget({String name = "Alex's Plan", String currencyCode = 'USD'}) {
 }
 
 void main() {
-  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
-
-  testWidgets(
+  patrolWidgetTest(
     'navigates settings -> plan settings -> currency -> display options',
-    (tester) async {
+    ($) async {
+      final tester = $.tester;
       final container = ProviderContainer(
         overrides: [
           budgetDetailProvider.overrideWith((ref, id) async => _makeBudget()),

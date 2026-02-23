@@ -1,6 +1,6 @@
 # OpenBudget UI Migration Tracker (from `~/Downloads/ynab-ui`)
 
-Last updated: 2026-02-23 (review-transactions + overspending coverage parity)
+Last updated: 2026-02-23 (Patrol integration + account success + reorder parity)
 
 ## Scope
 
@@ -10,7 +10,7 @@ Last updated: 2026-02-23 (review-transactions + overspending coverage parity)
 
 ## Progress Snapshot
 
-- Overall migration progress: **~97%**
+- Overall migration progress: **~98%**
 - Core plan/settings/auth/navigation flows: **implemented**
 - Advanced accounts/transactions/reports flows: **in progress**
 
@@ -60,6 +60,7 @@ Last updated: 2026-02-23 (review-transactions + overspending coverage parity)
   - [x] Notes
   - [x] Rename/Hide/Delete actions
   - [x] Snooze toggle
+- [x] Reorder categories flow parity
 
 ## In Progress
 
@@ -89,7 +90,7 @@ Last updated: 2026-02-23 (review-transactions + overspending coverage parity)
   - [x] Add custom target flow
   - [x] Loan target flow
   - [x] Cover overspending flow
-  - [ ] Reorder categories flow parity
+  - [x] Reorder categories flow parity
   - [ ] Hide category flow polish
 - [ ] Reports and analysis parity
   - [ ] Net worth visual parity
@@ -113,11 +114,14 @@ Last updated: 2026-02-23 (review-transactions + overspending coverage parity)
 - [x] Integration coverage for loan target create/edit interaction
 - [x] Integration coverage for closed-account edit actions (delete/reopen visibility)
 - [x] Integration coverage for account reconcile confirmation prompt (Yes/No/Cancel)
+- [x] Integration coverage for unlinked-account submit success flow
 - [x] Integration coverage for transaction list filters + edit/flag interactions
 - [x] Integration coverage for review-transactions sheet (select, approve, empty state)
 - [x] Integration coverage for overspending coverage sheet opening
+- [x] Integration coverage for category reorder interactions
 - [x] Integration coverage for account settings -> delete account flow
 - [x] Integration CI configured to fail on any individual integration test failure
 - [x] Integration CI hardened to detect failure markers / no-tests-ran false-green output
+- [x] Integration tests migrated to Patrol (`patrolWidgetTest`) across all flow files
 - [x] Integration coverage for opening custom target editor and validating Save button enablement
 - [ ] Expand integration tests for remaining pending batches above

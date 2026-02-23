@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-import 'package:integration_test/integration_test.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/screens/budget_shell_screen.dart';
+import 'package:patrol/patrol.dart';
 
 const _budgetId = 'test-budget-id';
 
@@ -67,9 +67,8 @@ Widget _buildApp() {
 }
 
 void main() {
-  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
-
-  testWidgets('bottom navigation bar renders all five tabs', (tester) async {
+  patrolWidgetTest('bottom navigation bar renders all five tabs', ($) async {
+    final tester = $.tester;
     await tester.pumpWidget(_buildApp());
     await tester.pumpAndSettle();
 
@@ -81,7 +80,8 @@ void main() {
     expect(find.text('More'), findsOneWidget);
   });
 
-  testWidgets('tapping Accounts tab shows accounts content', (tester) async {
+  patrolWidgetTest('tapping Accounts tab shows accounts content', ($) async {
+    final tester = $.tester;
     await tester.pumpWidget(_buildApp());
     await tester.pumpAndSettle();
 
@@ -91,7 +91,8 @@ void main() {
     expect(find.text('Accounts Tab'), findsOneWidget);
   });
 
-  testWidgets('tapping Add tab shows add transaction sheet', (tester) async {
+  patrolWidgetTest('tapping Add tab shows add transaction sheet', ($) async {
+    final tester = $.tester;
     await tester.pumpWidget(_buildApp());
     await tester.pumpAndSettle();
 
@@ -104,7 +105,8 @@ void main() {
     expect(find.text('Transfer'), findsOneWidget);
   });
 
-  testWidgets('dismissing add sheet keeps plan tab visible', (tester) async {
+  patrolWidgetTest('dismissing add sheet keeps plan tab visible', ($) async {
+    final tester = $.tester;
     await tester.pumpWidget(_buildApp());
     await tester.pumpAndSettle();
 
@@ -116,9 +118,10 @@ void main() {
     expect(find.text('Plan Tab'), findsOneWidget);
   });
 
-  testWidgets('tab switching works across reflect and more tabs', (
-    tester,
+  patrolWidgetTest('tab switching works across reflect and more tabs', (
+    $,
   ) async {
+    final tester = $.tester;
     await tester.pumpWidget(_buildApp());
     await tester.pumpAndSettle();
 

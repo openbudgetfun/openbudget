@@ -1,3 +1,5 @@
+import 'dart:async';
+
 // Serverpod's UuidValue.fromString is marked experimental.
 // ignore_for_file: experimental_member_use
 
@@ -5,8 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:integration_test/integration_test.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
+import 'package:openbudget_app/src/features/accounts/providers/account_actions_provider.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_transactions_provider.dart';
 import 'package:openbudget_app/src/features/accounts/screens/account_detail_screen.dart';
@@ -17,6 +19,7 @@ import 'package:openbudget_app/src/features/budget/providers/budget_summary_prov
 import 'package:openbudget_app/src/features/payees/providers/payee_list_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
+import 'package:patrol/patrol.dart';
 
 const _budgetId = 'test-budget-id';
 final _budgetUuid = UuidValue.fromString(
@@ -89,6 +92,34 @@ Transaction _makeTransaction({
   );
 }
 
+class _FakeAccountActions extends AccountActions {
+  @override
+  FutureOr<void> build() {}
+
+  @override
+  Future<Account> createAccount({
+    required String name,
+    required String accountType,
+    required int balanceCents,
+    required String currencyCode,
+    required String budgetId,
+    required bool onBudget,
+    required int sortOrder,
+  }) async {
+    return Account(
+      id: UuidValue.fromString('00000000-0000-0000-0000-000000000777'),
+      name: name,
+      accountType: accountType,
+      balanceCents: balanceCents,
+      currencyCode: currencyCode,
+      budgetId: _budgetUuid,
+      onBudget: onBudget,
+      sortOrder: sortOrder,
+      isClosed: false,
+    );
+  }
+}
+
 Widget _buildApp({
   required List<Account> accounts,
   List<Transaction> accountTransactions = const [],
@@ -122,6 +153,7 @@ Widget _buildApp({
 
   return ProviderScope(
     overrides: [
+      accountActionsProvider.overrideWith(_FakeAccountActions.new),
       accountListProvider.overrideWith((ref, budgetId) async => accounts),
       accountTransactionsProvider.overrideWith(
         (ref, args) async => accountTransactions,
@@ -144,10 +176,10 @@ Widget _buildApp({
 }
 
 void main() {
-  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
-  testWidgets('shows mixed-currency summaries in accounts view', (
-    tester,
+  patrolWidgetTest('shows mixed-currency summaries in accounts view', (
+    $,
   ) async {
+    final tester = $.tester;
     await tester.pumpWidget(
       _buildApp(
         accounts: [
@@ -172,9 +204,10 @@ void main() {
     expect(find.textContaining('EUR'), findsWidgets);
   });
 
-  testWidgets('empty accounts flow navigates through add account wizard', (
-    tester,
+  patrolWidgetTest('empty accounts flow navigates through add account wizard', (
+    $,
   ) async {
+    final tester = $.tester;
     await tester.pumpWidget(_buildApp(accounts: const []));
     await tester.pumpAndSettle();
 
@@ -199,9 +232,10 @@ void main() {
     expect(find.text('GBP (£)'), findsOneWidget);
   });
 
-  testWidgets('bank search shortcut moves user to unlinked account flow', (
-    tester,
+  patrolWidgetTest('bank search shortcut moves user to unlinked account flow', (
+    $,
   ) async {
+    final tester = $.tester;
     await tester.pumpWidget(_buildApp(accounts: const []));
     await tester.pumpAndSettle();
 
@@ -219,41 +253,84 @@ void main() {
     );
   });
 
-  testWidgets('unlinked account requires explicit type selection before next', (
-    tester,
+  patrolWidgetTest(
+    'unlinked account requires explicit type selection before next',
+    ($) async {
+      final tester = $.tester;
+      await tester.pumpWidget(_buildApp(accounts: const []));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Add Account'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Add an Unlinked Account'));
+      await tester.pumpAndSettle();
+
+      var nextButton = tester.widget<FilledButton>(
+        find.widgetWithText(FilledButton, 'Next'),
+      );
+      expect(nextButton.onPressed, isNull);
+
+      await tester.enterText(find.byType(TextField).at(0), 'Daily');
+      await tester.enterText(find.byType(TextField).at(1), '50000');
+      await tester.pumpAndSettle();
+
+      nextButton = tester.widget(find.widgetWithText(FilledButton, 'Next'));
+      expect(nextButton.onPressed, isNull);
+
+      await tester.tap(find.text('Select account type...'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Checking'));
+      await tester.pumpAndSettle();
+
+      nextButton = tester.widget(find.widgetWithText(FilledButton, 'Next'));
+      expect(nextButton.onPressed, isNotNull);
+    },
+  );
+
+  patrolWidgetTest(
+    'unlinked account submit shows success and returns to accounts',
+    ($) async {
+      final tester = $.tester;
+      await tester.pumpWidget(_buildApp(accounts: const []));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Add Account'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Add an Unlinked Account'));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField).at(0), 'Daily');
+      await tester.tap(find.text('Select account type...'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Checking'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField).at(1), '50000');
+      await tester.pumpAndSettle();
+
+      final nextButton = tester.widget<FilledButton>(
+        find.widgetWithText(FilledButton, 'Next'),
+      );
+      expect(nextButton.onPressed, isNotNull);
+
+      await tester.tap(find.widgetWithText(FilledButton, 'Next'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Success!'), findsOneWidget);
+      expect(find.text('Add Another'), findsOneWidget);
+      expect(find.widgetWithText(FilledButton, 'Done'), findsOneWidget);
+
+      await tester.tap(find.widgetWithText(FilledButton, 'Done'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Accounts'), findsOneWidget);
+      expect(find.text('No Accounts Yet'), findsOneWidget);
+    },
+  );
+
+  patrolWidgetTest('account detail flow navigates to detail and back to list', (
+    $,
   ) async {
-    await tester.pumpWidget(_buildApp(accounts: const []));
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.text('Add Account'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Add an Unlinked Account'));
-    await tester.pumpAndSettle();
-
-    var nextButton = tester.widget<FilledButton>(
-      find.widgetWithText(FilledButton, 'Next'),
-    );
-    expect(nextButton.onPressed, isNull);
-
-    await tester.enterText(find.byType(TextField).at(0), 'Daily');
-    await tester.enterText(find.byType(TextField).at(1), '50000');
-    await tester.pumpAndSettle();
-
-    nextButton = tester.widget(find.widgetWithText(FilledButton, 'Next'));
-    expect(nextButton.onPressed, isNull);
-
-    await tester.tap(find.text('Select account type...'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Checking'));
-    await tester.pumpAndSettle();
-
-    nextButton = tester.widget(find.widgetWithText(FilledButton, 'Next'));
-    expect(nextButton.onPressed, isNotNull);
-  });
-
-  testWidgets('account detail flow navigates to detail and back to list', (
-    tester,
-  ) async {
+    final tester = $.tester;
     final accountId = UuidValue.fromString(
       '00000000-0000-0000-0000-000000000111',
     );
@@ -291,62 +368,65 @@ void main() {
     expect(find.text('Daily USD'), findsOneWidget);
   });
 
-  testWidgets('account detail overflow menu toggles reconciled visibility', (
-    tester,
+  patrolWidgetTest(
+    'account detail overflow menu toggles reconciled visibility',
+    ($) async {
+      final tester = $.tester;
+      final accountId = UuidValue.fromString(
+        '00000000-0000-0000-0000-000000000111',
+      );
+      await tester.pumpWidget(
+        _buildApp(
+          accounts: [
+            _makeAccount(
+              id: accountId,
+              name: 'Daily USD',
+              balanceCents: 250000,
+              currencyCode: 'USD',
+            ),
+          ],
+          accountTransactions: [
+            _makeTransaction(
+              id: '00000000-0000-0000-0000-000000000211',
+              accountId: accountId,
+              description: 'Self storage',
+              amountCents: -3000,
+            ),
+            _makeTransaction(
+              id: '00000000-0000-0000-0000-000000000212',
+              accountId: accountId,
+              description: 'Starting Balance',
+              amountCents: 5000000,
+              reconciled: true,
+              transactionDate: DateTime(2026, 9, 2),
+            ),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Daily USD'));
+      await tester.pumpAndSettle();
+      expect(find.text('Starting Balance'), findsOneWidget);
+
+      await tester.tap(find.byIcon(Icons.more_horiz_rounded));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Hide Reconciled'), warnIfMissed: false);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Starting Balance'), findsNothing);
+      expect(find.text('Self storage'), findsOneWidget);
+
+      await tester.tap(find.textContaining('uncleared transactions'));
+      await tester.pumpAndSettle();
+      expect(find.text('Self storage'), findsOneWidget);
+    },
+  );
+
+  patrolWidgetTest('account detail edit flow opens full-screen account form', (
+    $,
   ) async {
-    final accountId = UuidValue.fromString(
-      '00000000-0000-0000-0000-000000000111',
-    );
-    await tester.pumpWidget(
-      _buildApp(
-        accounts: [
-          _makeAccount(
-            id: accountId,
-            name: 'Daily USD',
-            balanceCents: 250000,
-            currencyCode: 'USD',
-          ),
-        ],
-        accountTransactions: [
-          _makeTransaction(
-            id: '00000000-0000-0000-0000-000000000211',
-            accountId: accountId,
-            description: 'Self storage',
-            amountCents: -3000,
-          ),
-          _makeTransaction(
-            id: '00000000-0000-0000-0000-000000000212',
-            accountId: accountId,
-            description: 'Starting Balance',
-            amountCents: 5000000,
-            reconciled: true,
-            transactionDate: DateTime(2026, 9, 2),
-          ),
-        ],
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.text('Daily USD'));
-    await tester.pumpAndSettle();
-    expect(find.text('Starting Balance'), findsOneWidget);
-
-    await tester.tap(find.byIcon(Icons.more_horiz_rounded));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Hide Reconciled'), warnIfMissed: false);
-    await tester.pumpAndSettle();
-
-    expect(find.text('Starting Balance'), findsNothing);
-    expect(find.text('Self storage'), findsOneWidget);
-
-    await tester.tap(find.textContaining('uncleared transactions'));
-    await tester.pumpAndSettle();
-    expect(find.text('Self storage'), findsOneWidget);
-  });
-
-  testWidgets('account detail edit flow opens full-screen account form', (
-    tester,
-  ) async {
+    final tester = $.tester;
     final accountId = UuidValue.fromString(
       '00000000-0000-0000-0000-000000000122',
     );
@@ -387,44 +467,47 @@ void main() {
     expect(find.text('Close Account'), findsOneWidget);
   });
 
-  testWidgets('closed account edit dialog exposes delete and reopen actions', (
-    tester,
-  ) async {
-    final accountId = UuidValue.fromString(
-      '00000000-0000-0000-0000-000000000113',
-    );
-    await tester.pumpWidget(
-      _buildApp(
-        accounts: [
-          _makeAccount(
-            id: accountId,
-            name: 'Loan',
-            balanceCents: -50000,
-            currencyCode: 'USD',
-            onBudget: false,
-            isClosed: true,
-          ),
-        ],
-      ),
-    );
-    await tester.pumpAndSettle();
+  patrolWidgetTest(
+    'closed account edit dialog exposes delete and reopen actions',
+    ($) async {
+      final tester = $.tester;
+      final accountId = UuidValue.fromString(
+        '00000000-0000-0000-0000-000000000113',
+      );
+      await tester.pumpWidget(
+        _buildApp(
+          accounts: [
+            _makeAccount(
+              id: accountId,
+              name: 'Loan',
+              balanceCents: -50000,
+              currencyCode: 'USD',
+              onBudget: false,
+              isClosed: true,
+            ),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Loan'));
-    await tester.pumpAndSettle();
+      await tester.tap(find.text('Loan'));
+      await tester.pumpAndSettle();
 
-    await tester.tap(find.byIcon(Icons.more_horiz_rounded));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Edit Account'));
-    await tester.pumpAndSettle();
+      await tester.tap(find.byIcon(Icons.more_horiz_rounded));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Edit Account'));
+      await tester.pumpAndSettle();
 
-    expect(
-      find.text('Delete Permanently', skipOffstage: false),
-      findsOneWidget,
-    );
-    expect(find.text('Reopen Account', skipOffstage: false), findsOneWidget);
-  });
+      expect(
+        find.text('Delete Permanently', skipOffstage: false),
+        findsOneWidget,
+      );
+      expect(find.text('Reopen Account', skipOffstage: false), findsOneWidget);
+    },
+  );
 
-  testWidgets('reconcile action opens balance match prompt', (tester) async {
+  patrolWidgetTest('reconcile action opens balance match prompt', ($) async {
+    final tester = $.tester;
     final accountId = UuidValue.fromString(
       '00000000-0000-0000-0000-000000000114',
     );
@@ -468,7 +551,8 @@ void main() {
     expect(find.text('Cancel'), findsOneWidget);
   });
 
-  testWidgets('loan account shows overview and activity tabs', (tester) async {
+  patrolWidgetTest('loan account shows overview and activity tabs', ($) async {
+    final tester = $.tester;
     final accountId = UuidValue.fromString(
       '00000000-0000-0000-0000-000000000115',
     );
