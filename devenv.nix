@@ -234,9 +234,9 @@ in
     "lint:analyze" = {
       exec = ''
         set -e
-        melos run analyze --no-select
+        dart analyze --fatal-infos .
       '';
-      description = "Run dart analyze across all packages.";
+      description = "Run dart analyze across the workspace in a single process.";
     };
     "lint:all" = {
       exec = ''
