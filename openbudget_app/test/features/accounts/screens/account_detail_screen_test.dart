@@ -32,16 +32,22 @@ Budget _makeBudget() => Budget(
   createdAt: DateTime(2026),
 );
 
-Account _makeAccount() => Account(
+Account _makeAccount({
+  String name = 'Daily',
+  String accountType = 'checking',
+  int balanceCents = 5202000,
+  bool onBudget = true,
+  bool isClosed = false,
+}) => Account(
   id: _accountUuid,
-  name: 'Daily',
-  accountType: 'checking',
-  balanceCents: 5202000,
+  name: name,
+  accountType: accountType,
+  balanceCents: balanceCents,
   currencyCode: 'USD',
   budgetId: _budgetUuid,
-  onBudget: true,
+  onBudget: onBudget,
   sortOrder: 0,
-  isClosed: false,
+  isClosed: isClosed,
 );
 
 Transaction _makeTransaction({
@@ -75,7 +81,7 @@ BudgetSummary _makeSummary() => BudgetSummary(
   month: 9,
 );
 
-Widget _buildSubject({List<Transaction>? transactions}) {
+Widget _buildSubject({List<Transaction>? transactions, Account? account}) {
   final router = GoRouter(
     initialLocation: '/budgets/$_budgetId/accounts/$_accountId',
     routes: [
@@ -99,7 +105,7 @@ Widget _buildSubject({List<Transaction>? transactions}) {
   return ProviderScope(
     overrides: [
       accountListProvider.overrideWith(
-        (ref, budgetId) async => [_makeAccount()],
+        (ref, budgetId) async => [account ?? _makeAccount()],
       ),
       accountTransactionsProvider.overrideWith(
         (ref, args) async =>
@@ -223,6 +229,52 @@ void main() {
       expect(find.text('Yes'), findsOneWidget);
       expect(find.text('No'), findsOneWidget);
       expect(find.text('Cancel'), findsOneWidget);
+    });
+
+    testWidgets('loan account renders overview and activity tabs', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _buildSubject(
+          account: _makeAccount(
+            name: 'Loan',
+            accountType: 'other',
+            balanceCents: -125,
+            onBudget: false,
+          ),
+          transactions: [
+            _makeTransaction(
+              id: '00000000-0000-0000-0000-000000000311',
+              description: 'Payment from Daily',
+              amountCents: 50000,
+            ),
+            _makeTransaction(
+              id: '00000000-0000-0000-0000-000000000312',
+              description: 'Initial Balance',
+              amountCents: -50000,
+              transactionDate: DateTime(2026, 9),
+            ),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Overview'), findsOneWidget);
+      expect(find.text('Activity'), findsOneWidget);
+      expect(find.text('Loan Payoff Overview'), findsOneWidget);
+      await tester.scrollUntilVisible(
+        find.text('Create Target'),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Create Target'), findsOneWidget);
+
+      await tester.tap(find.text('Activity'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Payment from Daily'), findsOneWidget);
+      expect(find.text('Payments'), findsOneWidget);
     });
   });
 }

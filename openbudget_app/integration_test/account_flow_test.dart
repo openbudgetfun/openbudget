@@ -28,13 +28,14 @@ Account _makeAccount({
   required int balanceCents,
   required String currencyCode,
   UuidValue? id,
+  String accountType = 'checking',
   bool onBudget = true,
   bool isClosed = false,
 }) {
   return Account(
     id: id,
     name: name,
-    accountType: 'checking',
+    accountType: accountType,
     balanceCents: balanceCents,
     currencyCode: currencyCode,
     budgetId: _budgetUuid,
@@ -387,5 +388,55 @@ void main() {
     expect(find.text('Yes'), findsOneWidget);
     expect(find.text('No'), findsOneWidget);
     expect(find.text('Cancel'), findsOneWidget);
+  });
+
+  testWidgets('loan account shows overview and activity tabs', (tester) async {
+    final accountId = UuidValue.fromString(
+      '00000000-0000-0000-0000-000000000115',
+    );
+    await tester.pumpWidget(
+      _buildApp(
+        accounts: [
+          _makeAccount(
+            id: accountId,
+            name: 'Loan',
+            accountType: 'other',
+            balanceCents: -125,
+            currencyCode: 'USD',
+            onBudget: false,
+          ),
+        ],
+        accountTransactions: [
+          _makeTransaction(
+            id: '00000000-0000-0000-0000-000000000411',
+            accountId: accountId,
+            description: 'Payment from Daily',
+            amountCents: 50000,
+            transactionDate: DateTime(2026, 9, 4),
+          ),
+          _makeTransaction(
+            id: '00000000-0000-0000-0000-000000000412',
+            accountId: accountId,
+            description: 'Initial Balance',
+            amountCents: -50000,
+            transactionDate: DateTime(2026, 9, 3),
+          ),
+        ],
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Loan'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Overview'), findsOneWidget);
+    expect(find.text('Activity'), findsOneWidget);
+    expect(find.text('Loan Payoff Overview'), findsOneWidget);
+
+    await tester.tap(find.text('Activity'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Payment from Daily'), findsOneWidget);
+    expect(find.text('Payments'), findsOneWidget);
   });
 }

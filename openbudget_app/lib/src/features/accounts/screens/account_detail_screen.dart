@@ -20,6 +20,8 @@ enum _StatusFilter { all, uncleared }
 
 enum _AccountMenuAction { reconcile, hideReconciled, editAccount, linkAccount }
 
+enum _LoanDetailTab { overview, activity }
+
 class AccountDetailScreen extends HookConsumerWidget {
   const AccountDetailScreen({
     required this.budgetId,
@@ -44,6 +46,7 @@ class AccountDetailScreen extends HookConsumerWidget {
     final searchController = useTextEditingController();
     final statusFilter = useState(_StatusFilter.all);
     final hideReconciled = useState(false);
+    final loanDetailTab = useState(_LoanDetailTab.overview);
 
     final accountData = accountsAsync
         .whenData(
@@ -57,6 +60,8 @@ class AccountDetailScreen extends HookConsumerWidget {
             orElse: () => CurrencyCode.usd,
           )
         : CurrencyCode.usd;
+    final isLoanAccount =
+        accountData != null && _isLoanStyleAccount(accountData);
     final unclearedCount = txnAsync.whenOrNull(
       data: (txns) => txns.where((t) => !t.cleared && !t.reconciled).length,
     );
@@ -92,111 +97,73 @@ class AccountDetailScreen extends HookConsumerWidget {
               ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: null,
-            style: TextButton.styleFrom(
-              foregroundColor: OpenBudgetPalette.accentBlue,
-              textStyle: theme.textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            child: const Text('Select'),
-          ),
-          PopupMenuButton<_AccountMenuAction>(
-            icon: const Icon(Icons.more_horiz_rounded),
-            onSelected: (action) {
-              switch (action) {
-                case _AccountMenuAction.reconcile:
-                  if (txnAsync.hasValue) {
-                    _reconcile(context, ref, txnAsync.value!, currencyCode);
-                  }
-                case _AccountMenuAction.hideReconciled:
-                  hideReconciled.value = !hideReconciled.value;
-                case _AccountMenuAction.editAccount:
-                  if (accountData != null) {
-                    _openEditAccount(context, accountData);
-                  }
-                case _AccountMenuAction.linkAccount:
-                  _showLinkAccountComingSoon(context);
-              }
-            },
-            itemBuilder: (context) => [
-              PopupMenuItem<_AccountMenuAction>(
-                value: _AccountMenuAction.reconcile,
-                enabled: txnAsync.hasValue,
-                child: Text(l10n.reconcileButton),
-              ),
-              CheckedPopupMenuItem<_AccountMenuAction>(
-                value: _AccountMenuAction.hideReconciled,
-                checked: hideReconciled.value,
-                child: const Text('Hide Reconciled'),
-              ),
-              PopupMenuItem<_AccountMenuAction>(
-                value: _AccountMenuAction.editAccount,
-                enabled: accountData != null,
-                child: Text(l10n.accountEditTitle),
-              ),
-              const PopupMenuItem<_AccountMenuAction>(
-                value: _AccountMenuAction.linkAccount,
-                child: Text('Link Account'),
-              ),
-            ],
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          if (accountData != null)
-            _BalanceHeader(
-              accountData: accountData,
-              currencyCode: currencyCode,
-              transactions: txnAsync.whenOrNull(data: (txns) => txns),
-            ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              SpacingTokens.md,
-              SpacingTokens.sm,
-              SpacingTokens.md,
-              SpacingTokens.xs,
-            ),
-            child: Column(
-              children: [
-                TextField(
-                  controller: searchController,
-                  textInputAction: TextInputAction.search,
-                  decoration: InputDecoration(
-                    hintText: l10n.accountDetailSearchHint,
-                    prefixIcon: const Icon(Icons.search_rounded),
-                  ),
-                  onChanged: (value) => searchQuery.value = value,
+        actions: isLoanAccount
+            ? [
+                IconButton(
+                  icon: const Icon(Icons.edit_outlined),
+                  onPressed: () => _openEditAccount(context, accountData),
                 ),
-                const SizedBox(height: SpacingTokens.sm),
-                Material(
-                  color: OpenBudgetPalette.surface,
-                  borderRadius: BorderRadius.circular(RadiusTokens.md),
-                  child: ListTile(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(RadiusTokens.md),
-                      side: const BorderSide(color: OpenBudgetPalette.divider),
+              ]
+            : [
+                TextButton(
+                  onPressed: null,
+                  style: TextButton.styleFrom(
+                    foregroundColor: OpenBudgetPalette.accentBlue,
+                    textStyle: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
                     ),
-                    title: Text(
-                      'Show ${unclearedCount ?? 0} '
-                      '${l10n.accountFilterUncleared.toLowerCase()} '
-                      'transactions',
-                    ),
-                    trailing: const Icon(Icons.chevron_right_rounded),
-                    onTap: () => statusFilter.value =
-                        statusFilter.value == _StatusFilter.uncleared
-                        ? _StatusFilter.all
-                        : _StatusFilter.uncleared,
                   ),
+                  child: const Text('Select'),
+                ),
+                PopupMenuButton<_AccountMenuAction>(
+                  icon: const Icon(Icons.more_horiz_rounded),
+                  onSelected: (action) {
+                    switch (action) {
+                      case _AccountMenuAction.reconcile:
+                        if (txnAsync.hasValue) {
+                          _reconcile(
+                            context,
+                            ref,
+                            txnAsync.value!,
+                            currencyCode,
+                          );
+                        }
+                      case _AccountMenuAction.hideReconciled:
+                        hideReconciled.value = !hideReconciled.value;
+                      case _AccountMenuAction.editAccount:
+                        if (accountData != null) {
+                          _openEditAccount(context, accountData);
+                        }
+                      case _AccountMenuAction.linkAccount:
+                        _showLinkAccountComingSoon(context);
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    PopupMenuItem<_AccountMenuAction>(
+                      value: _AccountMenuAction.reconcile,
+                      enabled: txnAsync.hasValue,
+                      child: Text(l10n.reconcileButton),
+                    ),
+                    CheckedPopupMenuItem<_AccountMenuAction>(
+                      value: _AccountMenuAction.hideReconciled,
+                      checked: hideReconciled.value,
+                      child: const Text('Hide Reconciled'),
+                    ),
+                    PopupMenuItem<_AccountMenuAction>(
+                      value: _AccountMenuAction.editAccount,
+                      enabled: accountData != null,
+                      child: Text(l10n.accountEditTitle),
+                    ),
+                    const PopupMenuItem<_AccountMenuAction>(
+                      value: _AccountMenuAction.linkAccount,
+                      child: Text('Link Account'),
+                    ),
+                  ],
                 ),
               ],
-            ),
-          ),
-          Expanded(
-            child: txnAsync.when(
+      ),
+      body: isLoanAccount
+          ? txnAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (error, _) => Center(
                 child: Text(
@@ -206,153 +173,238 @@ class AccountDetailScreen extends HookConsumerWidget {
                   ),
                 ),
               ),
-              data: (transactions) {
-                // Build payee and envelope name lookup maps.
-                final payeeAsync = ref.watch(payeeListProvider(budgetId));
-                final summaryAsync = ref.watch(budgetSummaryProvider(budgetId));
-                final payeeMap = <String, String>{};
-                if (payeeAsync.hasValue) {
-                  for (final payee in payeeAsync.value!) {
-                    final id = payee.id?.toString();
-                    if (id != null) payeeMap[id] = payee.name;
-                  }
-                }
-                final envelopeMap = <String, String>{};
-                if (summaryAsync.hasValue && summaryAsync.value != null) {
-                  for (final cat in summaryAsync.value!.categories) {
-                    for (final env in cat.envelopes) {
-                      final id = env.id?.toString();
-                      if (id != null) envelopeMap[id] = env.name;
-                    }
-                  }
-                }
-
-                // Apply search filter.
-                var filtered = transactions;
-                if (searchQuery.value.isNotEmpty) {
-                  final query = searchQuery.value.toLowerCase();
-                  filtered = filtered
-                      .where(
-                        (t) =>
-                            t.description.toLowerCase().contains(query) ||
-                            (t.memo?.toLowerCase().contains(query) ?? false) ||
-                            (payeeMap[t.payeeId?.toString()]
-                                    ?.toLowerCase()
-                                    .contains(query) ??
-                                false) ||
-                            (envelopeMap[t.envelopeId?.toString()]
-                                    ?.toLowerCase()
-                                    .contains(query) ??
-                                false),
-                      )
-                      .toList();
-                }
-
-                if (hideReconciled.value) {
-                  filtered = filtered.where((t) => !t.reconciled).toList();
-                }
-
-                filtered = switch (statusFilter.value) {
-                  _StatusFilter.all => filtered,
-                  _StatusFilter.uncleared =>
-                    filtered.where((t) => !t.cleared && !t.reconciled).toList(),
-                };
-
-                if (filtered.isEmpty) {
-                  return Center(
-                    child: Text(
-                      searchQuery.value.isNotEmpty
-                          ? l10n.transactionNoResults
-                          : l10n.transactionEmpty,
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        color: OpenBudgetPalette.mutedText,
+              data: (transactions) => _LoanAccountDetailBody(
+                accountData: accountData,
+                transactions: transactions,
+                currencyCode: currencyCode,
+                selectedTab: loanDetailTab.value,
+                onTabChanged: (tab) => loanDetailTab.value = tab,
+              ),
+            )
+          : Column(
+              children: [
+                if (accountData != null)
+                  _BalanceHeader(
+                    accountData: accountData,
+                    currencyCode: currencyCode,
+                    transactions: txnAsync.whenOrNull(data: (txns) => txns),
+                  ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    SpacingTokens.md,
+                    SpacingTokens.sm,
+                    SpacingTokens.md,
+                    SpacingTokens.xs,
+                  ),
+                  child: Column(
+                    children: [
+                      TextField(
+                        controller: searchController,
+                        textInputAction: TextInputAction.search,
+                        decoration: InputDecoration(
+                          hintText: l10n.accountDetailSearchHint,
+                          prefixIcon: const Icon(Icons.search_rounded),
+                        ),
+                        onChanged: (value) => searchQuery.value = value,
+                      ),
+                      const SizedBox(height: SpacingTokens.sm),
+                      Material(
+                        color: OpenBudgetPalette.surface,
+                        borderRadius: BorderRadius.circular(RadiusTokens.md),
+                        child: ListTile(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                              RadiusTokens.md,
+                            ),
+                            side: const BorderSide(
+                              color: OpenBudgetPalette.divider,
+                            ),
+                          ),
+                          title: Text(
+                            'Show ${unclearedCount ?? 0} '
+                            '${l10n.accountFilterUncleared.toLowerCase()} '
+                            'transactions',
+                          ),
+                          trailing: const Icon(Icons.chevron_right_rounded),
+                          onTap: () => statusFilter.value =
+                              statusFilter.value == _StatusFilter.uncleared
+                              ? _StatusFilter.all
+                              : _StatusFilter.uncleared,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: txnAsync.when(
+                    loading: () =>
+                        const Center(child: CircularProgressIndicator()),
+                    error: (error, _) => Center(
+                      child: Text(
+                        l10n.transactionLoadError,
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          color: colorScheme.error,
+                        ),
                       ),
                     ),
-                  );
-                }
+                    data: (transactions) {
+                      // Build payee and envelope name lookup maps.
+                      final payeeAsync = ref.watch(payeeListProvider(budgetId));
+                      final summaryAsync = ref.watch(
+                        budgetSummaryProvider(budgetId),
+                      );
+                      final payeeMap = <String, String>{};
+                      if (payeeAsync.hasValue) {
+                        for (final payee in payeeAsync.value!) {
+                          final id = payee.id?.toString();
+                          if (id != null) payeeMap[id] = payee.name;
+                        }
+                      }
+                      final envelopeMap = <String, String>{};
+                      if (summaryAsync.hasValue && summaryAsync.value != null) {
+                        for (final cat in summaryAsync.value!.categories) {
+                          for (final env in cat.envelopes) {
+                            final id = env.id?.toString();
+                            if (id != null) envelopeMap[id] = env.name;
+                          }
+                        }
+                      }
 
-                // Compute running balances on full list, then map to filtered.
-                final startingBalance = accountData?.balanceCents ?? 0;
-                final totalTxnAmount = transactions.fold<int>(
-                  0,
-                  (sum, t) => sum + t.amountCents,
-                );
-                final currentBalance = startingBalance + totalTxnAmount;
-                final balanceMap = <String, int>{};
-                var balance = currentBalance;
-                for (var i = 0; i < transactions.length; i++) {
-                  balanceMap[transactions[i].id?.toString() ?? '$i'] = balance;
-                  balance -= transactions[i].amountCents;
-                }
+                      // Apply search filter.
+                      var filtered = transactions;
+                      if (searchQuery.value.isNotEmpty) {
+                        final query = searchQuery.value.toLowerCase();
+                        filtered = filtered
+                            .where(
+                              (t) =>
+                                  t.description.toLowerCase().contains(query) ||
+                                  (t.memo?.toLowerCase().contains(query) ??
+                                      false) ||
+                                  (payeeMap[t.payeeId?.toString()]
+                                          ?.toLowerCase()
+                                          .contains(query) ??
+                                      false) ||
+                                  (envelopeMap[t.envelopeId?.toString()]
+                                          ?.toLowerCase()
+                                          .contains(query) ??
+                                      false),
+                            )
+                            .toList();
+                      }
 
-                return RefreshIndicator(
-                  onRefresh: () async {
-                    ref.invalidate(
-                      accountTransactionsProvider(budgetId, accountId),
-                    );
-                  },
-                  child: ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(
-                      SpacingTokens.md,
-                      SpacingTokens.xs,
-                      SpacingTokens.md,
-                      SpacingTokens.lg,
-                    ),
-                    itemCount: filtered.length,
-                    itemBuilder: (context, index) {
-                      final txn = filtered[index];
-                      final prevTxn = index > 0 ? filtered[index - 1] : null;
-                      final showDateHeader =
-                          prevTxn == null ||
-                          !_isSameDay(
-                            prevTxn.transactionDate,
-                            txn.transactionDate,
-                          );
-                      final runningBalance =
-                          balanceMap[txn.id?.toString() ?? '$index'] ?? 0;
-                      final payeeName = txn.payeeId != null
-                          ? payeeMap[txn.payeeId.toString()]
-                          : null;
-                      final envelopeName = txn.envelopeId != null
-                          ? envelopeMap[txn.envelopeId.toString()]
-                          : null;
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          if (showDateHeader)
-                            Padding(
-                              padding: EdgeInsets.only(
-                                top: index == 0 ? 0 : SpacingTokens.md,
-                                bottom: SpacingTokens.xs,
-                              ),
-                              child: Text(
-                                _formatDayHeader(txn.transactionDate),
-                                style: theme.textTheme.titleSmall?.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                  color: OpenBudgetPalette.mutedText,
-                                ),
-                              ),
+                      if (hideReconciled.value) {
+                        filtered = filtered
+                            .where((t) => !t.reconciled)
+                            .toList();
+                      }
+
+                      filtered = switch (statusFilter.value) {
+                        _StatusFilter.all => filtered,
+                        _StatusFilter.uncleared =>
+                          filtered
+                              .where((t) => !t.cleared && !t.reconciled)
+                              .toList(),
+                      };
+
+                      if (filtered.isEmpty) {
+                        return Center(
+                          child: Text(
+                            searchQuery.value.isNotEmpty
+                                ? l10n.transactionNoResults
+                                : l10n.transactionEmpty,
+                            style: theme.textTheme.bodyLarge?.copyWith(
+                              color: OpenBudgetPalette.mutedText,
                             ),
-                          _TransactionRow(
-                            transaction: txn,
-                            currencyCode: currencyCode,
-                            runningBalanceCents: runningBalance,
-                            payeeName: payeeName,
-                            envelopeName: envelopeName,
-                            onToggleCleared: txn.reconciled
-                                ? null
-                                : () => _toggleCleared(context, ref, txn),
                           ),
-                        ],
+                        );
+                      }
+
+                      // Compute running balances on full list, then map to filtered.
+                      final startingBalance = accountData?.balanceCents ?? 0;
+                      final totalTxnAmount = transactions.fold<int>(
+                        0,
+                        (sum, t) => sum + t.amountCents,
+                      );
+                      final currentBalance = startingBalance + totalTxnAmount;
+                      final balanceMap = <String, int>{};
+                      var balance = currentBalance;
+                      for (var i = 0; i < transactions.length; i++) {
+                        balanceMap[transactions[i].id?.toString() ?? '$i'] =
+                            balance;
+                        balance -= transactions[i].amountCents;
+                      }
+
+                      return RefreshIndicator(
+                        onRefresh: () async {
+                          ref.invalidate(
+                            accountTransactionsProvider(budgetId, accountId),
+                          );
+                        },
+                        child: ListView.builder(
+                          padding: const EdgeInsets.fromLTRB(
+                            SpacingTokens.md,
+                            SpacingTokens.xs,
+                            SpacingTokens.md,
+                            SpacingTokens.lg,
+                          ),
+                          itemCount: filtered.length,
+                          itemBuilder: (context, index) {
+                            final txn = filtered[index];
+                            final prevTxn = index > 0
+                                ? filtered[index - 1]
+                                : null;
+                            final showDateHeader =
+                                prevTxn == null ||
+                                !_isSameDay(
+                                  prevTxn.transactionDate,
+                                  txn.transactionDate,
+                                );
+                            final runningBalance =
+                                balanceMap[txn.id?.toString() ?? '$index'] ?? 0;
+                            final payeeName = txn.payeeId != null
+                                ? payeeMap[txn.payeeId.toString()]
+                                : null;
+                            final envelopeName = txn.envelopeId != null
+                                ? envelopeMap[txn.envelopeId.toString()]
+                                : null;
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                if (showDateHeader)
+                                  Padding(
+                                    padding: EdgeInsets.only(
+                                      top: index == 0 ? 0 : SpacingTokens.md,
+                                      bottom: SpacingTokens.xs,
+                                    ),
+                                    child: Text(
+                                      _formatDayHeader(txn.transactionDate),
+                                      style: theme.textTheme.titleSmall
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w700,
+                                            color: OpenBudgetPalette.mutedText,
+                                          ),
+                                    ),
+                                  ),
+                                _TransactionRow(
+                                  transaction: txn,
+                                  currencyCode: currencyCode,
+                                  runningBalanceCents: runningBalance,
+                                  payeeName: payeeName,
+                                  envelopeName: envelopeName,
+                                  onToggleCleared: txn.reconciled
+                                      ? null
+                                      : () => _toggleCleared(context, ref, txn),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
                       );
                     },
                   ),
-                );
-              },
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -362,6 +414,14 @@ class AccountDetailScreen extends HookConsumerWidget {
 
   static String _formatDayHeader(DateTime date) {
     return DateFormat.yMMMMd().format(date);
+  }
+
+  static bool _isLoanStyleAccount(Account account) {
+    final name = account.name.toLowerCase();
+    return !account.isClosed &&
+        !account.onBudget &&
+        (account.accountType == 'other' || name.contains('loan')) &&
+        account.balanceCents <= 0;
   }
 
   void _openEditAccount(BuildContext context, Account account) {
@@ -781,6 +841,603 @@ class _TransactionRow extends HookWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _LoanAccountDetailBody extends StatelessWidget {
+  const _LoanAccountDetailBody({
+    required this.accountData,
+    required this.transactions,
+    required this.currencyCode,
+    required this.selectedTab,
+    required this.onTabChanged,
+  });
+
+  final Account accountData;
+  final List<Transaction> transactions;
+  final CurrencyCode currencyCode;
+  final _LoanDetailTab selectedTab;
+  final ValueChanged<_LoanDetailTab> onTabChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final now = DateTime.now();
+    final monthStart = DateTime(now.year, now.month);
+    final monthEnd = DateTime(now.year, now.month + 1);
+
+    final sortedTransactions = [...transactions]
+      ..sort((a, b) => b.transactionDate.compareTo(a.transactionDate));
+    final monthTransactions = sortedTransactions
+        .where(
+          (txn) =>
+              !txn.transactionDate.isBefore(monthStart) &&
+              txn.transactionDate.isBefore(monthEnd),
+        )
+        .toList();
+
+    final paidThisMonthCents = monthTransactions
+        .where((txn) => txn.amountCents > 0)
+        .fold<int>(0, (sum, txn) => sum + txn.amountCents);
+    final chargedThisMonthCents = monthTransactions
+        .where((txn) => txn.amountCents < 0)
+        .fold<int>(0, (sum, txn) => sum + txn.amountCents);
+    final totalBorrowedCents = sortedTransactions
+        .where((txn) => txn.amountCents < 0)
+        .fold<int>(0, (sum, txn) => sum + (-txn.amountCents));
+    final currentDebtCents = accountData.balanceCents < 0
+        ? -accountData.balanceCents
+        : 0;
+    final paidOffRatio = totalBorrowedCents <= 0
+        ? (currentDebtCents == 0 ? 1.0 : 0.0)
+        : ((totalBorrowedCents - currentDebtCents) / totalBorrowedCents).clamp(
+            0.0,
+            1.0,
+          );
+    final paidOffPercent = (paidOffRatio * 100).toStringAsFixed(1);
+    final monthlyPaymentBaseline = paidThisMonthCents > 0
+        ? paidThisMonthCents
+        : 35000;
+    final monthsToPayoff = currentDebtCents == 0
+        ? 0
+        : (currentDebtCents / monthlyPaymentBaseline).ceil();
+    final debtFreeDate = DateTime(now.year, now.month + monthsToPayoff);
+
+    return Column(
+      children: [
+        Container(
+          decoration: const BoxDecoration(
+            border: Border(
+              bottom: BorderSide(color: OpenBudgetPalette.divider),
+            ),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: _LoanTabButton(
+                  label: 'Overview',
+                  selected: selectedTab == _LoanDetailTab.overview,
+                  onTap: () => onTabChanged(_LoanDetailTab.overview),
+                ),
+              ),
+              Expanded(
+                child: _LoanTabButton(
+                  label: 'Activity',
+                  selected: selectedTab == _LoanDetailTab.activity,
+                  onTap: () => onTabChanged(_LoanDetailTab.activity),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(
+              SpacingTokens.md,
+              SpacingTokens.md,
+              SpacingTokens.md,
+              SpacingTokens.lg,
+            ),
+            children: selectedTab == _LoanDetailTab.overview
+                ? [
+                    _LoanSummaryGrid(
+                      entries: [
+                        _LoanSummaryEntry(
+                          label: 'Balance',
+                          value: formatCents(
+                            accountData.balanceCents,
+                            currencyCode,
+                          ),
+                          emphasized: true,
+                          positive: accountData.balanceCents >= 0,
+                        ),
+                        _LoanSummaryEntry(
+                          label: 'Paid',
+                          value: formatCents(paidThisMonthCents, currencyCode),
+                          emphasized: true,
+                          positive: true,
+                        ),
+                        _LoanSummaryEntry(
+                          label: DateFormat.MMMM().format(now),
+                          value: formatCents(
+                            chargedThisMonthCents,
+                            currencyCode,
+                          ),
+                          emphasized: false,
+                          positive: chargedThisMonthCents >= 0,
+                        ),
+                        _LoanSummaryEntry(
+                          label: 'Total Borrowed',
+                          value: formatCents(-totalBorrowedCents, currencyCode),
+                          emphasized: false,
+                          positive: false,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: SpacingTokens.lg),
+                    Center(
+                      child: SizedBox(
+                        width: 144,
+                        height: 144,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            SizedBox(
+                              width: 120,
+                              height: 120,
+                              child: CircularProgressIndicator(
+                                value: paidOffRatio,
+                                strokeWidth: 10,
+                                color: OpenBudgetPalette.accentBlue,
+                                backgroundColor: OpenBudgetPalette.surfaceMuted,
+                              ),
+                            ),
+                            Text(
+                              '$paidOffPercent%\nPaid Off',
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.titleMedium
+                                  ?.copyWith(fontWeight: FontWeight.w700),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: SpacingTokens.lg),
+                    const _LoanSectionTitle(title: 'Loan Payoff Overview'),
+                    _LoanCard(
+                      child: Padding(
+                        padding: const EdgeInsets.all(SpacingTokens.md),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(SpacingTokens.md),
+                              decoration: BoxDecoration(
+                                color: OpenBudgetPalette.surfaceMuted,
+                                borderRadius: BorderRadius.circular(
+                                  RadiusTokens.md,
+                                ),
+                              ),
+                              child: Text(
+                                "You'll pay off your loan in "
+                                '${monthsToPayoff == 1 ? '1 month' : '$monthsToPayoff months'} '
+                                'if you pay the minimum every month.',
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context).textTheme.bodyLarge
+                                    ?.copyWith(fontWeight: FontWeight.w600),
+                              ),
+                            ),
+                            const SizedBox(height: SpacingTokens.md),
+                            _LoanDetailRow(
+                              label: 'Monthly Target',
+                              value: formatCents(
+                                monthlyPaymentBaseline,
+                                currencyCode,
+                              ),
+                            ),
+                            const Divider(height: 1),
+                            const _LoanDetailRow(
+                              label: 'Due Every',
+                              value: 'Monthly',
+                            ),
+                            const Divider(height: 1),
+                            _LoanDetailRow(
+                              label: 'Debt Free Date',
+                              value: DateFormat.yMMM().format(debtFreeDate),
+                              emphasize: true,
+                            ),
+                            const SizedBox(height: SpacingTokens.md),
+                            FilledButton(
+                              onPressed: () =>
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                        'Loan target editing is coming soon to OpenBudget.',
+                                      ),
+                                    ),
+                                  ),
+                              child: const Text('Create Target'),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: SpacingTokens.md),
+                    const _LoanSectionTitle(title: 'Loan Details'),
+                    _LoanCard(
+                      child: Column(
+                        children: [
+                          const _LoanDetailRow(
+                            label: 'Interest Rate',
+                            value: '3%',
+                          ),
+                          const Divider(height: 1),
+                          _LoanDetailRow(
+                            label: 'Monthly Minimum',
+                            value: formatCents(
+                              monthlyPaymentBaseline,
+                              currencyCode,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ]
+                : [
+                    _LoanSummaryGrid(
+                      entries: [
+                        _LoanSummaryEntry(
+                          label: 'Balance',
+                          value: formatCents(
+                            accountData.balanceCents,
+                            currencyCode,
+                          ),
+                          emphasized: true,
+                          positive: accountData.balanceCents >= 0,
+                        ),
+                        _LoanSummaryEntry(
+                          label: 'Paid',
+                          value: formatCents(paidThisMonthCents, currencyCode),
+                          emphasized: true,
+                          positive: true,
+                        ),
+                        _LoanSummaryEntry(
+                          label: 'In ${DateFormat.MMMM().format(now)}',
+                          value: formatCents(
+                            chargedThisMonthCents,
+                            currencyCode,
+                          ),
+                          emphasized: true,
+                          positive: chargedThisMonthCents >= 0,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: SpacingTokens.md),
+                    _LoanActivityList(
+                      transactions: sortedTransactions,
+                      currencyCode: currencyCode,
+                    ),
+                  ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _LoanTabButton extends StatelessWidget {
+  const _LoanTabButton({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final color = selected
+        ? OpenBudgetPalette.accentBlue
+        : OpenBudgetPalette.mutedText;
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: SpacingTokens.md),
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(
+              color: selected
+                  ? OpenBudgetPalette.accentBlue
+                  : Colors.transparent,
+              width: 2,
+            ),
+          ),
+        ),
+        child: Text(
+          label,
+          textAlign: TextAlign.center,
+          style: theme.textTheme.titleMedium?.copyWith(
+            color: color,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _LoanSectionTitle extends StatelessWidget {
+  const _LoanSectionTitle({required this.title});
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(
+        bottom: SpacingTokens.sm,
+        left: SpacingTokens.xs,
+      ),
+      child: Text(
+        title,
+        style: Theme.of(
+          context,
+        ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+      ),
+    );
+  }
+}
+
+class _LoanCard extends StatelessWidget {
+  const _LoanCard({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: OpenBudgetPalette.surface,
+        borderRadius: BorderRadius.circular(RadiusTokens.md),
+        border: Border.all(color: OpenBudgetPalette.divider),
+      ),
+      child: child,
+    );
+  }
+}
+
+class _LoanDetailRow extends StatelessWidget {
+  const _LoanDetailRow({
+    required this.label,
+    required this.value,
+    this.emphasize = false,
+  });
+
+  final String label;
+  final String value;
+  final bool emphasize;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: SpacingTokens.md,
+        vertical: SpacingTokens.sm,
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: textTheme.titleMedium?.copyWith(
+                fontWeight: emphasize ? FontWeight.w700 : FontWeight.w500,
+              ),
+            ),
+          ),
+          Text(
+            value,
+            style: textTheme.titleMedium?.copyWith(
+              fontWeight: emphasize ? FontWeight.w800 : FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+@immutable
+class _LoanSummaryEntry {
+  const _LoanSummaryEntry({
+    required this.label,
+    required this.value,
+    required this.emphasized,
+    required this.positive,
+  });
+
+  final String label;
+  final String value;
+  final bool emphasized;
+  final bool positive;
+}
+
+class _LoanSummaryGrid extends StatelessWidget {
+  const _LoanSummaryGrid({required this.entries});
+
+  final List<_LoanSummaryEntry> entries;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return _LoanCard(
+      child: Padding(
+        padding: const EdgeInsets.all(SpacingTokens.md),
+        child: Wrap(
+          spacing: SpacingTokens.md,
+          runSpacing: SpacingTokens.md,
+          children: entries
+              .map(
+                (entry) => SizedBox(
+                  width:
+                      (MediaQuery.sizeOf(context).width -
+                          (SpacingTokens.md * 4)) /
+                      2,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        entry.label,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: OpenBudgetPalette.mutedText,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        entry.value,
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: entry.emphasized
+                              ? FontWeight.w800
+                              : FontWeight.w600,
+                          color: entry.positive
+                              ? OpenBudgetPalette.progressGreen
+                              : OpenBudgetPalette.negative,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+              .toList(),
+        ),
+      ),
+    );
+  }
+}
+
+class _LoanActivityList extends StatelessWidget {
+  const _LoanActivityList({
+    required this.transactions,
+    required this.currencyCode,
+  });
+
+  final List<Transaction> transactions;
+  final CurrencyCode currencyCode;
+
+  @override
+  Widget build(BuildContext context) {
+    if (transactions.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(SpacingTokens.lg),
+          child: Text(
+            'No loan activity yet',
+            style: Theme.of(
+              context,
+            ).textTheme.bodyLarge?.copyWith(color: OpenBudgetPalette.mutedText),
+          ),
+        ),
+      );
+    }
+
+    final grouped = <String, List<Transaction>>{};
+    for (final txn in transactions) {
+      final key = DateFormat.yMMMM().format(txn.transactionDate);
+      grouped.putIfAbsent(key, () => []).add(txn);
+    }
+    final orderedKeys = grouped.keys.toList()
+      ..sort(
+        (a, b) =>
+            DateFormat.yMMMM().parse(b).compareTo(DateFormat.yMMMM().parse(a)),
+      );
+
+    return _LoanCard(
+      child: Column(
+        children: [
+          for (final key in orderedKeys) ...[
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(
+                SpacingTokens.md,
+                SpacingTokens.sm,
+                SpacingTokens.md,
+                SpacingTokens.sm,
+              ),
+              color: OpenBudgetPalette.surfaceMuted,
+              child: Text(
+                key,
+                style: Theme.of(
+                  context,
+                ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+              ),
+            ),
+            for (final txn in grouped[key]!) ...[
+              _LoanActivityRow(transaction: txn, currencyCode: currencyCode),
+              if (txn != grouped[key]!.last) const Divider(height: 1),
+            ],
+            if (key != orderedKeys.last) const Divider(height: 1),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _LoanActivityRow extends StatelessWidget {
+  const _LoanActivityRow({
+    required this.transaction,
+    required this.currencyCode,
+  });
+
+  final Transaction transaction;
+  final CurrencyCode currencyCode;
+
+  @override
+  Widget build(BuildContext context) {
+    final isPayment = transaction.amountCents > 0;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        SpacingTokens.md,
+        SpacingTokens.md,
+        SpacingTokens.md,
+        SpacingTokens.md,
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  transaction.description,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                Text(
+                  isPayment ? 'Payments' : 'Other Activity',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: OpenBudgetPalette.mutedText,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Text(
+            formatCents(transaction.amountCents, currencyCode),
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              color: isPayment
+                  ? OpenBudgetPalette.progressGreen
+                  : OpenBudgetPalette.negative,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
       ),
     );
   }
