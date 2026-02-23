@@ -120,9 +120,17 @@ jobs:
 
           for f in "${tests[@]}"; do
             echo "::group::Running $f"
-            if ! flutter test "$f" -d flutter-tester; then
+            test_output="$(mktemp)"
+            if ! flutter test "$f" -d flutter-tester 2>&1 | tee "$test_output"; then
               failed=1
             fi
+
+            if grep -Eq "Some tests failed|[0-9]+ failed|No tests ran|Test failed" "$test_output"; then
+              echo "::error::Detected integration failure markers in $f output."
+              failed=1
+            fi
+
+            rm -f "$test_output"
             echo "::endgroup::"
           done
 
