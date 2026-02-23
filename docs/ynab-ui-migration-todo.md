@@ -1,6 +1,6 @@
 # OpenBudget UI Migration Tracker (from `~/Downloads/ynab-ui`)
 
-Last updated: 2026-02-23 (accounts delete flow + transaction list parity pass)
+Last updated: 2026-02-23 (accounts list parity pass + transaction coverage)
 
 ## Scope
 
@@ -10,7 +10,7 @@ Last updated: 2026-02-23 (accounts delete flow + transaction list parity pass)
 
 ## Progress Snapshot
 
-- Overall migration progress: **~84%**
+- Overall migration progress: **~86%**
 - Core plan/settings/auth/navigation flows: **implemented**
 - Advanced accounts/transactions/reports flows: **in progress**
 
@@ -26,6 +26,11 @@ Last updated: 2026-02-23 (accounts delete flow + transaction list parity pass)
 - [x] Plan screen categories tab baseline structure
 - [x] Plan screen spotlight tab baseline structure
 - [x] Plan month switching controls (previous/next month navigation)
+- [x] Accounts list parity pass:
+  - [x] Notifications banner
+  - [x] All transactions entry point
+  - [x] Top-right quick actions (add + overflow menu)
+  - [x] In-list add-account CTA
 - [x] Plan menu actions:
   - [x] Undo last move
   - [x] Route transitions after menu dismissal (prevents popup overlay artifacts)

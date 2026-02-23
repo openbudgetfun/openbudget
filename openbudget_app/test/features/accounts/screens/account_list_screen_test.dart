@@ -64,6 +64,18 @@ Widget _buildRoutedSubject({required List<Account> accounts}) {
             const Scaffold(body: Center(child: Text('Transfer Route'))),
       ),
       GoRoute(
+        name: transactionListRoute,
+        path: transactionListPath,
+        builder: (_, _) =>
+            const Scaffold(body: Center(child: Text('Transactions Route'))),
+      ),
+      GoRoute(
+        name: settingsRoute,
+        path: settingsPath,
+        builder: (_, _) =>
+            const Scaffold(body: Center(child: Text('Settings Route'))),
+      ),
+      GoRoute(
         name: accountDetailRoute,
         path: accountDetailPath,
         builder: (context, state) => Scaffold(
@@ -162,7 +174,7 @@ void main() {
       expect(find.byIcon(Icons.account_balance_rounded), findsOneWidget);
     });
 
-    testWidgets('renders app bar with title and transfer button', (
+    testWidgets('renders app bar with title and quick action buttons', (
       tester,
     ) async {
       await tester.pumpWidget(
@@ -183,7 +195,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Accounts'), findsOneWidget);
-      expect(find.byIcon(Icons.swap_horiz_rounded), findsOneWidget);
+      expect(find.byIcon(Icons.add_circle_outline_rounded), findsOneWidget);
+      expect(find.byIcon(Icons.more_horiz_rounded), findsOneWidget);
     });
 
     testWidgets('renders on-budget accounts section', (tester) async {
@@ -358,6 +371,12 @@ void main() {
 
       expect(find.text('Budget Accounts'), findsOneWidget);
       expect(find.text('Tracking Accounts'), findsOneWidget);
+      await tester.scrollUntilVisible(
+        find.text('Closed Accounts'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
       expect(find.text('Closed Accounts'), findsOneWidget);
       expect(find.text('On Budget Account'), findsOneWidget);
       expect(find.text('Off Budget Account'), findsOneWidget);
@@ -398,7 +417,21 @@ void main() {
       expect(find.text('EUR Checking'), findsOneWidget);
     });
 
-    testWidgets('always shows FAB add button', (tester) async {
+    testWidgets('notification banner can be dismissed', (tester) async {
+      await tester.pumpWidget(
+        _buildRoutedSubject(accounts: [_makeAccount(name: 'Daily')]),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Notifications'), findsOneWidget);
+
+      await tester.tap(find.byIcon(Icons.close_rounded).first);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Notifications'), findsNothing);
+    });
+
+    testWidgets('always shows in-list add account button', (tester) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
@@ -416,7 +449,10 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.byType(FloatingActionButton), findsOneWidget);
+      expect(
+        find.widgetWithText(OutlinedButton, 'Add Account'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('empty-state Add Account button navigates to add account', (
@@ -431,13 +467,15 @@ void main() {
       expect(find.text('Add Account Route'), findsOneWidget);
     });
 
-    testWidgets('FAB navigates to add account route', (tester) async {
+    testWidgets('top app bar add action navigates to add account route', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         _buildRoutedSubject(accounts: [_makeAccount(name: 'Daily')]),
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byType(FloatingActionButton));
+      await tester.tap(find.byIcon(Icons.add_circle_outline_rounded));
       await tester.pumpAndSettle();
 
       expect(find.text('Add Account Route'), findsOneWidget);
@@ -449,10 +487,26 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byIcon(Icons.swap_horiz_rounded));
+      await tester.tap(find.byIcon(Icons.more_horiz_rounded));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Transfer'));
       await tester.pumpAndSettle();
 
       expect(find.text('Transfer Route'), findsOneWidget);
+    });
+
+    testWidgets('all transactions row navigates to transactions route', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _buildRoutedSubject(accounts: [_makeAccount(name: 'Daily')]),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('All transactions'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Transactions Route'), findsOneWidget);
     });
 
     testWidgets('tapping account row navigates to account detail route', (

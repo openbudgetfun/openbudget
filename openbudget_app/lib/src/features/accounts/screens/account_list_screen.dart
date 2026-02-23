@@ -23,6 +23,7 @@ class AccountListScreen extends HookConsumerWidget {
     final accounts = ref.watch(accountListProvider(budgetId));
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final showNotificationBanner = useState(true);
 
     return Scaffold(
       appBar: AppBar(
@@ -30,12 +31,39 @@ class AccountListScreen extends HookConsumerWidget {
         title: Text(l10n.accountListTitle),
         actions: [
           IconButton(
-            icon: const Icon(Icons.swap_horiz_rounded),
-            tooltip: l10n.transferTitle,
+            icon: const Icon(Icons.add_circle_outline_rounded),
+            tooltip: l10n.accountAddButton,
             onPressed: () => context.goNamed(
-              createTransferRoute,
+              addAccountRoute,
               pathParameters: {'id': budgetId},
             ),
+          ),
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_horiz_rounded),
+            onSelected: (value) {
+              switch (value) {
+                case 'transfer':
+                  context.goNamed(
+                    createTransferRoute,
+                    pathParameters: {'id': budgetId},
+                  );
+                case 'settings':
+                  context.goNamed(
+                    settingsRoute,
+                    pathParameters: {'id': budgetId},
+                  );
+              }
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem<String>(
+                value: 'transfer',
+                child: Text(l10n.transferTitle),
+              ),
+              PopupMenuItem<String>(
+                value: 'settings',
+                child: Text(l10n.moreSettings),
+              ),
+            ],
           ),
         ],
       ),
@@ -128,6 +156,24 @@ class AccountListScreen extends HookConsumerWidget {
             child: ListView(
               padding: const EdgeInsets.all(SpacingTokens.md),
               children: [
+                if (showNotificationBanner.value) ...[
+                  _NotificationBanner(
+                    onClose: () => showNotificationBanner.value = false,
+                  ),
+                  const SizedBox(height: SpacingTokens.md),
+                ],
+                Card(
+                  margin: const EdgeInsets.only(bottom: SpacingTokens.md),
+                  child: ListTile(
+                    leading: const Icon(Icons.receipt_long_outlined),
+                    title: const Text('All transactions'),
+                    trailing: const Icon(Icons.chevron_right_rounded),
+                    onTap: () => context.goNamed(
+                      transactionListRoute,
+                      pathParameters: {'id': budgetId},
+                    ),
+                  ),
+                ),
                 _NetWorthCard(totalsByCurrency: netWorthByCurrency),
                 const SizedBox(height: SpacingTokens.md),
                 if (onBudget.isNotEmpty) ...[
@@ -162,15 +208,68 @@ class AccountListScreen extends HookConsumerWidget {
                         _AccountTile(account: account, budgetId: budgetId),
                   ),
                 ],
+                const SizedBox(height: SpacingTokens.md),
+                OutlinedButton.icon(
+                  onPressed: () => context.goNamed(
+                    addAccountRoute,
+                    pathParameters: {'id': budgetId},
+                  ),
+                  icon: const Icon(Icons.add_rounded),
+                  label: Text(l10n.accountAddButton),
+                ),
               ],
             ),
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () =>
-            context.goNamed(addAccountRoute, pathParameters: {'id': budgetId}),
-        child: const Icon(Icons.add),
+    );
+  }
+}
+
+class _NotificationBanner extends HookWidget {
+  const _NotificationBanner({required this.onClose});
+
+  final VoidCallback onClose;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(
+        SpacingTokens.md,
+        SpacingTokens.md,
+        SpacingTokens.sm,
+        SpacingTokens.md,
+      ),
+      decoration: BoxDecoration(
+        color: const Color(0xFFE8E6FF),
+        borderRadius: BorderRadius.circular(RadiusTokens.md),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Notifications',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: SpacingTokens.xs),
+                Text(
+                  'OpenBudget will notify you when you have new '
+                  'transactions or overspending.',
+                  style: theme.textTheme.bodyMedium,
+                ),
+              ],
+            ),
+          ),
+          IconButton(onPressed: onClose, icon: const Icon(Icons.close_rounded)),
+        ],
       ),
     );
   }
