@@ -3,6 +3,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_actions_provider.dart';
+import 'package:openbudget_app/src/theme/openbudget_palette.dart';
+import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
@@ -23,9 +25,13 @@ class EditAccountDialog extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+
     final nameController = useTextEditingController(text: account.name);
+    final notesController = useTextEditingController();
     final onBudget = useState(account.onBudget);
     final isSubmitting = useState(false);
+    final currencyCode = parseCurrencyCode(account.currencyCode);
+    final factor = _pow10(currencyCode.decimals);
 
     final accountTypes = [
       'checking',
@@ -36,6 +42,16 @@ class EditAccountDialog extends HookConsumerWidget {
       'other',
     ];
     final selectedType = useState(account.accountType);
+    final balanceIsPositive = useState(account.balanceCents >= 0);
+    final balanceController = useTextEditingController(
+      text: _formatInitialAmount(
+        cents: account.balanceCents.abs(),
+        decimals: currencyCode.decimals,
+      ),
+    );
+
+    useListenable(nameController);
+    useListenable(balanceController);
 
     String typeLabel(String type) => switch (type) {
       'checking' => l10n.accountTypeChecking,
@@ -46,21 +62,107 @@ class EditAccountDialog extends HookConsumerWidget {
       _ => l10n.accountTypeOther,
     };
 
-    return AlertDialog(
-      title: Text(l10n.accountEditTitle),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+    final parsedBalance = double.tryParse(balanceController.text.trim());
+    final canSave =
+        nameController.text.trim().isNotEmpty &&
+        parsedBalance != null &&
+        parsedBalance >= 0;
+
+    return Dialog.fullscreen(
+      child: Scaffold(
+        backgroundColor: OpenBudgetPalette.appBackground,
+        appBar: AppBar(
+          backgroundColor: OpenBudgetPalette.appBackground,
+          surfaceTintColor: Colors.transparent,
+          scrolledUnderElevation: 0,
+          leadingWidth: 92,
+          leading: TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(l10n.dialogCancel),
+          ),
+          title: Text(
+            l10n.accountEditTitle,
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: canSave && !isSubmitting.value
+                  ? () async {
+                      final name = nameController.text.trim();
+                      final balance = parsedBalance;
+                      if (name.isEmpty) return;
+
+                      var balanceCents = (balance * factor).round();
+                      if (!balanceIsPositive.value && balanceCents > 0) {
+                        balanceCents = -balanceCents;
+                      }
+
+                      isSubmitting.value = true;
+                      final navigator = Navigator.of(context);
+                      final messenger = ScaffoldMessenger.of(context);
+
+                      try {
+                        await ref
+                            .read(accountActionsProvider.notifier)
+                            .updateAccount(
+                              accountId: account.id?.toString() ?? '',
+                              budgetId: budgetId,
+                              name: name,
+                              accountType: selectedType.value,
+                              balanceCents: balanceCents,
+                              onBudget: onBudget.value,
+                            );
+                        messenger.showSnackBar(
+                          SnackBar(content: Text(l10n.accountEditSuccess)),
+                        );
+                        navigator.pop();
+                      } on Exception catch (_) {
+                        isSubmitting.value = false;
+                        messenger.showSnackBar(
+                          SnackBar(
+                            content: Text(l10n.accountEditError),
+                            backgroundColor: colorScheme.error,
+                          ),
+                        );
+                      }
+                    }
+                  : null,
+              child: isSubmitting.value
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Text(l10n.dialogSave),
+            ),
+          ],
+        ),
+        body: ListView(
+          padding: const EdgeInsets.fromLTRB(
+            SpacingTokens.md,
+            SpacingTokens.md,
+            SpacingTokens.md,
+            SpacingTokens.xl,
+          ),
           children: [
+            const _SectionLabel(text: 'Account Nickname'),
             TextField(
               controller: nameController,
-              decoration: InputDecoration(
-                labelText: l10n.accountNameLabel,
-                prefixIcon: const Icon(Icons.label_outlined),
-              ),
-              textInputAction: TextInputAction.done,
+              textInputAction: TextInputAction.next,
+              decoration: const InputDecoration(hintText: 'Daily'),
             ),
             const SizedBox(height: SpacingTokens.md),
+            const _SectionLabel(text: 'Account Notes'),
+            TextField(
+              controller: notesController,
+              maxLines: 3,
+              textInputAction: TextInputAction.newline,
+              decoration: const InputDecoration(hintText: 'Enter a memo...'),
+            ),
+            const SizedBox(height: SpacingTokens.md),
+            const _SectionLabel(text: 'Account Type'),
             DropdownButtonFormField<String>(
               initialValue: selectedType.value,
               items: accountTypes
@@ -74,93 +176,130 @@ class EditAccountDialog extends HookConsumerWidget {
               onChanged: (value) {
                 if (value != null) selectedType.value = value;
               },
-              decoration: InputDecoration(
-                labelText: l10n.accountTypeLabel,
-                prefixIcon: const Icon(Icons.account_balance_rounded),
+            ),
+            const SizedBox(height: SpacingTokens.md),
+            const _SectionLabel(text: 'Working Balance'),
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: SpacingTokens.sm,
+                vertical: SpacingTokens.xs,
+              ),
+              decoration: BoxDecoration(
+                color: OpenBudgetPalette.surface,
+                borderRadius: BorderRadius.circular(RadiusTokens.md),
+                border: Border.all(color: OpenBudgetPalette.divider),
+              ),
+              child: Row(
+                children: [
+                  InkWell(
+                    borderRadius: BorderRadius.circular(RadiusTokens.sm),
+                    onTap: () =>
+                        balanceIsPositive.value = !balanceIsPositive.value,
+                    child: Container(
+                      width: 44,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: balanceIsPositive.value
+                            ? OpenBudgetPalette.progressGreen
+                            : OpenBudgetPalette.negative,
+                        borderRadius: BorderRadius.circular(RadiusTokens.sm),
+                      ),
+                      child: Icon(
+                        balanceIsPositive.value
+                            ? Icons.add_rounded
+                            : Icons.remove_rounded,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: SpacingTokens.sm),
+                  Text(
+                    currencyCode.symbol,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(width: SpacingTokens.xs),
+                  Expanded(
+                    child: TextField(
+                      controller: balanceController,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      textAlign: TextAlign.end,
+                      decoration: const InputDecoration(
+                        border: InputBorder.none,
+                        isDense: true,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: SpacingTokens.xs),
+            Text(
+              'An adjustment transaction will be created automatically '
+              'if you change this amount.',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: OpenBudgetPalette.mutedText,
               ),
             ),
             const SizedBox(height: SpacingTokens.md),
-            SwitchListTile(
-              value: onBudget.value,
-              onChanged: (value) => onBudget.value = value,
-              title: Text(l10n.accountOnBudgetLabel),
-              subtitle: Text(l10n.accountOnBudgetHint),
-              contentPadding: EdgeInsets.zero,
+            const _SectionLabel(text: 'Bank Connection'),
+            OutlinedButton(
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      'Linked bank connections are coming soon in OpenBudget.',
+                    ),
+                  ),
+                );
+              },
+              style: OutlinedButton.styleFrom(
+                alignment: Alignment.centerLeft,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: SpacingTokens.md,
+                  vertical: SpacingTokens.sm,
+                ),
+              ),
+              child: const Text('Link an Account'),
             ),
+            const SizedBox(height: SpacingTokens.md),
+            if (!account.isClosed)
+              OutlinedButton(
+                onPressed: isSubmitting.value
+                    ? null
+                    : () => _closeAccount(context, ref),
+                style: OutlinedButton.styleFrom(
+                  alignment: Alignment.centerLeft,
+                  foregroundColor: colorScheme.error,
+                  side: BorderSide(color: colorScheme.error.withAlpha(80)),
+                ),
+                child: Text(l10n.accountCloseButton),
+              ),
+            if (account.isClosed) ...[
+              FilledButton.tonal(
+                onPressed: isSubmitting.value
+                    ? null
+                    : () => _reopenAccount(context, ref),
+                child: Text(l10n.accountReopenButton),
+              ),
+              const SizedBox(height: SpacingTokens.sm),
+              FilledButton.tonal(
+                onPressed: isSubmitting.value
+                    ? null
+                    : () => _deleteAccountPermanently(context, ref),
+                style: FilledButton.styleFrom(
+                  foregroundColor: colorScheme.error,
+                  backgroundColor: colorScheme.errorContainer.withAlpha(120),
+                ),
+                child: Text(l10n.accountDeleteButton),
+              ),
+            ],
           ],
         ),
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: Text(l10n.dialogCancel),
-        ),
-        if (!account.isClosed)
-          TextButton(
-            onPressed: isSubmitting.value
-                ? null
-                : () => _closeAccount(context, ref),
-            style: TextButton.styleFrom(foregroundColor: colorScheme.error),
-            child: Text(l10n.accountCloseButton),
-          ),
-        if (account.isClosed) ...[
-          TextButton(
-            onPressed: isSubmitting.value
-                ? null
-                : () => _deleteAccountPermanently(context, ref),
-            style: TextButton.styleFrom(foregroundColor: colorScheme.error),
-            child: Text(l10n.accountDeleteButton),
-          ),
-          TextButton(
-            onPressed: isSubmitting.value
-                ? null
-                : () => _reopenAccount(context, ref),
-            child: Text(l10n.accountReopenButton),
-          ),
-        ],
-        FilledButton(
-          onPressed: isSubmitting.value
-              ? null
-              : () async {
-                  final name = nameController.text.trim();
-                  if (name.isEmpty) return;
-
-                  isSubmitting.value = true;
-                  final navigator = Navigator.of(context);
-                  final messenger = ScaffoldMessenger.of(context);
-                  try {
-                    await ref
-                        .read(accountActionsProvider.notifier)
-                        .updateAccount(
-                          accountId: account.id?.toString() ?? '',
-                          budgetId: budgetId,
-                          name: name,
-                          accountType: selectedType.value,
-                          onBudget: onBudget.value,
-                        );
-                    messenger.showSnackBar(
-                      SnackBar(content: Text(l10n.accountEditSuccess)),
-                    );
-                    navigator.pop();
-                  } on Exception catch (_) {
-                    isSubmitting.value = false;
-                    messenger.showSnackBar(
-                      SnackBar(
-                        content: Text(l10n.accountEditError),
-                        backgroundColor: colorScheme.error,
-                      ),
-                    );
-                  }
-                },
-          child: isSubmitting.value
-              ? const SizedBox(
-                  height: 20,
-                  width: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : Text(l10n.dialogSave),
-        ),
-      ],
     );
   }
 
@@ -325,4 +464,40 @@ class EditAccountDialog extends HookConsumerWidget {
           messenger.showSnackBar(SnackBar(content: Text(l10n.undoDeleteError)));
         });
   }
+}
+
+class _SectionLabel extends StatelessWidget {
+  const _SectionLabel({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: SpacingTokens.xs),
+      child: Text(
+        text,
+        style: Theme.of(
+          context,
+        ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+      ),
+    );
+  }
+}
+
+String _formatInitialAmount({required int cents, required int decimals}) {
+  final divisor = _pow10(decimals);
+  final amount = cents / divisor;
+  if (decimals == 0) return amount.toStringAsFixed(0);
+
+  final fixed = amount.toStringAsFixed(decimals);
+  return fixed.replaceFirst(RegExp(r'\.?0+$'), '');
+}
+
+double _pow10(int exponent) {
+  var result = 1.0;
+  for (var i = 0; i < exponent; i++) {
+    result *= 10;
+  }
+  return result;
 }

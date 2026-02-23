@@ -36,7 +36,7 @@ class AddAccountScreen extends HookConsumerWidget {
     final balanceController = useTextEditingController();
     final searchController = useTextEditingController();
     final isSubmitting = useState(false);
-    final selectedTypeKey = useState('checking');
+    final selectedTypeKey = useState<String?>(null);
     final selectedCurrency = useState(CurrencyCode.usd);
     final didHydrateBudgetCurrency = useState(false);
     final showSearchingOverlay = useState(false);
@@ -49,10 +49,12 @@ class AddAccountScreen extends HookConsumerWidget {
     final accountTypes = [
       for (final section in typeSections) ...section.options,
     ];
-    final selectedType = accountTypes.firstWhere(
-      (type) => type.key == selectedTypeKey.value,
-      orElse: () => accountTypes.first,
-    );
+    final selectedType = selectedTypeKey.value == null
+        ? null
+        : accountTypes.firstWhere(
+            (type) => type.key == selectedTypeKey.value,
+            orElse: () => accountTypes.first,
+          );
 
     useEffect(() {
       if (didHydrateBudgetCurrency.value || budgetCurrencyCode == null) {
@@ -78,7 +80,9 @@ class AddAccountScreen extends HookConsumerWidget {
 
     final balanceValue = double.tryParse(balanceController.text.trim());
     final canSubmit =
-        nameController.text.trim().isNotEmpty && balanceValue != null;
+        nameController.text.trim().isNotEmpty &&
+        balanceValue != null &&
+        selectedType != null;
 
     Future<void> startLinkedBankFlow(String institutionName) async {
       if (showSearchingOverlay.value || institutionName.trim().isEmpty) return;
@@ -100,6 +104,7 @@ class AddAccountScreen extends HookConsumerWidget {
 
     Future<void> submitUnlinkedAccount() async {
       if (!canSubmit || isSubmitting.value) return;
+      final chosenType = selectedType;
       final budget = budgetAsync.value;
       if (budget == null) return;
 
@@ -107,7 +112,7 @@ class AddAccountScreen extends HookConsumerWidget {
 
       var balanceCents =
           (balanceValue * _pow10(selectedCurrency.value.decimals)).round();
-      if (selectedType.isDebt && balanceCents > 0) {
+      if (chosenType.isDebt && balanceCents > 0) {
         balanceCents = -balanceCents;
       }
 
@@ -117,11 +122,11 @@ class AddAccountScreen extends HookConsumerWidget {
             .read(accountActionsProvider.notifier)
             .createAccount(
               name: nameController.text.trim(),
-              accountType: selectedType.serverType,
+              accountType: chosenType.serverType,
               balanceCents: balanceCents,
               currencyCode: selectedCurrency.value.code,
               budgetId: budgetId,
-              onBudget: selectedType.onBudgetDefault,
+              onBudget: chosenType.onBudgetDefault,
               sortOrder: 0,
             );
         if (!context.mounted) return;
@@ -200,7 +205,9 @@ class AddAccountScreen extends HookConsumerWidget {
             _AddAccountStep.unlinkedAccount => _UnlinkedAccountStep(
               nameController: nameController,
               balanceController: balanceController,
-              selectedTypeLabel: selectedType.label,
+              selectedTypeLabel:
+                  selectedType?.label ?? 'Select account type...',
+              hasSelectedType: selectedType != null,
               selectedCurrency: selectedCurrency.value,
               onChooseType: () => step.value = _AddAccountStep.accountType,
               onCurrencyChanged: (code) =>
@@ -215,7 +222,7 @@ class AddAccountScreen extends HookConsumerWidget {
               },
             ),
             _AddAccountStep.success => _SuccessStep(
-              accountTypeLabel: selectedType.label,
+              accountTypeLabel: selectedType?.label ?? 'Account',
               onAddAnother: () {
                 nameController.clear();
                 balanceController.clear();
@@ -467,6 +474,7 @@ class _UnlinkedAccountStep extends StatelessWidget {
     required this.nameController,
     required this.balanceController,
     required this.selectedTypeLabel,
+    required this.hasSelectedType,
     required this.selectedCurrency,
     required this.onChooseType,
     required this.onCurrencyChanged,
@@ -475,6 +483,7 @@ class _UnlinkedAccountStep extends StatelessWidget {
   final TextEditingController nameController;
   final TextEditingController balanceController;
   final String selectedTypeLabel;
+  final bool hasSelectedType;
   final CurrencyCode selectedCurrency;
   final VoidCallback onChooseType;
   final ValueChanged<String> onCurrencyChanged;
@@ -490,7 +499,8 @@ class _UnlinkedAccountStep extends StatelessWidget {
       ),
       children: [
         Text(
-          "Let's go! You can always connect this account to a bank later.",
+          "Let's go! And don't worry - if you change your mind, "
+          'you can link your account at any time.',
           style: Theme.of(context).textTheme.bodyMedium,
         ),
         const SizedBox(height: SpacingTokens.md),
@@ -504,7 +514,7 @@ class _UnlinkedAccountStep extends StatelessWidget {
         TextField(
           controller: nameController,
           textInputAction: TextInputAction.next,
-          decoration: const InputDecoration(hintText: 'Daily'),
+          decoration: const InputDecoration(hintText: 'Enter nickname'),
         ),
         const SizedBox(height: SpacingTokens.md),
         Text(
@@ -516,7 +526,13 @@ class _UnlinkedAccountStep extends StatelessWidget {
         const SizedBox(height: SpacingTokens.xs),
         ListTile(
           onTap: onChooseType,
-          title: Text(selectedTypeLabel),
+          title: Text(
+            selectedTypeLabel,
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              color: hasSelectedType ? null : OpenBudgetPalette.mutedText,
+              fontWeight: hasSelectedType ? FontWeight.w600 : FontWeight.w500,
+            ),
+          ),
           trailing: const Icon(Icons.chevron_right_rounded),
           contentPadding: const EdgeInsets.symmetric(
             horizontal: SpacingTokens.sm,
@@ -576,7 +592,7 @@ class _AccountTypeStep extends StatelessWidget {
   });
 
   final List<_AccountTypeSection> sections;
-  final String selectedTypeKey;
+  final String? selectedTypeKey;
   final ValueChanged<_AccountTypeOption> onSelected;
 
   @override

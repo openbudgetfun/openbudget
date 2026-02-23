@@ -219,6 +219,38 @@ void main() {
     );
   });
 
+  testWidgets('unlinked account requires explicit type selection before next', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_buildApp(accounts: const []));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Add Account'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Add an Unlinked Account'));
+    await tester.pumpAndSettle();
+
+    var nextButton = tester.widget<FilledButton>(
+      find.widgetWithText(FilledButton, 'Next'),
+    );
+    expect(nextButton.onPressed, isNull);
+
+    await tester.enterText(find.byType(TextField).at(0), 'Daily');
+    await tester.enterText(find.byType(TextField).at(1), '50000');
+    await tester.pumpAndSettle();
+
+    nextButton = tester.widget(find.widgetWithText(FilledButton, 'Next'));
+    expect(nextButton.onPressed, isNull);
+
+    await tester.tap(find.text('Select account type...'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Checking'));
+    await tester.pumpAndSettle();
+
+    nextButton = tester.widget(find.widgetWithText(FilledButton, 'Next'));
+    expect(nextButton.onPressed, isNotNull);
+  });
+
   testWidgets('account detail flow navigates to detail and back to list', (
     tester,
   ) async {
@@ -312,6 +344,49 @@ void main() {
     expect(find.text('Self storage'), findsOneWidget);
   });
 
+  testWidgets('account detail edit flow opens full-screen account form', (
+    tester,
+  ) async {
+    final accountId = UuidValue.fromString(
+      '00000000-0000-0000-0000-000000000122',
+    );
+    await tester.pumpWidget(
+      _buildApp(
+        accounts: [
+          _makeAccount(
+            id: accountId,
+            name: 'Daily USD',
+            balanceCents: 250000,
+            currencyCode: 'USD',
+          ),
+        ],
+        accountTransactions: [
+          _makeTransaction(
+            id: '00000000-0000-0000-0000-000000000512',
+            accountId: accountId,
+            description: 'Gym',
+            amountCents: -15000,
+          ),
+        ],
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Daily USD'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byIcon(Icons.more_horiz_rounded));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Edit Account'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Account Nickname'), findsOneWidget);
+    expect(find.text('Account Notes'), findsOneWidget);
+    expect(find.text('Working Balance'), findsWidgets);
+    expect(find.text('Link an Account'), findsOneWidget);
+    expect(find.text('Close Account'), findsOneWidget);
+  });
+
   testWidgets('closed account edit dialog exposes delete and reopen actions', (
     tester,
   ) async {
@@ -342,8 +417,11 @@ void main() {
     await tester.tap(find.text('Edit Account'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Delete Permanently'), findsOneWidget);
-    expect(find.text('Reopen Account'), findsOneWidget);
+    expect(
+      find.text('Delete Permanently', skipOffstage: false),
+      findsOneWidget,
+    );
+    expect(find.text('Reopen Account', skipOffstage: false), findsOneWidget);
   });
 
   testWidgets('reconcile action opens balance match prompt', (tester) async {

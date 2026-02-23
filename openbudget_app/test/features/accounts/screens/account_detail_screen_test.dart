@@ -231,6 +231,21 @@ void main() {
       expect(find.text('Cancel'), findsOneWidget);
     });
 
+    testWidgets('edit account opens full-screen form fields', (tester) async {
+      await tester.pumpWidget(_buildSubject());
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.more_horiz_rounded));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Edit Account'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Account Nickname'), findsOneWidget);
+      expect(find.text('Account Notes'), findsOneWidget);
+      expect(find.text('Working Balance'), findsWidgets);
+      expect(find.text('Link an Account'), findsOneWidget);
+    });
+
     testWidgets('loan account renders overview and activity tabs', (
       tester,
     ) async {

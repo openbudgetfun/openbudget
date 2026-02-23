@@ -1,6 +1,6 @@
 # OpenBudget UI Migration Tracker (from `~/Downloads/ynab-ui`)
 
-Last updated: 2026-02-23 (accounts/settings/loan target + add-account loading parity)
+Last updated: 2026-02-23 (accounts edit parity + unlinked-account validation + CI integration hardening)
 
 ## Scope
 
@@ -10,7 +10,7 @@ Last updated: 2026-02-23 (accounts/settings/loan target + add-account loading pa
 
 ## Progress Snapshot
 
-- Overall migration progress: **~92%**
+- Overall migration progress: **~93%**
 - Core plan/settings/auth/navigation flows: **implemented**
 - Advanced accounts/transactions/reports flows: **in progress**
 
@@ -36,8 +36,10 @@ Last updated: 2026-02-23 (accounts/settings/loan target + add-account loading pa
   - [x] Top-right quick actions (add + overflow menu)
   - [x] In-list add-account CTA
   - [x] Add-accounts institution loading state
+  - [x] Full-screen edit account form parity
   - [x] Loan account detail tabs (overview + activity)
   - [x] Loan target create/edit interaction on loan detail screen
+  - [x] Unlinked account type selection validation before submit
 - [x] Plan menu actions:
   - [x] Undo last move
   - [x] Route transitions after menu dismissal (prevents popup overlay artifacts)
@@ -104,7 +106,9 @@ Last updated: 2026-02-23 (accounts/settings/loan target + add-account loading pa
 - [x] Integration coverage for onboarding account CTA routing
 - [x] Integration coverage for plan month switching
 - [x] Integration coverage for add-account wizard/search flow
+- [x] Integration coverage for unlinked account type selection validation
 - [x] Integration coverage for account detail overflow actions and uncleared filtering
+- [x] Integration coverage for account detail edit form presentation
 - [x] Integration coverage for loan account overview/activity tabs
 - [x] Integration coverage for loan target create/edit interaction
 - [x] Integration coverage for closed-account edit actions (delete/reopen visibility)
@@ -112,4 +116,5 @@ Last updated: 2026-02-23 (accounts/settings/loan target + add-account loading pa
 - [x] Integration coverage for transaction list filters + edit/flag interactions
 - [x] Integration coverage for account settings -> delete account flow
 - [x] Integration CI configured to fail on any individual integration test failure
+- [x] Integration CI hardened to detect failure markers / no-tests-ran false-green output
 - [ ] Expand integration tests for remaining pending batches above

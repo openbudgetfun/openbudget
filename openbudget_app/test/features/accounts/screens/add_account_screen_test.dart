@@ -95,12 +95,42 @@ void main() {
     await tester.tap(find.text('Add an Unlinked Account'));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Checking'));
+    await tester.tap(find.text('Select account type...'));
     await tester.pumpAndSettle();
 
     expect(find.text('Select Account Type'), findsOneWidget);
     expect(find.text('Cash Accounts'), findsOneWidget);
     expect(find.text('Credit Accounts'), findsOneWidget);
     expect(find.text('Mortgages and Loans'), findsOneWidget);
+  });
+
+  testWidgets('next stays disabled until type and balance are provided', (
+    tester,
+  ) async {
+    await tester.pumpWidget(buildSubject());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Add an Unlinked Account'));
+    await tester.pumpAndSettle();
+
+    var nextButton = tester.widget<FilledButton>(
+      find.widgetWithText(FilledButton, 'Next'),
+    );
+    expect(nextButton.onPressed, isNull);
+
+    await tester.enterText(find.byType(TextField).at(0), 'Daily');
+    await tester.enterText(find.byType(TextField).at(1), '50000');
+    await tester.pumpAndSettle();
+
+    nextButton = tester.widget(find.widgetWithText(FilledButton, 'Next'));
+    expect(nextButton.onPressed, isNull);
+
+    await tester.tap(find.text('Select account type...'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Checking'));
+    await tester.pumpAndSettle();
+
+    nextButton = tester.widget(find.widgetWithText(FilledButton, 'Next'));
+    expect(nextButton.onPressed, isNotNull);
   });
 }

@@ -105,6 +105,9 @@ void main() {
       await tester.tap(find.text('Open Edit Dialog'));
       await tester.pumpAndSettle();
 
+      expect(find.text('Account Nickname'), findsOneWidget);
+      expect(find.text('Working Balance'), findsOneWidget);
+      expect(find.text('Link an Account'), findsOneWidget);
       expect(find.text('Close Account'), findsOneWidget);
       expect(find.text('Delete Permanently'), findsNothing);
       expect(find.text('Reopen Account'), findsNothing);
@@ -119,9 +122,32 @@ void main() {
       await tester.tap(find.text('Open Edit Dialog'));
       await tester.pumpAndSettle();
 
+      await tester.scrollUntilVisible(
+        find.text('Delete Permanently'),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+
       expect(find.text('Delete Permanently'), findsOneWidget);
       expect(find.text('Reopen Account'), findsOneWidget);
       expect(find.text('Close Account'), findsNothing);
+    });
+
+    testWidgets('save stays disabled with invalid balance input', (
+      tester,
+    ) async {
+      await tester.pumpWidget(_buildSubject(account: _makeAccount()));
+      await tester.tap(find.text('Open Edit Dialog'));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField).at(2), 'abc');
+      await tester.pumpAndSettle();
+
+      final saveButton = tester.widget<TextButton>(
+        find.widgetWithText(TextButton, 'Save'),
+      );
+      expect(saveButton.onPressed, isNull);
     });
 
     testWidgets('delete action triggers callback after successful delete', (
@@ -140,10 +166,19 @@ void main() {
       await tester.tap(find.text('Open Edit Dialog'));
       await tester.pumpAndSettle();
 
+      await tester.scrollUntilVisible(
+        find.text('Delete Permanently'),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+
       await tester.tap(find.text('Delete Permanently'));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.widgetWithText(FilledButton, 'Delete Permanently'));
+      await tester.tap(
+        find.widgetWithText(FilledButton, 'Delete Permanently').last,
+      );
       await tester.pumpAndSettle();
 
       expect(deleteCalled, isTrue);
