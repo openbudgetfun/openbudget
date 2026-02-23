@@ -25,6 +25,7 @@ Last updated: 2026-02-23 (late, menu transition polish)
 - [x] Display Options (theme + balance style)
 - [x] Plan screen categories tab baseline structure
 - [x] Plan screen spotlight tab baseline structure
+- [x] Plan month switching controls (previous/next month navigation)
 - [x] Plan menu actions:
   - [x] Undo last move
   - [x] Route transitions after menu dismissal (prevents popup overlay artifacts)
@@ -88,5 +89,6 @@ Last updated: 2026-02-23 (late, menu transition polish)
 - [x] Integration flow coverage for plan/settings/auth/more/navigation
 - [x] Integration coverage for Undo + recent-moves source chip drilldown
 - [x] Integration coverage for onboarding account CTA routing
+- [x] Integration coverage for plan month switching
 - [x] Integration CI configured to fail on any individual integration test failure
 - [ ] Expand integration tests for remaining pending batches above
