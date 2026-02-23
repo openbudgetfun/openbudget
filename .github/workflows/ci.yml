@@ -163,25 +163,3 @@ jobs:
           else
             echo "No native dependency changes detected. Safe for Shorebird patch (minor/patch bump)."
           fi
-
-  pinned-deps:
-    name: Enforce pinned app dependencies
-    runs-on: blacksmith-2vcpu-ubuntu-2404
-    steps:
-      - uses: actions/checkout@v4
-      - name: check for unpinned dependencies
-        run: |
-          VIOLATIONS=$(sed -n '/^dependencies:/,/^[^ ]/p' openbudget_app/pubspec.yaml \
-            | grep -E ':\s*[\^>~]' \
-            | grep -v '^\s*#' \
-            || true)
-
-          if [ -n "$VIOLATIONS" ]; then
-            echo "::error::openbudget_app has unpinned dependencies. All app dependencies must use exact versions (no ^, >=, ~)."
-            echo ""
-            echo "$VIOLATIONS"
-            echo ""
-            echo "Pin to exact versions (e.g., 'cupertino_icons: 1.0.8' instead of 'cupertino_icons: ^1.0.8')"
-            exit 1
-          fi
-          echo "All app dependencies are pinned to exact versions."

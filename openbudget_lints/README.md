@@ -15,6 +15,9 @@ include: package:openbudget_lints/analysis_options.yaml
 - `avoid_stateful_widgets`: Disallows classes that extend
   `StatefulWidget`, `ConsumerStatefulWidget`, or
   `StatefulHookConsumerWidget`.
+- `enforce_pinned_app_dependencies`: In `openbudget_app/pubspec.yaml`,
+  requires exact versions in `dependencies` and rejects constraints starting
+  with `^`, `>`, or `~`.
 
 ## Enable Plugin Rules
 
