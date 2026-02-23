@@ -328,6 +328,7 @@ class CategoryDetailScreen extends HookConsumerWidget {
         budgetId: budgetId,
         currencyCode: currencyCode,
         existingGoal: existingGoal,
+        envelopeName: envelope.name,
       ),
     );
   }

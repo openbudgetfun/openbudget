@@ -1,6 +1,6 @@
 # OpenBudget UI Migration Tracker (from `~/Downloads/ynab-ui`)
 
-Last updated: 2026-02-23 (accounts edit parity + unlinked-account validation + CI integration hardening)
+Last updated: 2026-02-23 (custom target editor parity + integration coverage)
 
 ## Scope
 
@@ -10,7 +10,7 @@ Last updated: 2026-02-23 (accounts edit parity + unlinked-account validation + C
 
 ## Progress Snapshot
 
-- Overall migration progress: **~93%**
+- Overall migration progress: **~95%**
 - Core plan/settings/auth/navigation flows: **implemented**
 - Advanced accounts/transactions/reports flows: **in progress**
 
@@ -86,8 +86,8 @@ Last updated: 2026-02-23 (accounts edit parity + unlinked-account validation + C
   - [ ] Approve scheduled transaction
   - [x] Filtering transactions
 - [ ] Budget/category advanced flows
-  - [ ] Add custom target flow
-  - [ ] Loan target flow
+  - [x] Add custom target flow
+  - [x] Loan target flow
   - [ ] Cover overspending flow
   - [ ] Reorder categories flow parity
   - [ ] Hide category flow polish
@@ -117,4 +117,5 @@ Last updated: 2026-02-23 (accounts edit parity + unlinked-account validation + C
 - [x] Integration coverage for account settings -> delete account flow
 - [x] Integration CI configured to fail on any individual integration test failure
 - [x] Integration CI hardened to detect failure markers / no-tests-ran false-green output
+- [x] Integration coverage for opening custom target editor and validating Save button enablement
 - [ ] Expand integration tests for remaining pending batches above

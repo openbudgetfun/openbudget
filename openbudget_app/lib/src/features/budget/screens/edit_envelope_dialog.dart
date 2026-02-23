@@ -190,6 +190,7 @@ class EditEnvelopeDialog extends HookConsumerWidget {
         budgetId: budgetId,
         currencyCode: currencyCode,
         existingGoal: existingGoal,
+        envelopeName: envelope.name,
       ),
     );
   }

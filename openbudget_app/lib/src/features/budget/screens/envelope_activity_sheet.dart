@@ -306,6 +306,7 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
         budgetId: budgetId,
         currencyCode: currencyCode,
         existingGoal: goal,
+        envelopeName: envelope.name,
       ),
     );
   }

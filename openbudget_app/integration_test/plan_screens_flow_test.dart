@@ -302,6 +302,26 @@ void main() {
     await _captureScreenshot(binding, 'category-detail-screen');
     await tester.pump(const Duration(seconds: 1));
     expect(find.text('Balance'), findsOneWidget);
+    expect(find.text('Set Goal'), findsOneWidget);
+    await tester.tap(find.text('Set Goal'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Save Target'), findsOneWidget);
+    var saveTargetButton = tester.widget<FilledButton>(
+      find.widgetWithText(FilledButton, 'Save Target'),
+    );
+    expect(saveTargetButton.onPressed, isNull);
+
+    await tester.enterText(find.byType(TextField).first, '2800');
+    await tester.pumpAndSettle();
+
+    saveTargetButton = tester.widget<FilledButton>(
+      find.widgetWithText(FilledButton, 'Save Target'),
+    );
+    expect(saveTargetButton.onPressed, isNotNull);
+
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
     expect(find.text('Rename Category'), findsOneWidget);
   });
 }
