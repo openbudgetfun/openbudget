@@ -43,10 +43,21 @@ final class DisallowStatefulWidgetsRule extends AnalysisRule {
 }
 
 final class _DisallowStatefulWidgetsVisitor extends SimpleAstVisitor<void> {
-  _DisallowStatefulWidgetsVisitor(this.rule, this.disallowedWidgetTypes);
+  _DisallowStatefulWidgetsVisitor(this.rule, this.disallowedWidgetTypes)
+    : allowedWidgetTypes = _alwaysAllowedWidgetTypes.difference(
+        disallowedWidgetTypes,
+      );
+
+  static const Set<String> _alwaysAllowedWidgetTypes = {
+    'HookWidget',
+    'HookConsumerWidget',
+    'ConsumerWidget',
+    'StatelessWidget',
+  };
 
   final AnalysisRule rule;
   final Set<String> disallowedWidgetTypes;
+  final Set<String> allowedWidgetTypes;
 
   @override
   void visitClassDeclaration(ClassDeclaration node) {
@@ -69,22 +80,34 @@ final class _DisallowStatefulWidgetsVisitor extends SimpleAstVisitor<void> {
       return;
     }
 
-    if (disallowedWidgetTypes.contains(superclass.name.lexeme)) {
+    final superclassName = superclass.name.lexeme;
+    if (allowedWidgetTypes.contains(superclassName)) {
+      return;
+    }
+    if (disallowedWidgetTypes.contains(superclassName)) {
       rule.reportAtNode(superclass);
     }
   }
 
   bool _isDisallowedOrStatefulDescendant(InterfaceType type) {
-    if (disallowedWidgetTypes.contains(type.element.name)) {
-      return true;
+    final hierarchyTypeNames = <String>{};
+    final directTypeName = type.element.name;
+    if (directTypeName != null) {
+      hierarchyTypeNames.add(directTypeName);
     }
-
     for (final supertype in type.allSupertypes) {
-      if (disallowedWidgetTypes.contains(supertype.element.name)) {
-        return true;
+      final supertypeName = supertype.element.name;
+      if (supertypeName != null) {
+        hierarchyTypeNames.add(supertypeName);
       }
     }
 
+    if (hierarchyTypeNames.any(allowedWidgetTypes.contains)) {
+      return false;
+    }
+    if (hierarchyTypeNames.any(disallowedWidgetTypes.contains)) {
+      return true;
+    }
     return false;
   }
 }
