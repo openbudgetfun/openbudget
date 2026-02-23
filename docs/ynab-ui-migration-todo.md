@@ -1,6 +1,6 @@
 # OpenBudget UI Migration Tracker (from `~/Downloads/ynab-ui`)
 
-Last updated: 2026-02-23 (Reflect dashboard + spending breakdown/net worth parity + Patrol coverage)
+Last updated: 2026-02-23 (Edit Plan setup parity + Reflect parity + Patrol coverage)
 
 ## Scope
 
@@ -61,6 +61,11 @@ Last updated: 2026-02-23 (Reflect dashboard + spending breakdown/net worth parit
   - [x] Rename/Hide/Delete actions
   - [x] Snooze toggle
 - [x] Reorder categories flow parity
+- [x] Edit Plan setup flow:
+  - [x] Cost-to-be-me header and monthly targets/income card
+  - [x] New Group and Reorder controls
+  - [x] Category-group details sheet with hide/delete actions
+  - [x] Add Target entry from edit-plan category rows
 - [x] Reflect dashboard parity:
   - [x] Spending Breakdown preview card
   - [x] Net Worth preview card
@@ -102,7 +107,7 @@ Last updated: 2026-02-23 (Reflect dashboard + spending breakdown/net worth parit
   - [x] Loan target flow
   - [x] Cover overspending flow
   - [x] Reorder categories flow parity
-  - [ ] Hide category flow polish
+  - [x] Hide category flow polish (edit-plan details dialog + confirmation)
 - [ ] Reports and analysis parity
   - [x] Net worth visual parity
   - [x] Spending breakdown parity

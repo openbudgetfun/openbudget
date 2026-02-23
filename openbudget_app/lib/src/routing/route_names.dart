@@ -31,6 +31,8 @@ const envelopeMovesPath = '/budgets/:id/plan/recent-moves/:envelopeId';
 const categoryDetailRoute = 'categoryDetail';
 const categoryDetailPath =
     '/budgets/:id/plan/category/:categoryId/envelope/:envelopeId';
+const editPlanRoute = 'editPlan';
+const editPlanPath = '/budgets/:id/plan/edit';
 
 // Shell tab branches
 const budgetShellRoute = 'budgetShell';

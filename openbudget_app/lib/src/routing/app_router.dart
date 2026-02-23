@@ -11,6 +11,7 @@ import 'package:openbudget_app/src/features/budget/screens/budget_detail_screen.
 import 'package:openbudget_app/src/features/budget/screens/budget_shell_screen.dart';
 import 'package:openbudget_app/src/features/budget/screens/category_detail_screen.dart';
 import 'package:openbudget_app/src/features/budget/screens/create_budget_screen.dart';
+import 'package:openbudget_app/src/features/budget/screens/edit_plan_screen.dart';
 import 'package:openbudget_app/src/features/budget/screens/recent_moves_screen.dart';
 import 'package:openbudget_app/src/features/home/screens/home_screen.dart';
 import 'package:openbudget_app/src/features/more/screens/more_screen.dart';
@@ -100,6 +101,14 @@ GoRouter appRouter(Ref ref) {
           return '/budgets/$id/plan';
         },
         routes: [
+          GoRoute(
+            name: editPlanRoute,
+            path: 'plan/edit',
+            builder: (context, state) {
+              final id = state.pathParameters['id']!;
+              return EditPlanScreen(budgetId: id);
+            },
+          ),
           // Budget shell with bottom tab navigation.
           StatefulShellRoute.indexedStack(
             builder: (context, state, navigationShell) {
