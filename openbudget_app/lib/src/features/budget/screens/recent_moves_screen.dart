@@ -592,9 +592,9 @@ class _RecentMoveRow extends HookWidget {
 
     final toName =
         envelopeNames[event.toEnvelopeId] ?? l10n.recentMovesUnnamedEnvelope;
-    final fromName = event.fromEnvelopeId != null
-        ? envelopeNames[event.fromEnvelopeId!] ??
-              l10n.recentMovesUnnamedEnvelope
+    final sourceEnvelopeId = event.fromEnvelopeId;
+    final fromName = sourceEnvelopeId != null
+        ? envelopeNames[sourceEnvelopeId] ?? l10n.recentMovesUnnamedEnvelope
         : l10n.recentMovesReadyToAssign;
 
     return Padding(
@@ -606,7 +606,13 @@ class _RecentMoveRow extends HookWidget {
       ),
       child: Row(
         children: [
-          _MoveChip(label: fromName),
+          _MoveChip(
+            label: fromName,
+            accent: sourceEnvelopeId != null,
+            onTap: sourceEnvelopeId != null
+                ? () => onEnvelopeTap(sourceEnvelopeId)
+                : null,
+          ),
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: SpacingTokens.xs),
             child: Icon(

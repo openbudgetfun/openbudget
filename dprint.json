@@ -21,7 +21,7 @@
         "exts": ["sh", "bash"]
       },
       {
-        "command": "dartfmt {{file_path}}",
+        "command": "./tools/dartfmt.sh {{file_path}}",
         "exts": ["dart"],
         "stdin": false
       }

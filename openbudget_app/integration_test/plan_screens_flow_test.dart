@@ -206,6 +206,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     await tester.tap(find.text('Categories'));
     await tester.pumpAndSettle();
+    expect(find.byType(LinearProgressIndicator), findsWidgets);
 
     await tester.tap(find.byIcon(Icons.more_horiz_rounded));
     await tester.pumpAndSettle();
@@ -213,20 +214,37 @@ void main() {
     await _captureScreenshot(binding, 'plan-menu');
     await tester.pump(const Duration(seconds: 1));
 
-    await tester.tap(find.text('Collapse/Expand'));
+    await _tapPopupMenuItem(tester, 'Hide Progress Bars');
+    expect(find.byType(LinearProgressIndicator), findsNothing);
+
+    await tester.tap(find.byIcon(Icons.more_horiz_rounded));
     await tester.pumpAndSettle();
+    await _tapPopupMenuItem(tester, 'Hide Progress Bars');
+    expect(find.byType(LinearProgressIndicator), findsWidgets);
+
+    await tester.tap(find.byIcon(Icons.more_horiz_rounded));
+    await tester.pumpAndSettle();
+    await _tapPopupMenuItem(tester, 'Hide Amounts');
+    expect(find.text('••••'), findsWidgets);
+
+    await tester.tap(find.byIcon(Icons.more_horiz_rounded));
+    await tester.pumpAndSettle();
+    await _tapPopupMenuItem(tester, 'Hide Amounts');
+    expect(find.text('••••'), findsNothing);
+
+    await tester.tap(find.byIcon(Icons.more_horiz_rounded));
+    await tester.pumpAndSettle();
+    await _tapPopupMenuItem(tester, 'Collapse/Expand');
     expect(find.textContaining('Auto-pay every month'), findsNothing);
 
     await tester.tap(find.byIcon(Icons.more_horiz_rounded));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Collapse/Expand'));
-    await tester.pumpAndSettle();
+    await _tapPopupMenuItem(tester, 'Collapse/Expand');
     expect(find.textContaining('Auto-pay every month'), findsOneWidget);
 
     await tester.tap(find.byIcon(Icons.more_horiz_rounded));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Recent Moves'));
-    await tester.pumpAndSettle();
+    await _tapPopupMenuItem(tester, 'Recent Moves');
     final gotIt = find.text('Got It!');
     if (gotIt.evaluate().isNotEmpty) {
       await tester.tap(gotIt);
@@ -238,6 +256,13 @@ void main() {
     await tester.pumpAndSettle();
     await _captureScreenshot(binding, 'recent-moves-moved-screen');
     await tester.pump(const Duration(seconds: 1));
+    await tester.tap(find.text('Self storage').first);
+    await tester.pumpAndSettle();
+    expect(find.text('Moves'), findsOneWidget);
+    await tester.tap(find.text('Done'));
+    await tester.pumpAndSettle();
+    expect(find.text('Recent Moves'), findsOneWidget);
+
     await tester.tap(find.text('Utilities').first);
     await tester.pumpAndSettle();
     await _captureScreenshot(binding, 'envelope-moves-screen');
@@ -289,4 +314,22 @@ Future<void> _captureScreenshot(
   // Expose location in test logs for host-side collection.
   // ignore: avoid_print
   print('Saved screenshot: $screenshotPath');
+}
+
+Future<void> _tapPopupMenuItem(WidgetTester tester, String label) async {
+  final textFinder = find.text(label, skipOffstage: false);
+  if (textFinder.evaluate().isEmpty) {
+    throw TestFailure('Expected popup menu item "$label" to be visible.');
+  }
+
+  final menuItemFinder = find.ancestor(
+    of: textFinder.first,
+    matching: find.byType(PopupMenuItem),
+  );
+  if (menuItemFinder.evaluate().isNotEmpty) {
+    await tester.tap(menuItemFinder.first, warnIfMissed: false);
+  } else {
+    await tester.tap(textFinder.first, warnIfMissed: false);
+  }
+  await tester.pumpAndSettle();
 }
