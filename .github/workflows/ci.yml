@@ -106,16 +106,29 @@ jobs:
       - name: run integration tests
         run: |
           cd openbudget_app
-          set -u
+          set -euo pipefail
+          shopt -s nullglob
+          tests=(integration_test/*_test.dart)
+
+          if [ "${#tests[@]}" -eq 0 ]; then
+            echo "::error::No integration tests were discovered under openbudget_app/integration_test."
+            exit 1
+          fi
+
+          echo "Discovered ${#tests[@]} integration test file(s)."
           failed=0
 
-          for f in integration_test/*_test.dart; do
+          for f in "${tests[@]}"; do
             echo "::group::Running $f"
             if ! flutter test "$f" -d flutter-tester; then
               failed=1
             fi
             echo "::endgroup::"
           done
+
+          if [ "$failed" -ne 0 ]; then
+            echo "::error::One or more integration tests failed."
+          fi
 
           exit "$failed"
         shell: devenv shell -- bash -e {0}
