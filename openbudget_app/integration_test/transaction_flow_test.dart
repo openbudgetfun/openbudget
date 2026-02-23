@@ -7,12 +7,14 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
+import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
 import 'package:openbudget_app/src/features/budget/widgets/add_transaction_sheet.dart';
 import 'package:openbudget_app/src/features/payees/providers/payee_list_provider.dart';
 import 'package:openbudget_app/src/features/transactions/screens/add_expense_screen.dart';
 import 'package:openbudget_app/src/features/transactions/screens/add_income_screen.dart';
+import 'package:openbudget_app/src/features/transactions/screens/transaction_list_screen.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 
@@ -39,6 +41,27 @@ BudgetSummary _makeSummary() => BudgetSummary(
   year: 2026,
   month: 9,
 );
+
+Transaction _makeTransaction({
+  required String id,
+  required String description,
+  required int amountCents,
+  DateTime? transactionDate,
+  bool cleared = false,
+  bool reconciled = false,
+}) {
+  return Transaction(
+    id: UuidValue.fromString(id),
+    description: description,
+    amountCents: amountCents,
+    currencyCode: 'USD',
+    budgetId: _budgetUuid,
+    accountId: UuidValue.fromString('00000000-0000-0000-0000-000000000111'),
+    transactionDate: transactionDate ?? DateTime(2026, 9, 4),
+    cleared: cleared,
+    reconciled: reconciled,
+  );
+}
 
 Widget _buildApp() {
   final router = GoRouter(
@@ -88,6 +111,60 @@ Widget _buildApp() {
       budgetDetailProvider.overrideWith((ref, id) async => _makeBudget()),
       budgetSummaryProvider.overrideWith((ref, id) async => _makeSummary()),
       payeeListProvider.overrideWith((ref, id) async => const []),
+    ],
+    child: MaterialApp.router(
+      theme: ThemeData.light(useMaterial3: true),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      routerConfig: router,
+    ),
+  );
+}
+
+Widget _buildTransactionListApp({required List<Transaction> transactions}) {
+  final router = GoRouter(
+    initialLocation: '/budgets/$_budgetId/transactions',
+    routes: [
+      GoRoute(
+        name: planRoute,
+        path: planPath,
+        builder: (_, _) =>
+            const Scaffold(body: Center(child: Text('Plan Route'))),
+      ),
+      GoRoute(
+        name: transactionListRoute,
+        path: transactionListPath,
+        builder: (context, state) =>
+            TransactionListScreen(budgetId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        name: addIncomeRoute,
+        path: addIncomePath,
+        builder: (context, state) =>
+            AddIncomeScreen(budgetId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        name: addExpenseRoute,
+        path: addExpensePath,
+        builder: (context, state) =>
+            AddExpenseScreen(budgetId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        name: createTransferRoute,
+        path: createTransferPath,
+        builder: (_, _) =>
+            const Scaffold(body: Center(child: Text('Transfer Route'))),
+      ),
+    ],
+  );
+
+  return ProviderScope(
+    overrides: [
+      transactionListProvider.overrideWith((ref, id) async => transactions),
+      budgetDetailProvider.overrideWith((ref, id) async => _makeBudget()),
+      budgetSummaryProvider.overrideWith((ref, id) async => _makeSummary()),
+      payeeListProvider.overrideWith((ref, id) async => const []),
+      accountListProvider.overrideWith((ref, id) async => const []),
     ],
     child: MaterialApp.router(
       theme: ThemeData.light(useMaterial3: true),
@@ -195,5 +272,82 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Plan Route'), findsOneWidget);
+  });
+
+  testWidgets('transaction list status filter shows only uncleared rows', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _buildTransactionListApp(
+        transactions: [
+          _makeTransaction(
+            id: '00000000-0000-0000-0000-000000000301',
+            description: 'Grocery Store',
+            amountCents: -5000,
+          ),
+          _makeTransaction(
+            id: '00000000-0000-0000-0000-000000000302',
+            description: 'Rent',
+            amountCents: -280000,
+            cleared: true,
+          ),
+        ],
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Grocery Store'), findsOneWidget);
+    expect(find.text('Rent'), findsOneWidget);
+
+    await tester.tap(find.text('Status'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Uncleared'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Grocery Store'), findsOneWidget);
+    expect(find.text('Rent'), findsNothing);
+  });
+
+  testWidgets('tapping transaction row opens edit dialog', (tester) async {
+    await tester.pumpWidget(
+      _buildTransactionListApp(
+        transactions: [
+          _makeTransaction(
+            id: '00000000-0000-0000-0000-000000000401',
+            description: 'Grocery Store',
+            amountCents: -5000,
+          ),
+        ],
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Grocery Store'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Edit Transaction'), findsOneWidget);
+  });
+
+  testWidgets('long press transaction row opens flag action sheet', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _buildTransactionListApp(
+        transactions: [
+          _makeTransaction(
+            id: '00000000-0000-0000-0000-000000000501',
+            description: 'Grocery Store',
+            amountCents: -5000,
+          ),
+        ],
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.longPress(find.text('Grocery Store'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Set Flag'), findsOneWidget);
+    expect(find.text('Red'), findsOneWidget);
   });
 }
