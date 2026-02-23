@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/screens/budget_shell_screen.dart';
-import 'package:openbudget_ui/openbudget_ui.dart';
 
 const _budgetId = 'test-budget-id';
 
@@ -60,7 +59,7 @@ Widget _buildApp() {
   );
 
   return MaterialApp.router(
-    theme: OpenBudgetTheme.light,
+    theme: ThemeData.light(useMaterial3: true),
     localizationsDelegates: AppLocalizations.localizationsDelegates,
     supportedLocales: AppLocalizations.supportedLocales,
     routerConfig: router,

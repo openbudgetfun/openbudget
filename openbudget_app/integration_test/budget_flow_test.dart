@@ -11,7 +11,6 @@ import 'package:openbudget_app/src/features/budget/screens/create_budget_screen.
 import 'package:openbudget_app/src/features/home/providers/budget_list_provider.dart';
 import 'package:openbudget_app/src/routing/app_router.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
-import 'package:openbudget_ui/openbudget_ui.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -30,7 +29,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         child: MaterialApp.router(
-          theme: OpenBudgetTheme.light,
+          theme: ThemeData.light(useMaterial3: true),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           routerConfig: router,

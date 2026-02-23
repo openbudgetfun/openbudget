@@ -9,7 +9,6 @@ import 'package:openbudget_app/src/features/auth/providers/auth_state.dart';
 import 'package:openbudget_app/src/features/auth/screens/login_screen.dart';
 import 'package:openbudget_app/src/features/auth/screens/register_screen.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
-import 'package:openbudget_ui/openbudget_ui.dart';
 
 Widget _buildAuthApp({String initialLocation = loginPath}) {
   final router = GoRouter(
@@ -23,7 +22,7 @@ Widget _buildAuthApp({String initialLocation = loginPath}) {
   return ProviderScope(
     overrides: [authProvider.overrideWithValue(const Unauthenticated())],
     child: MaterialApp.router(
-      theme: OpenBudgetTheme.light,
+      theme: ThemeData.light(useMaterial3: true),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       routerConfig: router,

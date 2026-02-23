@@ -15,7 +15,6 @@ import 'package:openbudget_app/src/features/transactions/screens/add_expense_scr
 import 'package:openbudget_app/src/features/transactions/screens/add_income_screen.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
-import 'package:openbudget_ui/openbudget_ui.dart';
 
 const _budgetId = 'test-budget-id';
 final _budgetUuid = UuidValue.fromString(
@@ -91,7 +90,7 @@ Widget _buildApp() {
       payeeListProvider.overrideWith((ref, id) async => const []),
     ],
     child: MaterialApp.router(
-      theme: OpenBudgetTheme.light,
+      theme: ThemeData.light(useMaterial3: true),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       routerConfig: router,

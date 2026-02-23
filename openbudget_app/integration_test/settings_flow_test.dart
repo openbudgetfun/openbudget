@@ -17,7 +17,6 @@ import 'package:openbudget_app/src/features/settings/screens/settings_screen.dar
 import 'package:openbudget_app/src/providers/theme_mode_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
-import 'package:openbudget_ui/openbudget_ui.dart';
 
 const _budgetId = 'test-budget-id';
 final _ownerUuid = UuidValue.fromString('00000000-0000-0000-0000-000000000311');
@@ -89,7 +88,7 @@ void main() {
         UncontrolledProviderScope(
           container: container,
           child: MaterialApp.router(
-            theme: OpenBudgetTheme.light,
+            theme: ThemeData.light(useMaterial3: true),
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
             routerConfig: router,
