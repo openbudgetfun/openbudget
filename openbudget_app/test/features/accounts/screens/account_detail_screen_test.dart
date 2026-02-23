@@ -44,16 +44,25 @@ Account _makeAccount() => Account(
   isClosed: false,
 );
 
-Transaction _makeTransaction() => Transaction(
-  id: UuidValue.fromString('00000000-0000-0000-0000-000000000211'),
-  description: 'Rent',
-  amountCents: -280000,
+Transaction _makeTransaction({
+  required String id,
+  required String description,
+  required int amountCents,
+  DateTime? transactionDate,
+  String? memo,
+  bool cleared = false,
+  bool reconciled = false,
+}) => Transaction(
+  id: UuidValue.fromString(id),
+  description: description,
+  amountCents: amountCents,
   currencyCode: 'USD',
   budgetId: _budgetUuid,
   accountId: _accountUuid,
-  transactionDate: DateTime(2026, 9, 3),
-  memo: 'September rent',
-  cleared: true,
+  transactionDate: transactionDate ?? DateTime(2026, 9, 3),
+  memo: memo,
+  cleared: cleared,
+  reconciled: reconciled,
 );
 
 BudgetSummary _makeSummary() => BudgetSummary(
@@ -66,7 +75,7 @@ BudgetSummary _makeSummary() => BudgetSummary(
   month: 9,
 );
 
-Widget _buildSubject() {
+Widget _buildSubject({List<Transaction>? transactions}) {
   final router = GoRouter(
     initialLocation: '/budgets/$_budgetId/accounts/$_accountId',
     routes: [
@@ -93,7 +102,23 @@ Widget _buildSubject() {
         (ref, budgetId) async => [_makeAccount()],
       ),
       accountTransactionsProvider.overrideWith(
-        (ref, args) async => [_makeTransaction()],
+        (ref, args) async =>
+            transactions ??
+            [
+              _makeTransaction(
+                id: '00000000-0000-0000-0000-000000000211',
+                description: 'Rent',
+                amountCents: -280000,
+                memo: 'September rent',
+              ),
+              _makeTransaction(
+                id: '00000000-0000-0000-0000-000000000212',
+                description: 'Payroll',
+                amountCents: 300000,
+                transactionDate: DateTime(2026, 9, 2),
+                reconciled: true,
+              ),
+            ],
       ),
       payeeListProvider.overrideWith((ref, budgetId) async => const []),
       budgetSummaryProvider.overrideWith(
@@ -122,6 +147,7 @@ void main() {
       expect(find.text('Daily'), findsOneWidget);
       expect(find.text('Rent'), findsOneWidget);
       expect(find.text('September rent'), findsOneWidget);
+      expect(find.text('Payroll'), findsOneWidget);
     });
 
     testWidgets('back button navigates to account list route', (tester) async {
@@ -132,6 +158,53 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Accounts Route'), findsOneWidget);
+    });
+
+    testWidgets('menu toggle hides reconciled rows', (tester) async {
+      await tester.pumpWidget(_buildSubject());
+      await tester.pumpAndSettle();
+
+      expect(find.text('Payroll'), findsOneWidget);
+
+      await tester.tap(find.byIcon(Icons.more_horiz_rounded));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Hide Reconciled'), warnIfMissed: false);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Payroll'), findsNothing);
+      expect(find.text('Rent'), findsOneWidget);
+    });
+
+    testWidgets('uncleared shortcut filters to uncleared transactions', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _buildSubject(
+          transactions: [
+            _makeTransaction(
+              id: '00000000-0000-0000-0000-000000000211',
+              description: 'Rent',
+              amountCents: -280000,
+            ),
+            _makeTransaction(
+              id: '00000000-0000-0000-0000-000000000212',
+              description: 'Gym',
+              amountCents: -8000,
+              cleared: true,
+            ),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Rent'), findsOneWidget);
+      expect(find.text('Gym'), findsOneWidget);
+
+      await tester.tap(find.textContaining('uncleared transactions'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Rent'), findsOneWidget);
+      expect(find.text('Gym'), findsNothing);
     });
   });
 }

@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_transactions_provider.dart';
+import 'package:openbudget_app/src/features/accounts/screens/edit_account_dialog.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
 import 'package:openbudget_app/src/features/payees/providers/payee_list_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
@@ -14,7 +16,9 @@ import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
-enum _StatusFilter { all, uncleared, cleared, reconciled }
+enum _StatusFilter { all, uncleared }
+
+enum _AccountMenuAction { reconcile, hideReconciled, editAccount, linkAccount }
 
 class AccountDetailScreen extends HookConsumerWidget {
   const AccountDetailScreen({
@@ -36,10 +40,10 @@ class AccountDetailScreen extends HookConsumerWidget {
       accountTransactionsProvider(budgetId, accountId),
     );
 
-    final isSearching = useState(false);
     final searchQuery = useState('');
     final searchController = useTextEditingController();
     final statusFilter = useState(_StatusFilter.all);
+    final hideReconciled = useState(false);
 
     final accountData = accountsAsync
         .whenData(
@@ -53,6 +57,9 @@ class AccountDetailScreen extends HookConsumerWidget {
             orElse: () => CurrencyCode.usd,
           )
         : CurrencyCode.usd;
+    final unclearedCount = txnAsync.whenOrNull(
+      data: (txns) => txns.where((t) => !t.cleared && !t.reconciled).length,
+    );
 
     return Scaffold(
       backgroundColor: OpenBudgetPalette.appBackground,
@@ -67,41 +74,74 @@ class AccountDetailScreen extends HookConsumerWidget {
             pathParameters: {'id': budgetId},
           ),
         ),
-        title: isSearching.value
-            ? TextField(
-                controller: searchController,
-                autofocus: true,
-                decoration: InputDecoration(
-                  hintText: l10n.accountDetailSearchHint,
-                  border: InputBorder.none,
-                ),
-                onChanged: (value) => searchQuery.value = value,
-              )
-            : Text(
-                accountData?.name ?? l10n.accountListTitle,
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w700,
+        title: Column(
+          children: [
+            Text(
+              accountData?.name ?? l10n.accountListTitle,
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            if (accountData != null)
+              Text(
+                accountData.onBudget ? 'Budget Account' : 'Tracking Account',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: OpenBudgetPalette.mutedText,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
+          ],
+        ),
         actions: [
-          IconButton(
-            icon: Icon(
-              isSearching.value ? Icons.close_rounded : Icons.search_rounded,
+          TextButton(
+            onPressed: null,
+            style: TextButton.styleFrom(
+              foregroundColor: OpenBudgetPalette.accentBlue,
+              textStyle: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
             ),
-            onPressed: () {
-              isSearching.value = !isSearching.value;
-              if (!isSearching.value) {
-                searchController.clear();
-                searchQuery.value = '';
+            child: const Text('Select'),
+          ),
+          PopupMenuButton<_AccountMenuAction>(
+            icon: const Icon(Icons.more_horiz_rounded),
+            onSelected: (action) {
+              switch (action) {
+                case _AccountMenuAction.reconcile:
+                  if (txnAsync.hasValue) {
+                    _reconcile(context, ref, txnAsync.value!, currencyCode);
+                  }
+                case _AccountMenuAction.hideReconciled:
+                  hideReconciled.value = !hideReconciled.value;
+                case _AccountMenuAction.editAccount:
+                  if (accountData != null) {
+                    _openEditAccount(context, accountData);
+                  }
+                case _AccountMenuAction.linkAccount:
+                  _showLinkAccountComingSoon(context);
               }
             },
-          ),
-          IconButton(
-            icon: const Icon(Icons.check_circle_outline_rounded),
-            tooltip: l10n.reconcileButton,
-            onPressed: txnAsync.hasValue
-                ? () => _reconcile(context, ref, txnAsync.value!, currencyCode)
-                : null,
+            itemBuilder: (context) => [
+              PopupMenuItem<_AccountMenuAction>(
+                value: _AccountMenuAction.reconcile,
+                enabled: txnAsync.hasValue,
+                child: Text(l10n.reconcileButton),
+              ),
+              CheckedPopupMenuItem<_AccountMenuAction>(
+                value: _AccountMenuAction.hideReconciled,
+                checked: hideReconciled.value,
+                child: const Text('Hide Reconciled'),
+              ),
+              PopupMenuItem<_AccountMenuAction>(
+                value: _AccountMenuAction.editAccount,
+                enabled: accountData != null,
+                child: Text(l10n.accountEditTitle),
+              ),
+              const PopupMenuItem<_AccountMenuAction>(
+                value: _AccountMenuAction.linkAccount,
+                child: Text('Link Account'),
+              ),
+            ],
           ),
         ],
       ),
@@ -114,31 +154,44 @@ class AccountDetailScreen extends HookConsumerWidget {
               transactions: txnAsync.whenOrNull(data: (txns) => txns),
             ),
           Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: SpacingTokens.md,
-              vertical: SpacingTokens.sm,
+            padding: const EdgeInsets.fromLTRB(
+              SpacingTokens.md,
+              SpacingTokens.sm,
+              SpacingTokens.md,
+              SpacingTokens.xs,
             ),
-            child: Wrap(
-              spacing: SpacingTokens.xs,
-              runSpacing: SpacingTokens.xs,
+            child: Column(
               children: [
-                for (final filter in _StatusFilter.values)
-                  ChoiceChip(
-                    label: Text(switch (filter) {
-                      _StatusFilter.all => l10n.accountFilterAll,
-                      _StatusFilter.uncleared => l10n.accountFilterUncleared,
-                      _StatusFilter.cleared => l10n.accountFilterCleared,
-                      _StatusFilter.reconciled => l10n.accountFilterReconciled,
-                    }),
-                    selected: statusFilter.value == filter,
-                    onSelected: (_) => statusFilter.value = filter,
-                    visualDensity: VisualDensity.compact,
-                    selectedColor: OpenBudgetPalette.accentPurple,
-                    side: const BorderSide(color: OpenBudgetPalette.divider),
-                    labelStyle: theme.textTheme.labelMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                TextField(
+                  controller: searchController,
+                  textInputAction: TextInputAction.search,
+                  decoration: InputDecoration(
+                    hintText: l10n.accountDetailSearchHint,
+                    prefixIcon: const Icon(Icons.search_rounded),
                   ),
+                  onChanged: (value) => searchQuery.value = value,
+                ),
+                const SizedBox(height: SpacingTokens.sm),
+                Material(
+                  color: OpenBudgetPalette.surface,
+                  borderRadius: BorderRadius.circular(RadiusTokens.md),
+                  child: ListTile(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(RadiusTokens.md),
+                      side: const BorderSide(color: OpenBudgetPalette.divider),
+                    ),
+                    title: Text(
+                      'Show ${unclearedCount ?? 0} '
+                      '${l10n.accountFilterUncleared.toLowerCase()} '
+                      'transactions',
+                    ),
+                    trailing: const Icon(Icons.chevron_right_rounded),
+                    onTap: () => statusFilter.value =
+                        statusFilter.value == _StatusFilter.uncleared
+                        ? _StatusFilter.all
+                        : _StatusFilter.uncleared,
+                  ),
+                ),
               ],
             ),
           ),
@@ -182,20 +235,27 @@ class AccountDetailScreen extends HookConsumerWidget {
                       .where(
                         (t) =>
                             t.description.toLowerCase().contains(query) ||
-                            (t.memo?.toLowerCase().contains(query) ?? false),
+                            (t.memo?.toLowerCase().contains(query) ?? false) ||
+                            (payeeMap[t.payeeId?.toString()]
+                                    ?.toLowerCase()
+                                    .contains(query) ??
+                                false) ||
+                            (envelopeMap[t.envelopeId?.toString()]
+                                    ?.toLowerCase()
+                                    .contains(query) ??
+                                false),
                       )
                       .toList();
                 }
 
-                // Apply status filter.
+                if (hideReconciled.value) {
+                  filtered = filtered.where((t) => !t.reconciled).toList();
+                }
+
                 filtered = switch (statusFilter.value) {
                   _StatusFilter.all => filtered,
                   _StatusFilter.uncleared =>
                     filtered.where((t) => !t.cleared && !t.reconciled).toList(),
-                  _StatusFilter.cleared =>
-                    filtered.where((t) => t.cleared && !t.reconciled).toList(),
-                  _StatusFilter.reconciled =>
-                    filtered.where((t) => t.reconciled).toList(),
                 };
 
                 if (filtered.isEmpty) {
@@ -301,7 +361,25 @@ class AccountDetailScreen extends HookConsumerWidget {
   }
 
   static String _formatDayHeader(DateTime date) {
-    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+    return DateFormat.yMMMMd().format(date);
+  }
+
+  void _openEditAccount(BuildContext context, Account account) {
+    showDialog<void>(
+      context: context,
+      builder: (_) => EditAccountDialog(account: account, budgetId: budgetId),
+    );
+  }
+
+  void _showLinkAccountComingSoon(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'Bank linking for OpenBudget is coming soon. '
+          'Use unlinked accounts for now.',
+        ),
+      ),
+    );
   }
 
   Future<void> _toggleCleared(

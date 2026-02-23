@@ -17,7 +17,6 @@ import 'package:openbudget_app/src/features/budget/providers/budget_summary_prov
 import 'package:openbudget_app/src/features/payees/providers/payee_list_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
-import 'package:openbudget_ui/openbudget_ui.dart';
 
 const _budgetId = 'test-budget-id';
 final _budgetUuid = UuidValue.fromString(
@@ -63,6 +62,28 @@ BudgetSummary _makeSummary({String currencyCode = 'USD'}) {
     readyToAssignCents: 0,
     year: 2026,
     month: 9,
+  );
+}
+
+Transaction _makeTransaction({
+  required String id,
+  required UuidValue accountId,
+  required String description,
+  required int amountCents,
+  bool cleared = false,
+  bool reconciled = false,
+  DateTime? transactionDate,
+}) {
+  return Transaction(
+    id: UuidValue.fromString(id),
+    description: description,
+    amountCents: amountCents,
+    currencyCode: 'USD',
+    budgetId: _budgetUuid,
+    accountId: accountId,
+    transactionDate: transactionDate ?? DateTime(2026, 9, 3),
+    cleared: cleared,
+    reconciled: reconciled,
   );
 }
 
@@ -112,7 +133,7 @@ Widget _buildApp({
       ),
     ],
     child: MaterialApp.router(
-      theme: OpenBudgetTheme.light,
+      theme: ThemeData.light(useMaterial3: true),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       routerConfig: router,
@@ -122,7 +143,6 @@ Widget _buildApp({
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
-
   testWidgets('shows mixed-currency summaries in accounts view', (
     tester,
   ) async {
@@ -235,5 +255,58 @@ void main() {
     await tester.tap(find.byIcon(Icons.arrow_back));
     await tester.pumpAndSettle();
     expect(find.text('Daily USD'), findsOneWidget);
+  });
+
+  testWidgets('account detail overflow menu toggles reconciled visibility', (
+    tester,
+  ) async {
+    final accountId = UuidValue.fromString(
+      '00000000-0000-0000-0000-000000000111',
+    );
+    await tester.pumpWidget(
+      _buildApp(
+        accounts: [
+          _makeAccount(
+            id: accountId,
+            name: 'Daily USD',
+            balanceCents: 250000,
+            currencyCode: 'USD',
+          ),
+        ],
+        accountTransactions: [
+          _makeTransaction(
+            id: '00000000-0000-0000-0000-000000000211',
+            accountId: accountId,
+            description: 'Self storage',
+            amountCents: -3000,
+          ),
+          _makeTransaction(
+            id: '00000000-0000-0000-0000-000000000212',
+            accountId: accountId,
+            description: 'Starting Balance',
+            amountCents: 5000000,
+            reconciled: true,
+            transactionDate: DateTime(2026, 9, 2),
+          ),
+        ],
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Daily USD'));
+    await tester.pumpAndSettle();
+    expect(find.text('Starting Balance'), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.more_horiz_rounded));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Hide Reconciled'), warnIfMissed: false);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Starting Balance'), findsNothing);
+    expect(find.text('Self storage'), findsOneWidget);
+
+    await tester.tap(find.textContaining('uncleared transactions'));
+    await tester.pumpAndSettle();
+    expect(find.text('Self storage'), findsOneWidget);
   });
 }
