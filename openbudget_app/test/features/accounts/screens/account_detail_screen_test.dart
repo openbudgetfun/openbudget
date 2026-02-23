@@ -206,5 +206,23 @@ void main() {
       expect(find.text('Rent'), findsOneWidget);
       expect(find.text('Gym'), findsNothing);
     });
+
+    testWidgets('reconcile menu opens balance match prompt', (tester) async {
+      await tester.pumpWidget(_buildSubject());
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.more_horiz_rounded));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Reconcile'));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.textContaining('Does this match your bank balance'),
+        findsOneWidget,
+      );
+      expect(find.text('Yes'), findsOneWidget);
+      expect(find.text('No'), findsOneWidget);
+      expect(find.text('Cancel'), findsOneWidget);
+    });
   });
 }

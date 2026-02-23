@@ -344,4 +344,48 @@ void main() {
     expect(find.text('Delete Permanently'), findsOneWidget);
     expect(find.text('Reopen Account'), findsOneWidget);
   });
+
+  testWidgets('reconcile action opens balance match prompt', (tester) async {
+    final accountId = UuidValue.fromString(
+      '00000000-0000-0000-0000-000000000114',
+    );
+    await tester.pumpWidget(
+      _buildApp(
+        accounts: [
+          _makeAccount(
+            id: accountId,
+            name: 'Daily USD',
+            balanceCents: 250000,
+            currencyCode: 'USD',
+          ),
+        ],
+        accountTransactions: [
+          _makeTransaction(
+            id: '00000000-0000-0000-0000-000000000311',
+            accountId: accountId,
+            description: 'Rent',
+            amountCents: -280000,
+            cleared: true,
+          ),
+        ],
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Daily USD'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byIcon(Icons.more_horiz_rounded));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Reconcile'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.textContaining('Does this match your bank balance'),
+      findsOneWidget,
+    );
+    expect(find.text('Yes'), findsOneWidget);
+    expect(find.text('No'), findsOneWidget);
+    expect(find.text('Cancel'), findsOneWidget);
+  });
 }

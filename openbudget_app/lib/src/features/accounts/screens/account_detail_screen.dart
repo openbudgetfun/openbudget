@@ -427,6 +427,39 @@ class AccountDetailScreen extends HookConsumerWidget {
       }
     }
 
+    final useClearedBalance = await showDialog<bool>(
+      context: context,
+      builder: (_) => _ReconcileMatchDialog(
+        clearedBalanceCents: clearedBalanceCents,
+        currencyCode: currencyCode,
+      ),
+    );
+
+    if (useClearedBalance == null || !context.mounted) return;
+
+    if (useClearedBalance) {
+      try {
+        final count = await ref
+            .read(accountTransactionActionsProvider.notifier)
+            .reconcileAccount(accountId: accountId, budgetId: budgetId);
+        if (context.mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(l10n.reconcileSuccess(count))));
+        }
+      } on Exception catch (_) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l10n.reconcileError),
+              backgroundColor: colorScheme.error,
+            ),
+          );
+        }
+      }
+      return;
+    }
+
     final result = await showDialog<int>(
       context: context,
       builder: (_) => _ReconcileDialog(
@@ -864,5 +897,47 @@ class _ReconcileDialog extends HookWidget {
       result *= 10;
     }
     return result;
+  }
+}
+
+class _ReconcileMatchDialog extends HookWidget {
+  const _ReconcileMatchDialog({
+    required this.clearedBalanceCents,
+    required this.currencyCode,
+  });
+
+  final int clearedBalanceCents;
+  final CurrencyCode currencyCode;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return AlertDialog(
+      title: Text(
+        'Your cleared balance in OpenBudget is '
+        '${formatCents(clearedBalanceCents, currencyCode)}',
+        textAlign: TextAlign.center,
+      ),
+      content: Text(
+        'Does this match your bank balance?',
+        style: theme.textTheme.bodyLarge,
+        textAlign: TextAlign.center,
+      ),
+      actions: [
+        FilledButton(
+          onPressed: () => Navigator.of(context).pop(true),
+          child: const Text('Yes'),
+        ),
+        FilledButton.tonal(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: const Text('No'),
+        ),
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancel'),
+        ),
+      ],
+    );
   }
 }
