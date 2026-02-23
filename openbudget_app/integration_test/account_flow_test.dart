@@ -29,6 +29,7 @@ Account _makeAccount({
   required String currencyCode,
   UuidValue? id,
   bool onBudget = true,
+  bool isClosed = false,
 }) {
   return Account(
     id: id,
@@ -39,7 +40,7 @@ Account _makeAccount({
     budgetId: _budgetUuid,
     onBudget: onBudget,
     sortOrder: 0,
-    isClosed: false,
+    isClosed: isClosed,
   );
 }
 
@@ -308,5 +309,39 @@ void main() {
     await tester.tap(find.textContaining('uncleared transactions'));
     await tester.pumpAndSettle();
     expect(find.text('Self storage'), findsOneWidget);
+  });
+
+  testWidgets('closed account edit dialog exposes delete and reopen actions', (
+    tester,
+  ) async {
+    final accountId = UuidValue.fromString(
+      '00000000-0000-0000-0000-000000000113',
+    );
+    await tester.pumpWidget(
+      _buildApp(
+        accounts: [
+          _makeAccount(
+            id: accountId,
+            name: 'Loan',
+            balanceCents: -50000,
+            currencyCode: 'USD',
+            onBudget: false,
+            isClosed: true,
+          ),
+        ],
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Loan'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byIcon(Icons.more_horiz_rounded));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Edit Account'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Delete Permanently'), findsOneWidget);
+    expect(find.text('Reopen Account'), findsOneWidget);
   });
 }

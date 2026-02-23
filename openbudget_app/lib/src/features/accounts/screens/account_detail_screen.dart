@@ -367,7 +367,12 @@ class AccountDetailScreen extends HookConsumerWidget {
   void _openEditAccount(BuildContext context, Account account) {
     showDialog<void>(
       context: context,
-      builder: (_) => EditAccountDialog(account: account, budgetId: budgetId),
+      builder: (_) => EditAccountDialog(
+        account: account,
+        budgetId: budgetId,
+        onDeleted: () =>
+            context.goNamed(accountListRoute, pathParameters: {'id': budgetId}),
+      ),
     );
   }
 

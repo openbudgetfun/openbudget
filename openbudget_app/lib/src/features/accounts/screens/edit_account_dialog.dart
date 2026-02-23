@@ -10,11 +10,13 @@ class EditAccountDialog extends HookConsumerWidget {
   const EditAccountDialog({
     required this.account,
     required this.budgetId,
+    this.onDeleted,
     super.key,
   });
 
   final Account account;
   final String budgetId;
+  final VoidCallback? onDeleted;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -292,6 +294,7 @@ class EditAccountDialog extends HookConsumerWidget {
         ),
       );
       navigator.pop();
+      onDeleted?.call();
     } on Exception catch (_) {
       if (context.mounted) {
         messenger.showSnackBar(
