@@ -75,7 +75,7 @@ class NetWorthScreen extends HookConsumerWidget {
                 child: Column(
                   children: [
                     Text(
-                      l10n.netWorthTitle,
+                      'Current',
                       style: theme.textTheme.titleSmall?.copyWith(
                         color: netWorthColor.withAlpha(200),
                       ),
@@ -88,6 +88,28 @@ class NetWorthScreen extends HookConsumerWidget {
                         fontWeight: FontWeight.bold,
                       ),
                       textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: SpacingTokens.sm),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            '${l10n.netWorthAssets} ${formatCents(primaryBreakdown?.totalAssets ?? 0, primaryCurrency)}',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: ColorTokens.secondary,
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: Text(
+                            '${l10n.netWorthLiabilities} ${formatCents(primaryBreakdown?.totalLiabilities ?? 0, primaryCurrency)}',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: ColorTokens.error,
+                            ),
+                            textAlign: TextAlign.right,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -217,6 +239,29 @@ class NetWorthScreen extends HookConsumerWidget {
                     ),
                   ),
                 ),
+              if (data.assetAccounts.isNotEmpty ||
+                  data.liabilityAccounts.isNotEmpty) ...[
+                Text(
+                  'Understanding Net Worth',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: SpacingTokens.sm),
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(SpacingTokens.md),
+                    child: Text(
+                      'Net worth summarizes all active accounts in your plan. '
+                      'Use it as a simple snapshot of where you stand today: '
+                      'assets minus liabilities.',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ],
           );
         },

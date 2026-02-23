@@ -3,8 +3,12 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
+import 'package:openbudget_app/src/features/budget/providers/age_of_money_provider.dart';
+import 'package:openbudget_app/src/features/reports/providers/net_worth_provider.dart';
 import 'package:openbudget_app/src/features/reports/providers/spending_report_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
+import 'package:openbudget_app/src/theme/openbudget_palette.dart';
+import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
@@ -25,185 +29,99 @@ class ReportsScreen extends HookConsumerWidget {
     final reportAsync = ref.watch(
       spendingReportProvider(budgetId, selectedYear.value, selectedMonth.value),
     );
+    final netWorthAsync = ref.watch(netWorthProvider(budgetId));
+    final ageOfMoneyAsync = ref.watch(ageOfMoneyProvider(budgetId));
 
     return Scaffold(
+      backgroundColor: OpenBudgetPalette.appBackground,
       appBar: AppBar(
-        title: Text(l10n.reportsTitle),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.category_rounded),
-            tooltip: l10n.categoryTrendsTitle,
-            onPressed: () => context.pushNamed(
-              categoryTrendsRoute,
-              pathParameters: {'id': budgetId},
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.store_rounded),
-            tooltip: l10n.spendingByPayeeTitle,
-            onPressed: () => context.pushNamed(
+        backgroundColor: OpenBudgetPalette.appBackground,
+        surfaceTintColor: Colors.transparent,
+        title: Text(l10n.tabReflect),
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(SpacingTokens.md),
+        children: [
+          _ReflectCard(
+            title: l10n.spendingByPayeeBreakdown,
+            icon: Icons.pie_chart_rounded,
+            onTap: () => context.pushNamed(
               spendingByPayeeRoute,
               pathParameters: {'id': budgetId},
             ),
+            child: reportAsync.when(
+              loading: () => const SizedBox(
+                height: 120,
+                child: Center(child: CircularProgressIndicator()),
+              ),
+              error: (error, _) => Text(
+                error.toString(),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.error,
+                ),
+              ),
+              data: (report) => _SpendingBreakdownPreview(
+                report: report,
+                monthLabel: _monthName(
+                  l10n,
+                  selectedMonth.value,
+                  selectedYear.value,
+                ),
+              ),
+            ),
           ),
-          IconButton(
-            icon: const Icon(Icons.account_balance_wallet_rounded),
-            tooltip: l10n.netWorthTitle,
-            onPressed: () => context.pushNamed(
+          const SizedBox(height: SpacingTokens.md),
+          _ReflectCard(
+            title: l10n.netWorthTitle,
+            icon: Icons.account_balance_rounded,
+            onTap: () => context.pushNamed(
               netWorthRoute,
               pathParameters: {'id': budgetId},
             ),
+            child: netWorthAsync.when(
+              loading: () => const SizedBox(
+                height: 120,
+                child: Center(child: CircularProgressIndicator()),
+              ),
+              error: (error, _) => Text(
+                error.toString(),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.error,
+                ),
+              ),
+              data: (data) => _NetWorthPreview(data: data),
+            ),
           ),
-          IconButton(
-            icon: const Icon(Icons.trending_up_rounded),
-            tooltip: l10n.spendingTrendsTitle,
-            onPressed: () => context.pushNamed(
+          const SizedBox(height: SpacingTokens.md),
+          _ReflectCard(
+            title: l10n.ageOfMoneyLabel(ageOfMoneyAsync.value ?? 0),
+            icon: Icons.schedule_rounded,
+            onTap: () => context.pushNamed(
               spendingTrendsRoute,
               pathParameters: {'id': budgetId},
             ),
+            child: ageOfMoneyAsync.when(
+              loading: () => const SizedBox(
+                height: 88,
+                child: Center(child: CircularProgressIndicator()),
+              ),
+              error: (error, _) => Text(
+                error.toString(),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.error,
+                ),
+              ),
+              data: (days) => _AgeOfMoneyPreview(days: days),
+            ),
           ),
-          IconButton(
-            icon: const Icon(Icons.compare_arrows_rounded),
-            tooltip: l10n.comparisonTitle,
+          const SizedBox(height: SpacingTokens.sm),
+          TextButton.icon(
             onPressed: () => context.pushNamed(
               multiMonthComparisonRoute,
               pathParameters: {'id': budgetId},
             ),
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: SpacingTokens.md,
-              vertical: SpacingTokens.sm,
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                IconButton(
-                  onPressed: () {
-                    if (selectedMonth.value == 1) {
-                      selectedMonth.value = 12;
-                      selectedYear.value--;
-                    } else {
-                      selectedMonth.value--;
-                    }
-                  },
-                  icon: const Icon(Icons.chevron_left),
-                ),
-                Text(
-                  _monthName(l10n, selectedMonth.value, selectedYear.value),
-                  style: theme.textTheme.titleMedium,
-                ),
-                IconButton(
-                  onPressed: () {
-                    if (selectedMonth.value == 12) {
-                      selectedMonth.value = 1;
-                      selectedYear.value++;
-                    } else {
-                      selectedMonth.value++;
-                    }
-                  },
-                  icon: const Icon(Icons.chevron_right),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: reportAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, _) => Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.error_outline_rounded,
-                      size: 48,
-                      color: colorScheme.error,
-                    ),
-                    const SizedBox(height: SpacingTokens.md),
-                    Text(
-                      l10n.reportsLoadError,
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        color: colorScheme.error,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              data: (report) {
-                final currency = CurrencyCode.values.firstWhere(
-                  (c) => c.code == report.currencyCode,
-                  orElse: () => CurrencyCode.usd,
-                );
-
-                return ListView(
-                  padding: const EdgeInsets.all(SpacingTokens.md),
-                  children: [
-                    _SummaryCard(
-                      report: report,
-                      currency: currency,
-                      l10n: l10n,
-                    ),
-                    const SizedBox(height: SpacingTokens.md),
-                    if (report.categorySpending.isNotEmpty)
-                      ...[
-                        Text(
-                          l10n.reportsSpendingByCategory,
-                          style: theme.textTheme.titleMedium,
-                        ),
-                        const SizedBox(height: SpacingTokens.sm),
-                        ...report.categorySpending.entries.toList()
-                          ..sort((a, b) => b.value.compareTo(a.value)),
-                      ].map((entry) {
-                        if (entry is MapEntry<String, int>) {
-                          return _CategorySpendingBar(
-                            categoryName: entry.key,
-                            amountCents: entry.value,
-                            maxCents: report.totalExpenses,
-                            currency: currency,
-                            colorScheme: colorScheme,
-                          );
-                        }
-                        return entry as Widget;
-                      }),
-                    if (report.categorySpending.isEmpty &&
-                        report.transactionCount == 0)
-                      Center(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: SpacingTokens.xl,
-                          ),
-                          child: Column(
-                            children: [
-                              Icon(
-                                Icons.bar_chart_rounded,
-                                size: 48,
-                                color: colorScheme.outlineVariant,
-                              ),
-                              const SizedBox(height: SpacingTokens.md),
-                              Text(
-                                l10n.reportsEmptyTitle,
-                                style: theme.textTheme.titleMedium,
-                              ),
-                              const SizedBox(height: SpacingTokens.sm),
-                              Text(
-                                l10n.reportsEmptySubtitle,
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: colorScheme.onSurfaceVariant,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                  ],
-                );
-              },
-            ),
+            icon: const Icon(Icons.compare_arrows_rounded),
+            label: Text(l10n.comparisonTitle),
           ),
         ],
       ),
@@ -230,105 +148,251 @@ class ReportsScreen extends HookConsumerWidget {
   }
 }
 
-class _SummaryCard extends HookWidget {
-  const _SummaryCard({
-    required this.report,
-    required this.currency,
-    required this.l10n,
+class _ReflectCard extends StatelessWidget {
+  const _ReflectCard({
+    required this.title,
+    required this.icon,
+    required this.child,
+    required this.onTap,
   });
 
-  final SpendingReport report;
-  final CurrencyCode currency;
-  final AppLocalizations l10n;
+  final String title;
+  final IconData icon;
+  final Widget child;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final divisor = _pow10(currency.decimals);
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(SpacingTokens.md),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: _MetricTile(
-                    label: l10n.reportsIncome,
-                    value:
-                        '${currency.symbol}${(report.totalIncome / divisor).toStringAsFixed(currency.decimals)}',
-                    color: colorScheme.primary,
+    return Material(
+      color: OpenBudgetPalette.surface,
+      borderRadius: BorderRadius.circular(RadiusTokens.md),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(SpacingTokens.md),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Icon(icon, color: OpenBudgetPalette.accentBlue, size: 18),
+                  const SizedBox(width: SpacingTokens.xs),
+                  Text(
+                    title,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      color: OpenBudgetPalette.accentBlue,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
-                ),
-                Expanded(
-                  child: _MetricTile(
-                    label: l10n.reportsExpenses,
-                    value:
-                        '${currency.symbol}${(report.totalExpenses / divisor).toStringAsFixed(currency.decimals)}',
-                    color: colorScheme.error,
-                  ),
-                ),
-              ],
-            ),
-            const Divider(),
-            Row(
-              children: [
-                Expanded(
-                  child: _MetricTile(
-                    label: l10n.reportsNetIncome,
-                    value:
-                        '${report.netIncome >= 0 ? '+' : '-'}${currency.symbol}${(report.netIncome.abs() / divisor).toStringAsFixed(currency.decimals)}',
-                    color: report.netIncome >= 0
-                        ? colorScheme.primary
-                        : colorScheme.error,
-                  ),
-                ),
-                Expanded(
-                  child: _MetricTile(
-                    label: l10n.reportsTransactions,
-                    value: report.transactionCount.toString(),
-                    color: colorScheme.onSurface,
-                  ),
-                ),
-              ],
-            ),
-          ],
+                  const Spacer(),
+                  const Icon(Icons.chevron_right_rounded),
+                ],
+              ),
+              const SizedBox(height: SpacingTokens.sm),
+              child,
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-class _MetricTile extends HookWidget {
-  const _MetricTile({
-    required this.label,
-    required this.value,
-    required this.color,
+class _SpendingBreakdownPreview extends StatelessWidget {
+  const _SpendingBreakdownPreview({
+    required this.report,
+    required this.monthLabel,
   });
 
-  final String label;
-  final String value;
-  final Color color;
+  final SpendingReport report;
+  final String monthLabel;
+
+  static const _barColors = <Color>[
+    Color(0xFF5962F1),
+    Color(0xFF8FD23A),
+    Color(0xFFE9C022),
+    Color(0xFFCC606B),
+    Color(0xFF6E7CFF),
+    Color(0xFFCACAF8),
+  ];
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final sortedEntries = report.categorySpending.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+    final categories = sortedEntries.take(6).toList();
+    final currency = CurrencyCode.values.firstWhere(
+      (code) => code.code == report.currencyCode,
+      orElse: () => CurrencyCode.usd,
+    );
+    final totalCents = categories.fold<int>(0, (sum, item) => sum + item.value);
+
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          label,
-          style: theme.textTheme.labelMedium?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
+          monthLabel,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: OpenBudgetPalette.mutedText,
           ),
         ),
         const SizedBox(height: SpacingTokens.xs),
         Text(
-          value,
-          style: theme.textTheme.titleLarge?.copyWith(
-            color: color,
-            fontWeight: FontWeight.w600,
+          formatCents(report.totalExpenses, currency),
+          style: theme.textTheme.headlineMedium?.copyWith(
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        if (categories.isEmpty) ...[
+          const SizedBox(height: SpacingTokens.sm),
+          Text(
+            AppLocalizations.of(context).reportsEmptySubtitle,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: OpenBudgetPalette.mutedText,
+            ),
+          ),
+        ] else ...[
+          const SizedBox(height: SpacingTokens.md),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(6),
+            child: SizedBox(
+              height: 18,
+              child: Row(
+                children: [
+                  for (var index = 0; index < categories.length; index++)
+                    Expanded(
+                      flex: categories[index].value,
+                      child: Container(color: _barColors[index]),
+                    ),
+                  if (report.totalExpenses > totalCents)
+                    Expanded(
+                      flex: report.totalExpenses - totalCents,
+                      child: Container(color: OpenBudgetPalette.surfaceMuted),
+                    ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: SpacingTokens.sm),
+          Text(
+            AppLocalizations.of(context).reportsSpendingByCategory,
+            style: theme.textTheme.labelLarge?.copyWith(
+              color: OpenBudgetPalette.mutedText,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: SpacingTokens.xs),
+          for (var index = 0; index < categories.length; index++)
+            Padding(
+              padding: const EdgeInsets.only(bottom: SpacingTokens.xs),
+              child: Row(
+                children: [
+                  Container(
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: _barColors[index],
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: SpacingTokens.xs),
+                  Expanded(
+                    child: Text(
+                      categories[index].key,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodyMedium,
+                    ),
+                  ),
+                  Text(
+                    formatCents(categories[index].value, currency),
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ],
+    );
+  }
+}
+
+class _NetWorthPreview extends StatelessWidget {
+  const _NetWorthPreview({required this.data});
+
+  final NetWorthData data;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final primary = data.currencyBreakdown.firstOrNull;
+    final currency = primary?.currency ?? CurrencyCode.usd;
+    final assets = primary?.totalAssets ?? 0;
+    final liabilities = primary?.totalLiabilities ?? 0;
+    final netWorth = primary?.netWorth ?? 0;
+    final maxAbs = [
+      assets.abs(),
+      liabilities.abs(),
+      netWorth.abs(),
+    ].reduce((a, b) => a > b ? a : b);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          formatCents(netWorth, currency),
+          style: theme.textTheme.headlineMedium?.copyWith(
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        const SizedBox(height: SpacingTokens.sm),
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                '${AppLocalizations.of(context).netWorthAssets} ${formatCents(assets, currency)}',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: OpenBudgetPalette.accentBlue,
+                ),
+              ),
+            ),
+            Expanded(
+              child: Text(
+                '${AppLocalizations.of(context).netWorthLiabilities} ${formatCents(liabilities, currency)}',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: OpenBudgetPalette.negative,
+                ),
+                textAlign: TextAlign.right,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: SpacingTokens.sm),
+        SizedBox(
+          height: 80,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Expanded(
+                child: _Bar(
+                  fraction: maxAbs == 0 ? 0 : assets.abs() / maxAbs,
+                  color: OpenBudgetPalette.accentBlue,
+                  label: AppLocalizations.of(context).netWorthAssets,
+                ),
+              ),
+              const SizedBox(width: SpacingTokens.sm),
+              Expanded(
+                child: _Bar(
+                  fraction: maxAbs == 0 ? 0 : liabilities.abs() / maxAbs,
+                  color: OpenBudgetPalette.negative,
+                  label: AppLocalizations.of(context).netWorthLiabilities,
+                ),
+              ),
+            ],
           ),
         ),
       ],
@@ -336,64 +400,86 @@ class _MetricTile extends HookWidget {
   }
 }
 
-class _CategorySpendingBar extends HookWidget {
-  const _CategorySpendingBar({
-    required this.categoryName,
-    required this.amountCents,
-    required this.maxCents,
-    required this.currency,
-    required this.colorScheme,
+class _Bar extends StatelessWidget {
+  const _Bar({
+    required this.fraction,
+    required this.color,
+    required this.label,
   });
 
-  final String categoryName;
-  final int amountCents;
-  final int maxCents;
-  final CurrencyCode currency;
-  final ColorScheme colorScheme;
+  final double fraction;
+  final Color color;
+  final String label;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final divisor = _pow10(currency.decimals);
-    final fraction = maxCents > 0 ? amountCents / maxCents : 0.0;
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: SpacingTokens.sm),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(categoryName, style: theme.textTheme.bodyMedium),
-              Text(
-                '${currency.symbol}${(amountCents / divisor).toStringAsFixed(currency.decimals)}',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: FractionallySizedBox(
+              heightFactor: fraction < 0.02
+                  ? 0.02
+                  : (fraction > 1 ? 1 : fraction),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: color.withAlpha(190),
+                  borderRadius: BorderRadius.circular(8),
                 ),
               ),
-            ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: OpenBudgetPalette.mutedText,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
+    );
+  }
+}
+
+class _AgeOfMoneyPreview extends StatelessWidget {
+  const _AgeOfMoneyPreview({required this.days});
+
+  final int? days;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final displayDays = days ?? 0;
+    final suffix = displayDays == 1 ? 'day' : 'days';
+    return SizedBox(
+      height: 88,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            '$displayDays $suffix',
+            style: theme.textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.w800,
+            ),
           ),
           const SizedBox(height: SpacingTokens.xs),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(
-              value: fraction,
-              minHeight: 8,
-              backgroundColor: colorScheme.surfaceContainerHighest,
-              valueColor: AlwaysStoppedAnimation(colorScheme.primary),
+          Text(
+            days == null
+                ? AppLocalizations.of(context).reportsEmptySubtitle
+                : AppLocalizations.of(context).ageOfMoneyLabel(displayDays),
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: OpenBudgetPalette.mutedText,
             ),
           ),
         ],
       ),
     );
   }
-}
-
-double _pow10(int exponent) {
-  var result = 1.0;
-  for (var i = 0; i < exponent; i++) {
-    result *= 10;
-  }
-  return result;
 }

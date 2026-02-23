@@ -1,6 +1,6 @@
 # OpenBudget UI Migration Tracker (from `~/Downloads/ynab-ui`)
 
-Last updated: 2026-02-23 (Patrol integration + account success + reorder parity)
+Last updated: 2026-02-23 (Reflect dashboard + spending breakdown/net worth parity + Patrol coverage)
 
 ## Scope
 
@@ -10,7 +10,7 @@ Last updated: 2026-02-23 (Patrol integration + account success + reorder parity)
 
 ## Progress Snapshot
 
-- Overall migration progress: **~98%**
+- Overall migration progress: **~99%**
 - Core plan/settings/auth/navigation flows: **implemented**
 - Advanced accounts/transactions/reports flows: **in progress**
 
@@ -61,6 +61,17 @@ Last updated: 2026-02-23 (Patrol integration + account success + reorder parity)
   - [x] Rename/Hide/Delete actions
   - [x] Snooze toggle
 - [x] Reorder categories flow parity
+- [x] Reflect dashboard parity:
+  - [x] Spending Breakdown preview card
+  - [x] Net Worth preview card
+  - [x] Age of Money preview card
+- [x] Spending Breakdown detail parity pass:
+  - [x] Month/Preset controls
+  - [x] Category distribution strip and list
+  - [x] Positive inflow summary
+- [x] Net Worth detail visual parity pass:
+  - [x] Current total + assets/liabilities summary
+  - [x] Understanding Net Worth explainer block
 
 ## In Progress
 
@@ -93,8 +104,9 @@ Last updated: 2026-02-23 (Patrol integration + account success + reorder parity)
   - [x] Reorder categories flow parity
   - [ ] Hide category flow polish
 - [ ] Reports and analysis parity
-  - [ ] Net worth visual parity
-  - [ ] Spending breakdown parity
+  - [x] Net worth visual parity
+  - [x] Spending breakdown parity
+  - [ ] Multi-month/preset advanced analytics polish
 - [ ] Appearance/system flows
   - [ ] Dark mode parity pass
   - [ ] App icon switching parity pass
@@ -124,4 +136,5 @@ Last updated: 2026-02-23 (Patrol integration + account success + reorder parity)
 - [x] Integration CI hardened to detect failure markers / no-tests-ran false-green output
 - [x] Integration tests migrated to Patrol (`patrolWidgetTest`) across all flow files
 - [x] Integration coverage for opening custom target editor and validating Save button enablement
+- [x] Integration coverage for Reflect dashboard -> Spending Breakdown + Net Worth flows
 - [ ] Expand integration tests for remaining pending batches above

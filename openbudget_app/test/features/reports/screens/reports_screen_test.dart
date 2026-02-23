@@ -1,16 +1,25 @@
 // UuidValue is needed for constructing test model data.
 // ignore_for_file: experimental_member_use
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
+import 'package:openbudget_app/src/features/budget/providers/age_of_money_provider.dart';
+import 'package:openbudget_app/src/features/reports/providers/net_worth_provider.dart';
 import 'package:openbudget_app/src/features/reports/providers/spending_report_provider.dart';
 import 'package:openbudget_app/src/features/reports/screens/reports_screen.dart';
+import 'package:openbudget_client/openbudget_client.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 const _budgetId = 'test-budget-id';
+final _budgetUuid = UuidValue.fromString(
+  '00000000-0000-0000-0000-000000000901',
+);
 
 SpendingReport _makeReport({
   int totalIncome = 0,
@@ -30,304 +39,162 @@ SpendingReport _makeReport({
   );
 }
 
+NetWorthData _makeNetWorthData() {
+  final checking = Account(
+    id: UuidValue.fromString('00000000-0000-0000-0000-000000000902'),
+    name: 'Checking',
+    accountType: 'checking',
+    balanceCents: 5222000,
+    currencyCode: 'USD',
+    budgetId: _budgetUuid,
+    onBudget: true,
+    sortOrder: 0,
+    isClosed: false,
+  );
+  final creditCard = Account(
+    id: UuidValue.fromString('00000000-0000-0000-0000-000000000903'),
+    name: 'Credit Card',
+    accountType: 'creditCard',
+    balanceCents: -125,
+    currencyCode: 'USD',
+    budgetId: _budgetUuid,
+    onBudget: true,
+    sortOrder: 1,
+    isClosed: false,
+  );
+  return NetWorthData(
+    totalAssets: 5222000,
+    totalLiabilities: -125,
+    netWorth: 5221875,
+    assetAccounts: [checking],
+    liabilityAccounts: [creditCard],
+    currencyCode: 'USD',
+    currencyBreakdown: [
+      CurrencyNetWorthData(
+        currency: CurrencyCode.usd,
+        totalAssets: 5222000,
+        totalLiabilities: -125,
+        assetAccounts: [checking],
+        liabilityAccounts: [creditCard],
+      ),
+    ],
+  );
+}
+
+Widget _buildSubject({
+  required Future<SpendingReport> Function(Ref ref, (String, int, int) args)
+  spendingBuilder,
+  Future<NetWorthData> Function(Ref ref, String budgetId)? netWorthBuilder,
+  Future<int?> Function(Ref ref, String budgetId)? ageBuilder,
+}) {
+  return ProviderScope(
+    overrides: [
+      spendingReportProvider.overrideWith(spendingBuilder),
+      netWorthProvider.overrideWith(
+        netWorthBuilder ?? (ref, _) async => _makeNetWorthData(),
+      ),
+      ageOfMoneyProvider.overrideWith(ageBuilder ?? (ref, _) async => 2),
+    ],
+    child: MaterialApp(
+      theme: OpenBudgetTheme.light,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: const ReportsScreen(budgetId: _budgetId),
+    ),
+  );
+}
+
 void main() {
   setUpAll(() {
     GoogleFonts.config.allowRuntimeFetching = false;
   });
 
   group('ReportsScreen', () {
-    testWidgets('renders loading indicator while report loads', (tester) async {
+    testWidgets('renders loading indicator while spending preview loads', (
+      tester,
+    ) async {
+      final completer = Completer<SpendingReport>();
       await tester.pumpWidget(
-        ProviderScope(
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const ReportsScreen(budgetId: _budgetId),
-          ),
+        _buildSubject(
+          spendingBuilder: (ref, args) => completer.future,
+          netWorthBuilder: (ref, _) => Future.value(_makeNetWorthData()),
+          ageBuilder: (ref, _) => Future.value(2),
         ),
       );
       await tester.pump();
 
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.byType(CircularProgressIndicator), findsWidgets);
     });
 
-    testWidgets('renders error state with error icon', (tester) async {
+    testWidgets('renders reflect dashboard cards', (tester) async {
       await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            spendingReportProvider.overrideWith(
-              (ref, args) => throw Exception('Could not load report data'),
-            ),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const ReportsScreen(budgetId: _budgetId),
+        _buildSubject(
+          spendingBuilder: (ref, args) async => _makeReport(
+            totalIncome: 800000,
+            totalExpenses: 222000,
+            transactionCount: 8,
+            categorySpending: {
+              'Rent': 120000,
+              'Utilities': 60000,
+              'Groceries': 42000,
+            },
           ),
         ),
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Could not load report data'), findsOneWidget);
-      expect(find.byIcon(Icons.error_outline_rounded), findsOneWidget);
+      expect(find.text('Reflect'), findsOneWidget);
+      expect(find.text('Spending Breakdown'), findsOneWidget);
+      expect(find.text('Net Worth'), findsOneWidget);
+      expect(find.textContaining(r'$2,220.00'), findsWidgets);
+      expect(find.textContaining(r'$52,218.75'), findsWidgets);
     });
 
-    testWidgets('renders empty state when no transactions', (tester) async {
+    testWidgets('renders spending categories in preview card', (tester) async {
       await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            spendingReportProvider.overrideWith(
-              (ref, args) async => _makeReport(),
-            ),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const ReportsScreen(budgetId: _budgetId),
+        _buildSubject(
+          spendingBuilder: (ref, args) async => _makeReport(
+            totalExpenses: 145000,
+            transactionCount: 5,
+            categorySpending: {
+              'Rent': 100000,
+              'Utilities': 30000,
+              'Groceries': 15000,
+            },
           ),
         ),
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('No Data Yet'), findsOneWidget);
-      expect(
-        find.text('Add transactions to see spending reports for this month'),
-        findsOneWidget,
-      );
-      expect(find.byIcon(Icons.bar_chart_rounded), findsOneWidget);
-    });
-
-    testWidgets('renders app bar with reports title', (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            spendingReportProvider.overrideWith(
-              (ref, args) async => _makeReport(),
-            ),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const ReportsScreen(budgetId: _budgetId),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.text('Reports'), findsOneWidget);
-    });
-
-    testWidgets('renders month navigation with previous and next buttons', (
-      tester,
-    ) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            spendingReportProvider.overrideWith(
-              (ref, args) async => _makeReport(),
-            ),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const ReportsScreen(budgetId: _budgetId),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.byIcon(Icons.chevron_left), findsOneWidget);
-      expect(find.byIcon(Icons.chevron_right), findsOneWidget);
-    });
-
-    testWidgets('renders summary card with income label', (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            spendingReportProvider.overrideWith(
-              (ref, args) async => _makeReport(
-                totalIncome: 300000,
-                totalExpenses: 150000,
-                transactionCount: 5,
-              ),
-            ),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const ReportsScreen(budgetId: _budgetId),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.text('Income'), findsOneWidget);
-    });
-
-    testWidgets('renders summary card with expenses label', (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            spendingReportProvider.overrideWith(
-              (ref, args) async => _makeReport(
-                totalIncome: 300000,
-                totalExpenses: 150000,
-                transactionCount: 5,
-              ),
-            ),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const ReportsScreen(budgetId: _budgetId),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.text('Expenses'), findsOneWidget);
-    });
-
-    testWidgets('renders summary card with net income label', (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            spendingReportProvider.overrideWith(
-              (ref, args) async => _makeReport(
-                totalIncome: 300000,
-                totalExpenses: 150000,
-                transactionCount: 5,
-              ),
-            ),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const ReportsScreen(budgetId: _budgetId),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.text('Net Income'), findsOneWidget);
-    });
-
-    testWidgets('renders summary card with transactions label', (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            spendingReportProvider.overrideWith(
-              (ref, args) async => _makeReport(
-                totalIncome: 300000,
-                totalExpenses: 150000,
-                transactionCount: 5,
-              ),
-            ),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const ReportsScreen(budgetId: _budgetId),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.text('Transactions'), findsOneWidget);
-    });
-
-    testWidgets('renders category spending section when categories present', (
-      tester,
-    ) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            spendingReportProvider.overrideWith(
-              (ref, args) async => _makeReport(
-                totalIncome: 500000,
-                totalExpenses: 200000,
-                transactionCount: 8,
-                categorySpending: {
-                  'Groceries': 80000,
-                  'Transport': 50000,
-                  'Entertainment': 70000,
-                },
-              ),
-            ),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const ReportsScreen(budgetId: _budgetId),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.text('Spending by Category'), findsOneWidget);
+      expect(find.text('Rent'), findsOneWidget);
+      expect(find.text('Utilities'), findsOneWidget);
       expect(find.text('Groceries'), findsOneWidget);
-      expect(find.text('Transport'), findsOneWidget);
-      expect(find.text('Entertainment'), findsOneWidget);
     });
 
-    testWidgets('renders spending bars for each category', (tester) async {
+    testWidgets('renders spending error text when report fails', (
+      tester,
+    ) async {
       await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            spendingReportProvider.overrideWith(
-              (ref, args) async => _makeReport(
-                totalExpenses: 100000,
-                transactionCount: 3,
-                categorySpending: {'Food': 60000, 'Bills': 40000},
-              ),
-            ),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const ReportsScreen(budgetId: _budgetId),
-          ),
+        _buildSubject(
+          spendingBuilder: (ref, args) =>
+              Future.error(Exception('Could not load report data')),
         ),
       );
       await tester.pumpAndSettle();
 
-      expect(find.byType(LinearProgressIndicator), findsWidgets);
+      expect(find.textContaining('Could not load report data'), findsOneWidget);
     });
 
-    testWidgets('renders action icons in app bar', (tester) async {
+    testWidgets('renders age of money preview with days', (tester) async {
       await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            spendingReportProvider.overrideWith(
-              (ref, args) async => _makeReport(),
-            ),
-          ],
-          child: MaterialApp(
-            theme: OpenBudgetTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const ReportsScreen(budgetId: _budgetId),
-          ),
+        _buildSubject(
+          spendingBuilder: (ref, args) async => _makeReport(),
+          ageBuilder: (ref, _) async => 7,
         ),
       );
       await tester.pumpAndSettle();
 
-      expect(find.byIcon(Icons.category_rounded), findsOneWidget);
-      expect(find.byIcon(Icons.store_rounded), findsOneWidget);
-      expect(find.byIcon(Icons.account_balance_wallet_rounded), findsOneWidget);
-      expect(find.byIcon(Icons.trending_up_rounded), findsOneWidget);
-      expect(find.byIcon(Icons.compare_arrows_rounded), findsOneWidget);
+      expect(find.text('7 days'), findsOneWidget);
     });
   });
 }
