@@ -3,11 +3,13 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/accounts/screens/add_account_screen.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
+import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
@@ -27,50 +29,78 @@ void main() {
   );
 
   Widget buildSubject({String currencyCode = 'USD'}) {
+    final router = GoRouter(
+      initialLocation: '/budgets/$budgetId/accounts/add',
+      routes: [
+        GoRoute(
+          name: addAccountRoute,
+          path: '/budgets/:id/accounts/add',
+          builder: (context, state) =>
+              AddAccountScreen(budgetId: state.pathParameters['id']!),
+        ),
+        GoRoute(
+          name: accountListRoute,
+          path: '/budgets/:id/accounts',
+          builder: (_, __) => const Scaffold(body: Text('Account List')),
+        ),
+      ],
+    );
+
     return ProviderScope(
       overrides: [
         budgetDetailProvider.overrideWith(
           (ref, id) async => makeBudget(currencyCode: currencyCode),
         ),
       ],
-      child: MaterialApp(
+      child: MaterialApp.router(
         theme: OpenBudgetTheme.light,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: const AddAccountScreen(budgetId: budgetId),
+        routerConfig: router,
       ),
     );
   }
 
-  testWidgets('renders currency selector', (tester) async {
+  testWidgets('renders bank search entry step', (tester) async {
     await tester.pumpWidget(buildSubject());
     await tester.pumpAndSettle();
 
-    expect(find.text('Currency'), findsOneWidget);
-    expect(find.byType(DropdownButtonFormField<String>), findsOneWidget);
+    expect(find.text('Add Accounts'), findsOneWidget);
+    expect(find.text('Search for your bank'), findsOneWidget);
+    expect(find.text('Popular Options'), findsOneWidget);
+    expect(find.text('Add an Unlinked Account'), findsOneWidget);
   });
 
-  testWidgets('uses budget currency as initial account currency', (
+  testWidgets('renders currency selector in unlinked account step', (
     tester,
   ) async {
     await tester.pumpWidget(buildSubject(currencyCode: 'EUR'));
     await tester.pumpAndSettle();
 
+    await tester.tap(find.text('Add an Unlinked Account'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Add Unlinked Account'), findsOneWidget);
+    expect(find.text('Currency'), findsOneWidget);
     expect(find.text('EUR (€)'), findsOneWidget);
+    expect(find.byType(DropdownButtonFormField<String>), findsOneWidget);
   });
 
-  testWidgets('currency dropdown includes supported currencies', (
+  testWidgets('account type picker can be opened from unlinked form', (
     tester,
   ) async {
     await tester.pumpWidget(buildSubject());
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text(r'USD ($)'));
+    await tester.tap(find.text('Add an Unlinked Account'));
     await tester.pumpAndSettle();
 
-    expect(find.text('EUR (€)'), findsOneWidget);
-    expect(find.text('GBP (£)'), findsOneWidget);
-    expect(find.text('JPY (¥)'), findsOneWidget);
-    expect(find.text('BTC (₿)'), findsOneWidget);
+    await tester.tap(find.text('Checking'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Select Account Type'), findsOneWidget);
+    expect(find.text('Cash Accounts'), findsOneWidget);
+    expect(find.text('Credit Accounts'), findsOneWidget);
+    expect(find.text('Mortgages and Loans'), findsOneWidget);
   });
 }

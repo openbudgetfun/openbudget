@@ -1,6 +1,6 @@
 # OpenBudget UI Migration Tracker (from `~/Downloads/ynab-ui`)
 
-Last updated: 2026-02-23 (late, menu transition polish)
+Last updated: 2026-02-23 (accounts wizard + search flow)
 
 ## Scope
 
@@ -10,7 +10,7 @@ Last updated: 2026-02-23 (late, menu transition polish)
 
 ## Progress Snapshot
 
-- Overall migration progress: **~70%**
+- Overall migration progress: **~75%**
 - Core plan/settings/auth/navigation flows: **implemented**
 - Advanced accounts/transactions/reports flows: **in progress**
 
@@ -60,8 +60,8 @@ Last updated: 2026-02-23 (late, menu transition polish)
 ## Pending Flows (Next Batches)
 
 - [ ] Accounts flows
-  - [ ] Add account wizard parity
-  - [ ] Search bank flow
+  - [x] Add account wizard parity
+  - [x] Search bank flow
   - [ ] Account details (cash/loan)
   - [ ] Reconcile account
   - [ ] Delete account
@@ -90,5 +90,6 @@ Last updated: 2026-02-23 (late, menu transition polish)
 - [x] Integration coverage for Undo + recent-moves source chip drilldown
 - [x] Integration coverage for onboarding account CTA routing
 - [x] Integration coverage for plan month switching
+- [x] Integration coverage for add-account wizard/search flow
 - [x] Integration CI configured to fail on any individual integration test failure
 - [ ] Expand integration tests for remaining pending batches above

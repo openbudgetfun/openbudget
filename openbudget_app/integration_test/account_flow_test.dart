@@ -150,7 +150,7 @@ void main() {
     expect(find.textContaining('EUR'), findsWidgets);
   });
 
-  testWidgets('empty accounts flow navigates to add account with currencies', (
+  testWidgets('empty accounts flow navigates through add account wizard', (
     tester,
   ) async {
     await tester.pumpWidget(_buildApp(accounts: const []));
@@ -158,6 +158,13 @@ void main() {
 
     expect(find.text('No Accounts Yet'), findsOneWidget);
     await tester.tap(find.text('Add Account'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Add Accounts'), findsOneWidget);
+    expect(find.text('Search for your bank'), findsOneWidget);
+    expect(find.text('Add an Unlinked Account'), findsOneWidget);
+
+    await tester.tap(find.text('Add an Unlinked Account'));
     await tester.pumpAndSettle();
 
     expect(find.text('Currency'), findsOneWidget);
@@ -168,6 +175,26 @@ void main() {
 
     expect(find.text('EUR (€)'), findsOneWidget);
     expect(find.text('GBP (£)'), findsOneWidget);
+  });
+
+  testWidgets('bank search shortcut moves user to unlinked account flow', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_buildApp(accounts: const []));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Add Account'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Chase'));
+    await tester.pump(const Duration(milliseconds: 900));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Add Unlinked Account'), findsOneWidget);
+    expect(
+      find.textContaining('Linked connections for "Chase" are coming soon'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('account detail flow navigates to detail and back to list', (
