@@ -19,8 +19,6 @@ dependencies:
   google_fonts: ^8.0.1
   openbudget_core:
     path: ../openbudget_core
-  openbudget_wired:
-    path: ../openbudget_wired
 
 dev_dependencies:
   flutter_test:

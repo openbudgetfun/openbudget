@@ -165,7 +165,7 @@ in
     "serverpod" = {
       exec = ''
         set -e
-        dart run serverpod $@
+        dart run serverpod_cli $@
       '';
       description = "Run the serverpod cli.";
     };
@@ -211,7 +211,7 @@ in
     "test:all" = {
       exec = ''
         set -e
-        melos run test:flutter --no-select
+        test:flutter
         melos exec --scope="openbudget_core" -- dart test
       '';
       description = "Run tests in all packages.";
