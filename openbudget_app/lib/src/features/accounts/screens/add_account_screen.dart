@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
@@ -11,7 +13,13 @@ import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
-enum _AddAccountStep { searchBank, unlinkedAccount, accountType, success }
+enum _AddAccountStep {
+  loading,
+  searchBank,
+  unlinkedAccount,
+  accountType,
+  success,
+}
 
 class AddAccountScreen extends HookConsumerWidget {
   const AddAccountScreen({required this.budgetId, super.key});
@@ -23,7 +31,7 @@ class AddAccountScreen extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final step = useState(_AddAccountStep.searchBank);
+    final step = useState(_AddAccountStep.loading);
     final nameController = useTextEditingController();
     final balanceController = useTextEditingController();
     final searchController = useTextEditingController();
@@ -57,6 +65,16 @@ class AddAccountScreen extends HookConsumerWidget {
 
     useListenable(nameController);
     useListenable(balanceController);
+
+    useEffect(() {
+      if (step.value != _AddAccountStep.loading) return null;
+      final timer = Timer(const Duration(milliseconds: 900), () {
+        if (context.mounted) {
+          step.value = _AddAccountStep.searchBank;
+        }
+      });
+      return timer.cancel;
+    }, [step.value]);
 
     final balanceValue = double.tryParse(balanceController.text.trim());
     final canSubmit =
@@ -134,6 +152,8 @@ class AddAccountScreen extends HookConsumerWidget {
                 icon: const Icon(Icons.arrow_back_ios_new_rounded),
                 onPressed: () {
                   switch (step.value) {
+                    case _AddAccountStep.loading:
+                      break;
                     case _AddAccountStep.searchBank:
                       break;
                     case _AddAccountStep.unlinkedAccount:
@@ -147,6 +167,7 @@ class AddAccountScreen extends HookConsumerWidget {
               ),
         title: Text(
           switch (step.value) {
+            _AddAccountStep.loading => 'Add Accounts',
             _AddAccountStep.searchBank => 'Add Accounts',
             _AddAccountStep.unlinkedAccount => 'Add Unlinked Account',
             _AddAccountStep.accountType => 'Select Account Type',
@@ -169,6 +190,7 @@ class AddAccountScreen extends HookConsumerWidget {
       body: Stack(
         children: [
           switch (step.value) {
+            _AddAccountStep.loading => const _LoadingStep(),
             _AddAccountStep.searchBank => _BankSearchStep(
               searchController: searchController,
               onSearchSubmitted: startLinkedBankFlow,
@@ -230,6 +252,7 @@ class AddAccountScreen extends HookConsumerWidget {
         ],
       ),
       bottomNavigationBar: switch (step.value) {
+        _AddAccountStep.loading => null,
         _AddAccountStep.unlinkedAccount => SafeArea(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(
@@ -255,6 +278,50 @@ class AddAccountScreen extends HookConsumerWidget {
         _AddAccountStep.success => null,
         _AddAccountStep.searchBank || _AddAccountStep.accountType => null,
       },
+    );
+  }
+}
+
+class _LoadingStep extends StatelessWidget {
+  const _LoadingStep();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: SpacingTokens.xl),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.account_balance_rounded,
+              size: 72,
+              color: theme.colorScheme.primary,
+            ),
+            const SizedBox(height: SpacingTokens.md),
+            Text(
+              'Loading institutions...',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: SpacingTokens.xs),
+            Text(
+              'This might take a few seconds.',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: OpenBudgetPalette.mutedText,
+              ),
+            ),
+            const SizedBox(height: SpacingTokens.lg),
+            const SizedBox(
+              height: 28,
+              width: 28,
+              child: CircularProgressIndicator(strokeWidth: 3),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
