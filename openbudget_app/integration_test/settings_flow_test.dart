@@ -9,8 +9,10 @@ import 'package:integration_test/integration_test.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
 import 'package:openbudget_app/src/features/settings/providers/display_options_provider.dart';
+import 'package:openbudget_app/src/features/settings/screens/account_settings_screen.dart';
 import 'package:openbudget_app/src/features/settings/screens/app_icon_screen.dart';
 import 'package:openbudget_app/src/features/settings/screens/currency_settings_screen.dart';
+import 'package:openbudget_app/src/features/settings/screens/delete_account_screen.dart';
 import 'package:openbudget_app/src/features/settings/screens/display_options_screen.dart';
 import 'package:openbudget_app/src/features/settings/screens/plan_settings_screen.dart';
 import 'package:openbudget_app/src/features/settings/screens/settings_screen.dart';
@@ -72,6 +74,22 @@ void main() {
                 path: 'app-icon',
                 builder: (context, state) =>
                     AppIconScreen(budgetId: state.pathParameters['id']!),
+              ),
+              GoRoute(
+                name: accountSettingsRoute,
+                path: 'account-settings',
+                builder: (context, state) => AccountSettingsScreen(
+                  budgetId: state.pathParameters['id']!,
+                ),
+                routes: [
+                  GoRoute(
+                    name: deleteAccountRoute,
+                    path: 'delete',
+                    builder: (context, state) => DeleteAccountScreen(
+                      budgetId: state.pathParameters['id']!,
+                    ),
+                  ),
+                ],
               ),
               GoRoute(
                 name: displayOptionsRoute,
@@ -166,6 +184,42 @@ void main() {
       );
       expect(container.read(hideAmountsProvider), isTrue);
       expect(container.read(hideProgressBarsProvider), isTrue);
+
+      await tester.tap(find.text('Done'));
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.text('Account Settings'),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Account Settings'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Account Settings'), findsWidgets);
+      await tester.scrollUntilVisible(
+        find.widgetWithText(FilledButton, 'Delete Account'),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.widgetWithText(FilledButton, 'Delete Account'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Confirm Password'), findsOneWidget);
+      await tester.enterText(find.byType(TextField).first, 'password123');
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilledButton, 'Delete Account'));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text(
+          'Your account and data will be completely deleted shortly. '
+          'In rare cases this may take up to an hour.',
+        ),
+        findsOneWidget,
+      );
     },
   );
 }

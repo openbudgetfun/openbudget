@@ -217,8 +217,10 @@ class SettingsScreen extends HookConsumerWidget {
                     icon: Icons.person_rounded,
                     label: l10n.settingsAccountSettings,
                     subtitle: l10n.settingsAccountSettingsHint,
-                    onTap: () =>
-                        _showComingSoon(context, l10n.settingsAccountSettings),
+                    onTap: () => context.goNamed(
+                      accountSettingsRoute,
+                      pathParameters: {'id': budgetId},
+                    ),
                   ),
                   const Divider(height: 1),
                   _SettingsTile(

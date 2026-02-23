@@ -23,8 +23,10 @@ import 'package:openbudget_app/src/features/reports/screens/net_worth_screen.dar
 import 'package:openbudget_app/src/features/reports/screens/reports_screen.dart';
 import 'package:openbudget_app/src/features/reports/screens/spending_by_payee_screen.dart';
 import 'package:openbudget_app/src/features/reports/screens/spending_trends_screen.dart';
+import 'package:openbudget_app/src/features/settings/screens/account_settings_screen.dart';
 import 'package:openbudget_app/src/features/settings/screens/app_icon_screen.dart';
 import 'package:openbudget_app/src/features/settings/screens/currency_settings_screen.dart';
+import 'package:openbudget_app/src/features/settings/screens/delete_account_screen.dart';
 import 'package:openbudget_app/src/features/settings/screens/display_options_screen.dart';
 import 'package:openbudget_app/src/features/settings/screens/plan_settings_screen.dart';
 import 'package:openbudget_app/src/features/settings/screens/settings_screen.dart';
@@ -342,6 +344,24 @@ GoRouter appRouter(Ref ref) {
                               final id = state.pathParameters['id']!;
                               return AppIconScreen(budgetId: id);
                             },
+                          ),
+                          GoRoute(
+                            name: accountSettingsRoute,
+                            path: 'account-settings',
+                            builder: (context, state) {
+                              final id = state.pathParameters['id']!;
+                              return AccountSettingsScreen(budgetId: id);
+                            },
+                            routes: [
+                              GoRoute(
+                                name: deleteAccountRoute,
+                                path: 'delete',
+                                builder: (context, state) {
+                                  final id = state.pathParameters['id']!;
+                                  return DeleteAccountScreen(budgetId: id);
+                                },
+                              ),
+                            ],
                           ),
                           GoRoute(
                             name: displayOptionsRoute,
