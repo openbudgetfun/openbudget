@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
-  analyze:
+  lint:
     runs-on: blacksmith-2vcpu-ubuntu-2404
     timeout-minutes: 60
     steps:
@@ -20,8 +20,8 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: lint analyze
-        run: lint:analyze
+      - name: lint all
+        run: lint:all
         shell: devenv shell -- bash -e {0}
 
   test:
@@ -92,18 +92,6 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: run server tests
         run: melos exec --scope="openbudget_server" -- dart test
-        shell: devenv shell -- bash -e {0}
-
-  format:
-    runs-on: blacksmith-2vcpu-ubuntu-2404
-    timeout-minutes: 60
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/devenv
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: check dprint formatting
-        run: lint:format
         shell: devenv shell -- bash -e {0}
 
   integration-test:
