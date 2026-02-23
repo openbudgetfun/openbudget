@@ -527,7 +527,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
                         : formatCents(summary.readyToAssignCents, currencyCode),
                     onPrimaryAction: () => switch (onboardingType) {
                       _PlanOnboardingType.addAccounts => context.goNamed(
-                        accountListRoute,
+                        addAccountRoute,
                         pathParameters: {'id': budgetId},
                       ),
                       _PlanOnboardingType.assignMoney => _showAutoAssignDialog(
@@ -540,7 +540,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
                     onSecondaryAction:
                         onboardingType == _PlanOnboardingType.assignMoney
                         ? () => context.goNamed(
-                            accountListRoute,
+                            addAccountRoute,
                             pathParameters: {'id': budgetId},
                           )
                         : null,

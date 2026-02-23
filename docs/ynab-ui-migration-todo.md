@@ -18,6 +18,7 @@ Last updated: 2026-02-23 (late, menu transition polish)
 
 - [x] Login screen parity with OpenBudget branding (social + email login layout)
 - [x] Create plan onboarding welcome screen and personalize CTA
+- [x] Plan onboarding account CTAs route directly to Add Account flow
 - [x] Settings root screen structure and section grouping
 - [x] Plan Settings screen
 - [x] Currency screen
@@ -86,5 +87,6 @@ Last updated: 2026-02-23 (late, menu transition polish)
 - [x] Widget tests for major migrated screens
 - [x] Integration flow coverage for plan/settings/auth/more/navigation
 - [x] Integration coverage for Undo + recent-moves source chip drilldown
+- [x] Integration coverage for onboarding account CTA routing
 - [x] Integration CI configured to fail on any individual integration test failure
 - [ ] Expand integration tests for remaining pending batches above
