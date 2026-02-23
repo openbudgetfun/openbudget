@@ -12,7 +12,6 @@ workspace:
   - openbudget_ui
   - openbudget_lints
   - openbudget_test_utils
-  - openbudget_wired
 
 dev_dependencies:
   melos: ^7.4.0

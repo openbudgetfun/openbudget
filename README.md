@@ -51,7 +51,6 @@ openbudget/
 ├── openbudget_client/        # Generated client protocol
 ├── openbudget_core/          # Shared Dart models & utilities
 ├── openbudget_ui/            # Shared widgets & theme
-├── openbudget_wired/         # Hand-drawn wired UI components
 ├── openbudget_lints/         # Centralized lint rules
 ├── openbudget_test_utils/    # Shared test helpers
 ├── pubspec.yaml              # Workspace root

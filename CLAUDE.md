@@ -13,7 +13,6 @@ OpenBudget is a cross-platform envelope budgeting app built with Flutter and Ser
 | `openbudget_client`     | Dart package     | Generated Serverpod client protocol                         |
 | `openbudget_core`       | Dart package     | Shared models, constants, utilities (no Flutter dependency) |
 | `openbudget_ui`         | Flutter package  | Shared widgets, theme, design tokens                        |
-| `openbudget_wired`      | Flutter package  | Hand-drawn wired UI components (ported from verily_wired)   |
 | `openbudget_lints`      | Dart package     | Centralized lint rules (all packages depend on this)        |
 | `openbudget_test_utils` | Flutter package  | Shared test helpers (`pumpApp`, etc.)                       |
 
@@ -89,10 +88,6 @@ All providers MUST use `riverpod_annotation` (`@riverpod`). No manual `StateNoti
 ### Freezed Models
 
 All state objects and DTOs MUST use `@freezed`. Use sealed class union types for states (e.g., `AuthState.authenticated`, `AuthState.unauthenticated`, `AuthState.loading`).
-
-### Wired UI
-
-All user-facing components MUST use `openbudget_wired` widgets (`WiredButton`, `WiredInput`, `WiredCard`, `WiredCombo`, `WiredCheckbox`, `WiredToggle`, etc.). No raw Material buttons/inputs in feature screens. The wired components are re-exported via `openbudget_ui`.
 
 ### Localization (i18n)
 
@@ -208,7 +203,7 @@ See `.specify/memory/constitution.md` for the full project constitution (v1.0.0)
 ## Tech Stack
 
 - **Flutter** (latest stable) — all platforms
-- **Serverpod** 3.3.0 — backend with PostgreSQL
+- **Serverpod** 3.3.1 — backend with PostgreSQL
 - **Riverpod** + **Flutter Hooks** — state management
 - **Freezed** — immutable models
 - **Shorebird** — code push (iOS/Android)

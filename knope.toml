@@ -23,11 +23,6 @@ versioned_files = ["openbudget_ui/pubspec.yaml"]
 changelog = "openbudget_ui/CHANGELOG.md"
 scopes = ["ui"]
 
-[packages.openbudget_wired]
-versioned_files = ["openbudget_wired/pubspec.yaml"]
-changelog = "openbudget_wired/CHANGELOG.md"
-scopes = ["wired"]
-
 [packages.openbudget_lints]
 versioned_files = ["openbudget_lints/pubspec.yaml"]
 changelog = "openbudget_lints/CHANGELOG.md"
