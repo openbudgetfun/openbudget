@@ -175,6 +175,32 @@ class BudgetDetailScreen extends HookConsumerWidget {
           searchQuery.value,
           showHidden: showHidden.value,
         );
+        final overspentEnvelopes = <_OverspentEnvelopeEntry>[];
+        for (final categoryWithEnvelopes in summary.categories) {
+          final categoryId =
+              categoryWithEnvelopes.category.id?.toString() ?? '';
+          if (categoryId.isEmpty) continue;
+          for (
+            var index = 0;
+            index < categoryWithEnvelopes.monthlyEnvelopes.length;
+            index++
+          ) {
+            final monthlyData = categoryWithEnvelopes.monthlyEnvelopes[index];
+            if (monthlyData.availableCents >= 0) continue;
+            final envelopeId = monthlyData.envelope.id?.toString() ?? '';
+            if (envelopeId.isEmpty) continue;
+            if (monthlyData.envelope.isHidden ?? false) continue;
+            overspentEnvelopes.add(
+              _OverspentEnvelopeEntry(
+                categoryId: categoryId,
+                envelopeId: envelopeId,
+                envelopeName: monthlyData.envelope.name,
+                overspentCents: monthlyData.availableCents.abs(),
+                allocatedCents: monthlyData.allocatedCents,
+              ),
+            );
+          }
+        }
         final onboardingType = _resolveOnboardingType(
           summary: summary,
           onboardingComplete: onboardingComplete.value,
@@ -570,6 +596,19 @@ class BudgetDetailScreen extends HookConsumerWidget {
                       budgetId: budgetId,
                       year: summary.year,
                       month: summary.month,
+                    ),
+                  ),
+                  const SizedBox(height: SpacingTokens.sm),
+                ],
+                if (!showSpotlight.value && overspentEnvelopes.isNotEmpty) ...[
+                  _CoverOverspentBanner(
+                    count: overspentEnvelopes.length,
+                    onTap: () => _showCoverOverspendingSheet(
+                      context,
+                      currencyCode,
+                      year: summary.year,
+                      month: summary.month,
+                      overspentEnvelopes: overspentEnvelopes,
                     ),
                   ),
                   const SizedBox(height: SpacingTokens.sm),
@@ -1002,6 +1041,30 @@ class BudgetDetailScreen extends HookConsumerWidget {
       context: context,
       builder: (_) =>
           AutoAssignDialog(budgetId: budgetId, currencyCode: currencyCode),
+    );
+  }
+
+  void _showCoverOverspendingSheet(
+    BuildContext context,
+    CurrencyCode currencyCode, {
+    required int year,
+    required int month,
+    required List<_OverspentEnvelopeEntry> overspentEnvelopes,
+  }) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => FractionallySizedBox(
+        heightFactor: 0.9,
+        child: _CoverOverspendingSheet(
+          budgetId: budgetId,
+          year: year,
+          month: month,
+          currencyCode: currencyCode,
+          overspentEnvelopes: overspentEnvelopes,
+        ),
+      ),
     );
   }
 
@@ -2182,6 +2245,315 @@ class _ReviewTransactionsBanner extends HookWidget {
               const Icon(Icons.chevron_right_rounded),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _OverspentEnvelopeEntry {
+  const _OverspentEnvelopeEntry({
+    required this.categoryId,
+    required this.envelopeId,
+    required this.envelopeName,
+    required this.overspentCents,
+    required this.allocatedCents,
+  });
+
+  final String categoryId;
+  final String envelopeId;
+  final String envelopeName;
+  final int overspentCents;
+  final int allocatedCents;
+}
+
+class _CoverOverspentBanner extends HookWidget {
+  const _CoverOverspentBanner({required this.count, required this.onTap});
+
+  final int count;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final title = count == 1
+        ? 'Cover 1 overspent category'
+        : 'Cover $count overspent categories';
+
+    return Material(
+      color: OpenBudgetPalette.surface,
+      borderRadius: BorderRadius.circular(RadiusTokens.md),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(RadiusTokens.md),
+        child: Ink(
+          padding: const EdgeInsets.symmetric(
+            horizontal: SpacingTokens.md,
+            vertical: SpacingTokens.sm,
+          ),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(RadiusTokens.md),
+            border: Border.all(color: OpenBudgetPalette.divider),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 20,
+                height: 20,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFDE7E7),
+                  borderRadius: BorderRadius.circular(RadiusTokens.sm),
+                ),
+                child: Text(
+                  '$count',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: OpenBudgetPalette.negative,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              const SizedBox(width: SpacingTokens.sm),
+              Expanded(
+                child: Text(
+                  title,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              const Icon(Icons.chevron_right_rounded),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CoverOverspendingSheet extends HookConsumerWidget {
+  const _CoverOverspendingSheet({
+    required this.budgetId,
+    required this.year,
+    required this.month,
+    required this.currencyCode,
+    required this.overspentEnvelopes,
+  });
+
+  final String budgetId;
+  final int year;
+  final int month;
+  final CurrencyCode currencyCode;
+  final List<_OverspentEnvelopeEntry> overspentEnvelopes;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final remainingItems = useState(
+      List<_OverspentEnvelopeEntry>.of(overspentEnvelopes),
+    );
+    final isApplying = useState(false);
+
+    Future<void> coverEnvelope(_OverspentEnvelopeEntry item) async {
+      if (isApplying.value) return;
+      isApplying.value = true;
+      try {
+        await ref
+            .read(monthlyAllocationActionsProvider.notifier)
+            .upsertAllocation(
+              envelopeId: item.envelopeId,
+              budgetId: budgetId,
+              year: year,
+              month: month,
+              allocatedCents: item.allocatedCents + item.overspentCents,
+            );
+        remainingItems.value = remainingItems.value
+            .where((candidate) => candidate.envelopeId != item.envelopeId)
+            .toList(growable: false);
+      } on Exception catch (_) {
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not cover overspending.')),
+        );
+      } finally {
+        ref
+          ..invalidate(monthlyTransactionsProvider(budgetId, year, month))
+          ..invalidate(budgetMonthlySummaryProvider(budgetId));
+        isApplying.value = false;
+      }
+    }
+
+    Future<void> coverAll() async {
+      if (isApplying.value || remainingItems.value.isEmpty) return;
+      isApplying.value = true;
+      final coveredIds = <String>{};
+      try {
+        for (final item in remainingItems.value) {
+          try {
+            await ref
+                .read(monthlyAllocationActionsProvider.notifier)
+                .upsertAllocation(
+                  envelopeId: item.envelopeId,
+                  budgetId: budgetId,
+                  year: year,
+                  month: month,
+                  allocatedCents: item.allocatedCents + item.overspentCents,
+                );
+            coveredIds.add(item.envelopeId);
+          } on Exception catch (_) {
+            // Continue covering the rest even if one update fails.
+          }
+        }
+        remainingItems.value = remainingItems.value
+            .where((item) => !coveredIds.contains(item.envelopeId))
+            .toList(growable: false);
+      } finally {
+        ref
+          ..invalidate(monthlyTransactionsProvider(budgetId, year, month))
+          ..invalidate(budgetMonthlySummaryProvider(budgetId));
+        isApplying.value = false;
+      }
+    }
+
+    return DecoratedBox(
+      decoration: const BoxDecoration(
+        color: OpenBudgetPalette.appBackground,
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(RadiusTokens.lg),
+        ),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Column(
+          children: [
+            const SizedBox(height: SpacingTokens.xs),
+            Container(
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(
+                color: OpenBudgetPalette.divider,
+                borderRadius: BorderRadius.circular(RadiusTokens.md),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                SpacingTokens.md,
+                SpacingTokens.sm,
+                SpacingTokens.md,
+                SpacingTokens.sm,
+              ),
+              child: Row(
+                children: [
+                  const SizedBox(width: 56),
+                  Expanded(
+                    child: Text(
+                      'Cover Overspending',
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    width: 56,
+                    child: TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text('Done'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(height: 1),
+            Expanded(
+              child: remainingItems.value.isEmpty
+                  ? Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: SpacingTokens.lg,
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.check_circle_rounded,
+                              size: 32,
+                              color: OpenBudgetPalette.progressGreen,
+                            ),
+                            const SizedBox(height: SpacingTokens.md),
+                            Text(
+                              'All overspending is covered.',
+                              style: theme.textTheme.titleLarge?.copyWith(
+                                fontWeight: FontWeight.w700,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  : ListView.separated(
+                      padding: const EdgeInsets.all(SpacingTokens.md),
+                      itemBuilder: (context, index) {
+                        final item = remainingItems.value[index];
+                        return Container(
+                          decoration: BoxDecoration(
+                            color: OpenBudgetPalette.surface,
+                            borderRadius: BorderRadius.circular(
+                              RadiusTokens.md,
+                            ),
+                            border: Border.all(
+                              color: OpenBudgetPalette.divider,
+                            ),
+                          ),
+                          child: ListTile(
+                            title: Text(
+                              item.envelopeName,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            subtitle: Text(
+                              'Needs ${formatCents(item.overspentCents, currencyCode)} to get back to zero',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: OpenBudgetPalette.mutedText,
+                              ),
+                            ),
+                            trailing: FilledButton(
+                              onPressed: isApplying.value
+                                  ? null
+                                  : () => coverEnvelope(item),
+                              child: const Text('Cover'),
+                            ),
+                          ),
+                        );
+                      },
+                      separatorBuilder: (_, _) =>
+                          const SizedBox(height: SpacingTokens.sm),
+                      itemCount: remainingItems.value.length,
+                    ),
+            ),
+            if (remainingItems.value.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  SpacingTokens.md,
+                  SpacingTokens.xs,
+                  SpacingTokens.md,
+                  SpacingTokens.md,
+                ),
+                child: FilledButton(
+                  onPressed: isApplying.value ? null : coverAll,
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size.fromHeight(46),
+                  ),
+                  child: Text(
+                    isApplying.value
+                        ? 'Covering...'
+                        : 'Cover ${remainingItems.value.length} Overspent ${remainingItems.value.length == 1 ? 'Category' : 'Categories'}',
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
     );

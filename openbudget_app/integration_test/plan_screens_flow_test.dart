@@ -103,6 +103,80 @@ BudgetSummary _makeSummary() {
   );
 }
 
+BudgetSummary _makeOverspentSummary() {
+  final budgetUuid = UuidValue.fromString(_budgetId);
+  final categoryUuid = UuidValue.fromString(_categoryId);
+  final utilitiesEnvelopeUuid = UuidValue.fromString(_utilitiesEnvelopeId);
+  final storageEnvelopeUuid = UuidValue.fromString(_storageEnvelopeId);
+  final ownerUuid = UuidValue.fromString(
+    '00000000-0000-0000-0000-000000000904',
+  );
+
+  final utilitiesEnvelope = Envelope(
+    id: utilitiesEnvelopeUuid,
+    name: 'Utilities',
+    categoryId: categoryUuid,
+    budgetedAmountCents: 0,
+    spentAmountCents: 6000,
+    currencyCode: 'USD',
+    sortOrder: 0,
+    note: 'Auto-pay every month',
+  );
+  final storageEnvelope = Envelope(
+    id: storageEnvelopeUuid,
+    name: 'Self storage',
+    categoryId: categoryUuid,
+    budgetedAmountCents: 0,
+    spentAmountCents: 0,
+    currencyCode: 'USD',
+    sortOrder: 1,
+  );
+
+  return BudgetSummary(
+    budget: Budget(
+      id: budgetUuid,
+      name: 'Family Plan',
+      currencyCode: 'USD',
+      ownerId: ownerUuid,
+    ),
+    categories: [
+      CategoryWithEnvelopes(
+        category: Category(
+          id: categoryUuid,
+          name: 'Bills',
+          budgetId: budgetUuid,
+          sortOrder: 0,
+        ),
+        envelopes: [utilitiesEnvelope, storageEnvelope],
+        monthlyEnvelopes: [
+          MonthlyEnvelopeData(
+            envelope: utilitiesEnvelope,
+            allocatedCents: 0,
+            spentCents: 6000,
+            availableCents: -6000,
+            carryoverCents: 0,
+          ),
+          MonthlyEnvelopeData(
+            envelope: storageEnvelope,
+            allocatedCents: 0,
+            spentCents: 0,
+            availableCents: 0,
+            carryoverCents: 0,
+          ),
+        ],
+        totalBudgetedCents: 0,
+        totalSpentCents: 6000,
+        totalAvailableCents: -6000,
+      ),
+    ],
+    totalIncomeCents: 20000,
+    totalBudgetedCents: 0,
+    readyToAssignCents: 20000,
+    year: 2026,
+    month: 2,
+  );
+}
+
 List<Transaction> _makeMonthlyTransactions() {
   return [
     Transaction(
@@ -363,6 +437,60 @@ void main() {
     await tester.tap(find.text('Cancel'));
     await tester.pumpAndSettle();
     expect(find.text('Rename Category'), findsOneWidget);
+  });
+
+  testWidgets('opens overspending coverage sheet from plan banner', (
+    tester,
+  ) async {
+    final container = ProviderContainer(
+      overrides: [
+        budgetMonthlySummaryProvider.overrideWith((ref, _) async {
+          return _makeOverspentSummary();
+        }),
+        budgetGoalsProvider.overrideWith((ref, _) async => {}),
+        creditCardPaymentsProvider.overrideWith((ref, _) async => const []),
+        monthlyTransactionsProvider.overrideWith((ref, _) async => const []),
+        recurringDueCountProvider.overrideWith((ref, _) async => 0),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    final router = GoRouter(
+      initialLocation: '/budgets/$_budgetId/plan',
+      routes: [
+        GoRoute(
+          name: planRoute,
+          path: '/budgets/:id/plan',
+          builder: (context, state) =>
+              BudgetDetailScreen(budgetId: state.pathParameters['id']!),
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp.router(
+          theme: ThemeData.light(useMaterial3: true),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          routerConfig: router,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Cover 1 overspent category'), findsOneWidget);
+    await tester.tap(find.text('Cover 1 overspent category'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Cover Overspending'), findsOneWidget);
+    expect(find.textContaining(r'Needs $60.00'), findsOneWidget);
+    expect(find.text('Cover'), findsOneWidget);
+
+    await tester.tap(find.text('Done'));
+    await tester.pumpAndSettle();
+    expect(find.text('Cover 1 overspent category'), findsOneWidget);
   });
 }
 
