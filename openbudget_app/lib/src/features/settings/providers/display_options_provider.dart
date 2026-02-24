@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/src/features/settings/providers/ui_preferences_store.dart';
 
@@ -14,14 +15,35 @@ enum DateFormatStyle { monthDayYear, dayMonthYear, yearMonthDay }
 const hiddenAmountPlaceholder = '••••';
 
 extension AppIconStyleAssets on AppIconStyle {
-  String get previewAssetPath => switch (this) {
-    AppIconStyle.primary => 'assets/branding/logos/ob_primary_light_512.png',
-    AppIconStyle.v1 => 'assets/branding/logos/ob_v1_light_preview.png',
-    AppIconStyle.v2 => 'assets/branding/logos/ob_v2_light_preview.png',
-    AppIconStyle.v3 => 'assets/branding/logos/ob_v3_light_preview.png',
-    AppIconStyle.v4 => 'assets/branding/logos/ob_v4_light_preview.png',
-    AppIconStyle.v5 => 'assets/branding/logos/ob_v5_light_preview.png',
-  };
+  String get previewAssetPath => previewAssetPathFor(Brightness.light);
+
+  String previewAssetPathFor(Brightness brightness) =>
+      switch ((this, brightness)) {
+        (AppIconStyle.primary, Brightness.light) =>
+          'assets/branding/logos/ob_primary_light_512.png',
+        (AppIconStyle.primary, Brightness.dark) =>
+          'assets/branding/logos/ob_primary_dark_512.png',
+        (AppIconStyle.v1, Brightness.light) =>
+          'assets/branding/logos/ob_v1_light_preview.png',
+        (AppIconStyle.v1, Brightness.dark) =>
+          'assets/branding/logos/ob_v1_dark_preview.png',
+        (AppIconStyle.v2, Brightness.light) =>
+          'assets/branding/logos/ob_v2_light_preview.png',
+        (AppIconStyle.v2, Brightness.dark) =>
+          'assets/branding/logos/ob_v2_dark_preview.png',
+        (AppIconStyle.v3, Brightness.light) =>
+          'assets/branding/logos/ob_v3_light_preview.png',
+        (AppIconStyle.v3, Brightness.dark) =>
+          'assets/branding/logos/ob_v3_dark_preview.png',
+        (AppIconStyle.v4, Brightness.light) =>
+          'assets/branding/logos/ob_v4_light_preview.png',
+        (AppIconStyle.v4, Brightness.dark) =>
+          'assets/branding/logos/ob_v4_dark_preview.png',
+        (AppIconStyle.v5, Brightness.light) =>
+          'assets/branding/logos/ob_v5_light_preview.png',
+        (AppIconStyle.v5, Brightness.dark) =>
+          'assets/branding/logos/ob_v5_dark_preview.png',
+      };
 }
 
 final balanceStyleProvider =
