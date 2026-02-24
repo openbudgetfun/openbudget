@@ -609,5 +609,51 @@ void main() {
         expect(transactions, isEmpty);
       },
     );
+
+    test(
+      'when creating split with account outside budget then throws and does not persist',
+      () async {
+        final primaryBudget = await endpoints.budget.create(
+          authedSession,
+          'Primary Split Account Budget',
+          'USD',
+        );
+        final foreignBudget = await endpoints.budget.create(
+          authedSession,
+          'Foreign Split Account Budget',
+          'USD',
+        );
+        final foreignAccount = await endpoints.account.create(
+          authedSession,
+          'Foreign Split Account',
+          'checking',
+          0,
+          'USD',
+          foreignBudget.id!,
+          onBudget: true,
+          sortOrder: 0,
+        );
+
+        await expectLater(
+          endpoints.transaction.createSplit(
+            authedSession,
+            'Invalid split account',
+            -2500,
+            'USD',
+            primaryBudget.id!,
+            DateTime.utc(2026, 1, 15),
+            [SplitItem(amountCents: 2500, memo: 'Single split')],
+            accountId: foreignAccount.id,
+          ),
+          throwsA(isA<NotFoundException>()),
+        );
+
+        final transactions = await endpoints.transaction.list(
+          authedSession,
+          primaryBudget.id!,
+        );
+        expect(transactions, isEmpty);
+      },
+    );
   });
 }

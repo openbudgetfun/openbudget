@@ -409,6 +409,13 @@ class TransactionService {
       budgetId: budgetId,
       payeeId: payeeId,
     );
+    if (accountId != null) {
+      await _assertAccountBelongsToBudget(
+        session,
+        accountId: accountId,
+        budgetId: budgetId,
+      );
+    }
 
     for (final split in splits) {
       if (split.envelopeId != null) {
