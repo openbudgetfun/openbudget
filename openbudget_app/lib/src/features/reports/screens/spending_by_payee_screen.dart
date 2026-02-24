@@ -12,11 +12,15 @@ class SpendingByPayeeScreen extends HookConsumerWidget {
   const SpendingByPayeeScreen({
     required this.budgetId,
     this.initialUsePreset = false,
+    this.initialYear,
+    this.initialMonth,
     super.key,
   });
 
   final String budgetId;
   final bool initialUsePreset;
+  final int? initialYear;
+  final int? initialMonth;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -24,8 +28,9 @@ class SpendingByPayeeScreen extends HookConsumerWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final now = DateTime.now();
-    final selectedYear = useState(now.year);
-    final selectedMonth = useState(now.month);
+    final selectedYear = useState(initialYear ?? now.year);
+    final normalizedInitialMonth = initialMonth?.clamp(1, 12) ?? now.month;
+    final selectedMonth = useState(normalizedInitialMonth);
     final presetMonths = useState(3);
     final usePreset = useState(initialUsePreset);
 
@@ -86,35 +91,36 @@ class SpendingByPayeeScreen extends HookConsumerWidget {
                 onModeChanged: (value) => usePreset.value = value,
               ),
               const SizedBox(height: SpacingTokens.sm),
-              if (!usePreset.value)
-                _MonthSelector(
-                  label: _monthName(
-                    l10n,
-                    selectedMonth.value,
-                    selectedYear.value,
-                  ),
-                  onPrevious: () {
-                    if (selectedMonth.value == 1) {
-                      selectedMonth.value = 12;
-                      selectedYear.value--;
-                    } else {
-                      selectedMonth.value--;
-                    }
-                  },
-                  onNext: () {
-                    if (selectedMonth.value == 12) {
-                      selectedMonth.value = 1;
-                      selectedYear.value++;
-                    } else {
-                      selectedMonth.value++;
-                    }
-                  },
-                )
-              else
+              if (usePreset.value) ...[
                 _PresetSelector(
                   presetMonths: presetMonths.value,
                   onChanged: (value) => presetMonths.value = value,
                 ),
+                const SizedBox(height: SpacingTokens.xs),
+              ],
+              _MonthSelector(
+                label: _monthName(
+                  l10n,
+                  selectedMonth.value,
+                  selectedYear.value,
+                ),
+                onPrevious: () {
+                  if (selectedMonth.value == 1) {
+                    selectedMonth.value = 12;
+                    selectedYear.value--;
+                  } else {
+                    selectedMonth.value--;
+                  }
+                },
+                onNext: () {
+                  if (selectedMonth.value == 12) {
+                    selectedMonth.value = 1;
+                    selectedYear.value++;
+                  } else {
+                    selectedMonth.value++;
+                  }
+                },
+              ),
               const SizedBox(height: SpacingTokens.sm),
               Card(
                 child: Padding(

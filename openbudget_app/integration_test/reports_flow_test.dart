@@ -26,15 +26,53 @@ final _budgetUuid = UuidValue.fromString(
   '00000000-0000-0000-0000-000000000601',
 );
 
-SpendingReport _makeReport() {
-  return const SpendingReport(
-    totalIncome: 800000,
-    totalExpenses: 222000,
-    netIncome: 578000,
-    transactionCount: 9,
-    categorySpending: {'Rent': 120000, 'Utilities': 60000, 'Groceries': 42000},
-    currencyCode: 'USD',
-  );
+SpendingReport _makeReportForMonth(int year, int month) {
+  return switch ((year, month)) {
+    (2026, 2) => const SpendingReport(
+      totalIncome: 800000,
+      totalExpenses: 222000,
+      netIncome: 578000,
+      transactionCount: 9,
+      categorySpending: {'Rent': 120000, 'Clothing': 80000, 'Utilities': 22000},
+      currencyCode: 'USD',
+    ),
+    (2026, 1) => const SpendingReport(
+      totalIncome: 800000,
+      totalExpenses: 162000,
+      netIncome: 638000,
+      transactionCount: 8,
+      categorySpending: {'Rent': 90000, 'Clothing': 50000, 'Utilities': 22000},
+      currencyCode: 'USD',
+    ),
+    (2025, 12) => const SpendingReport(
+      totalIncome: 800000,
+      totalExpenses: 282000,
+      netIncome: 518000,
+      transactionCount: 10,
+      categorySpending: {
+        'Rent': 150000,
+        'Clothing': 100000,
+        'Utilities': 32000,
+      },
+      currencyCode: 'USD',
+    ),
+    (2025, 11) => const SpendingReport(
+      totalIncome: 730000,
+      totalExpenses: 152000,
+      netIncome: 578000,
+      transactionCount: 8,
+      categorySpending: {'Rent': 80000, 'Clothing': 50000, 'Utilities': 22000},
+      currencyCode: 'USD',
+    ),
+    _ => const SpendingReport(
+      totalIncome: 0,
+      totalExpenses: 0,
+      netIncome: 0,
+      transactionCount: 0,
+      categorySpending: {},
+      currencyCode: 'USD',
+    ),
+  };
 }
 
 NetWorthData _makeNetWorthData() {
@@ -92,8 +130,11 @@ Widget _buildApp() {
       GoRoute(
         name: spendingByPayeeRoute,
         path: '/budgets/:id/reflect/payees',
-        builder: (context, state) =>
-            SpendingByPayeeScreen(budgetId: state.pathParameters['id']!),
+        builder: (context, state) => SpendingByPayeeScreen(
+          budgetId: state.pathParameters['id']!,
+          initialYear: 2026,
+          initialMonth: 2,
+        ),
       ),
       GoRoute(
         name: netWorthRoute,
@@ -106,7 +147,9 @@ Widget _buildApp() {
 
   return ProviderScope(
     overrides: [
-      spendingReportProvider.overrideWith((ref, args) async => _makeReport()),
+      spendingReportProvider.overrideWith(
+        (ref, args) async => _makeReportForMonth(args.$2, args.$3),
+      ),
       netWorthProvider.overrideWith(
         (ref, budgetId) async => _makeNetWorthData(),
       ),
@@ -137,6 +180,7 @@ void main() {
     expect(find.text('Preset'), findsOneWidget);
     expect(find.text('Rent'), findsWidgets);
     expect(find.text('Utilities'), findsWidgets);
+    expect(find.textContaining('2,220.00'), findsOneWidget);
   });
 
   patrolWidgetTest(
@@ -154,10 +198,16 @@ void main() {
 
       expect(find.text('Preset Range'), findsOneWidget);
       expect(find.text('Last 3 Months'), findsWidgets);
-      expect(
-        find.textContaining(RegExp(r'[A-Za-z]+ \d{4}–[A-Za-z]+ \d{4}')),
-        findsOneWidget,
-      );
+      expect(find.text('February 2026'), findsOneWidget);
+      expect(find.text('December 2025–February 2026'), findsOneWidget);
+      expect(find.textContaining(r'$6,660.00'), findsOneWidget);
+
+      await tester.tap(find.byIcon(Icons.chevron_left_rounded));
+      await tester.pumpAndSettle();
+
+      expect(find.text('January 2026'), findsOneWidget);
+      expect(find.text('November 2025–January 2026'), findsOneWidget);
+      expect(find.textContaining(r'$5,960.00'), findsOneWidget);
       await _captureScreenshot(tester, 'reports-spending-breakdown-preset');
     },
   );
