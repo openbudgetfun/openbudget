@@ -1,14 +1,10 @@
 // Serverpod's UuidValue.fromString is marked experimental.
 // ignore_for_file: experimental_member_use
 
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:integration_test/integration_test.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/age_of_money_provider.dart';
 import 'package:openbudget_app/src/features/reports/providers/net_worth_provider.dart';
@@ -22,6 +18,8 @@ import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 import 'package:patrol/patrol.dart';
+
+import 'helpers/screenshot_capture.dart';
 
 const _budgetId = 'test-budget-id';
 final _budgetUuid = UuidValue.fromString(
@@ -234,7 +232,10 @@ void main() {
       expect(find.text('January 2026'), findsOneWidget);
       expect(find.text('November 2025–January 2026'), findsOneWidget);
       expect(find.textContaining(r'$5,960.00'), findsOneWidget);
-      await _captureScreenshot(tester, 'reports-spending-breakdown-preset');
+      await captureIntegrationScreenshot(
+        tester,
+        'reports-spending-breakdown-preset',
+      );
     },
   );
 
@@ -252,34 +253,4 @@ void main() {
     expect(find.text('Assets'), findsWidgets);
     expect(find.text('Liabilities'), findsWidgets);
   });
-}
-
-Future<void> _captureScreenshot(WidgetTester tester, String name) async {
-  final binding = tester.binding;
-  if (binding is! IntegrationTestWidgetsFlutterBinding) {
-    // ignore: avoid_print, reason: keeps CI logs explicit when screenshot capture is unavailable.
-    print('Skipping screenshot capture for $name: unsupported test binding');
-    return;
-  }
-
-  List<int> bytes;
-  try {
-    bytes = await binding.takeScreenshot(name);
-  } on MissingPluginException {
-    // ignore: avoid_print, reason: keeps CI logs explicit when screenshot plugin is unavailable.
-    print('Skipping screenshot capture for $name: plugin unavailable');
-    return;
-  }
-  if (bytes.isEmpty) return;
-
-  final screenshotDir = Directory(
-    '${Directory.systemTemp.path}/openbudget_screenshots/runtime',
-  );
-  if (!screenshotDir.existsSync()) {
-    screenshotDir.createSync(recursive: true);
-  }
-  final screenshotPath = '${screenshotDir.path}/$name.png';
-  File(screenshotPath).writeAsBytesSync(bytes);
-  // ignore: avoid_print, reason: exposes generated artifact path in CI/test logs.
-  print('Saved screenshot: $screenshotPath');
 }
