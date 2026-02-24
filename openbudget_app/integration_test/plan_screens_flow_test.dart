@@ -1,15 +1,11 @@
-import 'dart:io';
-
 // Serverpod's UuidValue.fromString is marked experimental.
 // ignore_for_file: experimental_member_use
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:integration_test/integration_test.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_goals_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
@@ -23,6 +19,8 @@ import 'package:openbudget_app/src/features/recurring/providers/recurring_auto_p
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:patrol/patrol.dart';
+
+import 'helpers/screenshot_capture.dart';
 
 const _budgetId = '00000000-0000-0000-0000-000000000901';
 const _categoryId = '00000000-0000-0000-0000-000000000902';
@@ -380,7 +378,7 @@ void main() {
           amountCents: 3000,
         );
     await tester.pumpAndSettle();
-    await _captureScreenshot(tester, 'plan-screen');
+    await captureIntegrationScreenshot(tester, 'plan-screen');
     await tester.pump(const Duration(seconds: 1));
     await tester.tap(find.text('Finish Onboarding'));
     await tester.pumpAndSettle();
@@ -389,7 +387,7 @@ void main() {
     await tester.tap(find.text('Review 1 transaction'));
     await tester.pumpAndSettle();
     expect(find.text('1 New Transaction'), findsOneWidget);
-    await _captureScreenshot(tester, 'review-transactions-screen');
+    await captureIntegrationScreenshot(tester, 'review-transactions-screen');
     await tester.pump(const Duration(seconds: 1));
 
     await tester.tap(find.text('Landlord'));
@@ -399,15 +397,21 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('No Transactions'), findsOneWidget);
     expect(find.text("You're All Done!"), findsOneWidget);
-    await _captureScreenshot(tester, 'review-transactions-empty-screen');
+    await captureIntegrationScreenshot(
+      tester,
+      'review-transactions-empty-screen',
+    );
     await tester.pump(const Duration(seconds: 1));
     await tester.tap(find.text('Done'));
     await tester.pumpAndSettle();
-    await _captureScreenshot(tester, 'plan-screen-onboarding-dismissed');
+    await captureIntegrationScreenshot(
+      tester,
+      'plan-screen-onboarding-dismissed',
+    );
     await tester.pump(const Duration(seconds: 1));
     await tester.tap(find.text('Spotlight'));
     await tester.pumpAndSettle();
-    await _captureScreenshot(tester, 'spotlight-screen');
+    await captureIntegrationScreenshot(tester, 'spotlight-screen');
     await tester.pump(const Duration(seconds: 1));
     await tester.tap(find.text('Categories'));
     await tester.pumpAndSettle();
@@ -416,7 +420,7 @@ void main() {
     await tester.tap(find.byIcon(Icons.more_horiz_rounded));
     await tester.pumpAndSettle();
     expect(find.text('Hide Amounts'), findsOneWidget);
-    await _captureScreenshot(tester, 'plan-menu');
+    await captureIntegrationScreenshot(tester, 'plan-menu');
     await tester.pump(const Duration(seconds: 1));
 
     await _tapPopupMenuItem(tester, 'Undo');
@@ -474,11 +478,11 @@ void main() {
     await tester.pumpAndSettle();
     await _tapPopupMenuItem(tester, 'Recent Moves');
     await _dismissCoachmarkIfVisible(tester);
-    await _captureScreenshot(tester, 'recent-moves-screen');
+    await captureIntegrationScreenshot(tester, 'recent-moves-screen');
     await tester.pump(const Duration(seconds: 1));
     await tester.tap(find.text('Moved'));
     await tester.pumpAndSettle();
-    await _captureScreenshot(tester, 'recent-moves-moved-screen');
+    await captureIntegrationScreenshot(tester, 'recent-moves-moved-screen');
     await tester.pump(const Duration(seconds: 1));
     await tester.tap(find.text('Self storage').first);
     await tester.pumpAndSettle();
@@ -489,7 +493,7 @@ void main() {
 
     await tester.tap(find.text('Utilities').first);
     await tester.pumpAndSettle();
-    await _captureScreenshot(tester, 'envelope-moves-screen');
+    await captureIntegrationScreenshot(tester, 'envelope-moves-screen');
     await tester.pump(const Duration(seconds: 1));
     await tester.tap(find.text('Done'));
     await tester.pumpAndSettle();
@@ -500,11 +504,11 @@ void main() {
 
     await tester.tap(find.text('Utilities'));
     await tester.pumpAndSettle();
-    await _captureScreenshot(tester, 'plan-inline-editor-screen');
+    await captureIntegrationScreenshot(tester, 'plan-inline-editor-screen');
     await tester.pump(const Duration(seconds: 1));
     await tester.tap(find.text('Details'));
     await tester.pumpAndSettle();
-    await _captureScreenshot(tester, 'category-detail-screen');
+    await captureIntegrationScreenshot(tester, 'category-detail-screen');
     await tester.pump(const Duration(seconds: 1));
     expect(find.text('Balance'), findsOneWidget);
     expect(find.text('Set Goal'), findsOneWidget);
@@ -653,41 +657,6 @@ void main() {
 
     expect(find.byIcon(Icons.swap_vert_rounded), findsOneWidget);
   });
-}
-
-Future<void> _captureScreenshot(WidgetTester tester, String name) async {
-  final binding = tester.binding;
-  if (binding is! IntegrationTestWidgetsFlutterBinding) {
-    // Logging here keeps the CI output explicit when screenshot capture is not
-    // supported by the active test binding.
-    // ignore: avoid_print
-    print('Skipping screenshot capture for $name: unsupported test binding');
-    return;
-  }
-
-  List<int> bytes;
-  try {
-    bytes = await binding.takeScreenshot(name);
-  } on MissingPluginException {
-    // Some test runtimes (for example flutter-tester) don't expose screenshot
-    // capture. Keep test assertions focused on behavior in those environments.
-    // ignore: avoid_print
-    print('Skipping screenshot capture for $name: plugin unavailable');
-    return;
-  }
-  if (bytes.isEmpty) return;
-
-  final screenshotDir = Directory(
-    '${Directory.systemTemp.path}/openbudget_screenshots/runtime',
-  );
-  if (!screenshotDir.existsSync()) {
-    screenshotDir.createSync(recursive: true);
-  }
-  final screenshotPath = '${screenshotDir.path}/$name.png';
-  File(screenshotPath).writeAsBytesSync(bytes);
-  // Expose location in test logs for host-side collection.
-  // ignore: avoid_print
-  print('Saved screenshot: $screenshotPath');
 }
 
 Future<void> _tapPopupMenuItem(WidgetTester tester, String label) async {
