@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
 import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
 import 'package:openbudget_client/openbudget_client.dart';
@@ -46,16 +47,13 @@ Future<SpendingReport> spendingReport(
     } else {
       totalExpenses += tx.amountCents.abs();
     }
-
-    if (tx.envelopeId != null) {
-      final envelopeIdStr = tx.envelopeId.toString();
-      final categoryName = envelopeCategoryById[envelopeIdStr];
-      if (categoryName != null) {
-        categorySpending[categoryName] =
-            (categorySpending[categoryName] ?? 0) + tx.amountCents.abs();
-      }
-    }
   }
+  categorySpending.addAll(
+    buildCategorySpendingByEnvelope(
+      transactions: transactions,
+      envelopeCategoryById: envelopeCategoryById,
+    ),
+  );
 
   return SpendingReport(
     totalIncome: totalIncome,
@@ -166,4 +164,28 @@ class _YearMonth {
 
   final int year;
   final int month;
+}
+
+@visibleForTesting
+Map<String, int> buildCategorySpendingByEnvelope({
+  required Iterable<Transaction> transactions,
+  required Map<String, String> envelopeCategoryById,
+}) {
+  final categorySpending = <String, int>{};
+
+  for (final tx in transactions) {
+    if (tx.amountCents >= 0 || tx.envelopeId == null) {
+      continue;
+    }
+
+    final categoryName = envelopeCategoryById[tx.envelopeId.toString()];
+    if (categoryName == null) {
+      continue;
+    }
+
+    categorySpending[categoryName] =
+        (categorySpending[categoryName] ?? 0) + tx.amountCents.abs();
+  }
+
+  return categorySpending;
 }

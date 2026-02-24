@@ -9,9 +9,14 @@ import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 class SpendingByPayeeScreen extends HookConsumerWidget {
-  const SpendingByPayeeScreen({required this.budgetId, super.key});
+  const SpendingByPayeeScreen({
+    required this.budgetId,
+    this.initialUsePreset = false,
+    super.key,
+  });
 
   final String budgetId;
+  final bool initialUsePreset;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -22,7 +27,7 @@ class SpendingByPayeeScreen extends HookConsumerWidget {
     final selectedYear = useState(now.year);
     final selectedMonth = useState(now.month);
     final presetMonths = useState(3);
-    final usePreset = useState(false);
+    final usePreset = useState(initialUsePreset);
 
     final reportAsync = usePreset.value
         ? ref.watch(

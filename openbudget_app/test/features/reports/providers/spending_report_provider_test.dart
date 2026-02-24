@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/src/features/reports/providers/spending_report_provider.dart';
+import 'package:openbudget_client/openbudget_client.dart';
 
 void main() {
   group('spendingReportPresetProvider', () {
@@ -63,6 +64,69 @@ void main() {
       expect(report.netIncome, equals(2700));
       expect(report.transactionCount, equals(9));
       expect(report.categorySpending, equals({'Rent': 120, 'Utilities': 180}));
+    });
+  });
+
+  group('buildCategorySpendingByEnvelope', () {
+    final budgetId = UuidValue.fromString(
+      '00000000-0000-0000-0000-000000000701',
+    );
+    final utilitiesEnvelopeId = UuidValue.fromString(
+      '00000000-0000-0000-0000-000000000702',
+    );
+    final groceriesEnvelopeId = UuidValue.fromString(
+      '00000000-0000-0000-0000-000000000703',
+    );
+    final incomeEnvelopeId = UuidValue.fromString(
+      '00000000-0000-0000-0000-000000000704',
+    );
+
+    test('counts outflow transactions only', () {
+      final categorySpending = buildCategorySpendingByEnvelope(
+        transactions: [
+          Transaction(
+            description: 'Utilities bill',
+            amountCents: -6000,
+            currencyCode: 'USD',
+            envelopeId: utilitiesEnvelopeId,
+            budgetId: budgetId,
+            transactionDate: DateTime(2026, 2, 22),
+          ),
+          Transaction(
+            description: 'Groceries',
+            amountCents: -2500,
+            currencyCode: 'USD',
+            envelopeId: groceriesEnvelopeId,
+            budgetId: budgetId,
+            transactionDate: DateTime(2026, 2, 22),
+          ),
+          Transaction(
+            description: 'Payroll',
+            amountCents: 50000,
+            currencyCode: 'USD',
+            envelopeId: incomeEnvelopeId,
+            budgetId: budgetId,
+            transactionDate: DateTime(2026, 2, 22),
+          ),
+          Transaction(
+            description: 'Ignored unassigned inflow',
+            amountCents: 10000,
+            currencyCode: 'USD',
+            budgetId: budgetId,
+            transactionDate: DateTime(2026, 2, 22),
+          ),
+        ],
+        envelopeCategoryById: {
+          utilitiesEnvelopeId.toString(): 'Utilities',
+          groceriesEnvelopeId.toString(): 'Groceries',
+          incomeEnvelopeId.toString(): 'Income',
+        },
+      );
+
+      expect(
+        categorySpending,
+        equals(<String, int>{'Utilities': 6000, 'Groceries': 2500}),
+      );
     });
   });
 }
