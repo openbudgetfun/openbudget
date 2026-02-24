@@ -83,6 +83,9 @@ class AppIconScreen extends HookConsumerWidget {
                     (style) => _AppIconStyleTile(
                       style: style,
                       label: _styleLabel(l10n, style),
+                      previewAssetPath: style.previewAssetPathFor(
+                        theme.brightness,
+                      ),
                       selected: style == currentStyle,
                       onTap: () => ref
                           .read(appIconStyleProvider.notifier)
@@ -144,12 +147,14 @@ class _AppIconStyleTile extends HookWidget {
   const _AppIconStyleTile({
     required this.style,
     required this.label,
+    required this.previewAssetPath,
     required this.selected,
     required this.onTap,
   });
 
   final AppIconStyle style;
   final String label;
+  final String previewAssetPath;
   final bool selected;
   final VoidCallback onTap;
 
@@ -170,7 +175,7 @@ class _AppIconStyleTile extends HookWidget {
           border: Border.all(color: OpenBudgetPalette.dividerFor(theme)),
         ),
         clipBehavior: Clip.antiAlias,
-        child: Image.asset(style.previewAssetPath, fit: BoxFit.cover),
+        child: Image.asset(previewAssetPath, fit: BoxFit.cover),
       ),
     );
   }

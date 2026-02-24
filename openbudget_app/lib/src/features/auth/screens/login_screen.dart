@@ -238,11 +238,15 @@ class _OpenBudgetMark extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
     final appIconStyle = ref.watch(appIconStyleProvider);
     return SizedBox(
       height: 96,
       width: 96,
-      child: Image.asset(appIconStyle.previewAssetPath, fit: BoxFit.contain),
+      child: Image.asset(
+        appIconStyle.previewAssetPathFor(theme.brightness),
+        fit: BoxFit.contain,
+      ),
     );
   }
 }

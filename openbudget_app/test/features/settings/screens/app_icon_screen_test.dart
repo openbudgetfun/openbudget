@@ -57,5 +57,32 @@ void main() {
 
       expect(container.read(appIconStyleProvider), AppIconStyle.v5);
     });
+
+    testWidgets('uses dark icon previews in dark mode', (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          child: MaterialApp(
+            theme: OpenBudgetTheme.light,
+            darkTheme: OpenBudgetTheme.dark,
+            themeMode: ThemeMode.dark,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: const AppIconScreen(budgetId: 'test-budget-id'),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final sproutTile = find.widgetWithText(ListTile, 'Sprout');
+      final sproutImage = tester.widget<Image>(
+        find.descendant(of: sproutTile, matching: find.byType(Image)).first,
+      );
+      final sproutAsset = sproutImage.image as AssetImage;
+
+      expect(
+        sproutAsset.assetName,
+        'assets/branding/logos/ob_v3_dark_preview.png',
+      );
+    });
   });
 }
