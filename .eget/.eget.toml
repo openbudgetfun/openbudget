@@ -11,6 +11,3 @@ tag = "knope/v0.22.3"
 ["pulumi/esc"]
 asset_filters = [".tar.gz"]
 tag = "v0.22.0"
-
-["pnpm/pnpm"]
-tag = "v10.30.2"

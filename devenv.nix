@@ -175,8 +175,9 @@ in
         set -e
         install:eget
         install:pulumi
+        install:pnpm
         install:dart
-        install:infra
+        install:infra || echo "Skipping infra install (pnpm not available)"
       '';
       description = "Run all install scripts.";
       binary = "bash";
@@ -222,6 +223,27 @@ in
         echo "Pulumi $PULUMI_VERSION installed"
       '';
       description = "Install Pulumi CLI from official releases.";
+      binary = "bash";
+    };
+    "install:pnpm" = {
+      exec = ''
+        PNPM_DIR="$DEVENV_ROOT/.eget/bin"
+        PNPM_VERSION="10.30.2"
+        if [ -f "$PNPM_DIR/pnpm" ]; then
+          CURRENT=$("$PNPM_DIR/pnpm" --version 2>/dev/null || echo "")
+          if [ "$CURRENT" = "$PNPM_VERSION" ]; then
+            echo "pnpm $PNPM_VERSION already installed"
+            exit 0
+          fi
+        fi
+        echo "Installing pnpm $PNPM_VERSION..."
+        OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+        ARCH=$(uname -m | sed 's/x86_64/x64/' | sed 's/aarch64/arm64/')
+        curl -fsSL "https://github.com/pnpm/pnpm/releases/download/v$PNPM_VERSION/pnpm-$OS-$ARCH" -o "$PNPM_DIR/pnpm"
+        chmod +x "$PNPM_DIR/pnpm"
+        echo "pnpm $PNPM_VERSION installed"
+      '';
+      description = "Install pnpm standalone binary.";
       binary = "bash";
     };
     "install:infra" = {
