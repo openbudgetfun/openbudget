@@ -105,51 +105,9 @@ jobs:
 
       - name: run integration tests
         run: |
-          cd openbudget_app
-          set -euo pipefail
-          shopt -s nullglob
-          tests=(integration_test/*_test.dart)
-
-          if [ "${#tests[@]}" -eq 0 ]; then
-            echo "::error::No integration tests were discovered under openbudget_app/integration_test."
-            exit 1
-          fi
-
-          echo "Discovered ${#tests[@]} integration test file(s)."
-          failed=0
-          per_file_timeout_seconds=900
-
-          for f in "${tests[@]}"; do
-            echo "::group::Running $f"
-            test_output="$(mktemp)"
-
-            set +e
-            timeout "${per_file_timeout_seconds}s" \
-              flutter test "$f" -d flutter-tester 2>&1 | tee "$test_output"
-            status=$?
-            set -e
-
-            if [ "$status" -ne 0 ]; then
-              if [ "$status" -eq 124 ]; then
-                echo "::error::Integration test timed out after ${per_file_timeout_seconds}s: $f"
-              fi
-              failed=1
-            fi
-
-            if grep -Eq "Some tests failed|[0-9]+ failed|No tests ran|Test failed" "$test_output"; then
-              echo "::error::Detected integration failure markers in $f output."
-              failed=1
-            fi
-
-            rm -f "$test_output"
-            echo "::endgroup::"
-          done
-
-          if [ "$failed" -ne 0 ]; then
-            echo "::error::One or more integration tests failed."
-          fi
-
-          exit "$failed"
+          ./tools/run_patrol_integration_tests.sh
+        env:
+          PER_FILE_TIMEOUT_SECONDS: 900
         shell: devenv shell -- bash -e {0}
 
   native-change-check:
