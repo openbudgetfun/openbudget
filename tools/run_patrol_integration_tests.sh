@@ -8,10 +8,8 @@ cd "$APP_DIR"
 
 shopt -s nullglob
 test_glob="${PATROL_TEST_GLOB:-integration_test/*_test.dart}"
-tests=()
-while IFS= read -r test_file; do
-	tests+=("$test_file")
-done < <(compgen -G "$test_glob" | sort || true)
+# shellcheck disable=SC2206
+tests=($test_glob)
 
 if [ "${#tests[@]}" -eq 0 ]; then
 	echo "::error::No integration tests were discovered under openbudget_app/integration_test."
