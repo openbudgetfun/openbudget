@@ -63,7 +63,7 @@ void main() {
 
   testWidgets('renders bank search entry step', (tester) async {
     await tester.pumpWidget(buildSubject());
-    await tester.pumpAndSettle();
+    await _pumpToBankSearch(tester);
 
     expect(find.text('Add Accounts'), findsOneWidget);
     expect(find.text('Search for your bank'), findsOneWidget);
@@ -71,11 +71,30 @@ void main() {
     expect(find.text('Add an Unlinked Account'), findsOneWidget);
   });
 
+  testWidgets('shows staged loading states before bank search', (tester) async {
+    await tester.pumpWidget(buildSubject());
+    await tester.pump();
+
+    expect(find.text('Loading...'), findsOneWidget);
+    expect(find.text('Search for your bank'), findsNothing);
+
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump();
+
+    expect(find.text('Add Accounts'), findsOneWidget);
+    expect(find.text('Loading institutions...'), findsOneWidget);
+
+    await tester.pump(const Duration(milliseconds: 1000));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Search for your bank'), findsOneWidget);
+  });
+
   testWidgets('renders currency selector in unlinked account step', (
     tester,
   ) async {
     await tester.pumpWidget(buildSubject(currencyCode: 'EUR'));
-    await tester.pumpAndSettle();
+    await _pumpToBankSearch(tester);
 
     await tester.tap(find.text('Add an Unlinked Account'));
     await tester.pumpAndSettle();
@@ -90,7 +109,7 @@ void main() {
     tester,
   ) async {
     await tester.pumpWidget(buildSubject());
-    await tester.pumpAndSettle();
+    await _pumpToBankSearch(tester);
 
     await tester.tap(find.text('Add an Unlinked Account'));
     await tester.pumpAndSettle();
@@ -108,7 +127,7 @@ void main() {
     tester,
   ) async {
     await tester.pumpWidget(buildSubject());
-    await tester.pumpAndSettle();
+    await _pumpToBankSearch(tester);
 
     await tester.tap(find.text('Add an Unlinked Account'));
     await tester.pumpAndSettle();
@@ -133,4 +152,9 @@ void main() {
     nextButton = tester.widget(find.widgetWithText(FilledButton, 'Next'));
     expect(nextButton.onPressed, isNotNull);
   });
+}
+
+Future<void> _pumpToBankSearch(WidgetTester tester) async {
+  await tester.pump(const Duration(milliseconds: 1500));
+  await tester.pumpAndSettle();
 }
