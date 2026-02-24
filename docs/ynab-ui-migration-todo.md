@@ -1,6 +1,6 @@
 # OpenBudget UI Migration Tracker (from `~/Downloads/ynab-ui`)
 
-Last updated: 2026-02-23 (Edit Plan setup parity + Reflect parity + Patrol coverage)
+Last updated: 2026-02-24 (Server/API hardening + CI integration timeout guard + tracker refresh)
 
 ## Scope
 
@@ -10,9 +10,10 @@ Last updated: 2026-02-23 (Edit Plan setup parity + Reflect parity + Patrol cover
 
 ## Progress Snapshot
 
-- Overall migration progress: **~99%**
+- Overall migration progress: **~99.5%**
 - Core plan/settings/auth/navigation flows: **implemented**
-- Advanced accounts/transactions/reports flows: **in progress**
+- Advanced accounts/transactions flows: **implemented**
+- Reports/appearance polish flows: **in progress**
 
 ## Completed Flows
 
@@ -90,19 +91,19 @@ Last updated: 2026-02-23 (Edit Plan setup parity + Reflect parity + Patrol cover
 
 ## Pending Flows (Next Batches)
 
-- [ ] Accounts flows
+- [x] Accounts flows
   - [x] Add account wizard parity
   - [x] Search bank flow
   - [x] Account details (cash flow baseline + overflow actions)
   - [x] Account details (loan overview + activity tabs)
   - [x] Reconcile account (from account detail menu)
   - [x] Delete account
-- [ ] Transactions flows
+- [x] Transactions flows
   - [x] Transaction detail parity
   - [x] Edit/delete/clear transaction flows
   - [x] Approve scheduled transaction / review queue flow
   - [x] Filtering transactions
-- [ ] Budget/category advanced flows
+- [x] Budget/category advanced flows
   - [x] Add custom target flow
   - [x] Loan target flow
   - [x] Cover overspending flow
@@ -142,4 +143,5 @@ Last updated: 2026-02-23 (Edit Plan setup parity + Reflect parity + Patrol cover
 - [x] Integration tests migrated to Patrol (`patrolWidgetTest`) across all flow files
 - [x] Integration coverage for opening custom target editor and validating Save button enablement
 - [x] Integration coverage for Reflect dashboard -> Spending Breakdown + Net Worth flows
+- [x] Integration CI enforces per-file timeout for stuck integration files with explicit timeout errors
 - [ ] Expand integration tests for remaining pending batches above
