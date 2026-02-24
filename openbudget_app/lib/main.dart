@@ -2,16 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/analytics/analytics_provider.dart';
+import 'package:openbudget_app/src/features/settings/providers/ui_preferences_store.dart';
 import 'package:openbudget_app/src/logging/app_logging.dart';
 import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
 import 'package:openbudget_app/src/providers/theme_mode_provider.dart';
 import 'package:openbudget_app/src/routing/app_router.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  final container = ProviderContainer();
+  final preferences = await SharedPreferences.getInstance();
+  final container = ProviderContainer(
+    overrides: [
+      uiPreferencesStoreProvider.overrideWithValue(
+        SharedPrefsUiPreferencesStore(preferences),
+      ),
+    ],
+  );
   initAppLogging(container.read(serverpodClientProvider));
 
   // Initialize PostHog analytics (no-ops in debug mode).

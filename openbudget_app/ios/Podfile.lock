@@ -13,6 +13,8 @@ PODS:
   - connectivity_plus (0.0.1):
     - Flutter
   - Flutter (1.0.0)
+  - flutter_native_splash (2.4.3):
+    - Flutter
   - flutter_secure_storage_darwin (10.0.0):
     - Flutter
     - FlutterMacOS
@@ -47,14 +49,19 @@ PODS:
     - GTMSessionFetcher/Core
   - integration_test (0.0.1):
     - Flutter
-  - path_provider_foundation (0.0.1):
-    - Flutter
-    - FlutterMacOS
   - patrol (0.0.1):
     - CocoaAsyncSocket (~> 7.6)
     - Flutter
     - FlutterMacOS
+  - PostHog (3.41.2)
+  - posthog_flutter (0.0.1):
+    - Flutter
+    - FlutterMacOS
+    - PostHog (< 4.0.0, >= 3.40.0)
   - PromisesObjC (2.4.0)
+  - shared_preferences_foundation (0.0.1):
+    - Flutter
+    - FlutterMacOS
   - sign_in_with_apple (0.0.1):
     - Flutter
   - url_launcher_ios (0.0.1):
@@ -63,12 +70,14 @@ PODS:
 DEPENDENCIES:
   - connectivity_plus (from `.symlinks/plugins/connectivity_plus/ios`)
   - Flutter (from `Flutter`)
+  - flutter_native_splash (from `.symlinks/plugins/flutter_native_splash/ios`)
   - flutter_secure_storage_darwin (from `.symlinks/plugins/flutter_secure_storage_darwin/darwin`)
   - flutter_web_auth_2 (from `.symlinks/plugins/flutter_web_auth_2/ios`)
   - google_sign_in_ios (from `.symlinks/plugins/google_sign_in_ios/darwin`)
   - integration_test (from `.symlinks/plugins/integration_test/ios`)
-  - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - patrol (from `.symlinks/plugins/patrol/darwin`)
+  - posthog_flutter (from `.symlinks/plugins/posthog_flutter/ios`)
+  - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
   - sign_in_with_apple (from `.symlinks/plugins/sign_in_with_apple/ios`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
 
@@ -81,6 +90,7 @@ SPEC REPOS:
     - GoogleUtilities
     - GTMAppAuth
     - GTMSessionFetcher
+    - PostHog
     - PromisesObjC
 
 EXTERNAL SOURCES:
@@ -88,6 +98,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/connectivity_plus/ios"
   Flutter:
     :path: Flutter
+  flutter_native_splash:
+    :path: ".symlinks/plugins/flutter_native_splash/ios"
   flutter_secure_storage_darwin:
     :path: ".symlinks/plugins/flutter_secure_storage_darwin/darwin"
   flutter_web_auth_2:
@@ -96,10 +108,12 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/google_sign_in_ios/darwin"
   integration_test:
     :path: ".symlinks/plugins/integration_test/ios"
-  path_provider_foundation:
-    :path: ".symlinks/plugins/path_provider_foundation/darwin"
   patrol:
     :path: ".symlinks/plugins/patrol/darwin"
+  posthog_flutter:
+    :path: ".symlinks/plugins/posthog_flutter/ios"
+  shared_preferences_foundation:
+    :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
   sign_in_with_apple:
     :path: ".symlinks/plugins/sign_in_with_apple/ios"
   url_launcher_ios:
@@ -111,19 +125,22 @@ SPEC CHECKSUMS:
   CocoaAsyncSocket: 065fd1e645c7abab64f7a6a2007a48038fdc6a99
   connectivity_plus: 2a701ffec2c0ae28a48cf7540e279787e77c447d
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
+  flutter_native_splash: df59bb2e1421aa0282cb2e95618af4dcb0c56c29
   flutter_secure_storage_darwin: 557817588b80e60213cbecb573c45c76b788018d
   flutter_web_auth_2: 4091f1645696258ddc57849f62bef2a848fc313c
-  google_sign_in_ios: 4bb0e529b167cadc6ac785b6ed943c0a0a4cc1c9
+  google_sign_in_ios: 7336a3372ea93ea56a21e126a0055ffca3723601
   GoogleSignIn: fcee2257188d5eda57a5e2b6a715550ffff9206d
   GoogleUtilities: 00c88b9a86066ef77f0da2fab05f65d7768ed8e1
   GTMAppAuth: 217a876b249c3c585a54fd6f73e6b58c4f5c4238
   GTMSessionFetcher: 5aea5ba6bd522a239e236100971f10cb71b96ab6
   integration_test: 252f60fa39af5e17c3aa9899d35d908a0721b573
-  path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
   patrol: 5a504c6012be7a84369231475ede1fce6e777268
+  PostHog: 2a8daf098230d8e631adbc599b785bd966f7639f
+  posthog_flutter: 30917861666ce0ce3dc83d4f5aae5432ef93b8c0
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
+  shared_preferences_foundation: 5086985c1d43c5ba4d5e69a4e8083a389e2909e6
   sign_in_with_apple: f3bf75217ea4c2c8b91823f225d70230119b8440
-  url_launcher_ios: 5334b05cef931de560670eeae103fd3e431ac3fe
+  url_launcher_ios: bb13df5870e8c4234ca12609d04010a21be43dfa
 
 PODFILE CHECKSUM: 671fb9dc313b15dac337c595a3bd3450bb4ed23e
 

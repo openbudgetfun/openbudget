@@ -1,6 +1,6 @@
 # OpenBudget UI Migration Tracker (from `~/Downloads/ynab-ui`)
 
-Last updated: 2026-02-24 (Reports dark-mode surface parity)
+Last updated: 2026-02-24 (Appearance preferences persistence + app-icon flow polish)
 
 ## Scope
 
@@ -10,7 +10,7 @@ Last updated: 2026-02-24 (Reports dark-mode surface parity)
 
 ## Progress Snapshot
 
-- Overall migration progress: **~99.8%**
+- Overall migration progress: **~99.85%**
 - Core plan/settings/auth/navigation flows: **implemented**
 - Advanced accounts/transactions flows: **implemented**
 - Reports/appearance polish flows: **in progress**
@@ -23,10 +23,13 @@ Last updated: 2026-02-24 (Reports dark-mode surface parity)
 - 2026-02-24: Patrol flow updated to assert preset range rendering in integration coverage (`openbudget_app/integration_test/reports_flow_test.dart`).
 - 2026-02-24: Patrol flow expanded to assert deterministic preset month-pivot ranges (`December 2025–February 2026` then `November 2025–January 2026`) and aggregated totals.
 - 2026-02-24: Patrol flow expanded to assert dark-mode scaffold background parity for Spending Breakdown.
+- 2026-02-24: Appearance preference notifiers now persist theme/app-icon/privacy formatting state to local UI preferences and hydrate on launch.
+- 2026-02-24: Settings -> App Icon screen updated to use theme-aware surface/background tokens for dark-mode parity.
 - 2026-02-24: PR screenshot artifacts policy active: every migration PR must include at least one runtime screenshot link in PR body/comments.
 - 2026-02-24: PR #127 artifact screenshot (Preset mode): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-24-pr127/reports-preset-mode.png
 - 2026-02-24: PR #129 artifact screenshot (Preset range + month anchor): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-24-pr129/reports-preset-range-month-anchor.png
 - 2026-02-24: PR #130 artifact screenshot (Dark-mode spending breakdown): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-24-pr130/reports-dark-mode-runtime.png
+- 2026-02-24: PR #131 artifact screenshot (Dark-mode app icon settings): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-24-pr131/settings-app-icon-dark.png
 
 ## Completed Flows
 
@@ -157,6 +160,7 @@ Last updated: 2026-02-24 (Reports dark-mode surface parity)
 - [x] Integration coverage for opening custom target editor and validating Save button enablement
 - [x] Integration coverage for Reflect dashboard -> Spending Breakdown + Net Worth flows
 - [x] Integration coverage for dark-mode report surfaces (Reflect -> Spending Breakdown)
+- [x] Unit coverage for persisted appearance preference hydration/write behavior
 - [x] Integration CI enforces per-file timeout for stuck integration files with explicit timeout errors
 - [ ] Expand integration tests for remaining pending batches above
 

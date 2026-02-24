@@ -33,6 +33,7 @@ dependencies:
   riverpod_annotation: 4.0.2
   serverpod_auth_idp_flutter: 3.3.1
   serverpod_flutter: 3.3.1
+  shared_preferences: 2.5.3
   shorebird_code_push: 2.0.5
 
 dev_dependencies:

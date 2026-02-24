@@ -1,4 +1,5 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:openbudget_app/src/features/settings/providers/ui_preferences_store.dart';
 
 enum BalanceStyle { standard, differentiateWithoutColor }
 
@@ -44,41 +45,65 @@ final hideProgressBarsProvider =
 
 class BalanceStyleNotifier extends Notifier<BalanceStyle> {
   @override
-  BalanceStyle build() => BalanceStyle.standard;
+  BalanceStyle build() {
+    final rawValue = ref
+        .watch(uiPreferencesStoreProvider)
+        .readString(UiPreferenceKeys.balanceStyle);
+    return enumFromName(BalanceStyle.values, rawValue, BalanceStyle.standard);
+  }
 
   // ignore: use_setters_to_change_properties, Keep explicit command-style API for consistency with other notifiers.
   void setBalanceStyle(BalanceStyle style) {
     state = style;
+    persistString(ref, key: UiPreferenceKeys.balanceStyle, value: style.name);
   }
 }
 
 class AppIconStyleNotifier extends Notifier<AppIconStyle> {
   @override
-  AppIconStyle build() => AppIconStyle.primary;
+  AppIconStyle build() {
+    final rawValue = ref
+        .watch(uiPreferencesStoreProvider)
+        .readString(UiPreferenceKeys.appIconStyle);
+    return enumFromName(AppIconStyle.values, rawValue, AppIconStyle.primary);
+  }
 
   // ignore: use_setters_to_change_properties, Keep explicit command-style API for consistency with other notifiers.
   void setAppIconStyle(AppIconStyle style) {
     state = style;
+    persistString(ref, key: UiPreferenceKeys.appIconStyle, value: style.name);
   }
 }
 
 class HideAmountsNotifier extends Notifier<bool> {
   @override
-  bool build() => false;
+  bool build() {
+    return ref
+            .watch(uiPreferencesStoreProvider)
+            .readBool(UiPreferenceKeys.hideAmounts) ??
+        false;
+  }
 
   // ignore: use_setters_to_change_properties, Keep explicit command-style API for consistency with other notifiers.
   void setHideAmounts({required bool value}) {
     state = value;
+    persistBool(ref, key: UiPreferenceKeys.hideAmounts, value: value);
   }
 }
 
 class HideProgressBarsNotifier extends Notifier<bool> {
   @override
-  bool build() => false;
+  bool build() {
+    return ref
+            .watch(uiPreferencesStoreProvider)
+            .readBool(UiPreferenceKeys.hideProgressBars) ??
+        false;
+  }
 
   // ignore: use_setters_to_change_properties, Keep explicit command-style API for consistency with other notifiers.
   void setHideProgressBars({required bool value}) {
     state = value;
+    persistBool(ref, key: UiPreferenceKeys.hideProgressBars, value: value);
   }
 }
 
@@ -89,11 +114,25 @@ final numberFormatStyleProvider =
 
 class NumberFormatStyleNotifier extends Notifier<NumberFormatStyle> {
   @override
-  NumberFormatStyle build() => NumberFormatStyle.standard;
+  NumberFormatStyle build() {
+    final rawValue = ref
+        .watch(uiPreferencesStoreProvider)
+        .readString(UiPreferenceKeys.numberFormatStyle);
+    return enumFromName(
+      NumberFormatStyle.values,
+      rawValue,
+      NumberFormatStyle.standard,
+    );
+  }
 
   // ignore: use_setters_to_change_properties, Keep explicit command-style API for consistency with other notifiers.
   void setNumberFormat(NumberFormatStyle style) {
     state = style;
+    persistString(
+      ref,
+      key: UiPreferenceKeys.numberFormatStyle,
+      value: style.name,
+    );
   }
 }
 
@@ -104,11 +143,25 @@ final currencyPlacementStyleProvider =
 
 class CurrencyPlacementStyleNotifier extends Notifier<CurrencyPlacementStyle> {
   @override
-  CurrencyPlacementStyle build() => CurrencyPlacementStyle.beforeAmount;
+  CurrencyPlacementStyle build() {
+    final rawValue = ref
+        .watch(uiPreferencesStoreProvider)
+        .readString(UiPreferenceKeys.currencyPlacementStyle);
+    return enumFromName(
+      CurrencyPlacementStyle.values,
+      rawValue,
+      CurrencyPlacementStyle.beforeAmount,
+    );
+  }
 
   // ignore: use_setters_to_change_properties, Keep explicit command-style API for consistency with other notifiers.
   void setCurrencyPlacement(CurrencyPlacementStyle style) {
     state = style;
+    persistString(
+      ref,
+      key: UiPreferenceKeys.currencyPlacementStyle,
+      value: style.name,
+    );
   }
 }
 
@@ -119,10 +172,24 @@ final dateFormatStyleProvider =
 
 class DateFormatStyleNotifier extends Notifier<DateFormatStyle> {
   @override
-  DateFormatStyle build() => DateFormatStyle.monthDayYear;
+  DateFormatStyle build() {
+    final rawValue = ref
+        .watch(uiPreferencesStoreProvider)
+        .readString(UiPreferenceKeys.dateFormatStyle);
+    return enumFromName(
+      DateFormatStyle.values,
+      rawValue,
+      DateFormatStyle.monthDayYear,
+    );
+  }
 
   // ignore: use_setters_to_change_properties, Keep explicit command-style API for consistency with other notifiers.
   void setDateFormat(DateFormatStyle style) {
     state = style;
+    persistString(
+      ref,
+      key: UiPreferenceKeys.dateFormatStyle,
+      value: style.name,
+    );
   }
 }
