@@ -65,6 +65,46 @@ void main() {
     });
 
     test(
+      'when listing with duplicate envelope ids then returns unique goals',
+      () async {
+        final budget = await endpoints.budget.create(
+          authedSession,
+          'Duplicate Budget',
+          'USD',
+        );
+        final category = await endpoints.category.create(
+          authedSession,
+          'Utilities',
+          budget.id!,
+          0,
+        );
+        final envelope = await endpoints.envelope.create(
+          authedSession,
+          'Internet',
+          category.id!,
+          0,
+          'USD',
+        );
+
+        await endpoints.envelopeGoal.upsert(
+          authedSession,
+          envelope.id!,
+          'monthly_funding',
+          8000,
+          monthlyFundingCents: 8000,
+        );
+
+        final goals = await endpoints.envelopeGoal.listForEnvelopes(
+          authedSession,
+          [envelope.id!, envelope.id!, envelope.id!],
+        );
+
+        expect(goals, hasLength(1));
+        expect(goals.single.envelopeId, envelope.id);
+      },
+    );
+
+    test(
       'when listing goals with no envelope ids then returns empty',
       () async {
         final goals = await endpoints.envelopeGoal.listForEnvelopes(
