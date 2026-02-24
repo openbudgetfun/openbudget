@@ -99,10 +99,36 @@ class EnvelopeService {
   }) async {
     await CategoryService.getById(session, categoryId: categoryId);
 
+    if (envelopeIds.isEmpty) return [];
+
+    final orderedEnvelopeIds = envelopeIds.toSet().toList();
+    final requestedEnvelopeIds = orderedEnvelopeIds.toSet();
+
+    final envelopes = await Envelope.db.find(
+      session,
+      where: (t) =>
+          t.id.inSet(requestedEnvelopeIds) & t.categoryId.equals(categoryId),
+    );
+
+    if (envelopes.length != requestedEnvelopeIds.length) {
+      throw NotFoundException(
+        'One or more envelopes were not found in this category',
+      );
+    }
+
+    final envelopesById = <UuidValue, Envelope>{
+      for (final envelope in envelopes) envelope.id!: envelope,
+    };
+
     final results = <Envelope>[];
-    for (var i = 0; i < envelopeIds.length; i++) {
-      final envelope = await Envelope.db.findById(session, envelopeIds[i]);
-      if (envelope == null) continue;
+    for (var i = 0; i < orderedEnvelopeIds.length; i++) {
+      final envelope = envelopesById[orderedEnvelopeIds[i]];
+      if (envelope == null) {
+        throw NotFoundException(
+          'One or more envelopes were not found in this category',
+        );
+      }
+
       final updated = envelope.copyWith(sortOrder: i);
       results.add(await Envelope.db.updateRow(session, updated));
     }

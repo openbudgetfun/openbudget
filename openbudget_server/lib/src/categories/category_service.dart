@@ -86,10 +86,36 @@ class CategoryService {
   }) async {
     await BudgetService.getById(session, budgetId: budgetId);
 
+    if (categoryIds.isEmpty) return [];
+
+    final orderedCategoryIds = categoryIds.toSet().toList();
+    final requestedCategoryIds = orderedCategoryIds.toSet();
+
+    final categories = await Category.db.find(
+      session,
+      where: (t) =>
+          t.id.inSet(requestedCategoryIds) & t.budgetId.equals(budgetId),
+    );
+
+    if (categories.length != requestedCategoryIds.length) {
+      throw NotFoundException(
+        'One or more categories were not found in this budget',
+      );
+    }
+
+    final categoriesById = <UuidValue, Category>{
+      for (final category in categories) category.id!: category,
+    };
+
     final results = <Category>[];
-    for (var i = 0; i < categoryIds.length; i++) {
-      final category = await Category.db.findById(session, categoryIds[i]);
-      if (category == null) continue;
+    for (var i = 0; i < orderedCategoryIds.length; i++) {
+      final category = categoriesById[orderedCategoryIds[i]];
+      if (category == null) {
+        throw NotFoundException(
+          'One or more categories were not found in this budget',
+        );
+      }
+
       final updated = category.copyWith(sortOrder: i);
       results.add(await Category.db.updateRow(session, updated));
     }

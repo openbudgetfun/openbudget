@@ -159,5 +159,175 @@ void main() {
         );
       },
     );
+
+    test('when reordering envelopes then sort order is updated', () async {
+      final budget = await endpoints.budget.create(
+        authedSession,
+        'Reorder Budget',
+        'USD',
+      );
+      final category = await endpoints.category.create(
+        authedSession,
+        'Utilities',
+        budget.id!,
+        0,
+      );
+
+      final first = await endpoints.envelope.create(
+        authedSession,
+        'First',
+        category.id!,
+        1000,
+        'USD',
+      );
+      final second = await endpoints.envelope.create(
+        authedSession,
+        'Second',
+        category.id!,
+        2000,
+        'USD',
+      );
+      final third = await endpoints.envelope.create(
+        authedSession,
+        'Third',
+        category.id!,
+        3000,
+        'USD',
+      );
+
+      final reordered = await endpoints.envelope.reorder(
+        authedSession,
+        category.id!,
+        [third.id!.toString(), first.id!.toString(), second.id!.toString()],
+      );
+      expect(reordered.map((envelope) => envelope.name), [
+        'Third',
+        'First',
+        'Second',
+      ]);
+
+      final listed = await endpoints.envelope.list(authedSession, category.id!);
+      expect(listed.map((envelope) => envelope.name), [
+        'Third',
+        'First',
+        'Second',
+      ]);
+    });
+
+    test(
+      'when reordering with envelope from another category then throws',
+      () async {
+        final budget = await endpoints.budget.create(
+          authedSession,
+          'Mixed Category Budget',
+          'USD',
+        );
+        final primaryCategory = await endpoints.category.create(
+          authedSession,
+          'Primary Category',
+          budget.id!,
+          0,
+        );
+        final otherCategory = await endpoints.category.create(
+          authedSession,
+          'Other Category',
+          budget.id!,
+          1,
+        );
+
+        final primaryA = await endpoints.envelope.create(
+          authedSession,
+          'Primary A',
+          primaryCategory.id!,
+          1000,
+          'USD',
+        );
+        final primaryB = await endpoints.envelope.create(
+          authedSession,
+          'Primary B',
+          primaryCategory.id!,
+          2000,
+          'USD',
+        );
+        final foreign = await endpoints.envelope.create(
+          authedSession,
+          'Foreign Envelope',
+          otherCategory.id!,
+          5000,
+          'USD',
+        );
+
+        await expectLater(
+          endpoints.envelope.reorder(authedSession, primaryCategory.id!, [
+            primaryA.id!.toString(),
+            foreign.id!.toString(),
+            primaryB.id!.toString(),
+          ]),
+          throwsA(isA<NotFoundException>()),
+        );
+
+        final primaryListed = await endpoints.envelope.list(
+          authedSession,
+          primaryCategory.id!,
+        );
+        expect(primaryListed.map((envelope) => envelope.name), [
+          'Primary A',
+          'Primary B',
+        ]);
+
+        final foreignEnvelope = await endpoints.envelope.get(
+          authedSession,
+          foreign.id!,
+        );
+        expect(foreignEnvelope.sortOrder, 0);
+      },
+    );
+
+    test(
+      'when reordering with duplicate envelope ids then applies unique order',
+      () async {
+        final budget = await endpoints.budget.create(
+          authedSession,
+          'Duplicate Envelope Budget',
+          'USD',
+        );
+        final category = await endpoints.category.create(
+          authedSession,
+          'Primary Category',
+          budget.id!,
+          0,
+        );
+        final first = await endpoints.envelope.create(
+          authedSession,
+          'First',
+          category.id!,
+          1000,
+          'USD',
+        );
+        final second = await endpoints.envelope.create(
+          authedSession,
+          'Second',
+          category.id!,
+          2000,
+          'USD',
+        );
+
+        final reordered = await endpoints.envelope.reorder(
+          authedSession,
+          category.id!,
+          [second.id!.toString(), first.id!.toString(), second.id!.toString()],
+        );
+
+        expect(reordered.map((envelope) => envelope.name), ['Second', 'First']);
+
+        final listed = await endpoints.envelope.list(
+          authedSession,
+          category.id!,
+        );
+        expect(listed.map((envelope) => envelope.name), ['Second', 'First']);
+        expect(listed.first.sortOrder, 0);
+        expect(listed.last.sortOrder, 1);
+      },
+    );
   });
 }

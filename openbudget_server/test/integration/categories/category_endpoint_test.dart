@@ -135,5 +135,145 @@ void main() {
         );
       },
     );
+
+    test('when reordering categories then sort order is updated', () async {
+      final budget = await endpoints.budget.create(
+        authedSession,
+        'Reorder Budget',
+        'USD',
+      );
+
+      final first = await endpoints.category.create(
+        authedSession,
+        'First',
+        budget.id!,
+        0,
+      );
+      final second = await endpoints.category.create(
+        authedSession,
+        'Second',
+        budget.id!,
+        1,
+      );
+      final third = await endpoints.category.create(
+        authedSession,
+        'Third',
+        budget.id!,
+        2,
+      );
+
+      final reordered = await endpoints.category.reorder(
+        authedSession,
+        budget.id!,
+        [third.id!, first.id!, second.id!],
+      );
+      expect(reordered.map((category) => category.name), [
+        'Third',
+        'First',
+        'Second',
+      ]);
+
+      final listed = await endpoints.category.list(authedSession, budget.id!);
+      expect(listed.map((category) => category.name), [
+        'Third',
+        'First',
+        'Second',
+      ]);
+    });
+
+    test(
+      'when reordering with categories from another budget then throws',
+      () async {
+        final primaryBudget = await endpoints.budget.create(
+          authedSession,
+          'Primary Budget',
+          'USD',
+        );
+        final foreignBudget = await endpoints.budget.create(
+          authedSession,
+          'Foreign Budget',
+          'USD',
+        );
+
+        final primaryA = await endpoints.category.create(
+          authedSession,
+          'Primary A',
+          primaryBudget.id!,
+          0,
+        );
+        final primaryB = await endpoints.category.create(
+          authedSession,
+          'Primary B',
+          primaryBudget.id!,
+          1,
+        );
+        final foreign = await endpoints.category.create(
+          authedSession,
+          'Foreign',
+          foreignBudget.id!,
+          5,
+        );
+
+        await expectLater(
+          endpoints.category.reorder(authedSession, primaryBudget.id!, [
+            primaryA.id!,
+            foreign.id!,
+            primaryB.id!,
+          ]),
+          throwsA(isA<NotFoundException>()),
+        );
+
+        final primaryListed = await endpoints.category.list(
+          authedSession,
+          primaryBudget.id!,
+        );
+        expect(primaryListed.map((category) => category.name), [
+          'Primary A',
+          'Primary B',
+        ]);
+
+        final foreignCategory = await endpoints.category.get(
+          authedSession,
+          foreign.id!,
+        );
+        expect(foreignCategory.sortOrder, 5);
+      },
+    );
+
+    test(
+      'when reordering with duplicate category ids then applies unique order',
+      () async {
+        final budget = await endpoints.budget.create(
+          authedSession,
+          'Duplicate Reorder Budget',
+          'USD',
+        );
+        final first = await endpoints.category.create(
+          authedSession,
+          'First',
+          budget.id!,
+          0,
+        );
+        final second = await endpoints.category.create(
+          authedSession,
+          'Second',
+          budget.id!,
+          1,
+        );
+
+        final reordered = await endpoints.category.reorder(
+          authedSession,
+          budget.id!,
+          [second.id!, first.id!, second.id!],
+        );
+
+        expect(reordered.map((category) => category.name), ['Second', 'First']);
+
+        final listed = await endpoints.category.list(authedSession, budget.id!);
+        expect(listed.map((category) => category.name), ['Second', 'First']);
+        expect(listed.first.sortOrder, 0);
+        expect(listed.last.sortOrder, 1);
+      },
+    );
   });
 }
