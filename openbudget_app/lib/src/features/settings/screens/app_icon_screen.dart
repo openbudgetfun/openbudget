@@ -20,9 +20,9 @@ class AppIconScreen extends HookConsumerWidget {
     final currentStyle = ref.watch(appIconStyleProvider);
 
     return Scaffold(
-      backgroundColor: OpenBudgetPalette.appBackground,
+      backgroundColor: OpenBudgetPalette.appBackgroundFor(theme),
       appBar: AppBar(
-        backgroundColor: OpenBudgetPalette.appBackground,
+        backgroundColor: OpenBudgetPalette.appBackgroundFor(theme),
         surfaceTintColor: Colors.transparent,
         centerTitle: true,
         leadingWidth: 120,
@@ -102,7 +102,7 @@ class AppIconScreen extends HookConsumerWidget {
           Text(
             l10n.settingsAppIconHint,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: OpenBudgetPalette.mutedText,
+              color: OpenBudgetPalette.mutedTextFor(theme),
             ),
           ),
         ],
@@ -128,11 +128,12 @@ class _SettingsCard extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: OpenBudgetPalette.surface,
+        color: OpenBudgetPalette.surfaceFor(theme),
         borderRadius: BorderRadius.circular(RadiusTokens.md),
-        border: Border.all(color: OpenBudgetPalette.divider),
+        border: Border.all(color: OpenBudgetPalette.dividerFor(theme)),
       ),
       child: child,
     );
@@ -154,6 +155,7 @@ class _AppIconStyleTile extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return ListTile(
       onTap: onTap,
       leading: selected
@@ -165,7 +167,7 @@ class _AppIconStyleTile extends HookWidget {
         width: 34,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: OpenBudgetPalette.divider),
+          border: Border.all(color: OpenBudgetPalette.dividerFor(theme)),
         ),
         clipBehavior: Clip.antiAlias,
         child: Image.asset(style.previewAssetPath, fit: BoxFit.cover),

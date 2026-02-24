@@ -8,6 +8,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
 import 'package:openbudget_app/src/features/settings/providers/display_options_provider.dart';
+import 'package:openbudget_app/src/features/settings/providers/ui_preferences_store.dart';
 import 'package:openbudget_app/src/features/settings/screens/account_settings_screen.dart';
 import 'package:openbudget_app/src/features/settings/screens/app_icon_screen.dart';
 import 'package:openbudget_app/src/features/settings/screens/currency_settings_screen.dart';
@@ -32,9 +33,11 @@ void main() {
     'navigates settings -> plan settings -> currency -> display options',
     ($) async {
       final tester = $.tester;
+      final store = InMemoryUiPreferencesStore();
       final container = ProviderContainer(
         overrides: [
           budgetDetailProvider.overrideWith((ref, id) async => _makeBudget()),
+          uiPreferencesStoreProvider.overrideWithValue(store),
         ],
       );
       addTearDown(container.dispose);
@@ -127,6 +130,10 @@ void main() {
       await tester.tap(find.text('Arrow'));
       await tester.pumpAndSettle();
       expect(container.read(appIconStyleProvider), AppIconStyle.v5);
+      expect(
+        store.readString(UiPreferenceKeys.appIconStyle),
+        AppIconStyle.v5.name,
+      );
 
       await tester.tap(find.text('Done'));
       await tester.pumpAndSettle();
@@ -183,6 +190,13 @@ void main() {
       );
       expect(container.read(hideAmountsProvider), isTrue);
       expect(container.read(hideProgressBarsProvider), isTrue);
+      expect(store.readString(UiPreferenceKeys.themeMode), ThemeMode.dark.name);
+      expect(
+        store.readString(UiPreferenceKeys.balanceStyle),
+        BalanceStyle.differentiateWithoutColor.name,
+      );
+      expect(store.readBool(UiPreferenceKeys.hideAmounts), isTrue);
+      expect(store.readBool(UiPreferenceKeys.hideProgressBars), isTrue);
 
       await tester.tap(find.text('Done'));
       await tester.pumpAndSettle();
