@@ -239,5 +239,41 @@ void main() {
         expect(foreignCategory.sortOrder, 5);
       },
     );
+
+    test(
+      'when reordering with duplicate category ids then applies unique order',
+      () async {
+        final budget = await endpoints.budget.create(
+          authedSession,
+          'Duplicate Reorder Budget',
+          'USD',
+        );
+        final first = await endpoints.category.create(
+          authedSession,
+          'First',
+          budget.id!,
+          0,
+        );
+        final second = await endpoints.category.create(
+          authedSession,
+          'Second',
+          budget.id!,
+          1,
+        );
+
+        final reordered = await endpoints.category.reorder(
+          authedSession,
+          budget.id!,
+          [second.id!, first.id!, second.id!],
+        );
+
+        expect(reordered.map((category) => category.name), ['Second', 'First']);
+
+        final listed = await endpoints.category.list(authedSession, budget.id!);
+        expect(listed.map((category) => category.name), ['Second', 'First']);
+        expect(listed.first.sortOrder, 0);
+        expect(listed.last.sortOrder, 1);
+      },
+    );
   });
 }

@@ -282,5 +282,52 @@ void main() {
         expect(foreignEnvelope.sortOrder, 0);
       },
     );
+
+    test(
+      'when reordering with duplicate envelope ids then applies unique order',
+      () async {
+        final budget = await endpoints.budget.create(
+          authedSession,
+          'Duplicate Envelope Budget',
+          'USD',
+        );
+        final category = await endpoints.category.create(
+          authedSession,
+          'Primary Category',
+          budget.id!,
+          0,
+        );
+        final first = await endpoints.envelope.create(
+          authedSession,
+          'First',
+          category.id!,
+          1000,
+          'USD',
+        );
+        final second = await endpoints.envelope.create(
+          authedSession,
+          'Second',
+          category.id!,
+          2000,
+          'USD',
+        );
+
+        final reordered = await endpoints.envelope.reorder(
+          authedSession,
+          category.id!,
+          [second.id!.toString(), first.id!.toString(), second.id!.toString()],
+        );
+
+        expect(reordered.map((envelope) => envelope.name), ['Second', 'First']);
+
+        final listed = await endpoints.envelope.list(
+          authedSession,
+          category.id!,
+        );
+        expect(listed.map((envelope) => envelope.name), ['Second', 'First']);
+        expect(listed.first.sortOrder, 0);
+        expect(listed.last.sortOrder, 1);
+      },
+    );
   });
 }
