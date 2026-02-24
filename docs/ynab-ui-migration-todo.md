@@ -145,3 +145,11 @@ Last updated: 2026-02-24 (Server/API hardening + CI integration timeout guard + 
 - [x] Integration coverage for Reflect dashboard -> Spending Breakdown + Net Worth flows
 - [x] Integration CI enforces per-file timeout for stuck integration files with explicit timeout errors
 - [ ] Expand integration tests for remaining pending batches above
+
+## Deletion Criteria
+
+- [ ] All remaining `Pending Flows` checkboxes are complete
+- [ ] Remaining `Validation Status` checkboxes are complete
+- [ ] Final OpenBudget branding review confirms no YNAB labels in shipped UI
+
+When every item above is checked, this migration tracker can be safely deleted.
