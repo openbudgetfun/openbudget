@@ -1,6 +1,6 @@
 # OpenBudget UI Migration Tracker (from `~/Downloads/ynab-ui`)
 
-Last updated: 2026-02-24 (Server/API hardening + CI integration timeout guard + tracker refresh)
+Last updated: 2026-02-24 (Server/API hardening + CI integration hardening + reports preset aggregation parity)
 
 ## Scope
 
@@ -112,7 +112,7 @@ Last updated: 2026-02-24 (Server/API hardening + CI integration timeout guard + 
 - [ ] Reports and analysis parity
   - [x] Net worth visual parity
   - [x] Spending breakdown parity
-  - [ ] Multi-month/preset advanced analytics polish
+  - [x] Multi-month/preset advanced analytics polish
 - [ ] Appearance/system flows
   - [ ] Dark mode parity pass
   - [ ] App icon switching parity pass

@@ -24,8 +24,27 @@ class SpendingByPayeeScreen extends HookConsumerWidget {
     final presetMonths = useState(3);
     final usePreset = useState(false);
 
-    final reportAsync = ref.watch(
-      spendingReportProvider(budgetId, selectedYear.value, selectedMonth.value),
+    final reportAsync = usePreset.value
+        ? ref.watch(
+            spendingReportPresetProvider(
+              budgetId,
+              selectedYear.value,
+              selectedMonth.value,
+              presetMonths.value,
+            ),
+          )
+        : ref.watch(
+            spendingReportProvider(
+              budgetId,
+              selectedYear.value,
+              selectedMonth.value,
+            ),
+          );
+    final presetRangeLabel = _presetRangeLabel(
+      l10n,
+      selectedYear.value,
+      selectedMonth.value,
+      presetMonths.value,
     );
 
     return Scaffold(
@@ -110,6 +129,16 @@ class SpendingByPayeeScreen extends HookConsumerWidget {
                           fontWeight: FontWeight.w700,
                         ),
                       ),
+                      if (usePreset.value) ...[
+                        const SizedBox(height: SpacingTokens.xs),
+                        Text(
+                          presetRangeLabel,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: OpenBudgetPalette.mutedText,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: SpacingTokens.sm),
                       Text(
                         formatCents(totalSpent, currency),
@@ -221,6 +250,29 @@ class SpendingByPayeeScreen extends HookConsumerWidget {
       12 => 'Last 12 Months',
       _ => 'Last $months Months',
     };
+  }
+
+  String _presetRangeLabel(
+    AppLocalizations l10n,
+    int endYear,
+    int endMonth,
+    int monthCount,
+  ) {
+    final normalizedCount = monthCount < 1 ? 1 : monthCount;
+    var startYear = endYear;
+    var startMonth = endMonth;
+    for (var index = 1; index < normalizedCount; index++) {
+      if (startMonth == 1) {
+        startMonth = 12;
+        startYear -= 1;
+      } else {
+        startMonth -= 1;
+      }
+    }
+
+    final startLabel = _monthName(l10n, startMonth, startYear);
+    final endLabel = _monthName(l10n, endMonth, endYear);
+    return '$startLabel\u2013$endLabel';
   }
 }
 

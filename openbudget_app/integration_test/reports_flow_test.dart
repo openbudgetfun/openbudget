@@ -150,6 +150,10 @@ void main() {
 
       expect(find.text('Preset Range'), findsOneWidget);
       expect(find.text('Last 3 Months'), findsWidgets);
+      expect(
+        find.textContaining(RegExp(r'[A-Za-z]+ \d{4}–[A-Za-z]+ \d{4}')),
+        findsOneWidget,
+      );
     },
   );
 
