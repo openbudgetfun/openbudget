@@ -233,6 +233,61 @@ void main() {
     });
 
     test(
+      'when moving money from envelope outside budget then throws',
+      () async {
+        final primaryBudget = await endpoints.budget.create(
+          authedSession,
+          'Primary Source Budget',
+          'USD',
+        );
+        final foreignBudget = await endpoints.budget.create(
+          authedSession,
+          'Foreign Source Budget',
+          'USD',
+        );
+        final primaryCategory = await endpoints.category.create(
+          authedSession,
+          'Primary Category',
+          primaryBudget.id!,
+          0,
+        );
+        final foreignCategory = await endpoints.category.create(
+          authedSession,
+          'Foreign Category',
+          foreignBudget.id!,
+          0,
+        );
+        final foreignEnvelope = await endpoints.envelope.create(
+          authedSession,
+          'Foreign',
+          foreignCategory.id!,
+          0,
+          'USD',
+        );
+        final toEnvelope = await endpoints.envelope.create(
+          authedSession,
+          'To',
+          primaryCategory.id!,
+          0,
+          'USD',
+        );
+
+        await expectLater(
+          endpoints.monthlyAllocation.moveMoney(
+            authedSession,
+            foreignEnvelope.id!,
+            toEnvelope.id!,
+            primaryBudget.id!,
+            2026,
+            2,
+            100,
+          ),
+          throwsA(isA<NotFoundException>()),
+        );
+      },
+    );
+
+    test(
       'when deleting allocation twice then second call throws not found',
       () async {
         final budget = await endpoints.budget.create(
