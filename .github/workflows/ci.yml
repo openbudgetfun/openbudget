@@ -117,11 +117,22 @@ jobs:
 
           echo "Discovered ${#tests[@]} integration test file(s)."
           failed=0
+          per_file_timeout_seconds=900
 
           for f in "${tests[@]}"; do
             echo "::group::Running $f"
             test_output="$(mktemp)"
-            if ! flutter test "$f" -d flutter-tester 2>&1 | tee "$test_output"; then
+
+            set +e
+            timeout "${per_file_timeout_seconds}s" \
+              flutter test "$f" -d flutter-tester 2>&1 | tee "$test_output"
+            status=$?
+            set -e
+
+            if [ "$status" -ne 0 ]; then
+              if [ "$status" -eq 124 ]; then
+                echo "::error::Integration test timed out after ${per_file_timeout_seconds}s: $f"
+              fi
               failed=1
             fi
 
