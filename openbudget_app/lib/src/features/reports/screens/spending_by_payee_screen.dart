@@ -58,9 +58,9 @@ class SpendingByPayeeScreen extends HookConsumerWidget {
     );
 
     return Scaffold(
-      backgroundColor: OpenBudgetPalette.appBackground,
+      backgroundColor: OpenBudgetPalette.appBackgroundFor(theme),
       appBar: AppBar(
-        backgroundColor: OpenBudgetPalette.appBackground,
+        backgroundColor: OpenBudgetPalette.appBackgroundFor(theme),
         surfaceTintColor: Colors.transparent,
         title: Text(l10n.spendingByPayeeBreakdown),
       ),
@@ -145,7 +145,7 @@ class SpendingByPayeeScreen extends HookConsumerWidget {
                         Text(
                           presetRangeLabel,
                           style: theme.textTheme.bodyMedium?.copyWith(
-                            color: OpenBudgetPalette.mutedText,
+                            color: OpenBudgetPalette.mutedTextFor(theme),
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -161,7 +161,7 @@ class SpendingByPayeeScreen extends HookConsumerWidget {
                       Text(
                         l10n.spendingByPayeeTotalSpent,
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          color: OpenBudgetPalette.mutedText,
+                          color: OpenBudgetPalette.mutedTextFor(theme),
                         ),
                       ),
                       const SizedBox(height: SpacingTokens.md),
@@ -188,7 +188,7 @@ class SpendingByPayeeScreen extends HookConsumerWidget {
                     child: Text(
                       l10n.reportsEmptySubtitle,
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: OpenBudgetPalette.mutedText,
+                        color: OpenBudgetPalette.mutedTextFor(theme),
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -295,10 +295,11 @@ class _ModeToggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: OpenBudgetPalette.surfaceMuted,
+        color: OpenBudgetPalette.surfaceMutedFor(theme),
         borderRadius: BorderRadius.circular(RadiusTokens.md),
       ),
       child: Row(
@@ -344,7 +345,9 @@ class _ModeButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: SpacingTokens.xs),
         decoration: BoxDecoration(
-          color: selected ? OpenBudgetPalette.surface : Colors.transparent,
+          color: selected
+              ? OpenBudgetPalette.surfaceFor(theme)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(RadiusTokens.sm),
         ),
         child: Text(
@@ -453,12 +456,13 @@ class _CategoryStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final top = categoryEntries.take(colors.length).toList();
     if (top.isEmpty || totalSpent <= 0) {
       return Container(
         height: 16,
         decoration: BoxDecoration(
-          color: OpenBudgetPalette.surfaceMuted,
+          color: OpenBudgetPalette.surfaceMutedFor(theme),
           borderRadius: BorderRadius.circular(6),
         ),
       );
@@ -481,7 +485,7 @@ class _CategoryStrip extends StatelessWidget {
       segments.add(
         Expanded(
           flex: totalSpent - used,
-          child: Container(color: OpenBudgetPalette.surfaceMuted),
+          child: Container(color: OpenBudgetPalette.surfaceMutedFor(theme)),
         ),
       );
     }
@@ -527,7 +531,7 @@ class _CategoryRow extends StatelessWidget {
           subtitle: Text(
             '${percentage.toStringAsFixed(percentage >= 10 ? 0 : 1)}%',
             style: theme.textTheme.bodySmall?.copyWith(
-              color: OpenBudgetPalette.mutedText,
+              color: OpenBudgetPalette.mutedTextFor(theme),
             ),
           ),
           trailing: Row(
