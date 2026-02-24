@@ -1,5 +1,4 @@
 import 'package:openbudget_core/openbudget_core.dart';
-import 'package:openbudget_server/src/accounts/account_service.dart';
 import 'package:openbudget_server/src/budgets/budget_service.dart';
 import 'package:openbudget_server/src/exceptions/exceptions.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
@@ -148,22 +147,6 @@ class TransactionService {
       'Creating transfer from=$fromAccountId to=$toAccountId amount=$amountCents',
     );
     await BudgetService.getById(session, budgetId: budgetId);
-    await _assertAccountBelongsToBudget(
-      session,
-      accountId: fromAccountId,
-      budgetId: budgetId,
-    );
-    await _assertAccountBelongsToBudget(
-      session,
-      accountId: toAccountId,
-      budgetId: budgetId,
-    );
-
-    if (fromAccountId == toAccountId) {
-      throw ValidationException(
-        'Source and destination accounts must be different',
-      );
-    }
 
     final outflow = Transaction(
       description: description,
@@ -517,16 +500,5 @@ class TransactionService {
     _log.info('Deleting transaction id=$transactionId');
     final transaction = await getById(session, transactionId: transactionId);
     return Transaction.db.deleteRow(session, transaction);
-  }
-
-  static Future<void> _assertAccountBelongsToBudget(
-    Session session, {
-    required UuidValue accountId,
-    required UuidValue budgetId,
-  }) async {
-    final account = await AccountService.getById(session, accountId: accountId);
-    if (account.budgetId != budgetId) {
-      throw NotFoundException('Account not found in this budget');
-    }
   }
 }
