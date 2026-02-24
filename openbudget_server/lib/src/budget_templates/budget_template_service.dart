@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_server/src/budgets/budget_service.dart';
+import 'package:openbudget_server/src/exceptions/exceptions.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:openbudget_server/src/monthly_allocations/monthly_allocation_service.dart';
 import 'package:serverpod/serverpod.dart';
@@ -74,7 +75,7 @@ class BudgetTemplateService {
     _log.info('Applying template=$templateId to $year/$month');
     final template = await BudgetTemplate.db.findById(session, templateId);
     if (template == null) {
-      throw Exception('Budget template not found');
+      throw NotFoundException('Budget template not found');
     }
 
     await BudgetService.getById(session, budgetId: budgetId);
@@ -106,7 +107,7 @@ class BudgetTemplateService {
     _log.info('Deleting template id=$templateId');
     final template = await BudgetTemplate.db.findById(session, templateId);
     if (template == null) {
-      throw Exception('Budget template not found');
+      throw NotFoundException('Budget template not found');
     }
 
     await BudgetService.getById(session, budgetId: template.budgetId);
