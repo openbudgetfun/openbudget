@@ -70,6 +70,12 @@ class EnvelopeGoalService {
   }) async {
     if (envelopeIds.isEmpty) return [];
 
+    // Validate ownership of every requested envelope before returning any goal
+    // rows to avoid cross-budget information leakage.
+    for (final envelopeId in envelopeIds) {
+      await EnvelopeService.getById(session, envelopeId: envelopeId);
+    }
+
     return EnvelopeGoal.db.find(
       session,
       where: (t) => t.envelopeId.inSet(envelopeIds.toSet()),
