@@ -355,8 +355,8 @@ in
     "test:integration" = {
       exec = ''
         set -e
-        cd "$DEVENV_ROOT/openbudget_app"
-        flutter test integration_test
+        cd "$DEVENV_ROOT"
+        ./tools/run_patrol_integration_tests.sh
       '';
       description = "Run Patrol integration tests.";
     };
