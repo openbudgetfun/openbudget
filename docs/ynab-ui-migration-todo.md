@@ -23,7 +23,7 @@ Last updated: 2026-02-24 (Reports preset month-anchor parity + integration asser
 - 2026-02-24: Patrol flow expanded to assert deterministic preset month-pivot ranges (`December 2025–February 2026` then `November 2025–January 2026`) and aggregated totals.
 - 2026-02-24: PR screenshot artifacts policy active: every migration PR must include at least one runtime screenshot link in PR body/comments.
 - 2026-02-24: PR #127 artifact screenshot (Preset mode): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-24-pr127/reports-preset-mode.png
-- 2026-02-24: PR #128 artifact screenshot (Preset range + month anchor): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-24-pr128/reports-preset-range-month-anchor.png
+- 2026-02-24: PR #129 artifact screenshot (Preset range + month anchor): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-24-pr129/reports-preset-range-month-anchor.png
 
 ## Completed Flows
 
