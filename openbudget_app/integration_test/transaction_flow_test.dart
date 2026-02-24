@@ -14,6 +14,7 @@ import 'package:openbudget_app/src/features/payees/providers/payee_list_provider
 import 'package:openbudget_app/src/features/transactions/screens/add_expense_screen.dart';
 import 'package:openbudget_app/src/features/transactions/screens/add_income_screen.dart';
 import 'package:openbudget_app/src/features/transactions/screens/transaction_list_screen.dart';
+import 'package:openbudget_app/src/features/transfers/screens/create_transfer_screen.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:patrol/patrol.dart';
@@ -60,6 +61,24 @@ Transaction _makeTransaction({
     transactionDate: transactionDate ?? DateTime(2026, 9, 4),
     cleared: cleared,
     reconciled: reconciled,
+  );
+}
+
+Account _makeAccount({
+  required String id,
+  required String name,
+  required String currencyCode,
+}) {
+  return Account(
+    id: UuidValue.fromString(id),
+    name: name,
+    accountType: 'checking',
+    balanceCents: 0,
+    currencyCode: currencyCode,
+    budgetId: _budgetUuid,
+    onBudget: true,
+    sortOrder: 0,
+    isClosed: false,
   );
 }
 
@@ -111,6 +130,65 @@ Widget _buildApp() {
       budgetDetailProvider.overrideWith((ref, id) async => _makeBudget()),
       budgetSummaryProvider.overrideWith((ref, id) async => _makeSummary()),
       payeeListProvider.overrideWith((ref, id) async => const []),
+    ],
+    child: MaterialApp.router(
+      theme: ThemeData.light(useMaterial3: true),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      routerConfig: router,
+    ),
+  );
+}
+
+Widget _buildTransferFlowApp({required List<Account> accounts}) {
+  final router = GoRouter(
+    initialLocation: '/budgets/$_budgetId/plan',
+    routes: [
+      GoRoute(
+        name: planRoute,
+        path: planPath,
+        builder: (context, state) => Scaffold(
+          appBar: AppBar(title: const Text('Plan Route')),
+          body: Center(
+            child: FilledButton(
+              onPressed: () => showModalBottomSheet<void>(
+                context: context,
+                isScrollControlled: true,
+                builder: (_) =>
+                    AddTransactionSheet(budgetId: state.pathParameters['id']!),
+              ),
+              child: const Text('Open Add Sheet'),
+            ),
+          ),
+        ),
+      ),
+      GoRoute(
+        name: addIncomeRoute,
+        path: addIncomePath,
+        builder: (context, state) =>
+            AddIncomeScreen(budgetId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        name: addExpenseRoute,
+        path: addExpensePath,
+        builder: (context, state) =>
+            AddExpenseScreen(budgetId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        name: createTransferRoute,
+        path: createTransferPath,
+        builder: (context, state) =>
+            CreateTransferScreen(budgetId: state.pathParameters['id']!),
+      ),
+    ],
+  );
+
+  return ProviderScope(
+    overrides: [
+      budgetDetailProvider.overrideWith((ref, id) async => _makeBudget()),
+      budgetSummaryProvider.overrideWith((ref, id) async => _makeSummary()),
+      payeeListProvider.overrideWith((ref, id) async => const []),
+      accountListProvider.overrideWith((ref, id) async => accounts),
     ],
     child: MaterialApp.router(
       theme: ThemeData.light(useMaterial3: true),
@@ -248,6 +326,64 @@ void main() {
 
     expect(find.text('Transfer Route'), findsOneWidget);
   });
+
+  patrolWidgetTest(
+    'transfer flow prevents selecting same account for source and destination',
+    ($) async {
+      final tester = $.tester;
+      await tester.pumpWidget(
+        _buildTransferFlowApp(
+          accounts: [
+            _makeAccount(
+              id: '00000000-0000-0000-0000-000000000601',
+              name: 'Checking',
+              currencyCode: 'USD',
+            ),
+            _makeAccount(
+              id: '00000000-0000-0000-0000-000000000602',
+              name: 'Savings',
+              currencyCode: 'USD',
+            ),
+            _makeAccount(
+              id: '00000000-0000-0000-0000-000000000603',
+              name: 'Euro Wallet',
+              currencyCode: 'EUR',
+            ),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Open Add Sheet'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Transfer'));
+      await tester.pumpAndSettle();
+
+      final sourceDropdown = find.byType(DropdownButtonFormField<String>).at(0);
+      final destinationDropdown = find
+          .byType(DropdownButtonFormField<String>)
+          .at(1);
+
+      await tester.tap(destinationDropdown);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Checking (USD)').last);
+      await tester.pumpAndSettle();
+
+      await tester.tap(sourceDropdown);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Checking (USD)').last);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Checking (USD)'), findsOneWidget);
+
+      await tester.tap(destinationDropdown);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Checking (USD)'), findsOneWidget);
+      expect(find.text('Savings (USD)'), findsOneWidget);
+      expect(find.text('Euro Wallet (EUR)'), findsNothing);
+    },
+  );
 
   patrolWidgetTest('cancel from add expense returns to plan route', ($) async {
     final tester = $.tester;

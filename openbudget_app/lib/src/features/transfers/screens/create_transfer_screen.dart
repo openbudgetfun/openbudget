@@ -26,7 +26,11 @@ List<Account> transferDestinationAccounts(
   if (fromAccount == null) return accounts;
 
   return accounts
-      .where((account) => account.currencyCode == fromAccount.currencyCode)
+      .where(
+        (account) =>
+            account.currencyCode == fromAccount.currencyCode &&
+            account.id != fromAccount.id,
+      )
       .toList();
 }
 
@@ -140,7 +144,8 @@ class CreateTransferScreen extends HookConsumerWidget {
                   );
                   if (from != null &&
                       currentTo != null &&
-                      from.currencyCode != currentTo.currencyCode) {
+                      (from.id == currentTo.id ||
+                          from.currencyCode != currentTo.currencyCode)) {
                     toAccountId.value = null;
                   }
                 },
