@@ -64,7 +64,7 @@ for f in "${tests[@]}"; do
 		failed=1
 	fi
 
-	if grep -Eq "All tests passed!|🎉[[:space:]]+[0-9]+[[:space:]]+tests[[:space:]]+passed\\.|[0-9]+[[:space:]]+tests passed\\." "$output_file"; then
+	if grep -Eq "All tests passed!|🎉[[:space:]]+[0-9]+[[:space:]]+test(s)?[[:space:]]+passed\\.|[0-9]+[[:space:]]+test(s)? passed\\." "$output_file"; then
 		saw_success_marker=1
 		passed_files=$((passed_files + 1))
 	else
