@@ -15,6 +15,7 @@ import 'package:openbudget_ui/openbudget_ui.dart';
 
 enum _AddAccountStep {
   loading,
+  loadingInstitutions,
   searchBank,
   unlinkedAccount,
   accountType,
@@ -70,6 +71,16 @@ class AddAccountScreen extends HookConsumerWidget {
 
     useEffect(() {
       if (step.value != _AddAccountStep.loading) return null;
+      final timer = Timer(const Duration(milliseconds: 450), () {
+        if (context.mounted) {
+          step.value = _AddAccountStep.loadingInstitutions;
+        }
+      });
+      return timer.cancel;
+    }, [step.value]);
+
+    useEffect(() {
+      if (step.value != _AddAccountStep.loadingInstitutions) return null;
       final timer = Timer(const Duration(milliseconds: 900), () {
         if (context.mounted) {
           step.value = _AddAccountStep.searchBank;
@@ -151,13 +162,17 @@ class AddAccountScreen extends HookConsumerWidget {
         surfaceTintColor: Colors.transparent,
         scrolledUnderElevation: 0,
         automaticallyImplyLeading: false,
-        leading: step.value == _AddAccountStep.searchBank
+        leading:
+            step.value == _AddAccountStep.loading ||
+                step.value == _AddAccountStep.loadingInstitutions ||
+                step.value == _AddAccountStep.searchBank
             ? null
             : IconButton(
                 icon: const Icon(Icons.arrow_back_ios_new_rounded),
                 onPressed: () {
                   switch (step.value) {
                     case _AddAccountStep.loading:
+                    case _AddAccountStep.loadingInstitutions:
                       break;
                     case _AddAccountStep.searchBank:
                       break;
@@ -172,7 +187,8 @@ class AddAccountScreen extends HookConsumerWidget {
               ),
         title: Text(
           switch (step.value) {
-            _AddAccountStep.loading => 'Add Accounts',
+            _AddAccountStep.loading => '',
+            _AddAccountStep.loadingInstitutions => 'Add Accounts',
             _AddAccountStep.searchBank => 'Add Accounts',
             _AddAccountStep.unlinkedAccount => 'Add Unlinked Account',
             _AddAccountStep.accountType => 'Select Account Type',
@@ -195,7 +211,14 @@ class AddAccountScreen extends HookConsumerWidget {
       body: Stack(
         children: [
           switch (step.value) {
-            _AddAccountStep.loading => const _LoadingStep(),
+            _AddAccountStep.loading => const _LoadingStep(
+              title: 'Loading...',
+              includeSpinner: false,
+            ),
+            _AddAccountStep.loadingInstitutions => const _LoadingStep(
+              title: 'Loading institutions...',
+              includeSpinner: true,
+            ),
             _AddAccountStep.searchBank => _BankSearchStep(
               searchController: searchController,
               onSearchSubmitted: startLinkedBankFlow,
@@ -260,6 +283,7 @@ class AddAccountScreen extends HookConsumerWidget {
       ),
       bottomNavigationBar: switch (step.value) {
         _AddAccountStep.loading => null,
+        _AddAccountStep.loadingInstitutions => null,
         _AddAccountStep.unlinkedAccount => SafeArea(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(
@@ -290,25 +314,41 @@ class AddAccountScreen extends HookConsumerWidget {
 }
 
 class _LoadingStep extends StatelessWidget {
-  const _LoadingStep();
+  const _LoadingStep({required this.title, required this.includeSpinner});
+
+  final String title;
+  final bool includeSpinner;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final logoAsset = theme.brightness == Brightness.dark
+        ? 'assets/branding/logos/ob_primary_dark_512.png'
+        : 'assets/branding/logos/ob_primary_light_512.png';
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: SpacingTokens.xl),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.account_balance_rounded,
-              size: 72,
-              color: theme.colorScheme.primary,
+            ClipRRect(
+              borderRadius: BorderRadius.circular(RadiusTokens.lg),
+              child: Image.asset(
+                logoAsset,
+                width: 84,
+                height: 84,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => Icon(
+                  Icons.account_balance_rounded,
+                  size: 84,
+                  color: theme.colorScheme.primary,
+                ),
+              ),
             ),
             const SizedBox(height: SpacingTokens.md),
             Text(
-              'Loading institutions...',
+              title,
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w700,
               ),
@@ -320,12 +360,14 @@ class _LoadingStep extends StatelessWidget {
                 color: OpenBudgetPalette.mutedText,
               ),
             ),
-            const SizedBox(height: SpacingTokens.lg),
-            const SizedBox(
-              height: 28,
-              width: 28,
-              child: CircularProgressIndicator(strokeWidth: 3),
-            ),
+            if (includeSpinner) ...[
+              const SizedBox(height: SpacingTokens.lg),
+              const SizedBox(
+                height: 28,
+                width: 28,
+                child: CircularProgressIndicator(strokeWidth: 3),
+              ),
+            ],
           ],
         ),
       ),

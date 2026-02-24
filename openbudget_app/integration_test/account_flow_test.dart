@@ -21,6 +21,8 @@ import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:patrol/patrol.dart';
 
+import 'helpers/screenshot_capture.dart';
+
 const _budgetId = 'test-budget-id';
 final _budgetUuid = UuidValue.fromString(
   '00000000-0000-0000-0000-000000000010',
@@ -213,11 +215,20 @@ void main() {
 
     expect(find.text('No Accounts Yet'), findsOneWidget);
     await tester.tap(find.text('Add Account'));
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump();
+    expect(find.text('Loading institutions...'), findsOneWidget);
+    await captureIntegrationScreenshot(
+      tester,
+      'add-accounts-loading-institutions-screen',
+    );
+    await tester.pump(const Duration(milliseconds: 1000));
     await tester.pumpAndSettle();
 
     expect(find.text('Add Accounts'), findsOneWidget);
     expect(find.text('Search for your bank'), findsOneWidget);
     expect(find.text('Add an Unlinked Account'), findsOneWidget);
+    await captureIntegrationScreenshot(tester, 'add-accounts-search-screen');
 
     await tester.tap(find.text('Add an Unlinked Account'));
     await tester.pumpAndSettle();
@@ -240,7 +251,7 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('Add Account'));
-    await tester.pumpAndSettle();
+    await _pumpToAddAccountSearch(tester);
 
     await tester.tap(find.text('Chase'));
     await tester.pump(const Duration(milliseconds: 900));
@@ -261,7 +272,7 @@ void main() {
       await tester.pumpAndSettle();
 
       await tester.tap(find.text('Add Account'));
-      await tester.pumpAndSettle();
+      await _pumpToAddAccountSearch(tester);
       await tester.tap(find.text('Add an Unlinked Account'));
       await tester.pumpAndSettle();
 
@@ -295,7 +306,7 @@ void main() {
       await tester.pumpAndSettle();
 
       await tester.tap(find.text('Add Account'));
-      await tester.pumpAndSettle();
+      await _pumpToAddAccountSearch(tester);
       await tester.tap(find.text('Add an Unlinked Account'));
       await tester.pumpAndSettle();
 
@@ -614,4 +625,9 @@ void main() {
     expect(find.text('Payment from Daily'), findsOneWidget);
     expect(find.text('Payments'), findsOneWidget);
   });
+}
+
+Future<void> _pumpToAddAccountSearch(WidgetTester tester) async {
+  await tester.pump(const Duration(milliseconds: 1500));
+  await tester.pumpAndSettle();
 }
