@@ -305,6 +305,12 @@ void main() {
           ),
           throwsA(isA<ValidationException>()),
         );
+
+        final transactions = await endpoints.transaction.list(
+          authedSession,
+          budget.id!,
+        );
+        expect(transactions, isEmpty);
       },
     );
 
