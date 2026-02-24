@@ -1,6 +1,6 @@
 # OpenBudget UI Migration Tracker (from `~/Downloads/ynab-ui`)
 
-Last updated: 2026-02-24 (Reports preset aggregation correctness + screenflow checkpoint logging)
+Last updated: 2026-02-24 (Reports preset month-anchor parity + integration assertions)
 
 ## Scope
 
@@ -10,7 +10,7 @@ Last updated: 2026-02-24 (Reports preset aggregation correctness + screenflow ch
 
 ## Progress Snapshot
 
-- Overall migration progress: **~99.5%**
+- Overall migration progress: **~99.7%**
 - Core plan/settings/auth/navigation flows: **implemented**
 - Advanced accounts/transactions flows: **implemented**
 - Reports/appearance polish flows: **in progress**
@@ -18,9 +18,12 @@ Last updated: 2026-02-24 (Reports preset aggregation correctness + screenflow ch
 ## Screenflow Checkpoints
 
 - 2026-02-24: Reflect -> Spending Breakdown -> Preset mode now aggregates multi-month data from the selected month backward (`Last 3/6/12 Months`) with visible range label (`Month YYYY–Month YYYY`) and outflow-only category totals.
+- 2026-02-24: Reflect -> Spending Breakdown (Preset) now shows both controls used in the reference flow: `Preset Range` selector and month anchor row (`< Month YYYY >`) for range pivoting.
 - 2026-02-24: Patrol flow updated to assert preset range rendering in integration coverage (`openbudget_app/integration_test/reports_flow_test.dart`).
+- 2026-02-24: Patrol flow expanded to assert deterministic preset month-pivot ranges (`December 2025–February 2026` then `November 2025–January 2026`) and aggregated totals.
 - 2026-02-24: PR screenshot artifacts policy active: every migration PR must include at least one runtime screenshot link in PR body/comments.
 - 2026-02-24: PR #127 artifact screenshot (Preset mode): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-24-pr127/reports-preset-mode.png
+- 2026-02-24: PR #129 artifact screenshot (Preset range + month anchor): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-24-pr129/reports-preset-range-month-anchor.png
 
 ## Completed Flows
 
@@ -116,7 +119,7 @@ Last updated: 2026-02-24 (Reports preset aggregation correctness + screenflow ch
   - [x] Cover overspending flow
   - [x] Reorder categories flow parity
   - [x] Hide category flow polish (edit-plan details dialog + confirmation)
-- [ ] Reports and analysis parity
+- [x] Reports and analysis parity
   - [x] Net worth visual parity
   - [x] Spending breakdown parity
   - [x] Multi-month/preset advanced analytics polish
