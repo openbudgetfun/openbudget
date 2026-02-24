@@ -1,0 +1,6 @@
+name: openbudget-infra
+runtime:
+  name: nodejs
+  options:
+    packagemanager: pnpm
+description: OpenBudget cloud infrastructure for AWS and GCP

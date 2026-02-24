@@ -1,0 +1,23 @@
+{
+  "name": "openbudget-infra",
+  "version": "0.1.0",
+  "private": true,
+  "description": "OpenBudget cloud infrastructure for AWS and GCP",
+  "main": "index.ts",
+  "scripts": {
+    "build": "tsc",
+    "preview": "pulumi preview",
+    "up": "pulumi up",
+    "destroy": "pulumi destroy"
+  },
+  "dependencies": {
+    "@pulumi/aws": "^6.0.0",
+    "@pulumi/awsx": "^2.0.0",
+    "@pulumi/gcp": "^8.0.0",
+    "@pulumi/pulumi": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.0.0"
+  }
+}
