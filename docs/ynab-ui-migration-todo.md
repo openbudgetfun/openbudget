@@ -1,6 +1,6 @@
 # OpenBudget UI Migration Tracker (from `~/Downloads/ynab-ui`)
 
-Last updated: 2026-02-24 (Server/API hardening + CI integration timeout guard + tracker refresh)
+Last updated: 2026-02-24 (Reports preset aggregation correctness + screenflow checkpoint logging)
 
 ## Scope
 
@@ -14,6 +14,13 @@ Last updated: 2026-02-24 (Server/API hardening + CI integration timeout guard + 
 - Core plan/settings/auth/navigation flows: **implemented**
 - Advanced accounts/transactions flows: **implemented**
 - Reports/appearance polish flows: **in progress**
+
+## Screenflow Checkpoints
+
+- 2026-02-24: Reflect -> Spending Breakdown -> Preset mode now aggregates multi-month data from the selected month backward (`Last 3/6/12 Months`) with visible range label (`Month YYYY–Month YYYY`) and outflow-only category totals.
+- 2026-02-24: Patrol flow updated to assert preset range rendering in integration coverage (`openbudget_app/integration_test/reports_flow_test.dart`).
+- 2026-02-24: PR screenshot artifacts policy active: every migration PR must include at least one runtime screenshot link in PR body/comments.
+- 2026-02-24: PR #127 artifact screenshot (Preset mode): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-24-pr127/reports-preset-mode.png
 
 ## Completed Flows
 
@@ -112,7 +119,7 @@ Last updated: 2026-02-24 (Server/API hardening + CI integration timeout guard + 
 - [ ] Reports and analysis parity
   - [x] Net worth visual parity
   - [x] Spending breakdown parity
-  - [ ] Multi-month/preset advanced analytics polish
+  - [x] Multi-month/preset advanced analytics polish
 - [ ] Appearance/system flows
   - [ ] Dark mode parity pass
   - [ ] App icon switching parity pass
