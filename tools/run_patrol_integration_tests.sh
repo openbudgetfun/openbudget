@@ -67,7 +67,15 @@ for f in "${tests[@]}"; do
 	fi
 
 	if grep -Eq "All tests passed!" "$output_file"; then
+		saw_success_marker=1
 		passed_files=$((passed_files + 1))
+	else
+		saw_success_marker=0
+	fi
+
+	if [ "$status" -eq 0 ] && [ "$saw_success_marker" -eq 0 ]; then
+		echo "::error::No success marker found in output for $f despite zero exit status."
+		failed=1
 	fi
 
 	rm -f "$output_file"
