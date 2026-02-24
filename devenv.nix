@@ -284,6 +284,51 @@ in
       description = "Run pnpm package manager.";
       binary = "bash";
     };
+    "infra:preview" = {
+      exec = ''
+        set -e
+        cd "$DEVENV_ROOT/infra"
+        pulumi preview $@
+      '';
+      description = "Preview infrastructure changes.";
+      binary = "bash";
+    };
+    "infra:up" = {
+      exec = ''
+        set -e
+        cd "$DEVENV_ROOT/infra"
+        pulumi up $@
+      '';
+      description = "Deploy infrastructure changes.";
+      binary = "bash";
+    };
+    "infra:destroy" = {
+      exec = ''
+        set -e
+        cd "$DEVENV_ROOT/infra"
+        pulumi destroy $@
+      '';
+      description = "Tear down all infrastructure resources.";
+      binary = "bash";
+    };
+    "infra:build" = {
+      exec = ''
+        set -e
+        cd "$DEVENV_ROOT/infra"
+        pnpm build
+      '';
+      description = "Type-check the infrastructure code.";
+      binary = "bash";
+    };
+    "infra:stack" = {
+      exec = ''
+        set -e
+        cd "$DEVENV_ROOT/infra"
+        pulumi stack $@
+      '';
+      description = "Manage Pulumi stacks (select, ls, output, etc.).";
+      binary = "bash";
+    };
     "server:start" = {
       exec = ''
         set -e
