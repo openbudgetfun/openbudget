@@ -175,6 +175,12 @@ void main() {
           ),
           throwsA(isA<NotFoundException>()),
         );
+
+        final primaryTransactions = await endpoints.transaction.list(
+          authedSession,
+          primaryBudget.id!,
+        );
+        expect(primaryTransactions, isEmpty);
       },
     );
 
