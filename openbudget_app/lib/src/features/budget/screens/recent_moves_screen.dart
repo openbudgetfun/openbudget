@@ -516,38 +516,81 @@ class _RecentMovesList extends HookWidget {
               SpacingTokens.md,
               SpacingTokens.xs,
             ),
-            child: Text(
-              _dayHeading(l10n, day),
-              style: Theme.of(
-                context,
-              ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
-            ),
+            child: _buildDayHeading(context, l10n, day),
           ),
-          for (final event in grouped[day]!)
+          for (
+            var eventIndex = 0;
+            eventIndex < grouped[day]!.length;
+            eventIndex++
+          )
             _RecentMoveRow(
-              event: event,
+              event: grouped[day]![eventIndex],
               envelopeNames: envelopeNames,
               currencyCode: currencyCode,
               hideAmounts: hideAmounts,
               onEnvelopeTap: onEnvelopeTap,
+              showDivider: eventIndex < grouped[day]!.length - 1,
             ),
         ],
       ],
     );
   }
 
-  String _dayHeading(AppLocalizations l10n, DateTime day) {
+  Widget _buildDayHeading(
+    BuildContext context,
+    AppLocalizations l10n,
+    DateTime day,
+  ) {
+    final theme = Theme.of(context);
+    final heading = _dayHeading(l10n, day);
+    if (heading.relativeLabel == null) {
+      return Text(
+        heading.dateLabel,
+        style: theme.textTheme.titleMedium?.copyWith(
+          fontWeight: FontWeight.w700,
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          heading.relativeLabel!,
+          style: theme.textTheme.bodyLarge?.copyWith(
+            fontWeight: FontWeight.w500,
+            color: OpenBudgetPalette.mutedTextFor(theme),
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          heading.dateLabel,
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ],
+    );
+  }
+
+  _DayHeadingData _dayHeading(AppLocalizations l10n, DateTime day) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final yesterday = today.subtract(const Duration(days: 1));
 
     if (day == today) {
-      return '${l10n.transactionDateToday}\n${_formatDate(l10n, day)}';
+      return _DayHeadingData(
+        relativeLabel: l10n.transactionDateToday,
+        dateLabel: _formatDate(l10n, day),
+      );
     }
     if (day == yesterday) {
-      return '${l10n.transactionDateYesterday}\n${_formatDate(l10n, day)}';
+      return _DayHeadingData(
+        relativeLabel: l10n.transactionDateYesterday,
+        dateLabel: _formatDate(l10n, day),
+      );
     }
-    return _formatDate(l10n, day);
+    return _DayHeadingData(dateLabel: _formatDate(l10n, day));
   }
 
   String _formatDate(AppLocalizations l10n, DateTime day) {
@@ -578,6 +621,7 @@ class _RecentMoveRow extends HookWidget {
     required this.currencyCode,
     required this.hideAmounts,
     required this.onEnvelopeTap,
+    required this.showDivider,
   });
 
   final RecentMoveEvent event;
@@ -585,6 +629,7 @@ class _RecentMoveRow extends HookWidget {
   final CurrencyCode currencyCode;
   final bool hideAmounts;
   final ValueChanged<String> onEnvelopeTap;
+  final bool showDivider;
 
   @override
   Widget build(BuildContext context) {
@@ -601,45 +646,53 @@ class _RecentMoveRow extends HookWidget {
         ? envelopeNames[sourceEnvelopeId] ?? l10n.recentMovesUnnamedEnvelope
         : l10n.recentMovesReadyToAssign;
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        SpacingTokens.md,
-        SpacingTokens.xs,
-        SpacingTokens.md,
-        SpacingTokens.xs,
-      ),
-      child: Row(
+    return ColoredBox(
+      color: OpenBudgetPalette.surfaceFor(theme),
+      child: Column(
         children: [
-          _MoveChip(
-            label: fromName,
-            accent: sourceEnvelopeId != null,
-            onTap: sourceEnvelopeId != null
-                ? () => onEnvelopeTap(sourceEnvelopeId)
-                : null,
-          ),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: SpacingTokens.xs),
-            child: Icon(
-              Icons.arrow_forward_rounded,
-              size: 16,
-              color: OpenBudgetPalette.mutedText,
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              SpacingTokens.md,
+              SpacingTokens.sm,
+              SpacingTokens.md,
+              SpacingTokens.sm,
+            ),
+            child: Row(
+              children: [
+                _MoveChip(
+                  label: fromName,
+                  accent: sourceEnvelopeId != null,
+                  onTap: sourceEnvelopeId != null
+                      ? () => onEnvelopeTap(sourceEnvelopeId)
+                      : null,
+                ),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: SpacingTokens.xs),
+                  child: Icon(
+                    Icons.arrow_forward_rounded,
+                    size: 16,
+                    color: OpenBudgetPalette.mutedText,
+                  ),
+                ),
+                _MoveChip(
+                  label: toName,
+                  accent: true,
+                  onTap: () => onEnvelopeTap(event.toEnvelopeId),
+                ),
+                const SizedBox(width: SpacingTokens.sm),
+                Expanded(
+                  child: Text(
+                    amountText,
+                    textAlign: TextAlign.right,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-          _MoveChip(
-            label: toName,
-            accent: true,
-            onTap: () => onEnvelopeTap(event.toEnvelopeId),
-          ),
-          const SizedBox(width: SpacingTokens.sm),
-          Expanded(
-            child: Text(
-              amountText,
-              textAlign: TextAlign.right,
-              style: theme.textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
+          if (showDivider) const Divider(height: 1),
         ],
       ),
     );
@@ -755,16 +808,17 @@ class _MoveChip extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final accentFill = theme.brightness == Brightness.dark
+        ? OpenBudgetPalette.accentBlue.withAlpha(38)
+        : OpenBudgetPalette.accentBlue.withAlpha(24);
     final chip = Container(
-      constraints: const BoxConstraints(maxWidth: 140),
+      constraints: const BoxConstraints(maxWidth: 152),
       padding: const EdgeInsets.symmetric(
         horizontal: SpacingTokens.sm,
-        vertical: 6,
+        vertical: 7,
       ),
       decoration: BoxDecoration(
-        color: accent
-            ? OpenBudgetPalette.accentBlue.withAlpha(30)
-            : OpenBudgetPalette.surfaceMuted,
+        color: accent ? accentFill : OpenBudgetPalette.surfaceMutedFor(theme),
         borderRadius: BorderRadius.circular(RadiusTokens.sm),
       ),
       child: Text(
@@ -785,6 +839,14 @@ class _MoveChip extends HookWidget {
       child: chip,
     );
   }
+}
+
+@immutable
+class _DayHeadingData {
+  const _DayHeadingData({required this.dateLabel, this.relativeLabel});
+
+  final String dateLabel;
+  final String? relativeLabel;
 }
 
 class _EmptyMovesState extends HookWidget {

@@ -138,6 +138,8 @@ void main() {
       await _dismissCoachmarkIfVisible(tester);
 
       expect(find.text('Recent Moves'), findsWidgets);
+      expect(find.text('Today'), findsOneWidget);
+      expect(find.textContaining(DateTime.now().year.toString()), findsWidgets);
       expect(find.text('All'), findsOneWidget);
       expect(find.text('Moved'), findsOneWidget);
       expect(find.text('Assigned'), findsOneWidget);
