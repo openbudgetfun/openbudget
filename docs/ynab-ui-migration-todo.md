@@ -1,6 +1,6 @@
 # OpenBudget UI Migration Tracker (from `~/Downloads/ynab-ui`)
 
-Last updated: 2026-02-24 (Patrol screenshot fallback on flutter-tester)
+Last updated: 2026-02-24 (Recent Moves visual polish)
 
 ## Scope
 
@@ -28,6 +28,7 @@ Last updated: 2026-02-24 (Patrol screenshot fallback on flutter-tester)
 - 2026-02-24: App icon previews now resolve by current theme brightness (`light`/`dark`) across Settings -> App Icon and Login branding mark.
 - 2026-02-24: Added dedicated Patrol integration coverage for app icon dark-mode preview asset + style persistence (`integration_test/app_icon_flow_test.dart`).
 - 2026-02-24: Patrol screenshot capture now falls back to render-tree capture when `IntegrationTestWidgetsFlutterBinding.takeScreenshot` is unavailable (e.g., `flutter-tester`), writing PNG artifacts instead of skipping.
+- 2026-02-24: Recent Moves list rows now use improved day-heading typography (relative label + date split) and divider-backed spacing for closer parity.
 - 2026-02-24: PR screenshot artifacts policy active: every migration PR must include at least one runtime screenshot link in PR body/comments.
 - 2026-02-24: PR #127 artifact screenshot (Preset mode): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-24-pr127/reports-preset-mode.png
 - 2026-02-24: PR #129 artifact screenshot (Preset range + month anchor): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-24-pr129/reports-preset-range-month-anchor.png
@@ -106,7 +107,7 @@ Last updated: 2026-02-24 (Patrol screenshot fallback on flutter-tester)
   - [x] Destination chip navigation
   - [x] Source chip navigation
   - [x] Undo integration from plan menu
-  - [ ] Additional visual parity polish for row spacing/typography
+  - [x] Additional visual parity polish for row spacing/typography
 - [x] Plan menu behavior polish for mobile transitions
 
 ## Pending Flows (Next Batches)
