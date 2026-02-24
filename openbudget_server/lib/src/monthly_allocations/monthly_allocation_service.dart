@@ -1,6 +1,8 @@
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_server/src/budgets/budget_service.dart';
+import 'package:openbudget_server/src/categories/category_service.dart';
 import 'package:openbudget_server/src/envelopes/envelope_service.dart';
+import 'package:openbudget_server/src/exceptions/exceptions.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
 
@@ -27,12 +29,17 @@ class MonthlyAllocationService {
       'Upserting allocation envelope=$envelopeId year=$year month=$month',
     );
     await BudgetService.getById(session, budgetId: budgetId);
-    await EnvelopeService.getById(session, envelopeId: envelopeId);
+    await _assertEnvelopeBelongsToBudget(
+      session,
+      envelopeId: envelopeId,
+      budgetId: budgetId,
+    );
 
     final existing = await MonthlyAllocation.db.findFirstRow(
       session,
       where: (t) =>
           t.envelopeId.equals(envelopeId) &
+          t.budgetId.equals(budgetId) &
           t.year.equals(year) &
           t.month.equals(month),
     );
@@ -133,14 +140,23 @@ class MonthlyAllocationService {
       'Moving $amountCents cents from=$fromEnvelopeId to=$toEnvelopeId',
     );
     await BudgetService.getById(session, budgetId: budgetId);
-    await EnvelopeService.getById(session, envelopeId: fromEnvelopeId);
-    await EnvelopeService.getById(session, envelopeId: toEnvelopeId);
+    await _assertEnvelopeBelongsToBudget(
+      session,
+      envelopeId: fromEnvelopeId,
+      budgetId: budgetId,
+    );
+    await _assertEnvelopeBelongsToBudget(
+      session,
+      envelopeId: toEnvelopeId,
+      budgetId: budgetId,
+    );
 
     // Get or create source allocation.
     final fromExisting = await MonthlyAllocation.db.findFirstRow(
       session,
       where: (t) =>
           t.envelopeId.equals(fromEnvelopeId) &
+          t.budgetId.equals(budgetId) &
           t.year.equals(year) &
           t.month.equals(month),
     );
@@ -161,6 +177,7 @@ class MonthlyAllocationService {
       session,
       where: (t) =>
           t.envelopeId.equals(toEnvelopeId) &
+          t.budgetId.equals(budgetId) &
           t.year.equals(year) &
           t.month.equals(month),
     );
@@ -189,10 +206,29 @@ class MonthlyAllocationService {
       allocationId,
     );
     if (allocation == null) {
-      throw Exception('Monthly allocation not found');
+      throw NotFoundException('Monthly allocation not found');
     }
 
     await BudgetService.getById(session, budgetId: allocation.budgetId);
     return MonthlyAllocation.db.deleteRow(session, allocation);
+  }
+
+  static Future<void> _assertEnvelopeBelongsToBudget(
+    Session session, {
+    required UuidValue envelopeId,
+    required UuidValue budgetId,
+  }) async {
+    final envelope = await EnvelopeService.getById(
+      session,
+      envelopeId: envelopeId,
+    );
+    final category = await CategoryService.getById(
+      session,
+      categoryId: envelope.categoryId,
+    );
+
+    if (category.budgetId != budgetId) {
+      throw NotFoundException('Envelope not found in this budget');
+    }
   }
 }
