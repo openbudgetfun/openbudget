@@ -18,6 +18,7 @@ in
       fvm
       gitleaks
       nixfmt
+      nodejs_22
       shfmt
     ]
     ++ lib.optionals stdenv.isDarwin [
@@ -173,7 +174,9 @@ in
       exec = ''
         set -e
         install:eget
+        install:pulumi
         install:dart
+        install:infra
       '';
       description = "Run all install scripts.";
       binary = "bash";
@@ -199,6 +202,65 @@ in
         fi
       '';
       description = "Install github binaries with eget.";
+    };
+    "install:pulumi" = {
+      exec = ''
+        PULUMI_DIR="$DEVENV_ROOT/.eget/bin"
+        PULUMI_VERSION="v3.223.0"
+        if [ -f "$PULUMI_DIR/pulumi" ]; then
+          CURRENT=$("$PULUMI_DIR/pulumi" version 2>/dev/null || echo "")
+          if [ "$CURRENT" = "$PULUMI_VERSION" ]; then
+            echo "Pulumi $PULUMI_VERSION already installed"
+            exit 0
+          fi
+        fi
+        echo "Installing Pulumi $PULUMI_VERSION..."
+        OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+        ARCH=$(uname -m | sed 's/x86_64/x64/' | sed 's/aarch64/arm64/')
+        curl -fsSL "https://get.pulumi.com/releases/sdk/pulumi-$PULUMI_VERSION-$OS-$ARCH.tar.gz" \
+          | tar xz --strip-components=1 -C "$PULUMI_DIR"
+        echo "Pulumi $PULUMI_VERSION installed"
+      '';
+      description = "Install Pulumi CLI from official releases.";
+      binary = "bash";
+    };
+    "install:infra" = {
+      exec = ''
+        set -e
+        cd "$DEVENV_ROOT/infra"
+        $DEVENV_ROOT/.eget/bin/pnpm install
+      '';
+      description = "Install infrastructure dependencies.";
+      binary = "bash";
+    };
+    "pulumi" = {
+      exec = ''
+        set -e
+        export PATH="$DEVENV_ROOT/.eget/bin:$PATH"
+        source "$HOME/.env.dotfiles" 2>/dev/null || true
+        export PULUMI_ACCESS_TOKEN="''${PULUMI_ACCESS_TOKEN:-$PULUMI_TOKEN}"
+        $DEVENV_ROOT/.eget/bin/pulumi $@
+      '';
+      description = "Run Pulumi infrastructure CLI.";
+      binary = "bash";
+    };
+    "esc" = {
+      exec = ''
+        set -e
+        source "$HOME/.env.dotfiles" 2>/dev/null || true
+        export PULUMI_ACCESS_TOKEN="''${PULUMI_ACCESS_TOKEN:-$PULUMI_TOKEN}"
+        $DEVENV_ROOT/.eget/bin/esc $@
+      '';
+      description = "Run Pulumi ESC CLI.";
+      binary = "bash";
+    };
+    "pnpm" = {
+      exec = ''
+        set -e
+        $DEVENV_ROOT/.eget/bin/pnpm $@
+      '';
+      description = "Run pnpm package manager.";
+      binary = "bash";
     };
     "server:start" = {
       exec = ''
