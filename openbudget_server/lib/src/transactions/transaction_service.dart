@@ -1,8 +1,11 @@
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_server/src/accounts/account_service.dart';
 import 'package:openbudget_server/src/budgets/budget_service.dart';
+import 'package:openbudget_server/src/categories/category_service.dart';
+import 'package:openbudget_server/src/envelopes/envelope_service.dart';
 import 'package:openbudget_server/src/exceptions/exceptions.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
+import 'package:openbudget_server/src/payees/payee_service.dart';
 import 'package:serverpod/serverpod.dart' hide Transaction;
 
 /// Business logic for managing transactions within a budget.
@@ -25,6 +28,12 @@ class TransactionService {
   }) async {
     _log.info('Creating transaction desc=$description amount=$amountCents');
     await BudgetService.getById(session, budgetId: budgetId);
+    await _validateTransactionReferences(
+      session,
+      budgetId: budgetId,
+      envelopeId: envelopeId,
+      payeeId: payeeId,
+    );
 
     final transaction = Transaction(
       description: description,
@@ -106,6 +115,12 @@ class TransactionService {
     String? flagColor,
   }) async {
     final transaction = await getById(session, transactionId: transactionId);
+    await _validateTransactionReferences(
+      session,
+      budgetId: transaction.budgetId,
+      envelopeId: envelopeId,
+      payeeId: payeeId,
+    );
 
     final updated = transaction.copyWith(
       description: description ?? transaction.description,
@@ -389,6 +404,21 @@ class TransactionService {
       'Creating split transaction desc=$description splits=${splits.length}',
     );
     await BudgetService.getById(session, budgetId: budgetId);
+    await _validateTransactionReferences(
+      session,
+      budgetId: budgetId,
+      payeeId: payeeId,
+    );
+
+    for (final split in splits) {
+      if (split.envelopeId != null) {
+        await _assertEnvelopeBelongsToBudget(
+          session,
+          budgetId: budgetId,
+          envelopeId: split.envelopeId!,
+        );
+      }
+    }
 
     // Validate split amounts sum to total.
     final splitSum = splits.fold<int>(0, (sum, s) => sum + s.amountCents.abs());
@@ -527,6 +557,58 @@ class TransactionService {
     final account = await AccountService.getById(session, accountId: accountId);
     if (account.budgetId != budgetId) {
       throw NotFoundException('Account not found in this budget');
+    }
+  }
+
+  static Future<void> _assertEnvelopeBelongsToBudget(
+    Session session, {
+    required UuidValue envelopeId,
+    required UuidValue budgetId,
+  }) async {
+    final envelope = await EnvelopeService.getById(
+      session,
+      envelopeId: envelopeId,
+    );
+    final category = await CategoryService.getById(
+      session,
+      categoryId: envelope.categoryId,
+    );
+    if (category.budgetId != budgetId) {
+      throw NotFoundException('Envelope not found in this budget');
+    }
+  }
+
+  static Future<void> _assertPayeeBelongsToBudget(
+    Session session, {
+    required UuidValue payeeId,
+    required UuidValue budgetId,
+  }) async {
+    final payee = await PayeeService.getById(session, payeeId: payeeId);
+    if (payee.budgetId != budgetId) {
+      throw NotFoundException('Payee not found in this budget');
+    }
+  }
+
+  static Future<void> _validateTransactionReferences(
+    Session session, {
+    required UuidValue budgetId,
+    UuidValue? envelopeId,
+    UuidValue? payeeId,
+  }) async {
+    if (envelopeId != null) {
+      await _assertEnvelopeBelongsToBudget(
+        session,
+        budgetId: budgetId,
+        envelopeId: envelopeId,
+      );
+    }
+
+    if (payeeId != null) {
+      await _assertPayeeBelongsToBudget(
+        session,
+        budgetId: budgetId,
+        payeeId: payeeId,
+      );
     }
   }
 }

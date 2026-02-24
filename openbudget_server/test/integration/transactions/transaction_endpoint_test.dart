@@ -1,4 +1,5 @@
 import 'package:openbudget_server/src/exceptions/exceptions.dart';
+import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:test/test.dart';
 
 import '../helpers/auth_helper.dart';
@@ -69,6 +70,94 @@ void main() {
           envelopeId: envelope.id,
         );
         expect(transaction.envelopeId, envelope.id);
+      },
+    );
+
+    test(
+      'when creating transaction with envelope outside budget then throws and does not persist',
+      () async {
+        final primaryBudget = await endpoints.budget.create(
+          authedSession,
+          'Primary Budget',
+          'USD',
+        );
+        final foreignBudget = await endpoints.budget.create(
+          authedSession,
+          'Foreign Budget',
+          'USD',
+        );
+        final foreignCategory = await endpoints.category.create(
+          authedSession,
+          'Foreign Category',
+          foreignBudget.id!,
+          0,
+        );
+        final foreignEnvelope = await endpoints.envelope.create(
+          authedSession,
+          'Foreign Envelope',
+          foreignCategory.id!,
+          0,
+          'USD',
+        );
+
+        await expectLater(
+          endpoints.transaction.create(
+            authedSession,
+            'Invalid envelope transaction',
+            -1200,
+            'USD',
+            primaryBudget.id!,
+            DateTime.utc(2026, 1, 15),
+            envelopeId: foreignEnvelope.id,
+          ),
+          throwsA(isA<NotFoundException>()),
+        );
+
+        final transactions = await endpoints.transaction.list(
+          authedSession,
+          primaryBudget.id!,
+        );
+        expect(transactions, isEmpty);
+      },
+    );
+
+    test(
+      'when creating transaction with payee outside budget then throws and does not persist',
+      () async {
+        final primaryBudget = await endpoints.budget.create(
+          authedSession,
+          'Primary Payee Budget',
+          'USD',
+        );
+        final foreignBudget = await endpoints.budget.create(
+          authedSession,
+          'Foreign Payee Budget',
+          'USD',
+        );
+        final foreignPayee = await endpoints.payee.create(
+          authedSession,
+          'Foreign Payee',
+          foreignBudget.id!,
+        );
+
+        await expectLater(
+          endpoints.transaction.create(
+            authedSession,
+            'Invalid payee transaction',
+            -1200,
+            'USD',
+            primaryBudget.id!,
+            DateTime.utc(2026, 1, 15),
+            payeeId: foreignPayee.id,
+          ),
+          throwsA(isA<NotFoundException>()),
+        );
+
+        final transactions = await endpoints.transaction.list(
+          authedSession,
+          primaryBudget.id!,
+        );
+        expect(transactions, isEmpty);
       },
     );
 
@@ -314,6 +403,108 @@ void main() {
       },
     );
 
+    test(
+      'when updating transaction with envelope outside budget then throws and keeps original',
+      () async {
+        final primaryBudget = await endpoints.budget.create(
+          authedSession,
+          'Primary Update Budget',
+          'USD',
+        );
+        final foreignBudget = await endpoints.budget.create(
+          authedSession,
+          'Foreign Update Budget',
+          'USD',
+        );
+        final foreignCategory = await endpoints.category.create(
+          authedSession,
+          'Foreign Update Category',
+          foreignBudget.id!,
+          0,
+        );
+        final foreignEnvelope = await endpoints.envelope.create(
+          authedSession,
+          'Foreign Update Envelope',
+          foreignCategory.id!,
+          0,
+          'USD',
+        );
+        final transaction = await endpoints.transaction.create(
+          authedSession,
+          'Update Envelope Source',
+          -1300,
+          'USD',
+          primaryBudget.id!,
+          DateTime.utc(2026, 1, 15),
+        );
+
+        await expectLater(
+          endpoints.transaction.update(
+            authedSession,
+            transaction.id!,
+            envelopeId: foreignEnvelope.id,
+          ),
+          throwsA(isA<NotFoundException>()),
+        );
+
+        final unchanged = await endpoints.transaction.get(
+          authedSession,
+          transaction.id!,
+        );
+        expect(unchanged.envelopeId, isNull);
+      },
+    );
+
+    test(
+      'when updating transaction with payee outside budget then throws and keeps original',
+      () async {
+        final primaryBudget = await endpoints.budget.create(
+          authedSession,
+          'Primary Update Payee Budget',
+          'USD',
+        );
+        final foreignBudget = await endpoints.budget.create(
+          authedSession,
+          'Foreign Update Payee Budget',
+          'USD',
+        );
+        final foreignPayee = await endpoints.payee.create(
+          authedSession,
+          'Foreign Update Payee',
+          foreignBudget.id!,
+        );
+        final localPayee = await endpoints.payee.create(
+          authedSession,
+          'Local Payee',
+          primaryBudget.id!,
+        );
+        final transaction = await endpoints.transaction.create(
+          authedSession,
+          'Update Payee Source',
+          -1300,
+          'USD',
+          primaryBudget.id!,
+          DateTime.utc(2026, 1, 15),
+          payeeId: localPayee.id,
+        );
+
+        await expectLater(
+          endpoints.transaction.update(
+            authedSession,
+            transaction.id!,
+            payeeId: foreignPayee.id,
+          ),
+          throwsA(isA<NotFoundException>()),
+        );
+
+        final unchanged = await endpoints.transaction.get(
+          authedSession,
+          transaction.id!,
+        );
+        expect(unchanged.payeeId, localPayee.id);
+      },
+    );
+
     test('when deleting a transaction then it is removed', () async {
       final budget = await endpoints.budget.create(
         authedSession,
@@ -362,6 +553,60 @@ void main() {
           () => endpoints.transaction.get(otherSession, transaction.id!),
           throwsA(isA<NotFoundException>()),
         );
+      },
+    );
+
+    test(
+      'when creating split with envelope outside budget then throws and does not persist',
+      () async {
+        final primaryBudget = await endpoints.budget.create(
+          authedSession,
+          'Primary Split Budget',
+          'USD',
+        );
+        final foreignBudget = await endpoints.budget.create(
+          authedSession,
+          'Foreign Split Budget',
+          'USD',
+        );
+        final foreignCategory = await endpoints.category.create(
+          authedSession,
+          'Foreign Split Category',
+          foreignBudget.id!,
+          0,
+        );
+        final foreignEnvelope = await endpoints.envelope.create(
+          authedSession,
+          'Foreign Split Envelope',
+          foreignCategory.id!,
+          0,
+          'USD',
+        );
+
+        await expectLater(
+          endpoints.transaction.createSplit(
+            authedSession,
+            'Invalid split',
+            -2500,
+            'USD',
+            primaryBudget.id!,
+            DateTime.utc(2026, 1, 15),
+            [
+              SplitItem(
+                amountCents: 2500,
+                envelopeId: foreignEnvelope.id,
+                memo: 'Invalid split envelope',
+              ),
+            ],
+          ),
+          throwsA(isA<NotFoundException>()),
+        );
+
+        final transactions = await endpoints.transaction.list(
+          authedSession,
+          primaryBudget.id!,
+        );
+        expect(transactions, isEmpty);
       },
     );
   });
