@@ -17,8 +17,10 @@ import 'package:openbudget_app/src/features/reports/screens/net_worth_screen.dar
 import 'package:openbudget_app/src/features/reports/screens/reports_screen.dart';
 import 'package:openbudget_app/src/features/reports/screens/spending_by_payee_screen.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
+import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
+import 'package:openbudget_ui/openbudget_ui.dart';
 import 'package:patrol/patrol.dart';
 
 const _budgetId = 'test-budget-id';
@@ -117,7 +119,7 @@ NetWorthData _makeNetWorthData() {
   );
 }
 
-Widget _buildApp() {
+Widget _buildApp({ThemeMode themeMode = ThemeMode.light}) {
   final router = GoRouter(
     initialLocation: '/budgets/$_budgetId/reflect',
     routes: [
@@ -156,7 +158,9 @@ Widget _buildApp() {
       ageOfMoneyProvider.overrideWith((ref, budgetId) async => 2),
     ],
     child: MaterialApp.router(
-      theme: ThemeData.light(useMaterial3: true),
+      theme: OpenBudgetTheme.light,
+      darkTheme: OpenBudgetTheme.dark,
+      themeMode: themeMode,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       routerConfig: router,
@@ -181,6 +185,28 @@ void main() {
     expect(find.text('Rent'), findsWidgets);
     expect(find.text('Utilities'), findsWidgets);
     expect(find.textContaining('2,220.00'), findsOneWidget);
+  });
+
+  patrolWidgetTest('spending breakdown applies dark-mode background surfaces', (
+    $,
+  ) async {
+    final tester = $.tester;
+    await tester.pumpWidget(_buildApp(themeMode: ThemeMode.dark));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Spending Breakdown').first);
+    await tester.pumpAndSettle();
+
+    final expectedBackground = OpenBudgetPalette.appBackgroundFor(
+      OpenBudgetTheme.dark,
+    );
+    expect(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is Scaffold && widget.backgroundColor == expectedBackground,
+      ),
+      findsWidgets,
+    );
   });
 
   patrolWidgetTest(

@@ -1,6 +1,6 @@
 # OpenBudget UI Migration Tracker (from `~/Downloads/ynab-ui`)
 
-Last updated: 2026-02-24 (Reports preset month-anchor parity + integration assertions)
+Last updated: 2026-02-24 (Reports dark-mode surface parity)
 
 ## Scope
 
@@ -10,7 +10,7 @@ Last updated: 2026-02-24 (Reports preset month-anchor parity + integration asser
 
 ## Progress Snapshot
 
-- Overall migration progress: **~99.7%**
+- Overall migration progress: **~99.8%**
 - Core plan/settings/auth/navigation flows: **implemented**
 - Advanced accounts/transactions flows: **implemented**
 - Reports/appearance polish flows: **in progress**
@@ -19,11 +19,14 @@ Last updated: 2026-02-24 (Reports preset month-anchor parity + integration asser
 
 - 2026-02-24: Reflect -> Spending Breakdown -> Preset mode now aggregates multi-month data from the selected month backward (`Last 3/6/12 Months`) with visible range label (`Month YYYY–Month YYYY`) and outflow-only category totals.
 - 2026-02-24: Reflect -> Spending Breakdown (Preset) now shows both controls used in the reference flow: `Preset Range` selector and month anchor row (`< Month YYYY >`) for range pivoting.
+- 2026-02-24: Reflect and Spending Breakdown report screens now use theme-aware surfaces/backgrounds/dividers for dark appearance parity instead of fixed light palette tokens.
 - 2026-02-24: Patrol flow updated to assert preset range rendering in integration coverage (`openbudget_app/integration_test/reports_flow_test.dart`).
 - 2026-02-24: Patrol flow expanded to assert deterministic preset month-pivot ranges (`December 2025–February 2026` then `November 2025–January 2026`) and aggregated totals.
+- 2026-02-24: Patrol flow expanded to assert dark-mode scaffold background parity for Spending Breakdown.
 - 2026-02-24: PR screenshot artifacts policy active: every migration PR must include at least one runtime screenshot link in PR body/comments.
 - 2026-02-24: PR #127 artifact screenshot (Preset mode): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-24-pr127/reports-preset-mode.png
 - 2026-02-24: PR #129 artifact screenshot (Preset range + month anchor): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-24-pr129/reports-preset-range-month-anchor.png
+- 2026-02-24: PR #130 artifact screenshot (Dark-mode spending breakdown): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-24-pr130/reports-dark-mode-runtime.png
 
 ## Completed Flows
 
@@ -124,7 +127,7 @@ Last updated: 2026-02-24 (Reports preset month-anchor parity + integration asser
   - [x] Spending breakdown parity
   - [x] Multi-month/preset advanced analytics polish
 - [ ] Appearance/system flows
-  - [ ] Dark mode parity pass
+  - [x] Dark mode parity pass
   - [ ] App icon switching parity pass
 
 ## Validation Status
@@ -153,6 +156,7 @@ Last updated: 2026-02-24 (Reports preset month-anchor parity + integration asser
 - [x] Integration tests migrated to Patrol (`patrolWidgetTest`) across all flow files
 - [x] Integration coverage for opening custom target editor and validating Save button enablement
 - [x] Integration coverage for Reflect dashboard -> Spending Breakdown + Net Worth flows
+- [x] Integration coverage for dark-mode report surfaces (Reflect -> Spending Breakdown)
 - [x] Integration CI enforces per-file timeout for stuck integration files with explicit timeout errors
 - [ ] Expand integration tests for remaining pending batches above
 

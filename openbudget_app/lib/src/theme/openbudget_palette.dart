@@ -12,4 +12,39 @@ abstract final class OpenBudgetPalette {
   static const Color accentGreen = Color(0xFFA9DF61);
   static const Color progressGreen = Color(0xFF6FAF2F);
   static const Color negative = Color(0xFFC23043);
+
+  static Color appBackgroundFor(ThemeData theme) {
+    if (theme.brightness == Brightness.dark) {
+      return theme.colorScheme.surface;
+    }
+    return appBackground;
+  }
+
+  static Color surfaceFor(ThemeData theme) {
+    if (theme.brightness == Brightness.dark) {
+      return theme.colorScheme.surfaceContainerLow;
+    }
+    return surface;
+  }
+
+  static Color surfaceMutedFor(ThemeData theme) {
+    if (theme.brightness == Brightness.dark) {
+      return theme.colorScheme.surfaceContainerHigh;
+    }
+    return surfaceMuted;
+  }
+
+  static Color dividerFor(ThemeData theme) {
+    if (theme.brightness == Brightness.dark) {
+      return theme.colorScheme.outlineVariant;
+    }
+    return divider;
+  }
+
+  static Color mutedTextFor(ThemeData theme) {
+    if (theme.brightness == Brightness.dark) {
+      return theme.colorScheme.onSurfaceVariant;
+    }
+    return mutedText;
+  }
 }

@@ -33,9 +33,9 @@ class ReportsScreen extends HookConsumerWidget {
     final ageOfMoneyAsync = ref.watch(ageOfMoneyProvider(budgetId));
 
     return Scaffold(
-      backgroundColor: OpenBudgetPalette.appBackground,
+      backgroundColor: OpenBudgetPalette.appBackgroundFor(theme),
       appBar: AppBar(
-        backgroundColor: OpenBudgetPalette.appBackground,
+        backgroundColor: OpenBudgetPalette.appBackgroundFor(theme),
         surfaceTintColor: Colors.transparent,
         title: Text(l10n.tabReflect),
       ),
@@ -165,7 +165,7 @@ class _ReflectCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Material(
-      color: OpenBudgetPalette.surface,
+      color: OpenBudgetPalette.surfaceFor(theme),
       borderRadius: BorderRadius.circular(RadiusTokens.md),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -235,7 +235,7 @@ class _SpendingBreakdownPreview extends StatelessWidget {
         Text(
           monthLabel,
           style: theme.textTheme.bodyMedium?.copyWith(
-            color: OpenBudgetPalette.mutedText,
+            color: OpenBudgetPalette.mutedTextFor(theme),
           ),
         ),
         const SizedBox(height: SpacingTokens.xs),
@@ -250,7 +250,7 @@ class _SpendingBreakdownPreview extends StatelessWidget {
           Text(
             AppLocalizations.of(context).reportsEmptySubtitle,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: OpenBudgetPalette.mutedText,
+              color: OpenBudgetPalette.mutedTextFor(theme),
             ),
           ),
         ] else ...[
@@ -269,7 +269,9 @@ class _SpendingBreakdownPreview extends StatelessWidget {
                   if (report.totalExpenses > totalCents)
                     Expanded(
                       flex: report.totalExpenses - totalCents,
-                      child: Container(color: OpenBudgetPalette.surfaceMuted),
+                      child: Container(
+                        color: OpenBudgetPalette.surfaceMutedFor(theme),
+                      ),
                     ),
                 ],
               ),
@@ -279,7 +281,7 @@ class _SpendingBreakdownPreview extends StatelessWidget {
           Text(
             AppLocalizations.of(context).reportsSpendingByCategory,
             style: theme.textTheme.labelLarge?.copyWith(
-              color: OpenBudgetPalette.mutedText,
+              color: OpenBudgetPalette.mutedTextFor(theme),
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -437,7 +439,7 @@ class _Bar extends StatelessWidget {
         Text(
           label,
           style: theme.textTheme.labelSmall?.copyWith(
-            color: OpenBudgetPalette.mutedText,
+            color: OpenBudgetPalette.mutedTextFor(theme),
           ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
@@ -475,7 +477,7 @@ class _AgeOfMoneyPreview extends StatelessWidget {
                 ? AppLocalizations.of(context).reportsEmptySubtitle
                 : AppLocalizations.of(context).ageOfMoneyLabel(displayDays),
             style: theme.textTheme.bodySmall?.copyWith(
-              color: OpenBudgetPalette.mutedText,
+              color: OpenBudgetPalette.mutedTextFor(theme),
             ),
           ),
         ],
