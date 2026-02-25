@@ -99,7 +99,7 @@ void main() {
     expect(find.text('Search for your bank'), findsOneWidget);
   });
 
-  testWidgets('renders currency selector in unlinked account step', (
+  testWidgets('does not render currency selector in unlinked account step', (
     tester,
   ) async {
     await tester.pumpWidget(buildSubject(currencyCode: 'EUR'));
@@ -109,9 +109,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Add Unlinked Account'), findsOneWidget);
-    expect(find.text('Currency'), findsOneWidget);
-    expect(find.text('EUR (€)'), findsOneWidget);
-    expect(find.byType(DropdownButtonFormField<String>), findsOneWidget);
+    expect(find.text('Currency'), findsNothing);
+    expect(find.text('EUR (€)'), findsNothing);
+    expect(find.byType(DropdownButtonFormField<String>), findsNothing);
   });
 
   testWidgets('filters institutions by search query', (tester) async {
