@@ -27,6 +27,7 @@ Progress checklist: `docs/openbudget-migration-progress.md`
   - Desktop guardrails for linked-bank loading overlay and account-menu reconcile/edit states
   - Desktop unlinked-account form and success-step parity coverage
   - Desktop unlinked-account form parity update (currency selector removed from step-one form)
+  - Desktop account-type selector copy parity (credit and loan section guidance aligned to target wording)
   - Desktop unlinked-account step-reset hardening (scroll position reset when returning from account type and after add-another)
   - Add Accounts unlinked step hardening (independent per-step scroll state + keyed controls for reliable mobile/desktop interactions)
 - Transactions
@@ -99,3 +100,4 @@ Progress checklist: `docs/openbudget-migration-progress.md`
 - Add Unlinked Account desktop form (no-currency parity pass): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-main-unlinked-no-currency/add-unlinked-account-desktop-form-screen.png
 - Add Unlinked Account desktop filled state (no-currency parity pass): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-main-unlinked-no-currency/add-unlinked-account-desktop-filled-screen.png
 - Add Unlinked Account desktop success (no-currency parity pass): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-main-unlinked-no-currency/add-unlinked-account-desktop-success-screen.png
+- Add Account type selection (copy parity pass): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-main-account-type-copy/add-account-type-selection.png

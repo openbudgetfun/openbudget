@@ -557,6 +557,10 @@ void main() {
       'Daily',
     );
     await _activateListTile(tester, find.byKey(_addAccountTypeTileKey));
+    expect(
+      find.textContaining("you'll need to repay later, often with interest"),
+      findsOneWidget,
+    );
     await _activateListTile(tester, find.byKey(_addAccountCheckingTypeKey));
     await tester.pumpAndSettle();
     await _enterTextWhenVisible(

@@ -29,6 +29,7 @@ This checklist tracks progress for migrating and polishing app flows using the `
 - [x] Add Accounts desktop unlinked-account step reset parity (non-persistent scroll offsets + regression coverage)
 - [x] Add Accounts desktop search helper guidance parity (helper text remains visible in default and empty-result states)
 - [x] Add Accounts desktop unlinked-account parity update (remove step-one currency selector to match target flow)
+- [x] Add Accounts desktop account-type selector copy parity (credit and mortgage/loan guidance text)
 - [x] Transaction review + action sheet flow parity
 - [x] Recent Moves tabs, coach dialog, and drilldown parity
 - [x] Recent Moves desktop tab-switch regression coverage

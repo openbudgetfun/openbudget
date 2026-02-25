@@ -985,7 +985,8 @@ List<_AccountTypeSection> _accountTypeSections(AppLocalizations l10n) {
     ),
     _AccountTypeSection(
       title: 'Credit Accounts',
-      subtitle: 'Credit accounts let you spend borrowed money to repay later.',
+      subtitle:
+          "A credit account lets you spend borrowed money that you'll need to repay later, often with interest.",
       options: [
         _AccountTypeOption(
           key: 'creditCard',
@@ -1005,7 +1006,8 @@ List<_AccountTypeSection> _accountTypeSections(AppLocalizations l10n) {
     ),
     const _AccountTypeSection(
       title: 'Mortgages and Loans',
-      subtitle: "Accounts with an outstanding balance you're paying off.",
+      subtitle:
+          "Accounts that have an outstanding balance you're currently paying off, and aren't spending from.",
       options: [
         _AccountTypeOption(
           key: 'mortgage',
