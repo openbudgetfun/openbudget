@@ -24,6 +24,7 @@ This checklist tracks progress for migrating and polishing app flows using the `
 - [x] Recent Moves tabs, coach dialog, and drilldown parity
 - [x] Reflect dashboard + Spending Breakdown + Net Worth parity
 - [x] Spending Breakdown preset range recalculation regression coverage
+- [x] Spending Breakdown desktop preset-range parity regression coverage
 
 ## Testing and CI Checklist
 
