@@ -22,42 +22,50 @@ import 'budgets/budget.dart' as _i7;
 import 'categories/category.dart' as _i8;
 import 'envelope_goals/envelope_goal.dart' as _i9;
 import 'envelopes/envelope.dart' as _i10;
-import 'monthly_allocations/monthly_allocation.dart' as _i11;
-import 'payees/payee.dart' as _i12;
-import 'recurring_transactions/recurring_transaction.dart' as _i13;
-import 'transaction_rules/transaction_rule.dart' as _i14;
-import 'transactions/import_row.dart' as _i15;
-import 'transactions/split_item.dart' as _i16;
-import 'transactions/transaction.dart' as _i17;
-import 'package:openbudget_server/src/generated/accounts/account.dart' as _i18;
+import 'fx_rates/fx_latest_snapshot.dart' as _i11;
+import 'fx_rates/fx_rate_entry.dart' as _i12;
+import 'fx_rates/fx_rate_quote.dart' as _i13;
+import 'fx_rates/fx_rate_snapshot.dart' as _i14;
+import 'monthly_allocations/monthly_allocation.dart' as _i15;
+import 'payees/payee.dart' as _i16;
+import 'recurring_transactions/recurring_transaction.dart' as _i17;
+import 'transaction_rules/transaction_rule.dart' as _i18;
+import 'transactions/import_row.dart' as _i19;
+import 'transactions/split_item.dart' as _i20;
+import 'transactions/transaction.dart' as _i21;
+import 'package:openbudget_server/src/generated/accounts/account.dart' as _i22;
 import 'package:openbudget_server/src/generated/budget_templates/budget_template.dart'
-    as _i19;
-import 'package:openbudget_server/src/generated/monthly_allocations/monthly_allocation.dart'
-    as _i20;
-import 'package:openbudget_server/src/generated/budgets/budget.dart' as _i21;
-import 'package:openbudget_server/src/generated/categories/category.dart'
-    as _i22;
-import 'package:openbudget_server/src/generated/envelope_goals/envelope_goal.dart'
     as _i23;
-import 'package:openbudget_server/src/generated/envelopes/envelope.dart'
+import 'package:openbudget_server/src/generated/monthly_allocations/monthly_allocation.dart'
     as _i24;
-import 'package:openbudget_server/src/generated/payees/payee.dart' as _i25;
-import 'package:openbudget_server/src/generated/recurring_transactions/recurring_transaction.dart'
+import 'package:openbudget_server/src/generated/budgets/budget.dart' as _i25;
+import 'package:openbudget_server/src/generated/categories/category.dart'
     as _i26;
-import 'package:openbudget_server/src/generated/transaction_rules/transaction_rule.dart'
+import 'package:openbudget_server/src/generated/envelope_goals/envelope_goal.dart'
     as _i27;
-import 'package:openbudget_server/src/generated/transactions/transaction.dart'
+import 'package:openbudget_server/src/generated/envelopes/envelope.dart'
     as _i28;
-import 'package:openbudget_server/src/generated/transactions/split_item.dart'
-    as _i29;
-import 'package:openbudget_server/src/generated/transactions/import_row.dart'
+import 'package:openbudget_server/src/generated/payees/payee.dart' as _i29;
+import 'package:openbudget_server/src/generated/recurring_transactions/recurring_transaction.dart'
     as _i30;
+import 'package:openbudget_server/src/generated/transaction_rules/transaction_rule.dart'
+    as _i31;
+import 'package:openbudget_server/src/generated/transactions/transaction.dart'
+    as _i32;
+import 'package:openbudget_server/src/generated/transactions/split_item.dart'
+    as _i33;
+import 'package:openbudget_server/src/generated/transactions/import_row.dart'
+    as _i34;
 export 'accounts/account.dart';
 export 'budget_templates/budget_template.dart';
 export 'budgets/budget.dart';
 export 'categories/category.dart';
 export 'envelope_goals/envelope_goal.dart';
 export 'envelopes/envelope.dart';
+export 'fx_rates/fx_latest_snapshot.dart';
+export 'fx_rates/fx_rate_entry.dart';
+export 'fx_rates/fx_rate_quote.dart';
+export 'fx_rates/fx_rate_snapshot.dart';
 export 'monthly_allocations/monthly_allocation.dart';
 export 'payees/payee.dart';
 export 'recurring_transactions/recurring_transaction.dart';
@@ -209,6 +217,12 @@ class Protocol extends _i1.SerializationManagerServer {
           columnType: _i2.ColumnType.text,
           isNullable: false,
           dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'displayCurrencyCode',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
         ),
         _i2.ColumnDefinition(
           name: 'ownerId',
@@ -641,6 +655,231 @@ class Protocol extends _i1.SerializationManagerServer {
             _i2.IndexElementDefinition(
               type: _i2.IndexElementDefinitionType.column,
               definition: 'envelopeId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _i2.TableDefinition(
+      name: 'fx_rate_entry',
+      dartName: 'FxRateEntry',
+      schema: 'public',
+      module: 'openbudget',
+      columns: [
+        _i2.ColumnDefinition(
+          name: 'id',
+          columnType: _i2.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue?',
+          columnDefault: 'gen_random_uuid_v7()',
+        ),
+        _i2.ColumnDefinition(
+          name: 'snapshotId',
+          columnType: _i2.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _i2.ColumnDefinition(
+          name: 'currencyCode',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'rate',
+          columnType: _i2.ColumnType.doublePrecision,
+          isNullable: false,
+          dartType: 'double',
+        ),
+        _i2.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'CURRENT_TIMESTAMP',
+        ),
+      ],
+      foreignKeys: [
+        _i2.ForeignKeyDefinition(
+          constraintName: 'fx_rate_entry_fk_0',
+          columns: ['snapshotId'],
+          referenceTable: 'fx_rate_snapshot',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _i2.ForeignKeyAction.noAction,
+          onDelete: _i2.ForeignKeyAction.noAction,
+          matchType: null,
+        ),
+      ],
+      indexes: [
+        _i2.IndexDefinition(
+          indexName: 'fx_rate_entry_pkey',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'id',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: true,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'fx_rate_entry_snapshot_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'snapshotId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'fx_rate_entry_snapshot_currency_unique_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'snapshotId',
+            ),
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'currencyCode',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _i2.TableDefinition(
+      name: 'fx_rate_snapshot',
+      dartName: 'FxRateSnapshot',
+      schema: 'public',
+      module: 'openbudget',
+      columns: [
+        _i2.ColumnDefinition(
+          name: 'id',
+          columnType: _i2.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue?',
+          columnDefault: 'gen_random_uuid_v7()',
+        ),
+        _i2.ColumnDefinition(
+          name: 'provider',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'baseCurrencyCode',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'fetchedAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+        _i2.ColumnDefinition(
+          name: 'isLatest',
+          columnType: _i2.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+          columnDefault: 'false',
+        ),
+        _i2.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'CURRENT_TIMESTAMP',
+        ),
+      ],
+      foreignKeys: [],
+      indexes: [
+        _i2.IndexDefinition(
+          indexName: 'fx_rate_snapshot_pkey',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'id',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: true,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'fx_rate_snapshot_latest_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'provider',
+            ),
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'baseCurrencyCode',
+            ),
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'isLatest',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'fx_rate_snapshot_fetched_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'provider',
+            ),
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'baseCurrencyCode',
+            ),
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'fetchedAt',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'fx_rate_snapshot_provider_base_time_unique_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'provider',
+            ),
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'baseCurrencyCode',
+            ),
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'fetchedAt',
             ),
           ],
           type: 'btree',
@@ -1507,26 +1746,38 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == _i10.Envelope) {
       return _i10.Envelope.fromJson(data) as T;
     }
-    if (t == _i11.MonthlyAllocation) {
-      return _i11.MonthlyAllocation.fromJson(data) as T;
+    if (t == _i11.FxLatestSnapshot) {
+      return _i11.FxLatestSnapshot.fromJson(data) as T;
     }
-    if (t == _i12.Payee) {
-      return _i12.Payee.fromJson(data) as T;
+    if (t == _i12.FxRateEntry) {
+      return _i12.FxRateEntry.fromJson(data) as T;
     }
-    if (t == _i13.RecurringTransaction) {
-      return _i13.RecurringTransaction.fromJson(data) as T;
+    if (t == _i13.FxRateQuote) {
+      return _i13.FxRateQuote.fromJson(data) as T;
     }
-    if (t == _i14.TransactionRule) {
-      return _i14.TransactionRule.fromJson(data) as T;
+    if (t == _i14.FxRateSnapshot) {
+      return _i14.FxRateSnapshot.fromJson(data) as T;
     }
-    if (t == _i15.ImportRow) {
-      return _i15.ImportRow.fromJson(data) as T;
+    if (t == _i15.MonthlyAllocation) {
+      return _i15.MonthlyAllocation.fromJson(data) as T;
     }
-    if (t == _i16.SplitItem) {
-      return _i16.SplitItem.fromJson(data) as T;
+    if (t == _i16.Payee) {
+      return _i16.Payee.fromJson(data) as T;
     }
-    if (t == _i17.Transaction) {
-      return _i17.Transaction.fromJson(data) as T;
+    if (t == _i17.RecurringTransaction) {
+      return _i17.RecurringTransaction.fromJson(data) as T;
+    }
+    if (t == _i18.TransactionRule) {
+      return _i18.TransactionRule.fromJson(data) as T;
+    }
+    if (t == _i19.ImportRow) {
+      return _i19.ImportRow.fromJson(data) as T;
+    }
+    if (t == _i20.SplitItem) {
+      return _i20.SplitItem.fromJson(data) as T;
+    }
+    if (t == _i21.Transaction) {
+      return _i21.Transaction.fromJson(data) as T;
     }
     if (t == _i1.getType<_i5.Account?>()) {
       return (data != null ? _i5.Account.fromJson(data) : null) as T;
@@ -1546,100 +1797,118 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == _i1.getType<_i10.Envelope?>()) {
       return (data != null ? _i10.Envelope.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i11.MonthlyAllocation?>()) {
-      return (data != null ? _i11.MonthlyAllocation.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i11.FxLatestSnapshot?>()) {
+      return (data != null ? _i11.FxLatestSnapshot.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i12.Payee?>()) {
-      return (data != null ? _i12.Payee.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i12.FxRateEntry?>()) {
+      return (data != null ? _i12.FxRateEntry.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i13.RecurringTransaction?>()) {
-      return (data != null ? _i13.RecurringTransaction.fromJson(data) : null)
+    if (t == _i1.getType<_i13.FxRateQuote?>()) {
+      return (data != null ? _i13.FxRateQuote.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i14.FxRateSnapshot?>()) {
+      return (data != null ? _i14.FxRateSnapshot.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i15.MonthlyAllocation?>()) {
+      return (data != null ? _i15.MonthlyAllocation.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i16.Payee?>()) {
+      return (data != null ? _i16.Payee.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i17.RecurringTransaction?>()) {
+      return (data != null ? _i17.RecurringTransaction.fromJson(data) : null)
           as T;
     }
-    if (t == _i1.getType<_i14.TransactionRule?>()) {
-      return (data != null ? _i14.TransactionRule.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i18.TransactionRule?>()) {
+      return (data != null ? _i18.TransactionRule.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i15.ImportRow?>()) {
-      return (data != null ? _i15.ImportRow.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i19.ImportRow?>()) {
+      return (data != null ? _i19.ImportRow.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i16.SplitItem?>()) {
-      return (data != null ? _i16.SplitItem.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i20.SplitItem?>()) {
+      return (data != null ? _i20.SplitItem.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i17.Transaction?>()) {
-      return (data != null ? _i17.Transaction.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i21.Transaction?>()) {
+      return (data != null ? _i21.Transaction.fromJson(data) : null) as T;
     }
-    if (t == List<_i18.Account>) {
-      return (data as List).map((e) => deserialize<_i18.Account>(e)).toList()
-          as T;
-    }
-    if (t == List<_i19.BudgetTemplate>) {
+    if (t == List<_i13.FxRateQuote>) {
       return (data as List)
-              .map((e) => deserialize<_i19.BudgetTemplate>(e))
+              .map((e) => deserialize<_i13.FxRateQuote>(e))
               .toList()
           as T;
     }
-    if (t == List<_i20.MonthlyAllocation>) {
+    if (t == List<_i22.Account>) {
+      return (data as List).map((e) => deserialize<_i22.Account>(e)).toList()
+          as T;
+    }
+    if (t == List<_i23.BudgetTemplate>) {
       return (data as List)
-              .map((e) => deserialize<_i20.MonthlyAllocation>(e))
+              .map((e) => deserialize<_i23.BudgetTemplate>(e))
               .toList()
           as T;
     }
-    if (t == List<_i21.Budget>) {
-      return (data as List).map((e) => deserialize<_i21.Budget>(e)).toList()
+    if (t == List<_i24.MonthlyAllocation>) {
+      return (data as List)
+              .map((e) => deserialize<_i24.MonthlyAllocation>(e))
+              .toList()
           as T;
     }
-    if (t == List<_i22.Category>) {
-      return (data as List).map((e) => deserialize<_i22.Category>(e)).toList()
+    if (t == List<_i25.Budget>) {
+      return (data as List).map((e) => deserialize<_i25.Budget>(e)).toList()
+          as T;
+    }
+    if (t == List<_i26.Category>) {
+      return (data as List).map((e) => deserialize<_i26.Category>(e)).toList()
           as T;
     }
     if (t == List<_i1.UuidValue>) {
       return (data as List).map((e) => deserialize<_i1.UuidValue>(e)).toList()
           as T;
     }
-    if (t == List<_i23.EnvelopeGoal>) {
+    if (t == List<_i27.EnvelopeGoal>) {
       return (data as List)
-              .map((e) => deserialize<_i23.EnvelopeGoal>(e))
+              .map((e) => deserialize<_i27.EnvelopeGoal>(e))
               .toList()
           as T;
     }
-    if (t == List<_i24.Envelope>) {
-      return (data as List).map((e) => deserialize<_i24.Envelope>(e)).toList()
+    if (t == List<_i28.Envelope>) {
+      return (data as List).map((e) => deserialize<_i28.Envelope>(e)).toList()
           as T;
     }
     if (t == List<String>) {
       return (data as List).map((e) => deserialize<String>(e)).toList() as T;
     }
-    if (t == List<_i25.Payee>) {
-      return (data as List).map((e) => deserialize<_i25.Payee>(e)).toList()
+    if (t == List<_i29.Payee>) {
+      return (data as List).map((e) => deserialize<_i29.Payee>(e)).toList()
           as T;
     }
-    if (t == List<_i26.RecurringTransaction>) {
+    if (t == List<_i30.RecurringTransaction>) {
       return (data as List)
-              .map((e) => deserialize<_i26.RecurringTransaction>(e))
+              .map((e) => deserialize<_i30.RecurringTransaction>(e))
               .toList()
           as T;
     }
-    if (t == List<_i27.TransactionRule>) {
+    if (t == List<_i31.TransactionRule>) {
       return (data as List)
-              .map((e) => deserialize<_i27.TransactionRule>(e))
+              .map((e) => deserialize<_i31.TransactionRule>(e))
               .toList()
           as T;
     }
-    if (t == List<_i28.Transaction>) {
+    if (t == List<_i32.Transaction>) {
       return (data as List)
-              .map((e) => deserialize<_i28.Transaction>(e))
+              .map((e) => deserialize<_i32.Transaction>(e))
               .toList()
           as T;
     }
     if (t == List<int>) {
       return (data as List).map((e) => deserialize<int>(e)).toList() as T;
     }
-    if (t == List<_i29.SplitItem>) {
-      return (data as List).map((e) => deserialize<_i29.SplitItem>(e)).toList()
+    if (t == List<_i33.SplitItem>) {
+      return (data as List).map((e) => deserialize<_i33.SplitItem>(e)).toList()
           as T;
     }
-    if (t == List<_i30.ImportRow>) {
-      return (data as List).map((e) => deserialize<_i30.ImportRow>(e)).toList()
+    if (t == List<_i34.ImportRow>) {
+      return (data as List).map((e) => deserialize<_i34.ImportRow>(e)).toList()
           as T;
     }
     try {
@@ -1662,13 +1931,17 @@ class Protocol extends _i1.SerializationManagerServer {
       _i8.Category => 'Category',
       _i9.EnvelopeGoal => 'EnvelopeGoal',
       _i10.Envelope => 'Envelope',
-      _i11.MonthlyAllocation => 'MonthlyAllocation',
-      _i12.Payee => 'Payee',
-      _i13.RecurringTransaction => 'RecurringTransaction',
-      _i14.TransactionRule => 'TransactionRule',
-      _i15.ImportRow => 'ImportRow',
-      _i16.SplitItem => 'SplitItem',
-      _i17.Transaction => 'Transaction',
+      _i11.FxLatestSnapshot => 'FxLatestSnapshot',
+      _i12.FxRateEntry => 'FxRateEntry',
+      _i13.FxRateQuote => 'FxRateQuote',
+      _i14.FxRateSnapshot => 'FxRateSnapshot',
+      _i15.MonthlyAllocation => 'MonthlyAllocation',
+      _i16.Payee => 'Payee',
+      _i17.RecurringTransaction => 'RecurringTransaction',
+      _i18.TransactionRule => 'TransactionRule',
+      _i19.ImportRow => 'ImportRow',
+      _i20.SplitItem => 'SplitItem',
+      _i21.Transaction => 'Transaction',
       _ => null,
     };
   }
@@ -1695,19 +1968,27 @@ class Protocol extends _i1.SerializationManagerServer {
         return 'EnvelopeGoal';
       case _i10.Envelope():
         return 'Envelope';
-      case _i11.MonthlyAllocation():
+      case _i11.FxLatestSnapshot():
+        return 'FxLatestSnapshot';
+      case _i12.FxRateEntry():
+        return 'FxRateEntry';
+      case _i13.FxRateQuote():
+        return 'FxRateQuote';
+      case _i14.FxRateSnapshot():
+        return 'FxRateSnapshot';
+      case _i15.MonthlyAllocation():
         return 'MonthlyAllocation';
-      case _i12.Payee():
+      case _i16.Payee():
         return 'Payee';
-      case _i13.RecurringTransaction():
+      case _i17.RecurringTransaction():
         return 'RecurringTransaction';
-      case _i14.TransactionRule():
+      case _i18.TransactionRule():
         return 'TransactionRule';
-      case _i15.ImportRow():
+      case _i19.ImportRow():
         return 'ImportRow';
-      case _i16.SplitItem():
+      case _i20.SplitItem():
         return 'SplitItem';
-      case _i17.Transaction():
+      case _i21.Transaction():
         return 'Transaction';
     }
     className = _i2.Protocol().getClassNameForObject(data);
@@ -1749,26 +2030,38 @@ class Protocol extends _i1.SerializationManagerServer {
     if (dataClassName == 'Envelope') {
       return deserialize<_i10.Envelope>(data['data']);
     }
+    if (dataClassName == 'FxLatestSnapshot') {
+      return deserialize<_i11.FxLatestSnapshot>(data['data']);
+    }
+    if (dataClassName == 'FxRateEntry') {
+      return deserialize<_i12.FxRateEntry>(data['data']);
+    }
+    if (dataClassName == 'FxRateQuote') {
+      return deserialize<_i13.FxRateQuote>(data['data']);
+    }
+    if (dataClassName == 'FxRateSnapshot') {
+      return deserialize<_i14.FxRateSnapshot>(data['data']);
+    }
     if (dataClassName == 'MonthlyAllocation') {
-      return deserialize<_i11.MonthlyAllocation>(data['data']);
+      return deserialize<_i15.MonthlyAllocation>(data['data']);
     }
     if (dataClassName == 'Payee') {
-      return deserialize<_i12.Payee>(data['data']);
+      return deserialize<_i16.Payee>(data['data']);
     }
     if (dataClassName == 'RecurringTransaction') {
-      return deserialize<_i13.RecurringTransaction>(data['data']);
+      return deserialize<_i17.RecurringTransaction>(data['data']);
     }
     if (dataClassName == 'TransactionRule') {
-      return deserialize<_i14.TransactionRule>(data['data']);
+      return deserialize<_i18.TransactionRule>(data['data']);
     }
     if (dataClassName == 'ImportRow') {
-      return deserialize<_i15.ImportRow>(data['data']);
+      return deserialize<_i19.ImportRow>(data['data']);
     }
     if (dataClassName == 'SplitItem') {
-      return deserialize<_i16.SplitItem>(data['data']);
+      return deserialize<_i20.SplitItem>(data['data']);
     }
     if (dataClassName == 'Transaction') {
-      return deserialize<_i17.Transaction>(data['data']);
+      return deserialize<_i21.Transaction>(data['data']);
     }
     if (dataClassName.startsWith('serverpod.')) {
       data['className'] = dataClassName.substring(10);
@@ -1818,16 +2111,20 @@ class Protocol extends _i1.SerializationManagerServer {
         return _i9.EnvelopeGoal.t;
       case _i10.Envelope:
         return _i10.Envelope.t;
-      case _i11.MonthlyAllocation:
-        return _i11.MonthlyAllocation.t;
-      case _i12.Payee:
-        return _i12.Payee.t;
-      case _i13.RecurringTransaction:
-        return _i13.RecurringTransaction.t;
-      case _i14.TransactionRule:
-        return _i14.TransactionRule.t;
-      case _i17.Transaction:
-        return _i17.Transaction.t;
+      case _i12.FxRateEntry:
+        return _i12.FxRateEntry.t;
+      case _i14.FxRateSnapshot:
+        return _i14.FxRateSnapshot.t;
+      case _i15.MonthlyAllocation:
+        return _i15.MonthlyAllocation.t;
+      case _i16.Payee:
+        return _i16.Payee.t;
+      case _i17.RecurringTransaction:
+        return _i17.RecurringTransaction.t;
+      case _i18.TransactionRule:
+        return _i18.TransactionRule.t;
+      case _i21.Transaction:
+        return _i21.Transaction.t;
     }
     return null;
   }

@@ -17,45 +17,53 @@ import 'budgets/budget.dart' as _i4;
 import 'categories/category.dart' as _i5;
 import 'envelope_goals/envelope_goal.dart' as _i6;
 import 'envelopes/envelope.dart' as _i7;
-import 'monthly_allocations/monthly_allocation.dart' as _i8;
-import 'payees/payee.dart' as _i9;
-import 'recurring_transactions/recurring_transaction.dart' as _i10;
-import 'transaction_rules/transaction_rule.dart' as _i11;
-import 'transactions/import_row.dart' as _i12;
-import 'transactions/split_item.dart' as _i13;
-import 'transactions/transaction.dart' as _i14;
-import 'package:openbudget_client/src/protocol/accounts/account.dart' as _i15;
+import 'fx_rates/fx_latest_snapshot.dart' as _i8;
+import 'fx_rates/fx_rate_entry.dart' as _i9;
+import 'fx_rates/fx_rate_quote.dart' as _i10;
+import 'fx_rates/fx_rate_snapshot.dart' as _i11;
+import 'monthly_allocations/monthly_allocation.dart' as _i12;
+import 'payees/payee.dart' as _i13;
+import 'recurring_transactions/recurring_transaction.dart' as _i14;
+import 'transaction_rules/transaction_rule.dart' as _i15;
+import 'transactions/import_row.dart' as _i16;
+import 'transactions/split_item.dart' as _i17;
+import 'transactions/transaction.dart' as _i18;
+import 'package:openbudget_client/src/protocol/accounts/account.dart' as _i19;
 import 'package:openbudget_client/src/protocol/budget_templates/budget_template.dart'
-    as _i16;
-import 'package:openbudget_client/src/protocol/monthly_allocations/monthly_allocation.dart'
-    as _i17;
-import 'package:openbudget_client/src/protocol/budgets/budget.dart' as _i18;
-import 'package:openbudget_client/src/protocol/categories/category.dart'
-    as _i19;
-import 'package:openbudget_client/src/protocol/envelope_goals/envelope_goal.dart'
     as _i20;
-import 'package:openbudget_client/src/protocol/envelopes/envelope.dart' as _i21;
-import 'package:openbudget_client/src/protocol/payees/payee.dart' as _i22;
-import 'package:openbudget_client/src/protocol/recurring_transactions/recurring_transaction.dart'
+import 'package:openbudget_client/src/protocol/monthly_allocations/monthly_allocation.dart'
+    as _i21;
+import 'package:openbudget_client/src/protocol/budgets/budget.dart' as _i22;
+import 'package:openbudget_client/src/protocol/categories/category.dart'
     as _i23;
-import 'package:openbudget_client/src/protocol/transaction_rules/transaction_rule.dart'
+import 'package:openbudget_client/src/protocol/envelope_goals/envelope_goal.dart'
     as _i24;
-import 'package:openbudget_client/src/protocol/transactions/transaction.dart'
-    as _i25;
-import 'package:openbudget_client/src/protocol/transactions/split_item.dart'
-    as _i26;
-import 'package:openbudget_client/src/protocol/transactions/import_row.dart'
+import 'package:openbudget_client/src/protocol/envelopes/envelope.dart' as _i25;
+import 'package:openbudget_client/src/protocol/payees/payee.dart' as _i26;
+import 'package:openbudget_client/src/protocol/recurring_transactions/recurring_transaction.dart'
     as _i27;
-import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart'
+import 'package:openbudget_client/src/protocol/transaction_rules/transaction_rule.dart'
     as _i28;
-import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
+import 'package:openbudget_client/src/protocol/transactions/transaction.dart'
     as _i29;
+import 'package:openbudget_client/src/protocol/transactions/split_item.dart'
+    as _i30;
+import 'package:openbudget_client/src/protocol/transactions/import_row.dart'
+    as _i31;
+import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart'
+    as _i32;
+import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
+    as _i33;
 export 'accounts/account.dart';
 export 'budget_templates/budget_template.dart';
 export 'budgets/budget.dart';
 export 'categories/category.dart';
 export 'envelope_goals/envelope_goal.dart';
 export 'envelopes/envelope.dart';
+export 'fx_rates/fx_latest_snapshot.dart';
+export 'fx_rates/fx_rate_entry.dart';
+export 'fx_rates/fx_rate_quote.dart';
+export 'fx_rates/fx_rate_snapshot.dart';
 export 'monthly_allocations/monthly_allocation.dart';
 export 'payees/payee.dart';
 export 'recurring_transactions/recurring_transaction.dart';
@@ -114,26 +122,38 @@ class Protocol extends _i1.SerializationManager {
     if (t == _i7.Envelope) {
       return _i7.Envelope.fromJson(data) as T;
     }
-    if (t == _i8.MonthlyAllocation) {
-      return _i8.MonthlyAllocation.fromJson(data) as T;
+    if (t == _i8.FxLatestSnapshot) {
+      return _i8.FxLatestSnapshot.fromJson(data) as T;
     }
-    if (t == _i9.Payee) {
-      return _i9.Payee.fromJson(data) as T;
+    if (t == _i9.FxRateEntry) {
+      return _i9.FxRateEntry.fromJson(data) as T;
     }
-    if (t == _i10.RecurringTransaction) {
-      return _i10.RecurringTransaction.fromJson(data) as T;
+    if (t == _i10.FxRateQuote) {
+      return _i10.FxRateQuote.fromJson(data) as T;
     }
-    if (t == _i11.TransactionRule) {
-      return _i11.TransactionRule.fromJson(data) as T;
+    if (t == _i11.FxRateSnapshot) {
+      return _i11.FxRateSnapshot.fromJson(data) as T;
     }
-    if (t == _i12.ImportRow) {
-      return _i12.ImportRow.fromJson(data) as T;
+    if (t == _i12.MonthlyAllocation) {
+      return _i12.MonthlyAllocation.fromJson(data) as T;
     }
-    if (t == _i13.SplitItem) {
-      return _i13.SplitItem.fromJson(data) as T;
+    if (t == _i13.Payee) {
+      return _i13.Payee.fromJson(data) as T;
     }
-    if (t == _i14.Transaction) {
-      return _i14.Transaction.fromJson(data) as T;
+    if (t == _i14.RecurringTransaction) {
+      return _i14.RecurringTransaction.fromJson(data) as T;
+    }
+    if (t == _i15.TransactionRule) {
+      return _i15.TransactionRule.fromJson(data) as T;
+    }
+    if (t == _i16.ImportRow) {
+      return _i16.ImportRow.fromJson(data) as T;
+    }
+    if (t == _i17.SplitItem) {
+      return _i17.SplitItem.fromJson(data) as T;
+    }
+    if (t == _i18.Transaction) {
+      return _i18.Transaction.fromJson(data) as T;
     }
     if (t == _i1.getType<_i2.Account?>()) {
       return (data != null ? _i2.Account.fromJson(data) : null) as T;
@@ -153,107 +173,125 @@ class Protocol extends _i1.SerializationManager {
     if (t == _i1.getType<_i7.Envelope?>()) {
       return (data != null ? _i7.Envelope.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i8.MonthlyAllocation?>()) {
-      return (data != null ? _i8.MonthlyAllocation.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i8.FxLatestSnapshot?>()) {
+      return (data != null ? _i8.FxLatestSnapshot.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i9.Payee?>()) {
-      return (data != null ? _i9.Payee.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i9.FxRateEntry?>()) {
+      return (data != null ? _i9.FxRateEntry.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i10.RecurringTransaction?>()) {
-      return (data != null ? _i10.RecurringTransaction.fromJson(data) : null)
+    if (t == _i1.getType<_i10.FxRateQuote?>()) {
+      return (data != null ? _i10.FxRateQuote.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i11.FxRateSnapshot?>()) {
+      return (data != null ? _i11.FxRateSnapshot.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i12.MonthlyAllocation?>()) {
+      return (data != null ? _i12.MonthlyAllocation.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i13.Payee?>()) {
+      return (data != null ? _i13.Payee.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i14.RecurringTransaction?>()) {
+      return (data != null ? _i14.RecurringTransaction.fromJson(data) : null)
           as T;
     }
-    if (t == _i1.getType<_i11.TransactionRule?>()) {
-      return (data != null ? _i11.TransactionRule.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i15.TransactionRule?>()) {
+      return (data != null ? _i15.TransactionRule.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i12.ImportRow?>()) {
-      return (data != null ? _i12.ImportRow.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i16.ImportRow?>()) {
+      return (data != null ? _i16.ImportRow.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i13.SplitItem?>()) {
-      return (data != null ? _i13.SplitItem.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i17.SplitItem?>()) {
+      return (data != null ? _i17.SplitItem.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i14.Transaction?>()) {
-      return (data != null ? _i14.Transaction.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i18.Transaction?>()) {
+      return (data != null ? _i18.Transaction.fromJson(data) : null) as T;
     }
-    if (t == List<_i15.Account>) {
-      return (data as List).map((e) => deserialize<_i15.Account>(e)).toList()
-          as T;
-    }
-    if (t == List<_i16.BudgetTemplate>) {
+    if (t == List<_i10.FxRateQuote>) {
       return (data as List)
-              .map((e) => deserialize<_i16.BudgetTemplate>(e))
+              .map((e) => deserialize<_i10.FxRateQuote>(e))
               .toList()
           as T;
     }
-    if (t == List<_i17.MonthlyAllocation>) {
+    if (t == List<_i19.Account>) {
+      return (data as List).map((e) => deserialize<_i19.Account>(e)).toList()
+          as T;
+    }
+    if (t == List<_i20.BudgetTemplate>) {
       return (data as List)
-              .map((e) => deserialize<_i17.MonthlyAllocation>(e))
+              .map((e) => deserialize<_i20.BudgetTemplate>(e))
               .toList()
           as T;
     }
-    if (t == List<_i18.Budget>) {
-      return (data as List).map((e) => deserialize<_i18.Budget>(e)).toList()
+    if (t == List<_i21.MonthlyAllocation>) {
+      return (data as List)
+              .map((e) => deserialize<_i21.MonthlyAllocation>(e))
+              .toList()
           as T;
     }
-    if (t == List<_i19.Category>) {
-      return (data as List).map((e) => deserialize<_i19.Category>(e)).toList()
+    if (t == List<_i22.Budget>) {
+      return (data as List).map((e) => deserialize<_i22.Budget>(e)).toList()
+          as T;
+    }
+    if (t == List<_i23.Category>) {
+      return (data as List).map((e) => deserialize<_i23.Category>(e)).toList()
           as T;
     }
     if (t == List<_i1.UuidValue>) {
       return (data as List).map((e) => deserialize<_i1.UuidValue>(e)).toList()
           as T;
     }
-    if (t == List<_i20.EnvelopeGoal>) {
+    if (t == List<_i24.EnvelopeGoal>) {
       return (data as List)
-              .map((e) => deserialize<_i20.EnvelopeGoal>(e))
+              .map((e) => deserialize<_i24.EnvelopeGoal>(e))
               .toList()
           as T;
     }
-    if (t == List<_i21.Envelope>) {
-      return (data as List).map((e) => deserialize<_i21.Envelope>(e)).toList()
+    if (t == List<_i25.Envelope>) {
+      return (data as List).map((e) => deserialize<_i25.Envelope>(e)).toList()
           as T;
     }
     if (t == List<String>) {
       return (data as List).map((e) => deserialize<String>(e)).toList() as T;
     }
-    if (t == List<_i22.Payee>) {
-      return (data as List).map((e) => deserialize<_i22.Payee>(e)).toList()
+    if (t == List<_i26.Payee>) {
+      return (data as List).map((e) => deserialize<_i26.Payee>(e)).toList()
           as T;
     }
-    if (t == List<_i23.RecurringTransaction>) {
+    if (t == List<_i27.RecurringTransaction>) {
       return (data as List)
-              .map((e) => deserialize<_i23.RecurringTransaction>(e))
+              .map((e) => deserialize<_i27.RecurringTransaction>(e))
               .toList()
           as T;
     }
-    if (t == List<_i24.TransactionRule>) {
+    if (t == List<_i28.TransactionRule>) {
       return (data as List)
-              .map((e) => deserialize<_i24.TransactionRule>(e))
+              .map((e) => deserialize<_i28.TransactionRule>(e))
               .toList()
           as T;
     }
-    if (t == List<_i25.Transaction>) {
+    if (t == List<_i29.Transaction>) {
       return (data as List)
-              .map((e) => deserialize<_i25.Transaction>(e))
+              .map((e) => deserialize<_i29.Transaction>(e))
               .toList()
           as T;
     }
     if (t == List<int>) {
       return (data as List).map((e) => deserialize<int>(e)).toList() as T;
     }
-    if (t == List<_i26.SplitItem>) {
-      return (data as List).map((e) => deserialize<_i26.SplitItem>(e)).toList()
+    if (t == List<_i30.SplitItem>) {
+      return (data as List).map((e) => deserialize<_i30.SplitItem>(e)).toList()
           as T;
     }
-    if (t == List<_i27.ImportRow>) {
-      return (data as List).map((e) => deserialize<_i27.ImportRow>(e)).toList()
+    if (t == List<_i31.ImportRow>) {
+      return (data as List).map((e) => deserialize<_i31.ImportRow>(e)).toList()
           as T;
     }
     try {
-      return _i28.Protocol().deserialize<T>(data, t);
+      return _i32.Protocol().deserialize<T>(data, t);
     } on _i1.DeserializationTypeNotFoundException catch (_) {}
     try {
-      return _i29.Protocol().deserialize<T>(data, t);
+      return _i33.Protocol().deserialize<T>(data, t);
     } on _i1.DeserializationTypeNotFoundException catch (_) {}
     return super.deserialize<T>(data, t);
   }
@@ -266,13 +304,17 @@ class Protocol extends _i1.SerializationManager {
       _i5.Category => 'Category',
       _i6.EnvelopeGoal => 'EnvelopeGoal',
       _i7.Envelope => 'Envelope',
-      _i8.MonthlyAllocation => 'MonthlyAllocation',
-      _i9.Payee => 'Payee',
-      _i10.RecurringTransaction => 'RecurringTransaction',
-      _i11.TransactionRule => 'TransactionRule',
-      _i12.ImportRow => 'ImportRow',
-      _i13.SplitItem => 'SplitItem',
-      _i14.Transaction => 'Transaction',
+      _i8.FxLatestSnapshot => 'FxLatestSnapshot',
+      _i9.FxRateEntry => 'FxRateEntry',
+      _i10.FxRateQuote => 'FxRateQuote',
+      _i11.FxRateSnapshot => 'FxRateSnapshot',
+      _i12.MonthlyAllocation => 'MonthlyAllocation',
+      _i13.Payee => 'Payee',
+      _i14.RecurringTransaction => 'RecurringTransaction',
+      _i15.TransactionRule => 'TransactionRule',
+      _i16.ImportRow => 'ImportRow',
+      _i17.SplitItem => 'SplitItem',
+      _i18.Transaction => 'Transaction',
       _ => null,
     };
   }
@@ -299,26 +341,34 @@ class Protocol extends _i1.SerializationManager {
         return 'EnvelopeGoal';
       case _i7.Envelope():
         return 'Envelope';
-      case _i8.MonthlyAllocation():
+      case _i8.FxLatestSnapshot():
+        return 'FxLatestSnapshot';
+      case _i9.FxRateEntry():
+        return 'FxRateEntry';
+      case _i10.FxRateQuote():
+        return 'FxRateQuote';
+      case _i11.FxRateSnapshot():
+        return 'FxRateSnapshot';
+      case _i12.MonthlyAllocation():
         return 'MonthlyAllocation';
-      case _i9.Payee():
+      case _i13.Payee():
         return 'Payee';
-      case _i10.RecurringTransaction():
+      case _i14.RecurringTransaction():
         return 'RecurringTransaction';
-      case _i11.TransactionRule():
+      case _i15.TransactionRule():
         return 'TransactionRule';
-      case _i12.ImportRow():
+      case _i16.ImportRow():
         return 'ImportRow';
-      case _i13.SplitItem():
+      case _i17.SplitItem():
         return 'SplitItem';
-      case _i14.Transaction():
+      case _i18.Transaction():
         return 'Transaction';
     }
-    className = _i28.Protocol().getClassNameForObject(data);
+    className = _i32.Protocol().getClassNameForObject(data);
     if (className != null) {
       return 'serverpod_auth_idp.$className';
     }
-    className = _i29.Protocol().getClassNameForObject(data);
+    className = _i33.Protocol().getClassNameForObject(data);
     if (className != null) {
       return 'serverpod_auth_core.$className';
     }
@@ -349,34 +399,46 @@ class Protocol extends _i1.SerializationManager {
     if (dataClassName == 'Envelope') {
       return deserialize<_i7.Envelope>(data['data']);
     }
+    if (dataClassName == 'FxLatestSnapshot') {
+      return deserialize<_i8.FxLatestSnapshot>(data['data']);
+    }
+    if (dataClassName == 'FxRateEntry') {
+      return deserialize<_i9.FxRateEntry>(data['data']);
+    }
+    if (dataClassName == 'FxRateQuote') {
+      return deserialize<_i10.FxRateQuote>(data['data']);
+    }
+    if (dataClassName == 'FxRateSnapshot') {
+      return deserialize<_i11.FxRateSnapshot>(data['data']);
+    }
     if (dataClassName == 'MonthlyAllocation') {
-      return deserialize<_i8.MonthlyAllocation>(data['data']);
+      return deserialize<_i12.MonthlyAllocation>(data['data']);
     }
     if (dataClassName == 'Payee') {
-      return deserialize<_i9.Payee>(data['data']);
+      return deserialize<_i13.Payee>(data['data']);
     }
     if (dataClassName == 'RecurringTransaction') {
-      return deserialize<_i10.RecurringTransaction>(data['data']);
+      return deserialize<_i14.RecurringTransaction>(data['data']);
     }
     if (dataClassName == 'TransactionRule') {
-      return deserialize<_i11.TransactionRule>(data['data']);
+      return deserialize<_i15.TransactionRule>(data['data']);
     }
     if (dataClassName == 'ImportRow') {
-      return deserialize<_i12.ImportRow>(data['data']);
+      return deserialize<_i16.ImportRow>(data['data']);
     }
     if (dataClassName == 'SplitItem') {
-      return deserialize<_i13.SplitItem>(data['data']);
+      return deserialize<_i17.SplitItem>(data['data']);
     }
     if (dataClassName == 'Transaction') {
-      return deserialize<_i14.Transaction>(data['data']);
+      return deserialize<_i18.Transaction>(data['data']);
     }
     if (dataClassName.startsWith('serverpod_auth_idp.')) {
       data['className'] = dataClassName.substring(19);
-      return _i28.Protocol().deserializeByClassName(data);
+      return _i32.Protocol().deserializeByClassName(data);
     }
     if (dataClassName.startsWith('serverpod_auth_core.')) {
       data['className'] = dataClassName.substring(20);
-      return _i29.Protocol().deserializeByClassName(data);
+      return _i33.Protocol().deserializeByClassName(data);
     }
     return super.deserializeByClassName(data);
   }
@@ -391,10 +453,10 @@ class Protocol extends _i1.SerializationManager {
       return null;
     }
     try {
-      return _i28.Protocol().mapRecordToJson(record);
+      return _i32.Protocol().mapRecordToJson(record);
     } catch (_) {}
     try {
-      return _i29.Protocol().mapRecordToJson(record);
+      return _i33.Protocol().mapRecordToJson(record);
     } catch (_) {}
     throw Exception('Unsupported record type ${record.runtimeType}');
   }

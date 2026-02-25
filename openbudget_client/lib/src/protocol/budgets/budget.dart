@@ -18,6 +18,7 @@ abstract class Budget implements _i1.SerializableModel {
     this.id,
     required this.name,
     required this.currencyCode,
+    this.displayCurrencyCode,
     required this.ownerId,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -28,6 +29,7 @@ abstract class Budget implements _i1.SerializableModel {
     _i1.UuidValue? id,
     required String name,
     required String currencyCode,
+    String? displayCurrencyCode,
     required _i1.UuidValue ownerId,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -40,6 +42,7 @@ abstract class Budget implements _i1.SerializableModel {
           : _i1.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
       name: jsonSerialization['name'] as String,
       currencyCode: jsonSerialization['currencyCode'] as String,
+      displayCurrencyCode: jsonSerialization['displayCurrencyCode'] as String?,
       ownerId: _i1.UuidValueJsonExtension.fromJson(
         jsonSerialization['ownerId'],
       ),
@@ -62,6 +65,10 @@ abstract class Budget implements _i1.SerializableModel {
   /// ISO 4217 currency code (e.g. USD, EUR).
   String currencyCode;
 
+  /// Optional display currency override for aggregated/reporting views.
+  /// If null, the budget's native currencyCode is used for display.
+  String? displayCurrencyCode;
+
   /// The user who owns this budget.
   _i1.UuidValue ownerId;
 
@@ -76,6 +83,7 @@ abstract class Budget implements _i1.SerializableModel {
     _i1.UuidValue? id,
     String? name,
     String? currencyCode,
+    String? displayCurrencyCode,
     _i1.UuidValue? ownerId,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -87,6 +95,8 @@ abstract class Budget implements _i1.SerializableModel {
       if (id != null) 'id': id?.toJson(),
       'name': name,
       'currencyCode': currencyCode,
+      if (displayCurrencyCode != null)
+        'displayCurrencyCode': displayCurrencyCode,
       'ownerId': ownerId.toJson(),
       'createdAt': createdAt.toJson(),
       'updatedAt': updatedAt.toJson(),
@@ -106,6 +116,7 @@ class _BudgetImpl extends Budget {
     _i1.UuidValue? id,
     required String name,
     required String currencyCode,
+    String? displayCurrencyCode,
     required _i1.UuidValue ownerId,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -113,6 +124,7 @@ class _BudgetImpl extends Budget {
          id: id,
          name: name,
          currencyCode: currencyCode,
+         displayCurrencyCode: displayCurrencyCode,
          ownerId: ownerId,
          createdAt: createdAt,
          updatedAt: updatedAt,
@@ -126,6 +138,7 @@ class _BudgetImpl extends Budget {
     Object? id = _Undefined,
     String? name,
     String? currencyCode,
+    Object? displayCurrencyCode = _Undefined,
     _i1.UuidValue? ownerId,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -134,6 +147,9 @@ class _BudgetImpl extends Budget {
       id: id is _i1.UuidValue? ? id : this.id,
       name: name ?? this.name,
       currencyCode: currencyCode ?? this.currencyCode,
+      displayCurrencyCode: displayCurrencyCode is String?
+          ? displayCurrencyCode
+          : this.displayCurrencyCode,
       ownerId: ownerId ?? this.ownerId,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
