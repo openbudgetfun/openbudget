@@ -1,0 +1,18 @@
+### Snapshot of exchange rates fetched from an upstream FX provider.
+class: FxRateSnapshot
+table: fx_rate_snapshot
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  provider: String
+  baseCurrencyCode: String
+  fetchedAt: DateTime
+  isLatest: bool, default=false
+  createdAt: DateTime, default=now
+indexes:
+  fx_rate_snapshot_latest_idx:
+    fields: provider, baseCurrencyCode, isLatest
+  fx_rate_snapshot_fetched_idx:
+    fields: provider, baseCurrencyCode, fetchedAt
+  fx_rate_snapshot_provider_base_time_unique_idx:
+    fields: provider, baseCurrencyCode, fetchedAt
+    unique: true
