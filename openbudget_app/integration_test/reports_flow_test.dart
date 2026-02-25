@@ -300,6 +300,13 @@ void main() {
       expect(find.textContaining(r'$4,400.00'), findsOneWidget);
       expect(find.textContaining(r'$2,800.00'), findsOneWidget);
       expect(find.textContaining(r'$980.00'), findsOneWidget);
+      await tester.scrollUntilVisible(
+        find.text('Positive Inflow Total'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Positive Inflow Total'), findsOneWidget);
 
       await captureIntegrationScreenshot(
         tester,
