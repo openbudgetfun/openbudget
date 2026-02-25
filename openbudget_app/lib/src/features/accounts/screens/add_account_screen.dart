@@ -118,17 +118,12 @@ class AddAccountScreen extends HookConsumerWidget {
           });
         }
 
-        switch (step.value) {
-          case _AddAccountStep.searchBank:
-            resetScroll(searchScrollController);
-          case _AddAccountStep.unlinkedAccount:
-            resetScroll(unlinkedScrollController);
-          case _AddAccountStep.accountType:
-            resetScroll(accountTypeScrollController);
-          case _AddAccountStep.loading:
-          case _AddAccountStep.loadingInstitutions:
-          case _AddAccountStep.success:
-            break;
+        if (step.value == _AddAccountStep.searchBank) {
+          resetScroll(searchScrollController);
+        } else if (step.value == _AddAccountStep.unlinkedAccount) {
+          resetScroll(unlinkedScrollController);
+        } else if (step.value == _AddAccountStep.accountType) {
+          resetScroll(accountTypeScrollController);
         }
 
         return null;
@@ -222,18 +217,11 @@ class AddAccountScreen extends HookConsumerWidget {
             : IconButton(
                 icon: const Icon(Icons.arrow_back_ios_new_rounded),
                 onPressed: () {
-                  switch (step.value) {
-                    case _AddAccountStep.loading:
-                    case _AddAccountStep.loadingInstitutions:
-                      break;
-                    case _AddAccountStep.searchBank:
-                      break;
-                    case _AddAccountStep.unlinkedAccount:
-                      step.value = _AddAccountStep.searchBank;
-                    case _AddAccountStep.accountType:
-                      step.value = _AddAccountStep.unlinkedAccount;
-                    case _AddAccountStep.success:
-                      step.value = _AddAccountStep.unlinkedAccount;
+                  if (step.value == _AddAccountStep.unlinkedAccount) {
+                    step.value = _AddAccountStep.searchBank;
+                  } else if (step.value == _AddAccountStep.accountType ||
+                      step.value == _AddAccountStep.success) {
+                    step.value = _AddAccountStep.unlinkedAccount;
                   }
                 },
               ),
