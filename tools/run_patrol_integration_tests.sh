@@ -24,6 +24,10 @@ elif command -v gtimeout >/dev/null 2>&1; then
 	timeout_cmd="gtimeout"
 fi
 
+echo "::group::Resolving Flutter dependencies"
+flutter pub get
+echo "::endgroup::"
+
 echo "Discovered ${#tests[@]} Patrol integration test file(s)."
 
 failed=0
@@ -44,10 +48,10 @@ for f in "${tests[@]}"; do
 	set +e
 	if [ -n "$timeout_cmd" ]; then
 		"$timeout_cmd" "${timeout_seconds}s" \
-			flutter test "$f" -d flutter-tester 2>&1 | tee "$output_file"
+			flutter test --no-pub "$f" -d flutter-tester 2>&1 | tee "$output_file"
 		status=${PIPESTATUS[0]}
 	else
-		flutter test "$f" -d flutter-tester 2>&1 | tee "$output_file"
+		flutter test --no-pub "$f" -d flutter-tester 2>&1 | tee "$output_file"
 		status=${PIPESTATUS[0]}
 	fi
 	set -e

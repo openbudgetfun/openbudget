@@ -32,6 +32,7 @@ Last updated: 2026-02-25
 - CI hardening for integration reliability:
   - Per-file timeout enforcement
   - Failure-marker detection to prevent false-green runs
+  - Shared dependency resolution + `--no-pub` Patrol file execution to reduce redundant setup time
   - Repaint fallback screenshot capture on `flutter-tester`
 - Branding regression guard:
   - `/openbudget_app/test/branding/no_ynab_branding_test.dart`
