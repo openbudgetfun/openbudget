@@ -239,6 +239,41 @@ void main() {
     },
   );
 
+  patrolWidgetTest(
+    'spending breakdown updates totals when preset range changes',
+    ($) async {
+      final tester = $.tester;
+      await tester.pumpWidget(_buildApp());
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Spending Breakdown').first);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Preset'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Last 3 Months'), findsWidgets);
+      expect(find.text('December 2025–February 2026'), findsOneWidget);
+      expect(find.textContaining(r'$6,660.00'), findsOneWidget);
+
+      await tester.tap(find.byType(DropdownButton<int>).first);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Last 6 Months').last);
+      await tester.pumpAndSettle();
+
+      expect(find.text('September 2025–February 2026'), findsOneWidget);
+      expect(find.textContaining(r'$8,180.00'), findsOneWidget);
+      expect(find.textContaining(r'$4,400.00'), findsOneWidget);
+      expect(find.textContaining(r'$2,800.00'), findsOneWidget);
+      expect(find.textContaining(r'$980.00'), findsOneWidget);
+
+      await captureIntegrationScreenshot(
+        tester,
+        'reports-spending-breakdown-last-six-months',
+      );
+    },
+  );
+
   patrolWidgetTest('reflect dashboard navigates to net worth detail', (
     $,
   ) async {

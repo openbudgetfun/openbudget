@@ -24,6 +24,7 @@ Last updated: 2026-02-25
   - Add expense/income/transfer, filtering, edit and action sheets, review queue approval flow
 - Reflect and reports
   - Spending Breakdown (month and preset ranges), Net Worth detail, dark-mode parity
+  - Spending Breakdown preset selector regression coverage (3/6/12 range recalculation)
 - Recent Moves
   - Tabs, coach dialog, empty and populated states, source/destination drilldowns
 
@@ -46,3 +47,4 @@ Last updated: 2026-02-25
 - Add Account type selection: https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-24-pr137/add-account-type-selection.png
 - Add Accounts desktop bank search: https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-pr140/add-accounts-search-desktop-screen.png
 - Add Accounts search-submit results state: https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-pr141/add-accounts-search-submit-results.png
+- Spending Breakdown last-six-months preset: https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-pr142/reports-spending-breakdown-last-six-months.png
