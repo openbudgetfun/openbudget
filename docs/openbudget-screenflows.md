@@ -38,7 +38,7 @@ Progress checklist: `docs/openbudget-migration-progress.md`
 - Patrol integration suites under `/openbudget_app/integration_test`.
 - CI hardening for integration reliability:
   - Per-file timeout enforcement
-  - Failure-marker detection to prevent false-green runs
+  - Failure-marker detection and per-file failure accounting to prevent false-green runs
   - Shared dependency resolution + `--no-pub` Patrol file execution to reduce redundant setup time
   - Repaint fallback screenshot capture on `flutter-tester`
 - Branding regression guard:
