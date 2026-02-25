@@ -22,6 +22,7 @@ This checklist tracks progress for migrating and polishing app flows using the `
 - [x] Add Accounts search submit behavior regression fix
 - [x] Add Accounts desktop unlinked-account form/success parity coverage
 - [x] Add Accounts unlinked flow stability hardening (isolated step scroll state + keyed form controls)
+- [x] Add Accounts desktop screenshot capture hardening (targeted boundary capture for unlinked-account form artifacts)
 - [x] Transaction review + action sheet flow parity
 - [x] Recent Moves tabs, coach dialog, and drilldown parity
 - [x] Recent Moves desktop tab-switch regression coverage
