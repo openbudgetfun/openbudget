@@ -329,6 +329,43 @@ void main() {
   );
 
   patrolWidgetTest(
+    'desktop linked bank tap shows loading overlay before fallback',
+    ($) async {
+      final tester = $.tester;
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      await tester.binding.setSurfaceSize(const Size(1024, 768));
+      await tester.pumpWidget(_buildApp(accounts: const []));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Add Account'));
+      await _pumpToAddAccountSearch(tester);
+
+      await tester.enterText(find.byType(TextField).first, 'citi');
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Citi'));
+      await tester.pump(const Duration(milliseconds: 150));
+      await tester.pump();
+
+      expect(find.text('Loading institutions...'), findsOneWidget);
+      await captureIntegrationScreenshot(
+        tester,
+        'add-accounts-loading-overlay-desktop-screen',
+      );
+
+      await tester.pump(const Duration(milliseconds: 800));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Loading institutions...'), findsNothing);
+      expect(find.text('Add Unlinked Account'), findsOneWidget);
+      expect(
+        find.textContaining('Linked connections for "Citi" are coming soon'),
+        findsOneWidget,
+      );
+    },
+  );
+
+  patrolWidgetTest(
     'unlinked account requires explicit type selection before next',
     ($) async {
       final tester = $.tester;
@@ -625,6 +662,80 @@ void main() {
     expect(find.text('Yes'), findsOneWidget);
     expect(find.text('No'), findsOneWidget);
     expect(find.text('Cancel'), findsOneWidget);
+  });
+
+  patrolWidgetTest('desktop account menu supports reconcile and edit flows', (
+    $,
+  ) async {
+    final tester = $.tester;
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.binding.setSurfaceSize(const Size(1024, 768));
+    final accountId = UuidValue.fromString(
+      '00000000-0000-0000-0000-000000000116',
+    );
+    await tester.pumpWidget(
+      _buildApp(
+        accounts: [
+          _makeAccount(
+            id: accountId,
+            name: 'Daily USD',
+            balanceCents: 5222000,
+            currencyCode: 'USD',
+          ),
+        ],
+        accountTransactions: [
+          _makeTransaction(
+            id: '00000000-0000-0000-0000-000000000611',
+            accountId: accountId,
+            description: 'Landlord',
+            amountCents: -10000,
+            cleared: true,
+          ),
+          _makeTransaction(
+            id: '00000000-0000-0000-0000-000000000612',
+            accountId: accountId,
+            description: 'Supermarket',
+            amountCents: -50000,
+            cleared: true,
+          ),
+        ],
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Daily USD'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byIcon(Icons.more_horiz_rounded));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Reconcile'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.textContaining('Does this match your bank balance'),
+      findsOneWidget,
+    );
+    await captureIntegrationScreenshot(
+      tester,
+      'accounts-reconcile-dialog-desktop-screen',
+    );
+
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byIcon(Icons.more_horiz_rounded));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Edit Account'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Edit Account'), findsOneWidget);
+    expect(find.text('Account Nickname'), findsOneWidget);
+    expect(find.text('Account Notes'), findsOneWidget);
+    expect(find.text('Working Balance'), findsWidgets);
+    await captureIntegrationScreenshot(
+      tester,
+      'accounts-edit-account-desktop-screen',
+    );
   });
 
   patrolWidgetTest('loan account shows overview and activity tabs', ($) async {

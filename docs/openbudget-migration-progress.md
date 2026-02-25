@@ -40,6 +40,6 @@ This checklist tracks progress for migrating and polishing app flows using the `
 
 ## Next Backlog (Polish)
 
-- [ ] Add wider desktop Patrol coverage for additional account-management states (edit account, reconcile prompt)
-- [ ] Add explicit guardrail tests for account-link loading overlays on large viewports
+- [x] Add wider desktop Patrol coverage for additional account-management states (edit account, reconcile prompt)
+- [x] Add explicit guardrail tests for account-link loading overlays on large viewports
 - [ ] Continue tightening copy and spacing parity for any newly identified visual drift
