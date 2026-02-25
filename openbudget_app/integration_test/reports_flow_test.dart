@@ -274,6 +274,40 @@ void main() {
     },
   );
 
+  patrolWidgetTest(
+    'desktop spending breakdown preset keeps six-month totals in sync',
+    ($) async {
+      final tester = $.tester;
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      await tester.binding.setSurfaceSize(const Size(1024, 768));
+      await tester.pumpWidget(_buildApp());
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Spending Breakdown').first);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Preset'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byType(DropdownButton<int>).first);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Last 6 Months').last);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Preset Range'), findsOneWidget);
+      expect(find.text('Last 6 Months'), findsWidgets);
+      expect(find.text('September 2025–February 2026'), findsOneWidget);
+      expect(find.textContaining(r'$8,180.00'), findsOneWidget);
+      expect(find.textContaining(r'$4,400.00'), findsOneWidget);
+      expect(find.textContaining(r'$2,800.00'), findsOneWidget);
+      expect(find.textContaining(r'$980.00'), findsOneWidget);
+
+      await captureIntegrationScreenshot(
+        tester,
+        'reports-spending-breakdown-last-six-months-desktop-screen',
+      );
+    },
+  );
+
   patrolWidgetTest('reflect dashboard navigates to net worth detail', (
     $,
   ) async {
