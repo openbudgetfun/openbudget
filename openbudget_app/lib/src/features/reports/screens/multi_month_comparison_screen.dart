@@ -3,6 +3,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/reports/providers/multi_month_comparison_provider.dart';
+import 'package:openbudget_app/src/features/settings/providers/display_currency_provider.dart';
+import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -18,6 +20,10 @@ class MultiMonthComparisonScreen extends HookConsumerWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final monthCount = useState(3);
+    final converter = ref
+        .watch(displayCurrencyConverterProvider(budgetId))
+        .asData
+        ?.value;
 
     final comparisonAsync = ref.watch(
       multiMonthComparisonProvider(budgetId, monthCount: monthCount.value),
@@ -63,9 +69,8 @@ class MultiMonthComparisonScreen extends HookConsumerWidget {
           ),
         ),
         data: (comparison) {
-          final currency = CurrencyCode.values.firstWhere(
-            (c) => c.code == comparison.budget.currencyCode,
-            orElse: () => CurrencyCode.usd,
+          final sourceCurrency = parseCurrencyCode(
+            comparison.budget.currencyCode,
           );
 
           if (comparison.categories.isEmpty) {
@@ -96,7 +101,11 @@ class MultiMonthComparisonScreen extends HookConsumerWidget {
             );
           }
 
-          return _ComparisonTable(comparison: comparison, currency: currency);
+          return _ComparisonTable(
+            comparison: comparison,
+            sourceCurrency: sourceCurrency,
+            converter: converter,
+          );
         },
       ),
     );
@@ -104,10 +113,15 @@ class MultiMonthComparisonScreen extends HookConsumerWidget {
 }
 
 class _ComparisonTable extends HookWidget {
-  const _ComparisonTable({required this.comparison, required this.currency});
+  const _ComparisonTable({
+    required this.comparison,
+    required this.sourceCurrency,
+    required this.converter,
+  });
 
   final MultiMonthComparison comparison;
-  final CurrencyCode currency;
+  final CurrencyCode sourceCurrency;
+  final DisplayCurrencyConverter? converter;
 
   @override
   Widget build(BuildContext context) {
@@ -208,7 +222,11 @@ class _ComparisonTable extends HookWidget {
             SizedBox(
               width: 120,
               child: Text(
-                formatCents(m.totalSpentCents, currency),
+                converter?.formatAmount(
+                      amountCents: m.totalSpentCents,
+                      sourceCurrency: sourceCurrency,
+                    ) ??
+                    formatCents(m.totalSpentCents, sourceCurrency),
                 style: theme.textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: ColorTokens.error,
@@ -252,7 +270,11 @@ class _ComparisonTable extends HookWidget {
             SizedBox(
               width: 120,
               child: Text(
-                formatCents(cat.monthTotals[key]?[1] ?? 0, currency),
+                converter?.formatAmount(
+                      amountCents: cat.monthTotals[key]?[1] ?? 0,
+                      sourceCurrency: sourceCurrency,
+                    ) ??
+                    formatCents(cat.monthTotals[key]?[1] ?? 0, sourceCurrency),
                 style: theme.textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
@@ -291,7 +313,11 @@ class _ComparisonTable extends HookWidget {
             SizedBox(
               width: 120,
               child: Text(
-                formatCents(env.monthData[key]?[1] ?? 0, currency),
+                converter?.formatAmount(
+                      amountCents: env.monthData[key]?[1] ?? 0,
+                      sourceCurrency: sourceCurrency,
+                    ) ??
+                    formatCents(env.monthData[key]?[1] ?? 0, sourceCurrency),
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),

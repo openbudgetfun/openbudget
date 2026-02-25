@@ -6,8 +6,10 @@ import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/age_of_money_provider.dart';
 import 'package:openbudget_app/src/features/reports/providers/net_worth_provider.dart';
 import 'package:openbudget_app/src/features/reports/providers/spending_report_provider.dart';
+import 'package:openbudget_app/src/features/settings/providers/display_currency_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/theme/openbudget_palette.dart';
+import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -31,6 +33,10 @@ class ReportsScreen extends HookConsumerWidget {
     );
     final netWorthAsync = ref.watch(netWorthProvider(budgetId));
     final ageOfMoneyAsync = ref.watch(ageOfMoneyProvider(budgetId));
+    final converter = ref
+        .watch(displayCurrencyConverterProvider(budgetId))
+        .asData
+        ?.value;
 
     return Scaffold(
       backgroundColor: OpenBudgetPalette.appBackgroundFor(theme),
@@ -67,6 +73,7 @@ class ReportsScreen extends HookConsumerWidget {
                   selectedMonth.value,
                   selectedYear.value,
                 ),
+                converter: converter,
               ),
             ),
           ),
@@ -89,7 +96,8 @@ class ReportsScreen extends HookConsumerWidget {
                   color: colorScheme.error,
                 ),
               ),
-              data: (data) => _NetWorthPreview(data: data),
+              data: (data) =>
+                  _NetWorthPreview(data: data, converter: converter),
             ),
           ),
           const SizedBox(height: SpacingTokens.md),
@@ -203,10 +211,12 @@ class _SpendingBreakdownPreview extends StatelessWidget {
   const _SpendingBreakdownPreview({
     required this.report,
     required this.monthLabel,
+    required this.converter,
   });
 
   final SpendingReport report;
   final String monthLabel;
+  final DisplayCurrencyConverter? converter;
 
   static const _barColors = <Color>[
     Color(0xFF5962F1),
@@ -223,10 +233,7 @@ class _SpendingBreakdownPreview extends StatelessWidget {
     final sortedEntries = report.categorySpending.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
     final categories = sortedEntries.take(6).toList();
-    final currency = CurrencyCode.values.firstWhere(
-      (code) => code.code == report.currencyCode,
-      orElse: () => CurrencyCode.usd,
-    );
+    final sourceCurrency = parseCurrencyCode(report.currencyCode);
     final totalCents = categories.fold<int>(0, (sum, item) => sum + item.value);
 
     return Column(
@@ -240,7 +247,11 @@ class _SpendingBreakdownPreview extends StatelessWidget {
         ),
         const SizedBox(height: SpacingTokens.xs),
         Text(
-          formatCents(report.totalExpenses, currency),
+          converter?.formatAmount(
+                amountCents: report.totalExpenses,
+                sourceCurrency: sourceCurrency,
+              ) ??
+              formatCents(report.totalExpenses, sourceCurrency),
           style: theme.textTheme.headlineMedium?.copyWith(
             fontWeight: FontWeight.w800,
           ),
@@ -309,7 +320,11 @@ class _SpendingBreakdownPreview extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    formatCents(categories[index].value, currency),
+                    converter?.formatAmount(
+                          amountCents: categories[index].value,
+                          sourceCurrency: sourceCurrency,
+                        ) ??
+                        formatCents(categories[index].value, sourceCurrency),
                     style: theme.textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
@@ -324,18 +339,49 @@ class _SpendingBreakdownPreview extends StatelessWidget {
 }
 
 class _NetWorthPreview extends StatelessWidget {
-  const _NetWorthPreview({required this.data});
+  const _NetWorthPreview({required this.data, required this.converter});
 
   final NetWorthData data;
+  final DisplayCurrencyConverter? converter;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final netWorthByCurrency = {
+      for (final breakdown in data.currencyBreakdown)
+        breakdown.currency: breakdown.netWorth,
+    };
+    final assetsByCurrency = {
+      for (final breakdown in data.currencyBreakdown)
+        breakdown.currency: breakdown.totalAssets,
+    };
+    final liabilitiesByCurrency = {
+      for (final breakdown in data.currencyBreakdown)
+        breakdown.currency: breakdown.totalLiabilities,
+    };
+    final convertedNetWorth = converter?.convertTotalsToDisplay(
+      netWorthByCurrency,
+    );
+    final convertedAssets = converter?.convertTotalsToDisplay(assetsByCurrency);
+    final convertedLiabilities = converter?.convertTotalsToDisplay(
+      liabilitiesByCurrency,
+    );
+
+    final useConverted =
+        convertedNetWorth != null &&
+        convertedAssets != null &&
+        convertedLiabilities != null;
     final primary = data.currencyBreakdown.firstOrNull;
-    final currency = primary?.currency ?? CurrencyCode.usd;
-    final assets = primary?.totalAssets ?? 0;
-    final liabilities = primary?.totalLiabilities ?? 0;
-    final netWorth = primary?.netWorth ?? 0;
+    final currency = useConverted
+        ? converter!.displayCurrency
+        : (primary?.currency ?? CurrencyCode.usd);
+    final assets = useConverted ? convertedAssets : (primary?.totalAssets ?? 0);
+    final liabilities = useConverted
+        ? convertedLiabilities
+        : (primary?.totalLiabilities ?? 0);
+    final netWorth = useConverted
+        ? convertedNetWorth
+        : (primary?.netWorth ?? 0);
     final maxAbs = [
       assets.abs(),
       liabilities.abs(),

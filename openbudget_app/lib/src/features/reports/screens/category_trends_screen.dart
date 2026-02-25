@@ -5,6 +5,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/reports/providers/category_trends_provider.dart';
+import 'package:openbudget_app/src/features/settings/providers/display_currency_provider.dart';
+import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -20,6 +22,10 @@ class CategoryTrendsScreen extends HookConsumerWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final trendsAsync = ref.watch(categoryTrendsProvider(budgetId));
+    final converter = ref
+        .watch(displayCurrencyConverterProvider(budgetId))
+        .asData
+        ?.value;
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.categoryTrendsTitle)),
@@ -76,10 +82,7 @@ class CategoryTrendsScreen extends HookConsumerWidget {
             );
           }
 
-          final currency = CurrencyCode.values.firstWhere(
-            (c) => c.code == data.currencyCode,
-            orElse: () => CurrencyCode.usd,
-          );
+          final sourceCurrency = parseCurrencyCode(data.currencyCode);
 
           return ListView(
             padding: const EdgeInsets.all(SpacingTokens.md),
@@ -90,7 +93,8 @@ class CategoryTrendsScreen extends HookConsumerWidget {
                 (cat) => _CategoryTrendRow(
                   category: cat,
                   months: data.months,
-                  currency: currency,
+                  sourceCurrency: sourceCurrency,
+                  converter: converter,
                 ),
               ),
             ],
@@ -153,12 +157,14 @@ class _CategoryTrendRow extends HookWidget {
   const _CategoryTrendRow({
     required this.category,
     required this.months,
-    required this.currency,
+    required this.sourceCurrency,
+    required this.converter,
   });
 
   final CategoryTrendLine category;
   final List<MonthLabel> months;
-  final CurrencyCode currency;
+  final CurrencyCode sourceCurrency;
+  final DisplayCurrencyConverter? converter;
 
   @override
   Widget build(BuildContext context) {
@@ -187,7 +193,11 @@ class _CategoryTrendRow extends HookWidget {
                   ),
                 ),
                 Text(
-                  formatCents(category.totalCents, currency),
+                  converter?.formatAmount(
+                        amountCents: category.totalCents,
+                        sourceCurrency: sourceCurrency,
+                      ) ??
+                      formatCents(category.totalCents, sourceCurrency),
                   style: theme.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w600,
                     color: colorScheme.primary,
@@ -204,7 +214,8 @@ class _CategoryTrendRow extends HookWidget {
                     child: _MiniBar(
                       value: category.monthlyCents[i],
                       maxValue: maxCents,
-                      currency: currency,
+                      sourceCurrency: sourceCurrency,
+                      converter: converter,
                       colorScheme: colorScheme,
                     ),
                   ),
@@ -222,13 +233,15 @@ class _MiniBar extends HookWidget {
   const _MiniBar({
     required this.value,
     required this.maxValue,
-    required this.currency,
+    required this.sourceCurrency,
+    required this.converter,
     required this.colorScheme,
   });
 
   final int value;
   final int maxValue;
-  final CurrencyCode currency;
+  final CurrencyCode sourceCurrency;
+  final DisplayCurrencyConverter? converter;
   final ColorScheme colorScheme;
 
   @override
@@ -237,7 +250,12 @@ class _MiniBar extends HookWidget {
     final fraction = maxValue > 0 ? value / maxValue : 0.0;
 
     return Tooltip(
-      message: formatCents(value, currency),
+      message:
+          converter?.formatAmount(
+            amountCents: value,
+            sourceCurrency: sourceCurrency,
+          ) ??
+          formatCents(value, sourceCurrency),
       child: Column(
         children: [
           SizedBox(
@@ -261,7 +279,13 @@ class _MiniBar extends HookWidget {
           ),
           const SizedBox(height: 2),
           Text(
-            value > 0 ? formatCents(value, currency) : '-',
+            value > 0
+                ? (converter?.formatAmount(
+                        amountCents: value,
+                        sourceCurrency: sourceCurrency,
+                      ) ??
+                      formatCents(value, sourceCurrency))
+                : '-',
             style: theme.textTheme.labelSmall?.copyWith(
               fontSize: 9,
               color: colorScheme.onSurfaceVariant,
