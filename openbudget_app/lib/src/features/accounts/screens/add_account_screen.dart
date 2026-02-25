@@ -728,7 +728,6 @@ class _AccountTypeStep extends StatelessWidget {
           for (final option in section.options) ...[
             ListTile(
               onTap: () => onSelected(option),
-              leading: Icon(option.icon),
               title: Text(option.label),
               trailing: option.key == selectedTypeKey
                   ? const Icon(
@@ -837,7 +836,6 @@ class _AccountTypeOption {
   const _AccountTypeOption({
     required this.key,
     required this.label,
-    required this.icon,
     required this.serverType,
     required this.onBudgetDefault,
     required this.isDebt,
@@ -845,7 +843,6 @@ class _AccountTypeOption {
 
   final String key;
   final String label;
-  final IconData icon;
   final String serverType;
   final bool onBudgetDefault;
   final bool isDebt;
@@ -874,7 +871,6 @@ List<_AccountTypeSection> _accountTypeSections(AppLocalizations l10n) {
         _AccountTypeOption(
           key: 'checking',
           label: l10n.accountTypeChecking,
-          icon: Icons.account_balance_rounded,
           serverType: 'checking',
           onBudgetDefault: true,
           isDebt: false,
@@ -882,7 +878,6 @@ List<_AccountTypeSection> _accountTypeSections(AppLocalizations l10n) {
         _AccountTypeOption(
           key: 'savings',
           label: l10n.accountTypeSavings,
-          icon: Icons.savings_rounded,
           serverType: 'savings',
           onBudgetDefault: true,
           isDebt: false,
@@ -890,7 +885,6 @@ List<_AccountTypeSection> _accountTypeSections(AppLocalizations l10n) {
         _AccountTypeOption(
           key: 'cash',
           label: l10n.accountTypeCash,
-          icon: Icons.payments_rounded,
           serverType: 'cash',
           onBudgetDefault: true,
           isDebt: false,
@@ -904,7 +898,6 @@ List<_AccountTypeSection> _accountTypeSections(AppLocalizations l10n) {
         _AccountTypeOption(
           key: 'creditCard',
           label: l10n.accountTypeCreditCard,
-          icon: Icons.credit_card_rounded,
           serverType: 'creditCard',
           onBudgetDefault: true,
           isDebt: true,
@@ -912,7 +905,6 @@ List<_AccountTypeSection> _accountTypeSections(AppLocalizations l10n) {
         const _AccountTypeOption(
           key: 'lineOfCredit',
           label: 'Line of Credit',
-          icon: Icons.credit_score_rounded,
           serverType: 'other',
           onBudgetDefault: true,
           isDebt: true,
@@ -926,7 +918,6 @@ List<_AccountTypeSection> _accountTypeSections(AppLocalizations l10n) {
         _AccountTypeOption(
           key: 'mortgage',
           label: 'Mortgage',
-          icon: Icons.home_work_outlined,
           serverType: 'other',
           onBudgetDefault: false,
           isDebt: true,
@@ -934,7 +925,6 @@ List<_AccountTypeSection> _accountTypeSections(AppLocalizations l10n) {
         _AccountTypeOption(
           key: 'autoLoan',
           label: 'Auto Loan',
-          icon: Icons.directions_car_outlined,
           serverType: 'other',
           onBudgetDefault: false,
           isDebt: true,
@@ -942,7 +932,6 @@ List<_AccountTypeSection> _accountTypeSections(AppLocalizations l10n) {
         _AccountTypeOption(
           key: 'studentLoan',
           label: 'Student Loan',
-          icon: Icons.school_outlined,
           serverType: 'other',
           onBudgetDefault: false,
           isDebt: true,
@@ -950,7 +939,6 @@ List<_AccountTypeSection> _accountTypeSections(AppLocalizations l10n) {
         _AccountTypeOption(
           key: 'personalLoan',
           label: 'Personal Loan',
-          icon: Icons.person_outline_rounded,
           serverType: 'other',
           onBudgetDefault: false,
           isDebt: true,
@@ -958,7 +946,6 @@ List<_AccountTypeSection> _accountTypeSections(AppLocalizations l10n) {
         _AccountTypeOption(
           key: 'medicalDebt',
           label: 'Medical Debt',
-          icon: Icons.health_and_safety_outlined,
           serverType: 'other',
           onBudgetDefault: false,
           isDebt: true,
@@ -966,7 +953,6 @@ List<_AccountTypeSection> _accountTypeSections(AppLocalizations l10n) {
         _AccountTypeOption(
           key: 'otherDebt',
           label: 'Other Debt',
-          icon: Icons.receipt_long_outlined,
           serverType: 'other',
           onBudgetDefault: false,
           isDebt: true,
@@ -981,7 +967,6 @@ List<_AccountTypeSection> _accountTypeSections(AppLocalizations l10n) {
         _AccountTypeOption(
           key: 'asset',
           label: 'Asset (e.g. Investment)',
-          icon: Icons.trending_up_rounded,
           serverType: 'investment',
           onBudgetDefault: false,
           isDebt: false,
@@ -989,7 +974,6 @@ List<_AccountTypeSection> _accountTypeSections(AppLocalizations l10n) {
         _AccountTypeOption(
           key: 'liability',
           label: 'Liability',
-          icon: Icons.warning_amber_rounded,
           serverType: 'other',
           onBudgetDefault: false,
           isDebt: true,

@@ -1,6 +1,6 @@
 # OpenBudget UI Migration Tracker (from `~/Downloads/ynab-ui`)
 
-Last updated: 2026-02-24 (Add Accounts bank-search filtering polish)
+Last updated: 2026-02-24 (Account-type list visual parity)
 
 ## Scope
 
@@ -31,6 +31,7 @@ Last updated: 2026-02-24 (Add Accounts bank-search filtering polish)
 - 2026-02-24: Recent Moves list rows now use improved day-heading typography (relative label + date split) and divider-backed spacing for closer parity.
 - 2026-02-24: Add Accounts flow now includes staged loading states (`Loading...` then `Loading institutions...`) with OpenBudget-branded logo treatment before bank search.
 - 2026-02-24: Add Accounts bank search now supports live filtering, empty-state messaging, and richer institution tile styling for parity with the reference flow.
+- 2026-02-24: Add Accounts -> Select Account Type now uses text-focused list rows (without leading icons) for closer visual parity.
 - 2026-02-24: PR screenshot artifacts policy active: every migration PR must include at least one runtime screenshot link in PR body/comments.
 - 2026-02-24: PR #127 artifact screenshot (Preset mode): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-24-pr127/reports-preset-mode.png
 - 2026-02-24: PR #129 artifact screenshot (Preset range + month anchor): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-24-pr129/reports-preset-range-month-anchor.png

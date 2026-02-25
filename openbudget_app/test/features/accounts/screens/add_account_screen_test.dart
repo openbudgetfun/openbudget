@@ -147,6 +147,8 @@ void main() {
     expect(find.text('Cash Accounts'), findsOneWidget);
     expect(find.text('Credit Accounts'), findsOneWidget);
     expect(find.text('Mortgages and Loans'), findsOneWidget);
+    expect(find.byIcon(Icons.account_balance_rounded), findsNothing);
+    expect(find.byIcon(Icons.savings_rounded), findsNothing);
   });
 
   testWidgets('next stays disabled until type and balance are provided', (
