@@ -479,6 +479,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Success!'), findsOneWidget);
+    expect(find.text('Add Another'), findsOneWidget);
+    expect(find.widgetWithText(FilledButton, 'Done'), findsOneWidget);
     await captureIntegrationScreenshot(
       tester,
       'add-unlinked-account-desktop-success-screen',
