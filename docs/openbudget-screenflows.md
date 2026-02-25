@@ -18,6 +18,7 @@ Last updated: 2026-02-25
   - Settings root, plan settings, currency, display options, app icon switching (light/dark aware)
 - Accounts
   - Add account wizard, institution search/filtering, unlinked account validation, account detail actions, reconcile, loan overview/activity, edit/close
+  - Desktop/tablet Add Accounts search parity (search labeling, two-column institution grid, unlinked CTA alignment)
 - Transactions
   - Add expense/income/transfer, filtering, edit and action sheets, review queue approval flow
 - Reflect and reports
@@ -42,3 +43,4 @@ Last updated: 2026-02-25
 - Add Accounts loading institutions: https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-24-pr135/add-accounts-loading-institutions-screen.png
 - Add Accounts bank search: https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-24-pr136/add-accounts-search-screen.png
 - Add Account type selection: https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-24-pr137/add-account-type-selection.png
+- Add Accounts desktop bank search: https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-pr140/add-accounts-search-desktop-screen.png
