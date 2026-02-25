@@ -19,6 +19,8 @@ void main() {
   });
 
   const budgetId = 'test-budget-1';
+  const unlinkedTypeTileKey = Key('add-account-unlinked-type-tile');
+  const checkingTypeOptionKey = ValueKey('add-account-type-option-checking');
 
   Budget makeBudget({String currencyCode = 'USD'}) => Budget(
     id: UuidValue.fromString('00000000-0000-0000-0000-000000000001'),
@@ -161,10 +163,12 @@ void main() {
     await _tapAddUnlinked(tester);
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Select account type...'));
-    await tester.pumpAndSettle();
+    await _openAccountTypePicker(
+      tester,
+      typeTileFinder: find.byKey(unlinkedTypeTileKey),
+    );
 
-    expect(find.text('Select Account Type'), findsOneWidget);
+    expect(find.byKey(checkingTypeOptionKey), findsOneWidget);
     expect(find.text('Cash Accounts'), findsOneWidget);
     expect(find.text('Credit Accounts'), findsOneWidget);
     expect(find.text('Mortgages and Loans'), findsOneWidget);
@@ -193,10 +197,14 @@ void main() {
     nextButton = tester.widget(find.widgetWithText(FilledButton, 'Next'));
     expect(nextButton.onPressed, isNull);
 
-    await tester.tap(find.text('Select account type...'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Checking'));
-    await tester.pumpAndSettle();
+    await _openAccountTypePicker(
+      tester,
+      typeTileFinder: find.byKey(unlinkedTypeTileKey),
+    );
+    await _tapAccountTypeOption(
+      tester,
+      optionFinder: find.byKey(checkingTypeOptionKey),
+    );
 
     nextButton = tester.widget(find.widgetWithText(FilledButton, 'Next'));
     expect(nextButton.onPressed, isNotNull);
@@ -223,5 +231,31 @@ Future<void> _scrollToAddUnlinked(WidgetTester tester) async {
     );
   }
   await tester.ensureVisible(finder);
+  await tester.pumpAndSettle();
+}
+
+Future<void> _openAccountTypePicker(
+  WidgetTester tester, {
+  required Finder typeTileFinder,
+}) async {
+  final tile = tester.widget<ListTile>(typeTileFinder);
+  final onTap = tile.onTap;
+  if (onTap == null) {
+    fail('Expected account type tile to be tappable.');
+  }
+  onTap();
+  await tester.pumpAndSettle();
+}
+
+Future<void> _tapAccountTypeOption(
+  WidgetTester tester, {
+  required Finder optionFinder,
+}) async {
+  final tile = tester.widget<ListTile>(optionFinder);
+  final onTap = tile.onTap;
+  if (onTap == null) {
+    fail('Expected account type option to be tappable.');
+  }
+  onTap();
   await tester.pumpAndSettle();
 }
