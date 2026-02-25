@@ -9,13 +9,15 @@ import 'package:integration_test/integration_test.dart';
 
 Future<void> captureIntegrationScreenshot(
   WidgetTester tester,
-  String name,
-) async {
+  String name, {
+  Finder? captureTarget,
+}) async {
   final captureBackend = _resolveCaptureBackend();
   final captureResult = await _captureWithBackendPreference(
     tester: tester,
     name: name,
     backend: captureBackend,
+    captureTarget: captureTarget,
   );
   final bytes = captureResult.bytes;
 
@@ -66,6 +68,7 @@ Future<_CaptureResult> _captureWithBackendPreference({
   required WidgetTester tester,
   required String name,
   required _ScreenshotBackend backend,
+  Finder? captureTarget,
 }) async {
   Future<_CaptureResult?> attempt(_ScreenshotBackend option) async {
     final bytes = switch (option) {
@@ -81,6 +84,13 @@ Future<_CaptureResult> _captureWithBackendPreference({
     return _CaptureResult(bytes: bytes, backend: option.name);
   }
 
+  if (captureTarget != null) {
+    final targetBytes = await _captureViaTargetBoundary(tester, captureTarget);
+    if (targetBytes != null && targetBytes.isNotEmpty) {
+      return _CaptureResult(bytes: targetBytes, backend: 'target');
+    }
+  }
+
   if (backend != _ScreenshotBackend.auto) {
     final forcedResult = await attempt(backend);
     if (forcedResult != null) return forcedResult;
@@ -88,8 +98,8 @@ Future<_CaptureResult> _captureWithBackendPreference({
 
   const fallbackOrder = [
     _ScreenshotBackend.integration,
-    _ScreenshotBackend.repaint,
     _ScreenshotBackend.renderView,
+    _ScreenshotBackend.repaint,
   ];
   for (final option in fallbackOrder) {
     final result = await attempt(option);
@@ -158,6 +168,42 @@ Future<Uint8List?> _captureViaRepaintBoundary(WidgetTester tester) async {
       ? tester.view.devicePixelRatio
       : 1.0;
   final image = await largestBoundary.toImage(pixelRatio: pixelRatio);
+  final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
+  if (bytes == null) {
+    return null;
+  }
+
+  return bytes.buffer.asUint8List();
+}
+
+Future<Uint8List?> _captureViaTargetBoundary(
+  WidgetTester tester,
+  Finder target,
+) async {
+  await tester.pump();
+  final targetElements = target.evaluate().toList(growable: false);
+  if (targetElements.isEmpty) {
+    return null;
+  }
+
+  final renderObject = targetElements.first.renderObject;
+  if (renderObject is! RenderRepaintBoundary) {
+    return null;
+  }
+
+  if (!renderObject.hasSize) {
+    return null;
+  }
+
+  final size = renderObject.size;
+  if (size.isEmpty || !size.isFinite) {
+    return null;
+  }
+
+  final pixelRatio = tester.view.devicePixelRatio > 0
+      ? tester.view.devicePixelRatio
+      : 1.0;
+  final image = await renderObject.toImage(pixelRatio: pixelRatio);
   final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
   if (bytes == null) {
     return null;

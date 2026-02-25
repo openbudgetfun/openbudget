@@ -24,6 +24,9 @@ enum _AddAccountStep {
 
 const _addAccountSearchScrollKey = Key('add-account-search-scroll');
 const _addAccountUnlinkedScrollKey = Key('add-account-unlinked-scroll');
+const addAccountScreenCaptureBoundaryKey = Key(
+  'add-account-screen-capture-boundary',
+);
 const _addAccountAddUnlinkedButtonKey = Key('add-account-add-unlinked-button');
 const _addAccountUnlinkedNicknameFieldKey = Key(
   'add-account-unlinked-nickname-field',
@@ -202,169 +205,172 @@ class AddAccountScreen extends HookConsumerWidget {
       }
     }
 
-    return Scaffold(
-      backgroundColor: OpenBudgetPalette.appBackground,
-      appBar: AppBar(
+    return RepaintBoundary(
+      key: addAccountScreenCaptureBoundaryKey,
+      child: Scaffold(
         backgroundColor: OpenBudgetPalette.appBackground,
-        surfaceTintColor: Colors.transparent,
-        scrolledUnderElevation: 0,
-        automaticallyImplyLeading: false,
-        leading:
-            step.value == _AddAccountStep.loading ||
-                step.value == _AddAccountStep.loadingInstitutions ||
-                step.value == _AddAccountStep.searchBank
-            ? null
-            : IconButton(
-                icon: const Icon(Icons.arrow_back_ios_new_rounded),
-                onPressed: () {
-                  if (step.value == _AddAccountStep.unlinkedAccount) {
-                    step.value = _AddAccountStep.searchBank;
-                  } else if (step.value == _AddAccountStep.accountType ||
-                      step.value == _AddAccountStep.success) {
-                    step.value = _AddAccountStep.unlinkedAccount;
-                  }
-                },
-              ),
-        title: Text(
-          switch (step.value) {
-            _AddAccountStep.loading => '',
-            _AddAccountStep.loadingInstitutions => 'Add Accounts',
-            _AddAccountStep.searchBank => 'Add Accounts',
-            _AddAccountStep.unlinkedAccount => 'Add Unlinked Account',
-            _AddAccountStep.accountType => 'Select Account Type',
-            _AddAccountStep.success => 'Add Unlinked Account',
-          },
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.close_rounded),
-            onPressed: () => context.goNamed(
-              accountListRoute,
-              pathParameters: {'id': budgetId},
+        appBar: AppBar(
+          backgroundColor: OpenBudgetPalette.appBackground,
+          surfaceTintColor: Colors.transparent,
+          scrolledUnderElevation: 0,
+          automaticallyImplyLeading: false,
+          leading:
+              step.value == _AddAccountStep.loading ||
+                  step.value == _AddAccountStep.loadingInstitutions ||
+                  step.value == _AddAccountStep.searchBank
+              ? null
+              : IconButton(
+                  icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                  onPressed: () {
+                    if (step.value == _AddAccountStep.unlinkedAccount) {
+                      step.value = _AddAccountStep.searchBank;
+                    } else if (step.value == _AddAccountStep.accountType ||
+                        step.value == _AddAccountStep.success) {
+                      step.value = _AddAccountStep.unlinkedAccount;
+                    }
+                  },
+                ),
+          title: Text(
+            switch (step.value) {
+              _AddAccountStep.loading => '',
+              _AddAccountStep.loadingInstitutions => 'Add Accounts',
+              _AddAccountStep.searchBank => 'Add Accounts',
+              _AddAccountStep.unlinkedAccount => 'Add Unlinked Account',
+              _AddAccountStep.accountType => 'Select Account Type',
+              _AddAccountStep.success => 'Add Unlinked Account',
+            },
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.w700,
             ),
           ),
-        ],
-      ),
-      body: Stack(
-        children: [
-          switch (step.value) {
-            _AddAccountStep.loading => const _StepFrame(
-              child: _LoadingStep(title: 'Loading...', includeSpinner: false),
-            ),
-            _AddAccountStep.loadingInstitutions => const _StepFrame(
-              child: _LoadingStep(
-                title: 'Loading institutions...',
-                includeSpinner: true,
-              ),
-            ),
-            _AddAccountStep.searchBank => _StepFrame(
-              child: _BankSearchStep(
-                scrollController: searchScrollController,
-                searchController: searchController,
-                searchQuery: searchController.text,
-                onInstitutionTap: startLinkedBankFlow,
-                onAddUnlinked: () =>
-                    step.value = _AddAccountStep.unlinkedAccount,
-              ),
-            ),
-            _AddAccountStep.unlinkedAccount => _StepFrame(
-              maxWidth: 720,
-              child: _UnlinkedAccountStep(
-                scrollController: unlinkedScrollController,
-                nameController: nameController,
-                balanceController: balanceController,
-                selectedTypeLabel:
-                    selectedType?.label ?? 'Select account type...',
-                hasSelectedType: selectedType != null,
-                selectedCurrency: selectedCurrency.value,
-                onChooseType: () => step.value = _AddAccountStep.accountType,
-                onCurrencyChanged: (code) =>
-                    selectedCurrency.value = parseCurrencyCode(code),
-              ),
-            ),
-            _AddAccountStep.accountType => _StepFrame(
-              maxWidth: 720,
-              child: _AccountTypeStep(
-                scrollController: accountTypeScrollController,
-                sections: typeSections,
-                selectedTypeKey: selectedTypeKey.value,
-                onSelected: (option) {
-                  selectedTypeKey.value = option.key;
-                  step.value = _AddAccountStep.unlinkedAccount;
-                },
-              ),
-            ),
-            _AddAccountStep.success => _SuccessStep(
-              accountTypeLabel: selectedType?.label ?? 'Account',
-              onAddAnother: () {
-                nameController.clear();
-                balanceController.clear();
-                step.value = _AddAccountStep.unlinkedAccount;
-              },
-              onDone: () => context.goNamed(
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.close_rounded),
+              onPressed: () => context.goNamed(
                 accountListRoute,
                 pathParameters: {'id': budgetId},
               ),
             ),
-          },
-          if (showSearchingOverlay.value)
-            ColoredBox(
-              color: Colors.black.withAlpha(120),
-              child: const Center(
-                child: Card(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: SpacingTokens.lg,
-                      vertical: SpacingTokens.md,
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        CircularProgressIndicator(),
-                        SizedBox(height: SpacingTokens.md),
-                        Text('Loading institutions...'),
-                      ],
+          ],
+        ),
+        body: Stack(
+          children: [
+            switch (step.value) {
+              _AddAccountStep.loading => const _StepFrame(
+                child: _LoadingStep(title: 'Loading...', includeSpinner: false),
+              ),
+              _AddAccountStep.loadingInstitutions => const _StepFrame(
+                child: _LoadingStep(
+                  title: 'Loading institutions...',
+                  includeSpinner: true,
+                ),
+              ),
+              _AddAccountStep.searchBank => _StepFrame(
+                child: _BankSearchStep(
+                  scrollController: searchScrollController,
+                  searchController: searchController,
+                  searchQuery: searchController.text,
+                  onInstitutionTap: startLinkedBankFlow,
+                  onAddUnlinked: () =>
+                      step.value = _AddAccountStep.unlinkedAccount,
+                ),
+              ),
+              _AddAccountStep.unlinkedAccount => _StepFrame(
+                maxWidth: 720,
+                child: _UnlinkedAccountStep(
+                  scrollController: unlinkedScrollController,
+                  nameController: nameController,
+                  balanceController: balanceController,
+                  selectedTypeLabel:
+                      selectedType?.label ?? 'Select account type...',
+                  hasSelectedType: selectedType != null,
+                  selectedCurrency: selectedCurrency.value,
+                  onChooseType: () => step.value = _AddAccountStep.accountType,
+                  onCurrencyChanged: (code) =>
+                      selectedCurrency.value = parseCurrencyCode(code),
+                ),
+              ),
+              _AddAccountStep.accountType => _StepFrame(
+                maxWidth: 720,
+                child: _AccountTypeStep(
+                  scrollController: accountTypeScrollController,
+                  sections: typeSections,
+                  selectedTypeKey: selectedTypeKey.value,
+                  onSelected: (option) {
+                    selectedTypeKey.value = option.key;
+                    step.value = _AddAccountStep.unlinkedAccount;
+                  },
+                ),
+              ),
+              _AddAccountStep.success => _SuccessStep(
+                accountTypeLabel: selectedType?.label ?? 'Account',
+                onAddAnother: () {
+                  nameController.clear();
+                  balanceController.clear();
+                  step.value = _AddAccountStep.unlinkedAccount;
+                },
+                onDone: () => context.goNamed(
+                  accountListRoute,
+                  pathParameters: {'id': budgetId},
+                ),
+              ),
+            },
+            if (showSearchingOverlay.value)
+              ColoredBox(
+                color: Colors.black.withAlpha(120),
+                child: const Center(
+                  child: Card(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: SpacingTokens.lg,
+                        vertical: SpacingTokens.md,
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          CircularProgressIndicator(),
+                          SizedBox(height: SpacingTokens.md),
+                          Text('Loading institutions...'),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-        ],
-      ),
-      bottomNavigationBar: switch (step.value) {
-        _AddAccountStep.loading => null,
-        _AddAccountStep.loadingInstitutions => null,
-        _AddAccountStep.unlinkedAccount => SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(
-              SpacingTokens.md,
-              SpacingTokens.sm,
-              SpacingTokens.md,
-              SpacingTokens.md,
-            ),
-            child: _StepFrame(
-              maxWidth: 720,
-              child: FilledButton(
-                onPressed: canSubmit && !isSubmitting.value
-                    ? submitUnlinkedAccount
-                    : null,
-                child: isSubmitting.value
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Text('Next'),
+          ],
+        ),
+        bottomNavigationBar: switch (step.value) {
+          _AddAccountStep.loading => null,
+          _AddAccountStep.loadingInstitutions => null,
+          _AddAccountStep.unlinkedAccount => SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(
+                SpacingTokens.md,
+                SpacingTokens.sm,
+                SpacingTokens.md,
+                SpacingTokens.md,
+              ),
+              child: _StepFrame(
+                maxWidth: 720,
+                child: FilledButton(
+                  onPressed: canSubmit && !isSubmitting.value
+                      ? submitUnlinkedAccount
+                      : null,
+                  child: isSubmitting.value
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Text('Next'),
+                ),
               ),
             ),
           ),
-        ),
-        _AddAccountStep.success => null,
-        _AddAccountStep.searchBank || _AddAccountStep.accountType => null,
-      },
+          _AddAccountStep.success => null,
+          _AddAccountStep.searchBank || _AddAccountStep.accountType => null,
+        },
+      ),
     );
   }
 }
@@ -661,12 +667,18 @@ class _UnlinkedAccountStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final primaryTextColor = theme.brightness == Brightness.dark
+        ? theme.colorScheme.onSurface
+        : const Color(0xFF23201A);
+    final secondaryTextColor = theme.brightness == Brightness.dark
+        ? theme.colorScheme.onSurfaceVariant
+        : OpenBudgetPalette.mutedText;
     final headingStyle = theme.textTheme.titleSmall?.copyWith(
       fontWeight: FontWeight.w700,
-      color: theme.colorScheme.onSurface,
+      color: primaryTextColor,
     );
     final introStyle = theme.textTheme.bodyMedium?.copyWith(
-      color: theme.colorScheme.onSurface,
+      color: secondaryTextColor,
     );
 
     return SingleChildScrollView(
@@ -705,7 +717,7 @@ class _UnlinkedAccountStep extends StatelessWidget {
             title: Text(
               selectedTypeLabel,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: hasSelectedType ? null : OpenBudgetPalette.mutedText,
+                color: hasSelectedType ? primaryTextColor : secondaryTextColor,
                 fontWeight: hasSelectedType ? FontWeight.w600 : FontWeight.w500,
               ),
             ),

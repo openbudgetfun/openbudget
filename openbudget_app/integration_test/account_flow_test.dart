@@ -513,6 +513,7 @@ void main() {
     await captureIntegrationScreenshot(
       tester,
       'add-unlinked-account-desktop-form-screen',
+      captureTarget: find.byKey(addAccountScreenCaptureBoundaryKey),
     );
 
     await _enterTextWhenVisible(
