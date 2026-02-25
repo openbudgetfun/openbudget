@@ -547,6 +547,61 @@ void main() {
     );
   });
 
+  patrolWidgetTest(
+    'desktop unlinked account next button stays gated until required fields are complete',
+    ($) async {
+      final tester = $.tester;
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      await tester.binding.setSurfaceSize(const Size(1024, 768));
+      await tester.pumpWidget(_buildApp(accounts: const []));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Add Account'));
+      await _pumpToAddAccountSearch(tester);
+      await _tapAddUnlinkedAccount(tester);
+      await tester.pumpAndSettle();
+
+      final nextFinder = find.widgetWithText(FilledButton, 'Next');
+
+      var nextButton = tester.widget<FilledButton>(nextFinder);
+      expect(nextButton.onPressed, isNull);
+      expect(find.text(r'USD ($)'), findsOneWidget);
+
+      await _enterTextWhenVisible(
+        tester,
+        find.byKey(_addAccountNicknameFieldKey),
+        'Daily',
+      );
+      await tester.pumpAndSettle();
+      nextButton = tester.widget(nextFinder);
+      expect(nextButton.onPressed, isNull);
+
+      await _activateListTile(tester, find.byKey(_addAccountTypeTileKey));
+      await _activateListTile(tester, find.byKey(_addAccountCheckingTypeKey));
+      await tester.pumpAndSettle();
+      nextButton = tester.widget(nextFinder);
+      expect(nextButton.onPressed, isNull);
+
+      await _enterTextWhenVisible(
+        tester,
+        find.byKey(_addAccountBalanceFieldKey),
+        '50000',
+      );
+      await tester.pumpAndSettle();
+      nextButton = tester.widget(nextFinder);
+      expect(nextButton.onPressed, isNotNull);
+
+      await _enterTextWhenVisible(
+        tester,
+        find.byKey(_addAccountBalanceFieldKey),
+        '',
+      );
+      await tester.pumpAndSettle();
+      nextButton = tester.widget(nextFinder);
+      expect(nextButton.onPressed, isNull);
+    },
+  );
+
   patrolWidgetTest('account detail flow navigates to detail and back to list', (
     $,
   ) async {

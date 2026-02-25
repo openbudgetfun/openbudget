@@ -24,6 +24,7 @@ This checklist tracks progress for migrating and polishing app flows using the `
 - [x] Add Accounts unlinked flow stability hardening (isolated step scroll state + keyed form controls)
 - [x] Add Accounts desktop screenshot capture hardening (targeted boundary capture for unlinked-account form artifacts)
 - [x] Add Accounts desktop unlinked-account layout parity fix (preserve vertical constraints in step frame)
+- [x] Add Accounts desktop unlinked-account next-button gating regression coverage
 - [x] Transaction review + action sheet flow parity
 - [x] Recent Moves tabs, coach dialog, and drilldown parity
 - [x] Recent Moves desktop tab-switch regression coverage
