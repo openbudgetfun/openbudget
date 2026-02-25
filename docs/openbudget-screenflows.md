@@ -23,6 +23,7 @@ Progress checklist: `docs/openbudget-migration-progress.md`
   - Desktop/tablet Add Accounts search parity (search labeling, two-column institution grid, unlinked CTA alignment)
   - Search submit stays in Add Accounts filtering mode (no accidental jump into unlinked flow)
   - Desktop guardrails for linked-bank loading overlay and account-menu reconcile/edit states
+  - Desktop unlinked-account form and success-step parity coverage
 - Transactions
   - Add expense/income/transfer, filtering, edit and action sheets, review queue approval flow
 - Reflect and reports
@@ -54,3 +55,5 @@ Progress checklist: `docs/openbudget-migration-progress.md`
 - Add Accounts desktop linked-bank loading overlay: https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-pr145/add-accounts-loading-overlay-desktop-screen.png
 - Accounts desktop reconcile dialog: https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-pr145/accounts-reconcile-dialog-desktop-screen.png
 - Accounts desktop edit account form: https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-pr145/accounts-edit-account-desktop-screen.png
+- Add Unlinked Account desktop form: https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-pr148/add-unlinked-account-desktop-form-screen.png
+- Add Unlinked Account desktop success: https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-pr148/add-unlinked-account-desktop-success-screen.png
