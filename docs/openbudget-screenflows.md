@@ -24,6 +24,7 @@ Progress checklist: `docs/openbudget-migration-progress.md`
   - Search submit stays in Add Accounts filtering mode (no accidental jump into unlinked flow)
   - Desktop guardrails for linked-bank loading overlay and account-menu reconcile/edit states
   - Desktop unlinked-account form and success-step parity coverage
+  - Desktop unlinked-account step-reset hardening (scroll position reset when returning from account type and after add-another)
   - Add Accounts unlinked step hardening (independent per-step scroll state + keyed controls for reliable mobile/desktop interactions)
 - Transactions
   - Add expense/income/transfer, filtering, edit and action sheets, review queue approval flow
@@ -85,3 +86,7 @@ Progress checklist: `docs/openbudget-migration-progress.md`
 - Add Accounts desktop bank search (clean fallback backend): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-main-screenshot-backend/add-accounts-search-desktop-screen.png
 - Add Unlinked Account desktop form (clean fallback backend): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-main-screenshot-backend/add-unlinked-account-desktop-form-screen.png
 - Add Unlinked Account desktop success (clean fallback backend): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-main-screenshot-backend/add-unlinked-account-desktop-success-screen.png
+- Add Accounts desktop bank search (scroll-reset regression pass): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-main-unlinked-scroll-reset/add-accounts-search-desktop-screen.png
+- Add Unlinked Account desktop form (scroll-reset regression pass): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-main-unlinked-scroll-reset/add-unlinked-account-desktop-form-screen.png
+- Add Unlinked Account desktop reset state (scroll-reset regression pass): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-main-unlinked-scroll-reset/add-unlinked-account-desktop-reset-screen.png
+- Add Unlinked Account desktop success (scroll-reset regression pass): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-main-unlinked-scroll-reset/add-unlinked-account-desktop-success-screen.png

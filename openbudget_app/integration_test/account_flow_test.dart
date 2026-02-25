@@ -28,6 +28,7 @@ final _budgetUuid = UuidValue.fromString(
   '00000000-0000-0000-0000-000000000010',
 );
 const _addAccountUnlinkedButtonKey = Key('add-account-add-unlinked-button');
+const _addAccountUnlinkedScrollKey = Key('add-account-unlinked-scroll');
 const _addAccountNicknameFieldKey = Key('add-account-unlinked-nickname-field');
 const _addAccountTypeTileKey = Key('add-account-unlinked-type-tile');
 const _addAccountBalanceFieldKey = Key('add-account-unlinked-balance-field');
@@ -599,6 +600,68 @@ void main() {
       await tester.pumpAndSettle();
       nextButton = tester.widget(nextFinder);
       expect(nextButton.onPressed, isNull);
+    },
+  );
+
+  patrolWidgetTest(
+    'desktop unlinked account resets scroll position across step transitions',
+    ($) async {
+      final tester = $.tester;
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      await tester.binding.setSurfaceSize(const Size(1024, 460));
+      await tester.pumpWidget(_buildApp(accounts: const []));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Add Account'));
+      await _pumpToAddAccountSearch(tester);
+      await _tapAddUnlinkedAccount(tester);
+      await tester.pumpAndSettle();
+
+      final introFinder = find.textContaining("Let's go!");
+      expect(introFinder, findsOneWidget);
+      final introTopBeforeScroll = tester.getTopLeft(introFinder).dy;
+
+      await tester.drag(
+        find.byKey(_addAccountUnlinkedScrollKey),
+        const Offset(0, -320),
+      );
+      await tester.pumpAndSettle();
+      final introTopAfterManualScroll = tester.getTopLeft(introFinder).dy;
+      expect(introTopAfterManualScroll, lessThan(introTopBeforeScroll));
+
+      await _activateListTile(tester, find.byKey(_addAccountTypeTileKey));
+      await tester.pumpAndSettle();
+      await _activateListTile(tester, find.byKey(_addAccountCheckingTypeKey));
+      await tester.pumpAndSettle();
+
+      final introTopAfterTypeReturn = tester.getTopLeft(introFinder).dy;
+      expect(introTopAfterTypeReturn, greaterThan(introTopAfterManualScroll));
+
+      await _enterTextWhenVisible(
+        tester,
+        find.byKey(_addAccountNicknameFieldKey),
+        'Daily',
+      );
+      await _enterTextWhenVisible(
+        tester,
+        find.byKey(_addAccountBalanceFieldKey),
+        '50000',
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilledButton, 'Next'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Success!'), findsOneWidget);
+      await tester.tap(find.widgetWithText(OutlinedButton, 'Add Another'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Add Unlinked Account'), findsOneWidget);
+      final introTopAfterAddAnother = tester.getTopLeft(introFinder).dy;
+      expect(introTopAfterAddAnother, greaterThan(introTopAfterManualScroll));
+      await captureIntegrationScreenshot(
+        tester,
+        'add-unlinked-account-desktop-reset-screen',
+      );
     },
   );
 

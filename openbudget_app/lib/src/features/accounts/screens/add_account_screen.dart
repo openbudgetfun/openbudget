@@ -55,9 +55,15 @@ class AddAccountScreen extends HookConsumerWidget {
     final selectedCurrency = useState(CurrencyCode.usd);
     final didHydrateBudgetCurrency = useState(false);
     final showSearchingOverlay = useState(false);
-    final searchScrollController = useScrollController();
-    final unlinkedScrollController = useScrollController();
-    final accountTypeScrollController = useScrollController();
+    // Keep step scroll state ephemeral so returning between wizard steps always
+    // starts from the top instead of restoring page-storage offsets.
+    final searchScrollController = useScrollController(keepScrollOffset: false);
+    final unlinkedScrollController = useScrollController(
+      keepScrollOffset: false,
+    );
+    final accountTypeScrollController = useScrollController(
+      keepScrollOffset: false,
+    );
     final budgetAsync = ref.watch(budgetDetailProvider(budgetId));
     final budgetCurrencyCode = budgetAsync.whenOrNull(
       data: (budget) => budget.currencyCode,
