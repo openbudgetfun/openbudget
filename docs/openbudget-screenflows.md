@@ -82,3 +82,6 @@ Progress checklist: `docs/openbudget-migration-progress.md`
 - Add Account type selection (desktop gating regression coverage): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-main-unlinked-gating/add-account-type-selection.png
 - Add Unlinked Account desktop form (desktop gating regression coverage): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-main-unlinked-gating/add-unlinked-account-desktop-form-screen.png
 - Add Unlinked Account desktop success (desktop gating regression coverage): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-main-unlinked-gating/add-unlinked-account-desktop-success-screen.png
+- Add Accounts desktop bank search (clean fallback backend): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-main-screenshot-backend/add-accounts-search-desktop-screen.png
+- Add Unlinked Account desktop form (clean fallback backend): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-main-screenshot-backend/add-unlinked-account-desktop-form-screen.png
+- Add Unlinked Account desktop success (clean fallback backend): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-main-screenshot-backend/add-unlinked-account-desktop-success-screen.png
