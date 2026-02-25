@@ -136,6 +136,22 @@ void main() {
     expect(find.text('Chase'), findsOneWidget);
   });
 
+  testWidgets('search submit keeps user on the bank search step', (
+    tester,
+  ) async {
+    await tester.pumpWidget(buildSubject());
+    await _pumpToBankSearch(tester);
+
+    await tester.enterText(find.byType(TextField).first, 'citi');
+    await tester.testTextInput.receiveAction(TextInputAction.search);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Search for your bank'), findsOneWidget);
+    expect(find.text('Search Results'), findsOneWidget);
+    expect(find.text('Add Unlinked Account'), findsNothing);
+    expect(find.textContaining('Linked connections for "citi"'), findsNothing);
+  });
+
   testWidgets('account type picker can be opened from unlinked form', (
     tester,
   ) async {
