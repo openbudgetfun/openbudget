@@ -4,6 +4,20 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 APP_DIR="${ROOT_DIR}/openbudget_app"
 
+# Fall back to the repo-managed Flutter SDK when PATH doesn't provide one.
+if ! command -v flutter >/dev/null 2>&1; then
+	fvm_flutter_bin="${ROOT_DIR}/.fvm/flutter_sdk/bin"
+	if [ -x "${fvm_flutter_bin}/flutter" ]; then
+		export PATH="${fvm_flutter_bin}:${PATH}"
+		echo "Using Flutter from ${fvm_flutter_bin}"
+	fi
+fi
+
+if ! command -v flutter >/dev/null 2>&1; then
+	echo "::error::Flutter executable not found in PATH and no .fvm fallback was available."
+	exit 1
+fi
+
 cd "$APP_DIR"
 
 shopt -s nullglob

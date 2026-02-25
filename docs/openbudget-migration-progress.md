@@ -38,6 +38,7 @@ This checklist tracks progress for migrating and polishing app flows using the `
 - [x] Patrol integration suite enabled for critical flows
 - [x] Patrol runner hardened with hidden-failure marker detection and per-file failure accounting
 - [x] Patrol runner optimized with shared dependency resolution and `--no-pub`
+- [x] Patrol runner auto-discovers repo-managed Flutter via `.fvm/flutter_sdk/bin` when PATH is missing
 - [x] Full Patrol suite rerun clean (`14/14`) after desktop unlinked-account parity fix
 - [x] Screenshot capture fallback order tuned (`integration -> repaint -> renderView`) for clean desktop artifacts
 - [x] Formatting, lint, and secrets git hooks configured in `devenv.nix`
