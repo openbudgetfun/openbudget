@@ -227,10 +227,11 @@ void main() {
 
     expect(find.text('Add Accounts'), findsOneWidget);
     expect(find.text('Search for your bank'), findsOneWidget);
+    await _ensureAddUnlinkedVisible(tester);
     expect(find.text('Add an Unlinked Account'), findsOneWidget);
     await captureIntegrationScreenshot(tester, 'add-accounts-search-screen');
 
-    await tester.tap(find.text('Add an Unlinked Account'));
+    await _tapAddUnlinkedAccount(tester);
     await tester.pumpAndSettle();
 
     expect(find.text('Currency'), findsOneWidget);
@@ -253,13 +254,20 @@ void main() {
     await tester.tap(find.text('Add Account'));
     await _pumpToAddAccountSearch(tester);
 
-    await tester.tap(find.text('Chase'));
+    await tester.enterText(find.byType(TextField).first, 'citi');
+    await tester.pumpAndSettle();
+
+    expect(find.text('Search Results'), findsOneWidget);
+    expect(find.text('Citi'), findsOneWidget);
+    expect(find.text('Chase'), findsNothing);
+
+    await tester.tap(find.text('Citi'));
     await tester.pump(const Duration(milliseconds: 900));
     await tester.pumpAndSettle();
 
     expect(find.text('Add Unlinked Account'), findsOneWidget);
     expect(
-      find.textContaining('Linked connections for "Chase" are coming soon'),
+      find.textContaining('Linked connections for "Citi" are coming soon'),
       findsOneWidget,
     );
   });
@@ -273,7 +281,7 @@ void main() {
 
       await tester.tap(find.text('Add Account'));
       await _pumpToAddAccountSearch(tester);
-      await tester.tap(find.text('Add an Unlinked Account'));
+      await _tapAddUnlinkedAccount(tester);
       await tester.pumpAndSettle();
 
       var nextButton = tester.widget<FilledButton>(
@@ -307,7 +315,7 @@ void main() {
 
       await tester.tap(find.text('Add Account'));
       await _pumpToAddAccountSearch(tester);
-      await tester.tap(find.text('Add an Unlinked Account'));
+      await _tapAddUnlinkedAccount(tester);
       await tester.pumpAndSettle();
 
       await tester.enterText(find.byType(TextField).at(0), 'Daily');
@@ -629,5 +637,23 @@ void main() {
 
 Future<void> _pumpToAddAccountSearch(WidgetTester tester) async {
   await tester.pump(const Duration(milliseconds: 1500));
+  await tester.pumpAndSettle();
+}
+
+Future<void> _tapAddUnlinkedAccount(WidgetTester tester) async {
+  await _ensureAddUnlinkedVisible(tester);
+  await tester.tap(find.text('Add an Unlinked Account'));
+}
+
+Future<void> _ensureAddUnlinkedVisible(WidgetTester tester) async {
+  final finder = find.text('Add an Unlinked Account');
+  if (finder.evaluate().isEmpty) {
+    await tester.scrollUntilVisible(
+      finder,
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+  }
+  await tester.ensureVisible(finder);
   await tester.pumpAndSettle();
 }

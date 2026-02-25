@@ -68,6 +68,7 @@ class AddAccountScreen extends HookConsumerWidget {
 
     useListenable(nameController);
     useListenable(balanceController);
+    useListenable(searchController);
 
     useEffect(() {
       if (step.value != _AddAccountStep.loading) return null;
@@ -221,6 +222,7 @@ class AddAccountScreen extends HookConsumerWidget {
             ),
             _AddAccountStep.searchBank => _BankSearchStep(
               searchController: searchController,
+              searchQuery: searchController.text,
               onSearchSubmitted: startLinkedBankFlow,
               onInstitutionTap: startLinkedBankFlow,
               onAddUnlinked: () => step.value = _AddAccountStep.unlinkedAccount,
@@ -378,28 +380,57 @@ class _LoadingStep extends StatelessWidget {
 class _BankSearchStep extends StatelessWidget {
   const _BankSearchStep({
     required this.searchController,
+    required this.searchQuery,
     required this.onSearchSubmitted,
     required this.onInstitutionTap,
     required this.onAddUnlinked,
   });
 
   final TextEditingController searchController;
+  final String searchQuery;
   final Future<void> Function(String value) onSearchSubmitted;
   final Future<void> Function(String institution) onInstitutionTap;
   final VoidCallback onAddUnlinked;
 
   @override
   Widget build(BuildContext context) {
-    const popularInstitutions = [
-      'Chase',
-      'Capital One',
-      'American Express',
-      'Bank of America',
-      'Citi',
-      'Discover',
-      'Wells Fargo',
-      'Apple Card',
+    const institutions = [
+      _InstitutionOption(name: 'Chase', backgroundColor: Color(0xFF1262AE)),
+      _InstitutionOption(
+        name: 'Capital One',
+        backgroundColor: Color(0xFF0A557D),
+      ),
+      _InstitutionOption(
+        name: 'American Express',
+        backgroundColor: Color(0xFF1876C8),
+      ),
+      _InstitutionOption(
+        name: 'Bank of America',
+        backgroundColor: Color(0xFFD22841),
+      ),
+      _InstitutionOption(name: 'Citi', backgroundColor: Color(0xFF044684)),
+      _InstitutionOption(name: 'Discover', backgroundColor: Color(0xFF383B54)),
+      _InstitutionOption(
+        name: 'Wells Fargo',
+        backgroundColor: Color(0xFFBD2134),
+      ),
+      _InstitutionOption(
+        name: 'Apple Card',
+        backgroundColor: Color(0xFF111111),
+      ),
     ];
+    final normalizedQuery = searchQuery.trim().toLowerCase();
+    final filteredInstitutions = normalizedQuery.isEmpty
+        ? institutions
+        : institutions
+              .where(
+                (institution) =>
+                    institution.name.toLowerCase().contains(normalizedQuery),
+              )
+              .toList(growable: false);
+    final sectionTitle = normalizedQuery.isEmpty
+        ? 'Popular Options'
+        : 'Search Results';
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(
@@ -433,23 +464,39 @@ class _BankSearchStep extends StatelessWidget {
         ),
         const SizedBox(height: SpacingTokens.md),
         Text(
-          'Popular Options',
+          sectionTitle,
           style: Theme.of(
             context,
           ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
         ),
         const SizedBox(height: SpacingTokens.sm),
-        Wrap(
-          spacing: SpacingTokens.sm,
-          runSpacing: SpacingTokens.sm,
-          children: [
-            for (final institution in popularInstitutions)
-              _InstitutionTile(
-                name: institution,
-                onTap: () => onInstitutionTap(institution),
+        if (filteredInstitutions.isEmpty)
+          Container(
+            padding: const EdgeInsets.all(SpacingTokens.md),
+            decoration: BoxDecoration(
+              color: OpenBudgetPalette.surface,
+              border: Border.all(color: OpenBudgetPalette.divider),
+              borderRadius: BorderRadius.circular(RadiusTokens.md),
+            ),
+            child: Text(
+              'No institutions found. Try another name or add an unlinked account.',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: OpenBudgetPalette.mutedText,
               ),
-          ],
-        ),
+            ),
+          )
+        else
+          Wrap(
+            spacing: SpacingTokens.sm,
+            runSpacing: SpacingTokens.sm,
+            children: [
+              for (final institution in filteredInstitutions)
+                _InstitutionTile(
+                  option: institution,
+                  onTap: () => onInstitutionTap(institution.name),
+                ),
+            ],
+          ),
         const SizedBox(height: SpacingTokens.md),
         Row(
           children: [
@@ -477,9 +524,9 @@ class _BankSearchStep extends StatelessWidget {
 }
 
 class _InstitutionTile extends StatelessWidget {
-  const _InstitutionTile({required this.name, required this.onTap});
+  const _InstitutionTile({required this.option, required this.onTap});
 
-  final String name;
+  final _InstitutionOption option;
   final VoidCallback onTap;
 
   @override
@@ -491,24 +538,40 @@ class _InstitutionTile extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(RadiusTokens.md),
         child: Container(
-          height: 56,
-          alignment: Alignment.center,
+          height: 82,
+          padding: const EdgeInsets.all(SpacingTokens.sm),
           decoration: BoxDecoration(
             color: OpenBudgetPalette.surface,
             border: Border.all(color: OpenBudgetPalette.divider),
             borderRadius: BorderRadius.circular(RadiusTokens.md),
           ),
-          child: Text(
-            name,
-            style: Theme.of(
-              context,
-            ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
-            textAlign: TextAlign.center,
+          child: Container(
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: option.backgroundColor,
+              borderRadius: BorderRadius.circular(RadiusTokens.sm),
+            ),
+            child: Text(
+              option.name,
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+              ),
+              textAlign: TextAlign.center,
+            ),
           ),
         ),
       ),
     );
   }
+}
+
+@immutable
+class _InstitutionOption {
+  const _InstitutionOption({required this.name, required this.backgroundColor});
+
+  final String name;
+  final Color backgroundColor;
 }
 
 class _UnlinkedAccountStep extends StatelessWidget {

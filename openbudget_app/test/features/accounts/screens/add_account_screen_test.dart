@@ -68,6 +68,8 @@ void main() {
     expect(find.text('Add Accounts'), findsOneWidget);
     expect(find.text('Search for your bank'), findsOneWidget);
     expect(find.text('Popular Options'), findsOneWidget);
+
+    await _scrollToAddUnlinked(tester);
     expect(find.text('Add an Unlinked Account'), findsOneWidget);
   });
 
@@ -96,7 +98,7 @@ void main() {
     await tester.pumpWidget(buildSubject(currencyCode: 'EUR'));
     await _pumpToBankSearch(tester);
 
-    await tester.tap(find.text('Add an Unlinked Account'));
+    await _tapAddUnlinked(tester);
     await tester.pumpAndSettle();
 
     expect(find.text('Add Unlinked Account'), findsOneWidget);
@@ -105,13 +107,37 @@ void main() {
     expect(find.byType(DropdownButtonFormField<String>), findsOneWidget);
   });
 
+  testWidgets('filters institutions by search query', (tester) async {
+    await tester.pumpWidget(buildSubject());
+    await _pumpToBankSearch(tester);
+
+    final searchField = find.byType(TextField).first;
+    await tester.enterText(searchField, 'citi');
+    await tester.pumpAndSettle();
+
+    expect(find.text('Search Results'), findsOneWidget);
+    expect(find.text('Citi'), findsOneWidget);
+    expect(find.text('Chase'), findsNothing);
+
+    await tester.enterText(searchField, 'zzz');
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('No institutions found'), findsOneWidget);
+
+    await tester.enterText(searchField, '');
+    await tester.pumpAndSettle();
+
+    expect(find.text('Popular Options'), findsOneWidget);
+    expect(find.text('Chase'), findsOneWidget);
+  });
+
   testWidgets('account type picker can be opened from unlinked form', (
     tester,
   ) async {
     await tester.pumpWidget(buildSubject());
     await _pumpToBankSearch(tester);
 
-    await tester.tap(find.text('Add an Unlinked Account'));
+    await _tapAddUnlinked(tester);
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('Select account type...'));
@@ -129,7 +155,7 @@ void main() {
     await tester.pumpWidget(buildSubject());
     await _pumpToBankSearch(tester);
 
-    await tester.tap(find.text('Add an Unlinked Account'));
+    await _tapAddUnlinked(tester);
     await tester.pumpAndSettle();
 
     var nextButton = tester.widget<FilledButton>(
@@ -156,5 +182,23 @@ void main() {
 
 Future<void> _pumpToBankSearch(WidgetTester tester) async {
   await tester.pump(const Duration(milliseconds: 1500));
+  await tester.pumpAndSettle();
+}
+
+Future<void> _tapAddUnlinked(WidgetTester tester) async {
+  await _scrollToAddUnlinked(tester);
+  await tester.tap(find.text('Add an Unlinked Account'));
+}
+
+Future<void> _scrollToAddUnlinked(WidgetTester tester) async {
+  final finder = find.text('Add an Unlinked Account');
+  if (finder.evaluate().isEmpty) {
+    await tester.scrollUntilVisible(
+      finder,
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+  }
+  await tester.ensureVisible(finder);
   await tester.pumpAndSettle();
 }
