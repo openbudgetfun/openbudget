@@ -22,6 +22,17 @@ enum _AddAccountStep {
   success,
 }
 
+const _addAccountSearchScrollKey = Key('add-account-search-scroll');
+const _addAccountUnlinkedScrollKey = Key('add-account-unlinked-scroll');
+const _addAccountAddUnlinkedButtonKey = Key('add-account-add-unlinked-button');
+const _addAccountUnlinkedNicknameFieldKey = Key(
+  'add-account-unlinked-nickname-field',
+);
+const _addAccountUnlinkedTypeTileKey = Key('add-account-unlinked-type-tile');
+const _addAccountUnlinkedBalanceFieldKey = Key(
+  'add-account-unlinked-balance-field',
+);
+
 class AddAccountScreen extends HookConsumerWidget {
   const AddAccountScreen({required this.budgetId, super.key});
 
@@ -41,6 +52,9 @@ class AddAccountScreen extends HookConsumerWidget {
     final selectedCurrency = useState(CurrencyCode.usd);
     final didHydrateBudgetCurrency = useState(false);
     final showSearchingOverlay = useState(false);
+    final searchScrollController = useScrollController();
+    final unlinkedScrollController = useScrollController();
+    final accountTypeScrollController = useScrollController();
     final budgetAsync = ref.watch(budgetDetailProvider(budgetId));
     final budgetCurrencyCode = budgetAsync.whenOrNull(
       data: (budget) => budget.currencyCode,
@@ -89,6 +103,43 @@ class AddAccountScreen extends HookConsumerWidget {
       });
       return timer.cancel;
     }, [step.value]);
+
+    useEffect(
+      () {
+        void resetScroll(ScrollController controller) {
+          if (controller.hasClients) {
+            controller.jumpTo(0);
+            return;
+          }
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (controller.hasClients) {
+              controller.jumpTo(0);
+            }
+          });
+        }
+
+        switch (step.value) {
+          case _AddAccountStep.searchBank:
+            resetScroll(searchScrollController);
+          case _AddAccountStep.unlinkedAccount:
+            resetScroll(unlinkedScrollController);
+          case _AddAccountStep.accountType:
+            resetScroll(accountTypeScrollController);
+          case _AddAccountStep.loading:
+          case _AddAccountStep.loadingInstitutions:
+          case _AddAccountStep.success:
+            break;
+        }
+
+        return null;
+      },
+      [
+        step.value,
+        searchScrollController,
+        unlinkedScrollController,
+        accountTypeScrollController,
+      ],
+    );
 
     final balanceValue = double.tryParse(balanceController.text.trim());
     final canSubmit =
@@ -212,38 +263,51 @@ class AddAccountScreen extends HookConsumerWidget {
       body: Stack(
         children: [
           switch (step.value) {
-            _AddAccountStep.loading => const _LoadingStep(
-              title: 'Loading...',
-              includeSpinner: false,
+            _AddAccountStep.loading => const _StepFrame(
+              child: _LoadingStep(title: 'Loading...', includeSpinner: false),
             ),
-            _AddAccountStep.loadingInstitutions => const _LoadingStep(
-              title: 'Loading institutions...',
-              includeSpinner: true,
+            _AddAccountStep.loadingInstitutions => const _StepFrame(
+              child: _LoadingStep(
+                title: 'Loading institutions...',
+                includeSpinner: true,
+              ),
             ),
-            _AddAccountStep.searchBank => _BankSearchStep(
-              searchController: searchController,
-              searchQuery: searchController.text,
-              onInstitutionTap: startLinkedBankFlow,
-              onAddUnlinked: () => step.value = _AddAccountStep.unlinkedAccount,
+            _AddAccountStep.searchBank => _StepFrame(
+              child: _BankSearchStep(
+                scrollController: searchScrollController,
+                searchController: searchController,
+                searchQuery: searchController.text,
+                onInstitutionTap: startLinkedBankFlow,
+                onAddUnlinked: () =>
+                    step.value = _AddAccountStep.unlinkedAccount,
+              ),
             ),
-            _AddAccountStep.unlinkedAccount => _UnlinkedAccountStep(
-              nameController: nameController,
-              balanceController: balanceController,
-              selectedTypeLabel:
-                  selectedType?.label ?? 'Select account type...',
-              hasSelectedType: selectedType != null,
-              selectedCurrency: selectedCurrency.value,
-              onChooseType: () => step.value = _AddAccountStep.accountType,
-              onCurrencyChanged: (code) =>
-                  selectedCurrency.value = parseCurrencyCode(code),
+            _AddAccountStep.unlinkedAccount => _StepFrame(
+              maxWidth: 720,
+              child: _UnlinkedAccountStep(
+                scrollController: unlinkedScrollController,
+                nameController: nameController,
+                balanceController: balanceController,
+                selectedTypeLabel:
+                    selectedType?.label ?? 'Select account type...',
+                hasSelectedType: selectedType != null,
+                selectedCurrency: selectedCurrency.value,
+                onChooseType: () => step.value = _AddAccountStep.accountType,
+                onCurrencyChanged: (code) =>
+                    selectedCurrency.value = parseCurrencyCode(code),
+              ),
             ),
-            _AddAccountStep.accountType => _AccountTypeStep(
-              sections: typeSections,
-              selectedTypeKey: selectedTypeKey.value,
-              onSelected: (option) {
-                selectedTypeKey.value = option.key;
-                step.value = _AddAccountStep.unlinkedAccount;
-              },
+            _AddAccountStep.accountType => _StepFrame(
+              maxWidth: 720,
+              child: _AccountTypeStep(
+                scrollController: accountTypeScrollController,
+                sections: typeSections,
+                selectedTypeKey: selectedTypeKey.value,
+                onSelected: (option) {
+                  selectedTypeKey.value = option.key;
+                  step.value = _AddAccountStep.unlinkedAccount;
+                },
+              ),
             ),
             _AddAccountStep.success => _SuccessStep(
               accountTypeLabel: selectedType?.label ?? 'Account',
@@ -293,22 +357,50 @@ class AddAccountScreen extends HookConsumerWidget {
               SpacingTokens.md,
               SpacingTokens.md,
             ),
-            child: FilledButton(
-              onPressed: canSubmit && !isSubmitting.value
-                  ? submitUnlinkedAccount
-                  : null,
-              child: isSubmitting.value
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Text('Next'),
+            child: _StepFrame(
+              maxWidth: 720,
+              child: FilledButton(
+                onPressed: canSubmit && !isSubmitting.value
+                    ? submitUnlinkedAccount
+                    : null,
+                child: isSubmitting.value
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text('Next'),
+              ),
             ),
           ),
         ),
         _AddAccountStep.success => null,
         _AddAccountStep.searchBank || _AddAccountStep.accountType => null,
+      },
+    );
+  }
+}
+
+class _StepFrame extends StatelessWidget {
+  const _StepFrame({required this.child, this.maxWidth = 980});
+
+  final Widget child;
+  final double maxWidth;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth >= 900
+            ? constraints.maxWidth.clamp(0, maxWidth).toDouble()
+            : constraints.maxWidth;
+        return Align(
+          alignment: Alignment.topCenter,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: width),
+            child: child,
+          ),
+        );
       },
     );
   }
@@ -378,12 +470,14 @@ class _LoadingStep extends StatelessWidget {
 
 class _BankSearchStep extends StatelessWidget {
   const _BankSearchStep({
+    required this.scrollController,
     required this.searchController,
     required this.searchQuery,
     required this.onInstitutionTap,
     required this.onAddUnlinked,
   });
 
+  final ScrollController scrollController;
   final TextEditingController searchController;
   final String searchQuery;
   final Future<void> Function(String institution) onInstitutionTap;
@@ -415,6 +509,9 @@ class _BankSearchStep extends StatelessWidget {
         : 'Search Results';
 
     return ListView(
+      key: _addAccountSearchScrollKey,
+      controller: scrollController,
+      primary: false,
       padding: const EdgeInsets.fromLTRB(
         SpacingTokens.md,
         SpacingTokens.md,
@@ -468,16 +565,24 @@ class _BankSearchStep extends StatelessWidget {
             ),
           )
         else
-          Wrap(
-            spacing: SpacingTokens.sm,
-            runSpacing: SpacingTokens.sm,
-            children: [
-              for (final institution in filteredInstitutions)
-                _InstitutionTile(
-                  option: institution,
-                  onTap: () => onInstitutionTap(institution.name),
-                ),
-            ],
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final tileWidth = (constraints.maxWidth - SpacingTokens.sm) / 2;
+              return Wrap(
+                spacing: SpacingTokens.sm,
+                runSpacing: SpacingTokens.sm,
+                children: [
+                  for (final institution in filteredInstitutions)
+                    SizedBox(
+                      width: tileWidth,
+                      child: _InstitutionTile(
+                        option: institution,
+                        onTap: () => onInstitutionTap(institution.name),
+                      ),
+                    ),
+                ],
+              );
+            },
           ),
         const SizedBox(height: SpacingTokens.md),
         Row(
@@ -497,6 +602,7 @@ class _BankSearchStep extends StatelessWidget {
         ),
         const SizedBox(height: SpacingTokens.md),
         OutlinedButton(
+          key: _addAccountAddUnlinkedButtonKey,
           onPressed: onAddUnlinked,
           child: const Text('Add an Unlinked Account'),
         ),
@@ -513,27 +619,23 @@ class _InstitutionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width:
-          (MediaQuery.sizeOf(context).width - (SpacingTokens.md * 2) - 12) / 2,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(RadiusTokens.md),
-        child: Container(
-          height: 84,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: OpenBudgetPalette.surface,
-            border: Border.all(color: OpenBudgetPalette.divider),
-            borderRadius: BorderRadius.circular(RadiusTokens.md),
-          ),
-          child: Text(
-            option.name,
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
-            textAlign: TextAlign.center,
-          ),
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(RadiusTokens.md),
+      child: Container(
+        height: 84,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: OpenBudgetPalette.surface,
+          border: Border.all(color: OpenBudgetPalette.divider),
+          borderRadius: BorderRadius.circular(RadiusTokens.md),
+        ),
+        child: Text(
+          option.name,
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+          textAlign: TextAlign.center,
         ),
       ),
     );
@@ -549,6 +651,7 @@ class _InstitutionOption {
 
 class _UnlinkedAccountStep extends StatelessWidget {
   const _UnlinkedAccountStep({
+    required this.scrollController,
     required this.nameController,
     required this.balanceController,
     required this.selectedTypeLabel,
@@ -558,6 +661,7 @@ class _UnlinkedAccountStep extends StatelessWidget {
     required this.onCurrencyChanged,
   });
 
+  final ScrollController scrollController;
   final TextEditingController nameController;
   final TextEditingController balanceController;
   final String selectedTypeLabel;
@@ -568,107 +672,112 @@ class _UnlinkedAccountStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
+    final theme = Theme.of(context);
+    final headingStyle = theme.textTheme.titleSmall?.copyWith(
+      fontWeight: FontWeight.w700,
+      color: theme.colorScheme.onSurface,
+    );
+    final introStyle = theme.textTheme.bodyMedium?.copyWith(
+      color: theme.colorScheme.onSurface,
+    );
+
+    return SingleChildScrollView(
+      key: _addAccountUnlinkedScrollKey,
+      controller: scrollController,
+      primary: false,
       padding: const EdgeInsets.fromLTRB(
         SpacingTokens.md,
         SpacingTokens.md,
         SpacingTokens.md,
         SpacingTokens.xl,
       ),
-      children: [
-        Text(
-          "Let's go! And don't worry - if you change your mind, "
-          'you can link your account at any time.',
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
-        const SizedBox(height: SpacingTokens.md),
-        Text(
-          'Give it a nickname',
-          style: Theme.of(
-            context,
-          ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
-        ),
-        const SizedBox(height: SpacingTokens.xs),
-        TextField(
-          controller: nameController,
-          textInputAction: TextInputAction.next,
-          decoration: const InputDecoration(hintText: 'Enter nickname'),
-        ),
-        const SizedBox(height: SpacingTokens.md),
-        Text(
-          'What type of account are you adding?',
-          style: Theme.of(
-            context,
-          ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
-        ),
-        const SizedBox(height: SpacingTokens.xs),
-        ListTile(
-          onTap: onChooseType,
-          title: Text(
-            selectedTypeLabel,
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: hasSelectedType ? null : OpenBudgetPalette.mutedText,
-              fontWeight: hasSelectedType ? FontWeight.w600 : FontWeight.w500,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            "Let's go! And don't worry - if you change your mind, "
+            'you can link your account at any time.',
+            style: introStyle,
+          ),
+          const SizedBox(height: SpacingTokens.md),
+          Text('Give it a nickname', style: headingStyle),
+          const SizedBox(height: SpacingTokens.xs),
+          TextField(
+            key: _addAccountUnlinkedNicknameFieldKey,
+            controller: nameController,
+            textInputAction: TextInputAction.next,
+            decoration: const InputDecoration(hintText: 'Enter nickname'),
+          ),
+          const SizedBox(height: SpacingTokens.md),
+          Text('What type of account are you adding?', style: headingStyle),
+          const SizedBox(height: SpacingTokens.xs),
+          ListTile(
+            key: _addAccountUnlinkedTypeTileKey,
+            onTap: onChooseType,
+            title: Text(
+              selectedTypeLabel,
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color: hasSelectedType ? null : OpenBudgetPalette.mutedText,
+                fontWeight: hasSelectedType ? FontWeight.w600 : FontWeight.w500,
+              ),
+            ),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: SpacingTokens.sm,
+            ),
+            shape: RoundedRectangleBorder(
+              side: const BorderSide(color: OpenBudgetPalette.divider),
+              borderRadius: BorderRadius.circular(RadiusTokens.md),
             ),
           ),
-          trailing: const Icon(Icons.chevron_right_rounded),
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: SpacingTokens.sm,
+          const SizedBox(height: SpacingTokens.md),
+          Text('What is your current account balance?', style: headingStyle),
+          const SizedBox(height: SpacingTokens.xs),
+          TextField(
+            key: _addAccountUnlinkedBalanceFieldKey,
+            controller: balanceController,
+            keyboardType: const TextInputType.numberWithOptions(
+              decimal: true,
+              signed: true,
+            ),
+            textInputAction: TextInputAction.done,
+            decoration: const InputDecoration(hintText: '5000'),
           ),
-          shape: RoundedRectangleBorder(
-            side: const BorderSide(color: OpenBudgetPalette.divider),
-            borderRadius: BorderRadius.circular(RadiusTokens.md),
+          const SizedBox(height: SpacingTokens.md),
+          DropdownButtonFormField<String>(
+            initialValue: selectedCurrency.code,
+            items: CurrencyCode.values
+                .map(
+                  (currency) => DropdownMenuItem(
+                    value: currency.code,
+                    child: Text('${currency.code} (${currency.symbol})'),
+                  ),
+                )
+                .toList(),
+            onChanged: (value) {
+              if (value == null) return;
+              onCurrencyChanged(value);
+            },
+            decoration: const InputDecoration(
+              labelText: 'Currency',
+              prefixIcon: Icon(Icons.language_rounded),
+            ),
           ),
-        ),
-        const SizedBox(height: SpacingTokens.md),
-        Text(
-          'What is your current account balance?',
-          style: Theme.of(
-            context,
-          ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
-        ),
-        const SizedBox(height: SpacingTokens.xs),
-        TextField(
-          controller: balanceController,
-          keyboardType: const TextInputType.numberWithOptions(
-            decimal: true,
-            signed: true,
-          ),
-          textInputAction: TextInputAction.done,
-          decoration: const InputDecoration(hintText: '5000'),
-        ),
-        const SizedBox(height: SpacingTokens.md),
-        DropdownButtonFormField<String>(
-          initialValue: selectedCurrency.code,
-          items: CurrencyCode.values
-              .map(
-                (currency) => DropdownMenuItem(
-                  value: currency.code,
-                  child: Text('${currency.code} (${currency.symbol})'),
-                ),
-              )
-              .toList(),
-          onChanged: (value) {
-            if (value == null) return;
-            onCurrencyChanged(value);
-          },
-          decoration: const InputDecoration(
-            labelText: 'Currency',
-            prefixIcon: Icon(Icons.language_rounded),
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
 
 class _AccountTypeStep extends StatelessWidget {
   const _AccountTypeStep({
+    required this.scrollController,
     required this.sections,
     required this.selectedTypeKey,
     required this.onSelected,
   });
 
+  final ScrollController scrollController;
   final List<_AccountTypeSection> sections;
   final String? selectedTypeKey;
   final ValueChanged<_AccountTypeOption> onSelected;
@@ -676,6 +785,8 @@ class _AccountTypeStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
+      controller: scrollController,
+      primary: false,
       padding: const EdgeInsets.fromLTRB(
         SpacingTokens.md,
         SpacingTokens.sm,
@@ -700,6 +811,7 @@ class _AccountTypeStep extends StatelessWidget {
           const SizedBox(height: SpacingTokens.sm),
           for (final option in section.options) ...[
             ListTile(
+              key: ValueKey('add-account-type-option-${option.key}'),
               onTap: () => onSelected(option),
               title: Text(option.label),
               trailing: option.key == selectedTypeKey
@@ -742,32 +854,36 @@ class _SuccessStep extends StatelessWidget {
       children: [
         Expanded(
           child: Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: SpacingTokens.xl),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(
-                    Icons.check_circle_rounded,
-                    size: 72,
-                    color: OpenBudgetPalette.progressGreen,
-                  ),
-                  const SizedBox(height: SpacingTokens.md),
-                  Text(
-                    'Success!',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.w800,
+            child: _StepFrame(
+              maxWidth: 720,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: SpacingTokens.xl,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.check_circle_rounded,
+                      size: 72,
+                      color: OpenBudgetPalette.progressGreen,
                     ),
-                  ),
-                  const SizedBox(height: SpacingTokens.xs),
-                  Text(
-                    '$accountTypeLabel account added to OpenBudget.',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: OpenBudgetPalette.mutedText,
+                    const SizedBox(height: SpacingTokens.md),
+                    Text(
+                      'Success!',
+                      style: Theme.of(context).textTheme.headlineSmall
+                          ?.copyWith(fontWeight: FontWeight.w800),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: SpacingTokens.xs),
+                    Text(
+                      '$accountTypeLabel account added to OpenBudget.',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: OpenBudgetPalette.mutedText,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -780,22 +896,25 @@ class _SuccessStep extends StatelessWidget {
               SpacingTokens.md,
               SpacingTokens.md,
             ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: onAddAnother,
-                    child: const Text('Add Another'),
+            child: _StepFrame(
+              maxWidth: 720,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: onAddAnother,
+                      child: const Text('Add Another'),
+                    ),
                   ),
-                ),
-                const SizedBox(width: SpacingTokens.sm),
-                Expanded(
-                  child: FilledButton(
-                    onPressed: onDone,
-                    child: const Text('Done'),
+                  const SizedBox(width: SpacingTokens.sm),
+                  Expanded(
+                    child: FilledButton(
+                      onPressed: onDone,
+                      child: const Text('Done'),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

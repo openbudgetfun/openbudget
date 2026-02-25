@@ -24,6 +24,7 @@ Progress checklist: `docs/openbudget-migration-progress.md`
   - Search submit stays in Add Accounts filtering mode (no accidental jump into unlinked flow)
   - Desktop guardrails for linked-bank loading overlay and account-menu reconcile/edit states
   - Desktop unlinked-account form and success-step parity coverage
+  - Add Accounts unlinked step hardening (independent per-step scroll state + keyed controls for reliable mobile/desktop interactions)
 - Transactions
   - Add expense/income/transfer, filtering, edit and action sheets, review queue approval flow
 - Reflect and reports
@@ -62,3 +63,13 @@ Progress checklist: `docs/openbudget-migration-progress.md`
 - Add Unlinked Account desktop success: https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-pr148/add-unlinked-account-desktop-success-screen.png
 - Recent Moves desktop (All tab): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-pr149/recent-moves-desktop-screen.png
 - Recent Moves desktop (Moved tab): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-pr149/recent-moves-desktop-moved-screen.png
+- Add Account type selection (stability pass): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-pr150/add-account-type-selection.png
+- Add Accounts desktop linked-bank loading overlay (stability pass): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-pr150/add-accounts-loading-overlay-desktop-screen.png
+- Add Accounts desktop filtered results (stability pass): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-pr150/add-accounts-search-desktop-citi-results-screen.png
+- Add Unlinked Account desktop form (stability pass): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-pr150/add-unlinked-account-desktop-form-screen.png
+- Add Unlinked Account desktop success (stability pass): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-pr150/add-unlinked-account-desktop-success-screen.png
+- Add Account type selection (Patrol rerun): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-pr163/add-account-type-selection.png
+- Add Accounts desktop linked-bank loading overlay (Patrol rerun): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-pr163/add-accounts-loading-overlay-desktop-screen.png
+- Add Accounts desktop filtered results (Patrol rerun): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-pr163/add-accounts-search-desktop-citi-results-screen.png
+- Add Unlinked Account desktop form (Patrol rerun): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-pr163/add-unlinked-account-desktop-form-screen.png
+- Add Unlinked Account desktop success (Patrol rerun): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-pr163/add-unlinked-account-desktop-success-screen.png

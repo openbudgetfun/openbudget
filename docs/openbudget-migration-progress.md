@@ -21,6 +21,7 @@ This checklist tracks progress for migrating and polishing app flows using the `
 - [x] Add Accounts desktop/tablet search layout parity
 - [x] Add Accounts search submit behavior regression fix
 - [x] Add Accounts desktop unlinked-account form/success parity coverage
+- [x] Add Accounts unlinked flow stability hardening (isolated step scroll state + keyed form controls)
 - [x] Transaction review + action sheet flow parity
 - [x] Recent Moves tabs, coach dialog, and drilldown parity
 - [x] Recent Moves desktop tab-switch regression coverage
@@ -45,4 +46,6 @@ This checklist tracks progress for migrating and polishing app flows using the `
 
 - [x] Add wider desktop Patrol coverage for additional account-management states (edit account, reconcile prompt)
 - [x] Add explicit guardrail tests for account-link loading overlays on large viewports
+- [x] Stabilize Add Accounts Patrol interactions with visibility-safe helpers and keyed account-type selection
+- [x] Re-run full Patrol suite end-to-end via `tools/run_patrol_integration_tests.sh` and keep CI parity (`14/14` files green)
 - [ ] Continue tightening copy and spacing parity for any newly identified visual drift
