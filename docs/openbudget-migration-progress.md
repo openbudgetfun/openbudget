@@ -23,6 +23,7 @@ This checklist tracks progress for migrating and polishing app flows using the `
 - [x] Add Accounts desktop unlinked-account form/success parity coverage
 - [x] Transaction review + action sheet flow parity
 - [x] Recent Moves tabs, coach dialog, and drilldown parity
+- [x] Recent Moves desktop tab-switch regression coverage
 - [x] Reflect dashboard + Spending Breakdown + Net Worth parity
 - [x] Spending Breakdown preset range recalculation regression coverage
 - [x] Spending Breakdown desktop preset-range parity regression coverage
