@@ -223,7 +223,6 @@ class AddAccountScreen extends HookConsumerWidget {
             _AddAccountStep.searchBank => _BankSearchStep(
               searchController: searchController,
               searchQuery: searchController.text,
-              onSearchSubmitted: startLinkedBankFlow,
               onInstitutionTap: startLinkedBankFlow,
               onAddUnlinked: () => step.value = _AddAccountStep.unlinkedAccount,
             ),
@@ -381,14 +380,12 @@ class _BankSearchStep extends StatelessWidget {
   const _BankSearchStep({
     required this.searchController,
     required this.searchQuery,
-    required this.onSearchSubmitted,
     required this.onInstitutionTap,
     required this.onAddUnlinked,
   });
 
   final TextEditingController searchController;
   final String searchQuery;
-  final Future<void> Function(String value) onSearchSubmitted;
   final Future<void> Function(String institution) onInstitutionTap;
   final VoidCallback onAddUnlinked;
 
@@ -441,7 +438,7 @@ class _BankSearchStep extends StatelessWidget {
         const SizedBox(height: SpacingTokens.xs),
         TextField(
           controller: searchController,
-          onSubmitted: onSearchSubmitted,
+          onSubmitted: (_) => FocusScope.of(context).unfocus(),
           textInputAction: TextInputAction.search,
           decoration: const InputDecoration(
             hintText: 'Search by institution name or web address (URL)',

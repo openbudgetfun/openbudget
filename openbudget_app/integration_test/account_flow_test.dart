@@ -272,6 +272,31 @@ void main() {
     );
   });
 
+  patrolWidgetTest('submitting search query keeps user in bank search mode', (
+    $,
+  ) async {
+    final tester = $.tester;
+    await tester.pumpWidget(_buildApp(accounts: const []));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Add Account'));
+    await _pumpToAddAccountSearch(tester);
+
+    await tester.enterText(find.byType(TextField).first, 'citi');
+    await tester.testTextInput.receiveAction(TextInputAction.search);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Search for your bank'), findsOneWidget);
+    expect(find.text('Search Results'), findsOneWidget);
+    expect(find.text('Citi'), findsOneWidget);
+    expect(find.text('Add Unlinked Account'), findsNothing);
+    expect(find.textContaining('Linked connections for "citi"'), findsNothing);
+    await captureIntegrationScreenshot(
+      tester,
+      'add-accounts-search-submit-results',
+    );
+  });
+
   patrolWidgetTest(
     'desktop add accounts flow shows search controls and options',
     ($) async {
