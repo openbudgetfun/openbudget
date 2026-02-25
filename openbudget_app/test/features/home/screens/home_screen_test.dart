@@ -10,7 +10,9 @@ import 'package:openbudget_app/src/features/accounts/providers/account_list_prov
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
 import 'package:openbudget_app/src/features/home/providers/budget_list_provider.dart';
 import 'package:openbudget_app/src/features/home/screens/home_screen.dart';
+import 'package:openbudget_app/src/features/settings/providers/display_currency_provider.dart';
 import 'package:openbudget_client/openbudget_client.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 final _ownerId = UuidValue.fromString('00000000-0000-0000-0000-000000000001');
@@ -539,6 +541,115 @@ void main() {
       expect(find.text('Business'), findsOneWidget);
       expect(find.text('USD'), findsOneWidget);
       expect(find.text('GBP'), findsOneWidget);
+    });
+
+    testWidgets(
+      'converts budget summary amounts when display override is active',
+      (tester) async {
+        final budget = _makeBudget(
+          id: _budgetIdStr,
+        ).copyWith(displayCurrencyCode: 'GBP');
+        final accounts = [
+          _makeAccount(
+            name: 'EUR Savings',
+            balanceCents: 10000,
+            currencyCode: 'EUR',
+          ),
+        ];
+        const converter = DisplayCurrencyConverter(
+          displayCurrency: CurrencyCode.gbp,
+          baseCurrencyCode: 'USD',
+          ratesByCode: {'USD': 1.0, 'EUR': 0.8, 'GBP': 0.7},
+        );
+
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              budgetListProvider.overrideWith((ref) async => [budget]),
+              accountListProvider.overrideWith(
+                (ref, budgetId) async => accounts,
+              ),
+              budgetSummaryProvider.overrideWith(
+                (ref, budgetId) async => BudgetSummary(
+                  budget: budget,
+                  categories: const [],
+                  totalIncomeCents: 10000,
+                  totalBudgetedCents: 0,
+                  readyToAssignCents: 10000,
+                  year: 2026,
+                  month: 2,
+                ),
+              ),
+              displayCurrencyConverterProvider.overrideWith(
+                (ref, budgetId) async => converter,
+              ),
+            ],
+            child: MaterialApp(
+              theme: OpenBudgetTheme.light,
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              home: const HomeScreen(),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.textContaining('\u00A387.50'), findsWidgets);
+        expect(find.textContaining('\u00A370.00 to assign'), findsOneWidget);
+      },
+    );
+
+    testWidgets('falls back to native formatting when rates are unavailable', (
+      tester,
+    ) async {
+      final budget = _makeBudget(
+        id: _budgetIdStr,
+      ).copyWith(displayCurrencyCode: 'GBP');
+      final accounts = [
+        _makeAccount(
+          name: 'EUR Savings',
+          balanceCents: 10000,
+          currencyCode: 'EUR',
+        ),
+      ];
+      const converter = DisplayCurrencyConverter(
+        displayCurrency: CurrencyCode.gbp,
+        baseCurrencyCode: 'USD',
+        ratesByCode: {'USD': 1.0},
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            budgetListProvider.overrideWith((ref) async => [budget]),
+            accountListProvider.overrideWith((ref, budgetId) async => accounts),
+            budgetSummaryProvider.overrideWith(
+              (ref, budgetId) async => BudgetSummary(
+                budget: budget,
+                categories: const [],
+                totalIncomeCents: 10000,
+                totalBudgetedCents: 0,
+                readyToAssignCents: 10000,
+                year: 2026,
+                month: 2,
+              ),
+            ),
+            displayCurrencyConverterProvider.overrideWith(
+              (ref, budgetId) async => converter,
+            ),
+          ],
+          child: MaterialApp(
+            theme: OpenBudgetTheme.light,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: const HomeScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('\u20AC100.00'), findsWidgets);
+      expect(find.textContaining(r'$100.00 to assign'), findsOneWidget);
     });
   });
 }
