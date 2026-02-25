@@ -388,12 +388,12 @@ class _StepFrame extends StatelessWidget {
         final width = constraints.maxWidth >= 900
             ? constraints.maxWidth.clamp(0, maxWidth).toDouble()
             : constraints.maxWidth;
-        return Align(
-          alignment: Alignment.topCenter,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: width),
-            child: child,
+        final horizontalPadding = (constraints.maxWidth - width) / 2;
+        return Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: horizontalPadding > 0 ? horizontalPadding : 0,
           ),
+          child: child,
         );
       },
     );
@@ -673,13 +673,22 @@ class _UnlinkedAccountStep extends StatelessWidget {
     final secondaryTextColor = theme.brightness == Brightness.dark
         ? theme.colorScheme.onSurfaceVariant
         : OpenBudgetPalette.mutedText;
-    final headingStyle = theme.textTheme.titleSmall?.copyWith(
-      fontWeight: FontWeight.w700,
-      color: primaryTextColor,
-    );
-    final introStyle = theme.textTheme.bodyMedium?.copyWith(
-      color: secondaryTextColor,
-    );
+    final headingStyle =
+        (theme.textTheme.titleSmall ??
+                const TextStyle(fontSize: 21, fontWeight: FontWeight.w600))
+            .copyWith(fontWeight: FontWeight.w700, color: primaryTextColor);
+    final introStyle =
+        (theme.textTheme.bodyMedium ??
+                const TextStyle(fontSize: 17, fontWeight: FontWeight.w400))
+            .copyWith(color: secondaryTextColor);
+    final formValueStyle =
+        (theme.textTheme.bodyLarge ??
+                const TextStyle(fontSize: 20, fontWeight: FontWeight.w500))
+            .copyWith(color: primaryTextColor);
+    final formHintStyle =
+        (theme.textTheme.bodyLarge ??
+                const TextStyle(fontSize: 20, fontWeight: FontWeight.w500))
+            .copyWith(color: secondaryTextColor.withAlpha(220));
 
     return SingleChildScrollView(
       key: _addAccountUnlinkedScrollKey,
@@ -706,7 +715,11 @@ class _UnlinkedAccountStep extends StatelessWidget {
             key: _addAccountUnlinkedNicknameFieldKey,
             controller: nameController,
             textInputAction: TextInputAction.next,
-            decoration: const InputDecoration(hintText: 'Enter nickname'),
+            style: formValueStyle,
+            decoration: InputDecoration(
+              hintText: 'Enter nickname',
+              hintStyle: formHintStyle,
+            ),
           ),
           const SizedBox(height: SpacingTokens.md),
           Text('What type of account are you adding?', style: headingStyle),
@@ -716,7 +729,7 @@ class _UnlinkedAccountStep extends StatelessWidget {
             onTap: onChooseType,
             title: Text(
               selectedTypeLabel,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              style: formValueStyle.copyWith(
                 color: hasSelectedType ? primaryTextColor : secondaryTextColor,
                 fontWeight: hasSelectedType ? FontWeight.w600 : FontWeight.w500,
               ),
@@ -741,16 +754,24 @@ class _UnlinkedAccountStep extends StatelessWidget {
               signed: true,
             ),
             textInputAction: TextInputAction.done,
-            decoration: const InputDecoration(hintText: '5000'),
+            style: formValueStyle,
+            decoration: InputDecoration(
+              hintText: '5000',
+              hintStyle: formHintStyle,
+            ),
           ),
           const SizedBox(height: SpacingTokens.md),
           DropdownButtonFormField<String>(
             initialValue: selectedCurrency.code,
+            style: formValueStyle,
             items: CurrencyCode.values
                 .map(
                   (currency) => DropdownMenuItem(
                     value: currency.code,
-                    child: Text('${currency.code} (${currency.symbol})'),
+                    child: Text(
+                      '${currency.code} (${currency.symbol})',
+                      style: formValueStyle,
+                    ),
                   ),
                 )
                 .toList(),
@@ -758,9 +779,10 @@ class _UnlinkedAccountStep extends StatelessWidget {
               if (value == null) return;
               onCurrencyChanged(value);
             },
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               labelText: 'Currency',
-              prefixIcon: Icon(Icons.language_rounded),
+              labelStyle: introStyle,
+              prefixIcon: const Icon(Icons.language_rounded),
             ),
           ),
         ],
