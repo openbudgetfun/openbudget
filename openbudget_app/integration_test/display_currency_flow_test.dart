@@ -290,7 +290,7 @@ void main() {
 
 Future<void> _captureScreenshot(WidgetTester tester, String name) async {
   final binding = tester.binding;
-  List<int> bytes = const [];
+  var bytes = const <int>[];
   if (binding is IntegrationTestWidgetsFlutterBinding) {
     try {
       bytes = await binding.takeScreenshot(name);
@@ -329,13 +329,14 @@ Future<void> _captureScreenshot(WidgetTester tester, String name) async {
 
 Future<List<int>?> _captureRenderViewPng(WidgetTester tester) async {
   try {
-    final renderView = tester.binding.renderView;
+    final renderView = tester.binding.renderViews.firstOrNull;
+    if (renderView == null) return null;
     final layer = renderView.debugLayer;
     if (layer is! OffsetLayer) return null;
     final image = await layer.toImage(renderView.paintBounds, pixelRatio: 3);
     final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
     return byteData?.buffer.asUint8List();
-  } catch (_) {
+  } on Exception {
     return null;
   }
 }
