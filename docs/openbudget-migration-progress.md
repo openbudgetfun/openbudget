@@ -23,6 +23,7 @@ This checklist tracks progress for migrating and polishing app flows using the `
 - [x] Add Accounts desktop unlinked-account form/success parity coverage
 - [x] Add Accounts unlinked flow stability hardening (isolated step scroll state + keyed form controls)
 - [x] Add Accounts desktop screenshot capture hardening (targeted boundary capture for unlinked-account form artifacts)
+- [x] Add Accounts desktop unlinked-account layout parity fix (preserve vertical constraints in step frame)
 - [x] Transaction review + action sheet flow parity
 - [x] Recent Moves tabs, coach dialog, and drilldown parity
 - [x] Recent Moves desktop tab-switch regression coverage
@@ -35,6 +36,7 @@ This checklist tracks progress for migrating and polishing app flows using the `
 - [x] Patrol integration suite enabled for critical flows
 - [x] Patrol runner hardened with hidden-failure marker detection and per-file failure accounting
 - [x] Patrol runner optimized with shared dependency resolution and `--no-pub`
+- [x] Full Patrol suite rerun clean (`14/14`) after desktop unlinked-account parity fix
 - [x] Formatting, lint, and secrets git hooks configured in `devenv.nix`
 - [x] Branding guard test prevents shipping `YNAB` strings in app UI sources
 

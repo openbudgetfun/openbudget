@@ -77,3 +77,5 @@ Progress checklist: `docs/openbudget-migration-progress.md`
 - Add Account type selection (targeted capture stabilization): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-pr151/add-account-type-selection.png
 - Add Unlinked Account desktop form (targeted capture stabilization): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-pr151/add-unlinked-account-desktop-form-screen.png
 - Add Unlinked Account desktop success (targeted capture stabilization): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-pr151/add-unlinked-account-desktop-success-screen.png
+- Add Unlinked Account desktop form (main `a13e4e5` layout parity fix): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-main-a13e4e5/add-unlinked-account-desktop-form-screen.png
+- Add Unlinked Account desktop success (main `a13e4e5` layout parity fix): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-main-a13e4e5/add-unlinked-account-desktop-success-screen.png
