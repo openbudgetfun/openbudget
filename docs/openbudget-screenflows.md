@@ -32,6 +32,7 @@ Progress checklist: `docs/openbudget-migration-progress.md`
   - Desktop Spending Breakdown preset parity coverage for six-month range totals
 - Recent Moves
   - Tabs, coach dialog, empty and populated states, source/destination drilldowns
+  - Desktop modal/tab-switch parity coverage for All and Moved tabs
 
 ## Verification Gates
 
@@ -59,3 +60,5 @@ Progress checklist: `docs/openbudget-migration-progress.md`
 - Accounts desktop edit account form: https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-pr145/accounts-edit-account-desktop-screen.png
 - Add Unlinked Account desktop form: https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-pr148/add-unlinked-account-desktop-form-screen.png
 - Add Unlinked Account desktop success: https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-pr148/add-unlinked-account-desktop-success-screen.png
+- Recent Moves desktop (All tab): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-pr149/recent-moves-desktop-screen.png
+- Recent Moves desktop (Moved tab): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-pr149/recent-moves-desktop-moved-screen.png
