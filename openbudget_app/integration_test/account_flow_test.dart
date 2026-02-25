@@ -356,6 +356,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 800));
       await tester.pumpAndSettle();
 
+      expect(find.text('Loading institutions...'), findsNothing);
       expect(find.text('Add Unlinked Account'), findsOneWidget);
       expect(
         find.textContaining('Linked connections for "Citi" are coming soon'),
