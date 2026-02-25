@@ -27,6 +27,7 @@ This checklist tracks progress for migrating and polishing app flows using the `
 - [x] Add Accounts desktop unlinked-account layout parity fix (preserve vertical constraints in step frame)
 - [x] Add Accounts desktop unlinked-account next-button gating regression coverage
 - [x] Add Accounts desktop unlinked-account step reset parity (non-persistent scroll offsets + regression coverage)
+- [x] Add Accounts desktop search helper guidance parity (helper text remains visible in default and empty-result states)
 - [x] Transaction review + action sheet flow parity
 - [x] Recent Moves tabs, coach dialog, and drilldown parity
 - [x] Recent Moves desktop tab-switch regression coverage
@@ -41,6 +42,7 @@ This checklist tracks progress for migrating and polishing app flows using the `
 - [x] Patrol runner optimized with shared dependency resolution and `--no-pub`
 - [x] Patrol runner auto-discovers repo-managed Flutter via `.fvm/flutter_sdk/bin` when PATH is missing
 - [x] Full Patrol suite rerun clean (`14/14`) after desktop unlinked-account parity fix
+- [x] Full Patrol suite rerun clean (`14/14`) after desktop search-helper parity update
 - [x] Screenshot capture fallback order tuned (`integration -> repaint -> renderView`) for clean desktop artifacts
 - [x] Formatting, lint, and secrets git hooks configured in `devenv.nix`
 - [x] Branding guard test prevents shipping `YNAB` strings in app UI sources

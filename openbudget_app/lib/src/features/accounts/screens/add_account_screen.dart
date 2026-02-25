@@ -537,9 +537,13 @@ class _BankSearchStep extends StatelessWidget {
           controller: searchController,
           onSubmitted: (_) => FocusScope.of(context).unfocus(),
           textInputAction: TextInputAction.search,
-          decoration: const InputDecoration(
-            hintText: 'Search by institution name or web address (URL)',
-          ),
+        ),
+        const SizedBox(height: SpacingTokens.xs),
+        Text(
+          'Search by institution name or web address (URL)',
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(color: OpenBudgetPalette.mutedText),
         ),
         const SizedBox(height: SpacingTokens.md),
         Text(

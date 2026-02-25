@@ -371,6 +371,10 @@ void main() {
 
     expect(find.text('Search Results'), findsOneWidget);
     expect(
+      find.text('Search by institution name or web address (URL)'),
+      findsOneWidget,
+    );
+    expect(
       find.text(
         'No institutions found. Try another name or add an unlinked account.',
       ),
