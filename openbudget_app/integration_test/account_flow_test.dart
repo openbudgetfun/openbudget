@@ -298,6 +298,7 @@ void main() {
 
       await tester.tap(find.text('Select account type...'));
       await tester.pumpAndSettle();
+      await captureIntegrationScreenshot(tester, 'add-account-type-selection');
       await tester.tap(find.text('Checking'));
       await tester.pumpAndSettle();
 
