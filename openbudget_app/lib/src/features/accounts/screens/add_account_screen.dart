@@ -290,10 +290,7 @@ class AddAccountScreen extends HookConsumerWidget {
                   selectedTypeLabel:
                       selectedType?.label ?? 'Select account type...',
                   hasSelectedType: selectedType != null,
-                  selectedCurrency: selectedCurrency.value,
                   onChooseType: () => step.value = _AddAccountStep.accountType,
-                  onCurrencyChanged: (code) =>
-                      selectedCurrency.value = parseCurrencyCode(code),
                 ),
               ),
               _AddAccountStep.accountType => _StepFrame(
@@ -660,9 +657,7 @@ class _UnlinkedAccountStep extends StatelessWidget {
     required this.balanceController,
     required this.selectedTypeLabel,
     required this.hasSelectedType,
-    required this.selectedCurrency,
     required this.onChooseType,
-    required this.onCurrencyChanged,
   });
 
   final ScrollController scrollController;
@@ -670,9 +665,7 @@ class _UnlinkedAccountStep extends StatelessWidget {
   final TextEditingController balanceController;
   final String selectedTypeLabel;
   final bool hasSelectedType;
-  final CurrencyCode selectedCurrency;
   final VoidCallback onChooseType;
-  final ValueChanged<String> onCurrencyChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -768,31 +761,6 @@ class _UnlinkedAccountStep extends StatelessWidget {
             decoration: InputDecoration(
               hintText: '5000',
               hintStyle: formHintStyle,
-            ),
-          ),
-          const SizedBox(height: SpacingTokens.md),
-          DropdownButtonFormField<String>(
-            initialValue: selectedCurrency.code,
-            style: formValueStyle,
-            items: CurrencyCode.values
-                .map(
-                  (currency) => DropdownMenuItem(
-                    value: currency.code,
-                    child: Text(
-                      '${currency.code} (${currency.symbol})',
-                      style: formValueStyle,
-                    ),
-                  ),
-                )
-                .toList(),
-            onChanged: (value) {
-              if (value == null) return;
-              onCurrencyChanged(value);
-            },
-            decoration: InputDecoration(
-              labelText: 'Currency',
-              labelStyle: introStyle,
-              prefixIcon: const Icon(Icons.language_rounded),
             ),
           ),
         ],

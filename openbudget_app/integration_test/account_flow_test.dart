@@ -565,6 +565,10 @@ void main() {
       '50000',
     );
     await tester.pumpAndSettle();
+    await captureIntegrationScreenshot(
+      tester,
+      'add-unlinked-account-desktop-filled-screen',
+    );
 
     final nextButton = tester.widget<FilledButton>(
       find.widgetWithText(FilledButton, 'Next'),
@@ -601,7 +605,8 @@ void main() {
 
       var nextButton = tester.widget<FilledButton>(nextFinder);
       expect(nextButton.onPressed, isNull);
-      expect(find.text(r'USD ($)'), findsOneWidget);
+      expect(find.text('Currency'), findsNothing);
+      expect(find.text(r'USD ($)'), findsNothing);
 
       await _enterTextWhenVisible(
         tester,
