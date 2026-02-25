@@ -354,6 +354,37 @@ void main() {
     },
   );
 
+  patrolWidgetTest('desktop add accounts search shows empty-results guidance', (
+    $,
+  ) async {
+    final tester = $.tester;
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.binding.setSurfaceSize(const Size(1024, 768));
+    await tester.pumpWidget(_buildApp(accounts: const []));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Add Account'));
+    await _pumpToAddAccountSearch(tester);
+
+    await tester.enterText(find.byType(TextField).first, 'no-bank-here');
+    await tester.pumpAndSettle();
+
+    expect(find.text('Search Results'), findsOneWidget);
+    expect(
+      find.text(
+        'No institutions found. Try another name or add an unlinked account.',
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('Citi'), findsNothing);
+    await _ensureAddUnlinkedVisible(tester);
+    expect(find.byKey(_addAccountUnlinkedButtonKey), findsOneWidget);
+    await captureIntegrationScreenshot(
+      tester,
+      'add-accounts-search-desktop-empty-results-screen',
+    );
+  });
+
   patrolWidgetTest(
     'desktop linked bank tap shows loading overlay before fallback',
     ($) async {

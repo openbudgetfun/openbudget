@@ -21,6 +21,7 @@ Progress checklist: `docs/openbudget-migration-progress.md`
 - Accounts
   - Add account wizard, institution search/filtering, unlinked account validation, account detail actions, reconcile, loan overview/activity, edit/close
   - Desktop/tablet Add Accounts search parity (search labeling, two-column institution grid, unlinked CTA alignment)
+  - Desktop Add Accounts empty-search-results guidance parity
   - Search submit stays in Add Accounts filtering mode (no accidental jump into unlinked flow)
   - Desktop guardrails for linked-bank loading overlay and account-menu reconcile/edit states
   - Desktop unlinked-account form and success-step parity coverage
@@ -90,3 +91,4 @@ Progress checklist: `docs/openbudget-migration-progress.md`
 - Add Unlinked Account desktop form (scroll-reset regression pass): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-main-unlinked-scroll-reset/add-unlinked-account-desktop-form-screen.png
 - Add Unlinked Account desktop reset state (scroll-reset regression pass): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-main-unlinked-scroll-reset/add-unlinked-account-desktop-reset-screen.png
 - Add Unlinked Account desktop success (scroll-reset regression pass): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-main-unlinked-scroll-reset/add-unlinked-account-desktop-success-screen.png
+- Add Accounts desktop empty results guidance: https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-main-empty-results/add-accounts-search-desktop-empty-results-screen.png

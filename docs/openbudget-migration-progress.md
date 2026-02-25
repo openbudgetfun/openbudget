@@ -20,6 +20,7 @@ This checklist tracks progress for migrating and polishing app flows using the `
 - [x] Add Accounts staged loading and search flow parity
 - [x] Add Accounts desktop/tablet search layout parity
 - [x] Add Accounts search submit behavior regression fix
+- [x] Add Accounts desktop empty-search-results guidance parity coverage
 - [x] Add Accounts desktop unlinked-account form/success parity coverage
 - [x] Add Accounts unlinked flow stability hardening (isolated step scroll state + keyed form controls)
 - [x] Add Accounts desktop screenshot capture hardening (targeted boundary capture for unlinked-account form artifacts)
