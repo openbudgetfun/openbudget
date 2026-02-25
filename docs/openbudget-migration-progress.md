@@ -29,7 +29,7 @@ This checklist tracks progress for migrating and polishing app flows using the `
 ## Testing and CI Checklist
 
 - [x] Patrol integration suite enabled for critical flows
-- [x] Patrol runner hardened to fail on hidden failure markers
+- [x] Patrol runner hardened with hidden-failure marker detection and per-file failure accounting
 - [x] Patrol runner optimized with shared dependency resolution and `--no-pub`
 - [x] Formatting, lint, and secrets git hooks configured in `devenv.nix`
 - [x] Branding guard test prevents shipping `YNAB` strings in app UI sources
