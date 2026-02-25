@@ -763,6 +763,18 @@
   "settingsDeletePlan": "Delete Plan",
   "settingsDisplayOptions": "Display Options",
   "settingsDisplayOptionsHint": "Display options are applied instantly across OpenBudget screens.",
+  "settingsDisplayCurrency": "Display Currency",
+  "settingsDisplayCurrencyMatchDefault": "Match Plan Currency (Default)",
+  "settingsDisplayCurrencyUpdateError": "Could not update display currency. Please try again.",
+  "settingsDisplayCurrencyUpdated": "Display currency updated to {currencyCode}",
+  "@settingsDisplayCurrencyUpdated": {
+    "placeholders": {
+      "currencyCode": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsDisplayCurrencyDefaultUpdated": "Display currency now matches plan currency.",
   "settingsExportData": "Export Budget",
   "settingsExportDataHint": "Copy all budget data as JSON to clipboard",
   "settingsExportError": "Could not export budget data. Please try again.",
