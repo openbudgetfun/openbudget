@@ -64,7 +64,7 @@ for f in "${tests[@]}"; do
 		file_failed=1
 	fi
 
-	if grep -Eq "Some tests failed|[0-9]+ failed|No tests ran|No tests were found|Test failed|\\[E\\]|\\+[0-9]+ -[1-9][0-9]*" "$output_file"; then
+	if grep -Eq "Some tests failed|[0-9]+ failed|No tests ran|No tests were found|Test failed|EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK|\\[E\\]|\\+[0-9]+ -[1-9][0-9]*" "$output_file"; then
 		echo "::error::Detected integration failure markers in $f output."
 		file_failed=1
 	fi
