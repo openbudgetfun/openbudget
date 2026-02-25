@@ -67,6 +67,11 @@ void main() {
 
     expect(find.text('Add Accounts'), findsOneWidget);
     expect(find.text('Search for your bank'), findsOneWidget);
+    expect(find.text('Search by institution name'), findsOneWidget);
+    expect(
+      find.text('Search by institution name or web address (URL)'),
+      findsOneWidget,
+    );
     expect(find.text('Popular Options'), findsOneWidget);
 
     await _scrollToAddUnlinked(tester);

@@ -395,29 +395,14 @@ class _BankSearchStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const institutions = [
-      _InstitutionOption(name: 'Chase', backgroundColor: Color(0xFF1262AE)),
-      _InstitutionOption(
-        name: 'Capital One',
-        backgroundColor: Color(0xFF0A557D),
-      ),
-      _InstitutionOption(
-        name: 'American Express',
-        backgroundColor: Color(0xFF1876C8),
-      ),
-      _InstitutionOption(
-        name: 'Bank of America',
-        backgroundColor: Color(0xFFD22841),
-      ),
-      _InstitutionOption(name: 'Citi', backgroundColor: Color(0xFF044684)),
-      _InstitutionOption(name: 'Discover', backgroundColor: Color(0xFF383B54)),
-      _InstitutionOption(
-        name: 'Wells Fargo',
-        backgroundColor: Color(0xFFBD2134),
-      ),
-      _InstitutionOption(
-        name: 'Apple Card',
-        backgroundColor: Color(0xFF111111),
-      ),
+      _InstitutionOption(name: 'Chase'),
+      _InstitutionOption(name: 'Capital One'),
+      _InstitutionOption(name: 'American Express'),
+      _InstitutionOption(name: 'Bank of America'),
+      _InstitutionOption(name: 'Citi'),
+      _InstitutionOption(name: 'Discover'),
+      _InstitutionOption(name: 'Wells Fargo'),
+      _InstitutionOption(name: 'Apple Card'),
     ];
     final normalizedQuery = searchQuery.trim().toLowerCase();
     final filteredInstitutions = normalizedQuery.isEmpty
@@ -447,20 +432,20 @@ class _BankSearchStep extends StatelessWidget {
           ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
         ),
         const SizedBox(height: SpacingTokens.sm),
+        Text(
+          'Search by institution name',
+          style: Theme.of(
+            context,
+          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w500),
+        ),
+        const SizedBox(height: SpacingTokens.xs),
         TextField(
           controller: searchController,
           onSubmitted: onSearchSubmitted,
           textInputAction: TextInputAction.search,
           decoration: const InputDecoration(
-            hintText: 'Search by institution name',
+            hintText: 'Search by institution name or web address (URL)',
           ),
-        ),
-        const SizedBox(height: SpacingTokens.xs),
-        Text(
-          'Search by institution name or web address (URL)',
-          style: Theme.of(
-            context,
-          ).textTheme.bodySmall?.copyWith(color: OpenBudgetPalette.mutedText),
         ),
         const SizedBox(height: SpacingTokens.md),
         Text(
@@ -538,27 +523,19 @@ class _InstitutionTile extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(RadiusTokens.md),
         child: Container(
-          height: 82,
-          padding: const EdgeInsets.all(SpacingTokens.sm),
+          height: 84,
+          alignment: Alignment.center,
           decoration: BoxDecoration(
             color: OpenBudgetPalette.surface,
             border: Border.all(color: OpenBudgetPalette.divider),
             borderRadius: BorderRadius.circular(RadiusTokens.md),
           ),
-          child: Container(
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: option.backgroundColor,
-              borderRadius: BorderRadius.circular(RadiusTokens.sm),
-            ),
-            child: Text(
-              option.name,
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
-              ),
-              textAlign: TextAlign.center,
-            ),
+          child: Text(
+            option.name,
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+            textAlign: TextAlign.center,
           ),
         ),
       ),
@@ -568,10 +545,9 @@ class _InstitutionTile extends StatelessWidget {
 
 @immutable
 class _InstitutionOption {
-  const _InstitutionOption({required this.name, required this.backgroundColor});
+  const _InstitutionOption({required this.name});
 
   final String name;
-  final Color backgroundColor;
 }
 
 class _UnlinkedAccountStep extends StatelessWidget {

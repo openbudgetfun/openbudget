@@ -273,6 +273,37 @@ void main() {
   });
 
   patrolWidgetTest(
+    'desktop add accounts flow shows search controls and options',
+    ($) async {
+      final tester = $.tester;
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      await tester.binding.setSurfaceSize(const Size(1024, 768));
+      await tester.pumpWidget(_buildApp(accounts: const []));
+      await tester.pumpAndSettle();
+
+      expect(find.text('No Accounts Yet'), findsOneWidget);
+      await tester.tap(find.text('Add Account'));
+      await _pumpToAddAccountSearch(tester);
+
+      expect(find.text('Search for your bank'), findsOneWidget);
+      expect(find.text('Search by institution name'), findsOneWidget);
+      expect(
+        find.text('Search by institution name or web address (URL)'),
+        findsOneWidget,
+      );
+      expect(find.text('Popular Options'), findsOneWidget);
+      expect(find.text('Chase'), findsOneWidget);
+      expect(find.text('Capital One'), findsOneWidget);
+      await _ensureAddUnlinkedVisible(tester);
+      expect(find.text('Add an Unlinked Account'), findsOneWidget);
+      await captureIntegrationScreenshot(
+        tester,
+        'add-accounts-search-desktop-screen',
+      );
+    },
+  );
+
+  patrolWidgetTest(
     'unlinked account requires explicit type selection before next',
     ($) async {
       final tester = $.tester;
