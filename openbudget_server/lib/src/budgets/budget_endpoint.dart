@@ -38,12 +38,16 @@ class BudgetEndpoint extends Endpoint {
     UuidValue budgetId, {
     String? name,
     String? currencyCode,
+    String? displayCurrencyCode,
+    bool? clearDisplayCurrencyCode,
   }) async {
     return BudgetService.update(
       session,
       budgetId: budgetId,
       name: name,
       currencyCode: currencyCode,
+      displayCurrencyCode: displayCurrencyCode,
+      clearDisplayCurrencyCode: clearDisplayCurrencyCode ?? false,
     );
   }
 

@@ -72,6 +72,8 @@ class BudgetService {
     required UuidValue budgetId,
     String? name,
     String? currencyCode,
+    String? displayCurrencyCode,
+    bool clearDisplayCurrencyCode = false,
   }) async {
     _log.info('Updating budget id=$budgetId');
     final budget = await getById(session, budgetId: budgetId);
@@ -79,6 +81,9 @@ class BudgetService {
     final updated = budget.copyWith(
       name: name ?? budget.name,
       currencyCode: currencyCode ?? budget.currencyCode,
+      displayCurrencyCode: clearDisplayCurrencyCode
+          ? null
+          : (displayCurrencyCode ?? budget.displayCurrencyCode),
       updatedAt: DateTime.now(),
     );
     return Budget.db.updateRow(session, updated);
