@@ -440,6 +440,53 @@ void main() {
     },
   );
 
+  patrolWidgetTest('desktop unlinked account flow submits successfully', (
+    $,
+  ) async {
+    final tester = $.tester;
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.binding.setSurfaceSize(const Size(1024, 768));
+    await tester.pumpWidget(_buildApp(accounts: const []));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Add Account'));
+    await _pumpToAddAccountSearch(tester);
+    await _tapAddUnlinkedAccount(tester);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Add Unlinked Account'), findsOneWidget);
+    expect(find.text('Give it a nickname'), findsOneWidget);
+    expect(find.text('What type of account are you adding?'), findsOneWidget);
+    await captureIntegrationScreenshot(
+      tester,
+      'add-unlinked-account-desktop-form-screen',
+    );
+
+    await tester.enterText(find.byType(TextField).at(0), 'Daily');
+    await tester.tap(find.text('Select account type...'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Checking'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField).at(1), '50000');
+    await tester.pumpAndSettle();
+
+    final nextButton = tester.widget<FilledButton>(
+      find.widgetWithText(FilledButton, 'Next'),
+    );
+    expect(nextButton.onPressed, isNotNull);
+
+    await tester.tap(find.widgetWithText(FilledButton, 'Next'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Success!'), findsOneWidget);
+    expect(find.text('Add Another'), findsOneWidget);
+    expect(find.widgetWithText(FilledButton, 'Done'), findsOneWidget);
+    await captureIntegrationScreenshot(
+      tester,
+      'add-unlinked-account-desktop-success-screen',
+    );
+  });
+
   patrolWidgetTest('account detail flow navigates to detail and back to list', (
     $,
   ) async {

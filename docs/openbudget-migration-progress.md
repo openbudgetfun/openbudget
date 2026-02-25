@@ -20,6 +20,7 @@ This checklist tracks progress for migrating and polishing app flows using the `
 - [x] Add Accounts staged loading and search flow parity
 - [x] Add Accounts desktop/tablet search layout parity
 - [x] Add Accounts search submit behavior regression fix
+- [x] Add Accounts desktop unlinked-account form/success parity coverage
 - [x] Transaction review + action sheet flow parity
 - [x] Recent Moves tabs, coach dialog, and drilldown parity
 - [x] Reflect dashboard + Spending Breakdown + Net Worth parity
