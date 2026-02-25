@@ -22,6 +22,7 @@ Progress checklist: `docs/openbudget-migration-progress.md`
   - Add account wizard, institution search/filtering, unlinked account validation, account detail actions, reconcile, loan overview/activity, edit/close
   - Desktop/tablet Add Accounts search parity (search labeling, two-column institution grid, unlinked CTA alignment)
   - Search submit stays in Add Accounts filtering mode (no accidental jump into unlinked flow)
+  - Desktop guardrails for linked-bank loading overlay and account-menu reconcile/edit states
 - Transactions
   - Add expense/income/transfer, filtering, edit and action sheets, review queue approval flow
 - Reflect and reports
@@ -50,3 +51,6 @@ Progress checklist: `docs/openbudget-migration-progress.md`
 - Add Accounts desktop bank search: https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-pr140/add-accounts-search-desktop-screen.png
 - Add Accounts search-submit results state: https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-pr141/add-accounts-search-submit-results.png
 - Spending Breakdown last-six-months preset: https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-pr142/reports-spending-breakdown-last-six-months.png
+- Add Accounts desktop linked-bank loading overlay: https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-pr145/add-accounts-loading-overlay-desktop-screen.png
+- Accounts desktop reconcile dialog: https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-pr145/accounts-reconcile-dialog-desktop-screen.png
+- Accounts desktop edit account form: https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-pr145/accounts-edit-account-desktop-screen.png
