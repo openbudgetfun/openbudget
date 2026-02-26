@@ -558,7 +558,19 @@ void main() {
     );
     await _activateListTile(tester, find.byKey(_addAccountTypeTileKey));
     expect(
+      find.text(
+        'Cash accounts hold funds you already own and can spend immediately.',
+      ),
+      findsOneWidget,
+    );
+    expect(
       find.textContaining("you'll need to repay later, often with interest"),
+      findsOneWidget,
+    );
+    expect(
+      find.text(
+        "Accounts that have an outstanding balance you're currently paying off, and aren't spending from.",
+      ),
       findsOneWidget,
     );
     await _activateListTile(tester, find.byKey(_addAccountCheckingTypeKey));

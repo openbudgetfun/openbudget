@@ -170,8 +170,26 @@ void main() {
 
     expect(find.byKey(checkingTypeOptionKey), findsOneWidget);
     expect(find.text('Cash Accounts'), findsOneWidget);
+    expect(
+      find.text(
+        'Cash accounts hold funds you already own and can spend immediately.',
+      ),
+      findsOneWidget,
+    );
     expect(find.text('Credit Accounts'), findsOneWidget);
+    expect(
+      find.text(
+        "A credit account lets you spend borrowed money that you'll need to repay later, often with interest.",
+      ),
+      findsOneWidget,
+    );
     expect(find.text('Mortgages and Loans'), findsOneWidget);
+    expect(
+      find.text(
+        "Accounts that have an outstanding balance you're currently paying off, and aren't spending from.",
+      ),
+      findsOneWidget,
+    );
     expect(find.byIcon(Icons.account_balance_rounded), findsNothing);
     expect(find.byIcon(Icons.savings_rounded), findsNothing);
   });

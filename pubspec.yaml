@@ -34,10 +34,7 @@ melos:
 
     test:flutter:
       description: Run Flutter tests in Flutter packages.
-      exec: flutter test
-      packageFilters:
-        dependsOn: flutter
-        dirExists: test
+      run: melos exec --concurrency=1 --depends-on=flutter --dir-exists=test -- flutter test
 
     generate:
       description: Run build_runner in all packages that use it.
