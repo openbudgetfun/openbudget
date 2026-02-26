@@ -1,6 +1,6 @@
 # OpenBudget Migration Progress
 
-Last updated: 2026-02-25
+Last updated: 2026-02-26
 
 This checklist tracks progress for migrating and polishing app flows using the `ynab-ui` reference set while enforcing OpenBudget branding.
 
@@ -30,6 +30,7 @@ This checklist tracks progress for migrating and polishing app flows using the `
 - [x] Add Accounts desktop search helper guidance parity (helper text remains visible in default and empty-result states)
 - [x] Add Accounts desktop unlinked-account parity update (remove step-one currency selector to match target flow)
 - [x] Add Accounts desktop account-type selector copy parity (credit and mortgage/loan guidance text)
+- [x] Add Accounts account-type selector helper-copy regression coverage (widget + Patrol)
 - [x] Transaction review + action sheet flow parity
 - [x] Recent Moves tabs, coach dialog, and drilldown parity
 - [x] Recent Moves desktop tab-switch regression coverage
@@ -43,6 +44,7 @@ This checklist tracks progress for migrating and polishing app flows using the `
 - [x] Patrol runner hardened with hidden-failure marker detection and per-file failure accounting
 - [x] Patrol runner optimized with shared dependency resolution and `--no-pub`
 - [x] Patrol runner auto-discovers repo-managed Flutter via `.fvm/flutter_sdk/bin` when PATH is missing
+- [x] `melos run test:flutter` executes packages sequentially (`--concurrency=1`) to remove Flutter startup-lock contention noise in CI logs
 - [x] Full Patrol suite rerun clean (`14/14`) after desktop unlinked-account parity fix
 - [x] Full Patrol suite rerun clean (`14/14`) after desktop search-helper parity update
 - [x] Patrol account-flow rerun clean after desktop unlinked-account currency-selector removal

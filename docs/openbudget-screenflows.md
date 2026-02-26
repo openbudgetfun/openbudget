@@ -1,6 +1,6 @@
 # OpenBudget Screenflows
 
-Last updated: 2026-02-25
+Last updated: 2026-02-26
 
 Progress checklist: `docs/openbudget-migration-progress.md`
 
@@ -101,3 +101,6 @@ Progress checklist: `docs/openbudget-migration-progress.md`
 - Add Unlinked Account desktop filled state (no-currency parity pass): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-main-unlinked-no-currency/add-unlinked-account-desktop-filled-screen.png
 - Add Unlinked Account desktop success (no-currency parity pass): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-main-unlinked-no-currency/add-unlinked-account-desktop-success-screen.png
 - Add Account type selection (copy parity pass): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-main-account-type-copy/add-account-type-selection.png
+- Add Account type selection (main CI copy-hardening pass): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-main-ci-copy-hardening/add-account-type-selection.png
+- Add Unlinked Account desktop form (main CI copy-hardening pass): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-main-ci-copy-hardening/add-unlinked-account-desktop-form-screen.png
+- Add Unlinked Account desktop success (main CI copy-hardening pass): https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-25-main-ci-copy-hardening/add-unlinked-account-desktop-success-screen.png
