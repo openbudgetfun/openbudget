@@ -133,13 +133,13 @@ Both the Flutter app and backend server write structured logs to a single shared
 In development, all logs are written to:
 
 ```
-.temp/logs/openbudget-dev.log
+.tmp/omni.log
 ```
 
 This file is gitignored. To follow logs in real time:
 
 ```bash
-tail -f .temp/logs/openbudget-dev.log
+tail -f .tmp/omni.log
 ```
 
 ### Log Format

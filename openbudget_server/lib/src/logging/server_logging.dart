@@ -13,13 +13,13 @@ DevFileLogHandler? get devFileLogHandler => _handler;
 /// Initializes server-side logging.
 ///
 /// Sets up [ObLogger] with source `'server'` and wires [Logger.root] records
-/// to the dev log file at `.temp/logs/openbudget-dev.log`.
+/// to the shared dev log file at `.tmp/omni.log`.
 void initServerLogging() {
   ObLogger.init(source: 'server');
 
   // Resolve the project root relative to the server working directory.
   final projectRoot = Directory.current.parent.path;
-  final logPath = '$projectRoot/.temp/logs/openbudget-dev.log';
+  final logPath = '$projectRoot/.tmp/omni.log';
 
   _handler = DevFileLogHandler(filePath: logPath);
 
