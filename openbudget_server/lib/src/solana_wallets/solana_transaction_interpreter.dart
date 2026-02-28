@@ -36,34 +36,80 @@ class SolanaTransactionInterpreter {
     final normalizedSource = transaction.source.toLowerCase();
     final hasJupiter =
         normalizedSource.contains('jup') || programLabels.contains('Jupiter');
+    final hasRaydium =
+        normalizedSource.contains('raydium') ||
+        programLabels.contains('Raydium');
+    final hasOrca =
+        normalizedSource.contains('orca') ||
+        programLabels.any((label) => label.contains('Orca'));
     final hasPump =
         normalizedSource.contains('pump') || programLabels.contains('Pump.fun');
     final hasNftMarketplace =
         normalizedSource.contains('magiceden') ||
         normalizedSource.contains('tensor');
-    final hasSwapSignals = flow.tokenIn > 0 && flow.tokenOut > 0;
+    final hasSwapSignals = flow.tokenInCount > 0 && flow.tokenOutCount > 0;
+    final normalizedType = transaction.type.toLowerCase();
 
     String action;
     var confidence = 'low';
-    if (hasJupiter || hasSwapSignals) {
-      action = hasJupiter ? 'Token swap on Jupiter' : 'Token swap';
-      confidence = hasJupiter ? 'high' : 'medium';
+    if (hasJupiter || hasRaydium || hasOrca || hasSwapSignals) {
+      if (hasJupiter) {
+        action = 'Token swap on Jupiter';
+        confidence = 'high';
+      } else if (hasRaydium) {
+        action = 'Token swap on Raydium';
+        confidence = 'high';
+      } else if (hasOrca) {
+        action = 'Token swap on Orca';
+        confidence = 'high';
+      } else {
+        action = 'Token swap';
+        confidence = 'medium';
+      }
     } else if (hasPump) {
       action = 'Trade on Pump.fun';
       confidence = 'high';
     } else if (hasNftMarketplace) {
-      action = 'NFT activity on $source';
+      final looksLikeBuy =
+          flow.nativeOutCount > 0 &&
+          flow.nativeInCount == 0 &&
+          flow.tokenInCount > 0;
+      final looksLikeSell =
+          flow.nativeInCount > 0 &&
+          flow.nativeOutCount == 0 &&
+          flow.tokenOutCount > 0;
+      if (looksLikeBuy) {
+        action = 'NFT purchase on $source';
+      } else if (looksLikeSell) {
+        action = 'NFT sale on $source';
+      } else {
+        action = 'NFT activity on $source';
+      }
       confidence = 'high';
-    } else if (flow.tokenOut > 0 && flow.tokenIn == 0 && flow.nativeIn == 0) {
+    } else if (normalizedType.contains('stake')) {
+      action = 'Staking activity';
+      confidence = 'medium';
+    } else if (normalizedType.contains('liquidity')) {
+      action = 'Liquidity position update';
+      confidence = 'medium';
+    } else if (flow.tokenOutCount > 0 &&
+        flow.tokenInCount == 0 &&
+        flow.nativeInCount == 0) {
       action = 'Token transfer sent';
       confidence = 'medium';
-    } else if (flow.tokenIn > 0 && flow.tokenOut == 0 && flow.nativeOut == 0) {
+    } else if (flow.tokenInCount > 0 &&
+        flow.tokenOutCount == 0 &&
+        flow.nativeOutCount == 0) {
       action = 'Token transfer received';
       confidence = 'medium';
-    } else if (flow.nativeOut > 0 && flow.nativeIn == 0 && flow.tokenIn == 0) {
+    } else if (flow.nativeOutCount > 0 &&
+        flow.nativeInCount == 0 &&
+        flow.tokenInCount == 0) {
       action = 'SOL transfer sent';
       confidence = 'medium';
-    } else if (flow.nativeIn > 0 && flow.nativeOut == 0 && flow.tokenOut == 0) {
+    } else if (flow.nativeInCount > 0 &&
+        flow.nativeOutCount == 0 &&
+        flow.tokenOutCount == 0) {
       action = 'SOL transfer received';
       confidence = 'medium';
     } else {
@@ -90,48 +136,89 @@ class SolanaTransactionInterpreter {
     );
   }
 
-  static ({int nativeIn, int nativeOut, int tokenIn, int tokenOut}) _walletFlow(
-    EnhancedTransaction tx,
-    String walletAddress,
-  ) {
-    var nativeIn = 0;
-    var nativeOut = 0;
+  static ({
+    int nativeInCount,
+    int nativeOutCount,
+    int nativeInLamports,
+    int nativeOutLamports,
+    int tokenInCount,
+    int tokenOutCount,
+  })
+  _walletFlow(EnhancedTransaction tx, String walletAddress) {
+    var nativeInCount = 0;
+    var nativeOutCount = 0;
+    var nativeInLamports = 0;
+    var nativeOutLamports = 0;
     for (final transfer in tx.nativeTransfers) {
-      if (transfer.toUserAccount == walletAddress) nativeIn += 1;
-      if (transfer.fromUserAccount == walletAddress) nativeOut += 1;
+      if (transfer.toUserAccount == walletAddress) {
+        nativeInCount += 1;
+        nativeInLamports += transfer.amount;
+      }
+      if (transfer.fromUserAccount == walletAddress) {
+        nativeOutCount += 1;
+        nativeOutLamports += transfer.amount;
+      }
     }
 
-    var tokenIn = 0;
-    var tokenOut = 0;
+    var tokenInCount = 0;
+    var tokenOutCount = 0;
     for (final transfer in tx.tokenTransfers) {
-      if (transfer.toUserAccount == walletAddress) tokenIn += 1;
-      if (transfer.fromUserAccount == walletAddress) tokenOut += 1;
+      if (transfer.toUserAccount == walletAddress) tokenInCount += 1;
+      if (transfer.fromUserAccount == walletAddress) tokenOutCount += 1;
     }
 
     return (
-      nativeIn: nativeIn,
-      nativeOut: nativeOut,
-      tokenIn: tokenIn,
-      tokenOut: tokenOut,
+      nativeInCount: nativeInCount,
+      nativeOutCount: nativeOutCount,
+      nativeInLamports: nativeInLamports,
+      nativeOutLamports: nativeOutLamports,
+      tokenInCount: tokenInCount,
+      tokenOutCount: tokenOutCount,
     );
   }
 
   static String _walletFlowSummary(
-    ({int nativeIn, int nativeOut, int tokenIn, int tokenOut}) flow,
+    ({
+      int nativeInCount,
+      int nativeOutCount,
+      int nativeInLamports,
+      int nativeOutLamports,
+      int tokenInCount,
+      int tokenOutCount,
+    })
+    flow,
   ) {
     final segments = <String>[];
-    if (flow.nativeIn > 0) segments.add('${flow.nativeIn} SOL in');
-    if (flow.nativeOut > 0) segments.add('${flow.nativeOut} SOL out');
-    if (flow.tokenIn > 0) segments.add('${flow.tokenIn} token in');
-    if (flow.tokenOut > 0) segments.add('${flow.tokenOut} token out');
+    if (flow.nativeInCount > 0) {
+      segments.add('SOL in ${_formatLamports(flow.nativeInLamports)}');
+    }
+    if (flow.nativeOutCount > 0) {
+      segments.add('SOL out ${_formatLamports(flow.nativeOutLamports)}');
+    }
+    if (flow.tokenInCount > 0) {
+      segments.add('${flow.tokenInCount} token in');
+    }
+    if (flow.tokenOutCount > 0) {
+      segments.add('${flow.tokenOutCount} token out');
+    }
     if (segments.isEmpty) return '';
     return ' (${segments.join(', ')})';
+  }
+
+  static String _formatLamports(int lamports) {
+    final sol = lamports / 1000000000;
+    var formatted = sol.toStringAsFixed(sol.abs() >= 1 ? 4 : 6);
+    formatted = formatted.replaceFirst(RegExp(r'0+$'), '');
+    formatted = formatted.replaceFirst(RegExp(r'\.$'), '');
+    return '$formatted SOL';
   }
 
   static String _friendlySource(String source) {
     final normalized = source.toLowerCase();
     return switch (normalized) {
       'jupiter' => 'Jupiter',
+      'raydium' => 'Raydium',
+      'orca' => 'Orca',
       'pumpfun' => 'Pump.fun',
       'magiceden' => 'Magic Eden',
       'tensor' => 'Tensor',
