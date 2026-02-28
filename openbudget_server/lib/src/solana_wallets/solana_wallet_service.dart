@@ -322,7 +322,7 @@ class SolanaWalletService {
       (instruction) => instruction.programId,
     );
     final uniquePrograms = programs.toSet().toList()..sort();
-    final description = _resolveDescription(tx, wallet.address);
+    final interpretation = _resolveDescription(tx, wallet.address);
 
     final existing = await SolanaWalletTransaction.db.findFirstRow(
       session,
@@ -340,9 +340,10 @@ class SolanaWalletService {
       signature: tx.signature,
       slot: tx.slot,
       occurredAt: occurredAt,
-      description: description,
+      description: interpretation.description,
       txType: tx.type,
       source: tx.source,
+      interpretationConfidence: interpretation.confidence,
       programsJson: uniquePrograms.isEmpty ? null : jsonEncode(uniquePrograms),
       nativeTransfersJson: tx.nativeTransfers.isEmpty
           ? null
@@ -366,6 +367,7 @@ class SolanaWalletService {
       description: payload.description,
       txType: payload.txType,
       source: payload.source,
+      interpretationConfidence: payload.interpretationConfidence,
       programsJson: payload.programsJson,
       nativeTransfersJson: payload.nativeTransfersJson,
       tokenTransfersJson: payload.tokenTransfersJson,
@@ -377,13 +379,13 @@ class SolanaWalletService {
     return false;
   }
 
-  static String _resolveDescription(
+  static ({String description, String confidence}) _resolveDescription(
     EnhancedTransaction tx,
     String walletAddress,
   ) {
     final directDescription = tx.description?.trim();
     if (directDescription != null && directDescription.isNotEmpty) {
-      return directDescription;
+      return (description: directDescription, confidence: 'high');
     }
 
     final flow = _walletFlow(tx, walletAddress);
@@ -407,20 +409,28 @@ class SolanaWalletService {
     final hasSwapSignals = flow.tokenIn > 0 && flow.tokenOut > 0;
 
     String action;
+    var confidence = 'low';
     if (hasJupiter || hasSwapSignals) {
       action = hasJupiter ? 'Token swap on Jupiter' : 'Token swap';
+      confidence = hasJupiter ? 'high' : 'medium';
     } else if (hasPump) {
       action = 'Trade on Pump.fun';
+      confidence = 'high';
     } else if (hasNftMarketplace) {
       action = 'NFT activity on $source';
+      confidence = 'high';
     } else if (flow.tokenOut > 0 && flow.tokenIn == 0 && flow.nativeIn == 0) {
       action = 'Token transfer sent';
+      confidence = 'medium';
     } else if (flow.tokenIn > 0 && flow.tokenOut == 0 && flow.nativeOut == 0) {
       action = 'Token transfer received';
+      confidence = 'medium';
     } else if (flow.nativeOut > 0 && flow.nativeIn == 0 && flow.tokenIn == 0) {
       action = 'SOL transfer sent';
+      confidence = 'medium';
     } else if (flow.nativeIn > 0 && flow.nativeOut == 0 && flow.tokenOut == 0) {
       action = 'SOL transfer received';
+      confidence = 'medium';
     } else {
       final readableType = tx.type
           .toLowerCase()
@@ -439,7 +449,10 @@ class SolanaWalletService {
         : ' using ${shortProgramLabels.join(', ')}'
               '${remainingPrograms > 0 ? ' +$remainingPrograms' : ''}';
 
-    return '$action$transferSummary$programSummary';
+    return (
+      description: '$action$transferSummary$programSummary',
+      confidence: confidence,
+    );
   }
 
   static ({int nativeIn, int nativeOut, int tokenIn, int tokenOut}) _walletFlow(

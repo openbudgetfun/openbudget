@@ -2453,6 +2453,7 @@ class _TransactionCard extends StatelessWidget {
       transaction,
     );
     final hasCategory = transaction.category?.trim().isNotEmpty ?? false;
+    final confidence = transaction.interpretationConfidence?.trim();
     final occurredText = transaction.occurredAt == null
         ? null
         : DateFormat.yMMMd().add_jm().format(transaction.occurredAt!);
@@ -2524,6 +2525,12 @@ class _TransactionCard extends StatelessWidget {
                   icon: Icons.hub_outlined,
                   label: _SolanaWalletAccountBody._toLabel(transaction.source),
                 ),
+                if (confidence != null && confidence.isNotEmpty)
+                  _MetadataChip(
+                    icon: Icons.psychology_alt_outlined,
+                    label:
+                        '${_SolanaWalletAccountBody._toLabel(confidence)} confidence',
+                  ),
                 for (final program in programs.take(4))
                   _MetadataChip(icon: Icons.extension_outlined, label: program),
                 if (hasCategory)
