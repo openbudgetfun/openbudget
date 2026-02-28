@@ -1521,6 +1521,11 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final isSyncing = useState(false);
+    final hideDustAssets = useState(true);
+    final transactionSearchController = useTextEditingController();
+    final showNeedsCategoryOnly = useState(false);
+
+    useListenable(transactionSearchController);
 
     if (account == null) {
       return const Center(child: Text('Account not found.'));
@@ -1861,6 +1866,15 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
                 ),
               ),
               const SizedBox(height: SpacingTokens.sm),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: FilterChip(
+                  selected: hideDustAssets.value,
+                  onSelected: (value) => hideDustAssets.value = value,
+                  label: const Text(r'Hide dust assets (< $0.01)'),
+                ),
+              ),
+              const SizedBox(height: SpacingTokens.sm),
               holdingsAsync.when(
                 loading: () => const Padding(
                   padding: EdgeInsets.all(SpacingTokens.md),
@@ -1886,9 +1900,27 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
                       (a, b) =>
                           (b.totalValue ?? 0).compareTo(a.totalValue ?? 0),
                     );
+                  final visibleHoldings = hideDustAssets.value
+                      ? sortedHoldings
+                            .where(
+                              (holding) =>
+                                  holding.isNft ||
+                                  holding.totalValue == null ||
+                                  holding.totalValue! >= 0.01,
+                            )
+                            .toList(growable: false)
+                      : sortedHoldings;
+                  if (visibleHoldings.isEmpty) {
+                    return const _EmptyStateCard(
+                      title: 'Only dust assets found',
+                      subtitle:
+                          'Turn off the dust filter to inspect very small-value token balances.',
+                      icon: Icons.tune_rounded,
+                    );
+                  }
                   return Column(
                     children: [
-                      for (final holding in sortedHoldings)
+                      for (final holding in visibleHoldings)
                         Padding(
                           padding: const EdgeInsets.only(
                             bottom: SpacingTokens.sm,
@@ -1925,6 +1957,24 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
                 ),
               ),
               const SizedBox(height: SpacingTokens.sm),
+              TextField(
+                controller: transactionSearchController,
+                textInputAction: TextInputAction.search,
+                decoration: const InputDecoration(
+                  hintText: 'Search description, category, tags, memo',
+                  prefixIcon: Icon(Icons.search_rounded),
+                ),
+              ),
+              const SizedBox(height: SpacingTokens.sm),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: FilterChip(
+                  selected: showNeedsCategoryOnly.value,
+                  onSelected: (value) => showNeedsCategoryOnly.value = value,
+                  label: const Text('Needs category'),
+                ),
+              ),
+              const SizedBox(height: SpacingTokens.sm),
               transactionsAsync.when(
                 loading: () => const Padding(
                   padding: EdgeInsets.all(SpacingTokens.md),
@@ -1955,9 +2005,39 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
                           DateTime.fromMillisecondsSinceEpoch(0);
                       return bTime.compareTo(aTime);
                     });
+                  final query = transactionSearchController.text
+                      .trim()
+                      .toLowerCase();
+                  final visibleTransactions = sortedTransactions
+                      .where((tx) {
+                        if (showNeedsCategoryOnly.value &&
+                            (tx.category?.trim().isNotEmpty ?? false)) {
+                          return false;
+                        }
+
+                        if (query.isEmpty) return true;
+                        final haystack = [
+                          tx.description,
+                          tx.txType,
+                          tx.source,
+                          tx.category ?? '',
+                          tx.tagsCsv ?? '',
+                          tx.memo ?? '',
+                        ].join(' ').toLowerCase();
+                        return haystack.contains(query);
+                      })
+                      .toList(growable: false);
+                  if (visibleTransactions.isEmpty) {
+                    return const _EmptyStateCard(
+                      title: 'No transactions match filters',
+                      subtitle:
+                          'Adjust search terms or disable the category filter.',
+                      icon: Icons.filter_alt_off_rounded,
+                    );
+                  }
                   return Column(
                     children: [
-                      for (final tx in sortedTransactions)
+                      for (final tx in visibleTransactions)
                         Padding(
                           padding: const EdgeInsets.only(
                             bottom: SpacingTokens.sm,
