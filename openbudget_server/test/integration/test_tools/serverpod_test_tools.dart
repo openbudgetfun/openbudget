@@ -28,17 +28,19 @@ import 'package:openbudget_server/src/generated/envelope_goals/envelope_goal.dar
     as _i10;
 import 'package:openbudget_server/src/generated/envelopes/envelope.dart'
     as _i11;
-import 'package:openbudget_server/src/generated/payees/payee.dart' as _i12;
+import 'package:openbudget_server/src/generated/fx_rates/fx_latest_snapshot.dart'
+    as _i12;
+import 'package:openbudget_server/src/generated/payees/payee.dart' as _i13;
 import 'package:openbudget_server/src/generated/recurring_transactions/recurring_transaction.dart'
-    as _i13;
-import 'package:openbudget_server/src/generated/transaction_rules/transaction_rule.dart'
     as _i14;
-import 'package:openbudget_server/src/generated/transactions/transaction.dart'
+import 'package:openbudget_server/src/generated/transaction_rules/transaction_rule.dart'
     as _i15;
-import 'package:openbudget_server/src/generated/transactions/split_item.dart'
+import 'package:openbudget_server/src/generated/transactions/transaction.dart'
     as _i16;
-import 'package:openbudget_server/src/generated/transactions/import_row.dart'
+import 'package:openbudget_server/src/generated/transactions/split_item.dart'
     as _i17;
+import 'package:openbudget_server/src/generated/transactions/import_row.dart'
+    as _i18;
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:openbudget_server/src/generated/endpoints.dart';
 export 'package:serverpod_test/serverpod_test_public_exports.dart';
@@ -168,6 +170,8 @@ class TestEndpoints {
 
   late final _EnvelopeEndpoint envelope;
 
+  late final _FxRateEndpoint fxRate;
+
   late final _LogIngestEndpoint logIngest;
 
   late final _MonthlyAllocationEndpoint monthlyAllocation;
@@ -229,6 +233,10 @@ class _InternalTestEndpoints extends TestEndpoints
       serializationManager,
     );
     envelope = _EnvelopeEndpoint(
+      endpoints,
+      serializationManager,
+    );
+    fxRate = _FxRateEndpoint(
       endpoints,
       serializationManager,
     );
@@ -1187,6 +1195,8 @@ class _BudgetEndpoint {
     _i2.UuidValue budgetId, {
     String? name,
     String? currencyCode,
+    String? displayCurrencyCode,
+    bool? clearDisplayCurrencyCode,
   }) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
@@ -1203,6 +1213,8 @@ class _BudgetEndpoint {
             'budgetId': budgetId,
             'name': name,
             'currencyCode': currencyCode,
+            'displayCurrencyCode': displayCurrencyCode,
+            'clearDisplayCurrencyCode': clearDisplayCurrencyCode,
           }),
           serializationManager: _serializationManager,
         );
@@ -1906,6 +1918,77 @@ class _EnvelopeEndpoint {
   }
 }
 
+class _FxRateEndpoint {
+  _FxRateEndpoint(
+    this._endpointDispatch,
+    this._serializationManager,
+  );
+
+  final _i2.EndpointDispatch _endpointDispatch;
+
+  final _i2.SerializationManager _serializationManager;
+
+  _i3.Future<_i12.FxLatestSnapshot> latest(
+    _i1.TestSessionBuilder sessionBuilder,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'fxRate',
+            method: 'latest',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'fxRate',
+          methodName: 'latest',
+          parameters: _i1.testObjectToJson({}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<_i12.FxLatestSnapshot>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<_i12.FxLatestSnapshot> refresh(
+    _i1.TestSessionBuilder sessionBuilder,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'fxRate',
+            method: 'refresh',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'fxRate',
+          methodName: 'refresh',
+          parameters: _i1.testObjectToJson({}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<_i12.FxLatestSnapshot>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+}
+
 class _LogIngestEndpoint {
   _LogIngestEndpoint(
     this._endpointDispatch,
@@ -2164,7 +2247,7 @@ class _PayeeEndpoint {
 
   final _i2.SerializationManager _serializationManager;
 
-  _i3.Future<_i12.Payee> create(
+  _i3.Future<_i13.Payee> create(
     _i1.TestSessionBuilder sessionBuilder,
     String name,
     _i2.UuidValue budgetId,
@@ -2191,7 +2274,7 @@ class _PayeeEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i12.Payee>);
+                as _i3.Future<_i13.Payee>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -2199,7 +2282,7 @@ class _PayeeEndpoint {
     });
   }
 
-  _i3.Future<List<_i12.Payee>> list(
+  _i3.Future<List<_i13.Payee>> list(
     _i1.TestSessionBuilder sessionBuilder,
     _i2.UuidValue budgetId,
   ) async {
@@ -2222,7 +2305,7 @@ class _PayeeEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<List<_i12.Payee>>);
+                as _i3.Future<List<_i13.Payee>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -2230,7 +2313,7 @@ class _PayeeEndpoint {
     });
   }
 
-  _i3.Future<_i12.Payee> get(
+  _i3.Future<_i13.Payee> get(
     _i1.TestSessionBuilder sessionBuilder,
     _i2.UuidValue payeeId,
   ) async {
@@ -2253,7 +2336,7 @@ class _PayeeEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i12.Payee>);
+                as _i3.Future<_i13.Payee>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -2261,7 +2344,7 @@ class _PayeeEndpoint {
     });
   }
 
-  _i3.Future<_i12.Payee> update(
+  _i3.Future<_i13.Payee> update(
     _i1.TestSessionBuilder sessionBuilder,
     _i2.UuidValue payeeId, {
     String? name,
@@ -2288,7 +2371,7 @@ class _PayeeEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i12.Payee>);
+                as _i3.Future<_i13.Payee>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -2366,7 +2449,7 @@ class _PayeeEndpoint {
     });
   }
 
-  _i3.Future<_i12.Payee> delete(
+  _i3.Future<_i13.Payee> delete(
     _i1.TestSessionBuilder sessionBuilder,
     _i2.UuidValue payeeId,
   ) async {
@@ -2389,7 +2472,7 @@ class _PayeeEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i12.Payee>);
+                as _i3.Future<_i13.Payee>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -2408,7 +2491,7 @@ class _RecurringTransactionEndpoint {
 
   final _i2.SerializationManager _serializationManager;
 
-  _i3.Future<_i13.RecurringTransaction> create(
+  _i3.Future<_i14.RecurringTransaction> create(
     _i1.TestSessionBuilder sessionBuilder,
     String description,
     int amountCents,
@@ -2451,7 +2534,7 @@ class _RecurringTransactionEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i13.RecurringTransaction>);
+                as _i3.Future<_i14.RecurringTransaction>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -2459,7 +2542,7 @@ class _RecurringTransactionEndpoint {
     });
   }
 
-  _i3.Future<List<_i13.RecurringTransaction>> list(
+  _i3.Future<List<_i14.RecurringTransaction>> list(
     _i1.TestSessionBuilder sessionBuilder,
     _i2.UuidValue budgetId, {
     bool? activeOnly,
@@ -2486,7 +2569,7 @@ class _RecurringTransactionEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<List<_i13.RecurringTransaction>>);
+                as _i3.Future<List<_i14.RecurringTransaction>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -2494,7 +2577,7 @@ class _RecurringTransactionEndpoint {
     });
   }
 
-  _i3.Future<_i13.RecurringTransaction> get(
+  _i3.Future<_i14.RecurringTransaction> get(
     _i1.TestSessionBuilder sessionBuilder,
     _i2.UuidValue recurringTransactionId,
   ) async {
@@ -2519,7 +2602,7 @@ class _RecurringTransactionEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i13.RecurringTransaction>);
+                as _i3.Future<_i14.RecurringTransaction>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -2527,7 +2610,7 @@ class _RecurringTransactionEndpoint {
     });
   }
 
-  _i3.Future<_i13.RecurringTransaction> update(
+  _i3.Future<_i14.RecurringTransaction> update(
     _i1.TestSessionBuilder sessionBuilder,
     _i2.UuidValue recurringTransactionId, {
     String? description,
@@ -2570,7 +2653,7 @@ class _RecurringTransactionEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i13.RecurringTransaction>);
+                as _i3.Future<_i14.RecurringTransaction>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -2578,7 +2661,7 @@ class _RecurringTransactionEndpoint {
     });
   }
 
-  _i3.Future<_i13.RecurringTransaction> delete(
+  _i3.Future<_i14.RecurringTransaction> delete(
     _i1.TestSessionBuilder sessionBuilder,
     _i2.UuidValue recurringTransactionId,
   ) async {
@@ -2603,7 +2686,7 @@ class _RecurringTransactionEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i13.RecurringTransaction>);
+                as _i3.Future<_i14.RecurringTransaction>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -2611,7 +2694,7 @@ class _RecurringTransactionEndpoint {
     });
   }
 
-  _i3.Future<_i13.RecurringTransaction> skipOccurrence(
+  _i3.Future<_i14.RecurringTransaction> skipOccurrence(
     _i1.TestSessionBuilder sessionBuilder,
     _i2.UuidValue recurringTransactionId,
   ) async {
@@ -2636,7 +2719,7 @@ class _RecurringTransactionEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i13.RecurringTransaction>);
+                as _i3.Future<_i14.RecurringTransaction>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -2717,7 +2800,7 @@ class _TransactionRuleEndpoint {
 
   final _i2.SerializationManager _serializationManager;
 
-  _i3.Future<_i14.TransactionRule> create(
+  _i3.Future<_i15.TransactionRule> create(
     _i1.TestSessionBuilder sessionBuilder,
     _i2.UuidValue budgetId,
     _i2.UuidValue payeeId,
@@ -2746,7 +2829,7 @@ class _TransactionRuleEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i14.TransactionRule>);
+                as _i3.Future<_i15.TransactionRule>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -2754,7 +2837,7 @@ class _TransactionRuleEndpoint {
     });
   }
 
-  _i3.Future<List<_i14.TransactionRule>> list(
+  _i3.Future<List<_i15.TransactionRule>> list(
     _i1.TestSessionBuilder sessionBuilder,
     _i2.UuidValue budgetId,
   ) async {
@@ -2777,7 +2860,7 @@ class _TransactionRuleEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<List<_i14.TransactionRule>>);
+                as _i3.Future<List<_i15.TransactionRule>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -2785,7 +2868,7 @@ class _TransactionRuleEndpoint {
     });
   }
 
-  _i3.Future<_i14.TransactionRule> get(
+  _i3.Future<_i15.TransactionRule> get(
     _i1.TestSessionBuilder sessionBuilder,
     _i2.UuidValue ruleId,
   ) async {
@@ -2808,7 +2891,7 @@ class _TransactionRuleEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i14.TransactionRule>);
+                as _i3.Future<_i15.TransactionRule>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -2816,7 +2899,7 @@ class _TransactionRuleEndpoint {
     });
   }
 
-  _i3.Future<_i14.TransactionRule> update(
+  _i3.Future<_i15.TransactionRule> update(
     _i1.TestSessionBuilder sessionBuilder,
     _i2.UuidValue ruleId, {
     _i2.UuidValue? targetEnvelopeId,
@@ -2845,7 +2928,7 @@ class _TransactionRuleEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i14.TransactionRule>);
+                as _i3.Future<_i15.TransactionRule>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -2888,7 +2971,7 @@ class _TransactionRuleEndpoint {
     });
   }
 
-  _i3.Future<_i14.TransactionRule> delete(
+  _i3.Future<_i15.TransactionRule> delete(
     _i1.TestSessionBuilder sessionBuilder,
     _i2.UuidValue ruleId,
   ) async {
@@ -2911,7 +2994,7 @@ class _TransactionRuleEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i14.TransactionRule>);
+                as _i3.Future<_i15.TransactionRule>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -2930,7 +3013,7 @@ class _TransactionEndpoint {
 
   final _i2.SerializationManager _serializationManager;
 
-  _i3.Future<_i15.Transaction> create(
+  _i3.Future<_i16.Transaction> create(
     _i1.TestSessionBuilder sessionBuilder,
     String description,
     int amountCents,
@@ -2969,7 +3052,7 @@ class _TransactionEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i15.Transaction>);
+                as _i3.Future<_i16.Transaction>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -2977,7 +3060,7 @@ class _TransactionEndpoint {
     });
   }
 
-  _i3.Future<List<_i15.Transaction>> list(
+  _i3.Future<List<_i16.Transaction>> list(
     _i1.TestSessionBuilder sessionBuilder,
     _i2.UuidValue budgetId,
   ) async {
@@ -3000,7 +3083,7 @@ class _TransactionEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<List<_i15.Transaction>>);
+                as _i3.Future<List<_i16.Transaction>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -3008,7 +3091,7 @@ class _TransactionEndpoint {
     });
   }
 
-  _i3.Future<List<_i15.Transaction>> listByMonth(
+  _i3.Future<List<_i16.Transaction>> listByMonth(
     _i1.TestSessionBuilder sessionBuilder,
     _i2.UuidValue budgetId,
     int year,
@@ -3037,7 +3120,7 @@ class _TransactionEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<List<_i15.Transaction>>);
+                as _i3.Future<List<_i16.Transaction>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -3045,7 +3128,7 @@ class _TransactionEndpoint {
     });
   }
 
-  _i3.Future<_i15.Transaction> get(
+  _i3.Future<_i16.Transaction> get(
     _i1.TestSessionBuilder sessionBuilder,
     _i2.UuidValue transactionId,
   ) async {
@@ -3068,7 +3151,7 @@ class _TransactionEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i15.Transaction>);
+                as _i3.Future<_i16.Transaction>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -3076,7 +3159,7 @@ class _TransactionEndpoint {
     });
   }
 
-  _i3.Future<_i15.Transaction> update(
+  _i3.Future<_i16.Transaction> update(
     _i1.TestSessionBuilder sessionBuilder,
     _i2.UuidValue transactionId, {
     String? description,
@@ -3115,7 +3198,7 @@ class _TransactionEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i15.Transaction>);
+                as _i3.Future<_i16.Transaction>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -3123,7 +3206,7 @@ class _TransactionEndpoint {
     });
   }
 
-  _i3.Future<_i15.Transaction> setFlag(
+  _i3.Future<_i16.Transaction> setFlag(
     _i1.TestSessionBuilder sessionBuilder,
     _i2.UuidValue transactionId, {
     String? flagColor,
@@ -3150,7 +3233,7 @@ class _TransactionEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i15.Transaction>);
+                as _i3.Future<_i16.Transaction>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -3158,7 +3241,7 @@ class _TransactionEndpoint {
     });
   }
 
-  _i3.Future<List<_i15.Transaction>> transfer(
+  _i3.Future<List<_i16.Transaction>> transfer(
     _i1.TestSessionBuilder sessionBuilder,
     String description,
     int amountCents,
@@ -3195,7 +3278,7 @@ class _TransactionEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<List<_i15.Transaction>>);
+                as _i3.Future<List<_i16.Transaction>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -3203,7 +3286,7 @@ class _TransactionEndpoint {
     });
   }
 
-  _i3.Future<List<_i15.Transaction>> listByAccount(
+  _i3.Future<List<_i16.Transaction>> listByAccount(
     _i1.TestSessionBuilder sessionBuilder,
     _i2.UuidValue accountId,
     _i2.UuidValue budgetId,
@@ -3230,7 +3313,7 @@ class _TransactionEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<List<_i15.Transaction>>);
+                as _i3.Future<List<_i16.Transaction>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -3238,7 +3321,7 @@ class _TransactionEndpoint {
     });
   }
 
-  _i3.Future<_i15.Transaction> toggleCleared(
+  _i3.Future<_i16.Transaction> toggleCleared(
     _i1.TestSessionBuilder sessionBuilder,
     _i2.UuidValue transactionId,
   ) async {
@@ -3261,7 +3344,7 @@ class _TransactionEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i15.Transaction>);
+                as _i3.Future<_i16.Transaction>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -3372,14 +3455,14 @@ class _TransactionEndpoint {
     });
   }
 
-  _i3.Future<List<_i15.Transaction>> createSplit(
+  _i3.Future<List<_i16.Transaction>> createSplit(
     _i1.TestSessionBuilder sessionBuilder,
     String description,
     int totalAmountCents,
     String currencyCode,
     _i2.UuidValue budgetId,
     DateTime transactionDate,
-    List<_i16.SplitItem> splits, {
+    List<_i17.SplitItem> splits, {
     _i2.UuidValue? payeeId,
     _i2.UuidValue? accountId,
   }) async {
@@ -3411,7 +3494,7 @@ class _TransactionEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<List<_i15.Transaction>>);
+                as _i3.Future<List<_i16.Transaction>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -3419,7 +3502,7 @@ class _TransactionEndpoint {
     });
   }
 
-  _i3.Future<List<_i15.Transaction>> listSplits(
+  _i3.Future<List<_i16.Transaction>> listSplits(
     _i1.TestSessionBuilder sessionBuilder,
     _i2.UuidValue parentTransactionId,
   ) async {
@@ -3444,7 +3527,7 @@ class _TransactionEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<List<_i15.Transaction>>);
+                as _i3.Future<List<_i16.Transaction>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -3456,7 +3539,7 @@ class _TransactionEndpoint {
     _i1.TestSessionBuilder sessionBuilder,
     _i2.UuidValue budgetId,
     String currencyCode,
-    List<_i17.ImportRow> rows, {
+    List<_i18.ImportRow> rows, {
     _i2.UuidValue? accountId,
   }) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
@@ -3491,7 +3574,7 @@ class _TransactionEndpoint {
     });
   }
 
-  _i3.Future<List<_i15.Transaction>> findDuplicates(
+  _i3.Future<List<_i16.Transaction>> findDuplicates(
     _i1.TestSessionBuilder sessionBuilder,
     _i2.UuidValue budgetId,
     int amountCents,
@@ -3520,7 +3603,7 @@ class _TransactionEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<List<_i15.Transaction>>);
+                as _i3.Future<List<_i16.Transaction>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -3528,7 +3611,7 @@ class _TransactionEndpoint {
     });
   }
 
-  _i3.Future<_i15.Transaction> delete(
+  _i3.Future<_i16.Transaction> delete(
     _i1.TestSessionBuilder sessionBuilder,
     _i2.UuidValue transactionId,
   ) async {
@@ -3551,7 +3634,7 @@ class _TransactionEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<_i15.Transaction>);
+                as _i3.Future<_i16.Transaction>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();

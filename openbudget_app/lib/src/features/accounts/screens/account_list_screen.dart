@@ -5,6 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
 import 'package:openbudget_app/src/features/accounts/screens/edit_account_dialog.dart';
+import 'package:openbudget_app/src/features/settings/providers/display_currency_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
@@ -24,6 +25,10 @@ class AccountListScreen extends HookConsumerWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final showNotificationBanner = useState(true);
+    final converter = ref
+        .watch(displayCurrencyConverterProvider(budgetId))
+        .asData
+        ?.value;
 
     return Scaffold(
       appBar: AppBar(
@@ -174,12 +179,16 @@ class AccountListScreen extends HookConsumerWidget {
                     ),
                   ),
                 ),
-                _NetWorthCard(totalsByCurrency: netWorthByCurrency),
+                _NetWorthCard(
+                  totalsByCurrency: netWorthByCurrency,
+                  converter: converter,
+                ),
                 const SizedBox(height: SpacingTokens.md),
                 if (onBudget.isNotEmpty) ...[
                   _SectionHeader(
                     title: l10n.accountOnBudget,
                     totalsByCurrency: onBudgetTotals,
+                    converter: converter,
                   ),
                   ...onBudget.map(
                     (account) =>
@@ -191,6 +200,7 @@ class AccountListScreen extends HookConsumerWidget {
                   _SectionHeader(
                     title: l10n.accountOffBudget,
                     totalsByCurrency: offBudgetTotals,
+                    converter: converter,
                   ),
                   ...offBudget.map(
                     (account) =>
@@ -202,6 +212,7 @@ class AccountListScreen extends HookConsumerWidget {
                   _SectionHeader(
                     title: l10n.accountClosed,
                     totalsByCurrency: closedTotals,
+                    converter: converter,
                   ),
                   ...closed.map(
                     (account) =>
@@ -276,21 +287,32 @@ class _NotificationBanner extends HookWidget {
 }
 
 class _SectionHeader extends HookWidget {
-  const _SectionHeader({required this.title, required this.totalsByCurrency});
+  const _SectionHeader({
+    required this.title,
+    required this.totalsByCurrency,
+    required this.converter,
+  });
 
   final String title;
   final Map<CurrencyCode, int> totalsByCurrency;
+  final DisplayCurrencyConverter? converter;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final hasSingleCurrency = totalsByCurrency.length == 1;
-    final singleTotal = hasSingleCurrency ? totalsByCurrency.values.first : 0;
-    final totalLabel = formatCurrencyBreakdown(
-      totalsByCurrency,
-      includeCurrencyCode: !hasSingleCurrency,
-    );
+    final convertedTotal = converter?.convertTotalsToDisplay(totalsByCurrency);
+    final hasSingleCurrency =
+        totalsByCurrency.length == 1 || convertedTotal != null;
+    final singleTotal =
+        convertedTotal ??
+        (totalsByCurrency.length == 1 ? totalsByCurrency.values.first : 0);
+    final totalLabel = convertedTotal != null
+        ? formatCents(convertedTotal, converter!.displayCurrency)
+        : formatCurrencyBreakdown(
+            totalsByCurrency,
+            includeCurrencyCode: !hasSingleCurrency,
+          );
     final labelColor = hasSingleCurrency
         ? singleTotal >= 0
               ? colorScheme.primary
@@ -436,25 +458,55 @@ class _AccountTile extends HookWidget {
 }
 
 class _NetWorthCard extends HookWidget {
-  const _NetWorthCard({required this.totalsByCurrency});
+  const _NetWorthCard({
+    required this.totalsByCurrency,
+    required this.converter,
+  });
 
   final List<_NetWorthTotals> totalsByCurrency;
+  final DisplayCurrencyConverter? converter;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final isSingleCurrency = totalsByCurrency.length == 1;
-    final overallLabel = isSingleCurrency
+    final netWorthByCurrency = {
+      for (final totals in totalsByCurrency) totals.currency: totals.netWorth,
+    };
+    final assetsByCurrency = {
+      for (final totals in totalsByCurrency) totals.currency: totals.assets,
+    };
+    final liabilitiesByCurrency = {
+      for (final totals in totalsByCurrency)
+        totals.currency: totals.liabilities,
+    };
+
+    final convertedNetWorth = converter?.convertTotalsToDisplay(
+      netWorthByCurrency,
+    );
+    final convertedAssets = converter?.convertTotalsToDisplay(assetsByCurrency);
+    final convertedLiabilities = converter?.convertTotalsToDisplay(
+      liabilitiesByCurrency,
+    );
+
+    final showConverted =
+        convertedNetWorth != null &&
+        convertedAssets != null &&
+        convertedLiabilities != null;
+    final primaryNetWorth = showConverted
+        ? convertedNetWorth
+        : totalsByCurrency.first.netWorth;
+
+    final isSingleCurrency = totalsByCurrency.length == 1 || showConverted;
+    final overallLabel = showConverted
+        ? formatCents(convertedNetWorth, converter!.displayCurrency)
+        : totalsByCurrency.length == 1
         ? formatCents(
             totalsByCurrency.first.netWorth,
             totalsByCurrency.first.currency,
           )
-        : formatCurrencyBreakdown({
-            for (final totals in totalsByCurrency)
-              totals.currency: totals.netWorth,
-          });
+        : formatCurrencyBreakdown(netWorthByCurrency);
 
     return Card(
       child: Padding(
@@ -473,14 +525,37 @@ class _NetWorthCard extends HookWidget {
               overallLabel,
               style: theme.textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: isSingleCurrency && totalsByCurrency.first.netWorth < 0
+                color: isSingleCurrency && primaryNetWorth < 0
                     ? colorScheme.error
                     : colorScheme.primary,
               ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: SpacingTokens.sm),
-            if (isSingleCurrency)
+            if (showConverted)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _NetWorthMetric(
+                    label: l10n.accountTotalAssets,
+                    amount: convertedAssets,
+                    currencyCode: converter!.displayCurrency,
+                    color: ColorTokens.secondary,
+                  ),
+                  Container(
+                    width: 1,
+                    height: 24,
+                    color: colorScheme.outlineVariant,
+                  ),
+                  _NetWorthMetric(
+                    label: l10n.accountTotalLiabilities,
+                    amount: convertedLiabilities,
+                    currencyCode: converter!.displayCurrency,
+                    color: ColorTokens.error,
+                  ),
+                ],
+              )
+            else if (isSingleCurrency)
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [

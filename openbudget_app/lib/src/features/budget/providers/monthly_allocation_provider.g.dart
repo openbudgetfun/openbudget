@@ -212,7 +212,7 @@ final class MonthlyAllocationActionsProvider
 }
 
 String _$monthlyAllocationActionsHash() =>
-    r'8373f3334a2565b7780200ae4979b824dcdaead7';
+    r'118cb861316ec91b700f851010dae46144b64b3b';
 
 abstract class _$MonthlyAllocationActions extends $Notifier<AsyncValue<void>> {
   AsyncValue<void> build();

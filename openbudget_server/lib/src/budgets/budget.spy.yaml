@@ -6,6 +6,9 @@ fields:
   name: String
   ### ISO 4217 currency code (e.g. USD, EUR).
   currencyCode: String
+  ### Optional display currency override for aggregated/reporting views.
+  ### If null, the budget's native currencyCode is used for display.
+  displayCurrencyCode: String?
   ### The user who owns this budget.
   ownerId: UuidValue
   createdAt: DateTime, default=now

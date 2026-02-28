@@ -57,7 +57,33 @@ void main() {
       );
       expect(updated.name, 'Updated');
       expect(updated.currencyCode, 'USD');
+      expect(updated.displayCurrencyCode, isNull);
     });
+
+    test(
+      'when setting and clearing display currency then value updates',
+      () async {
+        final created = await endpoints.budget.create(
+          authedSession,
+          'Display Test',
+          'USD',
+        );
+
+        final withDisplayCurrency = await endpoints.budget.update(
+          authedSession,
+          created.id!,
+          displayCurrencyCode: 'GBP',
+        );
+        expect(withDisplayCurrency.displayCurrencyCode, 'GBP');
+
+        final cleared = await endpoints.budget.update(
+          authedSession,
+          created.id!,
+          clearDisplayCurrencyCode: true,
+        );
+        expect(cleared.displayCurrencyCode, isNull);
+      },
+    );
 
     test('when deleting a budget then it is removed', () async {
       final created = await endpoints.budget.create(

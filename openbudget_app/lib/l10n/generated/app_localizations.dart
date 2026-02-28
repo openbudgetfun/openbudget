@@ -2806,6 +2806,36 @@ abstract class AppLocalizations {
   /// **'Display options are applied instantly across OpenBudget screens.'**
   String get settingsDisplayOptionsHint;
 
+  /// No description provided for @settingsDisplayCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'Display Currency'**
+  String get settingsDisplayCurrency;
+
+  /// No description provided for @settingsDisplayCurrencyMatchDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Match Plan Currency (Default)'**
+  String get settingsDisplayCurrencyMatchDefault;
+
+  /// No description provided for @settingsDisplayCurrencyUpdateError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not update display currency. Please try again.'**
+  String get settingsDisplayCurrencyUpdateError;
+
+  /// No description provided for @settingsDisplayCurrencyUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Display currency updated to {currencyCode}'**
+  String settingsDisplayCurrencyUpdated(String currencyCode);
+
+  /// No description provided for @settingsDisplayCurrencyDefaultUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Display currency now matches plan currency.'**
+  String get settingsDisplayCurrencyDefaultUpdated;
+
   /// No description provided for @settingsExportData.
   ///
   /// In en, this message translates to:

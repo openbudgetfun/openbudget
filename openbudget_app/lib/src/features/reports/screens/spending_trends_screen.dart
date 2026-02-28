@@ -5,6 +5,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/reports/providers/spending_trends_provider.dart';
+import 'package:openbudget_app/src/features/settings/providers/display_currency_provider.dart';
+import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -20,6 +22,10 @@ class SpendingTrendsScreen extends HookConsumerWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final trendsAsync = ref.watch(spendingTrendsProvider(budgetId));
+    final converter = ref
+        .watch(displayCurrencyConverterProvider(budgetId))
+        .asData
+        ?.value;
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.spendingTrendsTitle)),
@@ -45,10 +51,8 @@ class SpendingTrendsScreen extends HookConsumerWidget {
           ),
         ),
         data: (data) {
-          final currency = CurrencyCode.values.firstWhere(
-            (c) => c.code == data.currencyCode,
-            orElse: () => CurrencyCode.usd,
-          );
+          final sourceCurrency = parseCurrencyCode(data.currencyCode);
+          final displayCurrency = converter?.displayCurrency ?? sourceCurrency;
 
           if (data.months.every((m) => m.transactionCount == 0)) {
             return Center(
@@ -93,14 +97,24 @@ class SpendingTrendsScreen extends HookConsumerWidget {
                       Expanded(
                         child: _AverageTile(
                           label: l10n.spendingTrendsAvgIncome,
-                          value: formatCents(data.averageIncome, currency),
+                          value:
+                              converter?.formatAmount(
+                                amountCents: data.averageIncome,
+                                sourceCurrency: sourceCurrency,
+                              ) ??
+                              formatCents(data.averageIncome, sourceCurrency),
                           color: colorScheme.primary,
                         ),
                       ),
                       Expanded(
                         child: _AverageTile(
                           label: l10n.spendingTrendsAvgExpenses,
-                          value: formatCents(data.averageExpenses, currency),
+                          value:
+                              converter?.formatAmount(
+                                amountCents: data.averageExpenses,
+                                sourceCurrency: sourceCurrency,
+                              ) ??
+                              formatCents(data.averageExpenses, sourceCurrency),
                           color: colorScheme.error,
                         ),
                       ),
@@ -118,7 +132,7 @@ class SpendingTrendsScreen extends HookConsumerWidget {
                 ),
               ),
               const SizedBox(height: SpacingTokens.sm),
-              _MonthlyChart(months: data.months, currency: currency),
+              _MonthlyChart(months: data.months, currency: displayCurrency),
               const SizedBox(height: SpacingTokens.lg),
 
               // Monthly breakdown list
@@ -130,7 +144,11 @@ class SpendingTrendsScreen extends HookConsumerWidget {
               ),
               const SizedBox(height: SpacingTokens.sm),
               ...data.months.reversed.map(
-                (month) => _MonthSummaryTile(month: month, currency: currency),
+                (month) => _MonthSummaryTile(
+                  month: month,
+                  sourceCurrency: sourceCurrency,
+                  converter: converter,
+                ),
               ),
             ],
           );
@@ -340,10 +358,15 @@ class _LegendDot extends HookWidget {
 }
 
 class _MonthSummaryTile extends HookWidget {
-  const _MonthSummaryTile({required this.month, required this.currency});
+  const _MonthSummaryTile({
+    required this.month,
+    required this.sourceCurrency,
+    required this.converter,
+  });
 
   final MonthlyTrend month;
-  final CurrencyCode currency;
+  final CurrencyCode sourceCurrency;
+  final DisplayCurrencyConverter? converter;
 
   @override
   Widget build(BuildContext context) {
@@ -389,7 +412,7 @@ class _MonthSummaryTile extends HookWidget {
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       Text(
-                        '+${formatCents(month.totalIncome, currency)}',
+                        '+${converter?.formatAmount(amountCents: month.totalIncome, sourceCurrency: sourceCurrency) ?? formatCents(month.totalIncome, sourceCurrency)}',
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: colorScheme.primary,
                           fontWeight: FontWeight.w600,
@@ -397,7 +420,7 @@ class _MonthSummaryTile extends HookWidget {
                       ),
                       const SizedBox(width: SpacingTokens.sm),
                       Text(
-                        '-${formatCents(month.totalExpenses, currency)}',
+                        '-${converter?.formatAmount(amountCents: month.totalExpenses, sourceCurrency: sourceCurrency) ?? formatCents(month.totalExpenses, sourceCurrency)}',
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: colorScheme.error,
                           fontWeight: FontWeight.w600,
@@ -407,7 +430,7 @@ class _MonthSummaryTile extends HookWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    '${month.netIncome >= 0 ? '+' : ''}${formatCents(month.netIncome, currency)}',
+                    '${month.netIncome >= 0 ? '+' : ''}${converter?.formatAmount(amountCents: month.netIncome, sourceCurrency: sourceCurrency) ?? formatCents(month.netIncome, sourceCurrency)}',
                     style: theme.textTheme.titleSmall?.copyWith(
                       color: netColor,
                       fontWeight: FontWeight.bold,

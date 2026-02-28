@@ -8,12 +8,12 @@ part of 'net_worth_provider.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Computes net worth from all accounts in a budget.
+/// Computes net worth from all active accounts in a budget.
 
 @ProviderFor(netWorth)
 final netWorthProvider = NetWorthFamily._();
 
-/// Computes net worth from all accounts in a budget.
+/// Computes net worth from all active accounts in a budget.
 
 final class NetWorthProvider
     extends
@@ -23,7 +23,7 @@ final class NetWorthProvider
           FutureOr<NetWorthData>
         >
     with $FutureModifier<NetWorthData>, $FutureProvider<NetWorthData> {
-  /// Computes net worth from all accounts in a budget.
+  /// Computes net worth from all active accounts in a budget.
   NetWorthProvider._({
     required NetWorthFamily super.from,
     required String super.argument,
@@ -68,9 +68,9 @@ final class NetWorthProvider
   }
 }
 
-String _$netWorthHash() => r'7ee1748312a6a639531f44c81d8c5fb1672b6d21';
+String _$netWorthHash() => r'6db8fdc18b4132bdc096db573a2a190037dbb626';
 
-/// Computes net worth from all accounts in a budget.
+/// Computes net worth from all active accounts in a budget.
 
 final class NetWorthFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<NetWorthData>, String> {
@@ -83,7 +83,7 @@ final class NetWorthFamily extends $Family
         isAutoDispose: true,
       );
 
-  /// Computes net worth from all accounts in a budget.
+  /// Computes net worth from all active accounts in a budget.
 
   NetWorthProvider call(String budgetId) =>
       NetWorthProvider._(argument: budgetId, from: this);

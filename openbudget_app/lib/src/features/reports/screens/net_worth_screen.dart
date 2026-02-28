@@ -3,6 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/reports/providers/net_worth_provider.dart';
+import 'package:openbudget_app/src/features/settings/providers/display_currency_provider.dart';
 import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_client/openbudget_client.dart';
@@ -20,6 +21,10 @@ class NetWorthScreen extends HookConsumerWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final dataAsync = ref.watch(netWorthProvider(budgetId));
+    final converter = ref
+        .watch(displayCurrencyConverterProvider(budgetId))
+        .asData
+        ?.value;
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.netWorthTitle)),
@@ -45,16 +50,52 @@ class NetWorthScreen extends HookConsumerWidget {
           ),
         ),
         data: (data) {
+          final netWorthByCurrency = {
+            for (final breakdown in data.currencyBreakdown)
+              breakdown.currency: breakdown.netWorth,
+          };
+          final assetsByCurrency = {
+            for (final breakdown in data.currencyBreakdown)
+              breakdown.currency: breakdown.totalAssets,
+          };
+          final liabilitiesByCurrency = {
+            for (final breakdown in data.currencyBreakdown)
+              breakdown.currency: breakdown.totalLiabilities,
+          };
+          final convertedNetWorth = converter?.convertTotalsToDisplay(
+            netWorthByCurrency,
+          );
+          final convertedAssets = converter?.convertTotalsToDisplay(
+            assetsByCurrency,
+          );
+          final convertedLiabilities = converter?.convertTotalsToDisplay(
+            liabilitiesByCurrency,
+          );
+          final useConverted =
+              convertedNetWorth != null &&
+              convertedAssets != null &&
+              convertedLiabilities != null;
           final primaryBreakdown = data.currencyBreakdown.firstOrNull;
-          final primaryCurrency =
-              primaryBreakdown?.currency ?? CurrencyCode.usd;
-          final primaryNetWorth = primaryBreakdown?.netWorth ?? 0;
-          final netWorthColor = data.hasMultipleCurrencies
+          final primaryCurrency = useConverted
+              ? converter!.displayCurrency
+              : (primaryBreakdown?.currency ?? CurrencyCode.usd);
+          final primaryNetWorth = useConverted
+              ? convertedNetWorth
+              : (primaryBreakdown?.netWorth ?? 0);
+          final primaryAssets = useConverted
+              ? convertedAssets
+              : (primaryBreakdown?.totalAssets ?? 0);
+          final primaryLiabilities = useConverted
+              ? convertedLiabilities
+              : (primaryBreakdown?.totalLiabilities ?? 0);
+          final hasMultipleDisplayCurrencies =
+              !useConverted && data.hasMultipleCurrencies;
+          final netWorthColor = hasMultipleDisplayCurrencies
               ? colorScheme.primary
               : primaryNetWorth >= 0
               ? ColorTokens.secondary
               : ColorTokens.error;
-          final heroAmountLabel = data.hasMultipleCurrencies
+          final heroAmountLabel = hasMultipleDisplayCurrencies
               ? formatCurrencyBreakdown({
                   for (final breakdown in data.currencyBreakdown)
                     breakdown.currency: breakdown.netWorth,
@@ -94,7 +135,7 @@ class NetWorthScreen extends HookConsumerWidget {
                       children: [
                         Expanded(
                           child: Text(
-                            '${l10n.netWorthAssets} ${formatCents(primaryBreakdown?.totalAssets ?? 0, primaryCurrency)}',
+                            '${l10n.netWorthAssets} ${formatCents(primaryAssets, primaryCurrency)}',
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color: ColorTokens.secondary,
                             ),
@@ -102,7 +143,7 @@ class NetWorthScreen extends HookConsumerWidget {
                         ),
                         Expanded(
                           child: Text(
-                            '${l10n.netWorthLiabilities} ${formatCents(primaryBreakdown?.totalLiabilities ?? 0, primaryCurrency)}',
+                            '${l10n.netWorthLiabilities} ${formatCents(primaryLiabilities, primaryCurrency)}',
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color: ColorTokens.error,
                             ),
@@ -117,16 +158,13 @@ class NetWorthScreen extends HookConsumerWidget {
               const SizedBox(height: SpacingTokens.md),
 
               // Assets vs liabilities summary rows.
-              if (!data.hasMultipleCurrencies)
+              if (!hasMultipleDisplayCurrencies)
                 Row(
                   children: [
                     Expanded(
                       child: _SummaryChip(
                         label: l10n.netWorthAssets,
-                        amount: formatCents(
-                          primaryBreakdown?.totalAssets ?? 0,
-                          primaryCurrency,
-                        ),
+                        amount: formatCents(primaryAssets, primaryCurrency),
                         color: ColorTokens.secondary,
                       ),
                     ),
@@ -135,7 +173,7 @@ class NetWorthScreen extends HookConsumerWidget {
                       child: _SummaryChip(
                         label: l10n.netWorthLiabilities,
                         amount: formatCents(
-                          primaryBreakdown?.totalLiabilities ?? 0,
+                          primaryLiabilities,
                           primaryCurrency,
                         ),
                         color: ColorTokens.error,

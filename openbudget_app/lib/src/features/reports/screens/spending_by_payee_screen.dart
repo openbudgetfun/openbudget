@@ -3,7 +3,9 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/reports/providers/spending_report_provider.dart';
+import 'package:openbudget_app/src/features/settings/providers/display_currency_provider.dart';
 import 'package:openbudget_app/src/theme/openbudget_palette.dart';
+import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -33,6 +35,10 @@ class SpendingByPayeeScreen extends HookConsumerWidget {
     final selectedMonth = useState(normalizedInitialMonth);
     final presetMonths = useState(3);
     final usePreset = useState(initialUsePreset);
+    final converter = ref
+        .watch(displayCurrencyConverterProvider(budgetId))
+        .asData
+        ?.value;
 
     final reportAsync = usePreset.value
         ? ref.watch(
@@ -75,10 +81,7 @@ class SpendingByPayeeScreen extends HookConsumerWidget {
           ),
         ),
         data: (report) {
-          final currency = CurrencyCode.values.firstWhere(
-            (code) => code.code == report.currencyCode,
-            orElse: () => CurrencyCode.usd,
-          );
+          final sourceCurrency = parseCurrencyCode(report.currencyCode);
           final sortedEntries = report.categorySpending.entries.toList()
             ..sort((a, b) => b.value.compareTo(a.value));
           final totalSpent = report.totalExpenses;
@@ -152,7 +155,11 @@ class SpendingByPayeeScreen extends HookConsumerWidget {
                       ],
                       const SizedBox(height: SpacingTokens.sm),
                       Text(
-                        formatCents(totalSpent, currency),
+                        converter?.formatAmount(
+                              amountCents: totalSpent,
+                              sourceCurrency: sourceCurrency,
+                            ) ??
+                            formatCents(totalSpent, sourceCurrency),
                         style: theme.textTheme.headlineLarge?.copyWith(
                           fontWeight: FontWeight.w800,
                         ),
@@ -203,7 +210,8 @@ class SpendingByPayeeScreen extends HookConsumerWidget {
                           categoryName: sortedEntries[index].key,
                           amountCents: sortedEntries[index].value,
                           totalCents: totalSpent,
-                          currency: currency,
+                          sourceCurrency: sourceCurrency,
+                          converter: converter,
                           color: _CategoryStrip
                               .colors[index % _CategoryStrip.colors.length],
                           showDivider: index < sortedEntries.length - 1,
@@ -220,7 +228,11 @@ class SpendingByPayeeScreen extends HookConsumerWidget {
                     style: theme.textTheme.titleSmall,
                   ),
                   trailing: Text(
-                    formatCents(report.totalIncome, currency),
+                    converter?.formatAmount(
+                          amountCents: report.totalIncome,
+                          sourceCurrency: sourceCurrency,
+                        ) ??
+                        formatCents(report.totalIncome, sourceCurrency),
                     style: theme.textTheme.titleMedium?.copyWith(
                       color: OpenBudgetPalette.progressGreen,
                       fontWeight: FontWeight.w700,
@@ -502,7 +514,8 @@ class _CategoryRow extends StatelessWidget {
     required this.categoryName,
     required this.amountCents,
     required this.totalCents,
-    required this.currency,
+    required this.sourceCurrency,
+    required this.converter,
     required this.color,
     required this.showDivider,
   });
@@ -510,7 +523,8 @@ class _CategoryRow extends StatelessWidget {
   final String categoryName;
   final int amountCents;
   final int totalCents;
-  final CurrencyCode currency;
+  final CurrencyCode sourceCurrency;
+  final DisplayCurrencyConverter? converter;
   final Color color;
   final bool showDivider;
 
@@ -538,7 +552,11 @@ class _CategoryRow extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                formatCents(amountCents, currency),
+                converter?.formatAmount(
+                      amountCents: amountCents,
+                      sourceCurrency: sourceCurrency,
+                    ) ??
+                    formatCents(amountCents, sourceCurrency),
                 style: theme.textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.w700,
                 ),

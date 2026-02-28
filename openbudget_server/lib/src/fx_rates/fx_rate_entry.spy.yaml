@@ -1,0 +1,15 @@
+### Individual currency exchange rate value in a snapshot.
+class: FxRateEntry
+table: fx_rate_entry
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  snapshotId: UuidValue, relation(parent=fx_rate_snapshot)
+  currencyCode: String
+  rate: double
+  createdAt: DateTime, default=now
+indexes:
+  fx_rate_entry_snapshot_idx:
+    fields: snapshotId
+  fx_rate_entry_snapshot_currency_unique_idx:
+    fields: snapshotId, currencyCode
+    unique: true

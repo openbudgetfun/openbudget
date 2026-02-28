@@ -1663,6 +1663,26 @@ class AppLocalizationsEn extends AppLocalizations {
       'Display options are applied instantly across OpenBudget screens.';
 
   @override
+  String get settingsDisplayCurrency => 'Display Currency';
+
+  @override
+  String get settingsDisplayCurrencyMatchDefault =>
+      'Match Plan Currency (Default)';
+
+  @override
+  String get settingsDisplayCurrencyUpdateError =>
+      'Could not update display currency. Please try again.';
+
+  @override
+  String settingsDisplayCurrencyUpdated(String currencyCode) {
+    return 'Display currency updated to $currencyCode';
+  }
+
+  @override
+  String get settingsDisplayCurrencyDefaultUpdated =>
+      'Display currency now matches plan currency.';
+
+  @override
   String get settingsExportData => 'Export Budget';
 
   @override

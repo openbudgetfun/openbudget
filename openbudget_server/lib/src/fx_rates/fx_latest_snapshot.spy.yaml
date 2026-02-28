@@ -1,0 +1,7 @@
+### Latest FX rates payload returned to clients.
+class: FxLatestSnapshot
+fields:
+  baseCurrencyCode: String
+  fetchedAt: DateTime
+  isStale: bool
+  rates: List<FxRateQuote>

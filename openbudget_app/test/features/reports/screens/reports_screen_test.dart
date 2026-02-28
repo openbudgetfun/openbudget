@@ -12,6 +12,7 @@ import 'package:openbudget_app/src/features/budget/providers/age_of_money_provid
 import 'package:openbudget_app/src/features/reports/providers/net_worth_provider.dart';
 import 'package:openbudget_app/src/features/reports/providers/spending_report_provider.dart';
 import 'package:openbudget_app/src/features/reports/screens/reports_screen.dart';
+import 'package:openbudget_app/src/features/settings/providers/display_currency_provider.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -86,6 +87,8 @@ Widget _buildSubject({
   spendingBuilder,
   Future<NetWorthData> Function(Ref ref, String budgetId)? netWorthBuilder,
   Future<int?> Function(Ref ref, String budgetId)? ageBuilder,
+  Future<DisplayCurrencyConverter> Function(Ref ref, String budgetId)?
+  converterBuilder,
 }) {
   return ProviderScope(
     overrides: [
@@ -94,6 +97,8 @@ Widget _buildSubject({
         netWorthBuilder ?? (ref, _) async => _makeNetWorthData(),
       ),
       ageOfMoneyProvider.overrideWith(ageBuilder ?? (ref, _) async => 2),
+      if (converterBuilder != null)
+        displayCurrencyConverterProvider.overrideWith(converterBuilder),
     ],
     child: MaterialApp(
       theme: OpenBudgetTheme.light,
@@ -195,6 +200,56 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('7 days'), findsOneWidget);
+    });
+
+    testWidgets(
+      'renders converted report values when display currency is set',
+      (tester) async {
+        await tester.pumpWidget(
+          _buildSubject(
+            spendingBuilder: (ref, args) async => _makeReport(
+              totalIncome: 800000,
+              totalExpenses: 222000,
+              transactionCount: 8,
+              categorySpending: const {'Rent': 120000},
+            ),
+            converterBuilder: (ref, budgetId) async =>
+                const DisplayCurrencyConverter(
+                  displayCurrency: CurrencyCode.gbp,
+                  baseCurrencyCode: 'USD',
+                  ratesByCode: {'USD': 1.0, 'GBP': 0.7},
+                ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.textContaining('\u00A31,554.00'), findsWidgets);
+        expect(find.textContaining('\u00A336,553.13'), findsWidgets);
+      },
+    );
+
+    testWidgets('falls back to native report values when rates are missing', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _buildSubject(
+          spendingBuilder: (ref, args) async => _makeReport(
+            totalIncome: 800000,
+            totalExpenses: 222000,
+            transactionCount: 8,
+            categorySpending: const {'Rent': 120000},
+          ),
+          converterBuilder: (ref, budgetId) async =>
+              const DisplayCurrencyConverter(
+                displayCurrency: CurrencyCode.gbp,
+                baseCurrencyCode: 'USD',
+                ratesByCode: {'USD': 1.0},
+              ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining(r'$2,220.00'), findsWidgets);
     });
   });
 }

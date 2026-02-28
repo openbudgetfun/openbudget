@@ -8,6 +8,7 @@ import 'package:openbudget_app/src/features/auth/providers/auth_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
 import 'package:openbudget_app/src/features/home/providers/budget_actions_provider.dart';
 import 'package:openbudget_app/src/features/home/providers/budget_list_provider.dart';
+import 'package:openbudget_app/src/features/settings/providers/display_currency_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
@@ -215,6 +216,10 @@ class _BudgetCard extends HookConsumerWidget {
     final colorScheme = theme.colorScheme;
     final accountsAsync = ref.watch(accountListProvider(budgetId));
     final summaryAsync = ref.watch(budgetSummaryProvider(budgetId));
+    final converter = ref
+        .watch(displayCurrencyConverterProvider(budgetId))
+        .asData
+        ?.value;
 
     final currency = CurrencyCode.values.firstWhere(
       (c) => c.code == currencyCode,
@@ -282,9 +287,18 @@ class _BudgetCard extends HookConsumerWidget {
                       final singleTotal = hasSingleCurrency
                           ? (totalsByCurrency.values.firstOrNull ?? 0)
                           : 0;
-                      final totalLabel = hasSingleCurrency
+                      final convertedTotal = converter?.convertTotalsToDisplay(
+                        totalsByCurrency,
+                      );
+                      final totalLabel = convertedTotal != null
+                          ? formatCents(
+                              convertedTotal,
+                              converter!.displayCurrency,
+                            )
+                          : hasSingleCurrency
                           ? formatCents(singleTotal, singleCurrency)
                           : formatCurrencyBreakdown(totalsByCurrency);
+                      final totalForColor = convertedTotal ?? singleTotal;
 
                       return Padding(
                         padding: const EdgeInsets.only(top: SpacingTokens.md),
@@ -305,8 +319,10 @@ class _BudgetCard extends HookConsumerWidget {
                                 totalLabel,
                                 style: theme.textTheme.titleSmall?.copyWith(
                                   fontWeight: FontWeight.bold,
-                                  color: hasSingleCurrency
-                                      ? singleTotal >= 0
+                                  color:
+                                      (hasSingleCurrency ||
+                                          convertedTotal != null)
+                                      ? totalForColor >= 0
                                             ? ColorTokens.secondary
                                             : ColorTokens.error
                                       : colorScheme.onSurfaceVariant,
@@ -356,7 +372,11 @@ class _BudgetCard extends HookConsumerWidget {
                                   const SizedBox(width: SpacingTokens.xs),
                                   Text(
                                     l10n.homeBudgetReadyToAssign(
-                                      formatCents(readyToAssign, currency),
+                                      converter?.formatAmount(
+                                            amountCents: readyToAssign,
+                                            sourceCurrency: currency,
+                                          ) ??
+                                          formatCents(readyToAssign, currency),
                                     ),
                                     style: theme.textTheme.bodySmall?.copyWith(
                                       color: readyToAssign > 0

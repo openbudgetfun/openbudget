@@ -1,0 +1,5 @@
+### Currency exchange rate pair used in API responses.
+class: FxRateQuote
+fields:
+  currencyCode: String
+  rate: double

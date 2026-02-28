@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:openbudget_server/src/auth/apple_oauth_callback_route.dart';
 import 'package:openbudget_server/src/auth/email_sender.dart';
+import 'package:openbudget_server/src/fx_rates/fx_rate_service.dart';
 import 'package:openbudget_server/src/generated/endpoints.dart';
 import 'package:openbudget_server/src/generated/protocol.dart' hide Transaction;
 import 'package:openbudget_server/src/logging/server_logging.dart';
@@ -150,8 +151,16 @@ Future<void> run(List<String> args) async {
     );
   }
 
+  FxRateService.configure(
+    apiKey: _readPassword(pod, 'currencyApiKey'),
+    baseUrl: _readPassword(pod, 'currencyApiBaseUrl'),
+  );
+
   // Start the server.
   await pod.start();
+
+  // Keep persisted FX rates fresh for display-currency conversion.
+  FxRateService.startBackgroundRefresh(pod);
 }
 
 String? _readPassword(Serverpod pod, String key) {

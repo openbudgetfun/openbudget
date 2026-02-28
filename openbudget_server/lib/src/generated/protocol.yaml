@@ -54,6 +54,9 @@ envelope:
   - update:
   - reorder:
   - delete:
+fxRate:
+  - latest:
+  - refresh:
 logIngest:
   - ingest:
 monthlyAllocation:
