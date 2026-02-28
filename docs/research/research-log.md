@@ -638,3 +638,52 @@
 
 - Captured additional Android screenshot in this cycle:
   - `docs/research/screenshots/2026-02-28/nft-coverage-metrics-cycle-login.png`
+
+## 2026-02-28 - NFT Marketplace Pricing Fallback + Confidence Tiers (Issue #166)
+
+### Backend Progress
+
+- Added a dedicated Magic Eden NFT pricing client:
+  - `openbudget_server/lib/src/solana_wallets/magic_eden_nft_price_client.dart`
+  - fallback chain per NFT mint:
+    - current listing price
+    - most recent sale price (`buyNow` / `acceptBid`)
+    - collection floor price
+- Integrated SOL->USD conversion for NFT fallback quotes using Jupiter SOL pricing.
+- Wired NFT fallback quotes into holdings sync for:
+  - NFT-like assets inside fungible balance stream
+  - NFT-only assets discovered from DAS ownership listing
+- Added persistent valuation confidence metadata for holdings:
+  - schema field: `priceConfidence` (`high` / `medium` / `low`)
+  - mapped confidence behavior:
+    - Helius/Jupiter provider paths -> `high`
+    - derived price paths -> `medium`
+    - marketplace last-sale/floor and stale cache -> `medium` / `low`
+
+### App Progress
+
+- Updated Solana holdings UI card chips to display valuation confidence tier in addition to price source and price quality.
+
+### Test Coverage Added
+
+- Added unit coverage for Magic Eden parsing and fallback primitives:
+  - `openbudget_server/test/unit/solana_wallets/magic_eden_nft_price_client_test.dart`
+  - listing price parsing
+  - collection symbol parsing
+  - recent sale extraction
+  - floor lamports -> SOL conversion
+
+### Validation Completed
+
+- `serverpod generate` completed successfully after schema update.
+- `dart analyze openbudget_server openbudget_client openbudget_app` returned no issues.
+- `dart|flutter test` slices passed:
+  - `openbudget_server/test/unit/solana_wallets/jupiter_price_client_test.dart`
+  - `openbudget_server/test/unit/solana_wallets/magic_eden_nft_price_client_test.dart`
+  - `openbudget_server/test/unit/solana_wallets/solana_transaction_interpreter_test.dart`
+  - `openbudget_app/test/features/accounts/screens/account_detail_screen_test.dart`
+
+### Mobile Evidence
+
+- Captured additional simulator screenshot in this cycle:
+  - `docs/research/screenshots/2026-02-28/nft-marketplace-confidence-cycle-login.png`

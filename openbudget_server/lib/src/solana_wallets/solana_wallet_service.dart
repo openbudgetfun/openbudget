@@ -8,6 +8,7 @@ import 'package:openbudget_server/src/budgets/budget_service.dart';
 import 'package:openbudget_server/src/exceptions/exceptions.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:openbudget_server/src/solana_wallets/jupiter_price_client.dart';
+import 'package:openbudget_server/src/solana_wallets/magic_eden_nft_price_client.dart';
 import 'package:openbudget_server/src/solana_wallets/solana_transaction_interpreter.dart';
 import 'package:serverpod/serverpod.dart';
 import 'package:solana_kit_helius/solana_kit_helius.dart';
@@ -20,6 +21,7 @@ class SolanaWalletService {
   static const _clusterMainnet = 'mainnet';
   static const _clusterDevnet = 'devnet';
   static const _pnlEpsilon = 0.0000001;
+  static const _wrappedSolMint = 'So11111111111111111111111111111111111111112';
 
   /// Attaches a Solana wallet to an existing account.
   static Future<SolanaWallet> attachWallet(
@@ -787,9 +789,19 @@ class SolanaWalletService {
     );
 
     final assetsById = {for (final asset in assets.items) asset.id: asset};
+    final jupiterMints = <String>{
+      ...balances.tokens.map((token) => token.mint),
+      _wrappedSolMint,
+    };
     final jupiterPrices = await JupiterPriceClient.fetchUsdPrices(
-      mintAddresses: balances.tokens.map((token) => token.mint),
+      mintAddresses: jupiterMints,
       onWarning: (warning) => warnings.add(warning),
+    );
+    final nftMarketQuotes = await MagicEdenNftPriceClient.fetchUsdQuotes(
+      mintAddresses: assets.items.where(_isLikelyNft).map((asset) => asset.id),
+      solUsdPrice: jupiterPrices[_wrappedSolMint],
+      onWarning: (warning) => warnings.add(warning),
+      maxMints: 150,
     );
 
     final seenAssetIds = <String>{};
@@ -818,8 +830,10 @@ class SolanaWalletService {
       var totalValue = pricePerToken == null ? null : uiAmount * pricePerToken;
       var priceSource = priceInfo == null ? null : 'helius_das';
       var priceQuality = priceInfo == null ? 'unpriced' : 'provider';
+      var priceConfidence = priceInfo == null ? null : 'high';
       var isPriceStale = false;
       var priceAsOf = pricePerToken == null ? null : now;
+      NftMarketPriceQuote? nftMarketQuote;
 
       if (pricePerToken == null) {
         final derivedTotalPrice = priceInfo?.totalPrice;
@@ -828,6 +842,7 @@ class SolanaWalletService {
           totalValue = derivedTotalPrice;
           priceSource = 'helius_das_total_price';
           priceQuality = 'derived';
+          priceConfidence = 'medium';
           priceAsOf = now;
         }
       }
@@ -840,6 +855,22 @@ class SolanaWalletService {
           priceCurrency = 'USD';
           priceSource = 'jupiter_price_v3';
           priceQuality = 'provider';
+          priceConfidence = 'high';
+          isPriceStale = false;
+          priceAsOf = now;
+        }
+      }
+
+      final isNft = _isLikelyNft(asset);
+      if (pricePerToken == null && isNft) {
+        nftMarketQuote = nftMarketQuotes[assetId];
+        if (nftMarketQuote != null) {
+          pricePerToken = nftMarketQuote.usdPrice;
+          totalValue = uiAmount * nftMarketQuote.usdPrice;
+          priceCurrency = 'USD';
+          priceSource = nftMarketQuote.source;
+          priceQuality = 'marketplace';
+          priceConfidence = nftMarketQuote.confidence;
           isPriceStale = false;
           priceAsOf = now;
         }
@@ -853,6 +884,7 @@ class SolanaWalletService {
           priceCurrency = priceCurrency ?? existing?.priceCurrency;
           priceSource = existing?.priceSource ?? 'cached';
           priceQuality = 'stale_cache';
+          priceConfidence = 'low';
           isPriceStale = true;
           priceAsOf = existing?.priceAsOf;
           warnings.add('Using cached price for asset $assetId');
@@ -863,7 +895,18 @@ class SolanaWalletService {
         totalValuation += totalValue;
         valuationCurrency ??= priceCurrency;
       }
-      final isNft = _isLikelyNft(asset);
+      final metadata = <String, Object?>{
+        'interface': asset?.interface_,
+        'symbol': asset?.content?.metadata?.symbol,
+        'name': asset?.content?.metadata?.name,
+      };
+      final collectionSymbol = nftMarketQuote?.collectionSymbol;
+      if (collectionSymbol != null && collectionSymbol.isNotEmpty) {
+        metadata['collectionSymbol'] = collectionSymbol;
+      }
+      if (nftMarketQuote != null) {
+        metadata['marketSolPrice'] = nftMarketQuote.solPrice;
+      }
 
       final holding = SolanaWalletHolding(
         walletId: walletId,
@@ -881,15 +924,10 @@ class SolanaWalletService {
         totalValue: totalValue,
         priceSource: priceSource,
         priceQuality: priceQuality,
+        priceConfidence: priceConfidence,
         isPriceStale: isPriceStale,
         priceAsOf: priceAsOf,
-        metadataJson: asset == null
-            ? null
-            : jsonEncode({
-                'interface': asset.interface_,
-                'symbol': asset.content?.metadata?.symbol,
-                'name': asset.content?.metadata?.name,
-              }),
+        metadataJson: jsonEncode(metadata),
         updatedAt: now,
       );
 
@@ -929,16 +967,33 @@ class SolanaWalletService {
       var totalValue = priceInfo?.totalPrice;
       var priceSource = priceInfo == null ? null : 'helius_das';
       var priceQuality = priceInfo == null ? 'unpriced' : 'provider';
+      var priceConfidence = priceInfo == null ? null : 'high';
       var isPriceStale = false;
       var priceAsOf = priceInfo == null ? null : now;
+      NftMarketPriceQuote? nftMarketQuote;
 
       if (pricePerToken == null && totalValue != null) {
         // NFT-like balances are treated as 1 unit in this sync flow.
         pricePerToken = totalValue;
         priceSource = 'helius_das_total_price';
         priceQuality = 'derived';
+        priceConfidence = 'medium';
       } else if (totalValue == null && pricePerToken != null) {
         totalValue = pricePerToken;
+      }
+
+      if (pricePerToken == null) {
+        nftMarketQuote = nftMarketQuotes[asset.id];
+        if (nftMarketQuote != null) {
+          pricePerToken = nftMarketQuote.usdPrice;
+          totalValue = nftMarketQuote.usdPrice;
+          priceCurrency = 'USD';
+          priceSource = nftMarketQuote.source;
+          priceQuality = 'marketplace';
+          priceConfidence = nftMarketQuote.confidence;
+          isPriceStale = false;
+          priceAsOf = now;
+        }
       }
 
       if (pricePerToken == null) {
@@ -949,6 +1004,7 @@ class SolanaWalletService {
           priceCurrency = priceCurrency ?? existing?.priceCurrency;
           priceSource = existing?.priceSource ?? 'cached';
           priceQuality = 'stale_cache';
+          priceConfidence = 'low';
           isPriceStale = true;
           priceAsOf = existing?.priceAsOf;
           warnings.add('Using cached price for NFT asset ${asset.id}');
@@ -958,6 +1014,19 @@ class SolanaWalletService {
       if (totalValue != null) {
         totalValuation += totalValue;
         valuationCurrency ??= priceCurrency;
+      }
+
+      final metadata = <String, Object?>{
+        'interface': asset.interface_,
+        'symbol': asset.content?.metadata?.symbol,
+        'name': asset.content?.metadata?.name,
+      };
+      final collectionSymbol = nftMarketQuote?.collectionSymbol;
+      if (collectionSymbol != null && collectionSymbol.isNotEmpty) {
+        metadata['collectionSymbol'] = collectionSymbol;
+      }
+      if (nftMarketQuote != null) {
+        metadata['marketSolPrice'] = nftMarketQuote.solPrice;
       }
 
       final nftHolding = SolanaWalletHolding(
@@ -976,13 +1045,10 @@ class SolanaWalletService {
         totalValue: totalValue,
         priceSource: priceSource,
         priceQuality: priceQuality,
+        priceConfidence: priceConfidence,
         isPriceStale: isPriceStale,
         priceAsOf: priceAsOf,
-        metadataJson: jsonEncode({
-          'interface': asset.interface_,
-          'symbol': asset.content?.metadata?.symbol,
-          'name': asset.content?.metadata?.name,
-        }),
+        metadataJson: jsonEncode(metadata),
         updatedAt: now,
       );
       await _upsertHolding(session, nftHolding);
@@ -1063,6 +1129,7 @@ class SolanaWalletService {
       totalValue: incoming.totalValue,
       priceSource: incoming.priceSource,
       priceQuality: incoming.priceQuality,
+      priceConfidence: incoming.priceConfidence,
       isPriceStale: incoming.isPriceStale,
       priceAsOf: incoming.priceAsOf,
       metadataJson: incoming.metadataJson,

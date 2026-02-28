@@ -2656,6 +2656,13 @@ class _HoldingCard extends StatelessWidget {
                             holding.priceQuality!,
                           ),
                         ),
+                      if (holding.priceConfidence != null &&
+                          holding.priceConfidence!.trim().isNotEmpty)
+                        _MetadataChip(
+                          icon: Icons.speed_rounded,
+                          label:
+                              '${_SolanaWalletAccountBody._toLabel(holding.priceConfidence!)} confidence',
+                        ),
                       if (holding.isPriceStale ?? false)
                         const _MetadataChip(
                           icon: Icons.schedule_rounded,

@@ -37,6 +37,7 @@ abstract class SolanaWalletHolding implements _i1.SerializableModel {
     this.pnlAsOf,
     this.priceSource,
     this.priceQuality,
+    this.priceConfidence,
     this.isPriceStale,
     this.priceAsOf,
     this.metadataJson,
@@ -66,6 +67,7 @@ abstract class SolanaWalletHolding implements _i1.SerializableModel {
     DateTime? pnlAsOf,
     String? priceSource,
     String? priceQuality,
+    String? priceConfidence,
     bool? isPriceStale,
     DateTime? priceAsOf,
     String? metadataJson,
@@ -109,6 +111,7 @@ abstract class SolanaWalletHolding implements _i1.SerializableModel {
           : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['pnlAsOf']),
       priceSource: jsonSerialization['priceSource'] as String?,
       priceQuality: jsonSerialization['priceQuality'] as String?,
+      priceConfidence: jsonSerialization['priceConfidence'] as String?,
       isPriceStale: jsonSerialization['isPriceStale'] as bool?,
       priceAsOf: jsonSerialization['priceAsOf'] == null
           ? null
@@ -179,6 +182,9 @@ abstract class SolanaWalletHolding implements _i1.SerializableModel {
   /// Qualitative pricing classification: provider, derived, stale_cache, unpriced.
   String? priceQuality;
 
+  /// Confidence tier for the valuation source: high, medium, low.
+  String? priceConfidence;
+
   /// True when valuation is using a cached fallback price.
   bool? isPriceStale;
 
@@ -215,6 +221,7 @@ abstract class SolanaWalletHolding implements _i1.SerializableModel {
     DateTime? pnlAsOf,
     String? priceSource,
     String? priceQuality,
+    String? priceConfidence,
     bool? isPriceStale,
     DateTime? priceAsOf,
     String? metadataJson,
@@ -249,6 +256,7 @@ abstract class SolanaWalletHolding implements _i1.SerializableModel {
       if (pnlAsOf != null) 'pnlAsOf': pnlAsOf?.toJson(),
       if (priceSource != null) 'priceSource': priceSource,
       if (priceQuality != null) 'priceQuality': priceQuality,
+      if (priceConfidence != null) 'priceConfidence': priceConfidence,
       if (isPriceStale != null) 'isPriceStale': isPriceStale,
       if (priceAsOf != null) 'priceAsOf': priceAsOf?.toJson(),
       if (metadataJson != null) 'metadataJson': metadataJson,
@@ -288,6 +296,7 @@ class _SolanaWalletHoldingImpl extends SolanaWalletHolding {
     DateTime? pnlAsOf,
     String? priceSource,
     String? priceQuality,
+    String? priceConfidence,
     bool? isPriceStale,
     DateTime? priceAsOf,
     String? metadataJson,
@@ -315,6 +324,7 @@ class _SolanaWalletHoldingImpl extends SolanaWalletHolding {
          pnlAsOf: pnlAsOf,
          priceSource: priceSource,
          priceQuality: priceQuality,
+         priceConfidence: priceConfidence,
          isPriceStale: isPriceStale,
          priceAsOf: priceAsOf,
          metadataJson: metadataJson,
@@ -348,6 +358,7 @@ class _SolanaWalletHoldingImpl extends SolanaWalletHolding {
     Object? pnlAsOf = _Undefined,
     Object? priceSource = _Undefined,
     Object? priceQuality = _Undefined,
+    Object? priceConfidence = _Undefined,
     Object? isPriceStale = _Undefined,
     Object? priceAsOf = _Undefined,
     Object? metadataJson = _Undefined,
@@ -388,6 +399,9 @@ class _SolanaWalletHoldingImpl extends SolanaWalletHolding {
       pnlAsOf: pnlAsOf is DateTime? ? pnlAsOf : this.pnlAsOf,
       priceSource: priceSource is String? ? priceSource : this.priceSource,
       priceQuality: priceQuality is String? ? priceQuality : this.priceQuality,
+      priceConfidence: priceConfidence is String?
+          ? priceConfidence
+          : this.priceConfidence,
       isPriceStale: isPriceStale is bool? ? isPriceStale : this.isPriceStale,
       priceAsOf: priceAsOf is DateTime? ? priceAsOf : this.priceAsOf,
       metadataJson: metadataJson is String? ? metadataJson : this.metadataJson,

@@ -36,6 +36,8 @@ fields:
   priceSource: String?
   ### Qualitative pricing classification: provider, derived, stale_cache, unpriced.
   priceQuality: String?
+  ### Confidence tier for the valuation source: high, medium, low.
+  priceConfidence: String?
   ### True when valuation is using a cached fallback price.
   isPriceStale: bool?
   priceAsOf: DateTime?

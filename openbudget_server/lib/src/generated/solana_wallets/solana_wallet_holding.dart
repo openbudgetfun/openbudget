@@ -38,6 +38,7 @@ abstract class SolanaWalletHolding
     this.pnlAsOf,
     this.priceSource,
     this.priceQuality,
+    this.priceConfidence,
     this.isPriceStale,
     this.priceAsOf,
     this.metadataJson,
@@ -67,6 +68,7 @@ abstract class SolanaWalletHolding
     DateTime? pnlAsOf,
     String? priceSource,
     String? priceQuality,
+    String? priceConfidence,
     bool? isPriceStale,
     DateTime? priceAsOf,
     String? metadataJson,
@@ -110,6 +112,7 @@ abstract class SolanaWalletHolding
           : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['pnlAsOf']),
       priceSource: jsonSerialization['priceSource'] as String?,
       priceQuality: jsonSerialization['priceQuality'] as String?,
+      priceConfidence: jsonSerialization['priceConfidence'] as String?,
       isPriceStale: jsonSerialization['isPriceStale'] as bool?,
       priceAsOf: jsonSerialization['priceAsOf'] == null
           ? null
@@ -182,6 +185,9 @@ abstract class SolanaWalletHolding
   /// Qualitative pricing classification: provider, derived, stale_cache, unpriced.
   String? priceQuality;
 
+  /// Confidence tier for the valuation source: high, medium, low.
+  String? priceConfidence;
+
   /// True when valuation is using a cached fallback price.
   bool? isPriceStale;
 
@@ -221,6 +227,7 @@ abstract class SolanaWalletHolding
     DateTime? pnlAsOf,
     String? priceSource,
     String? priceQuality,
+    String? priceConfidence,
     bool? isPriceStale,
     DateTime? priceAsOf,
     String? metadataJson,
@@ -255,6 +262,7 @@ abstract class SolanaWalletHolding
       if (pnlAsOf != null) 'pnlAsOf': pnlAsOf?.toJson(),
       if (priceSource != null) 'priceSource': priceSource,
       if (priceQuality != null) 'priceQuality': priceQuality,
+      if (priceConfidence != null) 'priceConfidence': priceConfidence,
       if (isPriceStale != null) 'isPriceStale': isPriceStale,
       if (priceAsOf != null) 'priceAsOf': priceAsOf?.toJson(),
       if (metadataJson != null) 'metadataJson': metadataJson,
@@ -291,6 +299,7 @@ abstract class SolanaWalletHolding
       if (pnlAsOf != null) 'pnlAsOf': pnlAsOf?.toJson(),
       if (priceSource != null) 'priceSource': priceSource,
       if (priceQuality != null) 'priceQuality': priceQuality,
+      if (priceConfidence != null) 'priceConfidence': priceConfidence,
       if (isPriceStale != null) 'isPriceStale': isPriceStale,
       if (priceAsOf != null) 'priceAsOf': priceAsOf?.toJson(),
       if (metadataJson != null) 'metadataJson': metadataJson,
@@ -354,6 +363,7 @@ class _SolanaWalletHoldingImpl extends SolanaWalletHolding {
     DateTime? pnlAsOf,
     String? priceSource,
     String? priceQuality,
+    String? priceConfidence,
     bool? isPriceStale,
     DateTime? priceAsOf,
     String? metadataJson,
@@ -381,6 +391,7 @@ class _SolanaWalletHoldingImpl extends SolanaWalletHolding {
          pnlAsOf: pnlAsOf,
          priceSource: priceSource,
          priceQuality: priceQuality,
+         priceConfidence: priceConfidence,
          isPriceStale: isPriceStale,
          priceAsOf: priceAsOf,
          metadataJson: metadataJson,
@@ -414,6 +425,7 @@ class _SolanaWalletHoldingImpl extends SolanaWalletHolding {
     Object? pnlAsOf = _Undefined,
     Object? priceSource = _Undefined,
     Object? priceQuality = _Undefined,
+    Object? priceConfidence = _Undefined,
     Object? isPriceStale = _Undefined,
     Object? priceAsOf = _Undefined,
     Object? metadataJson = _Undefined,
@@ -454,6 +466,9 @@ class _SolanaWalletHoldingImpl extends SolanaWalletHolding {
       pnlAsOf: pnlAsOf is DateTime? ? pnlAsOf : this.pnlAsOf,
       priceSource: priceSource is String? ? priceSource : this.priceSource,
       priceQuality: priceQuality is String? ? priceQuality : this.priceQuality,
+      priceConfidence: priceConfidence is String?
+          ? priceConfidence
+          : this.priceConfidence,
       isPriceStale: isPriceStale is bool? ? isPriceStale : this.isPriceStale,
       priceAsOf: priceAsOf is DateTime? ? priceAsOf : this.priceAsOf,
       metadataJson: metadataJson is String? ? metadataJson : this.metadataJson,
@@ -467,251 +482,118 @@ class SolanaWalletHoldingUpdateTable
   SolanaWalletHoldingUpdateTable(super.table);
 
   _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> walletId(_i1.UuidValue value) =>
-      _i1.ColumnValue(
-        table.walletId,
-        value,
-      );
+      _i1.ColumnValue(table.walletId, value);
 
   _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> budgetId(_i1.UuidValue value) =>
-      _i1.ColumnValue(
-        table.budgetId,
-        value,
-      );
+      _i1.ColumnValue(table.budgetId, value);
 
-  _i1.ColumnValue<String, String> assetId(String value) => _i1.ColumnValue(
-    table.assetId,
-    value,
-  );
+  _i1.ColumnValue<String, String> assetId(String value) =>
+      _i1.ColumnValue(table.assetId, value);
 
-  _i1.ColumnValue<String, String> symbol(String? value) => _i1.ColumnValue(
-    table.symbol,
-    value,
-  );
+  _i1.ColumnValue<String, String> symbol(String? value) =>
+      _i1.ColumnValue(table.symbol, value);
 
-  _i1.ColumnValue<String, String> name(String? value) => _i1.ColumnValue(
-    table.name,
-    value,
-  );
+  _i1.ColumnValue<String, String> name(String? value) =>
+      _i1.ColumnValue(table.name, value);
 
   _i1.ColumnValue<String, String> tokenProgram(String? value) =>
-      _i1.ColumnValue(
-        table.tokenProgram,
-        value,
-      );
+      _i1.ColumnValue(table.tokenProgram, value);
 
-  _i1.ColumnValue<int, int> decimals(int value) => _i1.ColumnValue(
-    table.decimals,
-    value,
-  );
+  _i1.ColumnValue<int, int> decimals(int value) =>
+      _i1.ColumnValue(table.decimals, value);
 
-  _i1.ColumnValue<String, String> balanceRaw(String value) => _i1.ColumnValue(
-    table.balanceRaw,
-    value,
-  );
+  _i1.ColumnValue<String, String> balanceRaw(String value) =>
+      _i1.ColumnValue(table.balanceRaw, value);
 
-  _i1.ColumnValue<String, String> balanceUi(String value) => _i1.ColumnValue(
-    table.balanceUi,
-    value,
-  );
+  _i1.ColumnValue<String, String> balanceUi(String value) =>
+      _i1.ColumnValue(table.balanceUi, value);
 
-  _i1.ColumnValue<bool, bool> isNft(bool value) => _i1.ColumnValue(
-    table.isNft,
-    value,
-  );
+  _i1.ColumnValue<bool, bool> isNft(bool value) =>
+      _i1.ColumnValue(table.isNft, value);
 
   _i1.ColumnValue<String, String> priceCurrency(String? value) =>
-      _i1.ColumnValue(
-        table.priceCurrency,
-        value,
-      );
+      _i1.ColumnValue(table.priceCurrency, value);
 
   _i1.ColumnValue<double, double> pricePerToken(double? value) =>
-      _i1.ColumnValue(
-        table.pricePerToken,
-        value,
-      );
+      _i1.ColumnValue(table.pricePerToken, value);
 
-  _i1.ColumnValue<double, double> totalValue(double? value) => _i1.ColumnValue(
-    table.totalValue,
-    value,
-  );
+  _i1.ColumnValue<double, double> totalValue(double? value) =>
+      _i1.ColumnValue(table.totalValue, value);
 
   _i1.ColumnValue<double, double> estimatedCostBasis(double? value) =>
-      _i1.ColumnValue(
-        table.estimatedCostBasis,
-        value,
-      );
+      _i1.ColumnValue(table.estimatedCostBasis, value);
 
   _i1.ColumnValue<double, double> estimatedUnrealizedPnl(double? value) =>
-      _i1.ColumnValue(
-        table.estimatedUnrealizedPnl,
-        value,
-      );
+      _i1.ColumnValue(table.estimatedUnrealizedPnl, value);
 
   _i1.ColumnValue<double, double> estimatedUnrealizedPnlPercent(
     double? value,
-  ) => _i1.ColumnValue(
-    table.estimatedUnrealizedPnlPercent,
-    value,
-  );
+  ) => _i1.ColumnValue(table.estimatedUnrealizedPnlPercent, value);
 
   _i1.ColumnValue<double, double> estimatedRealizedPnl(double? value) =>
-      _i1.ColumnValue(
-        table.estimatedRealizedPnl,
-        value,
-      );
+      _i1.ColumnValue(table.estimatedRealizedPnl, value);
 
-  _i1.ColumnValue<String, String> pnlCurrency(String? value) => _i1.ColumnValue(
-    table.pnlCurrency,
-    value,
-  );
+  _i1.ColumnValue<String, String> pnlCurrency(String? value) =>
+      _i1.ColumnValue(table.pnlCurrency, value);
 
   _i1.ColumnValue<DateTime, DateTime> pnlAsOf(DateTime? value) =>
-      _i1.ColumnValue(
-        table.pnlAsOf,
-        value,
-      );
+      _i1.ColumnValue(table.pnlAsOf, value);
 
-  _i1.ColumnValue<String, String> priceSource(String? value) => _i1.ColumnValue(
-    table.priceSource,
-    value,
-  );
+  _i1.ColumnValue<String, String> priceSource(String? value) =>
+      _i1.ColumnValue(table.priceSource, value);
 
   _i1.ColumnValue<String, String> priceQuality(String? value) =>
-      _i1.ColumnValue(
-        table.priceQuality,
-        value,
-      );
+      _i1.ColumnValue(table.priceQuality, value);
 
-  _i1.ColumnValue<bool, bool> isPriceStale(bool? value) => _i1.ColumnValue(
-    table.isPriceStale,
-    value,
-  );
+  _i1.ColumnValue<String, String> priceConfidence(String? value) =>
+      _i1.ColumnValue(table.priceConfidence, value);
+
+  _i1.ColumnValue<bool, bool> isPriceStale(bool? value) =>
+      _i1.ColumnValue(table.isPriceStale, value);
 
   _i1.ColumnValue<DateTime, DateTime> priceAsOf(DateTime? value) =>
-      _i1.ColumnValue(
-        table.priceAsOf,
-        value,
-      );
+      _i1.ColumnValue(table.priceAsOf, value);
 
   _i1.ColumnValue<String, String> metadataJson(String? value) =>
-      _i1.ColumnValue(
-        table.metadataJson,
-        value,
-      );
+      _i1.ColumnValue(table.metadataJson, value);
 
   _i1.ColumnValue<DateTime, DateTime> updatedAt(DateTime value) =>
-      _i1.ColumnValue(
-        table.updatedAt,
-        value,
-      );
+      _i1.ColumnValue(table.updatedAt, value);
 }
 
 class SolanaWalletHoldingTable extends _i1.Table<_i1.UuidValue?> {
   SolanaWalletHoldingTable({super.tableRelation})
     : super(tableName: 'solana_wallet_holding') {
     updateTable = SolanaWalletHoldingUpdateTable(this);
-    walletId = _i1.ColumnUuid(
-      'walletId',
-      this,
-    );
-    budgetId = _i1.ColumnUuid(
-      'budgetId',
-      this,
-    );
-    assetId = _i1.ColumnString(
-      'assetId',
-      this,
-    );
-    symbol = _i1.ColumnString(
-      'symbol',
-      this,
-    );
-    name = _i1.ColumnString(
-      'name',
-      this,
-    );
-    tokenProgram = _i1.ColumnString(
-      'tokenProgram',
-      this,
-    );
-    decimals = _i1.ColumnInt(
-      'decimals',
-      this,
-    );
-    balanceRaw = _i1.ColumnString(
-      'balanceRaw',
-      this,
-    );
-    balanceUi = _i1.ColumnString(
-      'balanceUi',
-      this,
-    );
-    isNft = _i1.ColumnBool(
-      'isNft',
-      this,
-    );
-    priceCurrency = _i1.ColumnString(
-      'priceCurrency',
-      this,
-    );
-    pricePerToken = _i1.ColumnDouble(
-      'pricePerToken',
-      this,
-    );
-    totalValue = _i1.ColumnDouble(
-      'totalValue',
-      this,
-    );
-    estimatedCostBasis = _i1.ColumnDouble(
-      'estimatedCostBasis',
-      this,
-    );
-    estimatedUnrealizedPnl = _i1.ColumnDouble(
-      'estimatedUnrealizedPnl',
-      this,
-    );
+    walletId = _i1.ColumnUuid('walletId', this);
+    budgetId = _i1.ColumnUuid('budgetId', this);
+    assetId = _i1.ColumnString('assetId', this);
+    symbol = _i1.ColumnString('symbol', this);
+    name = _i1.ColumnString('name', this);
+    tokenProgram = _i1.ColumnString('tokenProgram', this);
+    decimals = _i1.ColumnInt('decimals', this);
+    balanceRaw = _i1.ColumnString('balanceRaw', this);
+    balanceUi = _i1.ColumnString('balanceUi', this);
+    isNft = _i1.ColumnBool('isNft', this);
+    priceCurrency = _i1.ColumnString('priceCurrency', this);
+    pricePerToken = _i1.ColumnDouble('pricePerToken', this);
+    totalValue = _i1.ColumnDouble('totalValue', this);
+    estimatedCostBasis = _i1.ColumnDouble('estimatedCostBasis', this);
+    estimatedUnrealizedPnl = _i1.ColumnDouble('estimatedUnrealizedPnl', this);
     estimatedUnrealizedPnlPercent = _i1.ColumnDouble(
       'estimatedUnrealizedPnlPercent',
       this,
     );
-    estimatedRealizedPnl = _i1.ColumnDouble(
-      'estimatedRealizedPnl',
-      this,
-    );
-    pnlCurrency = _i1.ColumnString(
-      'pnlCurrency',
-      this,
-    );
-    pnlAsOf = _i1.ColumnDateTime(
-      'pnlAsOf',
-      this,
-    );
-    priceSource = _i1.ColumnString(
-      'priceSource',
-      this,
-    );
-    priceQuality = _i1.ColumnString(
-      'priceQuality',
-      this,
-    );
-    isPriceStale = _i1.ColumnBool(
-      'isPriceStale',
-      this,
-    );
-    priceAsOf = _i1.ColumnDateTime(
-      'priceAsOf',
-      this,
-    );
-    metadataJson = _i1.ColumnString(
-      'metadataJson',
-      this,
-    );
-    updatedAt = _i1.ColumnDateTime(
-      'updatedAt',
-      this,
-      hasDefault: true,
-    );
+    estimatedRealizedPnl = _i1.ColumnDouble('estimatedRealizedPnl', this);
+    pnlCurrency = _i1.ColumnString('pnlCurrency', this);
+    pnlAsOf = _i1.ColumnDateTime('pnlAsOf', this);
+    priceSource = _i1.ColumnString('priceSource', this);
+    priceQuality = _i1.ColumnString('priceQuality', this);
+    priceConfidence = _i1.ColumnString('priceConfidence', this);
+    isPriceStale = _i1.ColumnBool('isPriceStale', this);
+    priceAsOf = _i1.ColumnDateTime('priceAsOf', this);
+    metadataJson = _i1.ColumnString('metadataJson', this);
+    updatedAt = _i1.ColumnDateTime('updatedAt', this, hasDefault: true);
   }
 
   late final SolanaWalletHoldingUpdateTable updateTable;
@@ -770,6 +652,9 @@ class SolanaWalletHoldingTable extends _i1.Table<_i1.UuidValue?> {
   /// Qualitative pricing classification: provider, derived, stale_cache, unpriced.
   late final _i1.ColumnString priceQuality;
 
+  /// Confidence tier for the valuation source: high, medium, low.
+  late final _i1.ColumnString priceConfidence;
+
   /// True when valuation is using a cached fallback price.
   late final _i1.ColumnBool isPriceStale;
 
@@ -804,6 +689,7 @@ class SolanaWalletHoldingTable extends _i1.Table<_i1.UuidValue?> {
     pnlAsOf,
     priceSource,
     priceQuality,
+    priceConfidence,
     isPriceStale,
     priceAsOf,
     metadataJson,

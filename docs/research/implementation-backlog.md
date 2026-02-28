@@ -23,6 +23,7 @@ This backlog turns strategy into implementable epics with explicit acceptance cr
 - [#163](https://github.com/openbudgetfun/openbudget/issues/163) Multi-source Solana asset pricing service with fallback + quality metadata.
 - [#164](https://github.com/openbudgetfun/openbudget/issues/164) Wallet pricing coverage summary in API and UI.
 - [#165](https://github.com/openbudgetfun/openbudget/issues/165) Expand Solana transaction interpretation matrix with protocol templates.
+- [#166](https://github.com/openbudgetfun/openbudget/issues/166) NFT valuation adapters with floor/last-sale fallback and confidence tiers.
 
 ## Execution Status Snapshot (2026-02-28 PM)
 
@@ -33,9 +34,10 @@ This backlog turns strategy into implementable epics with explicit acceptance cr
 - #155: Added UI-level automatic category suggestions for uncategorized wallet transactions (suggestion chips + metadata prefill + search indexing).
 - #156: Implemented initial holdings valuation wiring with provider-returned pricing fields; fallback adapter strategy still pending.
 - #157: In progress via #162: schema fields + first-pass estimated basis/realized/unrealized P&L engine + UI surfacing landed; FIFO lot accounting + tax-year summaries are now integrated, but tax-grade lot provenance/audit export is still pending.
-- #163: In progress: added holding-level pricing quality metadata, cached fallback valuation path, and Jupiter price API fallback for missing fungible token prices; still need dedicated NFT/illiquid asset pricing providers and historical coverage tracking.
+- #163: In progress: added holding-level pricing quality metadata, cached fallback valuation path, Jupiter price API fallback for missing fungible token prices, and Magic Eden NFT fallback quoting; historical pricing coverage tracking is still pending.
 - #164: Implemented sync-level coverage summary plus wallet dashboard coverage/unpriced metrics, including NFT-specific coverage counts in sync response messaging; periodic historical coverage trend visualization is still pending.
 - #165: In progress: extracted interpreter module + added fixture-style unit tests across protocol patterns (Jupiter, Pump.fun, Raydium, Orca, directional SOL transfer, NFT purchase flow, generic fallback, provider-direct descriptions); pending work is broader program-ID template expansion and richer per-protocol amount decoding.
+- #166: In progress: implemented NFT valuation fallback adapter chain (listing -> last sale -> collection floor) with SOL->USD conversion and persisted `priceConfidence` tiers (`high`/`medium`/`low`); additional marketplace adapters are still pending.
 - #158: Implemented Android flavors + app bootstrap routing + iOS flavor configurations; `default-flavor: dev` remains configured for tooling compatibility.
 - #161: Implemented iOS side-by-side flavor parity with distinct bundle IDs/display names and validated `flutter run` flows for both `dev` and `prod` schemes.
 - #159: Implemented environment-based client routing and secret lookup path (`passwords.yaml` + env fallback); deploy checklist still pending.
