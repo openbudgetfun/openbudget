@@ -1,11 +1,4 @@
-# OpenBudget iOS Guide
-
-This section is the iOS user guide for OpenBudget. Use the pages below based on
-what you are trying to do.
-
-## Guide pages
-
-<!-- {=iosGuideFlowPages} -->
+<!-- {@iosGuideFlowPages} -->
 
 - [Plan and priorities flow](./how-to-use-openbudget-plan-and-priorities.md)
 - [Transaction review flow](./how-to-use-openbudget-transaction-review.md)
@@ -13,9 +6,7 @@ what you are trying to do.
 
 <!-- {/iosGuideFlowPages} -->
 
-## Recommended daily flow
-
-<!-- {=iosGuideRecommendedDailyFlow} -->
+<!-- {@iosGuideRecommendedDailyFlow} -->
 
 1. Open the Plan screen and check **Ready to Assign**.
 2. Assign money to key categories.
@@ -24,3 +15,14 @@ what you are trying to do.
 5. Use recent moves and envelope detail screens to validate category activity.
 
 <!-- {/iosGuideRecommendedDailyFlow} -->
+
+<!-- {@iosGuideCompanionWorkflows} -->
+
+## Continue with another guide flow
+
+- [Guide home](./how-to-use-openbudget.md)
+- [Plan and priorities flow](./how-to-use-openbudget-plan-and-priorities.md)
+- [Transaction review flow](./how-to-use-openbudget-transaction-review.md)
+- [Recent moves and envelope details flow](./how-to-use-openbudget-recent-moves-and-envelopes.md)
+
+<!-- {/iosGuideCompanionWorkflows} -->

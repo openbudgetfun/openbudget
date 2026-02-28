@@ -44,6 +44,7 @@
     "**/*.freezed.dart",
     "**/generated_protocol/**",
     "**/generated/**",
+    "**/*.t.md",
     "**/ios/",
     "**/android/",
     "**/Pods/",
