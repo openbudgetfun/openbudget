@@ -322,7 +322,7 @@ class SolanaWalletService {
       (instruction) => instruction.programId,
     );
     final uniquePrograms = programs.toSet().toList()..sort();
-    final description = _resolveDescription(tx);
+    final description = _resolveDescription(tx, wallet.address);
 
     final existing = await SolanaWalletTransaction.db.findFirstRow(
       session,
@@ -377,33 +377,17 @@ class SolanaWalletService {
     return false;
   }
 
-  static String _resolveDescription(EnhancedTransaction tx) {
+  static String _resolveDescription(
+    EnhancedTransaction tx,
+    String walletAddress,
+  ) {
     final directDescription = tx.description?.trim();
     if (directDescription != null && directDescription.isNotEmpty) {
       return directDescription;
     }
 
-    final readableType = tx.type
-        .toLowerCase()
-        .replaceAll('_', ' ')
-        .replaceAllMapped(RegExp(r'\b\w'), (match) {
-          return match.group(0)!.toUpperCase();
-        });
-
+    final flow = _walletFlow(tx, walletAddress);
     final source = _friendlySource(tx.source);
-    final transferSummary = switch ((
-      tx.nativeTransfers.length,
-      tx.tokenTransfers.length,
-    )) {
-      (0, 0) => '',
-      (final nativeCount, 0) =>
-        ' ($nativeCount SOL transfer${nativeCount == 1 ? '' : 's'})',
-      (0, final tokenCount) =>
-        ' ($tokenCount token transfer${tokenCount == 1 ? '' : 's'})',
-      (final nativeCount, final tokenCount) =>
-        ' ($nativeCount SOL transfer${nativeCount == 1 ? '' : 's'}, '
-            '$tokenCount token transfer${tokenCount == 1 ? '' : 's'})',
-    };
 
     final programLabels = tx.instructions
         .map((instruction) => _friendlyProgram(instruction.programId))
@@ -412,6 +396,42 @@ class SolanaWalletService {
         .toSet()
         .toList(growable: false);
 
+    final normalizedSource = tx.source.toLowerCase();
+    final hasJupiter =
+        normalizedSource.contains('jup') || programLabels.contains('Jupiter');
+    final hasPump =
+        normalizedSource.contains('pump') || programLabels.contains('Pump.fun');
+    final hasNftMarketplace =
+        normalizedSource.contains('magiceden') ||
+        normalizedSource.contains('tensor');
+    final hasSwapSignals = flow.tokenIn > 0 && flow.tokenOut > 0;
+
+    String action;
+    if (hasJupiter || hasSwapSignals) {
+      action = hasJupiter ? 'Token swap on Jupiter' : 'Token swap';
+    } else if (hasPump) {
+      action = 'Trade on Pump.fun';
+    } else if (hasNftMarketplace) {
+      action = 'NFT activity on $source';
+    } else if (flow.tokenOut > 0 && flow.tokenIn == 0 && flow.nativeIn == 0) {
+      action = 'Token transfer sent';
+    } else if (flow.tokenIn > 0 && flow.tokenOut == 0 && flow.nativeOut == 0) {
+      action = 'Token transfer received';
+    } else if (flow.nativeOut > 0 && flow.nativeIn == 0 && flow.tokenIn == 0) {
+      action = 'SOL transfer sent';
+    } else if (flow.nativeIn > 0 && flow.nativeOut == 0 && flow.tokenOut == 0) {
+      action = 'SOL transfer received';
+    } else {
+      final readableType = tx.type
+          .toLowerCase()
+          .replaceAll('_', ' ')
+          .replaceAllMapped(RegExp(r'\b\w'), (match) {
+            return match.group(0)!.toUpperCase();
+          });
+      action = '$readableType via $source';
+    }
+
+    final transferSummary = _walletFlowSummary(flow);
     final shortProgramLabels = programLabels.take(2).toList(growable: false);
     final remainingPrograms = programLabels.length - shortProgramLabels.length;
     final programSummary = shortProgramLabels.isEmpty
@@ -419,7 +439,45 @@ class SolanaWalletService {
         : ' using ${shortProgramLabels.join(', ')}'
               '${remainingPrograms > 0 ? ' +$remainingPrograms' : ''}';
 
-    return '$readableType via $source$transferSummary$programSummary';
+    return '$action$transferSummary$programSummary';
+  }
+
+  static ({int nativeIn, int nativeOut, int tokenIn, int tokenOut}) _walletFlow(
+    EnhancedTransaction tx,
+    String walletAddress,
+  ) {
+    var nativeIn = 0;
+    var nativeOut = 0;
+    for (final transfer in tx.nativeTransfers) {
+      if (transfer.toUserAccount == walletAddress) nativeIn += 1;
+      if (transfer.fromUserAccount == walletAddress) nativeOut += 1;
+    }
+
+    var tokenIn = 0;
+    var tokenOut = 0;
+    for (final transfer in tx.tokenTransfers) {
+      if (transfer.toUserAccount == walletAddress) tokenIn += 1;
+      if (transfer.fromUserAccount == walletAddress) tokenOut += 1;
+    }
+
+    return (
+      nativeIn: nativeIn,
+      nativeOut: nativeOut,
+      tokenIn: tokenIn,
+      tokenOut: tokenOut,
+    );
+  }
+
+  static String _walletFlowSummary(
+    ({int nativeIn, int nativeOut, int tokenIn, int tokenOut}) flow,
+  ) {
+    final segments = <String>[];
+    if (flow.nativeIn > 0) segments.add('${flow.nativeIn} SOL in');
+    if (flow.nativeOut > 0) segments.add('${flow.nativeOut} SOL out');
+    if (flow.tokenIn > 0) segments.add('${flow.tokenIn} token in');
+    if (flow.tokenOut > 0) segments.add('${flow.tokenOut} token out');
+    if (segments.isEmpty) return '';
+    return ' (${segments.join(', ')})';
   }
 
   static String _friendlySource(String source) {
@@ -449,7 +507,8 @@ class SolanaWalletService {
     if (normalized.startsWith('AToken')) return 'Associated Token';
     if (normalized.startsWith('ComputeBudget')) return 'Compute Budget';
     if (normalized.startsWith('MemoSq4')) return 'Memo Program';
-    if (normalized.startsWith('JUP') || normalized.contains('jup')) {
+    if (normalized.startsWith('JUP') ||
+        normalized.toLowerCase().contains('jup')) {
       return 'Jupiter';
     }
     if (normalized.startsWith('6EF8rrecthR') ||
