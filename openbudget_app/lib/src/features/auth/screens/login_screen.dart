@@ -46,168 +46,237 @@ class LoginScreen extends HookConsumerWidget {
         const bool.hasEnvironment('APPLE_SERVICE_IDENTIFIER') &&
         const bool.hasEnvironment('APPLE_REDIRECT_URI');
     final showSocialSection = showGoogleSignIn || showAppleSignIn;
+    final backgroundColor = OpenBudgetPalette.appBackgroundFor(theme);
+    final cardColor = OpenBudgetPalette.surfaceFor(theme).withAlpha(240);
+    final dividerColor = OpenBudgetPalette.dividerFor(theme);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F4F2),
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(SpacingTokens.md),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 400),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const SizedBox(height: SpacingTokens.xxl),
-                  const _OpenBudgetMark(key: Key('login-openbudget-mark')),
-                  const SizedBox(height: SpacingTokens.xl + SpacingTokens.sm),
-                  if (showSocialSection) ...[
-                    if (showAppleSignIn)
-                      AppleSignInWidget(
-                        client: client,
-                        minimumWidth: 320,
-                        onAuthenticated: () {
-                          ref
-                              .read(authProvider.notifier)
-                              .syncExternalAuthState();
-                        },
-                        onError: (error) {
-                          ref
-                              .read(authProvider.notifier)
-                              .setExternalAuthError(error);
-                        },
-                      ),
-                    if (showAppleSignIn && showGoogleSignIn)
-                      const SizedBox(height: SpacingTokens.sm),
-                    if (showGoogleSignIn)
-                      GoogleSignInWidget(
-                        client: client,
-                        minimumWidth: 320,
-                        onAuthenticated: () {
-                          ref
-                              .read(authProvider.notifier)
-                              .syncExternalAuthState();
-                        },
-                        onError: (error) {
-                          ref
-                              .read(authProvider.notifier)
-                              .setExternalAuthError(error);
-                        },
-                      ),
-                    const SizedBox(height: SpacingTokens.md),
-                    Row(
-                      children: [
-                        const Expanded(
-                          child: Divider(
-                            color: OpenBudgetPalette.divider,
-                            height: 1,
-                          ),
+      backgroundColor: backgroundColor,
+      body: Stack(
+        children: [
+          _LoginBackdrop(
+            backgroundColor: backgroundColor,
+            accentColor: theme.colorScheme.primary.withAlpha(35),
+            secondaryAccentColor: theme.colorScheme.tertiary.withAlpha(30),
+          ),
+          SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(SpacingTokens.md),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 420),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const SizedBox(height: SpacingTokens.xl),
+                      const _OpenBudgetMark(key: Key('login-openbudget-mark')),
+                      const SizedBox(height: SpacingTokens.md),
+                      Text(
+                        'Welcome Back',
+                        style: theme.textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.w800,
                         ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: SpacingTokens.md,
-                          ),
-                          child: Text(
-                            l10n.loginOrSeparator,
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: OpenBudgetPalette.mutedText,
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: SpacingTokens.xs),
+                      Text(
+                        'Continue building better money habits.',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: OpenBudgetPalette.mutedTextFor(theme),
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: SpacingTokens.lg),
+                      Container(
+                        padding: const EdgeInsets.all(SpacingTokens.md),
+                        decoration: BoxDecoration(
+                          color: cardColor,
+                          borderRadius: BorderRadius.circular(RadiusTokens.lg),
+                          border: Border.all(color: dividerColor),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withAlpha(18),
+                              blurRadius: 18,
+                              offset: const Offset(0, 8),
                             ),
-                          ),
+                          ],
                         ),
-                        const Expanded(
-                          child: Divider(
-                            color: OpenBudgetPalette.divider,
-                            height: 1,
-                          ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            if (showSocialSection) ...[
+                              if (showAppleSignIn)
+                                AppleSignInWidget(
+                                  client: client,
+                                  minimumWidth: 320,
+                                  onAuthenticated: () {
+                                    ref
+                                        .read(authProvider.notifier)
+                                        .syncExternalAuthState();
+                                  },
+                                  onError: (error) {
+                                    ref
+                                        .read(authProvider.notifier)
+                                        .setExternalAuthError(error);
+                                  },
+                                ),
+                              if (showAppleSignIn && showGoogleSignIn)
+                                const SizedBox(height: SpacingTokens.sm),
+                              if (showGoogleSignIn)
+                                GoogleSignInWidget(
+                                  client: client,
+                                  minimumWidth: 320,
+                                  onAuthenticated: () {
+                                    ref
+                                        .read(authProvider.notifier)
+                                        .syncExternalAuthState();
+                                  },
+                                  onError: (error) {
+                                    ref
+                                        .read(authProvider.notifier)
+                                        .setExternalAuthError(error);
+                                  },
+                                ),
+                              const SizedBox(height: SpacingTokens.md),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Divider(
+                                      color: dividerColor,
+                                      height: 1,
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: SpacingTokens.md,
+                                    ),
+                                    child: Text(
+                                      l10n.loginOrSeparator,
+                                      style: theme.textTheme.bodyMedium
+                                          ?.copyWith(
+                                            color:
+                                                OpenBudgetPalette.mutedTextFor(
+                                                  theme,
+                                                ),
+                                          ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: Divider(
+                                      color: dividerColor,
+                                      height: 1,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: SpacingTokens.md),
+                            ],
+                            if (errorMessage != null) ...[
+                              Container(
+                                padding: const EdgeInsets.all(SpacingTokens.sm),
+                                decoration: BoxDecoration(
+                                  color: theme.colorScheme.errorContainer,
+                                  borderRadius: BorderRadius.circular(
+                                    RadiusTokens.sm,
+                                  ),
+                                ),
+                                child: Text(
+                                  errorMessage,
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: theme.colorScheme.onErrorContainer,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: SpacingTokens.md),
+                            ],
+                            _LoginTextField(
+                              controller: emailController,
+                              hintText: l10n.loginEmailLabel,
+                              keyboardType: TextInputType.emailAddress,
+                              textInputAction: TextInputAction.next,
+                            ),
+                            const SizedBox(height: SpacingTokens.sm),
+                            _LoginTextField(
+                              controller: passwordController,
+                              hintText: l10n.loginPasswordLabel,
+                              obscureText: obscurePassword.value,
+                              textInputAction: TextInputAction.done,
+                              suffixIcon: IconButton(
+                                onPressed: () => obscurePassword.value =
+                                    !obscurePassword.value,
+                                icon: Icon(
+                                  obscurePassword.value
+                                      ? Icons.visibility_outlined
+                                      : Icons.visibility_off_outlined,
+                                  color: OpenBudgetPalette.mutedTextFor(theme),
+                                ),
+                              ),
+                              onSubmitted: canLogin
+                                  ? (_) => _login(
+                                      ref,
+                                      emailController,
+                                      passwordController,
+                                    )
+                                  : null,
+                            ),
+                            const SizedBox(height: SpacingTokens.md),
+                            FilledButton(
+                              onPressed: canLogin
+                                  ? () => _login(
+                                      ref,
+                                      emailController,
+                                      passwordController,
+                                    )
+                                  : null,
+                              style: FilledButton.styleFrom(
+                                elevation: 0,
+                                minimumSize: const Size.fromHeight(48),
+                                backgroundColor: OpenBudgetPalette.accentBlue,
+                                foregroundColor: Colors.white,
+                                disabledBackgroundColor: dividerColor,
+                                disabledForegroundColor:
+                                    OpenBudgetPalette.mutedTextFor(theme),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(
+                                    RadiusTokens.sm,
+                                  ),
+                                ),
+                              ),
+                              child: isLoading
+                                  ? const SizedBox(
+                                      height: 20,
+                                      width: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : Text(l10n.loginButton),
+                            ),
+                            const SizedBox(height: SpacingTokens.sm),
+                            TextButton(
+                              onPressed: () => _showUnavailable(
+                                context,
+                                l10n.loginForgotPassword,
+                              ),
+                              child: Text(
+                                l10n.loginForgotPassword,
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  color: OpenBudgetPalette.accentBlue,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: SpacingTokens.md),
-                  ],
-                  if (errorMessage != null) ...[
-                    Container(
-                      padding: const EdgeInsets.all(SpacingTokens.sm),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.errorContainer,
-                        borderRadius: BorderRadius.circular(RadiusTokens.sm),
                       ),
-                      child: Text(
-                        errorMessage,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onErrorContainer,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: SpacingTokens.md),
-                  ],
-                  _LoginTextField(
-                    controller: emailController,
-                    hintText: l10n.loginEmailLabel,
-                    keyboardType: TextInputType.emailAddress,
-                    textInputAction: TextInputAction.next,
+                      const SizedBox(height: SpacingTokens.md),
+                    ],
                   ),
-                  const SizedBox(height: SpacingTokens.sm),
-                  _LoginTextField(
-                    controller: passwordController,
-                    hintText: l10n.loginPasswordLabel,
-                    obscureText: obscurePassword.value,
-                    textInputAction: TextInputAction.done,
-                    suffixIcon: IconButton(
-                      onPressed: () =>
-                          obscurePassword.value = !obscurePassword.value,
-                      icon: Icon(
-                        obscurePassword.value
-                            ? Icons.visibility_outlined
-                            : Icons.visibility_off_outlined,
-                        color: OpenBudgetPalette.mutedText,
-                      ),
-                    ),
-                    onSubmitted: canLogin
-                        ? (_) =>
-                              _login(ref, emailController, passwordController)
-                        : null,
-                  ),
-                  const SizedBox(height: SpacingTokens.md),
-                  FilledButton(
-                    onPressed: canLogin
-                        ? () => _login(ref, emailController, passwordController)
-                        : null,
-                    style: FilledButton.styleFrom(
-                      elevation: 0,
-                      minimumSize: const Size.fromHeight(48),
-                      backgroundColor: OpenBudgetPalette.accentBlue,
-                      foregroundColor: Colors.white,
-                      disabledBackgroundColor: OpenBudgetPalette.divider,
-                      disabledForegroundColor: OpenBudgetPalette.mutedText,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(RadiusTokens.sm),
-                      ),
-                    ),
-                    child: isLoading
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : Text(l10n.loginButton),
-                  ),
-                  const SizedBox(height: SpacingTokens.sm),
-                  TextButton(
-                    onPressed: () =>
-                        _showUnavailable(context, l10n.loginForgotPassword),
-                    child: Text(
-                      l10n.loginForgotPassword,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        color: OpenBudgetPalette.accentBlue,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -240,13 +309,76 @@ class _OpenBudgetMark extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final appIconStyle = ref.watch(appIconStyleProvider);
+    const fallbackColor = OpenBudgetPalette.accentBlue;
     return SizedBox(
       height: 96,
       width: 96,
       child: Image.asset(
         appIconStyle.previewAssetPathFor(theme.brightness),
         fit: BoxFit.contain,
+        errorBuilder: (context, error, stackTrace) {
+          return DecoratedBox(
+            decoration: BoxDecoration(
+              color: fallbackColor.withAlpha(22),
+              borderRadius: BorderRadius.circular(RadiusTokens.md),
+            ),
+            child: const Icon(
+              Icons.account_balance_wallet_outlined,
+              color: fallbackColor,
+              size: 44,
+            ),
+          );
+        },
       ),
+    );
+  }
+}
+
+class _LoginBackdrop extends StatelessWidget {
+  const _LoginBackdrop({
+    required this.backgroundColor,
+    required this.accentColor,
+    required this.secondaryAccentColor,
+  });
+
+  final Color backgroundColor;
+  final Color accentColor;
+  final Color secondaryAccentColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: DecoratedBox(
+            decoration: BoxDecoration(color: backgroundColor),
+          ),
+        ),
+        Positioned(
+          top: -140,
+          left: -90,
+          child: Container(
+            width: 280,
+            height: 280,
+            decoration: BoxDecoration(
+              color: accentColor,
+              shape: BoxShape.circle,
+            ),
+          ),
+        ),
+        Positioned(
+          bottom: -110,
+          right: -80,
+          child: Container(
+            width: 250,
+            height: 250,
+            decoration: BoxDecoration(
+              color: secondaryAccentColor,
+              shape: BoxShape.circle,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -282,10 +414,10 @@ class _LoginTextField extends HookWidget {
       decoration: InputDecoration(
         hintText: hintText,
         hintStyle: theme.textTheme.bodyLarge?.copyWith(
-          color: OpenBudgetPalette.mutedText,
+          color: OpenBudgetPalette.mutedTextFor(theme),
         ),
         filled: true,
-        fillColor: OpenBudgetPalette.surfaceMuted,
+        fillColor: OpenBudgetPalette.surfaceMutedFor(theme),
         suffixIcon: suffixIcon,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(RadiusTokens.sm),
@@ -297,7 +429,7 @@ class _LoginTextField extends HookWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(RadiusTokens.sm),
-          borderSide: const BorderSide(color: OpenBudgetPalette.divider),
+          borderSide: BorderSide(color: OpenBudgetPalette.dividerFor(theme)),
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: SpacingTokens.md,

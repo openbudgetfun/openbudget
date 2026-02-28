@@ -209,3 +209,33 @@
 - Widget tests passed after UX updates:
   - `add_account_screen_test.dart`
   - `account_detail_screen_test.dart`
+
+## 2026-02-28 - Login UX Refresh + Screenshot Cycle
+
+### Product/UX Progress
+
+- Refined the login screen visual structure:
+  - layered backdrop accents for depth.
+  - elevated auth card with cleaner hierarchy.
+  - stronger title/subtitle treatment and form spacing.
+- Added resilient app-mark rendering:
+  - `_OpenBudgetMark` now uses an icon fallback if branding image assets are missing.
+  - prevents widget-test/runtime crashes when icon preview assets are unavailable in test bundles.
+
+### Validation Completed
+
+- `flutter test openbudget_app/test/features/auth/screens/login_screen_test.dart` passed.
+- `flutter test` regression slice passed:
+  - `login_screen_test.dart`
+  - `account_detail_screen_test.dart`
+  - `add_account_screen_test.dart`
+- `dart analyze openbudget_app openbudget_server` returned no issues.
+
+### Mobile MCP + Screenshot Evidence
+
+- Launched app on Android device `SM02E4060324957` via `mcp__dart__launch_app` using `test_driver/main_driver.dart`.
+- Connected through DTD and captured verification screenshot via `mcp__dart__flutter_driver` (`screenshot` command).
+- Captured additional deterministic PNG evidence from the same device state and saved in repo:
+  - `docs/research/screenshots/2026-02-28/login-redesign-initial.png`
+  - `docs/research/screenshots/2026-02-28/login-redesign-email-focus.png`
+  - `docs/research/screenshots/2026-02-28/login-redesign-filled.png`
