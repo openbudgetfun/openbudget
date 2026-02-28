@@ -37,6 +37,8 @@ abstract class SolanaWalletHolding
     this.pnlCurrency,
     this.pnlAsOf,
     this.priceSource,
+    this.priceQuality,
+    this.isPriceStale,
     this.priceAsOf,
     this.metadataJson,
     DateTime? updatedAt,
@@ -64,6 +66,8 @@ abstract class SolanaWalletHolding
     String? pnlCurrency,
     DateTime? pnlAsOf,
     String? priceSource,
+    String? priceQuality,
+    bool? isPriceStale,
     DateTime? priceAsOf,
     String? metadataJson,
     DateTime? updatedAt,
@@ -105,6 +109,8 @@ abstract class SolanaWalletHolding
           ? null
           : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['pnlAsOf']),
       priceSource: jsonSerialization['priceSource'] as String?,
+      priceQuality: jsonSerialization['priceQuality'] as String?,
+      isPriceStale: jsonSerialization['isPriceStale'] as bool?,
       priceAsOf: jsonSerialization['priceAsOf'] == null
           ? null
           : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['priceAsOf']),
@@ -173,6 +179,12 @@ abstract class SolanaWalletHolding
 
   String? priceSource;
 
+  /// Qualitative pricing classification: provider, derived, stale_cache, unpriced.
+  String? priceQuality;
+
+  /// True when valuation is using a cached fallback price.
+  bool? isPriceStale;
+
   DateTime? priceAsOf;
 
   /// JSON-encoded asset metadata subset.
@@ -208,6 +220,8 @@ abstract class SolanaWalletHolding
     String? pnlCurrency,
     DateTime? pnlAsOf,
     String? priceSource,
+    String? priceQuality,
+    bool? isPriceStale,
     DateTime? priceAsOf,
     String? metadataJson,
     DateTime? updatedAt,
@@ -240,6 +254,8 @@ abstract class SolanaWalletHolding
       if (pnlCurrency != null) 'pnlCurrency': pnlCurrency,
       if (pnlAsOf != null) 'pnlAsOf': pnlAsOf?.toJson(),
       if (priceSource != null) 'priceSource': priceSource,
+      if (priceQuality != null) 'priceQuality': priceQuality,
+      if (isPriceStale != null) 'isPriceStale': isPriceStale,
       if (priceAsOf != null) 'priceAsOf': priceAsOf?.toJson(),
       if (metadataJson != null) 'metadataJson': metadataJson,
       'updatedAt': updatedAt.toJson(),
@@ -274,6 +290,8 @@ abstract class SolanaWalletHolding
       if (pnlCurrency != null) 'pnlCurrency': pnlCurrency,
       if (pnlAsOf != null) 'pnlAsOf': pnlAsOf?.toJson(),
       if (priceSource != null) 'priceSource': priceSource,
+      if (priceQuality != null) 'priceQuality': priceQuality,
+      if (isPriceStale != null) 'isPriceStale': isPriceStale,
       if (priceAsOf != null) 'priceAsOf': priceAsOf?.toJson(),
       if (metadataJson != null) 'metadataJson': metadataJson,
       'updatedAt': updatedAt.toJson(),
@@ -335,6 +353,8 @@ class _SolanaWalletHoldingImpl extends SolanaWalletHolding {
     String? pnlCurrency,
     DateTime? pnlAsOf,
     String? priceSource,
+    String? priceQuality,
+    bool? isPriceStale,
     DateTime? priceAsOf,
     String? metadataJson,
     DateTime? updatedAt,
@@ -360,6 +380,8 @@ class _SolanaWalletHoldingImpl extends SolanaWalletHolding {
          pnlCurrency: pnlCurrency,
          pnlAsOf: pnlAsOf,
          priceSource: priceSource,
+         priceQuality: priceQuality,
+         isPriceStale: isPriceStale,
          priceAsOf: priceAsOf,
          metadataJson: metadataJson,
          updatedAt: updatedAt,
@@ -391,6 +413,8 @@ class _SolanaWalletHoldingImpl extends SolanaWalletHolding {
     Object? pnlCurrency = _Undefined,
     Object? pnlAsOf = _Undefined,
     Object? priceSource = _Undefined,
+    Object? priceQuality = _Undefined,
+    Object? isPriceStale = _Undefined,
     Object? priceAsOf = _Undefined,
     Object? metadataJson = _Undefined,
     DateTime? updatedAt,
@@ -429,6 +453,8 @@ class _SolanaWalletHoldingImpl extends SolanaWalletHolding {
       pnlCurrency: pnlCurrency is String? ? pnlCurrency : this.pnlCurrency,
       pnlAsOf: pnlAsOf is DateTime? ? pnlAsOf : this.pnlAsOf,
       priceSource: priceSource is String? ? priceSource : this.priceSource,
+      priceQuality: priceQuality is String? ? priceQuality : this.priceQuality,
+      isPriceStale: isPriceStale is bool? ? isPriceStale : this.isPriceStale,
       priceAsOf: priceAsOf is DateTime? ? priceAsOf : this.priceAsOf,
       metadataJson: metadataJson is String? ? metadataJson : this.metadataJson,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -551,6 +577,17 @@ class SolanaWalletHoldingUpdateTable
     value,
   );
 
+  _i1.ColumnValue<String, String> priceQuality(String? value) =>
+      _i1.ColumnValue(
+        table.priceQuality,
+        value,
+      );
+
+  _i1.ColumnValue<bool, bool> isPriceStale(bool? value) => _i1.ColumnValue(
+    table.isPriceStale,
+    value,
+  );
+
   _i1.ColumnValue<DateTime, DateTime> priceAsOf(DateTime? value) =>
       _i1.ColumnValue(
         table.priceAsOf,
@@ -654,6 +691,14 @@ class SolanaWalletHoldingTable extends _i1.Table<_i1.UuidValue?> {
       'priceSource',
       this,
     );
+    priceQuality = _i1.ColumnString(
+      'priceQuality',
+      this,
+    );
+    isPriceStale = _i1.ColumnBool(
+      'isPriceStale',
+      this,
+    );
     priceAsOf = _i1.ColumnDateTime(
       'priceAsOf',
       this,
@@ -722,6 +767,12 @@ class SolanaWalletHoldingTable extends _i1.Table<_i1.UuidValue?> {
 
   late final _i1.ColumnString priceSource;
 
+  /// Qualitative pricing classification: provider, derived, stale_cache, unpriced.
+  late final _i1.ColumnString priceQuality;
+
+  /// True when valuation is using a cached fallback price.
+  late final _i1.ColumnBool isPriceStale;
+
   late final _i1.ColumnDateTime priceAsOf;
 
   /// JSON-encoded asset metadata subset.
@@ -752,6 +803,8 @@ class SolanaWalletHoldingTable extends _i1.Table<_i1.UuidValue?> {
     pnlCurrency,
     pnlAsOf,
     priceSource,
+    priceQuality,
+    isPriceStale,
     priceAsOf,
     metadataJson,
     updatedAt,

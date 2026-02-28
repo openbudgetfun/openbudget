@@ -34,6 +34,10 @@ fields:
   ### Timestamp for the last P&L estimate update.
   pnlAsOf: DateTime?
   priceSource: String?
+  ### Qualitative pricing classification: provider, derived, stale_cache, unpriced.
+  priceQuality: String?
+  ### True when valuation is using a cached fallback price.
+  isPriceStale: bool?
   priceAsOf: DateTime?
   ### JSON-encoded asset metadata subset.
   metadataJson: String?

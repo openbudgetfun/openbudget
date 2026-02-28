@@ -341,3 +341,38 @@
 - Captured fresh Android device screenshots during this cycle:
   - `docs/research/screenshots/2026-02-28/solana-tax-year-cycle-login.png`
   - `docs/research/screenshots/2026-02-28/solana-tax-year-cycle-login-email-focus.png`
+
+## 2026-02-28 - Pricing Quality Metadata + Cached Fallback (Issue #163)
+
+### Backend Progress
+
+- Extended `SolanaWalletHolding` pricing metadata:
+  - `priceQuality` (`provider`, `derived`, `stale_cache`, `unpriced`)
+  - `isPriceStale` (cached fallback indicator)
+- Added fallback valuation behavior in holdings sync:
+  - primary: direct Helius DAS token price.
+  - derived: if `pricePerToken` is missing but `totalPrice` exists, derive unit price.
+  - cached fallback: when provider returns no fresh price, reuse prior stored price for the same asset and mark stale.
+- Preserved valuation currency flow while surfacing warnings for cached/unpriced assets.
+- Added migration:
+  - `openbudget_server/migrations/20260228201106267`
+
+### App Progress
+
+- Wallet holding cards now display pricing quality chips and stale/unpriced states:
+  - quality chip from `priceQuality`
+  - stale chip when cached valuation is used
+  - unpriced warning chip + text when no valuation source is available
+
+### Validation Completed
+
+- `dart analyze openbudget_app openbudget_server openbudget_client` returned no issues.
+- Targeted widget regression slice passed:
+  - `openbudget_app/test/features/accounts/screens/account_detail_screen_test.dart`
+  - `openbudget_app/test/features/auth/screens/login_screen_test.dart`
+  - `openbudget_app/test/features/accounts/screens/add_account_screen_test.dart`
+
+### Mobile Evidence
+
+- Captured additional Android screenshot in this cycle:
+  - `docs/research/screenshots/2026-02-28/pricing-quality-cycle-login.png`

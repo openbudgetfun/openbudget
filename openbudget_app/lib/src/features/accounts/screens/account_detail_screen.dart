@@ -2567,6 +2567,26 @@ class _HoldingCard extends StatelessWidget {
                             holding.priceSource!,
                           ),
                         ),
+                      if (holding.priceQuality != null &&
+                          holding.priceQuality!.trim().isNotEmpty)
+                        _MetadataChip(
+                          icon: Icons.verified_outlined,
+                          label: _SolanaWalletAccountBody._toLabel(
+                            holding.priceQuality!,
+                          ),
+                        ),
+                      if (holding.isPriceStale ?? false)
+                        const _MetadataChip(
+                          icon: Icons.schedule_rounded,
+                          label: 'Stale price',
+                        ),
+                      if (holding.totalValue == null)
+                        _MetadataChip(
+                          icon: Icons.warning_amber_rounded,
+                          label: 'Unpriced',
+                          color: colorScheme.errorContainer.withAlpha(153),
+                          foregroundColor: colorScheme.onErrorContainer,
+                        ),
                     ],
                   ),
                 ],
@@ -2582,6 +2602,13 @@ class _HoldingCard extends StatelessWidget {
                     fontWeight: FontWeight.w800,
                   ),
                 ),
+                if (holding.totalValue == null)
+                  Text(
+                    'No valuation source',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: colorScheme.error,
+                    ),
+                  ),
                 if (holding.estimatedCostBasis != null)
                   Text(
                     'Basis ${NumberFormat.currency(symbol: r'$').format(holding.estimatedCostBasis)}',

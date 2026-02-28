@@ -839,6 +839,15 @@ class SolanaWalletService {
     required HeliusClient helius,
     required List<String> warnings,
   }) async {
+    final now = DateTime.now();
+    final existingHoldings = await SolanaWalletHolding.db.find(
+      session,
+      where: (t) => t.walletId.equals(walletId),
+    );
+    final existingByAssetId = {
+      for (final holding in existingHoldings) holding.assetId: holding,
+    };
+
     final balances = await helius.wallet.getBalances(
       GetBalancesRequest(address: wallet.address),
     );
@@ -858,18 +867,47 @@ class SolanaWalletService {
       seenAssetIds.add(assetId);
 
       final asset = assetsById[assetId];
+      final existing = existingByAssetId[assetId];
       final decimals = token.decimals;
       final rawAmount = token.amount;
       final uiAmount = _toUiAmount(rawAmount, decimals);
       final priceInfo = asset?.tokenInfo?.priceInfo;
-      final pricePerToken = priceInfo?.pricePerToken;
-      final totalValue = pricePerToken == null
-          ? null
-          : uiAmount * pricePerToken;
+      var priceCurrency = priceInfo?.currency ?? existing?.priceCurrency;
+      var pricePerToken = priceInfo?.pricePerToken;
+      var totalValue = pricePerToken == null ? null : uiAmount * pricePerToken;
+      var priceSource = priceInfo == null ? null : 'helius_das';
+      var priceQuality = priceInfo == null ? 'unpriced' : 'provider';
+      var isPriceStale = false;
+      var priceAsOf = pricePerToken == null ? null : now;
+
+      if (pricePerToken == null) {
+        final derivedTotalPrice = priceInfo?.totalPrice;
+        if (derivedTotalPrice != null && uiAmount.abs() > _pnlEpsilon) {
+          pricePerToken = derivedTotalPrice / uiAmount;
+          totalValue = derivedTotalPrice;
+          priceSource = 'helius_das_total_price';
+          priceQuality = 'derived';
+          priceAsOf = now;
+        }
+      }
+
+      if (pricePerToken == null) {
+        final cachedPrice = existing?.pricePerToken;
+        if (cachedPrice != null) {
+          pricePerToken = cachedPrice;
+          totalValue = uiAmount * cachedPrice;
+          priceCurrency = priceCurrency ?? existing?.priceCurrency;
+          priceSource = existing?.priceSource ?? 'cached';
+          priceQuality = 'stale_cache';
+          isPriceStale = true;
+          priceAsOf = existing?.priceAsOf;
+          warnings.add('Using cached price for asset $assetId');
+        }
+      }
 
       if (totalValue != null) {
         totalValuation += totalValue;
-        valuationCurrency ??= priceInfo?.currency;
+        valuationCurrency ??= priceCurrency;
       }
 
       final holding = SolanaWalletHolding(
@@ -883,11 +921,13 @@ class SolanaWalletService {
         balanceRaw: rawAmount.toString(),
         balanceUi: _formatUiAmount(rawAmount, decimals),
         isNft: _isLikelyNft(asset),
-        priceCurrency: priceInfo?.currency,
+        priceCurrency: priceCurrency,
         pricePerToken: pricePerToken,
         totalValue: totalValue,
-        priceSource: priceInfo == null ? null : 'helius_das',
-        priceAsOf: DateTime.now(),
+        priceSource: priceSource,
+        priceQuality: priceQuality,
+        isPriceStale: isPriceStale,
+        priceAsOf: priceAsOf,
         metadataJson: asset == null
             ? null
             : jsonEncode({
@@ -895,7 +935,7 @@ class SolanaWalletService {
                 'symbol': asset.content?.metadata?.symbol,
                 'name': asset.content?.metadata?.name,
               }),
-        updatedAt: DateTime.now(),
+        updatedAt: now,
       );
 
       await _upsertHolding(session, holding);
@@ -910,10 +950,41 @@ class SolanaWalletService {
       if (!seenAssetIds.add(asset.id)) continue;
 
       final priceInfo = asset.tokenInfo?.priceInfo;
-      final totalValue = priceInfo?.totalPrice ?? priceInfo?.pricePerToken;
+      final existing = existingByAssetId[asset.id];
+      var priceCurrency = priceInfo?.currency ?? existing?.priceCurrency;
+      var pricePerToken = priceInfo?.pricePerToken;
+      var totalValue = priceInfo?.totalPrice;
+      var priceSource = priceInfo == null ? null : 'helius_das';
+      var priceQuality = priceInfo == null ? 'unpriced' : 'provider';
+      var isPriceStale = false;
+      var priceAsOf = priceInfo == null ? null : now;
+
+      if (pricePerToken == null && totalValue != null) {
+        // NFT-like balances are treated as 1 unit in this sync flow.
+        pricePerToken = totalValue;
+        priceSource = 'helius_das_total_price';
+        priceQuality = 'derived';
+      } else if (totalValue == null && pricePerToken != null) {
+        totalValue = pricePerToken;
+      }
+
+      if (pricePerToken == null) {
+        final cachedPrice = existing?.pricePerToken;
+        if (cachedPrice != null) {
+          pricePerToken = cachedPrice;
+          totalValue = cachedPrice;
+          priceCurrency = priceCurrency ?? existing?.priceCurrency;
+          priceSource = existing?.priceSource ?? 'cached';
+          priceQuality = 'stale_cache';
+          isPriceStale = true;
+          priceAsOf = existing?.priceAsOf;
+          warnings.add('Using cached price for NFT asset ${asset.id}');
+        }
+      }
+
       if (totalValue != null) {
         totalValuation += totalValue;
-        valuationCurrency ??= priceInfo?.currency;
+        valuationCurrency ??= priceCurrency;
       }
 
       await _upsertHolding(
@@ -929,27 +1000,24 @@ class SolanaWalletService {
           balanceRaw: '1',
           balanceUi: '1',
           isNft: true,
-          priceCurrency: priceInfo?.currency,
-          pricePerToken: priceInfo?.pricePerToken,
+          priceCurrency: priceCurrency,
+          pricePerToken: pricePerToken,
           totalValue: totalValue,
-          priceSource: priceInfo == null ? null : 'helius_das',
-          priceAsOf: DateTime.now(),
+          priceSource: priceSource,
+          priceQuality: priceQuality,
+          isPriceStale: isPriceStale,
+          priceAsOf: priceAsOf,
           metadataJson: jsonEncode({
             'interface': asset.interface_,
             'symbol': asset.content?.metadata?.symbol,
             'name': asset.content?.metadata?.name,
           }),
-          updatedAt: DateTime.now(),
+          updatedAt: now,
         ),
       );
     }
 
-    final existing = await SolanaWalletHolding.db.find(
-      session,
-      where: (t) => t.walletId.equals(walletId),
-    );
-
-    for (final holding in existing) {
+    for (final holding in existingHoldings) {
       if (!seenAssetIds.contains(holding.assetId)) {
         await SolanaWalletHolding.db.deleteRow(session, holding);
       }
@@ -997,6 +1065,8 @@ class SolanaWalletService {
       pricePerToken: incoming.pricePerToken,
       totalValue: incoming.totalValue,
       priceSource: incoming.priceSource,
+      priceQuality: incoming.priceQuality,
+      isPriceStale: incoming.isPriceStale,
       priceAsOf: incoming.priceAsOf,
       metadataJson: incoming.metadataJson,
       updatedAt: DateTime.now(),
