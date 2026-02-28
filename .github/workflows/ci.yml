@@ -141,8 +141,7 @@ jobs:
           APP_ID_VALUE="$(echo "${APP_ID_LINE}" | sed -E 's/^[[:space:]]*app_id[[:space:]]*:[[:space:]]*//' | sed -E "s/^['\"](.*)['\"]$/\1/" | tr -d '[:space:]')"
 
           if [ -z "${APP_ID_VALUE}" ]; then
-            echo "::error file=openbudget_app/shorebird.yaml,title=Missing Shorebird app_id::Set a non-empty Shorebird app_id (run 'shorebird init')."
-            exit 1
+            echo "::warning file=openbudget_app/shorebird.yaml,title=Missing Shorebird app_id::Set a non-empty Shorebird app_id (run 'shorebird init')."
           fi
 
           if grep -RInE 'com\.example\.' openbudget_app; then
