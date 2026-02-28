@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -8,7 +9,14 @@ part 'serverpod_client_provider.g.dart';
 
 @Riverpod(keepAlive: true)
 Client serverpodClient(Ref ref) {
-  final client = Client('http://localhost:8080/')
+  const apiUrlOverride = String.fromEnvironment('OPENBUDGET_API_URL');
+  final apiUrl = resolveServerpodApiUrl(
+    isWeb: kIsWeb,
+    platform: defaultTargetPlatform,
+    apiUrlOverride: apiUrlOverride,
+  );
+
+  final client = Client(apiUrl)
     ..authSessionManager = FlutterAuthSessionManager();
 
   if (!_isWidgetTestRuntime()) {
@@ -23,4 +31,22 @@ bool _isWidgetTestRuntime() {
   return typeName.contains('TestWidgetsFlutterBinding') ||
       typeName.contains('IntegrationTestWidgetsFlutterBinding') ||
       typeName.contains('LiveTestWidgetsFlutterBinding');
+}
+
+String resolveServerpodApiUrl({
+  required bool isWeb,
+  required TargetPlatform platform,
+  required String apiUrlOverride,
+}) {
+  final override = apiUrlOverride.trim();
+  if (override.isNotEmpty) {
+    return override.endsWith('/') ? override : '$override/';
+  }
+
+  // Android emulators map host localhost to 10.0.2.2.
+  if (!isWeb && platform == TargetPlatform.android) {
+    return 'http://10.0.2.2:8080/';
+  }
+
+  return 'http://localhost:8080/';
 }

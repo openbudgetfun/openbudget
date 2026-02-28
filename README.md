@@ -82,6 +82,13 @@ flutter:app run -d android      # Run on Android emulator
 flutter:app build web          # Build for web
 ```
 
+Android note: emulator builds use `10.0.2.2` to reach the host machine. For
+physical devices (or custom network setup), override the API base URL:
+
+```bash
+flutter:app run -d android --dart-define=OPENBUDGET_API_URL=http://192.168.1.10:8080
+```
+
 ### Services
 
 ```bash
