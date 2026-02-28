@@ -1546,11 +1546,19 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
                 .read(solanaWalletActionsProvider.notifier)
                 .syncWallet(budgetId: budgetId, walletId: walletId);
             if (!context.mounted) return;
+            final coveredHoldings =
+                result.pricedHoldingCount + result.staleHoldingCount;
+            final coveragePercent = result.valuationCoverageRatio == null
+                ? null
+                : (result.valuationCoverageRatio! * 100).round();
             messenger.showSnackBar(
               SnackBar(
                 content: Text(
                   'Synced ${result.insertedTransactions + result.updatedTransactions}'
-                  ' transactions and ${result.holdingCount} holdings.',
+                  ' transactions and ${result.holdingCount} holdings. '
+                  'Coverage $coveredHoldings/${result.holdingCount}'
+                  '${coveragePercent == null ? '' : ' ($coveragePercent%)'}, '
+                  '${result.unpricedHoldingCount} unpriced.',
                 ),
               ),
             );
@@ -1755,6 +1763,25 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
                         SizedBox(
                           width: cardWidth,
                           child: _WalletMetricCard(
+                            label: 'Valuation Coverage',
+                            value: _formatCoverage(snapshot),
+                            icon: Icons.verified_rounded,
+                          ),
+                        ),
+                        SizedBox(
+                          width: cardWidth,
+                          child: _WalletMetricCard(
+                            label: 'Unpriced Assets',
+                            value: snapshot.unpricedHoldings.toString(),
+                            icon: Icons.warning_amber_rounded,
+                            valueColor: snapshot.unpricedHoldings > 0
+                                ? colorScheme.error
+                                : null,
+                          ),
+                        ),
+                        SizedBox(
+                          width: cardWidth,
+                          child: _WalletMetricCard(
                             label: 'Unrealized P&L',
                             value: _formatSignedUsd(
                               snapshot.totalUnrealizedPnl,
@@ -1814,6 +1841,21 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
                         label: 'NFT Assets',
                         value: snapshot.nftAssets.toString(),
                         icon: Icons.image_outlined,
+                      ),
+                      const SizedBox(height: gap),
+                      _WalletMetricCard(
+                        label: 'Valuation Coverage',
+                        value: _formatCoverage(snapshot),
+                        icon: Icons.verified_rounded,
+                      ),
+                      const SizedBox(height: gap),
+                      _WalletMetricCard(
+                        label: 'Unpriced Assets',
+                        value: snapshot.unpricedHoldings.toString(),
+                        icon: Icons.warning_amber_rounded,
+                        valueColor: snapshot.unpricedHoldings > 0
+                            ? colorScheme.error
+                            : null,
                       ),
                       const SizedBox(height: gap),
                       _WalletMetricCard(
@@ -2268,6 +2310,16 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
     ).format(amount);
   }
 
+  static String _formatCoverage(_SolanaWalletSnapshot snapshot) {
+    final ratio = snapshot.valuationCoverageRatio;
+    if (snapshot.holdings == 0 || ratio == null) {
+      return 'No holdings';
+    }
+    final covered = snapshot.pricedHoldings + snapshot.stalePricedHoldings;
+    final percent = (ratio * 100).round();
+    return '$percent% ($covered/${snapshot.holdings})';
+  }
+
   static Color _statusColor(String status, ColorScheme colorScheme) {
     switch (status.toLowerCase()) {
       case 'success':
@@ -2288,6 +2340,10 @@ class _SolanaWalletSnapshot {
     required this.totalUnrealizedPnl,
     required this.totalRealizedPnl,
     required this.holdings,
+    required this.pricedHoldings,
+    required this.stalePricedHoldings,
+    required this.unpricedHoldings,
+    required this.valuationCoverageRatio,
     required this.fungibleAssets,
     required this.nftAssets,
     required this.transactions,
@@ -2311,6 +2367,19 @@ class _SolanaWalletSnapshot {
       0,
       (total, transaction) => total + (transaction.estimatedRealizedPnl ?? 0),
     );
+    final pricedHoldings = holdings.where((holding) {
+      if (holding.totalValue == null) return false;
+      return !(holding.isPriceStale ?? false);
+    }).length;
+    final stalePricedHoldings = holdings.where((holding) {
+      if (holding.totalValue == null) return false;
+      return holding.isPriceStale ?? false;
+    }).length;
+    final unpricedHoldings =
+        holdings.length - pricedHoldings - stalePricedHoldings;
+    final valuationCoverageRatio = holdings.isEmpty
+        ? null
+        : (pricedHoldings + stalePricedHoldings) / holdings.length;
     final nftAssets = holdings.where((holding) => holding.isNft).length;
     final fungibleAssets = holdings.length - nftAssets;
     final taggedTransactions = transactions.where((transaction) {
@@ -2331,6 +2400,10 @@ class _SolanaWalletSnapshot {
       totalUnrealizedPnl: totalUnrealizedPnl,
       totalRealizedPnl: totalRealizedPnl,
       holdings: holdings.length,
+      pricedHoldings: pricedHoldings,
+      stalePricedHoldings: stalePricedHoldings,
+      unpricedHoldings: unpricedHoldings,
+      valuationCoverageRatio: valuationCoverageRatio,
       fungibleAssets: fungibleAssets,
       nftAssets: nftAssets,
       transactions: transactions.length,
@@ -2343,6 +2416,10 @@ class _SolanaWalletSnapshot {
   final double totalUnrealizedPnl;
   final double totalRealizedPnl;
   final int holdings;
+  final int pricedHoldings;
+  final int stalePricedHoldings;
+  final int unpricedHoldings;
+  final double? valuationCoverageRatio;
   final int fungibleAssets;
   final int nftAssets;
   final int transactions;

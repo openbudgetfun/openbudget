@@ -317,6 +317,10 @@ class SolanaWalletService {
         insertedTransactions: insertedTransactions,
         updatedTransactions: updatedTransactions,
         holdingCount: valuation.holdingCount,
+        pricedHoldingCount: valuation.pricedHoldingCount,
+        staleHoldingCount: valuation.staleHoldingCount,
+        unpricedHoldingCount: valuation.unpricedHoldingCount,
+        valuationCoverageRatio: valuation.valuationCoverageRatio,
         totalValuation: valuation.totalValuation,
         valuationCurrency: valuation.valuationCurrency,
         syncedAt: wallet.lastSyncedAt!,
@@ -861,6 +865,9 @@ class SolanaWalletService {
     final seenAssetIds = <String>{};
     var totalValuation = 0.0;
     String? valuationCurrency;
+    var pricedHoldingCount = 0;
+    var staleHoldingCount = 0;
+    var unpricedHoldingCount = 0;
 
     for (final token in balances.tokens) {
       final assetId = token.mint;
@@ -938,6 +945,14 @@ class SolanaWalletService {
         updatedAt: now,
       );
 
+      if (holding.totalValue == null) {
+        unpricedHoldingCount += 1;
+      } else if (holding.isPriceStale ?? false) {
+        staleHoldingCount += 1;
+      } else {
+        pricedHoldingCount += 1;
+      }
+
       await _upsertHolding(session, holding);
 
       if (pricePerToken == null) {
@@ -987,34 +1002,40 @@ class SolanaWalletService {
         valuationCurrency ??= priceCurrency;
       }
 
-      await _upsertHolding(
-        session,
-        SolanaWalletHolding(
-          walletId: walletId,
-          budgetId: wallet.budgetId,
-          assetId: asset.id,
-          symbol: asset.content?.metadata?.symbol,
-          name: asset.content?.metadata?.name,
-          tokenProgram: asset.tokenInfo?.tokenProgram,
-          decimals: asset.tokenInfo?.decimals ?? 0,
-          balanceRaw: '1',
-          balanceUi: '1',
-          isNft: true,
-          priceCurrency: priceCurrency,
-          pricePerToken: pricePerToken,
-          totalValue: totalValue,
-          priceSource: priceSource,
-          priceQuality: priceQuality,
-          isPriceStale: isPriceStale,
-          priceAsOf: priceAsOf,
-          metadataJson: jsonEncode({
-            'interface': asset.interface_,
-            'symbol': asset.content?.metadata?.symbol,
-            'name': asset.content?.metadata?.name,
-          }),
-          updatedAt: now,
-        ),
+      final nftHolding = SolanaWalletHolding(
+        walletId: walletId,
+        budgetId: wallet.budgetId,
+        assetId: asset.id,
+        symbol: asset.content?.metadata?.symbol,
+        name: asset.content?.metadata?.name,
+        tokenProgram: asset.tokenInfo?.tokenProgram,
+        decimals: asset.tokenInfo?.decimals ?? 0,
+        balanceRaw: '1',
+        balanceUi: '1',
+        isNft: true,
+        priceCurrency: priceCurrency,
+        pricePerToken: pricePerToken,
+        totalValue: totalValue,
+        priceSource: priceSource,
+        priceQuality: priceQuality,
+        isPriceStale: isPriceStale,
+        priceAsOf: priceAsOf,
+        metadataJson: jsonEncode({
+          'interface': asset.interface_,
+          'symbol': asset.content?.metadata?.symbol,
+          'name': asset.content?.metadata?.name,
+        }),
+        updatedAt: now,
       );
+      await _upsertHolding(session, nftHolding);
+
+      if (nftHolding.totalValue == null) {
+        unpricedHoldingCount += 1;
+      } else if (nftHolding.isPriceStale ?? false) {
+        staleHoldingCount += 1;
+      } else {
+        pricedHoldingCount += 1;
+      }
     }
 
     for (final holding in existingHoldings) {
@@ -1030,8 +1051,18 @@ class SolanaWalletService {
       valuationCurrency: valuationCurrency,
     );
 
+    final holdingCount = seenAssetIds.length;
+    final coveredCount = pricedHoldingCount + staleHoldingCount;
+    final valuationCoverageRatio = holdingCount == 0
+        ? null
+        : coveredCount / holdingCount;
+
     return _HoldingSyncSummary(
-      holdingCount: seenAssetIds.length,
+      holdingCount: holdingCount,
+      pricedHoldingCount: pricedHoldingCount,
+      staleHoldingCount: staleHoldingCount,
+      unpricedHoldingCount: unpricedHoldingCount,
+      valuationCoverageRatio: valuationCoverageRatio,
       totalValuation: seenAssetIds.isEmpty ? null : totalValuation,
       valuationCurrency: valuationCurrency,
     );
@@ -1131,11 +1162,19 @@ class SolanaWalletService {
 class _HoldingSyncSummary {
   const _HoldingSyncSummary({
     required this.holdingCount,
+    required this.pricedHoldingCount,
+    required this.staleHoldingCount,
+    required this.unpricedHoldingCount,
+    required this.valuationCoverageRatio,
     required this.totalValuation,
     required this.valuationCurrency,
   });
 
   final int holdingCount;
+  final int pricedHoldingCount;
+  final int staleHoldingCount;
+  final int unpricedHoldingCount;
+  final double? valuationCoverageRatio;
   final double? totalValuation;
   final String? valuationCurrency;
 }

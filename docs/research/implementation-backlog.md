@@ -20,6 +20,7 @@ This backlog turns strategy into implementable epics with explicit acceptance cr
 - [#159](https://github.com/openbudgetfun/openbudget/issues/159) Provider config + secret hygiene + deploy checklist.
 - [#162](https://github.com/openbudgetfun/openbudget/issues/162) Solana token cost basis + realized/unrealized P&L pipeline.
 - [#163](https://github.com/openbudgetfun/openbudget/issues/163) Multi-source Solana asset pricing service with fallback + quality metadata.
+- [#164](https://github.com/openbudgetfun/openbudget/issues/164) Wallet pricing coverage summary in API and UI.
 
 ## Execution Status Snapshot (2026-02-28 PM)
 
@@ -30,6 +31,7 @@ This backlog turns strategy into implementable epics with explicit acceptance cr
 - #156: Implemented initial holdings valuation wiring with provider-returned pricing fields; fallback adapter strategy still pending.
 - #157: In progress via #162: schema fields + first-pass estimated basis/realized/unrealized P&L engine + UI surfacing landed; FIFO lot accounting + tax-year summaries are now integrated, but tax-grade lot provenance/audit export is still pending.
 - #163: In progress: added holding-level pricing quality metadata and cached fallback valuation path; still need additional external pricing providers (beyond Helius) and explicit coverage summaries in API responses.
+- #164: Implemented coverage summary fields on sync result + wallet dashboard coverage/unpriced metrics; still need periodic historical coverage tracking and trend visualization.
 - #158: Implemented Android flavors + iOS schemes + app bootstrap routing; added `default-flavor: dev` for tooling compatibility.
 - #159: Implemented environment-based client routing and secret lookup path (`passwords.yaml` + env fallback); deploy checklist still pending.
 

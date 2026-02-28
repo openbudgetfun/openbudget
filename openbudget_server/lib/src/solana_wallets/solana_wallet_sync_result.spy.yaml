@@ -5,6 +5,10 @@ fields:
   insertedTransactions: int
   updatedTransactions: int
   holdingCount: int
+  pricedHoldingCount: int
+  staleHoldingCount: int
+  unpricedHoldingCount: int
+  valuationCoverageRatio: double?
   totalValuation: double?
   valuationCurrency: String?
   syncedAt: DateTime

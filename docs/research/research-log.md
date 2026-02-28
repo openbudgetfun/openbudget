@@ -376,3 +376,38 @@
 
 - Captured additional Android screenshot in this cycle:
   - `docs/research/screenshots/2026-02-28/pricing-quality-cycle-login.png`
+
+## 2026-02-28 - Wallet Valuation Coverage Metrics (Issue #164)
+
+### Backend Progress
+
+- Extended `SolanaWalletSyncResult` API payload with valuation coverage fields:
+  - `pricedHoldingCount`
+  - `staleHoldingCount`
+  - `unpricedHoldingCount`
+  - `valuationCoverageRatio`
+- Updated holdings sync summary accounting in `SolanaWalletService` to classify each synced holding as:
+  - priced (fresh)
+  - stale-priced (cached fallback)
+  - unpriced
+
+### App Progress
+
+- Updated sync success snackbar to include coverage counts and unpriced tally.
+- Added wallet dashboard summary cards:
+  - `Valuation Coverage`
+  - `Unpriced Assets`
+- Expanded wallet snapshot aggregation logic to compute coverage metrics from holdings.
+
+### Validation Completed
+
+- `dart analyze openbudget_app openbudget_server openbudget_client` returned no issues.
+- Targeted widget regression slice passed:
+  - `openbudget_app/test/features/accounts/screens/account_detail_screen_test.dart`
+  - `openbudget_app/test/features/auth/screens/login_screen_test.dart`
+  - `openbudget_app/test/features/accounts/screens/add_account_screen_test.dart`
+
+### Mobile Evidence
+
+- Captured additional Android screenshot in this cycle:
+  - `docs/research/screenshots/2026-02-28/coverage-metrics-cycle-login.png`

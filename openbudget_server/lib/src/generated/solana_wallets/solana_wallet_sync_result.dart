@@ -20,6 +20,10 @@ abstract class SolanaWalletSyncResult
     required this.insertedTransactions,
     required this.updatedTransactions,
     required this.holdingCount,
+    required this.pricedHoldingCount,
+    required this.staleHoldingCount,
+    required this.unpricedHoldingCount,
+    this.valuationCoverageRatio,
     this.totalValuation,
     this.valuationCurrency,
     required this.syncedAt,
@@ -31,6 +35,10 @@ abstract class SolanaWalletSyncResult
     required int insertedTransactions,
     required int updatedTransactions,
     required int holdingCount,
+    required int pricedHoldingCount,
+    required int staleHoldingCount,
+    required int unpricedHoldingCount,
+    double? valuationCoverageRatio,
     double? totalValuation,
     String? valuationCurrency,
     required DateTime syncedAt,
@@ -47,6 +55,11 @@ abstract class SolanaWalletSyncResult
       insertedTransactions: jsonSerialization['insertedTransactions'] as int,
       updatedTransactions: jsonSerialization['updatedTransactions'] as int,
       holdingCount: jsonSerialization['holdingCount'] as int,
+      pricedHoldingCount: jsonSerialization['pricedHoldingCount'] as int,
+      staleHoldingCount: jsonSerialization['staleHoldingCount'] as int,
+      unpricedHoldingCount: jsonSerialization['unpricedHoldingCount'] as int,
+      valuationCoverageRatio:
+          (jsonSerialization['valuationCoverageRatio'] as num?)?.toDouble(),
       totalValuation: (jsonSerialization['totalValuation'] as num?)?.toDouble(),
       valuationCurrency: jsonSerialization['valuationCurrency'] as String?,
       syncedAt: _i1.DateTimeJsonExtension.fromJson(
@@ -64,6 +77,14 @@ abstract class SolanaWalletSyncResult
 
   int holdingCount;
 
+  int pricedHoldingCount;
+
+  int staleHoldingCount;
+
+  int unpricedHoldingCount;
+
+  double? valuationCoverageRatio;
+
   double? totalValuation;
 
   String? valuationCurrency;
@@ -80,6 +101,10 @@ abstract class SolanaWalletSyncResult
     int? insertedTransactions,
     int? updatedTransactions,
     int? holdingCount,
+    int? pricedHoldingCount,
+    int? staleHoldingCount,
+    int? unpricedHoldingCount,
+    double? valuationCoverageRatio,
     double? totalValuation,
     String? valuationCurrency,
     DateTime? syncedAt,
@@ -93,6 +118,11 @@ abstract class SolanaWalletSyncResult
       'insertedTransactions': insertedTransactions,
       'updatedTransactions': updatedTransactions,
       'holdingCount': holdingCount,
+      'pricedHoldingCount': pricedHoldingCount,
+      'staleHoldingCount': staleHoldingCount,
+      'unpricedHoldingCount': unpricedHoldingCount,
+      if (valuationCoverageRatio != null)
+        'valuationCoverageRatio': valuationCoverageRatio,
       if (totalValuation != null) 'totalValuation': totalValuation,
       if (valuationCurrency != null) 'valuationCurrency': valuationCurrency,
       'syncedAt': syncedAt.toJson(),
@@ -108,6 +138,11 @@ abstract class SolanaWalletSyncResult
       'insertedTransactions': insertedTransactions,
       'updatedTransactions': updatedTransactions,
       'holdingCount': holdingCount,
+      'pricedHoldingCount': pricedHoldingCount,
+      'staleHoldingCount': staleHoldingCount,
+      'unpricedHoldingCount': unpricedHoldingCount,
+      if (valuationCoverageRatio != null)
+        'valuationCoverageRatio': valuationCoverageRatio,
       if (totalValuation != null) 'totalValuation': totalValuation,
       if (valuationCurrency != null) 'valuationCurrency': valuationCurrency,
       'syncedAt': syncedAt.toJson(),
@@ -129,6 +164,10 @@ class _SolanaWalletSyncResultImpl extends SolanaWalletSyncResult {
     required int insertedTransactions,
     required int updatedTransactions,
     required int holdingCount,
+    required int pricedHoldingCount,
+    required int staleHoldingCount,
+    required int unpricedHoldingCount,
+    double? valuationCoverageRatio,
     double? totalValuation,
     String? valuationCurrency,
     required DateTime syncedAt,
@@ -138,6 +177,10 @@ class _SolanaWalletSyncResultImpl extends SolanaWalletSyncResult {
          insertedTransactions: insertedTransactions,
          updatedTransactions: updatedTransactions,
          holdingCount: holdingCount,
+         pricedHoldingCount: pricedHoldingCount,
+         staleHoldingCount: staleHoldingCount,
+         unpricedHoldingCount: unpricedHoldingCount,
+         valuationCoverageRatio: valuationCoverageRatio,
          totalValuation: totalValuation,
          valuationCurrency: valuationCurrency,
          syncedAt: syncedAt,
@@ -153,6 +196,10 @@ class _SolanaWalletSyncResultImpl extends SolanaWalletSyncResult {
     int? insertedTransactions,
     int? updatedTransactions,
     int? holdingCount,
+    int? pricedHoldingCount,
+    int? staleHoldingCount,
+    int? unpricedHoldingCount,
+    Object? valuationCoverageRatio = _Undefined,
     Object? totalValuation = _Undefined,
     Object? valuationCurrency = _Undefined,
     DateTime? syncedAt,
@@ -163,6 +210,12 @@ class _SolanaWalletSyncResultImpl extends SolanaWalletSyncResult {
       insertedTransactions: insertedTransactions ?? this.insertedTransactions,
       updatedTransactions: updatedTransactions ?? this.updatedTransactions,
       holdingCount: holdingCount ?? this.holdingCount,
+      pricedHoldingCount: pricedHoldingCount ?? this.pricedHoldingCount,
+      staleHoldingCount: staleHoldingCount ?? this.staleHoldingCount,
+      unpricedHoldingCount: unpricedHoldingCount ?? this.unpricedHoldingCount,
+      valuationCoverageRatio: valuationCoverageRatio is double?
+          ? valuationCoverageRatio
+          : this.valuationCoverageRatio,
       totalValuation: totalValuation is double?
           ? totalValuation
           : this.totalValuation,
