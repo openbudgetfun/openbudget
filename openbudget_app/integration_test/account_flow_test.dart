@@ -115,6 +115,8 @@ class _FakeAccountActions extends AccountActions {
     required String budgetId,
     required bool onBudget,
     required int sortOrder,
+    String? walletAddress,
+    String walletCluster = 'mainnet',
   }) async {
     return Account(
       id: UuidValue.fromString('00000000-0000-0000-0000-000000000777'),

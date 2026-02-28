@@ -429,6 +429,7 @@ class _AccountTile extends HookWidget {
       'creditCard' => Icons.credit_card_rounded,
       'cash' => Icons.money_rounded,
       'investment' => Icons.trending_up_rounded,
+      'cryptoWallet' => Icons.currency_bitcoin_rounded,
       _ => Icons.account_balance_wallet_rounded,
     };
   }
@@ -440,6 +441,7 @@ class _AccountTile extends HookWidget {
       'creditCard' => 'Credit Card',
       'cash' => 'Cash',
       'investment' => 'Investment',
+      'cryptoWallet' => 'Solana Wallet',
       _ => 'Other',
     };
   }

@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -6,6 +9,7 @@ import 'package:intl/intl.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_transactions_provider.dart';
+import 'package:openbudget_app/src/features/accounts/providers/solana_wallet_provider.dart';
 import 'package:openbudget_app/src/features/accounts/screens/edit_account_dialog.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
 import 'package:openbudget_app/src/features/payees/providers/payee_list_provider.dart';
@@ -63,6 +67,7 @@ class AccountDetailScreen extends HookConsumerWidget {
         : CurrencyCode.usd;
     final isLoanAccount =
         accountData != null && _isLoanStyleAccount(accountData);
+    final isSolanaWalletAccount = accountData?.accountType == 'cryptoWallet';
     final unclearedCount = txnAsync.whenOrNull(
       data: (txns) => txns.where((t) => !t.cleared && !t.reconciled).length,
     );
@@ -186,6 +191,12 @@ class AccountDetailScreen extends HookConsumerWidget {
                 selectedTab: loanDetailTab.value,
                 onTabChanged: (tab) => loanDetailTab.value = tab,
               ),
+            )
+          : isSolanaWalletAccount
+          ? _SolanaWalletAccountBody(
+              budgetId: budgetId,
+              accountId: accountId,
+              account: accountData,
             )
           : Column(
               children: [
@@ -1456,6 +1467,1093 @@ class _LoanActivityRow extends StatelessWidget {
       ),
     );
   }
+}
+
+class _SolanaWalletAccountBody extends HookConsumerWidget {
+  const _SolanaWalletAccountBody({
+    required this.budgetId,
+    required this.accountId,
+    required this.account,
+  });
+
+  final String budgetId;
+  final String accountId;
+  final Account? account;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isSyncing = useState(false);
+
+    if (account == null) {
+      return const Center(child: Text('Account not found.'));
+    }
+
+    final walletAsync = ref.watch(
+      accountSolanaWalletProvider(budgetId, accountId),
+    );
+    return walletAsync.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, _) => Center(
+        child: Text(
+          'Failed to load wallet metadata.',
+          style: theme.textTheme.bodyLarge?.copyWith(
+            color: theme.colorScheme.error,
+          ),
+        ),
+      ),
+      data: (wallet) {
+        if (wallet == null || wallet.id == null) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(SpacingTokens.lg),
+              child: Text(
+                'No Solana wallet is attached to this account yet.',
+                style: theme.textTheme.bodyLarge,
+                textAlign: TextAlign.center,
+              ),
+            ),
+          );
+        }
+
+        final walletId = wallet.id!.toString();
+        final holdingsAsync = ref.watch(
+          solanaWalletHoldingsProvider(budgetId, walletId),
+        );
+        final transactionsAsync = ref.watch(
+          solanaWalletTransactionsProvider(budgetId, walletId),
+        );
+        final snapshot = _SolanaWalletSnapshot.from(
+          holdings: holdingsAsync.asData?.value ?? const [],
+          transactions: transactionsAsync.asData?.value ?? const [],
+        );
+
+        Future<void> runSync() async {
+          if (isSyncing.value) return;
+          isSyncing.value = true;
+          final messenger = ScaffoldMessenger.of(context);
+          try {
+            final result = await ref
+                .read(solanaWalletActionsProvider.notifier)
+                .syncWallet(budgetId: budgetId, walletId: walletId);
+            if (!context.mounted) return;
+            messenger.showSnackBar(
+              SnackBar(
+                content: Text(
+                  'Synced ${result.insertedTransactions + result.updatedTransactions}'
+                  ' transactions and ${result.holdingCount} holdings.',
+                ),
+              ),
+            );
+          } on Exception catch (_) {
+            if (!context.mounted) return;
+            messenger.showSnackBar(
+              SnackBar(
+                content: const Text('Wallet sync failed. Check server logs.'),
+                backgroundColor: theme.colorScheme.error,
+              ),
+            );
+          } finally {
+            if (context.mounted) {
+              isSyncing.value = false;
+            }
+          }
+        }
+
+        final statusLabel = _toLabel(wallet.syncStatus);
+        final statusColor = _statusColor(wallet.syncStatus, colorScheme);
+
+        return RefreshIndicator(
+          onRefresh: runSync,
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.fromLTRB(
+              SpacingTokens.md,
+              SpacingTokens.sm,
+              SpacingTokens.md,
+              SpacingTokens.xl,
+            ),
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      colorScheme.primaryContainer,
+                      colorScheme.tertiaryContainer,
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(RadiusTokens.lg),
+                  border: Border.all(color: colorScheme.outlineVariant),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(SpacingTokens.md),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(SpacingTokens.sm),
+                            decoration: BoxDecoration(
+                              color: colorScheme.surface.withAlpha(200),
+                              borderRadius: BorderRadius.circular(
+                                RadiusTokens.md,
+                              ),
+                            ),
+                            child: Icon(
+                              Icons.account_balance_wallet_rounded,
+                              color: colorScheme.primary,
+                            ),
+                          ),
+                          const SizedBox(width: SpacingTokens.sm),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  wallet.label ?? account!.name,
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                                const SizedBox(height: SpacingTokens.xs),
+                                Text(
+                                  _shortAddress(wallet.address),
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: colorScheme.onSurfaceVariant,
+                                    fontFamily: 'monospace',
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          FilledButton.tonalIcon(
+                            onPressed: isSyncing.value ? null : runSync,
+                            icon: isSyncing.value
+                                ? const SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : const Icon(Icons.sync_rounded),
+                            label: Text(isSyncing.value ? 'Syncing' : 'Sync'),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: SpacingTokens.sm),
+                      Wrap(
+                        spacing: SpacingTokens.xs,
+                        runSpacing: SpacingTokens.xs,
+                        children: [
+                          _MetadataChip(
+                            icon: Icons.hub_outlined,
+                            label: _toLabel(wallet.cluster),
+                          ),
+                          _MetadataChip(
+                            icon: Icons.check_circle_outline_rounded,
+                            label: statusLabel,
+                            color: statusColor.withAlpha(35),
+                            foregroundColor: statusColor,
+                          ),
+                          if (wallet.lastSyncedAt != null)
+                            _MetadataChip(
+                              icon: Icons.schedule_rounded,
+                              label: DateFormat.yMMMd().add_jm().format(
+                                wallet.lastSyncedAt!,
+                              ),
+                            ),
+                          _MetadataChip(
+                            icon: Icons.account_tree_outlined,
+                            label: '${snapshot.transactions} tx',
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: SpacingTokens.md),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Estimated Value',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                                const SizedBox(height: SpacingTokens.xs),
+                                Text(
+                                  _formatUsd(snapshot.totalValueUsd),
+                                  style: theme.textTheme.headlineSmall
+                                      ?.copyWith(fontWeight: FontWeight.w800),
+                                ),
+                              ],
+                            ),
+                          ),
+                          OutlinedButton.icon(
+                            onPressed: () async {
+                              await Clipboard.setData(
+                                ClipboardData(text: wallet.address),
+                              );
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Wallet address copied.'),
+                                  ),
+                                );
+                              }
+                            },
+                            icon: const Icon(Icons.copy_rounded),
+                            label: const Text('Copy'),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: SpacingTokens.md),
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  const gap = SpacingTokens.sm;
+                  final isWide = constraints.maxWidth >= 700;
+                  if (isWide) {
+                    final cardWidth = (constraints.maxWidth - gap) / 2;
+                    return Wrap(
+                      spacing: gap,
+                      runSpacing: gap,
+                      children: [
+                        SizedBox(
+                          width: cardWidth,
+                          child: _WalletMetricCard(
+                            label: 'Fungible Assets',
+                            value: snapshot.fungibleAssets.toString(),
+                            icon: Icons.scatter_plot_outlined,
+                          ),
+                        ),
+                        SizedBox(
+                          width: cardWidth,
+                          child: _WalletMetricCard(
+                            label: 'NFT Assets',
+                            value: snapshot.nftAssets.toString(),
+                            icon: Icons.image_outlined,
+                          ),
+                        ),
+                        SizedBox(
+                          width: cardWidth,
+                          child: _WalletMetricCard(
+                            label: 'Tagged Transactions',
+                            value: snapshot.taggedTransactions.toString(),
+                            icon: Icons.label_outline_rounded,
+                          ),
+                        ),
+                        SizedBox(
+                          width: cardWidth,
+                          child: _WalletMetricCard(
+                            label: 'Last Activity',
+                            value: snapshot.lastActivity == null
+                                ? 'No activity'
+                                : DateFormat.yMMMd().format(
+                                    snapshot.lastActivity!,
+                                  ),
+                            icon: Icons.history_rounded,
+                          ),
+                        ),
+                      ],
+                    );
+                  }
+
+                  return Column(
+                    children: [
+                      _WalletMetricCard(
+                        label: 'Fungible Assets',
+                        value: snapshot.fungibleAssets.toString(),
+                        icon: Icons.scatter_plot_outlined,
+                      ),
+                      const SizedBox(height: gap),
+                      _WalletMetricCard(
+                        label: 'NFT Assets',
+                        value: snapshot.nftAssets.toString(),
+                        icon: Icons.image_outlined,
+                      ),
+                      const SizedBox(height: gap),
+                      _WalletMetricCard(
+                        label: 'Tagged Transactions',
+                        value: snapshot.taggedTransactions.toString(),
+                        icon: Icons.label_outline_rounded,
+                      ),
+                      const SizedBox(height: gap),
+                      _WalletMetricCard(
+                        label: 'Last Activity',
+                        value: snapshot.lastActivity == null
+                            ? 'No activity'
+                            : DateFormat.yMMMd().format(snapshot.lastActivity!),
+                        icon: Icons.history_rounded,
+                      ),
+                    ],
+                  );
+                },
+              ),
+              const SizedBox(height: SpacingTokens.md),
+              Row(
+                children: [
+                  Text(
+                    'Holdings',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(width: SpacingTokens.xs),
+                  Text(
+                    '(${snapshot.holdings})',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: SpacingTokens.xs),
+              Text(
+                'Token balances with current valuation and detected programs.',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: SpacingTokens.sm),
+              holdingsAsync.when(
+                loading: () => const Padding(
+                  padding: EdgeInsets.all(SpacingTokens.md),
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+                error: (error, _) => Text(
+                  'Failed to load holdings.',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.error,
+                  ),
+                ),
+                data: (holdings) {
+                  if (holdings.isEmpty) {
+                    return const _EmptyStateCard(
+                      title: 'No holdings found',
+                      subtitle:
+                          'Run a sync to fetch tokens and NFTs for this wallet.',
+                      icon: Icons.inventory_2_outlined,
+                    );
+                  }
+                  final sortedHoldings = [...holdings]
+                    ..sort(
+                      (a, b) =>
+                          (b.totalValue ?? 0).compareTo(a.totalValue ?? 0),
+                    );
+                  return Column(
+                    children: [
+                      for (final holding in sortedHoldings)
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            bottom: SpacingTokens.sm,
+                          ),
+                          child: _HoldingCard(holding: holding),
+                        ),
+                    ],
+                  );
+                },
+              ),
+              const SizedBox(height: SpacingTokens.lg),
+              Row(
+                children: [
+                  Text(
+                    'Transaction History',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(width: SpacingTokens.xs),
+                  Text(
+                    '(${snapshot.transactions})',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: SpacingTokens.xs),
+              Text(
+                'Parsed activity with program context and editable labels.',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: SpacingTokens.sm),
+              transactionsAsync.when(
+                loading: () => const Padding(
+                  padding: EdgeInsets.all(SpacingTokens.md),
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+                error: (error, _) => Text(
+                  'Failed to load transactions.',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.error,
+                  ),
+                ),
+                data: (transactions) {
+                  if (transactions.isEmpty) {
+                    return const _EmptyStateCard(
+                      title: 'No transactions yet',
+                      subtitle:
+                          'Run a sync to import transaction history from the wallet.',
+                      icon: Icons.receipt_long_outlined,
+                    );
+                  }
+                  final sortedTransactions = [...transactions]
+                    ..sort((a, b) {
+                      final aTime =
+                          a.occurredAt ??
+                          DateTime.fromMillisecondsSinceEpoch(0);
+                      final bTime =
+                          b.occurredAt ??
+                          DateTime.fromMillisecondsSinceEpoch(0);
+                      return bTime.compareTo(aTime);
+                    });
+                  return Column(
+                    children: [
+                      for (final tx in sortedTransactions)
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            bottom: SpacingTokens.sm,
+                          ),
+                          child: _TransactionCard(
+                            transaction: tx,
+                            onEdit: () => _editTransactionMetadata(
+                              context,
+                              ref,
+                              budgetId: budgetId,
+                              walletId: walletId,
+                              transaction: tx,
+                            ),
+                          ),
+                        ),
+                    ],
+                  );
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _editTransactionMetadata(
+    BuildContext context,
+    WidgetRef ref, {
+    required String budgetId,
+    required String walletId,
+    required SolanaWalletTransaction transaction,
+  }) async {
+    if (transaction.id == null) return;
+    final categoryController = TextEditingController(
+      text: transaction.category,
+    );
+    final tagsController = TextEditingController(text: transaction.tagsCsv);
+    final memoController = TextEditingController(text: transaction.memo);
+
+    final didSave = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Edit Transaction Metadata'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: categoryController,
+                decoration: const InputDecoration(labelText: 'Category'),
+              ),
+              const SizedBox(height: SpacingTokens.sm),
+              TextField(
+                controller: tagsController,
+                decoration: const InputDecoration(
+                  labelText: 'Tags (comma separated)',
+                ),
+              ),
+              const SizedBox(height: SpacingTokens.sm),
+              TextField(
+                controller: memoController,
+                maxLines: 3,
+                decoration: const InputDecoration(labelText: 'Memo'),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+
+    if (didSave != true) return;
+
+    try {
+      await ref
+          .read(solanaWalletActionsProvider.notifier)
+          .updateTransactionMetadata(
+            budgetId: budgetId,
+            transactionId: transaction.id!.toString(),
+            walletId: walletId,
+            category: _emptyToNull(categoryController.text),
+            tagsCsv: _emptyToNull(tagsController.text),
+            memo: _emptyToNull(memoController.text),
+          );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Transaction metadata updated.')),
+        );
+      }
+    } on Exception catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Could not update transaction metadata.'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    } finally {
+      categoryController.dispose();
+      tagsController.dispose();
+      memoController.dispose();
+    }
+  }
+
+  static String? _emptyToNull(String value) {
+    final text = value.trim();
+    return text.isEmpty ? null : text;
+  }
+
+  static String _shortAddress(String address) {
+    if (address.length <= 16) return address;
+    return '${address.substring(0, 6)}...${address.substring(address.length - 6)}';
+  }
+
+  static String _toLabel(String value) {
+    final normalized = value.trim();
+    if (normalized.isEmpty) return 'Unknown';
+    return normalized
+        .split(RegExp(r'[_\s]+'))
+        .where((segment) => segment.isNotEmpty)
+        .map(
+          (segment) =>
+              '${segment[0].toUpperCase()}${segment.substring(1).toLowerCase()}',
+        )
+        .join(' ');
+  }
+
+  static String _formatUsd(double amount) {
+    if (amount == 0) return r'$0.00';
+    final decimals = amount.abs() >= 1000 ? 0 : 2;
+    return NumberFormat.currency(
+      locale: 'en_US',
+      symbol: r'$',
+      decimalDigits: decimals,
+    ).format(amount);
+  }
+
+  static Color _statusColor(String status, ColorScheme colorScheme) {
+    switch (status.toLowerCase()) {
+      case 'success':
+        return OpenBudgetPalette.progressGreen;
+      case 'error':
+        return colorScheme.error;
+      case 'pending':
+        return colorScheme.tertiary;
+      default:
+        return colorScheme.onSurfaceVariant;
+    }
+  }
+}
+
+class _SolanaWalletSnapshot {
+  const _SolanaWalletSnapshot({
+    required this.totalValueUsd,
+    required this.holdings,
+    required this.fungibleAssets,
+    required this.nftAssets,
+    required this.transactions,
+    required this.taggedTransactions,
+    required this.lastActivity,
+  });
+
+  factory _SolanaWalletSnapshot.from({
+    required List<SolanaWalletHolding> holdings,
+    required List<SolanaWalletTransaction> transactions,
+  }) {
+    final totalValueUsd = holdings.fold<double>(
+      0,
+      (total, holding) => total + (holding.totalValue ?? 0),
+    );
+    final nftAssets = holdings.where((holding) => holding.isNft).length;
+    final fungibleAssets = holdings.length - nftAssets;
+    final taggedTransactions = transactions.where((transaction) {
+      final hasCategory = transaction.category?.trim().isNotEmpty ?? false;
+      final hasTags = transaction.tagsCsv?.trim().isNotEmpty ?? false;
+      return hasCategory || hasTags;
+    }).length;
+    DateTime? lastActivity;
+    for (final transaction in transactions) {
+      final occurredAt = transaction.occurredAt;
+      if (occurredAt == null) continue;
+      if (lastActivity == null || occurredAt.isAfter(lastActivity)) {
+        lastActivity = occurredAt;
+      }
+    }
+    return _SolanaWalletSnapshot(
+      totalValueUsd: totalValueUsd,
+      holdings: holdings.length,
+      fungibleAssets: fungibleAssets,
+      nftAssets: nftAssets,
+      transactions: transactions.length,
+      taggedTransactions: taggedTransactions,
+      lastActivity: lastActivity,
+    );
+  }
+
+  final double totalValueUsd;
+  final int holdings;
+  final int fungibleAssets;
+  final int nftAssets;
+  final int transactions;
+  final int taggedTransactions;
+  final DateTime? lastActivity;
+}
+
+class _WalletMetricCard extends StatelessWidget {
+  const _WalletMetricCard({
+    required this.label,
+    required this.value,
+    required this.icon,
+  });
+
+  final String label;
+  final String value;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.all(SpacingTokens.md),
+      decoration: BoxDecoration(
+        color: OpenBudgetPalette.surfaceFor(theme),
+        borderRadius: BorderRadius.circular(RadiusTokens.md),
+        border: Border.all(color: OpenBudgetPalette.dividerFor(theme)),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, size: 20, color: colorScheme.primary),
+          const SizedBox(width: SpacingTokens.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: SpacingTokens.xs),
+                Text(
+                  value,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HoldingCard extends StatelessWidget {
+  const _HoldingCard({required this.holding});
+
+  final SolanaWalletHolding holding;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final title = holding.symbol ?? holding.name ?? holding.assetId;
+    final valueText = holding.totalValue == null
+        ? '-'
+        : NumberFormat.currency(
+            locale: 'en_US',
+            symbol: r'$',
+            decimalDigits: holding.totalValue!.abs() >= 1000 ? 0 : 2,
+          ).format(holding.totalValue);
+
+    return Card(
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.all(SpacingTokens.md),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: colorScheme.primaryContainer,
+                borderRadius: BorderRadius.circular(RadiusTokens.sm),
+              ),
+              child: Icon(
+                holding.isNft ? Icons.image_outlined : Icons.token_rounded,
+                color: colorScheme.onPrimaryContainer,
+              ),
+            ),
+            const SizedBox(width: SpacingTokens.sm),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: SpacingTokens.xs),
+                  Text(
+                    '${holding.balanceUi} units',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: SpacingTokens.xs),
+                  Wrap(
+                    spacing: SpacingTokens.xs,
+                    runSpacing: SpacingTokens.xs,
+                    children: [
+                      if (holding.isNft)
+                        const _MetadataChip(
+                          icon: Icons.image_outlined,
+                          label: 'NFT',
+                        ),
+                      _MetadataChip(
+                        icon: Icons.account_tree_outlined,
+                        label: _programLabel(holding.tokenProgram),
+                      ),
+                      if (holding.priceSource != null &&
+                          holding.priceSource!.trim().isNotEmpty)
+                        _MetadataChip(
+                          icon: Icons.price_change_outlined,
+                          label: _SolanaWalletAccountBody._toLabel(
+                            holding.priceSource!,
+                          ),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: SpacingTokens.sm),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  valueText,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                if (holding.pricePerToken != null)
+                  Text(
+                    '@ ${NumberFormat.currency(symbol: r'$').format(holding.pricePerToken)}',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TransactionCard extends StatelessWidget {
+  const _TransactionCard({required this.transaction, required this.onEdit});
+
+  final SolanaWalletTransaction transaction;
+  final VoidCallback onEdit;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final tags = _parseTags(transaction.tagsCsv);
+    final programs = _parsePrograms(
+      transaction.programsJson,
+    ).map(_programLabel).toSet().toList();
+    final occurredText = transaction.occurredAt == null
+        ? null
+        : DateFormat.yMMMd().add_jm().format(transaction.occurredAt!);
+
+    return Card(
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.all(SpacingTokens.md),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 34,
+                  height: 34,
+                  decoration: BoxDecoration(
+                    color: colorScheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(RadiusTokens.sm),
+                  ),
+                  child: Icon(
+                    _transactionIcon(transaction.txType),
+                    size: 18,
+                    color: colorScheme.primary,
+                  ),
+                ),
+                const SizedBox(width: SpacingTokens.sm),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        transaction.description,
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      if (occurredText != null)
+                        Padding(
+                          padding: const EdgeInsets.only(top: SpacingTokens.xs),
+                          child: Text(
+                            occurredText,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.edit_note_rounded),
+                  tooltip: 'Edit metadata',
+                  onPressed: onEdit,
+                ),
+              ],
+            ),
+            const SizedBox(height: SpacingTokens.sm),
+            Wrap(
+              spacing: SpacingTokens.xs,
+              runSpacing: SpacingTokens.xs,
+              children: [
+                _MetadataChip(
+                  icon: Icons.category_outlined,
+                  label: _SolanaWalletAccountBody._toLabel(transaction.txType),
+                ),
+                _MetadataChip(
+                  icon: Icons.hub_outlined,
+                  label: _SolanaWalletAccountBody._toLabel(transaction.source),
+                ),
+                for (final program in programs.take(4))
+                  _MetadataChip(icon: Icons.extension_outlined, label: program),
+                if (transaction.category?.trim().isNotEmpty ?? false)
+                  _MetadataChip(
+                    icon: Icons.folder_open_rounded,
+                    label: transaction.category!.trim(),
+                  ),
+                for (final tag in tags.take(4))
+                  _MetadataChip(icon: Icons.tag_rounded, label: tag),
+              ],
+            ),
+            if (transaction.memo?.trim().isNotEmpty ?? false) ...[
+              const SizedBox(height: SpacingTokens.sm),
+              Text(
+                transaction.memo!.trim(),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  static IconData _transactionIcon(String txType) {
+    final normalized = txType.toLowerCase();
+    if (normalized.contains('swap')) return Icons.swap_horiz_rounded;
+    if (normalized.contains('nft')) return Icons.image_outlined;
+    if (normalized.contains('stake')) return Icons.lock_clock_rounded;
+    if (normalized.contains('transfer')) return Icons.compare_arrows_rounded;
+    return Icons.receipt_long_outlined;
+  }
+}
+
+class _MetadataChip extends StatelessWidget {
+  const _MetadataChip({
+    required this.icon,
+    required this.label,
+    this.color,
+    this.foregroundColor,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color? color;
+  final Color? foregroundColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final backgroundColor =
+        color ?? theme.colorScheme.surfaceContainerHighest.withAlpha(180);
+    final textColor = foregroundColor ?? theme.colorScheme.onSurfaceVariant;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: SpacingTokens.xs,
+        vertical: 4,
+      ),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(RadiusTokens.xl),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 13, color: textColor),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: textColor,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _EmptyStateCard extends StatelessWidget {
+  const _EmptyStateCard({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+  });
+
+  final String title;
+  final String subtitle;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    return Card(
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.all(SpacingTokens.lg),
+        child: Column(
+          children: [
+            Icon(icon, size: 28, color: colorScheme.outline),
+            const SizedBox(height: SpacingTokens.sm),
+            Text(
+              title,
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: SpacingTokens.xs),
+            Text(
+              subtitle,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+String _programLabel(String? id) {
+  if (id == null || id.trim().isEmpty) {
+    return 'Unknown program';
+  }
+  final value = id.trim();
+  if (value.startsWith('TokenkegQfe')) return 'SPL Token';
+  if (value.startsWith('TokenzQd')) return 'Token-2022';
+  if (value == '11111111111111111111111111111111') return 'System Program';
+  if (value.startsWith('AToken')) return 'Associated Token';
+  if (value.toLowerCase().contains('jupiter') || value.startsWith('JUP')) {
+    return 'Jupiter';
+  }
+  if (value.toLowerCase().contains('pump')) return 'Pump.fun';
+  if (value.length <= 12) return value;
+  return '${value.substring(0, 6)}...${value.substring(value.length - 4)}';
+}
+
+List<String> _parsePrograms(String? programsJson) {
+  if (programsJson == null || programsJson.trim().isEmpty) {
+    return const [];
+  }
+  try {
+    final decoded = jsonDecode(programsJson);
+    if (decoded is List) {
+      return decoded.whereType<String>().toList(growable: false);
+    }
+  } on FormatException {
+    return const [];
+  }
+  return const [];
+}
+
+List<String> _parseTags(String? tagsCsv) {
+  if (tagsCsv == null || tagsCsv.trim().isEmpty) {
+    return const [];
+  }
+  return tagsCsv
+      .split(',')
+      .map((tag) => tag.trim())
+      .where((tag) => tag.isNotEmpty)
+      .toList(growable: false);
 }
 
 int _pow10Int(int exponent) {

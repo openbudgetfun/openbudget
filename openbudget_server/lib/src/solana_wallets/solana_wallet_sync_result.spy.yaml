@@ -1,0 +1,11 @@
+### Sync response payload for Solana wallet refreshes.
+class: SolanaWalletSyncResult
+fields:
+  walletId: UuidValue
+  insertedTransactions: int
+  updatedTransactions: int
+  holdingCount: int
+  totalValuation: double?
+  valuationCurrency: String?
+  syncedAt: DateTime
+  warnings: String?

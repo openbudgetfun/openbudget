@@ -1,0 +1,31 @@
+### A Solana wallet linked to an OpenBudget account.
+class: SolanaWallet
+table: solana_wallet
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  accountId: UuidValue, relation(parent=account)
+  budgetId: UuidValue, relation(parent=budget)
+  ### Solana wallet address (base58).
+  address: String
+  ### Optional wallet label shown in the UI.
+  label: String?
+  ### Solana cluster: mainnet or devnet.
+  cluster: String
+  ### Last processed signature for incremental syncing.
+  lastSignature: String?
+  ### Last successful sync timestamp.
+  lastSyncedAt: DateTime?
+  ### Current sync status: pending, success, error.
+  syncStatus: String
+  ### Last sync error, if any.
+  lastSyncError: String?
+  createdAt: DateTime, default=now
+  updatedAt: DateTime, default=now
+indexes:
+  solana_wallet_account_unique:
+    fields: accountId
+    unique: true
+  solana_wallet_budget_idx:
+    fields: budgetId
+  solana_wallet_address_idx:
+    fields: address

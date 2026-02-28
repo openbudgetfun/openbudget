@@ -39,6 +39,7 @@ class EditAccountDialog extends HookConsumerWidget {
       'creditCard',
       'cash',
       'investment',
+      'cryptoWallet',
       'other',
     ];
     final selectedType = useState(account.accountType);
@@ -59,6 +60,7 @@ class EditAccountDialog extends HookConsumerWidget {
       'creditCard' => l10n.accountTypeCreditCard,
       'cash' => l10n.accountTypeCash,
       'investment' => l10n.accountTypeInvestment,
+      'cryptoWallet' => 'Solana Wallet',
       _ => l10n.accountTypeOther,
     };
 
