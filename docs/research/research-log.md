@@ -608,3 +608,33 @@
 
 - Captured additional iOS simulator screenshot in this cycle:
   - `docs/research/screenshots/2026-02-28/ios-flavor-parity-dev-login.png`
+
+## 2026-02-28 - NFT Coverage Metrics in Sync Response (Issue #164 Continuation)
+
+### Backend Progress
+
+- Extended `SolanaWalletSyncResult` protocol payload with NFT-specific coverage fields:
+  - `nftHoldingCount`
+  - `pricedNftHoldingCount`
+  - `staleNftHoldingCount`
+  - `unpricedNftHoldingCount`
+- Updated holdings sync aggregation in `SolanaWalletService` to track NFT coverage counts alongside overall coverage counts.
+- Regenerated Serverpod protocol/client artifacts after schema update.
+
+### App Progress
+
+- Updated Solana wallet sync snackbar copy to include NFT coverage/unpriced counts from the sync response.
+
+### Validation Completed
+
+- `serverpod generate` completed successfully.
+- `dart analyze openbudget_app openbudget_server openbudget_client` returned no issues.
+- `flutter test openbudget_app/test/features/accounts/screens/account_detail_screen_test.dart` passed.
+- `dart test` unit slices passed:
+  - `openbudget_server/test/unit/solana_wallets/jupiter_price_client_test.dart`
+  - `openbudget_server/test/unit/solana_wallets/solana_transaction_interpreter_test.dart`
+
+### Mobile Evidence
+
+- Captured additional Android screenshot in this cycle:
+  - `docs/research/screenshots/2026-02-28/nft-coverage-metrics-cycle-login.png`

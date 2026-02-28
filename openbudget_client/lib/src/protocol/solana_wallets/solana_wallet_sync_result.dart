@@ -22,6 +22,10 @@ abstract class SolanaWalletSyncResult implements _i1.SerializableModel {
     required this.pricedHoldingCount,
     required this.staleHoldingCount,
     required this.unpricedHoldingCount,
+    required this.nftHoldingCount,
+    required this.pricedNftHoldingCount,
+    required this.staleNftHoldingCount,
+    required this.unpricedNftHoldingCount,
     this.valuationCoverageRatio,
     this.totalValuation,
     this.valuationCurrency,
@@ -37,6 +41,10 @@ abstract class SolanaWalletSyncResult implements _i1.SerializableModel {
     required int pricedHoldingCount,
     required int staleHoldingCount,
     required int unpricedHoldingCount,
+    required int nftHoldingCount,
+    required int pricedNftHoldingCount,
+    required int staleNftHoldingCount,
+    required int unpricedNftHoldingCount,
     double? valuationCoverageRatio,
     double? totalValuation,
     String? valuationCurrency,
@@ -57,6 +65,11 @@ abstract class SolanaWalletSyncResult implements _i1.SerializableModel {
       pricedHoldingCount: jsonSerialization['pricedHoldingCount'] as int,
       staleHoldingCount: jsonSerialization['staleHoldingCount'] as int,
       unpricedHoldingCount: jsonSerialization['unpricedHoldingCount'] as int,
+      nftHoldingCount: jsonSerialization['nftHoldingCount'] as int,
+      pricedNftHoldingCount: jsonSerialization['pricedNftHoldingCount'] as int,
+      staleNftHoldingCount: jsonSerialization['staleNftHoldingCount'] as int,
+      unpricedNftHoldingCount:
+          jsonSerialization['unpricedNftHoldingCount'] as int,
       valuationCoverageRatio:
           (jsonSerialization['valuationCoverageRatio'] as num?)?.toDouble(),
       totalValuation: (jsonSerialization['totalValuation'] as num?)?.toDouble(),
@@ -82,6 +95,14 @@ abstract class SolanaWalletSyncResult implements _i1.SerializableModel {
 
   int unpricedHoldingCount;
 
+  int nftHoldingCount;
+
+  int pricedNftHoldingCount;
+
+  int staleNftHoldingCount;
+
+  int unpricedNftHoldingCount;
+
   double? valuationCoverageRatio;
 
   double? totalValuation;
@@ -103,6 +124,10 @@ abstract class SolanaWalletSyncResult implements _i1.SerializableModel {
     int? pricedHoldingCount,
     int? staleHoldingCount,
     int? unpricedHoldingCount,
+    int? nftHoldingCount,
+    int? pricedNftHoldingCount,
+    int? staleNftHoldingCount,
+    int? unpricedNftHoldingCount,
     double? valuationCoverageRatio,
     double? totalValuation,
     String? valuationCurrency,
@@ -120,6 +145,10 @@ abstract class SolanaWalletSyncResult implements _i1.SerializableModel {
       'pricedHoldingCount': pricedHoldingCount,
       'staleHoldingCount': staleHoldingCount,
       'unpricedHoldingCount': unpricedHoldingCount,
+      'nftHoldingCount': nftHoldingCount,
+      'pricedNftHoldingCount': pricedNftHoldingCount,
+      'staleNftHoldingCount': staleNftHoldingCount,
+      'unpricedNftHoldingCount': unpricedNftHoldingCount,
       if (valuationCoverageRatio != null)
         'valuationCoverageRatio': valuationCoverageRatio,
       if (totalValuation != null) 'totalValuation': totalValuation,
@@ -146,6 +175,10 @@ class _SolanaWalletSyncResultImpl extends SolanaWalletSyncResult {
     required int pricedHoldingCount,
     required int staleHoldingCount,
     required int unpricedHoldingCount,
+    required int nftHoldingCount,
+    required int pricedNftHoldingCount,
+    required int staleNftHoldingCount,
+    required int unpricedNftHoldingCount,
     double? valuationCoverageRatio,
     double? totalValuation,
     String? valuationCurrency,
@@ -159,6 +192,10 @@ class _SolanaWalletSyncResultImpl extends SolanaWalletSyncResult {
          pricedHoldingCount: pricedHoldingCount,
          staleHoldingCount: staleHoldingCount,
          unpricedHoldingCount: unpricedHoldingCount,
+         nftHoldingCount: nftHoldingCount,
+         pricedNftHoldingCount: pricedNftHoldingCount,
+         staleNftHoldingCount: staleNftHoldingCount,
+         unpricedNftHoldingCount: unpricedNftHoldingCount,
          valuationCoverageRatio: valuationCoverageRatio,
          totalValuation: totalValuation,
          valuationCurrency: valuationCurrency,
@@ -178,6 +215,10 @@ class _SolanaWalletSyncResultImpl extends SolanaWalletSyncResult {
     int? pricedHoldingCount,
     int? staleHoldingCount,
     int? unpricedHoldingCount,
+    int? nftHoldingCount,
+    int? pricedNftHoldingCount,
+    int? staleNftHoldingCount,
+    int? unpricedNftHoldingCount,
     Object? valuationCoverageRatio = _Undefined,
     Object? totalValuation = _Undefined,
     Object? valuationCurrency = _Undefined,
@@ -192,6 +233,12 @@ class _SolanaWalletSyncResultImpl extends SolanaWalletSyncResult {
       pricedHoldingCount: pricedHoldingCount ?? this.pricedHoldingCount,
       staleHoldingCount: staleHoldingCount ?? this.staleHoldingCount,
       unpricedHoldingCount: unpricedHoldingCount ?? this.unpricedHoldingCount,
+      nftHoldingCount: nftHoldingCount ?? this.nftHoldingCount,
+      pricedNftHoldingCount:
+          pricedNftHoldingCount ?? this.pricedNftHoldingCount,
+      staleNftHoldingCount: staleNftHoldingCount ?? this.staleNftHoldingCount,
+      unpricedNftHoldingCount:
+          unpricedNftHoldingCount ?? this.unpricedNftHoldingCount,
       valuationCoverageRatio: valuationCoverageRatio is double?
           ? valuationCoverageRatio
           : this.valuationCoverageRatio,

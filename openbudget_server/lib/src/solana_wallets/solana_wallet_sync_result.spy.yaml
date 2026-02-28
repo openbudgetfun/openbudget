@@ -8,6 +8,10 @@ fields:
   pricedHoldingCount: int
   staleHoldingCount: int
   unpricedHoldingCount: int
+  nftHoldingCount: int
+  pricedNftHoldingCount: int
+  staleNftHoldingCount: int
+  unpricedNftHoldingCount: int
   valuationCoverageRatio: double?
   totalValuation: double?
   valuationCurrency: String?
