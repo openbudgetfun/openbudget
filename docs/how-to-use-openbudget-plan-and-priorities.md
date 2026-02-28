@@ -28,3 +28,14 @@ Use the overflow menu (`...`) for quick controls such as visibility toggles,
 undo actions, and fast navigation into recent moves.
 
 ![OpenBudget iOS plan actions menu](https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-24-ios-guide/plan-menu.png)
+
+<!-- {=iosGuideCompanionWorkflows} -->
+
+## Continue with another guide flow
+
+- [Guide home](./how-to-use-openbudget.md)
+- [Plan and priorities flow](./how-to-use-openbudget-plan-and-priorities.md)
+- [Transaction review flow](./how-to-use-openbudget-transaction-review.md)
+- [Recent moves and envelope details flow](./how-to-use-openbudget-recent-moves-and-envelopes.md)
+
+<!-- {/iosGuideCompanionWorkflows} -->

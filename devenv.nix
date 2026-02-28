@@ -8,6 +8,7 @@
 
 let
   isCI = builtins.getEnv "CI" != "";
+  ifiokjrMdt = inputs.ifiokjr-nixpkgs.packages.${pkgs.stdenv.hostPlatform.system}.mdt;
 in
 {
   packages =
@@ -21,6 +22,7 @@ in
       nodejs_22
       shfmt
     ]
+    ++ [ ifiokjrMdt ]
     ++ lib.optionals stdenv.isDarwin [
       coreutils
     ];
@@ -227,6 +229,7 @@ in
     };
     "install:pnpm" = {
       exec = ''
+        set -e
         PNPM_DIR="$DEVENV_ROOT/.eget/bin"
         PNPM_VERSION="10.30.2"
         if [ -f "$PNPM_DIR/pnpm" ]; then
@@ -238,6 +241,9 @@ in
         fi
         echo "Installing pnpm $PNPM_VERSION..."
         OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+        case "$OS" in
+          darwin) OS="macos" ;;
+        esac
         ARCH=$(uname -m | sed 's/x86_64/x64/' | sed 's/aarch64/arm64/')
         curl -fsSL "https://github.com/pnpm/pnpm/releases/download/v$PNPM_VERSION/pnpm-$OS-$ARCH" -o "$PNPM_DIR/pnpm"
         chmod +x "$PNPM_DIR/pnpm"
@@ -282,6 +288,30 @@ in
         $DEVENV_ROOT/.eget/bin/pnpm $@
       '';
       description = "Run pnpm package manager.";
+      binary = "bash";
+    };
+    "mdt" = {
+      exec = ''
+        set -e
+        ${ifiokjrMdt}/bin/mdt --path "$DEVENV_ROOT" "$@"
+      '';
+      description = "Manage reusable markdown templates.";
+      binary = "bash";
+    };
+    "docs:workflows:update" = {
+      exec = ''
+        set -e
+        mdt update
+      '';
+      description = "Sync markdown workflow templates into guide docs.";
+      binary = "bash";
+    };
+    "docs:workflows:check" = {
+      exec = ''
+        set -e
+        mdt check
+      '';
+      description = "Verify workflow markdown files are in sync with templates.";
       binary = "bash";
     };
     "infra:preview" = {
@@ -371,6 +401,7 @@ in
       exec = ''
         set -e
         lint:format
+        docs:workflows:check
         lint:analyze
       '';
       description = "Lint all project files.";
