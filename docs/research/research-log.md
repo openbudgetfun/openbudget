@@ -467,3 +467,34 @@
 
 - Captured additional Android screenshot in this cycle:
   - `docs/research/screenshots/2026-02-28/interpretation-confidence-cycle-login.png`
+
+## 2026-02-28 - Interpreter Module Extraction + Fixture Tests
+
+### Backend Progress
+
+- Extracted fallback interpretation logic into a dedicated module:
+  - `openbudget_server/lib/src/solana_wallets/solana_transaction_interpreter.dart`
+- Updated `SolanaWalletService` to delegate interpretation to this module.
+- Added focused unit tests for interpreter behavior:
+  - `openbudget_server/test/unit/solana_wallets/solana_transaction_interpreter_test.dart`
+- Fixture coverage currently includes:
+  - provider-direct descriptions
+  - Jupiter swap
+  - Pump.fun trade
+  - directional SOL transfer
+  - generic low-confidence fallback
+
+### Validation Completed
+
+- `dart analyze openbudget_app openbudget_server openbudget_client` returned no issues.
+- New unit suite passed:
+  - `dart test openbudget_server/test/unit/solana_wallets/solana_transaction_interpreter_test.dart`
+- Existing app regression slice passed:
+  - `openbudget_app/test/features/accounts/screens/account_detail_screen_test.dart`
+  - `openbudget_app/test/features/auth/screens/login_screen_test.dart`
+  - `openbudget_app/test/features/accounts/screens/add_account_screen_test.dart`
+
+### Mobile Evidence
+
+- Captured additional Android screenshot in this cycle:
+  - `docs/research/screenshots/2026-02-28/interpreter-fixtures-cycle-login.png`
