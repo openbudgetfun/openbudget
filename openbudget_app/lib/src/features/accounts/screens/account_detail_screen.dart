@@ -1788,6 +1788,32 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
                         SizedBox(
                           width: cardWidth,
                           child: _WalletMetricCard(
+                            label: 'Unrealized P&L',
+                            value: _formatSignedUsd(
+                              snapshot.totalUnrealizedPnl,
+                            ),
+                            valueColor: _pnlColor(
+                              snapshot.totalUnrealizedPnl,
+                              colorScheme,
+                            ),
+                            icon: Icons.trending_up_rounded,
+                          ),
+                        ),
+                        SizedBox(
+                          width: cardWidth,
+                          child: _WalletMetricCard(
+                            label: 'Realized P&L',
+                            value: _formatSignedUsd(snapshot.totalRealizedPnl),
+                            valueColor: _pnlColor(
+                              snapshot.totalRealizedPnl,
+                              colorScheme,
+                            ),
+                            icon: Icons.analytics_outlined,
+                          ),
+                        ),
+                        SizedBox(
+                          width: cardWidth,
+                          child: _WalletMetricCard(
                             label: 'Tagged Transactions',
                             value: snapshot.taggedTransactions.toString(),
                             icon: Icons.label_outline_rounded,
@@ -1821,6 +1847,26 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
                         label: 'NFT Assets',
                         value: snapshot.nftAssets.toString(),
                         icon: Icons.image_outlined,
+                      ),
+                      const SizedBox(height: gap),
+                      _WalletMetricCard(
+                        label: 'Unrealized P&L',
+                        value: _formatSignedUsd(snapshot.totalUnrealizedPnl),
+                        valueColor: _pnlColor(
+                          snapshot.totalUnrealizedPnl,
+                          colorScheme,
+                        ),
+                        icon: Icons.trending_up_rounded,
+                      ),
+                      const SizedBox(height: gap),
+                      _WalletMetricCard(
+                        label: 'Realized P&L',
+                        value: _formatSignedUsd(snapshot.totalRealizedPnl),
+                        valueColor: _pnlColor(
+                          snapshot.totalRealizedPnl,
+                          colorScheme,
+                        ),
+                        icon: Icons.analytics_outlined,
                       ),
                       const SizedBox(height: gap),
                       _WalletMetricCard(
@@ -2221,6 +2267,8 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
 class _SolanaWalletSnapshot {
   const _SolanaWalletSnapshot({
     required this.totalValueUsd,
+    required this.totalUnrealizedPnl,
+    required this.totalRealizedPnl,
     required this.holdings,
     required this.fungibleAssets,
     required this.nftAssets,
@@ -2236,6 +2284,14 @@ class _SolanaWalletSnapshot {
     final totalValueUsd = holdings.fold<double>(
       0,
       (total, holding) => total + (holding.totalValue ?? 0),
+    );
+    final totalUnrealizedPnl = holdings.fold<double>(
+      0,
+      (total, holding) => total + (holding.estimatedUnrealizedPnl ?? 0),
+    );
+    final totalRealizedPnl = transactions.fold<double>(
+      0,
+      (total, transaction) => total + (transaction.estimatedRealizedPnl ?? 0),
     );
     final nftAssets = holdings.where((holding) => holding.isNft).length;
     final fungibleAssets = holdings.length - nftAssets;
@@ -2254,6 +2310,8 @@ class _SolanaWalletSnapshot {
     }
     return _SolanaWalletSnapshot(
       totalValueUsd: totalValueUsd,
+      totalUnrealizedPnl: totalUnrealizedPnl,
+      totalRealizedPnl: totalRealizedPnl,
       holdings: holdings.length,
       fungibleAssets: fungibleAssets,
       nftAssets: nftAssets,
@@ -2264,6 +2322,8 @@ class _SolanaWalletSnapshot {
   }
 
   final double totalValueUsd;
+  final double totalUnrealizedPnl;
+  final double totalRealizedPnl;
   final int holdings;
   final int fungibleAssets;
   final int nftAssets;
@@ -2277,11 +2337,13 @@ class _WalletMetricCard extends StatelessWidget {
     required this.label,
     required this.value,
     required this.icon,
+    this.valueColor,
   });
 
   final String label;
   final String value;
   final IconData icon;
+  final Color? valueColor;
 
   @override
   Widget build(BuildContext context) {
@@ -2314,6 +2376,7 @@ class _WalletMetricCard extends StatelessWidget {
                   value,
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w700,
+                    color: valueColor,
                   ),
                 ),
               ],
@@ -2419,6 +2482,25 @@ class _HoldingCard extends StatelessWidget {
                     fontWeight: FontWeight.w800,
                   ),
                 ),
+                if (holding.estimatedCostBasis != null)
+                  Text(
+                    'Basis ${NumberFormat.currency(symbol: r'$').format(holding.estimatedCostBasis)}',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                if (holding.estimatedUnrealizedPnl != null)
+                  Text(
+                    'P&L ${_formatSignedUsd(holding.estimatedUnrealizedPnl!)}'
+                    '${holding.estimatedUnrealizedPnlPercent == null ? '' : ' (${holding.estimatedUnrealizedPnlPercent!.toStringAsFixed(1)}%)'}',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: _pnlColor(
+                        holding.estimatedUnrealizedPnl!,
+                        colorScheme,
+                      ),
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                 if (holding.pricePerToken != null)
                   Text(
                     '@ ${NumberFormat.currency(symbol: r'$').format(holding.pricePerToken)}',
@@ -2544,6 +2626,23 @@ class _TransactionCard extends StatelessWidget {
                     label: 'Suggested: $suggestedCategory',
                     color: colorScheme.primaryContainer,
                     foregroundColor: colorScheme.onPrimaryContainer,
+                  ),
+                if (transaction.estimatedRealizedPnl != null)
+                  _MetadataChip(
+                    icon: Icons.query_stats_rounded,
+                    label:
+                        'P&L ${_formatSignedUsd(transaction.estimatedRealizedPnl!)}',
+                    color: transaction.estimatedRealizedPnl! >= 0
+                        ? OpenBudgetPalette.progressGreen.withAlpha(40)
+                        : colorScheme.errorContainer,
+                    foregroundColor: transaction.estimatedRealizedPnl! >= 0
+                        ? OpenBudgetPalette.progressGreen
+                        : colorScheme.onErrorContainer,
+                  ),
+                if (transaction.taxYear != null)
+                  _MetadataChip(
+                    icon: Icons.calendar_today_rounded,
+                    label: 'Tax ${transaction.taxYear}',
                   ),
                 for (final tag in tags.take(4))
                   _MetadataChip(icon: Icons.tag_rounded, label: tag),
@@ -2706,6 +2805,24 @@ List<String> _parseTags(String? tagsCsv) {
       .map((tag) => tag.trim())
       .where((tag) => tag.isNotEmpty)
       .toList(growable: false);
+}
+
+String _formatSignedUsd(double amount) {
+  final decimals = amount.abs() >= 1000 ? 0 : 2;
+  final value = NumberFormat.currency(
+    locale: 'en_US',
+    symbol: r'$',
+    decimalDigits: decimals,
+  ).format(amount.abs());
+  if (amount > 0) return '+$value';
+  if (amount < 0) return '-$value';
+  return value;
+}
+
+Color _pnlColor(double amount, ColorScheme colorScheme) {
+  if (amount > 0) return OpenBudgetPalette.progressGreen;
+  if (amount < 0) return colorScheme.error;
+  return colorScheme.onSurface;
 }
 
 String? _suggestedCategoryForWalletTransaction(SolanaWalletTransaction tx) {
