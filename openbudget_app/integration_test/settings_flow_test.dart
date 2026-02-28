@@ -220,16 +220,21 @@ void main() {
       await tester.tap(find.widgetWithText(FilledButton, 'Delete Account'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Confirm Password'), findsOneWidget);
-      await tester.enterText(find.byType(TextField).first, 'password123');
-      await tester.pumpAndSettle();
-      await tester.tap(find.widgetWithText(FilledButton, 'Delete Account'));
-      await tester.pumpAndSettle();
+      expect(find.text('Delete Account'), findsWidgets);
+      expect(
+        find.textContaining(
+          'Account deletion is currently unavailable in this build',
+        ),
+        findsOneWidget,
+      );
+      final deleteActionButton = tester.widget<FilledButton>(
+        find.widgetWithText(FilledButton, 'Delete Account (Unavailable)'),
+      );
+      expect(deleteActionButton.onPressed, isNull);
 
       expect(
         find.text(
-          'Your account and data will be completely deleted shortly. '
-          'In rare cases this may take up to an hour.',
+          'Delete requests are disabled until backend account deletion is available.',
         ),
         findsOneWidget,
       );

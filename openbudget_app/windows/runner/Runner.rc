@@ -89,11 +89,11 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.example" "\0"
+            VALUE "CompanyName", "com.openbudget" "\0"
             VALUE "FileDescription", "OpenBudget" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "OpenBudget" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 com.example. All rights reserved." "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 com.openbudget. All rights reserved." "\0"
             VALUE "OriginalFilename", "OpenBudget.exe" "\0"
             VALUE "ProductName", "OpenBudget" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"

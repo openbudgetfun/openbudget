@@ -33,6 +33,8 @@ const _addAccountNicknameFieldKey = Key('add-account-unlinked-nickname-field');
 const _addAccountTypeTileKey = Key('add-account-unlinked-type-tile');
 const _addAccountBalanceFieldKey = Key('add-account-unlinked-balance-field');
 const _addAccountCheckingTypeKey = ValueKey('add-account-type-option-checking');
+const _addAccountUnlinkedIntroText =
+    'Bank connections are currently unavailable';
 
 Account _makeAccount({
   required String name,
@@ -224,7 +226,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 800));
     await tester.pump();
     expect(find.text('Loading institutions...'), findsOneWidget);
-    await captureIntegrationScreenshot(
+    await _captureAddAccountStepScreenshot(
       tester,
       'add-accounts-loading-institutions-screen',
     );
@@ -235,7 +237,10 @@ void main() {
     expect(find.text('Search for your bank'), findsOneWidget);
     await _ensureAddUnlinkedVisible(tester);
     expect(find.textContaining('Unlinked Account'), findsWidgets);
-    await captureIntegrationScreenshot(tester, 'add-accounts-search-screen');
+    await _captureAddAccountStepScreenshot(
+      tester,
+      'add-accounts-search-screen',
+    );
 
     await _tapAddUnlinkedAccount(tester);
     await tester.pumpAndSettle();
@@ -266,7 +271,9 @@ void main() {
 
     expect(find.text('Add Unlinked Account'), findsOneWidget);
     expect(
-      find.textContaining('Linked connections for "Citi" are coming soon'),
+      find.textContaining(
+        'Linked connections for "Citi" are currently unavailable',
+      ),
       findsOneWidget,
     );
   });
@@ -290,7 +297,7 @@ void main() {
     expect(find.text('Citi'), findsOneWidget);
     expect(find.text('Add Unlinked Account'), findsNothing);
     expect(find.textContaining('Linked connections for "citi"'), findsNothing);
-    await captureIntegrationScreenshot(
+    await _captureAddAccountStepScreenshot(
       tester,
       'add-accounts-search-submit-results',
     );
@@ -320,7 +327,7 @@ void main() {
       expect(find.text('Capital One'), findsOneWidget);
       await _ensureAddUnlinkedVisible(tester);
       expect(find.byKey(_addAccountUnlinkedButtonKey), findsOneWidget);
-      await captureIntegrationScreenshot(
+      await _captureAddAccountStepScreenshot(
         tester,
         'add-accounts-search-desktop-screen',
       );
@@ -347,7 +354,7 @@ void main() {
       expect(find.text('Chase'), findsNothing);
       await _ensureAddUnlinkedVisible(tester);
       expect(find.byKey(_addAccountUnlinkedButtonKey), findsOneWidget);
-      await captureIntegrationScreenshot(
+      await _captureAddAccountStepScreenshot(
         tester,
         'add-accounts-search-desktop-citi-results-screen',
       );
@@ -383,7 +390,7 @@ void main() {
     expect(find.text('Citi'), findsNothing);
     await _ensureAddUnlinkedVisible(tester);
     expect(find.byKey(_addAccountUnlinkedButtonKey), findsOneWidget);
-    await captureIntegrationScreenshot(
+    await _captureAddAccountStepScreenshot(
       tester,
       'add-accounts-search-desktop-empty-results-screen',
     );
@@ -409,7 +416,7 @@ void main() {
       await tester.pump();
 
       expect(find.text('Loading institutions...'), findsOneWidget);
-      await captureIntegrationScreenshot(
+      await _captureAddAccountStepScreenshot(
         tester,
         'add-accounts-loading-overlay-desktop-screen',
       );
@@ -420,7 +427,9 @@ void main() {
       expect(find.text('Loading institutions...'), findsNothing);
       expect(find.text('Add Unlinked Account'), findsOneWidget);
       expect(
-        find.textContaining('Linked connections for "Citi" are coming soon'),
+        find.textContaining(
+          'Linked connections for "Citi" are currently unavailable',
+        ),
         findsOneWidget,
       );
     },
@@ -459,7 +468,10 @@ void main() {
       expect(nextButton.onPressed, isNull);
 
       await _activateListTile(tester, find.byKey(_addAccountTypeTileKey));
-      await captureIntegrationScreenshot(tester, 'add-account-type-selection');
+      await _captureAddAccountStepScreenshot(
+        tester,
+        'add-account-type-selection',
+      );
       await _activateListTile(tester, find.byKey(_addAccountCheckingTypeKey));
       await tester.pumpAndSettle();
 
@@ -530,10 +542,12 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Add Unlinked Account'), findsOneWidget);
-    expect(find.textContaining("Let's go!"), findsOneWidget);
+    expect(find.textContaining(_addAccountUnlinkedIntroText), findsOneWidget);
     expect(find.text('Give it a nickname'), findsOneWidget);
     expect(find.text('What type of account are you adding?'), findsOneWidget);
-    final introDy = tester.getTopLeft(find.textContaining("Let's go!")).dy;
+    final introDy = tester
+        .getTopLeft(find.textContaining(_addAccountUnlinkedIntroText))
+        .dy;
     final nicknameFieldDy = tester
         .getTopLeft(find.byKey(_addAccountNicknameFieldKey))
         .dy;
@@ -546,7 +560,11 @@ void main() {
     expect(accountTypeTileDy, lessThan(520));
     await tester.pump(const Duration(milliseconds: 120));
     await tester.pumpAndSettle();
-    await captureIntegrationScreenshot(
+    await tester.ensureVisible(
+      find.textContaining(_addAccountUnlinkedIntroText),
+    );
+    await tester.pumpAndSettle();
+    await _captureAddAccountStepScreenshot(
       tester,
       'add-unlinked-account-desktop-form-screen',
     );
@@ -581,7 +599,11 @@ void main() {
       '50000',
     );
     await tester.pumpAndSettle();
-    await captureIntegrationScreenshot(
+    await tester.ensureVisible(
+      find.textContaining(_addAccountUnlinkedIntroText),
+    );
+    await tester.pumpAndSettle();
+    await _captureAddAccountStepScreenshot(
       tester,
       'add-unlinked-account-desktop-filled-screen',
     );
@@ -597,7 +619,7 @@ void main() {
     expect(find.text('Success!'), findsOneWidget);
     expect(find.text('Add Another'), findsOneWidget);
     expect(find.widgetWithText(FilledButton, 'Done'), findsOneWidget);
-    await captureIntegrationScreenshot(
+    await _captureAddAccountStepScreenshot(
       tester,
       'add-unlinked-account-desktop-success-screen',
     );
@@ -664,7 +686,7 @@ void main() {
     ($) async {
       final tester = $.tester;
       addTearDown(() => tester.binding.setSurfaceSize(null));
-      await tester.binding.setSurfaceSize(const Size(1024, 460));
+      await tester.binding.setSurfaceSize(const Size(1024, 420));
       await tester.pumpWidget(_buildApp(accounts: const []));
       await tester.pumpAndSettle();
 
@@ -673,16 +695,22 @@ void main() {
       await _tapAddUnlinkedAccount(tester);
       await tester.pumpAndSettle();
 
-      final introFinder = find.textContaining("Let's go!");
+      final introFinder = find.textContaining(_addAccountUnlinkedIntroText);
       expect(introFinder, findsOneWidget);
       final introTopBeforeScroll = tester.getTopLeft(introFinder).dy;
 
-      await tester.drag(
-        find.byKey(_addAccountUnlinkedScrollKey),
-        const Offset(0, -320),
-      );
-      await tester.pumpAndSettle();
-      final introTopAfterManualScroll = tester.getTopLeft(introFinder).dy;
+      var introTopAfterManualScroll = introTopBeforeScroll;
+      for (var attempt = 0; attempt < 4; attempt++) {
+        await tester.drag(
+          find.byKey(_addAccountUnlinkedScrollKey),
+          const Offset(0, -280),
+        );
+        await tester.pumpAndSettle();
+        introTopAfterManualScroll = tester.getTopLeft(introFinder).dy;
+        if (introTopAfterManualScroll < introTopBeforeScroll) {
+          break;
+        }
+      }
       expect(introTopAfterManualScroll, lessThan(introTopBeforeScroll));
 
       await _activateListTile(tester, find.byKey(_addAccountTypeTileKey));
@@ -714,10 +742,6 @@ void main() {
       expect(find.text('Add Unlinked Account'), findsOneWidget);
       final introTopAfterAddAnother = tester.getTopLeft(introFinder).dy;
       expect(introTopAfterAddAnother, greaterThan(introTopAfterManualScroll));
-      await captureIntegrationScreenshot(
-        tester,
-        'add-unlinked-account-desktop-reset-screen',
-      );
     },
   );
 
@@ -857,7 +881,7 @@ void main() {
     expect(find.text('Account Nickname'), findsOneWidget);
     expect(find.text('Account Notes'), findsOneWidget);
     expect(find.text('Working Balance'), findsWidgets);
-    expect(find.text('Link an Account'), findsOneWidget);
+    expect(find.text('Link an Account (Unavailable)'), findsOneWidget);
     expect(find.text('Close Account'), findsOneWidget);
   });
 
@@ -1163,6 +1187,7 @@ Future<void> _tapAddUnlinkedAccount(WidgetTester tester) async {
   final buttonLabel = find.byKey(_addAccountUnlinkedButtonKey);
   final nicknameLabel = find.byKey(_addAccountNicknameFieldKey);
   final titleLabel = find.text('Add Unlinked Account');
+  final introLabel = find.textContaining(_addAccountUnlinkedIntroText);
   for (var attempt = 0; attempt < 4; attempt++) {
     if (nicknameLabel.evaluate().isNotEmpty ||
         titleLabel.evaluate().isNotEmpty) {
@@ -1183,6 +1208,10 @@ Future<void> _tapAddUnlinkedAccount(WidgetTester tester) async {
     await tester.pump(const Duration(milliseconds: 150));
   }
   expect(titleLabel, findsOneWidget);
+  if (introLabel.evaluate().isNotEmpty) {
+    await tester.ensureVisible(introLabel.first);
+    await tester.pumpAndSettle();
+  }
 }
 
 Future<void> _ensureAddUnlinkedVisible(WidgetTester tester) async {
@@ -1207,4 +1236,15 @@ Future<void> _ensureAddUnlinkedVisible(WidgetTester tester) async {
   }
   await tester.ensureVisible(finder);
   await tester.pumpAndSettle();
+}
+
+Future<void> _captureAddAccountStepScreenshot(
+  WidgetTester tester,
+  String name,
+) {
+  return captureIntegrationScreenshot(
+    tester,
+    name,
+    captureTarget: find.byKey(addAccountScreenCaptureBoundaryKey),
+  );
 }

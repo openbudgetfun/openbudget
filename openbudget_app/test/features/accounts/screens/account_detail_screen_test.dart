@@ -243,7 +243,7 @@ void main() {
       expect(find.text('Account Nickname'), findsOneWidget);
       expect(find.text('Account Notes'), findsOneWidget);
       expect(find.text('Working Balance'), findsWidgets);
-      expect(find.text('Link an Account'), findsOneWidget);
+      expect(find.text('Link an Account (Unavailable)'), findsOneWidget);
     });
 
     testWidgets('loan account renders overview and activity tabs', (

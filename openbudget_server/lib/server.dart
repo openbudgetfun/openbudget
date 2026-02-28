@@ -13,8 +13,13 @@ import 'package:serverpod_auth_idp_server/providers/apple.dart';
 import 'package:serverpod_auth_idp_server/providers/email.dart';
 import 'package:serverpod_auth_idp_server/providers/google.dart';
 
-/// Email sender instance. Replace with [SmtpEmailSender] for production.
-final EmailSender _emailSender = ConsoleEmailSender();
+const List<String> _smtpPasswordKeys = [
+  'smtpHost',
+  'smtpPort',
+  'smtpUsername',
+  'smtpPassword',
+  'smtpFromAddress',
+];
 
 /// The starting point of the Serverpod server.
 Future<void> run(List<String> args) async {
@@ -22,6 +27,19 @@ Future<void> run(List<String> args) async {
   initServerLogging();
 
   final pod = Serverpod(args, Protocol(), Endpoints());
+  final emailSender = createEmailSender(
+    runMode: pod.runMode,
+    smtpHost: _readPassword(pod, 'smtpHost'),
+    smtpPort: _readIntPassword(pod, 'smtpPort'),
+    smtpUsername: _readPassword(pod, 'smtpUsername'),
+    smtpPassword: _readPassword(pod, 'smtpPassword'),
+    smtpFromAddress: _readPassword(pod, 'smtpFromAddress'),
+    smtpFromName: _readPassword(pod, 'smtpFromName'),
+    smtpUseSsl: _readBoolPassword(pod, 'smtpUseSsl'),
+    smtpIgnoreBadCertificate:
+        _readBoolPassword(pod, 'smtpIgnoreBadCertificate') ?? false,
+  );
+  final emailIdpEnabled = emailSender != null;
   final googleIdpEnabled = _hasRequiredPasswords(pod, const [
     'googleClientSecret',
   ]);
@@ -33,6 +51,11 @@ Future<void> run(List<String> args) async {
     'appleKeyId',
     'appleKey',
   ]);
+  if (!emailIdpEnabled) {
+    stderr.writeln(
+      'Email IDP disabled for run mode "${pod.runMode}". Missing required SMTP passwords: ${_smtpPasswordKeys.join(', ')}.',
+    );
+  }
 
   // Initialize Serverpod and connect it with your generated code.
   pod.initializeAuthServices(
@@ -43,10 +66,37 @@ Future<void> run(List<String> args) async {
     identityProviderBuilders: [
       // Configure the email identity provider for email/password
       // authentication.
-      EmailIdpConfigFromPasswords(
-        sendRegistrationVerificationCode: _sendRegistrationCode,
-        sendPasswordResetVerificationCode: _sendPasswordResetCode,
-      ),
+      if (emailIdpEnabled)
+        EmailIdpConfigFromPasswords(
+          sendRegistrationVerificationCode:
+              (
+                session, {
+                required email,
+                required accountRequestId,
+                required verificationCode,
+                required transaction,
+              }) {
+                return emailSender.sendVerificationCode(
+                  session,
+                  email: email,
+                  code: verificationCode,
+                );
+              },
+          sendPasswordResetVerificationCode:
+              (
+                session, {
+                required email,
+                required passwordResetRequestId,
+                required verificationCode,
+                required transaction,
+              }) {
+                return emailSender.sendPasswordResetCode(
+                  session,
+                  email: email,
+                  code: verificationCode,
+                );
+              },
+        ),
       if (googleIdpEnabled) GoogleIdpConfigFromPasswords(),
       if (appleIdpEnabled) AppleIdpConfigFromPasswords(),
     ],
@@ -110,34 +160,72 @@ String? _readPassword(Serverpod pod, String key) {
   return value;
 }
 
+int? _readIntPassword(Serverpod pod, String key) {
+  final value = _readPassword(pod, key);
+  if (value == null) return null;
+  return int.tryParse(value);
+}
+
+bool? _readBoolPassword(Serverpod pod, String key) {
+  final value = _readPassword(pod, key)?.toLowerCase();
+  if (value == null) return null;
+
+  switch (value) {
+    case '1':
+    case 'true':
+    case 'yes':
+    case 'on':
+      return true;
+    case '0':
+    case 'false':
+    case 'no':
+    case 'off':
+      return false;
+    default:
+      return null;
+  }
+}
+
 bool _hasRequiredPasswords(Serverpod pod, List<String> keys) {
   return keys.every((key) => _readPassword(pod, key) != null);
 }
 
-void _sendRegistrationCode(
-  Session session, {
-  required String email,
-  required UuidValue accountRequestId,
-  required String verificationCode,
-  required Transaction? transaction,
+EmailSender? createEmailSender({
+  required String runMode,
+  required String? smtpHost,
+  required int? smtpPort,
+  required String? smtpUsername,
+  required String? smtpPassword,
+  required String? smtpFromAddress,
+  String? smtpFromName,
+  bool? smtpUseSsl,
+  bool smtpIgnoreBadCertificate = false,
 }) {
-  _emailSender.sendVerificationCode(
-    session,
-    email: email,
-    code: verificationCode,
+  if (_isLocalRunMode(runMode)) {
+    return ConsoleEmailSender();
+  }
+
+  if (smtpHost == null ||
+      smtpPort == null ||
+      smtpUsername == null ||
+      smtpPassword == null ||
+      smtpFromAddress == null) {
+    return null;
+  }
+
+  return SmtpEmailSender(
+    host: smtpHost,
+    port: smtpPort,
+    username: smtpUsername,
+    password: smtpPassword,
+    fromAddress: smtpFromAddress,
+    fromName: smtpFromName,
+    useSsl: smtpUseSsl,
+    ignoreBadCertificate: smtpIgnoreBadCertificate,
   );
 }
 
-void _sendPasswordResetCode(
-  Session session, {
-  required String email,
-  required UuidValue passwordResetRequestId,
-  required String verificationCode,
-  required Transaction? transaction,
-}) {
-  _emailSender.sendPasswordResetCode(
-    session,
-    email: email,
-    code: verificationCode,
-  );
+bool _isLocalRunMode(String runMode) {
+  return runMode == ServerpodRunMode.development ||
+      runMode == ServerpodRunMode.test;
 }

@@ -1,0 +1,5 @@
+[templates]
+paths = ["docs"]
+
+[exclude]
+markdown_codeblocks = true
