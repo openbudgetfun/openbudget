@@ -21,17 +21,20 @@ This backlog turns strategy into implementable epics with explicit acceptance cr
 - [#162](https://github.com/openbudgetfun/openbudget/issues/162) Solana token cost basis + realized/unrealized P&L pipeline.
 - [#163](https://github.com/openbudgetfun/openbudget/issues/163) Multi-source Solana asset pricing service with fallback + quality metadata.
 - [#164](https://github.com/openbudgetfun/openbudget/issues/164) Wallet pricing coverage summary in API and UI.
+- [#165](https://github.com/openbudgetfun/openbudget/issues/165) Expand Solana transaction interpretation matrix with protocol templates.
 
 ## Execution Status Snapshot (2026-02-28 PM)
 
 - #154: Implemented core wallet attach/sync pipeline (Serverpod models, endpoint/service, migration, app attach flow).
 - #155: Implemented timeline UX and metadata editing; upgraded to richer wallet dashboard layout and card system.
 - #155: Added improved plain-English fallback descriptions by mapping detected program IDs (Jupiter, Pump.fun, SPL Token, Token-2022, etc.).
+- #155: Added wallet-centric direction-aware fallback text (sent/received/swap/trade/NFT activity) using source + program + transfer-flow signals.
 - #155: Added UI-level automatic category suggestions for uncategorized wallet transactions (suggestion chips + metadata prefill + search indexing).
 - #156: Implemented initial holdings valuation wiring with provider-returned pricing fields; fallback adapter strategy still pending.
 - #157: In progress via #162: schema fields + first-pass estimated basis/realized/unrealized P&L engine + UI surfacing landed; FIFO lot accounting + tax-year summaries are now integrated, but tax-grade lot provenance/audit export is still pending.
 - #163: In progress: added holding-level pricing quality metadata and cached fallback valuation path; still need additional external pricing providers (beyond Helius) and explicit coverage summaries in API responses.
 - #164: Implemented coverage summary fields on sync result + wallet dashboard coverage/unpriced metrics; still need periodic historical coverage tracking and trend visualization.
+- #165: Opened for deeper protocol-template interpretation coverage and confidence labeling; initial foundation landed in #155 fallback description path.
 - #158: Implemented Android flavors + iOS schemes + app bootstrap routing; added `default-flavor: dev` for tooling compatibility.
 - #159: Implemented environment-based client routing and secret lookup path (`passwords.yaml` + env fallback); deploy checklist still pending.
 

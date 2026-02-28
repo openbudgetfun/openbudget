@@ -411,3 +411,27 @@
 
 - Captured additional Android screenshot in this cycle:
   - `docs/research/screenshots/2026-02-28/coverage-metrics-cycle-login.png`
+
+## 2026-02-28 - Wallet-Centric Transaction Interpretation Enrichment
+
+### Backend Progress
+
+- Updated fallback transaction description synthesis to incorporate wallet-centric flow direction:
+  - counts inbound/outbound SOL and token transfers relative to the tracked wallet address.
+  - maps common activity text to clearer user language (`Token swap`, `Trade on Pump.fun`, `SOL transfer sent/received`, `Token transfer sent/received`, `NFT activity`).
+- Added source/program context chaining to preserve protocol visibility while improving readability.
+- Opened follow-up issue for deeper protocol template coverage:
+  - `#165` Expand Solana transaction interpretation matrix with protocol templates.
+
+### Validation Completed
+
+- `dart analyze openbudget_app openbudget_server openbudget_client` returned no issues.
+- Targeted widget regression slice passed:
+  - `openbudget_app/test/features/accounts/screens/account_detail_screen_test.dart`
+  - `openbudget_app/test/features/auth/screens/login_screen_test.dart`
+  - `openbudget_app/test/features/accounts/screens/add_account_screen_test.dart`
+
+### Mobile Evidence
+
+- Captured additional Android screenshot in this cycle:
+  - `docs/research/screenshots/2026-02-28/transaction-interpretation-cycle-login.png`
