@@ -30,6 +30,12 @@ abstract class SolanaWalletHolding
     this.priceCurrency,
     this.pricePerToken,
     this.totalValue,
+    this.estimatedCostBasis,
+    this.estimatedUnrealizedPnl,
+    this.estimatedUnrealizedPnlPercent,
+    this.estimatedRealizedPnl,
+    this.pnlCurrency,
+    this.pnlAsOf,
     this.priceSource,
     this.priceAsOf,
     this.metadataJson,
@@ -51,6 +57,12 @@ abstract class SolanaWalletHolding
     String? priceCurrency,
     double? pricePerToken,
     double? totalValue,
+    double? estimatedCostBasis,
+    double? estimatedUnrealizedPnl,
+    double? estimatedUnrealizedPnlPercent,
+    double? estimatedRealizedPnl,
+    String? pnlCurrency,
+    DateTime? pnlAsOf,
     String? priceSource,
     DateTime? priceAsOf,
     String? metadataJson,
@@ -79,6 +91,19 @@ abstract class SolanaWalletHolding
       priceCurrency: jsonSerialization['priceCurrency'] as String?,
       pricePerToken: (jsonSerialization['pricePerToken'] as num?)?.toDouble(),
       totalValue: (jsonSerialization['totalValue'] as num?)?.toDouble(),
+      estimatedCostBasis: (jsonSerialization['estimatedCostBasis'] as num?)
+          ?.toDouble(),
+      estimatedUnrealizedPnl:
+          (jsonSerialization['estimatedUnrealizedPnl'] as num?)?.toDouble(),
+      estimatedUnrealizedPnlPercent:
+          (jsonSerialization['estimatedUnrealizedPnlPercent'] as num?)
+              ?.toDouble(),
+      estimatedRealizedPnl: (jsonSerialization['estimatedRealizedPnl'] as num?)
+          ?.toDouble(),
+      pnlCurrency: jsonSerialization['pnlCurrency'] as String?,
+      pnlAsOf: jsonSerialization['pnlAsOf'] == null
+          ? null
+          : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['pnlAsOf']),
       priceSource: jsonSerialization['priceSource'] as String?,
       priceAsOf: jsonSerialization['priceAsOf'] == null
           ? null
@@ -128,6 +153,24 @@ abstract class SolanaWalletHolding
 
   double? totalValue;
 
+  /// Estimated aggregate acquisition basis in quote currency.
+  double? estimatedCostBasis;
+
+  /// Estimated unrealized gain/loss in quote currency.
+  double? estimatedUnrealizedPnl;
+
+  /// Estimated unrealized gain/loss percentage.
+  double? estimatedUnrealizedPnlPercent;
+
+  /// Estimated realized gain/loss accumulated for this asset.
+  double? estimatedRealizedPnl;
+
+  /// Quote currency used for estimated P&L values.
+  String? pnlCurrency;
+
+  /// Timestamp for the last P&L estimate update.
+  DateTime? pnlAsOf;
+
   String? priceSource;
 
   DateTime? priceAsOf;
@@ -158,6 +201,12 @@ abstract class SolanaWalletHolding
     String? priceCurrency,
     double? pricePerToken,
     double? totalValue,
+    double? estimatedCostBasis,
+    double? estimatedUnrealizedPnl,
+    double? estimatedUnrealizedPnlPercent,
+    double? estimatedRealizedPnl,
+    String? pnlCurrency,
+    DateTime? pnlAsOf,
     String? priceSource,
     DateTime? priceAsOf,
     String? metadataJson,
@@ -181,6 +230,15 @@ abstract class SolanaWalletHolding
       if (priceCurrency != null) 'priceCurrency': priceCurrency,
       if (pricePerToken != null) 'pricePerToken': pricePerToken,
       if (totalValue != null) 'totalValue': totalValue,
+      if (estimatedCostBasis != null) 'estimatedCostBasis': estimatedCostBasis,
+      if (estimatedUnrealizedPnl != null)
+        'estimatedUnrealizedPnl': estimatedUnrealizedPnl,
+      if (estimatedUnrealizedPnlPercent != null)
+        'estimatedUnrealizedPnlPercent': estimatedUnrealizedPnlPercent,
+      if (estimatedRealizedPnl != null)
+        'estimatedRealizedPnl': estimatedRealizedPnl,
+      if (pnlCurrency != null) 'pnlCurrency': pnlCurrency,
+      if (pnlAsOf != null) 'pnlAsOf': pnlAsOf?.toJson(),
       if (priceSource != null) 'priceSource': priceSource,
       if (priceAsOf != null) 'priceAsOf': priceAsOf?.toJson(),
       if (metadataJson != null) 'metadataJson': metadataJson,
@@ -206,6 +264,15 @@ abstract class SolanaWalletHolding
       if (priceCurrency != null) 'priceCurrency': priceCurrency,
       if (pricePerToken != null) 'pricePerToken': pricePerToken,
       if (totalValue != null) 'totalValue': totalValue,
+      if (estimatedCostBasis != null) 'estimatedCostBasis': estimatedCostBasis,
+      if (estimatedUnrealizedPnl != null)
+        'estimatedUnrealizedPnl': estimatedUnrealizedPnl,
+      if (estimatedUnrealizedPnlPercent != null)
+        'estimatedUnrealizedPnlPercent': estimatedUnrealizedPnlPercent,
+      if (estimatedRealizedPnl != null)
+        'estimatedRealizedPnl': estimatedRealizedPnl,
+      if (pnlCurrency != null) 'pnlCurrency': pnlCurrency,
+      if (pnlAsOf != null) 'pnlAsOf': pnlAsOf?.toJson(),
       if (priceSource != null) 'priceSource': priceSource,
       if (priceAsOf != null) 'priceAsOf': priceAsOf?.toJson(),
       if (metadataJson != null) 'metadataJson': metadataJson,
@@ -261,6 +328,12 @@ class _SolanaWalletHoldingImpl extends SolanaWalletHolding {
     String? priceCurrency,
     double? pricePerToken,
     double? totalValue,
+    double? estimatedCostBasis,
+    double? estimatedUnrealizedPnl,
+    double? estimatedUnrealizedPnlPercent,
+    double? estimatedRealizedPnl,
+    String? pnlCurrency,
+    DateTime? pnlAsOf,
     String? priceSource,
     DateTime? priceAsOf,
     String? metadataJson,
@@ -280,6 +353,12 @@ class _SolanaWalletHoldingImpl extends SolanaWalletHolding {
          priceCurrency: priceCurrency,
          pricePerToken: pricePerToken,
          totalValue: totalValue,
+         estimatedCostBasis: estimatedCostBasis,
+         estimatedUnrealizedPnl: estimatedUnrealizedPnl,
+         estimatedUnrealizedPnlPercent: estimatedUnrealizedPnlPercent,
+         estimatedRealizedPnl: estimatedRealizedPnl,
+         pnlCurrency: pnlCurrency,
+         pnlAsOf: pnlAsOf,
          priceSource: priceSource,
          priceAsOf: priceAsOf,
          metadataJson: metadataJson,
@@ -305,6 +384,12 @@ class _SolanaWalletHoldingImpl extends SolanaWalletHolding {
     Object? priceCurrency = _Undefined,
     Object? pricePerToken = _Undefined,
     Object? totalValue = _Undefined,
+    Object? estimatedCostBasis = _Undefined,
+    Object? estimatedUnrealizedPnl = _Undefined,
+    Object? estimatedUnrealizedPnlPercent = _Undefined,
+    Object? estimatedRealizedPnl = _Undefined,
+    Object? pnlCurrency = _Undefined,
+    Object? pnlAsOf = _Undefined,
     Object? priceSource = _Undefined,
     Object? priceAsOf = _Undefined,
     Object? metadataJson = _Undefined,
@@ -329,6 +414,20 @@ class _SolanaWalletHoldingImpl extends SolanaWalletHolding {
           ? pricePerToken
           : this.pricePerToken,
       totalValue: totalValue is double? ? totalValue : this.totalValue,
+      estimatedCostBasis: estimatedCostBasis is double?
+          ? estimatedCostBasis
+          : this.estimatedCostBasis,
+      estimatedUnrealizedPnl: estimatedUnrealizedPnl is double?
+          ? estimatedUnrealizedPnl
+          : this.estimatedUnrealizedPnl,
+      estimatedUnrealizedPnlPercent: estimatedUnrealizedPnlPercent is double?
+          ? estimatedUnrealizedPnlPercent
+          : this.estimatedUnrealizedPnlPercent,
+      estimatedRealizedPnl: estimatedRealizedPnl is double?
+          ? estimatedRealizedPnl
+          : this.estimatedRealizedPnl,
+      pnlCurrency: pnlCurrency is String? ? pnlCurrency : this.pnlCurrency,
+      pnlAsOf: pnlAsOf is DateTime? ? pnlAsOf : this.pnlAsOf,
       priceSource: priceSource is String? ? priceSource : this.priceSource,
       priceAsOf: priceAsOf is DateTime? ? priceAsOf : this.priceAsOf,
       metadataJson: metadataJson is String? ? metadataJson : this.metadataJson,
@@ -411,6 +510,42 @@ class SolanaWalletHoldingUpdateTable
     value,
   );
 
+  _i1.ColumnValue<double, double> estimatedCostBasis(double? value) =>
+      _i1.ColumnValue(
+        table.estimatedCostBasis,
+        value,
+      );
+
+  _i1.ColumnValue<double, double> estimatedUnrealizedPnl(double? value) =>
+      _i1.ColumnValue(
+        table.estimatedUnrealizedPnl,
+        value,
+      );
+
+  _i1.ColumnValue<double, double> estimatedUnrealizedPnlPercent(
+    double? value,
+  ) => _i1.ColumnValue(
+    table.estimatedUnrealizedPnlPercent,
+    value,
+  );
+
+  _i1.ColumnValue<double, double> estimatedRealizedPnl(double? value) =>
+      _i1.ColumnValue(
+        table.estimatedRealizedPnl,
+        value,
+      );
+
+  _i1.ColumnValue<String, String> pnlCurrency(String? value) => _i1.ColumnValue(
+    table.pnlCurrency,
+    value,
+  );
+
+  _i1.ColumnValue<DateTime, DateTime> pnlAsOf(DateTime? value) =>
+      _i1.ColumnValue(
+        table.pnlAsOf,
+        value,
+      );
+
   _i1.ColumnValue<String, String> priceSource(String? value) => _i1.ColumnValue(
     table.priceSource,
     value,
@@ -491,6 +626,30 @@ class SolanaWalletHoldingTable extends _i1.Table<_i1.UuidValue?> {
       'totalValue',
       this,
     );
+    estimatedCostBasis = _i1.ColumnDouble(
+      'estimatedCostBasis',
+      this,
+    );
+    estimatedUnrealizedPnl = _i1.ColumnDouble(
+      'estimatedUnrealizedPnl',
+      this,
+    );
+    estimatedUnrealizedPnlPercent = _i1.ColumnDouble(
+      'estimatedUnrealizedPnlPercent',
+      this,
+    );
+    estimatedRealizedPnl = _i1.ColumnDouble(
+      'estimatedRealizedPnl',
+      this,
+    );
+    pnlCurrency = _i1.ColumnString(
+      'pnlCurrency',
+      this,
+    );
+    pnlAsOf = _i1.ColumnDateTime(
+      'pnlAsOf',
+      this,
+    );
     priceSource = _i1.ColumnString(
       'priceSource',
       this,
@@ -543,6 +702,24 @@ class SolanaWalletHoldingTable extends _i1.Table<_i1.UuidValue?> {
 
   late final _i1.ColumnDouble totalValue;
 
+  /// Estimated aggregate acquisition basis in quote currency.
+  late final _i1.ColumnDouble estimatedCostBasis;
+
+  /// Estimated unrealized gain/loss in quote currency.
+  late final _i1.ColumnDouble estimatedUnrealizedPnl;
+
+  /// Estimated unrealized gain/loss percentage.
+  late final _i1.ColumnDouble estimatedUnrealizedPnlPercent;
+
+  /// Estimated realized gain/loss accumulated for this asset.
+  late final _i1.ColumnDouble estimatedRealizedPnl;
+
+  /// Quote currency used for estimated P&L values.
+  late final _i1.ColumnString pnlCurrency;
+
+  /// Timestamp for the last P&L estimate update.
+  late final _i1.ColumnDateTime pnlAsOf;
+
   late final _i1.ColumnString priceSource;
 
   late final _i1.ColumnDateTime priceAsOf;
@@ -568,6 +745,12 @@ class SolanaWalletHoldingTable extends _i1.Table<_i1.UuidValue?> {
     priceCurrency,
     pricePerToken,
     totalValue,
+    estimatedCostBasis,
+    estimatedUnrealizedPnl,
+    estimatedUnrealizedPnlPercent,
+    estimatedRealizedPnl,
+    pnlCurrency,
+    pnlAsOf,
     priceSource,
     priceAsOf,
     metadataJson,

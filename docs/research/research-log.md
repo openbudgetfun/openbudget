@@ -267,3 +267,44 @@
   - `account_detail_screen_test.dart`
   - `add_account_screen_test.dart`
 - `dart analyze openbudget_app` returned no issues.
+
+## 2026-02-28 - Solana P&L Foundation (Issue #162) In Progress
+
+### Schema + Protocol Progress
+
+- Added estimated P&L fields to Solana wallet models:
+  - holdings: `estimatedCostBasis`, `estimatedUnrealizedPnl`, `estimatedUnrealizedPnlPercent`, `estimatedRealizedPnl`, `pnlCurrency`, `pnlAsOf`
+  - transactions: `estimatedCostBasis`, `estimatedProceeds`, `estimatedRealizedPnl`, `pnlCurrency`, `taxYear`
+- Regenerated Serverpod protocol/client artifacts.
+- Created migration:
+  - `openbudget_server/migrations/20260228190201911`
+
+### Backend Engine Progress
+
+- Added first-pass estimated cost basis engine in `SolanaWalletService`:
+  - computes wallet token net flow from `tokenTransfersJson`
+  - tracks running per-asset basis state
+  - writes transaction-level estimated realized P&L and tax year
+  - writes holding-level estimated basis/unrealized/realized values
+  - runs after holdings sync in wallet sync pipeline
+- Added warning paths for partial estimates (for example missing price or disposal exceeding tracked basis quantity).
+
+### App Surfacing Progress
+
+- Wallet detail now surfaces estimated P&L:
+  - summary metric cards include realized/unrealized P&L totals.
+  - holding cards show basis + unrealized P&L (with percent when available).
+  - transaction cards show realized P&L chip and tax-year chip when present.
+- Updated wallet widget test fixtures/assertions for the new metadata rendering.
+
+### Validation Completed
+
+- `flutter test` regression slice passed:
+  - `account_detail_screen_test.dart`
+  - `login_screen_test.dart`
+  - `add_account_screen_test.dart`
+- `dart analyze openbudget_app openbudget_server openbudget_client` returned no issues.
+
+### Validation Note
+
+- `dart test` in `openbudget_server` currently exits during integration suite loading in this environment (no per-test assertion output). App/server compile and targeted widget suites are still passing.

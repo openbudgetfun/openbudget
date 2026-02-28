@@ -27,6 +27,11 @@ abstract class SolanaWalletTransaction implements _i1.SerializableModel {
     this.programsJson,
     this.nativeTransfersJson,
     this.tokenTransfersJson,
+    this.estimatedCostBasis,
+    this.estimatedProceeds,
+    this.estimatedRealizedPnl,
+    this.pnlCurrency,
+    this.taxYear,
     this.category,
     this.tagsCsv,
     this.memo,
@@ -49,6 +54,11 @@ abstract class SolanaWalletTransaction implements _i1.SerializableModel {
     String? programsJson,
     String? nativeTransfersJson,
     String? tokenTransfersJson,
+    double? estimatedCostBasis,
+    double? estimatedProceeds,
+    double? estimatedRealizedPnl,
+    String? pnlCurrency,
+    int? taxYear,
     String? category,
     String? tagsCsv,
     String? memo,
@@ -81,6 +91,14 @@ abstract class SolanaWalletTransaction implements _i1.SerializableModel {
       programsJson: jsonSerialization['programsJson'] as String?,
       nativeTransfersJson: jsonSerialization['nativeTransfersJson'] as String?,
       tokenTransfersJson: jsonSerialization['tokenTransfersJson'] as String?,
+      estimatedCostBasis: (jsonSerialization['estimatedCostBasis'] as num?)
+          ?.toDouble(),
+      estimatedProceeds: (jsonSerialization['estimatedProceeds'] as num?)
+          ?.toDouble(),
+      estimatedRealizedPnl: (jsonSerialization['estimatedRealizedPnl'] as num?)
+          ?.toDouble(),
+      pnlCurrency: jsonSerialization['pnlCurrency'] as String?,
+      taxYear: jsonSerialization['taxYear'] as int?,
       category: jsonSerialization['category'] as String?,
       tagsCsv: jsonSerialization['tagsCsv'] as String?,
       memo: jsonSerialization['memo'] as String?,
@@ -130,6 +148,21 @@ abstract class SolanaWalletTransaction implements _i1.SerializableModel {
   /// JSON-encoded token transfer details.
   String? tokenTransfersJson;
 
+  /// Estimated disposal cost basis in quote currency.
+  double? estimatedCostBasis;
+
+  /// Estimated disposal proceeds in quote currency.
+  double? estimatedProceeds;
+
+  /// Estimated realized gain/loss in quote currency.
+  double? estimatedRealizedPnl;
+
+  /// Quote currency used for estimated P&L values.
+  String? pnlCurrency;
+
+  /// Tax year inferred from occurredAt.
+  int? taxYear;
+
   /// User-managed category value.
   String? category;
 
@@ -162,6 +195,11 @@ abstract class SolanaWalletTransaction implements _i1.SerializableModel {
     String? programsJson,
     String? nativeTransfersJson,
     String? tokenTransfersJson,
+    double? estimatedCostBasis,
+    double? estimatedProceeds,
+    double? estimatedRealizedPnl,
+    String? pnlCurrency,
+    int? taxYear,
     String? category,
     String? tagsCsv,
     String? memo,
@@ -186,6 +224,12 @@ abstract class SolanaWalletTransaction implements _i1.SerializableModel {
       if (nativeTransfersJson != null)
         'nativeTransfersJson': nativeTransfersJson,
       if (tokenTransfersJson != null) 'tokenTransfersJson': tokenTransfersJson,
+      if (estimatedCostBasis != null) 'estimatedCostBasis': estimatedCostBasis,
+      if (estimatedProceeds != null) 'estimatedProceeds': estimatedProceeds,
+      if (estimatedRealizedPnl != null)
+        'estimatedRealizedPnl': estimatedRealizedPnl,
+      if (pnlCurrency != null) 'pnlCurrency': pnlCurrency,
+      if (taxYear != null) 'taxYear': taxYear,
       if (category != null) 'category': category,
       if (tagsCsv != null) 'tagsCsv': tagsCsv,
       if (memo != null) 'memo': memo,
@@ -217,6 +261,11 @@ class _SolanaWalletTransactionImpl extends SolanaWalletTransaction {
     String? programsJson,
     String? nativeTransfersJson,
     String? tokenTransfersJson,
+    double? estimatedCostBasis,
+    double? estimatedProceeds,
+    double? estimatedRealizedPnl,
+    String? pnlCurrency,
+    int? taxYear,
     String? category,
     String? tagsCsv,
     String? memo,
@@ -236,6 +285,11 @@ class _SolanaWalletTransactionImpl extends SolanaWalletTransaction {
          programsJson: programsJson,
          nativeTransfersJson: nativeTransfersJson,
          tokenTransfersJson: tokenTransfersJson,
+         estimatedCostBasis: estimatedCostBasis,
+         estimatedProceeds: estimatedProceeds,
+         estimatedRealizedPnl: estimatedRealizedPnl,
+         pnlCurrency: pnlCurrency,
+         taxYear: taxYear,
          category: category,
          tagsCsv: tagsCsv,
          memo: memo,
@@ -261,6 +315,11 @@ class _SolanaWalletTransactionImpl extends SolanaWalletTransaction {
     Object? programsJson = _Undefined,
     Object? nativeTransfersJson = _Undefined,
     Object? tokenTransfersJson = _Undefined,
+    Object? estimatedCostBasis = _Undefined,
+    Object? estimatedProceeds = _Undefined,
+    Object? estimatedRealizedPnl = _Undefined,
+    Object? pnlCurrency = _Undefined,
+    Object? taxYear = _Undefined,
     Object? category = _Undefined,
     Object? tagsCsv = _Undefined,
     Object? memo = _Undefined,
@@ -285,6 +344,17 @@ class _SolanaWalletTransactionImpl extends SolanaWalletTransaction {
       tokenTransfersJson: tokenTransfersJson is String?
           ? tokenTransfersJson
           : this.tokenTransfersJson,
+      estimatedCostBasis: estimatedCostBasis is double?
+          ? estimatedCostBasis
+          : this.estimatedCostBasis,
+      estimatedProceeds: estimatedProceeds is double?
+          ? estimatedProceeds
+          : this.estimatedProceeds,
+      estimatedRealizedPnl: estimatedRealizedPnl is double?
+          ? estimatedRealizedPnl
+          : this.estimatedRealizedPnl,
+      pnlCurrency: pnlCurrency is String? ? pnlCurrency : this.pnlCurrency,
+      taxYear: taxYear is int? ? taxYear : this.taxYear,
       category: category is String? ? category : this.category,
       tagsCsv: tagsCsv is String? ? tagsCsv : this.tagsCsv,
       memo: memo is String? ? memo : this.memo,

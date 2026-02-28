@@ -17,6 +17,7 @@ class SolanaWalletService {
 
   static const _clusterMainnet = 'mainnet';
   static const _clusterDevnet = 'devnet';
+  static const _pnlEpsilon = 0.0000001;
 
   /// Attaches a Solana wallet to an existing account.
   static Future<SolanaWallet> attachWallet(
@@ -240,6 +241,12 @@ class SolanaWalletService {
         helius: helius,
         warnings: warnings,
       );
+      await _recomputeEstimatedPnl(
+        session,
+        walletId: walletId,
+        wallet: wallet,
+        warnings: warnings,
+      );
 
       wallet
         ..syncStatus = 'success'
@@ -460,6 +467,295 @@ class SolanaWalletService {
     if (normalized.startsWith('whirLbM')) return 'Orca Whirlpool';
     if (normalized.startsWith('9W959DqE')) return 'Raydium';
     return null;
+  }
+
+  static Future<void> _recomputeEstimatedPnl(
+    Session session, {
+    required UuidValue walletId,
+    required SolanaWallet wallet,
+    required List<String> warnings,
+  }) async {
+    final holdings = await SolanaWalletHolding.db.find(
+      session,
+      where: (t) =>
+          t.walletId.equals(walletId) & t.budgetId.equals(wallet.budgetId),
+    );
+    final holdingsByAsset = {
+      for (final holding in holdings) holding.assetId: holding,
+    };
+    final pnlCurrency = _resolvePnlCurrency(holdings);
+
+    final transactions =
+        await SolanaWalletTransaction.db.find(
+            session,
+            where: (t) =>
+                t.walletId.equals(walletId) &
+                t.budgetId.equals(wallet.budgetId),
+            orderBy: (t) => t.occurredAt,
+          )
+          ..sort(_transactionSort);
+
+    final stateByAsset = <String, _CostBasisState>{};
+    final warningSet = warnings.toSet();
+
+    for (final tx in transactions) {
+      final tokenTransfers = _decodeTokenTransfers(tx.tokenTransfersJson);
+      final netRawByAsset = <String, int>{};
+
+      for (final transfer in tokenTransfers) {
+        final mint = transfer.mint?.trim();
+        if (mint == null || mint.isEmpty) continue;
+
+        var deltaRaw = 0;
+        if (_isSameAddress(transfer.toUserAccount, wallet.address)) {
+          deltaRaw += transfer.tokenAmount;
+        }
+        if (_isSameAddress(transfer.fromUserAccount, wallet.address)) {
+          deltaRaw -= transfer.tokenAmount;
+        }
+
+        if (deltaRaw == 0) continue;
+        netRawByAsset[mint] = (netRawByAsset[mint] ?? 0) + deltaRaw;
+      }
+
+      var txCostBasis = 0.0;
+      var txProceeds = 0.0;
+      var txRealized = 0.0;
+      var hasEstimate = false;
+
+      for (final entry in netRawByAsset.entries) {
+        final mint = entry.key;
+        final deltaRaw = entry.value;
+        final holding = holdingsByAsset[mint];
+        if (holding == null) continue;
+
+        final pricePerToken = holding.pricePerToken;
+        if (pricePerToken == null) {
+          final warning = 'Missing price for P&L estimate asset $mint';
+          if (warningSet.add(warning)) warnings.add(warning);
+          continue;
+        }
+
+        final deltaUi = _toUiAmount(deltaRaw, holding.decimals);
+        if (deltaUi.abs() <= _pnlEpsilon) continue;
+
+        final state = stateByAsset.putIfAbsent(mint, _CostBasisState.new);
+        if (deltaUi > 0) {
+          final addedCostBasis = deltaUi * pricePerToken;
+          state
+            ..quantityUi += deltaUi
+            ..costBasis += addedCostBasis;
+          continue;
+        }
+
+        final disposedUi = deltaUi.abs();
+        final availableQuantity = state.quantityUi;
+        final averageCostPerUnit = availableQuantity > _pnlEpsilon
+            ? state.costBasis / availableQuantity
+            : 0.0;
+        final matchedQuantity = math.min(disposedUi, availableQuantity);
+        final removedCostBasis = matchedQuantity * averageCostPerUnit;
+        final proceeds = disposedUi * pricePerToken;
+        final realizedPnl = proceeds - removedCostBasis;
+
+        state
+          ..quantityUi = math.max(0, availableQuantity - disposedUi)
+          ..costBasis = math.max(0, state.costBasis - removedCostBasis)
+          ..realizedPnl += realizedPnl;
+
+        txCostBasis += removedCostBasis;
+        txProceeds += proceeds;
+        txRealized += realizedPnl;
+        hasEstimate = true;
+
+        if (disposedUi > availableQuantity + _pnlEpsilon) {
+          final warning =
+              'Partial P&L estimate for $mint: disposal exceeded tracked basis quantity.';
+          if (warningSet.add(warning)) warnings.add(warning);
+        }
+      }
+
+      final estimatedCostBasis = hasEstimate ? txCostBasis : null;
+      final estimatedProceeds = hasEstimate ? txProceeds : null;
+      final estimatedRealizedPnl = hasEstimate ? txRealized : null;
+      final nextPnlCurrency = hasEstimate ? pnlCurrency : null;
+      final nextTaxYear = tx.occurredAt?.year;
+
+      final requiresUpdate =
+          !_doubleEqualsNullable(tx.estimatedCostBasis, estimatedCostBasis) ||
+          !_doubleEqualsNullable(tx.estimatedProceeds, estimatedProceeds) ||
+          !_doubleEqualsNullable(
+            tx.estimatedRealizedPnl,
+            estimatedRealizedPnl,
+          ) ||
+          tx.pnlCurrency != nextPnlCurrency ||
+          tx.taxYear != nextTaxYear;
+
+      if (!requiresUpdate) continue;
+
+      await SolanaWalletTransaction.db.updateRow(
+        session,
+        tx.copyWith(
+          estimatedCostBasis: estimatedCostBasis,
+          estimatedProceeds: estimatedProceeds,
+          estimatedRealizedPnl: estimatedRealizedPnl,
+          pnlCurrency: nextPnlCurrency,
+          taxYear: nextTaxYear,
+          updatedAt: DateTime.now(),
+        ),
+      );
+    }
+
+    for (final holding in holdings) {
+      final state = stateByAsset[holding.assetId];
+      final estimatedCostBasis = _estimateHoldingCostBasis(holding, state);
+      final estimatedUnrealizedPnl =
+          holding.totalValue != null && estimatedCostBasis != null
+          ? holding.totalValue! - estimatedCostBasis
+          : null;
+      final estimatedUnrealizedPnlPercent =
+          estimatedCostBasis != null &&
+              estimatedCostBasis.abs() > _pnlEpsilon &&
+              estimatedUnrealizedPnl != null
+          ? (estimatedUnrealizedPnl / estimatedCostBasis) * 100
+          : null;
+      final estimatedRealizedPnl = state?.realizedPnl;
+      final shouldSetPnlMetadata =
+          estimatedCostBasis != null || estimatedRealizedPnl != null;
+      final nextPnlCurrency = shouldSetPnlMetadata ? pnlCurrency : null;
+      final pnlValuesChanged =
+          !_doubleEqualsNullable(
+            holding.estimatedCostBasis,
+            estimatedCostBasis,
+          ) ||
+          !_doubleEqualsNullable(
+            holding.estimatedUnrealizedPnl,
+            estimatedUnrealizedPnl,
+          ) ||
+          !_doubleEqualsNullable(
+            holding.estimatedUnrealizedPnlPercent,
+            estimatedUnrealizedPnlPercent,
+          ) ||
+          !_doubleEqualsNullable(
+            holding.estimatedRealizedPnl,
+            estimatedRealizedPnl,
+          ) ||
+          holding.pnlCurrency != nextPnlCurrency;
+      final nextPnlAsOf = shouldSetPnlMetadata
+          ? (pnlValuesChanged ? DateTime.now() : holding.pnlAsOf)
+          : null;
+      final requiresUpdate = pnlValuesChanged || holding.pnlAsOf != nextPnlAsOf;
+
+      if (!requiresUpdate) continue;
+
+      await SolanaWalletHolding.db.updateRow(
+        session,
+        holding.copyWith(
+          estimatedCostBasis: estimatedCostBasis,
+          estimatedUnrealizedPnl: estimatedUnrealizedPnl,
+          estimatedUnrealizedPnlPercent: estimatedUnrealizedPnlPercent,
+          estimatedRealizedPnl: estimatedRealizedPnl,
+          pnlCurrency: nextPnlCurrency,
+          pnlAsOf: nextPnlAsOf,
+          updatedAt: DateTime.now(),
+        ),
+      );
+    }
+  }
+
+  static int _transactionSort(
+    SolanaWalletTransaction left,
+    SolanaWalletTransaction right,
+  ) {
+    final leftOccurredAt =
+        left.occurredAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+    final rightOccurredAt =
+        right.occurredAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+    final occurredAtComparison = leftOccurredAt.compareTo(rightOccurredAt);
+    if (occurredAtComparison != 0) return occurredAtComparison;
+    return left.slot.compareTo(right.slot);
+  }
+
+  static String _resolvePnlCurrency(List<SolanaWalletHolding> holdings) {
+    for (final holding in holdings) {
+      final currency = holding.priceCurrency?.trim();
+      if (currency != null && currency.isNotEmpty) {
+        return currency.toUpperCase();
+      }
+    }
+    return 'USD';
+  }
+
+  static List<_WalletTokenTransfer> _decodeTokenTransfers(
+    String? tokenTransfersJson,
+  ) {
+    if (tokenTransfersJson == null || tokenTransfersJson.trim().isEmpty) {
+      return const [];
+    }
+
+    try {
+      final decoded = jsonDecode(tokenTransfersJson);
+      if (decoded is! List) return const [];
+      return decoded
+          .whereType<Map<String, dynamic>>()
+          .map((item) {
+            final tokenAmount = _coerceInt(item['tokenAmount']);
+            if (tokenAmount == null) return null;
+            return _WalletTokenTransfer(
+              fromUserAccount: item['fromUserAccount'] as String?,
+              toUserAccount: item['toUserAccount'] as String?,
+              mint: item['mint'] as String?,
+              tokenAmount: tokenAmount,
+            );
+          })
+          .whereType<_WalletTokenTransfer>()
+          .toList(growable: false);
+    } on FormatException {
+      return const [];
+    }
+  }
+
+  static int? _coerceInt(Object? value) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    if (value is String) return int.tryParse(value);
+    return null;
+  }
+
+  static bool _isSameAddress(String? left, String? right) {
+    if (left == null || right == null) return false;
+    return left.trim() == right.trim();
+  }
+
+  static double? _estimateHoldingCostBasis(
+    SolanaWalletHolding holding,
+    _CostBasisState? state,
+  ) {
+    final balanceUi = double.tryParse(holding.balanceUi);
+    final balanceFromRaw = int.tryParse(holding.balanceRaw);
+    final currentBalance =
+        balanceUi ??
+        (balanceFromRaw == null
+            ? 0
+            : _toUiAmount(balanceFromRaw, holding.decimals));
+    if (currentBalance.abs() <= _pnlEpsilon) return 0;
+
+    if (state == null || state.quantityUi <= _pnlEpsilon) {
+      final fallbackPrice = holding.pricePerToken;
+      if (fallbackPrice == null) return null;
+      return currentBalance * fallbackPrice;
+    }
+
+    final scaledCostBasis =
+        state.costBasis * (currentBalance / state.quantityUi);
+    if (!scaledCostBasis.isFinite || scaledCostBasis.isNaN) return null;
+    return math.max(0, scaledCostBasis);
+  }
+
+  static bool _doubleEqualsNullable(double? left, double? right) {
+    if (left == null && right == null) return true;
+    if (left == null || right == null) return false;
+    return (left - right).abs() <= _pnlEpsilon;
   }
 
   static Future<_HoldingSyncSummary> _syncHoldings(
@@ -698,4 +994,24 @@ class _HoldingSyncSummary {
   final int holdingCount;
   final double? totalValuation;
   final String? valuationCurrency;
+}
+
+class _CostBasisState {
+  double quantityUi = 0;
+  double costBasis = 0;
+  double realizedPnl = 0;
+}
+
+class _WalletTokenTransfer {
+  const _WalletTokenTransfer({
+    required this.fromUserAccount,
+    required this.toUserAccount,
+    required this.mint,
+    required this.tokenAmount,
+  });
+
+  final String? fromUserAccount;
+  final String? toUserAccount;
+  final String? mint;
+  final int tokenAmount;
 }
