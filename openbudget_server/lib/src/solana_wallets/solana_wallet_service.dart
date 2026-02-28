@@ -405,7 +405,21 @@ class SolanaWalletService {
             '$tokenCount token transfer${tokenCount == 1 ? '' : 's'})',
     };
 
-    return '$readableType via $source$transferSummary';
+    final programLabels = tx.instructions
+        .map((instruction) => _friendlyProgram(instruction.programId))
+        .where((label) => label != null)
+        .cast<String>()
+        .toSet()
+        .toList(growable: false);
+
+    final shortProgramLabels = programLabels.take(2).toList(growable: false);
+    final remainingPrograms = programLabels.length - shortProgramLabels.length;
+    final programSummary = shortProgramLabels.isEmpty
+        ? ''
+        : ' using ${shortProgramLabels.join(', ')}'
+              '${remainingPrograms > 0 ? ' +$remainingPrograms' : ''}';
+
+    return '$readableType via $source$transferSummary$programSummary';
   }
 
   static String _friendlySource(String source) {
@@ -420,6 +434,32 @@ class SolanaWalletService {
       'token_2022' => 'SPL Token 2022 Program',
       _ => source,
     };
+  }
+
+  static String? _friendlyProgram(String? programId) {
+    if (programId == null) return null;
+    final normalized = programId.trim();
+    if (normalized.isEmpty) return null;
+
+    if (normalized == '11111111111111111111111111111111') {
+      return 'System Program';
+    }
+    if (normalized.startsWith('TokenkegQfe')) return 'SPL Token';
+    if (normalized.startsWith('TokenzQd')) return 'Token-2022';
+    if (normalized.startsWith('AToken')) return 'Associated Token';
+    if (normalized.startsWith('ComputeBudget')) return 'Compute Budget';
+    if (normalized.startsWith('MemoSq4')) return 'Memo Program';
+    if (normalized.startsWith('JUP') || normalized.contains('jup')) {
+      return 'Jupiter';
+    }
+    if (normalized.startsWith('6EF8rrecthR') ||
+        normalized.toLowerCase().contains('pump')) {
+      return 'Pump.fun';
+    }
+    if (normalized.startsWith('metaqbxx')) return 'Metaplex Metadata';
+    if (normalized.startsWith('whirLbM')) return 'Orca Whirlpool';
+    if (normalized.startsWith('9W959DqE')) return 'Raydium';
+    return null;
   }
 
   static Future<_HoldingSyncSummary> _syncHoldings(
