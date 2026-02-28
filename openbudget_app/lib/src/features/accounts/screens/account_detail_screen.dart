@@ -1565,6 +1565,9 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
         final transactionsAsync = ref.watch(
           solanaWalletTransactionsProvider(budgetId, walletId),
         );
+        final taxYearSummariesAsync = ref.watch(
+          solanaWalletTaxYearSummariesProvider(budgetId, walletId),
+        );
         final snapshot = _SolanaWalletSnapshot.from(
           holdings: holdingsAsync.asData?.value ?? const [],
           transactions: transactionsAsync.asData?.value ?? const [],
@@ -1882,6 +1885,58 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
                             : DateFormat.yMMMd().format(snapshot.lastActivity!),
                         icon: Icons.history_rounded,
                       ),
+                    ],
+                  );
+                },
+              ),
+              const SizedBox(height: SpacingTokens.md),
+              Row(
+                children: [
+                  Text(
+                    'Tax Year P&L',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(width: SpacingTokens.xs),
+                  Text(
+                    '(estimated)',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: SpacingTokens.sm),
+              taxYearSummariesAsync.when(
+                loading: () => const Padding(
+                  padding: EdgeInsets.all(SpacingTokens.sm),
+                  child: LinearProgressIndicator(minHeight: 2),
+                ),
+                error: (error, _) => Text(
+                  'Could not load tax-year summary.',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colorScheme.error,
+                  ),
+                ),
+                data: (summaries) {
+                  if (summaries.isEmpty) {
+                    return const _EmptyStateCard(
+                      title: 'No disposals yet',
+                      subtitle:
+                          'Tax-year summaries will appear after taxable disposal activity is detected.',
+                      icon: Icons.calculate_outlined,
+                    );
+                  }
+                  return Column(
+                    children: [
+                      for (final summary in summaries.take(3))
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            bottom: SpacingTokens.sm,
+                          ),
+                          child: _TaxYearSummaryCard(summary: summary),
+                        ),
                     ],
                   );
                 },
@@ -2383,6 +2438,88 @@ class _WalletMetricCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _TaxYearSummaryCard extends StatelessWidget {
+  const _TaxYearSummaryCard({required this.summary});
+
+  final SolanaWalletTaxYearSummary summary;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final pnlColor = _pnlColor(summary.estimatedRealizedPnl, colorScheme);
+    return Card(
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.all(SpacingTokens.md),
+        child: Row(
+          children: [
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: colorScheme.primaryContainer,
+                borderRadius: BorderRadius.circular(RadiusTokens.sm),
+              ),
+              child: Icon(
+                Icons.calendar_today_rounded,
+                size: 18,
+                color: colorScheme.onPrimaryContainer,
+              ),
+            ),
+            const SizedBox(width: SpacingTokens.sm),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Tax ${summary.taxYear}',
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: SpacingTokens.xs),
+                  Text(
+                    '${summary.transactionCount} taxable tx',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: SpacingTokens.sm),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  _formatSignedUsd(summary.estimatedRealizedPnl),
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: pnlColor,
+                  ),
+                ),
+                Text(
+                  'Proceeds ${NumberFormat.currency(symbol: r'$').format(summary.estimatedProceeds)}',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                Text(
+                  'Basis ${NumberFormat.currency(symbol: r'$').format(summary.estimatedCostBasis)}',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

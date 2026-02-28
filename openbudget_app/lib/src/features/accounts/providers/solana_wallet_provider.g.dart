@@ -259,6 +259,93 @@ final class SolanaWalletTransactionsFamily extends $Family
   String toString() => r'solanaWalletTransactionsProvider';
 }
 
+@ProviderFor(solanaWalletTaxYearSummaries)
+final solanaWalletTaxYearSummariesProvider =
+    SolanaWalletTaxYearSummariesFamily._();
+
+final class SolanaWalletTaxYearSummariesProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<SolanaWalletTaxYearSummary>>,
+          List<SolanaWalletTaxYearSummary>,
+          FutureOr<List<SolanaWalletTaxYearSummary>>
+        >
+    with
+        $FutureModifier<List<SolanaWalletTaxYearSummary>>,
+        $FutureProvider<List<SolanaWalletTaxYearSummary>> {
+  SolanaWalletTaxYearSummariesProvider._({
+    required SolanaWalletTaxYearSummariesFamily super.from,
+    required (String, String) super.argument,
+  }) : super(
+         retry: null,
+         name: r'solanaWalletTaxYearSummariesProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$solanaWalletTaxYearSummariesHash();
+
+  @override
+  String toString() {
+    return r'solanaWalletTaxYearSummariesProvider'
+        ''
+        '$argument';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<List<SolanaWalletTaxYearSummary>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<SolanaWalletTaxYearSummary>> create(Ref ref) {
+    final argument = this.argument as (String, String);
+    return solanaWalletTaxYearSummaries(ref, argument.$1, argument.$2);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is SolanaWalletTaxYearSummariesProvider &&
+        other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$solanaWalletTaxYearSummariesHash() =>
+    r'557700d18862009fe0e59b06d3c0c46c595fcccd';
+
+final class SolanaWalletTaxYearSummariesFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          FutureOr<List<SolanaWalletTaxYearSummary>>,
+          (String, String)
+        > {
+  SolanaWalletTaxYearSummariesFamily._()
+    : super(
+        retry: null,
+        name: r'solanaWalletTaxYearSummariesProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  SolanaWalletTaxYearSummariesProvider call(String budgetId, String walletId) =>
+      SolanaWalletTaxYearSummariesProvider._(
+        argument: (budgetId, walletId),
+        from: this,
+      );
+
+  @override
+  String toString() => r'solanaWalletTaxYearSummariesProvider';
+}
+
 @ProviderFor(SolanaWalletActions)
 final solanaWalletActionsProvider = SolanaWalletActionsProvider._();
 
@@ -284,7 +371,7 @@ final class SolanaWalletActionsProvider
 }
 
 String _$solanaWalletActionsHash() =>
-    r'2013b6812817c6145108039d358f6423019df3d7';
+    r'930ea0fbcf3543454bb744be7482290bd203ed54';
 
 abstract class _$SolanaWalletActions extends $AsyncNotifier<void> {
   FutureOr<void> build();

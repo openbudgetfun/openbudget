@@ -91,6 +91,7 @@ solanaWallet:
   - sync:
   - listTransactions:
   - listHoldings:
+  - listTaxYearSummaries:
   - updateTransactionMetadata:
 transactionRule:
   - create:
