@@ -301,5 +301,131 @@ void main() {
       expect(find.text('Payment from Daily'), findsOneWidget);
       expect(find.text('Payments'), findsOneWidget);
     });
+    testWidgets('solana wallet dashboard renders with filters', (tester) async {
+      await tester.pumpWidget(_buildWalletSubject());
+      await tester.pumpAndSettle();
+
+      expect(find.text('Main Wallet'), findsWidgets);
+      expect(find.text('Holdings'), findsOneWidget);
+      expect(find.text(r'Hide dust assets (< $0.01)'), findsOneWidget);
+      expect(find.text('SOL'), findsOneWidget);
+      expect(find.text('DUST'), findsNothing);
+      await tester.scrollUntilVisible(
+        find.text('Transaction History'),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(find.text('Jupiter swap'), findsOneWidget);
+      expect(find.text('Transfer to friend'), findsOneWidget);
+    });
+
+    testWidgets('dust filter can reveal tiny-value holdings', (tester) async {
+      await tester.pumpWidget(_buildWalletSubject());
+      await tester.pumpAndSettle();
+
+      expect(find.text('DUST'), findsNothing);
+
+      await tester.tap(find.text(r'Hide dust assets (< $0.01)'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('DUST'), findsOneWidget);
+    });
+
+    testWidgets('wallet transaction search and category filter work', (
+      tester,
+    ) async {
+      await tester.pumpWidget(_buildWalletSubject());
+      await tester.pumpAndSettle();
+
+      final searchField = find.byWidgetPredicate(
+        (widget) =>
+            widget is TextField &&
+            widget.decoration?.hintText ==
+                'Search description, category, tags, memo',
+      );
+      await tester.scrollUntilVisible(
+        searchField,
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.enterText(searchField, 'jupiter');
+      await tester.pumpAndSettle();
+      expect(find.text('Jupiter swap'), findsOneWidget);
+      expect(find.text('Transfer to friend'), findsNothing);
+
+      await tester.enterText(searchField, '');
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Needs category'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Jupiter swap'), findsNothing);
+      expect(find.text('Transfer to friend'), findsOneWidget);
+    });
+
+    testWidgets('uncategorized wallet transactions show suggested category', (
+      tester,
+    ) async {
+      await tester.pumpWidget(_buildWalletSubject());
+      await tester.pumpAndSettle();
+
+      await tester.scrollUntilVisible(
+        find.text('Transfer to friend'),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+
+      expect(find.text('Suggested: Transfers'), findsOneWidget);
+    });
+
+    testWidgets('wallet metadata editor pre-fills suggested category', (
+      tester,
+    ) async {
+      final binding = tester.binding;
+      await binding.setSurfaceSize(const Size(1200, 2200));
+      addTearDown(() => binding.setSurfaceSize(null));
+
+      await tester.pumpWidget(_buildWalletSubject());
+      await tester.pumpAndSettle();
+
+      await tester.scrollUntilVisible(
+        find.text('Transfer to friend'),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      final transferCard = find.ancestor(
+        of: find.text('Transfer to friend'),
+        matching: find.byType(Card),
+      );
+      final editButton = find.descendant(
+        of: transferCard.first,
+        matching: find.byTooltip('Edit metadata'),
+      );
+      await tester.scrollUntilVisible(
+        editButton,
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.tap(editButton);
+      await tester.pumpAndSettle();
+      expect(find.byType(AlertDialog), findsOneWidget);
+
+      final suggestedCategoryField = find.byWidgetPredicate(
+        (widget) =>
+            widget is TextField &&
+            widget.decoration?.labelText == 'Category' &&
+            widget.controller?.text == 'Transfers',
+      );
+      expect(suggestedCategoryField, findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byType(AlertDialog),
+          matching: find.text('Suggested: Transfers'),
+        ),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.widgetWithText(TextButton, 'Cancel'));
+      await tester.pumpAndSettle();
+    });
   });
 }
