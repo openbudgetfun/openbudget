@@ -17,6 +17,8 @@ fields:
   txType: String
   ### Parsed transaction source from Helius.
   source: String
+  ### Confidence level for synthesized fallback interpretation.
+  interpretationConfidence: String?
   ### JSON-encoded list of detected program IDs.
   programsJson: String?
   ### JSON-encoded native transfer details.

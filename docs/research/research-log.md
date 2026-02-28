@@ -435,3 +435,35 @@
 
 - Captured additional Android screenshot in this cycle:
   - `docs/research/screenshots/2026-02-28/transaction-interpretation-cycle-login.png`
+
+## 2026-02-28 - Interpretation Confidence Metadata (Issue #165)
+
+### Backend Progress
+
+- Added `interpretationConfidence` to `SolanaWalletTransaction` protocol/table model.
+- Updated fallback interpretation engine to return structured output:
+  - `description`
+  - `confidence` (`high`, `medium`, `low`)
+- Confidence assignment policy:
+  - `high` for provider direct descriptions and strong protocol matches (for example Jupiter/Pump.fun/NFT marketplace signals).
+  - `medium` for wallet-flow directional heuristics (sent/received patterns).
+  - `low` for generic type/source fallbacks.
+- Added migration:
+  - `openbudget_server/migrations/20260228202406907`
+
+### App Progress
+
+- Transaction cards now show an interpretation confidence chip when available.
+
+### Validation Completed
+
+- `dart analyze openbudget_app openbudget_server openbudget_client` returned no issues.
+- Targeted widget regression slice passed:
+  - `openbudget_app/test/features/accounts/screens/account_detail_screen_test.dart`
+  - `openbudget_app/test/features/auth/screens/login_screen_test.dart`
+  - `openbudget_app/test/features/accounts/screens/add_account_screen_test.dart`
+
+### Mobile Evidence
+
+- Captured additional Android screenshot in this cycle:
+  - `docs/research/screenshots/2026-02-28/interpretation-confidence-cycle-login.png`

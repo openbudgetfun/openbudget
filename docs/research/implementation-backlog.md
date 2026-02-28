@@ -34,7 +34,7 @@ This backlog turns strategy into implementable epics with explicit acceptance cr
 - #157: In progress via #162: schema fields + first-pass estimated basis/realized/unrealized P&L engine + UI surfacing landed; FIFO lot accounting + tax-year summaries are now integrated, but tax-grade lot provenance/audit export is still pending.
 - #163: In progress: added holding-level pricing quality metadata and cached fallback valuation path; still need additional external pricing providers (beyond Helius) and explicit coverage summaries in API responses.
 - #164: Implemented coverage summary fields on sync result + wallet dashboard coverage/unpriced metrics; still need periodic historical coverage tracking and trend visualization.
-- #165: Opened for deeper protocol-template interpretation coverage and confidence labeling; initial foundation landed in #155 fallback description path.
+- #165: In progress: added `interpretationConfidence` to wallet transactions and surfaced confidence chips in transaction cards; deeper protocol templates/fixtures are still pending.
 - #158: Implemented Android flavors + iOS schemes + app bootstrap routing; added `default-flavor: dev` for tooling compatibility.
 - #159: Implemented environment-based client routing and secret lookup path (`passwords.yaml` + env fallback); deploy checklist still pending.
 

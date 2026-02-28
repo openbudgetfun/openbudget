@@ -25,6 +25,7 @@ abstract class SolanaWalletTransaction
     required this.description,
     required this.txType,
     required this.source,
+    this.interpretationConfidence,
     this.programsJson,
     this.nativeTransfersJson,
     this.tokenTransfersJson,
@@ -52,6 +53,7 @@ abstract class SolanaWalletTransaction
     required String description,
     required String txType,
     required String source,
+    String? interpretationConfidence,
     String? programsJson,
     String? nativeTransfersJson,
     String? tokenTransfersJson,
@@ -89,6 +91,8 @@ abstract class SolanaWalletTransaction
       description: jsonSerialization['description'] as String,
       txType: jsonSerialization['txType'] as String,
       source: jsonSerialization['source'] as String,
+      interpretationConfidence:
+          jsonSerialization['interpretationConfidence'] as String?,
       programsJson: jsonSerialization['programsJson'] as String?,
       nativeTransfersJson: jsonSerialization['nativeTransfersJson'] as String?,
       tokenTransfersJson: jsonSerialization['tokenTransfersJson'] as String?,
@@ -141,6 +145,9 @@ abstract class SolanaWalletTransaction
 
   /// Parsed transaction source from Helius.
   String source;
+
+  /// Confidence level for synthesized fallback interpretation.
+  String? interpretationConfidence;
 
   /// JSON-encoded list of detected program IDs.
   String? programsJson;
@@ -198,6 +205,7 @@ abstract class SolanaWalletTransaction
     String? description,
     String? txType,
     String? source,
+    String? interpretationConfidence,
     String? programsJson,
     String? nativeTransfersJson,
     String? tokenTransfersJson,
@@ -226,6 +234,8 @@ abstract class SolanaWalletTransaction
       'description': description,
       'txType': txType,
       'source': source,
+      if (interpretationConfidence != null)
+        'interpretationConfidence': interpretationConfidence,
       if (programsJson != null) 'programsJson': programsJson,
       if (nativeTransfersJson != null)
         'nativeTransfersJson': nativeTransfersJson,
@@ -258,6 +268,8 @@ abstract class SolanaWalletTransaction
       'description': description,
       'txType': txType,
       'source': source,
+      if (interpretationConfidence != null)
+        'interpretationConfidence': interpretationConfidence,
       if (programsJson != null) 'programsJson': programsJson,
       if (nativeTransfersJson != null)
         'nativeTransfersJson': nativeTransfersJson,
@@ -320,6 +332,7 @@ class _SolanaWalletTransactionImpl extends SolanaWalletTransaction {
     required String description,
     required String txType,
     required String source,
+    String? interpretationConfidence,
     String? programsJson,
     String? nativeTransfersJson,
     String? tokenTransfersJson,
@@ -344,6 +357,7 @@ class _SolanaWalletTransactionImpl extends SolanaWalletTransaction {
          description: description,
          txType: txType,
          source: source,
+         interpretationConfidence: interpretationConfidence,
          programsJson: programsJson,
          nativeTransfersJson: nativeTransfersJson,
          tokenTransfersJson: tokenTransfersJson,
@@ -374,6 +388,7 @@ class _SolanaWalletTransactionImpl extends SolanaWalletTransaction {
     String? description,
     String? txType,
     String? source,
+    Object? interpretationConfidence = _Undefined,
     Object? programsJson = _Undefined,
     Object? nativeTransfersJson = _Undefined,
     Object? tokenTransfersJson = _Undefined,
@@ -399,6 +414,9 @@ class _SolanaWalletTransactionImpl extends SolanaWalletTransaction {
       description: description ?? this.description,
       txType: txType ?? this.txType,
       source: source ?? this.source,
+      interpretationConfidence: interpretationConfidence is String?
+          ? interpretationConfidence
+          : this.interpretationConfidence,
       programsJson: programsJson is String? ? programsJson : this.programsJson,
       nativeTransfersJson: nativeTransfersJson is String?
           ? nativeTransfersJson
@@ -473,6 +491,12 @@ class SolanaWalletTransactionUpdateTable
     table.source,
     value,
   );
+
+  _i1.ColumnValue<String, String> interpretationConfidence(String? value) =>
+      _i1.ColumnValue(
+        table.interpretationConfidence,
+        value,
+      );
 
   _i1.ColumnValue<String, String> programsJson(String? value) =>
       _i1.ColumnValue(
@@ -589,6 +613,10 @@ class SolanaWalletTransactionTable extends _i1.Table<_i1.UuidValue?> {
       'source',
       this,
     );
+    interpretationConfidence = _i1.ColumnString(
+      'interpretationConfidence',
+      this,
+    );
     programsJson = _i1.ColumnString(
       'programsJson',
       this,
@@ -673,6 +701,9 @@ class SolanaWalletTransactionTable extends _i1.Table<_i1.UuidValue?> {
   /// Parsed transaction source from Helius.
   late final _i1.ColumnString source;
 
+  /// Confidence level for synthesized fallback interpretation.
+  late final _i1.ColumnString interpretationConfidence;
+
   /// JSON-encoded list of detected program IDs.
   late final _i1.ColumnString programsJson;
 
@@ -724,6 +755,7 @@ class SolanaWalletTransactionTable extends _i1.Table<_i1.UuidValue?> {
     description,
     txType,
     source,
+    interpretationConfidence,
     programsJson,
     nativeTransfersJson,
     tokenTransfersJson,
