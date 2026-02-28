@@ -18,6 +18,7 @@ This backlog turns strategy into implementable epics with explicit acceptance cr
 - [#157](https://github.com/openbudgetfun/openbudget/issues/157) Token/Token-2022 P&L and tax-lot foundation.
 - [#158](https://github.com/openbudgetfun/openbudget/issues/158) Dev/prod flavor system across Android + iOS schemes.
 - [#159](https://github.com/openbudgetfun/openbudget/issues/159) Provider config + secret hygiene + deploy checklist.
+- [#161](https://github.com/openbudgetfun/openbudget/issues/161) iOS flavor parity: side-by-side dev/prod app install.
 - [#162](https://github.com/openbudgetfun/openbudget/issues/162) Solana token cost basis + realized/unrealized P&L pipeline.
 - [#163](https://github.com/openbudgetfun/openbudget/issues/163) Multi-source Solana asset pricing service with fallback + quality metadata.
 - [#164](https://github.com/openbudgetfun/openbudget/issues/164) Wallet pricing coverage summary in API and UI.
@@ -35,7 +36,8 @@ This backlog turns strategy into implementable epics with explicit acceptance cr
 - #163: In progress: added holding-level pricing quality metadata, cached fallback valuation path, and Jupiter price API fallback for missing fungible token prices; still need dedicated NFT/illiquid asset pricing providers and historical coverage tracking.
 - #164: Implemented coverage summary fields on sync result + wallet dashboard coverage/unpriced metrics; still need periodic historical coverage tracking and trend visualization.
 - #165: In progress: extracted interpreter module + added fixture-style unit tests across protocol patterns (Jupiter, Pump.fun, Raydium, Orca, directional SOL transfer, NFT purchase flow, generic fallback, provider-direct descriptions); pending work is broader program-ID template expansion and richer per-protocol amount decoding.
-- #158: Implemented Android flavors + iOS schemes + app bootstrap routing; added `default-flavor: dev` for tooling compatibility.
+- #158: Implemented Android flavors + app bootstrap routing + iOS flavor configurations; `default-flavor: dev` remains configured for tooling compatibility.
+- #161: Implemented iOS side-by-side flavor parity with distinct bundle IDs/display names and validated `flutter run` flows for both `dev` and `prod` schemes.
 - #159: Implemented environment-based client routing and secret lookup path (`passwords.yaml` + env fallback); deploy checklist still pending.
 
 ## Epic P0.1 - Currency Safety Invariants (Server)

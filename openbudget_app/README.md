@@ -11,6 +11,11 @@ OpenBudget uses environment entrypoints:
 - `pubspec.yaml` sets `flutter.default-flavor: dev` for tooling that runs
   without explicit `--flavor`
 
+iOS flavor bundle identifiers:
+
+- `dev` -> `com.openbudget.app.dev` (`OpenBudget Dev`)
+- `prod` -> `com.openbudget.app` (`OpenBudget`)
+
 ## Run Commands
 
 Run from repo root with devenv scripts:

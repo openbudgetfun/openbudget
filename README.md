@@ -98,6 +98,8 @@ Environment routing defaults:
 
 - `main_dev.dart` -> `https://api-staging.openbudget.app/`
 - `main_prod.dart` / `main.dart` -> `https://api.openbudget.app/`
+- iOS `dev` flavor bundle id: `com.openbudget.app.dev` (`OpenBudget Dev`)
+- iOS `prod` flavor bundle id: `com.openbudget.app` (`OpenBudget`)
 - `openbudget_app/pubspec.yaml` sets `default-flavor: dev` for tooling that
   cannot pass `--flavor`
 - Override for any build: `--dart-define=API_URL=https://your-api-host`

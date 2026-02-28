@@ -572,3 +572,39 @@
 
 - Captured additional Android screenshot in this cycle:
   - `docs/research/screenshots/2026-02-28/jupiter-pricing-fallback-cycle-login.png`
+
+## 2026-02-28 - iOS Flavor Parity and Side-by-Side Install (Issue #161)
+
+### Platform Progress
+
+- Added full iOS flavor build configuration matrix:
+  - `Debug-dev`, `Release-dev`, `Profile-dev`
+  - `Debug-prod`, `Release-prod`, `Profile-prod`
+- Updated iOS schemes to map to flavor-specific build configs:
+  - `dev.xcscheme` -> `*-dev` configs
+  - `prod.xcscheme` -> `*-prod` configs
+- Added flavor-specific iOS bundle/display separation:
+  - Dev: `com.openbudget.app.dev` / `OpenBudget Dev`
+  - Prod: `com.openbudget.app` / `OpenBudget`
+- Added flavor-specific iOS xcconfig wiring and Podfile configuration mapping for dev/prod build variants.
+
+### Validation Completed
+
+- `pod install` succeeded after flavor config expansion.
+- `flutter run --flavor dev -t lib/main_dev.dart -d 63886201-1983-42F2-8DEA-51FBF6C0191C --no-resident` succeeded.
+- `flutter run --flavor prod -t lib/main_prod.dart -d 63886201-1983-42F2-8DEA-51FBF6C0191C --no-resident` succeeded.
+- Simulator app list confirms both bundle IDs present concurrently:
+  - `com.openbudget.app`
+  - `com.openbudget.app.dev`
+
+### Documentation Updates
+
+- Updated flavor runbook and README references:
+  - `docs/solana-and-flavors-setup.md`
+  - `README.md`
+  - `openbudget_app/README.md`
+
+### Mobile Evidence
+
+- Captured additional iOS simulator screenshot in this cycle:
+  - `docs/research/screenshots/2026-02-28/ios-flavor-parity-dev-login.png`
