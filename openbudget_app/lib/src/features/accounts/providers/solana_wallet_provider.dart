@@ -61,6 +61,23 @@ Future<List<SolanaWalletTransaction>> solanaWalletTransactions(
 }
 
 @riverpod
+Future<List<SolanaWalletTaxYearSummary>> solanaWalletTaxYearSummaries(
+  Ref ref,
+  String budgetId,
+  String walletId,
+) async {
+  final client = ref.read(serverpodClientProvider);
+  // Serverpod API requires UuidValue which is experimental in uuid package.
+  // ignore: experimental_member_use
+  final budgetUuid = UuidValue.fromString(budgetId);
+  // Serverpod API requires UuidValue which is experimental in uuid package.
+  // ignore: experimental_member_use
+  final walletUuid = UuidValue.fromString(walletId);
+
+  return client.solanaWallet.listTaxYearSummaries(budgetUuid, walletUuid);
+}
+
+@riverpod
 class SolanaWalletActions extends _$SolanaWalletActions {
   @override
   FutureOr<void> build() {}
@@ -86,6 +103,7 @@ class SolanaWalletActions extends _$SolanaWalletActions {
     ref
       ..invalidate(solanaWalletTransactionsProvider(budgetId, walletId))
       ..invalidate(solanaWalletHoldingsProvider(budgetId, walletId))
+      ..invalidate(solanaWalletTaxYearSummariesProvider(budgetId, walletId))
       ..invalidate(accountListProvider(budgetId));
 
     return result;

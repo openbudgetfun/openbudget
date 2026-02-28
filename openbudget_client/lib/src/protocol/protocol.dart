@@ -23,43 +23,46 @@ import 'recurring_transactions/recurring_transaction.dart' as _i10;
 import 'solana_wallets/solana_wallet.dart' as _i11;
 import 'solana_wallets/solana_wallet_holding.dart' as _i12;
 import 'solana_wallets/solana_wallet_sync_result.dart' as _i13;
-import 'solana_wallets/solana_wallet_transaction.dart' as _i14;
-import 'transaction_rules/transaction_rule.dart' as _i15;
-import 'transactions/import_row.dart' as _i16;
-import 'transactions/split_item.dart' as _i17;
-import 'transactions/transaction.dart' as _i18;
-import 'package:openbudget_client/src/protocol/accounts/account.dart' as _i19;
+import 'solana_wallets/solana_wallet_tax_year_summary.dart' as _i14;
+import 'solana_wallets/solana_wallet_transaction.dart' as _i15;
+import 'transaction_rules/transaction_rule.dart' as _i16;
+import 'transactions/import_row.dart' as _i17;
+import 'transactions/split_item.dart' as _i18;
+import 'transactions/transaction.dart' as _i19;
+import 'package:openbudget_client/src/protocol/accounts/account.dart' as _i20;
 import 'package:openbudget_client/src/protocol/budget_templates/budget_template.dart'
-    as _i20;
-import 'package:openbudget_client/src/protocol/monthly_allocations/monthly_allocation.dart'
     as _i21;
-import 'package:openbudget_client/src/protocol/budgets/budget.dart' as _i22;
+import 'package:openbudget_client/src/protocol/monthly_allocations/monthly_allocation.dart'
+    as _i22;
+import 'package:openbudget_client/src/protocol/budgets/budget.dart' as _i23;
 import 'package:openbudget_client/src/protocol/categories/category.dart'
-    as _i23;
-import 'package:openbudget_client/src/protocol/envelope_goals/envelope_goal.dart'
     as _i24;
-import 'package:openbudget_client/src/protocol/envelopes/envelope.dart' as _i25;
-import 'package:openbudget_client/src/protocol/payees/payee.dart' as _i26;
+import 'package:openbudget_client/src/protocol/envelope_goals/envelope_goal.dart'
+    as _i25;
+import 'package:openbudget_client/src/protocol/envelopes/envelope.dart' as _i26;
+import 'package:openbudget_client/src/protocol/payees/payee.dart' as _i27;
 import 'package:openbudget_client/src/protocol/recurring_transactions/recurring_transaction.dart'
-    as _i27;
-import 'package:openbudget_client/src/protocol/solana_wallets/solana_wallet.dart'
     as _i28;
-import 'package:openbudget_client/src/protocol/solana_wallets/solana_wallet_transaction.dart'
+import 'package:openbudget_client/src/protocol/solana_wallets/solana_wallet.dart'
     as _i29;
-import 'package:openbudget_client/src/protocol/solana_wallets/solana_wallet_holding.dart'
+import 'package:openbudget_client/src/protocol/solana_wallets/solana_wallet_transaction.dart'
     as _i30;
-import 'package:openbudget_client/src/protocol/transaction_rules/transaction_rule.dart'
+import 'package:openbudget_client/src/protocol/solana_wallets/solana_wallet_holding.dart'
     as _i31;
-import 'package:openbudget_client/src/protocol/transactions/transaction.dart'
+import 'package:openbudget_client/src/protocol/solana_wallets/solana_wallet_tax_year_summary.dart'
     as _i32;
-import 'package:openbudget_client/src/protocol/transactions/split_item.dart'
+import 'package:openbudget_client/src/protocol/transaction_rules/transaction_rule.dart'
     as _i33;
-import 'package:openbudget_client/src/protocol/transactions/import_row.dart'
+import 'package:openbudget_client/src/protocol/transactions/transaction.dart'
     as _i34;
-import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart'
+import 'package:openbudget_client/src/protocol/transactions/split_item.dart'
     as _i35;
-import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
+import 'package:openbudget_client/src/protocol/transactions/import_row.dart'
     as _i36;
+import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart'
+    as _i37;
+import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
+    as _i38;
 export 'accounts/account.dart';
 export 'budget_templates/budget_template.dart';
 export 'budgets/budget.dart';
@@ -72,6 +75,7 @@ export 'recurring_transactions/recurring_transaction.dart';
 export 'solana_wallets/solana_wallet.dart';
 export 'solana_wallets/solana_wallet_holding.dart';
 export 'solana_wallets/solana_wallet_sync_result.dart';
+export 'solana_wallets/solana_wallet_tax_year_summary.dart';
 export 'solana_wallets/solana_wallet_transaction.dart';
 export 'transaction_rules/transaction_rule.dart';
 export 'transactions/import_row.dart';
@@ -149,20 +153,23 @@ class Protocol extends _i1.SerializationManager {
     if (t == _i13.SolanaWalletSyncResult) {
       return _i13.SolanaWalletSyncResult.fromJson(data) as T;
     }
-    if (t == _i14.SolanaWalletTransaction) {
-      return _i14.SolanaWalletTransaction.fromJson(data) as T;
+    if (t == _i14.SolanaWalletTaxYearSummary) {
+      return _i14.SolanaWalletTaxYearSummary.fromJson(data) as T;
     }
-    if (t == _i15.TransactionRule) {
-      return _i15.TransactionRule.fromJson(data) as T;
+    if (t == _i15.SolanaWalletTransaction) {
+      return _i15.SolanaWalletTransaction.fromJson(data) as T;
     }
-    if (t == _i16.ImportRow) {
-      return _i16.ImportRow.fromJson(data) as T;
+    if (t == _i16.TransactionRule) {
+      return _i16.TransactionRule.fromJson(data) as T;
     }
-    if (t == _i17.SplitItem) {
-      return _i17.SplitItem.fromJson(data) as T;
+    if (t == _i17.ImportRow) {
+      return _i17.ImportRow.fromJson(data) as T;
     }
-    if (t == _i18.Transaction) {
-      return _i18.Transaction.fromJson(data) as T;
+    if (t == _i18.SplitItem) {
+      return _i18.SplitItem.fromJson(data) as T;
+    }
+    if (t == _i19.Transaction) {
+      return _i19.Transaction.fromJson(data) as T;
     }
     if (t == _i1.getType<_i2.Account?>()) {
       return (data != null ? _i2.Account.fromJson(data) : null) as T;
@@ -203,119 +210,131 @@ class Protocol extends _i1.SerializationManager {
       return (data != null ? _i13.SolanaWalletSyncResult.fromJson(data) : null)
           as T;
     }
-    if (t == _i1.getType<_i14.SolanaWalletTransaction?>()) {
-      return (data != null ? _i14.SolanaWalletTransaction.fromJson(data) : null)
+    if (t == _i1.getType<_i14.SolanaWalletTaxYearSummary?>()) {
+      return (data != null
+              ? _i14.SolanaWalletTaxYearSummary.fromJson(data)
+              : null)
           as T;
     }
-    if (t == _i1.getType<_i15.TransactionRule?>()) {
-      return (data != null ? _i15.TransactionRule.fromJson(data) : null) as T;
-    }
-    if (t == _i1.getType<_i16.ImportRow?>()) {
-      return (data != null ? _i16.ImportRow.fromJson(data) : null) as T;
-    }
-    if (t == _i1.getType<_i17.SplitItem?>()) {
-      return (data != null ? _i17.SplitItem.fromJson(data) : null) as T;
-    }
-    if (t == _i1.getType<_i18.Transaction?>()) {
-      return (data != null ? _i18.Transaction.fromJson(data) : null) as T;
-    }
-    if (t == List<_i19.Account>) {
-      return (data as List).map((e) => deserialize<_i19.Account>(e)).toList()
+    if (t == _i1.getType<_i15.SolanaWalletTransaction?>()) {
+      return (data != null ? _i15.SolanaWalletTransaction.fromJson(data) : null)
           as T;
     }
-    if (t == List<_i20.BudgetTemplate>) {
+    if (t == _i1.getType<_i16.TransactionRule?>()) {
+      return (data != null ? _i16.TransactionRule.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i17.ImportRow?>()) {
+      return (data != null ? _i17.ImportRow.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i18.SplitItem?>()) {
+      return (data != null ? _i18.SplitItem.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i19.Transaction?>()) {
+      return (data != null ? _i19.Transaction.fromJson(data) : null) as T;
+    }
+    if (t == List<_i20.Account>) {
+      return (data as List).map((e) => deserialize<_i20.Account>(e)).toList()
+          as T;
+    }
+    if (t == List<_i21.BudgetTemplate>) {
       return (data as List)
-              .map((e) => deserialize<_i20.BudgetTemplate>(e))
+              .map((e) => deserialize<_i21.BudgetTemplate>(e))
               .toList()
           as T;
     }
-    if (t == List<_i21.MonthlyAllocation>) {
+    if (t == List<_i22.MonthlyAllocation>) {
       return (data as List)
-              .map((e) => deserialize<_i21.MonthlyAllocation>(e))
+              .map((e) => deserialize<_i22.MonthlyAllocation>(e))
               .toList()
           as T;
     }
-    if (t == List<_i22.Budget>) {
-      return (data as List).map((e) => deserialize<_i22.Budget>(e)).toList()
+    if (t == List<_i23.Budget>) {
+      return (data as List).map((e) => deserialize<_i23.Budget>(e)).toList()
           as T;
     }
-    if (t == List<_i23.Category>) {
-      return (data as List).map((e) => deserialize<_i23.Category>(e)).toList()
+    if (t == List<_i24.Category>) {
+      return (data as List).map((e) => deserialize<_i24.Category>(e)).toList()
           as T;
     }
     if (t == List<_i1.UuidValue>) {
       return (data as List).map((e) => deserialize<_i1.UuidValue>(e)).toList()
           as T;
     }
-    if (t == List<_i24.EnvelopeGoal>) {
+    if (t == List<_i25.EnvelopeGoal>) {
       return (data as List)
-              .map((e) => deserialize<_i24.EnvelopeGoal>(e))
+              .map((e) => deserialize<_i25.EnvelopeGoal>(e))
               .toList()
           as T;
     }
-    if (t == List<_i25.Envelope>) {
-      return (data as List).map((e) => deserialize<_i25.Envelope>(e)).toList()
+    if (t == List<_i26.Envelope>) {
+      return (data as List).map((e) => deserialize<_i26.Envelope>(e)).toList()
           as T;
     }
     if (t == List<String>) {
       return (data as List).map((e) => deserialize<String>(e)).toList() as T;
     }
-    if (t == List<_i26.Payee>) {
-      return (data as List).map((e) => deserialize<_i26.Payee>(e)).toList()
+    if (t == List<_i27.Payee>) {
+      return (data as List).map((e) => deserialize<_i27.Payee>(e)).toList()
           as T;
     }
-    if (t == List<_i27.RecurringTransaction>) {
+    if (t == List<_i28.RecurringTransaction>) {
       return (data as List)
-              .map((e) => deserialize<_i27.RecurringTransaction>(e))
+              .map((e) => deserialize<_i28.RecurringTransaction>(e))
               .toList()
           as T;
     }
-    if (t == List<_i28.SolanaWallet>) {
+    if (t == List<_i29.SolanaWallet>) {
       return (data as List)
-              .map((e) => deserialize<_i28.SolanaWallet>(e))
+              .map((e) => deserialize<_i29.SolanaWallet>(e))
               .toList()
           as T;
     }
-    if (t == List<_i29.SolanaWalletTransaction>) {
+    if (t == List<_i30.SolanaWalletTransaction>) {
       return (data as List)
-              .map((e) => deserialize<_i29.SolanaWalletTransaction>(e))
+              .map((e) => deserialize<_i30.SolanaWalletTransaction>(e))
               .toList()
           as T;
     }
-    if (t == List<_i30.SolanaWalletHolding>) {
+    if (t == List<_i31.SolanaWalletHolding>) {
       return (data as List)
-              .map((e) => deserialize<_i30.SolanaWalletHolding>(e))
+              .map((e) => deserialize<_i31.SolanaWalletHolding>(e))
               .toList()
           as T;
     }
-    if (t == List<_i31.TransactionRule>) {
+    if (t == List<_i32.SolanaWalletTaxYearSummary>) {
       return (data as List)
-              .map((e) => deserialize<_i31.TransactionRule>(e))
+              .map((e) => deserialize<_i32.SolanaWalletTaxYearSummary>(e))
               .toList()
           as T;
     }
-    if (t == List<_i32.Transaction>) {
+    if (t == List<_i33.TransactionRule>) {
       return (data as List)
-              .map((e) => deserialize<_i32.Transaction>(e))
+              .map((e) => deserialize<_i33.TransactionRule>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_i34.Transaction>) {
+      return (data as List)
+              .map((e) => deserialize<_i34.Transaction>(e))
               .toList()
           as T;
     }
     if (t == List<int>) {
       return (data as List).map((e) => deserialize<int>(e)).toList() as T;
     }
-    if (t == List<_i33.SplitItem>) {
-      return (data as List).map((e) => deserialize<_i33.SplitItem>(e)).toList()
+    if (t == List<_i35.SplitItem>) {
+      return (data as List).map((e) => deserialize<_i35.SplitItem>(e)).toList()
           as T;
     }
-    if (t == List<_i34.ImportRow>) {
-      return (data as List).map((e) => deserialize<_i34.ImportRow>(e)).toList()
+    if (t == List<_i36.ImportRow>) {
+      return (data as List).map((e) => deserialize<_i36.ImportRow>(e)).toList()
           as T;
     }
     try {
-      return _i35.Protocol().deserialize<T>(data, t);
+      return _i37.Protocol().deserialize<T>(data, t);
     } on _i1.DeserializationTypeNotFoundException catch (_) {}
     try {
-      return _i36.Protocol().deserialize<T>(data, t);
+      return _i38.Protocol().deserialize<T>(data, t);
     } on _i1.DeserializationTypeNotFoundException catch (_) {}
     return super.deserialize<T>(data, t);
   }
@@ -334,11 +353,12 @@ class Protocol extends _i1.SerializationManager {
       _i11.SolanaWallet => 'SolanaWallet',
       _i12.SolanaWalletHolding => 'SolanaWalletHolding',
       _i13.SolanaWalletSyncResult => 'SolanaWalletSyncResult',
-      _i14.SolanaWalletTransaction => 'SolanaWalletTransaction',
-      _i15.TransactionRule => 'TransactionRule',
-      _i16.ImportRow => 'ImportRow',
-      _i17.SplitItem => 'SplitItem',
-      _i18.Transaction => 'Transaction',
+      _i14.SolanaWalletTaxYearSummary => 'SolanaWalletTaxYearSummary',
+      _i15.SolanaWalletTransaction => 'SolanaWalletTransaction',
+      _i16.TransactionRule => 'TransactionRule',
+      _i17.ImportRow => 'ImportRow',
+      _i18.SplitItem => 'SplitItem',
+      _i19.Transaction => 'Transaction',
       _ => null,
     };
   }
@@ -377,22 +397,24 @@ class Protocol extends _i1.SerializationManager {
         return 'SolanaWalletHolding';
       case _i13.SolanaWalletSyncResult():
         return 'SolanaWalletSyncResult';
-      case _i14.SolanaWalletTransaction():
+      case _i14.SolanaWalletTaxYearSummary():
+        return 'SolanaWalletTaxYearSummary';
+      case _i15.SolanaWalletTransaction():
         return 'SolanaWalletTransaction';
-      case _i15.TransactionRule():
+      case _i16.TransactionRule():
         return 'TransactionRule';
-      case _i16.ImportRow():
+      case _i17.ImportRow():
         return 'ImportRow';
-      case _i17.SplitItem():
+      case _i18.SplitItem():
         return 'SplitItem';
-      case _i18.Transaction():
+      case _i19.Transaction():
         return 'Transaction';
     }
-    className = _i35.Protocol().getClassNameForObject(data);
+    className = _i37.Protocol().getClassNameForObject(data);
     if (className != null) {
       return 'serverpod_auth_idp.$className';
     }
-    className = _i36.Protocol().getClassNameForObject(data);
+    className = _i38.Protocol().getClassNameForObject(data);
     if (className != null) {
       return 'serverpod_auth_core.$className';
     }
@@ -441,28 +463,31 @@ class Protocol extends _i1.SerializationManager {
     if (dataClassName == 'SolanaWalletSyncResult') {
       return deserialize<_i13.SolanaWalletSyncResult>(data['data']);
     }
+    if (dataClassName == 'SolanaWalletTaxYearSummary') {
+      return deserialize<_i14.SolanaWalletTaxYearSummary>(data['data']);
+    }
     if (dataClassName == 'SolanaWalletTransaction') {
-      return deserialize<_i14.SolanaWalletTransaction>(data['data']);
+      return deserialize<_i15.SolanaWalletTransaction>(data['data']);
     }
     if (dataClassName == 'TransactionRule') {
-      return deserialize<_i15.TransactionRule>(data['data']);
+      return deserialize<_i16.TransactionRule>(data['data']);
     }
     if (dataClassName == 'ImportRow') {
-      return deserialize<_i16.ImportRow>(data['data']);
+      return deserialize<_i17.ImportRow>(data['data']);
     }
     if (dataClassName == 'SplitItem') {
-      return deserialize<_i17.SplitItem>(data['data']);
+      return deserialize<_i18.SplitItem>(data['data']);
     }
     if (dataClassName == 'Transaction') {
-      return deserialize<_i18.Transaction>(data['data']);
+      return deserialize<_i19.Transaction>(data['data']);
     }
     if (dataClassName.startsWith('serverpod_auth_idp.')) {
       data['className'] = dataClassName.substring(19);
-      return _i35.Protocol().deserializeByClassName(data);
+      return _i37.Protocol().deserializeByClassName(data);
     }
     if (dataClassName.startsWith('serverpod_auth_core.')) {
       data['className'] = dataClassName.substring(20);
-      return _i36.Protocol().deserializeByClassName(data);
+      return _i38.Protocol().deserializeByClassName(data);
     }
     return super.deserializeByClassName(data);
   }
@@ -477,10 +502,10 @@ class Protocol extends _i1.SerializationManager {
       return null;
     }
     try {
-      return _i35.Protocol().mapRecordToJson(record);
+      return _i37.Protocol().mapRecordToJson(record);
     } catch (_) {}
     try {
-      return _i36.Protocol().mapRecordToJson(record);
+      return _i38.Protocol().mapRecordToJson(record);
     } catch (_) {}
     throw Exception('Unsupported record type ${record.runtimeType}');
   }

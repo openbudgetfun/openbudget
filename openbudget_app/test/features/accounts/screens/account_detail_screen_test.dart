@@ -148,6 +148,7 @@ Widget _buildWalletSubject({
   SolanaWallet? wallet,
   List<SolanaWalletHolding>? holdings,
   List<SolanaWalletTransaction>? walletTransactions,
+  List<SolanaWalletTaxYearSummary>? taxYearSummaries,
 }) {
   final router = GoRouter(
     initialLocation: '/budgets/$_budgetId/accounts/$_accountId',
@@ -253,6 +254,20 @@ Widget _buildWalletSubject({
         ),
       ];
 
+  final testTaxYearSummaries =
+      taxYearSummaries ??
+      [
+        SolanaWalletTaxYearSummary(
+          walletId: _walletUuid,
+          taxYear: 2026,
+          transactionCount: 1,
+          estimatedRealizedPnl: 8,
+          estimatedProceeds: 18,
+          estimatedCostBasis: 10,
+          pnlCurrency: 'USD',
+        ),
+      ];
+
   return ProviderScope(
     overrides: [
       accountListProvider.overrideWith(
@@ -276,6 +291,9 @@ Widget _buildWalletSubject({
       ),
       solanaWalletTransactionsProvider.overrideWith(
         (ref, args) async => testWalletTransactions,
+      ),
+      solanaWalletTaxYearSummariesProvider.overrideWith(
+        (ref, args) async => testTaxYearSummaries,
       ),
     ],
     child: MaterialApp.router(
@@ -454,6 +472,11 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Main Wallet'), findsWidgets);
+      await tester.scrollUntilVisible(
+        find.text('Holdings'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
       expect(find.text('Holdings'), findsOneWidget);
       await tester.scrollUntilVisible(
         find.text(r'Hide dust assets (< $0.01)'),
@@ -476,7 +499,7 @@ void main() {
       expect(find.text('Jupiter swap'), findsOneWidget);
       expect(find.text('Transfer to friend'), findsOneWidget);
       expect(find.textContaining('P&L +'), findsWidgets);
-      expect(find.text('Tax 2026'), findsOneWidget);
+      expect(find.text('Tax 2026'), findsWidgets);
       expect(find.textContaining('Basis'), findsWidgets);
     });
 

@@ -1,0 +1,10 @@
+### Estimated realized wallet P&L grouped by tax year.
+class: SolanaWalletTaxYearSummary
+fields:
+  walletId: UuidValue
+  taxYear: int
+  transactionCount: int
+  estimatedRealizedPnl: double
+  estimatedProceeds: double
+  estimatedCostBasis: double
+  pnlCurrency: String

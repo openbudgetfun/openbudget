@@ -308,3 +308,36 @@
 ### Validation Note
 
 - `dart test` in `openbudget_server` currently exits during integration suite loading in this environment (no per-test assertion output). App/server compile and targeted widget suites are still passing.
+
+## 2026-02-28 - Solana FIFO Lots + Tax-Year Summary Surfacing
+
+### Backend Engine Progress
+
+- Refactored estimated basis logic in `SolanaWalletService` from aggregate-average state to FIFO lot tracking:
+  - introduced per-asset FIFO lots for acquisition/disposal matching.
+  - disposal events now consume lots in FIFO order.
+  - holding-level basis estimation now derives from remaining lots, with warnings when on-chain balances diverge from tracked lots.
+- Added tax-year summary API:
+  - protocol model: `SolanaWalletTaxYearSummary`.
+  - endpoint/service method: `solanaWallet.listTaxYearSummaries(budgetId, walletId)`.
+  - server/client generated protocol artifacts updated.
+
+### App Surfacing Progress
+
+- Added `solanaWalletTaxYearSummariesProvider` and integrated it into the Solana wallet detail UI.
+- Added a dedicated wallet section: `Tax Year P&L (estimated)` with per-year cards (disposals, proceeds, basis, realized P&L).
+- Wallet dashboard tests updated for the new section and revised scroll/assertion behavior.
+
+### Validation Completed
+
+- `dart analyze openbudget_app openbudget_server openbudget_client` returned no issues.
+- Targeted widget regression slice passed:
+  - `openbudget_app/test/features/accounts/screens/account_detail_screen_test.dart`
+  - `openbudget_app/test/features/auth/screens/login_screen_test.dart`
+  - `openbudget_app/test/features/accounts/screens/add_account_screen_test.dart`
+
+### Mobile Evidence
+
+- Captured fresh Android device screenshots during this cycle:
+  - `docs/research/screenshots/2026-02-28/solana-tax-year-cycle-login.png`
+  - `docs/research/screenshots/2026-02-28/solana-tax-year-cycle-login-email-focus.png`

@@ -143,6 +143,63 @@ class SolanaWalletService {
     return holdings;
   }
 
+  /// Returns estimated realized P&L grouped by tax year for a wallet.
+  static Future<List<SolanaWalletTaxYearSummary>> listTaxYearSummaries(
+    Session session, {
+    required UuidValue walletId,
+    required UuidValue budgetId,
+  }) async {
+    await _getWalletOrThrow(session, walletId: walletId, budgetId: budgetId);
+
+    final transactions = await SolanaWalletTransaction.db.find(
+      session,
+      where: (t) => t.walletId.equals(walletId) & t.budgetId.equals(budgetId),
+      orderBy: (t) => t.taxYear,
+      orderDescending: true,
+    );
+
+    final byYear = <int, _TaxYearAccumulator>{};
+    for (final tx in transactions) {
+      final taxYear = tx.taxYear;
+      if (taxYear == null) continue;
+      final hasEstimate =
+          tx.estimatedRealizedPnl != null ||
+          tx.estimatedProceeds != null ||
+          tx.estimatedCostBasis != null;
+      if (!hasEstimate) continue;
+
+      final bucket = byYear.putIfAbsent(taxYear, _TaxYearAccumulator.new)
+        ..transactionCount += 1
+        ..estimatedRealizedPnl += tx.estimatedRealizedPnl ?? 0
+        ..estimatedProceeds += tx.estimatedProceeds ?? 0
+        ..estimatedCostBasis += tx.estimatedCostBasis ?? 0;
+      final currency = tx.pnlCurrency?.trim();
+      if (bucket.pnlCurrency == null &&
+          currency != null &&
+          currency.isNotEmpty) {
+        bucket.pnlCurrency = currency.toUpperCase();
+      }
+    }
+
+    final summaries =
+        byYear.entries
+            .map(
+              (entry) => SolanaWalletTaxYearSummary(
+                walletId: walletId,
+                taxYear: entry.key,
+                transactionCount: entry.value.transactionCount,
+                estimatedRealizedPnl: entry.value.estimatedRealizedPnl,
+                estimatedProceeds: entry.value.estimatedProceeds,
+                estimatedCostBasis: entry.value.estimatedCostBasis,
+                pnlCurrency: entry.value.pnlCurrency ?? 'USD',
+              ),
+            )
+            .toList(growable: false)
+          ..sort((left, right) => right.taxYear.compareTo(left.taxYear));
+
+    return summaries;
+  }
+
   /// Updates user metadata for a wallet transaction.
   static Future<SolanaWalletTransaction> updateTransactionMetadata(
     Session session, {
@@ -495,7 +552,7 @@ class SolanaWalletService {
           )
           ..sort(_transactionSort);
 
-    final stateByAsset = <String, _CostBasisState>{};
+    final stateByAsset = <String, _AssetFifoState>{};
     final warningSet = warnings.toSet();
 
     for (final tx in transactions) {
@@ -539,29 +596,19 @@ class SolanaWalletService {
         final deltaUi = _toUiAmount(deltaRaw, holding.decimals);
         if (deltaUi.abs() <= _pnlEpsilon) continue;
 
-        final state = stateByAsset.putIfAbsent(mint, _CostBasisState.new);
+        final state = stateByAsset.putIfAbsent(mint, _AssetFifoState.new);
         if (deltaUi > 0) {
-          final addedCostBasis = deltaUi * pricePerToken;
-          state
-            ..quantityUi += deltaUi
-            ..costBasis += addedCostBasis;
+          state.addLot(quantityUi: deltaUi, unitCost: pricePerToken);
           continue;
         }
 
         final disposedUi = deltaUi.abs();
-        final availableQuantity = state.quantityUi;
-        final averageCostPerUnit = availableQuantity > _pnlEpsilon
-            ? state.costBasis / availableQuantity
-            : 0.0;
-        final matchedQuantity = math.min(disposedUi, availableQuantity);
-        final removedCostBasis = matchedQuantity * averageCostPerUnit;
+        final availableQuantity = state.totalQuantity;
+        final removedCostBasis = state.disposeFifo(disposedUi);
         final proceeds = disposedUi * pricePerToken;
         final realizedPnl = proceeds - removedCostBasis;
 
-        state
-          ..quantityUi = math.max(0, availableQuantity - disposedUi)
-          ..costBasis = math.max(0, state.costBasis - removedCostBasis)
-          ..realizedPnl += realizedPnl;
+        state.realizedPnl += realizedPnl;
 
         txCostBasis += removedCostBasis;
         txProceeds += proceeds;
@@ -608,7 +655,12 @@ class SolanaWalletService {
 
     for (final holding in holdings) {
       final state = stateByAsset[holding.assetId];
-      final estimatedCostBasis = _estimateHoldingCostBasis(holding, state);
+      final estimatedCostBasis = _estimateHoldingCostBasis(
+        holding,
+        state,
+        warnings: warnings,
+        warningSet: warningSet,
+      );
       final estimatedUnrealizedPnl =
           holding.totalValue != null && estimatedCostBasis != null
           ? holding.totalValue! - estimatedCostBasis
@@ -729,8 +781,10 @@ class SolanaWalletService {
 
   static double? _estimateHoldingCostBasis(
     SolanaWalletHolding holding,
-    _CostBasisState? state,
-  ) {
+    _AssetFifoState? state, {
+    required List<String> warnings,
+    required Set<String> warningSet,
+  }) {
     final balanceUi = double.tryParse(holding.balanceUi);
     final balanceFromRaw = int.tryParse(holding.balanceRaw);
     final currentBalance =
@@ -740,16 +794,36 @@ class SolanaWalletService {
             : _toUiAmount(balanceFromRaw, holding.decimals));
     if (currentBalance.abs() <= _pnlEpsilon) return 0;
 
-    if (state == null || state.quantityUi <= _pnlEpsilon) {
+    if (state == null || state.totalQuantity <= _pnlEpsilon) {
       final fallbackPrice = holding.pricePerToken;
       if (fallbackPrice == null) return null;
       return currentBalance * fallbackPrice;
     }
 
-    final scaledCostBasis =
-        state.costBasis * (currentBalance / state.quantityUi);
-    if (!scaledCostBasis.isFinite || scaledCostBasis.isNaN) return null;
-    return math.max(0, scaledCostBasis);
+    final trackedQuantity = state.totalQuantity;
+    final trackedCostBasis = state.totalCostBasis;
+
+    if ((currentBalance - trackedQuantity).abs() <= _pnlEpsilon) {
+      return math.max(0, trackedCostBasis);
+    }
+
+    if (currentBalance < trackedQuantity) {
+      final scaledCostBasis =
+          trackedCostBasis * (currentBalance / trackedQuantity);
+      if (!scaledCostBasis.isFinite || scaledCostBasis.isNaN) return null;
+      final warning =
+          'Estimated basis scaled down for ${holding.assetId}: tracked lots exceed current balance.';
+      if (warningSet.add(warning)) warnings.add(warning);
+      return math.max(0, scaledCostBasis);
+    }
+
+    final fallbackPrice = holding.pricePerToken;
+    if (fallbackPrice == null) return math.max(0, trackedCostBasis);
+    final additionalQuantity = currentBalance - trackedQuantity;
+    final warning =
+        'Estimated basis backfilled for ${holding.assetId}: current balance exceeds tracked lot quantity.';
+    if (warningSet.add(warning)) warnings.add(warning);
+    return math.max(0, trackedCostBasis + (additionalQuantity * fallbackPrice));
   }
 
   static bool _doubleEqualsNullable(double? left, double? right) {
@@ -996,10 +1070,45 @@ class _HoldingSyncSummary {
   final String? valuationCurrency;
 }
 
-class _CostBasisState {
-  double quantityUi = 0;
-  double costBasis = 0;
+class _AssetFifoState {
+  final List<_FifoLot> _lots = [];
   double realizedPnl = 0;
+
+  double get totalQuantity =>
+      _lots.fold<double>(0, (sum, lot) => sum + lot.quantityUi);
+
+  double get totalCostBasis => _lots.fold<double>(
+    0,
+    (sum, lot) => sum + (lot.quantityUi * lot.unitCost),
+  );
+
+  void addLot({required double quantityUi, required double unitCost}) {
+    if (quantityUi <= 0) return;
+    _lots.add(_FifoLot(quantityUi: quantityUi, unitCost: unitCost));
+  }
+
+  double disposeFifo(double quantityUi) {
+    var remaining = quantityUi;
+    var removedCostBasis = 0.0;
+    while (remaining > SolanaWalletService._pnlEpsilon && _lots.isNotEmpty) {
+      final lot = _lots.first;
+      final consumed = math.min(remaining, lot.quantityUi);
+      removedCostBasis += consumed * lot.unitCost;
+      lot.quantityUi -= consumed;
+      remaining -= consumed;
+      if (lot.quantityUi <= SolanaWalletService._pnlEpsilon) {
+        _lots.removeAt(0);
+      }
+    }
+    return removedCostBasis;
+  }
+}
+
+class _FifoLot {
+  _FifoLot({required this.quantityUi, required this.unitCost});
+
+  double quantityUi;
+  final double unitCost;
 }
 
 class _WalletTokenTransfer {
@@ -1014,4 +1123,12 @@ class _WalletTokenTransfer {
   final String? toUserAccount;
   final String? mint;
   final int tokenAmount;
+}
+
+class _TaxYearAccumulator {
+  int transactionCount = 0;
+  double estimatedRealizedPnl = 0;
+  double estimatedProceeds = 0;
+  double estimatedCostBasis = 0;
+  String? pnlCurrency;
 }
