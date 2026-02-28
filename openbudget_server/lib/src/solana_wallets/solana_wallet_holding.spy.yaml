@@ -1,0 +1,38 @@
+### Current holding state for an asset in a Solana wallet.
+class: SolanaWalletHolding
+table: solana_wallet_holding
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  walletId: UuidValue, relation(parent=solana_wallet)
+  budgetId: UuidValue, relation(parent=budget)
+  ### Asset identifier (mint address for fungible tokens / NFT ID).
+  assetId: String
+  symbol: String?
+  name: String?
+  ### Token program identifier (e.g. Tokenkeg..., TokenzQd...).
+  tokenProgram: String?
+  decimals: int
+  ### Raw integer amount in base units.
+  balanceRaw: String
+  ### Decimal amount as a string for display.
+  balanceUi: String
+  isNft: bool
+  ### Quote currency for valuation (for now typically USD).
+  priceCurrency: String?
+  pricePerToken: double?
+  totalValue: double?
+  priceSource: String?
+  priceAsOf: DateTime?
+  ### JSON-encoded asset metadata subset.
+  metadataJson: String?
+  updatedAt: DateTime, default=now
+indexes:
+  solana_wallet_holding_wallet_idx:
+    fields: walletId
+  solana_wallet_holding_budget_idx:
+    fields: budgetId
+  solana_wallet_holding_asset_idx:
+    fields: assetId
+  solana_wallet_holding_wallet_asset_unique:
+    fields: walletId, assetId
+    unique: true

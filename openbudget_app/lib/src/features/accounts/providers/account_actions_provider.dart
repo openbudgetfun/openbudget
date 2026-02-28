@@ -18,19 +18,39 @@ class AccountActions extends _$AccountActions {
     required String budgetId,
     required bool onBudget,
     required int sortOrder,
+    String? walletAddress,
+    String walletCluster = 'mainnet',
   }) async {
     final client = ref.read(serverpodClientProvider);
+    // Serverpod API requires UuidValue which is experimental in uuid package.
+    // ignore: experimental_member_use
+    final budgetUuid = UuidValue.fromString(budgetId);
     final account = await client.account.create(
       name,
       accountType,
       balanceCents,
       currencyCode,
-      // Serverpod API requires UuidValue which is experimental in uuid package.
-      // ignore: experimental_member_use
-      UuidValue.fromString(budgetId),
+      budgetUuid,
       onBudget: onBudget,
       sortOrder: sortOrder,
     );
+
+    final normalizedWallet = walletAddress?.trim();
+    if (normalizedWallet != null && normalizedWallet.isNotEmpty) {
+      final accountId = account.id;
+      if (accountId == null) {
+        throw StateError('Created account did not return an ID');
+      }
+
+      final wallet = await client.solanaWallet.attach(
+        budgetUuid,
+        accountId,
+        normalizedWallet,
+        cluster: walletCluster,
+      );
+      await client.solanaWallet.sync(budgetUuid, wallet.id!, limit: 200);
+    }
+
     ref.invalidate(accountListProvider(budgetId));
     return account;
   }

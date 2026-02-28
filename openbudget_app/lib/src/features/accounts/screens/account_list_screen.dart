@@ -452,6 +452,8 @@ class _AccountTile extends HookWidget {
         return Icons.payments_rounded;
       case 'investment':
         return Icons.trending_up_rounded;
+      case 'cryptoWallet':
+        return Icons.currency_bitcoin_rounded;
       default:
         return Icons.account_balance_wallet_rounded;
     }
@@ -464,6 +466,7 @@ class _AccountTile extends HookWidget {
         'creditCard' => l10n.accountTypeCreditCard,
         'cash' => l10n.accountTypeCash,
         'investment' => l10n.accountTypeInvestment,
+        'cryptoWallet' => 'Solana Wallet',
         _ => l10n.accountTypeOther,
       };
 }

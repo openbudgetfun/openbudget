@@ -1,5 +1,5 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:openbudget_app/src/config/app_environment.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -14,12 +14,11 @@ final _log = ObLogger('ServerpodClientProvider');
 Client serverpodClient(Ref ref) {
   const apiUrlOverride = String.fromEnvironment('OPENBUDGET_API_URL');
   final apiUrl = resolveServerpodApiUrl(
-    isWeb: kIsWeb,
-    platform: defaultTargetPlatform,
+    appEnvironmentApiUrl: AppEnvironment.apiUrl,
     apiUrlOverride: apiUrlOverride,
   );
   _log.info(
-    'resolvedApiUrl url=$apiUrl isWeb=$kIsWeb platform=$defaultTargetPlatform overrideProvided=${apiUrlOverride.trim().isNotEmpty}',
+    'resolvedApiUrl url=$apiUrl overrideProvided=${apiUrlOverride.trim().isNotEmpty}',
   );
 
   final client = Client(apiUrl)
@@ -40,8 +39,7 @@ bool _isWidgetTestRuntime() {
 }
 
 String resolveServerpodApiUrl({
-  required bool isWeb,
-  required TargetPlatform platform,
+  required String appEnvironmentApiUrl,
   required String apiUrlOverride,
 }) {
   final override = apiUrlOverride.trim();
@@ -49,10 +47,5 @@ String resolveServerpodApiUrl({
     return override.endsWith('/') ? override : '$override/';
   }
 
-  // Android emulators map host localhost to 10.0.2.2.
-  if (!isWeb && platform == TargetPlatform.android) {
-    return 'http://10.0.2.2:8080/';
-  }
-
-  return 'http://localhost:8080/';
+  return appEnvironmentApiUrl;
 }
