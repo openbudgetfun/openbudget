@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_server/src/exceptions/exceptions.dart';
@@ -33,7 +34,9 @@ class LogIngestEndpoint extends Endpoint {
       for (final item in decoded) {
         if (item is! Map<String, dynamic>) continue;
         final entry = LogEntry.fromJson(item);
-        handler.writeEntry(entry);
+        final line = LogFormatter.format(entry);
+        handler.writeLine(line);
+        stdout.writeln(line);
       }
     } on Object {
       // Never crash for logging.
