@@ -32,7 +32,7 @@ This backlog turns strategy into implementable epics with explicit acceptance cr
 - #155: Added UI-level automatic category suggestions for uncategorized wallet transactions (suggestion chips + metadata prefill + search indexing).
 - #156: Implemented initial holdings valuation wiring with provider-returned pricing fields; fallback adapter strategy still pending.
 - #157: In progress via #162: schema fields + first-pass estimated basis/realized/unrealized P&L engine + UI surfacing landed; FIFO lot accounting + tax-year summaries are now integrated, but tax-grade lot provenance/audit export is still pending.
-- #163: In progress: added holding-level pricing quality metadata and cached fallback valuation path; still need additional external pricing providers (beyond Helius) and explicit coverage summaries in API responses.
+- #163: In progress: added holding-level pricing quality metadata, cached fallback valuation path, and Jupiter price API fallback for missing fungible token prices; still need dedicated NFT/illiquid asset pricing providers and historical coverage tracking.
 - #164: Implemented coverage summary fields on sync result + wallet dashboard coverage/unpriced metrics; still need periodic historical coverage tracking and trend visualization.
 - #165: In progress: extracted interpreter module + added fixture-style unit tests across protocol patterns (Jupiter, Pump.fun, Raydium, Orca, directional SOL transfer, NFT purchase flow, generic fallback, provider-direct descriptions); pending work is broader program-ID template expansion and richer per-protocol amount decoding.
 - #158: Implemented Android flavors + iOS schemes + app bootstrap routing; added `default-flavor: dev` for tooling compatibility.

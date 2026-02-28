@@ -535,3 +535,40 @@
 
 - Captured additional Android screenshot in this cycle:
   - `docs/research/screenshots/2026-02-28/protocol-templates-cycle-login.png`
+
+## 2026-02-28 - Multi-Source Pricing: Jupiter Fallback (Issue #163)
+
+### Backend Progress
+
+- Added a dedicated Jupiter pricing client:
+  - `openbudget_server/lib/src/solana_wallets/jupiter_price_client.dart`
+  - fetches USD prices from Jupiter Price API v3 (`lite-api.jup.ag`) in batches.
+  - supports multiple response shapes (`data.price`, `usdPrice`, scalar values) to remain resilient during API payload transitions.
+- Wired Jupiter as a fallback source in holdings sync:
+  - when Helius DAS price is unavailable for fungible tokens, sync now attempts Jupiter price lookup by mint.
+  - successful fallback is persisted with pricing metadata:
+    - `priceSource = jupiter_price_v3`
+    - `priceQuality = provider`
+    - `priceCurrency = USD`
+- Existing stale-cache behavior remains in place for tokens that remain unpriced after external provider attempts.
+
+### Test Coverage Added
+
+- Added parser-focused unit coverage:
+  - `openbudget_server/test/unit/solana_wallets/jupiter_price_client_test.dart`
+  - validates both wrapped (`data`) and legacy (`usdPrice`) response structures.
+  - validates filtering of invalid/non-positive price entries.
+
+### Validation Completed
+
+- `dart test openbudget_server/test/unit/solana_wallets/jupiter_price_client_test.dart openbudget_server/test/unit/solana_wallets/solana_transaction_interpreter_test.dart` passed.
+- `flutter test` targeted regression slice passed:
+  - `openbudget_app/test/features/accounts/screens/account_detail_screen_test.dart`
+  - `openbudget_app/test/features/auth/screens/login_screen_test.dart`
+  - `openbudget_app/test/features/accounts/screens/add_account_screen_test.dart`
+- `dart analyze openbudget_server openbudget_app openbudget_client` returned no issues.
+
+### Mobile Evidence
+
+- Captured additional Android screenshot in this cycle:
+  - `docs/research/screenshots/2026-02-28/jupiter-pricing-fallback-cycle-login.png`
