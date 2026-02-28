@@ -84,6 +84,107 @@ void main() {
       expect(interpreted.confidence, 'high');
     });
 
+    test('identifies raydium swaps with high confidence', () {
+      final tx = _buildTx(
+        source: 'raydium',
+        tokenTransfers: const [
+          TokenTransfer(
+            fromUserAccount: walletAddress,
+            toUserAccount: 'Pool111111111111111111111111111111111111',
+            fromTokenAccount: 'FromToken111111111111111111111111111111',
+            toTokenAccount: 'ToToken11111111111111111111111111111111',
+            tokenAmount: 1000000,
+            mint: 'MintA111111111111111111111111111111111111',
+            tokenStandard: 'Fungible',
+          ),
+          TokenTransfer(
+            fromUserAccount: 'Pool111111111111111111111111111111111111',
+            toUserAccount: walletAddress,
+            fromTokenAccount: 'FromToken222222222222222222222222222222',
+            toTokenAccount: 'ToToken22222222222222222222222222222222',
+            tokenAmount: 950000,
+            mint: 'MintB111111111111111111111111111111111111',
+            tokenStandard: 'Fungible',
+          ),
+        ],
+      );
+
+      final interpreted = SolanaTransactionInterpreter.interpret(
+        transaction: tx,
+        walletAddress: walletAddress,
+      );
+
+      expect(interpreted.description, contains('Token swap on Raydium'));
+      expect(interpreted.confidence, 'high');
+    });
+
+    test('identifies orca swaps with high confidence', () {
+      final tx = _buildTx(
+        source: 'orca',
+        tokenTransfers: const [
+          TokenTransfer(
+            fromUserAccount: walletAddress,
+            toUserAccount: 'Pool111111111111111111111111111111111111',
+            fromTokenAccount: 'FromToken111111111111111111111111111111',
+            toTokenAccount: 'ToToken11111111111111111111111111111111',
+            tokenAmount: 700000,
+            mint: 'MintA111111111111111111111111111111111111',
+            tokenStandard: 'Fungible',
+          ),
+          TokenTransfer(
+            fromUserAccount: 'Pool111111111111111111111111111111111111',
+            toUserAccount: walletAddress,
+            fromTokenAccount: 'FromToken222222222222222222222222222222',
+            toTokenAccount: 'ToToken22222222222222222222222222222222',
+            tokenAmount: 680000,
+            mint: 'MintB111111111111111111111111111111111111',
+            tokenStandard: 'Fungible',
+          ),
+        ],
+      );
+
+      final interpreted = SolanaTransactionInterpreter.interpret(
+        transaction: tx,
+        walletAddress: walletAddress,
+      );
+
+      expect(interpreted.description, contains('Token swap on Orca'));
+      expect(interpreted.confidence, 'high');
+    });
+
+    test('identifies nft purchase flow with high confidence', () {
+      final tx = _buildTx(
+        source: 'magiceden',
+        nativeTransfers: const [
+          NativeTransfer(
+            fromUserAccount: walletAddress,
+            toUserAccount: 'Marketplace1111111111111111111111111111111',
+            amount: 1500000000,
+          ),
+        ],
+        tokenTransfers: const [
+          TokenTransfer(
+            fromUserAccount: 'Marketplace1111111111111111111111111111111',
+            toUserAccount: walletAddress,
+            fromTokenAccount: 'FromTokenNFT1111111111111111111111111111',
+            toTokenAccount: 'ToTokenNFT111111111111111111111111111111',
+            tokenAmount: 1,
+            mint: 'NftMint11111111111111111111111111111111111',
+            tokenStandard: 'NonFungible',
+          ),
+        ],
+      );
+
+      final interpreted = SolanaTransactionInterpreter.interpret(
+        transaction: tx,
+        walletAddress: walletAddress,
+      );
+
+      expect(interpreted.description, contains('NFT purchase on Magic Eden'));
+      expect(interpreted.description, contains('SOL out 1.5 SOL'));
+      expect(interpreted.confidence, 'high');
+    });
+
     test('classifies directional SOL transfer with medium confidence', () {
       final tx = _buildTx(
         nativeTransfers: const [
@@ -101,6 +202,7 @@ void main() {
       );
 
       expect(interpreted.description, startsWith('SOL transfer sent'));
+      expect(interpreted.description, contains('SOL out 0.005 SOL'));
       expect(interpreted.confidence, 'medium');
     });
 
