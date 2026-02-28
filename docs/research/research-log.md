@@ -199,6 +199,9 @@
   - App started and attached to DTD.
   - `mcp__dart__get_runtime_errors` returned none.
 - Observed and handled expected install conflict once (`INSTALL_FAILED_UPDATE_INCOMPATIBLE`) due existing signature mismatch on `com.openbudget.app.dev`; tool uninstalled and reinstalled successfully.
+- Added Mobile MCP screenshot workflow:
+  - driver-enabled entrypoint at `openbudget_app/test_driver/main_driver.dart`.
+  - captured Android screenshots and posted them to PR comments.
 
 ### Verification Completed
 

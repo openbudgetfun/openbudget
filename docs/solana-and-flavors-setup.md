@@ -111,7 +111,23 @@ For Dart/Flutter MCP launch tooling:
 flutter:app run --flavor prod -t lib/main_prod.dart -d android
 ```
 
-## 7) Known Gaps
+## 7) Mobile MCP Screenshot Workflow
+
+To support screenshot capture in Mobile MCP, use the driver-enabled target:
+
+```bash
+flutter:app run -t test_driver/main_driver.dart -d android
+```
+
+Then use Mobile MCP `flutter_driver` screenshot command.
+
+Current screenshot artifacts used in PR reviews are stored at:
+
+- `docs/research/screenshots/2026-02-28/login-screen.png`
+- `docs/research/screenshots/2026-02-28/login-email-focus.png`
+- `docs/research/screenshots/2026-02-28/login-email-filled.png`
+
+## 8) Known Gaps
 
 - iOS side-by-side install (distinct bundle IDs for dev/prod) is tracked separately.
 - Valuation currently relies primarily on provider-returned price fields; fallback pricing adapters are tracked in backlog.
