@@ -1587,6 +1587,8 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
             final coveragePercent = result.valuationCoverageRatio == null
                 ? null
                 : (result.valuationCoverageRatio! * 100).round();
+            final coveredNfts =
+                result.pricedNftHoldingCount + result.staleNftHoldingCount;
             messenger.showSnackBar(
               SnackBar(
                 content: Text(
@@ -1594,7 +1596,9 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
                   ' transactions and ${result.holdingCount} holdings. '
                   'Coverage $coveredHoldings/${result.holdingCount}'
                   '${coveragePercent == null ? '' : ' ($coveragePercent%)'}, '
-                  '${result.unpricedHoldingCount} unpriced.',
+                  '${result.unpricedHoldingCount} unpriced. '
+                  'NFTs $coveredNfts/${result.nftHoldingCount}, '
+                  '${result.unpricedNftHoldingCount} unpriced.',
                 ),
               ),
             );

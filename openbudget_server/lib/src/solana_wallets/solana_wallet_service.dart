@@ -322,10 +322,10 @@ class SolanaWalletService {
         pricedHoldingCount: valuation.pricedHoldingCount,
         staleHoldingCount: valuation.staleHoldingCount,
         unpricedHoldingCount: valuation.unpricedHoldingCount,
-        nftHoldingCount: 0,
-        pricedNftHoldingCount: 0,
-        staleNftHoldingCount: 0,
-        unpricedNftHoldingCount: 0,
+        nftHoldingCount: valuation.nftHoldingCount,
+        pricedNftHoldingCount: valuation.pricedNftHoldingCount,
+        staleNftHoldingCount: valuation.staleNftHoldingCount,
+        unpricedNftHoldingCount: valuation.unpricedNftHoldingCount,
         valuationCoverageRatio: valuation.valuationCoverageRatio,
         totalValuation: valuation.totalValuation,
         valuationCurrency: valuation.valuationCurrency,
@@ -798,6 +798,10 @@ class SolanaWalletService {
     var pricedHoldingCount = 0;
     var staleHoldingCount = 0;
     var unpricedHoldingCount = 0;
+    var nftHoldingCount = 0;
+    var pricedNftHoldingCount = 0;
+    var staleNftHoldingCount = 0;
+    var unpricedNftHoldingCount = 0;
 
     for (final token in balances.tokens) {
       final assetId = token.mint;
@@ -859,6 +863,7 @@ class SolanaWalletService {
         totalValuation += totalValue;
         valuationCurrency ??= priceCurrency;
       }
+      final isNft = _isLikelyNft(asset);
 
       final holding = SolanaWalletHolding(
         walletId: walletId,
@@ -870,7 +875,7 @@ class SolanaWalletService {
         decimals: decimals,
         balanceRaw: rawAmount.toString(),
         balanceUi: _formatUiAmount(rawAmount, decimals),
-        isNft: _isLikelyNft(asset),
+        isNft: isNft,
         priceCurrency: priceCurrency,
         pricePerToken: pricePerToken,
         totalValue: totalValue,
@@ -894,6 +899,16 @@ class SolanaWalletService {
         staleHoldingCount += 1;
       } else {
         pricedHoldingCount += 1;
+      }
+      if (isNft) {
+        nftHoldingCount += 1;
+        if (holding.totalValue == null) {
+          unpricedNftHoldingCount += 1;
+        } else if (holding.isPriceStale ?? false) {
+          staleNftHoldingCount += 1;
+        } else {
+          pricedNftHoldingCount += 1;
+        }
       }
 
       await _upsertHolding(session, holding);
@@ -974,11 +989,15 @@ class SolanaWalletService {
 
       if (nftHolding.totalValue == null) {
         unpricedHoldingCount += 1;
+        unpricedNftHoldingCount += 1;
       } else if (nftHolding.isPriceStale ?? false) {
         staleHoldingCount += 1;
+        staleNftHoldingCount += 1;
       } else {
         pricedHoldingCount += 1;
+        pricedNftHoldingCount += 1;
       }
+      nftHoldingCount += 1;
     }
 
     for (final holding in existingHoldings) {
@@ -1005,6 +1024,10 @@ class SolanaWalletService {
       pricedHoldingCount: pricedHoldingCount,
       staleHoldingCount: staleHoldingCount,
       unpricedHoldingCount: unpricedHoldingCount,
+      nftHoldingCount: nftHoldingCount,
+      pricedNftHoldingCount: pricedNftHoldingCount,
+      staleNftHoldingCount: staleNftHoldingCount,
+      unpricedNftHoldingCount: unpricedNftHoldingCount,
       valuationCoverageRatio: valuationCoverageRatio,
       totalValuation: seenAssetIds.isEmpty ? null : totalValuation,
       valuationCurrency: valuationCurrency,
@@ -1108,6 +1131,10 @@ class _HoldingSyncSummary {
     required this.pricedHoldingCount,
     required this.staleHoldingCount,
     required this.unpricedHoldingCount,
+    required this.nftHoldingCount,
+    required this.pricedNftHoldingCount,
+    required this.staleNftHoldingCount,
+    required this.unpricedNftHoldingCount,
     required this.valuationCoverageRatio,
     required this.totalValuation,
     required this.valuationCurrency,
@@ -1117,6 +1144,10 @@ class _HoldingSyncSummary {
   final int pricedHoldingCount;
   final int staleHoldingCount;
   final int unpricedHoldingCount;
+  final int nftHoldingCount;
+  final int pricedNftHoldingCount;
+  final int staleNftHoldingCount;
+  final int unpricedNftHoldingCount;
   final double? valuationCoverageRatio;
   final double? totalValuation;
   final String? valuationCurrency;
