@@ -7,6 +7,7 @@ import 'package:openbudget_server/src/accounts/account_service.dart';
 import 'package:openbudget_server/src/budgets/budget_service.dart';
 import 'package:openbudget_server/src/exceptions/exceptions.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
+import 'package:openbudget_server/src/solana_wallets/solana_transaction_interpreter.dart';
 import 'package:serverpod/serverpod.dart';
 import 'package:solana_kit_helius/solana_kit_helius.dart';
 
@@ -17,6 +18,7 @@ class SolanaWalletService {
 
   static const _clusterMainnet = 'mainnet';
   static const _clusterDevnet = 'devnet';
+  static const _pnlEpsilon = 0.0000001;
 
   /// Attaches a Solana wallet to an existing account.
   static Future<SolanaWallet> attachWallet(
@@ -142,6 +144,63 @@ class SolanaWalletService {
     return holdings;
   }
 
+  /// Returns estimated realized P&L grouped by tax year for a wallet.
+  static Future<List<SolanaWalletTaxYearSummary>> listTaxYearSummaries(
+    Session session, {
+    required UuidValue walletId,
+    required UuidValue budgetId,
+  }) async {
+    await _getWalletOrThrow(session, walletId: walletId, budgetId: budgetId);
+
+    final transactions = await SolanaWalletTransaction.db.find(
+      session,
+      where: (t) => t.walletId.equals(walletId) & t.budgetId.equals(budgetId),
+      orderBy: (t) => t.taxYear,
+      orderDescending: true,
+    );
+
+    final byYear = <int, _TaxYearAccumulator>{};
+    for (final tx in transactions) {
+      final taxYear = tx.taxYear;
+      if (taxYear == null) continue;
+      final hasEstimate =
+          tx.estimatedRealizedPnl != null ||
+          tx.estimatedProceeds != null ||
+          tx.estimatedCostBasis != null;
+      if (!hasEstimate) continue;
+
+      final bucket = byYear.putIfAbsent(taxYear, _TaxYearAccumulator.new)
+        ..transactionCount += 1
+        ..estimatedRealizedPnl += tx.estimatedRealizedPnl ?? 0
+        ..estimatedProceeds += tx.estimatedProceeds ?? 0
+        ..estimatedCostBasis += tx.estimatedCostBasis ?? 0;
+      final currency = tx.pnlCurrency?.trim();
+      if (bucket.pnlCurrency == null &&
+          currency != null &&
+          currency.isNotEmpty) {
+        bucket.pnlCurrency = currency.toUpperCase();
+      }
+    }
+
+    final summaries =
+        byYear.entries
+            .map(
+              (entry) => SolanaWalletTaxYearSummary(
+                walletId: walletId,
+                taxYear: entry.key,
+                transactionCount: entry.value.transactionCount,
+                estimatedRealizedPnl: entry.value.estimatedRealizedPnl,
+                estimatedProceeds: entry.value.estimatedProceeds,
+                estimatedCostBasis: entry.value.estimatedCostBasis,
+                pnlCurrency: entry.value.pnlCurrency ?? 'USD',
+              ),
+            )
+            .toList(growable: false)
+          ..sort((left, right) => right.taxYear.compareTo(left.taxYear));
+
+    return summaries;
+  }
+
   /// Updates user metadata for a wallet transaction.
   static Future<SolanaWalletTransaction> updateTransactionMetadata(
     Session session, {
@@ -240,6 +299,12 @@ class SolanaWalletService {
         helius: helius,
         warnings: warnings,
       );
+      await _recomputeEstimatedPnl(
+        session,
+        walletId: walletId,
+        wallet: wallet,
+        warnings: warnings,
+      );
 
       wallet
         ..syncStatus = 'success'
@@ -253,6 +318,10 @@ class SolanaWalletService {
         insertedTransactions: insertedTransactions,
         updatedTransactions: updatedTransactions,
         holdingCount: valuation.holdingCount,
+        pricedHoldingCount: valuation.pricedHoldingCount,
+        staleHoldingCount: valuation.staleHoldingCount,
+        unpricedHoldingCount: valuation.unpricedHoldingCount,
+        valuationCoverageRatio: valuation.valuationCoverageRatio,
         totalValuation: valuation.totalValuation,
         valuationCurrency: valuation.valuationCurrency,
         syncedAt: wallet.lastSyncedAt!,
@@ -322,7 +391,10 @@ class SolanaWalletService {
       (instruction) => instruction.programId,
     );
     final uniquePrograms = programs.toSet().toList()..sort();
-    final interpretation = _resolveDescription(tx, wallet.address);
+    final interpretation = SolanaTransactionInterpreter.interpret(
+      transaction: tx,
+      walletAddress: wallet.address,
+    );
 
     final existing = await SolanaWalletTransaction.db.findFirstRow(
       session,
@@ -379,159 +451,310 @@ class SolanaWalletService {
     return false;
   }
 
-  static ({String description, String confidence}) _resolveDescription(
-    EnhancedTransaction tx,
-    String walletAddress,
-  ) {
-    final directDescription = tx.description?.trim();
-    if (directDescription != null && directDescription.isNotEmpty) {
-      return (description: directDescription, confidence: 'high');
-    }
-
-    final flow = _walletFlow(tx, walletAddress);
-    final source = _friendlySource(tx.source);
-
-    final programLabels = tx.instructions
-        .map((instruction) => _friendlyProgram(instruction.programId))
-        .where((label) => label != null)
-        .cast<String>()
-        .toSet()
-        .toList(growable: false);
-
-    final normalizedSource = tx.source.toLowerCase();
-    final hasJupiter =
-        normalizedSource.contains('jup') || programLabels.contains('Jupiter');
-    final hasPump =
-        normalizedSource.contains('pump') || programLabels.contains('Pump.fun');
-    final hasNftMarketplace =
-        normalizedSource.contains('magiceden') ||
-        normalizedSource.contains('tensor');
-    final hasSwapSignals = flow.tokenIn > 0 && flow.tokenOut > 0;
-
-    String action;
-    var confidence = 'low';
-    if (hasJupiter || hasSwapSignals) {
-      action = hasJupiter ? 'Token swap on Jupiter' : 'Token swap';
-      confidence = hasJupiter ? 'high' : 'medium';
-    } else if (hasPump) {
-      action = 'Trade on Pump.fun';
-      confidence = 'high';
-    } else if (hasNftMarketplace) {
-      action = 'NFT activity on $source';
-      confidence = 'high';
-    } else if (flow.tokenOut > 0 && flow.tokenIn == 0 && flow.nativeIn == 0) {
-      action = 'Token transfer sent';
-      confidence = 'medium';
-    } else if (flow.tokenIn > 0 && flow.tokenOut == 0 && flow.nativeOut == 0) {
-      action = 'Token transfer received';
-      confidence = 'medium';
-    } else if (flow.nativeOut > 0 && flow.nativeIn == 0 && flow.tokenIn == 0) {
-      action = 'SOL transfer sent';
-      confidence = 'medium';
-    } else if (flow.nativeIn > 0 && flow.nativeOut == 0 && flow.tokenOut == 0) {
-      action = 'SOL transfer received';
-      confidence = 'medium';
-    } else {
-      final readableType = tx.type
-          .toLowerCase()
-          .replaceAll('_', ' ')
-          .replaceAllMapped(RegExp(r'\b\w'), (match) {
-            return match.group(0)!.toUpperCase();
-          });
-      action = '$readableType via $source';
-    }
-
-    final transferSummary = _walletFlowSummary(flow);
-    final shortProgramLabels = programLabels.take(2).toList(growable: false);
-    final remainingPrograms = programLabels.length - shortProgramLabels.length;
-    final programSummary = shortProgramLabels.isEmpty
-        ? ''
-        : ' using ${shortProgramLabels.join(', ')}'
-              '${remainingPrograms > 0 ? ' +$remainingPrograms' : ''}';
-
-    return (
-      description: '$action$transferSummary$programSummary',
-      confidence: confidence,
+  static Future<void> _recomputeEstimatedPnl(
+    Session session, {
+    required UuidValue walletId,
+    required SolanaWallet wallet,
+    required List<String> warnings,
+  }) async {
+    final holdings = await SolanaWalletHolding.db.find(
+      session,
+      where: (t) =>
+          t.walletId.equals(walletId) & t.budgetId.equals(wallet.budgetId),
     );
-  }
-
-  static ({int nativeIn, int nativeOut, int tokenIn, int tokenOut}) _walletFlow(
-    EnhancedTransaction tx,
-    String walletAddress,
-  ) {
-    var nativeIn = 0;
-    var nativeOut = 0;
-    for (final transfer in tx.nativeTransfers) {
-      if (transfer.toUserAccount == walletAddress) nativeIn += 1;
-      if (transfer.fromUserAccount == walletAddress) nativeOut += 1;
-    }
-
-    var tokenIn = 0;
-    var tokenOut = 0;
-    for (final transfer in tx.tokenTransfers) {
-      if (transfer.toUserAccount == walletAddress) tokenIn += 1;
-      if (transfer.fromUserAccount == walletAddress) tokenOut += 1;
-    }
-
-    return (
-      nativeIn: nativeIn,
-      nativeOut: nativeOut,
-      tokenIn: tokenIn,
-      tokenOut: tokenOut,
-    );
-  }
-
-  static String _walletFlowSummary(
-    ({int nativeIn, int nativeOut, int tokenIn, int tokenOut}) flow,
-  ) {
-    final segments = <String>[];
-    if (flow.nativeIn > 0) segments.add('${flow.nativeIn} SOL in');
-    if (flow.nativeOut > 0) segments.add('${flow.nativeOut} SOL out');
-    if (flow.tokenIn > 0) segments.add('${flow.tokenIn} token in');
-    if (flow.tokenOut > 0) segments.add('${flow.tokenOut} token out');
-    if (segments.isEmpty) return '';
-    return ' (${segments.join(', ')})';
-  }
-
-  static String _friendlySource(String source) {
-    final normalized = source.toLowerCase();
-    return switch (normalized) {
-      'jupiter' => 'Jupiter',
-      'pumpfun' => 'Pump.fun',
-      'magiceden' => 'Magic Eden',
-      'tensor' => 'Tensor',
-      'system_program' => 'System Program',
-      'token_program' => 'SPL Token Program',
-      'token_2022' => 'SPL Token 2022 Program',
-      _ => source,
+    final holdingsByAsset = {
+      for (final holding in holdings) holding.assetId: holding,
     };
+    final pnlCurrency = _resolvePnlCurrency(holdings);
+
+    final transactions =
+        await SolanaWalletTransaction.db.find(
+            session,
+            where: (t) =>
+                t.walletId.equals(walletId) &
+                t.budgetId.equals(wallet.budgetId),
+            orderBy: (t) => t.occurredAt,
+          )
+          ..sort(_transactionSort);
+
+    final stateByAsset = <String, _AssetFifoState>{};
+    final warningSet = warnings.toSet();
+
+    for (final tx in transactions) {
+      final tokenTransfers = _decodeTokenTransfers(tx.tokenTransfersJson);
+      final netRawByAsset = <String, int>{};
+
+      for (final transfer in tokenTransfers) {
+        final mint = transfer.mint?.trim();
+        if (mint == null || mint.isEmpty) continue;
+
+        var deltaRaw = 0;
+        if (_isSameAddress(transfer.toUserAccount, wallet.address)) {
+          deltaRaw += transfer.tokenAmount;
+        }
+        if (_isSameAddress(transfer.fromUserAccount, wallet.address)) {
+          deltaRaw -= transfer.tokenAmount;
+        }
+
+        if (deltaRaw == 0) continue;
+        netRawByAsset[mint] = (netRawByAsset[mint] ?? 0) + deltaRaw;
+      }
+
+      var txCostBasis = 0.0;
+      var txProceeds = 0.0;
+      var txRealized = 0.0;
+      var hasEstimate = false;
+
+      for (final entry in netRawByAsset.entries) {
+        final mint = entry.key;
+        final deltaRaw = entry.value;
+        final holding = holdingsByAsset[mint];
+        if (holding == null) continue;
+
+        final pricePerToken = holding.pricePerToken;
+        if (pricePerToken == null) {
+          final warning = 'Missing price for P&L estimate asset $mint';
+          if (warningSet.add(warning)) warnings.add(warning);
+          continue;
+        }
+
+        final deltaUi = _toUiAmount(deltaRaw, holding.decimals);
+        if (deltaUi.abs() <= _pnlEpsilon) continue;
+
+        final state = stateByAsset.putIfAbsent(mint, _AssetFifoState.new);
+        if (deltaUi > 0) {
+          state.addLot(quantityUi: deltaUi, unitCost: pricePerToken);
+          continue;
+        }
+
+        final disposedUi = deltaUi.abs();
+        final availableQuantity = state.totalQuantity;
+        final removedCostBasis = state.disposeFifo(disposedUi);
+        final proceeds = disposedUi * pricePerToken;
+        final realizedPnl = proceeds - removedCostBasis;
+
+        state.realizedPnl += realizedPnl;
+
+        txCostBasis += removedCostBasis;
+        txProceeds += proceeds;
+        txRealized += realizedPnl;
+        hasEstimate = true;
+
+        if (disposedUi > availableQuantity + _pnlEpsilon) {
+          final warning =
+              'Partial P&L estimate for $mint: disposal exceeded tracked basis quantity.';
+          if (warningSet.add(warning)) warnings.add(warning);
+        }
+      }
+
+      final estimatedCostBasis = hasEstimate ? txCostBasis : null;
+      final estimatedProceeds = hasEstimate ? txProceeds : null;
+      final estimatedRealizedPnl = hasEstimate ? txRealized : null;
+      final nextPnlCurrency = hasEstimate ? pnlCurrency : null;
+      final nextTaxYear = tx.occurredAt?.year;
+
+      final requiresUpdate =
+          !_doubleEqualsNullable(tx.estimatedCostBasis, estimatedCostBasis) ||
+          !_doubleEqualsNullable(tx.estimatedProceeds, estimatedProceeds) ||
+          !_doubleEqualsNullable(
+            tx.estimatedRealizedPnl,
+            estimatedRealizedPnl,
+          ) ||
+          tx.pnlCurrency != nextPnlCurrency ||
+          tx.taxYear != nextTaxYear;
+
+      if (!requiresUpdate) continue;
+
+      await SolanaWalletTransaction.db.updateRow(
+        session,
+        tx.copyWith(
+          estimatedCostBasis: estimatedCostBasis,
+          estimatedProceeds: estimatedProceeds,
+          estimatedRealizedPnl: estimatedRealizedPnl,
+          pnlCurrency: nextPnlCurrency,
+          taxYear: nextTaxYear,
+          updatedAt: DateTime.now(),
+        ),
+      );
+    }
+
+    for (final holding in holdings) {
+      final state = stateByAsset[holding.assetId];
+      final estimatedCostBasis = _estimateHoldingCostBasis(
+        holding,
+        state,
+        warnings: warnings,
+        warningSet: warningSet,
+      );
+      final estimatedUnrealizedPnl =
+          holding.totalValue != null && estimatedCostBasis != null
+          ? holding.totalValue! - estimatedCostBasis
+          : null;
+      final estimatedUnrealizedPnlPercent =
+          estimatedCostBasis != null &&
+              estimatedCostBasis.abs() > _pnlEpsilon &&
+              estimatedUnrealizedPnl != null
+          ? (estimatedUnrealizedPnl / estimatedCostBasis) * 100
+          : null;
+      final estimatedRealizedPnl = state?.realizedPnl;
+      final shouldSetPnlMetadata =
+          estimatedCostBasis != null || estimatedRealizedPnl != null;
+      final nextPnlCurrency = shouldSetPnlMetadata ? pnlCurrency : null;
+      final pnlValuesChanged =
+          !_doubleEqualsNullable(
+            holding.estimatedCostBasis,
+            estimatedCostBasis,
+          ) ||
+          !_doubleEqualsNullable(
+            holding.estimatedUnrealizedPnl,
+            estimatedUnrealizedPnl,
+          ) ||
+          !_doubleEqualsNullable(
+            holding.estimatedUnrealizedPnlPercent,
+            estimatedUnrealizedPnlPercent,
+          ) ||
+          !_doubleEqualsNullable(
+            holding.estimatedRealizedPnl,
+            estimatedRealizedPnl,
+          ) ||
+          holding.pnlCurrency != nextPnlCurrency;
+      final nextPnlAsOf = shouldSetPnlMetadata
+          ? (pnlValuesChanged ? DateTime.now() : holding.pnlAsOf)
+          : null;
+      final requiresUpdate = pnlValuesChanged || holding.pnlAsOf != nextPnlAsOf;
+
+      if (!requiresUpdate) continue;
+
+      await SolanaWalletHolding.db.updateRow(
+        session,
+        holding.copyWith(
+          estimatedCostBasis: estimatedCostBasis,
+          estimatedUnrealizedPnl: estimatedUnrealizedPnl,
+          estimatedUnrealizedPnlPercent: estimatedUnrealizedPnlPercent,
+          estimatedRealizedPnl: estimatedRealizedPnl,
+          pnlCurrency: nextPnlCurrency,
+          pnlAsOf: nextPnlAsOf,
+          updatedAt: DateTime.now(),
+        ),
+      );
+    }
   }
 
-  static String? _friendlyProgram(String? programId) {
-    if (programId == null) return null;
-    final normalized = programId.trim();
-    if (normalized.isEmpty) return null;
+  static int _transactionSort(
+    SolanaWalletTransaction left,
+    SolanaWalletTransaction right,
+  ) {
+    final leftOccurredAt =
+        left.occurredAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+    final rightOccurredAt =
+        right.occurredAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+    final occurredAtComparison = leftOccurredAt.compareTo(rightOccurredAt);
+    if (occurredAtComparison != 0) return occurredAtComparison;
+    return left.slot.compareTo(right.slot);
+  }
 
-    if (normalized == '11111111111111111111111111111111') {
-      return 'System Program';
+  static String _resolvePnlCurrency(List<SolanaWalletHolding> holdings) {
+    for (final holding in holdings) {
+      final currency = holding.priceCurrency?.trim();
+      if (currency != null && currency.isNotEmpty) {
+        return currency.toUpperCase();
+      }
     }
-    if (normalized.startsWith('TokenkegQfe')) return 'SPL Token';
-    if (normalized.startsWith('TokenzQd')) return 'Token-2022';
-    if (normalized.startsWith('AToken')) return 'Associated Token';
-    if (normalized.startsWith('ComputeBudget')) return 'Compute Budget';
-    if (normalized.startsWith('MemoSq4')) return 'Memo Program';
-    if (normalized.startsWith('JUP') ||
-        normalized.toLowerCase().contains('jup')) {
-      return 'Jupiter';
+    return 'USD';
+  }
+
+  static List<_WalletTokenTransfer> _decodeTokenTransfers(
+    String? tokenTransfersJson,
+  ) {
+    if (tokenTransfersJson == null || tokenTransfersJson.trim().isEmpty) {
+      return const [];
     }
-    if (normalized.startsWith('6EF8rrecthR') ||
-        normalized.toLowerCase().contains('pump')) {
-      return 'Pump.fun';
+
+    try {
+      final decoded = jsonDecode(tokenTransfersJson);
+      if (decoded is! List) return const [];
+      return decoded
+          .whereType<Map<String, dynamic>>()
+          .map((item) {
+            final tokenAmount = _coerceInt(item['tokenAmount']);
+            if (tokenAmount == null) return null;
+            return _WalletTokenTransfer(
+              fromUserAccount: item['fromUserAccount'] as String?,
+              toUserAccount: item['toUserAccount'] as String?,
+              mint: item['mint'] as String?,
+              tokenAmount: tokenAmount,
+            );
+          })
+          .whereType<_WalletTokenTransfer>()
+          .toList(growable: false);
+    } on FormatException {
+      return const [];
     }
-    if (normalized.startsWith('metaqbxx')) return 'Metaplex Metadata';
-    if (normalized.startsWith('whirLbM')) return 'Orca Whirlpool';
-    if (normalized.startsWith('9W959DqE')) return 'Raydium';
+  }
+
+  static int? _coerceInt(Object? value) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    if (value is String) return int.tryParse(value);
     return null;
+  }
+
+  static bool _isSameAddress(String? left, String? right) {
+    if (left == null || right == null) return false;
+    return left.trim() == right.trim();
+  }
+
+  static double? _estimateHoldingCostBasis(
+    SolanaWalletHolding holding,
+    _AssetFifoState? state, {
+    required List<String> warnings,
+    required Set<String> warningSet,
+  }) {
+    final balanceUi = double.tryParse(holding.balanceUi);
+    final balanceFromRaw = int.tryParse(holding.balanceRaw);
+    final currentBalance =
+        balanceUi ??
+        (balanceFromRaw == null
+            ? 0
+            : _toUiAmount(balanceFromRaw, holding.decimals));
+    if (currentBalance.abs() <= _pnlEpsilon) return 0;
+
+    if (state == null || state.totalQuantity <= _pnlEpsilon) {
+      final fallbackPrice = holding.pricePerToken;
+      if (fallbackPrice == null) return null;
+      return currentBalance * fallbackPrice;
+    }
+
+    final trackedQuantity = state.totalQuantity;
+    final trackedCostBasis = state.totalCostBasis;
+
+    if ((currentBalance - trackedQuantity).abs() <= _pnlEpsilon) {
+      return math.max(0, trackedCostBasis);
+    }
+
+    if (currentBalance < trackedQuantity) {
+      final scaledCostBasis =
+          trackedCostBasis * (currentBalance / trackedQuantity);
+      if (!scaledCostBasis.isFinite || scaledCostBasis.isNaN) return null;
+      final warning =
+          'Estimated basis scaled down for ${holding.assetId}: tracked lots exceed current balance.';
+      if (warningSet.add(warning)) warnings.add(warning);
+      return math.max(0, scaledCostBasis);
+    }
+
+    final fallbackPrice = holding.pricePerToken;
+    if (fallbackPrice == null) return math.max(0, trackedCostBasis);
+    final additionalQuantity = currentBalance - trackedQuantity;
+    final warning =
+        'Estimated basis backfilled for ${holding.assetId}: current balance exceeds tracked lot quantity.';
+    if (warningSet.add(warning)) warnings.add(warning);
+    return math.max(0, trackedCostBasis + (additionalQuantity * fallbackPrice));
+  }
+
+  static bool _doubleEqualsNullable(double? left, double? right) {
+    if (left == null && right == null) return true;
+    if (left == null || right == null) return false;
+    return (left - right).abs() <= _pnlEpsilon;
   }
 
   static Future<_HoldingSyncSummary> _syncHoldings(
@@ -541,6 +764,15 @@ class SolanaWalletService {
     required HeliusClient helius,
     required List<String> warnings,
   }) async {
+    final now = DateTime.now();
+    final existingHoldings = await SolanaWalletHolding.db.find(
+      session,
+      where: (t) => t.walletId.equals(walletId),
+    );
+    final existingByAssetId = {
+      for (final holding in existingHoldings) holding.assetId: holding,
+    };
+
     final balances = await helius.wallet.getBalances(
       GetBalancesRequest(address: wallet.address),
     );
@@ -554,24 +786,56 @@ class SolanaWalletService {
     final seenAssetIds = <String>{};
     var totalValuation = 0.0;
     String? valuationCurrency;
+    var pricedHoldingCount = 0;
+    var staleHoldingCount = 0;
+    var unpricedHoldingCount = 0;
 
     for (final token in balances.tokens) {
       final assetId = token.mint;
       seenAssetIds.add(assetId);
 
       final asset = assetsById[assetId];
+      final existing = existingByAssetId[assetId];
       final decimals = token.decimals;
       final rawAmount = token.amount;
       final uiAmount = _toUiAmount(rawAmount, decimals);
       final priceInfo = asset?.tokenInfo?.priceInfo;
-      final pricePerToken = priceInfo?.pricePerToken;
-      final totalValue = pricePerToken == null
-          ? null
-          : uiAmount * pricePerToken;
+      var priceCurrency = priceInfo?.currency ?? existing?.priceCurrency;
+      var pricePerToken = priceInfo?.pricePerToken;
+      var totalValue = pricePerToken == null ? null : uiAmount * pricePerToken;
+      var priceSource = priceInfo == null ? null : 'helius_das';
+      var priceQuality = priceInfo == null ? 'unpriced' : 'provider';
+      var isPriceStale = false;
+      var priceAsOf = pricePerToken == null ? null : now;
+
+      if (pricePerToken == null) {
+        final derivedTotalPrice = priceInfo?.totalPrice;
+        if (derivedTotalPrice != null && uiAmount.abs() > _pnlEpsilon) {
+          pricePerToken = derivedTotalPrice / uiAmount;
+          totalValue = derivedTotalPrice;
+          priceSource = 'helius_das_total_price';
+          priceQuality = 'derived';
+          priceAsOf = now;
+        }
+      }
+
+      if (pricePerToken == null) {
+        final cachedPrice = existing?.pricePerToken;
+        if (cachedPrice != null) {
+          pricePerToken = cachedPrice;
+          totalValue = uiAmount * cachedPrice;
+          priceCurrency = priceCurrency ?? existing?.priceCurrency;
+          priceSource = existing?.priceSource ?? 'cached';
+          priceQuality = 'stale_cache';
+          isPriceStale = true;
+          priceAsOf = existing?.priceAsOf;
+          warnings.add('Using cached price for asset $assetId');
+        }
+      }
 
       if (totalValue != null) {
         totalValuation += totalValue;
-        valuationCurrency ??= priceInfo?.currency;
+        valuationCurrency ??= priceCurrency;
       }
 
       final holding = SolanaWalletHolding(
@@ -585,11 +849,13 @@ class SolanaWalletService {
         balanceRaw: rawAmount.toString(),
         balanceUi: _formatUiAmount(rawAmount, decimals),
         isNft: _isLikelyNft(asset),
-        priceCurrency: priceInfo?.currency,
+        priceCurrency: priceCurrency,
         pricePerToken: pricePerToken,
         totalValue: totalValue,
-        priceSource: priceInfo == null ? null : 'helius_das',
-        priceAsOf: DateTime.now(),
+        priceSource: priceSource,
+        priceQuality: priceQuality,
+        isPriceStale: isPriceStale,
+        priceAsOf: priceAsOf,
         metadataJson: asset == null
             ? null
             : jsonEncode({
@@ -597,8 +863,16 @@ class SolanaWalletService {
                 'symbol': asset.content?.metadata?.symbol,
                 'name': asset.content?.metadata?.name,
               }),
-        updatedAt: DateTime.now(),
+        updatedAt: now,
       );
+
+      if (holding.totalValue == null) {
+        unpricedHoldingCount += 1;
+      } else if (holding.isPriceStale ?? false) {
+        staleHoldingCount += 1;
+      } else {
+        pricedHoldingCount += 1;
+      }
 
       await _upsertHolding(session, holding);
 
@@ -612,46 +886,80 @@ class SolanaWalletService {
       if (!seenAssetIds.add(asset.id)) continue;
 
       final priceInfo = asset.tokenInfo?.priceInfo;
-      final totalValue = priceInfo?.totalPrice ?? priceInfo?.pricePerToken;
-      if (totalValue != null) {
-        totalValuation += totalValue;
-        valuationCurrency ??= priceInfo?.currency;
+      final existing = existingByAssetId[asset.id];
+      var priceCurrency = priceInfo?.currency ?? existing?.priceCurrency;
+      var pricePerToken = priceInfo?.pricePerToken;
+      var totalValue = priceInfo?.totalPrice;
+      var priceSource = priceInfo == null ? null : 'helius_das';
+      var priceQuality = priceInfo == null ? 'unpriced' : 'provider';
+      var isPriceStale = false;
+      var priceAsOf = priceInfo == null ? null : now;
+
+      if (pricePerToken == null && totalValue != null) {
+        // NFT-like balances are treated as 1 unit in this sync flow.
+        pricePerToken = totalValue;
+        priceSource = 'helius_das_total_price';
+        priceQuality = 'derived';
+      } else if (totalValue == null && pricePerToken != null) {
+        totalValue = pricePerToken;
       }
 
-      await _upsertHolding(
-        session,
-        SolanaWalletHolding(
-          walletId: walletId,
-          budgetId: wallet.budgetId,
-          assetId: asset.id,
-          symbol: asset.content?.metadata?.symbol,
-          name: asset.content?.metadata?.name,
-          tokenProgram: asset.tokenInfo?.tokenProgram,
-          decimals: asset.tokenInfo?.decimals ?? 0,
-          balanceRaw: '1',
-          balanceUi: '1',
-          isNft: true,
-          priceCurrency: priceInfo?.currency,
-          pricePerToken: priceInfo?.pricePerToken,
-          totalValue: totalValue,
-          priceSource: priceInfo == null ? null : 'helius_das',
-          priceAsOf: DateTime.now(),
-          metadataJson: jsonEncode({
-            'interface': asset.interface_,
-            'symbol': asset.content?.metadata?.symbol,
-            'name': asset.content?.metadata?.name,
-          }),
-          updatedAt: DateTime.now(),
-        ),
+      if (pricePerToken == null) {
+        final cachedPrice = existing?.pricePerToken;
+        if (cachedPrice != null) {
+          pricePerToken = cachedPrice;
+          totalValue = cachedPrice;
+          priceCurrency = priceCurrency ?? existing?.priceCurrency;
+          priceSource = existing?.priceSource ?? 'cached';
+          priceQuality = 'stale_cache';
+          isPriceStale = true;
+          priceAsOf = existing?.priceAsOf;
+          warnings.add('Using cached price for NFT asset ${asset.id}');
+        }
+      }
+
+      if (totalValue != null) {
+        totalValuation += totalValue;
+        valuationCurrency ??= priceCurrency;
+      }
+
+      final nftHolding = SolanaWalletHolding(
+        walletId: walletId,
+        budgetId: wallet.budgetId,
+        assetId: asset.id,
+        symbol: asset.content?.metadata?.symbol,
+        name: asset.content?.metadata?.name,
+        tokenProgram: asset.tokenInfo?.tokenProgram,
+        decimals: asset.tokenInfo?.decimals ?? 0,
+        balanceRaw: '1',
+        balanceUi: '1',
+        isNft: true,
+        priceCurrency: priceCurrency,
+        pricePerToken: pricePerToken,
+        totalValue: totalValue,
+        priceSource: priceSource,
+        priceQuality: priceQuality,
+        isPriceStale: isPriceStale,
+        priceAsOf: priceAsOf,
+        metadataJson: jsonEncode({
+          'interface': asset.interface_,
+          'symbol': asset.content?.metadata?.symbol,
+          'name': asset.content?.metadata?.name,
+        }),
+        updatedAt: now,
       );
+      await _upsertHolding(session, nftHolding);
+
+      if (nftHolding.totalValue == null) {
+        unpricedHoldingCount += 1;
+      } else if (nftHolding.isPriceStale ?? false) {
+        staleHoldingCount += 1;
+      } else {
+        pricedHoldingCount += 1;
+      }
     }
 
-    final existing = await SolanaWalletHolding.db.find(
-      session,
-      where: (t) => t.walletId.equals(walletId),
-    );
-
-    for (final holding in existing) {
+    for (final holding in existingHoldings) {
       if (!seenAssetIds.contains(holding.assetId)) {
         await SolanaWalletHolding.db.deleteRow(session, holding);
       }
@@ -664,8 +972,18 @@ class SolanaWalletService {
       valuationCurrency: valuationCurrency,
     );
 
+    final holdingCount = seenAssetIds.length;
+    final coveredCount = pricedHoldingCount + staleHoldingCount;
+    final valuationCoverageRatio = holdingCount == 0
+        ? null
+        : coveredCount / holdingCount;
+
     return _HoldingSyncSummary(
-      holdingCount: seenAssetIds.length,
+      holdingCount: holdingCount,
+      pricedHoldingCount: pricedHoldingCount,
+      staleHoldingCount: staleHoldingCount,
+      unpricedHoldingCount: unpricedHoldingCount,
+      valuationCoverageRatio: valuationCoverageRatio,
       totalValuation: seenAssetIds.isEmpty ? null : totalValuation,
       valuationCurrency: valuationCurrency,
     );
@@ -699,6 +1017,8 @@ class SolanaWalletService {
       pricePerToken: incoming.pricePerToken,
       totalValue: incoming.totalValue,
       priceSource: incoming.priceSource,
+      priceQuality: incoming.priceQuality,
+      isPriceStale: incoming.isPriceStale,
       priceAsOf: incoming.priceAsOf,
       metadataJson: incoming.metadataJson,
       updatedAt: DateTime.now(),
@@ -763,11 +1083,82 @@ class SolanaWalletService {
 class _HoldingSyncSummary {
   const _HoldingSyncSummary({
     required this.holdingCount,
+    required this.pricedHoldingCount,
+    required this.staleHoldingCount,
+    required this.unpricedHoldingCount,
+    required this.valuationCoverageRatio,
     required this.totalValuation,
     required this.valuationCurrency,
   });
 
   final int holdingCount;
+  final int pricedHoldingCount;
+  final int staleHoldingCount;
+  final int unpricedHoldingCount;
+  final double? valuationCoverageRatio;
   final double? totalValuation;
   final String? valuationCurrency;
+}
+
+class _AssetFifoState {
+  final List<_FifoLot> _lots = [];
+  double realizedPnl = 0;
+
+  double get totalQuantity =>
+      _lots.fold<double>(0, (sum, lot) => sum + lot.quantityUi);
+
+  double get totalCostBasis => _lots.fold<double>(
+    0,
+    (sum, lot) => sum + (lot.quantityUi * lot.unitCost),
+  );
+
+  void addLot({required double quantityUi, required double unitCost}) {
+    if (quantityUi <= 0) return;
+    _lots.add(_FifoLot(quantityUi: quantityUi, unitCost: unitCost));
+  }
+
+  double disposeFifo(double quantityUi) {
+    var remaining = quantityUi;
+    var removedCostBasis = 0.0;
+    while (remaining > SolanaWalletService._pnlEpsilon && _lots.isNotEmpty) {
+      final lot = _lots.first;
+      final consumed = math.min(remaining, lot.quantityUi);
+      removedCostBasis += consumed * lot.unitCost;
+      lot.quantityUi -= consumed;
+      remaining -= consumed;
+      if (lot.quantityUi <= SolanaWalletService._pnlEpsilon) {
+        _lots.removeAt(0);
+      }
+    }
+    return removedCostBasis;
+  }
+}
+
+class _FifoLot {
+  _FifoLot({required this.quantityUi, required this.unitCost});
+
+  double quantityUi;
+  final double unitCost;
+}
+
+class _WalletTokenTransfer {
+  const _WalletTokenTransfer({
+    required this.fromUserAccount,
+    required this.toUserAccount,
+    required this.mint,
+    required this.tokenAmount,
+  });
+
+  final String? fromUserAccount;
+  final String? toUserAccount;
+  final String? mint;
+  final int tokenAmount;
+}
+
+class _TaxYearAccumulator {
+  int transactionCount = 0;
+  double estimatedRealizedPnl = 0;
+  double estimatedProceeds = 0;
+  double estimatedCostBasis = 0;
+  String? pnlCurrency;
 }
