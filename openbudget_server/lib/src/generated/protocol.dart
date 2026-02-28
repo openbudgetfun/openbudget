@@ -64,16 +64,18 @@ import 'package:openbudget_server/src/generated/solana_wallets/solana_wallet_tra
     as _i42;
 import 'package:openbudget_server/src/generated/solana_wallets/solana_wallet_holding.dart'
     as _i43;
-import 'package:openbudget_server/src/generated/transaction_rules/transaction_rule.dart'
+import 'package:openbudget_server/src/generated/solana_wallets/solana_wallet_tax_year_summary.dart'
     as _i44;
-import 'package:openbudget_server/src/generated/transactions/transaction.dart'
+import 'package:openbudget_server/src/generated/transaction_rules/transaction_rule.dart'
     as _i45;
-import 'package:openbudget_server/src/generated/transactions/split_item.dart'
+import 'package:openbudget_server/src/generated/transactions/transaction.dart'
     as _i46;
-import 'package:openbudget_server/src/generated/transactions/import_row.dart'
+import 'package:openbudget_server/src/generated/transactions/split_item.dart'
     as _i47;
-import 'package:openbudget_server/src/generated/wallets/wallet_holding.dart'
+import 'package:openbudget_server/src/generated/transactions/import_row.dart'
     as _i48;
+import 'package:openbudget_server/src/generated/wallets/wallet_holding.dart'
+    as _i49;
 export 'accounts/account.dart';
 export 'budget_templates/budget_template.dart';
 export 'budgets/budget.dart';
@@ -3218,32 +3220,38 @@ class Protocol extends _i1.SerializationManagerServer {
               .toList()
           as T;
     }
-    if (t == List<_i44.TransactionRule>) {
+    if (t == List<_i44.SolanaWalletTaxYearSummary>) {
       return (data as List)
-              .map((e) => deserialize<_i44.TransactionRule>(e))
+              .map((e) => deserialize<_i44.SolanaWalletTaxYearSummary>(e))
               .toList()
           as T;
     }
-    if (t == List<_i45.Transaction>) {
+    if (t == List<_i45.TransactionRule>) {
       return (data as List)
-              .map((e) => deserialize<_i45.Transaction>(e))
+              .map((e) => deserialize<_i45.TransactionRule>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_i46.Transaction>) {
+      return (data as List)
+              .map((e) => deserialize<_i46.Transaction>(e))
               .toList()
           as T;
     }
     if (t == List<int>) {
       return (data as List).map((e) => deserialize<int>(e)).toList() as T;
     }
-    if (t == List<_i46.SplitItem>) {
-      return (data as List).map((e) => deserialize<_i46.SplitItem>(e)).toList()
+    if (t == List<_i47.SplitItem>) {
+      return (data as List).map((e) => deserialize<_i47.SplitItem>(e)).toList()
           as T;
     }
-    if (t == List<_i47.ImportRow>) {
-      return (data as List).map((e) => deserialize<_i47.ImportRow>(e)).toList()
+    if (t == List<_i48.ImportRow>) {
+      return (data as List).map((e) => deserialize<_i48.ImportRow>(e)).toList()
           as T;
     }
-    if (t == List<_i48.WalletHolding>) {
+    if (t == List<_i49.WalletHolding>) {
       return (data as List)
-              .map((e) => deserialize<_i48.WalletHolding>(e))
+              .map((e) => deserialize<_i49.WalletHolding>(e))
               .toList()
           as T;
     }
