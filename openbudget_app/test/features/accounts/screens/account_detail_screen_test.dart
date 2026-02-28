@@ -9,6 +9,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_transactions_provider.dart';
+import 'package:openbudget_app/src/features/accounts/providers/solana_wallet_provider.dart';
 import 'package:openbudget_app/src/features/accounts/screens/account_detail_screen.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
 import 'package:openbudget_app/src/features/payees/providers/payee_list_provider.dart';
@@ -23,6 +24,9 @@ final _budgetUuid = UuidValue.fromString(
 );
 final _accountUuid = UuidValue.fromString(_accountId);
 final _ownerUuid = UuidValue.fromString('00000000-0000-0000-0000-000000000099');
+final _walletUuid = UuidValue.fromString(
+  '00000000-0000-0000-0000-000000000abc',
+);
 
 Budget _makeBudget() => Budget(
   id: _budgetUuid,
@@ -129,6 +133,139 @@ Widget _buildSubject({List<Transaction>? transactions, Account? account}) {
       payeeListProvider.overrideWith((ref, budgetId) async => const []),
       budgetSummaryProvider.overrideWith(
         (ref, budgetId) async => _makeSummary(),
+      ),
+    ],
+    child: MaterialApp.router(
+      theme: OpenBudgetTheme.light,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      routerConfig: router,
+    ),
+  );
+}
+
+Widget _buildWalletSubject({
+  SolanaWallet? wallet,
+  List<SolanaWalletHolding>? holdings,
+  List<SolanaWalletTransaction>? walletTransactions,
+}) {
+  final router = GoRouter(
+    initialLocation: '/budgets/$_budgetId/accounts/$_accountId',
+    routes: [
+      GoRoute(
+        name: accountListRoute,
+        path: accountListPath,
+        builder: (_, _) =>
+            const Scaffold(body: Center(child: Text('Accounts Route'))),
+      ),
+      GoRoute(
+        name: accountDetailRoute,
+        path: accountDetailPath,
+        builder: (context, state) => AccountDetailScreen(
+          budgetId: state.pathParameters['id']!,
+          accountId: state.pathParameters['accountId']!,
+        ),
+      ),
+    ],
+  );
+
+  final testWallet =
+      wallet ??
+      SolanaWallet(
+        id: _walletUuid,
+        accountId: _accountUuid,
+        budgetId: _budgetUuid,
+        address: '8f5PsYfTEvtwFw8szw8RKtAHY8fE6hzJHjxbM6j6YV1z',
+        cluster: 'mainnet',
+        syncStatus: 'success',
+        lastSyncedAt: DateTime(2026, 9, 5, 10, 30),
+      );
+
+  final testHoldings =
+      holdings ??
+      [
+        SolanaWalletHolding(
+          id: UuidValue.fromString('00000000-0000-0000-0000-000000000ac1'),
+          walletId: _walletUuid,
+          budgetId: _budgetUuid,
+          assetId: 'So11111111111111111111111111111111111111112',
+          symbol: 'SOL',
+          decimals: 9,
+          balanceRaw: '1500000000',
+          balanceUi: '1.5',
+          isNft: false,
+          totalValue: 280,
+          tokenProgram: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+        ),
+        SolanaWalletHolding(
+          id: UuidValue.fromString('00000000-0000-0000-0000-000000000ac2'),
+          walletId: _walletUuid,
+          budgetId: _budgetUuid,
+          assetId: 'DustToken1111111111111111111111111111111111',
+          symbol: 'DUST',
+          decimals: 6,
+          balanceRaw: '100',
+          balanceUi: '0.0001',
+          isNft: false,
+          totalValue: 0.0005,
+          tokenProgram: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+        ),
+      ];
+
+  final testWalletTransactions =
+      walletTransactions ??
+      [
+        SolanaWalletTransaction(
+          id: UuidValue.fromString('00000000-0000-0000-0000-000000000ad1'),
+          walletId: _walletUuid,
+          budgetId: _budgetUuid,
+          signature: 'sig-jup-1',
+          slot: 100,
+          occurredAt: DateTime(2026, 9, 4, 13),
+          description: 'Jupiter swap',
+          txType: 'SWAP',
+          source: 'JUPITER',
+          category: 'Swaps',
+          rawJson: '{}',
+        ),
+        SolanaWalletTransaction(
+          id: UuidValue.fromString('00000000-0000-0000-0000-000000000ad2'),
+          walletId: _walletUuid,
+          budgetId: _budgetUuid,
+          signature: 'sig-transfer-1',
+          slot: 101,
+          occurredAt: DateTime(2026, 9, 5, 9, 15),
+          description: 'Transfer to friend',
+          txType: 'TRANSFER',
+          source: 'SYSTEM_PROGRAM',
+          tagsCsv: 'personal',
+          rawJson: '{}',
+        ),
+      ];
+
+  return ProviderScope(
+    overrides: [
+      accountListProvider.overrideWith(
+        (ref, budgetId) async => [
+          _makeAccount(
+            name: 'Main Wallet',
+            accountType: 'cryptoWallet',
+            onBudget: false,
+            balanceCents: 28000,
+          ),
+        ],
+      ),
+      accountTransactionsProvider.overrideWith((ref, args) async => const []),
+      payeeListProvider.overrideWith((ref, budgetId) async => const []),
+      budgetSummaryProvider.overrideWith(
+        (ref, budgetId) async => _makeSummary(),
+      ),
+      accountSolanaWalletProvider.overrideWith((ref, args) async => testWallet),
+      solanaWalletHoldingsProvider.overrideWith(
+        (ref, args) async => testHoldings,
+      ),
+      solanaWalletTransactionsProvider.overrideWith(
+        (ref, args) async => testWalletTransactions,
       ),
     ],
     child: MaterialApp.router(
@@ -361,7 +498,6 @@ void main() {
       expect(find.text('Jupiter swap'), findsNothing);
       expect(find.text('Transfer to friend'), findsOneWidget);
     });
-
     testWidgets('uncategorized wallet transactions show suggested category', (
       tester,
     ) async {
