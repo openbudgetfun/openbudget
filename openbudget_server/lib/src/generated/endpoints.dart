@@ -2312,7 +2312,7 @@ class Endpoints extends _i1.EndpointDispatch {
                 _i1.Session session,
                 Map<String, dynamic> params,
               ) async =>
-                  (endpoints['solanaWallet'] as _i17.SolanaWalletEndpoint)
+                  (endpoints['solanaWallet'] as _i18.SolanaWalletEndpoint)
                       .listTaxYearSummaries(
                         session,
                         params['budgetId'],

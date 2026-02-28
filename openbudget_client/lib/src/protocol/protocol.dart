@@ -58,20 +58,22 @@ import 'package:openbudget_client/src/protocol/solana_wallets/solana_wallet_tran
     as _i39;
 import 'package:openbudget_client/src/protocol/solana_wallets/solana_wallet_holding.dart'
     as _i40;
-import 'package:openbudget_client/src/protocol/transaction_rules/transaction_rule.dart'
+import 'package:openbudget_client/src/protocol/solana_wallets/solana_wallet_tax_year_summary.dart'
     as _i41;
-import 'package:openbudget_client/src/protocol/transactions/transaction.dart'
+import 'package:openbudget_client/src/protocol/transaction_rules/transaction_rule.dart'
     as _i42;
-import 'package:openbudget_client/src/protocol/transactions/split_item.dart'
+import 'package:openbudget_client/src/protocol/transactions/transaction.dart'
     as _i43;
-import 'package:openbudget_client/src/protocol/transactions/import_row.dart'
+import 'package:openbudget_client/src/protocol/transactions/split_item.dart'
     as _i44;
-import 'package:openbudget_client/src/protocol/wallets/wallet_holding.dart'
+import 'package:openbudget_client/src/protocol/transactions/import_row.dart'
     as _i45;
-import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart'
+import 'package:openbudget_client/src/protocol/wallets/wallet_holding.dart'
     as _i46;
-import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
+import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart'
     as _i47;
+import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
+    as _i48;
 export 'accounts/account.dart';
 export 'budget_templates/budget_template.dart';
 export 'budgets/budget.dart';
@@ -386,40 +388,46 @@ class Protocol extends _i1.SerializationManager {
               .toList()
           as T;
     }
-    if (t == List<_i41.TransactionRule>) {
+    if (t == List<_i41.SolanaWalletTaxYearSummary>) {
       return (data as List)
-              .map((e) => deserialize<_i41.TransactionRule>(e))
+              .map((e) => deserialize<_i41.SolanaWalletTaxYearSummary>(e))
               .toList()
           as T;
     }
-    if (t == List<_i42.Transaction>) {
+    if (t == List<_i42.TransactionRule>) {
       return (data as List)
-              .map((e) => deserialize<_i42.Transaction>(e))
+              .map((e) => deserialize<_i42.TransactionRule>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_i43.Transaction>) {
+      return (data as List)
+              .map((e) => deserialize<_i43.Transaction>(e))
               .toList()
           as T;
     }
     if (t == List<int>) {
       return (data as List).map((e) => deserialize<int>(e)).toList() as T;
     }
-    if (t == List<_i43.SplitItem>) {
-      return (data as List).map((e) => deserialize<_i43.SplitItem>(e)).toList()
+    if (t == List<_i44.SplitItem>) {
+      return (data as List).map((e) => deserialize<_i44.SplitItem>(e)).toList()
           as T;
     }
-    if (t == List<_i44.ImportRow>) {
-      return (data as List).map((e) => deserialize<_i44.ImportRow>(e)).toList()
+    if (t == List<_i45.ImportRow>) {
+      return (data as List).map((e) => deserialize<_i45.ImportRow>(e)).toList()
           as T;
     }
-    if (t == List<_i45.WalletHolding>) {
+    if (t == List<_i46.WalletHolding>) {
       return (data as List)
-              .map((e) => deserialize<_i45.WalletHolding>(e))
+              .map((e) => deserialize<_i46.WalletHolding>(e))
               .toList()
           as T;
     }
     try {
-      return _i46.Protocol().deserialize<T>(data, t);
+      return _i47.Protocol().deserialize<T>(data, t);
     } on _i1.DeserializationTypeNotFoundException catch (_) {}
     try {
-      return _i47.Protocol().deserialize<T>(data, t);
+      return _i48.Protocol().deserialize<T>(data, t);
     } on _i1.DeserializationTypeNotFoundException catch (_) {}
     return super.deserialize<T>(data, t);
   }
@@ -522,11 +530,11 @@ class Protocol extends _i1.SerializationManager {
       case _i28.WalletHolding():
         return 'WalletHolding';
     }
-    className = _i46.Protocol().getClassNameForObject(data);
+    className = _i47.Protocol().getClassNameForObject(data);
     if (className != null) {
       return 'serverpod_auth_idp.$className';
     }
-    className = _i47.Protocol().getClassNameForObject(data);
+    className = _i48.Protocol().getClassNameForObject(data);
     if (className != null) {
       return 'serverpod_auth_core.$className';
     }
@@ -622,11 +630,11 @@ class Protocol extends _i1.SerializationManager {
     }
     if (dataClassName.startsWith('serverpod_auth_idp.')) {
       data['className'] = dataClassName.substring(19);
-      return _i46.Protocol().deserializeByClassName(data);
+      return _i47.Protocol().deserializeByClassName(data);
     }
     if (dataClassName.startsWith('serverpod_auth_core.')) {
       data['className'] = dataClassName.substring(20);
-      return _i47.Protocol().deserializeByClassName(data);
+      return _i48.Protocol().deserializeByClassName(data);
     }
     return super.deserializeByClassName(data);
   }
@@ -641,10 +649,10 @@ class Protocol extends _i1.SerializationManager {
       return null;
     }
     try {
-      return _i46.Protocol().mapRecordToJson(record);
+      return _i47.Protocol().mapRecordToJson(record);
     } catch (_) {}
     try {
-      return _i47.Protocol().mapRecordToJson(record);
+      return _i48.Protocol().mapRecordToJson(record);
     } catch (_) {}
     throw Exception('Unsupported record type ${record.runtimeType}');
   }
