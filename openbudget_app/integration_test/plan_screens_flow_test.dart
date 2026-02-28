@@ -589,6 +589,103 @@ void main() {
     expect(find.text('Cover 1 overspent category'), findsOneWidget);
   });
 
+  patrolWidgetTest('desktop recent moves flow opens and switches tabs', (
+    $,
+  ) async {
+    final tester = $.tester;
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.binding.setSurfaceSize(const Size(1024, 768));
+
+    final container = ProviderContainer(
+      overrides: [
+        budgetMonthlySummaryProvider.overrideWith((ref, _) async {
+          return _makeSummary();
+        }),
+        budgetGoalsProvider.overrideWith((ref, _) async => {}),
+        creditCardPaymentsProvider.overrideWith((ref, _) async => const []),
+        monthlyTransactionsProvider.overrideWith(
+          (ref, _) async => _makeMonthlyTransactions(),
+        ),
+        recurringDueCountProvider.overrideWith((ref, _) async => 0),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    final router = GoRouter(
+      initialLocation: '/budgets/$_budgetId/plan',
+      routes: [
+        GoRoute(
+          name: planRoute,
+          path: '/budgets/:id/plan',
+          builder: (context, state) =>
+              BudgetDetailScreen(budgetId: state.pathParameters['id']!),
+          routes: [
+            GoRoute(
+              name: recentMovesRoute,
+              path: 'recent-moves',
+              builder: (context, state) =>
+                  RecentMovesScreen(budgetId: state.pathParameters['id']!),
+            ),
+          ],
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp.router(
+          theme: ThemeData.light(useMaterial3: true),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          routerConfig: router,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    container
+        .read(recentMovesProvider.notifier)
+        .recordAssigned(
+          budgetId: _budgetId,
+          envelopeId: _utilitiesEnvelopeId,
+          amountCents: 6000,
+        );
+    container
+        .read(recentMovesProvider.notifier)
+        .recordMove(
+          budgetId: _budgetId,
+          fromEnvelopeId: _storageEnvelopeId,
+          toEnvelopeId: _utilitiesEnvelopeId,
+          amountCents: 3000,
+        );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byIcon(Icons.more_horiz_rounded));
+    await tester.pumpAndSettle();
+    await _tapPopupMenuItem(tester, 'Recent Moves');
+    await _dismissCoachmarkIfVisible(tester);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Recent Moves'), findsOneWidget);
+    expect(find.text('All'), findsOneWidget);
+    expect(find.text('Moved'), findsOneWidget);
+    await captureIntegrationScreenshot(tester, 'recent-moves-desktop-screen');
+
+    await tester.tap(find.text('Moved'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Self storage'), findsOneWidget);
+    await captureIntegrationScreenshot(
+      tester,
+      'recent-moves-desktop-moved-screen',
+    );
+
+    await tester.tap(find.text('Done'));
+    await tester.pumpAndSettle();
+    expect(find.text('Categories'), findsOneWidget);
+  });
+
   patrolWidgetTest('reorder mode moves categories and exits cleanly', (
     $,
   ) async {

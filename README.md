@@ -105,6 +105,8 @@ lint:analyze                   # Lint all packages
 lint:all                       # Run all linting (format check + analyze)
 format:all                     # Format all code (Dart + JSON/YAML/Markdown)
 format:check                   # Check non-Dart formatting without fixing
+docs:workflows:update          # Sync reusable markdown workflow template blocks
+docs:workflows:check           # Verify workflow docs are synced to templates
 ```
 
 ### Code Generation

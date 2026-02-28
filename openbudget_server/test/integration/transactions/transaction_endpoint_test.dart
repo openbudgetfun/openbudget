@@ -1,5 +1,6 @@
 import 'package:openbudget_server/src/exceptions/exceptions.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
+import 'package:openbudget_server/src/transactions/transaction_service.dart';
 import 'package:test/test.dart';
 
 import '../helpers/auth_helper.dart';
@@ -214,6 +215,81 @@ void main() {
         expect(inflow.amountCents, 25000);
         expect(outflow.transferPairId, inflow.id);
         expect(inflow.transferPairId, outflow.id);
+      },
+    );
+
+    test(
+      'when transfer inflow insert fails then no partial transactions persist',
+      () async {
+        final budget = await endpoints.budget.create(
+          authedSession,
+          'Transfer Rollback Budget',
+          'USD',
+        );
+        final budgetId = budget.id!;
+        final fromAccount = await endpoints.account.create(
+          authedSession,
+          'Checking',
+          'checking',
+          500000,
+          'USD',
+          budgetId,
+          onBudget: true,
+          sortOrder: 0,
+        );
+        final toAccount = await endpoints.account.create(
+          authedSession,
+          'Savings',
+          'savings',
+          100000,
+          'USD',
+          budgetId,
+          onBudget: true,
+          sortOrder: 1,
+        );
+
+        final session = authedSession.build();
+        try {
+          await session.db.unsafeSimpleExecute(r'''
+CREATE OR REPLACE FUNCTION ob_fail_transfer_inflow_insert()
+RETURNS trigger AS $$
+BEGIN
+  IF NEW."transferPairId" IS NOT NULL THEN
+    RAISE EXCEPTION 'forced transfer inflow failure';
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS ob_fail_transfer_inflow_insert_trigger ON "transaction";
+CREATE TRIGGER ob_fail_transfer_inflow_insert_trigger
+BEFORE INSERT ON "transaction"
+FOR EACH ROW
+EXECUTE FUNCTION ob_fail_transfer_inflow_insert();
+''');
+
+          await expectLater(
+            TransactionService.createTransfer(
+              session,
+              description: 'Should roll back',
+              amountCents: 25000,
+              currencyCode: 'USD',
+              budgetId: budgetId,
+              fromAccountId: fromAccount.id!,
+              toAccountId: toAccount.id!,
+              transactionDate: DateTime.utc(2026, 1, 20),
+            ),
+            throwsA(isA<Exception>()),
+          );
+
+          final transactions = await Transaction.db.find(
+            session,
+            where: (t) => t.budgetId.equals(budgetId),
+          );
+          expect(transactions, isEmpty);
+        } finally {
+          await session.close();
+        }
       },
     );
 
@@ -559,6 +635,78 @@ void main() {
           () => endpoints.transaction.get(otherSession, transaction.id!),
           throwsA(isA<NotFoundException>()),
         );
+      },
+    );
+
+    test(
+      'when creating split then creates parent and child transactions',
+      () async {
+        final budget = await endpoints.budget.create(
+          authedSession,
+          'Split Budget',
+          'USD',
+        );
+        final category = await endpoints.category.create(
+          authedSession,
+          'Expenses',
+          budget.id!,
+          0,
+        );
+        final groceriesEnvelope = await endpoints.envelope.create(
+          authedSession,
+          'Groceries',
+          category.id!,
+          0,
+          'USD',
+        );
+        final diningEnvelope = await endpoints.envelope.create(
+          authedSession,
+          'Dining',
+          category.id!,
+          0,
+          'USD',
+        );
+
+        final created = await endpoints.transaction.createSplit(
+          authedSession,
+          'Split purchase',
+          -2500,
+          'USD',
+          budget.id!,
+          DateTime.utc(2026, 1, 15),
+          [
+            SplitItem(
+              amountCents: 1500,
+              envelopeId: groceriesEnvelope.id,
+              memo: 'Groceries',
+            ),
+            SplitItem(
+              amountCents: 1000,
+              envelopeId: diningEnvelope.id,
+              memo: 'Dining',
+            ),
+          ],
+        );
+
+        expect(created, hasLength(3));
+        final parent = created.first;
+        final children = created.skip(1).toList();
+
+        expect(parent.parentTransactionId, isNull);
+        expect(parent.envelopeId, isNull);
+        for (final child in children) {
+          expect(child.parentTransactionId, parent.id);
+        }
+        expect(children.map((transaction) => transaction.amountCents).toSet(), {
+          -1500,
+          -1000,
+        });
+
+        final splits = await endpoints.transaction.listSplits(
+          authedSession,
+          parent.id!,
+        );
+        expect(splits, hasLength(2));
       },
     );
 

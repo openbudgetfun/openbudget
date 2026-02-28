@@ -107,7 +107,13 @@ void main() {
 
       expect(find.text('Account Nickname'), findsOneWidget);
       expect(find.text('Working Balance'), findsOneWidget);
-      expect(find.text('Link an Account'), findsOneWidget);
+      expect(find.text('Link an Account (Unavailable)'), findsOneWidget);
+      await tester.scrollUntilVisible(
+        find.text('Close Account'),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
       expect(find.text('Close Account'), findsOneWidget);
       expect(find.text('Delete Permanently'), findsNothing);
       expect(find.text('Reopen Account'), findsNothing);

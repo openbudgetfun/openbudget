@@ -13,12 +13,6 @@ class DeleteAccountScreen extends HookWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final passwordController = useTextEditingController();
-    final showPassword = useState(false);
-    final deleted = useState(false);
-    final passwordValue = useState('');
-
-    final canDelete = passwordValue.value.trim().isNotEmpty;
 
     return Scaffold(
       backgroundColor: OpenBudgetPalette.appBackground,
@@ -28,88 +22,61 @@ class DeleteAccountScreen extends HookWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(SpacingTokens.md),
-        child: deleted.value
-            ? Column(
+        child: ListView(
+          children: [
+            Text(
+              'Delete Account',
+              style: theme.textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: SpacingTokens.md),
+            Container(
+              padding: const EdgeInsets.all(SpacingTokens.md),
+              decoration: BoxDecoration(
+                color: OpenBudgetPalette.surface,
+                borderRadius: BorderRadius.circular(RadiusTokens.md),
+                border: Border.all(color: theme.colorScheme.errorContainer),
+              ),
+              child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    "We're sorry to see you go!",
-                    style: theme.textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
+                  Icon(
+                    Icons.info_outline_rounded,
+                    size: 20,
+                    color: theme.colorScheme.error,
+                  ),
+                  const SizedBox(width: SpacingTokens.sm),
+                  Expanded(
+                    child: Text(
+                      'Account deletion is currently unavailable in this build. '
+                      'No account or plan data can be removed from this screen.',
+                      style: theme.textTheme.bodyLarge,
                     ),
-                  ),
-                  const SizedBox(height: SpacingTokens.md),
-                  Text(
-                    'Your account and data will be completely deleted shortly. '
-                    'In rare cases this may take up to an hour.',
-                    style: theme.textTheme.bodyLarge,
-                  ),
-                  const SizedBox(height: SpacingTokens.md),
-                  Text(
-                    'If you change your mind, you can sign back up after the '
-                    'deletion process completes.',
-                    style: theme.textTheme.bodyLarge,
-                  ),
-                ],
-              )
-            : ListView(
-                children: [
-                  Text(
-                    "We're sorry to see you go!",
-                    style: theme.textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: SpacingTokens.md),
-                  Text(
-                    'If you are sure you want to delete your OpenBudget account, '
-                    'confirm your password below. Your account and plan data '
-                    'will be permanently deleted.',
-                    style: theme.textTheme.bodyLarge,
-                  ),
-                  const SizedBox(height: SpacingTokens.md),
-                  Text(
-                    l10n.settingsAccountEmail,
-                    style: theme.textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: SpacingTokens.md),
-                  Text(
-                    'Confirm Password',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: SpacingTokens.xs),
-                  TextField(
-                    controller: passwordController,
-                    obscureText: !showPassword.value,
-                    onChanged: (value) => passwordValue.value = value,
-                    decoration: InputDecoration(
-                      suffixIcon: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Checkbox(
-                            value: showPassword.value,
-                            onChanged: (value) =>
-                                showPassword.value = value ?? false,
-                          ),
-                          const Text('Show'),
-                          const SizedBox(width: SpacingTokens.sm),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: SpacingTokens.lg),
-                  FilledButton(
-                    style: FilledButton.styleFrom(
-                      backgroundColor: theme.colorScheme.errorContainer,
-                      foregroundColor: theme.colorScheme.error,
-                    ),
-                    onPressed: canDelete ? () => deleted.value = true : null,
-                    child: const Text('Delete Account'),
                   ),
                 ],
               ),
+            ),
+            const SizedBox(height: SpacingTokens.md),
+            Text(l10n.settingsAccountEmail, style: theme.textTheme.titleMedium),
+            const SizedBox(height: SpacingTokens.md),
+            Text(
+              'Delete requests are disabled until backend account deletion is available.',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: OpenBudgetPalette.mutedText,
+              ),
+            ),
+            const SizedBox(height: SpacingTokens.lg),
+            FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: theme.colorScheme.errorContainer,
+                foregroundColor: theme.colorScheme.error,
+              ),
+              onPressed: null,
+              child: const Text('Delete Account (Unavailable)'),
+            ),
+          ],
+        ),
       ),
     );
   }

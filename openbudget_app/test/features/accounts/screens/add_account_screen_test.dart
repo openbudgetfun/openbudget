@@ -19,6 +19,8 @@ void main() {
   });
 
   const budgetId = 'test-budget-1';
+  const unlinkedTypeTileKey = Key('add-account-unlinked-type-tile');
+  const checkingTypeOptionKey = ValueKey('add-account-type-option-checking');
 
   Budget makeBudget({String currencyCode = 'USD'}) => Budget(
     id: UuidValue.fromString('00000000-0000-0000-0000-000000000001'),
@@ -97,7 +99,7 @@ void main() {
     expect(find.text('Search for your bank'), findsOneWidget);
   });
 
-  testWidgets('renders currency selector in unlinked account step', (
+  testWidgets('does not render currency selector in unlinked account step', (
     tester,
   ) async {
     await tester.pumpWidget(buildSubject(currencyCode: 'EUR'));
@@ -107,9 +109,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Add Unlinked Account'), findsOneWidget);
-    expect(find.text('Currency'), findsOneWidget);
-    expect(find.text('EUR (€)'), findsOneWidget);
-    expect(find.byType(DropdownButtonFormField<String>), findsOneWidget);
+    expect(find.text('Currency'), findsNothing);
+    expect(find.text('EUR (€)'), findsNothing);
+    expect(find.byType(DropdownButtonFormField<String>), findsNothing);
   });
 
   testWidgets('filters institutions by search query', (tester) async {
@@ -152,6 +154,27 @@ void main() {
     expect(find.textContaining('Linked connections for "citi"'), findsNothing);
   });
 
+  testWidgets('bank selection shows unavailable notice and falls back', (
+    tester,
+  ) async {
+    await tester.pumpWidget(buildSubject());
+    await _pumpToBankSearch(tester);
+
+    await tester.enterText(find.byType(TextField).first, 'citi');
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Citi'));
+    await tester.pump(const Duration(milliseconds: 900));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Add Unlinked Account'), findsOneWidget);
+    expect(
+      find.textContaining(
+        'Linked connections for "Citi" are currently unavailable',
+      ),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('account type picker can be opened from unlinked form', (
     tester,
   ) async {
@@ -161,13 +184,33 @@ void main() {
     await _tapAddUnlinked(tester);
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Select account type...'));
-    await tester.pumpAndSettle();
+    await _openAccountTypePicker(
+      tester,
+      typeTileFinder: find.byKey(unlinkedTypeTileKey),
+    );
 
-    expect(find.text('Select Account Type'), findsOneWidget);
+    expect(find.byKey(checkingTypeOptionKey), findsOneWidget);
     expect(find.text('Cash Accounts'), findsOneWidget);
+    expect(
+      find.text(
+        'Cash accounts hold funds you already own and can spend immediately.',
+      ),
+      findsOneWidget,
+    );
     expect(find.text('Credit Accounts'), findsOneWidget);
+    expect(
+      find.text(
+        "A credit account lets you spend borrowed money that you'll need to repay later, often with interest.",
+      ),
+      findsOneWidget,
+    );
     expect(find.text('Mortgages and Loans'), findsOneWidget);
+    expect(
+      find.text(
+        "Accounts that have an outstanding balance you're currently paying off, and aren't spending from.",
+      ),
+      findsOneWidget,
+    );
     expect(find.byIcon(Icons.account_balance_rounded), findsNothing);
     expect(find.byIcon(Icons.savings_rounded), findsNothing);
   });
@@ -193,10 +236,14 @@ void main() {
     nextButton = tester.widget(find.widgetWithText(FilledButton, 'Next'));
     expect(nextButton.onPressed, isNull);
 
-    await tester.tap(find.text('Select account type...'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Checking'));
-    await tester.pumpAndSettle();
+    await _openAccountTypePicker(
+      tester,
+      typeTileFinder: find.byKey(unlinkedTypeTileKey),
+    );
+    await _tapAccountTypeOption(
+      tester,
+      optionFinder: find.byKey(checkingTypeOptionKey),
+    );
 
     nextButton = tester.widget(find.widgetWithText(FilledButton, 'Next'));
     expect(nextButton.onPressed, isNotNull);
@@ -223,5 +270,31 @@ Future<void> _scrollToAddUnlinked(WidgetTester tester) async {
     );
   }
   await tester.ensureVisible(finder);
+  await tester.pumpAndSettle();
+}
+
+Future<void> _openAccountTypePicker(
+  WidgetTester tester, {
+  required Finder typeTileFinder,
+}) async {
+  final tile = tester.widget<ListTile>(typeTileFinder);
+  final onTap = tile.onTap;
+  if (onTap == null) {
+    fail('Expected account type tile to be tappable.');
+  }
+  onTap();
+  await tester.pumpAndSettle();
+}
+
+Future<void> _tapAccountTypeOption(
+  WidgetTester tester, {
+  required Finder optionFinder,
+}) async {
+  final tile = tester.widget<ListTile>(optionFinder);
+  final onTap = tile.onTap;
+  if (onTap == null) {
+    fail('Expected account type option to be tappable.');
+  }
+  onTap();
   await tester.pumpAndSettle();
 }

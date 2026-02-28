@@ -117,6 +117,7 @@ void main() {
       expect(find.text('Account Settings'), findsOneWidget);
       expect(find.text('OpenBudget Together'), findsOneWidget);
       expect(find.text('Manage Bank Connections'), findsOneWidget);
+      expect(find.text('Currently unavailable in this build'), findsOneWidget);
       expect(find.text('Log Out'), findsOneWidget);
 
       await tester.scrollUntilVisible(

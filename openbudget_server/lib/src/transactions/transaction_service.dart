@@ -180,36 +180,49 @@ class TransactionService {
       );
     }
 
-    final outflow = Transaction(
-      description: description,
-      amountCents: -amountCents.abs(),
-      currencyCode: currencyCode,
-      budgetId: budgetId,
-      accountId: fromAccountId,
-      transactionDate: transactionDate,
-      createdAt: DateTime.now(),
-    );
-    final savedOutflow = await Transaction.db.insertRow(session, outflow);
+    return session.db.transaction((dbTransaction) async {
+      final outflow = Transaction(
+        description: description,
+        amountCents: -amountCents.abs(),
+        currencyCode: currencyCode,
+        budgetId: budgetId,
+        accountId: fromAccountId,
+        transactionDate: transactionDate,
+        createdAt: DateTime.now(),
+      );
+      final savedOutflow = await Transaction.db.insertRow(
+        session,
+        outflow,
+        transaction: dbTransaction,
+      );
 
-    final inflow = Transaction(
-      description: description,
-      amountCents: amountCents.abs(),
-      currencyCode: currencyCode,
-      budgetId: budgetId,
-      accountId: toAccountId,
-      transferPairId: savedOutflow.id,
-      transactionDate: transactionDate,
-      createdAt: DateTime.now(),
-    );
-    final savedInflow = await Transaction.db.insertRow(session, inflow);
+      final inflow = Transaction(
+        description: description,
+        amountCents: amountCents.abs(),
+        currencyCode: currencyCode,
+        budgetId: budgetId,
+        accountId: toAccountId,
+        transferPairId: savedOutflow.id,
+        transactionDate: transactionDate,
+        createdAt: DateTime.now(),
+      );
+      final savedInflow = await Transaction.db.insertRow(
+        session,
+        inflow,
+        transaction: dbTransaction,
+      );
 
-    final linkedOutflow = savedOutflow.copyWith(transferPairId: savedInflow.id);
-    final updatedOutflow = await Transaction.db.updateRow(
-      session,
-      linkedOutflow,
-    );
+      final linkedOutflow = savedOutflow.copyWith(
+        transferPairId: savedInflow.id,
+      );
+      final updatedOutflow = await Transaction.db.updateRow(
+        session,
+        linkedOutflow,
+        transaction: dbTransaction,
+      );
 
-    return [updatedOutflow, savedInflow];
+      return [updatedOutflow, savedInflow];
+    });
   }
 
   /// Lists transactions for a specific account.
@@ -435,42 +448,52 @@ class TransactionService {
       );
     }
 
-    // Create parent transaction (no envelope).
-    final parent = Transaction(
-      description: description,
-      amountCents: totalAmountCents,
-      currencyCode: currencyCode,
-      budgetId: budgetId,
-      payeeId: payeeId,
-      accountId: accountId,
-      transactionDate: transactionDate,
-      createdAt: DateTime.now(),
-    );
-    final savedParent = await Transaction.db.insertRow(session, parent);
-
-    final results = <Transaction>[savedParent];
-
-    // Create child split transactions.
-    for (final split in splits) {
-      final child = Transaction(
-        description: split.memo ?? description,
-        amountCents: totalAmountCents.isNegative
-            ? -split.amountCents.abs()
-            : split.amountCents.abs(),
+    return session.db.transaction((dbTransaction) async {
+      // Create parent transaction (no envelope).
+      final parent = Transaction(
+        description: description,
+        amountCents: totalAmountCents,
         currencyCode: currencyCode,
         budgetId: budgetId,
-        envelopeId: split.envelopeId,
         payeeId: payeeId,
         accountId: accountId,
-        parentTransactionId: savedParent.id,
         transactionDate: transactionDate,
         createdAt: DateTime.now(),
       );
-      final saved = await Transaction.db.insertRow(session, child);
-      results.add(saved);
-    }
+      final savedParent = await Transaction.db.insertRow(
+        session,
+        parent,
+        transaction: dbTransaction,
+      );
 
-    return results;
+      final results = <Transaction>[savedParent];
+
+      // Create child split transactions.
+      for (final split in splits) {
+        final child = Transaction(
+          description: split.memo ?? description,
+          amountCents: totalAmountCents.isNegative
+              ? -split.amountCents.abs()
+              : split.amountCents.abs(),
+          currencyCode: currencyCode,
+          budgetId: budgetId,
+          envelopeId: split.envelopeId,
+          payeeId: payeeId,
+          accountId: accountId,
+          parentTransactionId: savedParent.id,
+          transactionDate: transactionDate,
+          createdAt: DateTime.now(),
+        );
+        final saved = await Transaction.db.insertRow(
+          session,
+          child,
+          transaction: dbTransaction,
+        );
+        results.add(saved);
+      }
+
+      return results;
+    });
   }
 
   /// Lists the sub-transactions (splits) for a parent transaction.

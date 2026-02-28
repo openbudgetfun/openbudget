@@ -1,7 +1,10 @@
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_server/src/budgets/budget_service.dart';
+import 'package:openbudget_server/src/categories/category_service.dart';
+import 'package:openbudget_server/src/envelopes/envelope_service.dart';
 import 'package:openbudget_server/src/exceptions/exceptions.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
+import 'package:openbudget_server/src/payees/payee_service.dart';
 import 'package:serverpod/serverpod.dart';
 
 /// Business logic for managing transaction rules within a budget.
@@ -20,6 +23,12 @@ class TransactionRuleService {
   }) async {
     _log.info('Creating rule payee=$payeeId envelope=$targetEnvelopeId');
     await BudgetService.getById(session, budgetId: budgetId);
+    await _validateRuleReferences(
+      session,
+      budgetId: budgetId,
+      payeeId: payeeId,
+      targetEnvelopeId: targetEnvelopeId,
+    );
 
     final rule = TransactionRule(
       budgetId: budgetId,
@@ -67,6 +76,13 @@ class TransactionRuleService {
     bool? enabled,
   }) async {
     final rule = await getById(session, ruleId: ruleId);
+    if (targetEnvelopeId != null) {
+      await _assertEnvelopeBelongsToBudget(
+        session,
+        budgetId: rule.budgetId,
+        envelopeId: targetEnvelopeId,
+      );
+    }
 
     final updated = rule.copyWith(
       targetEnvelopeId: targetEnvelopeId ?? rule.targetEnvelopeId,
@@ -83,6 +99,13 @@ class TransactionRuleService {
     required UuidValue budgetId,
     required UuidValue payeeId,
   }) async {
+    await BudgetService.getById(session, budgetId: budgetId);
+    await _assertPayeeBelongsToBudget(
+      session,
+      budgetId: budgetId,
+      payeeId: payeeId,
+    );
+
     final rules = await TransactionRule.db.find(
       session,
       where: (t) =>
@@ -104,5 +127,52 @@ class TransactionRuleService {
     _log.info('Deleting rule id=$ruleId');
     final rule = await getById(session, ruleId: ruleId);
     return TransactionRule.db.deleteRow(session, rule);
+  }
+
+  static Future<void> _assertEnvelopeBelongsToBudget(
+    Session session, {
+    required UuidValue budgetId,
+    required UuidValue envelopeId,
+  }) async {
+    final envelope = await EnvelopeService.getById(
+      session,
+      envelopeId: envelopeId,
+    );
+    final category = await CategoryService.getById(
+      session,
+      categoryId: envelope.categoryId,
+    );
+    if (category.budgetId != budgetId) {
+      throw NotFoundException('Envelope not found in this budget');
+    }
+  }
+
+  static Future<void> _assertPayeeBelongsToBudget(
+    Session session, {
+    required UuidValue budgetId,
+    required UuidValue payeeId,
+  }) async {
+    final payee = await PayeeService.getById(session, payeeId: payeeId);
+    if (payee.budgetId != budgetId) {
+      throw NotFoundException('Payee not found in this budget');
+    }
+  }
+
+  static Future<void> _validateRuleReferences(
+    Session session, {
+    required UuidValue budgetId,
+    required UuidValue payeeId,
+    required UuidValue targetEnvelopeId,
+  }) async {
+    await _assertPayeeBelongsToBudget(
+      session,
+      budgetId: budgetId,
+      payeeId: payeeId,
+    );
+    await _assertEnvelopeBelongsToBudget(
+      session,
+      budgetId: budgetId,
+      envelopeId: targetEnvelopeId,
+    );
   }
 }

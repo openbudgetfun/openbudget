@@ -4,6 +4,20 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 APP_DIR="${ROOT_DIR}/openbudget_app"
 
+# Fall back to the repo-managed Flutter SDK when PATH doesn't provide one.
+if ! command -v flutter >/dev/null 2>&1; then
+	fvm_flutter_bin="${ROOT_DIR}/.fvm/flutter_sdk/bin"
+	if [ -x "${fvm_flutter_bin}/flutter" ]; then
+		export PATH="${fvm_flutter_bin}:${PATH}"
+		echo "Using Flutter from ${fvm_flutter_bin}"
+	fi
+fi
+
+if ! command -v flutter >/dev/null 2>&1; then
+	echo "::error::Flutter executable not found in PATH and no .fvm fallback was available."
+	exit 1
+fi
+
 cd "$APP_DIR"
 
 shopt -s nullglob
@@ -36,6 +50,7 @@ passed_files=0
 for f in "${tests[@]}"; do
 	echo "::group::Running $f"
 	output_file="$(mktemp)"
+	file_failed=0
 
 	if ! grep -Eq "patrolWidgetTest|patrolTest" "$f"; then
 		echo "::error::File does not declare Patrol tests: $f"
@@ -60,24 +75,29 @@ for f in "${tests[@]}"; do
 		if [ "$status" -eq 124 ]; then
 			echo "::error::Integration test timed out after ${timeout_seconds}s: $f"
 		fi
-		failed=1
+		file_failed=1
 	fi
 
-	if grep -Eq "Some tests failed|[0-9]+ failed|No tests ran|No tests were found|Test failed" "$output_file"; then
+	if grep -Eq "Some tests failed|[0-9]+ failed|No tests ran|No tests were found|Test failed|EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK|\\[E\\]|\\+[0-9]+ -[1-9][0-9]*" "$output_file"; then
 		echo "::error::Detected integration failure markers in $f output."
-		failed=1
+		file_failed=1
 	fi
 
 	if grep -Eq "All tests passed!|🎉[[:space:]]+[0-9]+[[:space:]]+test(s)?[[:space:]]+passed\\.|[0-9]+[[:space:]]+test(s)? passed\\." "$output_file"; then
 		saw_success_marker=1
-		passed_files=$((passed_files + 1))
 	else
 		saw_success_marker=0
 	fi
 
 	if [ "$status" -eq 0 ] && [ "$saw_success_marker" -eq 0 ]; then
 		echo "::error::No success marker found in output for $f despite zero exit status."
+		file_failed=1
+	fi
+
+	if [ "$file_failed" -ne 0 ]; then
 		failed=1
+	else
+		passed_files=$((passed_files + 1))
 	fi
 
 	rm -f "$output_file"

@@ -136,7 +136,7 @@ class AccountDetailScreen extends HookConsumerWidget {
                           _openEditAccount(context, accountData);
                         }
                       case _AccountMenuAction.linkAccount:
-                        _showLinkAccountComingSoon(context);
+                        _showLinkAccountUnavailable(context);
                     }
                   },
                   itemBuilder: (context) => [
@@ -157,7 +157,8 @@ class AccountDetailScreen extends HookConsumerWidget {
                     ),
                     const PopupMenuItem<_AccountMenuAction>(
                       value: _AccountMenuAction.linkAccount,
-                      child: Text('Link Account'),
+                      enabled: false,
+                      child: Text('Link Account (Unavailable)'),
                     ),
                   ],
                 ),
@@ -441,12 +442,12 @@ class AccountDetailScreen extends HookConsumerWidget {
     );
   }
 
-  void _showLinkAccountComingSoon(BuildContext context) {
+  void _showLinkAccountUnavailable(BuildContext context) {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text(
-          'Bank linking for OpenBudget is coming soon. '
-          'Use unlinked accounts for now.',
+          'Bank connections are currently unavailable in this build. '
+          'Use unlinked accounts instead.',
         ),
       ),
     );

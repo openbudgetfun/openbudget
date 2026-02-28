@@ -1,4 +1,4 @@
-package com.example.openbudget_app
+package com.openbudget.app
 
 import io.flutter.embedding.android.FlutterActivity
 
