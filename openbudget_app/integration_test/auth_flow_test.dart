@@ -50,6 +50,18 @@ void main() {
     expect(find.text('Send Verification Code'), findsOneWidget);
   });
 
+  patrolWidgetTest('login flow can navigate to register screen', ($) async {
+    final tester = $.tester;
+    await tester.pumpWidget(_buildAuthApp());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Create Account'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Create Account'), findsWidgets);
+    expect(find.text('Send Verification Code'), findsOneWidget);
+  });
+
   patrolWidgetTest('register flow can navigate back to login screen', (
     $,
   ) async {
