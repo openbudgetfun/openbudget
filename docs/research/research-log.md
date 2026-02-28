@@ -239,3 +239,31 @@
   - `docs/research/screenshots/2026-02-28/login-redesign-initial.png`
   - `docs/research/screenshots/2026-02-28/login-redesign-email-focus.png`
   - `docs/research/screenshots/2026-02-28/login-redesign-filled.png`
+
+## 2026-02-28 - Solana Auto-Category Suggestions (UI)
+
+### Product/UX Progress
+
+- Added automatic category suggestion heuristics for uncategorized Solana wallet transactions.
+- Suggestions are derived from parsed transaction signals (`txType`, `source`, and program IDs), with current mappings including:
+  - Swaps
+  - Transfers
+  - Staking
+  - NFT
+  - Lending
+  - Income
+- UI behavior:
+  - transaction cards now show a `Suggested: ...` chip when no user category exists.
+  - metadata edit dialog pre-fills category field with the suggestion (still fully editable).
+  - search now includes suggested category text for uncategorized transactions.
+- Important semantics retained:
+  - `Needs category` filter still keys off user-managed category only (suggestions do not mark a transaction as categorized).
+
+### Validation Completed
+
+- `flutter test openbudget_app/test/features/accounts/screens/account_detail_screen_test.dart` passed.
+- Regression test slice passed:
+  - `login_screen_test.dart`
+  - `account_detail_screen_test.dart`
+  - `add_account_screen_test.dart`
+- `dart analyze openbudget_app` returned no issues.

@@ -1985,6 +1985,7 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
                           tx.txType,
                           tx.source,
                           tx.category ?? '',
+                          _suggestedCategoryForWalletTransaction(tx) ?? '',
                           tx.tagsCsv ?? '',
                           tx.memo ?? '',
                         ].join(' ').toLowerCase();
@@ -2036,8 +2037,14 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
     required SolanaWalletTransaction transaction,
   }) async {
     if (transaction.id == null) return;
+    final suggestedCategory = _suggestedCategoryForWalletTransaction(
+      transaction,
+    );
+    final existingCategory = transaction.category?.trim();
     final categoryController = TextEditingController(
-      text: transaction.category,
+      text: existingCategory == null || existingCategory.isEmpty
+          ? (suggestedCategory ?? '')
+          : existingCategory,
     );
     final tagsController = TextEditingController(text: transaction.tagsCsv);
     final memoController = TextEditingController(text: transaction.memo);
@@ -2054,6 +2061,16 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
                 controller: categoryController,
                 decoration: const InputDecoration(labelText: 'Category'),
               ),
+              if (suggestedCategory != null) ...[
+                const SizedBox(height: SpacingTokens.xs),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Suggested: $suggestedCategory',
+                    style: Theme.of(dialogContext).textTheme.bodySmall,
+                  ),
+                ),
+              ],
               const SizedBox(height: SpacingTokens.sm),
               TextField(
                 controller: tagsController,
@@ -2395,6 +2412,10 @@ class _TransactionCard extends StatelessWidget {
     final programs = _parsePrograms(
       transaction.programsJson,
     ).map(_programLabel).toSet().toList();
+    final suggestedCategory = _suggestedCategoryForWalletTransaction(
+      transaction,
+    );
+    final hasCategory = transaction.category?.trim().isNotEmpty ?? false;
     final occurredText = transaction.occurredAt == null
         ? null
         : DateFormat.yMMMd().add_jm().format(transaction.occurredAt!);
@@ -2468,10 +2489,17 @@ class _TransactionCard extends StatelessWidget {
                 ),
                 for (final program in programs.take(4))
                   _MetadataChip(icon: Icons.extension_outlined, label: program),
-                if (transaction.category?.trim().isNotEmpty ?? false)
+                if (hasCategory)
                   _MetadataChip(
                     icon: Icons.folder_open_rounded,
                     label: transaction.category!.trim(),
+                  ),
+                if (!hasCategory && suggestedCategory != null)
+                  _MetadataChip(
+                    icon: Icons.auto_awesome_rounded,
+                    label: 'Suggested: $suggestedCategory',
+                    color: colorScheme.primaryContainer,
+                    foregroundColor: colorScheme.onPrimaryContainer,
                   ),
                 for (final tag in tags.take(4))
                   _MetadataChip(icon: Icons.tag_rounded, label: tag),
@@ -2634,6 +2662,46 @@ List<String> _parseTags(String? tagsCsv) {
       .map((tag) => tag.trim())
       .where((tag) => tag.isNotEmpty)
       .toList(growable: false);
+}
+
+String? _suggestedCategoryForWalletTransaction(SolanaWalletTransaction tx) {
+  final type = tx.txType.toLowerCase();
+  final source = tx.source.toLowerCase();
+  final programs = _parsePrograms(
+    tx.programsJson,
+  ).map((program) => program.toLowerCase());
+
+  bool containsSignal(String signal) {
+    return type.contains(signal) ||
+        source.contains(signal) ||
+        programs.any((program) => program.contains(signal));
+  }
+
+  if (containsSignal('swap') ||
+      containsSignal('jupiter') ||
+      containsSignal('raydium') ||
+      containsSignal('whirlpool') ||
+      containsSignal('orca') ||
+      containsSignal('pump')) {
+    return 'Swaps';
+  }
+  if (containsSignal('stake')) return 'Staking';
+  if (containsSignal('nft') ||
+      containsSignal('magiceden') ||
+      containsSignal('tensor') ||
+      containsSignal('metaplex')) {
+    return 'NFT';
+  }
+  if (containsSignal('lend') ||
+      containsSignal('borrow') ||
+      containsSignal('margin')) {
+    return 'Lending';
+  }
+  if (containsSignal('airdrop') || containsSignal('claim')) return 'Income';
+  if (containsSignal('transfer') || containsSignal('system_program')) {
+    return 'Transfers';
+  }
+  return null;
 }
 
 int _pow10Int(int exponent) {
