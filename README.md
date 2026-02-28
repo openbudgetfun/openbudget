@@ -45,8 +45,8 @@ devenv up
 # 6. In another terminal, follow local service logs
 tail -f ./tmp/log.txt
 
-# 7. In a separate terminal, run the app
-flutter:app run -d macos
+# 7. In a separate terminal, run the app (dev flavor)
+flutter:app run -t lib/main_dev.dart -d macos
 ```
 
 That's it. `devenv up` starts Postgres, Redis, and the backend server in one command. The server waits for the databases to be healthy before starting.
@@ -71,6 +71,8 @@ openbudget/
 
 Branding rules and naming constraints are documented in `docs/branding.md`.
 
+Solana wallet + flavor setup instructions are in `docs/solana-and-flavors-setup.md`.
+
 ## Commands
 
 All commands run from the repo root. No need to `cd` into subdirectories.
@@ -78,19 +80,33 @@ All commands run from the repo root. No need to `cd` into subdirectories.
 ### Running the App
 
 ```bash
-flutter:app run -d macos       # Run on macOS
-flutter:app run -d chrome       # Run on web
-flutter:app run -d ios          # Run on iOS simulator
-flutter:app run -d android      # Run on Android emulator
-flutter:app build web          # Build for web
+# Dev flavor (staging/dev cluster)
+flutter:app run -t lib/main_dev.dart -d macos
+flutter:app run -t lib/main_dev.dart -d chrome
+flutter:app run -t lib/main_dev.dart -d android
+flutter:app run --flavor dev -t lib/main_dev.dart -d ios
+flutter:app run --flavor dev -t lib/main_dev.dart -d android
+
+# Prod flavor (production cluster)
+flutter:app run -t lib/main_prod.dart -d macos
+flutter:app run -t lib/main_prod.dart -d chrome
+flutter:app run --flavor prod -t lib/main_prod.dart -d ios
+flutter:app run --flavor prod -t lib/main_prod.dart -d android
+
+# Build web
+flutter:app build web
 ```
 
-Android note: emulator builds use `10.0.2.2` to reach the host machine. For
-physical devices (or custom network setup), override the API base URL:
+Environment routing defaults:
 
-```bash
-flutter:app run -d android --dart-define=OPENBUDGET_API_URL=http://192.168.1.10:8080
-```
+- `main_dev.dart` -> `https://api-staging.openbudget.app/`
+- `main_prod.dart` / `main.dart` -> `https://api.openbudget.app/`
+- `openbudget_app/pubspec.yaml` sets `default-flavor: dev` for tooling that
+  cannot pass `--flavor`
+- Override for any build: `--dart-define=API_URL=https://your-api-host`
+
+Legacy local override support is also available with
+`--dart-define=OPENBUDGET_API_URL=http://192.168.1.10:8080`.
 
 ### Services
 

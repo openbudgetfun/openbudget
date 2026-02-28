@@ -1,0 +1,45 @@
+### A parsed Solana transaction associated with a wallet.
+class: SolanaWalletTransaction
+table: solana_wallet_transaction
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  walletId: UuidValue, relation(parent=solana_wallet)
+  budgetId: UuidValue, relation(parent=budget)
+  ### Transaction signature.
+  signature: String
+  ### Ledger slot number.
+  slot: int
+  ### Transaction timestamp from chain data.
+  occurredAt: DateTime?
+  ### Human-readable transaction description.
+  description: String
+  ### Parsed transaction type from Helius.
+  txType: String
+  ### Parsed transaction source from Helius.
+  source: String
+  ### JSON-encoded list of detected program IDs.
+  programsJson: String?
+  ### JSON-encoded native transfer details.
+  nativeTransfersJson: String?
+  ### JSON-encoded token transfer details.
+  tokenTransfersJson: String?
+  ### User-managed category value.
+  category: String?
+  ### User-managed comma-separated tags.
+  tagsCsv: String?
+  ### User-managed memo.
+  memo: String?
+  ### Raw enhanced transaction payload JSON.
+  rawJson: String
+  createdAt: DateTime, default=now
+  updatedAt: DateTime, default=now
+indexes:
+  solana_wallet_tx_wallet_idx:
+    fields: walletId
+  solana_wallet_tx_budget_idx:
+    fields: budgetId
+  solana_wallet_tx_signature_idx:
+    fields: signature
+  solana_wallet_tx_wallet_signature_unique:
+    fields: walletId, signature
+    unique: true

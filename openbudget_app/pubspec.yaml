@@ -63,6 +63,7 @@ patrol:
 
 flutter:
   generate: true
+  default-flavor: dev
   uses-material-design: true
   assets:
     - assets/config.json
