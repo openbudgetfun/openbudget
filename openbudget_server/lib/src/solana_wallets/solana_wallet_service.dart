@@ -7,6 +7,7 @@ import 'package:openbudget_server/src/accounts/account_service.dart';
 import 'package:openbudget_server/src/budgets/budget_service.dart';
 import 'package:openbudget_server/src/exceptions/exceptions.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
+import 'package:openbudget_server/src/solana_wallets/jupiter_price_client.dart';
 import 'package:openbudget_server/src/solana_wallets/solana_transaction_interpreter.dart';
 import 'package:serverpod/serverpod.dart';
 import 'package:solana_kit_helius/solana_kit_helius.dart';
@@ -786,6 +787,10 @@ class SolanaWalletService {
     );
 
     final assetsById = {for (final asset in assets.items) asset.id: asset};
+    final jupiterPrices = await JupiterPriceClient.fetchUsdPrices(
+      mintAddresses: balances.tokens.map((token) => token.mint),
+      onWarning: (warning) => warnings.add(warning),
+    );
 
     final seenAssetIds = <String>{};
     var totalValuation = 0.0;
@@ -819,6 +824,19 @@ class SolanaWalletService {
           totalValue = derivedTotalPrice;
           priceSource = 'helius_das_total_price';
           priceQuality = 'derived';
+          priceAsOf = now;
+        }
+      }
+
+      if (pricePerToken == null) {
+        final jupiterPrice = jupiterPrices[assetId];
+        if (jupiterPrice != null) {
+          pricePerToken = jupiterPrice;
+          totalValue = uiAmount * jupiterPrice;
+          priceCurrency = 'USD';
+          priceSource = 'jupiter_price_v3';
+          priceQuality = 'provider';
+          isPriceStale = false;
           priceAsOf = now;
         }
       }
