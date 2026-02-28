@@ -76,16 +76,31 @@ flutter:app run --flavor prod -t lib/main_prod.dart -d android
 
 ### iOS
 
-Shared schemes have been added:
+Shared schemes and flavor-specific build configurations are now wired:
 
 - `dev`
 - `prod`
+- `Debug-dev` / `Release-dev` / `Profile-dev`
+- `Debug-prod` / `Release-prod` / `Profile-prod`
+
+Bundle IDs / display names:
+
+- Dev: `com.openbudget.app.dev` (`OpenBudget Dev`)
+- Prod: `com.openbudget.app` (`OpenBudget`)
 
 Use:
 
 ```bash
 flutter:app run --flavor dev -t lib/main_dev.dart -d ios
 flutter:app run --flavor prod -t lib/main_prod.dart -d ios
+```
+
+Build checks used during validation:
+
+```bash
+flutter:app run --flavor dev -t lib/main_dev.dart -d 63886201-1983-42F2-8DEA-51FBF6C0191C --no-resident
+flutter:app run --flavor prod -t lib/main_prod.dart -d 63886201-1983-42F2-8DEA-51FBF6C0191C --no-resident
+xcrun simctl listapps 63886201-1983-42F2-8DEA-51FBF6C0191C | rg "com.openbudget.app(\\.dev)?"
 ```
 
 ## 5) Solana Wallet Flow (Current)
@@ -113,6 +128,5 @@ flutter:app run --flavor prod -t lib/main_prod.dart -d android
 
 ## 7) Known Gaps
 
-- iOS side-by-side install (distinct bundle IDs for dev/prod) is tracked separately.
 - Valuation currently relies primarily on provider-returned price fields; fallback pricing adapters are tracked in backlog.
 - Tax lot / deterministic realized P&L engine is tracked in backlog.
