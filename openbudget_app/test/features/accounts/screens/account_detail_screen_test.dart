@@ -195,6 +195,11 @@ Widget _buildWalletSubject({
           balanceUi: '1.5',
           isNft: false,
           totalValue: 280,
+          estimatedCostBasis: 250,
+          estimatedUnrealizedPnl: 30,
+          estimatedUnrealizedPnlPercent: 12,
+          estimatedRealizedPnl: 8,
+          pnlCurrency: 'USD',
           tokenProgram: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
         ),
         SolanaWalletHolding(
@@ -238,6 +243,11 @@ Widget _buildWalletSubject({
           description: 'Transfer to friend',
           txType: 'TRANSFER',
           source: 'SYSTEM_PROGRAM',
+          estimatedCostBasis: 10,
+          estimatedProceeds: 18,
+          estimatedRealizedPnl: 8,
+          pnlCurrency: 'USD',
+          taxYear: 2026,
           tagsCsv: 'personal',
           rawJson: '{}',
         ),
@@ -444,7 +454,17 @@ void main() {
 
       expect(find.text('Main Wallet'), findsWidgets);
       expect(find.text('Holdings'), findsOneWidget);
+      await tester.scrollUntilVisible(
+        find.text(r'Hide dust assets (< $0.01)'),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
       expect(find.text(r'Hide dust assets (< $0.01)'), findsOneWidget);
+      await tester.scrollUntilVisible(
+        find.text('SOL'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
       expect(find.text('SOL'), findsOneWidget);
       expect(find.text('DUST'), findsNothing);
       await tester.scrollUntilVisible(
@@ -454,15 +474,32 @@ void main() {
       );
       expect(find.text('Jupiter swap'), findsOneWidget);
       expect(find.text('Transfer to friend'), findsOneWidget);
+      expect(find.textContaining('P&L +'), findsWidgets);
+      expect(find.text('Tax 2026'), findsOneWidget);
+      expect(find.textContaining('Basis'), findsWidgets);
     });
 
     testWidgets('dust filter can reveal tiny-value holdings', (tester) async {
+      final binding = tester.binding;
+      await binding.setSurfaceSize(const Size(1200, 2200));
+      addTearDown(() => binding.setSurfaceSize(null));
+
       await tester.pumpWidget(_buildWalletSubject());
       await tester.pumpAndSettle();
 
       expect(find.text('DUST'), findsNothing);
 
-      await tester.tap(find.text(r'Hide dust assets (< $0.01)'));
+      await tester.scrollUntilVisible(
+        find.text(r'Hide dust assets (< $0.01)'),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      final dustChip = find.widgetWithText(
+        FilterChip,
+        r'Hide dust assets (< $0.01)',
+      );
+      await tester.ensureVisible(dustChip);
+      await tester.tap(dustChip);
       await tester.pumpAndSettle();
 
       expect(find.text('DUST'), findsOneWidget);
