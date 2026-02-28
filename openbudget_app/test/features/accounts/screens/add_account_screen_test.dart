@@ -154,6 +154,27 @@ void main() {
     expect(find.textContaining('Linked connections for "citi"'), findsNothing);
   });
 
+  testWidgets('bank selection shows unavailable notice and falls back', (
+    tester,
+  ) async {
+    await tester.pumpWidget(buildSubject());
+    await _pumpToBankSearch(tester);
+
+    await tester.enterText(find.byType(TextField).first, 'citi');
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Citi'));
+    await tester.pump(const Duration(milliseconds: 900));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Add Unlinked Account'), findsOneWidget);
+    expect(
+      find.textContaining(
+        'Linked connections for "Citi" are currently unavailable',
+      ),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('account type picker can be opened from unlinked form', (
     tester,
   ) async {

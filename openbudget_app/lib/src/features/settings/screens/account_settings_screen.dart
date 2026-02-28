@@ -15,27 +15,54 @@ class AccountSettingsScreen extends HookWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final firstNameController = useTextEditingController(text: 'Alex');
-    final hasChanges = useState(false);
+    const unavailableHint = 'Currently unavailable in this build.';
 
     return Scaffold(
       backgroundColor: OpenBudgetPalette.appBackground,
       appBar: AppBar(
         backgroundColor: OpenBudgetPalette.appBackground,
-        title: const Text('Account Settings'),
+        title: Text(l10n.settingsAccountSettings),
       ),
       body: ListView(
         padding: const EdgeInsets.all(SpacingTokens.md),
         children: [
           Text(
-            'Account Settings',
+            l10n.settingsAccountSettings,
             style: theme.textTheme.headlineMedium?.copyWith(
               fontWeight: FontWeight.w700,
             ),
           ),
           const SizedBox(height: SpacingTokens.xs),
-          Text(l10n.settingsAccountEmail, style: theme.textTheme.titleMedium),
+          Container(
+            padding: const EdgeInsets.all(SpacingTokens.md),
+            decoration: BoxDecoration(
+              color: OpenBudgetPalette.surface,
+              borderRadius: BorderRadius.circular(RadiusTokens.md),
+              border: Border.all(color: OpenBudgetPalette.divider),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(Icons.lock_outline_rounded, size: 20),
+                const SizedBox(width: SpacingTokens.sm),
+                Expanded(
+                  child: Text(
+                    'Account settings are read-only in this build. '
+                    'Profile, login method, and security updates are unavailable.',
+                    style: theme.textTheme.bodyMedium,
+                  ),
+                ),
+              ],
+            ),
+          ),
           const SizedBox(height: SpacingTokens.lg),
+          Text(
+            'Profile',
+            style: theme.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: SpacingTokens.md),
           Text(
             'First Name',
             style: theme.textTheme.titleMedium?.copyWith(
@@ -43,29 +70,25 @@ class AccountSettingsScreen extends HookWidget {
             ),
           ),
           const SizedBox(height: SpacingTokens.xs),
-          Text(
-            'We use your first name to personalize your OpenBudget experience.',
-            style: theme.textTheme.bodyMedium,
+          const TextField(
+            enabled: false,
+            decoration: InputDecoration(hintText: 'Unavailable in this build'),
           ),
           const SizedBox(height: SpacingTokens.sm),
-          TextField(
-            controller: firstNameController,
-            decoration: const InputDecoration(hintText: 'First name'),
-            onChanged: (value) => hasChanges.value = value.trim() != 'Alex',
-          ),
+          Text(l10n.settingsAccountEmail, style: theme.textTheme.titleMedium),
           const SizedBox(height: SpacingTokens.sm),
-          Align(
+          const Align(
             alignment: Alignment.centerRight,
             child: FilledButton(
-              onPressed: hasChanges.value
-                  ? () {
-                      hasChanges.value = false;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Saved account profile')),
-                      );
-                    }
-                  : null,
-              child: const Text('Save'),
+              onPressed: null,
+              child: Text('Save (Unavailable)'),
+            ),
+          ),
+          const SizedBox(height: SpacingTokens.xs),
+          Text(
+            unavailableHint,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: OpenBudgetPalette.mutedText,
             ),
           ),
           const SizedBox(height: SpacingTokens.xl),
@@ -86,17 +109,20 @@ class AccountSettingsScreen extends HookWidget {
           ),
           Text(l10n.settingsAccountEmail, style: theme.textTheme.bodyMedium),
           const SizedBox(height: SpacingTokens.sm),
-          FilledButton.tonal(
-            onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Email/password updates coming soon'),
-              ),
+          const FilledButton.tonal(
+            onPressed: null,
+            child: Text('Change Email & Password'),
+          ),
+          const SizedBox(height: SpacingTokens.xs),
+          Text(
+            unavailableHint,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: OpenBudgetPalette.mutedText,
             ),
-            child: const Text('Change Email & Password'),
           ),
           const SizedBox(height: SpacingTokens.lg),
           Text(
-            'Use OpenBudget on desktop to modify Apple or Google login methods.',
+            'Apple and Google login method changes are unavailable in this build.',
             style: theme.textTheme.bodyMedium,
           ),
           const SizedBox(height: SpacingTokens.lg),
@@ -112,11 +138,13 @@ class AccountSettingsScreen extends HookWidget {
             style: theme.textTheme.bodyMedium,
           ),
           const SizedBox(height: SpacingTokens.sm),
-          FilledButton.tonal(
-            onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Two-step setup coming soon')),
+          const FilledButton.tonal(onPressed: null, child: Text('Set Up')),
+          const SizedBox(height: SpacingTokens.xs),
+          Text(
+            unavailableHint,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: OpenBudgetPalette.mutedText,
             ),
-            child: const Text('Set Up'),
           ),
           const SizedBox(height: SpacingTokens.xl),
           Divider(color: theme.colorScheme.outlineVariant),
@@ -129,8 +157,8 @@ class AccountSettingsScreen extends HookWidget {
           ),
           const SizedBox(height: SpacingTokens.sm),
           Text(
-            'Delete your account if you no longer wish to use OpenBudget. '
-            'This permanently removes account and plan data.',
+            'Account deletion is currently unavailable in this build. '
+            'Open this page to review status and availability.',
             style: theme.textTheme.bodyMedium,
           ),
           const SizedBox(height: SpacingTokens.md),
@@ -144,6 +172,13 @@ class AccountSettingsScreen extends HookWidget {
               pathParameters: {'id': budgetId},
             ),
             child: const Text('Delete Account'),
+          ),
+          const SizedBox(height: SpacingTokens.xs),
+          Text(
+            'No account data can be removed from this app yet.',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: OpenBudgetPalette.mutedText,
+            ),
           ),
         ],
       ),

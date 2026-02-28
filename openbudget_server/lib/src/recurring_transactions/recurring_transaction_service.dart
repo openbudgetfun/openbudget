@@ -1,7 +1,11 @@
 import 'package:openbudget_core/openbudget_core.dart';
+import 'package:openbudget_server/src/accounts/account_service.dart';
 import 'package:openbudget_server/src/budgets/budget_service.dart';
+import 'package:openbudget_server/src/categories/category_service.dart';
+import 'package:openbudget_server/src/envelopes/envelope_service.dart';
 import 'package:openbudget_server/src/exceptions/exceptions.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
+import 'package:openbudget_server/src/payees/payee_service.dart';
 import 'package:serverpod/serverpod.dart' hide Transaction;
 
 /// Business logic for managing recurring transactions within a budget.
@@ -28,6 +32,13 @@ class RecurringTransactionService {
       'Creating recurring transaction desc=$description freq=$frequency',
     );
     await BudgetService.getById(session, budgetId: budgetId);
+    await _validateRecurringReferences(
+      session,
+      budgetId: budgetId,
+      envelopeId: envelopeId,
+      accountId: accountId,
+      payeeId: payeeId,
+    );
 
     final recurring = RecurringTransaction(
       description: description,
@@ -104,6 +115,13 @@ class RecurringTransactionService {
     final recurring = await getById(
       session,
       recurringTransactionId: recurringTransactionId,
+    );
+    await _validateRecurringReferences(
+      session,
+      budgetId: recurring.budgetId,
+      envelopeId: envelopeId,
+      accountId: accountId,
+      payeeId: payeeId,
     );
 
     final updated = recurring.copyWith(
@@ -243,6 +261,78 @@ class RecurringTransactionService {
           (r.nextOccurrence <= now),
     );
     return count;
+  }
+
+  static Future<void> _assertAccountBelongsToBudget(
+    Session session, {
+    required UuidValue accountId,
+    required UuidValue budgetId,
+  }) async {
+    final account = await AccountService.getById(session, accountId: accountId);
+    if (account.budgetId != budgetId) {
+      throw NotFoundException('Account not found in this budget');
+    }
+  }
+
+  static Future<void> _assertEnvelopeBelongsToBudget(
+    Session session, {
+    required UuidValue envelopeId,
+    required UuidValue budgetId,
+  }) async {
+    final envelope = await EnvelopeService.getById(
+      session,
+      envelopeId: envelopeId,
+    );
+    final category = await CategoryService.getById(
+      session,
+      categoryId: envelope.categoryId,
+    );
+    if (category.budgetId != budgetId) {
+      throw NotFoundException('Envelope not found in this budget');
+    }
+  }
+
+  static Future<void> _assertPayeeBelongsToBudget(
+    Session session, {
+    required UuidValue payeeId,
+    required UuidValue budgetId,
+  }) async {
+    final payee = await PayeeService.getById(session, payeeId: payeeId);
+    if (payee.budgetId != budgetId) {
+      throw NotFoundException('Payee not found in this budget');
+    }
+  }
+
+  static Future<void> _validateRecurringReferences(
+    Session session, {
+    required UuidValue budgetId,
+    UuidValue? envelopeId,
+    UuidValue? accountId,
+    UuidValue? payeeId,
+  }) async {
+    if (envelopeId != null) {
+      await _assertEnvelopeBelongsToBudget(
+        session,
+        budgetId: budgetId,
+        envelopeId: envelopeId,
+      );
+    }
+
+    if (accountId != null) {
+      await _assertAccountBelongsToBudget(
+        session,
+        budgetId: budgetId,
+        accountId: accountId,
+      );
+    }
+
+    if (payeeId != null) {
+      await _assertPayeeBelongsToBudget(
+        session,
+        budgetId: budgetId,
+        payeeId: payeeId,
+      );
+    }
   }
 
   /// Calculates the next occurrence based on frequency and current date.

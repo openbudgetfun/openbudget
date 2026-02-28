@@ -1,7 +1,7 @@
 name: openbudget_app
 description: OpenBudget — cross-platform envelope budgeting app.
 publish_to: none
-version: 1.0.0+1
+version: 1.0.0
 
 environment:
   sdk: ^3.11.0
@@ -55,11 +55,11 @@ dev_dependencies:
 patrol:
   app_name: OpenBudget
   android:
-    package_name: com.example.openbudget_app
+    package_name: com.openbudget.app
   ios:
-    bundle_id: com.example.openbudgetFlutter
+    bundle_id: com.openbudget.app
   macos:
-    bundle_id: com.example.openbudgetFlutter
+    bundle_id: com.openbudget.app
 
 flutter:
   generate: true

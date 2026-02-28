@@ -41,6 +41,23 @@ jobs:
         run: melos exec --scope="openbudget_core" -- dart test
         shell: devenv shell -- bash -e {0}
 
+  infra-validate:
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/devenv
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: install infra dependencies
+        run: install:infra
+        shell: devenv shell -- bash -e {0}
+
+      - name: type-check infra
+        run: infra:build
+        shell: devenv shell -- bash -e {0}
+
   server-test:
     runs-on: blacksmith-2vcpu-ubuntu-2404
     timeout-minutes: 60
@@ -109,6 +126,31 @@ jobs:
         env:
           PER_FILE_TIMEOUT_SECONDS: 900
         shell: devenv shell -- bash -e {0}
+
+  release-config-guard:
+    name: Release config guard
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: validate Shorebird and package IDs
+        run: |
+          set -euo pipefail
+
+          APP_ID_LINE="$(grep -E '^[[:space:]]*app_id[[:space:]]*:' openbudget_app/shorebird.yaml | head -1 || true)"
+          APP_ID_VALUE="$(echo "${APP_ID_LINE}" | sed -E 's/^[[:space:]]*app_id[[:space:]]*:[[:space:]]*//' | sed -E "s/^['\"](.*)['\"]$/\1/" | tr -d '[:space:]')"
+
+          if [ -z "${APP_ID_VALUE}" ]; then
+            echo "::error file=openbudget_app/shorebird.yaml,title=Missing Shorebird app_id::Set a non-empty Shorebird app_id (run 'shorebird init')."
+            exit 1
+          fi
+
+          if grep -RInE 'com\.example\.' openbudget_app; then
+            echo "::error title=Placeholder package IDs detected::Replace com.example.* package IDs in app platform configs."
+            exit 1
+          fi
+
+          echo "Release config guard passed."
 
   native-change-check:
     name: Detect native dependency changes

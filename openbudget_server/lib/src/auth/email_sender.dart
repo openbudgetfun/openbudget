@@ -1,4 +1,6 @@
-import 'package:serverpod/serverpod.dart';
+import 'package:mailer/mailer.dart';
+import 'package:mailer/smtp_server.dart';
+import 'package:serverpod/serverpod.dart' hide Message;
 
 /// Abstraction for sending email verification codes.
 ///
@@ -49,13 +51,22 @@ class SmtpEmailSender implements EmailSender {
     required this.username,
     required this.password,
     required this.fromAddress,
-  });
+    this.fromName,
+    bool? useSsl,
+    this.ignoreBadCertificate = false,
+    SmtpMessageSender? messageSender,
+  }) : useSsl = useSsl ?? port == 465,
+       _messageSender = messageSender ?? _defaultSmtpMessageSender;
 
   final String host;
   final int port;
   final String username;
   final String password;
   final String fromAddress;
+  final String? fromName;
+  final bool useSsl;
+  final bool ignoreBadCertificate;
+  final SmtpMessageSender _messageSender;
 
   @override
   Future<void> sendVerificationCode(
@@ -63,8 +74,14 @@ class SmtpEmailSender implements EmailSender {
     required String email,
     required String code,
   }) async {
-    // TODO(openbudget): Implement SMTP email sending for registration codes.
-    session.log('[SMTP] Would send registration code to $email: $code');
+    await _sendCode(
+      session: session,
+      email: email,
+      code: code,
+      subject: 'Your OpenBudget verification code',
+      purpose: 'registration',
+      description: 'registration verification code',
+    );
   }
 
   @override
@@ -73,7 +90,82 @@ class SmtpEmailSender implements EmailSender {
     required String email,
     required String code,
   }) async {
-    // TODO(openbudget): Implement SMTP email sending for password reset codes.
-    session.log('[SMTP] Would send password reset code to $email: $code');
+    await _sendCode(
+      session: session,
+      email: email,
+      code: code,
+      subject: 'Your OpenBudget password reset code',
+      purpose: 'password reset',
+      description: 'password reset verification code',
+    );
   }
+
+  Future<void> _sendCode({
+    required Session session,
+    required String email,
+    required String code,
+    required String subject,
+    required String purpose,
+    required String description,
+  }) async {
+    final message = Message()
+      ..from = fromName == null
+          ? Address(fromAddress)
+          : Address(fromAddress, fromName)
+      ..recipients.add(email)
+      ..subject = subject
+      ..text =
+          '''
+Your OpenBudget $purpose code is: $code
+
+If you did not request this code, you can safely ignore this email.
+''';
+
+    final smtpServer = SmtpServer(
+      host,
+      port: port,
+      username: username,
+      password: password,
+      ssl: useSsl,
+      ignoreBadCertificate: ignoreBadCertificate,
+    );
+
+    try {
+      await _messageSender(message, smtpServer);
+      session.log(
+        '[EmailIdp] Sent $description to ${_maskEmailForLogs(email)} via SMTP.',
+      );
+    } on MailerException catch (error, stackTrace) {
+      session.log(
+        '[EmailIdp] Failed to send $description to ${_maskEmailForLogs(email)} via SMTP.',
+        level: LogLevel.error,
+        exception: error,
+        stackTrace: stackTrace,
+      );
+      rethrow;
+    }
+  }
+}
+
+typedef SmtpMessageSender =
+    Future<void> Function(Message message, SmtpServer smtpServer);
+
+Future<void> _defaultSmtpMessageSender(
+  Message message,
+  SmtpServer smtpServer,
+) async {
+  await send(message, smtpServer);
+}
+
+String _maskEmailForLogs(String email) {
+  final parts = email.split('@');
+  if (parts.length != 2) return '[invalid-email]';
+
+  final localPart = parts[0];
+  final domain = parts[1];
+  if (localPart.isEmpty) return '*@$domain';
+  if (localPart.length == 1) return '*@$domain';
+  if (localPart.length == 2) return '${localPart[0]}*@$domain';
+
+  return '${localPart[0]}***${localPart[localPart.length - 1]}@$domain';
 }

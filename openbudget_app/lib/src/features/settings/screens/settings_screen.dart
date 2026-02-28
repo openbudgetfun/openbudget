@@ -233,10 +233,9 @@ class SettingsScreen extends HookConsumerWidget {
                   _SettingsTile(
                     icon: Icons.account_balance_rounded,
                     label: l10n.settingsManageBankConnections,
-                    onTap: () => _showComingSoon(
-                      context,
-                      l10n.settingsManageBankConnections,
-                    ),
+                    subtitle: 'Currently unavailable in this build',
+                    enabled: false,
+                    onTap: null,
                   ),
                   const Divider(height: 1),
                   _SettingsTile(
@@ -466,20 +465,28 @@ class _SettingsTile extends HookWidget {
     required this.label,
     required this.onTap,
     this.subtitle,
+    this.enabled = true,
   });
 
   final IconData icon;
   final String label;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   final String? subtitle;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final titleColor = enabled
+        ? theme.textTheme.bodyLarge?.color
+        : OpenBudgetPalette.mutedText;
 
     return ListTile(
       leading: Icon(icon, color: OpenBudgetPalette.mutedText),
-      title: Text(label, style: theme.textTheme.bodyLarge),
+      title: Text(
+        label,
+        style: theme.textTheme.bodyLarge?.copyWith(color: titleColor),
+      ),
       subtitle: subtitle == null
           ? null
           : Text(
@@ -488,11 +495,11 @@ class _SettingsTile extends HookWidget {
                 color: OpenBudgetPalette.mutedText,
               ),
             ),
-      trailing: const Icon(
-        Icons.chevron_right_rounded,
+      trailing: Icon(
+        enabled ? Icons.chevron_right_rounded : Icons.block_rounded,
         color: OpenBudgetPalette.mutedText,
       ),
-      onTap: onTap,
+      onTap: enabled ? onTap : null,
     );
   }
 }

@@ -247,15 +247,7 @@ class EditAccountDialog extends HookConsumerWidget {
             const SizedBox(height: SpacingTokens.md),
             const _SectionLabel(text: 'Bank Connection'),
             OutlinedButton(
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                      'Linked bank connections are coming soon in OpenBudget.',
-                    ),
-                  ),
-                );
-              },
+              onPressed: null,
               style: OutlinedButton.styleFrom(
                 alignment: Alignment.centerLeft,
                 padding: const EdgeInsets.symmetric(
@@ -263,7 +255,15 @@ class EditAccountDialog extends HookConsumerWidget {
                   vertical: SpacingTokens.sm,
                 ),
               ),
-              child: const Text('Link an Account'),
+              child: const Text('Link an Account (Unavailable)'),
+            ),
+            const SizedBox(height: SpacingTokens.xs),
+            Text(
+              'Bank connections are currently unavailable in this build. '
+              'Add or manage unlinked accounts instead.',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: OpenBudgetPalette.mutedText,
+              ),
             ),
             const SizedBox(height: SpacingTokens.md),
             if (!account.isClosed)

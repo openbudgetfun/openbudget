@@ -162,8 +162,8 @@ class AddAccountScreen extends HookConsumerWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Linked connections for "$institutionName" are coming soon. '
-            'Add an unlinked account for now.',
+            'Linked connections for "$institutionName" are currently unavailable. '
+            'Add an unlinked account instead.',
           ),
         ),
       );
@@ -416,50 +416,51 @@ class _LoadingStep extends StatelessWidget {
         ? 'assets/branding/logos/ob_primary_dark_512.png'
         : 'assets/branding/logos/ob_primary_light_512.png';
 
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: SpacingTokens.xl),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(RadiusTokens.lg),
-              child: Image.asset(
-                logoAsset,
-                width: 84,
-                height: 84,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Icon(
-                  Icons.account_balance_rounded,
-                  size: 84,
-                  color: theme.colorScheme.primary,
-                ),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(
+        horizontal: SpacingTokens.xl,
+        vertical: SpacingTokens.lg,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(RadiusTokens.lg),
+            child: Image.asset(
+              logoAsset,
+              width: 84,
+              height: 84,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => Icon(
+                Icons.account_balance_rounded,
+                size: 84,
+                color: theme.colorScheme.primary,
               ),
             ),
-            const SizedBox(height: SpacingTokens.md),
-            Text(
-              title,
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
+          ),
+          const SizedBox(height: SpacingTokens.md),
+          Text(
+            title,
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w700,
             ),
-            const SizedBox(height: SpacingTokens.xs),
-            Text(
-              'This might take a few seconds.',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: OpenBudgetPalette.mutedText,
-              ),
+          ),
+          const SizedBox(height: SpacingTokens.xs),
+          Text(
+            'This might take a few seconds.',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: OpenBudgetPalette.mutedText,
             ),
-            if (includeSpinner) ...[
-              const SizedBox(height: SpacingTokens.lg),
-              const SizedBox(
-                height: 28,
-                width: 28,
-                child: CircularProgressIndicator(strokeWidth: 3),
-              ),
-            ],
+          ),
+          if (includeSpinner) ...[
+            const SizedBox(height: SpacingTokens.lg),
+            const SizedBox(
+              height: 28,
+              width: 28,
+              child: CircularProgressIndicator(strokeWidth: 3),
+            ),
           ],
-        ),
+        ],
       ),
     );
   }
@@ -707,8 +708,8 @@ class _UnlinkedAccountStep extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            "Let's go! And don't worry - if you change your mind, "
-            'you can link your account at any time.',
+            'Bank connections are currently unavailable in this build, '
+            "so let's set up an unlinked account.",
             style: introStyle,
           ),
           const SizedBox(height: SpacingTokens.md),
@@ -850,55 +851,40 @@ class _SuccessStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Expanded(
-          child: Center(
-            child: _StepFrame(
-              maxWidth: 720,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: SpacingTokens.xl,
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.check_circle_rounded,
-                      size: 72,
-                      color: OpenBudgetPalette.progressGreen,
-                    ),
-                    const SizedBox(height: SpacingTokens.md),
-                    Text(
-                      'Success!',
-                      style: Theme.of(context).textTheme.headlineSmall
-                          ?.copyWith(fontWeight: FontWeight.w800),
-                    ),
-                    const SizedBox(height: SpacingTokens.xs),
-                    Text(
-                      '$accountTypeLabel account added to OpenBudget.',
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: OpenBudgetPalette.mutedText,
-                      ),
-                    ),
-                  ],
+    return SafeArea(
+      child: _StepFrame(
+        maxWidth: 720,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(
+            SpacingTokens.md,
+            SpacingTokens.md,
+            SpacingTokens.md,
+            SpacingTokens.md,
+          ),
+          child: Column(
+            children: [
+              const Icon(
+                Icons.check_circle_rounded,
+                size: 72,
+                color: OpenBudgetPalette.progressGreen,
+              ),
+              const SizedBox(height: SpacingTokens.md),
+              Text(
+                'Success!',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w800,
                 ),
               ),
-            ),
-          ),
-        ),
-        SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(
-              SpacingTokens.md,
-              SpacingTokens.sm,
-              SpacingTokens.md,
-              SpacingTokens.md,
-            ),
-            child: _StepFrame(
-              maxWidth: 720,
-              child: Row(
+              const SizedBox(height: SpacingTokens.xs),
+              Text(
+                '$accountTypeLabel account added to OpenBudget.',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: OpenBudgetPalette.mutedText,
+                ),
+              ),
+              const SizedBox(height: SpacingTokens.xl),
+              Row(
                 children: [
                   Expanded(
                     child: OutlinedButton(
@@ -915,10 +901,10 @@ class _SuccessStep extends StatelessWidget {
                   ),
                 ],
               ),
-            ),
+            ],
           ),
         ),
-      ],
+      ),
     );
   }
 }

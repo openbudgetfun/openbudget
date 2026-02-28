@@ -363,7 +363,7 @@ in
     "lint:analyze" = {
       exec = ''
         set -e
-        dart analyze --fatal-infos .
+        dart analyze --fatal-infos $DEVENV_ROOT
       '';
       description = "Run dart analyze across the workspace in a single process.";
     };
@@ -393,9 +393,17 @@ in
     "fix:all" = {
       exec = ''
         set -e
-        format:all
+        fix:format
+        fix:dart
       '';
       description = "Fix all fixable lint issues.";
+    };
+    "fix:dart" = {
+      exec = ''
+        set -e
+        dart fix --apply
+      '';
+      description = "Fix dart lint issues";
     };
     "fix:format" = {
       exec = ''
