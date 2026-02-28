@@ -105,9 +105,11 @@ in
         server:start
       '';
       process-compose = {
-        depends_on = {
-          "devenv-up-postgres".condition = "process_healthy";
-          "devenv-up-redis".condition = "process_healthy";
+        # Devenv service processes are named after the service keys.
+        # In CI, these services are disabled, so skip hard dependencies.
+        depends_on = lib.optionalAttrs (!isCI) {
+          "postgres".condition = "process_healthy";
+          "redis".condition = "process_healthy";
         };
       };
     };
