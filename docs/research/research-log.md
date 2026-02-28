@@ -185,6 +185,8 @@
 - Improved wallet creation UX in add-account:
   - wallet-specific helper card and guidance.
   - monospaced wallet-address entry and clearer validation hint copy.
+- Improved backend fallback description synthesis for wallet transactions:
+  - appends recognized program context (for example SPL Token, Token-2022, Jupiter, Pump.fun) when direct provider descriptions are missing.
 
 ### Tooling and Runflow Progress
 
