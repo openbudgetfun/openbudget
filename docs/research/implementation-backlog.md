@@ -18,14 +18,18 @@ This backlog turns strategy into implementable epics with explicit acceptance cr
 - [#157](https://github.com/openbudgetfun/openbudget/issues/157) Token/Token-2022 P&L and tax-lot foundation.
 - [#158](https://github.com/openbudgetfun/openbudget/issues/158) Dev/prod flavor system across Android + iOS schemes.
 - [#159](https://github.com/openbudgetfun/openbudget/issues/159) Provider config + secret hygiene + deploy checklist.
+- [#162](https://github.com/openbudgetfun/openbudget/issues/162) Solana token cost basis + realized/unrealized P&L pipeline.
+- [#163](https://github.com/openbudgetfun/openbudget/issues/163) Multi-source Solana asset pricing service with fallback + quality metadata.
 
 ## Execution Status Snapshot (2026-02-28 PM)
 
 - #154: Implemented core wallet attach/sync pipeline (Serverpod models, endpoint/service, migration, app attach flow).
 - #155: Implemented timeline UX and metadata editing; upgraded to richer wallet dashboard layout and card system.
 - #155: Added improved plain-English fallback descriptions by mapping detected program IDs (Jupiter, Pump.fun, SPL Token, Token-2022, etc.).
+- #155: Added UI-level automatic category suggestions for uncategorized wallet transactions (suggestion chips + metadata prefill + search indexing).
 - #156: Implemented initial holdings valuation wiring with provider-returned pricing fields; fallback adapter strategy still pending.
-- #157: Not started (schema and engine work pending).
+- #157: Not started (schema and engine work pending). Tracked in #162.
+- #163: Opened to drive pricing-provider fallback and quality metadata completion for #156.
 - #158: Implemented Android flavors + iOS schemes + app bootstrap routing; added `default-flavor: dev` for tooling compatibility.
 - #159: Implemented environment-based client routing and secret lookup path (`passwords.yaml` + env fallback); deploy checklist still pending.
 
