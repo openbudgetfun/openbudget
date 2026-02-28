@@ -142,6 +142,8 @@ jobs:
 
           if [ -z "${APP_ID_VALUE}" ]; then
             echo "::warning file=openbudget_app/shorebird.yaml,title=Missing Shorebird app_id::Set a non-empty Shorebird app_id (run 'shorebird init')."
+            echo "::error file=openbudget_app/shorebird.yaml,title=Missing Shorebird app_id::Set a non-empty Shorebird app_id (run 'shorebird init')."
+            exit 1
           fi
 
           if grep -RInE 'com\.example\.' openbudget_app; then
