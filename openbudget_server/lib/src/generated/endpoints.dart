@@ -2293,6 +2293,32 @@ class Endpoints extends _i1.EndpointDispatch {
                         params['walletId'],
                       ),
         ),
+        'listTaxYearSummaries': _i1.MethodConnector(
+          name: 'listTaxYearSummaries',
+          params: {
+            'budgetId': _i1.ParameterDescription(
+              name: 'budgetId',
+              type: _i1.getType<_i1.UuidValue>(),
+              nullable: false,
+            ),
+            'walletId': _i1.ParameterDescription(
+              name: 'walletId',
+              type: _i1.getType<_i1.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['solanaWallet'] as _i17.SolanaWalletEndpoint)
+                      .listTaxYearSummaries(
+                        session,
+                        params['budgetId'],
+                        params['walletId'],
+                      ),
+        ),
         'updateTransactionMetadata': _i1.MethodConnector(
           name: 'updateTransactionMetadata',
           params: {

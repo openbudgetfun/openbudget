@@ -87,6 +87,19 @@ class SolanaWalletEndpoint extends Endpoint {
     );
   }
 
+  /// Returns estimated realized wallet P&L grouped by tax year.
+  Future<List<SolanaWalletTaxYearSummary>> listTaxYearSummaries(
+    Session session,
+    UuidValue budgetId,
+    UuidValue walletId,
+  ) async {
+    return SolanaWalletService.listTaxYearSummaries(
+      session,
+      budgetId: budgetId,
+      walletId: walletId,
+    );
+  }
+
   /// Updates category/tags/memo for a wallet transaction.
   Future<SolanaWalletTransaction> updateTransactionMetadata(
     Session session,
