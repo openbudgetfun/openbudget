@@ -498,3 +498,40 @@
 
 - Captured additional Android screenshot in this cycle:
   - `docs/research/screenshots/2026-02-28/interpreter-fixtures-cycle-login.png`
+
+## 2026-02-28 - Protocol Template Expansion (Issue #165) Continued
+
+### Backend Progress
+
+- Expanded interpreter protocol matching coverage for additional high-signal sources:
+  - Raydium swap pattern
+  - Orca swap pattern
+  - NFT marketplace buy/sell flow heuristics for Magic Eden / Tensor
+- Added wallet-flow amount context:
+  - tracks native lamports in/out per interpreted transaction
+  - appends SOL amount summary to fallback descriptions (for example `SOL out 1.5 SOL`)
+- Added lower-confidence generalized classifications for emerging non-transfer types:
+  - staking activity
+  - liquidity position updates
+
+### Test Coverage Added
+
+- Extended `solana_transaction_interpreter_test.dart` with new fixture-style cases:
+  - Raydium swap (`high` confidence)
+  - Orca swap (`high` confidence)
+  - NFT purchase flow on Magic Eden (`high` confidence + SOL amount context assertion)
+  - SOL transfer summary assertion includes amount text
+
+### Validation Completed
+
+- `dart test openbudget_server/test/unit/solana_wallets/solana_transaction_interpreter_test.dart` passed.
+- `flutter test` targeted regression slice passed:
+  - `openbudget_app/test/features/accounts/screens/account_detail_screen_test.dart`
+  - `openbudget_app/test/features/auth/screens/login_screen_test.dart`
+  - `openbudget_app/test/features/accounts/screens/add_account_screen_test.dart`
+- `dart analyze openbudget_server openbudget_app openbudget_client` returned no issues in this cycle.
+
+### Mobile Evidence
+
+- Captured additional Android screenshot in this cycle:
+  - `docs/research/screenshots/2026-02-28/protocol-templates-cycle-login.png`
