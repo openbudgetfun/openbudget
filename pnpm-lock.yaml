@@ -6,7 +6,7 @@ settings:
 
 importers:
 
-  .:
+  infra:
     dependencies:
       '@pulumi/aws':
         specifier: ^6.0.0

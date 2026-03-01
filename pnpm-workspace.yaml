@@ -1,0 +1,4 @@
+packages:
+  - "infra"
+
+useNodeVersion: "24.14.0"
