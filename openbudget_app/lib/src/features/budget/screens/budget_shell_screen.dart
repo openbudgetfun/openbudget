@@ -70,10 +70,22 @@ class BudgetShellScreen extends HookWidget {
   Future<void> _onTap(BuildContext context, int index) async {
     if (index == 2) {
       // "+" tab — show add transaction sheet
-      await showModalBottomSheet<void>(
+      final action = await showModalBottomSheet<AddTransactionAction>(
         context: context,
         builder: (_) => AddTransactionSheet(budgetId: budgetId),
       );
+      if (!context.mounted || action == null) return;
+      switch (action) {
+        case AddTransactionAction.income:
+          context.goNamed(addIncomeRoute, pathParameters: {'id': budgetId});
+        case AddTransactionAction.expense:
+          context.goNamed(addExpenseRoute, pathParameters: {'id': budgetId});
+        case AddTransactionAction.transfer:
+          context.goNamed(
+            createTransferRoute,
+            pathParameters: {'id': budgetId},
+          );
+      }
       return;
     }
 
