@@ -10,9 +10,7 @@ final _namedLiteralPattern = RegExp(
 
 void main() {
   final root = Directory.current;
-  final sourceRoot = Directory(
-    '${root.path}/openbudget_app/lib/src',
-  );
+  final sourceRoot = Directory('${root.path}/openbudget_app/lib/src');
 
   if (!sourceRoot.existsSync()) {
     stderr.writeln(

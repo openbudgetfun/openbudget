@@ -1057,7 +1057,9 @@ class _LoanAccountDetailBody extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: SpacingTokens.lg),
-                    _LoanSectionTitle(title: l10n.accountDetailLoanPayoffOverview),
+                    _LoanSectionTitle(
+                      title: l10n.accountDetailLoanPayoffOverview,
+                    ),
                     _LoanCard(
                       child: Padding(
                         padding: const EdgeInsets.all(SpacingTokens.md),
@@ -1776,7 +1778,8 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
                               if (context.mounted) {
                                 showAppToast(
                                   context,
-                                  message: l10n.accountDetailWalletAddressCopied,
+                                  message:
+                                      l10n.accountDetailWalletAddressCopied,
                                   variant: AppToastVariant.success,
                                 );
                               }
@@ -2264,7 +2267,9 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    l10n.accountDetailWalletSuggestedCategory(suggestedCategory),
+                    l10n.accountDetailWalletSuggestedCategory(
+                      suggestedCategory,
+                    ),
                     style: Theme.of(dialogContext).textTheme.bodySmall,
                   ),
                 ),
@@ -2280,7 +2285,9 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
               TextField(
                 controller: memoController,
                 maxLines: 3,
-                decoration: InputDecoration(labelText: l10n.transactionMemoLabel),
+                decoration: InputDecoration(
+                  labelText: l10n.transactionMemoLabel,
+                ),
               ),
             ],
           ),
@@ -2714,12 +2721,11 @@ class _HoldingCard extends StatelessWidget {
                           holding.priceConfidence!.trim().isNotEmpty)
                         _MetadataChip(
                           icon: Icons.speed_rounded,
-                          label:
-                              l10n.accountDetailWalletConfidence(
-                                _SolanaWalletAccountBody._toLabel(
-                                  holding.priceConfidence!,
-                                ),
-                              ),
+                          label: l10n.accountDetailWalletConfidence(
+                            _SolanaWalletAccountBody._toLabel(
+                              holding.priceConfidence!,
+                            ),
+                          ),
                         ),
                       if (holding.isPriceStale ?? false)
                         _MetadataChip(

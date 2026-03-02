@@ -37,7 +37,9 @@ class EditPlanScreen extends HookConsumerWidget {
       error: (_, _) => Scaffold(
         backgroundColor: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
         appBar: _EditPlanAppBar(budgetId: budgetId),
-        body: Center(child: Text(AppLocalizations.of(context).editPlanLoadError)),
+        body: Center(
+          child: Text(AppLocalizations.of(context).editPlanLoadError),
+        ),
       ),
       data: (summary) {
         final goalsMap = goalsAsync.asData?.value ?? <String, EnvelopeGoal>{};
