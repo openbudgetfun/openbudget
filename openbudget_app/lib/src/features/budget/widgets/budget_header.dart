@@ -47,16 +47,38 @@ class BudgetHeader extends HookConsumerWidget {
     final isCurrentMonth = year == now.year && month == now.month;
     final readyCardColor = readyToAssignCents >= 0
         ? OpenBudgetPalette.bgSuccessFor(theme)
-        : OpenBudgetPalette.fgErrorFor(theme).withAlpha(35);
+        : OpenBudgetPalette.bgErrorFor(theme);
     final readyTextColor = readyToAssignCents >= 0
         ? OpenBudgetPalette.fgPrimaryFor(theme)
         : OpenBudgetPalette.fgErrorFor(theme);
 
     return Container(
       decoration: BoxDecoration(
-        color: OpenBudgetPalette.bgSecondaryFor(theme),
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            OpenBudgetPalette.bgSecondaryFor(theme),
+            OpenBudgetPalette.bgTertiaryFor(
+              theme,
+            ).withAlpha(theme.brightness == Brightness.dark ? 84 : 54),
+          ],
+        ),
         borderRadius: BorderRadius.circular(RadiusTokens.xl),
-        border: Border.all(color: OpenBudgetPalette.borderSubtleFor(theme)),
+        border: Border.all(
+          color: OpenBudgetPalette.borderSubtleFor(
+            theme,
+          ).withAlpha(theme.brightness == Brightness.dark ? 214 : 245),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: OpenBudgetPalette.overlayScrimFor(
+              theme,
+            ).withAlpha(theme.brightness == Brightness.dark ? 74 : 18),
+            blurRadius: theme.brightness == Brightness.dark ? 20 : 14,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -64,7 +86,16 @@ class BudgetHeader extends HookConsumerWidget {
         children: [
           Container(
             decoration: BoxDecoration(
-              color: OpenBudgetPalette.bgAccentFor(theme),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  OpenBudgetPalette.bgAccentFor(theme),
+                  OpenBudgetPalette.bgBrandFor(
+                    theme,
+                  ).withAlpha(theme.brightness == Brightness.dark ? 48 : 30),
+                ],
+              ),
               borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(RadiusTokens.xl),
               ),
@@ -149,6 +180,11 @@ class BudgetHeader extends HookConsumerWidget {
               decoration: BoxDecoration(
                 color: readyCardColor,
                 borderRadius: BorderRadius.circular(RadiusTokens.md),
+                border: Border.all(
+                  color: readyToAssignCents >= 0
+                      ? OpenBudgetPalette.fgSuccessFor(theme).withAlpha(40)
+                      : OpenBudgetPalette.fgErrorFor(theme).withAlpha(70),
+                ),
               ),
               child: Padding(
                 padding: const EdgeInsets.symmetric(

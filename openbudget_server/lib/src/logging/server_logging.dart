@@ -6,7 +6,7 @@ import 'package:openbudget_core/openbudget_core.dart';
 /// Initializes server-side logging.
 ///
 /// Sets up [ObLogger] with source `'server'` and writes structured logs
-/// to stdout, allowing process-compose to persist them in `tmp/log.txt`.
+/// to stdout, allowing process-compose to persist them in `.tmp/log.txt`.
 void initServerLogging() {
   ObLogger.init(source: 'server');
 

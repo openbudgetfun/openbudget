@@ -6,6 +6,7 @@ import 'package:openbudget_app/src/features/budget/providers/envelope_actions_pr
 import 'package:openbudget_app/src/features/budget/providers/envelope_goal_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/monthly_allocation_provider.dart';
 import 'package:openbudget_app/src/features/budget/screens/set_goal_dialog.dart';
+import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -31,6 +32,7 @@ class EditEnvelopeDialog extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
     final nameController = useTextEditingController(text: envelope.name);
     final amountController = useTextEditingController(
       text: _formatInitialAmount(envelope.budgetedAmountCents, currencyCode),
@@ -39,7 +41,14 @@ class EditEnvelopeDialog extends HookConsumerWidget {
     final isSubmitting = useState(false);
 
     return AlertDialog(
-      title: Text(l10n.editEnvelopeTitle),
+      insetPadding: const EdgeInsets.symmetric(horizontal: SpacingTokens.sm),
+      constraints: const BoxConstraints(maxWidth: 560),
+      title: Text(
+        l10n.editEnvelopeTitle,
+        style: theme.textTheme.titleMedium?.copyWith(
+          fontWeight: FontWeight.w700,
+        ),
+      ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -97,6 +106,15 @@ class EditEnvelopeDialog extends HookConsumerWidget {
       ),
       actions: [
         TextButton(
+          onPressed: isSubmitting.value
+              ? null
+              : () => _delete(context, ref, isSubmitting),
+          child: Text(
+            l10n.deleteConfirmButton,
+            style: TextStyle(color: Theme.of(context).colorScheme.error),
+          ),
+        ),
+        TextButton(
           onPressed: () => Navigator.of(context).pop(),
           child: Text(l10n.dialogCancel),
         ),
@@ -123,6 +141,64 @@ class EditEnvelopeDialog extends HookConsumerWidget {
     );
   }
 
+  Future<void> _delete(
+    BuildContext context,
+    WidgetRef ref,
+    ValueNotifier<bool> isSubmitting,
+  ) async {
+    final l10n = AppLocalizations.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.deleteConfirmTitle),
+        content: Text('${l10n.deleteConfirmMessage}\n\n"${envelope.name}"'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l10n.dialogCancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            style: FilledButton.styleFrom(
+              backgroundColor: colorScheme.error,
+              foregroundColor: colorScheme.onError,
+            ),
+            child: Text(l10n.deleteConfirmButton),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !context.mounted) return;
+
+    isSubmitting.value = true;
+    try {
+      await ref
+          .read(envelopeActionsProvider.notifier)
+          .deleteEnvelope(
+            envelopeId: envelope.id?.toString() ?? '',
+            categoryId: categoryId,
+            budgetId: budgetId,
+          );
+      if (!context.mounted) return;
+      showAppToast(
+        context,
+        message: l10n.deleteSuccess,
+        variant: AppToastVariant.success,
+      );
+      if (context.mounted) Navigator.of(context).pop();
+    } on Exception {
+      isSubmitting.value = false;
+      if (!context.mounted) return;
+      showAppToast(
+        context,
+        message: l10n.deleteError,
+        variant: AppToastVariant.error,
+      );
+    }
+  }
+
   Future<void> _submit(
     BuildContext context,
     WidgetRef ref,
@@ -142,8 +218,6 @@ class EditEnvelopeDialog extends HookConsumerWidget {
 
     isSubmitting.value = true;
     final navigator = Navigator.of(context);
-    final messenger = ScaffoldMessenger.of(context);
-    final colorScheme = Theme.of(context).colorScheme;
     try {
       await ref
           .read(envelopeActionsProvider.notifier)
@@ -164,15 +238,20 @@ class EditEnvelopeDialog extends HookConsumerWidget {
             month: month,
             allocatedCents: amountCents,
           );
-      messenger.showSnackBar(SnackBar(content: Text(l10n.editEnvelopeSaved)));
+      if (!context.mounted) return;
+      showAppToast(
+        context,
+        message: l10n.editEnvelopeSaved,
+        variant: AppToastVariant.success,
+      );
       navigator.pop();
     } on Exception catch (_) {
       isSubmitting.value = false;
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(l10n.editEnvelopeError),
-          backgroundColor: colorScheme.error,
-        ),
+      if (!context.mounted) return;
+      showAppToast(
+        context,
+        message: l10n.editEnvelopeError,
+        variant: AppToastVariant.error,
       );
     }
   }

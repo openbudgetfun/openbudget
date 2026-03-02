@@ -71,6 +71,8 @@ class CategoryGroup extends HookConsumerWidget {
 
     return Card(
       margin: EdgeInsets.zero,
+      elevation: theme.brightness == Brightness.dark ? 0 : 1,
+      shadowColor: OpenBudgetPalette.overlayScrimFor(theme).withAlpha(26),
       color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(RadiusTokens.md),
@@ -85,7 +87,7 @@ class CategoryGroup extends HookConsumerWidget {
           GestureDetector(
             onTap: isReorderingEnvelopes.value
                 ? () => isReorderingEnvelopes.value = false
-                : onToggleCollapsed ?? onEditCategory,
+                : onToggleCollapsed,
             onLongPress: () => _showCategoryMenu(context),
             child: Opacity(
               opacity: (category.isHidden ?? false) ? 0.5 : 1.0,
@@ -95,7 +97,20 @@ class CategoryGroup extends HookConsumerWidget {
                   vertical: SpacingTokens.sm + SpacingTokens.xs,
                 ),
                 decoration: BoxDecoration(
-                  color: OpenBudgetPalette.bgTertiaryFor(Theme.of(context)),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      OpenBudgetPalette.bgTertiaryFor(Theme.of(context)),
+                      OpenBudgetPalette.bgAccentFor(
+                        Theme.of(context),
+                      ).withAlpha(
+                        Theme.of(context).brightness == Brightness.dark
+                            ? 82
+                            : 44,
+                      ),
+                    ],
+                  ),
                   borderRadius: const BorderRadius.vertical(
                     top: Radius.circular(RadiusTokens.md),
                   ),
@@ -158,6 +173,20 @@ class CategoryGroup extends HookConsumerWidget {
                           ),
                         ),
                       ],
+                    ),
+                    const SizedBox(width: SpacingTokens.xs),
+                    IconButton(
+                      onPressed: onEditCategory,
+                      tooltip: l10n.budgetEditCategoryTitle,
+                      icon: const Icon(Icons.edit_rounded, size: 18),
+                      style: IconButton.styleFrom(
+                        minimumSize: const Size(44, 44),
+                        padding: const EdgeInsets.all(SpacingTokens.sm),
+                        tapTargetSize: MaterialTapTargetSize.padded,
+                        foregroundColor: OpenBudgetPalette.bgBrandFor(
+                          Theme.of(context),
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -288,6 +317,10 @@ class CategoryGroup extends HookConsumerWidget {
                 SpacingTokens.md,
               ),
               decoration: BoxDecoration(
+                color: OpenBudgetPalette.bgPrimaryFor(Theme.of(context))
+                    .withAlpha(
+                      Theme.of(context).brightness == Brightness.dark ? 36 : 56,
+                    ),
                 border: Border(
                   top: BorderSide(
                     color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),

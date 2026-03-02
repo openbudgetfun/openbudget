@@ -144,6 +144,9 @@ in
           "redis".condition = "process_healthy";
         };
         is_interactive = true;
+        log_configuration = {
+          flush_each_line = true;
+        };
       };
     };
 
@@ -165,7 +168,7 @@ in
   process = {
     managers.process-compose = {
       settings = {
-        log_location = "${config.env.DEVENV_ROOT}/tmp/log.txt";
+        log_location = "${config.env.DEVENV_ROOT}/.tmp/log.txt";
         log_configuration = {
           add_timestamp = true;
         };

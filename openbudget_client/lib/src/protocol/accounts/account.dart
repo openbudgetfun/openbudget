@@ -24,6 +24,11 @@ abstract class Account implements _i1.SerializableModel {
     required this.onBudget,
     required this.sortOrder,
     required this.isClosed,
+    this.sourceType,
+    this.externalAccountId,
+    this.connectionId,
+    this.lastSyncedAt,
+    this.syncStatus,
     DateTime? createdAt,
   }) : createdAt = createdAt ?? DateTime.now();
 
@@ -37,6 +42,11 @@ abstract class Account implements _i1.SerializableModel {
     required bool onBudget,
     required int sortOrder,
     required bool isClosed,
+    String? sourceType,
+    String? externalAccountId,
+    _i1.UuidValue? connectionId,
+    DateTime? lastSyncedAt,
+    String? syncStatus,
     DateTime? createdAt,
   }) = _AccountImpl;
 
@@ -55,6 +65,19 @@ abstract class Account implements _i1.SerializableModel {
       onBudget: jsonSerialization['onBudget'] as bool,
       sortOrder: jsonSerialization['sortOrder'] as int,
       isClosed: jsonSerialization['isClosed'] as bool,
+      sourceType: jsonSerialization['sourceType'] as String?,
+      externalAccountId: jsonSerialization['externalAccountId'] as String?,
+      connectionId: jsonSerialization['connectionId'] == null
+          ? null
+          : _i1.UuidValueJsonExtension.fromJson(
+              jsonSerialization['connectionId'],
+            ),
+      lastSyncedAt: jsonSerialization['lastSyncedAt'] == null
+          ? null
+          : _i1.DateTimeJsonExtension.fromJson(
+              jsonSerialization['lastSyncedAt'],
+            ),
+      syncStatus: jsonSerialization['syncStatus'] as String?,
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
@@ -88,6 +111,21 @@ abstract class Account implements _i1.SerializableModel {
   /// Whether this account has been closed/archived.
   bool isClosed;
 
+  /// Source of account data: manual, plaid, solana.
+  String? sourceType;
+
+  /// External source account identifier (e.g. Plaid account_id or wallet address).
+  String? externalAccountId;
+
+  /// Connection identifier used by external account sync providers.
+  _i1.UuidValue? connectionId;
+
+  /// Last time the account was synchronized from an external provider.
+  DateTime? lastSyncedAt;
+
+  /// Latest sync status for the account (e.g. synced, stale, error).
+  String? syncStatus;
+
   DateTime createdAt;
 
   /// Returns a shallow copy of this [Account]
@@ -103,6 +141,11 @@ abstract class Account implements _i1.SerializableModel {
     bool? onBudget,
     int? sortOrder,
     bool? isClosed,
+    String? sourceType,
+    String? externalAccountId,
+    _i1.UuidValue? connectionId,
+    DateTime? lastSyncedAt,
+    String? syncStatus,
     DateTime? createdAt,
   });
   @override
@@ -118,6 +161,11 @@ abstract class Account implements _i1.SerializableModel {
       'onBudget': onBudget,
       'sortOrder': sortOrder,
       'isClosed': isClosed,
+      if (sourceType != null) 'sourceType': sourceType,
+      if (externalAccountId != null) 'externalAccountId': externalAccountId,
+      if (connectionId != null) 'connectionId': connectionId?.toJson(),
+      if (lastSyncedAt != null) 'lastSyncedAt': lastSyncedAt?.toJson(),
+      if (syncStatus != null) 'syncStatus': syncStatus,
       'createdAt': createdAt.toJson(),
     };
   }
@@ -141,6 +189,11 @@ class _AccountImpl extends Account {
     required bool onBudget,
     required int sortOrder,
     required bool isClosed,
+    String? sourceType,
+    String? externalAccountId,
+    _i1.UuidValue? connectionId,
+    DateTime? lastSyncedAt,
+    String? syncStatus,
     DateTime? createdAt,
   }) : super._(
          id: id,
@@ -152,6 +205,11 @@ class _AccountImpl extends Account {
          onBudget: onBudget,
          sortOrder: sortOrder,
          isClosed: isClosed,
+         sourceType: sourceType,
+         externalAccountId: externalAccountId,
+         connectionId: connectionId,
+         lastSyncedAt: lastSyncedAt,
+         syncStatus: syncStatus,
          createdAt: createdAt,
        );
 
@@ -169,6 +227,11 @@ class _AccountImpl extends Account {
     bool? onBudget,
     int? sortOrder,
     bool? isClosed,
+    Object? sourceType = _Undefined,
+    Object? externalAccountId = _Undefined,
+    Object? connectionId = _Undefined,
+    Object? lastSyncedAt = _Undefined,
+    Object? syncStatus = _Undefined,
     DateTime? createdAt,
   }) {
     return Account(
@@ -181,6 +244,17 @@ class _AccountImpl extends Account {
       onBudget: onBudget ?? this.onBudget,
       sortOrder: sortOrder ?? this.sortOrder,
       isClosed: isClosed ?? this.isClosed,
+      sourceType: sourceType is String? ? sourceType : this.sourceType,
+      externalAccountId: externalAccountId is String?
+          ? externalAccountId
+          : this.externalAccountId,
+      connectionId: connectionId is _i1.UuidValue?
+          ? connectionId
+          : this.connectionId,
+      lastSyncedAt: lastSyncedAt is DateTime?
+          ? lastSyncedAt
+          : this.lastSyncedAt,
+      syncStatus: syncStatus is String? ? syncStatus : this.syncStatus,
       createdAt: createdAt ?? this.createdAt,
     );
   }

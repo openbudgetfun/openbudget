@@ -5,6 +5,7 @@ import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/monthly_allocation_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/quick_budget_provider.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
+import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
@@ -35,6 +36,8 @@ class QuickBudgetDialog extends HookConsumerWidget {
     );
 
     return AlertDialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: SpacingTokens.sm),
+      constraints: const BoxConstraints(maxWidth: 560),
       title: Text(l10n.quickBudgetTitle),
       content: suggestion.when(
         loading: () => const SizedBox(
@@ -86,8 +89,6 @@ class QuickBudgetDialog extends HookConsumerWidget {
 
   Future<void> _apply(BuildContext context, WidgetRef ref, int cents) async {
     final l10n = AppLocalizations.of(context);
-    final messenger = ScaffoldMessenger.of(context);
-    final colorScheme = Theme.of(context).colorScheme;
 
     try {
       await ref
@@ -99,16 +100,19 @@ class QuickBudgetDialog extends HookConsumerWidget {
             month: month,
             allocatedCents: cents,
           );
-      messenger.showSnackBar(
-        SnackBar(content: Text(l10n.budgetAllocationUpdated)),
+      if (!context.mounted) return;
+      showAppToast(
+        context,
+        message: l10n.budgetAllocationUpdated,
+        variant: AppToastVariant.success,
       );
       if (context.mounted) Navigator.of(context).pop();
     } on Exception catch (_) {
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(l10n.budgetAllocationError),
-          backgroundColor: colorScheme.error,
-        ),
+      if (!context.mounted) return;
+      showAppToast(
+        context,
+        message: l10n.budgetAllocationError,
+        variant: AppToastVariant.error,
       );
     }
   }

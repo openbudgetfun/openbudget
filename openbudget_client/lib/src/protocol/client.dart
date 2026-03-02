@@ -39,7 +39,11 @@ import 'package:openbudget_client/src/protocol/transactions/split_item.dart'
     as _i17;
 import 'package:openbudget_client/src/protocol/transactions/import_row.dart'
     as _i18;
-import 'protocol.dart' as _i19;
+import 'package:openbudget_client/src/protocol/wallets/wallet_connect_result.dart'
+    as _i19;
+import 'package:openbudget_client/src/protocol/wallets/wallet_holding.dart'
+    as _i20;
+import 'protocol.dart' as _i21;
 
 /// API surface for account operations.
 ///
@@ -818,6 +822,40 @@ class EndpointPayee extends _i1.EndpointRef {
       .callServerEndpoint<_i13.Payee>('payee', 'delete', {'payeeId': payeeId});
 }
 
+/// API surface for Plaid-linked account integration.
+/// {@category Endpoint}
+class EndpointPlaid extends _i1.EndpointRef {
+  EndpointPlaid(_i1.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'plaid';
+
+  /// Creates a short-lived link token for starting Plaid Link in the client.
+  _i2.Future<String> createLinkToken(_i1.UuidValue budgetId) =>
+      caller.callServerEndpoint<String>('plaid', 'createLinkToken', {
+        'budgetId': budgetId,
+      });
+
+  /// Exchanges a public token and imports linked bank accounts into OpenBudget.
+  _i2.Future<List<_i3.Account>> exchangePublicToken(
+    _i1.UuidValue budgetId,
+    String publicToken,
+  ) => caller.callServerEndpoint<List<_i3.Account>>(
+    'plaid',
+    'exchangePublicToken',
+    {'budgetId': budgetId, 'publicToken': publicToken},
+  );
+
+  /// Refreshes an existing Plaid item connection and updates imported accounts.
+  _i2.Future<List<_i3.Account>> syncConnection(
+    _i1.UuidValue budgetId,
+    _i1.UuidValue connectionId,
+  ) => caller.callServerEndpoint<List<_i3.Account>>('plaid', 'syncConnection', {
+    'budgetId': budgetId,
+    'connectionId': connectionId,
+  });
+}
+
 /// API surface for recurring transaction operations.
 ///
 /// All methods require authentication.
@@ -1240,6 +1278,52 @@ class EndpointTransaction extends _i1.EndpointRef {
       });
 }
 
+/// API surface for read-only blockchain wallet account integration.
+/// {@category Endpoint}
+class EndpointWallet extends _i1.EndpointRef {
+  EndpointWallet(_i1.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'wallet';
+
+  /// Connects a Solana wallet and imports holdings as a synced account.
+  _i2.Future<_i19.WalletConnectResult> connectSolanaWallet(
+    _i1.UuidValue budgetId,
+    String address, {
+    String? label,
+    required bool onBudget,
+  }) => caller.callServerEndpoint<_i19.WalletConnectResult>(
+    'wallet',
+    'connectSolanaWallet',
+    {
+      'budgetId': budgetId,
+      'address': address,
+      'label': label,
+      'onBudget': onBudget,
+    },
+  );
+
+  /// Refreshes holdings and account balance for a wallet connection.
+  _i2.Future<_i19.WalletConnectResult> refreshSolanaWallet(
+    _i1.UuidValue budgetId,
+    _i1.UuidValue connectionId,
+  ) => caller.callServerEndpoint<_i19.WalletConnectResult>(
+    'wallet',
+    'refreshSolanaWallet',
+    {'budgetId': budgetId, 'connectionId': connectionId},
+  );
+
+  /// Returns the latest persisted holdings for a wallet connection.
+  _i2.Future<List<_i20.WalletHolding>> listWalletHoldings(
+    _i1.UuidValue budgetId,
+    _i1.UuidValue connectionId,
+  ) => caller.callServerEndpoint<List<_i20.WalletHolding>>(
+    'wallet',
+    'listWalletHoldings',
+    {'budgetId': budgetId, 'connectionId': connectionId},
+  );
+}
+
 class Modules {
   Modules(Client client) {
     serverpod_auth_idp = _i4.Caller(client);
@@ -1266,7 +1350,7 @@ class Client extends _i1.ServerpodClientShared {
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
          host,
-         _i19.Protocol(),
+         _i21.Protocol(),
          securityContext: securityContext,
          streamingConnectionTimeout: streamingConnectionTimeout,
          connectionTimeout: connectionTimeout,
@@ -1289,9 +1373,11 @@ class Client extends _i1.ServerpodClientShared {
     fxRate = EndpointFxRate(this);
     monthlyAllocation = EndpointMonthlyAllocation(this);
     payee = EndpointPayee(this);
+    plaid = EndpointPlaid(this);
     recurringTransaction = EndpointRecurringTransaction(this);
     transactionRule = EndpointTransactionRule(this);
     transaction = EndpointTransaction(this);
+    wallet = EndpointWallet(this);
     modules = Modules(this);
   }
 
@@ -1323,11 +1409,15 @@ class Client extends _i1.ServerpodClientShared {
 
   late final EndpointPayee payee;
 
+  late final EndpointPlaid plaid;
+
   late final EndpointRecurringTransaction recurringTransaction;
 
   late final EndpointTransactionRule transactionRule;
 
   late final EndpointTransaction transaction;
+
+  late final EndpointWallet wallet;
 
   late final Modules modules;
 
@@ -1347,9 +1437,11 @@ class Client extends _i1.ServerpodClientShared {
     'fxRate': fxRate,
     'monthlyAllocation': monthlyAllocation,
     'payee': payee,
+    'plaid': plaid,
     'recurringTransaction': recurringTransaction,
     'transactionRule': transactionRule,
     'transaction': transaction,
+    'wallet': wallet,
   };
 
   @override

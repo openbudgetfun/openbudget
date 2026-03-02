@@ -50,9 +50,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Display Options'), findsOneWidget);
+      expect(find.text('Appearance'), findsNWidgets(2));
       expect(find.text('Light'), findsOneWidget);
-      expect(find.text('Dark'), findsOneWidget);
-      expect(find.text('System'), findsOneWidget);
       expect(find.text('Balance Style'), findsOneWidget);
       expect(find.text('Default'), findsOneWidget);
       expect(find.text('Differentiate Without Color'), findsOneWidget);
@@ -91,7 +90,10 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Dark'));
+      final themeSwitch = tester.widget<SwitchListTile>(
+        find.widgetWithText(SwitchListTile, 'Appearance'),
+      );
+      themeSwitch.onChanged?.call(true);
       await tester.pumpAndSettle();
 
       await tester.tap(find.text('Differentiate Without Color'));

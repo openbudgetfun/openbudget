@@ -2,29 +2,29 @@ import 'package:flutter/material.dart';
 
 /// Brand color tokens for OpenBudget.
 abstract final class ColorTokens {
-  /// Primary brand color — a financial-trust blue.
-  static const Color primary = Color(0xFF1565C0);
+  /// Primary brand color used for key actions and selected states.
+  static const Color primary = Color(0xFF4E63FF);
 
-  /// Secondary accent — a growth green.
-  static const Color secondary = Color(0xFF2E7D32);
+  /// Secondary accent used for progress and supportive highlights.
+  static const Color secondary = Color(0xFF28C6A0);
 
-  /// Tertiary accent — a warm amber for warnings and highlights.
-  static const Color tertiary = Color(0xFFF9A825);
+  /// Tertiary accent used for warnings and warm emphasis.
+  static const Color tertiary = Color(0xFFFFB64C);
 
-  /// Error color.
-  static const Color error = Color(0xFFB71C1C);
+  /// Error color used for destructive and negative states.
+  static const Color error = Color(0xFFC23558);
 
-  /// Surface color for light theme.
-  static const Color surfaceLight = Color(0xFFFAFAFA);
+  /// Base surface color for light theme.
+  static const Color surfaceLight = Color(0xFFFCFDFF);
 
-  /// Surface color for dark theme.
-  static const Color surfaceDark = Color(0xFF121212);
+  /// Base surface color for dark theme.
+  static const Color surfaceDark = Color(0xFF0F1324);
 
   /// Background color for light theme.
-  static const Color backgroundLight = Color(0xFFFFFFFF);
+  static const Color backgroundLight = Color(0xFFF5F7FF);
 
   /// Background color for dark theme.
-  static const Color backgroundDark = Color(0xFF1E1E1E);
+  static const Color backgroundDark = Color(0xFF090D1A);
 }
 
 /// Spacing tokens for consistent layout.

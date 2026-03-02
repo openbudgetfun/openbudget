@@ -30,9 +30,10 @@ void main() {
       await tester.pump();
 
       expect(find.text('Welcome, new OpenBudgeter!'), findsOneWidget);
+      expect(find.text('Budget Name'), findsOneWidget);
       expect(find.text('Plan Currency'), findsOneWidget);
       expect(find.text('US Dollar'), findsOneWidget);
-      expect(find.byType(TextField), findsNothing);
+      expect(find.byType(TextField), findsOneWidget);
       expect(find.byType(DropdownButtonFormField<String>), findsNothing);
     });
 
@@ -48,11 +49,17 @@ void main() {
       await tester.pumpWidget(buildSubject());
       await tester.pump();
 
-      final annotatedRegion = tester
-          .widget<AnnotatedRegion<SystemUiOverlayStyle>>(
+      final annotatedRegions = tester
+          .widgetList<AnnotatedRegion<SystemUiOverlayStyle>>(
             find.byType(AnnotatedRegion<SystemUiOverlayStyle>),
-          );
-      expect(annotatedRegion.value.statusBarIconBrightness, Brightness.dark);
+          )
+          .toList();
+      expect(
+        annotatedRegions.any(
+          (region) => region.value.statusBarIconBrightness == Brightness.dark,
+        ),
+        isTrue,
+      );
     });
 
     testWidgets('renders readable paragraph text in light mode', (

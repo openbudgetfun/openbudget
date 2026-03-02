@@ -1,22 +1,27 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_actions_provider.dart';
+import 'package:openbudget_app/src/features/accounts/providers/plaid_account_link_provider.dart';
+import 'package:openbudget_app/src/features/accounts/providers/wallet_actions_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
+import 'package:plaid_flutter/plaid_flutter.dart';
 
 enum _AddAccountStep {
   loading,
   loadingInstitutions,
   searchBank,
+  walletConnection,
   unlinkedAccount,
   accountType,
   success,
@@ -35,6 +40,10 @@ const _addAccountUnlinkedTypeTileKey = Key('add-account-unlinked-type-tile');
 const _addAccountUnlinkedBalanceFieldKey = Key(
   'add-account-unlinked-balance-field',
 );
+const _addAccountWalletAddressFieldKey = Key(
+  'add-account-wallet-address-field',
+);
+const _addAccountWalletLabelFieldKey = Key('add-account-wallet-label-field');
 
 class AddAccountScreen extends HookConsumerWidget {
   const AddAccountScreen({required this.budgetId, super.key});
@@ -50,9 +59,13 @@ class AddAccountScreen extends HookConsumerWidget {
     final nameController = useTextEditingController();
     final balanceController = useTextEditingController();
     final searchController = useTextEditingController();
+    final walletAddressController = useTextEditingController();
+    final walletLabelController = useTextEditingController();
     final isSubmitting = useState(false);
     final selectedTypeKey = useState<String?>(null);
     final selectedCurrency = useState(CurrencyCode.usd);
+    final walletOnBudget = useState(false);
+    final successAccountLabel = useState<String>('Account');
     final didHydrateBudgetCurrency = useState(false);
     final showSearchingOverlay = useState(false);
     // Keep step scroll state ephemeral so returning between wizard steps always
@@ -92,6 +105,8 @@ class AddAccountScreen extends HookConsumerWidget {
     useListenable(nameController);
     useListenable(balanceController);
     useListenable(searchController);
+    useListenable(walletAddressController);
+    useListenable(walletLabelController);
 
     useEffect(() {
       if (step.value != _AddAccountStep.loading) return null;
@@ -150,23 +165,114 @@ class AddAccountScreen extends HookConsumerWidget {
         nameController.text.trim().isNotEmpty &&
         balanceValue != null &&
         selectedType != null;
+    final canSubmitWallet = walletAddressController.text.trim().isNotEmpty;
 
     Future<void> startLinkedBankFlow(String institutionName) async {
       if (showSearchingOverlay.value || institutionName.trim().isEmpty) return;
-      showSearchingOverlay.value = true;
-      await Future<void>.delayed(const Duration(milliseconds: 700));
-      if (!context.mounted) return;
+      final messenger = ScaffoldMessenger.of(context);
 
-      showSearchingOverlay.value = false;
-      step.value = _AddAccountStep.unlinkedAccount;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Linked connections for "$institutionName" are currently unavailable. '
-            'Add an unlinked account instead.',
+      final isMobilePlaidPlatform =
+          !kIsWeb &&
+          (defaultTargetPlatform == TargetPlatform.iOS ||
+              defaultTargetPlatform == TargetPlatform.android);
+      if (!isMobilePlaidPlatform) {
+        step.value = _AddAccountStep.unlinkedAccount;
+        messenger.showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Linked connections are only available on iOS/Android right now. '
+              'Add an unlinked account instead.',
+            ),
           ),
-        ),
-      );
+        );
+        return;
+      }
+
+      showSearchingOverlay.value = true;
+      try {
+        final linkToken = await ref
+            .read(plaidAccountLinkProvider.notifier)
+            .createLinkToken(budgetId: budgetId);
+        final publicToken = await _runPlaidLink(linkToken: linkToken);
+        if (!context.mounted) return;
+
+        if (publicToken == null || publicToken.isEmpty) {
+          step.value = _AddAccountStep.unlinkedAccount;
+          messenger.showSnackBar(
+            SnackBar(
+              content: Text(
+                'Linked connections for "$institutionName" were not completed. '
+                'Add an unlinked account instead.',
+              ),
+            ),
+          );
+          return;
+        }
+
+        final imported = await ref
+            .read(plaidAccountLinkProvider.notifier)
+            .exchangePublicToken(budgetId: budgetId, publicToken: publicToken);
+        if (!context.mounted) return;
+
+        if (imported.isEmpty) {
+          step.value = _AddAccountStep.unlinkedAccount;
+          messenger.showSnackBar(
+            const SnackBar(
+              content: Text(
+                'No accounts were imported from this connection. '
+                'Add an unlinked account instead.',
+              ),
+            ),
+          );
+          return;
+        }
+
+        context.goNamed(accountListRoute, pathParameters: {'id': budgetId});
+      } on Exception catch (_) {
+        if (!context.mounted) return;
+        step.value = _AddAccountStep.unlinkedAccount;
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(
+              'Linked connections for "$institutionName" are currently unavailable. '
+              'Add an unlinked account instead.',
+            ),
+          ),
+        );
+      } finally {
+        showSearchingOverlay.value = false;
+      }
+    }
+
+    Future<void> submitSolanaWallet() async {
+      if (!canSubmitWallet || isSubmitting.value) return;
+      isSubmitting.value = true;
+      final messenger = ScaffoldMessenger.of(context);
+      try {
+        await ref
+            .read(walletActionsProvider.notifier)
+            .connectSolanaWallet(
+              budgetId: budgetId,
+              address: walletAddressController.text.trim(),
+              label: walletLabelController.text.trim().isEmpty
+                  ? null
+                  : walletLabelController.text.trim(),
+              onBudget: walletOnBudget.value,
+            );
+        if (!context.mounted) return;
+        successAccountLabel.value = 'Solana Wallet';
+        step.value = _AddAccountStep.success;
+      } on Exception catch (_) {
+        if (!context.mounted) return;
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(l10n.accountCreateError),
+            backgroundColor: colorScheme.error,
+          ),
+        );
+      } finally {
+        isSubmitting.value = false;
+      }
     }
 
     Future<void> submitUnlinkedAccount() async {
@@ -198,6 +304,7 @@ class AddAccountScreen extends HookConsumerWidget {
             );
         if (!context.mounted) return;
         isSubmitting.value = false;
+        successAccountLabel.value = chosenType.label;
         step.value = _AddAccountStep.success;
       } on Exception catch (_) {
         if (!context.mounted) return;
@@ -230,6 +337,8 @@ class AddAccountScreen extends HookConsumerWidget {
                   onPressed: () {
                     if (step.value == _AddAccountStep.unlinkedAccount) {
                       step.value = _AddAccountStep.searchBank;
+                    } else if (step.value == _AddAccountStep.walletConnection) {
+                      step.value = _AddAccountStep.searchBank;
                     } else if (step.value == _AddAccountStep.accountType ||
                         step.value == _AddAccountStep.success) {
                       step.value = _AddAccountStep.unlinkedAccount;
@@ -241,9 +350,10 @@ class AddAccountScreen extends HookConsumerWidget {
               _AddAccountStep.loading => '',
               _AddAccountStep.loadingInstitutions => 'Add Accounts',
               _AddAccountStep.searchBank => 'Add Accounts',
+              _AddAccountStep.walletConnection => 'Connect Solana Wallet',
               _AddAccountStep.unlinkedAccount => 'Add Unlinked Account',
               _AddAccountStep.accountType => 'Select Account Type',
-              _AddAccountStep.success => 'Add Unlinked Account',
+              _AddAccountStep.success => 'Account Added',
             },
             style: theme.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.w700,
@@ -277,8 +387,19 @@ class AddAccountScreen extends HookConsumerWidget {
                   searchController: searchController,
                   searchQuery: searchController.text,
                   onInstitutionTap: startLinkedBankFlow,
+                  onConnectSolana: () =>
+                      step.value = _AddAccountStep.walletConnection,
                   onAddUnlinked: () =>
                       step.value = _AddAccountStep.unlinkedAccount,
+                ),
+              ),
+              _AddAccountStep.walletConnection => _StepFrame(
+                maxWidth: 720,
+                child: _WalletConnectStep(
+                  walletAddressController: walletAddressController,
+                  walletLabelController: walletLabelController,
+                  onBudget: walletOnBudget.value,
+                  onBudgetChanged: (value) => walletOnBudget.value = value,
                 ),
               ),
               _AddAccountStep.unlinkedAccount => _StepFrame(
@@ -306,10 +427,13 @@ class AddAccountScreen extends HookConsumerWidget {
                 ),
               ),
               _AddAccountStep.success => _SuccessStep(
-                accountTypeLabel: selectedType?.label ?? 'Account',
+                accountTypeLabel: successAccountLabel.value,
                 onAddAnother: () {
                   nameController.clear();
                   balanceController.clear();
+                  walletAddressController.clear();
+                  walletLabelController.clear();
+                  walletOnBudget.value = false;
                   step.value = _AddAccountStep.unlinkedAccount;
                 },
                 onDone: () => context.goNamed(
@@ -347,6 +471,31 @@ class AddAccountScreen extends HookConsumerWidget {
         bottomNavigationBar: switch (step.value) {
           _AddAccountStep.loading => null,
           _AddAccountStep.loadingInstitutions => null,
+          _AddAccountStep.walletConnection => SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(
+                SpacingTokens.md,
+                SpacingTokens.sm,
+                SpacingTokens.md,
+                SpacingTokens.md,
+              ),
+              child: _StepFrame(
+                maxWidth: 720,
+                child: FilledButton(
+                  onPressed: canSubmitWallet && !isSubmitting.value
+                      ? submitSolanaWallet
+                      : null,
+                  child: isSubmitting.value
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Text('Connect Wallet'),
+                ),
+              ),
+            ),
+          ),
           _AddAccountStep.unlinkedAccount => SafeArea(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(
@@ -377,6 +526,38 @@ class AddAccountScreen extends HookConsumerWidget {
         },
       ),
     );
+  }
+
+  Future<String?> _runPlaidLink({required String linkToken}) async {
+    final completer = Completer<String?>();
+    late final StreamSubscription<LinkSuccess> successSub;
+    late final StreamSubscription<LinkExit> exitSub;
+
+    successSub = PlaidLink.onSuccess.listen((event) {
+      if (!completer.isCompleted) {
+        completer.complete(event.publicToken);
+      }
+    });
+
+    exitSub = PlaidLink.onExit.listen((_) {
+      if (!completer.isCompleted) {
+        completer.complete(null);
+      }
+    });
+
+    try {
+      await PlaidLink.create(
+        configuration: LinkTokenConfiguration(token: linkToken),
+      );
+      await PlaidLink.open();
+      return await completer.future.timeout(
+        const Duration(minutes: 5),
+        onTimeout: () => null,
+      );
+    } finally {
+      await successSub.cancel();
+      await exitSub.cancel();
+    }
   }
 }
 
@@ -474,6 +655,7 @@ class _BankSearchStep extends StatelessWidget {
     required this.searchController,
     required this.searchQuery,
     required this.onInstitutionTap,
+    required this.onConnectSolana,
     required this.onAddUnlinked,
   });
 
@@ -481,6 +663,7 @@ class _BankSearchStep extends StatelessWidget {
   final TextEditingController searchController;
   final String searchQuery;
   final Future<void> Function(String institution) onInstitutionTap;
+  final VoidCallback onConnectSolana;
   final VoidCallback onAddUnlinked;
 
   @override
@@ -612,6 +795,12 @@ class _BankSearchStep extends StatelessWidget {
           onPressed: onAddUnlinked,
           child: const Text('Add an Unlinked Account'),
         ),
+        const SizedBox(height: SpacingTokens.sm),
+        FilledButton.icon(
+          onPressed: onConnectSolana,
+          icon: const Icon(Icons.currency_bitcoin_rounded),
+          label: const Text('Connect Solana Wallet'),
+        ),
       ],
     );
   }
@@ -655,6 +844,82 @@ class _InstitutionOption {
   const _InstitutionOption({required this.name});
 
   final String name;
+}
+
+class _WalletConnectStep extends StatelessWidget {
+  const _WalletConnectStep({
+    required this.walletAddressController,
+    required this.walletLabelController,
+    required this.onBudget,
+    required this.onBudgetChanged,
+  });
+
+  final TextEditingController walletAddressController;
+  final TextEditingController walletLabelController;
+  final bool onBudget;
+  final ValueChanged<bool> onBudgetChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(
+        SpacingTokens.md,
+        SpacingTokens.md,
+        SpacingTokens.md,
+        SpacingTokens.xl,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            'Connect a Solana wallet in read-only mode. '
+            'OpenBudget imports native SPL balances and keeps fiat valuation synced.',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: OpenBudgetPalette.fgSecondaryFor(theme),
+            ),
+          ),
+          const SizedBox(height: SpacingTokens.md),
+          Text(
+            'Wallet Address',
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: SpacingTokens.xs),
+          TextField(
+            key: _addAccountWalletAddressFieldKey,
+            controller: walletAddressController,
+            textInputAction: TextInputAction.next,
+            decoration: const InputDecoration(
+              hintText: 'Paste Solana wallet address',
+            ),
+          ),
+          const SizedBox(height: SpacingTokens.md),
+          Text(
+            'Wallet Label (optional)',
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: SpacingTokens.xs),
+          TextField(
+            key: _addAccountWalletLabelFieldKey,
+            controller: walletLabelController,
+            textInputAction: TextInputAction.done,
+            decoration: const InputDecoration(hintText: 'My Solana Wallet'),
+          ),
+          const SizedBox(height: SpacingTokens.md),
+          SwitchListTile(
+            title: const Text('Include in budget totals'),
+            value: onBudget,
+            onChanged: onBudgetChanged,
+            contentPadding: EdgeInsets.zero,
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _UnlinkedAccountStep extends StatelessWidget {

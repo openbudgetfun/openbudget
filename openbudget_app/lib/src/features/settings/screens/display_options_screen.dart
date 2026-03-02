@@ -32,6 +32,10 @@ class DisplayOptionsScreen extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final currentThemeMode = ref.watch(themeModeProvider);
+    final isDarkMode =
+        currentThemeMode == ThemeMode.dark ||
+        (currentThemeMode == ThemeMode.system &&
+            theme.brightness == Brightness.dark);
     final currentBalanceStyle = ref.watch(balanceStyleProvider);
     final hideAmounts = ref.watch(hideAmountsProvider);
     final hideProgressBars = ref.watch(hideProgressBarsProvider);
@@ -97,32 +101,13 @@ class DisplayOptionsScreen extends HookConsumerWidget {
         children: [
           _SectionLabel(label: l10n.themeTitle),
           _SettingsCard(
-            child: Column(
-              children: [
-                _SelectionTile(
-                  label: l10n.themeLight,
-                  selected: currentThemeMode == ThemeMode.light,
-                  onTap: () => ref
-                      .read(themeModeProvider.notifier)
-                      .setThemeMode(ThemeMode.light),
-                ),
-                const Divider(height: 1),
-                _SelectionTile(
-                  label: l10n.themeDark,
-                  selected: currentThemeMode == ThemeMode.dark,
-                  onTap: () => ref
-                      .read(themeModeProvider.notifier)
-                      .setThemeMode(ThemeMode.dark),
-                ),
-                const Divider(height: 1),
-                _SelectionTile(
-                  label: l10n.themeSystem,
-                  selected: currentThemeMode == ThemeMode.system,
-                  onTap: () => ref
-                      .read(themeModeProvider.notifier)
-                      .setThemeMode(ThemeMode.system),
-                ),
-              ],
+            child: _ToggleTile(
+              label: l10n.themeTitle,
+              subtitle: isDarkMode ? l10n.themeDark : l10n.themeLight,
+              value: isDarkMode,
+              onChanged: (value) => ref
+                  .read(themeModeProvider.notifier)
+                  .setThemeMode(value ? ThemeMode.dark : ThemeMode.light),
             ),
           ),
           const SizedBox(height: SpacingTokens.lg),
@@ -339,32 +324,6 @@ class _SectionLabel extends HookWidget {
           fontWeight: FontWeight.w600,
         ),
       ),
-    );
-  }
-}
-
-class _SelectionTile extends HookWidget {
-  const _SelectionTile({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      onTap: onTap,
-      title: Text(label),
-      leading: selected
-          ? Icon(
-              Icons.check_rounded,
-              color: OpenBudgetPalette.bgBrandFor(Theme.of(context)),
-            )
-          : const SizedBox(width: 24),
     );
   }
 }
