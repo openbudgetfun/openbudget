@@ -616,7 +616,7 @@ class _LoadingStep extends StatelessWidget {
         ? 'assets/branding/logos/ob_primary_dark_512.png'
         : 'assets/branding/logos/ob_primary_light_512.png';
 
-    return SingleChildScrollView(
+    final content = Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: SpacingTokens.xl,
         vertical: SpacingTokens.lg,
@@ -661,6 +661,15 @@ class _LoadingStep extends StatelessWidget {
             ),
           ],
         ],
+      ),
+    );
+
+    return LayoutBuilder(
+      builder: (context, constraints) => SingleChildScrollView(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minHeight: constraints.maxHeight),
+          child: Center(child: content),
+        ),
       ),
     );
   }
