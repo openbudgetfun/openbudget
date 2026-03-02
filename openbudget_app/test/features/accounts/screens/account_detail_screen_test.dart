@@ -305,6 +305,21 @@ Widget _buildWalletSubject({
   );
 }
 
+Future<void> _scrollToText(
+  WidgetTester tester,
+  String text, {
+  double delta = 300,
+}) async {
+  final scrollables = find.byType(Scrollable);
+  expect(scrollables, findsWidgets);
+  await tester.scrollUntilVisible(
+    find.text(text),
+    delta,
+    scrollable: scrollables.last,
+  );
+  await tester.pumpAndSettle();
+}
+
 void main() {
   setUpAll(() {
     GoogleFonts.config.allowRuntimeFetching = false;
@@ -441,13 +456,9 @@ void main() {
 
       expect(find.text('Overview'), findsOneWidget);
       expect(find.text('Activity'), findsOneWidget);
+      await _scrollToText(tester, 'Loan Payoff Overview');
       expect(find.text('Loan Payoff Overview'), findsOneWidget);
-      await tester.scrollUntilVisible(
-        find.text('Create Target'),
-        300,
-        scrollable: find.byType(Scrollable).first,
-      );
-      await tester.pumpAndSettle();
+      await _scrollToText(tester, 'Create Target');
       expect(find.text('Create Target'), findsOneWidget);
 
       await tester.tap(find.text('Create Target'));
@@ -471,30 +482,14 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Main Wallet'), findsWidgets);
-      await tester.scrollUntilVisible(
-        find.text('Holdings'),
-        200,
-        scrollable: find.byType(Scrollable).first,
-      );
+      await _scrollToText(tester, 'Holdings', delta: 200);
       expect(find.text('Holdings'), findsOneWidget);
-      await tester.scrollUntilVisible(
-        find.text(r'Hide dust assets (< $0.01)'),
-        300,
-        scrollable: find.byType(Scrollable).first,
-      );
+      await _scrollToText(tester, r'Hide dust assets (< $0.01)');
       expect(find.text(r'Hide dust assets (< $0.01)'), findsOneWidget);
-      await tester.scrollUntilVisible(
-        find.text('SOL'),
-        200,
-        scrollable: find.byType(Scrollable).first,
-      );
+      await _scrollToText(tester, 'SOL', delta: 200);
       expect(find.text('SOL'), findsOneWidget);
       expect(find.text('DUST'), findsNothing);
-      await tester.scrollUntilVisible(
-        find.text('Transaction History'),
-        300,
-        scrollable: find.byType(Scrollable).first,
-      );
+      await _scrollToText(tester, 'Transaction History');
       expect(find.text('Jupiter swap'), findsOneWidget);
       expect(find.text('Transfer to friend'), findsOneWidget);
       expect(find.textContaining('P&L +'), findsWidgets);
@@ -512,11 +507,7 @@ void main() {
 
       expect(find.text('DUST'), findsNothing);
 
-      await tester.scrollUntilVisible(
-        find.text(r'Hide dust assets (< $0.01)'),
-        300,
-        scrollable: find.byType(Scrollable).first,
-      );
+      await _scrollToText(tester, r'Hide dust assets (< $0.01)');
       final dustChip = find.widgetWithText(
         FilterChip,
         r'Hide dust assets (< $0.01)',
@@ -540,10 +531,12 @@ void main() {
             widget.decoration?.hintText ==
                 'Search description, category, tags, memo',
       );
+      final scrollables = find.byType(Scrollable);
+      expect(scrollables, findsWidgets);
       await tester.scrollUntilVisible(
         searchField,
         300,
-        scrollable: find.byType(Scrollable).first,
+        scrollable: scrollables.last,
       );
       await tester.enterText(searchField, 'jupiter');
       await tester.pumpAndSettle();
@@ -564,11 +557,7 @@ void main() {
       await tester.pumpWidget(_buildWalletSubject());
       await tester.pumpAndSettle();
 
-      await tester.scrollUntilVisible(
-        find.text('Transfer to friend'),
-        300,
-        scrollable: find.byType(Scrollable).first,
-      );
+      await _scrollToText(tester, 'Transfer to friend');
 
       expect(find.text('Suggested: Transfers'), findsOneWidget);
     });
@@ -583,11 +572,7 @@ void main() {
       await tester.pumpWidget(_buildWalletSubject());
       await tester.pumpAndSettle();
 
-      await tester.scrollUntilVisible(
-        find.text('Transfer to friend'),
-        300,
-        scrollable: find.byType(Scrollable).first,
-      );
+      await _scrollToText(tester, 'Transfer to friend');
       final transferCard = find.ancestor(
         of: find.text('Transfer to friend'),
         matching: find.byType(Card),
@@ -596,10 +581,12 @@ void main() {
         of: transferCard.first,
         matching: find.byTooltip('Edit metadata'),
       );
+      final scrollables = find.byType(Scrollable);
+      expect(scrollables, findsWidgets);
       await tester.scrollUntilVisible(
         editButton,
         200,
-        scrollable: find.byType(Scrollable).first,
+        scrollable: scrollables.last,
       );
       await tester.tap(editButton);
       await tester.pumpAndSettle();
