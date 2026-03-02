@@ -9,10 +9,11 @@ val releaseKeystorePath = System.getenv("ANDROID_RELEASE_KEYSTORE_PATH")
 val releaseStorePassword = System.getenv("ANDROID_RELEASE_STORE_PASSWORD")
 val releaseKeyAlias = System.getenv("ANDROID_RELEASE_KEY_ALIAS")
 val releaseKeyPassword = System.getenv("ANDROID_RELEASE_KEY_PASSWORD")
-val hasReleaseSigningEnv = !releaseKeystorePath.isNullOrBlank() &&
-    !releaseStorePassword.isNullOrBlank() &&
-    !releaseKeyAlias.isNullOrBlank() &&
-    !releaseKeyPassword.isNullOrBlank()
+val hasReleaseSigningEnv =
+    !releaseKeystorePath.isNullOrBlank() &&
+        !releaseStorePassword.isNullOrBlank() &&
+        !releaseKeyAlias.isNullOrBlank() &&
+        !releaseKeyPassword.isNullOrBlank()
 
 android {
     namespace = "com.openbudget.app"
@@ -53,11 +54,12 @@ android {
     buildTypes {
         release {
             // Keep debug signing fallback for local release builds when signing env vars are not set.
-            signingConfig = if (hasReleaseSigningEnv) {
-                signingConfigs.getByName("release")
-            } else {
-                signingConfigs.getByName("debug")
-            }
+            signingConfig =
+                if (hasReleaseSigningEnv) {
+                    signingConfigs.getByName("release")
+                } else {
+                    signingConfigs.getByName("debug")
+                }
         }
     }
 }

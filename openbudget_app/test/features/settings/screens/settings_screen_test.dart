@@ -73,13 +73,20 @@ void main() {
 
       expect(find.text('Current Plan'), findsOneWidget);
       expect(find.text('Family Plan'), findsOneWidget);
+      await tester.scrollUntilVisible(
+        find.text('Plan Settings'),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
       expect(find.text('Plan Settings'), findsOneWidget);
       expect(find.text('New Plan'), findsOneWidget);
       expect(find.text('Open Plan'), findsOneWidget);
       expect(find.text('Make a Fresh Start'), findsOneWidget);
     });
 
-    testWidgets('renders app and account sections', (tester) async {
+    testWidgets('renders quick-access, app, and account sections', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
@@ -92,46 +99,38 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('App Icon'), findsOneWidget);
-      expect(find.text('Display Options'), findsOneWidget);
+      expect(find.text('Quick Access'), findsOneWidget);
+      expect(find.text('Accounts'), findsOneWidget);
+      expect(find.text('Add Account'), findsOneWidget);
       expect(find.text('Recurring Transactions'), findsOneWidget);
       expect(find.text('Payees'), findsOneWidget);
       expect(find.text('Transaction Rules'), findsOneWidget);
-      expect(find.text('Import Transactions'), findsOneWidget);
-
       await tester.scrollUntilVisible(
-        find.text('Export Budget'),
-        400,
-        scrollable: find.byType(Scrollable).first,
-      );
-
-      expect(find.text('Data'), findsOneWidget);
-      expect(find.text('Export Budget'), findsOneWidget);
-
-      await tester.scrollUntilVisible(
-        find.text('Account Settings'),
+        find.text('App Icon'),
         300,
         scrollable: find.byType(Scrollable).first,
       );
+      expect(find.text('App Icon'), findsOneWidget);
+      expect(find.text('Display Options'), findsOneWidget);
+      expect(find.text('Appearance'), findsOneWidget);
+      expect(find.text('Manage Bank Connections'), findsOneWidget);
+
+      await tester.drag(find.byType(ListView), const Offset(0, -500));
+      await tester.pumpAndSettle();
+
+      await tester.drag(find.byType(ListView), const Offset(0, -350));
+      await tester.pumpAndSettle();
 
       expect(find.text('Account Settings'), findsOneWidget);
-      expect(find.text('OpenBudget Together'), findsOneWidget);
-      expect(find.text('Manage Bank Connections'), findsOneWidget);
-      expect(find.text('Currently unavailable in this build'), findsOneWidget);
       expect(find.text('Log Out'), findsOneWidget);
 
-      await tester.scrollUntilVisible(
-        find.text('Terms of Service'),
-        400,
-        scrollable: find.byType(Scrollable).first,
-      );
+      await tester.drag(find.byType(ListView), const Offset(0, -550));
+      await tester.pumpAndSettle();
 
       expect(find.text('Misc'), findsOneWidget);
       expect(find.text('Write a Review'), findsOneWidget);
       expect(find.text('Send in Diagnostics'), findsOneWidget);
       expect(find.text('Privacy Policy'), findsOneWidget);
-      expect(find.text('California Privacy Policy'), findsOneWidget);
-      expect(find.text('Your Privacy Choices'), findsOneWidget);
       expect(find.text('Terms of Service'), findsOneWidget);
     });
   });

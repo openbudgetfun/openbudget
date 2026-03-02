@@ -1,0 +1,11 @@
+included:
+  - openbudget_app/ios
+  - openbudget_app/macos
+
+excluded:
+  - openbudget_app/ios/Flutter
+  - openbudget_app/macos/Flutter
+  - openbudget_app/ios/Pods
+  - openbudget_app/macos/Pods
+  - openbudget_app/ios/Runner.xcodeproj
+  - openbudget_app/macos/Runner.xcodeproj

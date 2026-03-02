@@ -495,6 +495,20 @@ void main() {
       expect(find.text('Transfer Route'), findsOneWidget);
     });
 
+    testWidgets('settings action navigates to settings route', (tester) async {
+      await tester.pumpWidget(
+        _buildRoutedSubject(accounts: [_makeAccount(name: 'Daily')]),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.more_horiz_rounded));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Settings'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Settings Route'), findsOneWidget);
+    });
+
     testWidgets('all transactions row navigates to transactions route', (
       tester,
     ) async {
