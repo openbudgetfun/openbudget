@@ -26,6 +26,7 @@ import 'package:openbudget_app/src/features/budget/widgets/category_group.dart';
 import 'package:openbudget_app/src/features/budget/widgets/credit_card_section.dart';
 import 'package:openbudget_app/src/features/recurring/providers/recurring_auto_post_provider.dart';
 import 'package:openbudget_app/src/features/settings/providers/display_options_provider.dart';
+import 'package:openbudget_app/src/providers/theme_mode_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
@@ -36,6 +37,12 @@ import 'package:openbudget_ui/openbudget_ui.dart';
 enum _PlanMenuAction {
   undoLastMove,
   recentMoves,
+  toggleSearch,
+  toggleHidden,
+  reorderCategories,
+  saveTemplate,
+  setThemeLight,
+  setThemeDark,
   collapseExpand,
   hideProgressBars,
   hideAmounts,
@@ -73,11 +80,40 @@ class BudgetDetailScreen extends HookConsumerWidget {
     final hideAmounts = ref.watch(hideAmountsProvider);
     final hideProgressBars = ref.watch(hideProgressBarsProvider);
     final recentMoves = ref.watch(recentMovesForBudgetProvider(budgetId));
+    final currentThemeMode = ref.watch(themeModeProvider);
     void navigateAfterMenuClose(VoidCallback callback) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!context.mounted) return;
         callback();
       });
+    }
+
+    void toggleSearchMode() {
+      isSearching.value = !isSearching.value;
+      selectedEditor.value = null;
+      editorInput.value = '';
+      if (!isSearching.value) {
+        searchController.clear();
+        searchQuery.value = '';
+      }
+    }
+
+    Widget buildMenuLabel({
+      required IconData icon,
+      required String label,
+      bool checked = false,
+    }) {
+      return Row(
+        children: [
+          Icon(icon, size: 18),
+          const SizedBox(width: SpacingTokens.sm),
+          Expanded(child: Text(label)),
+          if (checked) ...[
+            const SizedBox(width: SpacingTokens.md),
+            const Icon(Icons.check_rounded, size: 18),
+          ],
+        ],
+      );
     }
 
     // Auto-post due recurring transactions when the budget opens.
@@ -232,109 +268,13 @@ class BudgetDetailScreen extends HookConsumerWidget {
               Theme.of(context),
             ),
             scrolledUnderElevation: 0,
-            leading: PopupMenuButton<_PlanMenuAction>(
-              icon: const Icon(Icons.more_horiz_rounded),
-              onSelected: (action) => switch (action) {
-                _PlanMenuAction.undoLastMove =>
-                  ref
-                      .read(recentMovesProvider.notifier)
-                      .undoLast(budgetId: budgetId),
-                _PlanMenuAction.recentMoves => navigateAfterMenuClose(() {
-                  context.pushNamed(
-                    recentMovesRoute,
-                    pathParameters: {'id': budgetId},
-                  );
-                }),
-                _PlanMenuAction.collapseExpand =>
-                  collapseCategories.value = !collapseCategories.value,
-                _PlanMenuAction.hideProgressBars =>
-                  ref
-                      .read(hideProgressBarsProvider.notifier)
-                      .setHideProgressBars(value: !hideProgressBars),
-                _PlanMenuAction.hideAmounts =>
-                  ref
-                      .read(hideAmountsProvider.notifier)
-                      .setHideAmounts(value: !hideAmounts),
-                _PlanMenuAction.settings => navigateAfterMenuClose(() {
-                  context.goNamed(
-                    settingsRoute,
-                    pathParameters: {'id': budgetId},
-                  );
-                }),
-              },
-              itemBuilder: (context) => [
-                PopupMenuItem<_PlanMenuAction>(
-                  value: _PlanMenuAction.recentMoves,
-                  child: Row(
-                    children: [
-                      const Icon(Icons.history_rounded, size: 18),
-                      const SizedBox(width: SpacingTokens.sm),
-                      Text(l10n.recentMovesTitle),
-                    ],
-                  ),
-                ),
-                PopupMenuItem<_PlanMenuAction>(
-                  value: _PlanMenuAction.undoLastMove,
-                  enabled: recentMoves.isNotEmpty,
-                  child: Row(
-                    children: [
-                      const Icon(Icons.undo_rounded, size: 18),
-                      const SizedBox(width: SpacingTokens.sm),
-                      Text(l10n.undoAction),
-                    ],
-                  ),
-                ),
-                const PopupMenuDivider(),
-                PopupMenuItem<_PlanMenuAction>(
-                  value: _PlanMenuAction.collapseExpand,
-                  child: Row(
-                    children: [
-                      const Icon(Icons.unfold_more_rounded, size: 18),
-                      const SizedBox(width: SpacingTokens.sm),
-                      Text(l10n.budgetCollapseExpand),
-                    ],
-                  ),
-                ),
-                const PopupMenuDivider(),
-                CheckedPopupMenuItem<_PlanMenuAction>(
-                  value: _PlanMenuAction.hideProgressBars,
-                  checked: hideProgressBars,
-                  child: Row(
-                    children: [
-                      const Icon(Icons.linear_scale_rounded, size: 18),
-                      const SizedBox(width: SpacingTokens.sm),
-                      Text(l10n.settingsHideProgressBars),
-                    ],
-                  ),
-                ),
-                CheckedPopupMenuItem<_PlanMenuAction>(
-                  value: _PlanMenuAction.hideAmounts,
-                  checked: hideAmounts,
-                  child: Row(
-                    children: [
-                      const Icon(Icons.visibility_off_rounded, size: 18),
-                      const SizedBox(width: SpacingTokens.sm),
-                      Text(l10n.settingsHideAmounts),
-                    ],
-                  ),
-                ),
-                const PopupMenuDivider(),
-                PopupMenuItem<_PlanMenuAction>(
-                  value: _PlanMenuAction.settings,
-                  child: Row(
-                    children: [
-                      const Icon(Icons.settings_outlined, size: 18),
-                      const SizedBox(width: SpacingTokens.sm),
-                      Text(l10n.settingsTitle),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+            centerTitle: true,
             title: Text(
               summary.budget.name,
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w700,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
               ),
             ),
             actions: [
@@ -342,64 +282,180 @@ class BudgetDetailScreen extends HookConsumerWidget {
                 TextButton(
                   onPressed: () => isReordering.value = false,
                   child: Text(l10n.budgetReorderDone),
-                )
-              else ...[
-                IconButton(
-                  icon: const Icon(Icons.history_rounded),
-                  tooltip: l10n.recentMovesTitle,
-                  onPressed: () => context.pushNamed(
-                    recentMovesRoute,
-                    pathParameters: {'id': budgetId},
-                  ),
                 ),
-                IconButton(
-                  icon: Icon(
-                    isSearching.value
-                        ? Icons.search_off_rounded
-                        : Icons.search_rounded,
-                  ),
-                  tooltip: l10n.budgetSearchHint,
-                  onPressed: () {
-                    isSearching.value = !isSearching.value;
-                    selectedEditor.value = null;
-                    editorInput.value = '';
-                    if (!isSearching.value) {
-                      searchController.clear();
-                      searchQuery.value = '';
-                    }
-                  },
-                ),
-                IconButton(
-                  icon: Badge(
-                    isLabelVisible: !showHidden.value && hiddenCount > 0,
-                    label: Text('$hiddenCount'),
-                    child: Icon(
-                      showHidden.value
-                          ? Icons.visibility_rounded
-                          : Icons.visibility_off_rounded,
+              PopupMenuButton<_PlanMenuAction>(
+                icon: const Icon(Icons.more_horiz_rounded),
+                position: PopupMenuPosition.under,
+                offset: const Offset(0, 8),
+                onSelected: (action) => switch (action) {
+                  _PlanMenuAction.undoLastMove =>
+                    ref
+                        .read(recentMovesProvider.notifier)
+                        .undoLast(budgetId: budgetId),
+                  _PlanMenuAction.recentMoves => navigateAfterMenuClose(() {
+                    context.pushNamed(
+                      recentMovesRoute,
+                      pathParameters: {'id': budgetId},
+                    );
+                  }),
+                  _PlanMenuAction.toggleSearch => toggleSearchMode(),
+                  _PlanMenuAction.toggleHidden =>
+                    showHidden.value = !showHidden.value,
+                  _PlanMenuAction.reorderCategories =>
+                    isReordering.value = true,
+                  _PlanMenuAction.saveTemplate => navigateAfterMenuClose(() {
+                    showDialog<void>(
+                      context: context,
+                      builder: (_) => BudgetTemplateDialog(budgetId: budgetId),
+                    );
+                  }),
+                  _PlanMenuAction.setThemeLight =>
+                    ref
+                        .read(themeModeProvider.notifier)
+                        .setThemeMode(ThemeMode.light),
+                  _PlanMenuAction.setThemeDark =>
+                    ref
+                        .read(themeModeProvider.notifier)
+                        .setThemeMode(ThemeMode.dark),
+                  _PlanMenuAction.collapseExpand =>
+                    collapseCategories.value = !collapseCategories.value,
+                  _PlanMenuAction.hideProgressBars =>
+                    ref
+                        .read(hideProgressBarsProvider.notifier)
+                        .setHideProgressBars(value: !hideProgressBars),
+                  _PlanMenuAction.hideAmounts =>
+                    ref
+                        .read(hideAmountsProvider.notifier)
+                        .setHideAmounts(value: !hideAmounts),
+                  _PlanMenuAction.settings => navigateAfterMenuClose(() {
+                    context.goNamed(
+                      settingsRoute,
+                      pathParameters: {'id': budgetId},
+                    );
+                  }),
+                },
+                itemBuilder: (context) => [
+                  PopupMenuItem<_PlanMenuAction>(
+                    value: _PlanMenuAction.recentMoves,
+                    child: Row(
+                      children: [
+                        const Icon(Icons.history_rounded, size: 18),
+                        const SizedBox(width: SpacingTokens.sm),
+                        Text(l10n.recentMovesTitle),
+                      ],
                     ),
                   ),
-                  tooltip: showHidden.value
-                      ? l10n.budgetShowHidden
-                      : hiddenCount > 0
-                      ? l10n.budgetHiddenCount(hiddenCount)
-                      : l10n.budgetShowHidden,
-                  onPressed: () => showHidden.value = !showHidden.value,
-                ),
-                IconButton(
-                  icon: const Icon(Icons.swap_vert_rounded),
-                  tooltip: l10n.budgetReorderCategories,
-                  onPressed: () => isReordering.value = true,
-                ),
-                IconButton(
-                  icon: const Icon(Icons.bookmark_border_rounded),
-                  tooltip: l10n.templateTitle,
-                  onPressed: () => showDialog<void>(
-                    context: context,
-                    builder: (_) => BudgetTemplateDialog(budgetId: budgetId),
+                  PopupMenuItem<_PlanMenuAction>(
+                    value: _PlanMenuAction.undoLastMove,
+                    enabled: recentMoves.isNotEmpty,
+                    child: Row(
+                      children: [
+                        const Icon(Icons.undo_rounded, size: 18),
+                        const SizedBox(width: SpacingTokens.sm),
+                        Text(l10n.undoAction),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                  const PopupMenuDivider(),
+                  PopupMenuItem<_PlanMenuAction>(
+                    value: _PlanMenuAction.toggleSearch,
+                    child: buildMenuLabel(
+                      icon: Icons.search_rounded,
+                      label: l10n.budgetSearchHint,
+                      checked: isSearching.value,
+                    ),
+                  ),
+                  PopupMenuItem<_PlanMenuAction>(
+                    value: _PlanMenuAction.toggleHidden,
+                    child: buildMenuLabel(
+                      icon: Icons.visibility_off_rounded,
+                      label: showHidden.value
+                          ? l10n.budgetShowHidden
+                          : hiddenCount > 0
+                          ? l10n.budgetHiddenCount(hiddenCount)
+                          : l10n.budgetShowHidden,
+                      checked: showHidden.value,
+                    ),
+                  ),
+                  PopupMenuItem<_PlanMenuAction>(
+                    value: _PlanMenuAction.reorderCategories,
+                    enabled: !isReordering.value,
+                    child: Row(
+                      children: [
+                        const Icon(Icons.swap_vert_rounded, size: 18),
+                        const SizedBox(width: SpacingTokens.sm),
+                        Text(l10n.budgetReorderCategories),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem<_PlanMenuAction>(
+                    value: _PlanMenuAction.saveTemplate,
+                    child: Row(
+                      children: [
+                        const Icon(Icons.bookmark_border_rounded, size: 18),
+                        const SizedBox(width: SpacingTokens.sm),
+                        Text(l10n.templateTitle),
+                      ],
+                    ),
+                  ),
+                  const PopupMenuDivider(),
+                  PopupMenuItem<_PlanMenuAction>(
+                    value: _PlanMenuAction.setThemeLight,
+                    child: buildMenuLabel(
+                      icon: Icons.light_mode_rounded,
+                      label: l10n.themeLight,
+                      checked: currentThemeMode == ThemeMode.light,
+                    ),
+                  ),
+                  PopupMenuItem<_PlanMenuAction>(
+                    value: _PlanMenuAction.setThemeDark,
+                    child: buildMenuLabel(
+                      icon: Icons.dark_mode_rounded,
+                      label: l10n.themeDark,
+                      checked: currentThemeMode == ThemeMode.dark,
+                    ),
+                  ),
+                  const PopupMenuDivider(),
+                  PopupMenuItem<_PlanMenuAction>(
+                    value: _PlanMenuAction.collapseExpand,
+                    child: Row(
+                      children: [
+                        const Icon(Icons.unfold_more_rounded, size: 18),
+                        const SizedBox(width: SpacingTokens.sm),
+                        Text(l10n.budgetCollapseExpand),
+                      ],
+                    ),
+                  ),
+                  const PopupMenuDivider(),
+                  PopupMenuItem<_PlanMenuAction>(
+                    value: _PlanMenuAction.hideProgressBars,
+                    child: buildMenuLabel(
+                      icon: Icons.linear_scale_rounded,
+                      label: l10n.settingsHideProgressBars,
+                      checked: hideProgressBars,
+                    ),
+                  ),
+                  PopupMenuItem<_PlanMenuAction>(
+                    value: _PlanMenuAction.hideAmounts,
+                    child: buildMenuLabel(
+                      icon: Icons.visibility_off_rounded,
+                      label: l10n.settingsHideAmounts,
+                      checked: hideAmounts,
+                    ),
+                  ),
+                  const PopupMenuDivider(),
+                  PopupMenuItem<_PlanMenuAction>(
+                    value: _PlanMenuAction.settings,
+                    child: Row(
+                      children: [
+                        const Icon(Icons.settings_outlined, size: 18),
+                        const SizedBox(width: SpacingTokens.sm),
+                        Text(l10n.settingsTitle),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
           bottomNavigationBar:
@@ -2479,7 +2535,7 @@ class _CoverOverspendingSheet extends HookConsumerWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
-        borderRadius: BorderRadius.vertical(
+        borderRadius: const BorderRadius.vertical(
           top: Radius.circular(RadiusTokens.lg),
         ),
       ),
