@@ -96,7 +96,7 @@ class CategoryGroup extends HookConsumerWidget {
                 ),
                 decoration: BoxDecoration(
                   color: OpenBudgetPalette.bgTertiaryFor(Theme.of(context)),
-                  borderRadius: BorderRadius.vertical(
+                  borderRadius: const BorderRadius.vertical(
                     top: Radius.circular(RadiusTokens.md),
                   ),
                 ),

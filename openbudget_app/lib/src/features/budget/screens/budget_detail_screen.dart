@@ -2479,7 +2479,7 @@ class _CoverOverspendingSheet extends HookConsumerWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
-        borderRadius: BorderRadius.vertical(
+        borderRadius: const BorderRadius.vertical(
           top: Radius.circular(RadiusTokens.lg),
         ),
       ),

@@ -65,7 +65,7 @@ class BudgetHeader extends HookConsumerWidget {
           Container(
             decoration: BoxDecoration(
               color: OpenBudgetPalette.bgAccentFor(theme),
-              borderRadius: BorderRadius.vertical(
+              borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(RadiusTokens.xl),
               ),
             ),

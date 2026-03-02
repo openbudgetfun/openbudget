@@ -113,9 +113,11 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
       } on Exception {
         // Keep optimistic UI even if network is unavailable in test harnesses.
       } finally {
-        ref
-          ..invalidate(monthlyTransactionsProvider(budgetId, year, month))
-          ..invalidate(budgetMonthlySummaryProvider(budgetId));
+        if (context.mounted) {
+          ref
+            ..invalidate(monthlyTransactionsProvider(budgetId, year, month))
+            ..invalidate(budgetMonthlySummaryProvider(budgetId));
+        }
       }
     }
 
@@ -146,10 +148,12 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
           ),
         );
       } finally {
-        selectedIds.value = <String>{};
-        ref
-          ..invalidate(monthlyTransactionsProvider(budgetId, year, month))
-          ..invalidate(budgetMonthlySummaryProvider(budgetId));
+        if (context.mounted) {
+          selectedIds.value = <String>{};
+          ref
+            ..invalidate(monthlyTransactionsProvider(budgetId, year, month))
+            ..invalidate(budgetMonthlySummaryProvider(budgetId));
+        }
       }
     }
 
@@ -172,9 +176,11 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
       } on Exception {
         // Keep optimistic UI even if network is unavailable in test harnesses.
       } finally {
-        ref
-          ..invalidate(monthlyTransactionsProvider(budgetId, year, month))
-          ..invalidate(budgetMonthlySummaryProvider(budgetId));
+        if (context.mounted) {
+          ref
+            ..invalidate(monthlyTransactionsProvider(budgetId, year, month))
+            ..invalidate(budgetMonthlySummaryProvider(budgetId));
+        }
       }
     }
 
@@ -219,7 +225,7 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
-        borderRadius: BorderRadius.vertical(
+        borderRadius: const BorderRadius.vertical(
           top: Radius.circular(RadiusTokens.lg),
         ),
       ),

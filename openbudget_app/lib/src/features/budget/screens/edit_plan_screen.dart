@@ -825,7 +825,7 @@ class _EditPlanCategoryCard extends HookWidget {
             ),
             decoration: BoxDecoration(
               color: OpenBudgetPalette.bgTertiaryFor(Theme.of(context)),
-              borderRadius: BorderRadius.vertical(
+              borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(RadiusTokens.md),
               ),
             ),

@@ -15,7 +15,6 @@ in
     with pkgs;
     [
       dprint
-      eget
       extra.agave
       extra.knope
       extra.mdt
@@ -334,13 +333,27 @@ in
     "install:all" = {
       exec = ''
         set -e
-        install:eget
         install:pulumi
         install:pnpm
         install:dart
         install:infra || echo "Skipping infra install (pnpm not available)"
       '';
       description = "Run all install scripts.";
+      binary = "bash";
+    };
+    "install:pnpm" = {
+      exec = ''
+        set -euo pipefail
+        mkdir -p "$DEVENV_ROOT/.eget/bin"
+
+        if ! command -v pnpm >/dev/null 2>&1; then
+          echo "pnpm is not available in PATH."
+          exit 127
+        fi
+
+        ln -sf "$(command -v pnpm)" "$DEVENV_ROOT/.eget/bin/pnpm"
+      '';
+      description = "Ensure pnpm is available for install scripts.";
       binary = "bash";
     };
     "install:dart" = {
@@ -350,20 +363,6 @@ in
       '';
       description = "Install dart dependencies";
       binary = "bash";
-    };
-    "install:eget" = {
-      exec = ''
-        HASH=$(nix hash path --base32 ./.eget/.eget.toml)
-        echo "HASH: $HASH"
-        if [ ! -f ./.eget/bin/hash ] || [ "$HASH" != "$(cat ./.eget/bin/hash)" ]; then
-          echo "Updating eget binaries"
-          eget -D --to "$DEVENV_ROOT/.eget/bin"
-          echo "$HASH" > ./.eget/bin/hash
-        else
-          echo "eget binaries are up to date"
-        fi
-      '';
-      description = "Install github binaries with eget.";
     };
     "install:pulumi" = {
       exec = ''

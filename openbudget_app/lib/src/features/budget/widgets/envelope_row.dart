@@ -78,7 +78,7 @@ class EnvelopeRow extends HookConsumerWidget {
                     GestureDetector(
                       onTap: onQuickBudget,
                       child: Padding(
-                        padding: EdgeInsets.only(right: SpacingTokens.xs),
+                        padding: const EdgeInsets.only(right: SpacingTokens.xs),
                         child: Icon(
                           Icons.bolt_rounded,
                           size: 16,
