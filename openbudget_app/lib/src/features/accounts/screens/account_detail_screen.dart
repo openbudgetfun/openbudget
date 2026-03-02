@@ -1598,7 +1598,7 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
         }
 
         final statusLabel = _toLabel(wallet.syncStatus);
-        final statusColor = _statusColor(wallet.syncStatus, colorScheme);
+        final statusColor = _statusColor(wallet.syncStatus, theme);
 
         return RefreshIndicator(
           onRefresh: runSync,
@@ -2106,10 +2106,11 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
     ).format(amount);
   }
 
-  static Color _statusColor(String status, ColorScheme colorScheme) {
+  static Color _statusColor(String status, ThemeData theme) {
+    final colorScheme = theme.colorScheme;
     switch (status.toLowerCase()) {
       case 'success':
-        return OpenBudgetPalette.progressGreen;
+        return OpenBudgetPalette.fgSuccessFor(theme);
       case 'error':
         return colorScheme.error;
       case 'pending':
@@ -2193,9 +2194,9 @@ class _WalletMetricCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(SpacingTokens.md),
       decoration: BoxDecoration(
-        color: OpenBudgetPalette.surfaceFor(theme),
+        color: OpenBudgetPalette.bgSecondaryFor(theme),
         borderRadius: BorderRadius.circular(RadiusTokens.md),
-        border: Border.all(color: OpenBudgetPalette.dividerFor(theme)),
+        border: Border.all(color: OpenBudgetPalette.borderSubtleFor(theme)),
       ),
       child: Row(
         children: [
