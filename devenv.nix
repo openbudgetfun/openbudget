@@ -21,6 +21,7 @@ in
       extra.pnpm-standalone
       fvm
       gitleaks
+      ktlint
       nixfmt
       pulumi-bin
       pulumi-esc
@@ -28,6 +29,8 @@ in
     ]
     ++ lib.optionals stdenv.isDarwin [
       coreutils
+      swiftformat
+      swiftlint
     ];
 
   dotenv.disableHint = true;
@@ -518,10 +521,22 @@ in
       exec = ''
         set -e
         lint:format
+        lint:swift
         docs:workflows:check
         lint:analyze
       '';
       description = "Lint all project files.";
+    };
+    "lint:swift" = {
+      exec = ''
+        set -euo pipefail
+        if ! command -v swiftlint >/dev/null 2>&1; then
+          echo "swiftlint is unavailable on this platform; skipping Swift lint."
+          exit 0
+        fi
+        swiftlint lint --strict --quiet --config "$DEVENV_ROOT/.swiftlint.yml"
+      '';
+      description = "Run swiftlint for Swift source files.";
     };
     "lint:format" = {
       exec = ''

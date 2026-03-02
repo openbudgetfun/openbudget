@@ -31,6 +31,15 @@
         "command": "./tools/dartfmt.sh {{file_path}}",
         "exts": ["dart"],
         "stdin": false
+      },
+      {
+        "command": "ktlint --format --log-level=none --stdin --stdin-path {{file_path}}",
+        "exts": ["kt", "kts"]
+      },
+      {
+        "command": "./tools/swiftfmt.sh {{file_path}}",
+        "exts": ["swift"],
+        "stdin": false
       }
     ]
   },
@@ -45,8 +54,7 @@
     "**/generated_protocol/**",
     "**/generated/**",
     "**/*.t.md",
-    "**/ios/",
-    "**/android/",
+    "**/Flutter/GeneratedPluginRegistrant.swift",
     "**/Pods/",
     "**/test_tools/serverpod_test_tools.dart",
     "pubspec.lock",
