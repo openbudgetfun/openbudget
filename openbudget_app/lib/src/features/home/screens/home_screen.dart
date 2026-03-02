@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
@@ -85,7 +87,8 @@ class HomeScreen extends HookConsumerWidget {
                     ),
                     const SizedBox(height: SpacingTokens.lg),
                     FilledButton.icon(
-                      onPressed: () => context.goNamed(createBudgetRoute),
+                      onPressed: () =>
+                          unawaited(context.pushNamed(createBudgetRoute)),
                       icon: const Icon(Icons.add),
                       label: Text(l10n.homeCreateBudget),
                     ),
@@ -115,7 +118,12 @@ class HomeScreen extends HookConsumerWidget {
                     onTap: () {
                       final id = budget.id?.toString();
                       if (id == null || id.isEmpty) return;
-                      context.goNamed(planRoute, pathParameters: {'id': id});
+                      unawaited(
+                        context.pushNamed(
+                          planRoute,
+                          pathParameters: {'id': id},
+                        ),
+                      );
                     },
                     onLongPress: () => _confirmDeleteBudget(
                       context,
@@ -132,7 +140,8 @@ class HomeScreen extends HookConsumerWidget {
       floatingActionButton: budgets.maybeWhen(
         data: (list) => list.isNotEmpty
             ? FloatingActionButton(
-                onPressed: () => context.goNamed(createBudgetRoute),
+                onPressed: () =>
+                    unawaited(context.pushNamed(createBudgetRoute)),
                 child: const Icon(Icons.add),
               )
             : null,

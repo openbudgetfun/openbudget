@@ -20,39 +20,49 @@ class BudgetShellScreen extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final tabHistory = useState<List<int>>(<int>[navigationShell.currentIndex]);
 
-    return Scaffold(
-      body: navigationShell,
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _adjustedIndex(navigationShell.currentIndex),
-        onDestinationSelected: (index) => unawaited(_onTap(context, index)),
-        destinations: [
-          NavigationDestination(
-            icon: const Icon(Icons.savings_outlined),
-            selectedIcon: const Icon(Icons.savings_rounded),
-            label: l10n.tabPlan,
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.account_balance_outlined),
-            selectedIcon: const Icon(Icons.account_balance_rounded),
-            label: l10n.tabAccounts,
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.add_circle_outline_rounded),
-            selectedIcon: const Icon(Icons.add_circle_rounded),
-            label: l10n.tabAdd,
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.bar_chart_outlined),
-            selectedIcon: const Icon(Icons.bar_chart_rounded),
-            label: l10n.tabReflect,
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.more_horiz_rounded),
-            selectedIcon: const Icon(Icons.more_horiz_rounded),
-            label: l10n.tabMore,
-          ),
-        ],
+    useEffect(() {
+      _recordTabVisit(tabHistory, navigationShell.currentIndex);
+      return null;
+    }, [navigationShell.currentIndex]);
+
+    return BackButtonListener(
+      onBackButtonPressed: () => _onBackButtonPressed(context, tabHistory),
+      child: Scaffold(
+        body: navigationShell,
+        bottomNavigationBar: NavigationBar(
+          selectedIndex: _adjustedIndex(navigationShell.currentIndex),
+          onDestinationSelected: (index) =>
+              unawaited(_onTap(context, index, tabHistory)),
+          destinations: [
+            NavigationDestination(
+              icon: const Icon(Icons.savings_outlined),
+              selectedIcon: const Icon(Icons.savings_rounded),
+              label: l10n.tabPlan,
+            ),
+            NavigationDestination(
+              icon: const Icon(Icons.account_balance_outlined),
+              selectedIcon: const Icon(Icons.account_balance_rounded),
+              label: l10n.tabAccounts,
+            ),
+            NavigationDestination(
+              icon: const Icon(Icons.add_circle_outline_rounded),
+              selectedIcon: const Icon(Icons.add_circle_rounded),
+              label: l10n.tabAdd,
+            ),
+            NavigationDestination(
+              icon: const Icon(Icons.bar_chart_outlined),
+              selectedIcon: const Icon(Icons.bar_chart_rounded),
+              label: l10n.tabReflect,
+            ),
+            NavigationDestination(
+              icon: const Icon(Icons.more_horiz_rounded),
+              selectedIcon: const Icon(Icons.more_horiz_rounded),
+              label: l10n.tabMore,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -67,7 +77,11 @@ class BudgetShellScreen extends HookWidget {
     return shellIndex + 1;
   }
 
-  Future<void> _onTap(BuildContext context, int index) async {
+  Future<void> _onTap(
+    BuildContext context,
+    int index,
+    ValueNotifier<List<int>> tabHistory,
+  ) async {
     if (index == 2) {
       // "+" tab — show add transaction sheet
       final action = await showModalBottomSheet<AddTransactionAction>(
@@ -78,9 +92,15 @@ class BudgetShellScreen extends HookWidget {
       if (!context.mounted || action == null) return;
       switch (action) {
         case AddTransactionAction.income:
-          context.goNamed(addIncomeRoute, pathParameters: {'id': budgetId});
+          await context.pushNamed(
+            addIncomeRoute,
+            pathParameters: {'id': budgetId},
+          );
         case AddTransactionAction.expense:
-          context.goNamed(addExpenseRoute, pathParameters: {'id': budgetId});
+          await context.pushNamed(
+            addExpenseRoute,
+            pathParameters: {'id': budgetId},
+          );
         case AddTransactionAction.transfer:
           await context.pushNamed(
             createTransferRoute,
@@ -97,9 +117,39 @@ class BudgetShellScreen extends HookWidget {
 
     // Map visual tab index back to shell branch index
     final branchIndex = index > 2 ? index - 1 : index;
+    if (branchIndex != navigationShell.currentIndex) {
+      _recordTabVisit(tabHistory, branchIndex);
+    }
     // Always navigate to the branch root to avoid stale shell state causing
     // apparent no-op tab taps (especially on first visit to a branch).
     navigationShell.goBranch(branchIndex, initialLocation: true);
+  }
+
+  Future<bool> _onBackButtonPressed(
+    BuildContext context,
+    ValueNotifier<List<int>> tabHistory,
+  ) async {
+    final route = ModalRoute.of(context);
+    if (route != null && !route.isCurrent) return false;
+
+    final history = List<int>.from(tabHistory.value);
+    if (history.length <= 1) return false;
+
+    history.removeLast();
+    final previousBranch = history.last;
+    tabHistory.value = history;
+    navigationShell.goBranch(previousBranch, initialLocation: true);
+    return true;
+  }
+
+  void _recordTabVisit(ValueNotifier<List<int>> tabHistory, int branchIndex) {
+    final history = List<int>.from(tabHistory.value);
+    if (history.isNotEmpty && history.last == branchIndex) return;
+
+    history
+      ..remove(branchIndex)
+      ..add(branchIndex);
+    tabHistory.value = history;
   }
 
   Future<void> _showMoreQuickActions(BuildContext context) async {
@@ -136,11 +186,20 @@ class BudgetShellScreen extends HookWidget {
 
     switch (action) {
       case _MoreQuickAction.settings:
-        context.goNamed(settingsRoute, pathParameters: {'id': budgetId});
+        await context.pushNamed(
+          settingsRoute,
+          pathParameters: {'id': budgetId},
+        );
       case _MoreQuickAction.recurring:
-        context.goNamed(recurringListRoute, pathParameters: {'id': budgetId});
+        await context.pushNamed(
+          recurringListRoute,
+          pathParameters: {'id': budgetId},
+        );
       case _MoreQuickAction.payees:
-        context.goNamed(payeeListRoute, pathParameters: {'id': budgetId});
+        await context.pushNamed(
+          payeeListRoute,
+          pathParameters: {'id': budgetId},
+        );
     }
   }
 }
