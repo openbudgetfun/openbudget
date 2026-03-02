@@ -5,6 +5,7 @@ import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_actions_provider.dart';
 import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_app/src/utils/currency_code_utils.dart';
+import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
@@ -103,7 +104,6 @@ class EditAccountDialog extends HookConsumerWidget {
 
                       isSubmitting.value = true;
                       final navigator = Navigator.of(context);
-                      final messenger = ScaffoldMessenger.of(context);
 
                       try {
                         await ref
@@ -116,17 +116,20 @@ class EditAccountDialog extends HookConsumerWidget {
                               balanceCents: balanceCents,
                               onBudget: onBudget.value,
                             );
-                        messenger.showSnackBar(
-                          SnackBar(content: Text(l10n.accountEditSuccess)),
+                        if (!context.mounted) return;
+                        showAppToast(
+                          context,
+                          message: l10n.accountEditSuccess,
+                          variant: AppToastVariant.success,
                         );
                         navigator.pop();
                       } on Exception catch (_) {
                         isSubmitting.value = false;
-                        messenger.showSnackBar(
-                          SnackBar(
-                            content: Text(l10n.accountEditError),
-                            backgroundColor: colorScheme.error,
-                          ),
+                        if (!context.mounted) return;
+                        showAppToast(
+                          context,
+                          message: l10n.accountEditError,
+                          variant: AppToastVariant.error,
                         );
                       }
                     }
@@ -335,7 +338,6 @@ class EditAccountDialog extends HookConsumerWidget {
     if (confirmed != true || !context.mounted) return;
 
     final navigator = Navigator.of(context);
-    final messenger = ScaffoldMessenger.of(context);
     try {
       await ref
           .read(accountActionsProvider.notifier)
@@ -344,15 +346,19 @@ class EditAccountDialog extends HookConsumerWidget {
             budgetId: budgetId,
             isClosed: true,
           );
-      messenger.showSnackBar(SnackBar(content: Text(l10n.accountCloseSuccess)));
+      if (!context.mounted) return;
+      showAppToast(
+        context,
+        message: l10n.accountCloseSuccess,
+        variant: AppToastVariant.success,
+      );
       navigator.pop();
     } on Exception catch (_) {
       if (context.mounted) {
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text(l10n.accountEditError),
-            backgroundColor: colorScheme.error,
-          ),
+        showAppToast(
+          context,
+          message: l10n.accountEditError,
+          variant: AppToastVariant.error,
         );
       }
     }
@@ -360,9 +366,7 @@ class EditAccountDialog extends HookConsumerWidget {
 
   Future<void> _reopenAccount(BuildContext context, WidgetRef ref) async {
     final l10n = AppLocalizations.of(context);
-    final colorScheme = Theme.of(context).colorScheme;
     final navigator = Navigator.of(context);
-    final messenger = ScaffoldMessenger.of(context);
     try {
       await ref
           .read(accountActionsProvider.notifier)
@@ -371,17 +375,19 @@ class EditAccountDialog extends HookConsumerWidget {
             budgetId: budgetId,
             isClosed: false,
           );
-      messenger.showSnackBar(
-        SnackBar(content: Text(l10n.accountReopenSuccess)),
+      if (!context.mounted) return;
+      showAppToast(
+        context,
+        message: l10n.accountReopenSuccess,
+        variant: AppToastVariant.success,
       );
       navigator.pop();
     } on Exception catch (_) {
       if (context.mounted) {
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text(l10n.accountEditError),
-            backgroundColor: colorScheme.error,
-          ),
+        showAppToast(
+          context,
+          message: l10n.accountEditError,
+          variant: AppToastVariant.error,
         );
       }
     }
@@ -418,40 +424,47 @@ class EditAccountDialog extends HookConsumerWidget {
     if (confirmed != true || !context.mounted) return;
 
     final navigator = Navigator.of(context);
-    final messenger = ScaffoldMessenger.of(context);
+    Account deleted;
     try {
-      final deleted = await ref
+      deleted = await ref
           .read(accountActionsProvider.notifier)
           .deleteAccount(
             accountId: account.id?.toString() ?? '',
             budgetId: budgetId,
           );
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(l10n.accountDeleteSuccess),
-          action: SnackBarAction(
-            label: l10n.undoAction,
-            onPressed: () => _undoDelete(messenger, ref, deleted, l10n),
-          ),
-          duration: const Duration(seconds: 5),
-        ),
-      );
-      navigator.pop();
-      onDeleted?.call();
     } on Exception catch (_) {
       if (context.mounted) {
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text(l10n.accountDeleteError),
-            backgroundColor: colorScheme.error,
-          ),
+        showAppToast(
+          context,
+          message: l10n.accountDeleteError,
+          variant: AppToastVariant.error,
         );
+      }
+      return;
+    }
+
+    if (!context.mounted) return;
+
+    showAppToast(
+      context,
+      message: l10n.accountDeleteSuccess,
+      variant: AppToastVariant.success,
+      actionLabel: l10n.undoAction,
+      onAction: () => _undoDelete(context, ref, deleted, l10n),
+    );
+
+    navigator.pop();
+    if (onDeleted != null) {
+      try {
+        onDeleted!.call();
+      } on Exception catch (_) {
+        // Ignore navigation callback errors. The delete already succeeded.
       }
     }
   }
 
   void _undoDelete(
-    ScaffoldMessengerState messenger,
+    BuildContext context,
     WidgetRef ref,
     Account deleted,
     AppLocalizations l10n,
@@ -460,12 +473,20 @@ class EditAccountDialog extends HookConsumerWidget {
         .read(accountActionsProvider.notifier)
         .undoDeleteAccount(deletedAccount: deleted, budgetId: budgetId)
         .then((_) {
-          messenger.showSnackBar(
-            SnackBar(content: Text(l10n.undoDeleteSuccess)),
+          if (!context.mounted) return;
+          showAppToast(
+            context,
+            message: l10n.undoDeleteSuccess,
+            variant: AppToastVariant.success,
           );
         })
         .catchError((_) {
-          messenger.showSnackBar(SnackBar(content: Text(l10n.undoDeleteError)));
+          if (!context.mounted) return;
+          showAppToast(
+            context,
+            message: l10n.undoDeleteError,
+            variant: AppToastVariant.error,
+          );
         });
   }
 }
