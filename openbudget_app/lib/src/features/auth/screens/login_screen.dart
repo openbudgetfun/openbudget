@@ -46,9 +46,9 @@ class LoginScreen extends HookConsumerWidget {
         const bool.hasEnvironment('APPLE_SERVICE_IDENTIFIER') &&
         const bool.hasEnvironment('APPLE_REDIRECT_URI');
     final showSocialSection = showGoogleSignIn || showAppleSignIn;
-    final backgroundColor = OpenBudgetPalette.appBackgroundFor(theme);
-    final cardColor = OpenBudgetPalette.surfaceFor(theme).withAlpha(240);
-    final dividerColor = OpenBudgetPalette.dividerFor(theme);
+    final backgroundColor = OpenBudgetPalette.bgAuthFor(theme);
+    final cardColor = OpenBudgetPalette.bgSecondaryFor(theme).withAlpha(240);
+    final dividerColor = OpenBudgetPalette.borderSubtleFor(theme);
 
     return Scaffold(
       backgroundColor: backgroundColor,
@@ -82,7 +82,7 @@ class LoginScreen extends HookConsumerWidget {
                       Text(
                         'Continue building better money habits.',
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          color: OpenBudgetPalette.mutedTextFor(theme),
+                          color: OpenBudgetPalette.fgSecondaryFor(theme),
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -95,7 +95,9 @@ class LoginScreen extends HookConsumerWidget {
                           border: Border.all(color: dividerColor),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withAlpha(18),
+                              color:
+                                  OpenBudgetPalette.overlayScrimFor(theme)
+                                      .withAlpha(18),
                               blurRadius: 18,
                               offset: const Offset(0, 8),
                             ),
@@ -155,7 +157,7 @@ class LoginScreen extends HookConsumerWidget {
                                       style: theme.textTheme.bodyMedium
                                           ?.copyWith(
                                             color:
-                                                OpenBudgetPalette.mutedTextFor(
+                                                OpenBudgetPalette.fgSecondaryFor(
                                                   theme,
                                                 ),
                                           ),
@@ -208,7 +210,8 @@ class LoginScreen extends HookConsumerWidget {
                                   obscurePassword.value
                                       ? Icons.visibility_outlined
                                       : Icons.visibility_off_outlined,
-                                  color: OpenBudgetPalette.mutedTextFor(theme),
+                                  color:
+                                      OpenBudgetPalette.fgSecondaryFor(theme),
                                 ),
                               ),
                               onSubmitted: canLogin
@@ -231,11 +234,15 @@ class LoginScreen extends HookConsumerWidget {
                               style: FilledButton.styleFrom(
                                 elevation: 0,
                                 minimumSize: const Size.fromHeight(48),
-                                backgroundColor: OpenBudgetPalette.accentBlue,
-                                foregroundColor: Colors.white,
+                                backgroundColor: OpenBudgetPalette.bgBrandFor(
+                                  theme,
+                                ),
+                                foregroundColor: OpenBudgetPalette.fgOnBrandFor(
+                                  theme,
+                                ),
                                 disabledBackgroundColor: dividerColor,
                                 disabledForegroundColor:
-                                    OpenBudgetPalette.mutedTextFor(theme),
+                                    OpenBudgetPalette.fgSecondaryFor(theme),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(
                                     RadiusTokens.sm,
@@ -261,7 +268,7 @@ class LoginScreen extends HookConsumerWidget {
                               child: Text(
                                 l10n.loginForgotPassword,
                                 style: theme.textTheme.titleMedium?.copyWith(
-                                  color: OpenBudgetPalette.accentBlue,
+                                  color: OpenBudgetPalette.bgBrandFor(theme),
                                   fontWeight: FontWeight.w700,
                                 ),
                               ),
@@ -309,7 +316,7 @@ class _OpenBudgetMark extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final appIconStyle = ref.watch(appIconStyleProvider);
-    const fallbackColor = OpenBudgetPalette.accentBlue;
+    final fallbackColor = OpenBudgetPalette.bgBrandFor(theme);
     return SizedBox(
       height: 96,
       width: 96,
@@ -322,7 +329,7 @@ class _OpenBudgetMark extends HookConsumerWidget {
               color: fallbackColor.withAlpha(22),
               borderRadius: BorderRadius.circular(RadiusTokens.md),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.account_balance_wallet_outlined,
               color: fallbackColor,
               size: 44,
@@ -414,10 +421,10 @@ class _LoginTextField extends HookWidget {
       decoration: InputDecoration(
         hintText: hintText,
         hintStyle: theme.textTheme.bodyLarge?.copyWith(
-          color: OpenBudgetPalette.mutedTextFor(theme),
+          color: OpenBudgetPalette.fgSecondaryFor(theme),
         ),
         filled: true,
-        fillColor: OpenBudgetPalette.surfaceMutedFor(theme),
+        fillColor: OpenBudgetPalette.bgTertiaryFor(theme),
         suffixIcon: suffixIcon,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(RadiusTokens.sm),
@@ -429,7 +436,9 @@ class _LoginTextField extends HookWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(RadiusTokens.sm),
-          borderSide: BorderSide(color: OpenBudgetPalette.dividerFor(theme)),
+          borderSide: BorderSide(
+            color: OpenBudgetPalette.borderSubtleFor(theme),
+          ),
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: SpacingTokens.md,
