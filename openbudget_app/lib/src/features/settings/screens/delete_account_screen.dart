@@ -18,14 +18,14 @@ class DeleteAccountScreen extends HookWidget {
       backgroundColor: OpenBudgetPalette.bgPrimaryFor(theme),
       appBar: AppBar(
         backgroundColor: OpenBudgetPalette.bgPrimaryFor(theme),
-        title: const Text('Delete Account'),
+        title: Text(l10n.accountDeleteTitle),
       ),
       body: Padding(
         padding: const EdgeInsets.all(SpacingTokens.md),
         child: ListView(
           children: [
             Text(
-              'Delete Account',
+              l10n.accountDeleteTitle,
               style: theme.textTheme.headlineMedium?.copyWith(
                 fontWeight: FontWeight.w700,
               ),
@@ -49,8 +49,7 @@ class DeleteAccountScreen extends HookWidget {
                   const SizedBox(width: SpacingTokens.sm),
                   Expanded(
                     child: Text(
-                      'Account deletion is currently unavailable in this build. '
-                      'No account or plan data can be removed from this screen.',
+                      l10n.deleteAccountUnavailableNotice,
                       style: theme.textTheme.bodyLarge,
                     ),
                   ),
@@ -61,7 +60,7 @@ class DeleteAccountScreen extends HookWidget {
             Text(l10n.settingsAccountEmail, style: theme.textTheme.titleMedium),
             const SizedBox(height: SpacingTokens.md),
             Text(
-              'Delete requests are disabled until backend account deletion is available.',
+              l10n.deleteAccountUnavailableHint,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: OpenBudgetPalette.fgSecondaryFor(theme),
               ),
@@ -73,7 +72,7 @@ class DeleteAccountScreen extends HookWidget {
                 foregroundColor: theme.colorScheme.error,
               ),
               onPressed: null,
-              child: const Text('Delete Account (Unavailable)'),
+              child: Text(l10n.deleteAccountUnavailableButton),
             ),
           ],
         ),

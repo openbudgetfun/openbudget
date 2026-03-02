@@ -329,7 +329,7 @@ class AddExpenseScreen extends HookConsumerWidget {
                         const SizedBox(height: SpacingTokens.sm),
                         _ReadOnlyRow(
                           icon: Icons.account_balance_rounded,
-                          label: 'Account',
+                          label: l10n.transactionAccountLabel,
                           value:
                               budgetAsync.value?.name ?? l10n.accountListTitle,
                         ),
@@ -337,7 +337,7 @@ class AddExpenseScreen extends HookConsumerWidget {
                         ListTile(
                           contentPadding: EdgeInsets.zero,
                           leading: const Icon(Icons.calendar_today_rounded),
-                          title: const Text('Date'),
+                          title: Text(l10n.transactionDateLabel),
                           subtitle: Text(_formatDate(selectedDate.value)),
                           onTap: () async {
                             final picked = await showDatePicker(

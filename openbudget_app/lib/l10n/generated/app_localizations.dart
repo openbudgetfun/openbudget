@@ -262,6 +262,18 @@ abstract class AppLocalizations {
   /// **'Accounts'**
   String get accountListTitle;
 
+  /// No description provided for @accountListNotificationsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get accountListNotificationsTitle;
+
+  /// No description provided for @accountListNotificationsMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenBudget will notify you when you have new transactions or overspending.'**
+  String get accountListNotificationsMessage;
+
   /// No description provided for @accountLoadError.
   ///
   /// In en, this message translates to:
@@ -333,6 +345,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Credit Card'**
   String get accountTypeCreditCard;
+
+  /// No description provided for @accountTypeCryptoWallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Solana Wallet'**
+  String get accountTypeCryptoWallet;
 
   /// No description provided for @accountTypeInvestment.
   ///
@@ -3903,6 +3921,1574 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Settings'**
   String get moreSettings;
+
+  /// No description provided for @accountSettingsUnavailableHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Currently unavailable in this build.'**
+  String get accountSettingsUnavailableHint;
+
+  /// No description provided for @accountSettingsReadOnlyNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Account settings are read-only in this build. Profile, login method, and security updates are unavailable.'**
+  String get accountSettingsReadOnlyNotice;
+
+  /// No description provided for @accountSettingsProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get accountSettingsProfile;
+
+  /// No description provided for @accountSettingsFirstName.
+  ///
+  /// In en, this message translates to:
+  /// **'First Name'**
+  String get accountSettingsFirstName;
+
+  /// No description provided for @accountSettingsUnavailableFieldHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Unavailable in this build'**
+  String get accountSettingsUnavailableFieldHint;
+
+  /// No description provided for @accountSettingsSaveUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Save (Unavailable)'**
+  String get accountSettingsSaveUnavailable;
+
+  /// No description provided for @accountSettingsLoginMethods.
+  ///
+  /// In en, this message translates to:
+  /// **'Login Methods'**
+  String get accountSettingsLoginMethods;
+
+  /// No description provided for @accountSettingsEmailPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Email & Password'**
+  String get accountSettingsEmailPassword;
+
+  /// No description provided for @accountSettingsChangeEmailPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Change Email & Password'**
+  String get accountSettingsChangeEmailPassword;
+
+  /// No description provided for @accountSettingsSocialLoginUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Apple and Google login method changes are unavailable in this build.'**
+  String get accountSettingsSocialLoginUnavailable;
+
+  /// No description provided for @accountSettingsTwoStepVerification.
+  ///
+  /// In en, this message translates to:
+  /// **'Two-Step Verification'**
+  String get accountSettingsTwoStepVerification;
+
+  /// No description provided for @accountSettingsTwoStepHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Increase your OpenBudget login security by adding a second method of login.'**
+  String get accountSettingsTwoStepHint;
+
+  /// No description provided for @accountSettingsSetUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Set Up'**
+  String get accountSettingsSetUp;
+
+  /// No description provided for @accountSettingsDeleteSectionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Account deletion is currently unavailable in this build. Open this page to review status and availability.'**
+  String get accountSettingsDeleteSectionHint;
+
+  /// No description provided for @accountSettingsDeleteUnavailableHint.
+  ///
+  /// In en, this message translates to:
+  /// **'No account data can be removed from this app yet.'**
+  String get accountSettingsDeleteUnavailableHint;
+
+  /// No description provided for @settingsAccountsOverviewHint.
+  ///
+  /// In en, this message translates to:
+  /// **'View and organize every account in your budget.'**
+  String get settingsAccountsOverviewHint;
+
+  /// No description provided for @settingsAddAccountHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add manual accounts, bank links, or wallets.'**
+  String get settingsAddAccountHint;
+
+  /// No description provided for @settingsManageBankConnectionsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect Plaid banks or add Solana wallets.'**
+  String get settingsManageBankConnectionsHint;
+
+  /// No description provided for @deleteAccountUnavailableNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Account deletion is currently unavailable in this build. No account or plan data can be removed from this screen.'**
+  String get deleteAccountUnavailableNotice;
+
+  /// No description provided for @deleteAccountUnavailableHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete requests are disabled until backend account deletion is available.'**
+  String get deleteAccountUnavailableHint;
+
+  /// No description provided for @deleteAccountUnavailableButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Account (Unavailable)'**
+  String get deleteAccountUnavailableButton;
+
+  /// No description provided for @transactionCategoryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get transactionCategoryLabel;
+
+  /// No description provided for @transactionAccountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get transactionAccountLabel;
+
+  /// No description provided for @transactionDateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get transactionDateLabel;
+
+  /// No description provided for @addAccountConnectWallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect Solana Wallet'**
+  String get addAccountConnectWallet;
+
+  /// No description provided for @addAccountUnlinkedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Unlinked Account'**
+  String get addAccountUnlinkedTitle;
+
+  /// No description provided for @addAccountSelectAccountType.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Account Type'**
+  String get addAccountSelectAccountType;
+
+  /// No description provided for @addAccountSuccessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Added'**
+  String get addAccountSuccessTitle;
+
+  /// No description provided for @addAccountSuccessHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Success!'**
+  String get addAccountSuccessHeadline;
+
+  /// No description provided for @addAccountSuccessAddAnother.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Another'**
+  String get addAccountSuccessAddAnother;
+
+  /// No description provided for @addAccountSelectTypePlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Select account type...'**
+  String get addAccountSelectTypePlaceholder;
+
+  /// No description provided for @addAccountLoadingInstitutions.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading institutions...'**
+  String get addAccountLoadingInstitutions;
+
+  /// No description provided for @addAccountConnectWalletButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect Wallet'**
+  String get addAccountConnectWalletButton;
+
+  /// No description provided for @dialogNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get dialogNext;
+
+  /// No description provided for @loadingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading...'**
+  String get loadingTitle;
+
+  /// No description provided for @loadingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'This might take a few seconds.'**
+  String get loadingHint;
+
+  /// No description provided for @addAccountPopularOptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Popular Options'**
+  String get addAccountPopularOptions;
+
+  /// No description provided for @searchResults.
+  ///
+  /// In en, this message translates to:
+  /// **'Search Results'**
+  String get searchResults;
+
+  /// No description provided for @addAccountSearchForBank.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for your bank'**
+  String get addAccountSearchForBank;
+
+  /// No description provided for @addAccountSearchByInstitutionName.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by institution name'**
+  String get addAccountSearchByInstitutionName;
+
+  /// No description provided for @addAccountSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by institution name or web address (URL)'**
+  String get addAccountSearchHint;
+
+  /// No description provided for @addAccountNoInstitutionsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No institutions found. Try another name or add an unlinked account.'**
+  String get addAccountNoInstitutionsFound;
+
+  /// No description provided for @orText.
+  ///
+  /// In en, this message translates to:
+  /// **'or'**
+  String get orText;
+
+  /// No description provided for @addAccountAddUnlinked.
+  ///
+  /// In en, this message translates to:
+  /// **'Add an Unlinked Account'**
+  String get addAccountAddUnlinked;
+
+  /// No description provided for @addAccountWalletConnectionDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect a Solana wallet in read-only mode. OpenBudget imports native SPL balances and keeps fiat valuation synced.'**
+  String get addAccountWalletConnectionDescription;
+
+  /// No description provided for @addAccountWalletAddressLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet Address'**
+  String get addAccountWalletAddressLabel;
+
+  /// No description provided for @addAccountWalletAddressHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste Solana wallet address'**
+  String get addAccountWalletAddressHint;
+
+  /// No description provided for @addAccountWalletLabelOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet Label (optional)'**
+  String get addAccountWalletLabelOptional;
+
+  /// No description provided for @addAccountWalletLabelHint.
+  ///
+  /// In en, this message translates to:
+  /// **'My Solana Wallet'**
+  String get addAccountWalletLabelHint;
+
+  /// No description provided for @addAccountWalletIncludeInBudgetTotals.
+  ///
+  /// In en, this message translates to:
+  /// **'Include in budget totals'**
+  String get addAccountWalletIncludeInBudgetTotals;
+
+  /// No description provided for @addAccountWalletIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your Solana wallet to track transfers, swaps, and holdings in one place.'**
+  String get addAccountWalletIntro;
+
+  /// No description provided for @addAccountUnlinkedIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank connections are currently unavailable in this build, so let\'s set up an unlinked account.'**
+  String get addAccountUnlinkedIntro;
+
+  /// No description provided for @addAccountNicknameQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Give it a nickname'**
+  String get addAccountNicknameQuestion;
+
+  /// No description provided for @addAccountNicknameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter nickname'**
+  String get addAccountNicknameHint;
+
+  /// No description provided for @addAccountTypeQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'What type of account are you adding?'**
+  String get addAccountTypeQuestion;
+
+  /// No description provided for @addAccountWalletAutoSyncHint.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenBudget will auto-sync transactions and holdings after wallet setup. You can tag and categorize activity in account details.'**
+  String get addAccountWalletAutoSyncHint;
+
+  /// No description provided for @addAccountWalletAddressQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'What is your Solana wallet address?'**
+  String get addAccountWalletAddressQuestion;
+
+  /// No description provided for @addAccountWalletAddressExample.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 5xQf...w8bP'**
+  String get addAccountWalletAddressExample;
+
+  /// No description provided for @addAccountWalletPublicAddressOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Only public wallet addresses are supported.'**
+  String get addAccountWalletPublicAddressOnly;
+
+  /// No description provided for @addAccountBalanceQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'What is your current account balance?'**
+  String get addAccountBalanceQuestion;
+
+  /// No description provided for @addAccountBalanceExample.
+  ///
+  /// In en, this message translates to:
+  /// **'5000'**
+  String get addAccountBalanceExample;
+
+  /// No description provided for @addAccountSectionCashAccounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash Accounts'**
+  String get addAccountSectionCashAccounts;
+
+  /// No description provided for @addAccountSectionCashAccountsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash accounts hold funds you already own and can spend immediately.'**
+  String get addAccountSectionCashAccountsHint;
+
+  /// No description provided for @addAccountSectionCreditAccounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Credit Accounts'**
+  String get addAccountSectionCreditAccounts;
+
+  /// No description provided for @addAccountSectionCreditAccountsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'A credit account lets you spend borrowed money that you\'ll need to repay later, often with interest.'**
+  String get addAccountSectionCreditAccountsHint;
+
+  /// No description provided for @addAccountTypeLineOfCredit.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Account Type Line Of Credit'**
+  String get addAccountTypeLineOfCredit;
+
+  /// No description provided for @addAccountSectionMortgagesAndLoans.
+  ///
+  /// In en, this message translates to:
+  /// **'Mortgages and Loans'**
+  String get addAccountSectionMortgagesAndLoans;
+
+  /// No description provided for @addAccountSectionMortgagesAndLoansHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Accounts that have an outstanding balance you\'re currently paying off, and aren\'t spending from.'**
+  String get addAccountSectionMortgagesAndLoansHint;
+
+  /// No description provided for @addAccountTypeMortgage.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Account Type Mortgage'**
+  String get addAccountTypeMortgage;
+
+  /// No description provided for @addAccountTypeAutoLoan.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Account Type Auto Loan'**
+  String get addAccountTypeAutoLoan;
+
+  /// No description provided for @addAccountTypeStudentLoan.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Account Type Student Loan'**
+  String get addAccountTypeStudentLoan;
+
+  /// No description provided for @addAccountTypePersonalLoan.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Account Type Personal Loan'**
+  String get addAccountTypePersonalLoan;
+
+  /// No description provided for @addAccountTypeMedicalDebt.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Account Type Medical Debt'**
+  String get addAccountTypeMedicalDebt;
+
+  /// No description provided for @addAccountTypeOtherDebt.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Account Type Other Debt'**
+  String get addAccountTypeOtherDebt;
+
+  /// No description provided for @addAccountSectionTrackingAccounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Tracking Accounts'**
+  String get addAccountSectionTrackingAccounts;
+
+  /// No description provided for @addAccountSectionTrackingAccountsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Accounts that hold money you don\'t plan to spend soon, such as investments or loans.'**
+  String get addAccountSectionTrackingAccountsHint;
+
+  /// No description provided for @addAccountTypeAssetExample.
+  ///
+  /// In en, this message translates to:
+  /// **'Asset (e.g. Investment)'**
+  String get addAccountTypeAssetExample;
+
+  /// No description provided for @addAccountTypeLiability.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Account Type Liability'**
+  String get addAccountTypeLiability;
+
+  /// No description provided for @addAccountSectionDigitalAssets.
+  ///
+  /// In en, this message translates to:
+  /// **'Digital Assets'**
+  String get addAccountSectionDigitalAssets;
+
+  /// No description provided for @addAccountSectionDigitalAssetsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Track a Solana wallet with automatic transaction history and asset valuations.'**
+  String get addAccountSectionDigitalAssetsHint;
+
+  /// No description provided for @addAccountTypeSolanaWallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Account Type Solana Wallet'**
+  String get addAccountTypeSolanaWallet;
+
+  /// No description provided for @accountEditNicknameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Nickname'**
+  String get accountEditNicknameLabel;
+
+  /// No description provided for @accountEditNicknameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily'**
+  String get accountEditNicknameHint;
+
+  /// No description provided for @accountEditNotesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Notes'**
+  String get accountEditNotesLabel;
+
+  /// No description provided for @accountEditNotesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a memo...'**
+  String get accountEditNotesHint;
+
+  /// No description provided for @accountEditAdjustmentHint.
+  ///
+  /// In en, this message translates to:
+  /// **'An adjustment transaction will be created automatically if you change this amount.'**
+  String get accountEditAdjustmentHint;
+
+  /// No description provided for @accountEditBankConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank Connection'**
+  String get accountEditBankConnection;
+
+  /// No description provided for @accountEditLinkAccountUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Link an Account (Unavailable)'**
+  String get accountEditLinkAccountUnavailable;
+
+  /// No description provided for @accountEditLinkAccountUnavailableHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank connections are currently unavailable in this build. Add or manage unlinked accounts instead.'**
+  String get accountEditLinkAccountUnavailableHint;
+
+  /// No description provided for @accountListAllTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'All transactions'**
+  String get accountListAllTransactions;
+
+  /// No description provided for @accountDetailBudgetAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget Account'**
+  String get accountDetailBudgetAccount;
+
+  /// No description provided for @accountDetailTrackingAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Tracking Account'**
+  String get accountDetailTrackingAccount;
+
+  /// No description provided for @accountDetailSelect.
+  ///
+  /// In en, this message translates to:
+  /// **'Select'**
+  String get accountDetailSelect;
+
+  /// No description provided for @accountDetailHideReconciled.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide Reconciled'**
+  String get accountDetailHideReconciled;
+
+  /// No description provided for @accountDetailLinkAccountUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Link Account (Unavailable)'**
+  String get accountDetailLinkAccountUnavailable;
+
+  /// No description provided for @accountDetailLoanOverview.
+  ///
+  /// In en, this message translates to:
+  /// **'Overview'**
+  String get accountDetailLoanOverview;
+
+  /// No description provided for @accountDetailLoanActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity'**
+  String get accountDetailLoanActivity;
+
+  /// No description provided for @accountDetailLoanBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance'**
+  String get accountDetailLoanBalance;
+
+  /// No description provided for @accountDetailLoanPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid'**
+  String get accountDetailLoanPaid;
+
+  /// No description provided for @accountDetailLoanTotalBorrowed.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Borrowed'**
+  String get accountDetailLoanTotalBorrowed;
+
+  /// No description provided for @accountDetailLoanPayoffOverview.
+  ///
+  /// In en, this message translates to:
+  /// **'Loan Payoff Overview'**
+  String get accountDetailLoanPayoffOverview;
+
+  /// No description provided for @accountDetailLoanOneMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Detail Loan One Month'**
+  String get accountDetailLoanOneMonth;
+
+  /// No description provided for @accountDetailLoanMonthlyTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly Target'**
+  String get accountDetailLoanMonthlyTarget;
+
+  /// No description provided for @accountDetailLoanDueEvery.
+  ///
+  /// In en, this message translates to:
+  /// **'Due Every'**
+  String get accountDetailLoanDueEvery;
+
+  /// No description provided for @accountDetailLoanMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get accountDetailLoanMonthly;
+
+  /// No description provided for @accountDetailLoanDebtFreeDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Debt Free Date'**
+  String get accountDetailLoanDebtFreeDate;
+
+  /// No description provided for @accountDetailLoanCreateTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Target'**
+  String get accountDetailLoanCreateTarget;
+
+  /// No description provided for @accountDetailLoanEditTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Target'**
+  String get accountDetailLoanEditTarget;
+
+  /// No description provided for @accountDetailLoanDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Loan Details'**
+  String get accountDetailLoanDetails;
+
+  /// No description provided for @accountDetailLoanInterestRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Interest Rate'**
+  String get accountDetailLoanInterestRate;
+
+  /// No description provided for @accountDetailLoanInterestRateValue.
+  ///
+  /// In en, this message translates to:
+  /// **'3%'**
+  String get accountDetailLoanInterestRateValue;
+
+  /// No description provided for @accountDetailLoanMonthlyMinimum.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly Minimum'**
+  String get accountDetailLoanMonthlyMinimum;
+
+  /// No description provided for @accountDetailNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Account not found.'**
+  String get accountDetailNotFound;
+
+  /// No description provided for @accountDetailWalletLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load wallet metadata.'**
+  String get accountDetailWalletLoadError;
+
+  /// No description provided for @accountDetailWalletNotAttached.
+  ///
+  /// In en, this message translates to:
+  /// **'No Solana wallet is attached to this account yet.'**
+  String get accountDetailWalletNotAttached;
+
+  /// No description provided for @accountDetailWalletSyncFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet sync failed. Check server logs.'**
+  String get accountDetailWalletSyncFailed;
+
+  /// No description provided for @accountDetailWalletSyncing.
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing'**
+  String get accountDetailWalletSyncing;
+
+  /// No description provided for @accountDetailWalletSync.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync'**
+  String get accountDetailWalletSync;
+
+  /// No description provided for @accountDetailWalletEstimatedValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated Value'**
+  String get accountDetailWalletEstimatedValue;
+
+  /// No description provided for @accountDetailWalletAddressCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet address copied.'**
+  String get accountDetailWalletAddressCopied;
+
+  /// No description provided for @accountDetailWalletCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get accountDetailWalletCopy;
+
+  /// No description provided for @accountDetailWalletFungibleAssets.
+  ///
+  /// In en, this message translates to:
+  /// **'Fungible Assets'**
+  String get accountDetailWalletFungibleAssets;
+
+  /// No description provided for @accountDetailWalletNftAssets.
+  ///
+  /// In en, this message translates to:
+  /// **'NFT Assets'**
+  String get accountDetailWalletNftAssets;
+
+  /// No description provided for @accountDetailWalletValuationCoverage.
+  ///
+  /// In en, this message translates to:
+  /// **'Valuation Coverage'**
+  String get accountDetailWalletValuationCoverage;
+
+  /// No description provided for @accountDetailWalletUnpricedAssets.
+  ///
+  /// In en, this message translates to:
+  /// **'Unpriced Assets'**
+  String get accountDetailWalletUnpricedAssets;
+
+  /// No description provided for @accountDetailWalletUnrealizedPnl.
+  ///
+  /// In en, this message translates to:
+  /// **'Unrealized P&L'**
+  String get accountDetailWalletUnrealizedPnl;
+
+  /// No description provided for @accountDetailWalletRealizedPnl.
+  ///
+  /// In en, this message translates to:
+  /// **'Realized P&L'**
+  String get accountDetailWalletRealizedPnl;
+
+  /// No description provided for @accountDetailWalletTaggedTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'Tagged Transactions'**
+  String get accountDetailWalletTaggedTransactions;
+
+  /// No description provided for @accountDetailWalletLastActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Last Activity'**
+  String get accountDetailWalletLastActivity;
+
+  /// No description provided for @accountDetailWalletNoActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'No activity'**
+  String get accountDetailWalletNoActivity;
+
+  /// No description provided for @accountDetailWalletTaxYearPnl.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax Year P&L'**
+  String get accountDetailWalletTaxYearPnl;
+
+  /// No description provided for @accountDetailWalletEstimated.
+  ///
+  /// In en, this message translates to:
+  /// **'(estimated)'**
+  String get accountDetailWalletEstimated;
+
+  /// No description provided for @accountDetailWalletTaxYearLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load tax-year summary.'**
+  String get accountDetailWalletTaxYearLoadError;
+
+  /// No description provided for @accountDetailWalletNoDisposalsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No disposals yet'**
+  String get accountDetailWalletNoDisposalsYet;
+
+  /// No description provided for @accountDetailWalletNoDisposalsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax-year summaries will appear after taxable disposal activity is detected.'**
+  String get accountDetailWalletNoDisposalsHint;
+
+  /// No description provided for @accountDetailWalletHoldings.
+  ///
+  /// In en, this message translates to:
+  /// **'Holdings'**
+  String get accountDetailWalletHoldings;
+
+  /// No description provided for @accountDetailWalletHoldingsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Token balances with current valuation and detected programs.'**
+  String get accountDetailWalletHoldingsHint;
+
+  /// No description provided for @accountDetailWalletHideDustAssets.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide dust assets (< \$0.01)'**
+  String get accountDetailWalletHideDustAssets;
+
+  /// No description provided for @accountDetailWalletHoldingsLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load holdings.'**
+  String get accountDetailWalletHoldingsLoadError;
+
+  /// No description provided for @accountDetailWalletNoHoldingsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No holdings found'**
+  String get accountDetailWalletNoHoldingsFound;
+
+  /// No description provided for @accountDetailWalletNoHoldingsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Run a sync to fetch tokens and NFTs for this wallet.'**
+  String get accountDetailWalletNoHoldingsHint;
+
+  /// No description provided for @accountDetailWalletOnlyDustAssets.
+  ///
+  /// In en, this message translates to:
+  /// **'Only dust assets found'**
+  String get accountDetailWalletOnlyDustAssets;
+
+  /// No description provided for @accountDetailWalletOnlyDustAssetsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn off the dust filter to inspect very small-value token balances.'**
+  String get accountDetailWalletOnlyDustAssetsHint;
+
+  /// No description provided for @accountDetailWalletTransactionHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction History'**
+  String get accountDetailWalletTransactionHistory;
+
+  /// No description provided for @accountDetailWalletTransactionHistoryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Parsed activity with program context and editable labels.'**
+  String get accountDetailWalletTransactionHistoryHint;
+
+  /// No description provided for @accountDetailWalletTransactionSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search description, category, tags, memo'**
+  String get accountDetailWalletTransactionSearchHint;
+
+  /// No description provided for @accountDetailWalletNeedsCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs category'**
+  String get accountDetailWalletNeedsCategory;
+
+  /// No description provided for @accountDetailWalletTransactionsLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load transactions.'**
+  String get accountDetailWalletTransactionsLoadError;
+
+  /// No description provided for @accountDetailWalletNoTransactionsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No transactions yet'**
+  String get accountDetailWalletNoTransactionsYet;
+
+  /// No description provided for @accountDetailWalletNoTransactionsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Run a sync to import transaction history from the wallet.'**
+  String get accountDetailWalletNoTransactionsHint;
+
+  /// No description provided for @accountDetailWalletNoTransactionsMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'No transactions match filters'**
+  String get accountDetailWalletNoTransactionsMatch;
+
+  /// No description provided for @accountDetailWalletNoTransactionsMatchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust search terms or disable the category filter.'**
+  String get accountDetailWalletNoTransactionsMatchHint;
+
+  /// No description provided for @accountDetailWalletEditMetadataTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Transaction Metadata'**
+  String get accountDetailWalletEditMetadataTitle;
+
+  /// No description provided for @accountDetailWalletTagsCommaSeparated.
+  ///
+  /// In en, this message translates to:
+  /// **'Tags (comma separated)'**
+  String get accountDetailWalletTagsCommaSeparated;
+
+  /// No description provided for @accountDetailWalletMetadataUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction metadata updated.'**
+  String get accountDetailWalletMetadataUpdated;
+
+  /// No description provided for @accountDetailWalletMetadataUpdateError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not update transaction metadata.'**
+  String get accountDetailWalletMetadataUpdateError;
+
+  /// No description provided for @accountDetailWalletNft.
+  ///
+  /// In en, this message translates to:
+  /// **'NFT'**
+  String get accountDetailWalletNft;
+
+  /// No description provided for @accountDetailWalletStalePrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Stale price'**
+  String get accountDetailWalletStalePrice;
+
+  /// No description provided for @accountDetailWalletUnpriced.
+  ///
+  /// In en, this message translates to:
+  /// **'Unpriced'**
+  String get accountDetailWalletUnpriced;
+
+  /// No description provided for @accountDetailWalletNoValuationSource.
+  ///
+  /// In en, this message translates to:
+  /// **'No valuation source'**
+  String get accountDetailWalletNoValuationSource;
+
+  /// No description provided for @accountDetailWalletEditMetadataTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit metadata'**
+  String get accountDetailWalletEditMetadataTooltip;
+
+  /// No description provided for @accountDetailLoanTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Loan Target'**
+  String get accountDetailLoanTarget;
+
+  /// No description provided for @accountDetailLoanMonthlyPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly payment'**
+  String get accountDetailLoanMonthlyPayment;
+
+  /// No description provided for @accountDetailReconcileMatchQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Does this match your bank balance?'**
+  String get accountDetailReconcileMatchQuestion;
+
+  /// No description provided for @dialogYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes'**
+  String get dialogYes;
+
+  /// No description provided for @dialogNo.
+  ///
+  /// In en, this message translates to:
+  /// **'No'**
+  String get dialogNo;
+
+  /// No description provided for @spendingByPayeeMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get spendingByPayeeMonth;
+
+  /// No description provided for @spendingByPayeePreset.
+  ///
+  /// In en, this message translates to:
+  /// **'Preset'**
+  String get spendingByPayeePreset;
+
+  /// No description provided for @spendingByPayeePresetRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Preset Range'**
+  String get spendingByPayeePresetRange;
+
+  /// No description provided for @editPlanCostToBeMe.
+  ///
+  /// In en, this message translates to:
+  /// **'Cost to Be Me'**
+  String get editPlanCostToBeMe;
+
+  /// No description provided for @editPlanMonthlyTargets.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly Targets'**
+  String get editPlanMonthlyTargets;
+
+  /// No description provided for @editPlanMonthlyIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly Income'**
+  String get editPlanMonthlyIncome;
+
+  /// No description provided for @editPlanCostPromptTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What does it cost to be you?'**
+  String get editPlanCostPromptTitle;
+
+  /// No description provided for @editPlanCostPromptSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your targets add up to one simple number: everything you plan to spend and save each month.'**
+  String get editPlanCostPromptSubtitle;
+
+  /// No description provided for @editPlanNewGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'New Group'**
+  String get editPlanNewGroup;
+
+  /// No description provided for @editPlanReorder.
+  ///
+  /// In en, this message translates to:
+  /// **'Reorder'**
+  String get editPlanReorder;
+
+  /// No description provided for @editPlanDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get editPlanDetails;
+
+  /// No description provided for @editPlanCategoryGroupName.
+  ///
+  /// In en, this message translates to:
+  /// **'Category Group Name'**
+  String get editPlanCategoryGroupName;
+
+  /// No description provided for @editPlanHide.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide'**
+  String get editPlanHide;
+
+  /// No description provided for @editPlanDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get editPlanDelete;
+
+  /// No description provided for @editPlanHideGroupDialogDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Hidden categories are moved to a group at the bottom of your plan.'**
+  String get editPlanHideGroupDialogDescription;
+
+  /// No description provided for @editPlanHideGroupAndCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide Group and Categories'**
+  String get editPlanHideGroupAndCategories;
+
+  /// No description provided for @editPlanCategoryGroupHidden.
+  ///
+  /// In en, this message translates to:
+  /// **'Category group hidden.'**
+  String get editPlanCategoryGroupHidden;
+
+  /// No description provided for @editPlanHideGroupError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to hide category group.'**
+  String get editPlanHideGroupError;
+
+  /// No description provided for @editPlanDeleteGroupError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to delete category group.'**
+  String get editPlanDeleteGroupError;
+
+  /// No description provided for @editPlanMoveUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Move up'**
+  String get editPlanMoveUp;
+
+  /// No description provided for @editPlanMoveDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Move down'**
+  String get editPlanMoveDown;
+
+  /// No description provided for @editPlanAddEnvelope.
+  ///
+  /// In en, this message translates to:
+  /// **'Add envelope'**
+  String get editPlanAddEnvelope;
+
+  /// No description provided for @editPlanGroupDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Group details'**
+  String get editPlanGroupDetails;
+
+  /// No description provided for @editPlanAddTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Target'**
+  String get editPlanAddTarget;
+
+  /// No description provided for @planTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan'**
+  String get planTitle;
+
+  /// No description provided for @editPlanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Plan'**
+  String get editPlanTitle;
+
+  /// No description provided for @budgetDetailCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Categories'**
+  String get budgetDetailCategories;
+
+  /// No description provided for @budgetDetailSpotlight.
+  ///
+  /// In en, this message translates to:
+  /// **'Spotlight'**
+  String get budgetDetailSpotlight;
+
+  /// No description provided for @budgetDetailCoverOverspendingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cover Overspending'**
+  String get budgetDetailCoverOverspendingTitle;
+
+  /// No description provided for @budgetDetailAllOverspendingCovered.
+  ///
+  /// In en, this message translates to:
+  /// **'All overspending is covered.'**
+  String get budgetDetailAllOverspendingCovered;
+
+  /// No description provided for @budgetDetailCoverButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Cover'**
+  String get budgetDetailCoverButton;
+
+  /// No description provided for @budgetDetailCovering.
+  ///
+  /// In en, this message translates to:
+  /// **'Covering...'**
+  String get budgetDetailCovering;
+
+  /// No description provided for @reviewTransactionsUpdateCategoryError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not update transaction category.'**
+  String get reviewTransactionsUpdateCategoryError;
+
+  /// No description provided for @reviewTransactionsDeleteSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete selected'**
+  String get reviewTransactionsDeleteSelected;
+
+  /// No description provided for @reviewTransactionsNoTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'No Transactions'**
+  String get reviewTransactionsNoTransactions;
+
+  /// No description provided for @reviewTransactionsSingleNewTransaction.
+  ///
+  /// In en, this message translates to:
+  /// **'1 New Transaction'**
+  String get reviewTransactionsSingleNewTransaction;
+
+  /// No description provided for @reviewTransactionsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve or categorize new transactions'**
+  String get reviewTransactionsSubtitle;
+
+  /// No description provided for @reviewTransactionsAllDoneTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re All Done!'**
+  String get reviewTransactionsAllDoneTitle;
+
+  /// No description provided for @reviewTransactionsAllDoneSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Return to Accounts to see all of your transactions.'**
+  String get reviewTransactionsAllDoneSubtitle;
+
+  /// No description provided for @reviewTransactionsUncategorized.
+  ///
+  /// In en, this message translates to:
+  /// **'Uncategorized'**
+  String get reviewTransactionsUncategorized;
+
+  /// No description provided for @reviewTransactionsSelectCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Select category'**
+  String get reviewTransactionsSelectCategory;
+
+  /// No description provided for @reviewTransactionsApprove.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve'**
+  String get reviewTransactionsApprove;
+
+  /// No description provided for @reviewTransactionsCategorize.
+  ///
+  /// In en, this message translates to:
+  /// **'Categorize'**
+  String get reviewTransactionsCategorize;
+
+  /// No description provided for @reviewTransactionsClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get reviewTransactionsClear;
+
+  /// No description provided for @moreTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get moreTitle;
+
+  /// No description provided for @setGoalCadenceWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly'**
+  String get setGoalCadenceWeekly;
+
+  /// No description provided for @setGoalCadenceMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get setGoalCadenceMonthly;
+
+  /// No description provided for @setGoalCadenceYearly.
+  ///
+  /// In en, this message translates to:
+  /// **'Yearly'**
+  String get setGoalCadenceYearly;
+
+  /// No description provided for @setGoalCadenceCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get setGoalCadenceCustom;
+
+  /// No description provided for @setGoalAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get setGoalAmount;
+
+  /// No description provided for @setGoalINeed.
+  ///
+  /// In en, this message translates to:
+  /// **'I need'**
+  String get setGoalINeed;
+
+  /// No description provided for @setGoalBy.
+  ///
+  /// In en, this message translates to:
+  /// **'By'**
+  String get setGoalBy;
+
+  /// No description provided for @setGoalLastDayOfMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Last Day of the Month'**
+  String get setGoalLastDayOfMonth;
+
+  /// No description provided for @setGoalNextMonthINeedTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Next month I want to'**
+  String get setGoalNextMonthINeedTo;
+
+  /// No description provided for @setGoalIWantTo.
+  ///
+  /// In en, this message translates to:
+  /// **'I want to'**
+  String get setGoalIWantTo;
+
+  /// No description provided for @setGoalDueOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Due on'**
+  String get setGoalDueOn;
+
+  /// No description provided for @setGoalRepeats.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeats'**
+  String get setGoalRepeats;
+
+  /// No description provided for @setGoalEvery.
+  ///
+  /// In en, this message translates to:
+  /// **'Every'**
+  String get setGoalEvery;
+
+  /// No description provided for @setGoalMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get setGoalMonth;
+
+  /// No description provided for @setGoalYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Year'**
+  String get setGoalYear;
+
+  /// No description provided for @setGoalSaveTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Target'**
+  String get setGoalSaveTarget;
+
+  /// No description provided for @settingsPlanCurrencyDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan currency: {currencyCode}'**
+  String settingsPlanCurrencyDetail(String currencyCode);
+
+  /// No description provided for @settingsDisplayCurrencyDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Display currency: {currencyCode}'**
+  String settingsDisplayCurrencyDetail(String currencyCode);
+
+  /// No description provided for @settingsOwner.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner: {ownerLabel}'**
+  String settingsOwner(String ownerLabel);
+
+  /// No description provided for @settingsUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated: {lastUpdatedLabel}'**
+  String settingsUpdated(String lastUpdatedLabel);
+
+  /// No description provided for @addAccountSuccessMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'{accountTypeLabel} account added to OpenBudget.'**
+  String addAccountSuccessMessage(String accountTypeLabel);
+
+  /// No description provided for @accountDetailLoanPaidOff.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}%\\nPaid Off'**
+  String accountDetailLoanPaidOff(String percent);
+
+  /// No description provided for @accountDetailLoanPayoffEstimate.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ll pay off your loan in {duration} if you pay the minimum every month.'**
+  String accountDetailLoanPayoffEstimate(String duration);
+
+  /// No description provided for @accountDetailLoanManyMonths.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} months'**
+  String accountDetailLoanManyMonths(int count);
+
+  /// No description provided for @accountDetailLoanInMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'In {month}'**
+  String accountDetailLoanInMonth(String month);
+
+  /// No description provided for @accountDetailWalletSyncSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Synced {transactions} transactions and {holdings} holdings. Coverage {coveredHoldings}/{holdingCount}{coveragePercentText}, {unpricedHoldings} unpriced. NFTs {coveredNfts}/{nftCount}, {unpricedNfts} unpriced.'**
+  String accountDetailWalletSyncSummary(
+    int transactions,
+    int holdings,
+    int coveredHoldings,
+    String coveragePercentText,
+    int unpricedHoldings,
+    int coveredNfts,
+    int nftCount,
+    int unpricedNfts,
+    Object holdingCount,
+  );
+
+  /// No description provided for @accountDetailWalletTxCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{transactions} tx'**
+  String accountDetailWalletTxCount(int transactions);
+
+  /// No description provided for @accountDetailWalletSuggestedCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggested: {category}'**
+  String accountDetailWalletSuggestedCategory(String category);
+
+  /// No description provided for @accountDetailWalletUnits.
+  ///
+  /// In en, this message translates to:
+  /// **'{units} units'**
+  String accountDetailWalletUnits(String units);
+
+  /// No description provided for @accountDetailWalletConfidence.
+  ///
+  /// In en, this message translates to:
+  /// **'{confidence} confidence'**
+  String accountDetailWalletConfidence(String confidence);
+
+  /// No description provided for @accountDetailWalletBasis.
+  ///
+  /// In en, this message translates to:
+  /// **'Basis {amount}'**
+  String accountDetailWalletBasis(String amount);
+
+  /// No description provided for @accountDetailWalletPnl.
+  ///
+  /// In en, this message translates to:
+  /// **'P&L {value}{suffix}'**
+  String accountDetailWalletPnl(String value, String suffix);
+
+  /// No description provided for @accountDetailWalletPricePerToken.
+  ///
+  /// In en, this message translates to:
+  /// **'@ {amount}'**
+  String accountDetailWalletPricePerToken(String amount);
+
+  /// No description provided for @accountDetailWalletPnlValue.
+  ///
+  /// In en, this message translates to:
+  /// **'P&L {value}'**
+  String accountDetailWalletPnlValue(String value);
+
+  /// No description provided for @accountDetailWalletTaxYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax {year}'**
+  String accountDetailWalletTaxYear(int year);
+
+  /// No description provided for @accountDetailReconcileMatchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your cleared balance in OpenBudget is {balance}'**
+  String accountDetailReconcileMatchTitle(String balance);
+
+  /// No description provided for @spendingByPayeeLastMonths.
+  ///
+  /// In en, this message translates to:
+  /// **'Last {count} Months'**
+  String spendingByPayeeLastMonths(int count);
+
+  /// No description provided for @editPlanEnvelopeCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 envelope} other{{count} envelopes}}'**
+  String editPlanEnvelopeCount(int count);
+
+  /// No description provided for @editPlanDeleteCategoryGroupConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete category group \"{groupName}\"?\\n\\n{envelopeSummary}\\n{allocated} allocated'**
+  String editPlanDeleteCategoryGroupConfirm(
+    String groupName,
+    String envelopeSummary,
+    String allocated,
+  );
+
+  /// No description provided for @budgetDetailNeedsToCover.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs {amount} to get back to zero'**
+  String budgetDetailNeedsToCover(String amount);
+
+  /// No description provided for @budgetDetailCoverOverspent.
+  ///
+  /// In en, this message translates to:
+  /// **'Cover {count} overspent {count, plural, =1{Category} other{Categories}}'**
+  String budgetDetailCoverOverspent(int count);
+
+  /// No description provided for @reviewTransactionsSelectedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Selected'**
+  String reviewTransactionsSelectedTitle(int count);
+
+  /// No description provided for @reviewTransactionsNewTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} New Transactions'**
+  String reviewTransactionsNewTransactions(int count);
+
+  /// No description provided for @reviewTransactionsSelectedAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected • {amount}'**
+  String reviewTransactionsSelectedAmount(int count, String amount);
+
+  /// No description provided for @setGoalSetAsideAnother.
+  ///
+  /// In en, this message translates to:
+  /// **'Set aside another {amount}'**
+  String setGoalSetAsideAnother(String amount);
+
+  /// No description provided for @routerPageNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Page not found: {error}'**
+  String routerPageNotFound(String error);
+
+  /// No description provided for @editPlanLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load plan setup.'**
+  String get editPlanLoadError;
+
+  /// No description provided for @budgetDetailCoverOverspendingError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not cover overspending.'**
+  String get budgetDetailCoverOverspendingError;
 }
 
 class _AppLocalizationsDelegate

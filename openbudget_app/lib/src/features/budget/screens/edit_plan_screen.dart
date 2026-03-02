@@ -37,7 +37,9 @@ class EditPlanScreen extends HookConsumerWidget {
       error: (_, _) => Scaffold(
         backgroundColor: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
         appBar: _EditPlanAppBar(budgetId: budgetId),
-        body: const Center(child: Text('Failed to load plan setup.')),
+        body: Center(
+          child: Text(AppLocalizations.of(context).editPlanLoadError),
+        ),
       ),
       data: (summary) {
         final goalsMap = goalsAsync.asData?.value ?? <String, EnvelopeGoal>{};
@@ -144,7 +146,7 @@ class _EditPlanContent extends HookConsumerWidget {
                 ),
                 const SizedBox(height: SpacingTokens.xs),
                 Text(
-                  'Cost to Be Me',
+                  l10n.editPlanCostToBeMe,
                   style: theme.textTheme.titleLarge?.copyWith(
                     color: OpenBudgetPalette.fgOnBrandFor(
                       Theme.of(context),
@@ -189,7 +191,7 @@ class _EditPlanContent extends HookConsumerWidget {
                           Row(
                             children: [
                               Text(
-                                'Monthly Targets',
+                                l10n.editPlanMonthlyTargets,
                                 style: theme.textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -229,7 +231,7 @@ class _EditPlanContent extends HookConsumerWidget {
                           Row(
                             children: [
                               Text(
-                                'Monthly Income',
+                                l10n.editPlanMonthlyIncome,
                                 style: theme.textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -316,15 +318,14 @@ class _EditPlanContent extends HookConsumerWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'What does it cost to be you?',
+                                  l10n.editPlanCostPromptTitle,
                                   style: theme.textTheme.titleLarge?.copyWith(
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),
                                 const SizedBox(height: SpacingTokens.xs),
                                 Text(
-                                  'Your targets add up to one simple number: '
-                                  'everything you plan to spend and save each month.',
+                                  l10n.editPlanCostPromptSubtitle,
                                   style: theme.textTheme.bodyMedium?.copyWith(
                                     color: OpenBudgetPalette.fgSecondaryFor(
                                       Theme.of(context),
@@ -348,7 +349,7 @@ class _EditPlanContent extends HookConsumerWidget {
                             summary.categories.length,
                           ),
                           icon: const Icon(Icons.create_new_folder_rounded),
-                          label: const Text('New Group'),
+                          label: Text(l10n.editPlanNewGroup),
                           style: FilledButton.styleFrom(
                             backgroundColor: OpenBudgetPalette.bgTertiaryFor(
                               Theme.of(context),
@@ -376,7 +377,7 @@ class _EditPlanContent extends HookConsumerWidget {
                           label: Text(
                             isReordering.value
                                 ? l10n.budgetReorderDone
-                                : 'Reorder',
+                                : l10n.editPlanReorder,
                           ),
                           style: FilledButton.styleFrom(
                             backgroundColor: OpenBudgetPalette.bgTertiaryFor(
@@ -533,6 +534,7 @@ class _EditPlanContent extends HookConsumerWidget {
     required WidgetRef ref,
     required CategoryWithEnvelopes categoryWithEnvelopes,
   }) async {
+    final l10n = AppLocalizations.of(context);
     final category = categoryWithEnvelopes.category;
     final theme = Theme.of(context);
     await showModalBottomSheet<void>(
@@ -555,7 +557,7 @@ class _EditPlanContent extends HookConsumerWidget {
                 Row(
                   children: [
                     Text(
-                      'Details',
+                      l10n.editPlanDetails,
                       style: theme.textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
@@ -569,7 +571,7 @@ class _EditPlanContent extends HookConsumerWidget {
                 ),
                 const SizedBox(height: SpacingTokens.sm),
                 Text(
-                  'Category Group Name',
+                  l10n.editPlanCategoryGroupName,
                   style: theme.textTheme.labelLarge?.copyWith(
                     color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
                   ),
@@ -610,7 +612,7 @@ class _EditPlanContent extends HookConsumerWidget {
                           );
                         },
                         icon: const Icon(Icons.visibility_off_rounded),
-                        label: const Text('Hide'),
+                        label: Text(l10n.editPlanHide),
                         style: FilledButton.styleFrom(
                           backgroundColor: OpenBudgetPalette.bgTertiaryFor(
                             Theme.of(context),
@@ -633,7 +635,7 @@ class _EditPlanContent extends HookConsumerWidget {
                           );
                         },
                         icon: const Icon(Icons.delete_rounded),
-                        label: const Text('Delete'),
+                        label: Text(l10n.editPlanDelete),
                         style: FilledButton.styleFrom(
                           backgroundColor: OpenBudgetPalette.bgTertiaryFor(
                             Theme.of(context),
@@ -659,20 +661,19 @@ class _EditPlanContent extends HookConsumerWidget {
     required WidgetRef ref,
     required CategoryWithEnvelopes categoryWithEnvelopes,
   }) async {
+    final l10n = AppLocalizations.of(context);
     final shouldHide = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        content: const Text(
-          'Hidden categories are moved to a group at the bottom of your plan.',
-        ),
+        content: Text(l10n.editPlanHideGroupDialogDescription),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Cancel'),
+            child: Text(l10n.dialogCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Hide Group and Categories'),
+            child: Text(l10n.editPlanHideGroupAndCategories),
           ),
         ],
       ),
@@ -707,14 +708,14 @@ class _EditPlanContent extends HookConsumerWidget {
       if (!context.mounted) return;
       showAppToast(
         context,
-        message: 'Category group hidden.',
+        message: l10n.editPlanCategoryGroupHidden,
         variant: AppToastVariant.success,
       );
     } on Exception catch (_) {
       if (!context.mounted) return;
       showAppToast(
         context,
-        message: 'Unable to hide category group.',
+        message: l10n.editPlanHideGroupError,
         variant: AppToastVariant.error,
       );
     }
@@ -725,10 +726,11 @@ class _EditPlanContent extends HookConsumerWidget {
     required WidgetRef ref,
     required CategoryWithEnvelopes categoryWithEnvelopes,
   }) async {
+    final l10n = AppLocalizations.of(context);
     final envelopeCount = categoryWithEnvelopes.envelopes.length;
     final envelopeSummary = envelopeCount == 1
-        ? '1 envelope'
-        : '$envelopeCount envelopes';
+        ? l10n.editPlanEnvelopeCount(1)
+        : l10n.editPlanEnvelopeCount(envelopeCount);
     final allocated = formatCents(
       categoryWithEnvelopes.totalBudgetedCents,
       currencyCode,
@@ -737,17 +739,20 @@ class _EditPlanContent extends HookConsumerWidget {
       context: context,
       builder: (dialogContext) => AlertDialog(
         content: Text(
-          'Delete category group "${categoryWithEnvelopes.category.name}"?'
-          '\n\n$envelopeSummary\n$allocated allocated',
+          l10n.editPlanDeleteCategoryGroupConfirm(
+            categoryWithEnvelopes.category.name,
+            envelopeSummary,
+            allocated,
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Cancel'),
+            child: Text(l10n.dialogCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Delete'),
+            child: Text(l10n.editPlanDelete),
           ),
         ],
       ),
@@ -765,7 +770,7 @@ class _EditPlanContent extends HookConsumerWidget {
       if (!context.mounted) return;
       showAppToast(
         context,
-        message: 'Unable to delete category group.',
+        message: l10n.editPlanDeleteGroupError,
         variant: AppToastVariant.error,
       );
     }
@@ -816,6 +821,7 @@ class _EditPlanCategoryCard extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final categoryId = categoryWithEnvelopes.category.id?.toString() ?? '';
 
@@ -855,24 +861,24 @@ class _EditPlanCategoryCard extends HookWidget {
                   IconButton(
                     onPressed: onMoveUp,
                     icon: const Icon(Icons.arrow_upward_rounded),
-                    tooltip: 'Move up',
+                    tooltip: l10n.editPlanMoveUp,
                   ),
                   IconButton(
                     onPressed: onMoveDown,
                     icon: const Icon(Icons.arrow_downward_rounded),
-                    tooltip: 'Move down',
+                    tooltip: l10n.editPlanMoveDown,
                   ),
                 ] else ...[
                   IconButton(
                     onPressed: onAddEnvelope,
                     icon: const Icon(Icons.add_circle_outline_rounded),
-                    tooltip: 'Add envelope',
+                    tooltip: l10n.editPlanAddEnvelope,
                   ),
                   IconButton(
                     key: Key('edit-plan-group-menu-$categoryId'),
                     onPressed: onEditDetails,
                     icon: const Icon(Icons.more_horiz_rounded),
-                    tooltip: 'Group details',
+                    tooltip: l10n.editPlanGroupDetails,
                   ),
                 ],
               ],
@@ -923,7 +929,7 @@ class _EditPlanCategoryCard extends HookWidget {
                           ? TextButton.icon(
                               onPressed: () => onOpenTarget(envelope, goal),
                               icon: const Icon(Icons.add_circle, size: 16),
-                              label: const Text('Add Target'),
+                              label: Text(l10n.editPlanAddTarget),
                               style: TextButton.styleFrom(
                                 foregroundColor: OpenBudgetPalette.bgBrandFor(
                                   Theme.of(context),
@@ -967,6 +973,7 @@ class _EditPlanAppBar extends HookWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return AppBar(
       backgroundColor: OpenBudgetPalette.bgBrandFor(Theme.of(context)),
       foregroundColor: OpenBudgetPalette.fgOnBrandFor(Theme.of(context)),
@@ -978,12 +985,12 @@ class _EditPlanAppBar extends HookWidget implements PreferredSizeWidget {
           foregroundColor: OpenBudgetPalette.fgOnBrandFor(Theme.of(context)),
         ),
         icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 16),
-        label: const Text('Plan'),
+        label: Text(l10n.planTitle),
       ),
       centerTitle: true,
-      title: const Text(
-        'Edit Plan',
-        style: TextStyle(fontWeight: FontWeight.w700),
+      title: Text(
+        l10n.editPlanTitle,
+        style: const TextStyle(fontWeight: FontWeight.w700),
       ),
       actions: [
         TextButton(
@@ -992,7 +999,7 @@ class _EditPlanAppBar extends HookWidget implements PreferredSizeWidget {
           style: TextButton.styleFrom(
             foregroundColor: OpenBudgetPalette.fgOnBrandFor(Theme.of(context)),
           ),
-          child: const Text('Next'),
+          child: Text(l10n.dialogNext),
         ),
         const SizedBox(width: SpacingTokens.xs),
       ],

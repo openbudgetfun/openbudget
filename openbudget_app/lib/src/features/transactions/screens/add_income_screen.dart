@@ -243,15 +243,15 @@ class AddIncomeScreen extends HookConsumerWidget {
                           isExpanded: true,
                         ),
                         const SizedBox(height: SpacingTokens.sm),
-                        const _ReadOnlyRow(
+                        _ReadOnlyRow(
                           icon: Icons.savings_rounded,
-                          label: 'Category',
-                          value: 'Ready to Assign',
+                          label: l10n.transactionCategoryLabel,
+                          value: l10n.budgetReadyToAssign,
                         ),
                         const SizedBox(height: SpacingTokens.sm),
                         _ReadOnlyRow(
                           icon: Icons.account_balance_rounded,
-                          label: 'Account',
+                          label: l10n.transactionAccountLabel,
                           value:
                               budgetAsync.value?.name ?? l10n.accountListTitle,
                         ),
@@ -259,7 +259,7 @@ class AddIncomeScreen extends HookConsumerWidget {
                         ListTile(
                           contentPadding: EdgeInsets.zero,
                           leading: const Icon(Icons.calendar_today_rounded),
-                          title: const Text('Date'),
+                          title: Text(l10n.transactionDateLabel),
                           subtitle: Text(_formatDate(selectedDate.value)),
                           onTap: () async {
                             final picked = await showDatePicker(

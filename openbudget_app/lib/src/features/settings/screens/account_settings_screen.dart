@@ -15,7 +15,7 @@ class AccountSettingsScreen extends HookWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    const unavailableHint = 'Currently unavailable in this build.';
+    final unavailableHint = l10n.accountSettingsUnavailableHint;
 
     return Scaffold(
       backgroundColor: OpenBudgetPalette.bgPrimaryFor(theme),
@@ -49,8 +49,7 @@ class AccountSettingsScreen extends HookWidget {
                 const SizedBox(width: SpacingTokens.sm),
                 Expanded(
                   child: Text(
-                    'Account settings are read-only in this build. '
-                    'Profile, login method, and security updates are unavailable.',
+                    l10n.accountSettingsReadOnlyNotice,
                     style: theme.textTheme.bodyMedium,
                   ),
                 ),
@@ -59,31 +58,33 @@ class AccountSettingsScreen extends HookWidget {
           ),
           const SizedBox(height: SpacingTokens.lg),
           Text(
-            'Profile',
+            l10n.accountSettingsProfile,
             style: theme.textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.w700,
             ),
           ),
           const SizedBox(height: SpacingTokens.md),
           Text(
-            'First Name',
+            l10n.accountSettingsFirstName,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w600,
             ),
           ),
           const SizedBox(height: SpacingTokens.xs),
-          const TextField(
+          TextField(
             enabled: false,
-            decoration: InputDecoration(hintText: 'Unavailable in this build'),
+            decoration: InputDecoration(
+              hintText: l10n.accountSettingsUnavailableFieldHint,
+            ),
           ),
           const SizedBox(height: SpacingTokens.sm),
           Text(l10n.settingsAccountEmail, style: theme.textTheme.titleMedium),
           const SizedBox(height: SpacingTokens.sm),
-          const Align(
+          Align(
             alignment: Alignment.centerRight,
             child: FilledButton(
               onPressed: null,
-              child: Text('Save (Unavailable)'),
+              child: Text(l10n.accountSettingsSaveUnavailable),
             ),
           ),
           const SizedBox(height: SpacingTokens.xs),
@@ -97,23 +98,23 @@ class AccountSettingsScreen extends HookWidget {
           Divider(color: theme.colorScheme.outlineVariant),
           const SizedBox(height: SpacingTokens.lg),
           Text(
-            'Login Methods',
+            l10n.accountSettingsLoginMethods,
             style: theme.textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.w700,
             ),
           ),
           const SizedBox(height: SpacingTokens.md),
           Text(
-            'Email & Password',
+            l10n.accountSettingsEmailPassword,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w600,
             ),
           ),
           Text(l10n.settingsAccountEmail, style: theme.textTheme.bodyMedium),
           const SizedBox(height: SpacingTokens.sm),
-          const FilledButton.tonal(
+          FilledButton.tonal(
             onPressed: null,
-            child: Text('Change Email & Password'),
+            child: Text(l10n.accountSettingsChangeEmailPassword),
           ),
           const SizedBox(height: SpacingTokens.xs),
           Text(
@@ -124,23 +125,26 @@ class AccountSettingsScreen extends HookWidget {
           ),
           const SizedBox(height: SpacingTokens.lg),
           Text(
-            'Apple and Google login method changes are unavailable in this build.',
+            l10n.accountSettingsSocialLoginUnavailable,
             style: theme.textTheme.bodyMedium,
           ),
           const SizedBox(height: SpacingTokens.lg),
           Text(
-            'Two-Step Verification',
+            l10n.accountSettingsTwoStepVerification,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w600,
             ),
           ),
           const SizedBox(height: SpacingTokens.xs),
           Text(
-            'Increase your OpenBudget login security by adding a second method of login.',
+            l10n.accountSettingsTwoStepHint,
             style: theme.textTheme.bodyMedium,
           ),
           const SizedBox(height: SpacingTokens.sm),
-          const FilledButton.tonal(onPressed: null, child: Text('Set Up')),
+          FilledButton.tonal(
+            onPressed: null,
+            child: Text(l10n.accountSettingsSetUp),
+          ),
           const SizedBox(height: SpacingTokens.xs),
           Text(
             unavailableHint,
@@ -152,15 +156,14 @@ class AccountSettingsScreen extends HookWidget {
           Divider(color: theme.colorScheme.outlineVariant),
           const SizedBox(height: SpacingTokens.lg),
           Text(
-            'Delete Account',
+            l10n.accountDeleteTitle,
             style: theme.textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.w700,
             ),
           ),
           const SizedBox(height: SpacingTokens.sm),
           Text(
-            'Account deletion is currently unavailable in this build. '
-            'Open this page to review status and availability.',
+            l10n.accountSettingsDeleteSectionHint,
             style: theme.textTheme.bodyMedium,
           ),
           const SizedBox(height: SpacingTokens.md),
@@ -173,11 +176,11 @@ class AccountSettingsScreen extends HookWidget {
               deleteAccountRoute,
               pathParameters: {'id': budgetId},
             ),
-            child: const Text('Delete Account'),
+            child: Text(l10n.accountDeleteTitle),
           ),
           const SizedBox(height: SpacingTokens.xs),
           Text(
-            'No account data can be removed from this app yet.',
+            l10n.accountSettingsDeleteUnavailableHint,
             style: theme.textTheme.bodySmall?.copyWith(
               color: OpenBudgetPalette.fgSecondaryFor(theme),
             ),

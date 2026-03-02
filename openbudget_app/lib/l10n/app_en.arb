@@ -241,6 +241,8 @@
   "accountEmptySubtitle": "Add your first account to track balances",
   "accountEmptyTitle": "No Accounts Yet",
   "accountListTitle": "Accounts",
+  "accountListNotificationsTitle": "Notifications",
+  "accountListNotificationsMessage": "OpenBudget will notify you when you have new transactions or overspending.",
   "accountLoadError": "Could not load accounts",
   "accountNameLabel": "Account Name",
   "accountOffBudget": "Tracking Accounts",
@@ -253,6 +255,7 @@
   "accountTypeCash": "Cash",
   "accountTypeChecking": "Checking",
   "accountTypeCreditCard": "Credit Card",
+  "accountTypeCryptoWallet": "Solana Wallet",
   "accountTypeInvestment": "Investment",
   "accountTypeLabel": "Account Type",
   "accountTypeOther": "Other",
@@ -952,5 +955,507 @@
   "morePayees": "Payees",
   "moreRules": "Transaction Rules",
   "moreImport": "Import Transactions",
-  "moreSettings": "Settings"
+  "moreSettings": "Settings",
+  "accountSettingsUnavailableHint": "Currently unavailable in this build.",
+  "accountSettingsReadOnlyNotice": "Account settings are read-only in this build. Profile, login method, and security updates are unavailable.",
+  "accountSettingsProfile": "Profile",
+  "accountSettingsFirstName": "First Name",
+  "accountSettingsUnavailableFieldHint": "Unavailable in this build",
+  "accountSettingsSaveUnavailable": "Save (Unavailable)",
+  "accountSettingsLoginMethods": "Login Methods",
+  "accountSettingsEmailPassword": "Email & Password",
+  "accountSettingsChangeEmailPassword": "Change Email & Password",
+  "accountSettingsSocialLoginUnavailable": "Apple and Google login method changes are unavailable in this build.",
+  "accountSettingsTwoStepVerification": "Two-Step Verification",
+  "accountSettingsTwoStepHint": "Increase your OpenBudget login security by adding a second method of login.",
+  "accountSettingsSetUp": "Set Up",
+  "accountSettingsDeleteSectionHint": "Account deletion is currently unavailable in this build. Open this page to review status and availability.",
+  "accountSettingsDeleteUnavailableHint": "No account data can be removed from this app yet.",
+  "settingsAccountsOverviewHint": "View and organize every account in your budget.",
+  "settingsAddAccountHint": "Add manual accounts, bank links, or wallets.",
+  "settingsManageBankConnectionsHint": "Connect Plaid banks or add Solana wallets.",
+  "deleteAccountUnavailableNotice": "Account deletion is currently unavailable in this build. No account or plan data can be removed from this screen.",
+  "deleteAccountUnavailableHint": "Delete requests are disabled until backend account deletion is available.",
+  "deleteAccountUnavailableButton": "Delete Account (Unavailable)",
+  "transactionCategoryLabel": "Category",
+  "transactionAccountLabel": "Account",
+  "transactionDateLabel": "Date",
+  "addAccountConnectWallet": "Connect Solana Wallet",
+  "addAccountUnlinkedTitle": "Add Unlinked Account",
+  "addAccountSelectAccountType": "Select Account Type",
+  "addAccountSuccessTitle": "Account Added",
+  "addAccountSuccessHeadline": "Success!",
+  "addAccountSuccessAddAnother": "Add Another",
+  "addAccountSelectTypePlaceholder": "Select account type...",
+  "addAccountLoadingInstitutions": "Loading institutions...",
+  "addAccountConnectWalletButton": "Connect Wallet",
+  "dialogNext": "Next",
+  "loadingTitle": "Loading...",
+  "loadingHint": "This might take a few seconds.",
+  "addAccountPopularOptions": "Popular Options",
+  "searchResults": "Search Results",
+  "addAccountSearchForBank": "Search for your bank",
+  "addAccountSearchByInstitutionName": "Search by institution name",
+  "addAccountSearchHint": "Search by institution name or web address (URL)",
+  "addAccountNoInstitutionsFound": "No institutions found. Try another name or add an unlinked account.",
+  "orText": "or",
+  "addAccountAddUnlinked": "Add an Unlinked Account",
+  "addAccountWalletConnectionDescription": "Connect a Solana wallet in read-only mode. OpenBudget imports native SPL balances and keeps fiat valuation synced.",
+  "addAccountWalletAddressLabel": "Wallet Address",
+  "addAccountWalletAddressHint": "Paste Solana wallet address",
+  "addAccountWalletLabelOptional": "Wallet Label (optional)",
+  "addAccountWalletLabelHint": "My Solana Wallet",
+  "addAccountWalletIncludeInBudgetTotals": "Include in budget totals",
+  "addAccountWalletIntro": "Add your Solana wallet to track transfers, swaps, and holdings in one place.",
+  "addAccountUnlinkedIntro": "Bank connections are currently unavailable in this build, so let's set up an unlinked account.",
+  "addAccountNicknameQuestion": "Give it a nickname",
+  "addAccountNicknameHint": "Enter nickname",
+  "addAccountTypeQuestion": "What type of account are you adding?",
+  "addAccountWalletAutoSyncHint": "OpenBudget will auto-sync transactions and holdings after wallet setup. You can tag and categorize activity in account details.",
+  "addAccountWalletAddressQuestion": "What is your Solana wallet address?",
+  "addAccountWalletAddressExample": "e.g. 5xQf...w8bP",
+  "addAccountWalletPublicAddressOnly": "Only public wallet addresses are supported.",
+  "addAccountBalanceQuestion": "What is your current account balance?",
+  "addAccountBalanceExample": "5000",
+  "addAccountSectionCashAccounts": "Cash Accounts",
+  "addAccountSectionCashAccountsHint": "Cash accounts hold funds you already own and can spend immediately.",
+  "addAccountSectionCreditAccounts": "Credit Accounts",
+  "addAccountSectionCreditAccountsHint": "A credit account lets you spend borrowed money that you'll need to repay later, often with interest.",
+  "addAccountTypeLineOfCredit": "Add Account Type Line Of Credit",
+  "addAccountSectionMortgagesAndLoans": "Mortgages and Loans",
+  "addAccountSectionMortgagesAndLoansHint": "Accounts that have an outstanding balance you're currently paying off, and aren't spending from.",
+  "addAccountTypeMortgage": "Add Account Type Mortgage",
+  "addAccountTypeAutoLoan": "Add Account Type Auto Loan",
+  "addAccountTypeStudentLoan": "Add Account Type Student Loan",
+  "addAccountTypePersonalLoan": "Add Account Type Personal Loan",
+  "addAccountTypeMedicalDebt": "Add Account Type Medical Debt",
+  "addAccountTypeOtherDebt": "Add Account Type Other Debt",
+  "addAccountSectionTrackingAccounts": "Tracking Accounts",
+  "addAccountSectionTrackingAccountsHint": "Accounts that hold money you don't plan to spend soon, such as investments or loans.",
+  "addAccountTypeAssetExample": "Asset (e.g. Investment)",
+  "addAccountTypeLiability": "Add Account Type Liability",
+  "addAccountSectionDigitalAssets": "Digital Assets",
+  "addAccountSectionDigitalAssetsHint": "Track a Solana wallet with automatic transaction history and asset valuations.",
+  "addAccountTypeSolanaWallet": "Add Account Type Solana Wallet",
+  "accountEditNicknameLabel": "Account Nickname",
+  "accountEditNicknameHint": "Daily",
+  "accountEditNotesLabel": "Account Notes",
+  "accountEditNotesHint": "Enter a memo...",
+  "accountEditAdjustmentHint": "An adjustment transaction will be created automatically if you change this amount.",
+  "accountEditBankConnection": "Bank Connection",
+  "accountEditLinkAccountUnavailable": "Link an Account (Unavailable)",
+  "accountEditLinkAccountUnavailableHint": "Bank connections are currently unavailable in this build. Add or manage unlinked accounts instead.",
+  "accountListAllTransactions": "All transactions",
+  "accountDetailBudgetAccount": "Budget Account",
+  "accountDetailTrackingAccount": "Tracking Account",
+  "accountDetailSelect": "Select",
+  "accountDetailHideReconciled": "Hide Reconciled",
+  "accountDetailLinkAccountUnavailable": "Link Account (Unavailable)",
+  "accountDetailLoanOverview": "Overview",
+  "accountDetailLoanActivity": "Activity",
+  "accountDetailLoanBalance": "Balance",
+  "accountDetailLoanPaid": "Paid",
+  "accountDetailLoanTotalBorrowed": "Total Borrowed",
+  "accountDetailLoanPayoffOverview": "Loan Payoff Overview",
+  "accountDetailLoanOneMonth": "Account Detail Loan One Month",
+  "accountDetailLoanMonthlyTarget": "Monthly Target",
+  "accountDetailLoanDueEvery": "Due Every",
+  "accountDetailLoanMonthly": "Monthly",
+  "accountDetailLoanDebtFreeDate": "Debt Free Date",
+  "accountDetailLoanCreateTarget": "Create Target",
+  "accountDetailLoanEditTarget": "Edit Target",
+  "accountDetailLoanDetails": "Loan Details",
+  "accountDetailLoanInterestRate": "Interest Rate",
+  "accountDetailLoanInterestRateValue": "3%",
+  "accountDetailLoanMonthlyMinimum": "Monthly Minimum",
+  "accountDetailNotFound": "Account not found.",
+  "accountDetailWalletLoadError": "Failed to load wallet metadata.",
+  "accountDetailWalletNotAttached": "No Solana wallet is attached to this account yet.",
+  "accountDetailWalletSyncFailed": "Wallet sync failed. Check server logs.",
+  "accountDetailWalletSyncing": "Syncing",
+  "accountDetailWalletSync": "Sync",
+  "accountDetailWalletEstimatedValue": "Estimated Value",
+  "accountDetailWalletAddressCopied": "Wallet address copied.",
+  "accountDetailWalletCopy": "Copy",
+  "accountDetailWalletFungibleAssets": "Fungible Assets",
+  "accountDetailWalletNftAssets": "NFT Assets",
+  "accountDetailWalletValuationCoverage": "Valuation Coverage",
+  "accountDetailWalletUnpricedAssets": "Unpriced Assets",
+  "accountDetailWalletUnrealizedPnl": "Unrealized P&L",
+  "accountDetailWalletRealizedPnl": "Realized P&L",
+  "accountDetailWalletTaggedTransactions": "Tagged Transactions",
+  "accountDetailWalletLastActivity": "Last Activity",
+  "accountDetailWalletNoActivity": "No activity",
+  "accountDetailWalletTaxYearPnl": "Tax Year P&L",
+  "accountDetailWalletEstimated": "(estimated)",
+  "accountDetailWalletTaxYearLoadError": "Could not load tax-year summary.",
+  "accountDetailWalletNoDisposalsYet": "No disposals yet",
+  "accountDetailWalletNoDisposalsHint": "Tax-year summaries will appear after taxable disposal activity is detected.",
+  "accountDetailWalletHoldings": "Holdings",
+  "accountDetailWalletHoldingsHint": "Token balances with current valuation and detected programs.",
+  "accountDetailWalletHideDustAssets": "Hide dust assets (< $0.01)",
+  "accountDetailWalletHoldingsLoadError": "Failed to load holdings.",
+  "accountDetailWalletNoHoldingsFound": "No holdings found",
+  "accountDetailWalletNoHoldingsHint": "Run a sync to fetch tokens and NFTs for this wallet.",
+  "accountDetailWalletOnlyDustAssets": "Only dust assets found",
+  "accountDetailWalletOnlyDustAssetsHint": "Turn off the dust filter to inspect very small-value token balances.",
+  "accountDetailWalletTransactionHistory": "Transaction History",
+  "accountDetailWalletTransactionHistoryHint": "Parsed activity with program context and editable labels.",
+  "accountDetailWalletTransactionSearchHint": "Search description, category, tags, memo",
+  "accountDetailWalletNeedsCategory": "Needs category",
+  "accountDetailWalletTransactionsLoadError": "Failed to load transactions.",
+  "accountDetailWalletNoTransactionsYet": "No transactions yet",
+  "accountDetailWalletNoTransactionsHint": "Run a sync to import transaction history from the wallet.",
+  "accountDetailWalletNoTransactionsMatch": "No transactions match filters",
+  "accountDetailWalletNoTransactionsMatchHint": "Adjust search terms or disable the category filter.",
+  "accountDetailWalletEditMetadataTitle": "Edit Transaction Metadata",
+  "accountDetailWalletTagsCommaSeparated": "Tags (comma separated)",
+  "accountDetailWalletMetadataUpdated": "Transaction metadata updated.",
+  "accountDetailWalletMetadataUpdateError": "Could not update transaction metadata.",
+  "accountDetailWalletNft": "NFT",
+  "accountDetailWalletStalePrice": "Stale price",
+  "accountDetailWalletUnpriced": "Unpriced",
+  "accountDetailWalletNoValuationSource": "No valuation source",
+  "accountDetailWalletEditMetadataTooltip": "Edit metadata",
+  "accountDetailLoanTarget": "Loan Target",
+  "accountDetailLoanMonthlyPayment": "Monthly payment",
+  "accountDetailReconcileMatchQuestion": "Does this match your bank balance?",
+  "dialogYes": "Yes",
+  "dialogNo": "No",
+  "spendingByPayeeMonth": "Month",
+  "spendingByPayeePreset": "Preset",
+  "spendingByPayeePresetRange": "Preset Range",
+  "editPlanCostToBeMe": "Cost to Be Me",
+  "editPlanMonthlyTargets": "Monthly Targets",
+  "editPlanMonthlyIncome": "Monthly Income",
+  "editPlanCostPromptTitle": "What does it cost to be you?",
+  "editPlanCostPromptSubtitle": "Your targets add up to one simple number: everything you plan to spend and save each month.",
+  "editPlanNewGroup": "New Group",
+  "editPlanReorder": "Reorder",
+  "editPlanDetails": "Details",
+  "editPlanCategoryGroupName": "Category Group Name",
+  "editPlanHide": "Hide",
+  "editPlanDelete": "Delete",
+  "editPlanHideGroupDialogDescription": "Hidden categories are moved to a group at the bottom of your plan.",
+  "editPlanHideGroupAndCategories": "Hide Group and Categories",
+  "editPlanCategoryGroupHidden": "Category group hidden.",
+  "editPlanHideGroupError": "Unable to hide category group.",
+  "editPlanDeleteGroupError": "Unable to delete category group.",
+  "editPlanMoveUp": "Move up",
+  "editPlanMoveDown": "Move down",
+  "editPlanAddEnvelope": "Add envelope",
+  "editPlanGroupDetails": "Group details",
+  "editPlanAddTarget": "Add Target",
+  "planTitle": "Plan",
+  "editPlanTitle": "Edit Plan",
+  "budgetDetailCategories": "Categories",
+  "budgetDetailSpotlight": "Spotlight",
+  "budgetDetailCoverOverspendingTitle": "Cover Overspending",
+  "budgetDetailAllOverspendingCovered": "All overspending is covered.",
+  "budgetDetailCoverButton": "Cover",
+  "budgetDetailCovering": "Covering...",
+  "reviewTransactionsUpdateCategoryError": "Could not update transaction category.",
+  "reviewTransactionsDeleteSelected": "Delete selected",
+  "reviewTransactionsNoTransactions": "No Transactions",
+  "reviewTransactionsSingleNewTransaction": "1 New Transaction",
+  "reviewTransactionsSubtitle": "Approve or categorize new transactions",
+  "reviewTransactionsAllDoneTitle": "You're All Done!",
+  "reviewTransactionsAllDoneSubtitle": "Return to Accounts to see all of your transactions.",
+  "reviewTransactionsUncategorized": "Uncategorized",
+  "reviewTransactionsSelectCategory": "Select category",
+  "reviewTransactionsApprove": "Approve",
+  "reviewTransactionsCategorize": "Categorize",
+  "reviewTransactionsClear": "Clear",
+  "moreTitle": "More",
+  "setGoalCadenceWeekly": "Weekly",
+  "setGoalCadenceMonthly": "Monthly",
+  "setGoalCadenceYearly": "Yearly",
+  "setGoalCadenceCustom": "Custom",
+  "setGoalAmount": "Amount",
+  "setGoalINeed": "I need",
+  "setGoalBy": "By",
+  "setGoalLastDayOfMonth": "Last Day of the Month",
+  "setGoalNextMonthINeedTo": "Next month I want to",
+  "setGoalIWantTo": "I want to",
+  "setGoalDueOn": "Due on",
+  "setGoalRepeats": "Repeats",
+  "setGoalEvery": "Every",
+  "setGoalMonth": "Month",
+  "setGoalYear": "Year",
+  "setGoalSaveTarget": "Save Target",
+  "settingsPlanCurrencyDetail": "Plan currency: {currencyCode}",
+  "@settingsPlanCurrencyDetail": {
+    "placeholders": {
+      "currencyCode": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsDisplayCurrencyDetail": "Display currency: {currencyCode}",
+  "@settingsDisplayCurrencyDetail": {
+    "placeholders": {
+      "currencyCode": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsOwner": "Owner: {ownerLabel}",
+  "@settingsOwner": {
+    "placeholders": {
+      "ownerLabel": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsUpdated": "Updated: {lastUpdatedLabel}",
+  "@settingsUpdated": {
+    "placeholders": {
+      "lastUpdatedLabel": {
+        "type": "String"
+      }
+    }
+  },
+  "addAccountSuccessMessage": "{accountTypeLabel} account added to OpenBudget.",
+  "@addAccountSuccessMessage": {
+    "placeholders": {
+      "accountTypeLabel": {
+        "type": "String"
+      }
+    }
+  },
+  "accountDetailLoanPaidOff": "{percent}%\\nPaid Off",
+  "@accountDetailLoanPaidOff": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "accountDetailLoanPayoffEstimate": "You'll pay off your loan in {duration} if you pay the minimum every month.",
+  "@accountDetailLoanPayoffEstimate": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "accountDetailLoanManyMonths": "{count} months",
+  "@accountDetailLoanManyMonths": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "accountDetailLoanInMonth": "In {month}",
+  "@accountDetailLoanInMonth": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "accountDetailWalletSyncSummary": "Synced {transactions} transactions and {holdings} holdings. Coverage {coveredHoldings}/{holdingCount}{coveragePercentText}, {unpricedHoldings} unpriced. NFTs {coveredNfts}/{nftCount}, {unpricedNfts} unpriced.",
+  "@accountDetailWalletSyncSummary": {
+    "placeholders": {
+      "transactions": {
+        "type": "int"
+      },
+      "holdings": {
+        "type": "int"
+      },
+      "coveredHoldings": {
+        "type": "int"
+      },
+      "coveragePercentText": {
+        "type": "String"
+      },
+      "unpricedHoldings": {
+        "type": "int"
+      },
+      "coveredNfts": {
+        "type": "int"
+      },
+      "nftCount": {
+        "type": "int"
+      },
+      "unpricedNfts": {
+        "type": "int"
+      }
+    }
+  },
+  "accountDetailWalletTxCount": "{transactions} tx",
+  "@accountDetailWalletTxCount": {
+    "placeholders": {
+      "transactions": {
+        "type": "int"
+      }
+    }
+  },
+  "accountDetailWalletSuggestedCategory": "Suggested: {category}",
+  "@accountDetailWalletSuggestedCategory": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "accountDetailWalletUnits": "{units} units",
+  "@accountDetailWalletUnits": {
+    "placeholders": {
+      "units": {
+        "type": "String"
+      }
+    }
+  },
+  "accountDetailWalletConfidence": "{confidence} confidence",
+  "@accountDetailWalletConfidence": {
+    "placeholders": {
+      "confidence": {
+        "type": "String"
+      }
+    }
+  },
+  "accountDetailWalletBasis": "Basis {amount}",
+  "@accountDetailWalletBasis": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accountDetailWalletPnl": "P&L {value}{suffix}",
+  "@accountDetailWalletPnl": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "suffix": {
+        "type": "String"
+      }
+    }
+  },
+  "accountDetailWalletPricePerToken": "@ {amount}",
+  "@accountDetailWalletPricePerToken": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accountDetailWalletPnlValue": "P&L {value}",
+  "@accountDetailWalletPnlValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "accountDetailWalletTaxYear": "Tax {year}",
+  "@accountDetailWalletTaxYear": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "accountDetailReconcileMatchTitle": "Your cleared balance in OpenBudget is {balance}",
+  "@accountDetailReconcileMatchTitle": {
+    "placeholders": {
+      "balance": {
+        "type": "String"
+      }
+    }
+  },
+  "spendingByPayeeLastMonths": "Last {count} Months",
+  "@spendingByPayeeLastMonths": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "editPlanEnvelopeCount": "{count, plural, =1{1 envelope} other{{count} envelopes}}",
+  "@editPlanEnvelopeCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "editPlanDeleteCategoryGroupConfirm": "Delete category group \"{groupName}\"?\\n\\n{envelopeSummary}\\n{allocated} allocated",
+  "@editPlanDeleteCategoryGroupConfirm": {
+    "placeholders": {
+      "groupName": {
+        "type": "String"
+      },
+      "envelopeSummary": {
+        "type": "String"
+      },
+      "allocated": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetDetailNeedsToCover": "Needs {amount} to get back to zero",
+  "@budgetDetailNeedsToCover": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetDetailCoverOverspent": "Cover {count} overspent {count, plural, =1{Category} other{Categories}}",
+  "@budgetDetailCoverOverspent": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reviewTransactionsSelectedTitle": "{count} Selected",
+  "@reviewTransactionsSelectedTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reviewTransactionsNewTransactions": "{count} New Transactions",
+  "@reviewTransactionsNewTransactions": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reviewTransactionsSelectedAmount": "{count} selected • {amount}",
+  "@reviewTransactionsSelectedAmount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "setGoalSetAsideAnother": "Set aside another {amount}",
+  "@setGoalSetAsideAnother": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "routerPageNotFound": "Page not found: {error}",
+  "@routerPageNotFound": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "editPlanLoadError": "Failed to load plan setup.",
+  "budgetDetailCoverOverspendingError": "Could not cover overspending."
 }

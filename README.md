@@ -131,6 +131,7 @@ flutter:app test               # Run app tests only
 
 ```bash
 lint:analyze                   # Lint all packages
+lint:l10n                      # Fail on hardcoded UI text in app source
 lint:all                       # Run all linting (format check + analyze)
 format:all                     # Format all code (Dart + JSON/YAML/Markdown)
 format:check                   # Check non-Dart formatting without fixing

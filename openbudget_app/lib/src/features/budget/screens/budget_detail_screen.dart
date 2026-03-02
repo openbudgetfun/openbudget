@@ -1770,6 +1770,7 @@ class _BudgetViewToggle extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
 
     return Container(
@@ -1785,7 +1786,7 @@ class _BudgetViewToggle extends HookWidget {
         children: [
           Expanded(
             child: _ToggleButton(
-              label: 'Categories',
+              label: l10n.budgetDetailCategories,
               selected: !showSpotlight,
               onTap: () => onChanged(false),
               theme: theme,
@@ -1793,7 +1794,7 @@ class _BudgetViewToggle extends HookWidget {
           ),
           Expanded(
             child: _ToggleButton(
-              label: 'Spotlight',
+              label: l10n.budgetDetailSpotlight,
               selected: showSpotlight,
               onTap: () => onChanged(true),
               theme: theme,
@@ -2722,6 +2723,7 @@ class _CoverOverspendingSheet extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final remainingItems = useState(
       List<_OverspentEnvelopeEntry>.of(overspentEnvelopes),
@@ -2748,7 +2750,7 @@ class _CoverOverspendingSheet extends HookConsumerWidget {
         if (!context.mounted) return;
         showAppToast(
           context,
-          message: 'Could not cover overspending.',
+          message: l10n.budgetDetailCoverOverspendingError,
           variant: AppToastVariant.error,
         );
       } finally {
@@ -2823,7 +2825,7 @@ class _CoverOverspendingSheet extends HookConsumerWidget {
                   const SizedBox(width: 56),
                   Expanded(
                     child: Text(
-                      'Cover Overspending',
+                      l10n.budgetDetailCoverOverspendingTitle,
                       textAlign: TextAlign.center,
                       style: theme.textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.w800,
@@ -2834,7 +2836,7 @@ class _CoverOverspendingSheet extends HookConsumerWidget {
                     width: 56,
                     child: TextButton(
                       onPressed: () => Navigator.of(context).pop(),
-                      child: const Text('Done'),
+                      child: Text(l10n.dialogDone),
                     ),
                   ),
                 ],
@@ -2860,7 +2862,7 @@ class _CoverOverspendingSheet extends HookConsumerWidget {
                             ),
                             const SizedBox(height: SpacingTokens.md),
                             Text(
-                              'All overspending is covered.',
+                              l10n.budgetDetailAllOverspendingCovered,
                               style: theme.textTheme.titleLarge?.copyWith(
                                 fontWeight: FontWeight.w700,
                               ),
@@ -2896,7 +2898,9 @@ class _CoverOverspendingSheet extends HookConsumerWidget {
                               ),
                             ),
                             subtitle: Text(
-                              'Needs ${formatCents(item.overspentCents, currencyCode)} to get back to zero',
+                              l10n.budgetDetailNeedsToCover(
+                                formatCents(item.overspentCents, currencyCode),
+                              ),
                               style: theme.textTheme.bodySmall?.copyWith(
                                 color: OpenBudgetPalette.fgSecondaryFor(
                                   Theme.of(context),
@@ -2907,7 +2911,7 @@ class _CoverOverspendingSheet extends HookConsumerWidget {
                               onPressed: isApplying.value
                                   ? null
                                   : () => coverEnvelope(item),
-                              child: const Text('Cover'),
+                              child: Text(l10n.budgetDetailCoverButton),
                             ),
                           ),
                         );
@@ -2932,8 +2936,10 @@ class _CoverOverspendingSheet extends HookConsumerWidget {
                   ),
                   child: Text(
                     isApplying.value
-                        ? 'Covering...'
-                        : 'Cover ${remainingItems.value.length} Overspent ${remainingItems.value.length == 1 ? 'Category' : 'Categories'}',
+                        ? l10n.budgetDetailCovering
+                        : l10n.budgetDetailCoverOverspent(
+                            remainingItems.value.length,
+                          ),
                   ),
                 ),
               ),

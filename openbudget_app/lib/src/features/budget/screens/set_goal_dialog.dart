@@ -117,22 +117,22 @@ class SetGoalDialog extends HookConsumerWidget {
                 child: Column(
                   children: [
                     SegmentedButton<_GoalCadence>(
-                      segments: const [
+                      segments: [
                         ButtonSegment(
                           value: _GoalCadence.weekly,
-                          label: Text('Weekly'),
+                          label: Text(l10n.setGoalCadenceWeekly),
                         ),
                         ButtonSegment(
                           value: _GoalCadence.monthly,
-                          label: Text('Monthly'),
+                          label: Text(l10n.setGoalCadenceMonthly),
                         ),
                         ButtonSegment(
                           value: _GoalCadence.yearly,
-                          label: Text('Yearly'),
+                          label: Text(l10n.setGoalCadenceYearly),
                         ),
                         ButtonSegment(
                           value: _GoalCadence.custom,
-                          label: Text('Custom'),
+                          label: Text(l10n.setGoalCadenceCustom),
                         ),
                       ],
                       selected: {cadence.value},
@@ -151,8 +151,8 @@ class SetGoalDialog extends HookConsumerWidget {
                       ),
                       child: BudgetAmountField(
                         labelText: cadence.value == _GoalCadence.custom
-                            ? 'Amount'
-                            : 'I need',
+                            ? l10n.setGoalAmount
+                            : l10n.setGoalINeed,
                         currencyCode: currencyCode,
                         inputValue: amountInput.value,
                         hintText: formatBudgetAmountInputForField(
@@ -171,7 +171,7 @@ class SetGoalDialog extends HookConsumerWidget {
                             context: context,
                             currencyCode: currencyCode,
                             initialInput: amountInput.value,
-                            title: 'Amount',
+                            title: l10n.setGoalAmount,
                             allowNegative: false,
                           );
                           if (nextInput != null) {
@@ -201,7 +201,7 @@ class SetGoalDialog extends HookConsumerWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'By',
+                                    l10n.setGoalBy,
                                     style: Theme.of(context)
                                         .textTheme
                                         .labelLarge
@@ -218,8 +218,10 @@ class SetGoalDialog extends HookConsumerWidget {
                                       isDense: true,
                                       isExpanded: true,
                                       items: [
-                                        const DropdownMenuItem<int?>(
-                                          child: Text('Last Day of the Month'),
+                                        DropdownMenuItem<int?>(
+                                          child: Text(
+                                            l10n.setGoalLastDayOfMonth,
+                                          ),
                                         ),
                                         for (var day = 31; day >= 1; day--)
                                           DropdownMenuItem<int?>(
@@ -246,7 +248,7 @@ class SetGoalDialog extends HookConsumerWidget {
                           ),
                         ),
                         title: Text(
-                          'Next month I want to',
+                          l10n.setGoalNextMonthINeedTo,
                           style: Theme.of(context).textTheme.labelLarge
                               ?.copyWith(
                                 color: OpenBudgetPalette.fgSecondaryFor(
@@ -255,7 +257,9 @@ class SetGoalDialog extends HookConsumerWidget {
                               ),
                         ),
                         subtitle: Text(
-                          'Set aside another ${_formatCents(monthlyContribution, currencyCode)}',
+                          l10n.setGoalSetAsideAnother(
+                            _formatCents(monthlyContribution, currencyCode),
+                          ),
                           style: Theme.of(context).textTheme.titleMedium
                               ?.copyWith(fontWeight: FontWeight.w500),
                         ),
@@ -271,7 +275,7 @@ class SetGoalDialog extends HookConsumerWidget {
                           ),
                         ),
                         title: Text(
-                          'I want to',
+                          l10n.setGoalIWantTo,
                           style: Theme.of(context).textTheme.labelLarge
                               ?.copyWith(
                                 color: OpenBudgetPalette.fgSecondaryFor(
@@ -280,7 +284,9 @@ class SetGoalDialog extends HookConsumerWidget {
                               ),
                         ),
                         subtitle: Text(
-                          'Set aside another ${_formatCents(amountCents, currencyCode)}',
+                          l10n.setGoalSetAsideAnother(
+                            _formatCents(amountCents, currencyCode),
+                          ),
                           style: Theme.of(context).textTheme.titleMedium
                               ?.copyWith(fontWeight: FontWeight.w500),
                         ),
@@ -302,7 +308,7 @@ class SetGoalDialog extends HookConsumerWidget {
                             Theme.of(context),
                           ),
                         ),
-                        title: const Text('Due on'),
+                        title: Text(l10n.setGoalDueOn),
                         subtitle: Text(
                           DateFormat.yMMMd().format(dueDate.value),
                           style: Theme.of(context).textTheme.titleSmall
@@ -328,7 +334,7 @@ class SetGoalDialog extends HookConsumerWidget {
                             Theme.of(context),
                           ),
                         ),
-                        title: const Text('Repeats'),
+                        title: Text(l10n.setGoalRepeats),
                         value: repeats.value,
                         onChanged: (value) => repeats.value = value,
                       ),
@@ -356,7 +362,7 @@ class SetGoalDialog extends HookConsumerWidget {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      'Every',
+                                      l10n.setGoalEvery,
                                       style: Theme.of(context)
                                           .textTheme
                                           .labelLarge
@@ -387,14 +393,14 @@ class SetGoalDialog extends HookConsumerWidget {
                                         const SizedBox(width: SpacingTokens.sm),
                                         DropdownButton<_RepeatUnit>(
                                           value: repeatUnit.value,
-                                          items: const [
+                                          items: [
                                             DropdownMenuItem(
                                               value: _RepeatUnit.month,
-                                              child: Text('Month'),
+                                              child: Text(l10n.setGoalMonth),
                                             ),
                                             DropdownMenuItem(
                                               value: _RepeatUnit.year,
-                                              child: Text('Year'),
+                                              child: Text(l10n.setGoalYear),
                                             ),
                                           ],
                                           onChanged: (value) {
@@ -466,7 +472,7 @@ class SetGoalDialog extends HookConsumerWidget {
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Icon(Icons.check_circle_rounded),
-                  label: const Text('Save Target'),
+                  label: Text(l10n.setGoalSaveTarget),
                 ),
               ),
             ],
