@@ -57,8 +57,6 @@ envelope:
 fxRate:
   - latest:
   - refresh:
-logIngest:
-  - ingest:
 monthlyAllocation:
   - upsert:
   - list:

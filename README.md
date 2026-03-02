@@ -42,7 +42,10 @@ runner:serverpod
 # 5. Start everything (Postgres + Redis + server)
 devenv up
 
-# 6. In a separate terminal, run the app
+# 6. In another terminal, follow local service logs
+tail -f ./tmp/log.txt
+
+# 7. In a separate terminal, run the app
 flutter:app run -d macos
 ```
 
@@ -94,6 +97,7 @@ flutter:app run -d android --dart-define=OPENBUDGET_API_URL=http://192.168.1.10:
 ```bash
 devenv up                      # Start Postgres + Redis + server (all-in-one)
 server:start                   # Start the server manually (without devenv)
+tail -f ./tmp/log.txt          # Follow process-compose logs while developing
 ```
 
 ### Testing
@@ -133,45 +137,25 @@ update:deps                    # Update all dependencies
 
 ## Logging
 
-Both the Flutter app and backend server write structured logs to a single shared file during development. This makes it easy to follow what's happening across the entire stack from one place.
+When developing locally with `devenv up`, `process-compose` writes service logs
+to a shared file.
 
 ### Log File
 
-In development, all logs are written to:
+The log file is:
 
 ```
-.tmp/omni.log
+./tmp/log.txt
 ```
 
 This file is gitignored. To follow logs in real time:
 
 ```bash
-tail -f .tmp/omni.log
+tail -f ./tmp/log.txt
 ```
 
-### Log Format
-
-Each line is structured as:
-
-```
-[2026-02-17T10:30:00.000] [INFO   ] [server] [BudgetService] Created budget id=42
-[2026-02-17T10:30:01.000] [INFO   ] [flutter:macos] [Navigation] Push /home
-```
-
-The fields are: `[timestamp] [level] [source] [logger] message`
-
-- **source** identifies where the log came from:
-  - `server` — backend
-  - `flutter:macos` / `flutter:web` / `flutter:ios-simulator` / `flutter:android-emulator` — app (automatically detected per platform)
-- **logger** is the component name (e.g. `BudgetService`, `Navigation`)
-
-### Auto-Truncation
-
-The log file auto-truncates when it exceeds 10 MB, keeping the most recent 2 MB. No manual cleanup needed.
-
-### Frontend Log Relay
-
-In debug mode, the Flutter app batches log entries and sends them to the server every 2 seconds. The server writes them to the same log file, so you see both frontend and backend activity together. In release mode, log relay is disabled.
+Check this file first whenever local development issues appear (startup,
+database connectivity, server errors, etc.).
 
 ### PostHog Analytics (Production Only)
 
