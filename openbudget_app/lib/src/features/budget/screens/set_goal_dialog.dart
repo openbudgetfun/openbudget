@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/envelope_goal_provider.dart';
+import 'package:openbudget_app/src/features/budget/widgets/budget_amount_keypad.dart';
 import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
@@ -35,16 +36,16 @@ class SetGoalDialog extends HookConsumerWidget {
     final initialCadence = _initialCadence(existingGoal);
     final cadence = useState(initialCadence);
     final dueDay = useState<int?>(null);
-    final amountController = useTextEditingController(
-      text: existingGoal != null
-          ? _formatCents(
-              existingGoal!.monthlyFundingCents ??
+    final amountInput = useState(
+      existingGoal != null
+          ? budgetAmountInputFromCents(
+              cents:
+                  existingGoal!.monthlyFundingCents ??
                   existingGoal!.targetAmountCents,
-              currencyCode,
+              currencyCode: currencyCode,
             )
           : '',
     );
-    useListenable(amountController);
     final dueDate = useState<DateTime>(
       existingGoal?.targetDate ?? DateTime.now().add(const Duration(days: 30)),
     );
@@ -55,10 +56,12 @@ class SetGoalDialog extends HookConsumerWidget {
     final repeatEvery = useState(1);
     final repeatUnit = useState(_RepeatUnit.month);
     final isSubmitting = useState(false);
-    final amountCents = _parseAmountToCents(
-      amountController.text,
-      currencyCode,
-    );
+    final amountCents =
+        parseBudgetAmountInputToCents(
+          input: amountInput.value,
+          currencyCode: currencyCode,
+        ) ??
+        0;
     final canSave = amountCents > 0;
     final monthlyContribution = _monthlyContributionFor(
       cadence.value,
@@ -145,48 +148,35 @@ class SetGoalDialog extends HookConsumerWidget {
                         horizontal: SpacingTokens.md,
                         vertical: SpacingTokens.sm,
                       ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.payments_outlined,
-                            color: OpenBudgetPalette.bgBrandFor(
-                              Theme.of(context),
-                            ),
+                      child: BudgetAmountField(
+                        labelText: cadence.value == _GoalCadence.custom
+                            ? 'Amount'
+                            : 'I need',
+                        currencyCode: currencyCode,
+                        inputValue: amountInput.value,
+                        hintText: formatBudgetAmountInputForField(
+                          input: '0',
+                          currencyCode: currencyCode,
+                        ),
+                        prefixIcon: Icon(
+                          Icons.payments_outlined,
+                          color: OpenBudgetPalette.bgBrandFor(
+                            Theme.of(context),
                           ),
-                          const SizedBox(width: SpacingTokens.sm),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  cadence.value == _GoalCadence.custom
-                                      ? 'Amount'
-                                      : 'I need',
-                                  style: Theme.of(context).textTheme.labelLarge
-                                      ?.copyWith(
-                                        color: OpenBudgetPalette.fgSecondaryFor(
-                                          Theme.of(context),
-                                        ),
-                                      ),
-                                ),
-                                TextField(
-                                  controller: amountController,
-                                  keyboardType:
-                                      const TextInputType.numberWithOptions(
-                                        decimal: true,
-                                      ),
-                                  textInputAction: TextInputAction.done,
-                                  decoration: InputDecoration(
-                                    isDense: true,
-                                    border: InputBorder.none,
-                                    hintText: '0.00',
-                                    prefixText: currencyCode.symbol,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
+                        ),
+                        enabled: !isSubmitting.value,
+                        onTap: () async {
+                          final nextInput = await showBudgetAmountKeypadSheet(
+                            context: context,
+                            currencyCode: currencyCode,
+                            initialInput: amountInput.value,
+                            title: 'Amount',
+                            allowNegative: false,
+                          );
+                          if (nextInput != null) {
+                            amountInput.value = nextInput;
+                          }
+                        },
                       ),
                     ),
                     if (cadence.value != _GoalCadence.custom) ...[
@@ -579,12 +569,6 @@ class SetGoalDialog extends HookConsumerWidget {
       'target_by_date' => _GoalCadence.custom,
       _ => _GoalCadence.monthly,
     };
-  }
-
-  int _parseAmountToCents(String text, CurrencyCode currency) {
-    final normalized = text.replaceAll(RegExp(r'[^0-9\.\-]'), '');
-    final value = double.tryParse(normalized) ?? 0;
-    return (value * _pow10(currency.decimals)).round();
   }
 
   int _monthlyContributionFor(

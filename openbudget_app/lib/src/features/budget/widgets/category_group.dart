@@ -88,7 +88,8 @@ class CategoryGroup extends HookConsumerWidget {
             onTap: isReorderingEnvelopes.value
                 ? () => isReorderingEnvelopes.value = false
                 : onToggleCollapsed,
-            onLongPress: () => _showCategoryMenu(context),
+            onLongPress: () =>
+                _showCategoryMenu(context, isReorderingEnvelopes),
             child: Opacity(
               opacity: (category.isHidden ?? false) ? 0.5 : 1.0,
               child: Container(
@@ -295,7 +296,11 @@ class CategoryGroup extends HookConsumerWidget {
                       ? () =>
                             onShowActivity!(envelope, monthlyData, envelopeGoal)
                       : () => onEditEnvelope(envelope),
-                  onLongPress: () => _showEnvelopeMenu(context, envelope),
+                  onLongPress: () => _showEnvelopeMenu(
+                    context,
+                    envelope,
+                    isReorderingEnvelopes,
+                  ),
                   onQuickBudget: onQuickBudget != null
                       ? () => onQuickBudget!(envelope)
                       : null,
@@ -370,7 +375,10 @@ class CategoryGroup extends HookConsumerWidget {
     );
   }
 
-  void _showCategoryMenu(BuildContext context) {
+  void _showCategoryMenu(
+    BuildContext context,
+    ValueNotifier<bool> isReorderingEnvelopes,
+  ) {
     final l10n = AppLocalizations.of(context);
     final category = categoryWithEnvelopes.category;
     final isHidden = category.isHidden ?? false;
@@ -396,7 +404,7 @@ class CategoryGroup extends HookConsumerWidget {
                 title: Text(l10n.envelopeReorderHint),
                 onTap: () {
                   Navigator.of(ctx).pop();
-                  // Trigger reorder mode handled by parent.
+                  isReorderingEnvelopes.value = true;
                 },
               ),
             if (onToggleHideCategory != null)
@@ -436,7 +444,11 @@ class CategoryGroup extends HookConsumerWidget {
     );
   }
 
-  void _showEnvelopeMenu(BuildContext context, Envelope envelope) {
+  void _showEnvelopeMenu(
+    BuildContext context,
+    Envelope envelope,
+    ValueNotifier<bool> isReorderingEnvelopes,
+  ) {
     final l10n = AppLocalizations.of(context);
     final isHidden = envelope.isHidden ?? false;
 
@@ -461,6 +473,16 @@ class CategoryGroup extends HookConsumerWidget {
                 onTap: () {
                   Navigator.of(ctx).pop();
                   onQuickBudget!(envelope);
+                },
+              ),
+            if (onReorderEnvelopes != null &&
+                categoryWithEnvelopes.envelopes.length > 1)
+              ListTile(
+                leading: const Icon(Icons.swap_vert_rounded),
+                title: Text(l10n.envelopeReorderHint),
+                onTap: () {
+                  Navigator.of(ctx).pop();
+                  isReorderingEnvelopes.value = true;
                 },
               ),
             if (onToggleHideEnvelope != null)

@@ -5,6 +5,7 @@ import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/envelope_actions_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/monthly_allocation_provider.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
+import 'package:openbudget_app/src/features/budget/widgets/budget_amount_keypad.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
@@ -29,7 +30,7 @@ class AddEnvelopeDialog extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final nameController = useTextEditingController();
-    final amountController = useTextEditingController();
+    final amountInput = useState('');
     final isSubmitting = useState(false);
 
     return AlertDialog(
@@ -54,23 +55,27 @@ class AddEnvelopeDialog extends HookConsumerWidget {
             textInputAction: TextInputAction.next,
           ),
           const SizedBox(height: SpacingTokens.md),
-          TextField(
-            controller: amountController,
-            decoration: InputDecoration(
-              labelText: l10n.budgetEnvelopeAmountLabel,
-              prefixText: '${currencyCode.symbol} ',
+          BudgetAmountField(
+            labelText: l10n.budgetEnvelopeAmountLabel,
+            currencyCode: currencyCode,
+            inputValue: amountInput.value,
+            hintText: formatBudgetAmountInputForField(
+              input: '0',
+              currencyCode: currencyCode,
             ),
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            textInputAction: TextInputAction.done,
-            onSubmitted: isSubmitting.value
-                ? null
-                : (_) => _submit(
-                    context,
-                    ref,
-                    nameController,
-                    amountController,
-                    isSubmitting,
-                  ),
+            prefixIcon: const Icon(Icons.payments_outlined),
+            enabled: !isSubmitting.value,
+            onTap: () async {
+              final nextInput = await showBudgetAmountKeypadSheet(
+                context: context,
+                currencyCode: currencyCode,
+                initialInput: amountInput.value,
+                title: l10n.budgetEnvelopeAmountLabel,
+              );
+              if (nextInput != null) {
+                amountInput.value = nextInput;
+              }
+            },
           ),
         ],
       ),
@@ -86,7 +91,7 @@ class AddEnvelopeDialog extends HookConsumerWidget {
                   context,
                   ref,
                   nameController,
-                  amountController,
+                  amountInput.value,
                   isSubmitting,
                 ),
           child: isSubmitting.value
@@ -105,16 +110,19 @@ class AddEnvelopeDialog extends HookConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     TextEditingController nameController,
-    TextEditingController amountController,
+    String amountInput,
     ValueNotifier<bool> isSubmitting,
   ) async {
     final l10n = AppLocalizations.of(context);
     final name = nameController.text.trim();
     if (name.isEmpty) return;
 
-    final amountText = amountController.text.trim();
-    final amount = double.tryParse(amountText) ?? 0;
-    final amountCents = (amount * _pow10(currencyCode.decimals)).round();
+    final amountCents =
+        parseBudgetAmountInputToCents(
+          input: amountInput,
+          currencyCode: currencyCode,
+        ) ??
+        0;
 
     isSubmitting.value = true;
     final navigator = Navigator.of(context);
@@ -154,12 +162,4 @@ class AddEnvelopeDialog extends HookConsumerWidget {
       );
     }
   }
-}
-
-double _pow10(int exponent) {
-  var result = 1.0;
-  for (var i = 0; i < exponent; i++) {
-    result *= 10;
-  }
-  return result;
 }

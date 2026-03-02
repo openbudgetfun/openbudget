@@ -5,8 +5,8 @@ import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/monthly_allocation_provider.dart';
+import 'package:openbudget_app/src/features/budget/widgets/budget_amount_keypad.dart';
 import 'package:openbudget_app/src/utils/currency_code_utils.dart';
-import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -28,7 +28,7 @@ class MoveMoneyDialog extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final amountController = useTextEditingController();
+    final amountInput = useState('');
     final fromEnvelopeId = useState<String?>(null);
     final toEnvelopeId = useState<String?>(null);
     final isSubmitting = useState(false);
@@ -81,16 +81,28 @@ class MoveMoneyDialog extends HookConsumerWidget {
               onChanged: (v) => toEnvelopeId.value = v,
             ),
             const SizedBox(height: SpacingTokens.md),
-            TextField(
-              controller: amountController,
-              decoration: InputDecoration(
-                labelText: '${l10n.transactionAmountLabel} (${currency.code})',
-                prefixText: '${currency.symbol} ',
-                hintText: formatCents(0, currency),
+            BudgetAmountField(
+              labelText: '${l10n.transactionAmountLabel} (${currency.code})',
+              currencyCode: currency,
+              inputValue: amountInput.value,
+              hintText: formatBudgetAmountInputForField(
+                input: '0',
+                currencyCode: currency,
               ),
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
+              prefixIcon: const Icon(Icons.payments_outlined),
+              enabled: !isSubmitting.value,
+              onTap: () async {
+                final nextInput = await showBudgetAmountKeypadSheet(
+                  context: context,
+                  currencyCode: currency,
+                  initialInput: amountInput.value,
+                  title: l10n.moveMoneyTitle,
+                  allowNegative: false,
+                );
+                if (nextInput != null) {
+                  amountInput.value = nextInput;
+                }
+              },
             ),
           ],
         ),
@@ -106,7 +118,7 @@ class MoveMoneyDialog extends HookConsumerWidget {
               : () => _submit(
                   context,
                   ref,
-                  amountController,
+                  amountInput.value,
                   fromEnvelopeId,
                   toEnvelopeId,
                   currency,
@@ -127,7 +139,7 @@ class MoveMoneyDialog extends HookConsumerWidget {
   Future<void> _submit(
     BuildContext context,
     WidgetRef ref,
-    TextEditingController amountController,
+    String amountInput,
     ValueNotifier<String?> fromEnvelopeId,
     ValueNotifier<String?> toEnvelopeId,
     CurrencyCode currency,
@@ -145,10 +157,13 @@ class MoveMoneyDialog extends HookConsumerWidget {
       return;
     }
 
-    final amount = double.tryParse(amountController.text.trim()) ?? 0;
-    if (amount <= 0) return;
-
-    final amountCents = (amount * _pow10(currency.decimals)).round();
+    final amountCents =
+        parseBudgetAmountInputToCents(
+          input: amountInput,
+          currencyCode: currency,
+        ) ??
+        0;
+    if (amountCents <= 0) return;
     isSubmitting.value = true;
 
     try {
@@ -178,13 +193,5 @@ class MoveMoneyDialog extends HookConsumerWidget {
         variant: AppToastVariant.error,
       );
     }
-  }
-
-  double _pow10(int exponent) {
-    var result = 1.0;
-    for (var i = 0; i < exponent; i++) {
-      result *= 10;
-    }
-    return result;
   }
 }
