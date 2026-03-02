@@ -41,12 +41,11 @@ enum _PlanMenuAction {
   toggleHidden,
   reorderCategories,
   saveTemplate,
-  setThemeLight,
-  setThemeDark,
+  toggleTheme,
   collapseExpand,
   hideProgressBars,
   hideAmounts,
-  settings,
+  planSettings,
 }
 
 enum _PlanOnboardingType { addAccounts, assignMoney, finish }
@@ -82,6 +81,11 @@ class BudgetDetailScreen extends HookConsumerWidget {
     final hideProgressBars = ref.watch(hideProgressBarsProvider);
     final recentMoves = ref.watch(recentMovesForBudgetProvider(budgetId));
     final currentThemeMode = ref.watch(themeModeProvider);
+    final isDarkMode =
+        currentThemeMode == ThemeMode.dark ||
+        (currentThemeMode == ThemeMode.system &&
+            theme.brightness == Brightness.dark);
+
     void navigateAfterMenuClose(VoidCallback callback) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!context.mounted) return;
@@ -427,6 +431,11 @@ class BudgetDetailScreen extends HookConsumerWidget {
               Theme.of(context),
             ),
             scrolledUnderElevation: 0,
+            leading: IconButton(
+              tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+              icon: const Icon(Icons.close_rounded),
+              onPressed: () => context.goNamed(homeRoute),
+            ),
             centerTitle: true,
             title: Text(
               summary.budget.name,
@@ -469,14 +478,12 @@ class BudgetDetailScreen extends HookConsumerWidget {
                       builder: (_) => BudgetTemplateDialog(budgetId: budgetId),
                     );
                   }),
-                  _PlanMenuAction.setThemeLight =>
+                  _PlanMenuAction.toggleTheme =>
                     ref
                         .read(themeModeProvider.notifier)
-                        .setThemeMode(ThemeMode.light),
-                  _PlanMenuAction.setThemeDark =>
-                    ref
-                        .read(themeModeProvider.notifier)
-                        .setThemeMode(ThemeMode.dark),
+                        .setThemeMode(
+                          isDarkMode ? ThemeMode.light : ThemeMode.dark,
+                        ),
                   _PlanMenuAction.collapseExpand =>
                     collapseCategories.value = !collapseCategories.value,
                   _PlanMenuAction.hideProgressBars =>
@@ -487,9 +494,9 @@ class BudgetDetailScreen extends HookConsumerWidget {
                     ref
                         .read(hideAmountsProvider.notifier)
                         .setHideAmounts(value: !hideAmounts),
-                  _PlanMenuAction.settings => navigateAfterMenuClose(() {
+                  _PlanMenuAction.planSettings => navigateAfterMenuClose(() {
                     context.goNamed(
-                      settingsRoute,
+                      planSettingsRoute,
                       pathParameters: {'id': budgetId},
                     );
                   }),
@@ -560,19 +567,12 @@ class BudgetDetailScreen extends HookConsumerWidget {
                   ),
                   const PopupMenuDivider(),
                   PopupMenuItem<_PlanMenuAction>(
-                    value: _PlanMenuAction.setThemeLight,
+                    value: _PlanMenuAction.toggleTheme,
                     child: buildMenuLabel(
-                      icon: Icons.light_mode_rounded,
-                      label: l10n.themeLight,
-                      checked: currentThemeMode == ThemeMode.light,
-                    ),
-                  ),
-                  PopupMenuItem<_PlanMenuAction>(
-                    value: _PlanMenuAction.setThemeDark,
-                    child: buildMenuLabel(
-                      icon: Icons.dark_mode_rounded,
-                      label: l10n.themeDark,
-                      checked: currentThemeMode == ThemeMode.dark,
+                      icon: isDarkMode
+                          ? Icons.light_mode_rounded
+                          : Icons.dark_mode_rounded,
+                      label: isDarkMode ? l10n.themeLight : l10n.themeDark,
                     ),
                   ),
                   const PopupMenuDivider(),
@@ -605,12 +605,12 @@ class BudgetDetailScreen extends HookConsumerWidget {
                   ),
                   const PopupMenuDivider(),
                   PopupMenuItem<_PlanMenuAction>(
-                    value: _PlanMenuAction.settings,
+                    value: _PlanMenuAction.planSettings,
                     child: Row(
                       children: [
                         const Icon(Icons.settings_outlined, size: 18),
                         const SizedBox(width: SpacingTokens.sm),
-                        Text(l10n.settingsTitle),
+                        Text(l10n.settingsPlanSettings),
                       ],
                     ),
                   ),
@@ -2140,7 +2140,7 @@ class _InlineAmountEditor extends HookWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final canApply = inputValue.isNotEmpty && inputValue != '-';
-    const actionRowMinHeight = 62.0;
+    const actionRowHeight = 70.0;
 
     Widget key(
       String label, {
@@ -2174,7 +2174,7 @@ class _InlineAmountEditor extends HookWidget {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(RadiusTokens.sm),
               ),
-              minimumSize: Size.fromHeight(minHeight),
+              fixedSize: Size.fromHeight(minHeight),
               elevation: 0,
             ),
             child: child ?? Text(label),
@@ -2219,7 +2219,7 @@ class _InlineAmountEditor extends HookWidget {
                   key(
                     l10n.autoAssignButton,
                     onPressed: onAutoAssign,
-                    minHeight: actionRowMinHeight,
+                    minHeight: actionRowHeight,
                     child: Text(
                       l10n.autoAssignButton,
                       textAlign: TextAlign.center,
@@ -2229,7 +2229,7 @@ class _InlineAmountEditor extends HookWidget {
                   key(
                     l10n.envelopeActionMoveMoney,
                     onPressed: onMoveMoney,
-                    minHeight: actionRowMinHeight,
+                    minHeight: actionRowHeight,
                     child: Text(
                       l10n.envelopeActionMoveMoney,
                       textAlign: TextAlign.center,
@@ -2239,7 +2239,7 @@ class _InlineAmountEditor extends HookWidget {
                   key(
                     l10n.budgetInlineEditorDetails,
                     onPressed: onDetails,
-                    minHeight: actionRowMinHeight,
+                    minHeight: actionRowHeight,
                     child: Text(
                       l10n.budgetInlineEditorDetails,
                       textAlign: TextAlign.center,

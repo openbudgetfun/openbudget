@@ -40,7 +40,8 @@ class EditEnvelopeDialog extends HookConsumerWidget {
     final isSubmitting = useState(false);
 
     return AlertDialog(
-      insetPadding: const EdgeInsets.symmetric(horizontal: SpacingTokens.md),
+      insetPadding: const EdgeInsets.symmetric(horizontal: SpacingTokens.sm),
+      constraints: const BoxConstraints(maxWidth: 560),
       title: Text(
         l10n.editEnvelopeTitle,
         style: theme.textTheme.titleMedium?.copyWith(
@@ -104,6 +105,15 @@ class EditEnvelopeDialog extends HookConsumerWidget {
       ),
       actions: [
         TextButton(
+          onPressed: isSubmitting.value
+              ? null
+              : () => _delete(context, ref, isSubmitting),
+          child: Text(
+            l10n.deleteConfirmButton,
+            style: TextStyle(color: Theme.of(context).colorScheme.error),
+          ),
+        ),
+        TextButton(
           onPressed: () => Navigator.of(context).pop(),
           child: Text(l10n.dialogCancel),
         ),
@@ -128,6 +138,60 @@ class EditEnvelopeDialog extends HookConsumerWidget {
         ),
       ],
     );
+  }
+
+  Future<void> _delete(
+    BuildContext context,
+    WidgetRef ref,
+    ValueNotifier<bool> isSubmitting,
+  ) async {
+    final l10n = AppLocalizations.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.deleteConfirmTitle),
+        content: Text('${l10n.deleteConfirmMessage}\n\n"${envelope.name}"'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l10n.dialogCancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            style: FilledButton.styleFrom(
+              backgroundColor: colorScheme.error,
+              foregroundColor: colorScheme.onError,
+            ),
+            child: Text(l10n.deleteConfirmButton),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !context.mounted) return;
+
+    isSubmitting.value = true;
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await ref
+          .read(envelopeActionsProvider.notifier)
+          .deleteEnvelope(
+            envelopeId: envelope.id?.toString() ?? '',
+            categoryId: categoryId,
+            budgetId: budgetId,
+          );
+      messenger.showSnackBar(SnackBar(content: Text(l10n.deleteSuccess)));
+      if (context.mounted) Navigator.of(context).pop();
+    } on Exception {
+      isSubmitting.value = false;
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(l10n.deleteError),
+          backgroundColor: colorScheme.error,
+        ),
+      );
+    }
   }
 
   Future<void> _submit(

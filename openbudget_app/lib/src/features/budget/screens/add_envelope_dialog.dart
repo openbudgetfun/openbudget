@@ -32,7 +32,8 @@ class AddEnvelopeDialog extends HookConsumerWidget {
     final isSubmitting = useState(false);
 
     return AlertDialog(
-      insetPadding: const EdgeInsets.symmetric(horizontal: SpacingTokens.md),
+      insetPadding: const EdgeInsets.symmetric(horizontal: SpacingTokens.sm),
+      constraints: const BoxConstraints(maxWidth: 560),
       title: Text(
         l10n.budgetAddEnvelope,
         style: theme.textTheme.titleMedium?.copyWith(

@@ -26,6 +26,8 @@ class AutoAssignDialog extends HookConsumerWidget {
     final isAssigning = useState(false);
 
     return AlertDialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: SpacingTokens.sm),
+      constraints: const BoxConstraints(maxWidth: 560),
       title: Row(
         children: [
           const Icon(

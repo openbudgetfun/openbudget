@@ -35,6 +35,8 @@ class QuickBudgetDialog extends HookConsumerWidget {
     );
 
     return AlertDialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: SpacingTokens.sm),
+      constraints: const BoxConstraints(maxWidth: 560),
       title: Text(l10n.quickBudgetTitle),
       content: suggestion.when(
         loading: () => const SizedBox(

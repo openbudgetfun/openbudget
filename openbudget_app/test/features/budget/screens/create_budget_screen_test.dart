@@ -30,9 +30,10 @@ void main() {
       await tester.pump();
 
       expect(find.text('Welcome, new OpenBudgeter!'), findsOneWidget);
+      expect(find.text('Budget Name'), findsOneWidget);
       expect(find.text('Plan Currency'), findsOneWidget);
       expect(find.text('US Dollar'), findsOneWidget);
-      expect(find.byType(TextField), findsNothing);
+      expect(find.byType(TextField), findsOneWidget);
       expect(find.byType(DropdownButtonFormField<String>), findsNothing);
     });
 

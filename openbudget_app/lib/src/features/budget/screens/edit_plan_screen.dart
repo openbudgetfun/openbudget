@@ -515,6 +515,9 @@ class _EditPlanContent extends HookConsumerWidget {
     if (categoryId.isEmpty) return;
     showDialog<void>(
       context: context,
+      barrierColor: OpenBudgetPalette.overlayScrimFor(
+        Theme.of(context),
+      ).withAlpha(210),
       builder: (_) => AddEnvelopeDialog(
         categoryId: categoryId,
         budgetId: budgetId,
@@ -825,7 +828,7 @@ class _EditPlanCategoryCard extends HookWidget {
             ),
             decoration: BoxDecoration(
               color: OpenBudgetPalette.bgTertiaryFor(Theme.of(context)),
-              borderRadius: BorderRadius.vertical(
+              borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(RadiusTokens.md),
               ),
             ),

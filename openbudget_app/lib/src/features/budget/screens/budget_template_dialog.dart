@@ -20,8 +20,9 @@ class BudgetTemplateDialog extends HookConsumerWidget {
     final isSaving = useState(false);
 
     return Dialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: SpacingTokens.sm),
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 420, maxHeight: 520),
+        constraints: const BoxConstraints(maxWidth: 560, maxHeight: 560),
         child: Padding(
           padding: const EdgeInsets.all(SpacingTokens.lg),
           child: Column(

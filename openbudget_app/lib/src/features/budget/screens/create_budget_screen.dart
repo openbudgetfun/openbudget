@@ -16,6 +16,9 @@ class CreateBudgetScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
+    final nameController = useTextEditingController(
+      text: l10n.createBudgetDefaultName,
+    );
     final selectedCurrency = useState(CurrencyCode.usd);
     final isSubmitting = useState(false);
     final theme = Theme.of(context);
@@ -90,6 +93,17 @@ class CreateBudgetScreen extends HookConsumerWidget {
                       textAlign: TextAlign.left,
                     ),
                     const SizedBox(height: SpacingTokens.xxl),
+                    TextField(
+                      controller: nameController,
+                      enabled: !isSubmitting.value,
+                      textInputAction: TextInputAction.next,
+                      onTapOutside: (_) => FocusScope.of(context).unfocus(),
+                      decoration: InputDecoration(
+                        labelText: l10n.createBudgetNameLabel,
+                        prefixIcon: const Icon(Icons.label_outlined),
+                      ),
+                    ),
+                    const SizedBox(height: SpacingTokens.md),
                     _PlanCurrencyRow(
                       label: l10n.createBudgetPlanCurrency,
                       value: selectedCurrency.value.displayName,
@@ -112,10 +126,13 @@ class CreateBudgetScreen extends HookConsumerWidget {
                           : () async {
                               isSubmitting.value = true;
                               try {
+                                final budgetName = nameController.text.trim();
                                 final budgetId = await ref
                                     .read(createBudgetProvider.notifier)
                                     .create(
-                                      name: l10n.createBudgetDefaultName,
+                                      name: budgetName.isEmpty
+                                          ? l10n.createBudgetDefaultName
+                                          : budgetName,
                                       currency: selectedCurrency.value,
                                     );
                                 if (context.mounted) {
