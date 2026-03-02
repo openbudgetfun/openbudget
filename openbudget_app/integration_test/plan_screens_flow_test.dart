@@ -521,7 +521,13 @@ void main() {
     );
     expect(saveTargetButton.onPressed, isNull);
 
-    await tester.enterText(find.byType(TextField).first, '2800');
+    await tester.tap(find.text('I need'));
+    await tester.pumpAndSettle();
+    for (final digit in ['2', '8', '0', '0']) {
+      await tester.tap(find.byKey(Key('budget-keypad-digit-$digit')));
+      await tester.pump();
+    }
+    await tester.tap(find.byKey(const Key('budget-keypad-equals')));
     await tester.pumpAndSettle();
 
     saveTargetButton = tester.widget<FilledButton>(
@@ -728,8 +734,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byIcon(Icons.swap_vert_rounded));
+    await tester.tap(find.byIcon(Icons.more_horiz_rounded));
     await tester.pumpAndSettle();
+    await _tapPopupMenuItem(tester, 'Reorder Categories');
     expect(find.widgetWithText(TextButton, 'Done'), findsOneWidget);
     await tester.scrollUntilVisible(
       find.text('Groceries Group'),

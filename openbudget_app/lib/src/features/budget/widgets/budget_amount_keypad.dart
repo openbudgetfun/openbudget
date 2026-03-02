@@ -99,11 +99,13 @@ class BudgetAmountKeypad extends StatelessWidget {
       bool primary = false,
       bool accent = false,
       Widget? child,
+      Key? buttonKey,
     }) {
       return Expanded(
         child: Padding(
           padding: const EdgeInsets.all(SpacingTokens.xs),
           child: FilledButton(
+            key: buttonKey,
             onPressed: onPressed,
             style: FilledButton.styleFrom(
               backgroundColor: primary
@@ -143,9 +145,24 @@ class BudgetAmountKeypad extends StatelessWidget {
       children: [
         Row(
           children: [
-            key('7', onPressed: () => appendDigit('7'), accent: true),
-            key('8', onPressed: () => appendDigit('8'), accent: true),
-            key('9', onPressed: () => appendDigit('9'), accent: true),
+            key(
+              '7',
+              onPressed: () => appendDigit('7'),
+              accent: true,
+              buttonKey: const Key('budget-keypad-digit-7'),
+            ),
+            key(
+              '8',
+              onPressed: () => appendDigit('8'),
+              accent: true,
+              buttonKey: const Key('budget-keypad-digit-8'),
+            ),
+            key(
+              '9',
+              onPressed: () => appendDigit('9'),
+              accent: true,
+              buttonKey: const Key('budget-keypad-digit-9'),
+            ),
             key(
               '-',
               onPressed: allowNegative
@@ -159,14 +176,30 @@ class BudgetAmountKeypad extends StatelessWidget {
                     }
                   : null,
               accent: true,
+              buttonKey: const Key('budget-keypad-minus'),
             ),
           ],
         ),
         Row(
           children: [
-            key('4', onPressed: () => appendDigit('4'), accent: true),
-            key('5', onPressed: () => appendDigit('5'), accent: true),
-            key('6', onPressed: () => appendDigit('6'), accent: true),
+            key(
+              '4',
+              onPressed: () => appendDigit('4'),
+              accent: true,
+              buttonKey: const Key('budget-keypad-digit-4'),
+            ),
+            key(
+              '5',
+              onPressed: () => appendDigit('5'),
+              accent: true,
+              buttonKey: const Key('budget-keypad-digit-5'),
+            ),
+            key(
+              '6',
+              onPressed: () => appendDigit('6'),
+              accent: true,
+              buttonKey: const Key('budget-keypad-digit-6'),
+            ),
             key(
               '+',
               onPressed: () {
@@ -175,15 +208,36 @@ class BudgetAmountKeypad extends StatelessWidget {
                 }
               },
               accent: true,
+              buttonKey: const Key('budget-keypad-plus'),
             ),
           ],
         ),
         Row(
           children: [
-            key('1', onPressed: () => appendDigit('1'), accent: true),
-            key('2', onPressed: () => appendDigit('2'), accent: true),
-            key('3', onPressed: () => appendDigit('3'), accent: true),
-            key('=', onPressed: canSubmit ? onSubmit : null, accent: true),
+            key(
+              '1',
+              onPressed: () => appendDigit('1'),
+              accent: true,
+              buttonKey: const Key('budget-keypad-digit-1'),
+            ),
+            key(
+              '2',
+              onPressed: () => appendDigit('2'),
+              accent: true,
+              buttonKey: const Key('budget-keypad-digit-2'),
+            ),
+            key(
+              '3',
+              onPressed: () => appendDigit('3'),
+              accent: true,
+              buttonKey: const Key('budget-keypad-digit-3'),
+            ),
+            key(
+              '=',
+              onPressed: canSubmit ? onSubmit : null,
+              accent: true,
+              buttonKey: const Key('budget-keypad-equals'),
+            ),
           ],
         ),
         Row(
@@ -192,8 +246,14 @@ class BudgetAmountKeypad extends StatelessWidget {
               'x',
               onPressed: onClear ?? () => onChanged(''),
               child: const Icon(Icons.close_rounded),
+              buttonKey: const Key('budget-keypad-clear'),
             ),
-            key('0', onPressed: () => appendDigit('0'), accent: true),
+            key(
+              '0',
+              onPressed: () => appendDigit('0'),
+              accent: true,
+              buttonKey: const Key('budget-keypad-digit-0'),
+            ),
             key(
               '',
               onPressed: () {
@@ -201,12 +261,14 @@ class BudgetAmountKeypad extends StatelessWidget {
                 onChanged(inputValue.substring(0, inputValue.length - 1));
               },
               child: const Icon(Icons.backspace_outlined),
+              buttonKey: const Key('budget-keypad-backspace'),
             ),
             key(
               l10n.dialogDone,
               onPressed: canSubmit ? onSubmit : null,
               primary: true,
               child: const Icon(Icons.subdirectory_arrow_left_rounded),
+              buttonKey: const Key('budget-keypad-done'),
             ),
           ],
         ),

@@ -154,7 +154,13 @@ void main() {
       await tester.tap(find.text('Add Target').first);
       await tester.pumpAndSettle();
       expect(find.text('Save Target'), findsOneWidget);
-      await tester.enterText(find.byType(TextField).first, '2800');
+      await tester.tap(find.text('I need'));
+      await tester.pumpAndSettle();
+      for (final digit in ['2', '8', '0', '0']) {
+        await tester.tap(find.byKey(Key('budget-keypad-digit-$digit')));
+        await tester.pump();
+      }
+      await tester.tap(find.byKey(const Key('budget-keypad-equals')));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Cancel'));
       await tester.pumpAndSettle();
