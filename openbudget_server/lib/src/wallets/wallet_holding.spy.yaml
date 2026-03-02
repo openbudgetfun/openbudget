@@ -1,0 +1,21 @@
+### Native-asset holding for a wallet connection.
+class: WalletHolding
+table: wallet_holding
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  walletConnectionId: UuidValue, relation(parent=wallet_connection)
+  chain: String
+  assetId: String
+  symbol: String
+  decimals: int
+  quantityBaseUnits: String
+  quantityDisplay: double
+  usdPrice: double?
+  usdValue: double?
+  lastSyncedAt: DateTime, default=now
+indexes:
+  wallet_holding_connection_asset_idx:
+    fields: walletConnectionId, assetId
+    unique: true
+  wallet_holding_connection_idx:
+    fields: walletConnectionId

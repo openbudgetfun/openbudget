@@ -272,7 +272,7 @@ void main() {
     expect(find.text('Add Unlinked Account'), findsOneWidget);
     expect(
       find.textContaining(
-        'Linked connections for "Citi" are currently unavailable',
+        'Linked connections are only available on iOS/Android right now',
       ),
       findsOneWidget,
     );
@@ -397,7 +397,7 @@ void main() {
   });
 
   patrolWidgetTest(
-    'desktop linked bank tap shows loading overlay before fallback',
+    'desktop linked bank tap falls back to unlinked account guidance',
     ($) async {
       final tester = $.tester;
       addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -412,25 +412,18 @@ void main() {
       await tester.pumpAndSettle();
 
       await tester.tap(find.text('Citi'));
-      await tester.pump(const Duration(milliseconds: 150));
-      await tester.pump();
-
-      expect(find.text('Loading institutions...'), findsOneWidget);
-      await _captureAddAccountStepScreenshot(
-        tester,
-        'add-accounts-loading-overlay-desktop-screen',
-      );
-
-      await tester.pump(const Duration(milliseconds: 800));
       await tester.pumpAndSettle();
 
-      expect(find.text('Loading institutions...'), findsNothing);
       expect(find.text('Add Unlinked Account'), findsOneWidget);
       expect(
         find.textContaining(
-          'Linked connections for "Citi" are currently unavailable',
+          'Linked connections are only available on iOS/Android right now',
         ),
         findsOneWidget,
+      );
+      await _captureAddAccountStepScreenshot(
+        tester,
+        'add-accounts-desktop-unlinked-fallback-screen',
       );
     },
   );

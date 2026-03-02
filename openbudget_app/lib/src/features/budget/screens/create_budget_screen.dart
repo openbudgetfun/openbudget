@@ -103,7 +103,7 @@ class CreateBudgetScreen extends HookConsumerWidget {
                                     );
                                 if (context.mounted) {
                                   context.goNamed(
-                                    editPlanRoute,
+                                    addAccountRoute,
                                     pathParameters: {'id': budgetId},
                                   );
                                 }

@@ -1,0 +1,6 @@
+### Result payload after connecting or refreshing a wallet.
+class: WalletConnectResult
+fields:
+  account: Account
+  holdings: List<WalletHolding>
+  totalUsdValue: double
