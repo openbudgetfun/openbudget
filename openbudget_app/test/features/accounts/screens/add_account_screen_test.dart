@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
+import 'package:openbudget_app/src/features/accounts/providers/institution_catalog_provider.dart';
 import 'package:openbudget_app/src/features/accounts/screens/add_account_screen.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
@@ -21,6 +22,11 @@ void main() {
   const budgetId = 'test-budget-1';
   const unlinkedTypeTileKey = Key('add-account-unlinked-type-tile');
   const checkingTypeOptionKey = ValueKey('add-account-type-option-checking');
+  final testInstitutions = <Institution>[
+    Institution(slug: 'citi', name: 'Citi', plaidInstitutionId: 'ins_citi'),
+    Institution(slug: 'chase', name: 'Chase', plaidInstitutionId: 'ins_chase'),
+    Institution(slug: 'wise', name: 'Wise', plaidInstitutionId: 'ins_wise'),
+  ];
 
   Budget makeBudget({String currencyCode = 'USD'}) => Budget(
     id: UuidValue.fromString('00000000-0000-0000-0000-000000000001'),
@@ -52,6 +58,9 @@ void main() {
       overrides: [
         budgetDetailProvider.overrideWith(
           (ref, id) async => makeBudget(currencyCode: currencyCode),
+        ),
+        institutionCatalogProvider.overrideWith(
+          (ref, locationCode) async => testInstitutions,
         ),
       ],
       child: MaterialApp.router(
