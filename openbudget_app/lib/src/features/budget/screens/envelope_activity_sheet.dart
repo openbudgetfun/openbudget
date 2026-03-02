@@ -197,24 +197,31 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
                         );
 
                   if (transactions.isEmpty) {
-                    return Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.receipt_long_rounded,
-                            size: 40,
-                            color: colorScheme.outlineVariant,
+                    return LayoutBuilder(
+                      builder: (context, constraints) {
+                        final showIcon = constraints.maxHeight >= 72;
+                        return Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (showIcon) ...[
+                                Icon(
+                                  Icons.receipt_long_rounded,
+                                  size: 40,
+                                  color: colorScheme.outlineVariant,
+                                ),
+                                const SizedBox(height: SpacingTokens.sm),
+                              ],
+                              Text(
+                                l10n.envelopeNoActivity,
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: SpacingTokens.sm),
-                          Text(
-                            l10n.envelopeNoActivity,
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ],
-                      ),
+                        );
+                      },
                     );
                   }
 

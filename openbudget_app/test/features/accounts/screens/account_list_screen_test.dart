@@ -342,6 +342,12 @@ void main() {
 
       expect(find.text('Checking'), findsOneWidget);
       expect(find.text('Savings'), findsOneWidget);
+      await tester.scrollUntilVisible(
+        find.text('Credit Card'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
       expect(find.text('Credit Card'), findsOneWidget);
     });
 
