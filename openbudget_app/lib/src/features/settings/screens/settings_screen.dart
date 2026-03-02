@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/auth/providers/auth_provider.dart';
+import 'package:openbudget_app/src/features/auth/providers/auth_state.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
 import 'package:openbudget_app/src/features/settings/providers/budget_export_provider.dart';
+import 'package:openbudget_app/src/providers/theme_mode_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/theme/openbudget_palette.dart';
+import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 class SettingsScreen extends HookConsumerWidget {
@@ -22,14 +25,16 @@ class SettingsScreen extends HookConsumerWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final budgetAsync = ref.watch(budgetDetailProvider(budgetId));
+    final authState = ref.watch(authProvider);
+    final themeMode = ref.watch(themeModeProvider);
 
     return Scaffold(
-      backgroundColor: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
+      backgroundColor: OpenBudgetPalette.bgPrimaryFor(theme),
       appBar: AppBar(
-        backgroundColor: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
-        surfaceTintColor: OpenBudgetPalette.transparentFor(Theme.of(context)),
+        backgroundColor: OpenBudgetPalette.bgPrimaryFor(theme),
+        surfaceTintColor: OpenBudgetPalette.transparentFor(theme),
         automaticallyImplyLeading: false,
-        title: const SizedBox.shrink(),
+        title: Text(l10n.settingsTitle),
         actions: [
           TextButton(
             onPressed: () =>
@@ -54,281 +59,350 @@ class SettingsScreen extends HookConsumerWidget {
             ),
           ),
         ),
-        data: (budget) => ListView(
-          padding: const EdgeInsets.all(SpacingTokens.md),
-          children: [
-            Text(
-              l10n.settingsTitle,
-              style: theme.textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.w700,
+        data: (budget) {
+          final accountIdentity = _resolveAccountIdentity(
+            authState: authState,
+            budget: budget,
+          );
+          final themeModeLabel = _themeModeLabel(
+            l10n: l10n,
+            themeMode: themeMode,
+          );
+          final lastUpdatedLabel = _formatDateTime(budget.updatedAt);
+
+          return ListView(
+            padding: const EdgeInsets.all(SpacingTokens.md),
+            children: [
+              _SettingsOverviewCard(
+                budgetName: budget.name,
+                currencyCode: budget.currencyCode,
+                displayCurrencyCode: budget.displayCurrencyCode,
+                ownerLabel: accountIdentity,
+                lastUpdatedLabel: lastUpdatedLabel,
               ),
-            ),
-            const SizedBox(height: SpacingTokens.lg),
-            _SectionTitle(title: l10n.settingsCurrentPlan),
-            Padding(
-              padding: const EdgeInsets.only(
-                left: SpacingTokens.xs,
-                top: SpacingTokens.xs,
-              ),
-              child: Text(
-                budget.name,
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w700,
+              const SizedBox(height: SpacingTokens.lg),
+              _SectionTitle(title: l10n.settingsNavigationSection),
+              _SettingsCard(
+                child: Column(
+                  children: [
+                    _SettingsTile(
+                      icon: Icons.account_balance_wallet_rounded,
+                      label: l10n.accountListTitle,
+                      subtitle:
+                          'View and organize every account in your budget.',
+                      onTap: () => context.goNamed(
+                        accountListRoute,
+                        pathParameters: {'id': budgetId},
+                      ),
+                    ),
+                    const Divider(height: 1),
+                    _SettingsTile(
+                      icon: Icons.add_circle_outline_rounded,
+                      label: l10n.accountAddButton,
+                      subtitle: 'Add manual accounts, bank links, or wallets.',
+                      onTap: () => context.goNamed(
+                        addAccountRoute,
+                        pathParameters: {'id': budgetId},
+                      ),
+                    ),
+                    const Divider(height: 1),
+                    _SettingsTile(
+                      icon: Icons.repeat_rounded,
+                      label: l10n.recurringListTitle,
+                      onTap: () => context.goNamed(
+                        recurringListRoute,
+                        pathParameters: {'id': budgetId},
+                      ),
+                    ),
+                    const Divider(height: 1),
+                    _SettingsTile(
+                      icon: Icons.people_outline_rounded,
+                      label: l10n.morePayees,
+                      onTap: () => context.goNamed(
+                        payeeListRoute,
+                        pathParameters: {'id': budgetId},
+                      ),
+                    ),
+                    const Divider(height: 1),
+                    _SettingsTile(
+                      icon: Icons.rule_rounded,
+                      label: l10n.transactionRulesTitle,
+                      onTap: () => context.goNamed(
+                        transactionRulesRoute,
+                        pathParameters: {'id': budgetId},
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
-            const SizedBox(height: SpacingTokens.lg),
-            _SettingsCard(
-              child: Column(
-                children: [
-                  _SettingsTile(
-                    icon: Icons.build_outlined,
-                    label: l10n.settingsPlanSettings,
-                    onTap: () => context.goNamed(
-                      planSettingsRoute,
-                      pathParameters: {'id': budgetId},
+              const SizedBox(height: SpacingTokens.lg),
+              _SectionTitle(title: l10n.settingsCurrentPlan),
+              _SettingsCard(
+                child: Column(
+                  children: [
+                    _SettingsTile(
+                      icon: Icons.build_outlined,
+                      label: l10n.settingsPlanSettings,
+                      onTap: () => context.goNamed(
+                        planSettingsRoute,
+                        pathParameters: {'id': budgetId},
+                      ),
                     ),
-                  ),
-                  const Divider(height: 1),
-                  _SettingsTile(
-                    icon: Icons.add_circle_outline_rounded,
-                    label: l10n.settingsNewPlan,
-                    onTap: () => context.goNamed(createBudgetRoute),
-                  ),
-                  const Divider(height: 1),
-                  _SettingsTile(
-                    icon: Icons.folder_open_rounded,
-                    label: l10n.settingsOpenPlan,
-                    onTap: () => context.go(homePath),
-                  ),
-                  const Divider(height: 1),
-                  _SettingsTile(
-                    icon: Icons.eco_rounded,
-                    label: l10n.settingsFreshStart,
-                    onTap: () => _confirmFreshStart(context),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: SpacingTokens.lg),
-            _SectionTitle(title: l10n.settingsAppSection),
-            _SettingsCard(
-              child: Column(
-                children: [
-                  _SettingsTile(
-                    icon: Icons.apps_rounded,
-                    label: l10n.settingsAppIcon,
-                    onTap: () => context.goNamed(
-                      appIconRoute,
-                      pathParameters: {'id': budgetId},
+                    const Divider(height: 1),
+                    _SettingsTile(
+                      icon: Icons.add_circle_outline_rounded,
+                      label: l10n.settingsNewPlan,
+                      onTap: () => context.goNamed(createBudgetRoute),
                     ),
-                  ),
-                  const Divider(height: 1),
-                  _SettingsTile(
-                    icon: Icons.tune_rounded,
-                    label: l10n.settingsDisplayOptions,
-                    onTap: () => context.goNamed(
-                      displayOptionsRoute,
-                      pathParameters: {'id': budgetId},
+                    const Divider(height: 1),
+                    _SettingsTile(
+                      icon: Icons.folder_open_rounded,
+                      label: l10n.settingsOpenPlan,
+                      onTap: () => context.go(homePath),
                     ),
-                  ),
-                  const Divider(height: 1),
-                  _SettingsTile(
-                    icon: Icons.repeat_rounded,
-                    label: l10n.recurringListTitle,
-                    onTap: () => context.goNamed(
-                      recurringListRoute,
-                      pathParameters: {'id': budgetId},
+                    const Divider(height: 1),
+                    _SettingsTile(
+                      icon: Icons.eco_rounded,
+                      label: l10n.settingsFreshStart,
+                      onTap: () => _confirmFreshStart(context),
                     ),
-                  ),
-                  const Divider(height: 1),
-                  _SettingsTile(
-                    icon: Icons.people_outline_rounded,
-                    label: l10n.morePayees,
-                    onTap: () => context.goNamed(
-                      payeeListRoute,
-                      pathParameters: {'id': budgetId},
-                    ),
-                  ),
-                  const Divider(height: 1),
-                  _SettingsTile(
-                    icon: Icons.rule_rounded,
-                    label: l10n.transactionRulesTitle,
-                    onTap: () => context.goNamed(
-                      transactionRulesRoute,
-                      pathParameters: {'id': budgetId},
-                    ),
-                  ),
-                  const Divider(height: 1),
-                  _SettingsTile(
-                    icon: Icons.file_upload_outlined,
-                    label: l10n.moreImport,
-                    onTap: () => context.goNamed(
-                      importTransactionsRoute,
-                      pathParameters: {'id': budgetId},
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: SpacingTokens.lg),
-            _SectionTitle(title: l10n.settingsDataSection),
-            _SettingsCard(
-              child: _SettingsTile(
-                icon: Icons.download_rounded,
-                label: l10n.settingsExportData,
-                subtitle: l10n.settingsExportDataHint,
-                onTap: () => _exportBudgetData(context, ref),
-              ),
-            ),
-            const SizedBox(height: SpacingTokens.lg),
-            _SectionTitle(title: l10n.settingsAccountSection),
-            _SettingsCard(
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(
-                      SpacingTokens.md,
-                      SpacingTokens.md,
-                      SpacingTokens.md,
-                      SpacingTokens.sm,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          l10n.settingsLoggedInAs,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: OpenBudgetPalette.fgSecondaryFor(
-                              Theme.of(context),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          l10n.settingsAccountEmail,
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Divider(height: 1),
-                  _SettingsTile(
-                    icon: Icons.person_rounded,
-                    label: l10n.settingsAccountSettings,
-                    subtitle: l10n.settingsAccountSettingsHint,
-                    onTap: () => context.goNamed(
-                      accountSettingsRoute,
-                      pathParameters: {'id': budgetId},
-                    ),
-                  ),
-                  const Divider(height: 1),
-                  _SettingsTile(
-                    icon: Icons.diversity_1_rounded,
-                    label: l10n.settingsTogether,
-                    onTap: () =>
-                        _showComingSoon(context, l10n.settingsTogether),
-                  ),
-                  const Divider(height: 1),
-                  _SettingsTile(
-                    icon: Icons.account_balance_rounded,
-                    label: l10n.settingsManageBankConnections,
-                    subtitle: 'Currently unavailable in this build',
-                    enabled: false,
-                    onTap: null,
-                  ),
-                  const Divider(height: 1),
-                  _SettingsTile(
-                    icon: Icons.logout_rounded,
-                    label: l10n.settingsLogOut,
-                    onTap: () => _confirmLogout(context, ref),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: SpacingTokens.lg),
-            _SectionTitle(title: l10n.settingsMiscSection),
-            _SettingsCard(
-              child: Column(
-                children: [
-                  _SettingsTile(
-                    icon: Icons.favorite_rounded,
-                    label: l10n.settingsWriteAReview,
-                    onTap: () =>
-                        _showComingSoon(context, l10n.settingsWriteAReview),
-                  ),
-                  const Divider(height: 1),
-                  _SettingsTile(
-                    icon: Icons.near_me_rounded,
-                    label: l10n.settingsSendDiagnostics,
-                    onTap: () =>
-                        _showComingSoon(context, l10n.settingsSendDiagnostics),
-                  ),
-                  const Divider(height: 1),
-                  _SettingsTile(
-                    icon: Icons.description_outlined,
-                    label: l10n.settingsLegal,
-                    onTap: () => _showComingSoon(context, l10n.settingsLegal),
-                  ),
-                  const Divider(height: 1),
-                  _SettingsTile(
-                    icon: Icons.description_outlined,
-                    label: l10n.settingsPrivacyPolicy,
-                    onTap: () =>
-                        _showComingSoon(context, l10n.settingsPrivacyPolicy),
-                  ),
-                  const Divider(height: 1),
-                  _SettingsTile(
-                    icon: Icons.description_outlined,
-                    label: l10n.settingsCaliforniaPrivacyPolicy,
-                    onTap: () => _showComingSoon(
-                      context,
-                      l10n.settingsCaliforniaPrivacyPolicy,
-                    ),
-                  ),
-                  const Divider(height: 1),
-                  _SettingsTile(
-                    icon: Icons.description_outlined,
-                    label: l10n.settingsYourPrivacyChoices,
-                    onTap: () => _showComingSoon(
-                      context,
-                      l10n.settingsYourPrivacyChoices,
-                    ),
-                  ),
-                  const Divider(height: 1),
-                  _SettingsTile(
-                    icon: Icons.description_outlined,
-                    label: l10n.settingsTermsOfService,
-                    onTap: () =>
-                        _showComingSoon(context, l10n.settingsTermsOfService),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: SpacingTokens.xl),
-            Center(
-              child: Text(
-                l10n.settingsVersion,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
+                  ],
                 ),
               ),
-            ),
-            const SizedBox(height: SpacingTokens.xs),
-            Center(
-              child: Text(
-                l10n.settingsLastSynced,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
+              const SizedBox(height: SpacingTokens.lg),
+              _SectionTitle(title: l10n.settingsAppSection),
+              _SettingsCard(
+                child: Column(
+                  children: [
+                    _SettingsTile(
+                      icon: Icons.tune_rounded,
+                      label: l10n.settingsDisplayOptions,
+                      onTap: () => context.goNamed(
+                        displayOptionsRoute,
+                        pathParameters: {'id': budgetId},
+                      ),
+                    ),
+                    const Divider(height: 1),
+                    _SettingsTile(
+                      icon: Icons.apps_rounded,
+                      label: l10n.settingsAppIcon,
+                      onTap: () => context.goNamed(
+                        appIconRoute,
+                        pathParameters: {'id': budgetId},
+                      ),
+                    ),
+                    const Divider(height: 1),
+                    _SettingsTile(
+                      icon: Icons.palette_outlined,
+                      label: l10n.themeTitle,
+                      subtitle: themeModeLabel,
+                      onTap: () => _selectThemeMode(
+                        context: context,
+                        ref: ref,
+                        currentThemeMode: themeMode,
+                      ),
+                    ),
+                    const Divider(height: 1),
+                    _SettingsTile(
+                      icon: Icons.account_balance_rounded,
+                      label: l10n.settingsManageBankConnections,
+                      subtitle: 'Connect Plaid banks or add Solana wallets.',
+                      onTap: () => context.goNamed(
+                        addAccountRoute,
+                        pathParameters: {'id': budgetId},
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
-          ],
-        ),
+              const SizedBox(height: SpacingTokens.lg),
+              _SectionTitle(title: l10n.settingsDataSection),
+              _SettingsCard(
+                child: Column(
+                  children: [
+                    _SettingsTile(
+                      icon: Icons.download_rounded,
+                      label: l10n.settingsExportData,
+                      subtitle: l10n.settingsExportDataHint,
+                      onTap: () => _exportBudgetData(context, ref),
+                    ),
+                    const Divider(height: 1),
+                    _SettingsTile(
+                      icon: Icons.file_upload_outlined,
+                      label: l10n.moreImport,
+                      onTap: () => context.goNamed(
+                        importTransactionsRoute,
+                        pathParameters: {'id': budgetId},
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: SpacingTokens.lg),
+              _SectionTitle(title: l10n.settingsAccountSection),
+              _SettingsCard(
+                child: Column(
+                  children: [
+                    _AccountIdentityTile(accountIdentity: accountIdentity),
+                    const Divider(height: 1),
+                    _SettingsTile(
+                      icon: Icons.person_rounded,
+                      label: l10n.settingsAccountSettings,
+                      subtitle: l10n.settingsAccountSettingsHint,
+                      onTap: () => context.goNamed(
+                        accountSettingsRoute,
+                        pathParameters: {'id': budgetId},
+                      ),
+                    ),
+                    const Divider(height: 1),
+                    _SettingsTile(
+                      icon: Icons.logout_rounded,
+                      label: l10n.settingsLogOut,
+                      onTap: () => _confirmLogout(context, ref),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: SpacingTokens.lg),
+              _SectionTitle(title: l10n.settingsMiscSection),
+              _SettingsCard(
+                child: Column(
+                  children: [
+                    _SettingsTile(
+                      icon: Icons.favorite_rounded,
+                      label: l10n.settingsWriteAReview,
+                      onTap: () =>
+                          _showComingSoon(context, l10n.settingsWriteAReview),
+                    ),
+                    const Divider(height: 1),
+                    _SettingsTile(
+                      icon: Icons.near_me_rounded,
+                      label: l10n.settingsSendDiagnostics,
+                      onTap: () => _showComingSoon(
+                        context,
+                        l10n.settingsSendDiagnostics,
+                      ),
+                    ),
+                    const Divider(height: 1),
+                    _SettingsTile(
+                      icon: Icons.description_outlined,
+                      label: l10n.settingsPrivacyPolicy,
+                      onTap: () =>
+                          _showComingSoon(context, l10n.settingsPrivacyPolicy),
+                    ),
+                    const Divider(height: 1),
+                    _SettingsTile(
+                      icon: Icons.description_outlined,
+                      label: l10n.settingsTermsOfService,
+                      onTap: () =>
+                          _showComingSoon(context, l10n.settingsTermsOfService),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: SpacingTokens.xl),
+              Center(
+                child: Text(
+                  l10n.settingsVersion,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: OpenBudgetPalette.fgSecondaryFor(theme),
+                  ),
+                ),
+              ),
+              const SizedBox(height: SpacingTokens.xs),
+              Center(
+                child: Text(
+                  'Last updated: $lastUpdatedLabel',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: OpenBudgetPalette.fgSecondaryFor(theme),
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
+  }
+
+  String _resolveAccountIdentity({
+    required AuthState authState,
+    required Budget budget,
+  }) {
+    return switch (authState) {
+      Authenticated(:final userId) => userId,
+      _ => budget.ownerId.toString(),
+    };
+  }
+
+  String _themeModeLabel({
+    required AppLocalizations l10n,
+    required ThemeMode themeMode,
+  }) {
+    return switch (themeMode) {
+      ThemeMode.system => l10n.themeSystem,
+      ThemeMode.light => l10n.themeLight,
+      ThemeMode.dark => l10n.themeDark,
+    };
+  }
+
+  String _formatDateTime(DateTime timestamp) {
+    return DateFormat.yMMMd().add_jm().format(timestamp.toLocal());
+  }
+
+  Future<void> _selectThemeMode({
+    required BuildContext context,
+    required WidgetRef ref,
+    required ThemeMode currentThemeMode,
+  }) async {
+    final l10n = AppLocalizations.of(context);
+    final options = [ThemeMode.system, ThemeMode.light, ThemeMode.dark];
+
+    final selected = await showModalBottomSheet<ThemeMode>(
+      context: context,
+      showDragHandle: true,
+      builder: (sheetContext) {
+        final sheetTheme = Theme.of(sheetContext);
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  SpacingTokens.md,
+                  SpacingTokens.sm,
+                  SpacingTokens.md,
+                  SpacingTokens.xs,
+                ),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    l10n.themeTitle,
+                    style: sheetTheme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+              for (final option in options)
+                ListTile(
+                  leading: Icon(
+                    option == currentThemeMode
+                        ? Icons.check_circle_rounded
+                        : Icons.circle_outlined,
+                  ),
+                  title: Text(_themeModeLabel(l10n: l10n, themeMode: option)),
+                  onTap: () => Navigator.of(sheetContext).pop(option),
+                ),
+              const SizedBox(height: SpacingTokens.sm),
+            ],
+          ),
+        );
+      },
+    );
+
+    if (selected == null) return;
+    ref.read(themeModeProvider.notifier).setThemeMode(selected);
   }
 
   Future<void> _exportBudgetData(BuildContext context, WidgetRef ref) async {
@@ -419,7 +493,110 @@ class SettingsScreen extends HookConsumerWidget {
   }
 }
 
-class _SectionTitle extends HookWidget {
+class _SettingsOverviewCard extends StatelessWidget {
+  const _SettingsOverviewCard({
+    required this.budgetName,
+    required this.currencyCode,
+    required this.displayCurrencyCode,
+    required this.ownerLabel,
+    required this.lastUpdatedLabel,
+  });
+
+  final String budgetName;
+  final String currencyCode;
+  final String? displayCurrencyCode;
+  final String ownerLabel;
+  final String lastUpdatedLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final detailsStyle = theme.textTheme.bodyMedium?.copyWith(
+      color: OpenBudgetPalette.fgSecondaryFor(theme),
+    );
+
+    return _SettingsCard(
+      child: Padding(
+        padding: const EdgeInsets.all(SpacingTokens.md),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              budgetName,
+              style: theme.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: SpacingTokens.xs),
+            Text('Plan currency: $currencyCode', style: detailsStyle),
+            if (displayCurrencyCode != null &&
+                displayCurrencyCode != currencyCode)
+              Text(
+                'Display currency: $displayCurrencyCode',
+                style: detailsStyle,
+              ),
+            const SizedBox(height: SpacingTokens.sm),
+            Text('Owner: $ownerLabel', style: detailsStyle),
+            Text('Updated: $lastUpdatedLabel', style: detailsStyle),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _AccountIdentityTile extends StatelessWidget {
+  const _AccountIdentityTile({required this.accountIdentity});
+
+  final String accountIdentity;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        SpacingTokens.md,
+        SpacingTokens.md,
+        SpacingTokens.md,
+        SpacingTokens.sm,
+      ),
+      child: Row(
+        children: [
+          const CircleAvatar(
+            radius: 18,
+            child: Icon(Icons.person_outline_rounded),
+          ),
+          const SizedBox(width: SpacingTokens.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.settingsLoggedInAs,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: OpenBudgetPalette.fgSecondaryFor(theme),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  accountIdentity,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SectionTitle extends StatelessWidget {
   const _SectionTitle({required this.title});
 
   final String title;
@@ -435,7 +612,7 @@ class _SectionTitle extends HookWidget {
       child: Text(
         title,
         style: theme.textTheme.labelSmall?.copyWith(
-          color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
+          color: OpenBudgetPalette.fgSecondaryFor(theme),
           fontWeight: FontWeight.w600,
         ),
       ),
@@ -443,27 +620,27 @@ class _SectionTitle extends HookWidget {
   }
 }
 
-class _SettingsCard extends HookWidget {
+class _SettingsCard extends StatelessWidget {
   const _SettingsCard({required this.child});
 
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
+        color: OpenBudgetPalette.bgSecondaryFor(theme),
         borderRadius: BorderRadius.circular(RadiusTokens.md),
-        border: Border.all(
-          color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
-        ),
+        border: Border.all(color: OpenBudgetPalette.borderSubtleFor(theme)),
       ),
       child: child,
     );
   }
 }
 
-class _SettingsTile extends HookWidget {
+class _SettingsTile extends StatelessWidget {
   const _SettingsTile({
     required this.icon,
     required this.label,
@@ -483,13 +660,10 @@ class _SettingsTile extends HookWidget {
     final theme = Theme.of(context);
     final titleColor = enabled
         ? theme.textTheme.bodyLarge?.color
-        : OpenBudgetPalette.fgSecondaryFor(Theme.of(context));
+        : OpenBudgetPalette.fgSecondaryFor(theme);
 
     return ListTile(
-      leading: Icon(
-        icon,
-        color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
-      ),
+      leading: Icon(icon, color: OpenBudgetPalette.fgSecondaryFor(theme)),
       title: Text(
         label,
         style: theme.textTheme.bodyLarge?.copyWith(color: titleColor),
@@ -499,12 +673,12 @@ class _SettingsTile extends HookWidget {
           : Text(
               subtitle!,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
+                color: OpenBudgetPalette.fgSecondaryFor(theme),
               ),
             ),
       trailing: Icon(
         enabled ? Icons.chevron_right_rounded : Icons.block_rounded,
-        color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
+        color: OpenBudgetPalette.fgSecondaryFor(theme),
       ),
       onTap: enabled ? onTap : null,
     );
