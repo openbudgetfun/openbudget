@@ -465,11 +465,13 @@ String? authRedirectForLocation({
   final isAuthRoute = location == loginPath || location == registerPath;
   final isStartupRoute = location == startupPath;
   final isAuthenticated = authState is Authenticated;
-  final isLoading = authState is AuthLoading;
+  final isRestoring = authState is AuthRestoring;
 
-  if (isLoading) {
+  if (isRestoring) {
     return isStartupRoute ? null : startupPath;
   }
+
+  if (authState is AuthLoading) return null;
 
   if (!isAuthenticated) {
     return isAuthRoute ? null : loginPath;

@@ -20,6 +20,10 @@ class Unauthenticated extends AuthState {
   const Unauthenticated();
 }
 
+class AuthRestoring extends AuthState {
+  const AuthRestoring();
+}
+
 class AuthLoading extends AuthState {
   const AuthLoading();
 }
