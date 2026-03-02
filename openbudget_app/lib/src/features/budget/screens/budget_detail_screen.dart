@@ -2068,6 +2068,7 @@ class _InlineAmountEditor extends HookWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final canApply = inputValue.isNotEmpty && inputValue != '-';
+    const actionRowMinHeight = 62.0;
 
     Widget key(
       String label, {
@@ -2075,6 +2076,7 @@ class _InlineAmountEditor extends HookWidget {
       bool primary = false,
       bool accent = false,
       Widget? child,
+      double minHeight = 48,
     }) {
       return Expanded(
         child: Padding(
@@ -2100,7 +2102,7 @@ class _InlineAmountEditor extends HookWidget {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(RadiusTokens.sm),
               ),
-              minimumSize: const Size.fromHeight(48),
+              minimumSize: Size.fromHeight(minHeight),
               elevation: 0,
             ),
             child: child ?? Text(label),
@@ -2145,25 +2147,31 @@ class _InlineAmountEditor extends HookWidget {
                   key(
                     l10n.autoAssignButton,
                     onPressed: onAutoAssign,
+                    minHeight: actionRowMinHeight,
                     child: Text(
                       l10n.autoAssignButton,
                       textAlign: TextAlign.center,
+                      maxLines: 2,
                     ),
                   ),
                   key(
                     l10n.envelopeActionMoveMoney,
                     onPressed: onMoveMoney,
+                    minHeight: actionRowMinHeight,
                     child: Text(
                       l10n.envelopeActionMoveMoney,
                       textAlign: TextAlign.center,
+                      maxLines: 2,
                     ),
                   ),
                   key(
                     l10n.budgetInlineEditorDetails,
                     onPressed: onDetails,
+                    minHeight: actionRowMinHeight,
                     child: Text(
                       l10n.budgetInlineEditorDetails,
                       textAlign: TextAlign.center,
+                      maxLines: 2,
                     ),
                   ),
                 ],
