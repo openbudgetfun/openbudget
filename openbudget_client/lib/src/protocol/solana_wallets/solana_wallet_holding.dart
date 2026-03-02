@@ -29,7 +29,16 @@ abstract class SolanaWalletHolding implements _i1.SerializableModel {
     this.priceCurrency,
     this.pricePerToken,
     this.totalValue,
+    this.estimatedCostBasis,
+    this.estimatedUnrealizedPnl,
+    this.estimatedUnrealizedPnlPercent,
+    this.estimatedRealizedPnl,
+    this.pnlCurrency,
+    this.pnlAsOf,
     this.priceSource,
+    this.priceQuality,
+    this.priceConfidence,
+    this.isPriceStale,
     this.priceAsOf,
     this.metadataJson,
     DateTime? updatedAt,
@@ -50,7 +59,16 @@ abstract class SolanaWalletHolding implements _i1.SerializableModel {
     String? priceCurrency,
     double? pricePerToken,
     double? totalValue,
+    double? estimatedCostBasis,
+    double? estimatedUnrealizedPnl,
+    double? estimatedUnrealizedPnlPercent,
+    double? estimatedRealizedPnl,
+    String? pnlCurrency,
+    DateTime? pnlAsOf,
     String? priceSource,
+    String? priceQuality,
+    String? priceConfidence,
+    bool? isPriceStale,
     DateTime? priceAsOf,
     String? metadataJson,
     DateTime? updatedAt,
@@ -78,7 +96,23 @@ abstract class SolanaWalletHolding implements _i1.SerializableModel {
       priceCurrency: jsonSerialization['priceCurrency'] as String?,
       pricePerToken: (jsonSerialization['pricePerToken'] as num?)?.toDouble(),
       totalValue: (jsonSerialization['totalValue'] as num?)?.toDouble(),
+      estimatedCostBasis: (jsonSerialization['estimatedCostBasis'] as num?)
+          ?.toDouble(),
+      estimatedUnrealizedPnl:
+          (jsonSerialization['estimatedUnrealizedPnl'] as num?)?.toDouble(),
+      estimatedUnrealizedPnlPercent:
+          (jsonSerialization['estimatedUnrealizedPnlPercent'] as num?)
+              ?.toDouble(),
+      estimatedRealizedPnl: (jsonSerialization['estimatedRealizedPnl'] as num?)
+          ?.toDouble(),
+      pnlCurrency: jsonSerialization['pnlCurrency'] as String?,
+      pnlAsOf: jsonSerialization['pnlAsOf'] == null
+          ? null
+          : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['pnlAsOf']),
       priceSource: jsonSerialization['priceSource'] as String?,
+      priceQuality: jsonSerialization['priceQuality'] as String?,
+      priceConfidence: jsonSerialization['priceConfidence'] as String?,
+      isPriceStale: jsonSerialization['isPriceStale'] as bool?,
       priceAsOf: jsonSerialization['priceAsOf'] == null
           ? null
           : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['priceAsOf']),
@@ -125,7 +159,34 @@ abstract class SolanaWalletHolding implements _i1.SerializableModel {
 
   double? totalValue;
 
+  /// Estimated aggregate acquisition basis in quote currency.
+  double? estimatedCostBasis;
+
+  /// Estimated unrealized gain/loss in quote currency.
+  double? estimatedUnrealizedPnl;
+
+  /// Estimated unrealized gain/loss percentage.
+  double? estimatedUnrealizedPnlPercent;
+
+  /// Estimated realized gain/loss accumulated for this asset.
+  double? estimatedRealizedPnl;
+
+  /// Quote currency used for estimated P&L values.
+  String? pnlCurrency;
+
+  /// Timestamp for the last P&L estimate update.
+  DateTime? pnlAsOf;
+
   String? priceSource;
+
+  /// Qualitative pricing classification: provider, derived, stale_cache, unpriced.
+  String? priceQuality;
+
+  /// Confidence tier for the valuation source: high, medium, low.
+  String? priceConfidence;
+
+  /// True when valuation is using a cached fallback price.
+  bool? isPriceStale;
 
   DateTime? priceAsOf;
 
@@ -152,7 +213,16 @@ abstract class SolanaWalletHolding implements _i1.SerializableModel {
     String? priceCurrency,
     double? pricePerToken,
     double? totalValue,
+    double? estimatedCostBasis,
+    double? estimatedUnrealizedPnl,
+    double? estimatedUnrealizedPnlPercent,
+    double? estimatedRealizedPnl,
+    String? pnlCurrency,
+    DateTime? pnlAsOf,
     String? priceSource,
+    String? priceQuality,
+    String? priceConfidence,
+    bool? isPriceStale,
     DateTime? priceAsOf,
     String? metadataJson,
     DateTime? updatedAt,
@@ -175,7 +245,19 @@ abstract class SolanaWalletHolding implements _i1.SerializableModel {
       if (priceCurrency != null) 'priceCurrency': priceCurrency,
       if (pricePerToken != null) 'pricePerToken': pricePerToken,
       if (totalValue != null) 'totalValue': totalValue,
+      if (estimatedCostBasis != null) 'estimatedCostBasis': estimatedCostBasis,
+      if (estimatedUnrealizedPnl != null)
+        'estimatedUnrealizedPnl': estimatedUnrealizedPnl,
+      if (estimatedUnrealizedPnlPercent != null)
+        'estimatedUnrealizedPnlPercent': estimatedUnrealizedPnlPercent,
+      if (estimatedRealizedPnl != null)
+        'estimatedRealizedPnl': estimatedRealizedPnl,
+      if (pnlCurrency != null) 'pnlCurrency': pnlCurrency,
+      if (pnlAsOf != null) 'pnlAsOf': pnlAsOf?.toJson(),
       if (priceSource != null) 'priceSource': priceSource,
+      if (priceQuality != null) 'priceQuality': priceQuality,
+      if (priceConfidence != null) 'priceConfidence': priceConfidence,
+      if (isPriceStale != null) 'isPriceStale': isPriceStale,
       if (priceAsOf != null) 'priceAsOf': priceAsOf?.toJson(),
       if (metadataJson != null) 'metadataJson': metadataJson,
       'updatedAt': updatedAt.toJson(),
@@ -206,7 +288,16 @@ class _SolanaWalletHoldingImpl extends SolanaWalletHolding {
     String? priceCurrency,
     double? pricePerToken,
     double? totalValue,
+    double? estimatedCostBasis,
+    double? estimatedUnrealizedPnl,
+    double? estimatedUnrealizedPnlPercent,
+    double? estimatedRealizedPnl,
+    String? pnlCurrency,
+    DateTime? pnlAsOf,
     String? priceSource,
+    String? priceQuality,
+    String? priceConfidence,
+    bool? isPriceStale,
     DateTime? priceAsOf,
     String? metadataJson,
     DateTime? updatedAt,
@@ -225,7 +316,16 @@ class _SolanaWalletHoldingImpl extends SolanaWalletHolding {
          priceCurrency: priceCurrency,
          pricePerToken: pricePerToken,
          totalValue: totalValue,
+         estimatedCostBasis: estimatedCostBasis,
+         estimatedUnrealizedPnl: estimatedUnrealizedPnl,
+         estimatedUnrealizedPnlPercent: estimatedUnrealizedPnlPercent,
+         estimatedRealizedPnl: estimatedRealizedPnl,
+         pnlCurrency: pnlCurrency,
+         pnlAsOf: pnlAsOf,
          priceSource: priceSource,
+         priceQuality: priceQuality,
+         priceConfidence: priceConfidence,
+         isPriceStale: isPriceStale,
          priceAsOf: priceAsOf,
          metadataJson: metadataJson,
          updatedAt: updatedAt,
@@ -250,7 +350,16 @@ class _SolanaWalletHoldingImpl extends SolanaWalletHolding {
     Object? priceCurrency = _Undefined,
     Object? pricePerToken = _Undefined,
     Object? totalValue = _Undefined,
+    Object? estimatedCostBasis = _Undefined,
+    Object? estimatedUnrealizedPnl = _Undefined,
+    Object? estimatedUnrealizedPnlPercent = _Undefined,
+    Object? estimatedRealizedPnl = _Undefined,
+    Object? pnlCurrency = _Undefined,
+    Object? pnlAsOf = _Undefined,
     Object? priceSource = _Undefined,
+    Object? priceQuality = _Undefined,
+    Object? priceConfidence = _Undefined,
+    Object? isPriceStale = _Undefined,
     Object? priceAsOf = _Undefined,
     Object? metadataJson = _Undefined,
     DateTime? updatedAt,
@@ -274,7 +383,26 @@ class _SolanaWalletHoldingImpl extends SolanaWalletHolding {
           ? pricePerToken
           : this.pricePerToken,
       totalValue: totalValue is double? ? totalValue : this.totalValue,
+      estimatedCostBasis: estimatedCostBasis is double?
+          ? estimatedCostBasis
+          : this.estimatedCostBasis,
+      estimatedUnrealizedPnl: estimatedUnrealizedPnl is double?
+          ? estimatedUnrealizedPnl
+          : this.estimatedUnrealizedPnl,
+      estimatedUnrealizedPnlPercent: estimatedUnrealizedPnlPercent is double?
+          ? estimatedUnrealizedPnlPercent
+          : this.estimatedUnrealizedPnlPercent,
+      estimatedRealizedPnl: estimatedRealizedPnl is double?
+          ? estimatedRealizedPnl
+          : this.estimatedRealizedPnl,
+      pnlCurrency: pnlCurrency is String? ? pnlCurrency : this.pnlCurrency,
+      pnlAsOf: pnlAsOf is DateTime? ? pnlAsOf : this.pnlAsOf,
       priceSource: priceSource is String? ? priceSource : this.priceSource,
+      priceQuality: priceQuality is String? ? priceQuality : this.priceQuality,
+      priceConfidence: priceConfidence is String?
+          ? priceConfidence
+          : this.priceConfidence,
+      isPriceStale: isPriceStale is bool? ? isPriceStale : this.isPriceStale,
       priceAsOf: priceAsOf is DateTime? ? priceAsOf : this.priceAsOf,
       metadataJson: metadataJson is String? ? metadataJson : this.metadataJson,
       updatedAt: updatedAt ?? this.updatedAt,

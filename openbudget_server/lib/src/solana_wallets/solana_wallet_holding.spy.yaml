@@ -21,7 +21,25 @@ fields:
   priceCurrency: String?
   pricePerToken: double?
   totalValue: double?
+  ### Estimated aggregate acquisition basis in quote currency.
+  estimatedCostBasis: double?
+  ### Estimated unrealized gain/loss in quote currency.
+  estimatedUnrealizedPnl: double?
+  ### Estimated unrealized gain/loss percentage.
+  estimatedUnrealizedPnlPercent: double?
+  ### Estimated realized gain/loss accumulated for this asset.
+  estimatedRealizedPnl: double?
+  ### Quote currency used for estimated P&L values.
+  pnlCurrency: String?
+  ### Timestamp for the last P&L estimate update.
+  pnlAsOf: DateTime?
   priceSource: String?
+  ### Qualitative pricing classification: provider, derived, stale_cache, unpriced.
+  priceQuality: String?
+  ### Confidence tier for the valuation source: high, medium, low.
+  priceConfidence: String?
+  ### True when valuation is using a cached fallback price.
+  isPriceStale: bool?
   priceAsOf: DateTime?
   ### JSON-encoded asset metadata subset.
   metadataJson: String?
