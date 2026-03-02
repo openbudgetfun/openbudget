@@ -11,13 +11,9 @@
     "destroy": "pulumi destroy"
   },
   "dependencies": {
-    "@pulumi/aws": "^6.0.0",
-    "@pulumi/awsx": "^2.0.0",
-    "@pulumi/gcp": "^8.0.0",
-    "@pulumi/pulumi": "^3.0.0"
-  },
-  "devDependencies": {
-    "@types/node": "^22.0.0",
-    "typescript": "^5.0.0"
+    "@pulumi/aws": "^7.20.0",
+    "@pulumi/awsx": "^3.2.1",
+    "@pulumi/gcp": "^9.13.0",
+    "@pulumi/pulumi": "^3.224.0"
   }
 }

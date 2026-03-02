@@ -8,7 +8,7 @@
 
 let
   isCI = builtins.getEnv "CI" != "";
-  ifiokjrMdt = inputs.ifiokjr-nixpkgs.packages.${pkgs.stdenv.hostPlatform.system}.mdt;
+  extra = inputs.ifiokjr-nixpkgs.packages.${pkgs.stdenv.hostPlatform.system};
 in
 {
   packages =
@@ -16,22 +16,25 @@ in
     [
       dprint
       eget
+      extra.agave
+      extra.knope
+      extra.mdt
+      extra.pnpm-standalone
       fvm
       gitleaks
       nixfmt
-      nodejs_22
+      pulumi-bin
+      pulumi-esc
       shfmt
     ]
-    ++ [ ifiokjrMdt ]
     ++ lib.optionals stdenv.isDarwin [
       coreutils
     ];
 
-  env = {
-    EGET_CONFIG = "${config.env.DEVENV_ROOT}/.eget/.eget.toml";
-  };
-
   dotenv.disableHint = true;
+
+  # Ensure redis-cli health probes authenticate against local development redis.
+  env.REDISCLI_AUTH = "PTpOute8-systr4hDRsD6biK5x06B7Vv";
 
   git-hooks = {
     package = pkgs.prek;
@@ -86,6 +89,11 @@ in
         { name = "openbudget"; }
         { name = "openbudget_test"; }
       ];
+      extensions = extensions: [
+        extensions.pgvector
+        extensions.postgis
+        extensions.timescaledb
+      ];
       settings = {
         log_connections = true;
         log_statement = "all";
@@ -96,10 +104,47 @@ in
     redis = {
       enable = !isCI;
       port = 8091;
+      # Keep local redis auth aligned with openbudget_server/config/passwords.yaml (development.redis).
+      extraConfig = ''
+        requirepass PTpOute8-systr4hDRsD6biK5x06B7Vv
+      '';
     };
   };
 
   processes = {
+    "flutter:up" = {
+      exec = ''
+        set -eo pipefail
+
+        GENERATED_ENV_FILE="$DEVENV_ROOT/.tmp/flutter.env"
+        if [[ -f "$GENERATED_ENV_FILE" ]]; then
+          # shellcheck disable=SC1090
+          source "$GENERATED_ENV_FILE"
+        fi
+
+        if [[ -n "''${OPENBUDGET_API_URL:-}" ]]; then
+          if [[ -n "''${DEVICE_ID:-}" ]]; then
+            flutter:app run -d "$DEVICE_ID" --dart-define="OPENBUDGET_API_URL=$OPENBUDGET_API_URL"
+          else
+            flutter:app run --dart-define="OPENBUDGET_API_URL=$OPENBUDGET_API_URL"
+          fi
+        else
+          if [[ -n "''${DEVICE_ID:-}" ]]; then
+            flutter:app run -d "$DEVICE_ID"
+          else
+            flutter:app run
+          fi
+        fi
+      '';
+      process-compose = {
+        depends_on = lib.optionalAttrs (!isCI) {
+          "postgres".condition = "process_healthy";
+          "redis".condition = "process_healthy";
+        };
+        is_interactive = true;
+      };
+    };
+
     "server:up" = {
       exec = ''
         server:start
@@ -110,6 +155,17 @@ in
         depends_on = lib.optionalAttrs (!isCI) {
           "postgres".condition = "process_healthy";
           "redis".condition = "process_healthy";
+        };
+      };
+    };
+  };
+
+  process = {
+    managers.process-compose = {
+      settings = {
+        log_location = "${config.env.DEVENV_ROOT}/tmp/log.txt";
+        log_configuration = {
+          add_timestamp = true;
         };
       };
     };
@@ -152,14 +208,6 @@ in
       '';
       description = "Run flutter commands from the openbudget_app directory.";
     };
-    "knope" = {
-      exec = ''
-        set -e
-        $DEVENV_ROOT/.eget/bin/knope $@
-      '';
-      description = "The knope executable for changeset and release management.";
-      binary = "bash";
-    };
     "melos" = {
       exec = ''
         set -e
@@ -173,6 +221,115 @@ in
         dart run serverpod_cli $@
       '';
       description = "Run the serverpod cli.";
+    };
+    "openbudget:url:update" = {
+      exec = ''
+        set -e
+        cd "$DEVENV_ROOT"
+        dart run openbudget_scripts:update_dev_server_url "$@"
+      '';
+      description = "Generate OPENBUDGET_API_URL for local flutter runs.";
+      binary = "bash";
+    };
+    "start:up" = {
+      exec = ''
+        set -euo pipefail
+
+        POSTGRES_DATA_DIR="$DEVENV_ROOT/.devenv/state/postgres"
+        POSTMASTER_PID_FILE="$POSTGRES_DATA_DIR/postmaster.pid"
+        PROCESS_PID_FILE="$DEVENV_ROOT/.devenv/processes.pid"
+        RUN_DIR="$(readlink "$DEVENV_ROOT/.devenv/run" 2>/dev/null || true)"
+        PROCESS_COMPOSE_SOCKET=""
+        if [[ -n "$RUN_DIR" ]]; then
+          PROCESS_COMPOSE_SOCKET="$RUN_DIR/pc.sock"
+        fi
+
+        # Ensure we don't run two process-compose sessions for the same project.
+        devenv processes down >/dev/null 2>&1 || true
+
+        pid_is_running() {
+          local pid="$1"
+          kill -0 "$pid" 2>/dev/null
+        }
+
+        kill_pid() {
+          local pid="$1"
+
+          if ! pid_is_running "$pid"; then
+            return 0
+          fi
+
+          kill "$pid" 2>/dev/null || true
+          for _ in {1..20}; do
+            if ! pid_is_running "$pid"; then
+              return 0
+            fi
+            sleep 0.1
+          done
+
+          kill -9 "$pid" 2>/dev/null || true
+        }
+
+        kill_matching_pids() {
+          local pattern="$1"
+          local pids
+          pids="$(pgrep -f "$pattern" 2>/dev/null || true)"
+          if [[ -z "$pids" ]]; then
+            return 0
+          fi
+
+          while IFS= read -r pid; do
+            [[ -z "$pid" ]] && continue
+            kill_pid "$pid"
+          done <<< "$pids"
+        }
+
+        kill_matching_pids "devenv-processes-postgres"
+        kill_matching_pids "devenv-processes-redis"
+        kill_matching_pids "devenv-processes-server-up"
+        kill_matching_pids "devenv-processes-flutter-up"
+        if [[ -n "$PROCESS_COMPOSE_SOCKET" ]]; then
+          process_compose_pids="$(lsof -t "$PROCESS_COMPOSE_SOCKET" 2>/dev/null || true)"
+          if [[ -n "$process_compose_pids" ]]; then
+            while IFS= read -r process_compose_pid; do
+              [[ -z "$process_compose_pid" ]] && continue
+              kill_pid "$process_compose_pid"
+            done <<< "$process_compose_pids"
+          fi
+        fi
+
+        for port in 8080 8081 8082 8090 8091; do
+          port_pids="$(lsof -tiTCP:$port -sTCP:LISTEN 2>/dev/null || true)"
+          if [[ -n "$port_pids" ]]; then
+            while IFS= read -r port_pid; do
+              [[ -z "$port_pid" ]] && continue
+              kill_pid "$port_pid"
+            done <<< "$port_pids"
+          fi
+        done
+
+        if [[ -f "$POSTMASTER_PID_FILE" ]]; then
+          lock_pid="$(head -n1 "$POSTMASTER_PID_FILE" 2>/dev/null || true)"
+          if [[ ! "$lock_pid" =~ ^[0-9]+$ ]] || ! pid_is_running "$lock_pid"; then
+            echo "Removing stale postgres lock file..."
+            rm -f "$POSTMASTER_PID_FILE"
+          fi
+        fi
+
+        if [[ -f "$PROCESS_PID_FILE" ]]; then
+          process_pid="$(cat "$PROCESS_PID_FILE" 2>/dev/null || true)"
+          if [[ ! "$process_pid" =~ ^[0-9]+$ ]] || ! pid_is_running "$process_pid"; then
+            echo "Removing stale devenv processes PID file..."
+            rm -f "$PROCESS_PID_FILE"
+          fi
+        fi
+
+        openbudget:url:update development
+
+        exec devenv up "$@"
+      '';
+      description = "Start devenv after cleaning stale local postgres/redis state.";
+      binary = "bash";
     };
     "install:all" = {
       exec = ''
@@ -229,31 +386,6 @@ in
       description = "Install Pulumi CLI from official releases.";
       binary = "bash";
     };
-    "install:pnpm" = {
-      exec = ''
-        set -e
-        PNPM_DIR="$DEVENV_ROOT/.eget/bin"
-        PNPM_VERSION="10.30.2"
-        if [ -f "$PNPM_DIR/pnpm" ]; then
-          CURRENT=$("$PNPM_DIR/pnpm" --version 2>/dev/null || echo "")
-          if [ "$CURRENT" = "$PNPM_VERSION" ]; then
-            echo "pnpm $PNPM_VERSION already installed"
-            exit 0
-          fi
-        fi
-        echo "Installing pnpm $PNPM_VERSION..."
-        OS=$(uname -s | tr '[:upper:]' '[:lower:]')
-        case "$OS" in
-          darwin) OS="macos" ;;
-        esac
-        ARCH=$(uname -m | sed 's/x86_64/x64/' | sed 's/aarch64/arm64/')
-        curl -fsSL "https://github.com/pnpm/pnpm/releases/download/v$PNPM_VERSION/pnpm-$OS-$ARCH" -o "$PNPM_DIR/pnpm"
-        chmod +x "$PNPM_DIR/pnpm"
-        echo "pnpm $PNPM_VERSION installed"
-      '';
-      description = "Install pnpm standalone binary.";
-      binary = "bash";
-    };
     "install:infra" = {
       exec = ''
         set -e
@@ -282,22 +414,6 @@ in
         $DEVENV_ROOT/.eget/bin/esc $@
       '';
       description = "Run Pulumi ESC CLI.";
-      binary = "bash";
-    };
-    "pnpm" = {
-      exec = ''
-        set -e
-        $DEVENV_ROOT/.eget/bin/pnpm $@
-      '';
-      description = "Run pnpm package manager.";
-      binary = "bash";
-    };
-    "mdt" = {
-      exec = ''
-        set -e
-        ${ifiokjrMdt}/bin/mdt --path "$DEVENV_ROOT" "$@"
-      '';
-      description = "Manage reusable markdown templates.";
       binary = "bash";
     };
     "docs:workflows:update" = {

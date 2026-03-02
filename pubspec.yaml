@@ -7,6 +7,7 @@ environment:
 workspace:
   - openbudget_app
   - openbudget_client
+  - openbudget_scripts
   - openbudget_server
   - openbudget_core
   - openbudget_ui

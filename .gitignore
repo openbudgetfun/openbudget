@@ -71,6 +71,7 @@ build/
 .temp/
 .tmp/
 .screenshots/
+tmp/log.txt
 
 # Lock files — only keep pubspec.lock for the app package
 pubspec.lock
@@ -79,4 +80,4 @@ pubspec.lock
 # Local properties
 local.properties
 
-.eget/bin/
+**/node_modules/
