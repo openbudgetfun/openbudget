@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
@@ -56,9 +58,11 @@ class AccountListScreen extends HookConsumerWidget {
               switch (value) {
                 case 'transfer':
                   navigateAfterMenuClose(() {
-                    context.goNamed(
-                      createTransferRoute,
-                      pathParameters: {'id': budgetId},
+                    unawaited(
+                      context.pushNamed(
+                        createTransferRoute,
+                        pathParameters: {'id': budgetId},
+                      ),
                     );
                   });
                 case 'settings':

@@ -449,7 +449,7 @@ class TransactionListScreen extends HookConsumerWidget {
                 pathParameters: {'id': budgetId},
               );
             case AddTransactionAction.transfer:
-              context.goNamed(
+              await context.pushNamed(
                 createTransferRoute,
                 pathParameters: {'id': budgetId},
               );

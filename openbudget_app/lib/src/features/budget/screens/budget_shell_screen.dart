@@ -81,7 +81,7 @@ class BudgetShellScreen extends HookWidget {
         case AddTransactionAction.expense:
           context.goNamed(addExpenseRoute, pathParameters: {'id': budgetId});
         case AddTransactionAction.transfer:
-          context.goNamed(
+          await context.pushNamed(
             createTransferRoute,
             pathParameters: {'id': budgetId},
           );

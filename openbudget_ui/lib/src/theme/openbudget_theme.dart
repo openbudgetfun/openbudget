@@ -76,7 +76,7 @@ abstract final class OpenBudgetTheme {
       textTheme: textTheme,
       scaffoldBackgroundColor: colorScheme.surface,
       appBarTheme: AppBarTheme(
-        centerTitle: false,
+        centerTitle: true,
         backgroundColor: colorScheme.surface.withAlpha(isLight ? 245 : 235),
         foregroundColor: colorScheme.onSurface,
         surfaceTintColor: Colors.transparent,
