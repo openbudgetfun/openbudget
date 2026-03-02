@@ -119,7 +119,17 @@ void main() {
 
       expect(find.text('Settings'), findsWidgets);
       expect(find.text("Alex's Plan"), findsOneWidget);
+      await tester.scrollUntilVisible(
+        find.text('Plan Settings'),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
       expect(find.text('Plan Settings'), findsOneWidget);
+      await tester.scrollUntilVisible(
+        find.text('App Icon'),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
       expect(find.text('App Icon'), findsOneWidget);
       expect(find.text('Display Options'), findsOneWidget);
 
@@ -138,6 +148,8 @@ void main() {
       await tester.tap(find.text('Done'));
       await tester.pumpAndSettle();
 
+      await tester.drag(find.byType(ListView).first, const Offset(0, 500));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Plan Settings'));
       await tester.pumpAndSettle();
 
@@ -163,6 +175,11 @@ void main() {
 
       expect(find.text('Settings'), findsWidgets);
 
+      await tester.scrollUntilVisible(
+        find.text('Display Options'),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
       await tester.tap(find.text('Display Options'));
       await tester.pumpAndSettle();
 
