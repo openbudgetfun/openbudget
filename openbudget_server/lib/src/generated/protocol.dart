@@ -28,45 +28,52 @@ import 'fx_rates/fx_rate_quote.dart' as _i13;
 import 'fx_rates/fx_rate_snapshot.dart' as _i14;
 import 'monthly_allocations/monthly_allocation.dart' as _i15;
 import 'payees/payee.dart' as _i16;
-import 'recurring_transactions/recurring_transaction.dart' as _i17;
-import 'solana_wallets/solana_wallet.dart' as _i18;
-import 'solana_wallets/solana_wallet_holding.dart' as _i19;
-import 'solana_wallets/solana_wallet_sync_result.dart' as _i20;
-import 'solana_wallets/solana_wallet_tax_year_summary.dart' as _i21;
-import 'solana_wallets/solana_wallet_transaction.dart' as _i22;
-import 'transaction_rules/transaction_rule.dart' as _i23;
-import 'transactions/import_row.dart' as _i24;
-import 'transactions/split_item.dart' as _i25;
-import 'transactions/transaction.dart' as _i26;
-import 'package:openbudget_server/src/generated/accounts/account.dart' as _i27;
+import 'plaid/plaid_connection.dart' as _i17;
+import 'recurring_transactions/recurring_transaction.dart' as _i18;
+import 'solana_wallets/solana_wallet.dart' as _i19;
+import 'solana_wallets/solana_wallet_holding.dart' as _i20;
+import 'solana_wallets/solana_wallet_sync_result.dart' as _i21;
+import 'solana_wallets/solana_wallet_tax_year_summary.dart' as _i22;
+import 'solana_wallets/solana_wallet_transaction.dart' as _i23;
+import 'transaction_rules/transaction_rule.dart' as _i24;
+import 'transactions/import_row.dart' as _i25;
+import 'transactions/split_item.dart' as _i26;
+import 'transactions/transaction.dart' as _i27;
+import 'wallets/asset_quote_cache.dart' as _i28;
+import 'wallets/wallet_connect_result.dart' as _i29;
+import 'wallets/wallet_connection.dart' as _i30;
+import 'wallets/wallet_holding.dart' as _i31;
+import 'package:openbudget_server/src/generated/accounts/account.dart' as _i32;
 import 'package:openbudget_server/src/generated/budget_templates/budget_template.dart'
-    as _i28;
-import 'package:openbudget_server/src/generated/monthly_allocations/monthly_allocation.dart'
-    as _i29;
-import 'package:openbudget_server/src/generated/budgets/budget.dart' as _i30;
-import 'package:openbudget_server/src/generated/categories/category.dart'
-    as _i31;
-import 'package:openbudget_server/src/generated/envelope_goals/envelope_goal.dart'
-    as _i32;
-import 'package:openbudget_server/src/generated/envelopes/envelope.dart'
     as _i33;
-import 'package:openbudget_server/src/generated/payees/payee.dart' as _i34;
-import 'package:openbudget_server/src/generated/recurring_transactions/recurring_transaction.dart'
-    as _i35;
-import 'package:openbudget_server/src/generated/solana_wallets/solana_wallet.dart'
+import 'package:openbudget_server/src/generated/monthly_allocations/monthly_allocation.dart'
+    as _i34;
+import 'package:openbudget_server/src/generated/budgets/budget.dart' as _i35;
+import 'package:openbudget_server/src/generated/categories/category.dart'
     as _i36;
-import 'package:openbudget_server/src/generated/solana_wallets/solana_wallet_transaction.dart'
+import 'package:openbudget_server/src/generated/envelope_goals/envelope_goal.dart'
     as _i37;
-import 'package:openbudget_server/src/generated/solana_wallets/solana_wallet_holding.dart'
+import 'package:openbudget_server/src/generated/envelopes/envelope.dart'
     as _i38;
-import 'package:openbudget_server/src/generated/transaction_rules/transaction_rule.dart'
-    as _i39;
-import 'package:openbudget_server/src/generated/transactions/transaction.dart'
+import 'package:openbudget_server/src/generated/payees/payee.dart' as _i39;
+import 'package:openbudget_server/src/generated/recurring_transactions/recurring_transaction.dart'
     as _i40;
-import 'package:openbudget_server/src/generated/transactions/split_item.dart'
+import 'package:openbudget_server/src/generated/solana_wallets/solana_wallet.dart'
     as _i41;
-import 'package:openbudget_server/src/generated/transactions/import_row.dart'
+import 'package:openbudget_server/src/generated/solana_wallets/solana_wallet_transaction.dart'
     as _i42;
+import 'package:openbudget_server/src/generated/solana_wallets/solana_wallet_holding.dart'
+    as _i43;
+import 'package:openbudget_server/src/generated/transaction_rules/transaction_rule.dart'
+    as _i44;
+import 'package:openbudget_server/src/generated/transactions/transaction.dart'
+    as _i45;
+import 'package:openbudget_server/src/generated/transactions/split_item.dart'
+    as _i46;
+import 'package:openbudget_server/src/generated/transactions/import_row.dart'
+    as _i47;
+import 'package:openbudget_server/src/generated/wallets/wallet_holding.dart'
+    as _i48;
 export 'accounts/account.dart';
 export 'budget_templates/budget_template.dart';
 export 'budgets/budget.dart';
@@ -79,6 +86,7 @@ export 'fx_rates/fx_rate_quote.dart';
 export 'fx_rates/fx_rate_snapshot.dart';
 export 'monthly_allocations/monthly_allocation.dart';
 export 'payees/payee.dart';
+export 'plaid/plaid_connection.dart';
 export 'recurring_transactions/recurring_transaction.dart';
 export 'solana_wallets/solana_wallet.dart';
 export 'solana_wallets/solana_wallet_holding.dart';
@@ -89,6 +97,10 @@ export 'transaction_rules/transaction_rule.dart';
 export 'transactions/import_row.dart';
 export 'transactions/split_item.dart';
 export 'transactions/transaction.dart';
+export 'wallets/asset_quote_cache.dart';
+export 'wallets/wallet_connect_result.dart';
+export 'wallets/wallet_connection.dart';
+export 'wallets/wallet_holding.dart';
 
 class Protocol extends _i1.SerializationManagerServer {
   Protocol._();
@@ -160,6 +172,36 @@ class Protocol extends _i1.SerializationManagerServer {
           dartType: 'bool',
         ),
         _i2.ColumnDefinition(
+          name: 'sourceType',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'externalAccountId',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'connectionId',
+          columnType: _i2.ColumnType.uuid,
+          isNullable: true,
+          dartType: 'UuidValue?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'lastSyncedAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: true,
+          dartType: 'DateTime?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'syncStatus',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
           name: 'createdAt',
           columnType: _i2.ColumnType.timestampWithoutTimeZone,
           isNullable: false,
@@ -200,6 +242,122 @@ class Protocol extends _i1.SerializationManagerServer {
             _i2.IndexElementDefinition(
               type: _i2.IndexElementDefinitionType.column,
               definition: 'budgetId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'account_budget_external_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'budgetId',
+            ),
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'externalAccountId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _i2.TableDefinition(
+      name: 'asset_quote_cache',
+      dartName: 'AssetQuoteCache',
+      schema: 'public',
+      module: 'openbudget',
+      columns: [
+        _i2.ColumnDefinition(
+          name: 'id',
+          columnType: _i2.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue?',
+          columnDefault: 'gen_random_uuid_v7()',
+        ),
+        _i2.ColumnDefinition(
+          name: 'chain',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'assetId',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'symbol',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'usdPrice',
+          columnType: _i2.ColumnType.doublePrecision,
+          isNullable: false,
+          dartType: 'double',
+        ),
+        _i2.ColumnDefinition(
+          name: 'fetchedAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'CURRENT_TIMESTAMP',
+        ),
+        _i2.ColumnDefinition(
+          name: 'expiresAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+      ],
+      foreignKeys: [],
+      indexes: [
+        _i2.IndexDefinition(
+          indexName: 'asset_quote_cache_pkey',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'id',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: true,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'asset_quote_cache_chain_asset_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'chain',
+            ),
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'assetId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'asset_quote_cache_expires_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'expiresAt',
             ),
           ],
           type: 'btree',
@@ -1142,6 +1300,129 @@ class Protocol extends _i1.SerializationManagerServer {
           ],
           type: 'btree',
           isUnique: true,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _i2.TableDefinition(
+      name: 'plaid_connection',
+      dartName: 'PlaidConnection',
+      schema: 'public',
+      module: 'openbudget',
+      columns: [
+        _i2.ColumnDefinition(
+          name: 'id',
+          columnType: _i2.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue?',
+          columnDefault: 'gen_random_uuid_v7()',
+        ),
+        _i2.ColumnDefinition(
+          name: 'budgetId',
+          columnType: _i2.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _i2.ColumnDefinition(
+          name: 'plaidItemId',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'accessToken',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'institutionName',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'institutionId',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'CURRENT_TIMESTAMP',
+        ),
+        _i2.ColumnDefinition(
+          name: 'updatedAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'CURRENT_TIMESTAMP',
+        ),
+        _i2.ColumnDefinition(
+          name: 'lastSyncedAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: true,
+          dartType: 'DateTime?',
+        ),
+      ],
+      foreignKeys: [
+        _i2.ForeignKeyDefinition(
+          constraintName: 'plaid_connection_fk_0',
+          columns: ['budgetId'],
+          referenceTable: 'budget',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _i2.ForeignKeyAction.noAction,
+          onDelete: _i2.ForeignKeyAction.noAction,
+          matchType: null,
+        ),
+      ],
+      indexes: [
+        _i2.IndexDefinition(
+          indexName: 'plaid_connection_pkey',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'id',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: true,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'plaid_connection_budget_item_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'budgetId',
+            ),
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'plaidItemId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'plaid_connection_budget_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'budgetId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
           isPrimary: false,
         ),
       ],
@@ -2387,6 +2668,273 @@ class Protocol extends _i1.SerializationManagerServer {
       ],
       managed: true,
     ),
+    _i2.TableDefinition(
+      name: 'wallet_connection',
+      dartName: 'WalletConnection',
+      schema: 'public',
+      module: 'openbudget',
+      columns: [
+        _i2.ColumnDefinition(
+          name: 'id',
+          columnType: _i2.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue?',
+          columnDefault: 'gen_random_uuid_v7()',
+        ),
+        _i2.ColumnDefinition(
+          name: 'budgetId',
+          columnType: _i2.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _i2.ColumnDefinition(
+          name: 'chain',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'address',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'label',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'CURRENT_TIMESTAMP',
+        ),
+        _i2.ColumnDefinition(
+          name: 'updatedAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'CURRENT_TIMESTAMP',
+        ),
+        _i2.ColumnDefinition(
+          name: 'lastSyncedAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: true,
+          dartType: 'DateTime?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'syncStatus',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'lastError',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+      ],
+      foreignKeys: [
+        _i2.ForeignKeyDefinition(
+          constraintName: 'wallet_connection_fk_0',
+          columns: ['budgetId'],
+          referenceTable: 'budget',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _i2.ForeignKeyAction.noAction,
+          onDelete: _i2.ForeignKeyAction.noAction,
+          matchType: null,
+        ),
+      ],
+      indexes: [
+        _i2.IndexDefinition(
+          indexName: 'wallet_connection_pkey',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'id',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: true,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'wallet_connection_budget_chain_address_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'budgetId',
+            ),
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'chain',
+            ),
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'address',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'wallet_connection_budget_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'budgetId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _i2.TableDefinition(
+      name: 'wallet_holding',
+      dartName: 'WalletHolding',
+      schema: 'public',
+      module: 'openbudget',
+      columns: [
+        _i2.ColumnDefinition(
+          name: 'id',
+          columnType: _i2.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue?',
+          columnDefault: 'gen_random_uuid_v7()',
+        ),
+        _i2.ColumnDefinition(
+          name: 'walletConnectionId',
+          columnType: _i2.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _i2.ColumnDefinition(
+          name: 'chain',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'assetId',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'symbol',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'decimals',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _i2.ColumnDefinition(
+          name: 'quantityBaseUnits',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'quantityDisplay',
+          columnType: _i2.ColumnType.doublePrecision,
+          isNullable: false,
+          dartType: 'double',
+        ),
+        _i2.ColumnDefinition(
+          name: 'usdPrice',
+          columnType: _i2.ColumnType.doublePrecision,
+          isNullable: true,
+          dartType: 'double?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'usdValue',
+          columnType: _i2.ColumnType.doublePrecision,
+          isNullable: true,
+          dartType: 'double?',
+        ),
+        _i2.ColumnDefinition(
+          name: 'lastSyncedAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'CURRENT_TIMESTAMP',
+        ),
+      ],
+      foreignKeys: [
+        _i2.ForeignKeyDefinition(
+          constraintName: 'wallet_holding_fk_0',
+          columns: ['walletConnectionId'],
+          referenceTable: 'wallet_connection',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _i2.ForeignKeyAction.noAction,
+          onDelete: _i2.ForeignKeyAction.noAction,
+          matchType: null,
+        ),
+      ],
+      indexes: [
+        _i2.IndexDefinition(
+          indexName: 'wallet_holding_pkey',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'id',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: true,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'wallet_holding_connection_asset_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'walletConnectionId',
+            ),
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'assetId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'wallet_holding_connection_idx',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'walletConnectionId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
     ..._i3.Protocol.targetTableDefinitions,
     ..._i4.Protocol.targetTableDefinitions,
     ..._i2.Protocol.targetTableDefinitions,
@@ -2455,35 +3003,50 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == _i16.Payee) {
       return _i16.Payee.fromJson(data) as T;
     }
-    if (t == _i17.RecurringTransaction) {
-      return _i17.RecurringTransaction.fromJson(data) as T;
+    if (t == _i17.PlaidConnection) {
+      return _i17.PlaidConnection.fromJson(data) as T;
     }
-    if (t == _i18.SolanaWallet) {
-      return _i18.SolanaWallet.fromJson(data) as T;
+    if (t == _i18.RecurringTransaction) {
+      return _i18.RecurringTransaction.fromJson(data) as T;
     }
-    if (t == _i19.SolanaWalletHolding) {
-      return _i19.SolanaWalletHolding.fromJson(data) as T;
+    if (t == _i19.SolanaWallet) {
+      return _i19.SolanaWallet.fromJson(data) as T;
     }
-    if (t == _i20.SolanaWalletSyncResult) {
-      return _i20.SolanaWalletSyncResult.fromJson(data) as T;
+    if (t == _i20.SolanaWalletHolding) {
+      return _i20.SolanaWalletHolding.fromJson(data) as T;
     }
-    if (t == _i21.SolanaWalletTaxYearSummary) {
-      return _i21.SolanaWalletTaxYearSummary.fromJson(data) as T;
+    if (t == _i21.SolanaWalletSyncResult) {
+      return _i21.SolanaWalletSyncResult.fromJson(data) as T;
     }
-    if (t == _i22.SolanaWalletTransaction) {
-      return _i22.SolanaWalletTransaction.fromJson(data) as T;
+    if (t == _i22.SolanaWalletTaxYearSummary) {
+      return _i22.SolanaWalletTaxYearSummary.fromJson(data) as T;
     }
-    if (t == _i23.TransactionRule) {
-      return _i23.TransactionRule.fromJson(data) as T;
+    if (t == _i23.SolanaWalletTransaction) {
+      return _i23.SolanaWalletTransaction.fromJson(data) as T;
     }
-    if (t == _i24.ImportRow) {
-      return _i24.ImportRow.fromJson(data) as T;
+    if (t == _i24.TransactionRule) {
+      return _i24.TransactionRule.fromJson(data) as T;
     }
-    if (t == _i25.SplitItem) {
-      return _i25.SplitItem.fromJson(data) as T;
+    if (t == _i25.ImportRow) {
+      return _i25.ImportRow.fromJson(data) as T;
     }
-    if (t == _i26.Transaction) {
-      return _i26.Transaction.fromJson(data) as T;
+    if (t == _i26.SplitItem) {
+      return _i26.SplitItem.fromJson(data) as T;
+    }
+    if (t == _i27.Transaction) {
+      return _i27.Transaction.fromJson(data) as T;
+    }
+    if (t == _i28.AssetQuoteCache) {
+      return _i28.AssetQuoteCache.fromJson(data) as T;
+    }
+    if (t == _i29.WalletConnectResult) {
+      return _i29.WalletConnectResult.fromJson(data) as T;
+    }
+    if (t == _i30.WalletConnection) {
+      return _i30.WalletConnection.fromJson(data) as T;
+    }
+    if (t == _i31.WalletHolding) {
+      return _i31.WalletHolding.fromJson(data) as T;
     }
     if (t == _i1.getType<_i5.Account?>()) {
       return (data != null ? _i5.Account.fromJson(data) : null) as T;
@@ -2521,42 +3084,58 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == _i1.getType<_i16.Payee?>()) {
       return (data != null ? _i16.Payee.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i17.RecurringTransaction?>()) {
-      return (data != null ? _i17.RecurringTransaction.fromJson(data) : null)
+    if (t == _i1.getType<_i17.PlaidConnection?>()) {
+      return (data != null ? _i17.PlaidConnection.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i18.RecurringTransaction?>()) {
+      return (data != null ? _i18.RecurringTransaction.fromJson(data) : null)
           as T;
     }
-    if (t == _i1.getType<_i18.SolanaWallet?>()) {
-      return (data != null ? _i18.SolanaWallet.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i19.SolanaWallet?>()) {
+      return (data != null ? _i19.SolanaWallet.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i19.SolanaWalletHolding?>()) {
-      return (data != null ? _i19.SolanaWalletHolding.fromJson(data) : null)
+    if (t == _i1.getType<_i20.SolanaWalletHolding?>()) {
+      return (data != null ? _i20.SolanaWalletHolding.fromJson(data) : null)
           as T;
     }
-    if (t == _i1.getType<_i20.SolanaWalletSyncResult?>()) {
-      return (data != null ? _i20.SolanaWalletSyncResult.fromJson(data) : null)
+    if (t == _i1.getType<_i21.SolanaWalletSyncResult?>()) {
+      return (data != null ? _i21.SolanaWalletSyncResult.fromJson(data) : null)
           as T;
     }
-    if (t == _i1.getType<_i21.SolanaWalletTaxYearSummary?>()) {
+    if (t == _i1.getType<_i22.SolanaWalletTaxYearSummary?>()) {
       return (data != null
-              ? _i21.SolanaWalletTaxYearSummary.fromJson(data)
+              ? _i22.SolanaWalletTaxYearSummary.fromJson(data)
               : null)
           as T;
     }
-    if (t == _i1.getType<_i22.SolanaWalletTransaction?>()) {
-      return (data != null ? _i22.SolanaWalletTransaction.fromJson(data) : null)
+    if (t == _i1.getType<_i23.SolanaWalletTransaction?>()) {
+      return (data != null ? _i23.SolanaWalletTransaction.fromJson(data) : null)
           as T;
     }
-    if (t == _i1.getType<_i23.TransactionRule?>()) {
-      return (data != null ? _i23.TransactionRule.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i24.TransactionRule?>()) {
+      return (data != null ? _i24.TransactionRule.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i24.ImportRow?>()) {
-      return (data != null ? _i24.ImportRow.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i25.ImportRow?>()) {
+      return (data != null ? _i25.ImportRow.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i25.SplitItem?>()) {
-      return (data != null ? _i25.SplitItem.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i26.SplitItem?>()) {
+      return (data != null ? _i26.SplitItem.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i26.Transaction?>()) {
-      return (data != null ? _i26.Transaction.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i27.Transaction?>()) {
+      return (data != null ? _i27.Transaction.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i28.AssetQuoteCache?>()) {
+      return (data != null ? _i28.AssetQuoteCache.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i29.WalletConnectResult?>()) {
+      return (data != null ? _i29.WalletConnectResult.fromJson(data) : null)
+          as T;
+    }
+    if (t == _i1.getType<_i30.WalletConnection?>()) {
+      return (data != null ? _i30.WalletConnection.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i31.WalletHolding?>()) {
+      return (data != null ? _i31.WalletHolding.fromJson(data) : null) as T;
     }
     if (t == List<_i13.FxRateQuote>) {
       return (data as List)
@@ -2564,96 +3143,108 @@ class Protocol extends _i1.SerializationManagerServer {
               .toList()
           as T;
     }
-    if (t == List<_i27.Account>) {
-      return (data as List).map((e) => deserialize<_i27.Account>(e)).toList()
-          as T;
-    }
-    if (t == List<_i28.BudgetTemplate>) {
+    if (t == List<_i31.WalletHolding>) {
       return (data as List)
-              .map((e) => deserialize<_i28.BudgetTemplate>(e))
+              .map((e) => deserialize<_i31.WalletHolding>(e))
               .toList()
           as T;
     }
-    if (t == List<_i29.MonthlyAllocation>) {
+    if (t == List<_i32.Account>) {
+      return (data as List).map((e) => deserialize<_i32.Account>(e)).toList()
+          as T;
+    }
+    if (t == List<_i33.BudgetTemplate>) {
       return (data as List)
-              .map((e) => deserialize<_i29.MonthlyAllocation>(e))
+              .map((e) => deserialize<_i33.BudgetTemplate>(e))
               .toList()
           as T;
     }
-    if (t == List<_i30.Budget>) {
-      return (data as List).map((e) => deserialize<_i30.Budget>(e)).toList()
+    if (t == List<_i34.MonthlyAllocation>) {
+      return (data as List)
+              .map((e) => deserialize<_i34.MonthlyAllocation>(e))
+              .toList()
           as T;
     }
-    if (t == List<_i31.Category>) {
-      return (data as List).map((e) => deserialize<_i31.Category>(e)).toList()
+    if (t == List<_i35.Budget>) {
+      return (data as List).map((e) => deserialize<_i35.Budget>(e)).toList()
+          as T;
+    }
+    if (t == List<_i36.Category>) {
+      return (data as List).map((e) => deserialize<_i36.Category>(e)).toList()
           as T;
     }
     if (t == List<_i1.UuidValue>) {
       return (data as List).map((e) => deserialize<_i1.UuidValue>(e)).toList()
           as T;
     }
-    if (t == List<_i32.EnvelopeGoal>) {
+    if (t == List<_i37.EnvelopeGoal>) {
       return (data as List)
-              .map((e) => deserialize<_i32.EnvelopeGoal>(e))
+              .map((e) => deserialize<_i37.EnvelopeGoal>(e))
               .toList()
           as T;
     }
-    if (t == List<_i33.Envelope>) {
-      return (data as List).map((e) => deserialize<_i33.Envelope>(e)).toList()
+    if (t == List<_i38.Envelope>) {
+      return (data as List).map((e) => deserialize<_i38.Envelope>(e)).toList()
           as T;
     }
     if (t == List<String>) {
       return (data as List).map((e) => deserialize<String>(e)).toList() as T;
     }
-    if (t == List<_i34.Payee>) {
-      return (data as List).map((e) => deserialize<_i34.Payee>(e)).toList()
+    if (t == List<_i39.Payee>) {
+      return (data as List).map((e) => deserialize<_i39.Payee>(e)).toList()
           as T;
     }
-    if (t == List<_i35.RecurringTransaction>) {
+    if (t == List<_i40.RecurringTransaction>) {
       return (data as List)
-              .map((e) => deserialize<_i35.RecurringTransaction>(e))
+              .map((e) => deserialize<_i40.RecurringTransaction>(e))
               .toList()
           as T;
     }
-    if (t == List<_i36.SolanaWallet>) {
+    if (t == List<_i41.SolanaWallet>) {
       return (data as List)
-              .map((e) => deserialize<_i36.SolanaWallet>(e))
+              .map((e) => deserialize<_i41.SolanaWallet>(e))
               .toList()
           as T;
     }
-    if (t == List<_i37.SolanaWalletTransaction>) {
+    if (t == List<_i42.SolanaWalletTransaction>) {
       return (data as List)
-              .map((e) => deserialize<_i37.SolanaWalletTransaction>(e))
+              .map((e) => deserialize<_i42.SolanaWalletTransaction>(e))
               .toList()
           as T;
     }
-    if (t == List<_i38.SolanaWalletHolding>) {
+    if (t == List<_i43.SolanaWalletHolding>) {
       return (data as List)
-              .map((e) => deserialize<_i38.SolanaWalletHolding>(e))
+              .map((e) => deserialize<_i43.SolanaWalletHolding>(e))
               .toList()
           as T;
     }
-    if (t == List<_i39.TransactionRule>) {
+    if (t == List<_i44.TransactionRule>) {
       return (data as List)
-              .map((e) => deserialize<_i39.TransactionRule>(e))
+              .map((e) => deserialize<_i44.TransactionRule>(e))
               .toList()
           as T;
     }
-    if (t == List<_i40.Transaction>) {
+    if (t == List<_i45.Transaction>) {
       return (data as List)
-              .map((e) => deserialize<_i40.Transaction>(e))
+              .map((e) => deserialize<_i45.Transaction>(e))
               .toList()
           as T;
     }
     if (t == List<int>) {
       return (data as List).map((e) => deserialize<int>(e)).toList() as T;
     }
-    if (t == List<_i41.SplitItem>) {
-      return (data as List).map((e) => deserialize<_i41.SplitItem>(e)).toList()
+    if (t == List<_i46.SplitItem>) {
+      return (data as List).map((e) => deserialize<_i46.SplitItem>(e)).toList()
           as T;
     }
-    if (t == List<_i42.ImportRow>) {
-      return (data as List).map((e) => deserialize<_i42.ImportRow>(e)).toList()
+    if (t == List<_i47.ImportRow>) {
+      return (data as List).map((e) => deserialize<_i47.ImportRow>(e)).toList()
+          as T;
+    }
+    if (t == List<_i48.WalletHolding>) {
+      return (data as List)
+              .map((e) => deserialize<_i48.WalletHolding>(e))
+              .toList()
           as T;
     }
     try {
@@ -2682,16 +3273,21 @@ class Protocol extends _i1.SerializationManagerServer {
       _i14.FxRateSnapshot => 'FxRateSnapshot',
       _i15.MonthlyAllocation => 'MonthlyAllocation',
       _i16.Payee => 'Payee',
-      _i17.RecurringTransaction => 'RecurringTransaction',
-      _i18.SolanaWallet => 'SolanaWallet',
-      _i19.SolanaWalletHolding => 'SolanaWalletHolding',
-      _i20.SolanaWalletSyncResult => 'SolanaWalletSyncResult',
-      _i21.SolanaWalletTaxYearSummary => 'SolanaWalletTaxYearSummary',
-      _i22.SolanaWalletTransaction => 'SolanaWalletTransaction',
-      _i23.TransactionRule => 'TransactionRule',
-      _i24.ImportRow => 'ImportRow',
-      _i25.SplitItem => 'SplitItem',
-      _i26.Transaction => 'Transaction',
+      _i17.PlaidConnection => 'PlaidConnection',
+      _i18.RecurringTransaction => 'RecurringTransaction',
+      _i19.SolanaWallet => 'SolanaWallet',
+      _i20.SolanaWalletHolding => 'SolanaWalletHolding',
+      _i21.SolanaWalletSyncResult => 'SolanaWalletSyncResult',
+      _i22.SolanaWalletTaxYearSummary => 'SolanaWalletTaxYearSummary',
+      _i23.SolanaWalletTransaction => 'SolanaWalletTransaction',
+      _i24.TransactionRule => 'TransactionRule',
+      _i25.ImportRow => 'ImportRow',
+      _i26.SplitItem => 'SplitItem',
+      _i27.Transaction => 'Transaction',
+      _i28.AssetQuoteCache => 'AssetQuoteCache',
+      _i29.WalletConnectResult => 'WalletConnectResult',
+      _i30.WalletConnection => 'WalletConnection',
+      _i31.WalletHolding => 'WalletHolding',
       _ => null,
     };
   }
@@ -2730,26 +3326,36 @@ class Protocol extends _i1.SerializationManagerServer {
         return 'MonthlyAllocation';
       case _i16.Payee():
         return 'Payee';
-      case _i17.RecurringTransaction():
+      case _i17.PlaidConnection():
+        return 'PlaidConnection';
+      case _i18.RecurringTransaction():
         return 'RecurringTransaction';
-      case _i18.SolanaWallet():
+      case _i19.SolanaWallet():
         return 'SolanaWallet';
-      case _i19.SolanaWalletHolding():
+      case _i20.SolanaWalletHolding():
         return 'SolanaWalletHolding';
-      case _i20.SolanaWalletSyncResult():
+      case _i21.SolanaWalletSyncResult():
         return 'SolanaWalletSyncResult';
-      case _i21.SolanaWalletTaxYearSummary():
+      case _i22.SolanaWalletTaxYearSummary():
         return 'SolanaWalletTaxYearSummary';
-      case _i22.SolanaWalletTransaction():
+      case _i23.SolanaWalletTransaction():
         return 'SolanaWalletTransaction';
-      case _i23.TransactionRule():
+      case _i24.TransactionRule():
         return 'TransactionRule';
-      case _i24.ImportRow():
+      case _i25.ImportRow():
         return 'ImportRow';
-      case _i25.SplitItem():
+      case _i26.SplitItem():
         return 'SplitItem';
-      case _i26.Transaction():
+      case _i27.Transaction():
         return 'Transaction';
+      case _i28.AssetQuoteCache():
+        return 'AssetQuoteCache';
+      case _i29.WalletConnectResult():
+        return 'WalletConnectResult';
+      case _i30.WalletConnection():
+        return 'WalletConnection';
+      case _i31.WalletHolding():
+        return 'WalletHolding';
     }
     className = _i2.Protocol().getClassNameForObject(data);
     if (className != null) {
@@ -2808,35 +3414,50 @@ class Protocol extends _i1.SerializationManagerServer {
     if (dataClassName == 'Payee') {
       return deserialize<_i16.Payee>(data['data']);
     }
+    if (dataClassName == 'PlaidConnection') {
+      return deserialize<_i17.PlaidConnection>(data['data']);
+    }
     if (dataClassName == 'RecurringTransaction') {
-      return deserialize<_i17.RecurringTransaction>(data['data']);
+      return deserialize<_i18.RecurringTransaction>(data['data']);
     }
     if (dataClassName == 'SolanaWallet') {
-      return deserialize<_i18.SolanaWallet>(data['data']);
+      return deserialize<_i19.SolanaWallet>(data['data']);
     }
     if (dataClassName == 'SolanaWalletHolding') {
-      return deserialize<_i19.SolanaWalletHolding>(data['data']);
+      return deserialize<_i20.SolanaWalletHolding>(data['data']);
     }
     if (dataClassName == 'SolanaWalletSyncResult') {
-      return deserialize<_i20.SolanaWalletSyncResult>(data['data']);
+      return deserialize<_i21.SolanaWalletSyncResult>(data['data']);
     }
     if (dataClassName == 'SolanaWalletTaxYearSummary') {
-      return deserialize<_i21.SolanaWalletTaxYearSummary>(data['data']);
+      return deserialize<_i22.SolanaWalletTaxYearSummary>(data['data']);
     }
     if (dataClassName == 'SolanaWalletTransaction') {
-      return deserialize<_i22.SolanaWalletTransaction>(data['data']);
+      return deserialize<_i23.SolanaWalletTransaction>(data['data']);
     }
     if (dataClassName == 'TransactionRule') {
-      return deserialize<_i23.TransactionRule>(data['data']);
+      return deserialize<_i24.TransactionRule>(data['data']);
     }
     if (dataClassName == 'ImportRow') {
-      return deserialize<_i24.ImportRow>(data['data']);
+      return deserialize<_i25.ImportRow>(data['data']);
     }
     if (dataClassName == 'SplitItem') {
-      return deserialize<_i25.SplitItem>(data['data']);
+      return deserialize<_i26.SplitItem>(data['data']);
     }
     if (dataClassName == 'Transaction') {
-      return deserialize<_i26.Transaction>(data['data']);
+      return deserialize<_i27.Transaction>(data['data']);
+    }
+    if (dataClassName == 'AssetQuoteCache') {
+      return deserialize<_i28.AssetQuoteCache>(data['data']);
+    }
+    if (dataClassName == 'WalletConnectResult') {
+      return deserialize<_i29.WalletConnectResult>(data['data']);
+    }
+    if (dataClassName == 'WalletConnection') {
+      return deserialize<_i30.WalletConnection>(data['data']);
+    }
+    if (dataClassName == 'WalletHolding') {
+      return deserialize<_i31.WalletHolding>(data['data']);
     }
     if (dataClassName.startsWith('serverpod.')) {
       data['className'] = dataClassName.substring(10);
@@ -2894,18 +3515,26 @@ class Protocol extends _i1.SerializationManagerServer {
         return _i15.MonthlyAllocation.t;
       case _i16.Payee:
         return _i16.Payee.t;
-      case _i17.RecurringTransaction:
-        return _i17.RecurringTransaction.t;
-      case _i18.SolanaWallet:
-        return _i18.SolanaWallet.t;
-      case _i19.SolanaWalletHolding:
-        return _i19.SolanaWalletHolding.t;
-      case _i22.SolanaWalletTransaction:
-        return _i22.SolanaWalletTransaction.t;
-      case _i23.TransactionRule:
-        return _i23.TransactionRule.t;
-      case _i26.Transaction:
-        return _i26.Transaction.t;
+      case _i17.PlaidConnection:
+        return _i17.PlaidConnection.t;
+      case _i18.RecurringTransaction:
+        return _i18.RecurringTransaction.t;
+      case _i19.SolanaWallet:
+        return _i19.SolanaWallet.t;
+      case _i20.SolanaWalletHolding:
+        return _i20.SolanaWalletHolding.t;
+      case _i23.SolanaWalletTransaction:
+        return _i23.SolanaWalletTransaction.t;
+      case _i24.TransactionRule:
+        return _i24.TransactionRule.t;
+      case _i27.Transaction:
+        return _i27.Transaction.t;
+      case _i28.AssetQuoteCache:
+        return _i28.AssetQuoteCache.t;
+      case _i30.WalletConnection:
+        return _i30.WalletConnection.t;
+      case _i31.WalletHolding:
+        return _i31.WalletHolding.t;
     }
     return null;
   }
