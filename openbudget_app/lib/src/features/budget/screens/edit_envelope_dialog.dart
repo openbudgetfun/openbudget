@@ -6,8 +6,8 @@ import 'package:openbudget_app/src/features/budget/providers/envelope_actions_pr
 import 'package:openbudget_app/src/features/budget/providers/envelope_goal_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/monthly_allocation_provider.dart';
 import 'package:openbudget_app/src/features/budget/screens/set_goal_dialog.dart';
-import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_app/src/features/budget/widgets/budget_amount_keypad.dart';
+import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';

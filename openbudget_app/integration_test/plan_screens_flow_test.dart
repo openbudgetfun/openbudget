@@ -759,7 +759,7 @@ void main() {
     await tester.tap(find.widgetWithText(TextButton, 'Done'));
     await tester.pumpAndSettle();
 
-    expect(find.byIcon(Icons.swap_vert_rounded), findsOneWidget);
+    expect(find.byIcon(Icons.more_horiz_rounded), findsOneWidget);
   });
 }
 
