@@ -22,31 +22,35 @@ class AccountActions extends _$AccountActions {
     String? institutionId,
   }) async {
     final client = ref.read(serverpodClientProvider);
-    // Serverpod API requires UuidValue which is experimental in uuid package.
-    // ignore: experimental_member_use
-    final budgetUuid = UuidValue.fromString(budgetId);
-    final account = await client.account.create(
-      name,
-      accountType,
-      balanceCents,
-      currencyCode,
-      budgetUuid,
-      onBudget: onBudget,
-      sortOrder: sortOrder,
+    try {
       // Serverpod API requires UuidValue which is experimental in uuid package.
       // ignore: experimental_member_use
-      institutionId: institutionId == null
-          ? null
-          : UuidValue.fromString(institutionId),
-    );
+      final budgetUuid = UuidValue.fromString(budgetId);
+      final account = await client.account.create(
+        name,
+        accountType,
+        balanceCents,
+        currencyCode,
+        budgetUuid,
+        onBudget: onBudget,
+        sortOrder: sortOrder,
+        // Serverpod API requires UuidValue which is experimental in uuid package.
+        // ignore: experimental_member_use
+        institutionId: institutionId == null
+            ? null
+            : UuidValue.fromString(institutionId),
+      );
 
-    final normalizedWallet = walletAddress?.trim();
-    if (normalizedWallet != null && normalizedWallet.isNotEmpty) {
-      // Wallet linking is handled by dedicated wallet flows.
+      final normalizedWallet = walletAddress?.trim();
+      if (normalizedWallet != null && normalizedWallet.isNotEmpty) {
+        // Wallet linking is handled by dedicated wallet flows.
+      }
+
+      return account;
+    } finally {
+      // Always refresh account lists, even when the response fails to decode.
+      ref.invalidate(accountListProvider(budgetId));
     }
-
-    ref.invalidate(accountListProvider(budgetId));
-    return account;
   }
 
   Future<Account> addMineToBudget({
@@ -97,13 +101,17 @@ class AccountActions extends _$AccountActions {
     required String budgetId,
   }) async {
     final client = ref.read(serverpodClientProvider);
-    final deleted = await client.account.delete(
-      // Serverpod API requires UuidValue which is experimental in uuid package.
-      // ignore: experimental_member_use
-      UuidValue.fromString(accountId),
-    );
-    ref.invalidate(accountListProvider(budgetId));
-    return deleted;
+    try {
+      final deleted = await client.account.delete(
+        // Serverpod API requires UuidValue which is experimental in uuid package.
+        // ignore: experimental_member_use
+        UuidValue.fromString(accountId),
+      );
+      return deleted;
+    } finally {
+      // Always refresh account lists, even when the response fails to decode.
+      ref.invalidate(accountListProvider(budgetId));
+    }
   }
 
   Future<Account> undoDeleteAccount({

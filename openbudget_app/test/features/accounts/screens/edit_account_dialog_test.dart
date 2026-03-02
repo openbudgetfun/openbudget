@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_actions_provider.dart';
+import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
 import 'package:openbudget_app/src/features/accounts/screens/edit_account_dialog.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 
@@ -29,9 +30,10 @@ Account _makeAccount({bool isClosed = false}) {
 }
 
 class _FakeAccountActions extends AccountActions {
-  _FakeAccountActions({this.onDelete});
+  _FakeAccountActions({this.onDelete, this.throwOnDelete = false});
 
   final VoidCallback? onDelete;
+  final bool throwOnDelete;
 
   @override
   FutureOr<void> build() {}
@@ -42,6 +44,9 @@ class _FakeAccountActions extends AccountActions {
     required String budgetId,
   }) async {
     onDelete?.call();
+    if (throwOnDelete) {
+      throw StateError('delete response decode error');
+    }
     return _makeAccount(isClosed: true);
   }
 
@@ -64,12 +69,21 @@ Widget _buildSubject({
   required Account account,
   VoidCallback? onDeleted,
   VoidCallback? onDeleteAction,
+  bool throwOnDelete = false,
+  List<Account>? accountListOverride,
 }) {
   return ProviderScope(
     overrides: [
       accountActionsProvider.overrideWith(
-        () => _FakeAccountActions(onDelete: onDeleteAction),
+        () => _FakeAccountActions(
+          onDelete: onDeleteAction,
+          throwOnDelete: throwOnDelete,
+        ),
       ),
+      if (accountListOverride != null)
+        accountListProvider(_budgetId).overrideWith((ref) async {
+          return accountListOverride;
+        }),
     ],
     child: MaterialApp(
       theme: ThemeData.light(useMaterial3: true),
@@ -188,6 +202,44 @@ void main() {
 
       expect(deleteCalled, isTrue);
       expect(onDeletedCalled, isTrue);
+      expect(find.text('Edit Account'), findsNothing);
+    });
+
+    testWidgets('delete fallback succeeds when account is already gone', (
+      tester,
+    ) async {
+      var onDeletedCalled = false;
+
+      await tester.pumpWidget(
+        _buildSubject(
+          account: _makeAccount(isClosed: true),
+          throwOnDelete: true,
+          onDeleted: () => onDeletedCalled = true,
+          accountListOverride: const <Account>[],
+        ),
+      );
+      await tester.tap(find.text('Open Edit Dialog'));
+      await tester.pumpAndSettle();
+
+      await tester.scrollUntilVisible(
+        find.text('Delete Permanently'),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Delete Permanently'));
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.widgetWithText(FilledButton, 'Delete Permanently').last,
+      );
+      await tester.pumpAndSettle();
+
+      expect(onDeletedCalled, isTrue);
+      expect(
+        find.text('Could not delete account. Please try again.'),
+        findsNothing,
+      );
       expect(find.text('Edit Account'), findsNothing);
     });
   });

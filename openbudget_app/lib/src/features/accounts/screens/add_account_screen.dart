@@ -194,8 +194,11 @@ class AddAccountScreen extends HookConsumerWidget {
         institutionCatalogAsync.asData?.value ?? const <Institution>[];
     final myAccounts = myAccountsAsync.asData?.value ?? const <Account>[];
 
-    Future<Set<String>?> fetchAccountIds() async {
+    Future<Set<String>?> fetchAccountIds({bool forceRefresh = false}) async {
       try {
+        if (forceRefresh) {
+          ref.invalidate(accountListProvider(budgetId));
+        }
         final accounts = await ref.read(accountListProvider(budgetId).future);
         return accounts
             .map((item) => item.id?.toString())
@@ -204,6 +207,26 @@ class AddAccountScreen extends HookConsumerWidget {
       } on Object {
         return null;
       }
+    }
+
+    Future<bool> wasAccountCreatedDespiteError(Set<String>? existingIds) async {
+      if (existingIds == null) return false;
+      const retryDelays = <Duration>[
+        Duration.zero,
+        Duration(milliseconds: 120),
+        Duration(milliseconds: 280),
+      ];
+      for (final delay in retryDelays) {
+        if (delay > Duration.zero) {
+          await Future<void>.delayed(delay);
+        }
+        final latestAccountIds = await fetchAccountIds(forceRefresh: true);
+        if (latestAccountIds != null &&
+            latestAccountIds.difference(existingIds).isNotEmpty) {
+          return true;
+        }
+      }
+      return false;
     }
 
     Future<void> startLinkedBankFlow(Institution institution) async {
@@ -319,11 +342,9 @@ class AddAccountScreen extends HookConsumerWidget {
         successAccountLabel.value = 'Solana Wallet';
         step.value = _AddAccountStep.success;
       } on Object catch (_) {
-        final latestAccountIds = await fetchAccountIds();
-        final createdDespiteError =
-            existingAccountIds != null &&
-            latestAccountIds != null &&
-            latestAccountIds.difference(existingAccountIds).isNotEmpty;
+        final createdDespiteError = await wasAccountCreatedDespiteError(
+          existingAccountIds,
+        );
         if (!context.mounted) return;
         if (createdDespiteError) {
           successAccountLabel.value = 'Solana Wallet';
@@ -382,11 +403,9 @@ class AddAccountScreen extends HookConsumerWidget {
         successAccountLabel.value = chosenType.label;
         step.value = _AddAccountStep.success;
       } on Object catch (_) {
-        final latestAccountIds = await fetchAccountIds();
-        final createdDespiteError =
-            existingAccountIds != null &&
-            latestAccountIds != null &&
-            latestAccountIds.difference(existingAccountIds).isNotEmpty;
+        final createdDespiteError = await wasAccountCreatedDespiteError(
+          existingAccountIds,
+        );
         if (!context.mounted) return;
         isSubmitting.value = false;
         if (createdDespiteError) {

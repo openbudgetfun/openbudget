@@ -445,13 +445,27 @@ class EditAccountDialog extends HookConsumerWidget {
       // delete response, treat this as success by verifying the account no longer
       // exists in the latest list.
       var deletedOnServer = false;
-      try {
-        final accounts = await ref.read(accountListProvider(budgetId).future);
-        deletedOnServer = !accounts.any(
-          (item) => item.id?.toString() == accountId,
-        );
-      } on Object {
-        deletedOnServer = false;
+      const retryDelays = <Duration>[
+        Duration.zero,
+        Duration(milliseconds: 120),
+        Duration(milliseconds: 280),
+      ];
+      for (final delay in retryDelays) {
+        if (delay > Duration.zero) {
+          await Future<void>.delayed(delay);
+        }
+        try {
+          ref.invalidate(accountListProvider(budgetId));
+          final accounts = await ref.read(accountListProvider(budgetId).future);
+          deletedOnServer = !accounts.any(
+            (item) => item.id?.toString() == accountId,
+          );
+          if (deletedOnServer) {
+            break;
+          }
+        } on Object {
+          deletedOnServer = false;
+        }
       }
 
       if (deletedOnServer) {

@@ -7,12 +7,34 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
+import 'package:openbudget_app/src/features/accounts/providers/account_actions_provider.dart';
+import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
 import 'package:openbudget_app/src/features/accounts/providers/institution_catalog_provider.dart';
 import 'package:openbudget_app/src/features/accounts/screens/add_account_screen.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
+
+class _ThrowingCreateAccountActions extends AccountActions {
+  @override
+  Future<void> build() async {}
+
+  @override
+  Future<Account> createAccount({
+    required String name,
+    required String accountType,
+    required int balanceCents,
+    required String currencyCode,
+    required String budgetId,
+    required bool onBudget,
+    required int sortOrder,
+    String? walletAddress,
+    String? institutionId,
+  }) async {
+    throw StateError('createAccount decode error');
+  }
+}
 
 void main() {
   setUpAll(() {
@@ -256,6 +278,101 @@ void main() {
 
     nextButton = tester.widget(find.widgetWithText(FilledButton, 'Next'));
     expect(nextButton.onPressed, isNotNull);
+  });
+
+  testWidgets('create account fallback succeeds when row exists after error', (
+    tester,
+  ) async {
+    var accountListReads = 0;
+    final before = Account(
+      id: UuidValue.fromString('00000000-0000-0000-0000-000000000201'),
+      name: 'Existing',
+      accountType: 'checking',
+      balanceCents: 1000,
+      currencyCode: 'USD',
+      budgetId: UuidValue.fromString('00000000-0000-0000-0000-000000000001'),
+      onBudget: true,
+      sortOrder: 0,
+      isClosed: false,
+    );
+    final after = Account(
+      id: UuidValue.fromString('00000000-0000-0000-0000-000000000202'),
+      name: 'New',
+      accountType: 'checking',
+      balanceCents: 5000,
+      currencyCode: 'USD',
+      budgetId: UuidValue.fromString('00000000-0000-0000-0000-000000000001'),
+      onBudget: true,
+      sortOrder: 1,
+      isClosed: false,
+    );
+
+    final router = GoRouter(
+      initialLocation: '/budgets/$budgetId/accounts/add',
+      routes: [
+        GoRoute(
+          name: addAccountRoute,
+          path: '/budgets/:id/accounts/add',
+          builder: (context, state) =>
+              AddAccountScreen(budgetId: state.pathParameters['id']!),
+        ),
+        GoRoute(
+          name: accountListRoute,
+          path: '/budgets/:id/accounts',
+          builder: (_, __) => const Scaffold(body: Text('Account List')),
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          budgetDetailProvider.overrideWith((ref, id) async => makeBudget()),
+          institutionCatalogProvider.overrideWith(
+            (ref, locationCode) async => testInstitutions,
+          ),
+          accountActionsProvider.overrideWith(
+            _ThrowingCreateAccountActions.new,
+          ),
+          accountListProvider(budgetId).overrideWith((ref) async {
+            accountListReads++;
+            return accountListReads == 1 ? [before] : [before, after];
+          }),
+        ],
+        child: MaterialApp.router(
+          theme: OpenBudgetTheme.light,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          routerConfig: router,
+        ),
+      ),
+    );
+
+    await _pumpToBankSearch(tester);
+    await _tapAddUnlinked(tester);
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField).at(0), 'Daily');
+    await tester.enterText(find.byType(TextField).at(1), '50');
+    await _openAccountTypePicker(
+      tester,
+      typeTileFinder: find.byKey(unlinkedTypeTileKey),
+    );
+    await _tapAccountTypeOption(
+      tester,
+      optionFinder: find.byKey(checkingTypeOptionKey),
+    );
+
+    await tester.tap(find.widgetWithText(FilledButton, 'Next'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Account Added'), findsOneWidget);
+    expect(find.text('Success!'), findsOneWidget);
+    expect(
+      find.text('Could not create account. Please try again.'),
+      findsNothing,
+    );
+    expect(accountListReads, greaterThanOrEqualTo(2));
   });
 }
 
