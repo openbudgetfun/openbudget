@@ -48,11 +48,17 @@ void main() {
       await tester.pumpWidget(buildSubject());
       await tester.pump();
 
-      final annotatedRegion = tester
-          .widget<AnnotatedRegion<SystemUiOverlayStyle>>(
+      final annotatedRegions = tester
+          .widgetList<AnnotatedRegion<SystemUiOverlayStyle>>(
             find.byType(AnnotatedRegion<SystemUiOverlayStyle>),
-          );
-      expect(annotatedRegion.value.statusBarIconBrightness, Brightness.dark);
+          )
+          .toList();
+      expect(
+        annotatedRegions.any(
+          (region) => region.value.statusBarIconBrightness == Brightness.dark,
+        ),
+        isTrue,
+      );
     });
 
     testWidgets('renders readable paragraph text in light mode', (

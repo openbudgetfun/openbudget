@@ -90,7 +90,10 @@ GoRouter appRouter(Ref ref) {
       GoRoute(
         name: createBudgetRoute,
         path: createBudgetPath,
-        builder: (context, state) => const CreateBudgetScreen(),
+        pageBuilder: (context, state) => const MaterialPage<void>(
+          fullscreenDialog: true,
+          child: CreateBudgetScreen(),
+        ),
       ),
       GoRoute(
         name: budgetDetailRoute,

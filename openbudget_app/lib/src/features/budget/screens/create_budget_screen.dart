@@ -33,7 +33,24 @@ class CreateBudgetScreen extends HookConsumerWidget {
       value: statusBarStyle,
       child: Scaffold(
         backgroundColor: OpenBudgetPalette.bgAuthFor(theme),
+        appBar: AppBar(
+          backgroundColor: OpenBudgetPalette.bgAuthFor(theme),
+          surfaceTintColor: OpenBudgetPalette.transparentFor(theme),
+          scrolledUnderElevation: 0,
+          leading: IconButton(
+            tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+            icon: const Icon(Icons.close_rounded),
+            onPressed: () {
+              if (context.canPop()) {
+                context.pop();
+                return;
+              }
+              context.goNamed(homeRoute);
+            },
+          ),
+        ),
         body: SafeArea(
+          top: false,
           child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 420),
