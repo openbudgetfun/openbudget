@@ -119,5 +119,19 @@ void main() {
         throwsA(isA<ServerpodUnauthenticatedException>()),
       );
     });
+
+    test(
+      'latest returns a stale USD fallback when no snapshot and no credentials exist',
+      () async {
+        FxRateService.configure(apiKey: null, baseUrl: null);
+
+        final latest = await endpoints.fxRate.latest(authedSession);
+        expect(latest.baseCurrencyCode, 'USD');
+        expect(latest.isStale, isTrue);
+        expect(latest.rates.length, 1);
+        expect(latest.rates.single.currencyCode, 'USD');
+        expect(latest.rates.single.rate, 1.0);
+      },
+    );
   });
 }

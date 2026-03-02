@@ -208,9 +208,10 @@ class FxRateService {
       if (_hasProviderCredentials(session)) {
         return refreshNow(session);
       }
-      throw ValidationException(
-        'No FX rates available yet and provider credentials are not configured.',
+      _log.warning(
+        'No FX rates available yet and provider credentials are not configured; serving USD fallback snapshot.',
       );
+      return _fallbackSnapshot(fetchedAt: now);
     }
 
     final isDueForRefresh =
@@ -355,6 +356,15 @@ class FxRateService {
 
   static bool _hasProviderCredentials(Session session) {
     return _resolveApiKey(session) != null;
+  }
+
+  static FxLatestSnapshot _fallbackSnapshot({required DateTime fetchedAt}) {
+    return FxLatestSnapshot(
+      baseCurrencyCode: _baseCurrencyCode,
+      fetchedAt: fetchedAt,
+      isStale: true,
+      rates: [FxRateQuote(currencyCode: _baseCurrencyCode, rate: 1)],
+    );
   }
 
   static String? _resolveApiKey(Session session) {
