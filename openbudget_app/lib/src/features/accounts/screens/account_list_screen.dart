@@ -259,6 +259,7 @@ class _NotificationBanner extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
 
     return Container(
@@ -280,15 +281,14 @@ class _NotificationBanner extends HookWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Notifications',
+                  l10n.accountListNotificationsTitle,
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w700,
                   ),
                 ),
                 const SizedBox(height: SpacingTokens.xs),
                 Text(
-                  'OpenBudget will notify you when you have new '
-                  'transactions or overspending.',
+                  l10n.accountListNotificationsMessage,
                   style: theme.textTheme.bodyMedium,
                 ),
               ],
@@ -470,7 +470,7 @@ class _AccountTile extends HookWidget {
         'creditCard' => l10n.accountTypeCreditCard,
         'cash' => l10n.accountTypeCash,
         'investment' => l10n.accountTypeInvestment,
-        'cryptoWallet' => 'Solana Wallet',
+        'cryptoWallet' => l10n.accountTypeCryptoWallet,
         _ => l10n.accountTypeOther,
       };
 }

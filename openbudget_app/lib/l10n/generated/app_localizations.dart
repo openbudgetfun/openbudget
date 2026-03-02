@@ -262,6 +262,18 @@ abstract class AppLocalizations {
   /// **'Accounts'**
   String get accountListTitle;
 
+  /// No description provided for @accountListNotificationsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get accountListNotificationsTitle;
+
+  /// No description provided for @accountListNotificationsMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenBudget will notify you when you have new transactions or overspending.'**
+  String get accountListNotificationsMessage;
+
   /// No description provided for @accountLoadError.
   ///
   /// In en, this message translates to:
@@ -333,6 +345,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Credit Card'**
   String get accountTypeCreditCard;
+
+  /// No description provided for @accountTypeCryptoWallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Solana Wallet'**
+  String get accountTypeCryptoWallet;
 
   /// No description provided for @accountTypeInvestment.
   ///
@@ -4071,6 +4089,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Account Added'**
   String get addAccountSuccessTitle;
+
+  /// No description provided for @addAccountSuccessHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Success!'**
+  String get addAccountSuccessHeadline;
+
+  /// No description provided for @addAccountSuccessAddAnother.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Another'**
+  String get addAccountSuccessAddAnother;
 
   /// No description provided for @addAccountSelectTypePlaceholder.
   ///

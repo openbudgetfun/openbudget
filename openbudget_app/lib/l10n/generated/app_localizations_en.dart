@@ -97,6 +97,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountListTitle => 'Accounts';
 
   @override
+  String get accountListNotificationsTitle => 'Notifications';
+
+  @override
+  String get accountListNotificationsMessage =>
+      'OpenBudget will notify you when you have new transactions or overspending.';
+
+  @override
   String get accountLoadError => 'Could not load accounts';
 
   @override
@@ -131,6 +138,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get accountTypeCreditCard => 'Credit Card';
+
+  @override
+  String get accountTypeCryptoWallet => 'Solana Wallet';
 
   @override
   String get accountTypeInvestment => 'Investment';
@@ -2369,6 +2379,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get addAccountSuccessTitle => 'Account Added';
+
+  @override
+  String get addAccountSuccessHeadline => 'Success!';
+
+  @override
+  String get addAccountSuccessAddAnother => 'Add Another';
 
   @override
   String get addAccountSelectTypePlaceholder => 'Select account type...';

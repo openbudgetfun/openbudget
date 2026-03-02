@@ -354,8 +354,9 @@ class AddAccountScreen extends HookConsumerWidget {
           title: Text(
             switch (step.value) {
               _AddAccountStep.loading => '',
-              _AddAccountStep.loadingInstitutions => l10n.accountAddTitle,
-              _AddAccountStep.searchBank => l10n.accountAddTitle,
+              _AddAccountStep.loadingInstitutions =>
+                l10n.budgetOnboardingAddAccountsCta,
+              _AddAccountStep.searchBank => l10n.budgetOnboardingAddAccountsCta,
               _AddAccountStep.walletConnection => l10n.addAccountConnectWallet,
               _AddAccountStep.unlinkedAccount => l10n.addAccountUnlinkedTitle,
               _AddAccountStep.accountType => l10n.addAccountSelectAccountType,
@@ -416,7 +417,8 @@ class AddAccountScreen extends HookConsumerWidget {
                   walletAddressController: walletAddressController,
                   showWalletAddress: isWalletType,
                   selectedTypeLabel:
-                      selectedType?.label ?? l10n.addAccountSelectTypePlaceholder,
+                      selectedType?.label ??
+                      l10n.addAccountSelectTypePlaceholder,
                   hasSelectedType: selectedType != null,
                   onChooseType: () => step.value = _AddAccountStep.accountType,
                 ),
@@ -613,61 +615,68 @@ class _LoadingStep extends StatelessWidget {
     };
     final includeSpinner = titleKey == _LoadingStepKey.loadingInstitutions;
 
-    final content = Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: SpacingTokens.xl,
-        vertical: SpacingTokens.lg,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(RadiusTokens.lg),
-            child: Image.asset(
-              logoAsset,
-              width: 84,
-              height: 84,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => Icon(
-                Icons.account_balance_rounded,
-                size: 84,
-                color: theme.colorScheme.primary,
-              ),
-            ),
-          ),
-          const SizedBox(height: SpacingTokens.md),
-          Text(
-            title,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: SpacingTokens.xs),
-          Text(
-            l10n.loadingHint,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
-            ),
-          ),
-          if (includeSpinner) ...[
-            const SizedBox(height: SpacingTokens.lg),
-            const SizedBox(
-              height: 28,
-              width: 28,
-              child: CircularProgressIndicator(strokeWidth: 3),
-            ),
-          ],
-        ],
-      ),
-    );
-
     return LayoutBuilder(
-      builder: (context, constraints) => SingleChildScrollView(
-        child: ConstrainedBox(
-          constraints: BoxConstraints(minHeight: constraints.maxHeight),
-          child: Center(child: content),
-        ),
-      ),
+      builder: (context, constraints) {
+        final compact = constraints.maxHeight < 300;
+        final logoSize = compact ? 56.0 : 84.0;
+        final content = Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: compact ? SpacingTokens.lg : SpacingTokens.xl,
+            vertical: compact ? SpacingTokens.md : SpacingTokens.lg,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(RadiusTokens.lg),
+                child: Image.asset(
+                  logoAsset,
+                  width: logoSize,
+                  height: logoSize,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => Icon(
+                    Icons.account_balance_rounded,
+                    size: logoSize,
+                    color: theme.colorScheme.primary,
+                  ),
+                ),
+              ),
+              SizedBox(height: compact ? SpacingTokens.sm : SpacingTokens.md),
+              Text(
+                title,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              if (!compact) ...[
+                const SizedBox(height: SpacingTokens.xs),
+                Text(
+                  l10n.loadingHint,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+              if (includeSpinner) ...[
+                SizedBox(height: compact ? SpacingTokens.md : SpacingTokens.lg),
+                const SizedBox(
+                  height: 28,
+                  width: 28,
+                  child: CircularProgressIndicator(strokeWidth: 3),
+                ),
+              ],
+            ],
+          ),
+        );
+        return SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: Center(child: content),
+          ),
+        );
+      },
     );
   }
 }
@@ -931,7 +940,9 @@ class _WalletConnectStep extends StatelessWidget {
             key: _addAccountWalletLabelFieldKey,
             controller: walletLabelController,
             textInputAction: TextInputAction.done,
-            decoration: InputDecoration(hintText: l10n.addAccountWalletLabelHint),
+            decoration: InputDecoration(
+              hintText: l10n.addAccountWalletLabelHint,
+            ),
           ),
           const SizedBox(height: SpacingTokens.md),
           SwitchListTile(
@@ -1222,7 +1233,7 @@ class _SuccessStep extends StatelessWidget {
               ),
               const SizedBox(height: SpacingTokens.md),
               Text(
-                l10n.addAccountSuccessTitle,
+                l10n.addAccountSuccessHeadline,
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.w800,
                 ),
@@ -1241,7 +1252,7 @@ class _SuccessStep extends StatelessWidget {
                   Expanded(
                     child: OutlinedButton(
                       onPressed: onAddAnother,
-                      child: Text(l10n.budgetOnboardingAddAnotherAccount),
+                      child: Text(l10n.addAccountSuccessAddAnother),
                     ),
                   ),
                   const SizedBox(width: SpacingTokens.sm),
