@@ -1,0 +1,17 @@
+### Mapping between a Solana wallet public key and an auth user.
+class: SolanaWalletAuthAccount
+table: solana_wallet_auth_account
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  authUserId: UuidValue
+  publicKeyBase64: String
+  walletAddress: String?
+  createdAt: DateTime, default=now
+  updatedAt: DateTime, default=now
+  lastAuthenticatedAt: DateTime, default=now
+indexes:
+  solana_wallet_auth_account_public_key_unique:
+    fields: publicKeyBase64
+    unique: true
+  solana_wallet_auth_account_auth_user_idx:
+    fields: authUserId

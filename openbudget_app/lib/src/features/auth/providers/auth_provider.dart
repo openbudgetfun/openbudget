@@ -1,8 +1,12 @@
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
 import 'package:openbudget_app/src/features/auth/providers/auth_state.dart';
 import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
+import 'package:solana_mobile_client/solana_mobile_client.dart';
 
 part 'auth_provider.g.dart';
 
@@ -63,6 +67,96 @@ class AuthNotifier extends _$AuthNotifier {
       );
       if (!ref.mounted) return;
       state = AuthError(message: _friendlyError(error));
+    }
+  }
+
+  Future<void> loginWithSolanaMobileWallet() async {
+    if (kIsWeb || defaultTargetPlatform != TargetPlatform.android) {
+      state = const AuthError(
+        message: 'Solana wallet sign-in is only available on Android devices.',
+      );
+      return;
+    }
+
+    final client = ref.read(serverpodClientProvider);
+    state = const AuthLoading();
+
+    LocalAssociationScenario? scenario;
+    try {
+      final isWalletAvailable = await LocalAssociationScenario.isAvailable();
+      if (!isWalletAvailable) {
+        throw StateError(
+          'No compatible Solana wallet is installed on this Android device.',
+        );
+      }
+
+      scenario = await LocalAssociationScenario.create();
+      await scenario.startActivityForResult(null);
+      final walletClient = await scenario.start();
+
+      final authorization = await walletClient.authorize(
+        identityUri: Uri.parse('https://openbudget.app'),
+        iconUri: Uri.parse('https://openbudget.app/favicon.ico'),
+        identityName: 'OpenBudget',
+        cluster: 'mainnet-beta',
+      );
+      if (authorization == null) {
+        throw const _WalletAuthCanceledException();
+      }
+
+      final publicKeyBytes = authorization.publicKey;
+      final publicKeyBase64 = base64Encode(publicKeyBytes);
+
+      final challenge = await client.solanaWalletAuth.createChallenge(
+        publicKeyBase64,
+      );
+      final challengeMessageBytes = Uint8List.fromList(
+        utf8.encode(challenge.message),
+      );
+
+      final signedMessages = await walletClient.signMessages(
+        messages: [challengeMessageBytes],
+        addresses: [publicKeyBytes],
+      );
+      if (signedMessages.signedMessages.isEmpty) {
+        throw StateError('The wallet did not return a signed message.');
+      }
+
+      final signed = signedMessages.signedMessages.first;
+      if (signed.signatures.isEmpty) {
+        throw StateError('The wallet did not return a signature.');
+      }
+
+      final authSuccess = await client.solanaWalletAuth.login(
+        challenge.challengeId,
+        publicKeyBase64,
+        base64Encode(signed.message),
+        base64Encode(signed.signatures.first),
+      );
+
+      await client.auth.updateSignedInUser(authSuccess);
+      _log.info('walletLogin.success userId=${authSuccess.authUserId}');
+      if (!ref.mounted) return;
+      state = Authenticated(userId: authSuccess.authUserId.toString());
+    } on _WalletAuthCanceledException {
+      if (!ref.mounted) return;
+      state = const AuthError(message: 'Solana wallet sign-in was canceled.');
+    } on Exception catch (error, stackTrace) {
+      _log.warning(
+        'walletLogin.failed error=${error.runtimeType}: $error',
+        error,
+        stackTrace,
+      );
+      if (!ref.mounted) return;
+      state = AuthError(message: _friendlyWalletAuthError(error));
+    } finally {
+      if (scenario != null) {
+        try {
+          await scenario.close();
+        } on Exception {
+          // Best-effort close; ignore cleanup errors.
+        }
+      }
     }
   }
 
@@ -211,6 +305,29 @@ class AuthNotifier extends _$AuthNotifier {
 
     return 'Could not complete social sign-in. Please try again.';
   }
+
+  String _friendlyWalletAuthError(Object error) {
+    if (error is ServerpodClientException) {
+      return error.message;
+    }
+
+    final text = error.toString().toLowerCase();
+    if (text.contains('canceled') || text.contains('cancelled')) {
+      return 'Solana wallet sign-in was canceled.';
+    }
+    if (text.contains('no compatible solana wallet')) {
+      return 'Install a Solana wallet app that supports Mobile Wallet Adapter.';
+    }
+    if (text.contains('signed message') || text.contains('signature')) {
+      return 'The wallet did not return a valid signature. Please try again.';
+    }
+
+    return 'Could not complete Solana wallet sign-in. Please try again.';
+  }
+}
+
+class _WalletAuthCanceledException implements Exception {
+  const _WalletAuthCanceledException();
 }
 
 String _maskEmailForLogs(String email) {

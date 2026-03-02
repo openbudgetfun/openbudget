@@ -1,0 +1,6 @@
+### Response payload containing a wallet-signable login challenge.
+class: SolanaWalletAuthChallengeResponse
+fields:
+  challengeId: UuidValue
+  message: String
+  expiresAt: DateTime

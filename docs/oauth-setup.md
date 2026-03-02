@@ -5,6 +5,7 @@ This document covers manual setup required to run OAuth login with OpenBudget ac
 ## Scope Implemented
 
 - Implemented in code: Google + Apple
+- Implemented in code: Solana Mobile Wallet Adapter login (Android)
 - Documented only (not implemented in this pass): GitHub, Firebase, Passkey
 
 ## Prerequisites
@@ -122,7 +123,8 @@ For Google web/OAuth console entries, keep all required origins and redirect URI
 
 1. Launch app with required defines.
 2. Google login completes and sets authenticated state.
-3. Apple flow returns through `intent://callback` and completes login.
+3. Apple button is intentionally hidden on Android.
+4. Solana wallet login opens a compatible Mobile Wallet Adapter wallet and completes login.
 
 ### Regression
 
@@ -149,3 +151,10 @@ For Google web/OAuth console entries, keep all required origins and redirect URI
 - Use Serverpod passkey provider endpoints for registration/login challenges.
 - Configure relying party id/domain for web and associated mobile platform handling.
 - Add credential creation and assertion UX on login/register surfaces.
+
+## Solana Mobile Wallet Adapter Setup (Android)
+
+1. Install a wallet on your Android test device that supports Solana Mobile Wallet Adapter.
+2. On the login screen, use **Continue with Solana Wallet**.
+3. The app requests wallet authorization, fetches a one-time backend challenge, asks the wallet to sign it, then exchanges the signature for a Serverpod auth session.
+4. If no compatible wallet is installed, login returns a user-facing message instructing the user to install one.
