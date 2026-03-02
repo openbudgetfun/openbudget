@@ -315,6 +315,7 @@ class _ModeToggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
@@ -325,7 +326,7 @@ class _ModeToggle extends StatelessWidget {
         children: [
           Expanded(
             child: _ModeButton(
-              label: 'Month',
+              label: l10n.spendingByPayeeMonth,
               selected: !usePreset,
               onTap: () => onModeChanged(false),
             ),
@@ -333,7 +334,7 @@ class _ModeToggle extends StatelessWidget {
           const SizedBox(width: SpacingTokens.xs),
           Expanded(
             child: _ModeButton(
-              label: 'Preset',
+              label: l10n.spendingByPayeePreset,
               selected: usePreset,
               onTap: () => onModeChanged(true),
             ),
@@ -427,13 +428,14 @@ class _PresetSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     return Row(
       children: [
         const SizedBox(width: SpacingTokens.sm),
         Expanded(
           child: Text(
-            'Preset Range',
+            l10n.spendingByPayeePresetRange,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w700,
             ),
@@ -444,10 +446,19 @@ class _PresetSelector extends StatelessWidget {
           onChanged: (value) {
             if (value != null) onChanged(value);
           },
-          items: const [
-            DropdownMenuItem(value: 3, child: Text('Last 3 Months')),
-            DropdownMenuItem(value: 6, child: Text('Last 6 Months')),
-            DropdownMenuItem(value: 12, child: Text('Last 12 Months')),
+          items: [
+            DropdownMenuItem(
+              value: 3,
+              child: Text(l10n.spendingByPayeeLastMonths(3)),
+            ),
+            DropdownMenuItem(
+              value: 6,
+              child: Text(l10n.spendingByPayeeLastMonths(6)),
+            ),
+            DropdownMenuItem(
+              value: 12,
+              child: Text(l10n.spendingByPayeeLastMonths(12)),
+            ),
           ],
         ),
       ],

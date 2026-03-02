@@ -152,22 +152,24 @@ class EditAccountDialog extends HookConsumerWidget {
             SpacingTokens.xl,
           ),
           children: [
-            const _SectionLabel(text: 'Account Nickname'),
+            _SectionLabel(text: l10n.accountEditNicknameLabel),
             TextField(
               controller: nameController,
               textInputAction: TextInputAction.next,
-              decoration: const InputDecoration(hintText: 'Daily'),
+              decoration: InputDecoration(
+                hintText: l10n.accountEditNicknameHint,
+              ),
             ),
             const SizedBox(height: SpacingTokens.md),
-            const _SectionLabel(text: 'Account Notes'),
+            _SectionLabel(text: l10n.accountEditNotesLabel),
             TextField(
               controller: notesController,
               maxLines: 3,
               textInputAction: TextInputAction.newline,
-              decoration: const InputDecoration(hintText: 'Enter a memo...'),
+              decoration: InputDecoration(hintText: l10n.accountEditNotesHint),
             ),
             const SizedBox(height: SpacingTokens.md),
-            const _SectionLabel(text: 'Account Type'),
+            _SectionLabel(text: l10n.accountTypeLabel),
             DropdownButtonFormField<String>(
               initialValue: selectedType.value,
               items: accountTypes
@@ -183,7 +185,7 @@ class EditAccountDialog extends HookConsumerWidget {
               },
             ),
             const SizedBox(height: SpacingTokens.md),
-            const _SectionLabel(text: 'Working Balance'),
+            _SectionLabel(text: l10n.accountDetailBalance),
             Container(
               padding: const EdgeInsets.symmetric(
                 horizontal: SpacingTokens.sm,
@@ -245,14 +247,13 @@ class EditAccountDialog extends HookConsumerWidget {
             ),
             const SizedBox(height: SpacingTokens.xs),
             Text(
-              'An adjustment transaction will be created automatically '
-              'if you change this amount.',
+              l10n.accountEditAdjustmentHint,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: OpenBudgetPalette.fgSecondaryFor(theme),
               ),
             ),
             const SizedBox(height: SpacingTokens.md),
-            const _SectionLabel(text: 'Bank Connection'),
+            _SectionLabel(text: l10n.accountEditBankConnection),
             OutlinedButton(
               onPressed: null,
               style: OutlinedButton.styleFrom(
@@ -262,12 +263,11 @@ class EditAccountDialog extends HookConsumerWidget {
                   vertical: SpacingTokens.sm,
                 ),
               ),
-              child: const Text('Link an Account (Unavailable)'),
+              child: Text(l10n.accountEditLinkAccountUnavailable),
             ),
             const SizedBox(height: SpacingTokens.xs),
             Text(
-              'Bank connections are currently unavailable in this build. '
-              'Add or manage unlinked accounts instead.',
+              l10n.accountEditLinkAccountUnavailableHint,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: OpenBudgetPalette.fgSecondaryFor(theme),
               ),

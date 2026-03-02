@@ -354,12 +354,12 @@ class AddAccountScreen extends HookConsumerWidget {
           title: Text(
             switch (step.value) {
               _AddAccountStep.loading => '',
-              _AddAccountStep.loadingInstitutions => 'Add Accounts',
-              _AddAccountStep.searchBank => 'Add Accounts',
-              _AddAccountStep.walletConnection => 'Connect Solana Wallet',
-              _AddAccountStep.unlinkedAccount => 'Add Unlinked Account',
-              _AddAccountStep.accountType => 'Select Account Type',
-              _AddAccountStep.success => 'Account Added',
+              _AddAccountStep.loadingInstitutions => l10n.accountAddTitle,
+              _AddAccountStep.searchBank => l10n.accountAddTitle,
+              _AddAccountStep.walletConnection => l10n.addAccountConnectWallet,
+              _AddAccountStep.unlinkedAccount => l10n.addAccountUnlinkedTitle,
+              _AddAccountStep.accountType => l10n.addAccountSelectAccountType,
+              _AddAccountStep.success => l10n.addAccountSuccessTitle,
             },
             style: theme.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.w700,
@@ -379,12 +379,11 @@ class AddAccountScreen extends HookConsumerWidget {
           children: [
             switch (step.value) {
               _AddAccountStep.loading => const _StepFrame(
-                child: _LoadingStep(title: 'Loading...', includeSpinner: false),
+                child: _LoadingStep(titleKey: _LoadingStepKey.loading),
               ),
               _AddAccountStep.loadingInstitutions => const _StepFrame(
                 child: _LoadingStep(
-                  title: 'Loading institutions...',
-                  includeSpinner: true,
+                  titleKey: _LoadingStepKey.loadingInstitutions,
                 ),
               ),
               _AddAccountStep.searchBank => _StepFrame(
@@ -417,7 +416,7 @@ class AddAccountScreen extends HookConsumerWidget {
                   walletAddressController: walletAddressController,
                   showWalletAddress: isWalletType,
                   selectedTypeLabel:
-                      selectedType?.label ?? 'Select account type...',
+                      selectedType?.label ?? l10n.addAccountSelectTypePlaceholder,
                   hasSelectedType: selectedType != null,
                   onChooseType: () => step.value = _AddAccountStep.accountType,
                 ),
@@ -455,19 +454,19 @@ class AddAccountScreen extends HookConsumerWidget {
                 color: OpenBudgetPalette.fgPrimaryFor(
                   Theme.of(context),
                 ).withAlpha(120),
-                child: const Center(
+                child: Center(
                   child: Card(
                     child: Padding(
-                      padding: EdgeInsets.symmetric(
+                      padding: const EdgeInsets.symmetric(
                         horizontal: SpacingTokens.lg,
                         vertical: SpacingTokens.md,
                       ),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          CircularProgressIndicator(),
-                          SizedBox(height: SpacingTokens.md),
-                          Text('Loading institutions...'),
+                          const CircularProgressIndicator(),
+                          const SizedBox(height: SpacingTokens.md),
+                          Text(l10n.addAccountLoadingInstitutions),
                         ],
                       ),
                     ),
@@ -499,7 +498,7 @@ class AddAccountScreen extends HookConsumerWidget {
                           height: 20,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Text('Connect Wallet'),
+                      : Text(l10n.addAccountConnectWalletButton),
                 ),
               ),
             ),
@@ -524,7 +523,7 @@ class AddAccountScreen extends HookConsumerWidget {
                           height: 20,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Text('Next'),
+                      : Text(l10n.dialogNext),
                 ),
               ),
             ),
@@ -594,18 +593,25 @@ class _StepFrame extends StatelessWidget {
   }
 }
 
-class _LoadingStep extends StatelessWidget {
-  const _LoadingStep({required this.title, required this.includeSpinner});
+enum _LoadingStepKey { loading, loadingInstitutions }
 
-  final String title;
-  final bool includeSpinner;
+class _LoadingStep extends StatelessWidget {
+  const _LoadingStep({required this.titleKey});
+
+  final _LoadingStepKey titleKey;
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final logoAsset = theme.brightness == Brightness.dark
         ? 'assets/branding/logos/ob_primary_dark_512.png'
         : 'assets/branding/logos/ob_primary_light_512.png';
+    final title = switch (titleKey) {
+      _LoadingStepKey.loading => l10n.loadingTitle,
+      _LoadingStepKey.loadingInstitutions => l10n.addAccountLoadingInstitutions,
+    };
+    final includeSpinner = titleKey == _LoadingStepKey.loadingInstitutions;
 
     final content = Padding(
       padding: const EdgeInsets.symmetric(
@@ -638,7 +644,7 @@ class _LoadingStep extends StatelessWidget {
           ),
           const SizedBox(height: SpacingTokens.xs),
           Text(
-            'This might take a few seconds.',
+            l10n.loadingHint,
             style: theme.textTheme.bodyMedium?.copyWith(
               color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
             ),
@@ -685,6 +691,7 @@ class _BankSearchStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     const institutions = [
       _InstitutionOption(name: 'Chase'),
       _InstitutionOption(name: 'Capital One'),
@@ -705,8 +712,8 @@ class _BankSearchStep extends StatelessWidget {
               )
               .toList(growable: false);
     final sectionTitle = normalizedQuery.isEmpty
-        ? 'Popular Options'
-        : 'Search Results';
+        ? l10n.addAccountPopularOptions
+        : l10n.searchResults;
 
     return ListView(
       key: _addAccountSearchScrollKey,
@@ -720,14 +727,14 @@ class _BankSearchStep extends StatelessWidget {
       ),
       children: [
         Text(
-          'Search for your bank',
+          l10n.addAccountSearchForBank,
           style: Theme.of(
             context,
           ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
         ),
         const SizedBox(height: SpacingTokens.sm),
         Text(
-          'Search by institution name',
+          l10n.addAccountSearchByInstitutionName,
           style: Theme.of(
             context,
           ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w500),
@@ -740,7 +747,7 @@ class _BankSearchStep extends StatelessWidget {
         ),
         const SizedBox(height: SpacingTokens.xs),
         Text(
-          'Search by institution name or web address (URL)',
+          l10n.addAccountSearchHint,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
             color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
           ),
@@ -764,7 +771,7 @@ class _BankSearchStep extends StatelessWidget {
               borderRadius: BorderRadius.circular(RadiusTokens.md),
             ),
             child: Text(
-              'No institutions found. Try another name or add an unlinked account.',
+              l10n.addAccountNoInstitutionsFound,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
               ),
@@ -797,7 +804,7 @@ class _BankSearchStep extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: SpacingTokens.sm),
               child: Text(
-                'or',
+                l10n.orText,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
                 ),
@@ -810,13 +817,13 @@ class _BankSearchStep extends StatelessWidget {
         OutlinedButton(
           key: _addAccountAddUnlinkedButtonKey,
           onPressed: onAddUnlinked,
-          child: const Text('Add an Unlinked Account'),
+          child: Text(l10n.addAccountAddUnlinked),
         ),
         const SizedBox(height: SpacingTokens.sm),
         FilledButton.icon(
           onPressed: onConnectSolana,
           icon: const Icon(Icons.currency_bitcoin_rounded),
-          label: const Text('Connect Solana Wallet'),
+          label: Text(l10n.addAccountConnectWallet),
         ),
       ],
     );
@@ -878,6 +885,7 @@ class _WalletConnectStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(
@@ -890,15 +898,14 @@ class _WalletConnectStep extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'Connect a Solana wallet in read-only mode. '
-            'OpenBudget imports native SPL balances and keeps fiat valuation synced.',
+            l10n.addAccountWalletConnectionDescription,
             style: theme.textTheme.bodyMedium?.copyWith(
               color: OpenBudgetPalette.fgSecondaryFor(theme),
             ),
           ),
           const SizedBox(height: SpacingTokens.md),
           Text(
-            'Wallet Address',
+            l10n.addAccountWalletAddressLabel,
             style: theme.textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.w700,
             ),
@@ -908,13 +915,13 @@ class _WalletConnectStep extends StatelessWidget {
             key: _addAccountWalletAddressFieldKey,
             controller: walletAddressController,
             textInputAction: TextInputAction.next,
-            decoration: const InputDecoration(
-              hintText: 'Paste Solana wallet address',
+            decoration: InputDecoration(
+              hintText: l10n.addAccountWalletAddressHint,
             ),
           ),
           const SizedBox(height: SpacingTokens.md),
           Text(
-            'Wallet Label (optional)',
+            l10n.addAccountWalletLabelOptional,
             style: theme.textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.w700,
             ),
@@ -924,11 +931,11 @@ class _WalletConnectStep extends StatelessWidget {
             key: _addAccountWalletLabelFieldKey,
             controller: walletLabelController,
             textInputAction: TextInputAction.done,
-            decoration: const InputDecoration(hintText: 'My Solana Wallet'),
+            decoration: InputDecoration(hintText: l10n.addAccountWalletLabelHint),
           ),
           const SizedBox(height: SpacingTokens.md),
           SwitchListTile(
-            title: const Text('Include in budget totals'),
+            title: Text(l10n.addAccountWalletIncludeInBudgetTotals),
             value: onBudget,
             onChanged: onBudgetChanged,
             contentPadding: EdgeInsets.zero,
@@ -962,6 +969,7 @@ class _UnlinkedAccountStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final primaryTextColor = theme.brightness == Brightness.dark
@@ -987,8 +995,8 @@ class _UnlinkedAccountStep extends StatelessWidget {
                 const TextStyle(fontSize: 20, fontWeight: FontWeight.w500))
             .copyWith(color: secondaryTextColor.withAlpha(220));
     final introText = showWalletAddress
-        ? 'Add your Solana wallet to track transfers, swaps, and holdings in one place.'
-        : "Bank connections are currently unavailable in this build, so let's set up an unlinked account.";
+        ? l10n.addAccountWalletIntro
+        : l10n.addAccountUnlinkedIntro;
 
     return SingleChildScrollView(
       key: _addAccountUnlinkedScrollKey,
@@ -1005,7 +1013,7 @@ class _UnlinkedAccountStep extends StatelessWidget {
         children: [
           Text(introText, style: introStyle),
           const SizedBox(height: SpacingTokens.md),
-          Text('Give it a nickname', style: headingStyle),
+          Text(l10n.addAccountNicknameQuestion, style: headingStyle),
           const SizedBox(height: SpacingTokens.xs),
           TextField(
             key: _addAccountUnlinkedNicknameFieldKey,
@@ -1013,12 +1021,12 @@ class _UnlinkedAccountStep extends StatelessWidget {
             textInputAction: TextInputAction.next,
             style: formValueStyle,
             decoration: InputDecoration(
-              hintText: 'Enter nickname',
+              hintText: l10n.addAccountNicknameHint,
               hintStyle: formHintStyle,
             ),
           ),
           const SizedBox(height: SpacingTokens.md),
-          Text('What type of account are you adding?', style: headingStyle),
+          Text(l10n.addAccountTypeQuestion, style: headingStyle),
           const SizedBox(height: SpacingTokens.xs),
           ListTile(
             key: _addAccountUnlinkedTypeTileKey,
@@ -1057,8 +1065,7 @@ class _UnlinkedAccountStep extends StatelessWidget {
                   const SizedBox(width: SpacingTokens.sm),
                   Expanded(
                     child: Text(
-                      'OpenBudget will auto-sync transactions and holdings after wallet setup. '
-                      'You can tag and categorize activity in account details.',
+                      l10n.addAccountWalletAutoSyncHint,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: colorScheme.onSurfaceVariant,
                       ),
@@ -1068,7 +1075,7 @@ class _UnlinkedAccountStep extends StatelessWidget {
               ),
             ),
             const SizedBox(height: SpacingTokens.md),
-            Text('What is your Solana wallet address?', style: headingStyle),
+            Text(l10n.addAccountWalletAddressQuestion, style: headingStyle),
             const SizedBox(height: SpacingTokens.xs),
             TextField(
               key: _addAccountUnlinkedWalletAddressFieldKey,
@@ -1077,19 +1084,19 @@ class _UnlinkedAccountStep extends StatelessWidget {
               textInputAction: TextInputAction.done,
               style: formValueStyle.copyWith(fontFamily: 'monospace'),
               decoration: InputDecoration(
-                hintText: 'e.g. 5xQf...w8bP',
+                hintText: l10n.addAccountWalletAddressExample,
                 hintStyle: formHintStyle,
               ),
             ),
             const SizedBox(height: SpacingTokens.xs),
             Text(
-              'Only public wallet addresses are supported.',
+              l10n.addAccountWalletPublicAddressOnly,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: secondaryTextColor,
               ),
             ),
           ] else ...[
-            Text('What is your current account balance?', style: headingStyle),
+            Text(l10n.addAccountBalanceQuestion, style: headingStyle),
             const SizedBox(height: SpacingTokens.xs),
             TextField(
               key: _addAccountUnlinkedBalanceFieldKey,
@@ -1101,7 +1108,7 @@ class _UnlinkedAccountStep extends StatelessWidget {
               textInputAction: TextInputAction.done,
               style: formValueStyle,
               decoration: InputDecoration(
-                hintText: '5000',
+                hintText: l10n.addAccountBalanceExample,
                 hintStyle: formHintStyle,
               ),
             ),
@@ -1195,6 +1202,7 @@ class _SuccessStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return SafeArea(
       child: _StepFrame(
         maxWidth: 720,
@@ -1214,14 +1222,14 @@ class _SuccessStep extends StatelessWidget {
               ),
               const SizedBox(height: SpacingTokens.md),
               Text(
-                'Success!',
+                l10n.addAccountSuccessTitle,
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.w800,
                 ),
               ),
               const SizedBox(height: SpacingTokens.xs),
               Text(
-                '$accountTypeLabel account added to OpenBudget.',
+                l10n.addAccountSuccessMessage(accountTypeLabel),
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                   color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
@@ -1233,14 +1241,14 @@ class _SuccessStep extends StatelessWidget {
                   Expanded(
                     child: OutlinedButton(
                       onPressed: onAddAnother,
-                      child: const Text('Add Another'),
+                      child: Text(l10n.budgetOnboardingAddAnotherAccount),
                     ),
                   ),
                   const SizedBox(width: SpacingTokens.sm),
                   Expanded(
                     child: FilledButton(
                       onPressed: onDone,
-                      child: const Text('Done'),
+                      child: Text(l10n.dialogDone),
                     ),
                   ),
                 ],
@@ -1286,9 +1294,8 @@ class _AccountTypeSection {
 List<_AccountTypeSection> _accountTypeSections(AppLocalizations l10n) {
   return [
     _AccountTypeSection(
-      title: 'Cash Accounts',
-      subtitle:
-          'Cash accounts hold funds you already own and can spend immediately.',
+      title: l10n.addAccountSectionCashAccounts,
+      subtitle: l10n.addAccountSectionCashAccountsHint,
       options: [
         _AccountTypeOption(
           key: 'checking',
@@ -1314,9 +1321,8 @@ List<_AccountTypeSection> _accountTypeSections(AppLocalizations l10n) {
       ],
     ),
     _AccountTypeSection(
-      title: 'Credit Accounts',
-      subtitle:
-          "A credit account lets you spend borrowed money that you'll need to repay later, often with interest.",
+      title: l10n.addAccountSectionCreditAccounts,
+      subtitle: l10n.addAccountSectionCreditAccountsHint,
       options: [
         _AccountTypeOption(
           key: 'creditCard',
@@ -1325,93 +1331,90 @@ List<_AccountTypeSection> _accountTypeSections(AppLocalizations l10n) {
           onBudgetDefault: true,
           isDebt: true,
         ),
-        const _AccountTypeOption(
+        _AccountTypeOption(
           key: 'lineOfCredit',
-          label: 'Line of Credit',
+          label: l10n.addAccountTypeLineOfCredit,
           serverType: 'other',
           onBudgetDefault: true,
           isDebt: true,
         ),
       ],
     ),
-    const _AccountTypeSection(
-      title: 'Mortgages and Loans',
-      subtitle:
-          "Accounts that have an outstanding balance you're currently paying off, and aren't spending from.",
+    _AccountTypeSection(
+      title: l10n.addAccountSectionMortgagesAndLoans,
+      subtitle: l10n.addAccountSectionMortgagesAndLoansHint,
       options: [
         _AccountTypeOption(
           key: 'mortgage',
-          label: 'Mortgage',
+          label: l10n.addAccountTypeMortgage,
           serverType: 'other',
           onBudgetDefault: false,
           isDebt: true,
         ),
         _AccountTypeOption(
           key: 'autoLoan',
-          label: 'Auto Loan',
+          label: l10n.addAccountTypeAutoLoan,
           serverType: 'other',
           onBudgetDefault: false,
           isDebt: true,
         ),
         _AccountTypeOption(
           key: 'studentLoan',
-          label: 'Student Loan',
+          label: l10n.addAccountTypeStudentLoan,
           serverType: 'other',
           onBudgetDefault: false,
           isDebt: true,
         ),
         _AccountTypeOption(
           key: 'personalLoan',
-          label: 'Personal Loan',
+          label: l10n.addAccountTypePersonalLoan,
           serverType: 'other',
           onBudgetDefault: false,
           isDebt: true,
         ),
         _AccountTypeOption(
           key: 'medicalDebt',
-          label: 'Medical Debt',
+          label: l10n.addAccountTypeMedicalDebt,
           serverType: 'other',
           onBudgetDefault: false,
           isDebt: true,
         ),
         _AccountTypeOption(
           key: 'otherDebt',
-          label: 'Other Debt',
+          label: l10n.addAccountTypeOtherDebt,
           serverType: 'other',
           onBudgetDefault: false,
           isDebt: true,
         ),
       ],
     ),
-    const _AccountTypeSection(
-      title: 'Tracking Accounts',
-      subtitle:
-          "Accounts that hold money you don't plan to spend soon, such as investments or loans.",
+    _AccountTypeSection(
+      title: l10n.addAccountSectionTrackingAccounts,
+      subtitle: l10n.addAccountSectionTrackingAccountsHint,
       options: [
         _AccountTypeOption(
           key: 'asset',
-          label: 'Asset (e.g. Investment)',
+          label: l10n.addAccountTypeAssetExample,
           serverType: 'investment',
           onBudgetDefault: false,
           isDebt: false,
         ),
         _AccountTypeOption(
           key: 'liability',
-          label: 'Liability',
+          label: l10n.addAccountTypeLiability,
           serverType: 'other',
           onBudgetDefault: false,
           isDebt: true,
         ),
       ],
     ),
-    const _AccountTypeSection(
-      title: 'Digital Assets',
-      subtitle:
-          'Track a Solana wallet with automatic transaction history and asset valuations.',
+    _AccountTypeSection(
+      title: l10n.addAccountSectionDigitalAssets,
+      subtitle: l10n.addAccountSectionDigitalAssetsHint,
       options: [
         _AccountTypeOption(
           key: 'cryptoWallet',
-          label: 'Solana Wallet',
+          label: l10n.addAccountTypeSolanaWallet,
           serverType: 'cryptoWallet',
           onBudgetDefault: false,
           isDebt: false,

@@ -520,12 +520,21 @@ in
       '';
       description = "Run dart analyze across the workspace in a single process.";
     };
+    "lint:l10n" = {
+      exec = ''
+        set -e
+        cd "$DEVENV_ROOT"
+        dart run tools/check_localized_ui_text.dart
+      '';
+      description = "Fail if hardcoded UI text is found outside l10n resources.";
+    };
     "lint:all" = {
       exec = ''
         set -e
         lint:format
         lint:swift
         docs:workflows:check
+        lint:l10n
         lint:analyze
       '';
       description = "Lint all project files.";

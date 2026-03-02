@@ -2274,4 +2274,915 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get moreSettings => 'Settings';
+
+  @override
+  String get accountSettingsUnavailableHint =>
+      'Currently unavailable in this build.';
+
+  @override
+  String get accountSettingsReadOnlyNotice =>
+      'Account settings are read-only in this build. Profile, login method, and security updates are unavailable.';
+
+  @override
+  String get accountSettingsProfile => 'Profile';
+
+  @override
+  String get accountSettingsFirstName => 'First Name';
+
+  @override
+  String get accountSettingsUnavailableFieldHint => 'Unavailable in this build';
+
+  @override
+  String get accountSettingsSaveUnavailable => 'Save (Unavailable)';
+
+  @override
+  String get accountSettingsLoginMethods => 'Login Methods';
+
+  @override
+  String get accountSettingsEmailPassword => 'Email & Password';
+
+  @override
+  String get accountSettingsChangeEmailPassword => 'Change Email & Password';
+
+  @override
+  String get accountSettingsSocialLoginUnavailable =>
+      'Apple and Google login method changes are unavailable in this build.';
+
+  @override
+  String get accountSettingsTwoStepVerification => 'Two-Step Verification';
+
+  @override
+  String get accountSettingsTwoStepHint =>
+      'Increase your OpenBudget login security by adding a second method of login.';
+
+  @override
+  String get accountSettingsSetUp => 'Set Up';
+
+  @override
+  String get accountSettingsDeleteSectionHint =>
+      'Account deletion is currently unavailable in this build. Open this page to review status and availability.';
+
+  @override
+  String get accountSettingsDeleteUnavailableHint =>
+      'No account data can be removed from this app yet.';
+
+  @override
+  String get settingsAccountsOverviewHint =>
+      'View and organize every account in your budget.';
+
+  @override
+  String get settingsAddAccountHint =>
+      'Add manual accounts, bank links, or wallets.';
+
+  @override
+  String get settingsManageBankConnectionsHint =>
+      'Connect Plaid banks or add Solana wallets.';
+
+  @override
+  String get deleteAccountUnavailableNotice =>
+      'Account deletion is currently unavailable in this build. No account or plan data can be removed from this screen.';
+
+  @override
+  String get deleteAccountUnavailableHint =>
+      'Delete requests are disabled until backend account deletion is available.';
+
+  @override
+  String get deleteAccountUnavailableButton => 'Delete Account (Unavailable)';
+
+  @override
+  String get transactionCategoryLabel => 'Category';
+
+  @override
+  String get transactionAccountLabel => 'Account';
+
+  @override
+  String get transactionDateLabel => 'Date';
+
+  @override
+  String get addAccountConnectWallet => 'Connect Solana Wallet';
+
+  @override
+  String get addAccountUnlinkedTitle => 'Add Unlinked Account';
+
+  @override
+  String get addAccountSelectAccountType => 'Select Account Type';
+
+  @override
+  String get addAccountSuccessTitle => 'Account Added';
+
+  @override
+  String get addAccountSelectTypePlaceholder => 'Select account type...';
+
+  @override
+  String get addAccountLoadingInstitutions => 'Loading institutions...';
+
+  @override
+  String get addAccountConnectWalletButton => 'Connect Wallet';
+
+  @override
+  String get dialogNext => 'Next';
+
+  @override
+  String get loadingTitle => 'Loading...';
+
+  @override
+  String get loadingHint => 'This might take a few seconds.';
+
+  @override
+  String get addAccountPopularOptions => 'Popular Options';
+
+  @override
+  String get searchResults => 'Search Results';
+
+  @override
+  String get addAccountSearchForBank => 'Search for your bank';
+
+  @override
+  String get addAccountSearchByInstitutionName => 'Search by institution name';
+
+  @override
+  String get addAccountSearchHint =>
+      'Search by institution name or web address (URL)';
+
+  @override
+  String get addAccountNoInstitutionsFound =>
+      'No institutions found. Try another name or add an unlinked account.';
+
+  @override
+  String get orText => 'or';
+
+  @override
+  String get addAccountAddUnlinked => 'Add an Unlinked Account';
+
+  @override
+  String get addAccountWalletConnectionDescription =>
+      'Connect a Solana wallet in read-only mode. OpenBudget imports native SPL balances and keeps fiat valuation synced.';
+
+  @override
+  String get addAccountWalletAddressLabel => 'Wallet Address';
+
+  @override
+  String get addAccountWalletAddressHint => 'Paste Solana wallet address';
+
+  @override
+  String get addAccountWalletLabelOptional => 'Wallet Label (optional)';
+
+  @override
+  String get addAccountWalletLabelHint => 'My Solana Wallet';
+
+  @override
+  String get addAccountWalletIncludeInBudgetTotals =>
+      'Include in budget totals';
+
+  @override
+  String get addAccountWalletIntro =>
+      'Add your Solana wallet to track transfers, swaps, and holdings in one place.';
+
+  @override
+  String get addAccountUnlinkedIntro =>
+      'Bank connections are currently unavailable in this build, so let\'s set up an unlinked account.';
+
+  @override
+  String get addAccountNicknameQuestion => 'Give it a nickname';
+
+  @override
+  String get addAccountNicknameHint => 'Enter nickname';
+
+  @override
+  String get addAccountTypeQuestion => 'What type of account are you adding?';
+
+  @override
+  String get addAccountWalletAutoSyncHint =>
+      'OpenBudget will auto-sync transactions and holdings after wallet setup. You can tag and categorize activity in account details.';
+
+  @override
+  String get addAccountWalletAddressQuestion =>
+      'What is your Solana wallet address?';
+
+  @override
+  String get addAccountWalletAddressExample => 'e.g. 5xQf...w8bP';
+
+  @override
+  String get addAccountWalletPublicAddressOnly =>
+      'Only public wallet addresses are supported.';
+
+  @override
+  String get addAccountBalanceQuestion =>
+      'What is your current account balance?';
+
+  @override
+  String get addAccountBalanceExample => '5000';
+
+  @override
+  String get addAccountSectionCashAccounts => 'Cash Accounts';
+
+  @override
+  String get addAccountSectionCashAccountsHint =>
+      'Cash accounts hold funds you already own and can spend immediately.';
+
+  @override
+  String get addAccountSectionCreditAccounts => 'Credit Accounts';
+
+  @override
+  String get addAccountSectionCreditAccountsHint =>
+      'A credit account lets you spend borrowed money that you\'ll need to repay later, often with interest.';
+
+  @override
+  String get addAccountTypeLineOfCredit => 'Add Account Type Line Of Credit';
+
+  @override
+  String get addAccountSectionMortgagesAndLoans => 'Mortgages and Loans';
+
+  @override
+  String get addAccountSectionMortgagesAndLoansHint =>
+      'Accounts that have an outstanding balance you\'re currently paying off, and aren\'t spending from.';
+
+  @override
+  String get addAccountTypeMortgage => 'Add Account Type Mortgage';
+
+  @override
+  String get addAccountTypeAutoLoan => 'Add Account Type Auto Loan';
+
+  @override
+  String get addAccountTypeStudentLoan => 'Add Account Type Student Loan';
+
+  @override
+  String get addAccountTypePersonalLoan => 'Add Account Type Personal Loan';
+
+  @override
+  String get addAccountTypeMedicalDebt => 'Add Account Type Medical Debt';
+
+  @override
+  String get addAccountTypeOtherDebt => 'Add Account Type Other Debt';
+
+  @override
+  String get addAccountSectionTrackingAccounts => 'Tracking Accounts';
+
+  @override
+  String get addAccountSectionTrackingAccountsHint =>
+      'Accounts that hold money you don\'t plan to spend soon, such as investments or loans.';
+
+  @override
+  String get addAccountTypeAssetExample => 'Asset (e.g. Investment)';
+
+  @override
+  String get addAccountTypeLiability => 'Add Account Type Liability';
+
+  @override
+  String get addAccountSectionDigitalAssets => 'Digital Assets';
+
+  @override
+  String get addAccountSectionDigitalAssetsHint =>
+      'Track a Solana wallet with automatic transaction history and asset valuations.';
+
+  @override
+  String get addAccountTypeSolanaWallet => 'Add Account Type Solana Wallet';
+
+  @override
+  String get accountEditNicknameLabel => 'Account Nickname';
+
+  @override
+  String get accountEditNicknameHint => 'Daily';
+
+  @override
+  String get accountEditNotesLabel => 'Account Notes';
+
+  @override
+  String get accountEditNotesHint => 'Enter a memo...';
+
+  @override
+  String get accountEditAdjustmentHint =>
+      'An adjustment transaction will be created automatically if you change this amount.';
+
+  @override
+  String get accountEditBankConnection => 'Bank Connection';
+
+  @override
+  String get accountEditLinkAccountUnavailable =>
+      'Link an Account (Unavailable)';
+
+  @override
+  String get accountEditLinkAccountUnavailableHint =>
+      'Bank connections are currently unavailable in this build. Add or manage unlinked accounts instead.';
+
+  @override
+  String get accountListAllTransactions => 'All transactions';
+
+  @override
+  String get accountDetailBudgetAccount => 'Budget Account';
+
+  @override
+  String get accountDetailTrackingAccount => 'Tracking Account';
+
+  @override
+  String get accountDetailSelect => 'Select';
+
+  @override
+  String get accountDetailHideReconciled => 'Hide Reconciled';
+
+  @override
+  String get accountDetailLinkAccountUnavailable =>
+      'Link Account (Unavailable)';
+
+  @override
+  String get accountDetailLoanOverview => 'Overview';
+
+  @override
+  String get accountDetailLoanActivity => 'Activity';
+
+  @override
+  String get accountDetailLoanBalance => 'Balance';
+
+  @override
+  String get accountDetailLoanPaid => 'Paid';
+
+  @override
+  String get accountDetailLoanTotalBorrowed => 'Total Borrowed';
+
+  @override
+  String get accountDetailLoanPayoffOverview => 'Loan Payoff Overview';
+
+  @override
+  String get accountDetailLoanOneMonth => 'Account Detail Loan One Month';
+
+  @override
+  String get accountDetailLoanMonthlyTarget => 'Monthly Target';
+
+  @override
+  String get accountDetailLoanDueEvery => 'Due Every';
+
+  @override
+  String get accountDetailLoanMonthly => 'Monthly';
+
+  @override
+  String get accountDetailLoanDebtFreeDate => 'Debt Free Date';
+
+  @override
+  String get accountDetailLoanCreateTarget => 'Create Target';
+
+  @override
+  String get accountDetailLoanEditTarget => 'Edit Target';
+
+  @override
+  String get accountDetailLoanDetails => 'Loan Details';
+
+  @override
+  String get accountDetailLoanInterestRate => 'Interest Rate';
+
+  @override
+  String get accountDetailLoanInterestRateValue => '3%';
+
+  @override
+  String get accountDetailLoanMonthlyMinimum => 'Monthly Minimum';
+
+  @override
+  String get accountDetailNotFound => 'Account not found.';
+
+  @override
+  String get accountDetailWalletLoadError => 'Failed to load wallet metadata.';
+
+  @override
+  String get accountDetailWalletNotAttached =>
+      'No Solana wallet is attached to this account yet.';
+
+  @override
+  String get accountDetailWalletSyncFailed =>
+      'Wallet sync failed. Check server logs.';
+
+  @override
+  String get accountDetailWalletSyncing => 'Syncing';
+
+  @override
+  String get accountDetailWalletSync => 'Sync';
+
+  @override
+  String get accountDetailWalletEstimatedValue => 'Estimated Value';
+
+  @override
+  String get accountDetailWalletAddressCopied => 'Wallet address copied.';
+
+  @override
+  String get accountDetailWalletCopy => 'Copy';
+
+  @override
+  String get accountDetailWalletFungibleAssets => 'Fungible Assets';
+
+  @override
+  String get accountDetailWalletNftAssets => 'NFT Assets';
+
+  @override
+  String get accountDetailWalletValuationCoverage => 'Valuation Coverage';
+
+  @override
+  String get accountDetailWalletUnpricedAssets => 'Unpriced Assets';
+
+  @override
+  String get accountDetailWalletUnrealizedPnl => 'Unrealized P&L';
+
+  @override
+  String get accountDetailWalletRealizedPnl => 'Realized P&L';
+
+  @override
+  String get accountDetailWalletTaggedTransactions => 'Tagged Transactions';
+
+  @override
+  String get accountDetailWalletLastActivity => 'Last Activity';
+
+  @override
+  String get accountDetailWalletNoActivity => 'No activity';
+
+  @override
+  String get accountDetailWalletTaxYearPnl => 'Tax Year P&L';
+
+  @override
+  String get accountDetailWalletEstimated => '(estimated)';
+
+  @override
+  String get accountDetailWalletTaxYearLoadError =>
+      'Could not load tax-year summary.';
+
+  @override
+  String get accountDetailWalletNoDisposalsYet => 'No disposals yet';
+
+  @override
+  String get accountDetailWalletNoDisposalsHint =>
+      'Tax-year summaries will appear after taxable disposal activity is detected.';
+
+  @override
+  String get accountDetailWalletHoldings => 'Holdings';
+
+  @override
+  String get accountDetailWalletHoldingsHint =>
+      'Token balances with current valuation and detected programs.';
+
+  @override
+  String get accountDetailWalletHideDustAssets => 'Hide dust assets (< \$0.01)';
+
+  @override
+  String get accountDetailWalletHoldingsLoadError => 'Failed to load holdings.';
+
+  @override
+  String get accountDetailWalletNoHoldingsFound => 'No holdings found';
+
+  @override
+  String get accountDetailWalletNoHoldingsHint =>
+      'Run a sync to fetch tokens and NFTs for this wallet.';
+
+  @override
+  String get accountDetailWalletOnlyDustAssets => 'Only dust assets found';
+
+  @override
+  String get accountDetailWalletOnlyDustAssetsHint =>
+      'Turn off the dust filter to inspect very small-value token balances.';
+
+  @override
+  String get accountDetailWalletTransactionHistory => 'Transaction History';
+
+  @override
+  String get accountDetailWalletTransactionHistoryHint =>
+      'Parsed activity with program context and editable labels.';
+
+  @override
+  String get accountDetailWalletTransactionSearchHint =>
+      'Search description, category, tags, memo';
+
+  @override
+  String get accountDetailWalletNeedsCategory => 'Needs category';
+
+  @override
+  String get accountDetailWalletTransactionsLoadError =>
+      'Failed to load transactions.';
+
+  @override
+  String get accountDetailWalletNoTransactionsYet => 'No transactions yet';
+
+  @override
+  String get accountDetailWalletNoTransactionsHint =>
+      'Run a sync to import transaction history from the wallet.';
+
+  @override
+  String get accountDetailWalletNoTransactionsMatch =>
+      'No transactions match filters';
+
+  @override
+  String get accountDetailWalletNoTransactionsMatchHint =>
+      'Adjust search terms or disable the category filter.';
+
+  @override
+  String get accountDetailWalletEditMetadataTitle =>
+      'Edit Transaction Metadata';
+
+  @override
+  String get accountDetailWalletTagsCommaSeparated => 'Tags (comma separated)';
+
+  @override
+  String get accountDetailWalletMetadataUpdated =>
+      'Transaction metadata updated.';
+
+  @override
+  String get accountDetailWalletMetadataUpdateError =>
+      'Could not update transaction metadata.';
+
+  @override
+  String get accountDetailWalletNft => 'NFT';
+
+  @override
+  String get accountDetailWalletStalePrice => 'Stale price';
+
+  @override
+  String get accountDetailWalletUnpriced => 'Unpriced';
+
+  @override
+  String get accountDetailWalletNoValuationSource => 'No valuation source';
+
+  @override
+  String get accountDetailWalletEditMetadataTooltip => 'Edit metadata';
+
+  @override
+  String get accountDetailLoanTarget => 'Loan Target';
+
+  @override
+  String get accountDetailLoanMonthlyPayment => 'Monthly payment';
+
+  @override
+  String get accountDetailReconcileMatchQuestion =>
+      'Does this match your bank balance?';
+
+  @override
+  String get dialogYes => 'Yes';
+
+  @override
+  String get dialogNo => 'No';
+
+  @override
+  String get spendingByPayeeMonth => 'Month';
+
+  @override
+  String get spendingByPayeePreset => 'Preset';
+
+  @override
+  String get spendingByPayeePresetRange => 'Preset Range';
+
+  @override
+  String get editPlanCostToBeMe => 'Cost to Be Me';
+
+  @override
+  String get editPlanMonthlyTargets => 'Monthly Targets';
+
+  @override
+  String get editPlanMonthlyIncome => 'Monthly Income';
+
+  @override
+  String get editPlanCostPromptTitle => 'What does it cost to be you?';
+
+  @override
+  String get editPlanCostPromptSubtitle =>
+      'Your targets add up to one simple number: everything you plan to spend and save each month.';
+
+  @override
+  String get editPlanNewGroup => 'New Group';
+
+  @override
+  String get editPlanReorder => 'Reorder';
+
+  @override
+  String get editPlanDetails => 'Details';
+
+  @override
+  String get editPlanCategoryGroupName => 'Category Group Name';
+
+  @override
+  String get editPlanHide => 'Hide';
+
+  @override
+  String get editPlanDelete => 'Delete';
+
+  @override
+  String get editPlanHideGroupDialogDescription =>
+      'Hidden categories are moved to a group at the bottom of your plan.';
+
+  @override
+  String get editPlanHideGroupAndCategories => 'Hide Group and Categories';
+
+  @override
+  String get editPlanCategoryGroupHidden => 'Category group hidden.';
+
+  @override
+  String get editPlanHideGroupError => 'Unable to hide category group.';
+
+  @override
+  String get editPlanDeleteGroupError => 'Unable to delete category group.';
+
+  @override
+  String get editPlanMoveUp => 'Move up';
+
+  @override
+  String get editPlanMoveDown => 'Move down';
+
+  @override
+  String get editPlanAddEnvelope => 'Add envelope';
+
+  @override
+  String get editPlanGroupDetails => 'Group details';
+
+  @override
+  String get editPlanAddTarget => 'Add Target';
+
+  @override
+  String get planTitle => 'Plan';
+
+  @override
+  String get editPlanTitle => 'Edit Plan';
+
+  @override
+  String get budgetDetailCategories => 'Categories';
+
+  @override
+  String get budgetDetailSpotlight => 'Spotlight';
+
+  @override
+  String get budgetDetailCoverOverspendingTitle => 'Cover Overspending';
+
+  @override
+  String get budgetDetailAllOverspendingCovered =>
+      'All overspending is covered.';
+
+  @override
+  String get budgetDetailCoverButton => 'Cover';
+
+  @override
+  String get budgetDetailCovering => 'Covering...';
+
+  @override
+  String get reviewTransactionsUpdateCategoryError =>
+      'Could not update transaction category.';
+
+  @override
+  String get reviewTransactionsDeleteSelected => 'Delete selected';
+
+  @override
+  String get reviewTransactionsNoTransactions => 'No Transactions';
+
+  @override
+  String get reviewTransactionsSingleNewTransaction => '1 New Transaction';
+
+  @override
+  String get reviewTransactionsSubtitle =>
+      'Approve or categorize new transactions';
+
+  @override
+  String get reviewTransactionsAllDoneTitle => 'You\'re All Done!';
+
+  @override
+  String get reviewTransactionsAllDoneSubtitle =>
+      'Return to Accounts to see all of your transactions.';
+
+  @override
+  String get reviewTransactionsUncategorized => 'Uncategorized';
+
+  @override
+  String get reviewTransactionsSelectCategory => 'Select category';
+
+  @override
+  String get reviewTransactionsApprove => 'Approve';
+
+  @override
+  String get reviewTransactionsCategorize => 'Categorize';
+
+  @override
+  String get reviewTransactionsClear => 'Clear';
+
+  @override
+  String get moreTitle => 'More';
+
+  @override
+  String get setGoalCadenceWeekly => 'Weekly';
+
+  @override
+  String get setGoalCadenceMonthly => 'Monthly';
+
+  @override
+  String get setGoalCadenceYearly => 'Yearly';
+
+  @override
+  String get setGoalCadenceCustom => 'Custom';
+
+  @override
+  String get setGoalAmount => 'Amount';
+
+  @override
+  String get setGoalINeed => 'I need';
+
+  @override
+  String get setGoalBy => 'By';
+
+  @override
+  String get setGoalLastDayOfMonth => 'Last Day of the Month';
+
+  @override
+  String get setGoalNextMonthINeedTo => 'Next month I want to';
+
+  @override
+  String get setGoalIWantTo => 'I want to';
+
+  @override
+  String get setGoalDueOn => 'Due on';
+
+  @override
+  String get setGoalRepeats => 'Repeats';
+
+  @override
+  String get setGoalEvery => 'Every';
+
+  @override
+  String get setGoalMonth => 'Month';
+
+  @override
+  String get setGoalYear => 'Year';
+
+  @override
+  String get setGoalSaveTarget => 'Save Target';
+
+  @override
+  String settingsPlanCurrencyDetail(String currencyCode) {
+    return 'Plan currency: $currencyCode';
+  }
+
+  @override
+  String settingsDisplayCurrencyDetail(String currencyCode) {
+    return 'Display currency: $currencyCode';
+  }
+
+  @override
+  String settingsOwner(String ownerLabel) {
+    return 'Owner: $ownerLabel';
+  }
+
+  @override
+  String settingsUpdated(String lastUpdatedLabel) {
+    return 'Updated: $lastUpdatedLabel';
+  }
+
+  @override
+  String addAccountSuccessMessage(String accountTypeLabel) {
+    return '$accountTypeLabel account added to OpenBudget.';
+  }
+
+  @override
+  String accountDetailLoanPaidOff(String percent) {
+    return '$percent%\\nPaid Off';
+  }
+
+  @override
+  String accountDetailLoanPayoffEstimate(String duration) {
+    return 'You\'ll pay off your loan in $duration if you pay the minimum every month.';
+  }
+
+  @override
+  String accountDetailLoanManyMonths(int count) {
+    return '$count months';
+  }
+
+  @override
+  String accountDetailLoanInMonth(String month) {
+    return 'In $month';
+  }
+
+  @override
+  String accountDetailWalletSyncSummary(
+    int transactions,
+    int holdings,
+    int coveredHoldings,
+    String coveragePercentText,
+    int unpricedHoldings,
+    int coveredNfts,
+    int nftCount,
+    int unpricedNfts,
+    Object holdingCount,
+  ) {
+    return 'Synced $transactions transactions and $holdings holdings. Coverage $coveredHoldings/$holdingCount$coveragePercentText, $unpricedHoldings unpriced. NFTs $coveredNfts/$nftCount, $unpricedNfts unpriced.';
+  }
+
+  @override
+  String accountDetailWalletTxCount(int transactions) {
+    return '$transactions tx';
+  }
+
+  @override
+  String accountDetailWalletSuggestedCategory(String category) {
+    return 'Suggested: $category';
+  }
+
+  @override
+  String accountDetailWalletUnits(String units) {
+    return '$units units';
+  }
+
+  @override
+  String accountDetailWalletConfidence(String confidence) {
+    return '$confidence confidence';
+  }
+
+  @override
+  String accountDetailWalletBasis(String amount) {
+    return 'Basis $amount';
+  }
+
+  @override
+  String accountDetailWalletPnl(String value, String suffix) {
+    return 'P&L $value$suffix';
+  }
+
+  @override
+  String accountDetailWalletPricePerToken(String amount) {
+    return '@ $amount';
+  }
+
+  @override
+  String accountDetailWalletPnlValue(String value) {
+    return 'P&L $value';
+  }
+
+  @override
+  String accountDetailWalletTaxYear(int year) {
+    return 'Tax $year';
+  }
+
+  @override
+  String accountDetailReconcileMatchTitle(String balance) {
+    return 'Your cleared balance in OpenBudget is $balance';
+  }
+
+  @override
+  String spendingByPayeeLastMonths(int count) {
+    return 'Last $count Months';
+  }
+
+  @override
+  String editPlanEnvelopeCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count envelopes',
+      one: '1 envelope',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String editPlanDeleteCategoryGroupConfirm(
+    String groupName,
+    String envelopeSummary,
+    String allocated,
+  ) {
+    return 'Delete category group \"$groupName\"?\\n\\n$envelopeSummary\\n$allocated allocated';
+  }
+
+  @override
+  String budgetDetailNeedsToCover(String amount) {
+    return 'Needs $amount to get back to zero';
+  }
+
+  @override
+  String budgetDetailCoverOverspent(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Categories',
+      one: 'Category',
+    );
+    return 'Cover $count overspent $_temp0';
+  }
+
+  @override
+  String reviewTransactionsSelectedTitle(int count) {
+    return '$count Selected';
+  }
+
+  @override
+  String reviewTransactionsNewTransactions(int count) {
+    return '$count New Transactions';
+  }
+
+  @override
+  String reviewTransactionsSelectedAmount(int count, String amount) {
+    return '$count selected • $amount';
+  }
+
+  @override
+  String setGoalSetAsideAnother(String amount) {
+    return 'Set aside another $amount';
+  }
+
+  @override
+  String routerPageNotFound(String error) {
+    return 'Page not found: $error';
+  }
+
+  @override
+  String get editPlanLoadError => 'Failed to load plan setup.';
+
+  @override
+  String get budgetDetailCoverOverspendingError =>
+      'Could not cover overspending.';
 }

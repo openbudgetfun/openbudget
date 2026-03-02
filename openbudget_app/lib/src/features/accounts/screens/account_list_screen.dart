@@ -186,7 +186,7 @@ class AccountListScreen extends HookConsumerWidget {
                   margin: const EdgeInsets.only(bottom: SpacingTokens.md),
                   child: ListTile(
                     leading: const Icon(Icons.receipt_long_outlined),
-                    title: const Text('All transactions'),
+                    title: Text(l10n.accountListAllTransactions),
                     trailing: const Icon(Icons.chevron_right_rounded),
                     onTap: () => context.goNamed(
                       transactionListRoute,

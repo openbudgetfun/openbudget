@@ -96,7 +96,9 @@ class AccountDetailScreen extends HookConsumerWidget {
             ),
             if (accountData != null)
               Text(
-                accountData.onBudget ? 'Budget Account' : 'Tracking Account',
+                accountData.onBudget
+                    ? l10n.accountDetailBudgetAccount
+                    : l10n.accountDetailTrackingAccount,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
                   fontWeight: FontWeight.w500,
@@ -122,7 +124,7 @@ class AccountDetailScreen extends HookConsumerWidget {
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  child: const Text('Select'),
+                  child: Text(l10n.accountDetailSelect),
                 ),
                 PopupMenuButton<_AccountMenuAction>(
                   icon: const Icon(Icons.more_horiz_rounded),
@@ -156,17 +158,17 @@ class AccountDetailScreen extends HookConsumerWidget {
                     CheckedPopupMenuItem<_AccountMenuAction>(
                       value: _AccountMenuAction.hideReconciled,
                       checked: hideReconciled.value,
-                      child: const Text('Hide Reconciled'),
+                      child: Text(l10n.accountDetailHideReconciled),
                     ),
                     PopupMenuItem<_AccountMenuAction>(
                       value: _AccountMenuAction.editAccount,
                       enabled: accountData != null,
                       child: Text(l10n.accountEditTitle),
                     ),
-                    const PopupMenuItem<_AccountMenuAction>(
+                    PopupMenuItem<_AccountMenuAction>(
                       value: _AccountMenuAction.linkAccount,
                       enabled: false,
-                      child: Text('Link Account (Unavailable)'),
+                      child: Text(l10n.accountDetailLinkAccountUnavailable),
                     ),
                   ],
                 ),
@@ -906,6 +908,7 @@ class _LoanAccountDetailBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final now = DateTime.now();
     final monthStart = DateTime(now.year, now.month);
     final monthEnd = DateTime(now.year, now.month + 1);
@@ -961,14 +964,14 @@ class _LoanAccountDetailBody extends StatelessWidget {
             children: [
               Expanded(
                 child: _LoanTabButton(
-                  label: 'Overview',
+                  label: l10n.accountDetailLoanOverview,
                   selected: selectedTab == _LoanDetailTab.overview,
                   onTap: () => onTabChanged(_LoanDetailTab.overview),
                 ),
               ),
               Expanded(
                 child: _LoanTabButton(
-                  label: 'Activity',
+                  label: l10n.accountDetailLoanActivity,
                   selected: selectedTab == _LoanDetailTab.activity,
                   onTap: () => onTabChanged(_LoanDetailTab.activity),
                 ),
@@ -989,7 +992,7 @@ class _LoanAccountDetailBody extends StatelessWidget {
                     _LoanSummaryGrid(
                       entries: [
                         _LoanSummaryEntry(
-                          label: 'Balance',
+                          label: l10n.accountDetailLoanBalance,
                           value: formatCents(
                             accountData.balanceCents,
                             currencyCode,
@@ -998,7 +1001,7 @@ class _LoanAccountDetailBody extends StatelessWidget {
                           positive: accountData.balanceCents >= 0,
                         ),
                         _LoanSummaryEntry(
-                          label: 'Paid',
+                          label: l10n.accountDetailLoanPaid,
                           value: formatCents(paidThisMonthCents, currencyCode),
                           emphasized: true,
                           positive: true,
@@ -1013,7 +1016,7 @@ class _LoanAccountDetailBody extends StatelessWidget {
                           positive: chargedThisMonthCents >= 0,
                         ),
                         _LoanSummaryEntry(
-                          label: 'Total Borrowed',
+                          label: l10n.accountDetailLoanTotalBorrowed,
                           value: formatCents(-totalBorrowedCents, currencyCode),
                           emphasized: false,
                           positive: false,
@@ -1044,7 +1047,7 @@ class _LoanAccountDetailBody extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              '$paidOffPercent%\nPaid Off',
+                              l10n.accountDetailLoanPaidOff(paidOffPercent),
                               textAlign: TextAlign.center,
                               style: Theme.of(context).textTheme.titleMedium
                                   ?.copyWith(fontWeight: FontWeight.w700),
@@ -1054,7 +1057,7 @@ class _LoanAccountDetailBody extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: SpacingTokens.lg),
-                    const _LoanSectionTitle(title: 'Loan Payoff Overview'),
+                    _LoanSectionTitle(title: l10n.accountDetailLoanPayoffOverview),
                     _LoanCard(
                       child: Padding(
                         padding: const EdgeInsets.all(SpacingTokens.md),
@@ -1072,9 +1075,13 @@ class _LoanAccountDetailBody extends StatelessWidget {
                                 ),
                               ),
                               child: Text(
-                                "You'll pay off your loan in "
-                                '${monthsToPayoff == 1 ? '1 month' : '$monthsToPayoff months'} '
-                                'if you pay the minimum every month.',
+                                l10n.accountDetailLoanPayoffEstimate(
+                                  monthsToPayoff == 1
+                                      ? l10n.accountDetailLoanOneMonth
+                                      : l10n.accountDetailLoanManyMonths(
+                                          monthsToPayoff,
+                                        ),
+                                ),
                                 textAlign: TextAlign.center,
                                 style: Theme.of(context).textTheme.bodyLarge
                                     ?.copyWith(fontWeight: FontWeight.w600),
@@ -1082,20 +1089,20 @@ class _LoanAccountDetailBody extends StatelessWidget {
                             ),
                             const SizedBox(height: SpacingTokens.md),
                             _LoanDetailRow(
-                              label: 'Monthly Target',
+                              label: l10n.accountDetailLoanMonthlyTarget,
                               value: formatCents(
                                 monthlyPaymentBaseline,
                                 currencyCode,
                               ),
                             ),
                             const Divider(height: 1),
-                            const _LoanDetailRow(
-                              label: 'Due Every',
-                              value: 'Monthly',
+                            _LoanDetailRow(
+                              label: l10n.accountDetailLoanDueEvery,
+                              value: l10n.accountDetailLoanMonthly,
                             ),
                             const Divider(height: 1),
                             _LoanDetailRow(
-                              label: 'Debt Free Date',
+                              label: l10n.accountDetailLoanDebtFreeDate,
                               value: DateFormat.yMMM().format(debtFreeDate),
                               emphasize: true,
                             ),
@@ -1112,8 +1119,8 @@ class _LoanAccountDetailBody extends StatelessWidget {
                               },
                               child: Text(
                                 monthlyTargetCents == null
-                                    ? 'Create Target'
-                                    : 'Edit Target',
+                                    ? l10n.accountDetailLoanCreateTarget
+                                    : l10n.accountDetailLoanEditTarget,
                               ),
                             ),
                           ],
@@ -1121,17 +1128,17 @@ class _LoanAccountDetailBody extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: SpacingTokens.md),
-                    const _LoanSectionTitle(title: 'Loan Details'),
+                    _LoanSectionTitle(title: l10n.accountDetailLoanDetails),
                     _LoanCard(
                       child: Column(
                         children: [
-                          const _LoanDetailRow(
-                            label: 'Interest Rate',
-                            value: '3%',
+                          _LoanDetailRow(
+                            label: l10n.accountDetailLoanInterestRate,
+                            value: l10n.accountDetailLoanInterestRateValue,
                           ),
                           const Divider(height: 1),
                           _LoanDetailRow(
-                            label: 'Monthly Minimum',
+                            label: l10n.accountDetailLoanMonthlyMinimum,
                             value: formatCents(
                               monthlyPaymentBaseline,
                               currencyCode,
@@ -1145,7 +1152,7 @@ class _LoanAccountDetailBody extends StatelessWidget {
                     _LoanSummaryGrid(
                       entries: [
                         _LoanSummaryEntry(
-                          label: 'Balance',
+                          label: l10n.accountDetailLoanBalance,
                           value: formatCents(
                             accountData.balanceCents,
                             currencyCode,
@@ -1154,13 +1161,15 @@ class _LoanAccountDetailBody extends StatelessWidget {
                           positive: accountData.balanceCents >= 0,
                         ),
                         _LoanSummaryEntry(
-                          label: 'Paid',
+                          label: l10n.accountDetailLoanPaid,
                           value: formatCents(paidThisMonthCents, currencyCode),
                           emphasized: true,
                           positive: true,
                         ),
                         _LoanSummaryEntry(
-                          label: 'In ${DateFormat.MMMM().format(now)}',
+                          label: l10n.accountDetailLoanInMonth(
+                            DateFormat.MMMM().format(now),
+                          ),
                           value: formatCents(
                             chargedThisMonthCents,
                             currencyCode,
@@ -1519,6 +1528,7 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final isSyncing = useState(false);
@@ -1529,7 +1539,7 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
     useListenable(transactionSearchController);
 
     if (account == null) {
-      return const Center(child: Text('Account not found.'));
+      return Center(child: Text(l10n.accountDetailNotFound));
     }
 
     final walletAsync = ref.watch(
@@ -1539,7 +1549,7 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, _) => Center(
         child: Text(
-          'Failed to load wallet metadata.',
+          l10n.accountDetailWalletLoadError,
           style: theme.textTheme.bodyLarge?.copyWith(
             color: theme.colorScheme.error,
           ),
@@ -1551,7 +1561,7 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
             child: Padding(
               padding: const EdgeInsets.all(SpacingTokens.lg),
               child: Text(
-                'No Solana wallet is attached to this account yet.',
+                l10n.accountDetailWalletNotAttached,
                 style: theme.textTheme.bodyLarge,
                 textAlign: TextAlign.center,
               ),
@@ -1591,21 +1601,24 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
                 result.pricedNftHoldingCount + result.staleNftHoldingCount;
             showAppToast(
               context,
-              message:
-                  'Synced ${result.insertedTransactions + result.updatedTransactions}'
-                  ' transactions and ${result.holdingCount} holdings. '
-                  'Coverage $coveredHoldings/${result.holdingCount}'
-                  '${coveragePercent == null ? '' : ' ($coveragePercent%)'}, '
-                  '${result.unpricedHoldingCount} unpriced. '
-                  'NFTs $coveredNfts/${result.nftHoldingCount}, '
-                  '${result.unpricedNftHoldingCount} unpriced.',
+              message: l10n.accountDetailWalletSyncSummary(
+                result.insertedTransactions + result.updatedTransactions,
+                result.holdingCount,
+                coveredHoldings,
+                coveragePercent == null ? '' : ' ($coveragePercent%)',
+                result.unpricedHoldingCount,
+                coveredNfts,
+                result.nftHoldingCount,
+                result.unpricedNftHoldingCount,
+                result.holdingCount,
+              ),
               variant: AppToastVariant.success,
             );
           } on Exception catch (_) {
             if (!context.mounted) return;
             showAppToast(
               context,
-              message: 'Wallet sync failed. Check server logs.',
+              message: l10n.accountDetailWalletSyncFailed,
               variant: AppToastVariant.error,
             );
           } finally {
@@ -1695,7 +1708,11 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
                                     ),
                                   )
                                 : const Icon(Icons.sync_rounded),
-                            label: Text(isSyncing.value ? 'Syncing' : 'Sync'),
+                            label: Text(
+                              isSyncing.value
+                                  ? l10n.accountDetailWalletSyncing
+                                  : l10n.accountDetailWalletSync,
+                            ),
                           ),
                         ],
                       ),
@@ -1723,7 +1740,9 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
                             ),
                           _MetadataChip(
                             icon: Icons.account_tree_outlined,
-                            label: '${snapshot.transactions} tx',
+                            label: l10n.accountDetailWalletTxCount(
+                              snapshot.transactions,
+                            ),
                           ),
                         ],
                       ),
@@ -1735,7 +1754,7 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Estimated Value',
+                                  l10n.accountDetailWalletEstimatedValue,
                                   style: theme.textTheme.bodySmall?.copyWith(
                                     color: colorScheme.onSurfaceVariant,
                                   ),
@@ -1757,12 +1776,13 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
                               if (context.mounted) {
                                 showAppToast(
                                   context,
-                                  message: 'Wallet address copied.',
+                                  message: l10n.accountDetailWalletAddressCopied,
+                                  variant: AppToastVariant.success,
                                 );
                               }
                             },
                             icon: const Icon(Icons.copy_rounded),
-                            label: const Text('Copy'),
+                            label: Text(l10n.accountDetailWalletCopy),
                           ),
                         ],
                       ),
@@ -1784,7 +1804,7 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
                         SizedBox(
                           width: cardWidth,
                           child: _WalletMetricCard(
-                            label: 'Fungible Assets',
+                            label: l10n.accountDetailWalletFungibleAssets,
                             value: snapshot.fungibleAssets.toString(),
                             icon: Icons.scatter_plot_outlined,
                           ),
@@ -1792,7 +1812,7 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
                         SizedBox(
                           width: cardWidth,
                           child: _WalletMetricCard(
-                            label: 'NFT Assets',
+                            label: l10n.accountDetailWalletNftAssets,
                             value: snapshot.nftAssets.toString(),
                             icon: Icons.image_outlined,
                           ),
@@ -1800,7 +1820,7 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
                         SizedBox(
                           width: cardWidth,
                           child: _WalletMetricCard(
-                            label: 'Valuation Coverage',
+                            label: l10n.accountDetailWalletValuationCoverage,
                             value: _formatCoverage(snapshot),
                             icon: Icons.verified_rounded,
                           ),
@@ -1808,7 +1828,7 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
                         SizedBox(
                           width: cardWidth,
                           child: _WalletMetricCard(
-                            label: 'Unpriced Assets',
+                            label: l10n.accountDetailWalletUnpricedAssets,
                             value: snapshot.unpricedHoldings.toString(),
                             icon: Icons.warning_amber_rounded,
                             valueColor: snapshot.unpricedHoldings > 0
@@ -1819,7 +1839,7 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
                         SizedBox(
                           width: cardWidth,
                           child: _WalletMetricCard(
-                            label: 'Unrealized P&L',
+                            label: l10n.accountDetailWalletUnrealizedPnl,
                             value: _formatSignedUsd(
                               snapshot.totalUnrealizedPnl,
                             ),
@@ -1833,7 +1853,7 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
                         SizedBox(
                           width: cardWidth,
                           child: _WalletMetricCard(
-                            label: 'Realized P&L',
+                            label: l10n.accountDetailWalletRealizedPnl,
                             value: _formatSignedUsd(snapshot.totalRealizedPnl),
                             valueColor: _pnlColor(
                               snapshot.totalRealizedPnl,
@@ -1845,7 +1865,7 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
                         SizedBox(
                           width: cardWidth,
                           child: _WalletMetricCard(
-                            label: 'Tagged Transactions',
+                            label: l10n.accountDetailWalletTaggedTransactions,
                             value: snapshot.taggedTransactions.toString(),
                             icon: Icons.label_outline_rounded,
                           ),
@@ -1853,9 +1873,9 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
                         SizedBox(
                           width: cardWidth,
                           child: _WalletMetricCard(
-                            label: 'Last Activity',
+                            label: l10n.accountDetailWalletLastActivity,
                             value: snapshot.lastActivity == null
-                                ? 'No activity'
+                                ? l10n.accountDetailWalletNoActivity
                                 : DateFormat.yMMMd().format(
                                     snapshot.lastActivity!,
                                   ),
@@ -1869,25 +1889,25 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
                   return Column(
                     children: [
                       _WalletMetricCard(
-                        label: 'Fungible Assets',
+                        label: l10n.accountDetailWalletFungibleAssets,
                         value: snapshot.fungibleAssets.toString(),
                         icon: Icons.scatter_plot_outlined,
                       ),
                       const SizedBox(height: gap),
                       _WalletMetricCard(
-                        label: 'NFT Assets',
+                        label: l10n.accountDetailWalletNftAssets,
                         value: snapshot.nftAssets.toString(),
                         icon: Icons.image_outlined,
                       ),
                       const SizedBox(height: gap),
                       _WalletMetricCard(
-                        label: 'Valuation Coverage',
+                        label: l10n.accountDetailWalletValuationCoverage,
                         value: _formatCoverage(snapshot),
                         icon: Icons.verified_rounded,
                       ),
                       const SizedBox(height: gap),
                       _WalletMetricCard(
-                        label: 'Unpriced Assets',
+                        label: l10n.accountDetailWalletUnpricedAssets,
                         value: snapshot.unpricedHoldings.toString(),
                         icon: Icons.warning_amber_rounded,
                         valueColor: snapshot.unpricedHoldings > 0
@@ -1896,7 +1916,7 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
                       ),
                       const SizedBox(height: gap),
                       _WalletMetricCard(
-                        label: 'Unrealized P&L',
+                        label: l10n.accountDetailWalletUnrealizedPnl,
                         value: _formatSignedUsd(snapshot.totalUnrealizedPnl),
                         valueColor: _pnlColor(
                           snapshot.totalUnrealizedPnl,
@@ -1906,7 +1926,7 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
                       ),
                       const SizedBox(height: gap),
                       _WalletMetricCard(
-                        label: 'Realized P&L',
+                        label: l10n.accountDetailWalletRealizedPnl,
                         value: _formatSignedUsd(snapshot.totalRealizedPnl),
                         valueColor: _pnlColor(
                           snapshot.totalRealizedPnl,
@@ -1916,15 +1936,15 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
                       ),
                       const SizedBox(height: gap),
                       _WalletMetricCard(
-                        label: 'Tagged Transactions',
+                        label: l10n.accountDetailWalletTaggedTransactions,
                         value: snapshot.taggedTransactions.toString(),
                         icon: Icons.label_outline_rounded,
                       ),
                       const SizedBox(height: gap),
                       _WalletMetricCard(
-                        label: 'Last Activity',
+                        label: l10n.accountDetailWalletLastActivity,
                         value: snapshot.lastActivity == null
-                            ? 'No activity'
+                            ? l10n.accountDetailWalletNoActivity
                             : DateFormat.yMMMd().format(snapshot.lastActivity!),
                         icon: Icons.history_rounded,
                       ),
@@ -1936,14 +1956,14 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
               Row(
                 children: [
                   Text(
-                    'Tax Year P&L',
+                    l10n.accountDetailWalletTaxYearPnl,
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w800,
                     ),
                   ),
                   const SizedBox(width: SpacingTokens.xs),
                   Text(
-                    '(estimated)',
+                    l10n.accountDetailWalletEstimated,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: colorScheme.onSurfaceVariant,
                     ),
@@ -1957,17 +1977,16 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
                   child: LinearProgressIndicator(minHeight: 2),
                 ),
                 error: (error, _) => Text(
-                  'Could not load tax-year summary.',
+                  l10n.accountDetailWalletTaxYearLoadError,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: colorScheme.error,
                   ),
                 ),
                 data: (summaries) {
                   if (summaries.isEmpty) {
-                    return const _EmptyStateCard(
-                      title: 'No disposals yet',
-                      subtitle:
-                          'Tax-year summaries will appear after taxable disposal activity is detected.',
+                    return _EmptyStateCard(
+                      title: l10n.accountDetailWalletNoDisposalsYet,
+                      subtitle: l10n.accountDetailWalletNoDisposalsHint,
                       icon: Icons.calculate_outlined,
                     );
                   }
@@ -1988,7 +2007,7 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
               Row(
                 children: [
                   Text(
-                    'Holdings',
+                    l10n.accountDetailWalletHoldings,
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w800,
                     ),
@@ -2004,7 +2023,7 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
               ),
               const SizedBox(height: SpacingTokens.xs),
               Text(
-                'Token balances with current valuation and detected programs.',
+                l10n.accountDetailWalletHoldingsHint,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
@@ -2015,7 +2034,7 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
                 child: FilterChip(
                   selected: hideDustAssets.value,
                   onSelected: (value) => hideDustAssets.value = value,
-                  label: const Text(r'Hide dust assets (< $0.01)'),
+                  label: Text(l10n.accountDetailWalletHideDustAssets),
                 ),
               ),
               const SizedBox(height: SpacingTokens.sm),
@@ -2025,17 +2044,16 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
                   child: Center(child: CircularProgressIndicator()),
                 ),
                 error: (error, _) => Text(
-                  'Failed to load holdings.',
+                  l10n.accountDetailWalletHoldingsLoadError,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.error,
                   ),
                 ),
                 data: (holdings) {
                   if (holdings.isEmpty) {
-                    return const _EmptyStateCard(
-                      title: 'No holdings found',
-                      subtitle:
-                          'Run a sync to fetch tokens and NFTs for this wallet.',
+                    return _EmptyStateCard(
+                      title: l10n.accountDetailWalletNoHoldingsFound,
+                      subtitle: l10n.accountDetailWalletNoHoldingsHint,
                       icon: Icons.inventory_2_outlined,
                     );
                   }
@@ -2055,10 +2073,9 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
                             .toList(growable: false)
                       : sortedHoldings;
                   if (visibleHoldings.isEmpty) {
-                    return const _EmptyStateCard(
-                      title: 'Only dust assets found',
-                      subtitle:
-                          'Turn off the dust filter to inspect very small-value token balances.',
+                    return _EmptyStateCard(
+                      title: l10n.accountDetailWalletOnlyDustAssets,
+                      subtitle: l10n.accountDetailWalletOnlyDustAssetsHint,
                       icon: Icons.tune_rounded,
                     );
                   }
@@ -2079,7 +2096,7 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
               Row(
                 children: [
                   Text(
-                    'Transaction History',
+                    l10n.accountDetailWalletTransactionHistory,
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w800,
                     ),
@@ -2095,7 +2112,7 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
               ),
               const SizedBox(height: SpacingTokens.xs),
               Text(
-                'Parsed activity with program context and editable labels.',
+                l10n.accountDetailWalletTransactionHistoryHint,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
@@ -2104,9 +2121,9 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
               TextField(
                 controller: transactionSearchController,
                 textInputAction: TextInputAction.search,
-                decoration: const InputDecoration(
-                  hintText: 'Search description, category, tags, memo',
-                  prefixIcon: Icon(Icons.search_rounded),
+                decoration: InputDecoration(
+                  hintText: l10n.accountDetailWalletTransactionSearchHint,
+                  prefixIcon: const Icon(Icons.search_rounded),
                 ),
               ),
               const SizedBox(height: SpacingTokens.sm),
@@ -2115,7 +2132,7 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
                 child: FilterChip(
                   selected: showNeedsCategoryOnly.value,
                   onSelected: (value) => showNeedsCategoryOnly.value = value,
-                  label: const Text('Needs category'),
+                  label: Text(l10n.accountDetailWalletNeedsCategory),
                 ),
               ),
               const SizedBox(height: SpacingTokens.sm),
@@ -2125,17 +2142,16 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
                   child: Center(child: CircularProgressIndicator()),
                 ),
                 error: (error, _) => Text(
-                  'Failed to load transactions.',
+                  l10n.accountDetailWalletTransactionsLoadError,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.error,
                   ),
                 ),
                 data: (transactions) {
                   if (transactions.isEmpty) {
-                    return const _EmptyStateCard(
-                      title: 'No transactions yet',
-                      subtitle:
-                          'Run a sync to import transaction history from the wallet.',
+                    return _EmptyStateCard(
+                      title: l10n.accountDetailWalletNoTransactionsYet,
+                      subtitle: l10n.accountDetailWalletNoTransactionsHint,
                       icon: Icons.receipt_long_outlined,
                     );
                   }
@@ -2173,10 +2189,9 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
                       })
                       .toList(growable: false);
                   if (visibleTransactions.isEmpty) {
-                    return const _EmptyStateCard(
-                      title: 'No transactions match filters',
-                      subtitle:
-                          'Adjust search terms or disable the category filter.',
+                    return _EmptyStateCard(
+                      title: l10n.accountDetailWalletNoTransactionsMatch,
+                      subtitle: l10n.accountDetailWalletNoTransactionsMatchHint,
                       icon: Icons.filter_alt_off_rounded,
                     );
                   }
@@ -2216,6 +2231,7 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
     required String walletId,
     required SolanaWalletTransaction transaction,
   }) async {
+    final l10n = AppLocalizations.of(context);
     if (transaction.id == null) return;
     final suggestedCategory = _suggestedCategoryForWalletTransaction(
       transaction,
@@ -2232,21 +2248,23 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
     final didSave = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Edit Transaction Metadata'),
+        title: Text(l10n.accountDetailWalletEditMetadataTitle),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: categoryController,
-                decoration: const InputDecoration(labelText: 'Category'),
+                decoration: InputDecoration(
+                  labelText: l10n.transactionCategoryLabel,
+                ),
               ),
               if (suggestedCategory != null) ...[
                 const SizedBox(height: SpacingTokens.xs),
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    'Suggested: $suggestedCategory',
+                    l10n.accountDetailWalletSuggestedCategory(suggestedCategory),
                     style: Theme.of(dialogContext).textTheme.bodySmall,
                   ),
                 ),
@@ -2254,15 +2272,15 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
               const SizedBox(height: SpacingTokens.sm),
               TextField(
                 controller: tagsController,
-                decoration: const InputDecoration(
-                  labelText: 'Tags (comma separated)',
+                decoration: InputDecoration(
+                  labelText: l10n.accountDetailWalletTagsCommaSeparated,
                 ),
               ),
               const SizedBox(height: SpacingTokens.sm),
               TextField(
                 controller: memoController,
                 maxLines: 3,
-                decoration: const InputDecoration(labelText: 'Memo'),
+                decoration: InputDecoration(labelText: l10n.transactionMemoLabel),
               ),
             ],
           ),
@@ -2270,11 +2288,11 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Cancel'),
+            child: Text(l10n.dialogCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Save'),
+            child: Text(l10n.dialogSave),
           ),
         ],
       ),
@@ -2296,7 +2314,7 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
       if (context.mounted) {
         showAppToast(
           context,
-          message: 'Transaction metadata updated.',
+          message: l10n.accountDetailWalletMetadataUpdated,
           variant: AppToastVariant.success,
         );
       }
@@ -2304,7 +2322,7 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
       if (context.mounted) {
         showAppToast(
           context,
-          message: 'Could not update transaction metadata.',
+          message: l10n.accountDetailWalletMetadataUpdateError,
           variant: AppToastVariant.error,
         );
       }
@@ -2611,6 +2629,7 @@ class _HoldingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final title = holding.symbol ?? holding.name ?? holding.assetId;
@@ -2656,7 +2675,7 @@ class _HoldingCard extends StatelessWidget {
                   ),
                   const SizedBox(height: SpacingTokens.xs),
                   Text(
-                    '${holding.balanceUi} units',
+                    l10n.accountDetailWalletUnits(holding.balanceUi),
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: colorScheme.onSurfaceVariant,
                     ),
@@ -2667,9 +2686,9 @@ class _HoldingCard extends StatelessWidget {
                     runSpacing: SpacingTokens.xs,
                     children: [
                       if (holding.isNft)
-                        const _MetadataChip(
+                        _MetadataChip(
                           icon: Icons.image_outlined,
-                          label: 'NFT',
+                          label: l10n.accountDetailWalletNft,
                         ),
                       _MetadataChip(
                         icon: Icons.account_tree_outlined,
@@ -2696,17 +2715,21 @@ class _HoldingCard extends StatelessWidget {
                         _MetadataChip(
                           icon: Icons.speed_rounded,
                           label:
-                              '${_SolanaWalletAccountBody._toLabel(holding.priceConfidence!)} confidence',
+                              l10n.accountDetailWalletConfidence(
+                                _SolanaWalletAccountBody._toLabel(
+                                  holding.priceConfidence!,
+                                ),
+                              ),
                         ),
                       if (holding.isPriceStale ?? false)
-                        const _MetadataChip(
+                        _MetadataChip(
                           icon: Icons.schedule_rounded,
-                          label: 'Stale price',
+                          label: l10n.accountDetailWalletStalePrice,
                         ),
                       if (holding.totalValue == null)
                         _MetadataChip(
                           icon: Icons.warning_amber_rounded,
-                          label: 'Unpriced',
+                          label: l10n.accountDetailWalletUnpriced,
                           color: colorScheme.errorContainer.withAlpha(153),
                           foregroundColor: colorScheme.onErrorContainer,
                         ),
@@ -2727,22 +2750,30 @@ class _HoldingCard extends StatelessWidget {
                 ),
                 if (holding.totalValue == null)
                   Text(
-                    'No valuation source',
+                    l10n.accountDetailWalletNoValuationSource,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: colorScheme.error,
                     ),
                   ),
                 if (holding.estimatedCostBasis != null)
                   Text(
-                    'Basis ${NumberFormat.currency(symbol: r'$').format(holding.estimatedCostBasis)}',
+                    l10n.accountDetailWalletBasis(
+                      NumberFormat.currency(
+                        symbol: r'$',
+                      ).format(holding.estimatedCostBasis),
+                    ),
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: colorScheme.onSurfaceVariant,
                     ),
                   ),
                 if (holding.estimatedUnrealizedPnl != null)
                   Text(
-                    'P&L ${_formatSignedUsd(holding.estimatedUnrealizedPnl!)}'
-                    '${holding.estimatedUnrealizedPnlPercent == null ? '' : ' (${holding.estimatedUnrealizedPnlPercent!.toStringAsFixed(1)}%)'}',
+                    l10n.accountDetailWalletPnl(
+                      _formatSignedUsd(holding.estimatedUnrealizedPnl!),
+                      holding.estimatedUnrealizedPnlPercent == null
+                          ? ''
+                          : ' (${holding.estimatedUnrealizedPnlPercent!.toStringAsFixed(1)}%)',
+                    ),
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: _pnlColor(
                         holding.estimatedUnrealizedPnl!,
@@ -2753,7 +2784,11 @@ class _HoldingCard extends StatelessWidget {
                   ),
                 if (holding.pricePerToken != null)
                   Text(
-                    '@ ${NumberFormat.currency(symbol: r'$').format(holding.pricePerToken)}',
+                    l10n.accountDetailWalletPricePerToken(
+                      NumberFormat.currency(
+                        symbol: r'$',
+                      ).format(holding.pricePerToken),
+                    ),
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: colorScheme.onSurfaceVariant,
                     ),
@@ -2775,6 +2810,7 @@ class _TransactionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final tags = _parseTags(transaction.tagsCsv);
@@ -2839,7 +2875,7 @@ class _TransactionCard extends StatelessWidget {
                 ),
                 IconButton(
                   icon: const Icon(Icons.edit_note_rounded),
-                  tooltip: 'Edit metadata',
+                  tooltip: l10n.accountDetailWalletEditMetadataTooltip,
                   onPressed: onEdit,
                 ),
               ],
@@ -2860,8 +2896,9 @@ class _TransactionCard extends StatelessWidget {
                 if (confidence != null && confidence.isNotEmpty)
                   _MetadataChip(
                     icon: Icons.psychology_alt_outlined,
-                    label:
-                        '${_SolanaWalletAccountBody._toLabel(confidence)} confidence',
+                    label: l10n.accountDetailWalletConfidence(
+                      _SolanaWalletAccountBody._toLabel(confidence),
+                    ),
                   ),
                 for (final program in programs.take(4))
                   _MetadataChip(icon: Icons.extension_outlined, label: program),
@@ -2873,15 +2910,18 @@ class _TransactionCard extends StatelessWidget {
                 if (!hasCategory && suggestedCategory != null)
                   _MetadataChip(
                     icon: Icons.auto_awesome_rounded,
-                    label: 'Suggested: $suggestedCategory',
+                    label: l10n.accountDetailWalletSuggestedCategory(
+                      suggestedCategory,
+                    ),
                     color: colorScheme.primaryContainer,
                     foregroundColor: colorScheme.onPrimaryContainer,
                   ),
                 if (transaction.estimatedRealizedPnl != null)
                   _MetadataChip(
                     icon: Icons.query_stats_rounded,
-                    label:
-                        'P&L ${_formatSignedUsd(transaction.estimatedRealizedPnl!)}',
+                    label: l10n.accountDetailWalletPnlValue(
+                      _formatSignedUsd(transaction.estimatedRealizedPnl!),
+                    ),
                     color: transaction.estimatedRealizedPnl! >= 0
                         ? colorScheme.secondary.withAlpha(40)
                         : colorScheme.errorContainer,
@@ -2892,7 +2932,9 @@ class _TransactionCard extends StatelessWidget {
                 if (transaction.taxYear != null)
                   _MetadataChip(
                     icon: Icons.calendar_today_rounded,
-                    label: 'Tax ${transaction.taxYear}',
+                    label: l10n.accountDetailWalletTaxYear(
+                      transaction.taxYear!,
+                    ),
                   ),
                 for (final tag in tags.take(4))
                   _MetadataChip(icon: Icons.tag_rounded, label: tag),
@@ -3128,6 +3170,7 @@ Future<int?> _showLoanTargetDialog(
   required CurrencyCode currencyCode,
   required int? monthlyTargetCents,
 }) async {
+  final l10n = AppLocalizations.of(context);
   final factor = _pow10Int(currencyCode.decimals);
   final controller = TextEditingController(
     text: monthlyTargetCents == null
@@ -3138,12 +3181,12 @@ Future<int?> _showLoanTargetDialog(
   return showDialog<int>(
     context: context,
     builder: (dialogContext) => AlertDialog(
-      title: const Text('Loan Target'),
+      title: Text(l10n.accountDetailLoanTarget),
       content: TextField(
         controller: controller,
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
         decoration: InputDecoration(
-          labelText: 'Monthly payment',
+          labelText: l10n.accountDetailLoanMonthlyPayment,
           prefixText: '${currencyCode.symbol} ',
           border: const OutlineInputBorder(),
         ),
@@ -3151,7 +3194,7 @@ Future<int?> _showLoanTargetDialog(
       actions: [
         TextButton(
           onPressed: () => Navigator.of(dialogContext).pop(),
-          child: const Text('Cancel'),
+          child: Text(l10n.dialogCancel),
         ),
         FilledButton(
           onPressed: () {
@@ -3159,7 +3202,7 @@ Future<int?> _showLoanTargetDialog(
             if (value == null || value <= 0) return;
             Navigator.of(dialogContext).pop((value * factor).round());
           },
-          child: const Text('Save'),
+          child: Text(l10n.dialogSave),
         ),
       ],
     ),
@@ -3291,31 +3334,33 @@ class _ReconcileMatchDialog extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
 
     return AlertDialog(
       title: Text(
-        'Your cleared balance in OpenBudget is '
-        '${formatCents(clearedBalanceCents, currencyCode)}',
+        l10n.accountDetailReconcileMatchTitle(
+          formatCents(clearedBalanceCents, currencyCode),
+        ),
         textAlign: TextAlign.center,
       ),
       content: Text(
-        'Does this match your bank balance?',
+        l10n.accountDetailReconcileMatchQuestion,
         style: theme.textTheme.bodyLarge,
         textAlign: TextAlign.center,
       ),
       actions: [
         FilledButton(
           onPressed: () => Navigator.of(context).pop(true),
-          child: const Text('Yes'),
+          child: Text(l10n.dialogYes),
         ),
         FilledButton.tonal(
           onPressed: () => Navigator.of(context).pop(false),
-          child: const Text('No'),
+          child: Text(l10n.dialogNo),
         ),
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(l10n.dialogCancel),
         ),
       ],
     );

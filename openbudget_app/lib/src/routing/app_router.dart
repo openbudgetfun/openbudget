@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/accounts/screens/account_detail_screen.dart';
 import 'package:openbudget_app/src/features/accounts/screens/account_list_screen.dart';
 import 'package:openbudget_app/src/features/accounts/screens/add_account_screen.dart';
@@ -452,8 +453,14 @@ GoRouter appRouter(Ref ref) {
         ],
       ),
     ],
-    errorBuilder: (context, state) =>
-        Scaffold(body: Center(child: Text('Page not found: ${state.error}'))),
+    errorBuilder: (context, state) {
+      final l10n = AppLocalizations.of(context);
+      return Scaffold(
+        body: Center(
+          child: Text(l10n.routerPageNotFound(state.error.toString())),
+        ),
+      );
+    },
   );
 }
 

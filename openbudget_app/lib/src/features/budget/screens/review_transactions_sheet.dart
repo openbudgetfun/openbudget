@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/monthly_allocation_provider.dart';
 import 'package:openbudget_app/src/features/transactions/providers/transaction_actions_provider.dart';
@@ -50,6 +51,7 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final transactionsAsync = ref.watch(
       monthlyTransactionsProvider(budgetId, year, month),
@@ -145,7 +147,7 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
         if (!context.mounted) return;
         showAppToast(
           context,
-          message: 'Could not update transaction category.',
+          message: l10n.reviewTransactionsUpdateCategoryError,
           variant: AppToastVariant.error,
         );
       } finally {
@@ -194,12 +196,12 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
             children: [
               ListTile(
                 leading: const Icon(Icons.delete_outline_rounded),
-                title: const Text('Delete selected'),
+                title: Text(l10n.reviewTransactionsDeleteSelected),
                 onTap: () => Navigator.of(context).pop(_MoreAction.delete),
               ),
               ListTile(
                 leading: const Icon(Icons.close_rounded),
-                title: const Text('Cancel'),
+                title: Text(l10n.dialogCancel),
                 onTap: () => Navigator.of(context).pop(),
               ),
             ],
@@ -212,12 +214,12 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
     }
 
     final title = selectedCount > 0
-        ? '$selectedCount Selected'
+        ? l10n.reviewTransactionsSelectedTitle(selectedCount)
         : queue.value.isEmpty
-        ? 'No Transactions'
+        ? l10n.reviewTransactionsNoTransactions
         : queue.value.length == 1
-        ? '1 New Transaction'
-        : '${queue.value.length} New Transactions';
+        ? l10n.reviewTransactionsSingleNewTransaction
+        : l10n.reviewTransactionsNewTransactions(queue.value.length);
 
     final currencyCode = _currencyFromSummary(
       summaryAsync.hasValue ? summaryAsync.value : null,
@@ -252,7 +254,7 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
             ),
             const SizedBox(height: SpacingTokens.sm),
             Text(
-              'Approve or categorize new transactions',
+              l10n.reviewTransactionsSubtitle,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
                 fontWeight: FontWeight.w600,
@@ -281,7 +283,7 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
                     width: 56,
                     child: TextButton(
                       onPressed: () => Navigator.of(context).pop(),
-                      child: const Text('Done'),
+                      child: Text(l10n.dialogDone),
                     ),
                   ),
                 ],
@@ -309,14 +311,14 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
                             ),
                             const SizedBox(height: SpacingTokens.md),
                             Text(
-                              "You're All Done!",
+                              l10n.reviewTransactionsAllDoneTitle,
                               style: theme.textTheme.headlineSmall?.copyWith(
                                 fontWeight: FontWeight.w800,
                               ),
                             ),
                             const SizedBox(height: SpacingTokens.xs),
                             Text(
-                              'Return to Accounts to see all of your transactions.',
+                              l10n.reviewTransactionsAllDoneSubtitle,
                               style: theme.textTheme.bodyLarge?.copyWith(
                                 color: OpenBudgetPalette.fgSecondaryFor(
                                   Theme.of(context),
@@ -345,10 +347,10 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
                             !_isSameDay(previous, transaction);
 
                         final envelopeName = transaction.envelopeId == null
-                            ? 'Uncategorized'
+                            ? l10n.reviewTransactionsUncategorized
                             : envelopeNameById[transaction.envelopeId
                                       .toString()] ??
-                                  'Uncategorized';
+                                  l10n.reviewTransactionsUncategorized;
 
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -552,6 +554,7 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
     BuildContext context, {
     required List<_EnvelopeChoice> envelopeChoices,
   }) {
+    final l10n = AppLocalizations.of(context);
     return showModalBottomSheet<_EnvelopeChoice>(
       context: context,
       showDragHandle: true,
@@ -559,16 +562,19 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
         return SafeArea(
           child: ListView(
             children: [
-              const Padding(
-                padding: EdgeInsets.fromLTRB(
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
                   SpacingTokens.md,
                   0,
                   SpacingTokens.md,
                   SpacingTokens.xs,
                 ),
                 child: Text(
-                  'Select category',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                  l10n.reviewTransactionsSelectCategory,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
               for (final choice in envelopeChoices)
@@ -606,6 +612,7 @@ class _ReviewToolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Container(
       decoration: BoxDecoration(
         color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
@@ -637,7 +644,10 @@ class _ReviewToolbar extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              '$selectedCount selected • $selectedAmount',
+              l10n.reviewTransactionsSelectedAmount(
+                selectedCount,
+                selectedAmount,
+              ),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
                 fontWeight: FontWeight.w600,
@@ -648,27 +658,27 @@ class _ReviewToolbar extends StatelessWidget {
               children: [
                 _ToolbarAction(
                   icon: Icons.close_rounded,
-                  label: 'Cancel',
+                  label: l10n.dialogCancel,
                   onTap: onCancel,
                 ),
                 _ToolbarAction(
                   icon: Icons.check_circle_outline_rounded,
-                  label: 'Approve',
+                  label: l10n.reviewTransactionsApprove,
                   onTap: () => unawaited(onApprove()),
                 ),
                 _ToolbarAction(
                   icon: Icons.category_outlined,
-                  label: 'Categorize',
+                  label: l10n.reviewTransactionsCategorize,
                   onTap: () => unawaited(onCategorize()),
                 ),
                 _ToolbarAction(
                   icon: Icons.task_alt_outlined,
-                  label: 'Clear',
+                  label: l10n.reviewTransactionsClear,
                   onTap: () => unawaited(onClear()),
                 ),
                 _ToolbarAction(
                   icon: Icons.more_horiz_rounded,
-                  label: 'More',
+                  label: l10n.moreTitle,
                   onTap: () => unawaited(onMore()),
                 ),
               ],

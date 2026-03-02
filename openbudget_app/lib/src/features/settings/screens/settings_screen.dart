@@ -89,8 +89,7 @@ class SettingsScreen extends HookConsumerWidget {
                     _SettingsTile(
                       icon: Icons.account_balance_wallet_rounded,
                       label: l10n.accountListTitle,
-                      subtitle:
-                          'View and organize every account in your budget.',
+                      subtitle: l10n.settingsAccountsOverviewHint,
                       onTap: () => context.goNamed(
                         accountListRoute,
                         pathParameters: {'id': budgetId},
@@ -100,7 +99,7 @@ class SettingsScreen extends HookConsumerWidget {
                     _SettingsTile(
                       icon: Icons.add_circle_outline_rounded,
                       label: l10n.accountAddButton,
-                      subtitle: 'Add manual accounts, bank links, or wallets.',
+                      subtitle: l10n.settingsAddAccountHint,
                       onTap: () => context.goNamed(
                         addAccountRoute,
                         pathParameters: {'id': budgetId},
@@ -207,7 +206,7 @@ class SettingsScreen extends HookConsumerWidget {
                     _SettingsTile(
                       icon: Icons.account_balance_rounded,
                       label: l10n.settingsManageBankConnections,
-                      subtitle: 'Connect Plaid banks or add Solana wallets.',
+                      subtitle: l10n.settingsManageBankConnectionsHint,
                       onTap: () => context.goNamed(
                         addAccountRoute,
                         pathParameters: {'id': budgetId},
@@ -508,6 +507,7 @@ class _SettingsOverviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final detailsStyle = theme.textTheme.bodyMedium?.copyWith(
       color: OpenBudgetPalette.fgSecondaryFor(theme),
@@ -526,16 +526,19 @@ class _SettingsOverviewCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: SpacingTokens.xs),
-            Text('Plan currency: $currencyCode', style: detailsStyle),
+            Text(
+              l10n.settingsPlanCurrencyDetail(currencyCode),
+              style: detailsStyle,
+            ),
             if (displayCurrencyCode != null &&
                 displayCurrencyCode != currencyCode)
               Text(
-                'Display currency: $displayCurrencyCode',
+                l10n.settingsDisplayCurrencyDetail(displayCurrencyCode!),
                 style: detailsStyle,
               ),
             const SizedBox(height: SpacingTokens.sm),
-            Text('Owner: $ownerLabel', style: detailsStyle),
-            Text('Updated: $lastUpdatedLabel', style: detailsStyle),
+            Text(l10n.settingsOwner(ownerLabel), style: detailsStyle),
+            Text(l10n.settingsUpdated(lastUpdatedLabel), style: detailsStyle),
           ],
         ),
       ),
