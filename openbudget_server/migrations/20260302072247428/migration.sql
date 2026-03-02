@@ -32,16 +32,16 @@ volatile;
 --
 -- ACTION ALTER TABLE
 --
-ALTER TABLE "account" ADD COLUMN "sourceType" text;
-ALTER TABLE "account" ADD COLUMN "externalAccountId" text;
-ALTER TABLE "account" ADD COLUMN "connectionId" uuid;
-ALTER TABLE "account" ADD COLUMN "lastSyncedAt" timestamp without time zone;
-ALTER TABLE "account" ADD COLUMN "syncStatus" text;
-CREATE INDEX "account_budget_external_idx" ON "account" USING btree ("budgetId", "externalAccountId");
+ALTER TABLE "account" ADD COLUMN IF NOT EXISTS "sourceType" text;
+ALTER TABLE "account" ADD COLUMN IF NOT EXISTS "externalAccountId" text;
+ALTER TABLE "account" ADD COLUMN IF NOT EXISTS "connectionId" uuid;
+ALTER TABLE "account" ADD COLUMN IF NOT EXISTS "lastSyncedAt" timestamp without time zone;
+ALTER TABLE "account" ADD COLUMN IF NOT EXISTS "syncStatus" text;
+CREATE INDEX IF NOT EXISTS "account_budget_external_idx" ON "account" USING btree ("budgetId", "externalAccountId");
 --
 -- ACTION CREATE TABLE
 --
-CREATE TABLE "asset_quote_cache" (
+CREATE TABLE IF NOT EXISTS "asset_quote_cache" (
     "id" uuid PRIMARY KEY DEFAULT gen_random_uuid_v7(),
     "chain" text NOT NULL,
     "assetId" text NOT NULL,
@@ -52,13 +52,13 @@ CREATE TABLE "asset_quote_cache" (
 );
 
 -- Indexes
-CREATE UNIQUE INDEX "asset_quote_cache_chain_asset_idx" ON "asset_quote_cache" USING btree ("chain", "assetId");
-CREATE INDEX "asset_quote_cache_expires_idx" ON "asset_quote_cache" USING btree ("expiresAt");
+CREATE UNIQUE INDEX IF NOT EXISTS "asset_quote_cache_chain_asset_idx" ON "asset_quote_cache" USING btree ("chain", "assetId");
+CREATE INDEX IF NOT EXISTS "asset_quote_cache_expires_idx" ON "asset_quote_cache" USING btree ("expiresAt");
 
 --
 -- ACTION CREATE TABLE
 --
-CREATE TABLE "plaid_connection" (
+CREATE TABLE IF NOT EXISTS "plaid_connection" (
     "id" uuid PRIMARY KEY DEFAULT gen_random_uuid_v7(),
     "budgetId" uuid NOT NULL,
     "plaidItemId" text NOT NULL,
@@ -71,13 +71,13 @@ CREATE TABLE "plaid_connection" (
 );
 
 -- Indexes
-CREATE UNIQUE INDEX "plaid_connection_budget_item_idx" ON "plaid_connection" USING btree ("budgetId", "plaidItemId");
-CREATE INDEX "plaid_connection_budget_idx" ON "plaid_connection" USING btree ("budgetId");
+CREATE UNIQUE INDEX IF NOT EXISTS "plaid_connection_budget_item_idx" ON "plaid_connection" USING btree ("budgetId", "plaidItemId");
+CREATE INDEX IF NOT EXISTS "plaid_connection_budget_idx" ON "plaid_connection" USING btree ("budgetId");
 
 --
 -- ACTION CREATE TABLE
 --
-CREATE TABLE "wallet_connection" (
+CREATE TABLE IF NOT EXISTS "wallet_connection" (
     "id" uuid PRIMARY KEY DEFAULT gen_random_uuid_v7(),
     "budgetId" uuid NOT NULL,
     "chain" text NOT NULL,
@@ -91,13 +91,13 @@ CREATE TABLE "wallet_connection" (
 );
 
 -- Indexes
-CREATE UNIQUE INDEX "wallet_connection_budget_chain_address_idx" ON "wallet_connection" USING btree ("budgetId", "chain", "address");
-CREATE INDEX "wallet_connection_budget_idx" ON "wallet_connection" USING btree ("budgetId");
+CREATE UNIQUE INDEX IF NOT EXISTS "wallet_connection_budget_chain_address_idx" ON "wallet_connection" USING btree ("budgetId", "chain", "address");
+CREATE INDEX IF NOT EXISTS "wallet_connection_budget_idx" ON "wallet_connection" USING btree ("budgetId");
 
 --
 -- ACTION CREATE TABLE
 --
-CREATE TABLE "wallet_holding" (
+CREATE TABLE IF NOT EXISTS "wallet_holding" (
     "id" uuid PRIMARY KEY DEFAULT gen_random_uuid_v7(),
     "walletConnectionId" uuid NOT NULL,
     "chain" text NOT NULL,
@@ -112,38 +112,65 @@ CREATE TABLE "wallet_holding" (
 );
 
 -- Indexes
-CREATE UNIQUE INDEX "wallet_holding_connection_asset_idx" ON "wallet_holding" USING btree ("walletConnectionId", "assetId");
-CREATE INDEX "wallet_holding_connection_idx" ON "wallet_holding" USING btree ("walletConnectionId");
+CREATE UNIQUE INDEX IF NOT EXISTS "wallet_holding_connection_asset_idx" ON "wallet_holding" USING btree ("walletConnectionId", "assetId");
+CREATE INDEX IF NOT EXISTS "wallet_holding_connection_idx" ON "wallet_holding" USING btree ("walletConnectionId");
 
 --
 -- ACTION CREATE FOREIGN KEY
 --
-ALTER TABLE ONLY "plaid_connection"
-    ADD CONSTRAINT "plaid_connection_fk_0"
-    FOREIGN KEY("budgetId")
-    REFERENCES "budget"("id")
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION;
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_constraint
+    WHERE conname = 'plaid_connection_fk_0'
+  ) THEN
+    ALTER TABLE ONLY "plaid_connection"
+        ADD CONSTRAINT "plaid_connection_fk_0"
+        FOREIGN KEY("budgetId")
+        REFERENCES "budget"("id")
+        ON DELETE NO ACTION
+        ON UPDATE NO ACTION;
+  END IF;
+END $$;
 
 --
 -- ACTION CREATE FOREIGN KEY
 --
-ALTER TABLE ONLY "wallet_connection"
-    ADD CONSTRAINT "wallet_connection_fk_0"
-    FOREIGN KEY("budgetId")
-    REFERENCES "budget"("id")
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION;
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_constraint
+    WHERE conname = 'wallet_connection_fk_0'
+  ) THEN
+    ALTER TABLE ONLY "wallet_connection"
+        ADD CONSTRAINT "wallet_connection_fk_0"
+        FOREIGN KEY("budgetId")
+        REFERENCES "budget"("id")
+        ON DELETE NO ACTION
+        ON UPDATE NO ACTION;
+  END IF;
+END $$;
 
 --
 -- ACTION CREATE FOREIGN KEY
 --
-ALTER TABLE ONLY "wallet_holding"
-    ADD CONSTRAINT "wallet_holding_fk_0"
-    FOREIGN KEY("walletConnectionId")
-    REFERENCES "wallet_connection"("id")
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION;
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_constraint
+    WHERE conname = 'wallet_holding_fk_0'
+  ) THEN
+    ALTER TABLE ONLY "wallet_holding"
+        ADD CONSTRAINT "wallet_holding_fk_0"
+        FOREIGN KEY("walletConnectionId")
+        REFERENCES "wallet_connection"("id")
+        ON DELETE NO ACTION
+        ON UPDATE NO ACTION;
+  END IF;
+END $$;
 
 
 --

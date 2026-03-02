@@ -32,11 +32,11 @@ volatile;
 --
 -- ACTION ALTER TABLE
 --
-ALTER TABLE "budget" ADD COLUMN "displayCurrencyCode" text;
+ALTER TABLE "budget" ADD COLUMN IF NOT EXISTS "displayCurrencyCode" text;
 --
 -- ACTION CREATE TABLE
 --
-CREATE TABLE "fx_rate_entry" (
+CREATE TABLE IF NOT EXISTS "fx_rate_entry" (
     "id" uuid PRIMARY KEY DEFAULT gen_random_uuid_v7(),
     "snapshotId" uuid NOT NULL,
     "currencyCode" text NOT NULL,
@@ -45,13 +45,13 @@ CREATE TABLE "fx_rate_entry" (
 );
 
 -- Indexes
-CREATE INDEX "fx_rate_entry_snapshot_idx" ON "fx_rate_entry" USING btree ("snapshotId");
-CREATE UNIQUE INDEX "fx_rate_entry_snapshot_currency_unique_idx" ON "fx_rate_entry" USING btree ("snapshotId", "currencyCode");
+CREATE INDEX IF NOT EXISTS "fx_rate_entry_snapshot_idx" ON "fx_rate_entry" USING btree ("snapshotId");
+CREATE UNIQUE INDEX IF NOT EXISTS "fx_rate_entry_snapshot_currency_unique_idx" ON "fx_rate_entry" USING btree ("snapshotId", "currencyCode");
 
 --
 -- ACTION CREATE TABLE
 --
-CREATE TABLE "fx_rate_snapshot" (
+CREATE TABLE IF NOT EXISTS "fx_rate_snapshot" (
     "id" uuid PRIMARY KEY DEFAULT gen_random_uuid_v7(),
     "provider" text NOT NULL,
     "baseCurrencyCode" text NOT NULL,
@@ -61,19 +61,28 @@ CREATE TABLE "fx_rate_snapshot" (
 );
 
 -- Indexes
-CREATE INDEX "fx_rate_snapshot_latest_idx" ON "fx_rate_snapshot" USING btree ("provider", "baseCurrencyCode", "isLatest");
-CREATE INDEX "fx_rate_snapshot_fetched_idx" ON "fx_rate_snapshot" USING btree ("provider", "baseCurrencyCode", "fetchedAt");
-CREATE UNIQUE INDEX "fx_rate_snapshot_provider_base_time_unique_idx" ON "fx_rate_snapshot" USING btree ("provider", "baseCurrencyCode", "fetchedAt");
+CREATE INDEX IF NOT EXISTS "fx_rate_snapshot_latest_idx" ON "fx_rate_snapshot" USING btree ("provider", "baseCurrencyCode", "isLatest");
+CREATE INDEX IF NOT EXISTS "fx_rate_snapshot_fetched_idx" ON "fx_rate_snapshot" USING btree ("provider", "baseCurrencyCode", "fetchedAt");
+CREATE UNIQUE INDEX IF NOT EXISTS "fx_rate_snapshot_provider_base_time_unique_idx" ON "fx_rate_snapshot" USING btree ("provider", "baseCurrencyCode", "fetchedAt");
 
 --
 -- ACTION CREATE FOREIGN KEY
 --
-ALTER TABLE ONLY "fx_rate_entry"
-    ADD CONSTRAINT "fx_rate_entry_fk_0"
-    FOREIGN KEY("snapshotId")
-    REFERENCES "fx_rate_snapshot"("id")
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION;
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_constraint
+    WHERE conname = 'fx_rate_entry_fk_0'
+  ) THEN
+    ALTER TABLE ONLY "fx_rate_entry"
+        ADD CONSTRAINT "fx_rate_entry_fk_0"
+        FOREIGN KEY("snapshotId")
+        REFERENCES "fx_rate_snapshot"("id")
+        ON DELETE NO ACTION
+        ON UPDATE NO ACTION;
+  END IF;
+END $$;
 
 
 --

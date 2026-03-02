@@ -3,24 +3,24 @@ BEGIN;
 --
 -- ACTION ALTER TABLE
 --
-ALTER TABLE "solana_wallet_holding" ADD COLUMN "estimatedCostBasis" double precision;
-ALTER TABLE "solana_wallet_holding" ADD COLUMN "estimatedUnrealizedPnl" double precision;
-ALTER TABLE "solana_wallet_holding" ADD COLUMN "estimatedUnrealizedPnlPercent" double precision;
-ALTER TABLE "solana_wallet_holding" ADD COLUMN "estimatedRealizedPnl" double precision;
-ALTER TABLE "solana_wallet_holding" ADD COLUMN "pnlCurrency" text;
-ALTER TABLE "solana_wallet_holding" ADD COLUMN "pnlAsOf" timestamp without time zone;
-ALTER TABLE "solana_wallet_holding" ADD COLUMN "priceQuality" text;
-ALTER TABLE "solana_wallet_holding" ADD COLUMN "priceConfidence" text;
-ALTER TABLE "solana_wallet_holding" ADD COLUMN "isPriceStale" boolean;
+ALTER TABLE IF EXISTS "solana_wallet_holding" ADD COLUMN IF NOT EXISTS "estimatedCostBasis" double precision;
+ALTER TABLE IF EXISTS "solana_wallet_holding" ADD COLUMN IF NOT EXISTS "estimatedUnrealizedPnl" double precision;
+ALTER TABLE IF EXISTS "solana_wallet_holding" ADD COLUMN IF NOT EXISTS "estimatedUnrealizedPnlPercent" double precision;
+ALTER TABLE IF EXISTS "solana_wallet_holding" ADD COLUMN IF NOT EXISTS "estimatedRealizedPnl" double precision;
+ALTER TABLE IF EXISTS "solana_wallet_holding" ADD COLUMN IF NOT EXISTS "pnlCurrency" text;
+ALTER TABLE IF EXISTS "solana_wallet_holding" ADD COLUMN IF NOT EXISTS "pnlAsOf" timestamp without time zone;
+ALTER TABLE IF EXISTS "solana_wallet_holding" ADD COLUMN IF NOT EXISTS "priceQuality" text;
+ALTER TABLE IF EXISTS "solana_wallet_holding" ADD COLUMN IF NOT EXISTS "priceConfidence" text;
+ALTER TABLE IF EXISTS "solana_wallet_holding" ADD COLUMN IF NOT EXISTS "isPriceStale" boolean;
 --
 -- ACTION ALTER TABLE
 --
-ALTER TABLE "solana_wallet_transaction" ADD COLUMN "interpretationConfidence" text;
-ALTER TABLE "solana_wallet_transaction" ADD COLUMN "estimatedCostBasis" double precision;
-ALTER TABLE "solana_wallet_transaction" ADD COLUMN "estimatedProceeds" double precision;
-ALTER TABLE "solana_wallet_transaction" ADD COLUMN "estimatedRealizedPnl" double precision;
-ALTER TABLE "solana_wallet_transaction" ADD COLUMN "pnlCurrency" text;
-ALTER TABLE "solana_wallet_transaction" ADD COLUMN "taxYear" bigint;
+ALTER TABLE IF EXISTS "solana_wallet_transaction" ADD COLUMN IF NOT EXISTS "interpretationConfidence" text;
+ALTER TABLE IF EXISTS "solana_wallet_transaction" ADD COLUMN IF NOT EXISTS "estimatedCostBasis" double precision;
+ALTER TABLE IF EXISTS "solana_wallet_transaction" ADD COLUMN IF NOT EXISTS "estimatedProceeds" double precision;
+ALTER TABLE IF EXISTS "solana_wallet_transaction" ADD COLUMN IF NOT EXISTS "estimatedRealizedPnl" double precision;
+ALTER TABLE IF EXISTS "solana_wallet_transaction" ADD COLUMN IF NOT EXISTS "pnlCurrency" text;
+ALTER TABLE IF EXISTS "solana_wallet_transaction" ADD COLUMN IF NOT EXISTS "taxYear" bigint;
 
 --
 -- MIGRATION VERSION FOR openbudget
