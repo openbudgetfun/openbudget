@@ -1,0 +1,22 @@
+### Catalog entry for a financial institution that can be linked to accounts.
+class: Institution
+table: institution
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  ### Stable identifier used for idempotent catalog seeding.
+  slug: String
+  ### Institution display name.
+  name: String
+  ### Optional homepage domain for discovery/search.
+  website: String?
+  ### Optional Plaid institution id, when known.
+  plaidInstitutionId: String?
+  ### Marks digital-first challengers (e.g., Monzo, Revolut, Wise).
+  isDigitalBank: bool, default=false
+  createdAt: DateTime, default=now
+indexes:
+  institution_slug_idx:
+    fields: slug
+    unique: true
+  institution_name_idx:
+    fields: name

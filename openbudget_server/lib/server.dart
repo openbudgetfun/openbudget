@@ -5,6 +5,7 @@ import 'package:openbudget_server/src/auth/email_sender.dart';
 import 'package:openbudget_server/src/fx_rates/fx_rate_service.dart';
 import 'package:openbudget_server/src/generated/endpoints.dart';
 import 'package:openbudget_server/src/generated/protocol.dart' hide Transaction;
+import 'package:openbudget_server/src/institutions/institution_service.dart';
 import 'package:openbudget_server/src/logging/server_logging.dart';
 import 'package:openbudget_server/src/web/routes/app_config_route.dart';
 import 'package:openbudget_server/src/web/routes/root.dart';
@@ -159,6 +160,9 @@ Future<void> run(List<String> args) async {
   // Start the server.
   await pod.start();
 
+  // Ensure institution catalog seed data exists for account linking/search.
+  await _seedInstitutions(pod);
+
   // Keep persisted FX rates fresh for display-currency conversion.
   FxRateService.startBackgroundRefresh(pod);
 }
@@ -197,6 +201,17 @@ bool? _readBoolPassword(Serverpod pod, String key) {
 
 bool _hasRequiredPasswords(Serverpod pod, List<String> keys) {
   return keys.every((key) => _readPassword(pod, key) != null);
+}
+
+Future<void> _seedInstitutions(Serverpod pod) async {
+  final session = await pod.createSession(enableLogging: false);
+  try {
+    await InstitutionService.ensureCatalogSeeded(session);
+  } on Exception catch (error, stackTrace) {
+    stderr.writeln('Institution seed failed: $error\n$stackTrace');
+  } finally {
+    await session.close();
+  }
 }
 
 EmailSender? createEmailSender({

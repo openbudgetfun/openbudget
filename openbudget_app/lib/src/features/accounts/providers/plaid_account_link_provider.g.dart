@@ -33,7 +33,7 @@ final class PlaidAccountLinkProvider
   PlaidAccountLink create() => PlaidAccountLink();
 }
 
-String _$plaidAccountLinkHash() => r'74bf95982ad1f31c6c994b282d74762e89c29ad0';
+String _$plaidAccountLinkHash() => r'a04840ccf3598d59a12249fe43d8c3551cfac9df';
 
 abstract class _$PlaidAccountLink extends $AsyncNotifier<void> {
   FutureOr<void> build();

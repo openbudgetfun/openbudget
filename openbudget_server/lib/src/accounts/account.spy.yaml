@@ -11,6 +11,10 @@ fields:
   ### ISO 4217 currency code.
   currencyCode: String
   budgetId: UuidValue, relation(parent=budget)
+  ### The authenticated user that created this account record.
+  creatorId: UuidValue?
+  ### Optional linked financial institution for this account.
+  institutionId: UuidValue?, relation(parent=institution)
   ### Whether this account is included in the budget's "on budget" calculations.
   onBudget: bool
   ### Sort order for display.

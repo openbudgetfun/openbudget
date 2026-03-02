@@ -19,6 +19,7 @@ class AccountEndpoint extends Endpoint {
     UuidValue budgetId, {
     required bool onBudget,
     required int sortOrder,
+    UuidValue? institutionId,
   }) async {
     return AccountService.create(
       session,
@@ -29,12 +30,34 @@ class AccountEndpoint extends Endpoint {
       budgetId: budgetId,
       onBudget: onBudget,
       sortOrder: sortOrder,
+      institutionId: institutionId,
     );
   }
 
   /// Lists all accounts for a budget.
   Future<List<Account>> list(Session session, UuidValue budgetId) async {
     return AccountService.listForBudget(session, budgetId: budgetId);
+  }
+
+  /// Lists creator-owned reusable accounts that can be added to another budget.
+  Future<List<Account>> listMine(
+    Session session, {
+    UuidValue? excludeBudgetId,
+  }) async {
+    return AccountService.listMine(session, excludeBudgetId: excludeBudgetId);
+  }
+
+  /// Adds one of the creator's existing accounts to another owned budget.
+  Future<Account> addMineToBudget(
+    Session session,
+    UuidValue sourceAccountId,
+    UuidValue budgetId,
+  ) async {
+    return AccountService.addMineToBudget(
+      session,
+      sourceAccountId: sourceAccountId,
+      budgetId: budgetId,
+    );
   }
 
   /// Gets a single account by ID.

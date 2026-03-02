@@ -15,6 +15,7 @@ import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
+import 'package:simple_icons/simple_icons.dart';
 
 class AccountListScreen extends HookConsumerWidget {
   const AccountListScreen({required this.budgetId, super.key});
@@ -457,7 +458,7 @@ class _AccountTile extends HookWidget {
       case 'investment':
         return Icons.trending_up_rounded;
       case 'cryptoWallet':
-        return Icons.currency_bitcoin_rounded;
+        return SimpleIcons.solana;
       default:
         return Icons.account_balance_wallet_rounded;
     }

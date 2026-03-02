@@ -48,4 +48,4 @@ final class ServerpodClientProvider
   }
 }
 
-String _$serverpodClientHash() => r'a1e6432139996ca87b9e8c0fe3a17594d463c57c';
+String _$serverpodClientHash() => r'd0b8074264d1e4bc067675483aa84b2737514bde';

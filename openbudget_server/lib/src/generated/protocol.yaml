@@ -1,6 +1,8 @@
 account:
   - create:
   - list:
+  - listMine:
+  - addMineToBudget:
   - get:
   - update:
   - delete:
@@ -57,6 +59,8 @@ envelope:
 fxRate:
   - latest:
   - refresh:
+institution:
+  - list:
 monthlyAllocation:
   - upsert:
   - list:
@@ -75,6 +79,7 @@ plaid:
   - createLinkToken:
   - exchangePublicToken:
   - syncConnection:
+  - importSandboxAccounts:
 recurringTransaction:
   - create:
   - list:

@@ -37,4 +37,17 @@ class PlaidEndpoint extends Endpoint {
       connectionId: connectionId,
     );
   }
+
+  /// Creates a Plaid sandbox item and imports accounts without client-side Link.
+  Future<List<Account>> importSandboxAccounts(
+    Session session,
+    UuidValue budgetId, {
+    String? plaidInstitutionId,
+  }) async {
+    return PlaidService.importSandboxAccounts(
+      session,
+      budgetId: budgetId,
+      plaidInstitutionId: plaidInstitutionId,
+    );
+  }
 }
