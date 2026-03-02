@@ -437,6 +437,7 @@ class TransactionListScreen extends HookConsumerWidget {
           final action = await showModalBottomSheet<AddTransactionAction>(
             context: context,
             isScrollControlled: true,
+            showDragHandle: false,
             builder: (_) => AddTransactionSheet(budgetId: budgetId),
           );
           if (!context.mounted || action == null) return;

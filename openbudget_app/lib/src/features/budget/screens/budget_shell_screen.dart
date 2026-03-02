@@ -72,6 +72,7 @@ class BudgetShellScreen extends HookWidget {
       // "+" tab — show add transaction sheet
       final action = await showModalBottomSheet<AddTransactionAction>(
         context: context,
+        showDragHandle: false,
         builder: (_) => AddTransactionSheet(budgetId: budgetId),
       );
       if (!context.mounted || action == null) return;
