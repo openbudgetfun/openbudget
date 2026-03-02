@@ -646,28 +646,20 @@ class _SettingsTile extends StatelessWidget {
     required this.label,
     required this.onTap,
     this.subtitle,
-    this.enabled = true,
   });
 
   final IconData icon;
   final String label;
   final VoidCallback? onTap;
   final String? subtitle;
-  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final titleColor = enabled
-        ? theme.textTheme.bodyLarge?.color
-        : OpenBudgetPalette.fgSecondaryFor(theme);
 
     return ListTile(
       leading: Icon(icon, color: OpenBudgetPalette.fgSecondaryFor(theme)),
-      title: Text(
-        label,
-        style: theme.textTheme.bodyLarge?.copyWith(color: titleColor),
-      ),
+      title: Text(label, style: theme.textTheme.bodyLarge),
       subtitle: subtitle == null
           ? null
           : Text(
@@ -677,10 +669,10 @@ class _SettingsTile extends StatelessWidget {
               ),
             ),
       trailing: Icon(
-        enabled ? Icons.chevron_right_rounded : Icons.block_rounded,
+        Icons.chevron_right_rounded,
         color: OpenBudgetPalette.fgSecondaryFor(theme),
       ),
-      onTap: enabled ? onTap : null,
+      onTap: onTap,
     );
   }
 }
