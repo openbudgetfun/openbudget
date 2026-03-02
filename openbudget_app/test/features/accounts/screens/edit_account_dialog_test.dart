@@ -98,9 +98,7 @@ Widget _buildSubject({
 
 void main() {
   group('EditAccountDialog', () {
-    testWidgets('open account shows close action and hides delete/reopen', (
-      tester,
-    ) async {
+    testWidgets('open account shows close and delete actions', (tester) async {
       await tester.pumpWidget(_buildSubject(account: _makeAccount()));
       await tester.tap(find.text('Open Edit Dialog'));
       await tester.pumpAndSettle();
@@ -115,7 +113,7 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.text('Close Account'), findsOneWidget);
-      expect(find.text('Delete Permanently'), findsNothing);
+      expect(find.text('Delete Permanently'), findsOneWidget);
       expect(find.text('Reopen Account'), findsNothing);
     });
 
@@ -182,6 +180,7 @@ void main() {
       await tester.tap(find.text('Delete Permanently'));
       await tester.pumpAndSettle();
 
+      expect(find.textContaining('"Daily"'), findsOneWidget);
       await tester.tap(
         find.widgetWithText(FilledButton, 'Delete Permanently').last,
       );

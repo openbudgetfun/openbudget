@@ -289,18 +289,18 @@ class EditAccountDialog extends HookConsumerWidget {
                     : () => _reopenAccount(context, ref),
                 child: Text(l10n.accountReopenButton),
               ),
-              const SizedBox(height: SpacingTokens.sm),
-              FilledButton.tonal(
-                onPressed: isSubmitting.value
-                    ? null
-                    : () => _deleteAccountPermanently(context, ref),
-                style: FilledButton.styleFrom(
-                  foregroundColor: colorScheme.error,
-                  backgroundColor: colorScheme.errorContainer.withAlpha(120),
-                ),
-                child: Text(l10n.accountDeleteButton),
-              ),
             ],
+            const SizedBox(height: SpacingTokens.sm),
+            FilledButton.tonal(
+              onPressed: isSubmitting.value
+                  ? null
+                  : () => _deleteAccountPermanently(context, ref),
+              style: FilledButton.styleFrom(
+                foregroundColor: colorScheme.error,
+                backgroundColor: colorScheme.errorContainer.withAlpha(120),
+              ),
+              child: Text(l10n.accountDeleteButton),
+            ),
           ],
         ),
       ),
@@ -397,7 +397,7 @@ class EditAccountDialog extends HookConsumerWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(l10n.accountDeleteTitle),
-        content: Text(l10n.accountDeleteConfirm),
+        content: Text('${l10n.accountDeleteConfirm}\n\n"${account.name}"'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
