@@ -17,7 +17,19 @@ fields:
   sortOrder: int
   ### Whether this account has been closed/archived.
   isClosed: bool
+  ### Source of account data: manual, plaid, solana.
+  sourceType: String?
+  ### External source account identifier (e.g. Plaid account_id or wallet address).
+  externalAccountId: String?
+  ### Connection identifier used by external account sync providers.
+  connectionId: UuidValue?
+  ### Last time the account was synchronized from an external provider.
+  lastSyncedAt: DateTime?
+  ### Latest sync status for the account (e.g. synced, stale, error).
+  syncStatus: String?
   createdAt: DateTime, default=now
 indexes:
   account_budget_idx:
     fields: budgetId
+  account_budget_external_idx:
+    fields: budgetId, externalAccountId

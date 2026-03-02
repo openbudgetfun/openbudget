@@ -64,7 +64,7 @@ final class SpendingReportProvider
   }
 }
 
-String _$spendingReportHash() => r'189d7f807c51d9cb8a4d10b878fa2312e3a1d02b';
+String _$spendingReportHash() => r'a75cce4504e58212965a8a732deba6832ada787d';
 
 final class SpendingReportFamily extends $Family
     with

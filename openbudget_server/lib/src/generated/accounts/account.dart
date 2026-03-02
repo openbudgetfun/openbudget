@@ -25,6 +25,11 @@ abstract class Account
     required this.onBudget,
     required this.sortOrder,
     required this.isClosed,
+    this.sourceType,
+    this.externalAccountId,
+    this.connectionId,
+    this.lastSyncedAt,
+    this.syncStatus,
     DateTime? createdAt,
   }) : createdAt = createdAt ?? DateTime.now();
 
@@ -38,6 +43,11 @@ abstract class Account
     required bool onBudget,
     required int sortOrder,
     required bool isClosed,
+    String? sourceType,
+    String? externalAccountId,
+    _i1.UuidValue? connectionId,
+    DateTime? lastSyncedAt,
+    String? syncStatus,
     DateTime? createdAt,
   }) = _AccountImpl;
 
@@ -56,6 +66,19 @@ abstract class Account
       onBudget: jsonSerialization['onBudget'] as bool,
       sortOrder: jsonSerialization['sortOrder'] as int,
       isClosed: jsonSerialization['isClosed'] as bool,
+      sourceType: jsonSerialization['sourceType'] as String?,
+      externalAccountId: jsonSerialization['externalAccountId'] as String?,
+      connectionId: jsonSerialization['connectionId'] == null
+          ? null
+          : _i1.UuidValueJsonExtension.fromJson(
+              jsonSerialization['connectionId'],
+            ),
+      lastSyncedAt: jsonSerialization['lastSyncedAt'] == null
+          ? null
+          : _i1.DateTimeJsonExtension.fromJson(
+              jsonSerialization['lastSyncedAt'],
+            ),
+      syncStatus: jsonSerialization['syncStatus'] as String?,
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
@@ -91,6 +114,21 @@ abstract class Account
   /// Whether this account has been closed/archived.
   bool isClosed;
 
+  /// Source of account data: manual, plaid, solana.
+  String? sourceType;
+
+  /// External source account identifier (e.g. Plaid account_id or wallet address).
+  String? externalAccountId;
+
+  /// Connection identifier used by external account sync providers.
+  _i1.UuidValue? connectionId;
+
+  /// Last time the account was synchronized from an external provider.
+  DateTime? lastSyncedAt;
+
+  /// Latest sync status for the account (e.g. synced, stale, error).
+  String? syncStatus;
+
   DateTime createdAt;
 
   @override
@@ -109,6 +147,11 @@ abstract class Account
     bool? onBudget,
     int? sortOrder,
     bool? isClosed,
+    String? sourceType,
+    String? externalAccountId,
+    _i1.UuidValue? connectionId,
+    DateTime? lastSyncedAt,
+    String? syncStatus,
     DateTime? createdAt,
   });
   @override
@@ -124,6 +167,11 @@ abstract class Account
       'onBudget': onBudget,
       'sortOrder': sortOrder,
       'isClosed': isClosed,
+      if (sourceType != null) 'sourceType': sourceType,
+      if (externalAccountId != null) 'externalAccountId': externalAccountId,
+      if (connectionId != null) 'connectionId': connectionId?.toJson(),
+      if (lastSyncedAt != null) 'lastSyncedAt': lastSyncedAt?.toJson(),
+      if (syncStatus != null) 'syncStatus': syncStatus,
       'createdAt': createdAt.toJson(),
     };
   }
@@ -141,6 +189,11 @@ abstract class Account
       'onBudget': onBudget,
       'sortOrder': sortOrder,
       'isClosed': isClosed,
+      if (sourceType != null) 'sourceType': sourceType,
+      if (externalAccountId != null) 'externalAccountId': externalAccountId,
+      if (connectionId != null) 'connectionId': connectionId?.toJson(),
+      if (lastSyncedAt != null) 'lastSyncedAt': lastSyncedAt?.toJson(),
+      if (syncStatus != null) 'syncStatus': syncStatus,
       'createdAt': createdAt.toJson(),
     };
   }
@@ -188,6 +241,11 @@ class _AccountImpl extends Account {
     required bool onBudget,
     required int sortOrder,
     required bool isClosed,
+    String? sourceType,
+    String? externalAccountId,
+    _i1.UuidValue? connectionId,
+    DateTime? lastSyncedAt,
+    String? syncStatus,
     DateTime? createdAt,
   }) : super._(
          id: id,
@@ -199,6 +257,11 @@ class _AccountImpl extends Account {
          onBudget: onBudget,
          sortOrder: sortOrder,
          isClosed: isClosed,
+         sourceType: sourceType,
+         externalAccountId: externalAccountId,
+         connectionId: connectionId,
+         lastSyncedAt: lastSyncedAt,
+         syncStatus: syncStatus,
          createdAt: createdAt,
        );
 
@@ -216,6 +279,11 @@ class _AccountImpl extends Account {
     bool? onBudget,
     int? sortOrder,
     bool? isClosed,
+    Object? sourceType = _Undefined,
+    Object? externalAccountId = _Undefined,
+    Object? connectionId = _Undefined,
+    Object? lastSyncedAt = _Undefined,
+    Object? syncStatus = _Undefined,
     DateTime? createdAt,
   }) {
     return Account(
@@ -228,6 +296,17 @@ class _AccountImpl extends Account {
       onBudget: onBudget ?? this.onBudget,
       sortOrder: sortOrder ?? this.sortOrder,
       isClosed: isClosed ?? this.isClosed,
+      sourceType: sourceType is String? ? sourceType : this.sourceType,
+      externalAccountId: externalAccountId is String?
+          ? externalAccountId
+          : this.externalAccountId,
+      connectionId: connectionId is _i1.UuidValue?
+          ? connectionId
+          : this.connectionId,
+      lastSyncedAt: lastSyncedAt is DateTime?
+          ? lastSyncedAt
+          : this.lastSyncedAt,
+      syncStatus: syncStatus is String? ? syncStatus : this.syncStatus,
       createdAt: createdAt ?? this.createdAt,
     );
   }
@@ -277,6 +356,35 @@ class AccountUpdateTable extends _i1.UpdateTable<AccountTable> {
     value,
   );
 
+  _i1.ColumnValue<String, String> sourceType(String? value) => _i1.ColumnValue(
+    table.sourceType,
+    value,
+  );
+
+  _i1.ColumnValue<String, String> externalAccountId(String? value) =>
+      _i1.ColumnValue(
+        table.externalAccountId,
+        value,
+      );
+
+  _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> connectionId(
+    _i1.UuidValue? value,
+  ) => _i1.ColumnValue(
+    table.connectionId,
+    value,
+  );
+
+  _i1.ColumnValue<DateTime, DateTime> lastSyncedAt(DateTime? value) =>
+      _i1.ColumnValue(
+        table.lastSyncedAt,
+        value,
+      );
+
+  _i1.ColumnValue<String, String> syncStatus(String? value) => _i1.ColumnValue(
+    table.syncStatus,
+    value,
+  );
+
   _i1.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
       _i1.ColumnValue(
         table.createdAt,
@@ -319,6 +427,26 @@ class AccountTable extends _i1.Table<_i1.UuidValue?> {
       'isClosed',
       this,
     );
+    sourceType = _i1.ColumnString(
+      'sourceType',
+      this,
+    );
+    externalAccountId = _i1.ColumnString(
+      'externalAccountId',
+      this,
+    );
+    connectionId = _i1.ColumnUuid(
+      'connectionId',
+      this,
+    );
+    lastSyncedAt = _i1.ColumnDateTime(
+      'lastSyncedAt',
+      this,
+    );
+    syncStatus = _i1.ColumnString(
+      'syncStatus',
+      this,
+    );
     createdAt = _i1.ColumnDateTime(
       'createdAt',
       this,
@@ -350,6 +478,21 @@ class AccountTable extends _i1.Table<_i1.UuidValue?> {
   /// Whether this account has been closed/archived.
   late final _i1.ColumnBool isClosed;
 
+  /// Source of account data: manual, plaid, solana.
+  late final _i1.ColumnString sourceType;
+
+  /// External source account identifier (e.g. Plaid account_id or wallet address).
+  late final _i1.ColumnString externalAccountId;
+
+  /// Connection identifier used by external account sync providers.
+  late final _i1.ColumnUuid connectionId;
+
+  /// Last time the account was synchronized from an external provider.
+  late final _i1.ColumnDateTime lastSyncedAt;
+
+  /// Latest sync status for the account (e.g. synced, stale, error).
+  late final _i1.ColumnString syncStatus;
+
   late final _i1.ColumnDateTime createdAt;
 
   @override
@@ -363,6 +506,11 @@ class AccountTable extends _i1.Table<_i1.UuidValue?> {
     onBudget,
     sortOrder,
     isClosed,
+    sourceType,
+    externalAccountId,
+    connectionId,
+    lastSyncedAt,
+    syncStatus,
     createdAt,
   ];
 }

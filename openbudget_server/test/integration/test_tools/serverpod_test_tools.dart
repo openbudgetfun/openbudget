@@ -41,6 +41,10 @@ import 'package:openbudget_server/src/generated/transactions/split_item.dart'
     as _i17;
 import 'package:openbudget_server/src/generated/transactions/import_row.dart'
     as _i18;
+import 'package:openbudget_server/src/generated/wallets/wallet_connect_result.dart'
+    as _i19;
+import 'package:openbudget_server/src/generated/wallets/wallet_holding.dart'
+    as _i20;
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:openbudget_server/src/generated/endpoints.dart';
 export 'package:serverpod_test/serverpod_test_public_exports.dart';
@@ -176,11 +180,15 @@ class TestEndpoints {
 
   late final _PayeeEndpoint payee;
 
+  late final _PlaidEndpoint plaid;
+
   late final _RecurringTransactionEndpoint recurringTransaction;
 
   late final _TransactionRuleEndpoint transactionRule;
 
   late final _TransactionEndpoint transaction;
+
+  late final _WalletEndpoint wallet;
 }
 
 class _InternalTestEndpoints extends TestEndpoints
@@ -246,6 +254,10 @@ class _InternalTestEndpoints extends TestEndpoints
       endpoints,
       serializationManager,
     );
+    plaid = _PlaidEndpoint(
+      endpoints,
+      serializationManager,
+    );
     recurringTransaction = _RecurringTransactionEndpoint(
       endpoints,
       serializationManager,
@@ -255,6 +267,10 @@ class _InternalTestEndpoints extends TestEndpoints
       serializationManager,
     );
     transaction = _TransactionEndpoint(
+      endpoints,
+      serializationManager,
+    );
+    wallet = _WalletEndpoint(
       endpoints,
       serializationManager,
     );
@@ -2433,6 +2449,118 @@ class _PayeeEndpoint {
   }
 }
 
+class _PlaidEndpoint {
+  _PlaidEndpoint(
+    this._endpointDispatch,
+    this._serializationManager,
+  );
+
+  final _i2.EndpointDispatch _endpointDispatch;
+
+  final _i2.SerializationManager _serializationManager;
+
+  _i3.Future<String> createLinkToken(
+    _i1.TestSessionBuilder sessionBuilder,
+    _i2.UuidValue budgetId,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'plaid',
+            method: 'createLinkToken',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'plaid',
+          methodName: 'createLinkToken',
+          parameters: _i1.testObjectToJson({'budgetId': budgetId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<String>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<List<_i4.Account>> exchangePublicToken(
+    _i1.TestSessionBuilder sessionBuilder,
+    _i2.UuidValue budgetId,
+    String publicToken,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'plaid',
+            method: 'exchangePublicToken',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'plaid',
+          methodName: 'exchangePublicToken',
+          parameters: _i1.testObjectToJson({
+            'budgetId': budgetId,
+            'publicToken': publicToken,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<List<_i4.Account>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<List<_i4.Account>> syncConnection(
+    _i1.TestSessionBuilder sessionBuilder,
+    _i2.UuidValue budgetId,
+    _i2.UuidValue connectionId,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'plaid',
+            method: 'syncConnection',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'plaid',
+          methodName: 'syncConnection',
+          parameters: _i1.testObjectToJson({
+            'budgetId': budgetId,
+            'connectionId': connectionId,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<List<_i4.Account>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+}
+
 class _RecurringTransactionEndpoint {
   _RecurringTransactionEndpoint(
     this._endpointDispatch,
@@ -3587,6 +3715,126 @@ class _TransactionEndpoint {
                   _localCallContext.arguments,
                 )
                 as _i3.Future<_i16.Transaction>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+}
+
+class _WalletEndpoint {
+  _WalletEndpoint(
+    this._endpointDispatch,
+    this._serializationManager,
+  );
+
+  final _i2.EndpointDispatch _endpointDispatch;
+
+  final _i2.SerializationManager _serializationManager;
+
+  _i3.Future<_i19.WalletConnectResult> connectSolanaWallet(
+    _i1.TestSessionBuilder sessionBuilder,
+    _i2.UuidValue budgetId,
+    String address, {
+    String? label,
+    required bool onBudget,
+  }) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'wallet',
+            method: 'connectSolanaWallet',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'wallet',
+          methodName: 'connectSolanaWallet',
+          parameters: _i1.testObjectToJson({
+            'budgetId': budgetId,
+            'address': address,
+            'label': label,
+            'onBudget': onBudget,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<_i19.WalletConnectResult>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<_i19.WalletConnectResult> refreshSolanaWallet(
+    _i1.TestSessionBuilder sessionBuilder,
+    _i2.UuidValue budgetId,
+    _i2.UuidValue connectionId,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'wallet',
+            method: 'refreshSolanaWallet',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'wallet',
+          methodName: 'refreshSolanaWallet',
+          parameters: _i1.testObjectToJson({
+            'budgetId': budgetId,
+            'connectionId': connectionId,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<_i19.WalletConnectResult>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<List<_i20.WalletHolding>> listWalletHoldings(
+    _i1.TestSessionBuilder sessionBuilder,
+    _i2.UuidValue budgetId,
+    _i2.UuidValue connectionId,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'wallet',
+            method: 'listWalletHoldings',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'wallet',
+          methodName: 'listWalletHoldings',
+          parameters: _i1.testObjectToJson({
+            'budgetId': budgetId,
+            'connectionId': connectionId,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<List<_i20.WalletHolding>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();

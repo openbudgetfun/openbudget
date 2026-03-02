@@ -1,0 +1,19 @@
+### Plaid item connection persisted for syncing linked bank accounts.
+class: PlaidConnection
+table: plaid_connection
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  budgetId: UuidValue, relation(parent=budget)
+  plaidItemId: String
+  accessToken: String
+  institutionName: String?
+  institutionId: String?
+  createdAt: DateTime, default=now
+  updatedAt: DateTime, default=now
+  lastSyncedAt: DateTime?
+indexes:
+  plaid_connection_budget_item_idx:
+    fields: budgetId, plaidItemId
+    unique: true
+  plaid_connection_budget_idx:
+    fields: budgetId
