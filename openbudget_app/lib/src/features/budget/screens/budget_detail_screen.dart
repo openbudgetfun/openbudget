@@ -75,6 +75,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
     final onboardingComplete = useState(false);
     final selectedEditor = useState<_InlineEditorSelection?>(null);
     final editorInput = useState('');
+    final inlineEditorSheetOpen = useState(false);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final hideAmounts = ref.watch(hideAmountsProvider);
@@ -144,6 +145,164 @@ class BudgetDetailScreen extends HookConsumerWidget {
 
       return null;
     }, [dueCountAsync, summaryAsync]);
+
+    useEffect(() {
+      if (showSpotlight.value && selectedEditor.value != null) {
+        selectedEditor.value = null;
+        editorInput.value = '';
+      }
+      return null;
+    }, [showSpotlight.value]);
+
+    useEffect(
+      () {
+        if (showSpotlight.value) return null;
+        if (selectedEditor.value == null) return null;
+        if (inlineEditorSheetOpen.value) return null;
+        if (!summaryAsync.hasValue) return null;
+
+        final summary = summaryAsync.value!;
+        final selection = selectedEditor.value!;
+        final currencyCode = CurrencyCode.values.firstWhere(
+          (code) => code.code == summary.budget.currencyCode,
+          orElse: () => CurrencyCode.usd,
+        );
+        inlineEditorSheetOpen.value = true;
+
+        Future.microtask(() async {
+          if (!context.mounted) return;
+          var sheetInput = editorInput.value;
+
+          await showModalBottomSheet<void>(
+            context: context,
+            isScrollControlled: true,
+            showDragHandle: true,
+            backgroundColor: OpenBudgetPalette.transparentFor(
+              Theme.of(context),
+            ),
+            barrierColor: OpenBudgetPalette.overlayScrimFor(
+              Theme.of(context),
+            ).withAlpha(210),
+            builder: (sheetContext) => StatefulBuilder(
+              builder: (sheetContext, setSheetState) {
+                void setInputValue(String value) {
+                  setSheetState(() => sheetInput = value);
+                  editorInput.value = value;
+                }
+
+                return _InlineAmountEditor(
+                  inputValue: sheetInput,
+                  amountLabel: hideAmounts
+                      ? hiddenAmountPlaceholder
+                      : formatCents(
+                          _parseEditorCents(sheetInput) ??
+                              (selection.monthlyData?.allocatedCents ??
+                                  selection.envelope.budgetedAmountCents),
+                          currencyCode,
+                        ),
+                  onAutoAssign: () {
+                    Navigator.of(sheetContext).pop();
+                    _showQuickBudgetDialog(
+                      context,
+                      selection.envelope,
+                      currencyCode,
+                      year: summary.year,
+                      month: summary.month,
+                    );
+                  },
+                  onMoveMoney: () {
+                    Navigator.of(sheetContext).pop();
+                    showDialog<void>(
+                      context: context,
+                      barrierColor: OpenBudgetPalette.overlayScrimFor(
+                        Theme.of(context),
+                      ).withAlpha(210),
+                      builder: (_) => MoveMoneyDialog(
+                        budgetId: budgetId,
+                        year: summary.year,
+                        month: summary.month,
+                        categories: summary.categories,
+                      ),
+                    );
+                  },
+                  onDetails: () {
+                    final envelopeId = selection.envelope.id?.toString() ?? '';
+                    final categoryId = selection.categoryId;
+                    if (envelopeId.isEmpty || categoryId.isEmpty) return;
+                    Navigator.of(sheetContext).pop();
+                    context.pushNamed(
+                      categoryDetailRoute,
+                      pathParameters: {
+                        'id': budgetId,
+                        'categoryId': categoryId,
+                        'envelopeId': envelopeId,
+                      },
+                    );
+                  },
+                  onDigit: (digit) {
+                    if (sheetInput.length >= 9) return;
+                    setInputValue('$sheetInput$digit');
+                  },
+                  onBackspace: () {
+                    if (sheetInput.isEmpty) return;
+                    setInputValue(
+                      sheetInput.substring(0, sheetInput.length - 1),
+                    );
+                  },
+                  onNegative: () {
+                    if (sheetInput.isEmpty) return;
+                    setInputValue(
+                      sheetInput.startsWith('-')
+                          ? sheetInput.substring(1)
+                          : '-$sheetInput',
+                    );
+                  },
+                  onPositive: () {
+                    if (sheetInput.startsWith('-')) {
+                      setInputValue(sheetInput.substring(1));
+                    }
+                  },
+                  onCancel: () => Navigator.of(sheetContext).pop(),
+                  onApply: () => _applyInlineAllocation(
+                    context: context,
+                    ref: ref,
+                    selection: selection,
+                    year: summary.year,
+                    month: summary.month,
+                    input: sheetInput,
+                    closeEditor: false,
+                  ),
+                  onDone: () => _applyInlineAllocation(
+                    context: context,
+                    ref: ref,
+                    selection: selection,
+                    year: summary.year,
+                    month: summary.month,
+                    input: sheetInput,
+                    closeEditor: true,
+                    onCloseEditor: () => Navigator.of(sheetContext).pop(),
+                  ),
+                );
+              },
+            ),
+          );
+
+          if (!context.mounted) return;
+          inlineEditorSheetOpen.value = false;
+          selectedEditor.value = null;
+          editorInput.value = '';
+        });
+
+        return null;
+      },
+      [
+        showSpotlight.value,
+        selectedEditor.value,
+        summaryAsync,
+        hideAmounts,
+        inlineEditorSheetOpen.value,
+      ],
+    );
 
     return summaryAsync.when(
       loading: () => Scaffold(
@@ -306,6 +465,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
                   _PlanMenuAction.saveTemplate => navigateAfterMenuClose(() {
                     showDialog<void>(
                       context: context,
+                      barrierColor: _dialogBarrierColor(context),
                       builder: (_) => BudgetTemplateDialog(budgetId: budgetId),
                     );
                   }),
@@ -458,106 +618,6 @@ class BudgetDetailScreen extends HookConsumerWidget {
               ),
             ],
           ),
-          bottomNavigationBar:
-              !showSpotlight.value && selectedEditor.value != null
-              ? _InlineAmountEditor(
-                  inputValue: editorInput.value,
-                  amountLabel: hideAmounts
-                      ? hiddenAmountPlaceholder
-                      : formatCents(
-                          _parseEditorCents(editorInput.value) ??
-                              (selectedEditor
-                                      .value!
-                                      .monthlyData
-                                      ?.allocatedCents ??
-                                  selectedEditor
-                                      .value!
-                                      .envelope
-                                      .budgetedAmountCents),
-                          currencyCode,
-                        ),
-                  onAutoAssign: () => _showQuickBudgetDialog(
-                    context,
-                    selectedEditor.value!.envelope,
-                    currencyCode,
-                    year: summary.year,
-                    month: summary.month,
-                  ),
-                  onMoveMoney: () => showDialog<void>(
-                    context: context,
-                    builder: (_) => MoveMoneyDialog(
-                      budgetId: budgetId,
-                      year: summary.year,
-                      month: summary.month,
-                      categories: summary.categories,
-                    ),
-                  ),
-                  onDetails: () {
-                    final envelopeId =
-                        selectedEditor.value!.envelope.id?.toString() ?? '';
-                    final categoryId = selectedEditor.value!.categoryId;
-                    if (envelopeId.isEmpty || categoryId.isEmpty) return;
-                    selectedEditor.value = null;
-                    editorInput.value = '';
-                    context.pushNamed(
-                      categoryDetailRoute,
-                      pathParameters: {
-                        'id': budgetId,
-                        'categoryId': categoryId,
-                        'envelopeId': envelopeId,
-                      },
-                    );
-                  },
-                  onDigit: (digit) {
-                    if (editorInput.value.length >= 9) return;
-                    editorInput.value = '${editorInput.value}$digit';
-                  },
-                  onBackspace: () {
-                    if (editorInput.value.isEmpty) return;
-                    editorInput.value = editorInput.value.substring(
-                      0,
-                      editorInput.value.length - 1,
-                    );
-                  },
-                  onNegative: () {
-                    if (editorInput.value.isEmpty) return;
-                    editorInput.value = editorInput.value.startsWith('-')
-                        ? editorInput.value.substring(1)
-                        : '-${editorInput.value}';
-                  },
-                  onPositive: () {
-                    if (editorInput.value.startsWith('-')) {
-                      editorInput.value = editorInput.value.substring(1);
-                    }
-                  },
-                  onCancel: () {
-                    selectedEditor.value = null;
-                    editorInput.value = '';
-                  },
-                  onApply: () => _applyInlineAllocation(
-                    context: context,
-                    ref: ref,
-                    selection: selectedEditor.value!,
-                    year: summary.year,
-                    month: summary.month,
-                    input: editorInput.value,
-                    closeEditor: false,
-                  ),
-                  onDone: () => _applyInlineAllocation(
-                    context: context,
-                    ref: ref,
-                    selection: selectedEditor.value!,
-                    year: summary.year,
-                    month: summary.month,
-                    input: editorInput.value,
-                    closeEditor: true,
-                    onCloseEditor: () {
-                      selectedEditor.value = null;
-                      editorInput.value = '';
-                    },
-                  ),
-                )
-              : null,
           body: RefreshIndicator(
             onRefresh: () async {
               final selectedMonth = ref.read(selectedMonthProvider(budgetId));
@@ -1094,9 +1154,13 @@ class BudgetDetailScreen extends HookConsumerWidget {
     return null;
   }
 
+  Color _dialogBarrierColor(BuildContext context) =>
+      OpenBudgetPalette.overlayScrimFor(Theme.of(context)).withAlpha(210);
+
   void _showAutoAssignDialog(BuildContext context, CurrencyCode currencyCode) {
     showDialog<void>(
       context: context,
+      barrierColor: _dialogBarrierColor(context),
       builder: (_) =>
           AutoAssignDialog(budgetId: budgetId, currencyCode: currencyCode),
     );
@@ -1135,6 +1199,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
   }) {
     showDialog<void>(
       context: context,
+      barrierColor: _dialogBarrierColor(context),
       builder: (_) => QuickBudgetDialog(
         budgetId: budgetId,
         envelopeId: envelope.id?.toString() ?? '',
@@ -1153,6 +1218,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
   ) {
     showDialog<void>(
       context: context,
+      barrierColor: _dialogBarrierColor(context),
       builder: (_) => EditCategoryDialog(
         categoryId: categoryId,
         budgetId: budgetId,
@@ -1164,6 +1230,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
   void _showAddCategoryDialog(BuildContext context, int nextSortOrder) {
     showDialog<void>(
       context: context,
+      barrierColor: _dialogBarrierColor(context),
       builder: (_) =>
           AddCategoryDialog(budgetId: budgetId, nextSortOrder: nextSortOrder),
     );
@@ -1178,6 +1245,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
   }) {
     showDialog<void>(
       context: context,
+      barrierColor: _dialogBarrierColor(context),
       builder: (_) => AddEnvelopeDialog(
         categoryId: categoryId,
         budgetId: budgetId,
@@ -1198,6 +1266,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
   }) {
     showDialog<void>(
       context: context,
+      barrierColor: _dialogBarrierColor(context),
       builder: (_) => EditEnvelopeDialog(
         envelope: envelope,
         categoryId: categoryId,
@@ -1219,6 +1288,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final confirmed = await showDialog<bool>(
       context: context,
+      barrierColor: _dialogBarrierColor(context),
       builder: (ctx) => AlertDialog(
         title: Text(l10n.deleteConfirmTitle),
         content: Text('${l10n.deleteConfirmMessage}\n\n"$categoryName"'),
@@ -1336,6 +1406,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
+      barrierColor: _dialogBarrierColor(context),
       builder: (ctx) => AlertDialog(
         title: Text(l10n.budgetCopyLastMonth),
         content: Text(l10n.budgetCopyLastMonthConfirm),
@@ -1391,6 +1462,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final confirmed = await showDialog<bool>(
       context: context,
+      barrierColor: _dialogBarrierColor(context),
       builder: (ctx) => AlertDialog(
         title: Text(l10n.deleteConfirmTitle),
         content: Text('${l10n.deleteConfirmMessage}\n\n"$envelopeName"'),

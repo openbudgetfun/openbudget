@@ -26,12 +26,19 @@ class AddEnvelopeDialog extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
     final nameController = useTextEditingController();
     final amountController = useTextEditingController();
     final isSubmitting = useState(false);
 
     return AlertDialog(
-      title: Text(l10n.budgetAddEnvelope),
+      insetPadding: const EdgeInsets.symmetric(horizontal: SpacingTokens.md),
+      title: Text(
+        l10n.budgetAddEnvelope,
+        style: theme.textTheme.titleMedium?.copyWith(
+          fontWeight: FontWeight.w700,
+        ),
+      ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

@@ -31,6 +31,7 @@ class EditEnvelopeDialog extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
     final nameController = useTextEditingController(text: envelope.name);
     final amountController = useTextEditingController(
       text: _formatInitialAmount(envelope.budgetedAmountCents, currencyCode),
@@ -39,7 +40,13 @@ class EditEnvelopeDialog extends HookConsumerWidget {
     final isSubmitting = useState(false);
 
     return AlertDialog(
-      title: Text(l10n.editEnvelopeTitle),
+      insetPadding: const EdgeInsets.symmetric(horizontal: SpacingTokens.md),
+      title: Text(
+        l10n.editEnvelopeTitle,
+        style: theme.textTheme.titleMedium?.copyWith(
+          fontWeight: FontWeight.w700,
+        ),
+      ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

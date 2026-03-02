@@ -3,6 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/category_actions_provider.dart';
+import 'package:openbudget_ui/openbudget_ui.dart';
 
 class AddCategoryDialog extends HookConsumerWidget {
   const AddCategoryDialog({
@@ -17,11 +18,18 @@ class AddCategoryDialog extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
     final nameController = useTextEditingController();
     final isSubmitting = useState(false);
 
     return AlertDialog(
-      title: Text(l10n.budgetAddCategory),
+      insetPadding: const EdgeInsets.symmetric(horizontal: SpacingTokens.md),
+      title: Text(
+        l10n.budgetAddCategory,
+        style: theme.textTheme.titleMedium?.copyWith(
+          fontWeight: FontWeight.w700,
+        ),
+      ),
       content: TextField(
         controller: nameController,
         decoration: InputDecoration(
