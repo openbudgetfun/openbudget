@@ -268,6 +268,7 @@ class WalletService {
         balanceCents: balanceCents,
         currencyCode: budget.currencyCode,
         budgetId: budgetId,
+        creatorId: budget.ownerId,
         onBudget: onBudget,
         sortOrder: sortOrder,
         isClosed: false,

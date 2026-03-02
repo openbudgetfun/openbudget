@@ -1,4 +1,6 @@
 {
   "__className__": "serverpod.DatabaseMigration",
-  "actions": []
+  "actions": [],
+  "migrationApiVersion": 1,
+  "warnings": []
 }

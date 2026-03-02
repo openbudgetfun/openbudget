@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -7,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_actions_provider.dart';
+import 'package:openbudget_app/src/features/accounts/providers/institution_catalog_provider.dart';
 import 'package:openbudget_app/src/features/accounts/providers/plaid_account_link_provider.dart';
 import 'package:openbudget_app/src/features/accounts/providers/wallet_actions_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
@@ -14,9 +14,11 @@ import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
+import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 import 'package:plaid_flutter/plaid_flutter.dart';
+import 'package:simple_icons/simple_icons.dart';
 
 enum _AddAccountStep {
   loading,
@@ -49,6 +51,15 @@ const _addAccountUnlinkedWalletAddressFieldKey = Key(
   'add-account-unlinked-wallet-address-field',
 );
 
+String _resolveLocationCode() {
+  final locale = PlatformDispatcher.instance.locale;
+  final countryCode = locale.countryCode?.trim().toUpperCase();
+  if (countryCode != null && countryCode.isNotEmpty) {
+    return countryCode;
+  }
+  return 'US';
+}
+
 class AddAccountScreen extends HookConsumerWidget {
   const AddAccountScreen({required this.budgetId, super.key});
 
@@ -71,6 +82,8 @@ class AddAccountScreen extends HookConsumerWidget {
     final successAccountLabel = useState<String>('Account');
     final didHydrateBudgetCurrency = useState(false);
     final showSearchingOverlay = useState(false);
+    final selectedInstitution = useState<Institution?>(null);
+    final locationCode = useMemoized(_resolveLocationCode);
     // Keep step scroll state ephemeral so returning between wizard steps always
     // starts from the top instead of restoring page-storage offsets.
     final searchScrollController = useScrollController(keepScrollOffset: false);
@@ -81,6 +94,10 @@ class AddAccountScreen extends HookConsumerWidget {
       keepScrollOffset: false,
     );
     final budgetAsync = ref.watch(budgetDetailProvider(budgetId));
+    final institutionCatalogAsync = ref.watch(
+      institutionCatalogProvider(locationCode),
+    );
+    final myAccountsAsync = ref.watch(myReusableAccountsProvider(budgetId));
     final budgetCurrencyCode = budgetAsync.whenOrNull(
       data: (budget) => budget.currencyCode,
     );
@@ -172,15 +189,40 @@ class AddAccountScreen extends HookConsumerWidget {
             ? walletAddressController.text.trim().isNotEmpty
             : balanceValue != null);
     final canSubmitWallet = walletAddressController.text.trim().isNotEmpty;
+    final institutionCatalog =
+        institutionCatalogAsync.asData?.value ?? const <Institution>[];
+    final myAccounts = myAccountsAsync.asData?.value ?? const <Account>[];
 
-    Future<void> startLinkedBankFlow(String institutionName) async {
-      if (showSearchingOverlay.value || institutionName.trim().isEmpty) return;
+    Future<void> startLinkedBankFlow(Institution institution) async {
+      final institutionName = institution.name.trim();
+      if (showSearchingOverlay.value || institutionName.isEmpty) return;
+      selectedInstitution.value = institution;
 
       final isMobilePlaidPlatform =
           !kIsWeb &&
           (defaultTargetPlatform == TargetPlatform.iOS ||
               defaultTargetPlatform == TargetPlatform.android);
       if (!isMobilePlaidPlatform) {
+        showSearchingOverlay.value = true;
+        try {
+          final imported = await ref
+              .read(plaidAccountLinkProvider.notifier)
+              .importSandboxAccounts(
+                budgetId: budgetId,
+                plaidInstitutionId: institution.plaidInstitutionId,
+              );
+
+          if (!context.mounted) return;
+          if (imported.isNotEmpty) {
+            context.goNamed(accountListRoute, pathParameters: {'id': budgetId});
+            return;
+          }
+        } on Exception catch (_) {
+          // Fall back to unlinked setup while preserving institution context.
+        } finally {
+          showSearchingOverlay.value = false;
+        }
+
         step.value = _AddAccountStep.unlinkedAccount;
         showAppToast(
           context,
@@ -308,6 +350,7 @@ class AddAccountScreen extends HookConsumerWidget {
               walletAddress: isWalletType
                   ? walletAddressController.text.trim()
                   : null,
+              institutionId: selectedInstitution.value?.id?.toString(),
             );
         if (!context.mounted) return;
         isSubmitting.value = false;
@@ -392,11 +435,48 @@ class AddAccountScreen extends HookConsumerWidget {
                   scrollController: searchScrollController,
                   searchController: searchController,
                   searchQuery: searchController.text,
+                  institutions: institutionCatalog,
+                  myAccounts: myAccounts,
+                  isLoadingInstitutions:
+                      institutionCatalogAsync.isLoading ||
+                      myAccountsAsync.isLoading,
                   onInstitutionTap: startLinkedBankFlow,
+                  onMyAccountTap: (account) async {
+                    final accountId = account.id?.toString();
+                    if (accountId == null || isSubmitting.value) return;
+                    final messenger = ScaffoldMessenger.of(context);
+                    isSubmitting.value = true;
+                    showSearchingOverlay.value = true;
+                    try {
+                      await ref
+                          .read(accountActionsProvider.notifier)
+                          .addMineToBudget(
+                            sourceAccountId: accountId,
+                            budgetId: budgetId,
+                          );
+                      if (!context.mounted) return;
+                      successAccountLabel.value = account.name;
+                      step.value = _AddAccountStep.success;
+                    } on Exception catch (_) {
+                      if (!context.mounted) return;
+                      messenger.showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'Unable to add this account to the current budget.',
+                          ),
+                        ),
+                      );
+                    } finally {
+                      isSubmitting.value = false;
+                      showSearchingOverlay.value = false;
+                    }
+                  },
                   onConnectSolana: () =>
                       step.value = _AddAccountStep.walletConnection,
-                  onAddUnlinked: () =>
-                      step.value = _AddAccountStep.unlinkedAccount,
+                  onAddUnlinked: () {
+                    selectedInstitution.value = null;
+                    step.value = _AddAccountStep.unlinkedAccount;
+                  },
                 ),
               ),
               _AddAccountStep.walletConnection => _StepFrame(
@@ -420,6 +500,7 @@ class AddAccountScreen extends HookConsumerWidget {
                       selectedType?.label ??
                       l10n.addAccountSelectTypePlaceholder,
                   hasSelectedType: selectedType != null,
+                  selectedInstitutionName: selectedInstitution.value?.name,
                   onChooseType: () => step.value = _AddAccountStep.accountType,
                 ),
               ),
@@ -443,6 +524,7 @@ class AddAccountScreen extends HookConsumerWidget {
                   walletAddressController.clear();
                   walletLabelController.clear();
                   walletOnBudget.value = false;
+                  selectedInstitution.value = null;
                   step.value = _AddAccountStep.unlinkedAccount;
                 },
                 onDone: () => context.goNamed(
@@ -686,7 +768,11 @@ class _BankSearchStep extends StatelessWidget {
     required this.scrollController,
     required this.searchController,
     required this.searchQuery,
+    required this.institutions,
+    required this.myAccounts,
+    required this.isLoadingInstitutions,
     required this.onInstitutionTap,
+    required this.onMyAccountTap,
     required this.onConnectSolana,
     required this.onAddUnlinked,
   });
@@ -694,30 +780,36 @@ class _BankSearchStep extends StatelessWidget {
   final ScrollController scrollController;
   final TextEditingController searchController;
   final String searchQuery;
-  final Future<void> Function(String institution) onInstitutionTap;
+  final List<Institution> institutions;
+  final List<Account> myAccounts;
+  final bool isLoadingInstitutions;
+  final Future<void> Function(Institution institution) onInstitutionTap;
+  final Future<void> Function(Account account) onMyAccountTap;
   final VoidCallback onConnectSolana;
   final VoidCallback onAddUnlinked;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    const institutions = [
-      _InstitutionOption(name: 'Chase'),
-      _InstitutionOption(name: 'Capital One'),
-      _InstitutionOption(name: 'American Express'),
-      _InstitutionOption(name: 'Bank of America'),
-      _InstitutionOption(name: 'Citi'),
-      _InstitutionOption(name: 'Discover'),
-      _InstitutionOption(name: 'Wells Fargo'),
-      _InstitutionOption(name: 'Apple Card'),
-    ];
     final normalizedQuery = searchQuery.trim().toLowerCase();
+    final popularInstitutions = institutions.take(8).toList(growable: false);
     final filteredInstitutions = normalizedQuery.isEmpty
-        ? institutions
+        ? popularInstitutions
         : institutions
               .where(
                 (institution) =>
-                    institution.name.toLowerCase().contains(normalizedQuery),
+                    institution.name.toLowerCase().contains(normalizedQuery) ||
+                    (institution.website ?? '').toLowerCase().contains(
+                      normalizedQuery,
+                    ),
+              )
+              .toList(growable: false);
+    final filteredMyAccounts = normalizedQuery.isEmpty
+        ? myAccounts.take(6).toList(growable: false)
+        : myAccounts
+              .where(
+                (account) =>
+                    account.name.toLowerCase().contains(normalizedQuery),
               )
               .toList(growable: false);
     final sectionTitle = normalizedQuery.isEmpty
@@ -769,7 +861,14 @@ class _BankSearchStep extends StatelessWidget {
           ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
         ),
         const SizedBox(height: SpacingTokens.sm),
-        if (filteredInstitutions.isEmpty)
+        if (isLoadingInstitutions)
+          const Center(
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: SpacingTokens.md),
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+          )
+        else if (filteredInstitutions.isEmpty)
           Container(
             padding: const EdgeInsets.all(SpacingTokens.md),
             decoration: BoxDecoration(
@@ -799,13 +898,29 @@ class _BankSearchStep extends StatelessWidget {
                       width: tileWidth,
                       child: _InstitutionTile(
                         option: institution,
-                        onTap: () => onInstitutionTap(institution.name),
+                        onTap: () => onInstitutionTap(institution),
                       ),
                     ),
                 ],
               );
             },
           ),
+        if (filteredMyAccounts.isNotEmpty) ...[
+          const SizedBox(height: SpacingTokens.md),
+          Text(
+            'My accounts',
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: SpacingTokens.sm),
+          ...filteredMyAccounts.map(
+            (account) => _MyAccountTile(
+              account: account,
+              onTap: () => onMyAccountTap(account),
+            ),
+          ),
+        ],
         const SizedBox(height: SpacingTokens.md),
         Row(
           children: [
@@ -831,7 +946,7 @@ class _BankSearchStep extends StatelessWidget {
         const SizedBox(height: SpacingTokens.sm),
         FilledButton.icon(
           onPressed: onConnectSolana,
-          icon: const Icon(Icons.currency_bitcoin_rounded),
+          icon: const Icon(SimpleIcons.solana),
           label: Text(l10n.addAccountConnectWallet),
         ),
       ],
@@ -842,7 +957,7 @@ class _BankSearchStep extends StatelessWidget {
 class _InstitutionTile extends StatelessWidget {
   const _InstitutionTile({required this.option, required this.onTap});
 
-  final _InstitutionOption option;
+  final Institution option;
   final VoidCallback onTap;
 
   @override
@@ -872,11 +987,36 @@ class _InstitutionTile extends StatelessWidget {
   }
 }
 
-@immutable
-class _InstitutionOption {
-  const _InstitutionOption({required this.name});
+class _MyAccountTile extends StatelessWidget {
+  const _MyAccountTile({required this.account, required this.onTap});
 
-  final String name;
+  final Account account;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Card(
+      margin: const EdgeInsets.only(bottom: SpacingTokens.xs),
+      child: ListTile(
+        onTap: onTap,
+        leading: const Icon(Icons.bookmark_outline_rounded),
+        title: Text(
+          account.name,
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        subtitle: Text(
+          'Add this existing account to this budget',
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: OpenBudgetPalette.fgSecondaryFor(theme),
+          ),
+        ),
+        trailing: const Icon(Icons.add_link_rounded),
+      ),
+    );
+  }
 }
 
 class _WalletConnectStep extends StatelessWidget {
@@ -966,6 +1106,7 @@ class _UnlinkedAccountStep extends StatelessWidget {
     required this.showWalletAddress,
     required this.selectedTypeLabel,
     required this.hasSelectedType,
+    required this.selectedInstitutionName,
     required this.onChooseType,
   });
 
@@ -976,6 +1117,7 @@ class _UnlinkedAccountStep extends StatelessWidget {
   final bool showWalletAddress;
   final String selectedTypeLabel;
   final bool hasSelectedType;
+  final String? selectedInstitutionName;
   final VoidCallback onChooseType;
 
   @override
@@ -1023,6 +1165,34 @@ class _UnlinkedAccountStep extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(introText, style: introStyle),
+          if (selectedInstitutionName != null &&
+              selectedInstitutionName!.trim().isNotEmpty) ...[
+            const SizedBox(height: SpacingTokens.sm),
+            Container(
+              padding: const EdgeInsets.all(SpacingTokens.sm),
+              decoration: BoxDecoration(
+                color: OpenBudgetPalette.bgSecondaryFor(theme),
+                borderRadius: BorderRadius.circular(RadiusTokens.md),
+                border: Border.all(
+                  color: OpenBudgetPalette.borderSubtleFor(theme),
+                ),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.account_balance_rounded, size: 18),
+                  const SizedBox(width: SpacingTokens.xs),
+                  Expanded(
+                    child: Text(
+                      'Institution: $selectedInstitutionName',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
           const SizedBox(height: SpacingTokens.md),
           Text(l10n.addAccountNicknameQuestion, style: headingStyle),
           const SizedBox(height: SpacingTokens.xs),

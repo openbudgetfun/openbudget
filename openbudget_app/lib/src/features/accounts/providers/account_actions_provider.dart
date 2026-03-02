@@ -19,6 +19,7 @@ class AccountActions extends _$AccountActions {
     required bool onBudget,
     required int sortOrder,
     String? walletAddress,
+    String? institutionId,
   }) async {
     final client = ref.read(serverpodClientProvider);
     // Serverpod API requires UuidValue which is experimental in uuid package.
@@ -32,6 +33,11 @@ class AccountActions extends _$AccountActions {
       budgetUuid,
       onBudget: onBudget,
       sortOrder: sortOrder,
+      // Serverpod API requires UuidValue which is experimental in uuid package.
+      // ignore: experimental_member_use
+      institutionId: institutionId == null
+          ? null
+          : UuidValue.fromString(institutionId),
     );
 
     final normalizedWallet = walletAddress?.trim();
@@ -41,6 +47,23 @@ class AccountActions extends _$AccountActions {
 
     ref.invalidate(accountListProvider(budgetId));
     return account;
+  }
+
+  Future<Account> addMineToBudget({
+    required String sourceAccountId,
+    required String budgetId,
+  }) async {
+    final client = ref.read(serverpodClientProvider);
+    final added = await client.account.addMineToBudget(
+      // Serverpod API requires UuidValue which is experimental in uuid package.
+      // ignore: experimental_member_use
+      UuidValue.fromString(sourceAccountId),
+      // Serverpod API requires UuidValue which is experimental in uuid package.
+      // ignore: experimental_member_use
+      UuidValue.fromString(budgetId),
+    );
+    ref.invalidate(accountListProvider(budgetId));
+    return added;
   }
 
   Future<Account> updateAccount({

@@ -5,6 +5,7 @@ import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_server/src/budgets/budget_service.dart';
 import 'package:openbudget_server/src/exceptions/exceptions.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
+import 'package:openbudget_server/src/institutions/institution_service.dart';
 import 'package:serverpod/serverpod.dart';
 
 const _plaidClientIdKey = 'plaidClientId';
@@ -13,6 +14,7 @@ const _plaidEnvironmentKey = 'plaidEnvironment';
 const _plaidBaseUrlKey = 'plaidBaseUrl';
 const _plaidProductsKey = 'plaidProducts';
 const _plaidCountryCodesKey = 'plaidCountryCodes';
+const _plaidSandboxDefaultInstitutionId = 'ins_109508';
 
 class PlaidService {
   static final _log = ObLogger('PlaidService');
@@ -103,6 +105,11 @@ class PlaidService {
         institutionId: institutionId,
       );
     }
+    final linkedInstitutionId = await InstitutionService.resolveInstitutionId(
+      session,
+      plaidInstitutionId: institutionId,
+      institutionName: institutionName,
+    );
 
     final connection = await _upsertConnection(
       session,
@@ -121,6 +128,7 @@ class PlaidService {
       connection: connection,
       accountsResponse: accountsResponse,
       now: now,
+      institutionId: linkedInstitutionId,
     );
 
     _log.info(
@@ -141,6 +149,11 @@ class PlaidService {
     final budget = await BudgetService.getById(session, budgetId: budgetId);
     final credentials = _resolveCredentials(session);
     final now = DateTime.now().toUtc();
+    final linkedInstitutionId = await InstitutionService.resolveInstitutionId(
+      session,
+      plaidInstitutionId: connection.institutionId,
+      institutionName: connection.institutionName,
+    );
     final accountsResponse = await _fetchAccounts(
       credentials: credentials,
       accessToken: connection.accessToken,
@@ -152,8 +165,40 @@ class PlaidService {
       connection: connection,
       accountsResponse: accountsResponse,
       now: now,
+      institutionId: linkedInstitutionId,
     );
     return refresh;
+  }
+
+  static Future<List<Account>> importSandboxAccounts(
+    Session session, {
+    required UuidValue budgetId,
+    String? plaidInstitutionId,
+  }) async {
+    final credentials = _resolveCredentials(session);
+    final response = await _postJson(
+      uri: credentials.baseUri.replace(path: '/sandbox/public_token/create'),
+      payload: {
+        'client_id': credentials.clientId,
+        'secret': credentials.secret,
+        'institution_id':
+            (plaidInstitutionId == null || plaidInstitutionId.trim().isEmpty)
+            ? _plaidSandboxDefaultInstitutionId
+            : plaidInstitutionId.trim(),
+        'initial_products': credentials.products,
+      },
+    );
+
+    final publicToken = response['public_token'] as String?;
+    if (publicToken == null || publicToken.isEmpty) {
+      throw ValidationException('Plaid sandbox did not return a public token.');
+    }
+
+    return exchangePublicTokenAndImportAccounts(
+      session,
+      budgetId: budgetId,
+      publicToken: publicToken,
+    );
   }
 
   static Future<Map<String, dynamic>> _fetchAccounts({
@@ -177,6 +222,7 @@ class PlaidService {
     required PlaidConnection connection,
     required Map<String, dynamic> accountsResponse,
     required DateTime now,
+    required UuidValue? institutionId,
   }) async {
     final accountsJson = accountsResponse['accounts'];
     if (accountsJson is! List) {
@@ -224,6 +270,7 @@ class PlaidService {
             onBudget: onBudget,
             sourceType: 'plaid',
             connectionId: connection.id,
+            institutionId: institutionId ?? existing.institutionId,
             lastSyncedAt: now,
             syncStatus: 'synced',
           ),
@@ -241,6 +288,8 @@ class PlaidService {
           balanceCents: balanceCents,
           currencyCode: currencyCode,
           budgetId: budgetId,
+          creatorId: budget.ownerId,
+          institutionId: institutionId,
           onBudget: onBudget,
           sortOrder: maxSortOrder,
           isClosed: false,

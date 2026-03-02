@@ -1,0 +1,21 @@
+### Geographic availability and popularity metadata for an institution.
+class: InstitutionLocation
+table: institution_location
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  institutionId: UuidValue, relation(parent=institution)
+  ### ISO 3166 country code (e.g. US, GB) or regional marker (e.g. EU).
+  locationCode: String
+  ### Whether this institution should be shown in "Popular options" for location.
+  isPopular: bool, default=false
+  ### Lower rank means higher priority in popular ordering.
+  popularityRank: int?
+  createdAt: DateTime, default=now
+indexes:
+  institution_location_institution_idx:
+    fields: institutionId
+  institution_location_code_idx:
+    fields: locationCode, isPopular, popularityRank
+  institution_location_unique_idx:
+    fields: institutionId, locationCode
+    unique: true

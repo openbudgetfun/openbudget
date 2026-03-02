@@ -21,6 +21,8 @@ abstract class Account implements _i1.SerializableModel {
     required this.balanceCents,
     required this.currencyCode,
     required this.budgetId,
+    this.creatorId,
+    this.institutionId,
     required this.onBudget,
     required this.sortOrder,
     required this.isClosed,
@@ -39,6 +41,8 @@ abstract class Account implements _i1.SerializableModel {
     required int balanceCents,
     required String currencyCode,
     required _i1.UuidValue budgetId,
+    _i1.UuidValue? creatorId,
+    _i1.UuidValue? institutionId,
     required bool onBudget,
     required int sortOrder,
     required bool isClosed,
@@ -62,6 +66,14 @@ abstract class Account implements _i1.SerializableModel {
       budgetId: _i1.UuidValueJsonExtension.fromJson(
         jsonSerialization['budgetId'],
       ),
+      creatorId: jsonSerialization['creatorId'] == null
+          ? null
+          : _i1.UuidValueJsonExtension.fromJson(jsonSerialization['creatorId']),
+      institutionId: jsonSerialization['institutionId'] == null
+          ? null
+          : _i1.UuidValueJsonExtension.fromJson(
+              jsonSerialization['institutionId'],
+            ),
       onBudget: jsonSerialization['onBudget'] as bool,
       sortOrder: jsonSerialization['sortOrder'] as int,
       isClosed: jsonSerialization['isClosed'] as bool,
@@ -102,6 +114,12 @@ abstract class Account implements _i1.SerializableModel {
 
   _i1.UuidValue budgetId;
 
+  /// The authenticated user that created this account record.
+  _i1.UuidValue? creatorId;
+
+  /// Optional linked financial institution for this account.
+  _i1.UuidValue? institutionId;
+
   /// Whether this account is included in the budget's "on budget" calculations.
   bool onBudget;
 
@@ -138,6 +156,8 @@ abstract class Account implements _i1.SerializableModel {
     int? balanceCents,
     String? currencyCode,
     _i1.UuidValue? budgetId,
+    _i1.UuidValue? creatorId,
+    _i1.UuidValue? institutionId,
     bool? onBudget,
     int? sortOrder,
     bool? isClosed,
@@ -158,6 +178,8 @@ abstract class Account implements _i1.SerializableModel {
       'balanceCents': balanceCents,
       'currencyCode': currencyCode,
       'budgetId': budgetId.toJson(),
+      if (creatorId != null) 'creatorId': creatorId?.toJson(),
+      if (institutionId != null) 'institutionId': institutionId?.toJson(),
       'onBudget': onBudget,
       'sortOrder': sortOrder,
       'isClosed': isClosed,
@@ -186,6 +208,8 @@ class _AccountImpl extends Account {
     required int balanceCents,
     required String currencyCode,
     required _i1.UuidValue budgetId,
+    _i1.UuidValue? creatorId,
+    _i1.UuidValue? institutionId,
     required bool onBudget,
     required int sortOrder,
     required bool isClosed,
@@ -202,6 +226,8 @@ class _AccountImpl extends Account {
          balanceCents: balanceCents,
          currencyCode: currencyCode,
          budgetId: budgetId,
+         creatorId: creatorId,
+         institutionId: institutionId,
          onBudget: onBudget,
          sortOrder: sortOrder,
          isClosed: isClosed,
@@ -224,6 +250,8 @@ class _AccountImpl extends Account {
     int? balanceCents,
     String? currencyCode,
     _i1.UuidValue? budgetId,
+    Object? creatorId = _Undefined,
+    Object? institutionId = _Undefined,
     bool? onBudget,
     int? sortOrder,
     bool? isClosed,
@@ -241,6 +269,10 @@ class _AccountImpl extends Account {
       balanceCents: balanceCents ?? this.balanceCents,
       currencyCode: currencyCode ?? this.currencyCode,
       budgetId: budgetId ?? this.budgetId,
+      creatorId: creatorId is _i1.UuidValue? ? creatorId : this.creatorId,
+      institutionId: institutionId is _i1.UuidValue?
+          ? institutionId
+          : this.institutionId,
       onBudget: onBudget ?? this.onBudget,
       sortOrder: sortOrder ?? this.sortOrder,
       isClosed: isClosed ?? this.isClosed,
