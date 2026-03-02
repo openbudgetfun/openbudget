@@ -90,7 +90,7 @@ class _DismissKeyboardOnTap extends StatelessWidget {
         }
 
         final focusedContext = focusedNode.context;
-        if (focusedContext == null || focusedContext.widget is! EditableText) {
+        if (focusedContext == null) {
           return;
         }
 
