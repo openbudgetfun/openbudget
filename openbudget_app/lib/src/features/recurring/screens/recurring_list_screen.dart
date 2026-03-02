@@ -10,6 +10,7 @@ import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
+import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -317,17 +318,18 @@ class RecurringListScreen extends HookConsumerWidget {
             budgetId: budgetId,
           );
       if (context.mounted) {
-        ScaffoldMessenger.of(
+        showAppToast(
           context,
-        ).showSnackBar(SnackBar(content: Text(l10n.deleteSuccess)));
+          message: l10n.deleteSuccess,
+          variant: AppToastVariant.success,
+        );
       }
     } on Exception catch (_) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.deleteError),
-            backgroundColor: colorScheme.error,
-          ),
+        showAppToast(
+          context,
+          message: l10n.deleteError,
+          variant: AppToastVariant.error,
         );
       }
     }
@@ -339,8 +341,6 @@ class RecurringListScreen extends HookConsumerWidget {
     RecurringTransaction recurring,
   ) async {
     final l10n = AppLocalizations.of(context);
-    final colorScheme = Theme.of(context).colorScheme;
-    final messenger = ScaffoldMessenger.of(context);
 
     try {
       await ref
@@ -350,17 +350,18 @@ class RecurringListScreen extends HookConsumerWidget {
             budgetId: budgetId,
           );
       if (context.mounted) {
-        messenger.showSnackBar(
-          SnackBar(content: Text(l10n.recurringSkipSuccess)),
+        showAppToast(
+          context,
+          message: l10n.recurringSkipSuccess,
+          variant: AppToastVariant.success,
         );
       }
     } on Exception catch (_) {
       if (context.mounted) {
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text(l10n.recurringSkipError),
-            backgroundColor: colorScheme.error,
-          ),
+        showAppToast(
+          context,
+          message: l10n.recurringSkipError,
+          variant: AppToastVariant.error,
         );
       }
     }
@@ -910,8 +911,6 @@ class _AddRecurringDialog extends HookConsumerWidget {
 
     isSubmitting.value = true;
     final navigator = Navigator.of(context);
-    final messenger = ScaffoldMessenger.of(context);
-    final colorScheme = Theme.of(context).colorScheme;
     try {
       await ref
           .read(recurringActionsProvider.notifier)
@@ -923,17 +922,20 @@ class _AddRecurringDialog extends HookConsumerWidget {
             frequency: frequency.value,
             nextOccurrence: nextDate.value,
           );
-      messenger.showSnackBar(
-        SnackBar(content: Text(l10n.recurringCreateSuccess)),
+      if (!context.mounted) return;
+      showAppToast(
+        context,
+        message: l10n.recurringCreateSuccess,
+        variant: AppToastVariant.success,
       );
       navigator.pop();
     } on Exception catch (_) {
       isSubmitting.value = false;
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(l10n.recurringCreateError),
-          backgroundColor: colorScheme.error,
-        ),
+      if (!context.mounted) return;
+      showAppToast(
+        context,
+        message: l10n.recurringCreateError,
+        variant: AppToastVariant.error,
       );
     }
   }
@@ -1094,8 +1096,6 @@ class _EditRecurringDialog extends HookConsumerWidget {
 
     isSubmitting.value = true;
     final navigator = Navigator.of(context);
-    final messenger = ScaffoldMessenger.of(context);
-    final colorScheme = Theme.of(context).colorScheme;
     try {
       await ref
           .read(recurringActionsProvider.notifier)
@@ -1107,17 +1107,20 @@ class _EditRecurringDialog extends HookConsumerWidget {
             frequency: frequency.value,
             nextOccurrence: nextDate.value,
           );
-      messenger.showSnackBar(
-        SnackBar(content: Text(l10n.recurringEditSuccess)),
+      if (!context.mounted) return;
+      showAppToast(
+        context,
+        message: l10n.recurringEditSuccess,
+        variant: AppToastVariant.success,
       );
       navigator.pop();
     } on Exception catch (_) {
       isSubmitting.value = false;
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(l10n.recurringEditError),
-          backgroundColor: colorScheme.error,
-        ),
+      if (!context.mounted) return;
+      showAppToast(
+        context,
+        message: l10n.recurringEditError,
+        variant: AppToastVariant.error,
       );
     }
   }

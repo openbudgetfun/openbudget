@@ -10,6 +10,7 @@ import 'package:openbudget_app/src/providers/theme_mode_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_app/src/utils/currency_code_utils.dart';
+import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -263,23 +264,19 @@ class DisplayOptionsScreen extends HookConsumerWidget {
       );
       if (!context.mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            isDefaultSelection
-                ? l10n.settingsDisplayCurrencyDefaultUpdated
-                : l10n.settingsDisplayCurrencyUpdated(selected),
-          ),
-        ),
+      showAppToast(
+        context,
+        message: isDefaultSelection
+            ? l10n.settingsDisplayCurrencyDefaultUpdated
+            : l10n.settingsDisplayCurrencyUpdated(selected),
+        variant: AppToastVariant.success,
       );
     } on Exception {
       if (!context.mounted) return;
-      final colorScheme = Theme.of(context).colorScheme;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(l10n.settingsDisplayCurrencyUpdateError),
-          backgroundColor: colorScheme.error,
-        ),
+      showAppToast(
+        context,
+        message: l10n.settingsDisplayCurrencyUpdateError,
+        variant: AppToastVariant.error,
       );
     }
   }

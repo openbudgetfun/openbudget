@@ -13,6 +13,7 @@ import 'package:openbudget_app/src/features/budget/providers/budget_detail_provi
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_app/src/utils/currency_code_utils.dart';
+import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 import 'package:plaid_flutter/plaid_flutter.dart';
@@ -57,7 +58,6 @@ class AddAccountScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
     final step = useState(_AddAccountStep.loading);
     final nameController = useTextEditingController();
     final balanceController = useTextEditingController();
@@ -175,7 +175,6 @@ class AddAccountScreen extends HookConsumerWidget {
 
     Future<void> startLinkedBankFlow(String institutionName) async {
       if (showSearchingOverlay.value || institutionName.trim().isEmpty) return;
-      final messenger = ScaffoldMessenger.of(context);
 
       final isMobilePlaidPlatform =
           !kIsWeb &&
@@ -183,13 +182,12 @@ class AddAccountScreen extends HookConsumerWidget {
               defaultTargetPlatform == TargetPlatform.android);
       if (!isMobilePlaidPlatform) {
         step.value = _AddAccountStep.unlinkedAccount;
-        messenger.showSnackBar(
-          const SnackBar(
-            content: Text(
+        showAppToast(
+          context,
+          message:
               'Linked connections are only available on iOS/Android right now. '
               'Add an unlinked account instead.',
-            ),
-          ),
+          variant: AppToastVariant.warning,
         );
         return;
       }
@@ -204,13 +202,12 @@ class AddAccountScreen extends HookConsumerWidget {
 
         if (publicToken == null || publicToken.isEmpty) {
           step.value = _AddAccountStep.unlinkedAccount;
-          messenger.showSnackBar(
-            SnackBar(
-              content: Text(
+          showAppToast(
+            context,
+            message:
                 'Linked connections for "$institutionName" were not completed. '
                 'Add an unlinked account instead.',
-              ),
-            ),
+            variant: AppToastVariant.warning,
           );
           return;
         }
@@ -222,13 +219,12 @@ class AddAccountScreen extends HookConsumerWidget {
 
         if (imported.isEmpty) {
           step.value = _AddAccountStep.unlinkedAccount;
-          messenger.showSnackBar(
-            const SnackBar(
-              content: Text(
+          showAppToast(
+            context,
+            message:
                 'No accounts were imported from this connection. '
                 'Add an unlinked account instead.',
-              ),
-            ),
+            variant: AppToastVariant.warning,
           );
           return;
         }
@@ -237,13 +233,12 @@ class AddAccountScreen extends HookConsumerWidget {
       } on Exception catch (_) {
         if (!context.mounted) return;
         step.value = _AddAccountStep.unlinkedAccount;
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text(
+        showAppToast(
+          context,
+          message:
               'Linked connections for "$institutionName" are currently unavailable. '
               'Add an unlinked account instead.',
-            ),
-          ),
+          variant: AppToastVariant.error,
         );
       } finally {
         showSearchingOverlay.value = false;
@@ -253,7 +248,6 @@ class AddAccountScreen extends HookConsumerWidget {
     Future<void> submitSolanaWallet() async {
       if (!canSubmitWallet || isSubmitting.value) return;
       isSubmitting.value = true;
-      final messenger = ScaffoldMessenger.of(context);
       try {
         await ref
             .read(walletActionsProvider.notifier)
@@ -270,11 +264,10 @@ class AddAccountScreen extends HookConsumerWidget {
         step.value = _AddAccountStep.success;
       } on Exception catch (_) {
         if (!context.mounted) return;
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text(l10n.accountCreateError),
-            backgroundColor: colorScheme.error,
-          ),
+        showAppToast(
+          context,
+          message: l10n.accountCreateError,
+          variant: AppToastVariant.error,
         );
       } finally {
         isSubmitting.value = false;
@@ -301,7 +294,6 @@ class AddAccountScreen extends HookConsumerWidget {
         balanceCents = -balanceCents;
       }
 
-      final messenger = ScaffoldMessenger.of(context);
       try {
         await ref
             .read(accountActionsProvider.notifier)
@@ -324,11 +316,10 @@ class AddAccountScreen extends HookConsumerWidget {
       } on Exception catch (_) {
         if (!context.mounted) return;
         isSubmitting.value = false;
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text(l10n.accountCreateError),
-            backgroundColor: colorScheme.error,
-          ),
+        showAppToast(
+          context,
+          message: l10n.accountCreateError,
+          variant: AppToastVariant.error,
         );
       }
     }

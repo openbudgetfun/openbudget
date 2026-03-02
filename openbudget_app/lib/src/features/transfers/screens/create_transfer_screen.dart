@@ -7,6 +7,7 @@ import 'package:openbudget_app/src/features/accounts/providers/account_list_prov
 import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
 import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
+import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -251,31 +252,26 @@ class CreateTransferScreen extends HookConsumerWidget {
     ValueNotifier<bool> isSubmitting,
   ) async {
     final l10n = AppLocalizations.of(context);
-    final messenger = ScaffoldMessenger.of(context);
-    final colorScheme = Theme.of(context).colorScheme;
 
     if (fromAccountId.value == null || toAccountId.value == null) return;
     final fromAccount = findTransferAccountById(accounts, fromAccountId.value);
     final toAccount = findTransferAccountById(accounts, toAccountId.value);
     if (fromAccount == null || toAccount == null) return;
     if (fromAccountId.value == toAccountId.value) {
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(l10n.transferSameAccountError),
-          backgroundColor: colorScheme.error,
-        ),
+      showAppToast(
+        context,
+        message: l10n.transferSameAccountError,
+        variant: AppToastVariant.error,
       );
       return;
     }
 
     if (fromAccount.currencyCode != toAccount.currencyCode) {
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(
+      showAppToast(
+        context,
+        message:
             '${l10n.transferError} (${fromAccount.currencyCode} -> ${toAccount.currencyCode})',
-          ),
-          backgroundColor: colorScheme.error,
-        ),
+        variant: AppToastVariant.error,
       );
       return;
     }
@@ -306,15 +302,20 @@ class CreateTransferScreen extends HookConsumerWidget {
         selectedDate.value,
       );
       ref.invalidate(accountListProvider(budgetId));
-      messenger.showSnackBar(SnackBar(content: Text(l10n.transferSuccess)));
+      if (!context.mounted) return;
+      showAppToast(
+        context,
+        message: l10n.transferSuccess,
+        variant: AppToastVariant.success,
+      );
       if (context.mounted) context.pop();
     } on Exception catch (_) {
       isSubmitting.value = false;
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(l10n.transferError),
-          backgroundColor: colorScheme.error,
-        ),
+      if (!context.mounted) return;
+      showAppToast(
+        context,
+        message: l10n.transferError,
+        variant: AppToastVariant.error,
       );
     }
   }

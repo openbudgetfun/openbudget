@@ -9,6 +9,7 @@ import 'package:openbudget_app/src/features/budget/providers/monthly_allocation_
 import 'package:openbudget_app/src/features/transactions/providers/transaction_actions_provider.dart';
 import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
+import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -142,10 +143,10 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
             );
       } on Exception {
         if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Could not update transaction category.'),
-          ),
+        showAppToast(
+          context,
+          message: 'Could not update transaction category.',
+          variant: AppToastVariant.error,
         );
       } finally {
         if (context.mounted) {

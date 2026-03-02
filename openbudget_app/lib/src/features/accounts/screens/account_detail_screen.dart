@@ -16,6 +16,7 @@ import 'package:openbudget_app/src/features/payees/providers/payee_list_provider
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
+import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -465,13 +466,12 @@ class AccountDetailScreen extends HookConsumerWidget {
   }
 
   void _showLinkAccountUnavailable(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
+    showAppToast(
+      context,
+      message:
           'Bank connections are currently unavailable in this build. '
           'Use unlinked accounts instead.',
-        ),
-      ),
+      variant: AppToastVariant.warning,
     );
   }
 
@@ -491,9 +491,11 @@ class AccountDetailScreen extends HookConsumerWidget {
           );
     } on Exception catch (_) {
       if (context.mounted) {
-        ScaffoldMessenger.of(
+        showAppToast(
           context,
-        ).showSnackBar(SnackBar(content: Text(l10n.transactionEditError)));
+          message: l10n.transactionEditError,
+          variant: AppToastVariant.error,
+        );
       }
     }
   }
@@ -505,7 +507,6 @@ class AccountDetailScreen extends HookConsumerWidget {
     CurrencyCode currencyCode,
   ) async {
     final l10n = AppLocalizations.of(context);
-    final colorScheme = Theme.of(context).colorScheme;
 
     // Compute cleared balance from transactions.
     var clearedBalanceCents = 0;
@@ -531,17 +532,18 @@ class AccountDetailScreen extends HookConsumerWidget {
             .read(accountTransactionActionsProvider.notifier)
             .reconcileAccount(accountId: accountId, budgetId: budgetId);
         if (context.mounted) {
-          ScaffoldMessenger.of(
+          showAppToast(
             context,
-          ).showSnackBar(SnackBar(content: Text(l10n.reconcileSuccess(count))));
+            message: l10n.reconcileSuccess(count),
+            variant: AppToastVariant.success,
+          );
         }
       } on Exception catch (_) {
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(l10n.reconcileError),
-              backgroundColor: colorScheme.error,
-            ),
+          showAppToast(
+            context,
+            message: l10n.reconcileError,
+            variant: AppToastVariant.error,
           );
         }
       }
@@ -570,29 +572,28 @@ class AccountDetailScreen extends HookConsumerWidget {
         final count = response[0];
         final adjustment = response[1];
         if (adjustment != 0) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                l10n.reconcileSuccessWithAdjustment(
-                  count,
-                  formatCents(adjustment, currencyCode),
-                ),
-              ),
+          showAppToast(
+            context,
+            message: l10n.reconcileSuccessWithAdjustment(
+              count,
+              formatCents(adjustment, currencyCode),
             ),
+            variant: AppToastVariant.success,
           );
         } else {
-          ScaffoldMessenger.of(
+          showAppToast(
             context,
-          ).showSnackBar(SnackBar(content: Text(l10n.reconcileSuccess(count))));
+            message: l10n.reconcileSuccess(count),
+            variant: AppToastVariant.success,
+          );
         }
       }
     } on Exception catch (_) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.reconcileError),
-            backgroundColor: colorScheme.error,
-          ),
+        showAppToast(
+          context,
+          message: l10n.reconcileError,
+          variant: AppToastVariant.error,
         );
       }
     }
@@ -1576,7 +1577,6 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
         Future<void> runSync() async {
           if (isSyncing.value) return;
           isSyncing.value = true;
-          final messenger = ScaffoldMessenger.of(context);
           try {
             final result = await ref
                 .read(solanaWalletActionsProvider.notifier)
@@ -1589,9 +1589,9 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
                 : (result.valuationCoverageRatio! * 100).round();
             final coveredNfts =
                 result.pricedNftHoldingCount + result.staleNftHoldingCount;
-            messenger.showSnackBar(
-              SnackBar(
-                content: Text(
+            showAppToast(
+              context,
+              message:
                   'Synced ${result.insertedTransactions + result.updatedTransactions}'
                   ' transactions and ${result.holdingCount} holdings. '
                   'Coverage $coveredHoldings/${result.holdingCount}'
@@ -1599,16 +1599,14 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
                   '${result.unpricedHoldingCount} unpriced. '
                   'NFTs $coveredNfts/${result.nftHoldingCount}, '
                   '${result.unpricedNftHoldingCount} unpriced.',
-                ),
-              ),
+              variant: AppToastVariant.success,
             );
           } on Exception catch (_) {
             if (!context.mounted) return;
-            messenger.showSnackBar(
-              SnackBar(
-                content: const Text('Wallet sync failed. Check server logs.'),
-                backgroundColor: theme.colorScheme.error,
-              ),
+            showAppToast(
+              context,
+              message: 'Wallet sync failed. Check server logs.',
+              variant: AppToastVariant.error,
             );
           } finally {
             if (context.mounted) {
@@ -1757,10 +1755,9 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
                                 ClipboardData(text: wallet.address),
                               );
                               if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Wallet address copied.'),
-                                  ),
+                                showAppToast(
+                                  context,
+                                  message: 'Wallet address copied.',
                                 );
                               }
                             },
@@ -2297,17 +2294,18 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
             memo: _emptyToNull(memoController.text),
           );
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Transaction metadata updated.')),
+        showAppToast(
+          context,
+          message: 'Transaction metadata updated.',
+          variant: AppToastVariant.success,
         );
       }
     } on Exception catch (_) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Could not update transaction metadata.'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
+        showAppToast(
+          context,
+          message: 'Could not update transaction metadata.',
+          variant: AppToastVariant.error,
         );
       }
     } finally {

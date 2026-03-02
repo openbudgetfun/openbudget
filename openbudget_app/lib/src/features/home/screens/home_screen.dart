@@ -12,6 +12,7 @@ import 'package:openbudget_app/src/features/settings/providers/display_currency_
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
+import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
@@ -177,17 +178,18 @@ class HomeScreen extends HookConsumerWidget {
           .read(budgetActionsProvider.notifier)
           .deleteBudget(budgetId: budgetId);
       if (context.mounted) {
-        ScaffoldMessenger.of(
+        showAppToast(
           context,
-        ).showSnackBar(SnackBar(content: Text(l10n.budgetDeleteSuccess)));
+          message: l10n.budgetDeleteSuccess,
+          variant: AppToastVariant.success,
+        );
       }
     } on Exception catch (_) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.budgetDeleteError),
-            backgroundColor: colorScheme.error,
-          ),
+        showAppToast(
+          context,
+          message: l10n.budgetDeleteError,
+          variant: AppToastVariant.error,
         );
       }
     }

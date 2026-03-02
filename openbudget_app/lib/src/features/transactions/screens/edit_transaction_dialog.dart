@@ -5,6 +5,7 @@ import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
 import 'package:openbudget_app/src/features/payees/providers/payee_list_provider.dart';
 import 'package:openbudget_app/src/features/transactions/providers/transaction_actions_provider.dart';
+import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -24,8 +25,6 @@ class EditTransactionDialog extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
     final descriptionController = useTextEditingController(
       text: transaction.description,
     );
@@ -194,7 +193,6 @@ class EditTransactionDialog extends HookConsumerWidget {
 
                   isSubmitting.value = true;
                   final navigator = Navigator.of(context);
-                  final messenger = ScaffoldMessenger.of(context);
                   try {
                     await ref
                         .read(transactionActionsProvider.notifier)
@@ -208,17 +206,20 @@ class EditTransactionDialog extends HookConsumerWidget {
                           envelopeId: selectedEnvelopeId.value,
                           memo: memo.isNotEmpty ? memo : null,
                         );
-                    messenger.showSnackBar(
-                      SnackBar(content: Text(l10n.transactionEditSuccess)),
+                    if (!context.mounted) return;
+                    showAppToast(
+                      context,
+                      message: l10n.transactionEditSuccess,
+                      variant: AppToastVariant.success,
                     );
                     navigator.pop();
                   } on Exception catch (_) {
                     isSubmitting.value = false;
-                    messenger.showSnackBar(
-                      SnackBar(
-                        content: Text(l10n.transactionEditError),
-                        backgroundColor: colorScheme.error,
-                      ),
+                    if (!context.mounted) return;
+                    showAppToast(
+                      context,
+                      message: l10n.transactionEditError,
+                      variant: AppToastVariant.error,
                     );
                   }
                 },

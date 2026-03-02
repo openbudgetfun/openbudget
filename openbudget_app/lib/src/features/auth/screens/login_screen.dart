@@ -11,6 +11,7 @@ import 'package:openbudget_app/src/features/settings/providers/display_options_p
 import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/theme/openbudget_palette.dart';
+import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
 
@@ -330,8 +331,10 @@ class LoginScreen extends HookConsumerWidget {
 
   void _showUnavailable(BuildContext context, String provider) {
     final l10n = AppLocalizations.of(context);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.loginProviderUnavailable(provider))),
+    showAppToast(
+      context,
+      message: l10n.loginProviderUnavailable(provider),
+      variant: AppToastVariant.warning,
     );
   }
 }

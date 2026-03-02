@@ -15,6 +15,7 @@ import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
+import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
@@ -583,8 +584,6 @@ class TransactionListScreen extends HookConsumerWidget {
 
     if (selectedEnvelope == null || !context.mounted) return;
 
-    final messenger = ScaffoldMessenger.of(context);
-    final colorScheme = Theme.of(context).colorScheme;
     try {
       final count = await ref
           .read(transactionActionsProvider.notifier)
@@ -596,17 +595,18 @@ class TransactionListScreen extends HookConsumerWidget {
       selectionMode.value = false;
       selectedIds.value = {};
       if (context.mounted) {
-        messenger.showSnackBar(
-          SnackBar(content: Text(l10n.bulkAssignSuccess(count))),
+        showAppToast(
+          context,
+          message: l10n.bulkAssignSuccess(count),
+          variant: AppToastVariant.success,
         );
       }
     } on Exception catch (_) {
       if (context.mounted) {
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text(l10n.bulkAssignError),
-            backgroundColor: colorScheme.error,
-          ),
+        showAppToast(
+          context,
+          message: l10n.bulkAssignError,
+          variant: AppToastVariant.error,
         );
       }
     }
@@ -715,7 +715,6 @@ class TransactionListScreen extends HookConsumerWidget {
     String? flagColor,
   }) async {
     final l10n = AppLocalizations.of(context);
-    final messenger = ScaffoldMessenger.of(context);
     try {
       final count = await ref
           .read(transactionActionsProvider.notifier)
@@ -727,17 +726,18 @@ class TransactionListScreen extends HookConsumerWidget {
       selectionMode.value = false;
       selectedIds.value = {};
       if (context.mounted) {
-        messenger.showSnackBar(
-          SnackBar(content: Text(l10n.bulkFlagSuccess(count))),
+        showAppToast(
+          context,
+          message: l10n.bulkFlagSuccess(count),
+          variant: AppToastVariant.success,
         );
       }
     } on Exception catch (_) {
       if (context.mounted) {
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text(l10n.bulkFlagError),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
+        showAppToast(
+          context,
+          message: l10n.bulkFlagError,
+          variant: AppToastVariant.error,
         );
       }
     }
@@ -752,7 +752,6 @@ class TransactionListScreen extends HookConsumerWidget {
     ValueNotifier<Set<String>> selectedIds,
   ) async {
     final l10n = AppLocalizations.of(context);
-    final messenger = ScaffoldMessenger.of(context);
 
     // Only toggle uncleared, non-reconciled transactions to "cleared".
     final unclearedIds = <String>[];
@@ -785,17 +784,18 @@ class TransactionListScreen extends HookConsumerWidget {
         selectionMode.value = false;
         selectedIds.value = {};
         if (context.mounted) {
-          messenger.showSnackBar(
-            SnackBar(content: Text(l10n.bulkClearSuccess(count))),
+          showAppToast(
+            context,
+            message: l10n.bulkClearSuccess(count),
+            variant: AppToastVariant.success,
           );
         }
       } on Exception catch (_) {
         if (context.mounted) {
-          messenger.showSnackBar(
-            SnackBar(
-              content: Text(l10n.bulkClearError),
-              backgroundColor: Theme.of(context).colorScheme.error,
-            ),
+          showAppToast(
+            context,
+            message: l10n.bulkClearError,
+            variant: AppToastVariant.error,
           );
         }
       }
@@ -809,17 +809,18 @@ class TransactionListScreen extends HookConsumerWidget {
       selectionMode.value = false;
       selectedIds.value = {};
       if (context.mounted) {
-        messenger.showSnackBar(
-          SnackBar(content: Text(l10n.bulkClearSuccess(count))),
+        showAppToast(
+          context,
+          message: l10n.bulkClearSuccess(count),
+          variant: AppToastVariant.success,
         );
       }
     } on Exception catch (_) {
       if (context.mounted) {
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text(l10n.bulkClearError),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
+        showAppToast(
+          context,
+          message: l10n.bulkClearError,
+          variant: AppToastVariant.error,
         );
       }
     }
@@ -858,7 +859,6 @@ class TransactionListScreen extends HookConsumerWidget {
 
     if (confirmed != true || !context.mounted) return;
 
-    final messenger = ScaffoldMessenger.of(context);
     try {
       final count = await ref
           .read(transactionActionsProvider.notifier)
@@ -866,17 +866,18 @@ class TransactionListScreen extends HookConsumerWidget {
       selectionMode.value = false;
       selectedIds.value = {};
       if (context.mounted) {
-        messenger.showSnackBar(
-          SnackBar(content: Text(l10n.bulkDeleteSuccess(count))),
+        showAppToast(
+          context,
+          message: l10n.bulkDeleteSuccess(count),
+          variant: AppToastVariant.success,
         );
       }
     } on Exception catch (_) {
       if (context.mounted) {
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text(l10n.bulkDeleteError),
-            backgroundColor: colorScheme.error,
-          ),
+        showAppToast(
+          context,
+          message: l10n.bulkDeleteError,
+          variant: AppToastVariant.error,
         );
       }
     }
@@ -906,8 +907,10 @@ class TransactionListScreen extends HookConsumerWidget {
     }
 
     Clipboard.setData(ClipboardData(text: buffer.toString()));
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.transactionExportSuccess(topLevel.length))),
+    showAppToast(
+      context,
+      message: l10n.transactionExportSuccess(topLevel.length),
+      variant: AppToastVariant.success,
     );
   }
 
@@ -1511,9 +1514,11 @@ class _TransactionTile extends HookConsumerWidget {
           );
     } on Exception catch (_) {
       if (context.mounted) {
-        ScaffoldMessenger.of(
+        showAppToast(
           context,
-        ).showSnackBar(SnackBar(content: Text(l10n.transactionEditError)));
+          message: l10n.transactionEditError,
+          variant: AppToastVariant.error,
+        );
       }
     }
   }
@@ -1562,24 +1567,20 @@ class _TransactionTile extends HookConsumerWidget {
             budgetId: budgetId,
           );
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.deleteSuccess),
-            action: SnackBarAction(
-              label: l10n.undoAction,
-              onPressed: () => _undoDelete(context, ref, deleted, l10n),
-            ),
-            duration: const Duration(seconds: 5),
-          ),
+        showAppToast(
+          context,
+          message: l10n.deleteSuccess,
+          variant: AppToastVariant.success,
+          actionLabel: l10n.undoAction,
+          onAction: () => _undoDelete(context, ref, deleted, l10n),
         );
       }
     } on Exception catch (_) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.deleteError),
-            backgroundColor: colorScheme.error,
-          ),
+        showAppToast(
+          context,
+          message: l10n.deleteError,
+          variant: AppToastVariant.error,
         );
       }
     }
@@ -1599,17 +1600,18 @@ class _TransactionTile extends HookConsumerWidget {
             budgetId: budgetId,
           );
       if (context.mounted) {
-        ScaffoldMessenger.of(
+        showAppToast(
           context,
-        ).showSnackBar(SnackBar(content: Text(l10n.undoDeleteSuccess)));
+          message: l10n.undoDeleteSuccess,
+          variant: AppToastVariant.success,
+        );
       }
     } on Exception catch (_) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.undoDeleteError),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
+        showAppToast(
+          context,
+          message: l10n.undoDeleteError,
+          variant: AppToastVariant.error,
         );
       }
     }
@@ -1718,9 +1720,11 @@ class _TransactionTile extends HookConsumerWidget {
           );
     } on Exception catch (_) {
       if (context.mounted) {
-        ScaffoldMessenger.of(
+        showAppToast(
           context,
-        ).showSnackBar(SnackBar(content: Text(l10n.transactionEditError)));
+          message: l10n.transactionEditError,
+          variant: AppToastVariant.error,
+        );
       }
     }
   }

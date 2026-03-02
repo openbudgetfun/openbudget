@@ -6,6 +6,7 @@ import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/payees/providers/payee_actions_provider.dart';
 import 'package:openbudget_app/src/features/payees/providers/payee_list_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
+import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
@@ -313,24 +314,20 @@ class _PayeeTile extends HookConsumerWidget {
           .read(payeeActionsProvider.notifier)
           .deletePayee(payeeId: payee.id?.toString() ?? '', budgetId: budgetId);
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.deleteSuccess),
-            action: SnackBarAction(
-              label: l10n.undoAction,
-              onPressed: () => _undoDelete(context, ref, deleted, l10n),
-            ),
-            duration: const Duration(seconds: 5),
-          ),
+        showAppToast(
+          context,
+          message: l10n.deleteSuccess,
+          variant: AppToastVariant.success,
+          actionLabel: l10n.undoAction,
+          onAction: () => _undoDelete(context, ref, deleted, l10n),
         );
       }
     } on Exception catch (_) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.deleteError),
-            backgroundColor: colorScheme.error,
-          ),
+        showAppToast(
+          context,
+          message: l10n.deleteError,
+          variant: AppToastVariant.error,
         );
       }
     }
@@ -347,17 +344,18 @@ class _PayeeTile extends HookConsumerWidget {
           .read(payeeActionsProvider.notifier)
           .undoDeletePayee(deletedPayee: deleted, budgetId: budgetId);
       if (context.mounted) {
-        ScaffoldMessenger.of(
+        showAppToast(
           context,
-        ).showSnackBar(SnackBar(content: Text(l10n.undoDeleteSuccess)));
+          message: l10n.undoDeleteSuccess,
+          variant: AppToastVariant.success,
+        );
       }
     } on Exception catch (_) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.undoDeleteError),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
+        showAppToast(
+          context,
+          message: l10n.undoDeleteError,
+          variant: AppToastVariant.error,
         );
       }
     }
@@ -429,21 +427,24 @@ class _AddPayeeDialog extends HookConsumerWidget {
 
     isSubmitting.value = true;
     final navigator = Navigator.of(context);
-    final messenger = ScaffoldMessenger.of(context);
-    final colorScheme = Theme.of(context).colorScheme;
     try {
       await ref
           .read(payeeActionsProvider.notifier)
           .createPayee(name: name, budgetId: budgetId);
-      messenger.showSnackBar(SnackBar(content: Text(l10n.payeeCreateSuccess)));
+      if (!context.mounted) return;
+      showAppToast(
+        context,
+        message: l10n.payeeCreateSuccess,
+        variant: AppToastVariant.success,
+      );
       navigator.pop();
     } on Exception catch (_) {
       isSubmitting.value = false;
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(l10n.payeeCreateError),
-          backgroundColor: colorScheme.error,
-        ),
+      if (!context.mounted) return;
+      showAppToast(
+        context,
+        message: l10n.payeeCreateError,
+        variant: AppToastVariant.error,
       );
     }
   }
@@ -508,8 +509,6 @@ class _EditPayeeDialog extends HookConsumerWidget {
 
     isSubmitting.value = true;
     final navigator = Navigator.of(context);
-    final messenger = ScaffoldMessenger.of(context);
-    final colorScheme = Theme.of(context).colorScheme;
     try {
       await ref
           .read(payeeActionsProvider.notifier)
@@ -518,15 +517,20 @@ class _EditPayeeDialog extends HookConsumerWidget {
             budgetId: budgetId,
             name: name,
           );
-      messenger.showSnackBar(SnackBar(content: Text(l10n.payeeEditSuccess)));
+      if (!context.mounted) return;
+      showAppToast(
+        context,
+        message: l10n.payeeEditSuccess,
+        variant: AppToastVariant.success,
+      );
       navigator.pop();
     } on Exception catch (_) {
       isSubmitting.value = false;
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(l10n.payeeEditError),
-          backgroundColor: colorScheme.error,
-        ),
+      if (!context.mounted) return;
+      showAppToast(
+        context,
+        message: l10n.payeeEditError,
+        variant: AppToastVariant.error,
       );
     }
   }
@@ -621,8 +625,6 @@ class _MergePayeeDialog extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     isSubmitting.value = true;
     final navigator = Navigator.of(context);
-    final messenger = ScaffoldMessenger.of(context);
-    final colorScheme = Theme.of(context).colorScheme;
 
     try {
       await ref
@@ -632,15 +634,20 @@ class _MergePayeeDialog extends HookConsumerWidget {
             targetPayeeId: targetPayeeId,
             budgetId: budgetId,
           );
-      messenger.showSnackBar(SnackBar(content: Text(l10n.payeeMergeSuccess)));
+      if (!context.mounted) return;
+      showAppToast(
+        context,
+        message: l10n.payeeMergeSuccess,
+        variant: AppToastVariant.success,
+      );
       navigator.pop();
     } on Exception catch (_) {
       isSubmitting.value = false;
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(l10n.payeeMergeError),
-          backgroundColor: colorScheme.error,
-        ),
+      if (!context.mounted) return;
+      showAppToast(
+        context,
+        message: l10n.payeeMergeError,
+        variant: AppToastVariant.error,
       );
     }
   }

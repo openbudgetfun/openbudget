@@ -14,6 +14,7 @@ import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
+import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
@@ -451,7 +452,6 @@ class AddExpenseScreen extends HookConsumerWidget {
                                   .round();
 
                           isSubmitting.value = true;
-                          final messenger = ScaffoldMessenger.of(context);
                           final router = GoRouter.of(context);
                           try {
                             final memoText = memoController.text.trim();
@@ -468,8 +468,11 @@ class AddExpenseScreen extends HookConsumerWidget {
                                   payeeId: selectedPayeeId.value,
                                   memo: memoText.isEmpty ? null : memoText,
                                 );
-                            messenger.showSnackBar(
-                              SnackBar(content: Text(l10n.transactionSuccess)),
+                            if (!context.mounted) return;
+                            showAppToast(
+                              context,
+                              message: l10n.transactionSuccess,
+                              variant: AppToastVariant.success,
                             );
                             router.goNamed(
                               planRoute,
@@ -477,11 +480,11 @@ class AddExpenseScreen extends HookConsumerWidget {
                             );
                           } on Exception catch (_) {
                             isSubmitting.value = false;
-                            messenger.showSnackBar(
-                              SnackBar(
-                                content: Text(l10n.transactionError),
-                                backgroundColor: colorScheme.error,
-                              ),
+                            if (!context.mounted) return;
+                            showAppToast(
+                              context,
+                              message: l10n.transactionError,
+                              variant: AppToastVariant.error,
                             );
                           }
                         },

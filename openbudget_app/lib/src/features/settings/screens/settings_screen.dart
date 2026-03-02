@@ -11,6 +11,7 @@ import 'package:openbudget_app/src/features/settings/providers/budget_export_pro
 import 'package:openbudget_app/src/providers/theme_mode_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/theme/openbudget_palette.dart';
+import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
@@ -407,8 +408,6 @@ class SettingsScreen extends HookConsumerWidget {
 
   Future<void> _exportBudgetData(BuildContext context, WidgetRef ref) async {
     final l10n = AppLocalizations.of(context);
-    final messenger = ScaffoldMessenger.of(context);
-    final colorScheme = Theme.of(context).colorScheme;
 
     try {
       final json = await ref
@@ -416,17 +415,18 @@ class SettingsScreen extends HookConsumerWidget {
           .exportBudget(budgetId);
       await Clipboard.setData(ClipboardData(text: json));
       if (context.mounted) {
-        messenger.showSnackBar(
-          SnackBar(content: Text(l10n.settingsExportSuccess)),
+        showAppToast(
+          context,
+          message: l10n.settingsExportSuccess,
+          variant: AppToastVariant.success,
         );
       }
     } on Exception catch (_) {
       if (context.mounted) {
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text(l10n.settingsExportError),
-            backgroundColor: colorScheme.error,
-          ),
+        showAppToast(
+          context,
+          message: l10n.settingsExportError,
+          variant: AppToastVariant.error,
         );
       }
     }
@@ -487,9 +487,7 @@ class SettingsScreen extends HookConsumerWidget {
 
   void _showComingSoon(BuildContext context, String featureName) {
     final l10n = AppLocalizations.of(context);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.settingsComingSoon(featureName))),
-    );
+    showAppToast(context, message: l10n.settingsComingSoon(featureName));
   }
 }
 

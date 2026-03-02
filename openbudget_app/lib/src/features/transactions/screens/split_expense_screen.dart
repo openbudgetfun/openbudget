@@ -9,6 +9,7 @@ import 'package:openbudget_app/src/features/transactions/providers/split_transac
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
+import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -212,10 +213,10 @@ class SplitExpenseScreen extends HookConsumerWidget {
                               // Validate splits
                               final splits = splitControllers.value;
                               if (splits.length < 2) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(l10n.splitMinimumError),
-                                  ),
+                                showAppToast(
+                                  context,
+                                  message: l10n.splitMinimumError,
+                                  variant: AppToastVariant.warning,
                                 );
                                 return;
                               }
@@ -265,16 +266,15 @@ class SplitExpenseScreen extends HookConsumerWidget {
                                 (sum, s) => sum + s.amountCents,
                               );
                               if (splitSum != totalCents) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(l10n.splitMismatchError),
-                                  ),
+                                showAppToast(
+                                  context,
+                                  message: l10n.splitMismatchError,
+                                  variant: AppToastVariant.warning,
                                 );
                                 return;
                               }
 
                               isSubmitting.value = true;
-                              final messenger = ScaffoldMessenger.of(context);
                               final router = GoRouter.of(context);
 
                               try {
@@ -290,10 +290,11 @@ class SplitExpenseScreen extends HookConsumerWidget {
                                       date: DateTime.now(),
                                       splits: splitItems,
                                     );
-                                messenger.showSnackBar(
-                                  SnackBar(
-                                    content: Text(l10n.splitSaveSuccess),
-                                  ),
+                                if (!context.mounted) return;
+                                showAppToast(
+                                  context,
+                                  message: l10n.splitSaveSuccess,
+                                  variant: AppToastVariant.success,
                                 );
                                 router.goNamed(
                                   planRoute,
@@ -301,11 +302,11 @@ class SplitExpenseScreen extends HookConsumerWidget {
                                 );
                               } on Exception catch (_) {
                                 isSubmitting.value = false;
-                                messenger.showSnackBar(
-                                  SnackBar(
-                                    content: Text(l10n.splitSaveError),
-                                    backgroundColor: colorScheme.error,
-                                  ),
+                                if (!context.mounted) return;
+                                showAppToast(
+                                  context,
+                                  message: l10n.splitSaveError,
+                                  variant: AppToastVariant.error,
                                 );
                               }
                             },

@@ -13,6 +13,7 @@ import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_app/src/utils/currency_code_utils.dart';
+import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
@@ -199,21 +200,22 @@ class PlanSettingsScreen extends HookConsumerWidget {
     controller.dispose();
     if (name.isEmpty || name == budget.name) return;
 
-    final messenger = ScaffoldMessenger.of(context);
-    final colorScheme = Theme.of(context).colorScheme;
     try {
       final client = ref.read(serverpodClientProvider);
       await client.budget.update(UuidValue.fromString(budgetId), name: name);
       ref.invalidate(budgetDetailProvider(budgetId));
-      messenger.showSnackBar(
-        SnackBar(content: Text(l10n.settingsRenameSuccess)),
+      if (!context.mounted) return;
+      showAppToast(
+        context,
+        message: l10n.settingsRenameSuccess,
+        variant: AppToastVariant.success,
       );
     } on Exception catch (_) {
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(l10n.settingsRenameError),
-          backgroundColor: colorScheme.error,
-        ),
+      if (!context.mounted) return;
+      showAppToast(
+        context,
+        message: l10n.settingsRenameError,
+        variant: AppToastVariant.error,
       );
     }
   }
@@ -254,18 +256,19 @@ class PlanSettingsScreen extends HookConsumerWidget {
           .read(budgetActionsProvider.notifier)
           .deleteBudget(budgetId: budgetId);
       if (context.mounted) {
-        ScaffoldMessenger.of(
+        showAppToast(
           context,
-        ).showSnackBar(SnackBar(content: Text(l10n.budgetDeleteSuccess)));
+          message: l10n.budgetDeleteSuccess,
+          variant: AppToastVariant.success,
+        );
         context.go(homePath);
       }
     } on Exception catch (_) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.budgetDeleteError),
-            backgroundColor: colorScheme.error,
-          ),
+        showAppToast(
+          context,
+          message: l10n.budgetDeleteError,
+          variant: AppToastVariant.error,
         );
       }
     }

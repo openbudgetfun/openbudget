@@ -13,6 +13,7 @@ import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_app/src/utils/currency_code_utils.dart';
+import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -152,8 +153,6 @@ class CurrencySettingsScreen extends HookConsumerWidget {
 
     if (selected == null || selected == current || !context.mounted) return;
 
-    final colorScheme = Theme.of(context).colorScheme;
-    final messenger = ScaffoldMessenger.of(context);
     try {
       final client = ref.read(serverpodClientProvider);
       await client.budget.update(
@@ -164,15 +163,18 @@ class CurrencySettingsScreen extends HookConsumerWidget {
         ..invalidate(budgetDetailProvider(budgetId))
         ..invalidate(budgetSummaryProvider(budgetId));
 
-      messenger.showSnackBar(
-        SnackBar(content: Text(l10n.settingsCurrencyUpdated(selected.code))),
+      if (!context.mounted) return;
+      showAppToast(
+        context,
+        message: l10n.settingsCurrencyUpdated(selected.code),
+        variant: AppToastVariant.success,
       );
     } on Exception catch (_) {
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(l10n.settingsCurrencyUpdateError),
-          backgroundColor: colorScheme.error,
-        ),
+      if (!context.mounted) return;
+      showAppToast(
+        context,
+        message: l10n.settingsCurrencyUpdateError,
+        variant: AppToastVariant.error,
       );
     }
   }

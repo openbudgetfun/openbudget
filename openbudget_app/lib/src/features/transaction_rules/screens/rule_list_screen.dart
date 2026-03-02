@@ -7,6 +7,7 @@ import 'package:openbudget_app/src/features/payees/providers/payee_list_provider
 import 'package:openbudget_app/src/features/transaction_rules/providers/rule_actions_provider.dart';
 import 'package:openbudget_app/src/features/transaction_rules/providers/rule_list_provider.dart';
 import 'package:openbudget_app/src/theme/openbudget_palette.dart';
+import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 enum RuleViewFilter { all, enabled, disabled }
@@ -214,18 +215,16 @@ class RuleListScreen extends HookConsumerWidget {
     required bool enabled,
   }) async {
     final l10n = AppLocalizations.of(context);
-    final messenger = ScaffoldMessenger.of(context);
-    final colorScheme = Theme.of(context).colorScheme;
     try {
       await ref
           .read(ruleActionsProvider.notifier)
           .toggleRule(ruleId: ruleId, enabled: enabled, budgetId: budgetId);
     } on Exception catch (_) {
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(l10n.transactionRulesToggleError),
-          backgroundColor: colorScheme.error,
-        ),
+      if (!context.mounted) return;
+      showAppToast(
+        context,
+        message: l10n.transactionRulesToggleError,
+        variant: AppToastVariant.error,
       );
     }
   }
@@ -236,7 +235,6 @@ class RuleListScreen extends HookConsumerWidget {
     required String ruleId,
   }) async {
     final l10n = AppLocalizations.of(context);
-    final messenger = ScaffoldMessenger.of(context);
     final colorScheme = Theme.of(context).colorScheme;
     final confirmed = await showDialog<bool>(
       context: context,
@@ -266,15 +264,18 @@ class RuleListScreen extends HookConsumerWidget {
       await ref
           .read(ruleActionsProvider.notifier)
           .deleteRule(ruleId: ruleId, budgetId: budgetId);
-      messenger.showSnackBar(
-        SnackBar(content: Text(l10n.transactionRulesDeleteSuccess)),
+      if (!context.mounted) return;
+      showAppToast(
+        context,
+        message: l10n.transactionRulesDeleteSuccess,
+        variant: AppToastVariant.success,
       );
     } on Exception catch (_) {
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(l10n.transactionRulesDeleteError),
-          backgroundColor: colorScheme.error,
-        ),
+      if (!context.mounted) return;
+      showAppToast(
+        context,
+        message: l10n.transactionRulesDeleteError,
+        variant: AppToastVariant.error,
       );
     }
   }
@@ -288,8 +289,6 @@ class RuleListScreen extends HookConsumerWidget {
     if (result == null || !context.mounted) return;
 
     final l10n = AppLocalizations.of(context);
-    final messenger = ScaffoldMessenger.of(context);
-    final colorScheme = Theme.of(context).colorScheme;
 
     try {
       await ref
@@ -299,15 +298,18 @@ class RuleListScreen extends HookConsumerWidget {
             payeeId: result.payeeId,
             targetEnvelopeId: result.envelopeId,
           );
-      messenger.showSnackBar(
-        SnackBar(content: Text(l10n.transactionRulesCreateSuccess)),
+      if (!context.mounted) return;
+      showAppToast(
+        context,
+        message: l10n.transactionRulesCreateSuccess,
+        variant: AppToastVariant.success,
       );
     } on Exception catch (_) {
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(l10n.transactionRulesCreateError),
-          backgroundColor: colorScheme.error,
-        ),
+      if (!context.mounted) return;
+      showAppToast(
+        context,
+        message: l10n.transactionRulesCreateError,
+        variant: AppToastVariant.error,
       );
     }
   }

@@ -6,6 +6,7 @@ import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
 import 'package:openbudget_app/src/features/transactions/providers/import_transactions_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
+import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -231,9 +232,7 @@ class ImportTransactionsScreen extends HookConsumerWidget {
     ValueNotifier<bool> isSubmitting,
   ) async {
     final l10n = AppLocalizations.of(context);
-    final colorScheme = Theme.of(context).colorScheme;
     isSubmitting.value = true;
-    final messenger = ScaffoldMessenger.of(context);
     final router = GoRouter.of(context);
     try {
       final count = await ref
@@ -243,17 +242,20 @@ class ImportTransactionsScreen extends HookConsumerWidget {
             currencyCode: currencyCode.code,
             rows: rows,
           );
-      messenger.showSnackBar(
-        SnackBar(content: Text(l10n.importSuccess(count))),
+      if (!context.mounted) return;
+      showAppToast(
+        context,
+        message: l10n.importSuccess(count),
+        variant: AppToastVariant.success,
       );
       router.goNamed(planRoute, pathParameters: {'id': budgetId});
     } on Exception catch (_) {
       isSubmitting.value = false;
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(l10n.importError),
-          backgroundColor: colorScheme.error,
-        ),
+      if (!context.mounted) return;
+      showAppToast(
+        context,
+        message: l10n.importError,
+        variant: AppToastVariant.error,
       );
     }
   }

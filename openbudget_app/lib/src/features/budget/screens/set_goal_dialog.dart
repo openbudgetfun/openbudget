@@ -6,6 +6,7 @@ import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/envelope_goal_provider.dart';
 import 'package:openbudget_app/src/features/budget/widgets/budget_amount_keypad.dart';
 import 'package:openbudget_app/src/theme/openbudget_palette.dart';
+import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -490,8 +491,6 @@ class SetGoalDialog extends HookConsumerWidget {
     if (amountCents <= 0) return;
     isSubmitting.value = true;
     final navigator = Navigator.of(context);
-    final messenger = ScaffoldMessenger.of(context);
-    final colorScheme = Theme.of(context).colorScheme;
 
     final payload = _buildGoalPayload(
       cadence: cadence,
@@ -513,15 +512,20 @@ class SetGoalDialog extends HookConsumerWidget {
             targetDate: payload.targetDate,
             monthlyFundingCents: payload.monthlyFundingCents,
           );
-      messenger.showSnackBar(SnackBar(content: Text(l10n.goalSaved)));
+      if (!context.mounted) return;
+      showAppToast(
+        context,
+        message: l10n.goalSaved,
+        variant: AppToastVariant.success,
+      );
       navigator.pop();
     } on Exception catch (_) {
       isSubmitting.value = false;
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(l10n.goalError),
-          backgroundColor: colorScheme.error,
-        ),
+      if (!context.mounted) return;
+      showAppToast(
+        context,
+        message: l10n.goalError,
+        variant: AppToastVariant.error,
       );
     }
   }
@@ -534,8 +538,6 @@ class SetGoalDialog extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     isSubmitting.value = true;
     final navigator = Navigator.of(context);
-    final messenger = ScaffoldMessenger.of(context);
-    final colorScheme = Theme.of(context).colorScheme;
     try {
       await ref
           .read(envelopeGoalActionsProvider.notifier)
@@ -544,15 +546,20 @@ class SetGoalDialog extends HookConsumerWidget {
             envelopeId: envelopeId,
             budgetId: budgetId,
           );
-      messenger.showSnackBar(SnackBar(content: Text(l10n.goalRemoved)));
+      if (!context.mounted) return;
+      showAppToast(
+        context,
+        message: l10n.goalRemoved,
+        variant: AppToastVariant.success,
+      );
       navigator.pop();
     } on Exception catch (_) {
       isSubmitting.value = false;
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(l10n.goalError),
-          backgroundColor: colorScheme.error,
-        ),
+      if (!context.mounted) return;
+      showAppToast(
+        context,
+        message: l10n.goalError,
+        variant: AppToastVariant.error,
       );
     }
   }
