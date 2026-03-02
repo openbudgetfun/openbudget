@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/envelope_actions_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/monthly_allocation_provider.dart';
+import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
@@ -26,12 +27,20 @@ class AddEnvelopeDialog extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
     final nameController = useTextEditingController();
     final amountController = useTextEditingController();
     final isSubmitting = useState(false);
 
     return AlertDialog(
-      title: Text(l10n.budgetAddEnvelope),
+      insetPadding: const EdgeInsets.symmetric(horizontal: SpacingTokens.sm),
+      constraints: const BoxConstraints(maxWidth: 560),
+      title: Text(
+        l10n.budgetAddEnvelope,
+        style: theme.textTheme.titleMedium?.copyWith(
+          fontWeight: FontWeight.w700,
+        ),
+      ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -109,8 +118,6 @@ class AddEnvelopeDialog extends HookConsumerWidget {
 
     isSubmitting.value = true;
     final navigator = Navigator.of(context);
-    final messenger = ScaffoldMessenger.of(context);
-    final colorScheme = Theme.of(context).colorScheme;
     try {
       final envelope = await ref
           .read(envelopeActionsProvider.notifier)
@@ -130,17 +137,20 @@ class AddEnvelopeDialog extends HookConsumerWidget {
             month: month,
             allocatedCents: amountCents,
           );
-      messenger.showSnackBar(
-        SnackBar(content: Text(l10n.budgetEnvelopeCreated)),
+      if (!context.mounted) return;
+      showAppToast(
+        context,
+        message: l10n.budgetEnvelopeCreated,
+        variant: AppToastVariant.success,
       );
       navigator.pop();
     } on Exception catch (_) {
       isSubmitting.value = false;
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(l10n.budgetEnvelopeCreateError),
-          backgroundColor: colorScheme.error,
-        ),
+      if (!context.mounted) return;
+      showAppToast(
+        context,
+        message: l10n.budgetEnvelopeCreateError,
+        variant: AppToastVariant.error,
       );
     }
   }

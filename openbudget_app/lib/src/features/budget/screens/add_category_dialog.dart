@@ -3,6 +3,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/category_actions_provider.dart';
+import 'package:openbudget_app/src/widgets/app_toast.dart';
+import 'package:openbudget_ui/openbudget_ui.dart';
 
 class AddCategoryDialog extends HookConsumerWidget {
   const AddCategoryDialog({
@@ -17,11 +19,19 @@ class AddCategoryDialog extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
     final nameController = useTextEditingController();
     final isSubmitting = useState(false);
 
     return AlertDialog(
-      title: Text(l10n.budgetAddCategory),
+      insetPadding: const EdgeInsets.symmetric(horizontal: SpacingTokens.sm),
+      constraints: const BoxConstraints(maxWidth: 560),
+      title: Text(
+        l10n.budgetAddCategory,
+        style: theme.textTheme.titleMedium?.copyWith(
+          fontWeight: FontWeight.w700,
+        ),
+      ),
       content: TextField(
         controller: nameController,
         decoration: InputDecoration(
@@ -66,8 +76,6 @@ class AddCategoryDialog extends HookConsumerWidget {
     if (name.isEmpty) return;
     isSubmitting.value = true;
     final navigator = Navigator.of(context);
-    final messenger = ScaffoldMessenger.of(context);
-    final colorScheme = Theme.of(context).colorScheme;
     try {
       await ref
           .read(categoryActionsProvider.notifier)
@@ -76,17 +84,20 @@ class AddCategoryDialog extends HookConsumerWidget {
             budgetId: budgetId,
             sortOrder: nextSortOrder,
           );
-      messenger.showSnackBar(
-        SnackBar(content: Text(l10n.budgetCategoryCreated)),
+      if (!context.mounted) return;
+      showAppToast(
+        context,
+        message: l10n.budgetCategoryCreated,
+        variant: AppToastVariant.success,
       );
       navigator.pop();
     } on Exception catch (_) {
       isSubmitting.value = false;
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(l10n.budgetCategoryCreateError),
-          backgroundColor: colorScheme.error,
-        ),
+      if (!context.mounted) return;
+      showAppToast(
+        context,
+        message: l10n.budgetCategoryCreateError,
+        variant: AppToastVariant.error,
       );
     }
   }

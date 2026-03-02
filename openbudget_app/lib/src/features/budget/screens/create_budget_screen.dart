@@ -7,6 +7,7 @@ import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/theme/openbudget_palette.dart';
+import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
@@ -16,10 +17,12 @@ class CreateBudgetScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
+    final nameController = useTextEditingController(
+      text: l10n.createBudgetDefaultName,
+    );
     final selectedCurrency = useState(CurrencyCode.usd);
     final isSubmitting = useState(false);
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
     final bodyTextColor = OpenBudgetPalette.fgSecondaryFor(theme);
     final statusBarStyle =
         (theme.brightness == Brightness.light
@@ -33,7 +36,24 @@ class CreateBudgetScreen extends HookConsumerWidget {
       value: statusBarStyle,
       child: Scaffold(
         backgroundColor: OpenBudgetPalette.bgAuthFor(theme),
+        appBar: AppBar(
+          backgroundColor: OpenBudgetPalette.bgAuthFor(theme),
+          surfaceTintColor: OpenBudgetPalette.transparentFor(theme),
+          scrolledUnderElevation: 0,
+          leading: IconButton(
+            tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+            icon: const Icon(Icons.close_rounded),
+            onPressed: () {
+              if (context.canPop()) {
+                context.pop();
+                return;
+              }
+              context.goNamed(homeRoute);
+            },
+          ),
+        ),
         body: SafeArea(
+          top: false,
           child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 420),
@@ -73,6 +93,17 @@ class CreateBudgetScreen extends HookConsumerWidget {
                       textAlign: TextAlign.left,
                     ),
                     const SizedBox(height: SpacingTokens.xxl),
+                    TextField(
+                      controller: nameController,
+                      enabled: !isSubmitting.value,
+                      textInputAction: TextInputAction.next,
+                      onTapOutside: (_) => FocusScope.of(context).unfocus(),
+                      decoration: InputDecoration(
+                        labelText: l10n.createBudgetNameLabel,
+                        prefixIcon: const Icon(Icons.label_outlined),
+                      ),
+                    ),
+                    const SizedBox(height: SpacingTokens.md),
                     _PlanCurrencyRow(
                       label: l10n.createBudgetPlanCurrency,
                       value: selectedCurrency.value.displayName,
@@ -95,26 +126,28 @@ class CreateBudgetScreen extends HookConsumerWidget {
                           : () async {
                               isSubmitting.value = true;
                               try {
+                                final budgetName = nameController.text.trim();
                                 final budgetId = await ref
                                     .read(createBudgetProvider.notifier)
                                     .create(
-                                      name: l10n.createBudgetDefaultName,
+                                      name: budgetName.isEmpty
+                                          ? l10n.createBudgetDefaultName
+                                          : budgetName,
                                       currency: selectedCurrency.value,
                                     );
                                 if (context.mounted) {
                                   context.goNamed(
-                                    editPlanRoute,
+                                    addAccountRoute,
                                     pathParameters: {'id': budgetId},
                                   );
                                 }
                               } on Exception catch (_) {
                                 isSubmitting.value = false;
                                 if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(l10n.createBudgetError),
-                                      backgroundColor: colorScheme.error,
-                                    ),
+                                  showAppToast(
+                                    context,
+                                    message: l10n.createBudgetError,
+                                    variant: AppToastVariant.error,
                                   );
                                 }
                               }

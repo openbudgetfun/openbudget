@@ -43,7 +43,7 @@ runner:serverpod
 devenv up
 
 # 6. In another terminal, follow local service logs
-tail -f ./tmp/log.txt
+tail -f ./.tmp/log.txt
 
 # 7. In a separate terminal, run the app (dev flavor)
 flutter:app run -t lib/main_dev.dart -d macos
@@ -115,7 +115,7 @@ Legacy local override support is also available with
 ```bash
 devenv up                      # Start Postgres + Redis + server (all-in-one)
 server:start                   # Start the server manually (without devenv)
-tail -f ./tmp/log.txt          # Follow process-compose logs while developing
+tail -f ./.tmp/log.txt         # Follow process-compose logs while developing
 ```
 
 ### Testing
@@ -163,13 +163,13 @@ to a shared file.
 The log file is:
 
 ```
-./tmp/log.txt
+./.tmp/log.txt
 ```
 
 This file is gitignored. To follow logs in real time:
 
 ```bash
-tail -f ./tmp/log.txt
+tail -f ./.tmp/log.txt
 ```
 
 Check this file first whenever local development issues appear (startup,

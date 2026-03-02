@@ -26,9 +26,11 @@ import 'package:openbudget_app/src/features/budget/widgets/category_group.dart';
 import 'package:openbudget_app/src/features/budget/widgets/credit_card_section.dart';
 import 'package:openbudget_app/src/features/recurring/providers/recurring_auto_post_provider.dart';
 import 'package:openbudget_app/src/features/settings/providers/display_options_provider.dart';
+import 'package:openbudget_app/src/providers/theme_mode_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
+import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -36,10 +38,15 @@ import 'package:openbudget_ui/openbudget_ui.dart';
 enum _PlanMenuAction {
   undoLastMove,
   recentMoves,
+  toggleSearch,
+  toggleHidden,
+  reorderCategories,
+  saveTemplate,
+  toggleTheme,
   collapseExpand,
   hideProgressBars,
   hideAmounts,
-  settings,
+  planSettings,
 }
 
 enum _PlanOnboardingType { addAccounts, assignMoney, finish }
@@ -60,7 +67,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
     final hasAutoPosted = useState(false);
     final isReordering = useState(false);
     final showHidden = useState(false);
-    final collapseCategories = useState(false);
+    final collapsedCategoryIds = useState<Set<String>>(<String>{});
     final searchController = useTextEditingController();
     final searchQuery = useState('');
     final isSearching = useState(false);
@@ -68,16 +75,51 @@ class BudgetDetailScreen extends HookConsumerWidget {
     final onboardingComplete = useState(false);
     final selectedEditor = useState<_InlineEditorSelection?>(null);
     final editorInput = useState('');
+    final inlineEditorSheetOpen = useState(false);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final hideAmounts = ref.watch(hideAmountsProvider);
     final hideProgressBars = ref.watch(hideProgressBarsProvider);
     final recentMoves = ref.watch(recentMovesForBudgetProvider(budgetId));
+    final currentThemeMode = ref.watch(themeModeProvider);
+    final isDarkMode =
+        currentThemeMode == ThemeMode.dark ||
+        (currentThemeMode == ThemeMode.system &&
+            theme.brightness == Brightness.dark);
+
     void navigateAfterMenuClose(VoidCallback callback) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!context.mounted) return;
         callback();
       });
+    }
+
+    void toggleSearchMode() {
+      isSearching.value = !isSearching.value;
+      selectedEditor.value = null;
+      editorInput.value = '';
+      if (!isSearching.value) {
+        searchController.clear();
+        searchQuery.value = '';
+      }
+    }
+
+    Widget buildMenuLabel({
+      required IconData icon,
+      required String label,
+      bool checked = false,
+    }) {
+      return Row(
+        children: [
+          Icon(icon, size: 18),
+          const SizedBox(width: SpacingTokens.sm),
+          Expanded(child: Text(label)),
+          if (checked) ...[
+            const SizedBox(width: SpacingTokens.md),
+            const Icon(Icons.check_rounded, size: 18),
+          ],
+        ],
+      );
     }
 
     // Auto-post due recurring transactions when the budget opens.
@@ -95,8 +137,10 @@ class BudgetDetailScreen extends HookConsumerWidget {
               .read(recurringAutoPostActionsProvider.notifier)
               .postDue(budgetId: budgetId);
           if (context.mounted && count > 0) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(l10n.recurringAutoPosted(count))),
+            showAppToast(
+              context,
+              message: l10n.recurringAutoPosted(count),
+              variant: AppToastVariant.success,
             );
           }
         } on Exception catch (_) {
@@ -108,6 +152,169 @@ class BudgetDetailScreen extends HookConsumerWidget {
 
       return null;
     }, [dueCountAsync, summaryAsync]);
+
+    useEffect(() {
+      if (showSpotlight.value && selectedEditor.value != null) {
+        selectedEditor.value = null;
+        editorInput.value = '';
+      }
+      return null;
+    }, [showSpotlight.value]);
+
+    useEffect(
+      () {
+        if (showSpotlight.value) return null;
+        if (selectedEditor.value == null) return null;
+        if (inlineEditorSheetOpen.value) return null;
+        if (!summaryAsync.hasValue) return null;
+
+        final summary = summaryAsync.value!;
+        final selection = selectedEditor.value!;
+        final currencyCode = CurrencyCode.values.firstWhere(
+          (code) => code.code == summary.budget.currencyCode,
+          orElse: () => CurrencyCode.usd,
+        );
+        inlineEditorSheetOpen.value = true;
+
+        Future.microtask(() async {
+          if (!context.mounted) return;
+          var sheetInput = editorInput.value;
+
+          await showModalBottomSheet<void>(
+            context: context,
+            isScrollControlled: true,
+            showDragHandle: true,
+            backgroundColor: OpenBudgetPalette.transparentFor(
+              Theme.of(context),
+            ),
+            barrierColor: OpenBudgetPalette.overlayScrimFor(
+              Theme.of(context),
+            ).withAlpha(210),
+            builder: (sheetContext) => StatefulBuilder(
+              builder: (sheetContext, setSheetState) {
+                void setInputValue(String value) {
+                  setSheetState(() => sheetInput = value);
+                  editorInput.value = value;
+                }
+
+                return _InlineAmountEditor(
+                  inputValue: sheetInput,
+                  amountLabel: hideAmounts
+                      ? hiddenAmountPlaceholder
+                      : formatCents(
+                          _parseEditorCents(sheetInput) ??
+                              (selection.monthlyData?.allocatedCents ??
+                                  selection.envelope.budgetedAmountCents),
+                          currencyCode,
+                        ),
+                  onAutoAssign: () {
+                    Navigator.of(sheetContext).pop();
+                    _showQuickBudgetDialog(
+                      context,
+                      selection.envelope,
+                      currencyCode,
+                      year: summary.year,
+                      month: summary.month,
+                    );
+                  },
+                  onMoveMoney: () {
+                    Navigator.of(sheetContext).pop();
+                    showDialog<void>(
+                      context: context,
+                      barrierColor: OpenBudgetPalette.overlayScrimFor(
+                        Theme.of(context),
+                      ).withAlpha(210),
+                      builder: (_) => MoveMoneyDialog(
+                        budgetId: budgetId,
+                        year: summary.year,
+                        month: summary.month,
+                        categories: summary.categories,
+                      ),
+                    );
+                  },
+                  onDetails: () {
+                    final envelopeId = selection.envelope.id?.toString() ?? '';
+                    final categoryId = selection.categoryId;
+                    if (envelopeId.isEmpty || categoryId.isEmpty) return;
+                    Navigator.of(sheetContext).pop();
+                    context.pushNamed(
+                      categoryDetailRoute,
+                      pathParameters: {
+                        'id': budgetId,
+                        'categoryId': categoryId,
+                        'envelopeId': envelopeId,
+                      },
+                    );
+                  },
+                  onDigit: (digit) {
+                    if (sheetInput.length >= 9) return;
+                    setInputValue('$sheetInput$digit');
+                  },
+                  onBackspace: () {
+                    if (sheetInput.isEmpty) return;
+                    setInputValue(
+                      sheetInput.substring(0, sheetInput.length - 1),
+                    );
+                  },
+                  onNegative: () {
+                    final delta = _parseEditorCents(sheetInput);
+                    if (delta == null || delta == 0) return;
+                    final currentCents =
+                        selection.monthlyData?.allocatedCents ??
+                        selection.envelope.budgetedAmountCents;
+                    final nextDollars = ((currentCents - delta) / 100).round();
+                    setInputValue('$nextDollars');
+                  },
+                  onPositive: () {
+                    final delta = _parseEditorCents(sheetInput);
+                    if (delta == null || delta == 0) return;
+                    final currentCents =
+                        selection.monthlyData?.allocatedCents ??
+                        selection.envelope.budgetedAmountCents;
+                    final nextDollars = ((currentCents + delta) / 100).round();
+                    setInputValue('$nextDollars');
+                  },
+                  onCancel: () => Navigator.of(sheetContext).pop(),
+                  onApply: () => _applyInlineAllocation(
+                    context: context,
+                    ref: ref,
+                    selection: selection,
+                    year: summary.year,
+                    month: summary.month,
+                    input: sheetInput,
+                    closeEditor: false,
+                  ),
+                  onDone: () => _applyInlineAllocation(
+                    context: context,
+                    ref: ref,
+                    selection: selection,
+                    year: summary.year,
+                    month: summary.month,
+                    input: sheetInput,
+                    closeEditor: true,
+                    onCloseEditor: () => Navigator.of(sheetContext).pop(),
+                  ),
+                );
+              },
+            ),
+          );
+
+          if (!context.mounted) return;
+          inlineEditorSheetOpen.value = false;
+          selectedEditor.value = null;
+          editorInput.value = '';
+        });
+
+        return null;
+      },
+      [
+        showSpotlight.value,
+        selectedEditor.value,
+        summaryAsync,
+        hideAmounts,
+        inlineEditorSheetOpen.value,
+      ],
+    );
 
     return summaryAsync.when(
       loading: () => Scaffold(
@@ -232,109 +439,18 @@ class BudgetDetailScreen extends HookConsumerWidget {
               Theme.of(context),
             ),
             scrolledUnderElevation: 0,
-            leading: PopupMenuButton<_PlanMenuAction>(
-              icon: const Icon(Icons.more_horiz_rounded),
-              onSelected: (action) => switch (action) {
-                _PlanMenuAction.undoLastMove =>
-                  ref
-                      .read(recentMovesProvider.notifier)
-                      .undoLast(budgetId: budgetId),
-                _PlanMenuAction.recentMoves => navigateAfterMenuClose(() {
-                  context.pushNamed(
-                    recentMovesRoute,
-                    pathParameters: {'id': budgetId},
-                  );
-                }),
-                _PlanMenuAction.collapseExpand =>
-                  collapseCategories.value = !collapseCategories.value,
-                _PlanMenuAction.hideProgressBars =>
-                  ref
-                      .read(hideProgressBarsProvider.notifier)
-                      .setHideProgressBars(value: !hideProgressBars),
-                _PlanMenuAction.hideAmounts =>
-                  ref
-                      .read(hideAmountsProvider.notifier)
-                      .setHideAmounts(value: !hideAmounts),
-                _PlanMenuAction.settings => navigateAfterMenuClose(() {
-                  context.goNamed(
-                    settingsRoute,
-                    pathParameters: {'id': budgetId},
-                  );
-                }),
-              },
-              itemBuilder: (context) => [
-                PopupMenuItem<_PlanMenuAction>(
-                  value: _PlanMenuAction.recentMoves,
-                  child: Row(
-                    children: [
-                      const Icon(Icons.history_rounded, size: 18),
-                      const SizedBox(width: SpacingTokens.sm),
-                      Text(l10n.recentMovesTitle),
-                    ],
-                  ),
-                ),
-                PopupMenuItem<_PlanMenuAction>(
-                  value: _PlanMenuAction.undoLastMove,
-                  enabled: recentMoves.isNotEmpty,
-                  child: Row(
-                    children: [
-                      const Icon(Icons.undo_rounded, size: 18),
-                      const SizedBox(width: SpacingTokens.sm),
-                      Text(l10n.undoAction),
-                    ],
-                  ),
-                ),
-                const PopupMenuDivider(),
-                PopupMenuItem<_PlanMenuAction>(
-                  value: _PlanMenuAction.collapseExpand,
-                  child: Row(
-                    children: [
-                      const Icon(Icons.unfold_more_rounded, size: 18),
-                      const SizedBox(width: SpacingTokens.sm),
-                      Text(l10n.budgetCollapseExpand),
-                    ],
-                  ),
-                ),
-                const PopupMenuDivider(),
-                CheckedPopupMenuItem<_PlanMenuAction>(
-                  value: _PlanMenuAction.hideProgressBars,
-                  checked: hideProgressBars,
-                  child: Row(
-                    children: [
-                      const Icon(Icons.linear_scale_rounded, size: 18),
-                      const SizedBox(width: SpacingTokens.sm),
-                      Text(l10n.settingsHideProgressBars),
-                    ],
-                  ),
-                ),
-                CheckedPopupMenuItem<_PlanMenuAction>(
-                  value: _PlanMenuAction.hideAmounts,
-                  checked: hideAmounts,
-                  child: Row(
-                    children: [
-                      const Icon(Icons.visibility_off_rounded, size: 18),
-                      const SizedBox(width: SpacingTokens.sm),
-                      Text(l10n.settingsHideAmounts),
-                    ],
-                  ),
-                ),
-                const PopupMenuDivider(),
-                PopupMenuItem<_PlanMenuAction>(
-                  value: _PlanMenuAction.settings,
-                  child: Row(
-                    children: [
-                      const Icon(Icons.settings_outlined, size: 18),
-                      const SizedBox(width: SpacingTokens.sm),
-                      Text(l10n.settingsTitle),
-                    ],
-                  ),
-                ),
-              ],
+            leading: IconButton(
+              tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+              icon: const Icon(Icons.close_rounded),
+              onPressed: () => context.goNamed(homeRoute),
             ),
+            centerTitle: true,
             title: Text(
               summary.budget.name,
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w700,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
               ),
             ),
             actions: [
@@ -342,166 +458,188 @@ class BudgetDetailScreen extends HookConsumerWidget {
                 TextButton(
                   onPressed: () => isReordering.value = false,
                   child: Text(l10n.budgetReorderDone),
-                )
-              else ...[
-                IconButton(
-                  icon: const Icon(Icons.history_rounded),
-                  tooltip: l10n.recentMovesTitle,
-                  onPressed: () => context.pushNamed(
-                    recentMovesRoute,
-                    pathParameters: {'id': budgetId},
-                  ),
                 ),
-                IconButton(
-                  icon: Icon(
-                    isSearching.value
-                        ? Icons.search_off_rounded
-                        : Icons.search_rounded,
-                  ),
-                  tooltip: l10n.budgetSearchHint,
-                  onPressed: () {
-                    isSearching.value = !isSearching.value;
-                    selectedEditor.value = null;
-                    editorInput.value = '';
-                    if (!isSearching.value) {
-                      searchController.clear();
-                      searchQuery.value = '';
+              PopupMenuButton<_PlanMenuAction>(
+                icon: const Icon(Icons.more_horiz_rounded),
+                position: PopupMenuPosition.under,
+                offset: const Offset(0, 8),
+                onSelected: (action) => switch (action) {
+                  _PlanMenuAction.undoLastMove =>
+                    ref
+                        .read(recentMovesProvider.notifier)
+                        .undoLast(budgetId: budgetId),
+                  _PlanMenuAction.recentMoves => navigateAfterMenuClose(() {
+                    context.pushNamed(
+                      recentMovesRoute,
+                      pathParameters: {'id': budgetId},
+                    );
+                  }),
+                  _PlanMenuAction.toggleSearch => toggleSearchMode(),
+                  _PlanMenuAction.toggleHidden =>
+                    showHidden.value = !showHidden.value,
+                  _PlanMenuAction.reorderCategories =>
+                    isReordering.value = true,
+                  _PlanMenuAction.saveTemplate => navigateAfterMenuClose(() {
+                    showDialog<void>(
+                      context: context,
+                      barrierColor: _dialogBarrierColor(context),
+                      builder: (_) => BudgetTemplateDialog(budgetId: budgetId),
+                    );
+                  }),
+                  _PlanMenuAction.toggleTheme =>
+                    ref
+                        .read(themeModeProvider.notifier)
+                        .setThemeMode(
+                          isDarkMode ? ThemeMode.light : ThemeMode.dark,
+                        ),
+                  _PlanMenuAction.collapseExpand => (() {
+                    final visibleIds = filteredCategories
+                        .map((entry) => entry.category.id?.toString() ?? '')
+                        .where((id) => id.isNotEmpty)
+                        .toSet();
+                    if (visibleIds.isEmpty) return;
+
+                    final next = Set<String>.from(collapsedCategoryIds.value);
+                    final allVisibleCollapsed = visibleIds.every(next.contains);
+                    if (allVisibleCollapsed) {
+                      next.removeAll(visibleIds);
+                    } else {
+                      next.addAll(visibleIds);
                     }
-                  },
-                ),
-                IconButton(
-                  icon: Badge(
-                    isLabelVisible: !showHidden.value && hiddenCount > 0,
-                    label: Text('$hiddenCount'),
-                    child: Icon(
-                      showHidden.value
-                          ? Icons.visibility_rounded
-                          : Icons.visibility_off_rounded,
+                    collapsedCategoryIds.value = next;
+                  })(),
+                  _PlanMenuAction.hideProgressBars =>
+                    ref
+                        .read(hideProgressBarsProvider.notifier)
+                        .setHideProgressBars(value: !hideProgressBars),
+                  _PlanMenuAction.hideAmounts =>
+                    ref
+                        .read(hideAmountsProvider.notifier)
+                        .setHideAmounts(value: !hideAmounts),
+                  _PlanMenuAction.planSettings => navigateAfterMenuClose(() {
+                    context.goNamed(
+                      planSettingsRoute,
+                      pathParameters: {'id': budgetId},
+                    );
+                  }),
+                },
+                itemBuilder: (context) => [
+                  PopupMenuItem<_PlanMenuAction>(
+                    value: _PlanMenuAction.recentMoves,
+                    child: Row(
+                      children: [
+                        const Icon(Icons.history_rounded, size: 18),
+                        const SizedBox(width: SpacingTokens.sm),
+                        Text(l10n.recentMovesTitle),
+                      ],
                     ),
                   ),
-                  tooltip: showHidden.value
-                      ? l10n.budgetShowHidden
-                      : hiddenCount > 0
-                      ? l10n.budgetHiddenCount(hiddenCount)
-                      : l10n.budgetShowHidden,
-                  onPressed: () => showHidden.value = !showHidden.value,
-                ),
-                IconButton(
-                  icon: const Icon(Icons.swap_vert_rounded),
-                  tooltip: l10n.budgetReorderCategories,
-                  onPressed: () => isReordering.value = true,
-                ),
-                IconButton(
-                  icon: const Icon(Icons.bookmark_border_rounded),
-                  tooltip: l10n.templateTitle,
-                  onPressed: () => showDialog<void>(
-                    context: context,
-                    builder: (_) => BudgetTemplateDialog(budgetId: budgetId),
+                  PopupMenuItem<_PlanMenuAction>(
+                    value: _PlanMenuAction.undoLastMove,
+                    enabled: recentMoves.isNotEmpty,
+                    child: Row(
+                      children: [
+                        const Icon(Icons.undo_rounded, size: 18),
+                        const SizedBox(width: SpacingTokens.sm),
+                        Text(l10n.undoAction),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                  const PopupMenuDivider(),
+                  PopupMenuItem<_PlanMenuAction>(
+                    value: _PlanMenuAction.toggleSearch,
+                    child: buildMenuLabel(
+                      icon: Icons.search_rounded,
+                      label: l10n.budgetSearchHint,
+                      checked: isSearching.value,
+                    ),
+                  ),
+                  PopupMenuItem<_PlanMenuAction>(
+                    value: _PlanMenuAction.toggleHidden,
+                    child: buildMenuLabel(
+                      icon: Icons.visibility_off_rounded,
+                      label: showHidden.value
+                          ? l10n.budgetShowHidden
+                          : hiddenCount > 0
+                          ? l10n.budgetHiddenCount(hiddenCount)
+                          : l10n.budgetShowHidden,
+                      checked: showHidden.value,
+                    ),
+                  ),
+                  PopupMenuItem<_PlanMenuAction>(
+                    value: _PlanMenuAction.reorderCategories,
+                    enabled: !isReordering.value,
+                    child: Row(
+                      children: [
+                        const Icon(Icons.swap_vert_rounded, size: 18),
+                        const SizedBox(width: SpacingTokens.sm),
+                        Text(l10n.budgetReorderCategories),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem<_PlanMenuAction>(
+                    value: _PlanMenuAction.saveTemplate,
+                    child: Row(
+                      children: [
+                        const Icon(Icons.bookmark_border_rounded, size: 18),
+                        const SizedBox(width: SpacingTokens.sm),
+                        Text(l10n.templateTitle),
+                      ],
+                    ),
+                  ),
+                  const PopupMenuDivider(),
+                  PopupMenuItem<_PlanMenuAction>(
+                    value: _PlanMenuAction.toggleTheme,
+                    child: buildMenuLabel(
+                      icon: isDarkMode
+                          ? Icons.light_mode_rounded
+                          : Icons.dark_mode_rounded,
+                      label: isDarkMode ? l10n.themeLight : l10n.themeDark,
+                    ),
+                  ),
+                  const PopupMenuDivider(),
+                  PopupMenuItem<_PlanMenuAction>(
+                    value: _PlanMenuAction.collapseExpand,
+                    child: Row(
+                      children: [
+                        const Icon(Icons.unfold_more_rounded, size: 18),
+                        const SizedBox(width: SpacingTokens.sm),
+                        Text(l10n.budgetCollapseExpand),
+                      ],
+                    ),
+                  ),
+                  const PopupMenuDivider(),
+                  PopupMenuItem<_PlanMenuAction>(
+                    value: _PlanMenuAction.hideProgressBars,
+                    child: buildMenuLabel(
+                      icon: Icons.linear_scale_rounded,
+                      label: l10n.settingsHideProgressBars,
+                      checked: hideProgressBars,
+                    ),
+                  ),
+                  PopupMenuItem<_PlanMenuAction>(
+                    value: _PlanMenuAction.hideAmounts,
+                    child: buildMenuLabel(
+                      icon: Icons.visibility_off_rounded,
+                      label: l10n.settingsHideAmounts,
+                      checked: hideAmounts,
+                    ),
+                  ),
+                  const PopupMenuDivider(),
+                  PopupMenuItem<_PlanMenuAction>(
+                    value: _PlanMenuAction.planSettings,
+                    child: Row(
+                      children: [
+                        const Icon(Icons.settings_outlined, size: 18),
+                        const SizedBox(width: SpacingTokens.sm),
+                        Text(l10n.settingsPlanSettings),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
-          bottomNavigationBar:
-              !showSpotlight.value && selectedEditor.value != null
-              ? _InlineAmountEditor(
-                  inputValue: editorInput.value,
-                  amountLabel: hideAmounts
-                      ? hiddenAmountPlaceholder
-                      : formatCents(
-                          _parseEditorCents(editorInput.value) ??
-                              (selectedEditor
-                                      .value!
-                                      .monthlyData
-                                      ?.allocatedCents ??
-                                  selectedEditor
-                                      .value!
-                                      .envelope
-                                      .budgetedAmountCents),
-                          currencyCode,
-                        ),
-                  onAutoAssign: () => _showQuickBudgetDialog(
-                    context,
-                    selectedEditor.value!.envelope,
-                    currencyCode,
-                    year: summary.year,
-                    month: summary.month,
-                  ),
-                  onMoveMoney: () => showDialog<void>(
-                    context: context,
-                    builder: (_) => MoveMoneyDialog(
-                      budgetId: budgetId,
-                      year: summary.year,
-                      month: summary.month,
-                      categories: summary.categories,
-                    ),
-                  ),
-                  onDetails: () {
-                    final envelopeId =
-                        selectedEditor.value!.envelope.id?.toString() ?? '';
-                    final categoryId = selectedEditor.value!.categoryId;
-                    if (envelopeId.isEmpty || categoryId.isEmpty) return;
-                    selectedEditor.value = null;
-                    editorInput.value = '';
-                    context.pushNamed(
-                      categoryDetailRoute,
-                      pathParameters: {
-                        'id': budgetId,
-                        'categoryId': categoryId,
-                        'envelopeId': envelopeId,
-                      },
-                    );
-                  },
-                  onDigit: (digit) {
-                    if (editorInput.value.length >= 9) return;
-                    editorInput.value = '${editorInput.value}$digit';
-                  },
-                  onBackspace: () {
-                    if (editorInput.value.isEmpty) return;
-                    editorInput.value = editorInput.value.substring(
-                      0,
-                      editorInput.value.length - 1,
-                    );
-                  },
-                  onNegative: () {
-                    if (editorInput.value.isEmpty) return;
-                    editorInput.value = editorInput.value.startsWith('-')
-                        ? editorInput.value.substring(1)
-                        : '-${editorInput.value}';
-                  },
-                  onPositive: () {
-                    if (editorInput.value.startsWith('-')) {
-                      editorInput.value = editorInput.value.substring(1);
-                    }
-                  },
-                  onCancel: () {
-                    selectedEditor.value = null;
-                    editorInput.value = '';
-                  },
-                  onApply: () => _applyInlineAllocation(
-                    context: context,
-                    ref: ref,
-                    selection: selectedEditor.value!,
-                    year: summary.year,
-                    month: summary.month,
-                    input: editorInput.value,
-                    closeEditor: false,
-                  ),
-                  onDone: () => _applyInlineAllocation(
-                    context: context,
-                    ref: ref,
-                    selection: selectedEditor.value!,
-                    year: summary.year,
-                    month: summary.month,
-                    input: editorInput.value,
-                    closeEditor: true,
-                    onCloseEditor: () {
-                      selectedEditor.value = null;
-                      editorInput.value = '';
-                    },
-                  ),
-                )
-              : null,
           body: RefreshIndicator(
             onRefresh: () async {
               final selectedMonth = ref.read(selectedMonthProvider(budgetId));
@@ -635,6 +773,16 @@ class BudgetDetailScreen extends HookConsumerWidget {
                     totalActivityCents: totalActivityCents,
                     currencyCode: currencyCode,
                     hideAmounts: hideAmounts,
+                    onEditTargets: () => context.goNamed(
+                      editPlanRoute,
+                      pathParameters: {'id': budgetId},
+                    ),
+                    onAssign: () =>
+                        _showAutoAssignDialog(context, currencyCode),
+                    onReflect: () => context.goNamed(
+                      reflectRoute,
+                      pathParameters: {'id': budgetId},
+                    ),
                   ),
                 if (!showSpotlight.value && isSearching.value) ...[
                   TextField(
@@ -735,7 +883,21 @@ class BudgetDetailScreen extends HookConsumerWidget {
                       child: CategoryGroup(
                         categoryWithEnvelopes: catWithEnvelopes,
                         currencyCode: currencyCode,
-                        collapsed: collapseCategories.value,
+                        collapsed: collapsedCategoryIds.value.contains(
+                          catWithEnvelopes.category.id?.toString() ?? '',
+                        ),
+                        onToggleCollapsed: () {
+                          final categoryId =
+                              catWithEnvelopes.category.id?.toString() ?? '';
+                          if (categoryId.isEmpty) return;
+                          final next = Set<String>.from(
+                            collapsedCategoryIds.value,
+                          );
+                          if (!next.remove(categoryId)) {
+                            next.add(categoryId);
+                          }
+                          collapsedCategoryIds.value = next;
+                        },
                         goalsMap: goalsMap,
                         onAddEnvelope: () => _showAddEnvelopeDialog(
                           context,
@@ -748,12 +910,15 @@ class BudgetDetailScreen extends HookConsumerWidget {
                           context,
                           catWithEnvelopes.category.id?.toString() ?? '',
                           catWithEnvelopes.category.name,
+                          catWithEnvelopes.envelopes.length,
+                          catWithEnvelopes.totalBudgetedCents,
+                          currencyCode,
                         ),
                         onDeleteCategory: () => _confirmDeleteCategory(
                           context,
                           ref,
-                          catWithEnvelopes.category.id?.toString() ?? '',
-                          catWithEnvelopes.category.name,
+                          catWithEnvelopes,
+                          currencyCode,
                         ),
                         onEditEnvelope: (envelope) => _showEditEnvelopeDialog(
                           context,
@@ -1005,17 +1170,18 @@ class BudgetDetailScreen extends HookConsumerWidget {
             allocatedCents: allocatedCents,
           );
       if (context.mounted) {
-        ScaffoldMessenger.of(
+        showAppToast(
           context,
-        ).showSnackBar(SnackBar(content: Text(l10n.budgetAllocationUpdated)));
+          message: l10n.budgetAllocationUpdated,
+          variant: AppToastVariant.success,
+        );
       }
     } on Exception catch (_) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.budgetAllocationError),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
+        showAppToast(
+          context,
+          message: l10n.budgetAllocationError,
+          variant: AppToastVariant.error,
         );
       }
     } finally {
@@ -1038,9 +1204,13 @@ class BudgetDetailScreen extends HookConsumerWidget {
     return null;
   }
 
+  Color _dialogBarrierColor(BuildContext context) =>
+      OpenBudgetPalette.overlayScrimFor(Theme.of(context)).withAlpha(210);
+
   void _showAutoAssignDialog(BuildContext context, CurrencyCode currencyCode) {
     showDialog<void>(
       context: context,
+      barrierColor: _dialogBarrierColor(context),
       builder: (_) =>
           AutoAssignDialog(budgetId: budgetId, currencyCode: currencyCode),
     );
@@ -1079,6 +1249,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
   }) {
     showDialog<void>(
       context: context,
+      barrierColor: _dialogBarrierColor(context),
       builder: (_) => QuickBudgetDialog(
         budgetId: budgetId,
         envelopeId: envelope.id?.toString() ?? '',
@@ -1094,13 +1265,20 @@ class BudgetDetailScreen extends HookConsumerWidget {
     BuildContext context,
     String categoryId,
     String currentName,
+    int envelopeCount,
+    int totalAllocatedCents,
+    CurrencyCode currencyCode,
   ) {
     showDialog<void>(
       context: context,
+      barrierColor: _dialogBarrierColor(context),
       builder: (_) => EditCategoryDialog(
         categoryId: categoryId,
         budgetId: budgetId,
         currentName: currentName,
+        envelopeCount: envelopeCount,
+        totalAllocatedCents: totalAllocatedCents,
+        currencyCode: currencyCode,
       ),
     );
   }
@@ -1108,6 +1286,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
   void _showAddCategoryDialog(BuildContext context, int nextSortOrder) {
     showDialog<void>(
       context: context,
+      barrierColor: _dialogBarrierColor(context),
       builder: (_) =>
           AddCategoryDialog(budgetId: budgetId, nextSortOrder: nextSortOrder),
     );
@@ -1122,6 +1301,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
   }) {
     showDialog<void>(
       context: context,
+      barrierColor: _dialogBarrierColor(context),
       builder: (_) => AddEnvelopeDialog(
         categoryId: categoryId,
         budgetId: budgetId,
@@ -1142,6 +1322,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
   }) {
     showDialog<void>(
       context: context,
+      barrierColor: _dialogBarrierColor(context),
       builder: (_) => EditEnvelopeDialog(
         envelope: envelope,
         categoryId: categoryId,
@@ -1156,16 +1337,34 @@ class BudgetDetailScreen extends HookConsumerWidget {
   Future<void> _confirmDeleteCategory(
     BuildContext context,
     WidgetRef ref,
-    String categoryId,
-    String categoryName,
+    CategoryWithEnvelopes categoryWithEnvelopes,
+    CurrencyCode currencyCode,
   ) async {
     final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
+    final categoryId = categoryWithEnvelopes.category.id?.toString() ?? '';
+    if (categoryId.isEmpty) return;
+
+    final categoryName = categoryWithEnvelopes.category.name;
+    final envelopeCount = categoryWithEnvelopes.envelopes.length;
+    final totalAllocated = formatCents(
+      categoryWithEnvelopes.totalBudgetedCents,
+      currencyCode,
+    );
+    final envelopeSummary = envelopeCount == 1
+        ? '1 envelope'
+        : '$envelopeCount envelopes';
     final confirmed = await showDialog<bool>(
       context: context,
+      barrierColor: _dialogBarrierColor(context),
       builder: (ctx) => AlertDialog(
         title: Text(l10n.deleteConfirmTitle),
-        content: Text('${l10n.deleteConfirmMessage}\n\n"$categoryName"'),
+        content: Text(
+          '${l10n.deleteConfirmMessage}\n\n'
+          '"$categoryName"\n\n'
+          '$envelopeSummary\n'
+          '$totalAllocated allocated',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
@@ -1190,24 +1389,21 @@ class BudgetDetailScreen extends HookConsumerWidget {
           .read(categoryActionsProvider.notifier)
           .deleteCategory(categoryId: categoryId, budgetId: budgetId);
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.deleteSuccess),
-            action: SnackBarAction(
-              label: l10n.undoAction,
-              onPressed: () => _undoDeleteCategory(context, ref, deleted, l10n),
-            ),
-            duration: const Duration(seconds: 5),
-          ),
+        showAppToast(
+          context,
+          message: l10n.deleteSuccess,
+          variant: AppToastVariant.success,
+          actionLabel: l10n.undoAction,
+          onAction: () => _undoDeleteCategory(context, ref, deleted, l10n),
+          duration: const Duration(seconds: 5),
         );
       }
     } on Exception catch (_) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.deleteError),
-            backgroundColor: colorScheme.error,
-          ),
+        showAppToast(
+          context,
+          message: l10n.deleteError,
+          variant: AppToastVariant.error,
         );
       }
     }
@@ -1224,17 +1420,18 @@ class BudgetDetailScreen extends HookConsumerWidget {
           .read(categoryActionsProvider.notifier)
           .undoDeleteCategory(deletedCategory: deleted, budgetId: budgetId);
       if (context.mounted) {
-        ScaffoldMessenger.of(
+        showAppToast(
           context,
-        ).showSnackBar(SnackBar(content: Text(l10n.undoDeleteSuccess)));
+          message: l10n.undoDeleteSuccess,
+          variant: AppToastVariant.success,
+        );
       }
     } on Exception catch (_) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.undoDeleteError),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
+        showAppToast(
+          context,
+          message: l10n.undoDeleteError,
+          variant: AppToastVariant.error,
         );
       }
     }
@@ -1252,17 +1449,18 @@ class BudgetDetailScreen extends HookConsumerWidget {
           .read(recurringAutoPostActionsProvider.notifier)
           .postDue(budgetId: budgetId);
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.recurringPostSuccess(count))),
+        showAppToast(
+          context,
+          message: l10n.recurringPostSuccess(count),
+          variant: AppToastVariant.success,
         );
       }
     } on Exception catch (_) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.recurringPostError),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
+        showAppToast(
+          context,
+          message: l10n.recurringPostError,
+          variant: AppToastVariant.error,
         );
       }
     } finally {
@@ -1280,6 +1478,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
+      barrierColor: _dialogBarrierColor(context),
       builder: (ctx) => AlertDialog(
         title: Text(l10n.budgetCopyLastMonth),
         content: Text(l10n.budgetCopyLastMonthConfirm),
@@ -1308,17 +1507,18 @@ class BudgetDetailScreen extends HookConsumerWidget {
             currentMonth: month,
           );
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.budgetCopyLastMonthSuccess)),
+        showAppToast(
+          context,
+          message: l10n.budgetCopyLastMonthSuccess,
+          variant: AppToastVariant.success,
         );
       }
     } on Exception catch (_) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.budgetCopyLastMonthError),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
+        showAppToast(
+          context,
+          message: l10n.budgetCopyLastMonthError,
+          variant: AppToastVariant.error,
         );
       }
     }
@@ -1335,6 +1535,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final confirmed = await showDialog<bool>(
       context: context,
+      barrierColor: _dialogBarrierColor(context),
       builder: (ctx) => AlertDialog(
         title: Text(l10n.deleteConfirmTitle),
         content: Text('${l10n.deleteConfirmMessage}\n\n"$envelopeName"'),
@@ -1366,25 +1567,22 @@ class BudgetDetailScreen extends HookConsumerWidget {
             budgetId: budgetId,
           );
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.deleteSuccess),
-            action: SnackBarAction(
-              label: l10n.undoAction,
-              onPressed: () =>
-                  _undoDeleteEnvelope(context, ref, deleted, categoryId, l10n),
-            ),
-            duration: const Duration(seconds: 5),
-          ),
+        showAppToast(
+          context,
+          message: l10n.deleteSuccess,
+          variant: AppToastVariant.success,
+          actionLabel: l10n.undoAction,
+          onAction: () =>
+              _undoDeleteEnvelope(context, ref, deleted, categoryId, l10n),
+          duration: const Duration(seconds: 5),
         );
       }
     } on Exception catch (_) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.deleteError),
-            backgroundColor: colorScheme.error,
-          ),
+        showAppToast(
+          context,
+          message: l10n.deleteError,
+          variant: AppToastVariant.error,
         );
       }
     }
@@ -1406,17 +1604,18 @@ class BudgetDetailScreen extends HookConsumerWidget {
             budgetId: budgetId,
           );
       if (context.mounted) {
-        ScaffoldMessenger.of(
+        showAppToast(
           context,
-        ).showSnackBar(SnackBar(content: Text(l10n.undoDeleteSuccess)));
+          message: l10n.undoDeleteSuccess,
+          variant: AppToastVariant.success,
+        );
       }
     } on Exception catch (_) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.undoDeleteError),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
+        showAppToast(
+          context,
+          message: l10n.undoDeleteError,
+          variant: AppToastVariant.error,
         );
       }
     }
@@ -1655,6 +1854,9 @@ class _SpotlightOverview extends HookWidget {
     required this.totalActivityCents,
     required this.currencyCode,
     required this.hideAmounts,
+    required this.onEditTargets,
+    required this.onAssign,
+    required this.onReflect,
   });
 
   final BudgetSummary summary;
@@ -1662,6 +1864,9 @@ class _SpotlightOverview extends HookWidget {
   final int totalActivityCents;
   final CurrencyCode currencyCode;
   final bool hideAmounts;
+  final VoidCallback onEditTargets;
+  final VoidCallback onAssign;
+  final VoidCallback onReflect;
 
   @override
   Widget build(BuildContext context) {
@@ -1792,23 +1997,30 @@ class _SpotlightOverview extends HookWidget {
               Row(
                 children: [
                   Expanded(
-                    child: _SpotlightMetricTile(
-                      icon: Icons.track_changes_rounded,
-                      label: l10n.budgetSpotlightTotalTargets,
-                      value: hideAmounts
-                          ? hiddenAmountPlaceholder
-                          : formatCents(totalTargetsCents, currencyCode),
-                      actionLabel: l10n.budgetSpotlightEdit,
+                    child: SizedBox(
+                      height: 104,
+                      child: _SpotlightMetricTile(
+                        icon: Icons.track_changes_rounded,
+                        label: l10n.budgetSpotlightTotalTargets,
+                        value: hideAmounts
+                            ? hiddenAmountPlaceholder
+                            : formatCents(totalTargetsCents, currencyCode),
+                        actionLabel: l10n.budgetSpotlightEdit,
+                        onActionTap: onEditTargets,
+                      ),
                     ),
                   ),
                   const SizedBox(width: SpacingTokens.sm),
                   Expanded(
-                    child: _SpotlightMetricTile(
-                      icon: Icons.pie_chart_rounded,
-                      label: l10n.budgetSpotlightUnderfunded,
-                      value: hideAmounts
-                          ? hiddenAmountPlaceholder
-                          : formatCents(totalUnderfundedCents, currencyCode),
+                    child: SizedBox(
+                      height: 104,
+                      child: _SpotlightMetricTile(
+                        icon: Icons.pie_chart_rounded,
+                        label: l10n.budgetSpotlightUnderfunded,
+                        value: hideAmounts
+                            ? hiddenAmountPlaceholder
+                            : formatCents(totalUnderfundedCents, currencyCode),
+                      ),
                     ),
                   ),
                 ],
@@ -1817,27 +2029,35 @@ class _SpotlightOverview extends HookWidget {
               Row(
                 children: [
                   Expanded(
-                    child: _SpotlightMetricTile(
-                      icon: Icons.fact_check_rounded,
-                      label: l10n.budgetSpotlightAssigned,
-                      value: hideAmounts
-                          ? hiddenAmountPlaceholder
-                          : formatCents(
-                              summary.totalBudgetedCents,
-                              currencyCode,
-                            ),
-                      actionLabel: l10n.budgetSpotlightAssign,
+                    child: SizedBox(
+                      height: 104,
+                      child: _SpotlightMetricTile(
+                        icon: Icons.fact_check_rounded,
+                        label: l10n.budgetSpotlightAssigned,
+                        value: hideAmounts
+                            ? hiddenAmountPlaceholder
+                            : formatCents(
+                                summary.totalBudgetedCents,
+                                currencyCode,
+                              ),
+                        actionLabel: l10n.budgetSpotlightAssign,
+                        onActionTap: onAssign,
+                      ),
                     ),
                   ),
                   const SizedBox(width: SpacingTokens.sm),
                   Expanded(
-                    child: _SpotlightMetricTile(
-                      icon: Icons.payments_outlined,
-                      label: l10n.budgetSpotlightSpent,
-                      value: hideAmounts
-                          ? hiddenAmountPlaceholder
-                          : formatCents(totalActivityCents, currencyCode),
-                      actionLabel: l10n.budgetSpotlightReflect,
+                    child: SizedBox(
+                      height: 104,
+                      child: _SpotlightMetricTile(
+                        icon: Icons.payments_outlined,
+                        label: l10n.budgetSpotlightSpent,
+                        value: hideAmounts
+                            ? hiddenAmountPlaceholder
+                            : formatCents(totalActivityCents, currencyCode),
+                        actionLabel: l10n.budgetSpotlightReflect,
+                        onActionTap: onReflect,
+                      ),
                     ),
                   ),
                 ],
@@ -1872,62 +2092,135 @@ class _SpotlightMetricTile extends HookWidget {
     required this.label,
     required this.value,
     this.actionLabel,
+    this.onActionTap,
   });
 
   final IconData icon;
   final String label;
   final String value;
   final String? actionLabel;
+  final VoidCallback? onActionTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final accentColor = switch (icon) {
+      Icons.track_changes_rounded => OpenBudgetPalette.bgFlagInfoFor(theme),
+      Icons.pie_chart_rounded => OpenBudgetPalette.bgFlagCriticalFor(theme),
+      Icons.fact_check_rounded => OpenBudgetPalette.bgFlagPositiveFor(theme),
+      Icons.payments_outlined => OpenBudgetPalette.bgFlagAccentFor(theme),
+      _ => OpenBudgetPalette.bgBrandFor(theme),
+    };
+    final surfaceColor = Color.alphaBlend(
+      accentColor.withAlpha(theme.brightness == Brightness.dark ? 58 : 30),
+      OpenBudgetPalette.bgTertiaryFor(theme),
+    );
+
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: OpenBudgetPalette.bgTertiaryFor(Theme.of(context)),
+        color: surfaceColor,
         borderRadius: BorderRadius.circular(RadiusTokens.md),
-        border: Border.all(
-          color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
+        border: Border.all(color: accentColor.withAlpha(150)),
+        boxShadow: [
+          BoxShadow(
+            color: accentColor.withAlpha(
+              theme.brightness == Brightness.dark ? 52 : 34,
+            ),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+          BoxShadow(
+            color: OpenBudgetPalette.fgPrimaryFor(theme).withAlpha(16),
+            blurRadius: 4,
+            offset: const Offset(0, 1),
+          ),
+        ],
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            surfaceColor,
+            Color.alphaBlend(
+              accentColor.withAlpha(
+                theme.brightness == Brightness.dark ? 74 : 38,
+              ),
+              OpenBudgetPalette.bgSecondaryFor(theme),
+            ),
+          ],
         ),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(SpacingTokens.sm),
+        padding: const EdgeInsets.fromLTRB(
+          SpacingTokens.sm,
+          SpacingTokens.sm,
+          SpacingTokens.sm,
+          SpacingTokens.sm + 2,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Icon(
-                  icon,
-                  size: 18,
-                  color: OpenBudgetPalette.bgBrandFor(Theme.of(context)),
+                Container(
+                  width: 24,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    color: accentColor.withAlpha(
+                      theme.brightness == Brightness.dark ? 54 : 30,
+                    ),
+                    borderRadius: BorderRadius.circular(RadiusTokens.sm),
+                    border: Border.all(color: accentColor.withAlpha(165)),
+                  ),
+                  child: Icon(icon, size: 14, color: accentColor),
                 ),
                 const SizedBox(width: SpacingTokens.xs),
                 Expanded(
                   child: Text(
                     label,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: OpenBudgetPalette.fgSecondaryFor(
                         Theme.of(context),
                       ),
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
                 if (actionLabel != null)
-                  Text(
-                    actionLabel!,
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: OpenBudgetPalette.bgBrandFor(Theme.of(context)),
-                      fontWeight: FontWeight.w600,
+                  TextButton(
+                    onPressed: onActionTap,
+                    style: TextButton.styleFrom(
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      minimumSize: Size.zero,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: SpacingTokens.xs + 2,
+                        vertical: 2,
+                      ),
+                      backgroundColor: accentColor.withAlpha(
+                        theme.brightness == Brightness.dark ? 58 : 28,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(999),
+                        side: BorderSide(color: accentColor.withAlpha(145)),
+                      ),
+                    ),
+                    child: Text(
+                      actionLabel!,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: accentColor,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
               ],
             ),
-            const SizedBox(height: SpacingTokens.xs),
+            const SizedBox(height: SpacingTokens.xs + 2),
             Text(
               value,
               style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w800,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.1,
               ),
             ),
           ],
@@ -2012,6 +2305,7 @@ class _InlineAmountEditor extends HookWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final canApply = inputValue.isNotEmpty && inputValue != '-';
+    const actionRowHeight = 70.0;
 
     Widget key(
       String label, {
@@ -2019,6 +2313,7 @@ class _InlineAmountEditor extends HookWidget {
       bool primary = false,
       bool accent = false,
       Widget? child,
+      double minHeight = 48,
     }) {
       return Expanded(
         child: Padding(
@@ -2044,7 +2339,7 @@ class _InlineAmountEditor extends HookWidget {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(RadiusTokens.sm),
               ),
-              minimumSize: const Size.fromHeight(48),
+              fixedSize: Size.fromHeight(minHeight),
               elevation: 0,
             ),
             child: child ?? Text(label),
@@ -2089,25 +2384,31 @@ class _InlineAmountEditor extends HookWidget {
                   key(
                     l10n.autoAssignButton,
                     onPressed: onAutoAssign,
+                    minHeight: actionRowHeight,
                     child: Text(
                       l10n.autoAssignButton,
                       textAlign: TextAlign.center,
+                      maxLines: 2,
                     ),
                   ),
                   key(
                     l10n.envelopeActionMoveMoney,
                     onPressed: onMoveMoney,
+                    minHeight: actionRowHeight,
                     child: Text(
                       l10n.envelopeActionMoveMoney,
                       textAlign: TextAlign.center,
+                      maxLines: 2,
                     ),
                   ),
                   key(
                     l10n.budgetInlineEditorDetails,
                     onPressed: onDetails,
+                    minHeight: actionRowHeight,
                     child: Text(
                       l10n.budgetInlineEditorDetails,
                       textAlign: TextAlign.center,
+                      maxLines: 2,
                     ),
                   ),
                 ],
@@ -2149,7 +2450,19 @@ class _InlineAmountEditor extends HookWidget {
                     onPressed: onBackspace,
                     child: const Icon(Icons.backspace_outlined),
                   ),
-                  key(l10n.dialogDone, onPressed: onDone, primary: true),
+                  key(
+                    '',
+                    onPressed: onDone,
+                    primary: true,
+                    child: Tooltip(
+                      message: l10n.dialogDone,
+                      child: Semantics(
+                        button: true,
+                        label: l10n.dialogDone,
+                        child: const Icon(Icons.keyboard_return_rounded),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ],
@@ -2433,8 +2746,10 @@ class _CoverOverspendingSheet extends HookConsumerWidget {
             .toList(growable: false);
       } on Exception catch (_) {
         if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not cover overspending.')),
+        showAppToast(
+          context,
+          message: 'Could not cover overspending.',
+          variant: AppToastVariant.error,
         );
       } finally {
         ref

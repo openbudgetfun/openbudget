@@ -86,7 +86,27 @@ GoRouter appRouter(Ref ref) {
       GoRoute(
         name: createBudgetRoute,
         path: createBudgetPath,
-        builder: (context, state) => const CreateBudgetScreen(),
+        pageBuilder: (context, state) => CustomTransitionPage<void>(
+          key: state.pageKey,
+          transitionDuration: const Duration(milliseconds: 280),
+          reverseTransitionDuration: const Duration(milliseconds: 220),
+          child: const CreateBudgetScreen(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            final curvedAnimation = CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeOutCubic,
+              reverseCurve: Curves.easeInCubic,
+            );
+
+            return SlideTransition(
+              position: Tween<Offset>(
+                begin: const Offset(0, 1),
+                end: Offset.zero,
+              ).animate(curvedAnimation),
+              child: child,
+            );
+          },
+        ),
       ),
       GoRoute(
         name: budgetDetailRoute,
@@ -94,7 +114,11 @@ GoRouter appRouter(Ref ref) {
         redirect: (context, state) {
           final id = state.pathParameters['id'];
           if (id == null || id.isEmpty) return homePath;
-          return '/budgets/$id/plan';
+          final budgetRootPath = '/budgets/$id';
+          if (state.uri.path == budgetRootPath) {
+            return '$budgetRootPath/plan';
+          }
+          return null;
         },
         routes: [
           GoRoute(

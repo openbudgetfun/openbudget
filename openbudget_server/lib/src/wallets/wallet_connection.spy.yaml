@@ -1,0 +1,20 @@
+### Read-only blockchain wallet connection.
+class: WalletConnection
+table: wallet_connection
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  budgetId: UuidValue, relation(parent=budget)
+  chain: String
+  address: String
+  label: String?
+  createdAt: DateTime, default=now
+  updatedAt: DateTime, default=now
+  lastSyncedAt: DateTime?
+  syncStatus: String?
+  lastError: String?
+indexes:
+  wallet_connection_budget_chain_address_idx:
+    fields: budgetId, chain, address
+    unique: true
+  wallet_connection_budget_idx:
+    fields: budgetId

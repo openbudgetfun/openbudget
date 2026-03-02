@@ -1,0 +1,17 @@
+### Cached USD quote for a blockchain asset.
+class: AssetQuoteCache
+table: asset_quote_cache
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  chain: String
+  assetId: String
+  symbol: String
+  usdPrice: double
+  fetchedAt: DateTime, default=now
+  expiresAt: DateTime
+indexes:
+  asset_quote_cache_chain_asset_idx:
+    fields: chain, assetId
+    unique: true
+  asset_quote_cache_expires_idx:
+    fields: expiresAt

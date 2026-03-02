@@ -76,9 +76,8 @@ class BudgetShellScreen extends HookWidget {
 
     // Map visual tab index back to shell branch index
     final branchIndex = index > 2 ? index - 1 : index;
-    navigationShell.goBranch(
-      branchIndex,
-      initialLocation: branchIndex == navigationShell.currentIndex,
-    );
+    // Always navigate to the branch root to avoid stale shell state causing
+    // apparent no-op tab taps (especially on first visit to a branch).
+    navigationShell.goBranch(branchIndex, initialLocation: true);
   }
 }

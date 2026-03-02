@@ -71,6 +71,10 @@ payee:
   - lastUsedEnvelopeId:
   - merge:
   - delete:
+plaid:
+  - createLinkToken:
+  - exchangePublicToken:
+  - syncConnection:
 recurringTransaction:
   - create:
   - list:
@@ -113,3 +117,7 @@ transaction:
   - bulkImport:
   - findDuplicates:
   - delete:
+wallet:
+  - connectSolanaWallet:
+  - refreshSolanaWallet:
+  - listWalletHoldings:
