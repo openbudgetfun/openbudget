@@ -272,12 +272,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Add Unlinked Account'), findsOneWidget);
-    expect(
-      find.textContaining(
-        'Linked connections are only available on iOS/Android right now',
-      ),
-      findsOneWidget,
-    );
+    expect(find.textContaining('unlinked account instead'), findsOneWidget);
   });
 
   patrolWidgetTest('submitting search query keeps user in bank search mode', (
@@ -417,12 +412,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Add Unlinked Account'), findsOneWidget);
-      expect(
-        find.textContaining(
-          'Linked connections are only available on iOS/Android right now',
-        ),
-        findsOneWidget,
-      );
+      expect(find.textContaining('unlinked account instead'), findsOneWidget);
       await _captureAddAccountStepScreenshot(
         tester,
         'add-accounts-desktop-unlinked-fallback-screen',

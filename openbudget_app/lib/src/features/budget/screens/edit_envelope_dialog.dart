@@ -6,6 +6,7 @@ import 'package:openbudget_app/src/features/budget/providers/envelope_actions_pr
 import 'package:openbudget_app/src/features/budget/providers/envelope_goal_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/monthly_allocation_provider.dart';
 import 'package:openbudget_app/src/features/budget/screens/set_goal_dialog.dart';
+import 'package:openbudget_app/src/features/budget/widgets/budget_amount_keypad.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
@@ -34,8 +35,11 @@ class EditEnvelopeDialog extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final nameController = useTextEditingController(text: envelope.name);
-    final amountController = useTextEditingController(
-      text: _formatInitialAmount(envelope.budgetedAmountCents, currencyCode),
+    final amountInput = useState(
+      budgetAmountInputFromCents(
+        cents: envelope.budgetedAmountCents,
+        currencyCode: currencyCode,
+      ),
     );
     final noteController = useTextEditingController(text: envelope.note ?? '');
     final isSubmitting = useState(false);
@@ -62,24 +66,27 @@ class EditEnvelopeDialog extends HookConsumerWidget {
             textInputAction: TextInputAction.next,
           ),
           const SizedBox(height: SpacingTokens.md),
-          TextField(
-            controller: amountController,
-            decoration: InputDecoration(
-              labelText: l10n.budgetEnvelopeAmountLabel,
-              prefixText: '${currencyCode.symbol} ',
+          BudgetAmountField(
+            labelText: l10n.budgetEnvelopeAmountLabel,
+            currencyCode: currencyCode,
+            inputValue: amountInput.value,
+            hintText: formatBudgetAmountInputForField(
+              input: '0',
+              currencyCode: currencyCode,
             ),
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            textInputAction: TextInputAction.done,
-            onSubmitted: isSubmitting.value
-                ? null
-                : (_) => _submit(
-                    context,
-                    ref,
-                    nameController,
-                    amountController,
-                    noteController,
-                    isSubmitting,
-                  ),
+            prefixIcon: const Icon(Icons.payments_outlined),
+            enabled: !isSubmitting.value,
+            onTap: () async {
+              final nextInput = await showBudgetAmountKeypadSheet(
+                context: context,
+                currencyCode: currencyCode,
+                initialInput: amountInput.value,
+                title: l10n.budgetEnvelopeAmountLabel,
+              );
+              if (nextInput != null) {
+                amountInput.value = nextInput;
+              }
+            },
           ),
           const SizedBox(height: SpacingTokens.md),
           TextField(
@@ -125,7 +132,7 @@ class EditEnvelopeDialog extends HookConsumerWidget {
                   context,
                   ref,
                   nameController,
-                  amountController,
+                  amountInput.value,
                   noteController,
                   isSubmitting,
                 ),
@@ -203,7 +210,7 @@ class EditEnvelopeDialog extends HookConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     TextEditingController nameController,
-    TextEditingController amountController,
+    String amountInput,
     TextEditingController noteController,
     ValueNotifier<bool> isSubmitting,
   ) async {
@@ -211,9 +218,12 @@ class EditEnvelopeDialog extends HookConsumerWidget {
     final name = nameController.text.trim();
     if (name.isEmpty) return;
 
-    final amountText = amountController.text.trim();
-    final amount = double.tryParse(amountText) ?? 0;
-    final amountCents = (amount * _pow10(currencyCode.decimals)).round();
+    final amountCents =
+        parseBudgetAmountInputToCents(
+          input: amountInput,
+          currencyCode: currencyCode,
+        ) ??
+        0;
     final note = noteController.text.trim();
 
     isSubmitting.value = true;
@@ -273,18 +283,4 @@ class EditEnvelopeDialog extends HookConsumerWidget {
       ),
     );
   }
-
-  String _formatInitialAmount(int cents, CurrencyCode currency) {
-    final divisor = _pow10(currency.decimals);
-    final value = cents / divisor;
-    return value.toStringAsFixed(currency.decimals);
-  }
-}
-
-double _pow10(int exponent) {
-  var result = 1.0;
-  for (var i = 0; i < exponent; i++) {
-    result *= 10;
-  }
-  return result;
 }

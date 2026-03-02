@@ -2885,10 +2885,10 @@ class _TransactionCard extends StatelessWidget {
                     label:
                         'P&L ${_formatSignedUsd(transaction.estimatedRealizedPnl!)}',
                     color: transaction.estimatedRealizedPnl! >= 0
-                        ? OpenBudgetPalette.progressGreen.withAlpha(40)
+                        ? colorScheme.secondary.withAlpha(40)
                         : colorScheme.errorContainer,
                     foregroundColor: transaction.estimatedRealizedPnl! >= 0
-                        ? OpenBudgetPalette.progressGreen
+                        ? colorScheme.secondary
                         : colorScheme.onErrorContainer,
                   ),
                 if (transaction.taxYear != null)
@@ -3072,7 +3072,7 @@ String _formatSignedUsd(double amount) {
 }
 
 Color _pnlColor(double amount, ColorScheme colorScheme) {
-  if (amount > 0) return OpenBudgetPalette.progressGreen;
+  if (amount > 0) return colorScheme.secondary;
   if (amount < 0) return colorScheme.error;
   return colorScheme.onSurface;
 }

@@ -187,7 +187,7 @@ void main() {
       expect(find.text('Done'), findsOneWidget);
       expect(find.text('Settings'), findsWidgets);
 
-      await tester.tap(find.text('Dark'));
+      await tester.tap(find.byType(Switch).first);
       await tester.pumpAndSettle();
       await tester.tap(find.text('Differentiate Without Color'));
       await tester.pumpAndSettle();

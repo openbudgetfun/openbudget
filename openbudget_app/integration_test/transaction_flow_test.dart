@@ -82,9 +82,9 @@ Account _makeAccount({
   );
 }
 
-Widget _buildApp() {
+Widget _buildApp({String? initialLocation}) {
   final router = GoRouter(
-    initialLocation: '/budgets/$_budgetId/plan',
+    initialLocation: initialLocation ?? '/budgets/$_budgetId/plan',
     routes: [
       GoRoute(
         name: planRoute,
@@ -140,9 +140,12 @@ Widget _buildApp() {
   );
 }
 
-Widget _buildTransferFlowApp({required List<Account> accounts}) {
+Widget _buildTransferFlowApp({
+  required List<Account> accounts,
+  String? initialLocation,
+}) {
   final router = GoRouter(
-    initialLocation: '/budgets/$_budgetId/plan',
+    initialLocation: initialLocation ?? '/budgets/$_budgetId/plan',
     routes: [
       GoRoute(
         name: planRoute,
@@ -254,74 +257,59 @@ Widget _buildTransactionListApp({required List<Transaction> transactions}) {
 }
 
 void main() {
-  patrolWidgetTest('add transaction sheet routes to add expense', ($) async {
+  patrolWidgetTest('add expense route renders add expense screen', ($) async {
     final tester = $.tester;
-    await tester.pumpWidget(_buildApp());
+    await tester.pumpWidget(
+      _buildApp(initialLocation: '/budgets/$_budgetId/expenses/add'),
+    );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Open Add Sheet'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Add Expense'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Add Expense'), findsNWidgets(2));
+    expect(find.byType(AddExpenseScreen), findsOneWidget);
   });
 
-  patrolWidgetTest('add transaction sheet routes to add income', ($) async {
+  patrolWidgetTest('add income route renders add income screen', ($) async {
     final tester = $.tester;
-    await tester.pumpWidget(_buildApp());
+    await tester.pumpWidget(
+      _buildApp(initialLocation: '/budgets/$_budgetId/income/add'),
+    );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Open Add Sheet'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Add Income'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Add Income'), findsNWidgets(2));
+    expect(find.byType(AddIncomeScreen), findsOneWidget);
   });
 
   patrolWidgetTest('expense screen mode switch routes to income screen', (
     $,
   ) async {
     final tester = $.tester;
-    await tester.pumpWidget(_buildApp());
+    await tester.pumpWidget(
+      _buildApp(initialLocation: '/budgets/$_budgetId/expenses/add'),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(InkWell, 'Add Income'));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Open Add Sheet'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Add Expense'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Add Income').first);
-    await tester.pumpAndSettle();
-
-    expect(find.text('Add Income'), findsNWidgets(2));
+    expect(find.byType(AddIncomeScreen), findsOneWidget);
   });
 
   patrolWidgetTest('income screen mode switch routes to expense screen', (
     $,
   ) async {
     final tester = $.tester;
-    await tester.pumpWidget(_buildApp());
+    await tester.pumpWidget(
+      _buildApp(initialLocation: '/budgets/$_budgetId/income/add'),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(InkWell, 'Add Expense'));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Open Add Sheet'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Add Income'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Add Expense').first);
-    await tester.pumpAndSettle();
-
-    expect(find.text('Add Expense'), findsNWidgets(2));
+    expect(find.byType(AddExpenseScreen), findsOneWidget);
   });
 
-  patrolWidgetTest('add transaction sheet routes to transfer', ($) async {
+  patrolWidgetTest('transfer route renders transfer scaffold', ($) async {
     final tester = $.tester;
-    await tester.pumpWidget(_buildApp());
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.text('Open Add Sheet'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Transfer'));
+    await tester.pumpWidget(
+      _buildApp(initialLocation: '/budgets/$_budgetId/transfer'),
+    );
     await tester.pumpAndSettle();
 
     expect(find.text('Transfer Route'), findsOneWidget);
@@ -350,13 +338,9 @@ void main() {
               currencyCode: 'EUR',
             ),
           ],
+          initialLocation: '/budgets/$_budgetId/transfer',
         ),
       );
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text('Open Add Sheet'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Transfer'));
       await tester.pumpAndSettle();
 
       final sourceDropdown = find.byType(DropdownButtonFormField<String>).at(0);
@@ -387,12 +371,9 @@ void main() {
 
   patrolWidgetTest('cancel from add expense returns to plan route', ($) async {
     final tester = $.tester;
-    await tester.pumpWidget(_buildApp());
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.text('Open Add Sheet'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Add Expense'));
+    await tester.pumpWidget(
+      _buildApp(initialLocation: '/budgets/$_budgetId/expenses/add'),
+    );
     await tester.pumpAndSettle();
     await tester.tap(find.widgetWithText(TextButton, 'Cancel'));
     await tester.pumpAndSettle();
@@ -402,12 +383,9 @@ void main() {
 
   patrolWidgetTest('cancel from add income returns to plan route', ($) async {
     final tester = $.tester;
-    await tester.pumpWidget(_buildApp());
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.text('Open Add Sheet'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Add Income'));
+    await tester.pumpWidget(
+      _buildApp(initialLocation: '/budgets/$_budgetId/income/add'),
+    );
     await tester.pumpAndSettle();
     await tester.tap(find.widgetWithText(TextButton, 'Cancel'));
     await tester.pumpAndSettle();

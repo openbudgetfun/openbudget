@@ -146,7 +146,7 @@ void withServerpod(
       endpoints: Endpoints(),
       serializationManager: Protocol(),
       runMode: runMode,
-      applyMigrations: applyMigrations,
+      applyMigrations: applyMigrations ?? true,
       isDatabaseEnabled: true,
       serverpodLoggingMode: serverpodLoggingMode,
       testServerOutputMode: testServerOutputMode,
