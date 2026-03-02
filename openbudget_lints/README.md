@@ -18,6 +18,10 @@ include: package:openbudget_lints/analysis_options.yaml
 - `enforce_pinned_app_dependencies`: In `openbudget_app/pubspec.yaml`,
   requires exact versions in `dependencies` and rejects constraints starting
   with `^`, `>`, or `~`.
+- `enforce_theme_palette_colors`: In `openbudget_app/lib/**`, disallows
+  `Color(...)`, `Color.from*`, `Colors.*`, and direct palette members that do
+  not end with `For` outside
+  `lib/src/theme/openbudget_palette.dart`. Use `OpenBudgetPalette.*For(theme)`.
 
 ## Enable Plugin Rules
 
