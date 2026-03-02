@@ -25,6 +25,16 @@ fields:
   nativeTransfersJson: String?
   ### JSON-encoded token transfer details.
   tokenTransfersJson: String?
+  ### Estimated disposal cost basis in quote currency.
+  estimatedCostBasis: double?
+  ### Estimated disposal proceeds in quote currency.
+  estimatedProceeds: double?
+  ### Estimated realized gain/loss in quote currency.
+  estimatedRealizedPnl: double?
+  ### Quote currency used for estimated P&L values.
+  pnlCurrency: String?
+  ### Tax year inferred from occurredAt.
+  taxYear: int?
   ### User-managed category value.
   category: String?
   ### User-managed comma-separated tags.
