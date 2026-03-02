@@ -23,7 +23,6 @@ This backlog turns strategy into implementable epics with explicit acceptance cr
 
 - #154: Implemented core wallet attach/sync pipeline (Serverpod models, endpoint/service, migration, app attach flow).
 - #155: Implemented timeline UX and metadata editing; upgraded to richer wallet dashboard layout and card system.
-- #155: Added improved plain-English fallback descriptions by mapping detected program IDs (Jupiter, Pump.fun, SPL Token, Token-2022, etc.).
 - #156: Implemented initial holdings valuation wiring with provider-returned pricing fields; fallback adapter strategy still pending.
 - #157: Not started (schema and engine work pending).
 - #158: Implemented Android flavors + iOS schemes + app bootstrap routing; added `default-flavor: dev` for tooling compatibility.
