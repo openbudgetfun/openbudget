@@ -136,6 +136,27 @@ void main() {
       expect(find.text('Reflect Tab'), findsOneWidget);
     });
 
+    testWidgets('android back navigates through tab history', (tester) async {
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Accounts'));
+      await tester.pumpAndSettle();
+      expect(find.text('Accounts Tab'), findsOneWidget);
+
+      await tester.tap(find.text('Reflect'));
+      await tester.pumpAndSettle();
+      expect(find.text('Reflect Tab'), findsOneWidget);
+
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+      expect(find.text('Accounts Tab'), findsOneWidget);
+
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+      expect(find.text('Plan Tab'), findsOneWidget);
+    });
+
     testWidgets('tapping More tab navigates to more', (tester) async {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
