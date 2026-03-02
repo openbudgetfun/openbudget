@@ -44,6 +44,9 @@ const _addAccountWalletAddressFieldKey = Key(
   'add-account-wallet-address-field',
 );
 const _addAccountWalletLabelFieldKey = Key('add-account-wallet-label-field');
+const _addAccountUnlinkedWalletAddressFieldKey = Key(
+  'add-account-unlinked-wallet-address-field',
+);
 
 class AddAccountScreen extends HookConsumerWidget {
   const AddAccountScreen({required this.budgetId, super.key});
@@ -58,8 +61,8 @@ class AddAccountScreen extends HookConsumerWidget {
     final step = useState(_AddAccountStep.loading);
     final nameController = useTextEditingController();
     final balanceController = useTextEditingController();
-    final searchController = useTextEditingController();
     final walletAddressController = useTextEditingController();
+    final searchController = useTextEditingController();
     final walletLabelController = useTextEditingController();
     final isSubmitting = useState(false);
     final selectedTypeKey = useState<String?>(null);
@@ -104,8 +107,8 @@ class AddAccountScreen extends HookConsumerWidget {
 
     useListenable(nameController);
     useListenable(balanceController);
-    useListenable(searchController);
     useListenable(walletAddressController);
+    useListenable(searchController);
     useListenable(walletLabelController);
 
     useEffect(() {
@@ -161,10 +164,13 @@ class AddAccountScreen extends HookConsumerWidget {
     );
 
     final balanceValue = double.tryParse(balanceController.text.trim());
+    final isWalletType = selectedType?.key == 'cryptoWallet';
     final canSubmit =
+        selectedType != null &&
         nameController.text.trim().isNotEmpty &&
-        balanceValue != null &&
-        selectedType != null;
+        (isWalletType
+            ? walletAddressController.text.trim().isNotEmpty
+            : balanceValue != null);
     final canSubmitWallet = walletAddressController.text.trim().isNotEmpty;
 
     Future<void> startLinkedBankFlow(String institutionName) async {
@@ -283,8 +289,14 @@ class AddAccountScreen extends HookConsumerWidget {
 
       isSubmitting.value = true;
 
+      final parsedBalance = isWalletType ? 0.0 : balanceValue;
+      if (parsedBalance == null) {
+        isSubmitting.value = false;
+        return;
+      }
+
       var balanceCents =
-          (balanceValue * _pow10(selectedCurrency.value.decimals)).round();
+          (parsedBalance * _pow10(selectedCurrency.value.decimals)).round();
       if (chosenType.isDebt && balanceCents > 0) {
         balanceCents = -balanceCents;
       }
@@ -301,6 +313,9 @@ class AddAccountScreen extends HookConsumerWidget {
               budgetId: budgetId,
               onBudget: chosenType.onBudgetDefault,
               sortOrder: 0,
+              walletAddress: isWalletType
+                  ? walletAddressController.text.trim()
+                  : null,
             );
         if (!context.mounted) return;
         isSubmitting.value = false;
@@ -408,6 +423,8 @@ class AddAccountScreen extends HookConsumerWidget {
                   scrollController: unlinkedScrollController,
                   nameController: nameController,
                   balanceController: balanceController,
+                  walletAddressController: walletAddressController,
+                  showWalletAddress: isWalletType,
                   selectedTypeLabel:
                       selectedType?.label ?? 'Select account type...',
                   hasSelectedType: selectedType != null,
@@ -927,6 +944,8 @@ class _UnlinkedAccountStep extends StatelessWidget {
     required this.scrollController,
     required this.nameController,
     required this.balanceController,
+    required this.walletAddressController,
+    required this.showWalletAddress,
     required this.selectedTypeLabel,
     required this.hasSelectedType,
     required this.onChooseType,
@@ -935,6 +954,8 @@ class _UnlinkedAccountStep extends StatelessWidget {
   final ScrollController scrollController;
   final TextEditingController nameController;
   final TextEditingController balanceController;
+  final TextEditingController walletAddressController;
+  final bool showWalletAddress;
   final String selectedTypeLabel;
   final bool hasSelectedType;
   final VoidCallback onChooseType;
@@ -942,6 +963,7 @@ class _UnlinkedAccountStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final primaryTextColor = theme.brightness == Brightness.dark
         ? theme.colorScheme.onSurface
         : OpenBudgetPalette.fgIconStrongFor(Theme.of(context));
@@ -964,6 +986,9 @@ class _UnlinkedAccountStep extends StatelessWidget {
         (theme.textTheme.bodyLarge ??
                 const TextStyle(fontSize: 20, fontWeight: FontWeight.w500))
             .copyWith(color: secondaryTextColor.withAlpha(220));
+    final introText = showWalletAddress
+        ? 'Add your Solana wallet to track transfers, swaps, and holdings in one place.'
+        : "Bank connections are currently unavailable in this build, so let's set up an unlinked account.";
 
     return SingleChildScrollView(
       key: _addAccountUnlinkedScrollKey,
@@ -978,11 +1003,7 @@ class _UnlinkedAccountStep extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            'Bank connections are currently unavailable in this build, '
-            "so let's set up an unlinked account.",
-            style: introStyle,
-          ),
+          Text(introText, style: introStyle),
           const SizedBox(height: SpacingTokens.md),
           Text('Give it a nickname', style: headingStyle),
           const SizedBox(height: SpacingTokens.xs),
@@ -1021,22 +1042,70 @@ class _UnlinkedAccountStep extends StatelessWidget {
             ),
           ),
           const SizedBox(height: SpacingTokens.md),
-          Text('What is your current account balance?', style: headingStyle),
-          const SizedBox(height: SpacingTokens.xs),
-          TextField(
-            key: _addAccountUnlinkedBalanceFieldKey,
-            controller: balanceController,
-            keyboardType: const TextInputType.numberWithOptions(
-              decimal: true,
-              signed: true,
+          if (showWalletAddress) ...[
+            Container(
+              padding: const EdgeInsets.all(SpacingTokens.md),
+              decoration: BoxDecoration(
+                color: colorScheme.primaryContainer.withAlpha(120),
+                borderRadius: BorderRadius.circular(RadiusTokens.md),
+                border: Border.all(color: colorScheme.outlineVariant),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.wallet_outlined, color: colorScheme.primary),
+                  const SizedBox(width: SpacingTokens.sm),
+                  Expanded(
+                    child: Text(
+                      'OpenBudget will auto-sync transactions and holdings after wallet setup. '
+                      'You can tag and categorize activity in account details.',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-            textInputAction: TextInputAction.done,
-            style: formValueStyle,
-            decoration: InputDecoration(
-              hintText: '5000',
-              hintStyle: formHintStyle,
+            const SizedBox(height: SpacingTokens.md),
+            Text('What is your Solana wallet address?', style: headingStyle),
+            const SizedBox(height: SpacingTokens.xs),
+            TextField(
+              key: _addAccountUnlinkedWalletAddressFieldKey,
+              controller: walletAddressController,
+              keyboardType: TextInputType.text,
+              textInputAction: TextInputAction.done,
+              style: formValueStyle.copyWith(fontFamily: 'monospace'),
+              decoration: InputDecoration(
+                hintText: 'e.g. 5xQf...w8bP',
+                hintStyle: formHintStyle,
+              ),
             ),
-          ),
+            const SizedBox(height: SpacingTokens.xs),
+            Text(
+              'Only public wallet addresses are supported.',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: secondaryTextColor,
+              ),
+            ),
+          ] else ...[
+            Text('What is your current account balance?', style: headingStyle),
+            const SizedBox(height: SpacingTokens.xs),
+            TextField(
+              key: _addAccountUnlinkedBalanceFieldKey,
+              controller: balanceController,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+                signed: true,
+              ),
+              textInputAction: TextInputAction.done,
+              style: formValueStyle,
+              decoration: InputDecoration(
+                hintText: '5000',
+                hintStyle: formHintStyle,
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -1332,6 +1401,20 @@ List<_AccountTypeSection> _accountTypeSections(AppLocalizations l10n) {
           serverType: 'other',
           onBudgetDefault: false,
           isDebt: true,
+        ),
+      ],
+    ),
+    const _AccountTypeSection(
+      title: 'Digital Assets',
+      subtitle:
+          'Track a Solana wallet with automatic transaction history and asset valuations.',
+      options: [
+        _AccountTypeOption(
+          key: 'cryptoWallet',
+          label: 'Solana Wallet',
+          serverType: 'cryptoWallet',
+          onBudgetDefault: false,
+          isDebt: false,
         ),
       ],
     ),

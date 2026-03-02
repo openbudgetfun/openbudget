@@ -84,6 +84,14 @@ recurringTransaction:
   - skipOccurrence:
   - postDue:
   - countDue:
+solanaWallet:
+  - attach:
+  - list:
+  - getForAccount:
+  - sync:
+  - listTransactions:
+  - listHoldings:
+  - updateTransactionMetadata:
 transactionRule:
   - create:
   - list:

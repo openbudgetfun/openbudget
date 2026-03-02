@@ -18,19 +18,27 @@ class AccountActions extends _$AccountActions {
     required String budgetId,
     required bool onBudget,
     required int sortOrder,
+    String? walletAddress,
   }) async {
     final client = ref.read(serverpodClientProvider);
+    // Serverpod API requires UuidValue which is experimental in uuid package.
+    // ignore: experimental_member_use
+    final budgetUuid = UuidValue.fromString(budgetId);
     final account = await client.account.create(
       name,
       accountType,
       balanceCents,
       currencyCode,
-      // Serverpod API requires UuidValue which is experimental in uuid package.
-      // ignore: experimental_member_use
-      UuidValue.fromString(budgetId),
+      budgetUuid,
       onBudget: onBudget,
       sortOrder: sortOrder,
     );
+
+    final normalizedWallet = walletAddress?.trim();
+    if (normalizedWallet != null && normalizedWallet.isNotEmpty) {
+      // Wallet linking is handled by dedicated wallet flows.
+    }
+
     ref.invalidate(accountListProvider(budgetId));
     return account;
   }

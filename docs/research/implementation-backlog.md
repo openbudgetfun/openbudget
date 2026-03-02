@@ -10,6 +10,24 @@ This backlog turns strategy into implementable epics with explicit acceptance cr
 - P1 = core strategic unlocks
 - P2 = ecosystem and optimization
 
+## Execution Tracking (2026-02-28)
+
+- [#154](https://github.com/openbudgetfun/openbudget/issues/154) Solana wallet attachment + incremental sync pipeline.
+- [#155](https://github.com/openbudgetfun/openbudget/issues/155) Wallet transaction timeline UX with categorization/tags.
+- [#156](https://github.com/openbudgetfun/openbudget/issues/156) Holdings valuation and pricing fallback strategy.
+- [#157](https://github.com/openbudgetfun/openbudget/issues/157) Token/Token-2022 P&L and tax-lot foundation.
+- [#158](https://github.com/openbudgetfun/openbudget/issues/158) Dev/prod flavor system across Android + iOS schemes.
+- [#159](https://github.com/openbudgetfun/openbudget/issues/159) Provider config + secret hygiene + deploy checklist.
+
+## Execution Status Snapshot (2026-02-28 PM)
+
+- #154: Implemented core wallet attach/sync pipeline (Serverpod models, endpoint/service, migration, app attach flow).
+- #155: Implemented timeline UX and metadata editing; upgraded to richer wallet dashboard layout and card system.
+- #156: Implemented initial holdings valuation wiring with provider-returned pricing fields; fallback adapter strategy still pending.
+- #157: Not started (schema and engine work pending).
+- #158: Implemented Android flavors + iOS schemes + app bootstrap routing; added `default-flavor: dev` for tooling compatibility.
+- #159: Implemented environment-based client routing and secret lookup path (`passwords.yaml` + env fallback); deploy checklist still pending.
+
 ## Epic P0.1 - Currency Safety Invariants (Server)
 
 Problem:
