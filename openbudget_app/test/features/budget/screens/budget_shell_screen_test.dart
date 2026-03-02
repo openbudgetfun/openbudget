@@ -145,5 +145,22 @@ void main() {
 
       expect(find.text('More Tab'), findsOneWidget);
     });
+
+    testWidgets('re-tapping More tab opens quick actions sheet', (
+      tester,
+    ) async {
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('More'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('More'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Settings'), findsOneWidget);
+      expect(find.text('Recurring Transactions'), findsOneWidget);
+      expect(find.text('Payees'), findsOneWidget);
+    });
   });
 }
