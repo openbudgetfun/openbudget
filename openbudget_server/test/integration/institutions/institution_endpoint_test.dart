@@ -1,6 +1,5 @@
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:openbudget_server/src/institutions/institution_service.dart';
-import 'package:serverpod/serverpod.dart';
 import 'package:test/test.dart';
 
 import '../helpers/auth_helper.dart';
@@ -70,33 +69,25 @@ void main() {
         try {
           await InstitutionService.ensureCatalogSeeded(session);
 
-          final locations = await InstitutionLocation.db.find(session);
-          final codesByInstitutionId = <String, Set<String>>{};
-          for (final location in locations) {
-            final institutionId = location.institutionId.toString();
-            codesByInstitutionId
-                .putIfAbsent(institutionId, () => <String>{})
-                .add(location.locationCode);
-          }
-
-          final multiRegionInstitutionId = codesByInstitutionId.entries
-              .firstWhere(
-                (entry) => entry.value.length >= 2,
-                orElse: () => throw StateError(
-                  'Expected at least one institution in multiple regions.',
-                ),
-              )
-              .key;
-
-          final institution = await Institution.db.findFirstRow(
+          final wise = await Institution.db.findFirstRow(
             session,
-            where: (t) =>
-                t.id.equals(UuidValue.fromString(multiRegionInstitutionId)),
+            where: (t) => t.slug.equals('wise'),
           );
-          final regions = codesByInstitutionId[multiRegionInstitutionId]!;
+          if (wise == null || wise.id == null) {
+            fail('Expected seeded institution "wise" with a persistent id.');
+          }
+          final wiseId = wise.id!;
 
-          expect(institution, isNotNull);
+          final locations = await InstitutionLocation.db.find(
+            session,
+            where: (t) => t.institutionId.equals(wiseId),
+          );
+          final regions = locations
+              .map((location) => location.locationCode)
+              .toSet();
+
           expect(regions.length, greaterThanOrEqualTo(2));
+          expect(regions, containsAll(<String>{'GB', 'EU', 'US'}));
         } finally {
           await session.close();
         }

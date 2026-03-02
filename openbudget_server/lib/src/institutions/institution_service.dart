@@ -93,6 +93,7 @@ class InstitutionService {
       for (final location in existingLocations)
         '${location.institutionId}:${location.locationCode}': location,
     };
+    final expectedCodesByInstitutionId = <UuidValue, Set<String>>{};
 
     for (final seed in _seedInstitutions) {
       final institutionId = institutionIdsBySlug[seed.slug];
@@ -103,9 +104,12 @@ class InstitutionService {
         ...seed.popularRanks.keys,
       };
 
+      final normalizedCodes = <String>{};
+
       for (final rawCode in locationCodes) {
         final code = normalizeLocationCode(rawCode);
         if (code == null) continue;
+        normalizedCodes.add(code);
 
         final key = '$institutionId:$code';
         final existing = locationByKey[key];
@@ -135,6 +139,22 @@ class InstitutionService {
           locationByKey[key] = updated;
         }
       }
+
+      expectedCodesByInstitutionId[institutionId] = normalizedCodes;
+    }
+
+    final staleLocations = <InstitutionLocation>[];
+    for (final location in existingLocations) {
+      final expectedCodes =
+          expectedCodesByInstitutionId[location.institutionId];
+      if (expectedCodes == null) continue;
+      if (!expectedCodes.contains(location.locationCode)) {
+        staleLocations.add(location);
+      }
+    }
+
+    if (staleLocations.isNotEmpty) {
+      await InstitutionLocation.db.delete(session, staleLocations);
     }
   }
 
