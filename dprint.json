@@ -37,8 +37,9 @@
         "exts": ["kt", "kts"]
       },
       {
-        "command": "swiftformat stdin --stdinpath {{file_path}} --quiet",
-        "exts": ["swift"]
+        "command": "./tools/swiftfmt.sh {{file_path}}",
+        "exts": ["swift"],
+        "stdin": false
       }
     ]
   },

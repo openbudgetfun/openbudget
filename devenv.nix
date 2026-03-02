@@ -26,11 +26,11 @@ in
       pulumi-bin
       pulumi-esc
       shfmt
-      swiftformat
-      swiftlint
     ]
     ++ lib.optionals stdenv.isDarwin [
       coreutils
+      swiftformat
+      swiftlint
     ];
 
   dotenv.disableHint = true;
@@ -530,6 +530,10 @@ in
     "lint:swift" = {
       exec = ''
         set -euo pipefail
+        if ! command -v swiftlint >/dev/null 2>&1; then
+          echo "swiftlint is unavailable on this platform; skipping Swift lint."
+          exit 0
+        fi
         swiftlint lint --strict --quiet --config "$DEVENV_ROOT/.swiftlint.yml"
       '';
       description = "Run swiftlint for Swift source files.";
