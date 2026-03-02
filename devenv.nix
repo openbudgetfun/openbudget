@@ -21,10 +21,13 @@ in
       extra.pnpm-standalone
       fvm
       gitleaks
+      ktlint
       nixfmt
       pulumi-bin
       pulumi-esc
       shfmt
+      swiftformat
+      swiftlint
     ]
     ++ lib.optionals stdenv.isDarwin [
       coreutils
@@ -518,10 +521,18 @@ in
       exec = ''
         set -e
         lint:format
+        lint:swift
         docs:workflows:check
         lint:analyze
       '';
       description = "Lint all project files.";
+    };
+    "lint:swift" = {
+      exec = ''
+        set -euo pipefail
+        swiftlint lint --strict --quiet --config "$DEVENV_ROOT/.swiftlint.yml"
+      '';
+      description = "Run swiftlint for Swift source files.";
     };
     "lint:format" = {
       exec = ''
