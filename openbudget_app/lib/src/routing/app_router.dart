@@ -55,23 +55,19 @@ final _shellNavigatorKeys = <GlobalKey<NavigatorState>>[
 GoRouter appRouter(Ref ref) {
   final authState = ref.watch(authProvider);
 
-  final isAuthenticated = authState is Authenticated;
-  final isLoading = authState is AuthLoading;
-
   return GoRouter(
-    initialLocation: loginPath,
+    initialLocation: startupPath,
     observers: [LoggingNavigationObserver()],
-    redirect: (context, state) {
-      final location = state.matchedLocation;
-      final isAuthRoute = location == loginPath || location == registerPath;
-
-      if (isLoading) return null;
-      if (!isAuthenticated && !isAuthRoute) return loginPath;
-      if (isAuthenticated && isAuthRoute) return homePath;
-
-      return null;
-    },
+    redirect: (context, state) => authRedirectForLocation(
+      authState: authState,
+      location: state.matchedLocation,
+    ),
     routes: [
+      GoRoute(
+        name: startupRoute,
+        path: startupPath,
+        builder: (context, state) => const _StartupScreen(),
+      ),
       GoRoute(
         name: loginRoute,
         path: loginPath,
@@ -435,4 +431,38 @@ GoRouter appRouter(Ref ref) {
     errorBuilder: (context, state) =>
         Scaffold(body: Center(child: Text('Page not found: ${state.error}'))),
   );
+}
+
+@visibleForTesting
+String? authRedirectForLocation({
+  required AuthState authState,
+  required String location,
+}) {
+  final isAuthRoute = location == loginPath || location == registerPath;
+  final isStartupRoute = location == startupPath;
+  final isAuthenticated = authState is Authenticated;
+  final isLoading = authState is AuthLoading;
+
+  if (isLoading) {
+    return isStartupRoute ? null : startupPath;
+  }
+
+  if (!isAuthenticated) {
+    return isAuthRoute ? null : loginPath;
+  }
+
+  if (isStartupRoute || isAuthRoute) {
+    return homePath;
+  }
+
+  return null;
+}
+
+class _StartupScreen extends StatelessWidget {
+  const _StartupScreen();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(body: Center(child: CircularProgressIndicator()));
+  }
 }
