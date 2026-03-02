@@ -90,9 +90,26 @@ GoRouter appRouter(Ref ref) {
       GoRoute(
         name: createBudgetRoute,
         path: createBudgetPath,
-        pageBuilder: (context, state) => const MaterialPage<void>(
-          fullscreenDialog: true,
-          child: CreateBudgetScreen(),
+        pageBuilder: (context, state) => CustomTransitionPage<void>(
+          key: state.pageKey,
+          transitionDuration: const Duration(milliseconds: 280),
+          reverseTransitionDuration: const Duration(milliseconds: 220),
+          child: const CreateBudgetScreen(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            final curvedAnimation = CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeOutCubic,
+              reverseCurve: Curves.easeInCubic,
+            );
+
+            return SlideTransition(
+              position: Tween<Offset>(
+                begin: const Offset(0, 1),
+                end: Offset.zero,
+              ).animate(curvedAnimation),
+              child: child,
+            );
+          },
         ),
       ),
       GoRoute(
