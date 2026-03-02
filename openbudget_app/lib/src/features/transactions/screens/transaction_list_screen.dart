@@ -433,11 +433,28 @@ class TransactionListScreen extends HookConsumerWidget {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => showModalBottomSheet<void>(
-          context: context,
-          isScrollControlled: true,
-          builder: (_) => AddTransactionSheet(budgetId: budgetId),
-        ),
+        onPressed: () async {
+          final action = await showModalBottomSheet<AddTransactionAction>(
+            context: context,
+            isScrollControlled: true,
+            builder: (_) => AddTransactionSheet(budgetId: budgetId),
+          );
+          if (!context.mounted || action == null) return;
+          switch (action) {
+            case AddTransactionAction.income:
+              context.goNamed(addIncomeRoute, pathParameters: {'id': budgetId});
+            case AddTransactionAction.expense:
+              context.goNamed(
+                addExpenseRoute,
+                pathParameters: {'id': budgetId},
+              );
+            case AddTransactionAction.transfer:
+              context.goNamed(
+                createTransferRoute,
+                pathParameters: {'id': budgetId},
+              );
+          }
+        },
         child: const Icon(Icons.add),
       ),
       bottomNavigationBar: selectionMode.value && selectedIds.value.isNotEmpty

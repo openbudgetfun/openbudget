@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:go_router/go_router.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
-import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
+
+enum AddTransactionAction { income, expense, transfer }
 
 class AddTransactionSheet extends HookWidget {
   const AddTransactionSheet({required this.budgetId, super.key});
@@ -46,11 +46,7 @@ class AddTransactionSheet extends HookWidget {
               label: l10n.addTransactionIncome,
               color: OpenBudgetPalette.fgSuccessFor(theme),
               onTap: () {
-                Navigator.of(context).pop();
-                context.goNamed(
-                  addIncomeRoute,
-                  pathParameters: {'id': budgetId},
-                );
+                Navigator.of(context).pop(AddTransactionAction.income);
               },
             ),
             const SizedBox(height: SpacingTokens.sm),
@@ -59,11 +55,7 @@ class AddTransactionSheet extends HookWidget {
               label: l10n.addTransactionExpense,
               color: OpenBudgetPalette.fgErrorFor(theme),
               onTap: () {
-                Navigator.of(context).pop();
-                context.goNamed(
-                  addExpenseRoute,
-                  pathParameters: {'id': budgetId},
-                );
+                Navigator.of(context).pop(AddTransactionAction.expense);
               },
             ),
             const SizedBox(height: SpacingTokens.sm),
@@ -72,11 +64,7 @@ class AddTransactionSheet extends HookWidget {
               label: l10n.addTransactionTransfer,
               color: OpenBudgetPalette.bgBrandFor(theme),
               onTap: () {
-                Navigator.of(context).pop();
-                context.goNamed(
-                  createTransferRoute,
-                  pathParameters: {'id': budgetId},
-                );
+                Navigator.of(context).pop(AddTransactionAction.transfer);
               },
             ),
             const SizedBox(height: SpacingTokens.md),
