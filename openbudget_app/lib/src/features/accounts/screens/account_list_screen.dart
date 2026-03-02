@@ -30,6 +30,12 @@ class AccountListScreen extends HookConsumerWidget {
         .watch(displayCurrencyConverterProvider(budgetId))
         .asData
         ?.value;
+    void navigateAfterMenuClose(VoidCallback callback) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!context.mounted) return;
+        callback();
+      });
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -49,15 +55,19 @@ class AccountListScreen extends HookConsumerWidget {
             onSelected: (value) {
               switch (value) {
                 case 'transfer':
-                  context.goNamed(
-                    createTransferRoute,
-                    pathParameters: {'id': budgetId},
-                  );
+                  navigateAfterMenuClose(() {
+                    context.goNamed(
+                      createTransferRoute,
+                      pathParameters: {'id': budgetId},
+                    );
+                  });
                 case 'settings':
-                  context.goNamed(
-                    settingsRoute,
-                    pathParameters: {'id': budgetId},
-                  );
+                  navigateAfterMenuClose(() {
+                    context.goNamed(
+                      settingsRoute,
+                      pathParameters: {'id': budgetId},
+                    );
+                  });
               }
             },
             itemBuilder: (context) => [

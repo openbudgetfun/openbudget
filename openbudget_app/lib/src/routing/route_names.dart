@@ -1,3 +1,5 @@
+const startupRoute = 'startup';
+const startupPath = '/startup';
 const loginRoute = 'login';
 const loginPath = '/login';
 const registerRoute = 'register';
