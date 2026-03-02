@@ -667,7 +667,9 @@ class _RecentMoveRow extends HookWidget {
                       : null,
                 ),
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: SpacingTokens.xs),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: SpacingTokens.xs,
+                  ),
                   child: Icon(
                     Icons.arrow_forward_rounded,
                     size: 16,
@@ -761,7 +763,7 @@ class _EnvelopeMoveRow extends HookWidget {
                       WidgetSpan(
                         alignment: PlaceholderAlignment.middle,
                         child: Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 6),
+                          padding: const EdgeInsets.symmetric(horizontal: 6),
                           child: Icon(
                             Icons.arrow_forward_rounded,
                             size: 16,
