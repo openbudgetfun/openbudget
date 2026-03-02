@@ -23,12 +23,12 @@ void main() {
   });
 
   group('ColorTokens', () {
-    test('primary is blue', () {
-      expect(ColorTokens.primary, const Color(0xFF1565C0));
+    test('primary matches brand token', () {
+      expect(ColorTokens.primary, const Color(0xFF4E63FF));
     });
 
-    test('secondary is green', () {
-      expect(ColorTokens.secondary, const Color(0xFF2E7D32));
+    test('secondary matches brand token', () {
+      expect(ColorTokens.secondary, const Color(0xFF28C6A0));
     });
   });
 }
