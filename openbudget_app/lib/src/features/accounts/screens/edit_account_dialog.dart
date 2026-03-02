@@ -3,6 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_actions_provider.dart';
+import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
 import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
@@ -424,23 +425,47 @@ class EditAccountDialog extends HookConsumerWidget {
     if (confirmed != true || !context.mounted) return;
 
     final navigator = Navigator.of(context);
-    Account deleted;
+    var deleted = account;
+    final accountId = account.id?.toString();
+    if (accountId == null) {
+      showAppToast(
+        context,
+        message: l10n.accountDeleteError,
+        variant: AppToastVariant.error,
+      );
+      return;
+    }
+
     try {
       deleted = await ref
           .read(accountActionsProvider.notifier)
-          .deleteAccount(
-            accountId: account.id?.toString() ?? '',
-            budgetId: budgetId,
-          );
-    } on Exception catch (_) {
-      if (context.mounted) {
-        showAppToast(
-          context,
-          message: l10n.accountDeleteError,
-          variant: AppToastVariant.error,
+          .deleteAccount(accountId: accountId, budgetId: budgetId);
+    } on Object catch (_) {
+      // If the server deleted the row but the client failed to decode/handle the
+      // delete response, treat this as success by verifying the account no longer
+      // exists in the latest list.
+      var deletedOnServer = false;
+      try {
+        final accounts = await ref.read(accountListProvider(budgetId).future);
+        deletedOnServer = !accounts.any(
+          (item) => item.id?.toString() == accountId,
         );
+      } on Object {
+        deletedOnServer = false;
       }
-      return;
+
+      if (deletedOnServer) {
+        deleted = account;
+      } else {
+        if (context.mounted) {
+          showAppToast(
+            context,
+            message: l10n.accountDeleteError,
+            variant: AppToastVariant.error,
+          );
+        }
+        return;
+      }
     }
 
     if (!context.mounted) return;
@@ -457,7 +482,7 @@ class EditAccountDialog extends HookConsumerWidget {
     if (onDeleted != null) {
       try {
         onDeleted!.call();
-      } on Exception catch (_) {
+      } on Object {
         // Ignore navigation callback errors. The delete already succeeded.
       }
     }

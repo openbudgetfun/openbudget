@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_actions_provider.dart';
+import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
 import 'package:openbudget_app/src/features/accounts/providers/institution_catalog_provider.dart';
 import 'package:openbudget_app/src/features/accounts/providers/plaid_account_link_provider.dart';
 import 'package:openbudget_app/src/features/accounts/providers/wallet_actions_provider.dart';
@@ -193,6 +194,18 @@ class AddAccountScreen extends HookConsumerWidget {
         institutionCatalogAsync.asData?.value ?? const <Institution>[];
     final myAccounts = myAccountsAsync.asData?.value ?? const <Account>[];
 
+    Future<Set<String>?> fetchAccountIds() async {
+      try {
+        final accounts = await ref.read(accountListProvider(budgetId).future);
+        return accounts
+            .map((item) => item.id?.toString())
+            .whereType<String>()
+            .toSet();
+      } on Object {
+        return null;
+      }
+    }
+
     Future<void> startLinkedBankFlow(Institution institution) async {
       final institutionName = institution.name.trim();
       if (showSearchingOverlay.value || institutionName.isEmpty) return;
@@ -290,6 +303,7 @@ class AddAccountScreen extends HookConsumerWidget {
     Future<void> submitSolanaWallet() async {
       if (!canSubmitWallet || isSubmitting.value) return;
       isSubmitting.value = true;
+      final existingAccountIds = await fetchAccountIds();
       try {
         await ref
             .read(walletActionsProvider.notifier)
@@ -304,8 +318,18 @@ class AddAccountScreen extends HookConsumerWidget {
         if (!context.mounted) return;
         successAccountLabel.value = 'Solana Wallet';
         step.value = _AddAccountStep.success;
-      } on Exception catch (_) {
+      } on Object catch (_) {
+        final latestAccountIds = await fetchAccountIds();
+        final createdDespiteError =
+            existingAccountIds != null &&
+            latestAccountIds != null &&
+            latestAccountIds.difference(existingAccountIds).isNotEmpty;
         if (!context.mounted) return;
+        if (createdDespiteError) {
+          successAccountLabel.value = 'Solana Wallet';
+          step.value = _AddAccountStep.success;
+          return;
+        }
         showAppToast(
           context,
           message: l10n.accountCreateError,
@@ -336,6 +360,7 @@ class AddAccountScreen extends HookConsumerWidget {
         balanceCents = -balanceCents;
       }
 
+      final existingAccountIds = await fetchAccountIds();
       try {
         await ref
             .read(accountActionsProvider.notifier)
@@ -356,9 +381,19 @@ class AddAccountScreen extends HookConsumerWidget {
         isSubmitting.value = false;
         successAccountLabel.value = chosenType.label;
         step.value = _AddAccountStep.success;
-      } on Exception catch (_) {
+      } on Object catch (_) {
+        final latestAccountIds = await fetchAccountIds();
+        final createdDespiteError =
+            existingAccountIds != null &&
+            latestAccountIds != null &&
+            latestAccountIds.difference(existingAccountIds).isNotEmpty;
         if (!context.mounted) return;
         isSubmitting.value = false;
+        if (createdDespiteError) {
+          successAccountLabel.value = chosenType.label;
+          step.value = _AddAccountStep.success;
+          return;
+        }
         showAppToast(
           context,
           message: l10n.accountCreateError,
