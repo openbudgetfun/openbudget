@@ -2205,7 +2205,19 @@ class _InlineAmountEditor extends HookWidget {
                     onPressed: onBackspace,
                     child: const Icon(Icons.backspace_outlined),
                   ),
-                  key(l10n.dialogDone, onPressed: onDone, primary: true),
+                  key(
+                    '',
+                    onPressed: onDone,
+                    primary: true,
+                    child: Tooltip(
+                      message: l10n.dialogDone,
+                      child: Semantics(
+                        button: true,
+                        label: l10n.dialogDone,
+                        child: const Icon(Icons.keyboard_return_rounded),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ],
