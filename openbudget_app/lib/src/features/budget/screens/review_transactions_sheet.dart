@@ -218,8 +218,15 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
-        borderRadius: BorderRadius.vertical(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
+            OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
+          ],
+        ),
+        borderRadius: const BorderRadius.vertical(
           top: Radius.circular(RadiusTokens.lg),
         ),
       ),
@@ -341,15 +348,32 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
                           children: [
                             if (showHeader)
                               Container(
-                                color: OpenBudgetPalette.bgTertiaryFor(
-                                  Theme.of(context),
+                                margin: const EdgeInsets.fromLTRB(
+                                  SpacingTokens.md,
+                                  SpacingTokens.sm,
+                                  SpacingTokens.md,
+                                  SpacingTokens.xs,
                                 ),
                                 padding: const EdgeInsets.fromLTRB(
-                                  SpacingTokens.md,
                                   SpacingTokens.sm,
-                                  SpacingTokens.md,
+                                  SpacingTokens.xs,
                                   SpacingTokens.sm,
+                                  SpacingTokens.xs,
                                 ),
+                                decoration: BoxDecoration(
+                                  color: OpenBudgetPalette.bgTertiaryFor(
+                                    Theme.of(context),
+                                  ),
+                                  borderRadius: BorderRadius.circular(
+                                    RadiusTokens.sm,
+                                  ),
+                                  border: Border.all(
+                                    color: OpenBudgetPalette.borderSubtleFor(
+                                      Theme.of(context),
+                                    ),
+                                  ),
+                                ),
+
                                 child: Text(
                                   DateFormat.yMMMMd().format(
                                     transaction.transactionDate,
@@ -374,17 +398,24 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
                                       selectedIds.value = next;
                                     },
                               child: Container(
+                                margin: const EdgeInsets.fromLTRB(
+                                  SpacingTokens.md,
+                                  0,
+                                  SpacingTokens.md,
+                                  SpacingTokens.xs,
+                                ),
                                 decoration: BoxDecoration(
                                   color: isSelected
                                       ? OpenBudgetPalette.bgSelectedFor(theme)
                                       : OpenBudgetPalette.bgSecondaryFor(
                                           Theme.of(context),
                                         ),
-                                  border: Border(
-                                    bottom: BorderSide(
-                                      color: OpenBudgetPalette.borderSubtleFor(
-                                        Theme.of(context),
-                                      ),
+                                  borderRadius: BorderRadius.circular(
+                                    RadiusTokens.md,
+                                  ),
+                                  border: Border.all(
+                                    color: OpenBudgetPalette.borderSubtleFor(
+                                      Theme.of(context),
                                     ),
                                   ),
                                 ),
@@ -392,7 +423,7 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
                                   children: [
                                     Container(
                                       width: 4,
-                                      height: 64,
+                                      height: 68,
                                       color: isSelected
                                           ? OpenBudgetPalette.bgBrandFor(
                                               Theme.of(context),
@@ -576,6 +607,16 @@ class _ReviewToolbar extends StatelessWidget {
             color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
           ),
         ),
+        boxShadow: [
+          BoxShadow(
+            color: OpenBudgetPalette.overlayScrimFor(Theme.of(context))
+                .withAlpha(
+                  Theme.of(context).brightness == Brightness.dark ? 84 : 24,
+                ),
+            blurRadius: 16,
+            offset: const Offset(0, -4),
+          ),
+        ],
       ),
       padding: const EdgeInsets.fromLTRB(
         SpacingTokens.sm,

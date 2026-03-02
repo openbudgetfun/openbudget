@@ -90,9 +90,17 @@ class RecentMovesScreen extends HookConsumerWidget {
 
           return Column(
             children: [
-              _RecentMovesTabs(
-                selected: selectedTab.value,
-                onSelected: (tab) => selectedTab.value = tab,
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  SpacingTokens.md,
+                  SpacingTokens.sm,
+                  SpacingTokens.md,
+                  SpacingTokens.xs,
+                ),
+                child: _RecentMovesTabs(
+                  selected: selectedTab.value,
+                  onSelected: (tab) => selectedTab.value = tab,
+                ),
               ),
               const Divider(height: 1),
               Expanded(
@@ -393,33 +401,40 @@ class _RecentMovesTabs extends HookWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
 
-    return Row(
-      children: [
-        Expanded(
-          child: _RecentMovesTabButton(
-            label: l10n.recentMovesTabAll,
-            selected: selected == _RecentMovesTab.all,
-            onTap: () => onSelected(_RecentMovesTab.all),
-            theme: theme,
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: OpenBudgetPalette.bgSecondaryFor(theme),
+        borderRadius: BorderRadius.circular(RadiusTokens.md),
+        border: Border.all(color: OpenBudgetPalette.borderSubtleFor(theme)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: _RecentMovesTabButton(
+              label: l10n.recentMovesTabAll,
+              selected: selected == _RecentMovesTab.all,
+              onTap: () => onSelected(_RecentMovesTab.all),
+              theme: theme,
+            ),
           ),
-        ),
-        Expanded(
-          child: _RecentMovesTabButton(
-            label: l10n.recentMovesTabMoved,
-            selected: selected == _RecentMovesTab.moved,
-            onTap: () => onSelected(_RecentMovesTab.moved),
-            theme: theme,
+          Expanded(
+            child: _RecentMovesTabButton(
+              label: l10n.recentMovesTabMoved,
+              selected: selected == _RecentMovesTab.moved,
+              onTap: () => onSelected(_RecentMovesTab.moved),
+              theme: theme,
+            ),
           ),
-        ),
-        Expanded(
-          child: _RecentMovesTabButton(
-            label: l10n.recentMovesTabAssigned,
-            selected: selected == _RecentMovesTab.assigned,
-            onTap: () => onSelected(_RecentMovesTab.assigned),
-            theme: theme,
+          Expanded(
+            child: _RecentMovesTabButton(
+              label: l10n.recentMovesTabAssigned,
+              selected: selected == _RecentMovesTab.assigned,
+              onTap: () => onSelected(_RecentMovesTab.assigned),
+              theme: theme,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -443,30 +458,29 @@ class _RecentMovesTabButton extends HookWidget {
       color: OpenBudgetPalette.transparentFor(theme),
       child: InkWell(
         onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: SpacingTokens.xs,
-            vertical: SpacingTokens.sm,
+        borderRadius: BorderRadius.circular(RadiusTokens.sm),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeOut,
+          margin: const EdgeInsets.all(4),
+          padding: const EdgeInsets.symmetric(vertical: SpacingTokens.xs),
+          decoration: BoxDecoration(
+            color: selected
+                ? OpenBudgetPalette.bgBrandFor(
+                    theme,
+                  ).withAlpha(theme.brightness == Brightness.dark ? 62 : 28)
+                : OpenBudgetPalette.transparentFor(theme),
+            borderRadius: BorderRadius.circular(RadiusTokens.sm),
           ),
-          child: Column(
-            children: [
-              Text(
-                label,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                  color: selected
-                      ? OpenBudgetPalette.bgBrandFor(theme)
-                      : OpenBudgetPalette.fgSecondaryFor(theme),
-                ),
-              ),
-              const SizedBox(height: SpacingTokens.xs),
-              Container(
-                height: 2,
-                color: selected
-                    ? OpenBudgetPalette.bgBrandFor(theme)
-                    : OpenBudgetPalette.transparentFor(theme),
-              ),
-            ],
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+              color: selected
+                  ? OpenBudgetPalette.bgBrandFor(theme)
+                  : OpenBudgetPalette.fgSecondaryFor(theme),
+            ),
           ),
         ),
       ),
@@ -646,54 +660,72 @@ class _RecentMoveRow extends HookWidget {
         ? envelopeNames[sourceEnvelopeId] ?? l10n.recentMovesUnnamedEnvelope
         : l10n.recentMovesReadyToAssign;
 
-    return ColoredBox(
-      color: OpenBudgetPalette.bgSecondaryFor(theme),
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              SpacingTokens.md,
-              SpacingTokens.sm,
-              SpacingTokens.md,
-              SpacingTokens.sm,
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        SpacingTokens.md,
+        showDivider ? 0 : SpacingTokens.xs,
+        SpacingTokens.md,
+        showDivider ? SpacingTokens.xs : SpacingTokens.md,
+      ),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: OpenBudgetPalette.bgSecondaryFor(theme),
+          borderRadius: BorderRadius.circular(RadiusTokens.md),
+          border: Border.all(color: OpenBudgetPalette.borderSubtleFor(theme)),
+          boxShadow: [
+            BoxShadow(
+              color: OpenBudgetPalette.overlayScrimFor(
+                theme,
+              ).withAlpha(theme.brightness == Brightness.dark ? 54 : 12),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
             ),
-            child: Row(
-              children: [
-                _MoveChip(
-                  label: fromName,
-                  accent: sourceEnvelopeId != null,
-                  onTap: sourceEnvelopeId != null
-                      ? () => onEnvelopeTap(sourceEnvelopeId)
-                      : null,
-                ),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: SpacingTokens.xs),
-                  child: Icon(
-                    Icons.arrow_forward_rounded,
-                    size: 16,
-                    color: OpenBudgetPalette.fgSecondaryFor(theme),
-                  ),
-                ),
-                _MoveChip(
-                  label: toName,
-                  accent: true,
-                  onTap: () => onEnvelopeTap(event.toEnvelopeId),
-                ),
-                const SizedBox(width: SpacingTokens.sm),
-                Expanded(
-                  child: Text(
-                    amountText,
-                    textAlign: TextAlign.right,
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-              ],
-            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            SpacingTokens.md,
+            SpacingTokens.sm,
+            SpacingTokens.md,
+            SpacingTokens.sm,
           ),
-          if (showDivider) const Divider(height: 1),
-        ],
+          child: Row(
+            children: [
+              _MoveChip(
+                label: fromName,
+                accent: sourceEnvelopeId != null,
+                onTap: sourceEnvelopeId != null
+                    ? () => onEnvelopeTap(sourceEnvelopeId)
+                    : null,
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: SpacingTokens.xs,
+                ),
+                child: Icon(
+                  Icons.arrow_forward_rounded,
+                  size: 16,
+                  color: OpenBudgetPalette.fgSecondaryFor(theme),
+                ),
+              ),
+              _MoveChip(
+                label: toName,
+                accent: true,
+                onTap: () => onEnvelopeTap(event.toEnvelopeId),
+              ),
+              const SizedBox(width: SpacingTokens.sm),
+              Expanded(
+                child: Text(
+                  amountText,
+                  textAlign: TextAlign.right,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -737,9 +769,20 @@ class _EnvelopeMoveRow extends HookWidget {
         ? hiddenAmountPlaceholder
         : formatCents(signedAmount, currencyCode);
 
-    return Column(
-      children: [
-        Padding(
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        SpacingTokens.md,
+        SpacingTokens.xs,
+        SpacingTokens.md,
+        SpacingTokens.xs,
+      ),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: OpenBudgetPalette.bgSecondaryFor(theme),
+          borderRadius: BorderRadius.circular(RadiusTokens.md),
+          border: Border.all(color: OpenBudgetPalette.borderSubtleFor(theme)),
+        ),
+        child: Padding(
           padding: const EdgeInsets.fromLTRB(
             SpacingTokens.md,
             SpacingTokens.md,
@@ -761,7 +804,7 @@ class _EnvelopeMoveRow extends HookWidget {
                       WidgetSpan(
                         alignment: PlaceholderAlignment.middle,
                         child: Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 6),
+                          padding: const EdgeInsets.symmetric(horizontal: 6),
                           child: Icon(
                             Icons.arrow_forward_rounded,
                             size: 16,
@@ -792,8 +835,7 @@ class _EnvelopeMoveRow extends HookWidget {
             ],
           ),
         ),
-        const Divider(height: 1),
-      ],
+      ),
     );
   }
 }
@@ -820,6 +862,11 @@ class _MoveChip extends HookWidget {
       decoration: BoxDecoration(
         color: accent ? accentFill : OpenBudgetPalette.bgTertiaryFor(theme),
         borderRadius: BorderRadius.circular(RadiusTokens.sm),
+        border: Border.all(
+          color: accent
+              ? OpenBudgetPalette.bgBrandFor(theme).withAlpha(100)
+              : OpenBudgetPalette.borderSubtleFor(theme),
+        ),
       ),
       child: Text(
         label,

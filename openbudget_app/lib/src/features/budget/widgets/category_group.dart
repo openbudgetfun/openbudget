@@ -71,6 +71,8 @@ class CategoryGroup extends HookConsumerWidget {
 
     return Card(
       margin: EdgeInsets.zero,
+      elevation: theme.brightness == Brightness.dark ? 0 : 1,
+      shadowColor: OpenBudgetPalette.overlayScrimFor(theme).withAlpha(26),
       color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(RadiusTokens.md),
@@ -95,8 +97,21 @@ class CategoryGroup extends HookConsumerWidget {
                   vertical: SpacingTokens.sm + SpacingTokens.xs,
                 ),
                 decoration: BoxDecoration(
-                  color: OpenBudgetPalette.bgTertiaryFor(Theme.of(context)),
-                  borderRadius: BorderRadius.vertical(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      OpenBudgetPalette.bgTertiaryFor(Theme.of(context)),
+                      OpenBudgetPalette.bgAccentFor(
+                        Theme.of(context),
+                      ).withAlpha(
+                        Theme.of(context).brightness == Brightness.dark
+                            ? 82
+                            : 44,
+                      ),
+                    ],
+                  ),
+                  borderRadius: const BorderRadius.vertical(
                     top: Radius.circular(RadiusTokens.md),
                   ),
                 ),
@@ -288,6 +303,10 @@ class CategoryGroup extends HookConsumerWidget {
                 SpacingTokens.md,
               ),
               decoration: BoxDecoration(
+                color: OpenBudgetPalette.bgPrimaryFor(Theme.of(context))
+                    .withAlpha(
+                      Theme.of(context).brightness == Brightness.dark ? 36 : 56,
+                    ),
                 border: Border(
                   top: BorderSide(
                     color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
