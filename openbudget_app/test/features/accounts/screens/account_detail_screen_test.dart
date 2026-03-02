@@ -478,6 +478,10 @@ void main() {
       expect(find.text('Payments'), findsOneWidget);
     });
     testWidgets('solana wallet dashboard renders with filters', (tester) async {
+      final binding = tester.binding;
+      await binding.setSurfaceSize(const Size(1200, 2200));
+      addTearDown(() => binding.setSurfaceSize(null));
+
       await tester.pumpWidget(_buildWalletSubject());
       await tester.pumpAndSettle();
 
@@ -492,6 +496,7 @@ void main() {
       await _scrollToText(tester, 'Transaction History');
       expect(find.text('Jupiter swap'), findsOneWidget);
       expect(find.text('Transfer to friend'), findsOneWidget);
+      expect(find.text('Transaction History'), findsOneWidget);
       expect(find.textContaining('P&L +'), findsWidgets);
       expect(find.text('Tax 2026'), findsWidgets);
       expect(find.textContaining('Basis'), findsWidgets);
