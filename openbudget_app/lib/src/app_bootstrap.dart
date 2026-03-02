@@ -54,6 +54,7 @@ class OpenBudgetApp extends HookConsumerWidget {
         themeMode: themeMode,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
+        builder: (context, child) => _DismissKeyboardOnTap(child: child),
         home: const _AuthBootstrapScreen(),
       );
     }
@@ -67,7 +68,46 @@ class OpenBudgetApp extends HookConsumerWidget {
       themeMode: themeMode,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
+      builder: (context, child) => _DismissKeyboardOnTap(child: child),
       routerConfig: router,
+    );
+  }
+}
+
+class _DismissKeyboardOnTap extends StatelessWidget {
+  const _DismissKeyboardOnTap({required this.child});
+
+  final Widget? child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Listener(
+      behavior: HitTestBehavior.translucent,
+      onPointerDown: (event) {
+        final focusedNode = FocusManager.instance.primaryFocus;
+        if (focusedNode == null) {
+          return;
+        }
+
+        final focusedContext = focusedNode.context;
+        if (focusedContext == null || focusedContext.widget is! EditableText) {
+          return;
+        }
+
+        final focusedRenderObject = focusedContext.findRenderObject();
+        if (focusedRenderObject is! RenderBox) {
+          focusedNode.unfocus();
+          return;
+        }
+
+        final localOffset = focusedRenderObject.globalToLocal(event.position);
+        final isTapInsideFocusedField = focusedRenderObject.paintBounds
+            .contains(localOffset);
+        if (!isTapInsideFocusedField) {
+          focusedNode.unfocus();
+        }
+      },
+      child: child ?? const SizedBox.shrink(),
     );
   }
 }
