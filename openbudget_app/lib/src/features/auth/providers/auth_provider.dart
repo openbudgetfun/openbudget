@@ -13,7 +13,7 @@ class AuthNotifier extends _$AuthNotifier {
   @override
   AuthState build() {
     _tryRestore();
-    return const AuthLoading();
+    return const AuthRestoring();
   }
 
   Future<void> _tryRestore() async {

@@ -5,27 +5,40 @@ import 'package:openbudget_app/src/routing/route_names.dart';
 
 void main() {
   group('authRedirectForLocation', () {
-    test('keeps loading users on startup route', () {
+    test('keeps restoring users on startup route', () {
       expect(
         authRedirectForLocation(
-          authState: const AuthLoading(),
+          authState: const AuthRestoring(),
           location: startupPath,
         ),
         isNull,
       );
     });
 
-    test('redirects loading users to startup route', () {
+    test('redirects restoring users to startup route', () {
       expect(
         authRedirectForLocation(
-          authState: const AuthLoading(),
+          authState: const AuthRestoring(),
           location: loginPath,
         ),
         startupPath,
       );
       expect(
-        authRedirectForLocation(authState: const AuthLoading(), location: '/'),
+        authRedirectForLocation(
+          authState: const AuthRestoring(),
+          location: '/',
+        ),
         startupPath,
+      );
+    });
+
+    test('does not force redirect during in-flow auth loading', () {
+      expect(
+        authRedirectForLocation(
+          authState: const AuthLoading(),
+          location: loginPath,
+        ),
+        isNull,
       );
     });
 
