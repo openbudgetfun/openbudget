@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/widgets/add_transaction_sheet.dart';
+import 'package:openbudget_app/src/routing/route_names.dart';
 
 class BudgetShellScreen extends HookWidget {
   const BudgetShellScreen({
@@ -22,7 +25,7 @@ class BudgetShellScreen extends HookWidget {
       body: navigationShell,
       bottomNavigationBar: NavigationBar(
         selectedIndex: _adjustedIndex(navigationShell.currentIndex),
-        onDestinationSelected: (index) => _onTap(context, index),
+        onDestinationSelected: (index) => unawaited(_onTap(context, index)),
         destinations: [
           NavigationDestination(
             icon: const Icon(Icons.savings_outlined),
@@ -64,13 +67,18 @@ class BudgetShellScreen extends HookWidget {
     return shellIndex + 1;
   }
 
-  void _onTap(BuildContext context, int index) {
+  Future<void> _onTap(BuildContext context, int index) async {
     if (index == 2) {
       // "+" tab — show add transaction sheet
-      showModalBottomSheet<void>(
+      await showModalBottomSheet<void>(
         context: context,
         builder: (_) => AddTransactionSheet(budgetId: budgetId),
       );
+      return;
+    }
+
+    if (index == 4 && navigationShell.currentIndex == 3) {
+      await _showMoreQuickActions(context);
       return;
     }
 
@@ -80,4 +88,48 @@ class BudgetShellScreen extends HookWidget {
     // apparent no-op tab taps (especially on first visit to a branch).
     navigationShell.goBranch(branchIndex, initialLocation: true);
   }
+
+  Future<void> _showMoreQuickActions(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
+    final action = await showModalBottomSheet<_MoreQuickAction>(
+      context: context,
+      showDragHandle: true,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.settings_outlined),
+              title: Text(l10n.moreSettings),
+              onTap: () => Navigator.of(context).pop(_MoreQuickAction.settings),
+            ),
+            ListTile(
+              leading: const Icon(Icons.repeat_rounded),
+              title: Text(l10n.moreRecurring),
+              onTap: () =>
+                  Navigator.of(context).pop(_MoreQuickAction.recurring),
+            ),
+            ListTile(
+              leading: const Icon(Icons.people_outline_rounded),
+              title: Text(l10n.morePayees),
+              onTap: () => Navigator.of(context).pop(_MoreQuickAction.payees),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (!context.mounted || action == null) return;
+
+    switch (action) {
+      case _MoreQuickAction.settings:
+        context.goNamed(settingsRoute, pathParameters: {'id': budgetId});
+      case _MoreQuickAction.recurring:
+        context.goNamed(recurringListRoute, pathParameters: {'id': budgetId});
+      case _MoreQuickAction.payees:
+        context.goNamed(payeeListRoute, pathParameters: {'id': budgetId});
+    }
+  }
 }
+
+enum _MoreQuickAction { settings, recurring, payees }
