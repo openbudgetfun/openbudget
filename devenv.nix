@@ -143,7 +143,7 @@ in
           "postgres".condition = "process_healthy";
           "redis".condition = "process_healthy";
         };
-        is_interactive = true;
+        # is_interactive = true;
         log_configuration = {
           flush_each_line = true;
         };
