@@ -3,6 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_template_provider.dart';
+import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 class BudgetTemplateDialog extends HookConsumerWidget {
@@ -152,8 +153,6 @@ class BudgetTemplateDialog extends HookConsumerWidget {
     if (name.isEmpty) return;
 
     final l10n = AppLocalizations.of(context);
-    final messenger = ScaffoldMessenger.of(context);
-    final colorScheme = Theme.of(context).colorScheme;
     isSaving.value = true;
 
     try {
@@ -161,13 +160,18 @@ class BudgetTemplateDialog extends HookConsumerWidget {
           .read(budgetTemplateActionsProvider.notifier)
           .saveFromCurrentMonth(budgetId: budgetId, name: name);
       nameController.clear();
-      messenger.showSnackBar(SnackBar(content: Text(l10n.templateSaveSuccess)));
+      if (!context.mounted) return;
+      showAppToast(
+        context,
+        message: l10n.templateSaveSuccess,
+        variant: AppToastVariant.success,
+      );
     } on Exception catch (_) {
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(l10n.templateSaveError),
-          backgroundColor: colorScheme.error,
-        ),
+      if (!context.mounted) return;
+      showAppToast(
+        context,
+        message: l10n.templateSaveError,
+        variant: AppToastVariant.error,
       );
     } finally {
       isSaving.value = false;
@@ -180,24 +184,25 @@ class BudgetTemplateDialog extends HookConsumerWidget {
     String templateId,
   ) async {
     final l10n = AppLocalizations.of(context);
-    final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
-    final colorScheme = Theme.of(context).colorScheme;
 
     try {
       await ref
           .read(budgetTemplateActionsProvider.notifier)
           .applyTemplate(templateId: templateId, budgetId: budgetId);
-      messenger.showSnackBar(
-        SnackBar(content: Text(l10n.templateApplySuccess)),
+      if (!context.mounted) return;
+      showAppToast(
+        context,
+        message: l10n.templateApplySuccess,
+        variant: AppToastVariant.success,
       );
       navigator.pop();
     } on Exception catch (_) {
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(l10n.templateApplyError),
-          backgroundColor: colorScheme.error,
-        ),
+      if (!context.mounted) return;
+      showAppToast(
+        context,
+        message: l10n.templateApplyError,
+        variant: AppToastVariant.error,
       );
     }
   }
@@ -208,22 +213,23 @@ class BudgetTemplateDialog extends HookConsumerWidget {
     String templateId,
   ) async {
     final l10n = AppLocalizations.of(context);
-    final messenger = ScaffoldMessenger.of(context);
-    final colorScheme = Theme.of(context).colorScheme;
 
     try {
       await ref
           .read(budgetTemplateActionsProvider.notifier)
           .deleteTemplate(templateId: templateId, budgetId: budgetId);
-      messenger.showSnackBar(
-        SnackBar(content: Text(l10n.templateDeleteSuccess)),
+      if (!context.mounted) return;
+      showAppToast(
+        context,
+        message: l10n.templateDeleteSuccess,
+        variant: AppToastVariant.success,
       );
     } on Exception catch (_) {
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(l10n.templateDeleteError),
-          backgroundColor: colorScheme.error,
-        ),
+      if (!context.mounted) return;
+      showAppToast(
+        context,
+        message: l10n.templateDeleteError,
+        variant: AppToastVariant.error,
       );
     }
   }

@@ -7,6 +7,7 @@ import 'package:openbudget_app/src/features/budget/providers/budget_summary_prov
 import 'package:openbudget_app/src/features/budget/providers/monthly_allocation_provider.dart';
 import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
+import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
@@ -133,16 +134,13 @@ class MoveMoneyDialog extends HookConsumerWidget {
     ValueNotifier<bool> isSubmitting,
   ) async {
     final l10n = AppLocalizations.of(context);
-    final messenger = ScaffoldMessenger.of(context);
-    final colorScheme = Theme.of(context).colorScheme;
 
     if (fromEnvelopeId.value == null || toEnvelopeId.value == null) return;
     if (fromEnvelopeId.value == toEnvelopeId.value) {
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(l10n.moveMoneySameError),
-          backgroundColor: colorScheme.error,
-        ),
+      showAppToast(
+        context,
+        message: l10n.moveMoneySameError,
+        variant: AppToastVariant.error,
       );
       return;
     }
@@ -164,15 +162,20 @@ class MoveMoneyDialog extends HookConsumerWidget {
             month: month,
             amountCents: amountCents,
           );
-      messenger.showSnackBar(SnackBar(content: Text(l10n.moveMoneySuccess)));
+      if (!context.mounted) return;
+      showAppToast(
+        context,
+        message: l10n.moveMoneySuccess,
+        variant: AppToastVariant.success,
+      );
       if (context.mounted) Navigator.of(context).pop();
     } on Exception catch (_) {
       isSubmitting.value = false;
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(l10n.moveMoneyError),
-          backgroundColor: colorScheme.error,
-        ),
+      if (!context.mounted) return;
+      showAppToast(
+        context,
+        message: l10n.moveMoneyError,
+        variant: AppToastVariant.error,
       );
     }
   }

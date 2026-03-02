@@ -30,6 +30,7 @@ import 'package:openbudget_app/src/providers/theme_mode_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
+import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -66,7 +67,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
     final hasAutoPosted = useState(false);
     final isReordering = useState(false);
     final showHidden = useState(false);
-    final collapseCategories = useState(false);
+    final collapsedCategoryIds = useState<Set<String>>(<String>{});
     final searchController = useTextEditingController();
     final searchQuery = useState('');
     final isSearching = useState(false);
@@ -136,8 +137,10 @@ class BudgetDetailScreen extends HookConsumerWidget {
               .read(recurringAutoPostActionsProvider.notifier)
               .postDue(budgetId: budgetId);
           if (context.mounted && count > 0) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(l10n.recurringAutoPosted(count))),
+            showAppToast(
+              context,
+              message: l10n.recurringAutoPosted(count),
+              variant: AppToastVariant.success,
             );
           }
         } on Exception catch (_) {
@@ -254,17 +257,22 @@ class BudgetDetailScreen extends HookConsumerWidget {
                     );
                   },
                   onNegative: () {
-                    if (sheetInput.isEmpty) return;
-                    setInputValue(
-                      sheetInput.startsWith('-')
-                          ? sheetInput.substring(1)
-                          : '-$sheetInput',
-                    );
+                    final delta = _parseEditorCents(sheetInput);
+                    if (delta == null || delta == 0) return;
+                    final currentCents =
+                        selection.monthlyData?.allocatedCents ??
+                        selection.envelope.budgetedAmountCents;
+                    final nextDollars = ((currentCents - delta) / 100).round();
+                    setInputValue('$nextDollars');
                   },
                   onPositive: () {
-                    if (sheetInput.startsWith('-')) {
-                      setInputValue(sheetInput.substring(1));
-                    }
+                    final delta = _parseEditorCents(sheetInput);
+                    if (delta == null || delta == 0) return;
+                    final currentCents =
+                        selection.monthlyData?.allocatedCents ??
+                        selection.envelope.budgetedAmountCents;
+                    final nextDollars = ((currentCents + delta) / 100).round();
+                    setInputValue('$nextDollars');
                   },
                   onCancel: () => Navigator.of(sheetContext).pop(),
                   onApply: () => _applyInlineAllocation(
@@ -484,8 +492,22 @@ class BudgetDetailScreen extends HookConsumerWidget {
                         .setThemeMode(
                           isDarkMode ? ThemeMode.light : ThemeMode.dark,
                         ),
-                  _PlanMenuAction.collapseExpand =>
-                    collapseCategories.value = !collapseCategories.value,
+                  _PlanMenuAction.collapseExpand => (() {
+                    final visibleIds = filteredCategories
+                        .map((entry) => entry.category.id?.toString() ?? '')
+                        .where((id) => id.isNotEmpty)
+                        .toSet();
+                    if (visibleIds.isEmpty) return;
+
+                    final next = Set<String>.from(collapsedCategoryIds.value);
+                    final allVisibleCollapsed = visibleIds.every(next.contains);
+                    if (allVisibleCollapsed) {
+                      next.removeAll(visibleIds);
+                    } else {
+                      next.addAll(visibleIds);
+                    }
+                    collapsedCategoryIds.value = next;
+                  })(),
                   _PlanMenuAction.hideProgressBars =>
                     ref
                         .read(hideProgressBarsProvider.notifier)
@@ -851,7 +873,21 @@ class BudgetDetailScreen extends HookConsumerWidget {
                       child: CategoryGroup(
                         categoryWithEnvelopes: catWithEnvelopes,
                         currencyCode: currencyCode,
-                        collapsed: collapseCategories.value,
+                        collapsed: collapsedCategoryIds.value.contains(
+                          catWithEnvelopes.category.id?.toString() ?? '',
+                        ),
+                        onToggleCollapsed: () {
+                          final categoryId =
+                              catWithEnvelopes.category.id?.toString() ?? '';
+                          if (categoryId.isEmpty) return;
+                          final next = Set<String>.from(
+                            collapsedCategoryIds.value,
+                          );
+                          if (!next.remove(categoryId)) {
+                            next.add(categoryId);
+                          }
+                          collapsedCategoryIds.value = next;
+                        },
                         goalsMap: goalsMap,
                         onAddEnvelope: () => _showAddEnvelopeDialog(
                           context,
@@ -864,12 +900,15 @@ class BudgetDetailScreen extends HookConsumerWidget {
                           context,
                           catWithEnvelopes.category.id?.toString() ?? '',
                           catWithEnvelopes.category.name,
+                          catWithEnvelopes.envelopes.length,
+                          catWithEnvelopes.totalBudgetedCents,
+                          currencyCode,
                         ),
                         onDeleteCategory: () => _confirmDeleteCategory(
                           context,
                           ref,
-                          catWithEnvelopes.category.id?.toString() ?? '',
-                          catWithEnvelopes.category.name,
+                          catWithEnvelopes,
+                          currencyCode,
                         ),
                         onEditEnvelope: (envelope) => _showEditEnvelopeDialog(
                           context,
@@ -1121,17 +1160,18 @@ class BudgetDetailScreen extends HookConsumerWidget {
             allocatedCents: allocatedCents,
           );
       if (context.mounted) {
-        ScaffoldMessenger.of(
+        showAppToast(
           context,
-        ).showSnackBar(SnackBar(content: Text(l10n.budgetAllocationUpdated)));
+          message: l10n.budgetAllocationUpdated,
+          variant: AppToastVariant.success,
+        );
       }
     } on Exception catch (_) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.budgetAllocationError),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
+        showAppToast(
+          context,
+          message: l10n.budgetAllocationError,
+          variant: AppToastVariant.error,
         );
       }
     } finally {
@@ -1215,6 +1255,9 @@ class BudgetDetailScreen extends HookConsumerWidget {
     BuildContext context,
     String categoryId,
     String currentName,
+    int envelopeCount,
+    int totalAllocatedCents,
+    CurrencyCode currencyCode,
   ) {
     showDialog<void>(
       context: context,
@@ -1223,6 +1266,9 @@ class BudgetDetailScreen extends HookConsumerWidget {
         categoryId: categoryId,
         budgetId: budgetId,
         currentName: currentName,
+        envelopeCount: envelopeCount,
+        totalAllocatedCents: totalAllocatedCents,
+        currencyCode: currencyCode,
       ),
     );
   }
@@ -1281,17 +1327,34 @@ class BudgetDetailScreen extends HookConsumerWidget {
   Future<void> _confirmDeleteCategory(
     BuildContext context,
     WidgetRef ref,
-    String categoryId,
-    String categoryName,
+    CategoryWithEnvelopes categoryWithEnvelopes,
+    CurrencyCode currencyCode,
   ) async {
     final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
+    final categoryId = categoryWithEnvelopes.category.id?.toString() ?? '';
+    if (categoryId.isEmpty) return;
+
+    final categoryName = categoryWithEnvelopes.category.name;
+    final envelopeCount = categoryWithEnvelopes.envelopes.length;
+    final totalAllocated = formatCents(
+      categoryWithEnvelopes.totalBudgetedCents,
+      currencyCode,
+    );
+    final envelopeSummary = envelopeCount == 1
+        ? '1 envelope'
+        : '$envelopeCount envelopes';
     final confirmed = await showDialog<bool>(
       context: context,
       barrierColor: _dialogBarrierColor(context),
       builder: (ctx) => AlertDialog(
         title: Text(l10n.deleteConfirmTitle),
-        content: Text('${l10n.deleteConfirmMessage}\n\n"$categoryName"'),
+        content: Text(
+          '${l10n.deleteConfirmMessage}\n\n'
+          '"$categoryName"\n\n'
+          '$envelopeSummary\n'
+          '$totalAllocated allocated',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
@@ -1316,24 +1379,21 @@ class BudgetDetailScreen extends HookConsumerWidget {
           .read(categoryActionsProvider.notifier)
           .deleteCategory(categoryId: categoryId, budgetId: budgetId);
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.deleteSuccess),
-            action: SnackBarAction(
-              label: l10n.undoAction,
-              onPressed: () => _undoDeleteCategory(context, ref, deleted, l10n),
-            ),
-            duration: const Duration(seconds: 5),
-          ),
+        showAppToast(
+          context,
+          message: l10n.deleteSuccess,
+          variant: AppToastVariant.success,
+          actionLabel: l10n.undoAction,
+          onAction: () => _undoDeleteCategory(context, ref, deleted, l10n),
+          duration: const Duration(seconds: 5),
         );
       }
     } on Exception catch (_) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.deleteError),
-            backgroundColor: colorScheme.error,
-          ),
+        showAppToast(
+          context,
+          message: l10n.deleteError,
+          variant: AppToastVariant.error,
         );
       }
     }
@@ -1350,17 +1410,18 @@ class BudgetDetailScreen extends HookConsumerWidget {
           .read(categoryActionsProvider.notifier)
           .undoDeleteCategory(deletedCategory: deleted, budgetId: budgetId);
       if (context.mounted) {
-        ScaffoldMessenger.of(
+        showAppToast(
           context,
-        ).showSnackBar(SnackBar(content: Text(l10n.undoDeleteSuccess)));
+          message: l10n.undoDeleteSuccess,
+          variant: AppToastVariant.success,
+        );
       }
     } on Exception catch (_) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.undoDeleteError),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
+        showAppToast(
+          context,
+          message: l10n.undoDeleteError,
+          variant: AppToastVariant.error,
         );
       }
     }
@@ -1378,17 +1439,18 @@ class BudgetDetailScreen extends HookConsumerWidget {
           .read(recurringAutoPostActionsProvider.notifier)
           .postDue(budgetId: budgetId);
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.recurringPostSuccess(count))),
+        showAppToast(
+          context,
+          message: l10n.recurringPostSuccess(count),
+          variant: AppToastVariant.success,
         );
       }
     } on Exception catch (_) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.recurringPostError),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
+        showAppToast(
+          context,
+          message: l10n.recurringPostError,
+          variant: AppToastVariant.error,
         );
       }
     } finally {
@@ -1435,17 +1497,18 @@ class BudgetDetailScreen extends HookConsumerWidget {
             currentMonth: month,
           );
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.budgetCopyLastMonthSuccess)),
+        showAppToast(
+          context,
+          message: l10n.budgetCopyLastMonthSuccess,
+          variant: AppToastVariant.success,
         );
       }
     } on Exception catch (_) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.budgetCopyLastMonthError),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
+        showAppToast(
+          context,
+          message: l10n.budgetCopyLastMonthError,
+          variant: AppToastVariant.error,
         );
       }
     }
@@ -1494,25 +1557,22 @@ class BudgetDetailScreen extends HookConsumerWidget {
             budgetId: budgetId,
           );
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.deleteSuccess),
-            action: SnackBarAction(
-              label: l10n.undoAction,
-              onPressed: () =>
-                  _undoDeleteEnvelope(context, ref, deleted, categoryId, l10n),
-            ),
-            duration: const Duration(seconds: 5),
-          ),
+        showAppToast(
+          context,
+          message: l10n.deleteSuccess,
+          variant: AppToastVariant.success,
+          actionLabel: l10n.undoAction,
+          onAction: () =>
+              _undoDeleteEnvelope(context, ref, deleted, categoryId, l10n),
+          duration: const Duration(seconds: 5),
         );
       }
     } on Exception catch (_) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.deleteError),
-            backgroundColor: colorScheme.error,
-          ),
+        showAppToast(
+          context,
+          message: l10n.deleteError,
+          variant: AppToastVariant.error,
         );
       }
     }
@@ -1534,17 +1594,18 @@ class BudgetDetailScreen extends HookConsumerWidget {
             budgetId: budgetId,
           );
       if (context.mounted) {
-        ScaffoldMessenger.of(
+        showAppToast(
           context,
-        ).showSnackBar(SnackBar(content: Text(l10n.undoDeleteSuccess)));
+          message: l10n.undoDeleteSuccess,
+          variant: AppToastVariant.success,
+        );
       }
     } on Exception catch (_) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.undoDeleteError),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
+        showAppToast(
+          context,
+          message: l10n.undoDeleteError,
+          variant: AppToastVariant.error,
         );
       }
     }
@@ -2010,25 +2071,74 @@ class _SpotlightMetricTile extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final accentColor = switch (icon) {
+      Icons.track_changes_rounded => OpenBudgetPalette.bgFlagInfoFor(theme),
+      Icons.pie_chart_rounded => OpenBudgetPalette.bgFlagCriticalFor(theme),
+      Icons.fact_check_rounded => OpenBudgetPalette.bgFlagPositiveFor(theme),
+      Icons.payments_outlined => OpenBudgetPalette.bgFlagAccentFor(theme),
+      _ => OpenBudgetPalette.bgBrandFor(theme),
+    };
+    final surfaceColor = Color.alphaBlend(
+      accentColor.withAlpha(theme.brightness == Brightness.dark ? 58 : 30),
+      OpenBudgetPalette.bgTertiaryFor(theme),
+    );
+
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: OpenBudgetPalette.bgTertiaryFor(Theme.of(context)),
+        color: surfaceColor,
         borderRadius: BorderRadius.circular(RadiusTokens.md),
-        border: Border.all(
-          color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
+        border: Border.all(color: accentColor.withAlpha(150)),
+        boxShadow: [
+          BoxShadow(
+            color: accentColor.withAlpha(
+              theme.brightness == Brightness.dark ? 52 : 34,
+            ),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+          BoxShadow(
+            color: OpenBudgetPalette.fgPrimaryFor(theme).withAlpha(16),
+            blurRadius: 4,
+            offset: const Offset(0, 1),
+          ),
+        ],
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            surfaceColor,
+            Color.alphaBlend(
+              accentColor.withAlpha(
+                theme.brightness == Brightness.dark ? 74 : 38,
+              ),
+              OpenBudgetPalette.bgSecondaryFor(theme),
+            ),
+          ],
         ),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(SpacingTokens.sm),
+        padding: const EdgeInsets.fromLTRB(
+          SpacingTokens.sm,
+          SpacingTokens.sm,
+          SpacingTokens.sm,
+          SpacingTokens.sm + 2,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Icon(
-                  icon,
-                  size: 18,
-                  color: OpenBudgetPalette.bgBrandFor(Theme.of(context)),
+                Container(
+                  width: 26,
+                  height: 26,
+                  decoration: BoxDecoration(
+                    color: accentColor.withAlpha(
+                      theme.brightness == Brightness.dark ? 54 : 30,
+                    ),
+                    borderRadius: BorderRadius.circular(RadiusTokens.sm),
+                    border: Border.all(color: accentColor.withAlpha(165)),
+                  ),
+                  child: Icon(icon, size: 15, color: accentColor),
                 ),
                 const SizedBox(width: SpacingTokens.xs),
                 Expanded(
@@ -2038,24 +2148,39 @@ class _SpotlightMetricTile extends HookWidget {
                       color: OpenBudgetPalette.fgSecondaryFor(
                         Theme.of(context),
                       ),
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
                 if (actionLabel != null)
-                  Text(
-                    actionLabel!,
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: OpenBudgetPalette.bgBrandFor(Theme.of(context)),
-                      fontWeight: FontWeight.w600,
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: SpacingTokens.xs + 2,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: accentColor.withAlpha(
+                        theme.brightness == Brightness.dark ? 58 : 28,
+                      ),
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(color: accentColor.withAlpha(145)),
+                    ),
+                    child: Text(
+                      actionLabel!,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: accentColor,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
               ],
             ),
-            const SizedBox(height: SpacingTokens.xs),
+            const SizedBox(height: SpacingTokens.sm),
             Text(
               value,
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w800,
+                letterSpacing: 0.2,
               ),
             ),
           ],
@@ -2581,8 +2706,10 @@ class _CoverOverspendingSheet extends HookConsumerWidget {
             .toList(growable: false);
       } on Exception catch (_) {
         if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not cover overspending.')),
+        showAppToast(
+          context,
+          message: 'Could not cover overspending.',
+          variant: AppToastVariant.error,
         );
       } finally {
         ref

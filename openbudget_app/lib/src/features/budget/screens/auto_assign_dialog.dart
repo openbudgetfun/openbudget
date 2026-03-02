@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/auto_assign_provider.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
+import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
@@ -186,8 +187,6 @@ class AutoAssignDialog extends HookConsumerWidget {
     ValueNotifier<bool> isAssigning,
   ) async {
     final l10n = AppLocalizations.of(context);
-    final messenger = ScaffoldMessenger.of(context);
-    final colorScheme = Theme.of(context).colorScheme;
 
     isAssigning.value = true;
     try {
@@ -195,19 +194,20 @@ class AutoAssignDialog extends HookConsumerWidget {
           .read(autoAssignActionsProvider.notifier)
           .execute(budgetId: budgetId, items: proposal.items);
       if (context.mounted) {
-        messenger.showSnackBar(
-          SnackBar(content: Text(l10n.autoAssignSuccess(count))),
+        showAppToast(
+          context,
+          message: l10n.autoAssignSuccess(count),
+          variant: AppToastVariant.success,
         );
         Navigator.of(context).pop();
       }
     } on Exception catch (_) {
       isAssigning.value = false;
       if (context.mounted) {
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text(l10n.autoAssignError),
-            backgroundColor: colorScheme.error,
-          ),
+        showAppToast(
+          context,
+          message: l10n.autoAssignError,
+          variant: AppToastVariant.error,
         );
       }
     }

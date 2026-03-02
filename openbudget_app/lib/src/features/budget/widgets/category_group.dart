@@ -87,7 +87,7 @@ class CategoryGroup extends HookConsumerWidget {
           GestureDetector(
             onTap: isReorderingEnvelopes.value
                 ? () => isReorderingEnvelopes.value = false
-                : onToggleCollapsed ?? onEditCategory,
+                : onToggleCollapsed,
             onLongPress: () => _showCategoryMenu(context),
             child: Opacity(
               opacity: (category.isHidden ?? false) ? 0.5 : 1.0,
@@ -173,6 +173,20 @@ class CategoryGroup extends HookConsumerWidget {
                           ),
                         ),
                       ],
+                    ),
+                    const SizedBox(width: SpacingTokens.xs),
+                    IconButton(
+                      onPressed: onEditCategory,
+                      tooltip: l10n.budgetEditCategoryTitle,
+                      icon: const Icon(Icons.edit_rounded, size: 18),
+                      style: IconButton.styleFrom(
+                        minimumSize: const Size(44, 44),
+                        padding: const EdgeInsets.all(SpacingTokens.sm),
+                        tapTargetSize: MaterialTapTargetSize.padded,
+                        foregroundColor: OpenBudgetPalette.bgBrandFor(
+                          Theme.of(context),
+                        ),
+                      ),
                     ),
                   ],
                 ),

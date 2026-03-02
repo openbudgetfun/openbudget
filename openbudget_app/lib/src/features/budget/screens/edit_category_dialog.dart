@@ -3,6 +3,9 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/category_actions_provider.dart';
+import 'package:openbudget_app/src/utils/currency_formatter.dart';
+import 'package:openbudget_app/src/widgets/app_toast.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 class EditCategoryDialog extends HookConsumerWidget {
@@ -10,12 +13,18 @@ class EditCategoryDialog extends HookConsumerWidget {
     required this.categoryId,
     required this.budgetId,
     required this.currentName,
+    required this.envelopeCount,
+    required this.totalAllocatedCents,
+    required this.currencyCode,
     super.key,
   });
 
   final String categoryId;
   final String budgetId;
   final String currentName;
+  final int envelopeCount;
+  final int totalAllocatedCents;
+  final CurrencyCode currencyCode;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -82,11 +91,20 @@ class EditCategoryDialog extends HookConsumerWidget {
   ) async {
     final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
+    final envelopeSummary = envelopeCount == 1
+        ? '1 envelope'
+        : '$envelopeCount envelopes';
+    final allocated = formatCents(totalAllocatedCents, currencyCode);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(l10n.deleteConfirmTitle),
-        content: Text('${l10n.deleteConfirmMessage}\n\n"$currentName"'),
+        content: Text(
+          '${l10n.deleteConfirmMessage}\n\n'
+          '"$currentName"\n\n'
+          '$envelopeSummary\n'
+          '$allocated allocated',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
@@ -107,20 +125,24 @@ class EditCategoryDialog extends HookConsumerWidget {
     if (confirmed != true || !context.mounted) return;
 
     isSubmitting.value = true;
-    final messenger = ScaffoldMessenger.of(context);
     try {
       await ref
           .read(categoryActionsProvider.notifier)
           .deleteCategory(categoryId: categoryId, budgetId: budgetId);
-      messenger.showSnackBar(SnackBar(content: Text(l10n.deleteSuccess)));
+      if (!context.mounted) return;
+      showAppToast(
+        context,
+        message: l10n.deleteSuccess,
+        variant: AppToastVariant.success,
+      );
       if (context.mounted) Navigator.of(context).pop();
     } on Exception {
       isSubmitting.value = false;
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(l10n.deleteError),
-          backgroundColor: colorScheme.error,
-        ),
+      if (!context.mounted) return;
+      showAppToast(
+        context,
+        message: l10n.deleteError,
+        variant: AppToastVariant.error,
       );
     }
   }
@@ -136,8 +158,6 @@ class EditCategoryDialog extends HookConsumerWidget {
     if (name.isEmpty || name == currentName) return;
     isSubmitting.value = true;
     final navigator = Navigator.of(context);
-    final messenger = ScaffoldMessenger.of(context);
-    final colorScheme = Theme.of(context).colorScheme;
     try {
       await ref
           .read(categoryActionsProvider.notifier)
@@ -146,17 +166,20 @@ class EditCategoryDialog extends HookConsumerWidget {
             budgetId: budgetId,
             name: name,
           );
-      messenger.showSnackBar(
-        SnackBar(content: Text(l10n.budgetEditCategorySuccess)),
+      if (!context.mounted) return;
+      showAppToast(
+        context,
+        message: l10n.budgetEditCategorySuccess,
+        variant: AppToastVariant.success,
       );
       navigator.pop();
     } on Exception catch (_) {
       isSubmitting.value = false;
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(l10n.budgetEditCategoryError),
-          backgroundColor: colorScheme.error,
-        ),
+      if (!context.mounted) return;
+      showAppToast(
+        context,
+        message: l10n.budgetEditCategoryError,
+        variant: AppToastVariant.error,
       );
     }
   }

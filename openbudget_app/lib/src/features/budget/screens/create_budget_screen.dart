@@ -7,6 +7,7 @@ import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/theme/openbudget_palette.dart';
+import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
@@ -22,7 +23,6 @@ class CreateBudgetScreen extends HookConsumerWidget {
     final selectedCurrency = useState(CurrencyCode.usd);
     final isSubmitting = useState(false);
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
     final bodyTextColor = OpenBudgetPalette.fgSecondaryFor(theme);
     final statusBarStyle =
         (theme.brightness == Brightness.light
@@ -144,11 +144,10 @@ class CreateBudgetScreen extends HookConsumerWidget {
                               } on Exception catch (_) {
                                 isSubmitting.value = false;
                                 if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(l10n.createBudgetError),
-                                      backgroundColor: colorScheme.error,
-                                    ),
+                                  showAppToast(
+                                    context,
+                                    message: l10n.createBudgetError,
+                                    variant: AppToastVariant.error,
                                   );
                                 }
                               }

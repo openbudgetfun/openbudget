@@ -13,6 +13,7 @@ import 'package:openbudget_app/src/features/budget/screens/set_goal_dialog.dart'
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
+import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -108,11 +109,10 @@ class _EditPlanContent extends HookConsumerWidget {
         isReordering.value = false;
       } on Exception catch (_) {
         if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.budgetReorderError),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
+        showAppToast(
+          context,
+          message: l10n.budgetReorderError,
+          variant: AppToastVariant.error,
         );
       } finally {
         isSavingReorder.value = false;
@@ -705,16 +705,17 @@ class _EditPlanContent extends HookConsumerWidget {
       }
 
       if (!context.mounted) return;
-      ScaffoldMessenger.of(
+      showAppToast(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Category group hidden.')));
+        message: 'Category group hidden.',
+        variant: AppToastVariant.success,
+      );
     } on Exception catch (_) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Unable to hide category group.'),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
+      showAppToast(
+        context,
+        message: 'Unable to hide category group.',
+        variant: AppToastVariant.error,
       );
     }
   }
@@ -724,11 +725,20 @@ class _EditPlanContent extends HookConsumerWidget {
     required WidgetRef ref,
     required CategoryWithEnvelopes categoryWithEnvelopes,
   }) async {
+    final envelopeCount = categoryWithEnvelopes.envelopes.length;
+    final envelopeSummary = envelopeCount == 1
+        ? '1 envelope'
+        : '$envelopeCount envelopes';
+    final allocated = formatCents(
+      categoryWithEnvelopes.totalBudgetedCents,
+      currencyCode,
+    );
     final shouldDelete = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
         content: Text(
-          'Delete category group "${categoryWithEnvelopes.category.name}"?',
+          'Delete category group "${categoryWithEnvelopes.category.name}"?'
+          '\n\n$envelopeSummary\n$allocated allocated',
         ),
         actions: [
           TextButton(
@@ -753,11 +763,10 @@ class _EditPlanContent extends HookConsumerWidget {
           .deleteCategory(categoryId: categoryId, budgetId: budgetId);
     } on Exception catch (_) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Unable to delete category group.'),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
+      showAppToast(
+        context,
+        message: 'Unable to delete category group.',
+        variant: AppToastVariant.error,
       );
     }
   }
