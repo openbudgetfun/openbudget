@@ -20,10 +20,10 @@ class AppIconScreen extends HookConsumerWidget {
     final currentStyle = ref.watch(appIconStyleProvider);
 
     return Scaffold(
-      backgroundColor: OpenBudgetPalette.appBackgroundFor(theme),
+      backgroundColor: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
       appBar: AppBar(
-        backgroundColor: OpenBudgetPalette.appBackgroundFor(theme),
-        surfaceTintColor: Colors.transparent,
+        backgroundColor: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
+        surfaceTintColor: OpenBudgetPalette.transparentFor(Theme.of(context)),
         centerTitle: true,
         leadingWidth: 120,
         leading: TextButton(
@@ -105,7 +105,7 @@ class AppIconScreen extends HookConsumerWidget {
           Text(
             l10n.settingsAppIconHint,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: OpenBudgetPalette.mutedTextFor(theme),
+              color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
             ),
           ),
         ],
@@ -131,12 +131,13 @@ class _SettingsCard extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: OpenBudgetPalette.surfaceFor(theme),
+        color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
         borderRadius: BorderRadius.circular(RadiusTokens.md),
-        border: Border.all(color: OpenBudgetPalette.dividerFor(theme)),
+        border: Border.all(
+          color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
+        ),
       ),
       child: child,
     );
@@ -160,11 +161,13 @@ class _AppIconStyleTile extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return ListTile(
       onTap: onTap,
       leading: selected
-          ? const Icon(Icons.check_rounded, color: OpenBudgetPalette.accentBlue)
+          ? Icon(
+              Icons.check_rounded,
+              color: OpenBudgetPalette.bgBrandFor(Theme.of(context)),
+            )
           : const SizedBox(width: 24),
       title: Text(label),
       trailing: Container(
@@ -172,7 +175,9 @@ class _AppIconStyleTile extends HookWidget {
         width: 34,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: OpenBudgetPalette.dividerFor(theme)),
+          border: Border.all(
+            color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
+          ),
         ),
         clipBehavior: Clip.antiAlias,
         child: Image.asset(previewAssetPath, fit: BoxFit.cover),

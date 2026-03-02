@@ -12,6 +12,7 @@ import 'package:openbudget_app/src/features/payees/providers/payee_list_provider
 import 'package:openbudget_app/src/features/transactions/providers/transaction_actions_provider.dart';
 import 'package:openbudget_app/src/features/transactions/screens/edit_transaction_dialog.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
+import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_client/openbudget_client.dart';
@@ -601,13 +602,38 @@ class TransactionListScreen extends HookConsumerWidget {
     ValueNotifier<Set<String>> selectedIds,
   ) {
     final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
     final flags = <(String, String, Color)>[
-      ('red', l10n.transactionFlagRed, Colors.red),
-      ('orange', l10n.transactionFlagOrange, Colors.orange),
-      ('yellow', l10n.transactionFlagYellow, Colors.amber),
-      ('green', l10n.transactionFlagGreen, Colors.green),
-      ('blue', l10n.transactionFlagBlue, Colors.blue),
-      ('purple', l10n.transactionFlagPurple, Colors.purple),
+      (
+        'red',
+        l10n.transactionFlagRed,
+        OpenBudgetPalette.bgFlagCriticalFor(theme),
+      ),
+      (
+        'orange',
+        l10n.transactionFlagOrange,
+        OpenBudgetPalette.bgFlagHighFor(theme),
+      ),
+      (
+        'yellow',
+        l10n.transactionFlagYellow,
+        OpenBudgetPalette.bgFlagMediumFor(theme),
+      ),
+      (
+        'green',
+        l10n.transactionFlagGreen,
+        OpenBudgetPalette.bgFlagPositiveFor(theme),
+      ),
+      (
+        'blue',
+        l10n.transactionFlagBlue,
+        OpenBudgetPalette.bgFlagInfoFor(theme),
+      ),
+      (
+        'purple',
+        l10n.transactionFlagPurple,
+        OpenBudgetPalette.bgFlagAccentFor(theme),
+      ),
     ];
 
     showModalBottomSheet<void>(
@@ -1021,7 +1047,7 @@ class _FlagFilterChip extends HookWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final flagColor = _flagColorFromString(selectedFlag);
+    final flagColor = _flagColorFromString(selectedFlag, theme);
     final isActive = selectedFlag != null;
 
     return FilterChip(
@@ -1043,13 +1069,38 @@ class _FlagFilterChip extends HookWidget {
   }
 
   void _showFlagPicker(BuildContext context, AppLocalizations l10n) {
+    final theme = Theme.of(context);
     final flags = <(String, String, Color)>[
-      ('red', l10n.transactionFlagRed, Colors.red),
-      ('orange', l10n.transactionFlagOrange, Colors.orange),
-      ('yellow', l10n.transactionFlagYellow, Colors.amber),
-      ('green', l10n.transactionFlagGreen, Colors.green),
-      ('blue', l10n.transactionFlagBlue, Colors.blue),
-      ('purple', l10n.transactionFlagPurple, Colors.purple),
+      (
+        'red',
+        l10n.transactionFlagRed,
+        OpenBudgetPalette.bgFlagCriticalFor(theme),
+      ),
+      (
+        'orange',
+        l10n.transactionFlagOrange,
+        OpenBudgetPalette.bgFlagHighFor(theme),
+      ),
+      (
+        'yellow',
+        l10n.transactionFlagYellow,
+        OpenBudgetPalette.bgFlagMediumFor(theme),
+      ),
+      (
+        'green',
+        l10n.transactionFlagGreen,
+        OpenBudgetPalette.bgFlagPositiveFor(theme),
+      ),
+      (
+        'blue',
+        l10n.transactionFlagBlue,
+        OpenBudgetPalette.bgFlagInfoFor(theme),
+      ),
+      (
+        'purple',
+        l10n.transactionFlagPurple,
+        OpenBudgetPalette.bgFlagAccentFor(theme),
+      ),
     ];
 
     showModalBottomSheet<void>(
@@ -1211,14 +1262,14 @@ class _StatusFilterChip extends HookWidget {
   }
 }
 
-Color? _flagColorFromString(String? flagColor) {
+Color? _flagColorFromString(String? flagColor, ThemeData theme) {
   return switch (flagColor) {
-    'red' => Colors.red,
-    'orange' => Colors.orange,
-    'yellow' => Colors.amber,
-    'green' => Colors.green,
-    'blue' => Colors.blue,
-    'purple' => Colors.purple,
+    'red' => OpenBudgetPalette.bgFlagCriticalFor(theme),
+    'orange' => OpenBudgetPalette.bgFlagHighFor(theme),
+    'yellow' => OpenBudgetPalette.bgFlagMediumFor(theme),
+    'green' => OpenBudgetPalette.bgFlagPositiveFor(theme),
+    'blue' => OpenBudgetPalette.bgFlagInfoFor(theme),
+    'purple' => OpenBudgetPalette.bgFlagAccentFor(theme),
     _ => null,
   };
 }
@@ -1274,7 +1325,7 @@ class _TransactionTile extends HookConsumerWidget {
         ? l10n.transactionCleared
         : l10n.transactionUncleared;
 
-    final flagColor = _flagColorFromString(transaction.flagColor);
+    final flagColor = _flagColorFromString(transaction.flagColor, theme);
 
     final card = Card(
       margin: const EdgeInsets.only(bottom: SpacingTokens.sm),
@@ -1551,13 +1602,38 @@ class _TransactionTile extends HookConsumerWidget {
     WidgetRef ref,
     AppLocalizations l10n,
   ) {
+    final theme = Theme.of(context);
     final flags = <(String, String, Color)>[
-      ('red', l10n.transactionFlagRed, Colors.red),
-      ('orange', l10n.transactionFlagOrange, Colors.orange),
-      ('yellow', l10n.transactionFlagYellow, Colors.amber),
-      ('green', l10n.transactionFlagGreen, Colors.green),
-      ('blue', l10n.transactionFlagBlue, Colors.blue),
-      ('purple', l10n.transactionFlagPurple, Colors.purple),
+      (
+        'red',
+        l10n.transactionFlagRed,
+        OpenBudgetPalette.bgFlagCriticalFor(theme),
+      ),
+      (
+        'orange',
+        l10n.transactionFlagOrange,
+        OpenBudgetPalette.bgFlagHighFor(theme),
+      ),
+      (
+        'yellow',
+        l10n.transactionFlagYellow,
+        OpenBudgetPalette.bgFlagMediumFor(theme),
+      ),
+      (
+        'green',
+        l10n.transactionFlagGreen,
+        OpenBudgetPalette.bgFlagPositiveFor(theme),
+      ),
+      (
+        'blue',
+        l10n.transactionFlagBlue,
+        OpenBudgetPalette.bgFlagInfoFor(theme),
+      ),
+      (
+        'purple',
+        l10n.transactionFlagPurple,
+        OpenBudgetPalette.bgFlagAccentFor(theme),
+      ),
     ];
 
     showModalBottomSheet<void>(

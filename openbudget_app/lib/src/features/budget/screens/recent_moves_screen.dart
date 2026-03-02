@@ -45,10 +45,10 @@ class RecentMovesScreen extends HookConsumerWidget {
     }, [introSeen, allEvents.isEmpty]);
 
     return Scaffold(
-      backgroundColor: OpenBudgetPalette.appBackground,
+      backgroundColor: OpenBudgetPalette.bgPrimaryFor(theme),
       appBar: AppBar(
-        backgroundColor: OpenBudgetPalette.appBackground,
-        surfaceTintColor: Colors.transparent,
+        backgroundColor: OpenBudgetPalette.bgPrimaryFor(theme),
+        surfaceTintColor: OpenBudgetPalette.transparentFor(theme),
         automaticallyImplyLeading: false,
         title: Text(
           l10n.recentMovesTitle,
@@ -173,15 +173,15 @@ class _RecentMovesIntroDialog extends HookWidget {
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: SpacingTokens.lg),
               decoration: BoxDecoration(
-                color: OpenBudgetPalette.accentBlue.withAlpha(34),
+                color: OpenBudgetPalette.bgBrandFor(theme).withAlpha(34),
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(RadiusTokens.lg),
                 ),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.savings_rounded,
                 size: 48,
-                color: OpenBudgetPalette.accentBlue,
+                color: OpenBudgetPalette.bgBrandFor(theme),
               ),
             ),
             Padding(
@@ -244,10 +244,10 @@ class EnvelopeMovesScreen extends HookConsumerWidget {
     final hideAmounts = ref.watch(hideAmountsProvider);
 
     return Scaffold(
-      backgroundColor: OpenBudgetPalette.appBackground,
+      backgroundColor: OpenBudgetPalette.bgPrimaryFor(theme),
       appBar: AppBar(
-        backgroundColor: OpenBudgetPalette.appBackground,
-        surfaceTintColor: Colors.transparent,
+        backgroundColor: OpenBudgetPalette.bgPrimaryFor(theme),
+        surfaceTintColor: OpenBudgetPalette.transparentFor(theme),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
           onPressed: () => context.pop(),
@@ -338,7 +338,7 @@ class EnvelopeMovesScreen extends HookConsumerWidget {
                     horizontal: SpacingTokens.md,
                     vertical: SpacingTokens.sm,
                   ),
-                  color: OpenBudgetPalette.surfaceMuted,
+                  color: OpenBudgetPalette.bgTertiaryFor(theme),
                   child: Text(
                     _formatLongDate(l10n, day),
                     style: theme.textTheme.titleSmall?.copyWith(
@@ -440,7 +440,7 @@ class _RecentMovesTabButton extends HookWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.transparent,
+      color: OpenBudgetPalette.transparentFor(theme),
       child: InkWell(
         onTap: onTap,
         child: Padding(
@@ -455,16 +455,16 @@ class _RecentMovesTabButton extends HookWidget {
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
                   color: selected
-                      ? OpenBudgetPalette.accentBlue
-                      : OpenBudgetPalette.mutedText,
+                      ? OpenBudgetPalette.bgBrandFor(theme)
+                      : OpenBudgetPalette.fgSecondaryFor(theme),
                 ),
               ),
               const SizedBox(height: SpacingTokens.xs),
               Container(
                 height: 2,
                 color: selected
-                    ? OpenBudgetPalette.accentBlue
-                    : Colors.transparent,
+                    ? OpenBudgetPalette.bgBrandFor(theme)
+                    : OpenBudgetPalette.transparentFor(theme),
               ),
             ],
           ),
@@ -559,7 +559,7 @@ class _RecentMovesList extends HookWidget {
           heading.relativeLabel!,
           style: theme.textTheme.bodyLarge?.copyWith(
             fontWeight: FontWeight.w500,
-            color: OpenBudgetPalette.mutedTextFor(theme),
+            color: OpenBudgetPalette.fgSecondaryFor(theme),
           ),
         ),
         const SizedBox(height: 2),
@@ -647,7 +647,7 @@ class _RecentMoveRow extends HookWidget {
         : l10n.recentMovesReadyToAssign;
 
     return ColoredBox(
-      color: OpenBudgetPalette.surfaceFor(theme),
+      color: OpenBudgetPalette.bgSecondaryFor(theme),
       child: Column(
         children: [
           Padding(
@@ -666,12 +666,12 @@ class _RecentMoveRow extends HookWidget {
                       ? () => onEnvelopeTap(sourceEnvelopeId)
                       : null,
                 ),
-                const Padding(
+                Padding(
                   padding: EdgeInsets.symmetric(horizontal: SpacingTokens.xs),
                   child: Icon(
                     Icons.arrow_forward_rounded,
                     size: 16,
-                    color: OpenBudgetPalette.mutedText,
+                    color: OpenBudgetPalette.fgSecondaryFor(theme),
                   ),
                 ),
                 _MoveChip(
@@ -758,14 +758,14 @@ class _EnvelopeMoveRow extends HookWidget {
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      const WidgetSpan(
+                      WidgetSpan(
                         alignment: PlaceholderAlignment.middle,
                         child: Padding(
                           padding: EdgeInsets.symmetric(horizontal: 6),
                           child: Icon(
                             Icons.arrow_forward_rounded,
                             size: 16,
-                            color: OpenBudgetPalette.mutedText,
+                            color: OpenBudgetPalette.fgSecondaryFor(theme),
                           ),
                         ),
                       ),
@@ -785,8 +785,8 @@ class _EnvelopeMoveRow extends HookWidget {
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w700,
                   color: signedAmount >= 0
-                      ? OpenBudgetPalette.progressGreen
-                      : OpenBudgetPalette.negative,
+                      ? OpenBudgetPalette.fgSuccessFor(theme)
+                      : OpenBudgetPalette.fgErrorFor(theme),
                 ),
               ),
             ],
@@ -809,8 +809,8 @@ class _MoveChip extends HookWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final accentFill = theme.brightness == Brightness.dark
-        ? OpenBudgetPalette.accentBlue.withAlpha(38)
-        : OpenBudgetPalette.accentBlue.withAlpha(24);
+        ? OpenBudgetPalette.bgBrandFor(theme).withAlpha(38)
+        : OpenBudgetPalette.bgBrandFor(theme).withAlpha(24);
     final chip = Container(
       constraints: const BoxConstraints(maxWidth: 152),
       padding: const EdgeInsets.symmetric(
@@ -818,7 +818,7 @@ class _MoveChip extends HookWidget {
         vertical: 7,
       ),
       decoration: BoxDecoration(
-        color: accent ? accentFill : OpenBudgetPalette.surfaceMutedFor(theme),
+        color: accent ? accentFill : OpenBudgetPalette.bgTertiaryFor(theme),
         borderRadius: BorderRadius.circular(RadiusTokens.sm),
       ),
       child: Text(
@@ -826,7 +826,7 @@ class _MoveChip extends HookWidget {
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: theme.textTheme.bodyMedium?.copyWith(
-          color: accent ? OpenBudgetPalette.accentBlue : null,
+          color: accent ? OpenBudgetPalette.bgBrandFor(theme) : null,
           fontWeight: FontWeight.w600,
         ),
       ),
@@ -865,10 +865,10 @@ class _EmptyMovesState extends HookWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
+            Icon(
               Icons.swap_horiz_rounded,
               size: 40,
-              color: OpenBudgetPalette.mutedText,
+              color: OpenBudgetPalette.fgSecondaryFor(theme),
             ),
             const SizedBox(height: SpacingTokens.md),
             Text(
@@ -883,7 +883,7 @@ class _EmptyMovesState extends HookWidget {
               subtitle ?? l10n.recentMovesEmptySubtitle,
               textAlign: TextAlign.center,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: OpenBudgetPalette.mutedText,
+                color: OpenBudgetPalette.fgSecondaryFor(theme),
               ),
             ),
           ],

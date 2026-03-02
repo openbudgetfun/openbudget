@@ -58,8 +58,8 @@ class EnvelopeRow extends HookConsumerWidget {
 
     return Material(
       color: isSelected
-          ? OpenBudgetPalette.accentPurple.withAlpha(85)
-          : Colors.transparent,
+          ? OpenBudgetPalette.bgAccentFor(Theme.of(context)).withAlpha(85)
+          : OpenBudgetPalette.transparentFor(Theme.of(context)),
       child: InkWell(
         onTap: onTap,
         onLongPress: onLongPress,
@@ -77,12 +77,14 @@ class EnvelopeRow extends HookConsumerWidget {
                   if (onQuickBudget != null)
                     GestureDetector(
                       onTap: onQuickBudget,
-                      child: const Padding(
+                      child: Padding(
                         padding: EdgeInsets.only(right: SpacingTokens.xs),
                         child: Icon(
                           Icons.bolt_rounded,
                           size: 16,
-                          color: OpenBudgetPalette.accentBlue,
+                          color: OpenBudgetPalette.bgBrandFor(
+                            Theme.of(context),
+                          ),
                         ),
                       ),
                     )
@@ -121,8 +123,12 @@ class EnvelopeRow extends HookConsumerWidget {
                                         : Icons.arrow_back_rounded,
                                     size: 12,
                                     color: carryover > 0
-                                        ? OpenBudgetPalette.progressGreen
-                                        : OpenBudgetPalette.negative,
+                                        ? OpenBudgetPalette.fgSuccessFor(
+                                            Theme.of(context),
+                                          )
+                                        : OpenBudgetPalette.fgErrorFor(
+                                            Theme.of(context),
+                                          ),
                                   ),
                                 ),
                               ),
@@ -131,17 +137,21 @@ class EnvelopeRow extends HookConsumerWidget {
                         if (envelope.note != null && envelope.note!.isNotEmpty)
                           Row(
                             children: [
-                              const Icon(
+                              Icon(
                                 Icons.sticky_note_2_outlined,
                                 size: 10,
-                                color: OpenBudgetPalette.mutedText,
+                                color: OpenBudgetPalette.fgSecondaryFor(
+                                  Theme.of(context),
+                                ),
                               ),
                               const SizedBox(width: 2),
                               Flexible(
                                 child: Text(
                                   envelope.note!,
                                   style: theme.textTheme.labelSmall?.copyWith(
-                                    color: OpenBudgetPalette.mutedText,
+                                    color: OpenBudgetPalette.fgSecondaryFor(
+                                      Theme.of(context),
+                                    ),
                                     fontStyle: FontStyle.italic,
                                   ),
                                   maxLines: 1,
@@ -220,8 +230,8 @@ class EnvelopeRow extends HookConsumerWidget {
                   available < 0 ? 'Overspent' : 'Funded',
                   style: theme.textTheme.labelSmall?.copyWith(
                     color: available < 0
-                        ? OpenBudgetPalette.negative
-                        : OpenBudgetPalette.mutedText,
+                        ? OpenBudgetPalette.fgErrorFor(Theme.of(context))
+                        : OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -250,11 +260,11 @@ class _SpendingProgressBar extends HookWidget {
 
     final Color barColor;
     if (ratio > 1.0) {
-      barColor = OpenBudgetPalette.negative;
+      barColor = OpenBudgetPalette.fgErrorFor(Theme.of(context));
     } else if (ratio >= 0.8) {
       barColor = ColorTokens.tertiary;
     } else {
-      barColor = OpenBudgetPalette.progressGreen;
+      barColor = OpenBudgetPalette.fgSuccessFor(Theme.of(context));
     }
 
     return Padding(
@@ -312,11 +322,11 @@ class _GoalProgressBar extends HookWidget {
 
     final Color barColor;
     if (progress >= 1.0) {
-      barColor = OpenBudgetPalette.progressGreen;
+      barColor = OpenBudgetPalette.fgSuccessFor(Theme.of(context));
     } else if (progress >= 0.5) {
       barColor = ColorTokens.tertiary;
     } else {
-      barColor = OpenBudgetPalette.negative;
+      barColor = OpenBudgetPalette.fgErrorFor(Theme.of(context));
     }
 
     return Padding(

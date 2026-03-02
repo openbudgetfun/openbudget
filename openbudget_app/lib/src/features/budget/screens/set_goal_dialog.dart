@@ -68,12 +68,12 @@ class SetGoalDialog extends HookConsumerWidget {
     );
 
     return Dialog.fullscreen(
-      backgroundColor: OpenBudgetPalette.appBackground,
+      backgroundColor: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
       child: Scaffold(
-        backgroundColor: OpenBudgetPalette.appBackground,
+        backgroundColor: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
         appBar: AppBar(
-          backgroundColor: OpenBudgetPalette.appBackground,
-          surfaceTintColor: Colors.transparent,
+          backgroundColor: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
+          surfaceTintColor: OpenBudgetPalette.transparentFor(Theme.of(context)),
           leadingWidth: 96,
           leading: TextButton(
             onPressed: isSubmitting.value
@@ -85,10 +85,10 @@ class SetGoalDialog extends HookConsumerWidget {
           title: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(
+              Icon(
                 Icons.flag_rounded,
                 size: 16,
-                color: OpenBudgetPalette.accentBlue,
+                color: OpenBudgetPalette.bgBrandFor(Theme.of(context)),
               ),
               const SizedBox(width: SpacingTokens.xs),
               Text(
@@ -147,9 +147,11 @@ class SetGoalDialog extends HookConsumerWidget {
                       ),
                       child: Row(
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.payments_outlined,
-                            color: OpenBudgetPalette.accentBlue,
+                            color: OpenBudgetPalette.bgBrandFor(
+                              Theme.of(context),
+                            ),
                           ),
                           const SizedBox(width: SpacingTokens.sm),
                           Expanded(
@@ -162,7 +164,9 @@ class SetGoalDialog extends HookConsumerWidget {
                                       : 'I need',
                                   style: Theme.of(context).textTheme.labelLarge
                                       ?.copyWith(
-                                        color: OpenBudgetPalette.mutedText,
+                                        color: OpenBudgetPalette.fgSecondaryFor(
+                                          Theme.of(context),
+                                        ),
                                       ),
                                 ),
                                 TextField(
@@ -194,9 +198,11 @@ class SetGoalDialog extends HookConsumerWidget {
                         ),
                         child: Row(
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.calendar_month_outlined,
-                              color: OpenBudgetPalette.accentBlue,
+                              color: OpenBudgetPalette.bgBrandFor(
+                                Theme.of(context),
+                              ),
                             ),
                             const SizedBox(width: SpacingTokens.sm),
                             Expanded(
@@ -209,7 +215,10 @@ class SetGoalDialog extends HookConsumerWidget {
                                         .textTheme
                                         .labelLarge
                                         ?.copyWith(
-                                          color: OpenBudgetPalette.mutedText,
+                                          color:
+                                              OpenBudgetPalette.fgSecondaryFor(
+                                                Theme.of(context),
+                                              ),
                                         ),
                                   ),
                                   DropdownButtonHideUnderline(
@@ -239,14 +248,20 @@ class SetGoalDialog extends HookConsumerWidget {
                       ),
                       const Divider(height: 1),
                       ListTile(
-                        leading: const Icon(
+                        leading: Icon(
                           Icons.repeat_rounded,
-                          color: OpenBudgetPalette.accentBlue,
+                          color: OpenBudgetPalette.bgBrandFor(
+                            Theme.of(context),
+                          ),
                         ),
                         title: Text(
                           'Next month I want to',
                           style: Theme.of(context).textTheme.labelLarge
-                              ?.copyWith(color: OpenBudgetPalette.mutedText),
+                              ?.copyWith(
+                                color: OpenBudgetPalette.fgSecondaryFor(
+                                  Theme.of(context),
+                                ),
+                              ),
                         ),
                         subtitle: Text(
                           'Set aside another ${_formatCents(monthlyContribution, currencyCode)}',
@@ -258,14 +273,20 @@ class SetGoalDialog extends HookConsumerWidget {
                     ] else ...[
                       const Divider(height: 1),
                       ListTile(
-                        leading: const Icon(
+                        leading: Icon(
                           Icons.adjust_rounded,
-                          color: OpenBudgetPalette.accentBlue,
+                          color: OpenBudgetPalette.bgBrandFor(
+                            Theme.of(context),
+                          ),
                         ),
                         title: Text(
                           'I want to',
                           style: Theme.of(context).textTheme.labelLarge
-                              ?.copyWith(color: OpenBudgetPalette.mutedText),
+                              ?.copyWith(
+                                color: OpenBudgetPalette.fgSecondaryFor(
+                                  Theme.of(context),
+                                ),
+                              ),
                         ),
                         subtitle: Text(
                           'Set aside another ${_formatCents(amountCents, currencyCode)}',
@@ -284,9 +305,11 @@ class SetGoalDialog extends HookConsumerWidget {
                   child: Column(
                     children: [
                       ListTile(
-                        leading: const Icon(
+                        leading: Icon(
                           Icons.event_outlined,
-                          color: OpenBudgetPalette.accentBlue,
+                          color: OpenBudgetPalette.bgBrandFor(
+                            Theme.of(context),
+                          ),
                         ),
                         title: const Text('Due on'),
                         subtitle: Text(
@@ -308,9 +331,11 @@ class SetGoalDialog extends HookConsumerWidget {
                       ),
                       const Divider(height: 1),
                       SwitchListTile.adaptive(
-                        secondary: const Icon(
+                        secondary: Icon(
                           Icons.repeat_rounded,
-                          color: OpenBudgetPalette.accentBlue,
+                          color: OpenBudgetPalette.bgBrandFor(
+                            Theme.of(context),
+                          ),
                         ),
                         title: const Text('Repeats'),
                         value: repeats.value,
@@ -327,10 +352,12 @@ class SetGoalDialog extends HookConsumerWidget {
                           ),
                           child: Row(
                             children: [
-                              const Icon(
+                              Icon(
                                 Icons.calendar_today_outlined,
                                 size: 20,
-                                color: OpenBudgetPalette.accentBlue,
+                                color: OpenBudgetPalette.bgBrandFor(
+                                  Theme.of(context),
+                                ),
                               ),
                               const SizedBox(width: SpacingTokens.sm),
                               Expanded(
@@ -343,7 +370,10 @@ class SetGoalDialog extends HookConsumerWidget {
                                           .textTheme
                                           .labelLarge
                                           ?.copyWith(
-                                            color: OpenBudgetPalette.mutedText,
+                                            color:
+                                                OpenBudgetPalette.fgSecondaryFor(
+                                                  Theme.of(context),
+                                                ),
                                           ),
                                     ),
                                     Row(
@@ -414,7 +444,9 @@ class SetGoalDialog extends HookConsumerWidget {
                         ? null
                         : () => _deleteGoal(context, ref, isSubmitting),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: OpenBudgetPalette.negative,
+                      foregroundColor: OpenBudgetPalette.fgErrorFor(
+                        Theme.of(context),
+                      ),
                     ),
                     child: Text(l10n.goalRemove),
                   ),
@@ -644,9 +676,11 @@ class _GoalCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: OpenBudgetPalette.surface,
+        color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
         borderRadius: BorderRadius.circular(RadiusTokens.md),
-        border: Border.all(color: OpenBudgetPalette.divider),
+        border: Border.all(
+          color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
+        ),
       ),
       child: child,
     );

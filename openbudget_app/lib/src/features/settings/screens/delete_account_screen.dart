@@ -15,9 +15,9 @@ class DeleteAccountScreen extends HookWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: OpenBudgetPalette.appBackground,
+      backgroundColor: OpenBudgetPalette.bgPrimaryFor(theme),
       appBar: AppBar(
-        backgroundColor: OpenBudgetPalette.appBackground,
+        backgroundColor: OpenBudgetPalette.bgPrimaryFor(theme),
         title: const Text('Delete Account'),
       ),
       body: Padding(
@@ -34,7 +34,7 @@ class DeleteAccountScreen extends HookWidget {
             Container(
               padding: const EdgeInsets.all(SpacingTokens.md),
               decoration: BoxDecoration(
-                color: OpenBudgetPalette.surface,
+                color: OpenBudgetPalette.bgSecondaryFor(theme),
                 borderRadius: BorderRadius.circular(RadiusTokens.md),
                 border: Border.all(color: theme.colorScheme.errorContainer),
               ),
@@ -63,7 +63,7 @@ class DeleteAccountScreen extends HookWidget {
             Text(
               'Delete requests are disabled until backend account deletion is available.',
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: OpenBudgetPalette.mutedText,
+                color: OpenBudgetPalette.fgSecondaryFor(theme),
               ),
             ),
             const SizedBox(height: SpacingTokens.lg),

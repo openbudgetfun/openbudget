@@ -214,10 +214,10 @@ class AddAccountScreen extends HookConsumerWidget {
     return RepaintBoundary(
       key: addAccountScreenCaptureBoundaryKey,
       child: Scaffold(
-        backgroundColor: OpenBudgetPalette.appBackground,
+        backgroundColor: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
         appBar: AppBar(
-          backgroundColor: OpenBudgetPalette.appBackground,
-          surfaceTintColor: Colors.transparent,
+          backgroundColor: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
+          surfaceTintColor: OpenBudgetPalette.transparentFor(Theme.of(context)),
           scrolledUnderElevation: 0,
           automaticallyImplyLeading: false,
           leading:
@@ -320,7 +320,9 @@ class AddAccountScreen extends HookConsumerWidget {
             },
             if (showSearchingOverlay.value)
               ColoredBox(
-                color: Colors.black.withAlpha(120),
+                color: OpenBudgetPalette.fgPrimaryFor(
+                  Theme.of(context),
+                ).withAlpha(120),
                 child: const Center(
                   child: Card(
                     child: Padding(
@@ -449,7 +451,7 @@ class _LoadingStep extends StatelessWidget {
           Text(
             'This might take a few seconds.',
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: OpenBudgetPalette.mutedText,
+              color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
             ),
           ),
           if (includeSpinner) ...[
@@ -539,9 +541,9 @@ class _BankSearchStep extends StatelessWidget {
         const SizedBox(height: SpacingTokens.xs),
         Text(
           'Search by institution name or web address (URL)',
-          style: Theme.of(
-            context,
-          ).textTheme.bodyMedium?.copyWith(color: OpenBudgetPalette.mutedText),
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
+          ),
         ),
         const SizedBox(height: SpacingTokens.md),
         Text(
@@ -555,14 +557,16 @@ class _BankSearchStep extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(SpacingTokens.md),
             decoration: BoxDecoration(
-              color: OpenBudgetPalette.surface,
-              border: Border.all(color: OpenBudgetPalette.divider),
+              color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
+              border: Border.all(
+                color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
+              ),
               borderRadius: BorderRadius.circular(RadiusTokens.md),
             ),
             child: Text(
               'No institutions found. Try another name or add an unlinked account.',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: OpenBudgetPalette.mutedText,
+                color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
               ),
             ),
           )
@@ -595,7 +599,7 @@ class _BankSearchStep extends StatelessWidget {
               child: Text(
                 'or',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: OpenBudgetPalette.mutedText,
+                  color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
                 ),
               ),
             ),
@@ -628,8 +632,10 @@ class _InstitutionTile extends StatelessWidget {
         height: 84,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: OpenBudgetPalette.surface,
-          border: Border.all(color: OpenBudgetPalette.divider),
+          color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
+          border: Border.all(
+            color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
+          ),
           borderRadius: BorderRadius.circular(RadiusTokens.md),
         ),
         child: Text(
@@ -673,10 +679,10 @@ class _UnlinkedAccountStep extends StatelessWidget {
     final theme = Theme.of(context);
     final primaryTextColor = theme.brightness == Brightness.dark
         ? theme.colorScheme.onSurface
-        : const Color(0xFF23201A);
+        : OpenBudgetPalette.fgIconStrongFor(Theme.of(context));
     final secondaryTextColor = theme.brightness == Brightness.dark
         ? theme.colorScheme.onSurfaceVariant
-        : OpenBudgetPalette.mutedText;
+        : OpenBudgetPalette.fgSecondaryFor(Theme.of(context));
     final headingStyle =
         (theme.textTheme.titleSmall ??
                 const TextStyle(fontSize: 21, fontWeight: FontWeight.w600))
@@ -743,7 +749,9 @@ class _UnlinkedAccountStep extends StatelessWidget {
               horizontal: SpacingTokens.sm,
             ),
             shape: RoundedRectangleBorder(
-              side: const BorderSide(color: OpenBudgetPalette.divider),
+              side: BorderSide(
+                color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
+              ),
               borderRadius: BorderRadius.circular(RadiusTokens.md),
             ),
           ),
@@ -805,9 +813,9 @@ class _AccountTypeStep extends StatelessWidget {
           const SizedBox(height: SpacingTokens.xs),
           Text(
             section.subtitle,
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: OpenBudgetPalette.mutedText),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
+            ),
           ),
           const SizedBox(height: SpacingTokens.sm),
           for (final option in section.options) ...[
@@ -816,16 +824,18 @@ class _AccountTypeStep extends StatelessWidget {
               onTap: () => onSelected(option),
               title: Text(option.label),
               trailing: option.key == selectedTypeKey
-                  ? const Icon(
+                  ? Icon(
                       Icons.check_rounded,
-                      color: OpenBudgetPalette.accentBlue,
+                      color: OpenBudgetPalette.bgBrandFor(Theme.of(context)),
                     )
                   : null,
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: SpacingTokens.sm,
               ),
               shape: RoundedRectangleBorder(
-                side: const BorderSide(color: OpenBudgetPalette.divider),
+                side: BorderSide(
+                  color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
+                ),
                 borderRadius: BorderRadius.circular(RadiusTokens.md),
               ),
             ),
@@ -863,10 +873,10 @@ class _SuccessStep extends StatelessWidget {
           ),
           child: Column(
             children: [
-              const Icon(
+              Icon(
                 Icons.check_circle_rounded,
                 size: 72,
-                color: OpenBudgetPalette.progressGreen,
+                color: OpenBudgetPalette.fgSuccessFor(Theme.of(context)),
               ),
               const SizedBox(height: SpacingTokens.md),
               Text(
@@ -880,7 +890,7 @@ class _SuccessStep extends StatelessWidget {
                 '$accountTypeLabel account added to OpenBudget.',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: OpenBudgetPalette.mutedText,
+                  color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
                 ),
               ),
               const SizedBox(height: SpacingTokens.xl),

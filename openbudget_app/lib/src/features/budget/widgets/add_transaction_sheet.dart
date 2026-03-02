@@ -29,7 +29,7 @@ class AddTransactionSheet extends HookWidget {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: OpenBudgetPalette.divider,
+                color: OpenBudgetPalette.borderSubtleFor(theme),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -44,7 +44,7 @@ class AddTransactionSheet extends HookWidget {
             _ActionTile(
               icon: Icons.arrow_downward_rounded,
               label: l10n.addTransactionIncome,
-              color: OpenBudgetPalette.progressGreen,
+              color: OpenBudgetPalette.fgSuccessFor(theme),
               onTap: () {
                 Navigator.of(context).pop();
                 context.goNamed(
@@ -57,7 +57,7 @@ class AddTransactionSheet extends HookWidget {
             _ActionTile(
               icon: Icons.arrow_upward_rounded,
               label: l10n.addTransactionExpense,
-              color: OpenBudgetPalette.negative,
+              color: OpenBudgetPalette.fgErrorFor(theme),
               onTap: () {
                 Navigator.of(context).pop();
                 context.goNamed(
@@ -70,7 +70,7 @@ class AddTransactionSheet extends HookWidget {
             _ActionTile(
               icon: Icons.swap_horiz_rounded,
               label: l10n.addTransactionTransfer,
-              color: OpenBudgetPalette.accentBlue,
+              color: OpenBudgetPalette.bgBrandFor(theme),
               onTap: () {
                 Navigator.of(context).pop();
                 context.goNamed(
@@ -106,10 +106,10 @@ class _ActionTile extends HookWidget {
 
     return Card(
       margin: EdgeInsets.zero,
-      color: OpenBudgetPalette.surface,
+      color: OpenBudgetPalette.bgSecondaryFor(theme),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(RadiusTokens.md),
-        side: const BorderSide(color: OpenBudgetPalette.divider),
+        side: BorderSide(color: OpenBudgetPalette.borderSubtleFor(theme)),
       ),
       child: ListTile(
         onTap: onTap,
@@ -123,9 +123,9 @@ class _ActionTile extends HookWidget {
             fontWeight: FontWeight.w700,
           ),
         ),
-        trailing: const Icon(
+        trailing: Icon(
           Icons.chevron_right_rounded,
-          color: OpenBudgetPalette.mutedText,
+          color: OpenBudgetPalette.fgSecondaryFor(theme),
         ),
       ),
     );

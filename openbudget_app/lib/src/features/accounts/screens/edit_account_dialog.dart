@@ -70,10 +70,10 @@ class EditAccountDialog extends HookConsumerWidget {
 
     return Dialog.fullscreen(
       child: Scaffold(
-        backgroundColor: OpenBudgetPalette.appBackground,
+        backgroundColor: OpenBudgetPalette.bgPrimaryFor(theme),
         appBar: AppBar(
-          backgroundColor: OpenBudgetPalette.appBackground,
-          surfaceTintColor: Colors.transparent,
+          backgroundColor: OpenBudgetPalette.bgPrimaryFor(theme),
+          surfaceTintColor: OpenBudgetPalette.transparentFor(theme),
           scrolledUnderElevation: 0,
           leadingWidth: 92,
           leading: TextButton(
@@ -185,9 +185,11 @@ class EditAccountDialog extends HookConsumerWidget {
                 vertical: SpacingTokens.xs,
               ),
               decoration: BoxDecoration(
-                color: OpenBudgetPalette.surface,
+                color: OpenBudgetPalette.bgSecondaryFor(theme),
                 borderRadius: BorderRadius.circular(RadiusTokens.md),
-                border: Border.all(color: OpenBudgetPalette.divider),
+                border: Border.all(
+                  color: OpenBudgetPalette.borderSubtleFor(theme),
+                ),
               ),
               child: Row(
                 children: [
@@ -200,15 +202,15 @@ class EditAccountDialog extends HookConsumerWidget {
                       height: 36,
                       decoration: BoxDecoration(
                         color: balanceIsPositive.value
-                            ? OpenBudgetPalette.progressGreen
-                            : OpenBudgetPalette.negative,
+                            ? OpenBudgetPalette.fgSuccessFor(theme)
+                            : OpenBudgetPalette.fgErrorFor(theme),
                         borderRadius: BorderRadius.circular(RadiusTokens.sm),
                       ),
                       child: Icon(
                         balanceIsPositive.value
                             ? Icons.add_rounded
                             : Icons.remove_rounded,
-                        color: Colors.white,
+                        color: OpenBudgetPalette.fgOnBrandFor(theme),
                       ),
                     ),
                   ),
@@ -241,7 +243,7 @@ class EditAccountDialog extends HookConsumerWidget {
               'An adjustment transaction will be created automatically '
               'if you change this amount.',
               style: theme.textTheme.bodySmall?.copyWith(
-                color: OpenBudgetPalette.mutedText,
+                color: OpenBudgetPalette.fgSecondaryFor(theme),
               ),
             ),
             const SizedBox(height: SpacingTokens.md),
@@ -262,7 +264,7 @@ class EditAccountDialog extends HookConsumerWidget {
               'Bank connections are currently unavailable in this build. '
               'Add or manage unlinked accounts instead.',
               style: theme.textTheme.bodySmall?.copyWith(
-                color: OpenBudgetPalette.mutedText,
+                color: OpenBudgetPalette.fgSecondaryFor(theme),
               ),
             ),
             const SizedBox(height: SpacingTokens.md),

@@ -18,9 +18,9 @@ class AccountSettingsScreen extends HookWidget {
     const unavailableHint = 'Currently unavailable in this build.';
 
     return Scaffold(
-      backgroundColor: OpenBudgetPalette.appBackground,
+      backgroundColor: OpenBudgetPalette.bgPrimaryFor(theme),
       appBar: AppBar(
-        backgroundColor: OpenBudgetPalette.appBackground,
+        backgroundColor: OpenBudgetPalette.bgPrimaryFor(theme),
         title: Text(l10n.settingsAccountSettings),
       ),
       body: ListView(
@@ -36,9 +36,11 @@ class AccountSettingsScreen extends HookWidget {
           Container(
             padding: const EdgeInsets.all(SpacingTokens.md),
             decoration: BoxDecoration(
-              color: OpenBudgetPalette.surface,
+              color: OpenBudgetPalette.bgSecondaryFor(theme),
               borderRadius: BorderRadius.circular(RadiusTokens.md),
-              border: Border.all(color: OpenBudgetPalette.divider),
+              border: Border.all(
+                color: OpenBudgetPalette.borderSubtleFor(theme),
+              ),
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -88,7 +90,7 @@ class AccountSettingsScreen extends HookWidget {
           Text(
             unavailableHint,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: OpenBudgetPalette.mutedText,
+              color: OpenBudgetPalette.fgSecondaryFor(theme),
             ),
           ),
           const SizedBox(height: SpacingTokens.xl),
@@ -117,7 +119,7 @@ class AccountSettingsScreen extends HookWidget {
           Text(
             unavailableHint,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: OpenBudgetPalette.mutedText,
+              color: OpenBudgetPalette.fgSecondaryFor(theme),
             ),
           ),
           const SizedBox(height: SpacingTokens.lg),
@@ -143,7 +145,7 @@ class AccountSettingsScreen extends HookWidget {
           Text(
             unavailableHint,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: OpenBudgetPalette.mutedText,
+              color: OpenBudgetPalette.fgSecondaryFor(theme),
             ),
           ),
           const SizedBox(height: SpacingTokens.xl),
@@ -177,7 +179,7 @@ class AccountSettingsScreen extends HookWidget {
           Text(
             'No account data can be removed from this app yet.',
             style: theme.textTheme.bodySmall?.copyWith(
-              color: OpenBudgetPalette.mutedText,
+              color: OpenBudgetPalette.fgSecondaryFor(theme),
             ),
           ),
         ],

@@ -88,10 +88,10 @@ class AddIncomeScreen extends HookConsumerWidget {
         : formatCents(amountCentsPreview, budgetCurrency);
 
     return Scaffold(
-      backgroundColor: OpenBudgetPalette.appBackground,
+      backgroundColor: OpenBudgetPalette.bgPrimaryFor(theme),
       appBar: AppBar(
-        backgroundColor: OpenBudgetPalette.appBackground,
-        surfaceTintColor: Colors.transparent,
+        backgroundColor: OpenBudgetPalette.bgPrimaryFor(theme),
+        surfaceTintColor: OpenBudgetPalette.transparentFor(theme),
         scrolledUnderElevation: 0,
         leadingWidth: 88,
         leading: Align(
@@ -124,14 +124,16 @@ class AddIncomeScreen extends HookConsumerWidget {
                 Container(
                   padding: const EdgeInsets.all(SpacingTokens.md),
                   decoration: BoxDecoration(
-                    color: OpenBudgetPalette.accentGreen,
+                    color: OpenBudgetPalette.bgSuccessFor(theme),
                     borderRadius: BorderRadius.circular(RadiusTokens.md),
                   ),
                   child: Column(
                     children: [
                       Container(
                         decoration: BoxDecoration(
-                          color: Colors.white.withAlpha(120),
+                          color: OpenBudgetPalette.fgOnBrandFor(
+                            theme,
+                          ).withAlpha(120),
                           borderRadius: BorderRadius.circular(RadiusTokens.sm),
                         ),
                         padding: const EdgeInsets.all(2),
@@ -142,7 +144,7 @@ class AddIncomeScreen extends HookConsumerWidget {
                                 label: l10n.addTransactionExpense,
                                 icon: Icons.arrow_upward_rounded,
                                 selected: false,
-                                color: OpenBudgetPalette.mutedText,
+                                color: OpenBudgetPalette.fgSecondaryFor(theme),
                                 onTap: () => context.goNamed(
                                   addExpenseRoute,
                                   pathParameters: {'id': budgetId},
@@ -154,7 +156,7 @@ class AddIncomeScreen extends HookConsumerWidget {
                                 label: l10n.addTransactionIncome,
                                 icon: Icons.arrow_downward_rounded,
                                 selected: true,
-                                color: Colors.black,
+                                color: OpenBudgetPalette.fgPrimaryFor(theme),
                               ),
                             ),
                           ],
@@ -175,7 +177,7 @@ class AddIncomeScreen extends HookConsumerWidget {
                           textAlign: TextAlign.center,
                           style: theme.textTheme.displaySmall?.copyWith(
                             fontWeight: FontWeight.w800,
-                            color: Colors.black,
+                            color: OpenBudgetPalette.fgPrimaryFor(theme),
                           ),
                           decoration: InputDecoration(
                             labelText: l10n.transactionAmountLabel,
@@ -185,7 +187,9 @@ class AddIncomeScreen extends HookConsumerWidget {
                             contentPadding: EdgeInsets.zero,
                             hintText: formatCents(0, budgetCurrency),
                             hintStyle: theme.textTheme.displaySmall?.copyWith(
-                              color: Colors.black.withAlpha(120),
+                              color: OpenBudgetPalette.fgPrimaryFor(
+                                theme,
+                              ).withAlpha(120),
                               fontWeight: FontWeight.w700,
                             ),
                           ),
@@ -204,7 +208,9 @@ class AddIncomeScreen extends HookConsumerWidget {
                           child: Text(
                             formattedAmount,
                             style: theme.textTheme.labelMedium?.copyWith(
-                              color: Colors.black.withAlpha(150),
+                              color: OpenBudgetPalette.fgPrimaryFor(
+                                theme,
+                              ).withAlpha(150),
                             ),
                           ),
                         ),
@@ -213,7 +219,7 @@ class AddIncomeScreen extends HookConsumerWidget {
                 ),
                 const SizedBox(height: SpacingTokens.md),
                 Card(
-                  color: OpenBudgetPalette.surface,
+                  color: OpenBudgetPalette.bgSecondaryFor(theme),
                   margin: EdgeInsets.zero,
                   child: Padding(
                     padding: const EdgeInsets.all(SpacingTokens.md),
@@ -273,7 +279,7 @@ class AddIncomeScreen extends HookConsumerWidget {
                 ),
                 const SizedBox(height: SpacingTokens.md),
                 Card(
-                  color: OpenBudgetPalette.surface,
+                  color: OpenBudgetPalette.bgSecondaryFor(theme),
                   margin: EdgeInsets.zero,
                   child: Padding(
                     padding: const EdgeInsets.all(SpacingTokens.md),
@@ -391,8 +397,8 @@ class AddIncomeScreen extends HookConsumerWidget {
                       : const Icon(Icons.check_circle_rounded, size: 18),
                   label: Text(l10n.transactionSave),
                   style: FilledButton.styleFrom(
-                    backgroundColor: OpenBudgetPalette.accentBlue,
-                    foregroundColor: Colors.white,
+                    backgroundColor: OpenBudgetPalette.bgBrandFor(theme),
+                    foregroundColor: OpenBudgetPalette.fgOnBrandFor(theme),
                   ),
                 ),
               ],
@@ -427,13 +433,15 @@ class _ModeChip extends HookWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Material(
-      color: Colors.transparent,
+      color: OpenBudgetPalette.transparentFor(theme),
       child: InkWell(
         borderRadius: BorderRadius.circular(RadiusTokens.sm),
         onTap: onTap,
         child: Container(
           decoration: BoxDecoration(
-            color: selected ? Colors.white : Colors.transparent,
+            color: selected
+                ? OpenBudgetPalette.fgOnBrandFor(theme)
+                : OpenBudgetPalette.transparentFor(theme),
             borderRadius: BorderRadius.circular(RadiusTokens.sm),
           ),
           padding: const EdgeInsets.symmetric(vertical: SpacingTokens.sm),
@@ -476,7 +484,7 @@ class _ReadOnlyRow extends HookWidget {
     final theme = Theme.of(context);
     return Row(
       children: [
-        Icon(icon, size: 20, color: OpenBudgetPalette.accentBlue),
+        Icon(icon, size: 20, color: OpenBudgetPalette.bgBrandFor(theme)),
         const SizedBox(width: SpacingTokens.sm),
         Expanded(
           child: Column(
@@ -485,7 +493,7 @@ class _ReadOnlyRow extends HookWidget {
               Text(
                 label,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: OpenBudgetPalette.mutedText,
+                  color: OpenBudgetPalette.fgSecondaryFor(theme),
                 ),
               ),
               Text(

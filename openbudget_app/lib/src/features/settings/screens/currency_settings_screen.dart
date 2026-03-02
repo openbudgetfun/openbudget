@@ -32,10 +32,10 @@ class CurrencySettingsScreen extends HookConsumerWidget {
     final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      backgroundColor: OpenBudgetPalette.appBackground,
+      backgroundColor: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
       appBar: AppBar(
-        backgroundColor: OpenBudgetPalette.appBackground,
-        surfaceTintColor: Colors.transparent,
+        backgroundColor: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
+        surfaceTintColor: OpenBudgetPalette.transparentFor(Theme.of(context)),
         automaticallyImplyLeading: false,
         centerTitle: true,
         leadingWidth: 92,
@@ -261,9 +261,11 @@ class _SettingsCard extends HookWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: OpenBudgetPalette.surface,
+        color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
         borderRadius: BorderRadius.circular(RadiusTokens.md),
-        border: Border.all(color: OpenBudgetPalette.divider),
+        border: Border.all(
+          color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
+        ),
       ),
       child: child,
     );
@@ -297,7 +299,7 @@ class _SettingsTile extends HookWidget {
       ),
       trailing: Icon(
         isNavigation ? Icons.chevron_right_rounded : Icons.unfold_more_rounded,
-        color: OpenBudgetPalette.mutedText,
+        color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
       ),
     );
   }

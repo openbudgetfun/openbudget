@@ -22,8 +22,8 @@ Future<void> showReviewTransactionsSheet(
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: Colors.transparent,
-    barrierColor: Colors.black54,
+    backgroundColor: OpenBudgetPalette.transparentFor(Theme.of(context)),
+    barrierColor: OpenBudgetPalette.overlayScrimFor(Theme.of(context)),
     builder: (context) => FractionallySizedBox(
       heightFactor: 0.95,
       child: ReviewTransactionsSheet(
@@ -217,8 +217,8 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
     );
 
     return DecoratedBox(
-      decoration: const BoxDecoration(
-        color: OpenBudgetPalette.appBackground,
+      decoration: BoxDecoration(
+        color: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(RadiusTokens.lg),
         ),
@@ -232,7 +232,7 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
               width: 36,
               height: 4,
               decoration: BoxDecoration(
-                color: OpenBudgetPalette.divider,
+                color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
                 borderRadius: BorderRadius.circular(RadiusTokens.md),
               ),
             ),
@@ -240,7 +240,7 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
             Text(
               'Approve or categorize new transactions',
               style: theme.textTheme.bodySmall?.copyWith(
-                color: OpenBudgetPalette.mutedText,
+                color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -286,10 +286,12 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.task_alt_rounded,
                               size: 30,
-                              color: OpenBudgetPalette.mutedText,
+                              color: OpenBudgetPalette.fgSecondaryFor(
+                                Theme.of(context),
+                              ),
                             ),
                             const SizedBox(height: SpacingTokens.md),
                             Text(
@@ -302,7 +304,9 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
                             Text(
                               'Return to Accounts to see all of your transactions.',
                               style: theme.textTheme.bodyLarge?.copyWith(
-                                color: OpenBudgetPalette.mutedText,
+                                color: OpenBudgetPalette.fgSecondaryFor(
+                                  Theme.of(context),
+                                ),
                               ),
                               textAlign: TextAlign.center,
                             ),
@@ -337,7 +341,9 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
                           children: [
                             if (showHeader)
                               Container(
-                                color: OpenBudgetPalette.surfaceMuted,
+                                color: OpenBudgetPalette.bgTertiaryFor(
+                                  Theme.of(context),
+                                ),
                                 padding: const EdgeInsets.fromLTRB(
                                   SpacingTokens.md,
                                   SpacingTokens.sm,
@@ -370,11 +376,15 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
                               child: Container(
                                 decoration: BoxDecoration(
                                   color: isSelected
-                                      ? const Color(0xFFEFF0FF)
-                                      : OpenBudgetPalette.surface,
-                                  border: const Border(
+                                      ? OpenBudgetPalette.bgSelectedFor(theme)
+                                      : OpenBudgetPalette.bgSecondaryFor(
+                                          Theme.of(context),
+                                        ),
+                                  border: Border(
                                     bottom: BorderSide(
-                                      color: OpenBudgetPalette.divider,
+                                      color: OpenBudgetPalette.borderSubtleFor(
+                                        Theme.of(context),
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -384,8 +394,12 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
                                       width: 4,
                                       height: 64,
                                       color: isSelected
-                                          ? OpenBudgetPalette.accentBlue
-                                          : Colors.transparent,
+                                          ? OpenBudgetPalette.bgBrandFor(
+                                              Theme.of(context),
+                                            )
+                                          : OpenBudgetPalette.transparentFor(
+                                              theme,
+                                            ),
                                     ),
                                     const SizedBox(width: SpacingTokens.sm),
                                     Icon(
@@ -393,8 +407,12 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
                                           ? Icons.check_circle_rounded
                                           : Icons.circle_outlined,
                                       color: isSelected
-                                          ? OpenBudgetPalette.accentBlue
-                                          : OpenBudgetPalette.mutedText,
+                                          ? OpenBudgetPalette.bgBrandFor(
+                                              Theme.of(context),
+                                            )
+                                          : OpenBudgetPalette.fgSecondaryFor(
+                                              Theme.of(context),
+                                            ),
                                     ),
                                     const SizedBox(width: SpacingTokens.sm),
                                     Expanded(
@@ -414,8 +432,10 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
                                             envelopeName,
                                             style: theme.textTheme.bodyMedium
                                                 ?.copyWith(
-                                                  color: OpenBudgetPalette
-                                                      .mutedText,
+                                                  color:
+                                                      OpenBudgetPalette.fgSecondaryFor(
+                                                        theme,
+                                                      ),
                                                 ),
                                           ),
                                         ],
@@ -427,14 +447,16 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
                                         transaction.amountCents,
                                         currencyCode,
                                       ),
-                                      style: theme.textTheme.titleMedium
-                                          ?.copyWith(
-                                            fontWeight: FontWeight.w700,
-                                            color: transaction.amountCents >= 0
-                                                ? OpenBudgetPalette
-                                                      .progressGreen
-                                                : Colors.black87,
-                                          ),
+                                      style: theme.textTheme.titleMedium?.copyWith(
+                                        fontWeight: FontWeight.w700,
+                                        color: transaction.amountCents >= 0
+                                            ? OpenBudgetPalette.fgSuccessFor(
+                                                theme,
+                                              )
+                                            : OpenBudgetPalette.fgPrimaryEmphasisFor(
+                                                theme,
+                                              ),
+                                      ),
                                     ),
                                     const SizedBox(width: SpacingTokens.md),
                                   ],
@@ -547,9 +569,13 @@ class _ReviewToolbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        color: OpenBudgetPalette.surface,
-        border: Border(top: BorderSide(color: OpenBudgetPalette.divider)),
+      decoration: BoxDecoration(
+        color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
+        border: Border(
+          top: BorderSide(
+            color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
+          ),
+        ),
       ),
       padding: const EdgeInsets.fromLTRB(
         SpacingTokens.sm,
@@ -565,7 +591,7 @@ class _ReviewToolbar extends StatelessWidget {
             Text(
               '$selectedCount selected • $selectedAmount',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: OpenBudgetPalette.mutedText,
+                color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -627,12 +653,16 @@ class _ToolbarAction extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: SpacingTokens.xs),
           child: Column(
             children: [
-              Icon(icon, size: 20, color: OpenBudgetPalette.accentBlue),
+              Icon(
+                icon,
+                size: 20,
+                color: OpenBudgetPalette.bgBrandFor(Theme.of(context)),
+              ),
               const SizedBox(height: 2),
               Text(
                 label,
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: OpenBudgetPalette.accentBlue,
+                  color: OpenBudgetPalette.bgBrandFor(Theme.of(context)),
                   fontWeight: FontWeight.w700,
                 ),
               ),

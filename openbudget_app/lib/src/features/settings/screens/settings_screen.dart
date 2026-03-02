@@ -24,10 +24,10 @@ class SettingsScreen extends HookConsumerWidget {
     final budgetAsync = ref.watch(budgetDetailProvider(budgetId));
 
     return Scaffold(
-      backgroundColor: OpenBudgetPalette.appBackground,
+      backgroundColor: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
       appBar: AppBar(
-        backgroundColor: OpenBudgetPalette.appBackground,
-        surfaceTintColor: Colors.transparent,
+        backgroundColor: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
+        surfaceTintColor: OpenBudgetPalette.transparentFor(Theme.of(context)),
         automaticallyImplyLeading: false,
         title: const SizedBox.shrink(),
         actions: [
@@ -199,7 +199,9 @@ class SettingsScreen extends HookConsumerWidget {
                         Text(
                           l10n.settingsLoggedInAs,
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: OpenBudgetPalette.mutedText,
+                            color: OpenBudgetPalette.fgSecondaryFor(
+                              Theme.of(context),
+                            ),
                           ),
                         ),
                         const SizedBox(height: 2),
@@ -310,7 +312,7 @@ class SettingsScreen extends HookConsumerWidget {
               child: Text(
                 l10n.settingsVersion,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: OpenBudgetPalette.mutedText,
+                  color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
                 ),
               ),
             ),
@@ -319,7 +321,7 @@ class SettingsScreen extends HookConsumerWidget {
               child: Text(
                 l10n.settingsLastSynced,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: OpenBudgetPalette.mutedText,
+                  color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
                 ),
               ),
             ),
@@ -433,7 +435,7 @@ class _SectionTitle extends HookWidget {
       child: Text(
         title,
         style: theme.textTheme.labelSmall?.copyWith(
-          color: OpenBudgetPalette.mutedText,
+          color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
           fontWeight: FontWeight.w600,
         ),
       ),
@@ -450,9 +452,11 @@ class _SettingsCard extends HookWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: OpenBudgetPalette.surface,
+        color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
         borderRadius: BorderRadius.circular(RadiusTokens.md),
-        border: Border.all(color: OpenBudgetPalette.divider),
+        border: Border.all(
+          color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
+        ),
       ),
       child: child,
     );
@@ -479,10 +483,13 @@ class _SettingsTile extends HookWidget {
     final theme = Theme.of(context);
     final titleColor = enabled
         ? theme.textTheme.bodyLarge?.color
-        : OpenBudgetPalette.mutedText;
+        : OpenBudgetPalette.fgSecondaryFor(Theme.of(context));
 
     return ListTile(
-      leading: Icon(icon, color: OpenBudgetPalette.mutedText),
+      leading: Icon(
+        icon,
+        color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
+      ),
       title: Text(
         label,
         style: theme.textTheme.bodyLarge?.copyWith(color: titleColor),
@@ -492,12 +499,12 @@ class _SettingsTile extends HookWidget {
           : Text(
               subtitle!,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: OpenBudgetPalette.mutedText,
+                color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
               ),
             ),
       trailing: Icon(
         enabled ? Icons.chevron_right_rounded : Icons.block_rounded,
-        color: OpenBudgetPalette.mutedText,
+        color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
       ),
       onTap: enabled ? onTap : null,
     );

@@ -38,10 +38,10 @@ class DisplayOptionsScreen extends HookConsumerWidget {
     final budgetAsync = ref.watch(budgetDetailProvider(budgetId));
 
     return Scaffold(
-      backgroundColor: OpenBudgetPalette.appBackground,
+      backgroundColor: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
       appBar: AppBar(
-        backgroundColor: OpenBudgetPalette.appBackground,
-        surfaceTintColor: Colors.transparent,
+        backgroundColor: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
+        surfaceTintColor: OpenBudgetPalette.transparentFor(Theme.of(context)),
         automaticallyImplyLeading: false,
         centerTitle: true,
         leadingWidth: 120,
@@ -208,7 +208,7 @@ class DisplayOptionsScreen extends HookConsumerWidget {
           Text(
             l10n.settingsDisplayOptionsHint,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: OpenBudgetPalette.mutedText,
+              color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
             ),
           ),
         ],
@@ -309,9 +309,11 @@ class _SettingsCard extends HookWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: OpenBudgetPalette.surface,
+        color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
         borderRadius: BorderRadius.circular(RadiusTokens.md),
-        border: Border.all(color: OpenBudgetPalette.divider),
+        border: Border.all(
+          color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
+        ),
       ),
       child: child,
     );
@@ -358,7 +360,10 @@ class _SelectionTile extends HookWidget {
       onTap: onTap,
       title: Text(label),
       leading: selected
-          ? const Icon(Icons.check_rounded, color: OpenBudgetPalette.accentBlue)
+          ? Icon(
+              Icons.check_rounded,
+              color: OpenBudgetPalette.bgBrandFor(Theme.of(context)),
+            )
           : const SizedBox(width: 24),
     );
   }
@@ -382,7 +387,10 @@ class _BalanceStyleTile extends HookWidget {
     return ListTile(
       onTap: onTap,
       leading: selected
-          ? const Icon(Icons.check_rounded, color: OpenBudgetPalette.accentBlue)
+          ? Icon(
+              Icons.check_rounded,
+              color: OpenBudgetPalette.bgBrandFor(Theme.of(context)),
+            )
           : const SizedBox(width: 24),
       title: Text(label),
       subtitle: Padding(
@@ -406,19 +414,19 @@ class _BalanceStylePreview extends HookWidget {
       children: [
         _SampleBalancePill(
           label: r'-$10.00',
-          color: const Color(0xFFF5B2B6),
-          textColor: const Color(0xFF5E1C23),
+          color: OpenBudgetPalette.bgTagErrorFor(Theme.of(context)),
+          textColor: OpenBudgetPalette.fgTagErrorFor(Theme.of(context)),
           emphasize: style == BalanceStyle.differentiateWithoutColor,
         ),
-        const _SampleBalancePill(
+        _SampleBalancePill(
           label: r'$10.00',
-          color: Color(0xFFE8C743),
-          textColor: Color(0xFF4B3A00),
+          color: OpenBudgetPalette.bgWarningFor(Theme.of(context)),
+          textColor: OpenBudgetPalette.fgTagWarningFor(Theme.of(context)),
         ),
-        const _SampleBalancePill(
+        _SampleBalancePill(
           label: r'$10.00',
-          color: Color(0xFFA6DC57),
-          textColor: Color(0xFF234700),
+          color: OpenBudgetPalette.bgTagSuccessFor(Theme.of(context)),
+          textColor: OpenBudgetPalette.fgTagSuccessFor(Theme.of(context)),
         ),
       ],
     );
@@ -448,9 +456,9 @@ class _ValuePickerTile extends HookWidget {
           fontWeight: FontWeight.w500,
         ),
       ),
-      trailing: const Icon(
+      trailing: Icon(
         Icons.chevron_right_rounded,
-        color: OpenBudgetPalette.mutedText,
+        color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
       ),
     );
   }
@@ -476,7 +484,7 @@ class _ToggleTile extends HookWidget {
       onChanged: onChanged,
       title: Text(label),
       subtitle: Text(subtitle),
-      activeThumbColor: OpenBudgetPalette.accentBlue,
+      activeThumbColor: OpenBudgetPalette.bgBrandFor(Theme.of(context)),
       contentPadding: const EdgeInsets.symmetric(horizontal: SpacingTokens.sm),
     );
   }
@@ -503,7 +511,10 @@ class _SampleBalancePill extends HookWidget {
         color: color,
         borderRadius: BorderRadius.circular(999),
         border: emphasize
-            ? Border.all(color: const Color(0xFFC23043), width: 1.5)
+            ? Border.all(
+                color: OpenBudgetPalette.fgErrorFor(Theme.of(context)),
+                width: 1.5,
+              )
             : null,
       ),
       child: Text(

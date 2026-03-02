@@ -71,10 +71,12 @@ class CategoryGroup extends HookConsumerWidget {
 
     return Card(
       margin: EdgeInsets.zero,
-      color: OpenBudgetPalette.surface,
+      color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(RadiusTokens.md),
-        side: const BorderSide(color: OpenBudgetPalette.divider),
+        side: BorderSide(
+          color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -92,8 +94,8 @@ class CategoryGroup extends HookConsumerWidget {
                   horizontal: SpacingTokens.md,
                   vertical: SpacingTokens.sm + SpacingTokens.xs,
                 ),
-                decoration: const BoxDecoration(
-                  color: OpenBudgetPalette.surfaceMuted,
+                decoration: BoxDecoration(
+                  color: OpenBudgetPalette.bgTertiaryFor(Theme.of(context)),
                   borderRadius: BorderRadius.vertical(
                     top: Radius.circular(RadiusTokens.md),
                   ),
@@ -105,14 +107,18 @@ class CategoryGroup extends HookConsumerWidget {
                           ? Icons.chevron_right_rounded
                           : Icons.expand_more_rounded,
                       size: 18,
-                      color: OpenBudgetPalette.mutedText,
+                      color: OpenBudgetPalette.fgSecondaryFor(
+                        Theme.of(context),
+                      ),
                     ),
                     const SizedBox(width: SpacingTokens.xs),
                     if (category.isHidden ?? false) ...[
-                      const Icon(
+                      Icon(
                         Icons.visibility_off_rounded,
                         size: 14,
-                        color: OpenBudgetPalette.mutedText,
+                        color: OpenBudgetPalette.fgSecondaryFor(
+                          Theme.of(context),
+                        ),
                       ),
                       const SizedBox(width: SpacingTokens.xs),
                     ],
@@ -131,7 +137,9 @@ class CategoryGroup extends HookConsumerWidget {
                         Text(
                           l10n.budgetColumnAvailable,
                           style: theme.textTheme.labelSmall?.copyWith(
-                            color: OpenBudgetPalette.mutedText,
+                            color: OpenBudgetPalette.fgSecondaryFor(
+                              Theme.of(context),
+                            ),
                           ),
                         ),
                         Text(
@@ -145,6 +153,7 @@ class CategoryGroup extends HookConsumerWidget {
                             fontWeight: FontWeight.w700,
                             color: _availableColor(
                               categoryWithEnvelopes.totalAvailableCents,
+                              theme,
                             ),
                           ),
                         ),
@@ -165,17 +174,19 @@ class CategoryGroup extends HookConsumerWidget {
               ),
               child: Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.info_outline_rounded,
                     size: 14,
-                    color: OpenBudgetPalette.mutedText,
+                    color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
                   ),
                   const SizedBox(width: SpacingTokens.xs),
                   Expanded(
                     child: Text(
                       l10n.envelopeReorderHint,
                       style: theme.textTheme.labelSmall?.copyWith(
-                        color: OpenBudgetPalette.mutedText,
+                        color: OpenBudgetPalette.fgSecondaryFor(
+                          Theme.of(context),
+                        ),
                       ),
                     ),
                   ),
@@ -192,9 +203,9 @@ class CategoryGroup extends HookConsumerWidget {
               return ListTile(
                 key: ValueKey(envelope.id),
                 dense: true,
-                leading: const Icon(
+                leading: Icon(
                   Icons.drag_handle_rounded,
-                  color: OpenBudgetPalette.mutedText,
+                  color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
                 ),
                 title: Text(
                   envelope.name,
@@ -262,9 +273,9 @@ class CategoryGroup extends HookConsumerWidget {
                 ),
               );
               if (entry.key < envelopes.length - 1) {
-                yield const Divider(
+                yield Divider(
                   height: 1,
-                  color: OpenBudgetPalette.divider,
+                  color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
                 );
               }
             }),
@@ -276,9 +287,11 @@ class CategoryGroup extends HookConsumerWidget {
                 SpacingTokens.md,
                 SpacingTokens.md,
               ),
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 border: Border(
-                  top: BorderSide(color: OpenBudgetPalette.divider),
+                  top: BorderSide(
+                    color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
+                  ),
                 ),
               ),
               child: Row(
@@ -287,7 +300,9 @@ class CategoryGroup extends HookConsumerWidget {
                     child: Text(
                       l10n.budgetCategoryTotal,
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: OpenBudgetPalette.mutedText,
+                        color: OpenBudgetPalette.fgSecondaryFor(
+                          Theme.of(context),
+                        ),
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -297,9 +312,17 @@ class CategoryGroup extends HookConsumerWidget {
                     icon: const Icon(Icons.add, size: 16),
                     label: Text(l10n.budgetAddEnvelope),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: OpenBudgetPalette.accentBlue,
-                      side: const BorderSide(color: OpenBudgetPalette.divider),
-                      backgroundColor: OpenBudgetPalette.surfaceMuted,
+                      foregroundColor: OpenBudgetPalette.bgBrandFor(
+                        Theme.of(context),
+                      ),
+                      side: BorderSide(
+                        color: OpenBudgetPalette.borderSubtleFor(
+                          Theme.of(context),
+                        ),
+                      ),
+                      backgroundColor: OpenBudgetPalette.bgTertiaryFor(
+                        Theme.of(context),
+                      ),
                       padding: const EdgeInsets.symmetric(
                         horizontal: SpacingTokens.sm,
                         vertical: SpacingTokens.xs,
@@ -462,9 +485,9 @@ class CategoryGroup extends HookConsumerWidget {
     onReorderEnvelopes?.call(envelopeIds);
   }
 
-  Color _availableColor(int cents) {
-    if (cents > 0) return OpenBudgetPalette.progressGreen;
-    if (cents < 0) return OpenBudgetPalette.negative;
-    return OpenBudgetPalette.mutedText;
+  Color _availableColor(int cents, ThemeData theme) {
+    if (cents > 0) return OpenBudgetPalette.fgSuccessFor(theme);
+    if (cents < 0) return OpenBudgetPalette.fgErrorFor(theme);
+    return OpenBudgetPalette.fgSecondaryFor(theme);
   }
 }

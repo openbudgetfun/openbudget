@@ -39,10 +39,10 @@ class CategoryDetailScreen extends HookConsumerWidget {
     final isSnoozed = useState(false);
 
     return Scaffold(
-      backgroundColor: OpenBudgetPalette.appBackground,
+      backgroundColor: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
       appBar: AppBar(
-        backgroundColor: OpenBudgetPalette.appBackground,
-        surfaceTintColor: Colors.transparent,
+        backgroundColor: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
+        surfaceTintColor: OpenBudgetPalette.transparentFor(Theme.of(context)),
         automaticallyImplyLeading: false,
         actions: [
           TextButton(
@@ -113,8 +113,8 @@ class CategoryDetailScreen extends HookConsumerWidget {
               monthlyData?.spentCents ?? selectedEnvelope.spentAmountCents;
           final available = monthlyData?.availableCents ?? (assigned - spent);
           final availableColor = available >= 0
-              ? OpenBudgetPalette.progressGreen
-              : OpenBudgetPalette.negative;
+              ? OpenBudgetPalette.fgSuccessFor(Theme.of(context))
+              : OpenBudgetPalette.fgErrorFor(Theme.of(context));
 
           return ListView(
             padding: const EdgeInsets.fromLTRB(
@@ -217,9 +217,11 @@ class CategoryDetailScreen extends HookConsumerWidget {
                     value: isSnoozed.value,
                     onChanged: (value) => isSnoozed.value = value,
                     title: Text(l10n.categoryDetailSnoozeGoal),
-                    secondary: const Icon(
+                    secondary: Icon(
                       Icons.snooze_rounded,
-                      color: OpenBudgetPalette.mutedText,
+                      color: OpenBudgetPalette.fgSecondaryFor(
+                        Theme.of(context),
+                      ),
                     ),
                   ),
                 ),
@@ -235,7 +237,7 @@ class CategoryDetailScreen extends HookConsumerWidget {
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: (selectedEnvelope.note?.isNotEmpty ?? false)
                           ? null
-                          : OpenBudgetPalette.mutedText,
+                          : OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
                     ),
                   ),
                   trailing: IconButton(
@@ -283,8 +285,12 @@ class CategoryDetailScreen extends HookConsumerWidget {
               FilledButton.tonal(
                 onPressed: () => _confirmDeleteEnvelope(context, ref),
                 style: FilledButton.styleFrom(
-                  backgroundColor: OpenBudgetPalette.negative.withAlpha(24),
-                  foregroundColor: OpenBudgetPalette.negative,
+                  backgroundColor: OpenBudgetPalette.fgErrorFor(
+                    Theme.of(context),
+                  ).withAlpha(24),
+                  foregroundColor: OpenBudgetPalette.fgErrorFor(
+                    Theme.of(context),
+                  ),
                 ),
                 child: Text(l10n.categoryDetailDeleteEnvelope),
               ),
@@ -380,7 +386,7 @@ class CategoryDetailScreen extends HookConsumerWidget {
               }
             },
             style: FilledButton.styleFrom(
-              backgroundColor: OpenBudgetPalette.negative,
+              backgroundColor: OpenBudgetPalette.fgErrorFor(Theme.of(context)),
             ),
             child: Text(l10n.deleteConfirmButton),
           ),
@@ -433,8 +439,8 @@ class _GoalCard extends HookWidget {
 
     final isComplete = underfunded <= 0;
     final statusColor = isComplete
-        ? OpenBudgetPalette.progressGreen
-        : const Color(0xFFE8C743);
+        ? OpenBudgetPalette.fgSuccessFor(Theme.of(context))
+        : OpenBudgetPalette.bgWarningFor(Theme.of(context));
 
     return _Card(
       child: Padding(
@@ -452,13 +458,17 @@ class _GoalCard extends HookWidget {
                       value: clampedProgress,
                       strokeWidth: 8,
                       color: statusColor,
-                      backgroundColor: OpenBudgetPalette.divider,
+                      backgroundColor: OpenBudgetPalette.borderSubtleFor(
+                        Theme.of(context),
+                      ),
                     ),
                     Center(
                       child: isComplete
-                          ? const Icon(
+                          ? Icon(
                               Icons.check_rounded,
-                              color: OpenBudgetPalette.progressGreen,
+                              color: OpenBudgetPalette.fgSuccessFor(
+                                Theme.of(context),
+                              ),
                               size: 36,
                             )
                           : Text(
@@ -502,7 +512,9 @@ class _GoalCard extends HookWidget {
                 onPressed: onAssign,
                 style: FilledButton.styleFrom(
                   minimumSize: const Size.fromHeight(44),
-                  backgroundColor: OpenBudgetPalette.accentBlue,
+                  backgroundColor: OpenBudgetPalette.bgBrandFor(
+                    Theme.of(context),
+                  ),
                 ),
                 child: Text(l10n.budgetAssignMoney),
               ),
@@ -572,9 +584,11 @@ class _Card extends HookWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: OpenBudgetPalette.surface,
+        color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
         borderRadius: BorderRadius.circular(RadiusTokens.md),
-        border: Border.all(color: OpenBudgetPalette.divider),
+        border: Border.all(
+          color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
+        ),
       ),
       child: child,
     );
@@ -614,8 +628,10 @@ class _DetailRow extends HookWidget {
                 : EdgeInsets.zero,
             decoration: emphasize
                 ? BoxDecoration(
-                    color: (valueColor ?? OpenBudgetPalette.accentBlue)
-                        .withAlpha(32),
+                    color:
+                        (valueColor ??
+                                OpenBudgetPalette.bgBrandFor(Theme.of(context)))
+                            .withAlpha(32),
                     borderRadius: BorderRadius.circular(999),
                   )
                 : null,

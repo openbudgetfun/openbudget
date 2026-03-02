@@ -225,10 +225,12 @@ class BudgetDetailScreen extends HookConsumerWidget {
             onboardingType == _PlanOnboardingType.finish;
 
         return Scaffold(
-          backgroundColor: OpenBudgetPalette.appBackground,
+          backgroundColor: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
           appBar: AppBar(
-            backgroundColor: OpenBudgetPalette.appBackground,
-            surfaceTintColor: Colors.transparent,
+            backgroundColor: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
+            surfaceTintColor: OpenBudgetPalette.transparentFor(
+              Theme.of(context),
+            ),
             scrolledUnderElevation: 0,
             leading: PopupMenuButton<_PlanMenuAction>(
               icon: const Icon(Icons.more_horiz_rounded),
@@ -1054,7 +1056,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+      backgroundColor: OpenBudgetPalette.transparentFor(Theme.of(context)),
       builder: (context) => FractionallySizedBox(
         heightFactor: 0.9,
         child: _CoverOverspendingSheet(
@@ -1447,7 +1449,7 @@ class _PlanOnboardingCard extends HookWidget {
       primaryLabel,
     ) = switch (type) {
       _PlanOnboardingType.addAccounts => (
-        OpenBudgetPalette.accentPurple.withAlpha(70),
+        OpenBudgetPalette.bgAccentFor(Theme.of(context)).withAlpha(70),
         Icons.account_balance_rounded,
         l10n.budgetOnboardingAddAccountsTitle,
         l10n.budgetOnboardingAddAccountsBody,
@@ -1455,7 +1457,7 @@ class _PlanOnboardingCard extends HookWidget {
         l10n.budgetOnboardingAddAccountsCta,
       ),
       _PlanOnboardingType.assignMoney => (
-        OpenBudgetPalette.accentGreen,
+        OpenBudgetPalette.bgSuccessFor(Theme.of(context)),
         Icons.mail_rounded,
         l10n.budgetOnboardingAssignMoneyTitle(readyToAssign),
         l10n.budgetOnboardingAssignMoneyBody,
@@ -1463,7 +1465,7 @@ class _PlanOnboardingCard extends HookWidget {
         l10n.budgetAssignMoney,
       ),
       _PlanOnboardingType.finish => (
-        OpenBudgetPalette.accentPurple.withAlpha(70),
+        OpenBudgetPalette.bgAccentFor(Theme.of(context)).withAlpha(70),
         Icons.auto_awesome_rounded,
         l10n.budgetOnboardingFinishTitle,
         l10n.budgetOnboardingFinishBody,
@@ -1473,8 +1475,8 @@ class _PlanOnboardingCard extends HookWidget {
     };
 
     final primaryButtonColor = type == _PlanOnboardingType.assignMoney
-        ? const Color(0xFF3F7A1C)
-        : OpenBudgetPalette.accentBlue;
+        ? OpenBudgetPalette.fgSuccessStrongFor(Theme.of(context))
+        : OpenBudgetPalette.bgBrandFor(Theme.of(context));
 
     return Container(
       width: double.infinity,
@@ -1482,11 +1484,17 @@ class _PlanOnboardingCard extends HookWidget {
       decoration: BoxDecoration(
         color: backgroundColor,
         borderRadius: BorderRadius.circular(RadiusTokens.lg),
-        border: Border.all(color: OpenBudgetPalette.divider),
+        border: Border.all(
+          color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
+        ),
       ),
       child: Column(
         children: [
-          Icon(iconData, size: 42, color: OpenBudgetPalette.accentBlue),
+          Icon(
+            iconData,
+            size: 42,
+            color: OpenBudgetPalette.bgBrandFor(Theme.of(context)),
+          ),
           const SizedBox(height: SpacingTokens.sm),
           Text(
             title,
@@ -1498,14 +1506,20 @@ class _PlanOnboardingCard extends HookWidget {
           const SizedBox(height: SpacingTokens.xs),
           Text(
             body,
-            style: theme.textTheme.bodyLarge?.copyWith(color: Colors.black87),
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: OpenBudgetPalette.fgPrimaryEmphasisFor(Theme.of(context)),
+            ),
             textAlign: TextAlign.center,
           ),
           if (prompt != null) ...[
             const SizedBox(height: SpacingTokens.sm),
             Text(
               prompt,
-              style: theme.textTheme.bodyLarge?.copyWith(color: Colors.black87),
+              style: theme.textTheme.bodyLarge?.copyWith(
+                color: OpenBudgetPalette.fgPrimaryEmphasisFor(
+                  Theme.of(context),
+                ),
+              ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -1515,7 +1529,9 @@ class _PlanOnboardingCard extends HookWidget {
             style: FilledButton.styleFrom(
               minimumSize: const Size.fromHeight(44),
               backgroundColor: primaryButtonColor,
-              foregroundColor: Colors.white,
+              foregroundColor: OpenBudgetPalette.fgOnBrandFor(
+                Theme.of(context),
+              ),
             ),
             child: Text(primaryLabel),
           ),
@@ -1525,9 +1541,15 @@ class _PlanOnboardingCard extends HookWidget {
               onPressed: onSecondaryAction,
               style: OutlinedButton.styleFrom(
                 minimumSize: const Size.fromHeight(42),
-                side: const BorderSide(color: OpenBudgetPalette.divider),
-                backgroundColor: OpenBudgetPalette.surface,
-                foregroundColor: OpenBudgetPalette.accentBlue,
+                side: BorderSide(
+                  color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
+                ),
+                backgroundColor: OpenBudgetPalette.bgSecondaryFor(
+                  Theme.of(context),
+                ),
+                foregroundColor: OpenBudgetPalette.bgBrandFor(
+                  Theme.of(context),
+                ),
               ),
               child: Text(l10n.budgetOnboardingAddAnotherAccount),
             ),
@@ -1553,9 +1575,11 @@ class _BudgetViewToggle extends HookWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: OpenBudgetPalette.surfaceMuted,
+        color: OpenBudgetPalette.bgTertiaryFor(Theme.of(context)),
         borderRadius: BorderRadius.circular(RadiusTokens.md),
-        border: Border.all(color: OpenBudgetPalette.divider),
+        border: Border.all(
+          color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
+        ),
       ),
       padding: const EdgeInsets.all(2),
       child: Row(
@@ -1598,7 +1622,9 @@ class _ToggleButton extends HookWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: selected ? OpenBudgetPalette.surface : Colors.transparent,
+      color: selected
+          ? OpenBudgetPalette.bgSecondaryFor(Theme.of(context))
+          : OpenBudgetPalette.transparentFor(Theme.of(context)),
       borderRadius: BorderRadius.circular(RadiusTokens.sm),
       child: InkWell(
         onTap: onTap,
@@ -1610,7 +1636,9 @@ class _ToggleButton extends HookWidget {
               label,
               style: theme.textTheme.labelLarge?.copyWith(
                 fontWeight: FontWeight.w700,
-                color: selected ? Colors.black : OpenBudgetPalette.mutedText,
+                color: selected
+                    ? OpenBudgetPalette.fgPrimaryFor(Theme.of(context))
+                    : OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
               ),
             ),
           ),
@@ -1689,9 +1717,11 @@ class _SpotlightOverview extends HookWidget {
           width: double.infinity,
           padding: const EdgeInsets.all(SpacingTokens.md),
           decoration: BoxDecoration(
-            color: OpenBudgetPalette.surface,
+            color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
             borderRadius: BorderRadius.circular(RadiusTokens.md),
-            border: Border.all(color: OpenBudgetPalette.divider),
+            border: Border.all(
+              color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
+            ),
           ),
           child: Column(
             children: [
@@ -1727,7 +1757,7 @@ class _SpotlightOverview extends HookWidget {
                 l10n.budgetSpotlightTopPrioritiesHint,
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: OpenBudgetPalette.mutedText,
+                  color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
                 ),
               ),
               const SizedBox(height: SpacingTokens.md),
@@ -1743,9 +1773,11 @@ class _SpotlightOverview extends HookWidget {
           width: double.infinity,
           padding: const EdgeInsets.all(SpacingTokens.md),
           decoration: BoxDecoration(
-            color: OpenBudgetPalette.surface,
+            color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
             borderRadius: BorderRadius.circular(RadiusTokens.md),
-            border: Border.all(color: OpenBudgetPalette.divider),
+            border: Border.all(
+              color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
+            ),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1852,9 +1884,11 @@ class _SpotlightMetricTile extends HookWidget {
     final theme = Theme.of(context);
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: OpenBudgetPalette.surfaceMuted,
+        color: OpenBudgetPalette.bgTertiaryFor(Theme.of(context)),
         borderRadius: BorderRadius.circular(RadiusTokens.md),
-        border: Border.all(color: OpenBudgetPalette.divider),
+        border: Border.all(
+          color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
+        ),
       ),
       child: Padding(
         padding: const EdgeInsets.all(SpacingTokens.sm),
@@ -1863,13 +1897,19 @@ class _SpotlightMetricTile extends HookWidget {
           children: [
             Row(
               children: [
-                Icon(icon, size: 18, color: OpenBudgetPalette.accentBlue),
+                Icon(
+                  icon,
+                  size: 18,
+                  color: OpenBudgetPalette.bgBrandFor(Theme.of(context)),
+                ),
                 const SizedBox(width: SpacingTokens.xs),
                 Expanded(
                   child: Text(
                     label,
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: OpenBudgetPalette.mutedText,
+                      color: OpenBudgetPalette.fgSecondaryFor(
+                        Theme.of(context),
+                      ),
                     ),
                   ),
                 ),
@@ -1877,7 +1917,7 @@ class _SpotlightMetricTile extends HookWidget {
                   Text(
                     actionLabel!,
                     style: theme.textTheme.labelSmall?.copyWith(
-                      color: OpenBudgetPalette.accentBlue,
+                      color: OpenBudgetPalette.bgBrandFor(Theme.of(context)),
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -1911,11 +1951,16 @@ class _SpotlightPriorityIcon extends HookWidget {
         width: 56,
         height: 56,
         decoration: BoxDecoration(
-          color: OpenBudgetPalette.accentBlue.withAlpha(26),
+          color: OpenBudgetPalette.bgBrandFor(Theme.of(context)).withAlpha(26),
           borderRadius: BorderRadius.circular(RadiusTokens.md),
-          border: Border.all(color: OpenBudgetPalette.divider),
+          border: Border.all(
+            color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
+          ),
         ),
-        child: Icon(icon, color: OpenBudgetPalette.accentBlue),
+        child: Icon(
+          icon,
+          color: OpenBudgetPalette.bgBrandFor(Theme.of(context)),
+        ),
       ),
     );
   }
@@ -1982,16 +2027,20 @@ class _InlineAmountEditor extends HookWidget {
             onPressed: onPressed,
             style: FilledButton.styleFrom(
               backgroundColor: primary
-                  ? OpenBudgetPalette.accentBlue
-                  : OpenBudgetPalette.surface,
+                  ? OpenBudgetPalette.bgBrandFor(Theme.of(context))
+                  : OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
               foregroundColor: primary
-                  ? Colors.white
+                  ? OpenBudgetPalette.fgOnBrandFor(Theme.of(context))
                   : accent
-                  ? OpenBudgetPalette.accentBlue
-                  : Colors.black87,
+                  ? OpenBudgetPalette.bgBrandFor(Theme.of(context))
+                  : OpenBudgetPalette.fgPrimaryEmphasisFor(Theme.of(context)),
               side: primary
                   ? BorderSide.none
-                  : const BorderSide(color: OpenBudgetPalette.divider),
+                  : BorderSide(
+                      color: OpenBudgetPalette.borderSubtleFor(
+                        Theme.of(context),
+                      ),
+                    ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(RadiusTokens.sm),
               ),
@@ -2005,9 +2054,13 @@ class _InlineAmountEditor extends HookWidget {
     }
 
     return DecoratedBox(
-      decoration: const BoxDecoration(
-        color: OpenBudgetPalette.surfaceMuted,
-        border: Border(top: BorderSide(color: OpenBudgetPalette.divider)),
+      decoration: BoxDecoration(
+        color: OpenBudgetPalette.bgTertiaryFor(Theme.of(context)),
+        border: Border(
+          top: BorderSide(
+            color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
+          ),
+        ),
       ),
       child: SafeArea(
         top: false,
@@ -2027,7 +2080,7 @@ class _InlineAmountEditor extends HookWidget {
                   amountLabel,
                   style: theme.textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.w800,
-                    color: OpenBudgetPalette.accentBlue,
+                    color: OpenBudgetPalette.bgBrandFor(Theme.of(context)),
                   ),
                 ),
               ),
@@ -2156,12 +2209,14 @@ class _DueBanner extends HookWidget {
             FilledButton.icon(
               onPressed: isPosting ? null : onPost,
               icon: isPosting
-                  ? const SizedBox(
+                  ? SizedBox(
                       width: 14,
                       height: 14,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        color: Colors.white,
+                        color: OpenBudgetPalette.fgOnBrandFor(
+                          Theme.of(context),
+                        ),
                       ),
                     )
                   : const Icon(Icons.play_arrow_rounded, size: 16),
@@ -2170,7 +2225,9 @@ class _DueBanner extends HookWidget {
               ),
               style: FilledButton.styleFrom(
                 backgroundColor: ColorTokens.primary,
-                foregroundColor: Colors.white,
+                foregroundColor: OpenBudgetPalette.fgOnBrandFor(
+                  Theme.of(context),
+                ),
                 padding: const EdgeInsets.symmetric(
                   horizontal: SpacingTokens.md,
                   vertical: SpacingTokens.xs,
@@ -2201,7 +2258,7 @@ class _ReviewTransactionsBanner extends HookWidget {
         : 'Review $count transactions';
 
     return Material(
-      color: OpenBudgetPalette.surface,
+      color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
       borderRadius: BorderRadius.circular(RadiusTokens.md),
       child: InkWell(
         onTap: onTap,
@@ -2213,7 +2270,9 @@ class _ReviewTransactionsBanner extends HookWidget {
           ),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(RadiusTokens.md),
-            border: Border.all(color: OpenBudgetPalette.divider),
+            border: Border.all(
+              color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
+            ),
           ),
           child: Row(
             children: [
@@ -2222,13 +2281,13 @@ class _ReviewTransactionsBanner extends HookWidget {
                 height: 20,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE8E3FF),
+                  color: OpenBudgetPalette.bgInfoFor(Theme.of(context)),
                   borderRadius: BorderRadius.circular(RadiusTokens.sm),
                 ),
                 child: Text(
                   '$count',
                   style: theme.textTheme.labelSmall?.copyWith(
-                    color: OpenBudgetPalette.accentBlue,
+                    color: OpenBudgetPalette.bgBrandFor(Theme.of(context)),
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -2281,7 +2340,7 @@ class _CoverOverspentBanner extends HookWidget {
         : 'Cover $count overspent categories';
 
     return Material(
-      color: OpenBudgetPalette.surface,
+      color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
       borderRadius: BorderRadius.circular(RadiusTokens.md),
       child: InkWell(
         onTap: onTap,
@@ -2293,7 +2352,9 @@ class _CoverOverspentBanner extends HookWidget {
           ),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(RadiusTokens.md),
-            border: Border.all(color: OpenBudgetPalette.divider),
+            border: Border.all(
+              color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
+            ),
           ),
           child: Row(
             children: [
@@ -2302,13 +2363,13 @@ class _CoverOverspentBanner extends HookWidget {
                 height: 20,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFDE7E7),
+                  color: OpenBudgetPalette.bgErrorFor(Theme.of(context)),
                   borderRadius: BorderRadius.circular(RadiusTokens.sm),
                 ),
                 child: Text(
                   '$count',
                   style: theme.textTheme.labelSmall?.copyWith(
-                    color: OpenBudgetPalette.negative,
+                    color: OpenBudgetPalette.fgErrorFor(Theme.of(context)),
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -2416,8 +2477,8 @@ class _CoverOverspendingSheet extends HookConsumerWidget {
     }
 
     return DecoratedBox(
-      decoration: const BoxDecoration(
-        color: OpenBudgetPalette.appBackground,
+      decoration: BoxDecoration(
+        color: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(RadiusTokens.lg),
         ),
@@ -2431,7 +2492,7 @@ class _CoverOverspendingSheet extends HookConsumerWidget {
               width: 36,
               height: 4,
               decoration: BoxDecoration(
-                color: OpenBudgetPalette.divider,
+                color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
                 borderRadius: BorderRadius.circular(RadiusTokens.md),
               ),
             ),
@@ -2475,10 +2536,12 @@ class _CoverOverspendingSheet extends HookConsumerWidget {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.check_circle_rounded,
                               size: 32,
-                              color: OpenBudgetPalette.progressGreen,
+                              color: OpenBudgetPalette.fgSuccessFor(
+                                Theme.of(context),
+                              ),
                             ),
                             const SizedBox(height: SpacingTokens.md),
                             Text(
@@ -2498,12 +2561,16 @@ class _CoverOverspendingSheet extends HookConsumerWidget {
                         final item = remainingItems.value[index];
                         return Container(
                           decoration: BoxDecoration(
-                            color: OpenBudgetPalette.surface,
+                            color: OpenBudgetPalette.bgSecondaryFor(
+                              Theme.of(context),
+                            ),
                             borderRadius: BorderRadius.circular(
                               RadiusTokens.md,
                             ),
                             border: Border.all(
-                              color: OpenBudgetPalette.divider,
+                              color: OpenBudgetPalette.borderSubtleFor(
+                                Theme.of(context),
+                              ),
                             ),
                           ),
                           child: ListTile(
@@ -2516,7 +2583,9 @@ class _CoverOverspendingSheet extends HookConsumerWidget {
                             subtitle: Text(
                               'Needs ${formatCents(item.overspentCents, currencyCode)} to get back to zero',
                               style: theme.textTheme.bodySmall?.copyWith(
-                                color: OpenBudgetPalette.mutedText,
+                                color: OpenBudgetPalette.fgSecondaryFor(
+                                  Theme.of(context),
+                                ),
                               ),
                             ),
                             trailing: FilledButton(

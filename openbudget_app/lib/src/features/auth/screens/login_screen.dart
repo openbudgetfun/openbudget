@@ -53,12 +53,12 @@ class LoginScreen extends HookConsumerWidget {
         (theme.brightness == Brightness.light
                 ? SystemUiOverlayStyle.dark
                 : SystemUiOverlayStyle.light)
-            .copyWith(statusBarColor: Colors.transparent);
+            .copyWith(statusBarColor: OpenBudgetPalette.transparentFor(theme));
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: statusBarStyle,
       child: Scaffold(
-        backgroundColor: const Color(0xFFF5F4F2),
+        backgroundColor: OpenBudgetPalette.bgAuthFor(theme),
         body: SafeArea(
           child: Center(
             child: SingleChildScrollView(
@@ -107,9 +107,9 @@ class LoginScreen extends HookConsumerWidget {
                       const SizedBox(height: SpacingTokens.md),
                       Row(
                         children: [
-                          const Expanded(
+                          Expanded(
                             child: Divider(
-                              color: OpenBudgetPalette.divider,
+                              color: OpenBudgetPalette.borderSubtleFor(theme),
                               height: 1,
                             ),
                           ),
@@ -120,13 +120,13 @@ class LoginScreen extends HookConsumerWidget {
                             child: Text(
                               l10n.loginOrSeparator,
                               style: theme.textTheme.bodyMedium?.copyWith(
-                                color: OpenBudgetPalette.mutedText,
+                                color: OpenBudgetPalette.fgSecondaryFor(theme),
                               ),
                             ),
                           ),
-                          const Expanded(
+                          Expanded(
                             child: Divider(
-                              color: OpenBudgetPalette.divider,
+                              color: OpenBudgetPalette.borderSubtleFor(theme),
                               height: 1,
                             ),
                           ),
@@ -169,7 +169,7 @@ class LoginScreen extends HookConsumerWidget {
                           obscurePassword.value
                               ? Icons.visibility_outlined
                               : Icons.visibility_off_outlined,
-                          color: OpenBudgetPalette.mutedText,
+                          color: OpenBudgetPalette.fgSecondaryFor(theme),
                         ),
                       ),
                       onSubmitted: canLogin
@@ -186,10 +186,12 @@ class LoginScreen extends HookConsumerWidget {
                       style: FilledButton.styleFrom(
                         elevation: 0,
                         minimumSize: const Size.fromHeight(48),
-                        backgroundColor: OpenBudgetPalette.accentBlue,
-                        foregroundColor: Colors.white,
-                        disabledBackgroundColor: OpenBudgetPalette.divider,
-                        disabledForegroundColor: OpenBudgetPalette.mutedText,
+                        backgroundColor: OpenBudgetPalette.bgBrandFor(theme),
+                        foregroundColor: OpenBudgetPalette.fgOnBrandFor(theme),
+                        disabledBackgroundColor:
+                            OpenBudgetPalette.borderSubtleFor(theme),
+                        disabledForegroundColor:
+                            OpenBudgetPalette.fgSecondaryFor(theme),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(RadiusTokens.sm),
                         ),
@@ -209,7 +211,7 @@ class LoginScreen extends HookConsumerWidget {
                       child: Text(
                         l10n.loginForgotPassword,
                         style: theme.textTheme.titleMedium?.copyWith(
-                          color: OpenBudgetPalette.accentBlue,
+                          color: OpenBudgetPalette.bgBrandFor(theme),
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -219,7 +221,7 @@ class LoginScreen extends HookConsumerWidget {
                       child: Text(
                         l10n.loginCreateAccount,
                         style: theme.textTheme.titleMedium?.copyWith(
-                          color: OpenBudgetPalette.accentBlue,
+                          color: OpenBudgetPalette.bgBrandFor(theme),
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -304,10 +306,10 @@ class _LoginTextField extends HookWidget {
       decoration: InputDecoration(
         hintText: hintText,
         hintStyle: theme.textTheme.bodyLarge?.copyWith(
-          color: OpenBudgetPalette.mutedText,
+          color: OpenBudgetPalette.fgSecondaryFor(theme),
         ),
         filled: true,
-        fillColor: OpenBudgetPalette.surfaceMuted,
+        fillColor: OpenBudgetPalette.bgTertiaryFor(theme),
         suffixIcon: suffixIcon,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(RadiusTokens.sm),
@@ -319,7 +321,9 @@ class _LoginTextField extends HookWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(RadiusTokens.sm),
-          borderSide: const BorderSide(color: OpenBudgetPalette.divider),
+          borderSide: BorderSide(
+            color: OpenBudgetPalette.borderSubtleFor(theme),
+          ),
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: SpacingTokens.md,

@@ -29,12 +29,12 @@ class EditPlanScreen extends HookConsumerWidget {
 
     return summaryAsync.when(
       loading: () => Scaffold(
-        backgroundColor: OpenBudgetPalette.appBackground,
+        backgroundColor: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
         appBar: _EditPlanAppBar(budgetId: budgetId),
         body: const Center(child: CircularProgressIndicator()),
       ),
       error: (_, _) => Scaffold(
-        backgroundColor: OpenBudgetPalette.appBackground,
+        backgroundColor: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
         appBar: _EditPlanAppBar(budgetId: budgetId),
         body: const Center(child: Text('Failed to load plan setup.')),
       ),
@@ -120,13 +120,13 @@ class _EditPlanContent extends HookConsumerWidget {
     }
 
     return Scaffold(
-      backgroundColor: OpenBudgetPalette.appBackground,
+      backgroundColor: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
       appBar: _EditPlanAppBar(budgetId: budgetId),
       body: ListView(
         padding: EdgeInsets.zero,
         children: [
           Container(
-            color: OpenBudgetPalette.accentBlue,
+            color: OpenBudgetPalette.bgBrandFor(Theme.of(context)),
             padding: const EdgeInsets.fromLTRB(
               SpacingTokens.md,
               SpacingTokens.md,
@@ -138,7 +138,7 @@ class _EditPlanContent extends HookConsumerWidget {
                 Text(
                   formatCents(monthlyTargetsCents, currencyCode),
                   style: theme.textTheme.displaySmall?.copyWith(
-                    color: Colors.white,
+                    color: OpenBudgetPalette.fgOnBrandFor(Theme.of(context)),
                     fontWeight: FontWeight.w800,
                   ),
                 ),
@@ -146,7 +146,9 @@ class _EditPlanContent extends HookConsumerWidget {
                 Text(
                   'Cost to Be Me',
                   style: theme.textTheme.titleLarge?.copyWith(
-                    color: Colors.white.withAlpha(240),
+                    color: OpenBudgetPalette.fgOnBrandFor(
+                      Theme.of(context),
+                    ).withAlpha(240),
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -161,14 +163,22 @@ class _EditPlanContent extends HookConsumerWidget {
                 children: [
                   DecoratedBox(
                     decoration: BoxDecoration(
-                      color: OpenBudgetPalette.surface,
+                      color: OpenBudgetPalette.bgSecondaryFor(
+                        Theme.of(context),
+                      ),
                       borderRadius: BorderRadius.circular(RadiusTokens.lg),
-                      border: Border.all(color: OpenBudgetPalette.divider),
-                      boxShadow: const [
+                      border: Border.all(
+                        color: OpenBudgetPalette.borderSubtleFor(
+                          Theme.of(context),
+                        ),
+                      ),
+                      boxShadow: [
                         BoxShadow(
                           blurRadius: 8,
-                          color: Color.fromRGBO(0, 0, 0, 0.08),
-                          offset: Offset(0, 2),
+                          color: OpenBudgetPalette.fgPrimaryFor(
+                            theme,
+                          ).withAlpha(20),
+                          offset: const Offset(0, 2),
                         ),
                       ],
                     ),
@@ -189,7 +199,9 @@ class _EditPlanContent extends HookConsumerWidget {
                                 formatCents(monthlyTargetsCents, currencyCode),
                                 style: theme.textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.w700,
-                                  color: OpenBudgetPalette.progressGreen,
+                                  color: OpenBudgetPalette.fgSuccessFor(
+                                    Theme.of(context),
+                                  ),
                                 ),
                               ),
                             ],
@@ -202,9 +214,14 @@ class _EditPlanContent extends HookConsumerWidget {
                             child: LinearProgressIndicator(
                               value: monthlyTargetsProgress,
                               minHeight: 12,
-                              backgroundColor: OpenBudgetPalette.divider,
-                              valueColor: const AlwaysStoppedAnimation<Color>(
-                                OpenBudgetPalette.progressGreen,
+                              backgroundColor:
+                                  OpenBudgetPalette.borderSubtleFor(
+                                    Theme.of(context),
+                                  ),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                OpenBudgetPalette.fgSuccessFor(
+                                  Theme.of(context),
+                                ),
                               ),
                             ),
                           ),
@@ -218,10 +235,12 @@ class _EditPlanContent extends HookConsumerWidget {
                                 ),
                               ),
                               const Spacer(),
-                              const Icon(
+                              Icon(
                                 Icons.edit_rounded,
                                 size: 16,
-                                color: OpenBudgetPalette.mutedText,
+                                color: OpenBudgetPalette.fgSecondaryFor(
+                                  Theme.of(context),
+                                ),
                               ),
                               const SizedBox(width: SpacingTokens.xs),
                               Text(
@@ -237,12 +256,17 @@ class _EditPlanContent extends HookConsumerWidget {
                             borderRadius: BorderRadius.circular(
                               RadiusTokens.sm,
                             ),
-                            child: const LinearProgressIndicator(
+                            child: LinearProgressIndicator(
                               value: 1,
                               minHeight: 12,
-                              backgroundColor: OpenBudgetPalette.divider,
+                              backgroundColor:
+                                  OpenBudgetPalette.borderSubtleFor(
+                                    Theme.of(context),
+                                  ),
                               valueColor: AlwaysStoppedAnimation<Color>(
-                                OpenBudgetPalette.divider,
+                                OpenBudgetPalette.borderSubtleFor(
+                                  Theme.of(context),
+                                ),
                               ),
                             ),
                           ),
@@ -253,9 +277,15 @@ class _EditPlanContent extends HookConsumerWidget {
                   const SizedBox(height: SpacingTokens.md),
                   DecoratedBox(
                     decoration: BoxDecoration(
-                      color: OpenBudgetPalette.accentPurple.withAlpha(50),
+                      color: OpenBudgetPalette.bgAccentFor(
+                        Theme.of(context),
+                      ).withAlpha(50),
                       borderRadius: BorderRadius.circular(RadiusTokens.md),
-                      border: Border.all(color: OpenBudgetPalette.divider),
+                      border: Border.all(
+                        color: OpenBudgetPalette.borderSubtleFor(
+                          Theme.of(context),
+                        ),
+                      ),
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(SpacingTokens.md),
@@ -266,14 +296,18 @@ class _EditPlanContent extends HookConsumerWidget {
                             width: 46,
                             height: 46,
                             decoration: BoxDecoration(
-                              color: OpenBudgetPalette.accentBlue,
+                              color: OpenBudgetPalette.bgBrandFor(
+                                Theme.of(context),
+                              ),
                               borderRadius: BorderRadius.circular(
                                 RadiusTokens.xl,
                               ),
                             ),
-                            child: const Icon(
+                            child: Icon(
                               Icons.attach_money_rounded,
-                              color: Colors.white,
+                              color: OpenBudgetPalette.fgOnBrandFor(
+                                Theme.of(context),
+                              ),
                             ),
                           ),
                           const SizedBox(width: SpacingTokens.sm),
@@ -292,7 +326,9 @@ class _EditPlanContent extends HookConsumerWidget {
                                   'Your targets add up to one simple number: '
                                   'everything you plan to spend and save each month.',
                                   style: theme.textTheme.bodyMedium?.copyWith(
-                                    color: OpenBudgetPalette.mutedText,
+                                    color: OpenBudgetPalette.fgSecondaryFor(
+                                      Theme.of(context),
+                                    ),
                                   ),
                                 ),
                               ],
@@ -314,8 +350,11 @@ class _EditPlanContent extends HookConsumerWidget {
                           icon: const Icon(Icons.create_new_folder_rounded),
                           label: const Text('New Group'),
                           style: FilledButton.styleFrom(
-                            backgroundColor: OpenBudgetPalette.surfaceMuted,
-                            foregroundColor: Colors.black87,
+                            backgroundColor: OpenBudgetPalette.bgTertiaryFor(
+                              Theme.of(context),
+                            ),
+                            foregroundColor:
+                                OpenBudgetPalette.fgPrimaryEmphasisFor(theme),
                           ),
                         ),
                       ),
@@ -340,8 +379,11 @@ class _EditPlanContent extends HookConsumerWidget {
                                 : 'Reorder',
                           ),
                           style: FilledButton.styleFrom(
-                            backgroundColor: OpenBudgetPalette.surfaceMuted,
-                            foregroundColor: Colors.black87,
+                            backgroundColor: OpenBudgetPalette.bgTertiaryFor(
+                              Theme.of(context),
+                            ),
+                            foregroundColor:
+                                OpenBudgetPalette.fgPrimaryEmphasisFor(theme),
                           ),
                         ),
                       ),
@@ -352,7 +394,9 @@ class _EditPlanContent extends HookConsumerWidget {
                     Text(
                       l10n.budgetReorderHint,
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: OpenBudgetPalette.mutedText,
+                        color: OpenBudgetPalette.fgSecondaryFor(
+                          Theme.of(context),
+                        ),
                       ),
                     ),
                   ],
@@ -490,7 +534,7 @@ class _EditPlanContent extends HookConsumerWidget {
     final theme = Theme.of(context);
     await showModalBottomSheet<void>(
       context: context,
-      backgroundColor: OpenBudgetPalette.appBackground,
+      backgroundColor: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
       isScrollControlled: true,
       builder: (sheetContext) {
         return SafeArea(
@@ -524,15 +568,19 @@ class _EditPlanContent extends HookConsumerWidget {
                 Text(
                   'Category Group Name',
                   style: theme.textTheme.labelLarge?.copyWith(
-                    color: OpenBudgetPalette.mutedText,
+                    color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
                   ),
                 ),
                 const SizedBox(height: SpacingTokens.xs),
                 DecoratedBox(
                   decoration: BoxDecoration(
-                    color: OpenBudgetPalette.surface,
+                    color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
                     borderRadius: BorderRadius.circular(RadiusTokens.md),
-                    border: Border.all(color: OpenBudgetPalette.divider),
+                    border: Border.all(
+                      color: OpenBudgetPalette.borderSubtleFor(
+                        Theme.of(context),
+                      ),
+                    ),
                   ),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
@@ -561,8 +609,12 @@ class _EditPlanContent extends HookConsumerWidget {
                         icon: const Icon(Icons.visibility_off_rounded),
                         label: const Text('Hide'),
                         style: FilledButton.styleFrom(
-                          backgroundColor: OpenBudgetPalette.surfaceMuted,
-                          foregroundColor: OpenBudgetPalette.accentBlue,
+                          backgroundColor: OpenBudgetPalette.bgTertiaryFor(
+                            Theme.of(context),
+                          ),
+                          foregroundColor: OpenBudgetPalette.bgBrandFor(
+                            Theme.of(context),
+                          ),
                         ),
                       ),
                     ),
@@ -580,8 +632,12 @@ class _EditPlanContent extends HookConsumerWidget {
                         icon: const Icon(Icons.delete_rounded),
                         label: const Text('Delete'),
                         style: FilledButton.styleFrom(
-                          backgroundColor: OpenBudgetPalette.surfaceMuted,
-                          foregroundColor: OpenBudgetPalette.negative,
+                          backgroundColor: OpenBudgetPalette.bgTertiaryFor(
+                            Theme.of(context),
+                          ),
+                          foregroundColor: OpenBudgetPalette.fgErrorFor(
+                            Theme.of(context),
+                          ),
                         ),
                       ),
                     ),
@@ -753,9 +809,11 @@ class _EditPlanCategoryCard extends HookWidget {
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: OpenBudgetPalette.surface,
+        color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
         borderRadius: BorderRadius.circular(RadiusTokens.md),
-        border: Border.all(color: OpenBudgetPalette.divider),
+        border: Border.all(
+          color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -765,8 +823,8 @@ class _EditPlanCategoryCard extends HookWidget {
               horizontal: SpacingTokens.md,
               vertical: SpacingTokens.sm + 2,
             ),
-            decoration: const BoxDecoration(
-              color: OpenBudgetPalette.surfaceMuted,
+            decoration: BoxDecoration(
+              color: OpenBudgetPalette.bgTertiaryFor(Theme.of(context)),
               borderRadius: BorderRadius.vertical(
                 top: Radius.circular(RadiusTokens.md),
               ),
@@ -832,10 +890,12 @@ class _EditPlanCategoryCard extends HookWidget {
                 ),
                 child: Row(
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.label_rounded,
                       size: 16,
-                      color: OpenBudgetPalette.mutedText,
+                      color: OpenBudgetPalette.fgSecondaryFor(
+                        Theme.of(context),
+                      ),
                     ),
                     const SizedBox(width: SpacingTokens.sm),
                     Expanded(
@@ -853,7 +913,9 @@ class _EditPlanCategoryCard extends HookWidget {
                               icon: const Icon(Icons.add_circle, size: 16),
                               label: const Text('Add Target'),
                               style: TextButton.styleFrom(
-                                foregroundColor: OpenBudgetPalette.accentBlue,
+                                foregroundColor: OpenBudgetPalette.bgBrandFor(
+                                  Theme.of(context),
+                                ),
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: SpacingTokens.xs,
                                 ),
@@ -863,7 +925,9 @@ class _EditPlanCategoryCard extends HookWidget {
                               formatCents(targetCents, currencyCode),
                               style: theme.textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.w700,
-                                color: OpenBudgetPalette.mutedText,
+                                color: OpenBudgetPalette.fgSecondaryFor(
+                                  Theme.of(context),
+                                ),
                               ),
                             ),
                   ],
@@ -872,7 +936,10 @@ class _EditPlanCategoryCard extends HookWidget {
             );
 
             if (index < categoryWithEnvelopes.envelopes.length - 1) {
-              yield const Divider(height: 1, color: OpenBudgetPalette.divider);
+              yield Divider(
+                height: 1,
+                color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
+              );
             }
           }),
         ],
@@ -889,13 +956,15 @@ class _EditPlanAppBar extends HookWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: OpenBudgetPalette.accentBlue,
-      foregroundColor: Colors.white,
+      backgroundColor: OpenBudgetPalette.bgBrandFor(Theme.of(context)),
+      foregroundColor: OpenBudgetPalette.fgOnBrandFor(Theme.of(context)),
       leadingWidth: 102,
       leading: TextButton.icon(
         onPressed: () =>
             context.goNamed(planRoute, pathParameters: {'id': budgetId}),
-        style: TextButton.styleFrom(foregroundColor: Colors.white),
+        style: TextButton.styleFrom(
+          foregroundColor: OpenBudgetPalette.fgOnBrandFor(Theme.of(context)),
+        ),
         icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 16),
         label: const Text('Plan'),
       ),
@@ -908,7 +977,9 @@ class _EditPlanAppBar extends HookWidget implements PreferredSizeWidget {
         TextButton(
           onPressed: () =>
               context.goNamed(planRoute, pathParameters: {'id': budgetId}),
-          style: TextButton.styleFrom(foregroundColor: Colors.white),
+          style: TextButton.styleFrom(
+            foregroundColor: OpenBudgetPalette.fgOnBrandFor(Theme.of(context)),
+          ),
           child: const Text('Next'),
         ),
         const SizedBox(width: SpacingTokens.xs),

@@ -68,10 +68,10 @@ class AccountDetailScreen extends HookConsumerWidget {
     );
 
     return Scaffold(
-      backgroundColor: OpenBudgetPalette.appBackground,
+      backgroundColor: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
       appBar: AppBar(
-        backgroundColor: OpenBudgetPalette.appBackground,
-        surfaceTintColor: Colors.transparent,
+        backgroundColor: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
+        surfaceTintColor: OpenBudgetPalette.transparentFor(Theme.of(context)),
         scrolledUnderElevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -92,7 +92,7 @@ class AccountDetailScreen extends HookConsumerWidget {
               Text(
                 accountData.onBudget ? 'Budget Account' : 'Tracking Account',
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: OpenBudgetPalette.mutedText,
+                  color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -109,7 +109,9 @@ class AccountDetailScreen extends HookConsumerWidget {
                 TextButton(
                   onPressed: null,
                   style: TextButton.styleFrom(
-                    foregroundColor: OpenBudgetPalette.accentBlue,
+                    foregroundColor: OpenBudgetPalette.bgBrandFor(
+                      Theme.of(context),
+                    ),
                     textStyle: theme.textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
@@ -215,15 +217,19 @@ class AccountDetailScreen extends HookConsumerWidget {
                       ),
                       const SizedBox(height: SpacingTokens.sm),
                       Material(
-                        color: OpenBudgetPalette.surface,
+                        color: OpenBudgetPalette.bgSecondaryFor(
+                          Theme.of(context),
+                        ),
                         borderRadius: BorderRadius.circular(RadiusTokens.md),
                         child: ListTile(
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(
                               RadiusTokens.md,
                             ),
-                            side: const BorderSide(
-                              color: OpenBudgetPalette.divider,
+                            side: BorderSide(
+                              color: OpenBudgetPalette.borderSubtleFor(
+                                Theme.of(context),
+                              ),
                             ),
                           ),
                           title: Text(
@@ -319,7 +325,9 @@ class AccountDetailScreen extends HookConsumerWidget {
                                 ? l10n.transactionNoResults
                                 : l10n.transactionEmpty,
                             style: theme.textTheme.bodyLarge?.copyWith(
-                              color: OpenBudgetPalette.mutedText,
+                              color: OpenBudgetPalette.fgSecondaryFor(
+                                Theme.of(context),
+                              ),
                             ),
                           ),
                         );
@@ -387,7 +395,10 @@ class AccountDetailScreen extends HookConsumerWidget {
                                       style: theme.textTheme.titleSmall
                                           ?.copyWith(
                                             fontWeight: FontWeight.w700,
-                                            color: OpenBudgetPalette.mutedText,
+                                            color:
+                                                OpenBudgetPalette.fgSecondaryFor(
+                                                  Theme.of(context),
+                                                ),
                                           ),
                                     ),
                                   ),
@@ -614,16 +625,18 @@ class _BalanceHeader extends HookWidget {
       ),
       padding: const EdgeInsets.all(SpacingTokens.md),
       decoration: BoxDecoration(
-        color: OpenBudgetPalette.surface,
+        color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
         borderRadius: BorderRadius.circular(RadiusTokens.md),
-        border: Border.all(color: OpenBudgetPalette.divider),
+        border: Border.all(
+          color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
+        ),
       ),
       child: Column(
         children: [
           Text(
             l10n.accountDetailBalance,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: OpenBudgetPalette.mutedText,
+              color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -633,8 +646,8 @@ class _BalanceHeader extends HookWidget {
             style: theme.textTheme.headlineLarge?.copyWith(
               fontWeight: FontWeight.w800,
               color: accountData.balanceCents >= 0
-                  ? OpenBudgetPalette.progressGreen
-                  : OpenBudgetPalette.negative,
+                  ? OpenBudgetPalette.fgSuccessFor(Theme.of(context))
+                  : OpenBudgetPalette.fgErrorFor(Theme.of(context)),
             ),
           ),
           if (transactions != null) ...[
@@ -646,14 +659,14 @@ class _BalanceHeader extends HookWidget {
                   icon: Icons.check_circle_outline,
                   label: l10n.accountBalanceCleared,
                   amount: formatCents(clearedCents, currencyCode),
-                  color: OpenBudgetPalette.progressGreen,
+                  color: OpenBudgetPalette.fgSuccessFor(Theme.of(context)),
                 ),
                 const SizedBox(width: SpacingTokens.lg),
                 _BalanceChip(
                   icon: Icons.circle_outlined,
                   label: l10n.accountBalanceUncleared,
                   amount: formatCents(unclearedCents, currencyCode),
-                  color: OpenBudgetPalette.mutedText,
+                  color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
                 ),
               ],
             ),
@@ -754,19 +767,21 @@ class _TransactionRow extends HookWidget {
         ? Icons.check_circle_outline
         : Icons.circle_outlined;
     final statusColor = transaction.reconciled
-        ? OpenBudgetPalette.accentBlue
+        ? OpenBudgetPalette.bgBrandFor(Theme.of(context))
         : transaction.cleared
-        ? OpenBudgetPalette.progressGreen
-        : OpenBudgetPalette.mutedText;
+        ? OpenBudgetPalette.fgSuccessFor(Theme.of(context))
+        : OpenBudgetPalette.fgSecondaryFor(Theme.of(context));
 
     return InkWell(
       onTap: onToggleCleared,
       borderRadius: BorderRadius.circular(RadiusTokens.sm),
       child: Ink(
         decoration: BoxDecoration(
-          color: OpenBudgetPalette.surface,
+          color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
           borderRadius: BorderRadius.circular(RadiusTokens.sm),
-          border: Border.all(color: OpenBudgetPalette.divider),
+          border: Border.all(
+            color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
+          ),
         ),
         child: Padding(
           padding: const EdgeInsets.symmetric(
@@ -792,7 +807,9 @@ class _TransactionRow extends HookWidget {
                       Text(
                         _detailLine,
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: OpenBudgetPalette.mutedText,
+                          color: OpenBudgetPalette.fgSecondaryFor(
+                            Theme.of(context),
+                          ),
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -806,13 +823,17 @@ class _TransactionRow extends HookWidget {
                           vertical: 2,
                         ),
                         decoration: BoxDecoration(
-                          color: OpenBudgetPalette.surfaceMuted,
+                          color: OpenBudgetPalette.bgTertiaryFor(
+                            Theme.of(context),
+                          ),
                           borderRadius: BorderRadius.circular(RadiusTokens.sm),
                         ),
                         child: Text(
                           transaction.memo!,
                           style: theme.textTheme.labelSmall?.copyWith(
-                            color: OpenBudgetPalette.mutedText,
+                            color: OpenBudgetPalette.fgSecondaryFor(
+                              Theme.of(context),
+                            ),
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -830,16 +851,16 @@ class _TransactionRow extends HookWidget {
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w700,
                       color: isInflow
-                          ? OpenBudgetPalette.progressGreen
-                          : OpenBudgetPalette.negative,
+                          ? OpenBudgetPalette.fgSuccessFor(Theme.of(context))
+                          : OpenBudgetPalette.fgErrorFor(Theme.of(context)),
                     ),
                   ),
                   Text(
                     formatCents(runningBalanceCents, currencyCode),
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: runningBalanceCents >= 0
-                          ? OpenBudgetPalette.mutedText
-                          : OpenBudgetPalette.negative,
+                          ? OpenBudgetPalette.fgSecondaryFor(Theme.of(context))
+                          : OpenBudgetPalette.fgErrorFor(Theme.of(context)),
                     ),
                   ),
                 ],
@@ -917,9 +938,11 @@ class _LoanAccountDetailBody extends StatelessWidget {
     return Column(
       children: [
         Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             border: Border(
-              bottom: BorderSide(color: OpenBudgetPalette.divider),
+              bottom: BorderSide(
+                color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
+              ),
             ),
           ),
           child: Row(
@@ -999,8 +1022,13 @@ class _LoanAccountDetailBody extends StatelessWidget {
                               child: CircularProgressIndicator(
                                 value: paidOffRatio,
                                 strokeWidth: 10,
-                                color: OpenBudgetPalette.accentBlue,
-                                backgroundColor: OpenBudgetPalette.surfaceMuted,
+                                color: OpenBudgetPalette.bgBrandFor(
+                                  Theme.of(context),
+                                ),
+                                backgroundColor:
+                                    OpenBudgetPalette.bgTertiaryFor(
+                                      Theme.of(context),
+                                    ),
                               ),
                             ),
                             Text(
@@ -1024,7 +1052,9 @@ class _LoanAccountDetailBody extends StatelessWidget {
                             Container(
                               padding: const EdgeInsets.all(SpacingTokens.md),
                               decoration: BoxDecoration(
-                                color: OpenBudgetPalette.surfaceMuted,
+                                color: OpenBudgetPalette.bgTertiaryFor(
+                                  Theme.of(context),
+                                ),
                                 borderRadius: BorderRadius.circular(
                                   RadiusTokens.md,
                                 ),
@@ -1156,8 +1186,8 @@ class _LoanTabButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final color = selected
-        ? OpenBudgetPalette.accentBlue
-        : OpenBudgetPalette.mutedText;
+        ? OpenBudgetPalette.bgBrandFor(Theme.of(context))
+        : OpenBudgetPalette.fgSecondaryFor(Theme.of(context));
     return InkWell(
       onTap: onTap,
       child: Container(
@@ -1166,8 +1196,8 @@ class _LoanTabButton extends StatelessWidget {
           border: Border(
             bottom: BorderSide(
               color: selected
-                  ? OpenBudgetPalette.accentBlue
-                  : Colors.transparent,
+                  ? OpenBudgetPalette.bgBrandFor(Theme.of(context))
+                  : OpenBudgetPalette.transparentFor(Theme.of(context)),
               width: 2,
             ),
           ),
@@ -1216,9 +1246,11 @@ class _LoanCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: OpenBudgetPalette.surface,
+        color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
         borderRadius: BorderRadius.circular(RadiusTokens.md),
-        border: Border.all(color: OpenBudgetPalette.divider),
+        border: Border.all(
+          color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
+        ),
       ),
       child: child,
     );
@@ -1308,7 +1340,9 @@ class _LoanSummaryGrid extends StatelessWidget {
                       Text(
                         entry.label,
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: OpenBudgetPalette.mutedText,
+                          color: OpenBudgetPalette.fgSecondaryFor(
+                            Theme.of(context),
+                          ),
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -1320,8 +1354,10 @@ class _LoanSummaryGrid extends StatelessWidget {
                               ? FontWeight.w800
                               : FontWeight.w600,
                           color: entry.positive
-                              ? OpenBudgetPalette.progressGreen
-                              : OpenBudgetPalette.negative,
+                              ? OpenBudgetPalette.fgSuccessFor(
+                                  Theme.of(context),
+                                )
+                              : OpenBudgetPalette.fgErrorFor(Theme.of(context)),
                         ),
                       ),
                     ],
@@ -1352,9 +1388,9 @@ class _LoanActivityList extends StatelessWidget {
           padding: const EdgeInsets.all(SpacingTokens.lg),
           child: Text(
             'No loan activity yet',
-            style: Theme.of(
-              context,
-            ).textTheme.bodyLarge?.copyWith(color: OpenBudgetPalette.mutedText),
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
+            ),
           ),
         ),
       );
@@ -1383,7 +1419,7 @@ class _LoanActivityList extends StatelessWidget {
                 SpacingTokens.md,
                 SpacingTokens.sm,
               ),
-              color: OpenBudgetPalette.surfaceMuted,
+              color: OpenBudgetPalette.bgTertiaryFor(Theme.of(context)),
               child: Text(
                 key,
                 style: Theme.of(
@@ -1437,7 +1473,7 @@ class _LoanActivityRow extends StatelessWidget {
                 Text(
                   isPayment ? 'Payments' : 'Other Activity',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: OpenBudgetPalette.mutedText,
+                    color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
                   ),
                 ),
               ],
@@ -1447,8 +1483,8 @@ class _LoanActivityRow extends StatelessWidget {
             formatCents(transaction.amountCents, currencyCode),
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
               color: isPayment
-                  ? OpenBudgetPalette.progressGreen
-                  : OpenBudgetPalette.negative,
+                  ? OpenBudgetPalette.fgSuccessFor(Theme.of(context))
+                  : OpenBudgetPalette.fgErrorFor(Theme.of(context)),
               fontWeight: FontWeight.w700,
             ),
           ),

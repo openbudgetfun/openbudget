@@ -39,10 +39,10 @@ class ReportsScreen extends HookConsumerWidget {
         ?.value;
 
     return Scaffold(
-      backgroundColor: OpenBudgetPalette.appBackgroundFor(theme),
+      backgroundColor: OpenBudgetPalette.bgPrimaryFor(theme),
       appBar: AppBar(
-        backgroundColor: OpenBudgetPalette.appBackgroundFor(theme),
-        surfaceTintColor: Colors.transparent,
+        backgroundColor: OpenBudgetPalette.bgPrimaryFor(theme),
+        surfaceTintColor: OpenBudgetPalette.transparentFor(theme),
         title: Text(l10n.tabReflect),
       ),
       body: ListView(
@@ -173,7 +173,7 @@ class _ReflectCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Material(
-      color: OpenBudgetPalette.surfaceFor(theme),
+      color: OpenBudgetPalette.bgSecondaryFor(theme),
       borderRadius: BorderRadius.circular(RadiusTokens.md),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -184,12 +184,16 @@ class _ReflectCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Icon(icon, color: OpenBudgetPalette.accentBlue, size: 18),
+                  Icon(
+                    icon,
+                    color: OpenBudgetPalette.bgBrandFor(theme),
+                    size: 18,
+                  ),
                   const SizedBox(width: SpacingTokens.xs),
                   Text(
                     title,
                     style: theme.textTheme.titleSmall?.copyWith(
-                      color: OpenBudgetPalette.accentBlue,
+                      color: OpenBudgetPalette.bgBrandFor(theme),
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -218,18 +222,10 @@ class _SpendingBreakdownPreview extends StatelessWidget {
   final String monthLabel;
   final DisplayCurrencyConverter? converter;
 
-  static const _barColors = <Color>[
-    Color(0xFF5962F1),
-    Color(0xFF8FD23A),
-    Color(0xFFE9C022),
-    Color(0xFFCC606B),
-    Color(0xFF6E7CFF),
-    Color(0xFFCACAF8),
-  ];
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final barColors = OpenBudgetPalette.chartSeriesFor(theme);
     final sortedEntries = report.categorySpending.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
     final categories = sortedEntries.take(6).toList();
@@ -242,7 +238,7 @@ class _SpendingBreakdownPreview extends StatelessWidget {
         Text(
           monthLabel,
           style: theme.textTheme.bodyMedium?.copyWith(
-            color: OpenBudgetPalette.mutedTextFor(theme),
+            color: OpenBudgetPalette.fgSecondaryFor(theme),
           ),
         ),
         const SizedBox(height: SpacingTokens.xs),
@@ -261,7 +257,7 @@ class _SpendingBreakdownPreview extends StatelessWidget {
           Text(
             AppLocalizations.of(context).reportsEmptySubtitle,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: OpenBudgetPalette.mutedTextFor(theme),
+              color: OpenBudgetPalette.fgSecondaryFor(theme),
             ),
           ),
         ] else ...[
@@ -275,13 +271,13 @@ class _SpendingBreakdownPreview extends StatelessWidget {
                   for (var index = 0; index < categories.length; index++)
                     Expanded(
                       flex: categories[index].value,
-                      child: Container(color: _barColors[index]),
+                      child: Container(color: barColors[index]),
                     ),
                   if (report.totalExpenses > totalCents)
                     Expanded(
                       flex: report.totalExpenses - totalCents,
                       child: Container(
-                        color: OpenBudgetPalette.surfaceMutedFor(theme),
+                        color: OpenBudgetPalette.bgTertiaryFor(theme),
                       ),
                     ),
                 ],
@@ -292,7 +288,7 @@ class _SpendingBreakdownPreview extends StatelessWidget {
           Text(
             AppLocalizations.of(context).reportsSpendingByCategory,
             style: theme.textTheme.labelLarge?.copyWith(
-              color: OpenBudgetPalette.mutedTextFor(theme),
+              color: OpenBudgetPalette.fgSecondaryFor(theme),
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -306,7 +302,7 @@ class _SpendingBreakdownPreview extends StatelessWidget {
                     width: 8,
                     height: 8,
                     decoration: BoxDecoration(
-                      color: _barColors[index],
+                      color: barColors[index],
                       shape: BoxShape.circle,
                     ),
                   ),
@@ -404,7 +400,7 @@ class _NetWorthPreview extends StatelessWidget {
               child: Text(
                 '${AppLocalizations.of(context).netWorthAssets} ${formatCents(assets, currency)}',
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: OpenBudgetPalette.accentBlue,
+                  color: OpenBudgetPalette.bgBrandFor(theme),
                 ),
               ),
             ),
@@ -412,7 +408,7 @@ class _NetWorthPreview extends StatelessWidget {
               child: Text(
                 '${AppLocalizations.of(context).netWorthLiabilities} ${formatCents(liabilities, currency)}',
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: OpenBudgetPalette.negative,
+                  color: OpenBudgetPalette.fgErrorFor(theme),
                 ),
                 textAlign: TextAlign.right,
               ),
@@ -428,7 +424,7 @@ class _NetWorthPreview extends StatelessWidget {
               Expanded(
                 child: _Bar(
                   fraction: maxAbs == 0 ? 0 : assets.abs() / maxAbs,
-                  color: OpenBudgetPalette.accentBlue,
+                  color: OpenBudgetPalette.bgBrandFor(theme),
                   label: AppLocalizations.of(context).netWorthAssets,
                 ),
               ),
@@ -436,7 +432,7 @@ class _NetWorthPreview extends StatelessWidget {
               Expanded(
                 child: _Bar(
                   fraction: maxAbs == 0 ? 0 : liabilities.abs() / maxAbs,
-                  color: OpenBudgetPalette.negative,
+                  color: OpenBudgetPalette.fgErrorFor(theme),
                   label: AppLocalizations.of(context).netWorthLiabilities,
                 ),
               ),
@@ -485,7 +481,7 @@ class _Bar extends StatelessWidget {
         Text(
           label,
           style: theme.textTheme.labelSmall?.copyWith(
-            color: OpenBudgetPalette.mutedTextFor(theme),
+            color: OpenBudgetPalette.fgSecondaryFor(theme),
           ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
@@ -523,7 +519,7 @@ class _AgeOfMoneyPreview extends StatelessWidget {
                 ? AppLocalizations.of(context).reportsEmptySubtitle
                 : AppLocalizations.of(context).ageOfMoneyLabel(displayDays),
             style: theme.textTheme.bodySmall?.copyWith(
-              color: OpenBudgetPalette.mutedTextFor(theme),
+              color: OpenBudgetPalette.fgSecondaryFor(theme),
             ),
           ),
         ],

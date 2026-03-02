@@ -195,7 +195,7 @@ void main() {
     await tester.tap(find.text('Spending Breakdown').first);
     await tester.pumpAndSettle();
 
-    final expectedBackground = OpenBudgetPalette.appBackgroundFor(
+    final expectedBackground = OpenBudgetPalette.bgPrimaryFor(
       OpenBudgetTheme.dark,
     );
     expect(

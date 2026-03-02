@@ -46,25 +46,25 @@ class BudgetHeader extends HookConsumerWidget {
     final now = DateTime.now();
     final isCurrentMonth = year == now.year && month == now.month;
     final readyCardColor = readyToAssignCents >= 0
-        ? OpenBudgetPalette.accentGreen
-        : OpenBudgetPalette.negative.withAlpha(35);
+        ? OpenBudgetPalette.bgSuccessFor(theme)
+        : OpenBudgetPalette.fgErrorFor(theme).withAlpha(35);
     final readyTextColor = readyToAssignCents >= 0
-        ? Colors.black
-        : OpenBudgetPalette.negative;
+        ? OpenBudgetPalette.fgPrimaryFor(theme)
+        : OpenBudgetPalette.fgErrorFor(theme);
 
     return Container(
       decoration: BoxDecoration(
-        color: OpenBudgetPalette.surface,
+        color: OpenBudgetPalette.bgSecondaryFor(theme),
         borderRadius: BorderRadius.circular(RadiusTokens.xl),
-        border: Border.all(color: OpenBudgetPalette.divider),
+        border: Border.all(color: OpenBudgetPalette.borderSubtleFor(theme)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Container(
-            decoration: const BoxDecoration(
-              color: OpenBudgetPalette.accentPurple,
+            decoration: BoxDecoration(
+              color: OpenBudgetPalette.bgAccentFor(theme),
               borderRadius: BorderRadius.vertical(
                 top: Radius.circular(RadiusTokens.xl),
               ),
@@ -117,7 +117,7 @@ class BudgetHeader extends HookConsumerWidget {
                             Text(
                               l10n.budgetGoToToday,
                               style: theme.textTheme.labelSmall?.copyWith(
-                                color: OpenBudgetPalette.accentBlue,
+                                color: OpenBudgetPalette.bgBrandFor(theme),
                                 fontWeight: FontWeight.w600,
                               ),
                               overflow: TextOverflow.ellipsis,
@@ -195,7 +195,7 @@ class BudgetHeader extends HookConsumerWidget {
                     value: hideAmounts
                         ? hiddenAmountPlaceholder
                         : formatCents(totalIncomeCents, currencyCode),
-                    valueColor: OpenBudgetPalette.progressGreen,
+                    valueColor: OpenBudgetPalette.fgSuccessFor(theme),
                     theme: theme,
                   ),
                   _SummaryColumn(
@@ -211,8 +211,8 @@ class BudgetHeader extends HookConsumerWidget {
                         ? hiddenAmountPlaceholder
                         : formatCents(-totalActivityCents, currencyCode),
                     valueColor: totalActivityCents > 0
-                        ? OpenBudgetPalette.negative
-                        : OpenBudgetPalette.progressGreen,
+                        ? OpenBudgetPalette.fgErrorFor(theme)
+                        : OpenBudgetPalette.fgSuccessFor(theme),
                     theme: theme,
                   ),
                 ],
@@ -233,16 +233,16 @@ class BudgetHeader extends HookConsumerWidget {
                   vertical: SpacingTokens.xs,
                 ),
                 decoration: BoxDecoration(
-                  color: OpenBudgetPalette.negative.withAlpha(18),
+                  color: OpenBudgetPalette.fgErrorFor(theme).withAlpha(18),
                   borderRadius: BorderRadius.circular(RadiusTokens.sm),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.warning_amber_rounded,
                       size: 16,
-                      color: OpenBudgetPalette.negative,
+                      color: OpenBudgetPalette.fgErrorFor(theme),
                     ),
                     const SizedBox(width: SpacingTokens.xs),
                     Flexible(
@@ -253,7 +253,7 @@ class BudgetHeader extends HookConsumerWidget {
                               : formatCents(totalOverspentCents, currencyCode),
                         ),
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: OpenBudgetPalette.negative,
+                          color: OpenBudgetPalette.fgErrorFor(theme),
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -280,8 +280,8 @@ class BudgetHeader extends HookConsumerWidget {
                     icon: const Icon(Icons.auto_fix_high_rounded, size: 18),
                     label: Text(l10n.budgetAssignMoney),
                     style: FilledButton.styleFrom(
-                      backgroundColor: OpenBudgetPalette.accentBlue,
-                      foregroundColor: Colors.white,
+                      backgroundColor: OpenBudgetPalette.bgBrandFor(theme),
+                      foregroundColor: OpenBudgetPalette.fgOnBrandFor(theme),
                       padding: const EdgeInsets.symmetric(
                         horizontal: SpacingTokens.md,
                         vertical: SpacingTokens.sm,
@@ -297,9 +297,11 @@ class BudgetHeader extends HookConsumerWidget {
                     icon: const Icon(Icons.content_copy_rounded, size: 16),
                     label: Text(l10n.budgetCopyLastMonth),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: OpenBudgetPalette.accentBlue,
-                      side: const BorderSide(color: OpenBudgetPalette.divider),
-                      backgroundColor: OpenBudgetPalette.surfaceMuted,
+                      foregroundColor: OpenBudgetPalette.bgBrandFor(theme),
+                      side: BorderSide(
+                        color: OpenBudgetPalette.borderSubtleFor(theme),
+                      ),
+                      backgroundColor: OpenBudgetPalette.bgTertiaryFor(theme),
                       padding: const EdgeInsets.symmetric(
                         horizontal: SpacingTokens.md,
                         vertical: SpacingTokens.sm,
@@ -324,16 +326,16 @@ class BudgetHeader extends HookConsumerWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.hourglass_bottom_rounded,
                     size: 16,
-                    color: OpenBudgetPalette.mutedText,
+                    color: OpenBudgetPalette.fgSecondaryFor(theme),
                   ),
                   const SizedBox(width: SpacingTokens.xs),
                   Text(
                     l10n.ageOfMoneyLabel(ageOfMoneyAsync.value!),
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: OpenBudgetPalette.mutedText,
+                      color: OpenBudgetPalette.fgSecondaryFor(theme),
                     ),
                   ),
                 ],
@@ -481,7 +483,7 @@ class _MonthPickerDialog extends HookWidget {
                       ? colorScheme.primary
                       : isToday
                       ? colorScheme.primaryContainer
-                      : Colors.transparent,
+                      : OpenBudgetPalette.transparentFor(theme),
                   borderRadius: BorderRadius.circular(RadiusTokens.sm),
                   child: InkWell(
                     borderRadius: BorderRadius.circular(RadiusTokens.sm),
@@ -539,7 +541,7 @@ class _SummaryColumn extends HookWidget {
         Text(
           label,
           style: theme.textTheme.labelSmall?.copyWith(
-            color: OpenBudgetPalette.mutedText,
+            color: OpenBudgetPalette.fgSecondaryFor(theme),
           ),
         ),
         const SizedBox(height: 2),

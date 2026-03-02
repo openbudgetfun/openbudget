@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/screens/create_budget_screen.dart';
+import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 void main() {
@@ -40,6 +42,39 @@ void main() {
 
       expect(find.text('Personalize Your Plan'), findsOneWidget);
       expect(find.byType(FilledButton), findsOneWidget);
+    });
+
+    testWidgets('uses dark status bar icons in light mode', (tester) async {
+      await tester.pumpWidget(buildSubject());
+      await tester.pump();
+
+      final annotatedRegion = tester
+          .widget<AnnotatedRegion<SystemUiOverlayStyle>>(
+            find.byType(AnnotatedRegion<SystemUiOverlayStyle>),
+          );
+      expect(annotatedRegion.value.statusBarIconBrightness, Brightness.dark);
+    });
+
+    testWidgets('renders readable paragraph text in light mode', (
+      tester,
+    ) async {
+      await tester.pumpWidget(buildSubject());
+      await tester.pump();
+
+      final subtitle = tester.widget<Text>(
+        find.text(
+          "We'll show you how to give every dollar a job so you can spend without second-guessing.",
+        ),
+      );
+      final body = tester.widget<Text>(
+        find.text(
+          "First, let's make sure your categories are in tip-top shape.",
+        ),
+      );
+      final theme = Theme.of(tester.element(find.byType(CreateBudgetScreen)));
+
+      expect(subtitle.style?.color, OpenBudgetPalette.fgSecondaryFor(theme));
+      expect(body.style?.color, OpenBudgetPalette.fgSecondaryFor(theme));
     });
 
     testWidgets('opens currency selector from plan currency row', (

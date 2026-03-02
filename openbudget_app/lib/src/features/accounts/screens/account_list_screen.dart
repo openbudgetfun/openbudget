@@ -7,6 +7,7 @@ import 'package:openbudget_app/src/features/accounts/providers/account_list_prov
 import 'package:openbudget_app/src/features/accounts/screens/edit_account_dialog.dart';
 import 'package:openbudget_app/src/features/settings/providers/display_currency_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
+import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_client/openbudget_client.dart';
@@ -254,7 +255,7 @@ class _NotificationBanner extends HookWidget {
         SpacingTokens.md,
       ),
       decoration: BoxDecoration(
-        color: const Color(0xFFE8E6FF),
+        color: OpenBudgetPalette.bgBadgeFor(theme),
         borderRadius: BorderRadius.circular(RadiusTokens.md),
       ),
       child: Row(

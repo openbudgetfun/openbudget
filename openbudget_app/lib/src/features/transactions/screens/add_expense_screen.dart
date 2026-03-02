@@ -128,10 +128,10 @@ class AddExpenseScreen extends HookConsumerWidget {
         : formatCents(-amountCentsPreview, budgetCurrency);
 
     return Scaffold(
-      backgroundColor: OpenBudgetPalette.appBackground,
+      backgroundColor: OpenBudgetPalette.bgPrimaryFor(theme),
       appBar: AppBar(
-        backgroundColor: OpenBudgetPalette.appBackground,
-        surfaceTintColor: Colors.transparent,
+        backgroundColor: OpenBudgetPalette.bgPrimaryFor(theme),
+        surfaceTintColor: OpenBudgetPalette.transparentFor(theme),
         scrolledUnderElevation: 0,
         leadingWidth: 88,
         leading: Align(
@@ -164,15 +164,17 @@ class AddExpenseScreen extends HookConsumerWidget {
                 Container(
                   padding: const EdgeInsets.all(SpacingTokens.md),
                   decoration: BoxDecoration(
-                    color: OpenBudgetPalette.surface,
+                    color: OpenBudgetPalette.bgSecondaryFor(theme),
                     borderRadius: BorderRadius.circular(RadiusTokens.md),
-                    border: Border.all(color: OpenBudgetPalette.divider),
+                    border: Border.all(
+                      color: OpenBudgetPalette.borderSubtleFor(theme),
+                    ),
                   ),
                   child: Column(
                     children: [
                       Container(
                         decoration: BoxDecoration(
-                          color: OpenBudgetPalette.surfaceMuted,
+                          color: OpenBudgetPalette.bgTertiaryFor(theme),
                           borderRadius: BorderRadius.circular(RadiusTokens.sm),
                         ),
                         padding: const EdgeInsets.all(2),
@@ -183,7 +185,7 @@ class AddExpenseScreen extends HookConsumerWidget {
                                 label: l10n.addTransactionExpense,
                                 icon: Icons.arrow_upward_rounded,
                                 selected: true,
-                                color: OpenBudgetPalette.negative,
+                                color: OpenBudgetPalette.fgErrorFor(theme),
                               ),
                             ),
                             Expanded(
@@ -191,7 +193,7 @@ class AddExpenseScreen extends HookConsumerWidget {
                                 label: l10n.addTransactionIncome,
                                 icon: Icons.arrow_downward_rounded,
                                 selected: false,
-                                color: OpenBudgetPalette.mutedText,
+                                color: OpenBudgetPalette.fgSecondaryFor(theme),
                                 onTap: () => context.goNamed(
                                   addIncomeRoute,
                                   pathParameters: {'id': budgetId},
@@ -216,7 +218,7 @@ class AddExpenseScreen extends HookConsumerWidget {
                           textAlign: TextAlign.center,
                           style: theme.textTheme.displaySmall?.copyWith(
                             fontWeight: FontWeight.w800,
-                            color: OpenBudgetPalette.negative,
+                            color: OpenBudgetPalette.fgErrorFor(theme),
                           ),
                           decoration: InputDecoration(
                             labelText: l10n.transactionAmountLabel,
@@ -226,7 +228,9 @@ class AddExpenseScreen extends HookConsumerWidget {
                             contentPadding: EdgeInsets.zero,
                             hintText: '-${formatCents(0, budgetCurrency)}',
                             hintStyle: theme.textTheme.displaySmall?.copyWith(
-                              color: OpenBudgetPalette.negative.withAlpha(120),
+                              color: OpenBudgetPalette.fgErrorFor(
+                                theme,
+                              ).withAlpha(120),
                               fontWeight: FontWeight.w700,
                             ),
                           ),
@@ -237,7 +241,7 @@ class AddExpenseScreen extends HookConsumerWidget {
                         l10n.transactionAddExpense,
                         style: theme.textTheme.labelLarge?.copyWith(
                           fontWeight: FontWeight.w700,
-                          color: OpenBudgetPalette.negative,
+                          color: OpenBudgetPalette.fgErrorFor(theme),
                         ),
                       ),
                       if (amountText.isNotEmpty)
@@ -246,7 +250,7 @@ class AddExpenseScreen extends HookConsumerWidget {
                           child: Text(
                             formattedAmount,
                             style: theme.textTheme.labelMedium?.copyWith(
-                              color: OpenBudgetPalette.mutedText,
+                              color: OpenBudgetPalette.fgSecondaryFor(theme),
                             ),
                           ),
                         ),
@@ -255,7 +259,7 @@ class AddExpenseScreen extends HookConsumerWidget {
                 ),
                 const SizedBox(height: SpacingTokens.md),
                 Card(
-                  color: OpenBudgetPalette.surface,
+                  color: OpenBudgetPalette.bgSecondaryFor(theme),
                   margin: EdgeInsets.zero,
                   child: Padding(
                     padding: const EdgeInsets.all(SpacingTokens.md),
@@ -361,15 +365,15 @@ class AddExpenseScreen extends HookConsumerWidget {
                           : l10n.payeeAutoEnvelopeHint,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: autoAssignedByRule.value
-                            ? OpenBudgetPalette.accentBlue
-                            : OpenBudgetPalette.mutedText,
+                            ? OpenBudgetPalette.bgBrandFor(theme)
+                            : OpenBudgetPalette.fgSecondaryFor(theme),
                         fontStyle: FontStyle.italic,
                       ),
                     ),
                   ),
                 const SizedBox(height: SpacingTokens.md),
                 Card(
-                  color: OpenBudgetPalette.surface,
+                  color: OpenBudgetPalette.bgSecondaryFor(theme),
                   margin: EdgeInsets.zero,
                   child: Padding(
                     padding: const EdgeInsets.all(SpacingTokens.md),
@@ -490,8 +494,8 @@ class AddExpenseScreen extends HookConsumerWidget {
                       : const Icon(Icons.check_circle_rounded, size: 18),
                   label: Text(l10n.transactionSave),
                   style: FilledButton.styleFrom(
-                    backgroundColor: OpenBudgetPalette.accentBlue,
-                    foregroundColor: Colors.white,
+                    backgroundColor: OpenBudgetPalette.bgBrandFor(theme),
+                    foregroundColor: OpenBudgetPalette.fgOnBrandFor(theme),
                   ),
                 ),
               ],
@@ -526,13 +530,15 @@ class _ModeChip extends HookWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Material(
-      color: Colors.transparent,
+      color: OpenBudgetPalette.transparentFor(theme),
       child: InkWell(
         borderRadius: BorderRadius.circular(RadiusTokens.sm),
         onTap: onTap,
         child: Container(
           decoration: BoxDecoration(
-            color: selected ? Colors.white : Colors.transparent,
+            color: selected
+                ? OpenBudgetPalette.fgOnBrandFor(theme)
+                : OpenBudgetPalette.transparentFor(theme),
             borderRadius: BorderRadius.circular(RadiusTokens.sm),
           ),
           padding: const EdgeInsets.symmetric(vertical: SpacingTokens.sm),
@@ -575,7 +581,7 @@ class _ReadOnlyRow extends HookWidget {
     final theme = Theme.of(context);
     return Row(
       children: [
-        Icon(icon, size: 20, color: OpenBudgetPalette.accentBlue),
+        Icon(icon, size: 20, color: OpenBudgetPalette.bgBrandFor(theme)),
         const SizedBox(width: SpacingTokens.sm),
         Expanded(
           child: Column(
@@ -584,7 +590,7 @@ class _ReadOnlyRow extends HookWidget {
               Text(
                 label,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: OpenBudgetPalette.mutedText,
+                  color: OpenBudgetPalette.fgSecondaryFor(theme),
                 ),
               ),
               Text(

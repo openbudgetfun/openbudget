@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -19,115 +20,132 @@ class CreateBudgetScreen extends HookConsumerWidget {
     final isSubmitting = useState(false);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final bodyTextColor = OpenBudgetPalette.fgSecondaryFor(theme);
+    final statusBarStyle =
+        (theme.brightness == Brightness.light
+                ? SystemUiOverlayStyle.dark
+                : SystemUiOverlayStyle.light)
+            .copyWith(statusBarColor: OpenBudgetPalette.transparentFor(theme));
 
     ref.watch(createBudgetProvider);
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5F4F2),
-      body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 420),
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(SpacingTokens.md),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const SizedBox(height: SpacingTokens.sm),
-                  const _WelcomeHeroCard(),
-                  const SizedBox(height: SpacingTokens.xl + SpacingTokens.sm),
-                  Text(
-                    l10n.createBudgetWelcomeTitle,
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.displaySmall?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      color: const Color(0xFF1B2642),
-                      height: 1.08,
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: statusBarStyle,
+      child: Scaffold(
+        backgroundColor: OpenBudgetPalette.bgAuthFor(theme),
+        body: SafeArea(
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 420),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(SpacingTokens.md),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const SizedBox(height: SpacingTokens.sm),
+                    const _WelcomeHeroCard(),
+                    const SizedBox(height: SpacingTokens.xl + SpacingTokens.sm),
+                    Text(
+                      l10n.createBudgetWelcomeTitle,
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.displaySmall?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        color: OpenBudgetPalette.fgHeroTitleFor(theme),
+                        height: 1.08,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: SpacingTokens.lg),
-                  Text(
-                    l10n.createBudgetWelcomeSubtitle,
-                    style: theme.textTheme.bodyLarge?.copyWith(height: 1.35),
-                    textAlign: TextAlign.left,
-                  ),
-                  const SizedBox(height: SpacingTokens.md),
-                  Text(
-                    l10n.createBudgetWelcomeBody,
-                    style: theme.textTheme.bodyLarge?.copyWith(height: 1.35),
-                    textAlign: TextAlign.left,
-                  ),
-                  const SizedBox(height: SpacingTokens.xxl),
-                  _PlanCurrencyRow(
-                    label: l10n.createBudgetPlanCurrency,
-                    value: selectedCurrency.value.displayName,
-                    onTap: isSubmitting.value
-                        ? null
-                        : () async {
-                            final selected = await _selectCurrency(
-                              context,
-                              selectedCurrency.value,
-                            );
-                            if (selected != null) {
-                              selectedCurrency.value = selected;
-                            }
-                          },
-                  ),
-                  const SizedBox(height: SpacingTokens.lg),
-                  FilledButton(
-                    onPressed: isSubmitting.value
-                        ? null
-                        : () async {
-                            isSubmitting.value = true;
-                            try {
-                              final budgetId = await ref
-                                  .read(createBudgetProvider.notifier)
-                                  .create(
-                                    name: l10n.createBudgetDefaultName,
-                                    currency: selectedCurrency.value,
+                    const SizedBox(height: SpacingTokens.lg),
+                    Text(
+                      l10n.createBudgetWelcomeSubtitle,
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        height: 1.35,
+                        color: bodyTextColor,
+                      ),
+                      textAlign: TextAlign.left,
+                    ),
+                    const SizedBox(height: SpacingTokens.md),
+                    Text(
+                      l10n.createBudgetWelcomeBody,
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        height: 1.35,
+                        color: bodyTextColor,
+                      ),
+                      textAlign: TextAlign.left,
+                    ),
+                    const SizedBox(height: SpacingTokens.xxl),
+                    _PlanCurrencyRow(
+                      label: l10n.createBudgetPlanCurrency,
+                      value: selectedCurrency.value.displayName,
+                      onTap: isSubmitting.value
+                          ? null
+                          : () async {
+                              final selected = await _selectCurrency(
+                                context,
+                                selectedCurrency.value,
+                              );
+                              if (selected != null) {
+                                selectedCurrency.value = selected;
+                              }
+                            },
+                    ),
+                    const SizedBox(height: SpacingTokens.lg),
+                    FilledButton(
+                      onPressed: isSubmitting.value
+                          ? null
+                          : () async {
+                              isSubmitting.value = true;
+                              try {
+                                final budgetId = await ref
+                                    .read(createBudgetProvider.notifier)
+                                    .create(
+                                      name: l10n.createBudgetDefaultName,
+                                      currency: selectedCurrency.value,
+                                    );
+                                if (context.mounted) {
+                                  context.goNamed(
+                                    editPlanRoute,
+                                    pathParameters: {'id': budgetId},
                                   );
-                              if (context.mounted) {
-                                context.goNamed(
-                                  editPlanRoute,
-                                  pathParameters: {'id': budgetId},
-                                );
+                                }
+                              } on Exception catch (_) {
+                                isSubmitting.value = false;
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(l10n.createBudgetError),
+                                      backgroundColor: colorScheme.error,
+                                    ),
+                                  );
+                                }
                               }
-                            } on Exception catch (_) {
-                              isSubmitting.value = false;
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(l10n.createBudgetError),
-                                    backgroundColor: colorScheme.error,
-                                  ),
-                                );
-                              }
-                            }
-                          },
-                    style: FilledButton.styleFrom(
-                      elevation: 0,
-                      minimumSize: const Size.fromHeight(52),
-                      backgroundColor: OpenBudgetPalette.accentBlue,
-                      foregroundColor: Colors.white,
-                      disabledBackgroundColor: OpenBudgetPalette.divider,
-                      disabledForegroundColor: OpenBudgetPalette.mutedText,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(RadiusTokens.sm),
+                            },
+                      style: FilledButton.styleFrom(
+                        elevation: 0,
+                        minimumSize: const Size.fromHeight(52),
+                        backgroundColor: OpenBudgetPalette.bgBrandFor(theme),
+                        foregroundColor: OpenBudgetPalette.fgOnBrandFor(theme),
+                        disabledBackgroundColor:
+                            OpenBudgetPalette.borderSubtleFor(theme),
+                        disabledForegroundColor:
+                            OpenBudgetPalette.fgSecondaryFor(theme),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(RadiusTokens.sm),
+                        ),
+                        textStyle: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
-                      textStyle: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
+                      child: isSubmitting.value
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : Text(l10n.createBudgetPersonalize),
                     ),
-                    child: isSubmitting.value
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : Text(l10n.createBudgetPersonalize),
-                  ),
-                  const SizedBox(height: SpacingTokens.sm),
-                ],
+                    const SizedBox(height: SpacingTokens.sm),
+                  ],
+                ),
               ),
             ),
           ),
@@ -169,11 +187,16 @@ class _WelcomeHeroCard extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Container(
       height: 172,
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF6372F5), Color(0xFF4C5BEE)],
+        gradient: LinearGradient(
+          colors: [
+            OpenBudgetPalette.bgHeroGradientStartFor(theme),
+            OpenBudgetPalette.bgHeroGradientEndFor(theme),
+          ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -188,7 +211,9 @@ class _WelcomeHeroCard extends HookWidget {
               width: 190,
               height: 150,
               decoration: BoxDecoration(
-                color: const Color(0xFF7D87F7).withAlpha(130),
+                color: OpenBudgetPalette.bgHeroBlobPrimaryFor(
+                  theme,
+                ).withAlpha(130),
                 borderRadius: BorderRadius.circular(44),
               ),
             ),
@@ -200,15 +225,17 @@ class _WelcomeHeroCard extends HookWidget {
               width: 190,
               height: 120,
               decoration: BoxDecoration(
-                color: const Color(0xFF99A1FA).withAlpha(115),
+                color: OpenBudgetPalette.bgHeroBlobSecondaryFor(
+                  theme,
+                ).withAlpha(115),
                 borderRadius: BorderRadius.circular(90),
               ),
             ),
           ),
-          const Center(
+          Center(
             child: Icon(
               Icons.favorite_rounded,
-              color: Color(0xFF4ED09B),
+              color: OpenBudgetPalette.bgHeroBlobAccentFor(theme),
               size: 84,
             ),
           ),
@@ -241,7 +268,7 @@ class _PlanCurrencyRow extends HookWidget {
           vertical: SpacingTokens.sm + 2,
         ),
         decoration: BoxDecoration(
-          color: OpenBudgetPalette.divider.withAlpha(55),
+          color: OpenBudgetPalette.borderSubtleFor(theme).withAlpha(55),
           borderRadius: BorderRadius.circular(RadiusTokens.sm),
         ),
         child: Row(
@@ -253,20 +280,23 @@ class _PlanCurrencyRow extends HookWidget {
                   Text(
                     label,
                     style: theme.textTheme.titleMedium?.copyWith(
-                      color: OpenBudgetPalette.mutedText,
+                      color: OpenBudgetPalette.fgSecondaryFor(theme),
                     ),
                   ),
                   Text(
                     value,
                     style: theme.textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.w500,
-                      color: const Color(0xFF3A465A),
+                      color: OpenBudgetPalette.fgHeroBodyFor(theme),
                     ),
                   ),
                 ],
               ),
             ),
-            const Icon(Icons.edit_rounded, color: OpenBudgetPalette.mutedText),
+            Icon(
+              Icons.edit_rounded,
+              color: OpenBudgetPalette.fgSecondaryFor(theme),
+            ),
           ],
         ),
       ),

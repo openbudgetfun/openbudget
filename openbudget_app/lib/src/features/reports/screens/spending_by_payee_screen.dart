@@ -28,6 +28,7 @@ class SpendingByPayeeScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
+    final chartColors = OpenBudgetPalette.chartSeriesFor(Theme.of(context));
     final colorScheme = theme.colorScheme;
     final now = DateTime.now();
     final selectedYear = useState(initialYear ?? now.year);
@@ -64,10 +65,10 @@ class SpendingByPayeeScreen extends HookConsumerWidget {
     );
 
     return Scaffold(
-      backgroundColor: OpenBudgetPalette.appBackgroundFor(theme),
+      backgroundColor: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
       appBar: AppBar(
-        backgroundColor: OpenBudgetPalette.appBackgroundFor(theme),
-        surfaceTintColor: Colors.transparent,
+        backgroundColor: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
+        surfaceTintColor: OpenBudgetPalette.transparentFor(Theme.of(context)),
         title: Text(l10n.spendingByPayeeBreakdown),
       ),
       body: reportAsync.when(
@@ -139,7 +140,9 @@ class SpendingByPayeeScreen extends HookConsumerWidget {
                                 selectedYear.value,
                               ),
                         style: theme.textTheme.titleMedium?.copyWith(
-                          color: OpenBudgetPalette.accentBlue,
+                          color: OpenBudgetPalette.bgBrandFor(
+                            Theme.of(context),
+                          ),
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -148,7 +151,9 @@ class SpendingByPayeeScreen extends HookConsumerWidget {
                         Text(
                           presetRangeLabel,
                           style: theme.textTheme.bodyMedium?.copyWith(
-                            color: OpenBudgetPalette.mutedTextFor(theme),
+                            color: OpenBudgetPalette.fgSecondaryFor(
+                              Theme.of(context),
+                            ),
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -168,7 +173,9 @@ class SpendingByPayeeScreen extends HookConsumerWidget {
                       Text(
                         l10n.spendingByPayeeTotalSpent,
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          color: OpenBudgetPalette.mutedTextFor(theme),
+                          color: OpenBudgetPalette.fgSecondaryFor(
+                            Theme.of(context),
+                          ),
                         ),
                       ),
                       const SizedBox(height: SpacingTokens.md),
@@ -195,7 +202,9 @@ class SpendingByPayeeScreen extends HookConsumerWidget {
                     child: Text(
                       l10n.reportsEmptySubtitle,
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: OpenBudgetPalette.mutedTextFor(theme),
+                        color: OpenBudgetPalette.fgSecondaryFor(
+                          Theme.of(context),
+                        ),
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -212,8 +221,7 @@ class SpendingByPayeeScreen extends HookConsumerWidget {
                           totalCents: totalSpent,
                           sourceCurrency: sourceCurrency,
                           converter: converter,
-                          color: _CategoryStrip
-                              .colors[index % _CategoryStrip.colors.length],
+                          color: chartColors[index % chartColors.length],
                           showDivider: index < sortedEntries.length - 1,
                         ),
                     ],
@@ -234,7 +242,7 @@ class SpendingByPayeeScreen extends HookConsumerWidget {
                         ) ??
                         formatCents(report.totalIncome, sourceCurrency),
                     style: theme.textTheme.titleMedium?.copyWith(
-                      color: OpenBudgetPalette.progressGreen,
+                      color: OpenBudgetPalette.fgSuccessFor(Theme.of(context)),
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -307,11 +315,10 @@ class _ModeToggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: OpenBudgetPalette.surfaceMutedFor(theme),
+        color: OpenBudgetPalette.bgTertiaryFor(Theme.of(context)),
         borderRadius: BorderRadius.circular(RadiusTokens.md),
       ),
       child: Row(
@@ -358,8 +365,8 @@ class _ModeButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: SpacingTokens.xs),
         decoration: BoxDecoration(
           color: selected
-              ? OpenBudgetPalette.surfaceFor(theme)
-              : Colors.transparent,
+              ? OpenBudgetPalette.bgSecondaryFor(Theme.of(context))
+              : OpenBudgetPalette.transparentFor(Theme.of(context)),
           borderRadius: BorderRadius.circular(RadiusTokens.sm),
         ),
         child: Text(
@@ -457,24 +464,15 @@ class _CategoryStrip extends StatelessWidget {
   final List<MapEntry<String, int>> categoryEntries;
   final int totalSpent;
 
-  static const colors = <Color>[
-    Color(0xFF5962F1),
-    Color(0xFF8FD23A),
-    Color(0xFFE9C022),
-    Color(0xFFCC606B),
-    Color(0xFF6E7CFF),
-    Color(0xFFCACAF8),
-  ];
-
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final colors = OpenBudgetPalette.chartSeriesFor(Theme.of(context));
     final top = categoryEntries.take(colors.length).toList();
     if (top.isEmpty || totalSpent <= 0) {
       return Container(
         height: 16,
         decoration: BoxDecoration(
-          color: OpenBudgetPalette.surfaceMutedFor(theme),
+          color: OpenBudgetPalette.bgTertiaryFor(Theme.of(context)),
           borderRadius: BorderRadius.circular(6),
         ),
       );
@@ -497,7 +495,9 @@ class _CategoryStrip extends StatelessWidget {
       segments.add(
         Expanded(
           flex: totalSpent - used,
-          child: Container(color: OpenBudgetPalette.surfaceMutedFor(theme)),
+          child: Container(
+            color: OpenBudgetPalette.bgTertiaryFor(Theme.of(context)),
+          ),
         ),
       );
     }
@@ -545,7 +545,7 @@ class _CategoryRow extends StatelessWidget {
           subtitle: Text(
             '${percentage.toStringAsFixed(percentage >= 10 ? 0 : 1)}%',
             style: theme.textTheme.bodySmall?.copyWith(
-              color: OpenBudgetPalette.mutedTextFor(theme),
+              color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
             ),
           ),
           trailing: Row(
