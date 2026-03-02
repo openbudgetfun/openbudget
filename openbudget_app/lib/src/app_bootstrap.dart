@@ -5,7 +5,6 @@ import 'package:openbudget_app/src/analytics/analytics_provider.dart';
 import 'package:openbudget_app/src/config/app_environment.dart';
 import 'package:openbudget_app/src/features/settings/providers/ui_preferences_store.dart';
 import 'package:openbudget_app/src/logging/app_logging.dart';
-import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
 import 'package:openbudget_app/src/providers/theme_mode_provider.dart';
 import 'package:openbudget_app/src/routing/app_router.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -24,7 +23,7 @@ Future<void> runOpenBudgetApp(AppFlavor flavor) async {
     ],
   );
 
-  initAppLogging(container.read(serverpodClientProvider));
+  initAppLogging();
 
   // Initialize PostHog analytics (no-ops in debug mode).
   await container.read(analyticsProvider).init();
