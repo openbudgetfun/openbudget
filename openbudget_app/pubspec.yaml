@@ -37,8 +37,7 @@ dependencies:
   shared_preferences: 2.5.3
   shorebird_code_push: 2.0.5
   simple_icons: 14.6.1
-  solana_mobile_client:
-    path: ../third_party/solana_mobile_client
+  solana_kit_mobile_wallet_adapter: 0.2.1
 
 dev_dependencies:
   build_runner: 2.11.1

@@ -154,7 +154,8 @@ For Google web/OAuth console entries, keep all required origins and redirect URI
 
 ## Solana Mobile Wallet Adapter Setup (Android)
 
-1. Install a wallet on your Android test device that supports Solana Mobile Wallet Adapter.
-2. On the login screen, use **Continue with Solana Wallet**.
-3. The app requests wallet authorization, fetches a one-time backend challenge, asks the wallet to sign it, then exchanges the signature for a Serverpod auth session.
-4. If no compatible wallet is installed, login returns a user-facing message instructing the user to install one.
+1. The app integration uses `solana_kit_mobile_wallet_adapter` (from the `solana_kit` ecosystem) for wallet session/auth/sign flows.
+2. Install a wallet on your Android test device that supports Solana Mobile Wallet Adapter.
+3. On the login screen, use **Continue with Solana Wallet**.
+4. The app requests wallet authorization, fetches a one-time backend challenge, asks the wallet to sign it, then exchanges the signature for a Serverpod auth session.
+5. If no compatible wallet is installed, login returns a user-facing message instructing the user to install one.

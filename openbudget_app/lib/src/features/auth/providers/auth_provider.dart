@@ -6,7 +6,7 @@ import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
-import 'package:solana_mobile_client/solana_mobile_client.dart';
+import 'package:solana_kit_mobile_wallet_adapter/solana_kit_mobile_wallet_adapter.dart';
 
 part 'auth_provider.g.dart';
 
@@ -81,66 +81,73 @@ class AuthNotifier extends _$AuthNotifier {
     final client = ref.read(serverpodClientProvider);
     state = const AuthLoading();
 
-    LocalAssociationScenario? scenario;
     try {
-      final isWalletAvailable = await LocalAssociationScenario.isAvailable();
+      final isWalletAvailable = await MwaClientHostApi()
+          .isWalletEndpointAvailable();
       if (!isWalletAvailable) {
         throw StateError(
           'No compatible Solana wallet is installed on this Android device.',
         );
       }
 
-      scenario = await LocalAssociationScenario.create();
-      await scenario.startActivityForResult(null);
-      final walletClient = await scenario.start();
+      final signedChallenge = await transact<_WalletChallengeSignature>((
+        wallet,
+      ) async {
+        final authorization = await wallet.authorize(chain: 'solana:mainnet');
+        if (authorization.accounts.isEmpty) {
+          throw StateError('The wallet did not return an account.');
+        }
 
-      final authorization = await walletClient.authorize(
-        identityUri: Uri.parse('https://openbudget.app'),
-        iconUri: Uri.parse('https://openbudget.app/favicon.ico'),
-        identityName: 'OpenBudget',
-        cluster: 'mainnet-beta',
-      );
-      if (authorization == null) {
-        throw const _WalletAuthCanceledException();
-      }
+        final publicKeyBase64 = authorization.accounts.first.address;
+        final challenge = await client.solanaWalletAuth.createChallenge(
+          publicKeyBase64,
+        );
 
-      final publicKeyBytes = authorization.publicKey;
-      final publicKeyBase64 = base64Encode(publicKeyBytes);
+        final challengeMessageBytes = Uint8List.fromList(
+          utf8.encode(challenge.message),
+        );
+        final signedPayloads = await wallet.signMessages(
+          addresses: [publicKeyBase64],
+          payloads: [_encodeBase64UrlNoPadding(challengeMessageBytes)],
+        );
+        if (signedPayloads.isEmpty) {
+          throw StateError('The wallet did not return a signed payload.');
+        }
 
-      final challenge = await client.solanaWalletAuth.createChallenge(
-        publicKeyBase64,
-      );
-      final challengeMessageBytes = Uint8List.fromList(
-        utf8.encode(challenge.message),
-      );
+        final signedPayload = _decodeBase64Payload(signedPayloads.first);
+        if (signedPayload.length <= _ed25519SignatureLength) {
+          throw StateError('The wallet returned an invalid signed payload.');
+        }
 
-      final signedMessages = await walletClient.signMessages(
-        messages: [challengeMessageBytes],
-        addresses: [publicKeyBytes],
-      );
-      if (signedMessages.signedMessages.isEmpty) {
-        throw StateError('The wallet did not return a signed message.');
-      }
+        // MWA sign_messages returns the original payload with the Ed25519
+        // signature appended to the end of the byte array.
+        final messageBytes = signedPayload.sublist(
+          0,
+          signedPayload.length - _ed25519SignatureLength,
+        );
+        final signatureBytes = signedPayload.sublist(
+          signedPayload.length - _ed25519SignatureLength,
+        );
 
-      final signed = signedMessages.signedMessages.first;
-      if (signed.signatures.isEmpty) {
-        throw StateError('The wallet did not return a signature.');
-      }
+        return _WalletChallengeSignature(
+          challengeId: challenge.challengeId,
+          publicKeyBase64: publicKeyBase64,
+          signedMessageBase64: base64Encode(messageBytes),
+          signatureBase64: base64Encode(signatureBytes),
+        );
+      });
 
       final authSuccess = await client.solanaWalletAuth.login(
-        challenge.challengeId,
-        publicKeyBase64,
-        base64Encode(signed.message),
-        base64Encode(signed.signatures.first),
+        signedChallenge.challengeId,
+        signedChallenge.publicKeyBase64,
+        signedChallenge.signedMessageBase64,
+        signedChallenge.signatureBase64,
       );
 
       await client.auth.updateSignedInUser(authSuccess);
       _log.info('walletLogin.success userId=${authSuccess.authUserId}');
       if (!ref.mounted) return;
       state = Authenticated(userId: authSuccess.authUserId.toString());
-    } on _WalletAuthCanceledException {
-      if (!ref.mounted) return;
-      state = const AuthError(message: 'Solana wallet sign-in was canceled.');
     } on Exception catch (error, stackTrace) {
       _log.warning(
         'walletLogin.failed error=${error.runtimeType}: $error',
@@ -149,14 +156,6 @@ class AuthNotifier extends _$AuthNotifier {
       );
       if (!ref.mounted) return;
       state = AuthError(message: _friendlyWalletAuthError(error));
-    } finally {
-      if (scenario != null) {
-        try {
-          await scenario.close();
-        } on Exception {
-          // Best-effort close; ignore cleanup errors.
-        }
-      }
     }
   }
 
@@ -311,23 +310,77 @@ class AuthNotifier extends _$AuthNotifier {
       return error.message;
     }
 
+    final errorText = error.toString();
     final text = error.toString().toLowerCase();
+    if (text.contains('mwaprotocolerror') && text.contains('code: -3')) {
+      return 'Solana wallet sign-in was canceled.';
+    }
     if (text.contains('canceled') || text.contains('cancelled')) {
       return 'Solana wallet sign-in was canceled.';
     }
-    if (text.contains('no compatible solana wallet')) {
+    if (text.contains('no compatible solana wallet') ||
+        text.contains('wallet not found') ||
+        text.contains('mwawalletnotfound')) {
       return 'Install a Solana wallet app that supports Mobile Wallet Adapter.';
+    }
+    if (text.contains('mwasessiontimeout') || text.contains('session timeout')) {
+      return 'Timed out connecting to your wallet. Please try again.';
+    }
+    if (text.contains('code: -1')) {
+      return 'Wallet authorization was declined.';
+    }
+    if (text.contains('code: -2')) {
+      return 'The wallet rejected the signing payload.';
     }
     if (text.contains('signed message') || text.contains('signature')) {
       return 'The wallet did not return a valid signature. Please try again.';
     }
+    if (text.contains('invalid signed payload')) {
+      return 'The wallet returned an invalid signature payload.';
+    }
 
+    _log.warning('walletLogin.unhandledError message=$errorText');
     return 'Could not complete Solana wallet sign-in. Please try again.';
   }
 }
 
-class _WalletAuthCanceledException implements Exception {
-  const _WalletAuthCanceledException();
+const _ed25519SignatureLength = 64;
+
+String _encodeBase64UrlNoPadding(List<int> bytes) {
+  return base64UrlEncode(bytes).replaceAll('=', '');
+}
+
+Uint8List _decodeBase64Payload(String value) {
+  final normalized = value.trim();
+  if (normalized.isEmpty) {
+    throw StateError('The wallet returned an empty payload.');
+  }
+
+  final padded = normalized.padRight(
+    ((normalized.length + 3) ~/ 4) * 4,
+    '=',
+  );
+
+  try {
+    return Uint8List.fromList(base64Decode(padded));
+  } on FormatException {
+    final standard = padded.replaceAll('-', '+').replaceAll('_', '/');
+    return Uint8List.fromList(base64Decode(standard));
+  }
+}
+
+class _WalletChallengeSignature {
+  const _WalletChallengeSignature({
+    required this.challengeId,
+    required this.publicKeyBase64,
+    required this.signedMessageBase64,
+    required this.signatureBase64,
+  });
+
+  final UuidValue challengeId;
+  final String publicKeyBase64;
+  final String signedMessageBase64;
+  final String signatureBase64;
 }
 
 String _maskEmailForLogs(String email) {

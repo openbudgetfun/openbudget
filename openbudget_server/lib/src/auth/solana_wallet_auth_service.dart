@@ -7,7 +7,7 @@ import 'package:openbudget_server/src/exceptions/exceptions.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
 import 'package:serverpod_auth_idp_server/core.dart';
-import 'package:solana_kit_keys/solana_kit_keys.dart' as solana_keys;
+import 'package:solana_kit/solana_kit.dart' as solana;
 
 const _walletAuthMethod = 'solana_wallet';
 const _challengeLifetime = Duration(minutes: 5);
@@ -103,10 +103,10 @@ class SolanaWalletAuthService {
         throw ValidationException('Signed message does not match challenge.');
       }
 
-      final signature = solana_keys.signatureBytes(
+      final signature = solana.signatureBytes(
         Uint8List.fromList(signatureBytes),
       );
-      final verified = solana_keys.verifySignature(
+      final verified = solana.verifySignature(
         Uint8List.fromList(publicKeyBytes),
         signature,
         Uint8List.fromList(expectedMessage),
