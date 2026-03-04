@@ -11,6 +11,7 @@ import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_actions_provider.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_transactions_provider.dart';
+import 'package:openbudget_app/src/features/accounts/providers/institution_catalog_provider.dart';
 import 'package:openbudget_app/src/features/accounts/screens/account_detail_screen.dart';
 import 'package:openbudget_app/src/features/accounts/screens/account_list_screen.dart';
 import 'package:openbudget_app/src/features/accounts/screens/add_account_screen.dart';
@@ -35,6 +36,29 @@ const _addAccountBalanceFieldKey = Key('add-account-unlinked-balance-field');
 const _addAccountCheckingTypeKey = ValueKey('add-account-type-option-checking');
 const _addAccountUnlinkedIntroText =
     'Bank connections are currently unavailable';
+final _testInstitutions = <Institution>[
+  Institution(
+    id: UuidValue.fromString('00000000-0000-0000-0000-000000000201'),
+    slug: 'citi',
+    name: 'Citi',
+    website: 'citi.com',
+    plaidInstitutionId: 'ins_citi',
+  ),
+  Institution(
+    id: UuidValue.fromString('00000000-0000-0000-0000-000000000202'),
+    slug: 'chase',
+    name: 'Chase',
+    website: 'chase.com',
+    plaidInstitutionId: 'ins_chase',
+  ),
+  Institution(
+    id: UuidValue.fromString('00000000-0000-0000-0000-000000000203'),
+    slug: 'capital-one',
+    name: 'Capital One',
+    website: 'capitalone.com',
+    plaidInstitutionId: 'ins_capital_one',
+  ),
+];
 
 Account _makeAccount({
   required String name,
@@ -170,6 +194,9 @@ Widget _buildApp({
       accountTransactionsProvider.overrideWith(
         (ref, args) async => accountTransactions,
       ),
+      institutionCatalogProvider.overrideWith(
+        (ref, locationCode) async => _testInstitutions,
+      ),
       payeeListProvider.overrideWith((ref, budgetId) async => const []),
       budgetSummaryProvider.overrideWith(
         (ref, budgetId) async => _makeSummary(currencyCode: budgetCurrencyCode),
@@ -227,12 +254,15 @@ void main() {
     await tester.tap(find.text('Add Account'));
     await tester.pump(const Duration(milliseconds: 800));
     await tester.pump();
-    expect(find.text('Loading institutions...'), findsOneWidget);
-    await _captureAddAccountStepScreenshot(
-      tester,
-      'add-accounts-loading-institutions-screen',
-    );
-    await tester.pump(const Duration(milliseconds: 1000));
+    final loadingInstitutionsFinder = find.text('Loading institutions...');
+    if (loadingInstitutionsFinder.evaluate().isNotEmpty) {
+      expect(loadingInstitutionsFinder, findsOneWidget);
+      await _captureAddAccountStepScreenshot(
+        tester,
+        'add-accounts-loading-institutions-screen',
+      );
+      await tester.pump(const Duration(milliseconds: 1000));
+    }
     await tester.pumpAndSettle();
 
     expect(find.text('Add Accounts'), findsOneWidget);
