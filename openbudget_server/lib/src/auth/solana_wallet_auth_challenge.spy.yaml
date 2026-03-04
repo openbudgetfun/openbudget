@@ -1,0 +1,15 @@
+### One-time login challenge used for Solana wallet signature auth.
+class: SolanaWalletAuthChallenge
+table: solana_wallet_auth_challenge
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  publicKeyBase64: String
+  challengeMessage: String
+  createdAt: DateTime, default=now
+  expiresAt: DateTime
+  usedAt: DateTime?
+indexes:
+  solana_wallet_auth_challenge_public_key_idx:
+    fields: publicKeyBase64
+  solana_wallet_auth_challenge_expires_idx:
+    fields: expiresAt

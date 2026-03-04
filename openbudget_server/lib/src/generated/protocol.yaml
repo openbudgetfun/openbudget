@@ -23,6 +23,9 @@ googleIdp:
   - hasAccount:
 jwtRefresh:
   - refreshAccessToken:
+solanaWalletAuth:
+  - createChallenge:
+  - login:
 budgetTemplate:
   - saveFromMonth:
   - list:

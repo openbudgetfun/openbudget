@@ -31,6 +31,7 @@ void main() {
       expect(find.byKey(const Key('login-openbudget-mark')), findsOneWidget);
       expect(find.text('Continue with Apple'), findsNothing);
       expect(find.text('Continue with Google'), findsNothing);
+      expect(find.text('Continue with Solana Wallet'), findsOneWidget);
       expect(find.text('Forgot Password?'), findsOneWidget);
       expect(find.text('Create Account'), findsOneWidget);
       expect(find.byType(TextField), findsNWidgets(2));

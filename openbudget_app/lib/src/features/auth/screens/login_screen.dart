@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -14,6 +16,7 @@ import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
+import 'package:simple_icons/simple_icons.dart';
 
 class LoginScreen extends HookConsumerWidget {
   const LoginScreen({super.key});
@@ -37,19 +40,31 @@ class LoginScreen extends HookConsumerWidget {
         passwordController.text.isNotEmpty;
 
     final client = ref.watch(serverpodClientProvider);
+    const googleClientId = String.fromEnvironment('GOOGLE_CLIENT_ID');
+    const googleServerClientId = String.fromEnvironment(
+      'GOOGLE_SERVER_CLIENT_ID',
+    );
+    const appleServiceIdentifier = String.fromEnvironment(
+      'APPLE_SERVICE_IDENTIFIER',
+    );
+    const appleRedirectUri = String.fromEnvironment('APPLE_REDIRECT_URI');
     final supportsSocialSignIn =
         kIsWeb ||
         switch (theme.platform) {
           TargetPlatform.android || TargetPlatform.iOS => true,
           _ => false,
         };
+    final isAndroid = !kIsWeb && theme.platform == TargetPlatform.android;
     final showGoogleSignIn =
-        supportsSocialSignIn && const bool.hasEnvironment('GOOGLE_CLIENT_ID');
+        supportsSocialSignIn && googleClientId.trim().isNotEmpty;
     final showAppleSignIn =
         supportsSocialSignIn &&
-        const bool.hasEnvironment('APPLE_SERVICE_IDENTIFIER') &&
-        const bool.hasEnvironment('APPLE_REDIRECT_URI');
-    final showSocialSection = showGoogleSignIn || showAppleSignIn;
+        !isAndroid &&
+        appleServiceIdentifier.trim().isNotEmpty &&
+        appleRedirectUri.trim().isNotEmpty;
+    final showSolanaWalletSignIn = isAndroid;
+    final showSocialSection =
+        showGoogleSignIn || showAppleSignIn || showSolanaWalletSignIn;
     final backgroundColor = OpenBudgetPalette.bgAuthFor(theme);
     final cardColor = OpenBudgetPalette.bgSecondaryFor(theme).withAlpha(240);
     final dividerColor = OpenBudgetPalette.borderSubtleFor(theme);
@@ -58,6 +73,54 @@ class LoginScreen extends HookConsumerWidget {
                 ? SystemUiOverlayStyle.dark
                 : SystemUiOverlayStyle.light)
             .copyWith(statusBarColor: OpenBudgetPalette.transparentFor(theme));
+
+    useEffect(
+      () {
+        if (!showGoogleSignIn && !showAppleSignIn) {
+          return null;
+        }
+
+        Future<void> initializeSocialProviders() async {
+          if (showGoogleSignIn) {
+            try {
+              await client.auth.initializeGoogleSignIn(
+                clientId: googleClientId.trim().isEmpty
+                    ? null
+                    : googleClientId.trim(),
+                serverClientId: googleServerClientId.trim().isEmpty
+                    ? null
+                    : googleServerClientId.trim(),
+              );
+            } on Exception catch (error) {
+              ref.read(authProvider.notifier).setExternalAuthError(error);
+            }
+          }
+
+          if (showAppleSignIn) {
+            try {
+              await client.auth.initializeAppleSignIn(
+                serviceIdentifier: appleServiceIdentifier.trim(),
+                redirectUri: appleRedirectUri.trim(),
+              );
+            } on Exception catch (error) {
+              ref.read(authProvider.notifier).setExternalAuthError(error);
+            }
+          }
+        }
+
+        unawaited(initializeSocialProviders());
+        return null;
+      },
+      [
+        client,
+        googleClientId,
+        googleServerClientId,
+        appleServiceIdentifier,
+        appleRedirectUri,
+        showGoogleSignIn,
+        showAppleSignIn,
+      ],
+    );
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: statusBarStyle,
@@ -154,6 +217,32 @@ class LoginScreen extends HookConsumerWidget {
                                           .setExternalAuthError(error);
                                     },
                                   ),
+                                if (showSolanaWalletSignIn) ...[
+                                  if (showGoogleSignIn || showAppleSignIn)
+                                    const SizedBox(height: SpacingTokens.sm),
+                                  OutlinedButton.icon(
+                                    onPressed: isLoading
+                                        ? null
+                                        : () {
+                                            ref
+                                                .read(authProvider.notifier)
+                                                .loginWithSolanaMobileWallet();
+                                          },
+                                    icon: const Icon(SimpleIcons.solana),
+                                    label: const Text(
+                                      'Continue with Solana Wallet',
+                                    ),
+                                    style: OutlinedButton.styleFrom(
+                                      minimumSize: const Size.fromHeight(48),
+                                      side: BorderSide(color: dividerColor),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(
+                                          RadiusTokens.sm,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                                 const SizedBox(height: SpacingTokens.md),
                                 Row(
                                   children: [
