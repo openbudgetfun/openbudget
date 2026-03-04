@@ -73,10 +73,13 @@ class LoginScreen extends HookConsumerWidget {
                 ? SystemUiOverlayStyle.dark
                 : SystemUiOverlayStyle.light)
             .copyWith(statusBarColor: OpenBudgetPalette.transparentFor(theme));
-    final authNotifier = ref.read(authProvider.notifier);
 
     useEffect(
       () {
+        if (!showGoogleSignIn && !showAppleSignIn) {
+          return null;
+        }
+
         Future<void> initializeSocialProviders() async {
           if (showGoogleSignIn) {
             try {
@@ -89,7 +92,7 @@ class LoginScreen extends HookConsumerWidget {
                     : googleServerClientId.trim(),
               );
             } on Exception catch (error) {
-              authNotifier.setExternalAuthError(error);
+              ref.read(authProvider.notifier).setExternalAuthError(error);
             }
           }
 
@@ -100,7 +103,7 @@ class LoginScreen extends HookConsumerWidget {
                 redirectUri: appleRedirectUri.trim(),
               );
             } on Exception catch (error) {
-              authNotifier.setExternalAuthError(error);
+              ref.read(authProvider.notifier).setExternalAuthError(error);
             }
           }
         }
@@ -109,7 +112,6 @@ class LoginScreen extends HookConsumerWidget {
         return null;
       },
       [
-        authNotifier,
         client,
         googleClientId,
         googleServerClientId,

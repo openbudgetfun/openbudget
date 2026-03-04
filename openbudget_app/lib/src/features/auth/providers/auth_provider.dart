@@ -323,7 +323,8 @@ class AuthNotifier extends _$AuthNotifier {
         text.contains('mwawalletnotfound')) {
       return 'Install a Solana wallet app that supports Mobile Wallet Adapter.';
     }
-    if (text.contains('mwasessiontimeout') || text.contains('session timeout')) {
+    if (text.contains('mwasessiontimeout') ||
+        text.contains('session timeout')) {
       return 'Timed out connecting to your wallet. Please try again.';
     }
     if (text.contains('code: -1')) {
@@ -356,10 +357,7 @@ Uint8List _decodeBase64Payload(String value) {
     throw StateError('The wallet returned an empty payload.');
   }
 
-  final padded = normalized.padRight(
-    ((normalized.length + 3) ~/ 4) * 4,
-    '=',
-  );
+  final padded = normalized.padRight(((normalized.length + 3) ~/ 4) * 4, '=');
 
   try {
     return Uint8List.fromList(base64Decode(padded));
