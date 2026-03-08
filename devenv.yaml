@@ -4,6 +4,13 @@ inputs:
     url: github:NixOS/nixpkgs/nixpkgs-unstable
   ifiokjr-nixpkgs:
     url: github:ifiokjr/nixpkgs
+  git-hooks:
+    url: github:cachix/git-hooks.nix
+    inputs:
+      nixpkgs:
+        follows: nixpkgs
+  pre-commit-hooks:
+    follows: git-hooks
 # If you're using non-OSS software, you can set allowUnfree to true.
 allowUnfree: true
 
