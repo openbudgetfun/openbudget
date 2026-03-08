@@ -29,6 +29,31 @@ undo actions, and fast navigation into recent moves.
 
 ![OpenBudget iOS plan actions menu](https://f002.backblazeb2.com/file/openbudget/screenshots/2026-02-24-ios-guide/plan-menu.png)
 
+## Maintainer workflow: planning next steps with agent context
+
+When continuing implementation work from a feature plan, use the current
+SpecKit command flow and always refresh shared agent context before generating
+tasks.
+
+1. Start from a feature branch/spec context, then run
+   `.claude/commands/speckit.plan.md` workflow (`/speckit.plan`).
+2. During Phase 1 design, run
+   `.specify/scripts/bash/update-agent-context.sh claude`.
+3. Confirm the regeneration updated shared guidance artifacts:
+   - `AGENTS.md` (shared role guidance for codex/opencode/amp/q/bob flows)
+   - `.agent/rules/specify-rules.md`
+   - `.cursor/rules/specify-rules.mdc`
+   - `.windsurf/rules/specify-rules.md`
+   - `.kilocode/rules/specify-rules.md`
+   - `.augment/rules/specify-rules.md`
+   - `.roo/rules/specify-rules.md`
+4. Continue with `.claude/commands/speckit.tasks.md` (`/speckit.tasks`) to
+   generate dependency-ordered implementation tasks from the updated plan
+   artifacts.
+
+This keeps “next steps in the plan” aligned with the latest rules and
+multi-agent context.
+
 <!-- {=iosGuideCompanionWorkflows} -->
 
 ## Continue with another guide flow

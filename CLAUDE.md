@@ -213,3 +213,11 @@ See `.specify/memory/constitution.md` for the full project constitution (v1.0.0)
 - **Patrol** — E2E integration testing
 - **dprint** — non-Dart formatting
 - **Knope** — changeset-based version management and release automation
+
+## Recent Changes
+
+- 001-initialize-plan-artifacts: Added Bash (POSIX shell scripting with Bash 3.2+ compatibility) + Git, grep, sed, awk, mktemp
+
+## Active Technologies
+
+- Bash (POSIX shell scripting with Bash 3.2+ compatibility) + Git, grep, sed, awk, mktemp (001-initialize-plan-artifacts)
