@@ -197,7 +197,7 @@ parse_plan_data() {
 		log_info "Found framework: $NEW_FRAMEWORK"
 	fi
 
-	if [[ -n "$NEW_DB" ]] && [[ "$NEW_DB" != "N/A" ]]; then
+	if [[ -n "$NEW_DB" ]] && [[ "$NEW_DB" != N/A* ]]; then
 		log_info "Found database: $NEW_DB"
 	fi
 
@@ -375,21 +375,36 @@ update_existing_agent_file() {
 	local tech_stack=$(format_technology_stack "$NEW_LANG" "$NEW_FRAMEWORK")
 	local new_tech_entries=()
 	local new_change_entry=""
+	local tech_stack_entry=""
+	local db_entry=""
 
-	# Prepare new technology entries
-	if [[ -n "$tech_stack" ]] && ! grep -q "$tech_stack" "$target_file"; then
-		new_tech_entries+=("- $tech_stack ($CURRENT_BRANCH)")
+	# Prepare new technology entries (exact bullet-line dedupe)
+	if [[ -n "$tech_stack" ]]; then
+		tech_stack_entry="- $tech_stack ($CURRENT_BRANCH)"
+		if ! grep -Fqx -- "$tech_stack_entry" "$target_file" 2>/dev/null; then
+			new_tech_entries+=("$tech_stack_entry")
+		fi
 	fi
 
-	if [[ -n "$NEW_DB" ]] && [[ "$NEW_DB" != "N/A" ]] && [[ "$NEW_DB" != "NEEDS CLARIFICATION" ]] && ! grep -q "$NEW_DB" "$target_file"; then
-		new_tech_entries+=("- $NEW_DB ($CURRENT_BRANCH)")
+	if [[ -n "$NEW_DB" ]] && [[ "$NEW_DB" != N/A* ]] && [[ "$NEW_DB" != "NEEDS CLARIFICATION" ]]; then
+		db_entry="- $NEW_DB ($CURRENT_BRANCH)"
+		if ! grep -Fqx -- "$db_entry" "$target_file" 2>/dev/null; then
+			new_tech_entries+=("$db_entry")
+		fi
 	fi
 
 	# Prepare new change entry
 	if [[ -n "$tech_stack" ]]; then
 		new_change_entry="- $CURRENT_BRANCH: Added $tech_stack"
-	elif [[ -n "$NEW_DB" ]] && [[ "$NEW_DB" != "N/A" ]] && [[ "$NEW_DB" != "NEEDS CLARIFICATION" ]]; then
+	elif [[ -n "$NEW_DB" ]] && [[ "$NEW_DB" != N/A* ]] && [[ "$NEW_DB" != "NEEDS CLARIFICATION" ]]; then
 		new_change_entry="- $CURRENT_BRANCH: Added $NEW_DB"
+	fi
+
+	# Dedupe: if this exact recent-change entry already exists anywhere in the file,
+	# do not prepend it again.
+	local should_add_change_entry=true
+	if [[ -n "$new_change_entry" ]] && grep -Fqx -- "$new_change_entry" "$target_file" 2>/dev/null; then
+		should_add_change_entry=false
 	fi
 
 	# Check if sections exist in the file
@@ -408,9 +423,13 @@ update_existing_agent_file() {
 	local in_tech_section=false
 	local in_changes_section=false
 	local tech_entries_added=false
-	local changes_entries_added=false
 	local existing_changes_count=0
-	local file_ended=false
+	local existing_changes_limit=3
+	local seen_change_entries=""
+
+	if [[ "$should_add_change_entry" == true ]] && [[ -n "$new_change_entry" ]]; then
+		existing_changes_limit=2
+	fi
 
 	while IFS= read -r line || [[ -n "$line" ]]; do
 		# Handle Active Technologies section
@@ -435,25 +454,38 @@ update_existing_agent_file() {
 			fi
 			echo "$line" >>"$temp_file"
 			continue
+		elif [[ $in_tech_section == true ]] && { [[ "$line" == "- N/A"* ]] || [[ "$line" == *"[if applicable"* ]]; }; then
+			# Drop stale placeholder / N/A technology entries from previous generations.
+			continue
 		fi
 
 		# Handle Recent Changes section
 		if [[ "$line" == "## Recent Changes" ]]; then
 			echo "$line" >>"$temp_file"
-			# Add new change entry right after the heading
-			if [[ -n "$new_change_entry" ]]; then
+			# Add new change entry right after the heading (unless deduped)
+			if [[ "$should_add_change_entry" == true ]] && [[ -n "$new_change_entry" ]]; then
 				echo "$new_change_entry" >>"$temp_file"
+				seen_change_entries="${new_change_entry}"$'\n'
 			fi
 			in_changes_section=true
-			changes_entries_added=true
 			continue
 		elif [[ $in_changes_section == true ]] && [[ "$line" =~ ^##[[:space:]] ]]; then
 			echo "$line" >>"$temp_file"
 			in_changes_section=false
 			continue
 		elif [[ $in_changes_section == true ]] && [[ "$line" == "- "* ]]; then
-			# Keep only first 2 existing changes
-			if [[ $existing_changes_count -lt 2 ]]; then
+			# Drop stale placeholders from previous generations.
+			if [[ "$line" == *"[if applicable"* ]]; then
+				continue
+			fi
+
+			# Keep unique entries only, capped to preserve the last 3 changes total.
+			if printf '%s\n' "$seen_change_entries" | grep -Fqx -- "$line" 2>/dev/null; then
+				continue
+			fi
+
+			seen_change_entries="${seen_change_entries}${line}"$'\n'
+			if [[ $existing_changes_count -lt $existing_changes_limit ]]; then
 				echo "$line" >>"$temp_file"
 				((existing_changes_count++))
 			fi
@@ -482,11 +514,10 @@ update_existing_agent_file() {
 		tech_entries_added=true
 	fi
 
-	if [[ $has_recent_changes -eq 0 ]] && [[ -n "$new_change_entry" ]]; then
+	if [[ $has_recent_changes -eq 0 ]] && [[ "$should_add_change_entry" == true ]] && [[ -n "$new_change_entry" ]]; then
 		echo "" >>"$temp_file"
 		echo "## Recent Changes" >>"$temp_file"
 		echo "$new_change_entry" >>"$temp_file"
-		changes_entries_added=true
 	fi
 
 	# Move temp file to target atomically
@@ -644,86 +675,99 @@ update_specific_agent() {
 
 update_all_existing_agents() {
 	local found_agent=false
+	local processed_targets=""
+
+	target_already_processed() {
+		local target_file="$1"
+		if [[ -z "$processed_targets" ]]; then
+			return 1
+		fi
+		printf '%s\n' "$processed_targets" | grep -Fqx -- "$target_file"
+	}
+
+	mark_target_processed() {
+		local target_file="$1"
+		processed_targets="${processed_targets}${target_file}"$'\n'
+	}
+
+	# Update target only once even if multiple agent aliases map to same file
+	update_agent_file_once() {
+		local target_file="$1"
+		local agent_name="$2"
+
+		if target_already_processed "$target_file"; then
+			log_info "Skipping duplicate target for $agent_name: $target_file"
+			return 0
+		fi
+
+		update_agent_file "$target_file" "$agent_name"
+		mark_target_processed "$target_file"
+		found_agent=true
+	}
 
 	# Check each possible agent file and update if it exists
 	if [[ -f "$CLAUDE_FILE" ]]; then
-		update_agent_file "$CLAUDE_FILE" "Claude Code"
-		found_agent=true
+		update_agent_file_once "$CLAUDE_FILE" "Claude Code"
 	fi
 
 	if [[ -f "$GEMINI_FILE" ]]; then
-		update_agent_file "$GEMINI_FILE" "Gemini CLI"
-		found_agent=true
+		update_agent_file_once "$GEMINI_FILE" "Gemini CLI"
 	fi
 
 	if [[ -f "$COPILOT_FILE" ]]; then
-		update_agent_file "$COPILOT_FILE" "GitHub Copilot"
-		found_agent=true
+		update_agent_file_once "$COPILOT_FILE" "GitHub Copilot"
 	fi
 
 	if [[ -f "$CURSOR_FILE" ]]; then
-		update_agent_file "$CURSOR_FILE" "Cursor IDE"
-		found_agent=true
+		update_agent_file_once "$CURSOR_FILE" "Cursor IDE"
 	fi
 
 	if [[ -f "$QWEN_FILE" ]]; then
-		update_agent_file "$QWEN_FILE" "Qwen Code"
-		found_agent=true
+		update_agent_file_once "$QWEN_FILE" "Qwen Code"
 	fi
 
 	if [[ -f "$AGENTS_FILE" ]]; then
-		update_agent_file "$AGENTS_FILE" "Codex/opencode"
-		found_agent=true
+		update_agent_file_once "$AGENTS_FILE" "Codex/opencode"
 	fi
 
 	if [[ -f "$WINDSURF_FILE" ]]; then
-		update_agent_file "$WINDSURF_FILE" "Windsurf"
-		found_agent=true
+		update_agent_file_once "$WINDSURF_FILE" "Windsurf"
 	fi
 
 	if [[ -f "$KILOCODE_FILE" ]]; then
-		update_agent_file "$KILOCODE_FILE" "Kilo Code"
-		found_agent=true
+		update_agent_file_once "$KILOCODE_FILE" "Kilo Code"
 	fi
 
 	if [[ -f "$AUGGIE_FILE" ]]; then
-		update_agent_file "$AUGGIE_FILE" "Auggie CLI"
-		found_agent=true
+		update_agent_file_once "$AUGGIE_FILE" "Auggie CLI"
 	fi
 
 	if [[ -f "$ROO_FILE" ]]; then
-		update_agent_file "$ROO_FILE" "Roo Code"
-		found_agent=true
+		update_agent_file_once "$ROO_FILE" "Roo Code"
 	fi
 
 	if [[ -f "$CODEBUDDY_FILE" ]]; then
-		update_agent_file "$CODEBUDDY_FILE" "CodeBuddy CLI"
-		found_agent=true
+		update_agent_file_once "$CODEBUDDY_FILE" "CodeBuddy CLI"
 	fi
 
 	if [[ -f "$SHAI_FILE" ]]; then
-		update_agent_file "$SHAI_FILE" "SHAI"
-		found_agent=true
+		update_agent_file_once "$SHAI_FILE" "SHAI"
 	fi
 
 	if [[ -f "$QODER_FILE" ]]; then
-		update_agent_file "$QODER_FILE" "Qoder CLI"
-		found_agent=true
+		update_agent_file_once "$QODER_FILE" "Qoder CLI"
 	fi
 
 	if [[ -f "$Q_FILE" ]]; then
-		update_agent_file "$Q_FILE" "Amazon Q Developer CLI"
-		found_agent=true
+		update_agent_file_once "$Q_FILE" "Amazon Q Developer CLI"
 	fi
 
 	if [[ -f "$AGY_FILE" ]]; then
-		update_agent_file "$AGY_FILE" "Antigravity"
-		found_agent=true
+		update_agent_file_once "$AGY_FILE" "Antigravity"
 	fi
 
 	if [[ -f "$BOB_FILE" ]]; then
-		update_agent_file "$BOB_FILE" "IBM Bob"
-		found_agent=true
+		update_agent_file_once "$BOB_FILE" "IBM Bob"
 	fi
 
 	# If no agent files exist, create a default Claude file
@@ -744,7 +788,7 @@ print_summary() {
 		echo "  - Added framework: $NEW_FRAMEWORK"
 	fi
 
-	if [[ -n "$NEW_DB" ]] && [[ "$NEW_DB" != "N/A" ]]; then
+	if [[ -n "$NEW_DB" ]] && [[ "$NEW_DB" != N/A* ]]; then
 		echo "  - Added database: $NEW_DB"
 	fi
 
