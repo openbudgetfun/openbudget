@@ -27,8 +27,7 @@ Account _makeAccount({
   bool onBudget = true,
   bool isClosed = false,
   int sortOrder = 0,
-}) {
-  return Account(
+}) => Account(
     id: id,
     name: name,
     accountType: accountType,
@@ -39,7 +38,6 @@ Account _makeAccount({
     sortOrder: sortOrder,
     isClosed: isClosed,
   );
-}
 
 Widget _buildRoutedSubject({required List<Account> accounts}) {
   final router = GoRouter(

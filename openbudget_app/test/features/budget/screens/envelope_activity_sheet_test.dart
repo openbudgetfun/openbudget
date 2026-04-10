@@ -29,8 +29,7 @@ Envelope _makeEnvelope({
   int spentAmountCents = 12000,
   String? note,
   UuidValue? id,
-}) {
-  return Envelope(
+}) => Envelope(
     id: id ?? _envelopeUuid,
     name: name,
     categoryId: _categoryUuid,
@@ -40,7 +39,6 @@ Envelope _makeEnvelope({
     sortOrder: 0,
     note: note,
   );
-}
 
 MonthlyEnvelopeData _makeMonthlyData({
   Envelope? envelope,
@@ -48,39 +46,32 @@ MonthlyEnvelopeData _makeMonthlyData({
   int spentCents = 12000,
   int availableCents = 38000,
   int carryoverCents = 5000,
-}) {
-  return MonthlyEnvelopeData(
+}) => MonthlyEnvelopeData(
     envelope: envelope ?? _makeEnvelope(),
     allocatedCents: allocatedCents,
     spentCents: spentCents,
     availableCents: availableCents,
     carryoverCents: carryoverCents,
   );
-}
 
 EnvelopeGoal _makeGoal({
   String goalType = 'target_balance',
   int targetAmountCents = 100000,
-}) {
-  return EnvelopeGoal(
+}) => EnvelopeGoal(
     envelopeId: _envelopeUuid,
     goalType: goalType,
     targetAmountCents: targetAmountCents,
   );
-}
 
-Category _makeCategory({String name = 'Food'}) {
-  return Category(
+Category _makeCategory({String name = 'Food'}) => Category(
     id: _categoryUuid,
     name: name,
     budgetId: _budgetUuid,
     sortOrder: 0,
     isHidden: false,
   );
-}
 
-List<CategoryWithEnvelopes> _makeCategories() {
-  return [
+List<CategoryWithEnvelopes> _makeCategories() => [
     CategoryWithEnvelopes(
       category: _makeCategory(),
       envelopes: [_makeEnvelope()],
@@ -90,15 +81,13 @@ List<CategoryWithEnvelopes> _makeCategories() {
       totalAvailableCents: 38000,
     ),
   ];
-}
 
 Transaction _makeTransaction({
   String description = 'Whole Foods',
   int amountCents = -3500,
   UuidValue? envelopeId,
   DateTime? transactionDate,
-}) {
-  return Transaction(
+}) => Transaction(
     description: description,
     amountCents: amountCents,
     currencyCode: 'USD',
@@ -106,7 +95,6 @@ Transaction _makeTransaction({
     envelopeId: envelopeId ?? _envelopeUuid,
     transactionDate: transactionDate ?? DateTime(2026, 2, 15),
   );
-}
 
 void main() {
   setUpAll(() {

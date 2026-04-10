@@ -47,9 +47,7 @@ Future<List<Transaction>> monthlyTransactions(
 @Riverpod(keepAlive: true)
 class MonthlyAllocationActions extends _$MonthlyAllocationActions {
   @override
-  AsyncValue<void> build() {
-    return const AsyncValue.data(null);
-  }
+  AsyncValue<void> build() => const AsyncValue.data(null);
 
   Future<List<MonthlyAllocation>> moveMoney({
     required String fromEnvelopeId,

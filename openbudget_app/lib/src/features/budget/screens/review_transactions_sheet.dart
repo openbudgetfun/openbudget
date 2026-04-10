@@ -20,8 +20,7 @@ Future<void> showReviewTransactionsSheet(
   required String budgetId,
   required int year,
   required int month,
-}) {
-  return showModalBottomSheet<void>(
+}) => showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
     backgroundColor: OpenBudgetPalette.transparentFor(Theme.of(context)),
@@ -35,7 +34,6 @@ Future<void> showReviewTransactionsSheet(
       ),
     ),
   );
-}
 
 class ReviewTransactionsSheet extends HookConsumerWidget {
   const ReviewTransactionsSheet({
@@ -544,11 +542,9 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
     return queue;
   }
 
-  static bool _isSameDay(Transaction a, Transaction b) {
-    return a.transactionDate.year == b.transactionDate.year &&
+  static bool _isSameDay(Transaction a, Transaction b) => a.transactionDate.year == b.transactionDate.year &&
         a.transactionDate.month == b.transactionDate.month &&
         a.transactionDate.day == b.transactionDate.day;
-  }
 
   Future<_EnvelopeChoice?> _showEnvelopePicker(
     BuildContext context, {
@@ -558,8 +554,7 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
     return showModalBottomSheet<_EnvelopeChoice>(
       context: context,
       showDragHandle: true,
-      builder: (context) {
-        return SafeArea(
+      builder: (context) => SafeArea(
           child: ListView(
             children: [
               Padding(
@@ -585,8 +580,7 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
                 ),
             ],
           ),
-        );
-      },
+        ),
     );
   }
 }
@@ -702,8 +696,7 @@ class _ToolbarAction extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) {
-    return Expanded(
+  Widget build(BuildContext context) => Expanded(
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(RadiusTokens.sm),
@@ -729,7 +722,6 @@ class _ToolbarAction extends StatelessWidget {
         ),
       ),
     );
-  }
 }
 
 enum _MoreAction { delete }

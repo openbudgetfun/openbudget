@@ -453,8 +453,7 @@ class _RecentMovesTabButton extends HookWidget {
   final ThemeData theme;
 
   @override
-  Widget build(BuildContext context) {
-    return Material(
+  Widget build(BuildContext context) => Material(
       color: OpenBudgetPalette.transparentFor(theme),
       child: InkWell(
         onTap: onTap,
@@ -485,7 +484,6 @@ class _RecentMovesTabButton extends HookWidget {
         ),
       ),
     );
-  }
 }
 
 class _RecentMovesList extends HookWidget {

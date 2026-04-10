@@ -71,8 +71,7 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
       minChildSize: 0.3,
       maxChildSize: 0.9,
       expand: false,
-      builder: (context, scrollController) {
-        return Column(
+      builder: (context, scrollController) => Column(
           children: [
             // Drag handle
             Container(
@@ -297,8 +296,7 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
               ),
             ),
           ],
-        );
-      },
+        ),
     );
   }
 
@@ -341,9 +339,7 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
     );
   }
 
-  String _formatDate(DateTime date) {
-    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
-  }
+  String _formatDate(DateTime date) => '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
 }
 
 class _AvailablePill extends HookWidget {

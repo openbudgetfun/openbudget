@@ -57,9 +57,7 @@ class SplitExpenseScreen extends HookConsumerWidget {
 
     // Compute remaining amount
     final totalAmount = double.tryParse(totalAmountController.text.trim()) ?? 0;
-    final splitTotal = splitControllers.value.fold<double>(0, (sum, split) {
-      return sum + (double.tryParse(split.amountController.text.trim()) ?? 0);
-    });
+    final splitTotal = splitControllers.value.fold<double>(0, (sum, split) => sum + (double.tryParse(split.amountController.text.trim()) ?? 0));
     final remaining = totalAmount - splitTotal;
     final remainingCents = (remaining * _pow10(budgetCurrency.decimals))
         .round();

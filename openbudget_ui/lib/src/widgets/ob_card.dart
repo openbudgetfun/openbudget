@@ -9,9 +9,7 @@ class ObCard extends HookWidget {
   final EdgeInsetsGeometry? padding;
 
   @override
-  Widget build(BuildContext context) {
-    return Card(
+  Widget build(BuildContext context) => Card(
       child: padding != null ? Padding(padding: padding!, child: child) : child,
     );
-  }
 }

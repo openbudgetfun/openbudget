@@ -78,8 +78,7 @@ void main() {
     );
   }
 
-  Widget buildSubject() {
-    return ProviderScope(
+  Widget buildSubject() => ProviderScope(
       child: MaterialApp(
         theme: OpenBudgetTheme.light,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -98,7 +97,6 @@ void main() {
         ),
       ),
     );
-  }
 
   group('CategoryGroup', () {
     testWidgets('enters reorder mode from category long-press menu', (

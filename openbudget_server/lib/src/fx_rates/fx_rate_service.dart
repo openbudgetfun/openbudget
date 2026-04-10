@@ -313,8 +313,7 @@ class FxRateService {
     }
   }
 
-  static Future<FxRateSnapshot?> _findLatestSnapshot(Session session) {
-    return FxRateSnapshot.db.findFirstRow(
+  static Future<FxRateSnapshot?> _findLatestSnapshot(Session session) => FxRateSnapshot.db.findFirstRow(
       session,
       where: (table) =>
           table.provider.equals(_providerName) &
@@ -323,7 +322,6 @@ class FxRateService {
       orderBy: (table) => table.fetchedAt,
       orderDescending: true,
     );
-  }
 
   static Future<FxLatestSnapshot> _toLatestSnapshot(
     Session session,
@@ -354,18 +352,14 @@ class FxRateService {
     );
   }
 
-  static bool _hasProviderCredentials(Session session) {
-    return _resolveApiKey(session) != null;
-  }
+  static bool _hasProviderCredentials(Session session) => _resolveApiKey(session) != null;
 
-  static FxLatestSnapshot _fallbackSnapshot({required DateTime fetchedAt}) {
-    return FxLatestSnapshot(
+  static FxLatestSnapshot _fallbackSnapshot({required DateTime fetchedAt}) => FxLatestSnapshot(
       baseCurrencyCode: _baseCurrencyCode,
       fetchedAt: fetchedAt,
       isStale: true,
       rates: [FxRateQuote(currencyCode: _baseCurrencyCode, rate: 1)],
     );
-  }
 
   static String? _resolveApiKey(Session session) {
     final key =

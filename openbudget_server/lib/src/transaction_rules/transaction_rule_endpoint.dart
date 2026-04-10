@@ -31,14 +31,10 @@ class TransactionRuleEndpoint extends Endpoint {
   Future<List<TransactionRule>> list(
     Session session,
     UuidValue budgetId,
-  ) async {
-    return TransactionRuleService.listForBudget(session, budgetId: budgetId);
-  }
+  ) async => TransactionRuleService.listForBudget(session, budgetId: budgetId);
 
   /// Gets a single transaction rule by ID.
-  Future<TransactionRule> get(Session session, UuidValue ruleId) async {
-    return TransactionRuleService.getById(session, ruleId: ruleId);
-  }
+  Future<TransactionRule> get(Session session, UuidValue ruleId) async => TransactionRuleService.getById(session, ruleId: ruleId);
 
   /// Updates a transaction rule.
   Future<TransactionRule> update(
@@ -62,13 +58,11 @@ class TransactionRuleEndpoint extends Endpoint {
     Session session,
     UuidValue budgetId,
     UuidValue payeeId,
-  ) async {
-    return TransactionRuleService.findMatchingEnvelope(
+  ) async => TransactionRuleService.findMatchingEnvelope(
       session,
       budgetId: budgetId,
       payeeId: payeeId,
     );
-  }
 
   /// Deletes a transaction rule.
   Future<TransactionRule> delete(Session session, UuidValue ruleId) async {

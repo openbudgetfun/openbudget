@@ -20,12 +20,10 @@ void main() {
       initialLocation: '/plan',
       routes: [
         StatefulShellRoute.indexedStack(
-          builder: (context, state, navigationShell) {
-            return BudgetShellScreen(
+          builder: (context, state, navigationShell) => BudgetShellScreen(
               navigationShell: navigationShell,
               budgetId: budgetId,
-            );
-          },
+            ),
           branches: [
             StatefulShellBranch(
               routes: [

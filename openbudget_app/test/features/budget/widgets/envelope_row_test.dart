@@ -31,8 +31,7 @@ void main() {
     int spentAmountCents = 20000,
     String? note,
     bool? isHidden,
-  }) {
-    return Envelope(
+  }) => Envelope(
       id: testEnvelopeId,
       name: name,
       categoryId: testCategoryId,
@@ -43,22 +42,19 @@ void main() {
       note: note,
       isHidden: isHidden,
     );
-  }
 
   EnvelopeGoal makeGoal({
     String goalType = 'target_balance',
     int targetAmountCents = 100000,
     int? monthlyFundingCents,
     DateTime? targetDate,
-  }) {
-    return EnvelopeGoal(
+  }) => EnvelopeGoal(
       envelopeId: testEnvelopeId,
       goalType: goalType,
       targetAmountCents: targetAmountCents,
       monthlyFundingCents: monthlyFundingCents,
       targetDate: targetDate,
     );
-  }
 
   Widget buildSubject({
     required Envelope envelope,
@@ -68,8 +64,7 @@ void main() {
     VoidCallback? onQuickBudget,
     bool hideAmounts = false,
     bool hideProgressBars = false,
-  }) {
-    return ProviderScope(
+  }) => ProviderScope(
       child: MaterialApp(
         theme: OpenBudgetTheme.light,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -89,7 +84,6 @@ void main() {
         ),
       ),
     );
-  }
 
   group('EnvelopeRow', () {
     testWidgets('renders envelope name and amounts', (tester) async {

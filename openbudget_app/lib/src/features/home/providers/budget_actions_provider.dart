@@ -8,9 +8,7 @@ part 'budget_actions_provider.g.dart';
 @Riverpod(keepAlive: true)
 class BudgetActions extends _$BudgetActions {
   @override
-  AsyncValue<void> build() {
-    return const AsyncValue.data(null);
-  }
+  AsyncValue<void> build() => const AsyncValue.data(null);
 
   Future<void> deleteBudget({required String budgetId}) async {
     state = const AsyncValue.loading();

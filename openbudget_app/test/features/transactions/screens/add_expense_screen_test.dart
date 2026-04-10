@@ -112,8 +112,7 @@ void main() {
     BudgetSummary? summary,
     String? Function(Ref, (String, String))? ruleMatchOverride,
     String? Function(Ref, (String, String))? payeeLastEnvelopeOverride,
-  }) {
-    return ProviderScope(
+  }) => ProviderScope(
       overrides: [
         budgetDetailProvider.overrideWith(
           (ref, id) async => budget ?? makeBudget(),
@@ -141,7 +140,6 @@ void main() {
         home: const AddExpenseScreen(budgetId: budgetId),
       ),
     );
-  }
 
   Widget buildRoutedSubject({
     Budget? budget,

@@ -116,8 +116,7 @@ class _ToastStyleConfig {
   factory _ToastStyleConfig.forVariant({
     required ThemeData theme,
     required AppToastVariant variant,
-  }) {
-    return switch (variant) {
+  }) => switch (variant) {
       AppToastVariant.info => _ToastStyleConfig(
         icon: Icons.info_rounded,
         backgroundColor: OpenBudgetPalette.bgInfoFor(theme).withAlpha(220),
@@ -149,7 +148,6 @@ class _ToastStyleConfig {
         textColor: OpenBudgetPalette.fgPrimaryFor(theme),
       ),
     };
-  }
 
   final IconData icon;
   final Color backgroundColor;

@@ -288,8 +288,7 @@ class _SettingsCard extends HookWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
+  Widget build(BuildContext context) => DecoratedBox(
       decoration: BoxDecoration(
         color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
         borderRadius: BorderRadius.circular(RadiusTokens.md),
@@ -299,7 +298,6 @@ class _SettingsCard extends HookWidget {
       ),
       child: child,
     );
-  }
 }
 
 class _SectionLabel extends HookWidget {
@@ -339,8 +337,7 @@ class _BalanceStyleTile extends HookWidget {
   final Widget preview;
 
   @override
-  Widget build(BuildContext context) {
-    return ListTile(
+  Widget build(BuildContext context) => ListTile(
       onTap: onTap,
       leading: selected
           ? Icon(
@@ -354,7 +351,6 @@ class _BalanceStyleTile extends HookWidget {
         child: preview,
       ),
     );
-  }
 }
 
 class _BalanceStylePreview extends HookWidget {
@@ -363,8 +359,7 @@ class _BalanceStylePreview extends HookWidget {
   final BalanceStyle style;
 
   @override
-  Widget build(BuildContext context) {
-    return Wrap(
+  Widget build(BuildContext context) => Wrap(
       spacing: SpacingTokens.xs,
       runSpacing: SpacingTokens.xs,
       children: [
@@ -386,7 +381,6 @@ class _BalanceStylePreview extends HookWidget {
         ),
       ],
     );
-  }
 }
 
 class _ValuePickerTile extends HookWidget {
@@ -434,8 +428,7 @@ class _ToggleTile extends HookWidget {
   final ValueChanged<bool> onChanged;
 
   @override
-  Widget build(BuildContext context) {
-    return SwitchListTile(
+  Widget build(BuildContext context) => SwitchListTile(
       value: value,
       onChanged: onChanged,
       title: Text(label),
@@ -443,7 +436,6 @@ class _ToggleTile extends HookWidget {
       activeThumbColor: OpenBudgetPalette.bgBrandFor(Theme.of(context)),
       contentPadding: const EdgeInsets.symmetric(horizontal: SpacingTokens.sm),
     );
-  }
 }
 
 class _SampleBalancePill extends HookWidget {
@@ -460,8 +452,7 @@ class _SampleBalancePill extends HookWidget {
   final bool emphasize;
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
+  Widget build(BuildContext context) => Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
       decoration: BoxDecoration(
         color: color,
@@ -482,5 +473,4 @@ class _SampleBalancePill extends HookWidget {
         ),
       ),
     );
-  }
 }

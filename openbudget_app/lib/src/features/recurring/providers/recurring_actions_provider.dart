@@ -8,9 +8,7 @@ part 'recurring_actions_provider.g.dart';
 @Riverpod(keepAlive: true)
 class RecurringActions extends _$RecurringActions {
   @override
-  AsyncValue<void> build() {
-    return const AsyncValue.data(null);
-  }
+  AsyncValue<void> build() => const AsyncValue.data(null);
 
   Future<RecurringTransaction> createRecurring({
     required String description,

@@ -36,14 +36,10 @@ class SharedPrefsUiPreferencesStore implements UiPreferencesStore {
   bool? readBool(String key) => _preferences.getBool(key);
 
   @override
-  Future<void> writeString({required String key, required String value}) {
-    return _preferences.setString(key, value);
-  }
+  Future<void> writeString({required String key, required String value}) => _preferences.setString(key, value);
 
   @override
-  Future<void> writeBool({required String key, required bool value}) {
-    return _preferences.setBool(key, value);
-  }
+  Future<void> writeBool({required String key, required bool value}) => _preferences.setBool(key, value);
 }
 
 class InMemoryUiPreferencesStore implements UiPreferencesStore {

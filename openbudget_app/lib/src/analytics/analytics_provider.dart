@@ -4,6 +4,4 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'analytics_provider.g.dart';
 
 @Riverpod(keepAlive: true)
-AnalyticsService analytics(Ref ref) {
-  return AnalyticsService();
-}
+AnalyticsService analytics(Ref ref) => AnalyticsService();

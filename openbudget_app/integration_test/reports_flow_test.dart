@@ -26,8 +26,7 @@ final _budgetUuid = UuidValue.fromString(
   '00000000-0000-0000-0000-000000000601',
 );
 
-SpendingReport _makeReportForMonth(int year, int month) {
-  return switch ((year, month)) {
+SpendingReport _makeReportForMonth(int year, int month) => switch ((year, month)) {
     (2026, 2) => const SpendingReport(
       totalIncome: 800000,
       totalExpenses: 222000,
@@ -73,7 +72,6 @@ SpendingReport _makeReportForMonth(int year, int month) {
       currencyCode: 'USD',
     ),
   };
-}
 
 NetWorthData _makeNetWorthData() {
   final checking = Account(

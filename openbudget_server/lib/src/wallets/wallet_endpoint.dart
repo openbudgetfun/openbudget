@@ -47,11 +47,9 @@ class WalletEndpoint extends Endpoint {
     Session session,
     UuidValue budgetId,
     UuidValue connectionId,
-  ) async {
-    return WalletService.listHoldings(
+  ) async => WalletService.listHoldings(
       session,
       budgetId: budgetId,
       connectionId: connectionId,
     );
-  }
 }

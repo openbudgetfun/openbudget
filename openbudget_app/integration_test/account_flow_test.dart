@@ -44,8 +44,7 @@ Account _makeAccount({
   String accountType = 'checking',
   bool onBudget = true,
   bool isClosed = false,
-}) {
-  return Account(
+}) => Account(
     id: id,
     name: name,
     accountType: accountType,
@@ -56,20 +55,16 @@ Account _makeAccount({
     sortOrder: 0,
     isClosed: isClosed,
   );
-}
 
-Budget _makeBudget({String currencyCode = 'USD'}) {
-  return Budget(
+Budget _makeBudget({String currencyCode = 'USD'}) => Budget(
     id: _budgetUuid,
     name: 'OpenBudget',
     currencyCode: currencyCode,
     ownerId: UuidValue.fromString('00000000-0000-0000-0000-000000000099'),
     createdAt: DateTime(2026),
   );
-}
 
-BudgetSummary _makeSummary({String currencyCode = 'USD'}) {
-  return BudgetSummary(
+BudgetSummary _makeSummary({String currencyCode = 'USD'}) => BudgetSummary(
     budget: _makeBudget(currencyCode: currencyCode),
     categories: const [],
     totalIncomeCents: 0,
@@ -78,7 +73,6 @@ BudgetSummary _makeSummary({String currencyCode = 'USD'}) {
     year: 2026,
     month: 9,
   );
-}
 
 Transaction _makeTransaction({
   required String id,
@@ -88,8 +82,7 @@ Transaction _makeTransaction({
   bool cleared = false,
   bool reconciled = false,
   DateTime? transactionDate,
-}) {
-  return Transaction(
+}) => Transaction(
     id: UuidValue.fromString(id),
     description: description,
     amountCents: amountCents,
@@ -100,7 +93,6 @@ Transaction _makeTransaction({
     cleared: cleared,
     reconciled: reconciled,
   );
-}
 
 class _FakeAccountActions extends AccountActions {
   @override
@@ -117,8 +109,7 @@ class _FakeAccountActions extends AccountActions {
     required int sortOrder,
     String? walletAddress,
     String? institutionId,
-  }) async {
-    return Account(
+  }) async => Account(
       id: UuidValue.fromString('00000000-0000-0000-0000-000000000777'),
       name: name,
       accountType: accountType,
@@ -129,7 +120,6 @@ class _FakeAccountActions extends AccountActions {
       sortOrder: sortOrder,
       isClosed: false,
     );
-  }
 }
 
 Widget _buildApp({
@@ -1226,10 +1216,8 @@ Future<void> _ensureAddUnlinkedVisible(WidgetTester tester) async {
 Future<void> _captureAddAccountStepScreenshot(
   WidgetTester tester,
   String name,
-) {
-  return captureIntegrationScreenshot(
+) => captureIntegrationScreenshot(
     tester,
     name,
     captureTarget: find.byKey(addAccountScreenCaptureBoundaryKey),
   );
-}

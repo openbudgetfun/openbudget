@@ -80,8 +80,7 @@ class _DismissKeyboardOnTap extends StatelessWidget {
   final Widget? child;
 
   @override
-  Widget build(BuildContext context) {
-    return Listener(
+  Widget build(BuildContext context) => Listener(
       behavior: HitTestBehavior.translucent,
       onPointerDown: (event) {
         final focusedNode = FocusManager.instance.primaryFocus;
@@ -109,14 +108,11 @@ class _DismissKeyboardOnTap extends StatelessWidget {
       },
       child: child ?? const SizedBox.shrink(),
     );
-  }
 }
 
 class _AuthBootstrapScreen extends StatelessWidget {
   const _AuthBootstrapScreen();
 
   @override
-  Widget build(BuildContext context) {
-    return const Scaffold(body: Center(child: CircularProgressIndicator()));
-  }
+  Widget build(BuildContext context) => const Scaffold(body: Center(child: CircularProgressIndicator()));
 }

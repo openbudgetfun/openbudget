@@ -131,8 +131,7 @@ void main() {
   });
 }
 
-SpendingReport _reportFor({required int year, required int month}) {
-  return switch ((year, month)) {
+SpendingReport _reportFor({required int year, required int month}) => switch ((year, month)) {
     (2025, 9) => const SpendingReport(
       totalIncome: 3000,
       totalExpenses: 300,
@@ -166,4 +165,3 @@ SpendingReport _reportFor({required int year, required int month}) {
       currencyCode: 'USD',
     ),
   };
-}

@@ -21,9 +21,7 @@ Future<List<Transaction>> splitTransactions(
 @Riverpod(keepAlive: true)
 class SplitTransactionActions extends _$SplitTransactionActions {
   @override
-  AsyncValue<void> build() {
-    return const AsyncValue.data(null);
-  }
+  AsyncValue<void> build() => const AsyncValue.data(null);
 
   Future<List<Transaction>> createSplit({
     required String description,

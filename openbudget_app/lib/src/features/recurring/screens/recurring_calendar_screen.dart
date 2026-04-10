@@ -222,8 +222,7 @@ class _CalendarGrid extends HookWidget {
           ),
           const SizedBox(height: SpacingTokens.xs),
           // Calendar days.
-          ...List.generate(6, (week) {
-            return Row(
+          ...List.generate(6, (week) => Row(
               children: List.generate(7, (weekday) {
                 final dayIndex = week * 7 + weekday - (startWeekday - 1);
                 if (dayIndex < 1 || dayIndex > daysInMonth) {
@@ -285,8 +284,7 @@ class _CalendarGrid extends HookWidget {
                   ),
                 );
               }),
-            );
-          }),
+            )),
         ],
       ),
     );

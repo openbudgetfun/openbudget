@@ -7,9 +7,7 @@ part 'budget_export_provider.g.dart';
 @Riverpod(keepAlive: true)
 class BudgetExport extends _$BudgetExport {
   @override
-  AsyncValue<void> build() {
-    return const AsyncValue.data(null);
-  }
+  AsyncValue<void> build() => const AsyncValue.data(null);
 
   Future<String> exportBudget(String budgetId) async {
     state = const AsyncValue.loading();

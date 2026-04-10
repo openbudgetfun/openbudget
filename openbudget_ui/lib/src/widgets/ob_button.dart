@@ -15,8 +15,7 @@ class ObFilledButton extends HookWidget {
   final bool isLoading;
 
   @override
-  Widget build(BuildContext context) {
-    return FilledButton(
+  Widget build(BuildContext context) => FilledButton(
       onPressed: isLoading ? null : onPressed,
       child: isLoading
           ? const SizedBox(
@@ -26,7 +25,6 @@ class ObFilledButton extends HookWidget {
             )
           : child,
     );
-  }
 }
 
 /// A themed outlined button for secondary actions.
@@ -41,9 +39,7 @@ class ObOutlinedButton extends HookWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
-    return OutlinedButton(onPressed: onPressed, child: child);
-  }
+  Widget build(BuildContext context) => OutlinedButton(onPressed: onPressed, child: child);
 }
 
 /// A themed text button for tertiary actions.
@@ -54,7 +50,5 @@ class ObTextButton extends HookWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
-    return TextButton(onPressed: onPressed, child: child);
-  }
+  Widget build(BuildContext context) => TextButton(onPressed: onPressed, child: child);
 }

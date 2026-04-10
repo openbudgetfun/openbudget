@@ -14,8 +14,7 @@ void main() {
 
   const budgetId = 'test-budget-1';
 
-  Widget buildSubject() {
-    return MaterialApp(
+  Widget buildSubject() => MaterialApp(
       theme: OpenBudgetTheme.light,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
@@ -25,7 +24,6 @@ void main() {
         body: AddTransactionSheet(budgetId: budgetId),
       ),
     );
-  }
 
   Widget buildRoutingSubject() {
     final router = GoRouter(

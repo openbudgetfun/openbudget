@@ -30,9 +30,7 @@ class BudgetTemplateEndpoint extends Endpoint {
   }
 
   /// Lists all templates for a budget.
-  Future<List<BudgetTemplate>> list(Session session, UuidValue budgetId) async {
-    return BudgetTemplateService.listForBudget(session, budgetId: budgetId);
-  }
+  Future<List<BudgetTemplate>> list(Session session, UuidValue budgetId) async => BudgetTemplateService.listForBudget(session, budgetId: budgetId);
 
   /// Applies a template to a target month.
   Future<List<MonthlyAllocation>> applyToMonth(

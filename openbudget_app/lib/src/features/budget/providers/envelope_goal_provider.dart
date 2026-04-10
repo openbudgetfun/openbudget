@@ -33,9 +33,7 @@ Future<List<EnvelopeGoal>> envelopeGoals(
 @Riverpod(keepAlive: true)
 class EnvelopeGoalActions extends _$EnvelopeGoalActions {
   @override
-  AsyncValue<void> build() {
-    return const AsyncValue.data(null);
-  }
+  AsyncValue<void> build() => const AsyncValue.data(null);
 
   Future<EnvelopeGoal> upsertGoal({
     required String envelopeId,

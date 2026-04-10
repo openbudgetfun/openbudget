@@ -17,9 +17,7 @@ final _ownerUuid = UuidValue.fromString('00000000-0000-0000-0000-000000000001');
 Budget _makeBudget({
   String name = 'OpenBudget Plan',
   String currencyCode = 'USD',
-}) {
-  return Budget(name: name, currencyCode: currencyCode, ownerId: _ownerUuid);
-}
+}) => Budget(name: name, currencyCode: currencyCode, ownerId: _ownerUuid);
 
 void main() {
   setUpAll(() {

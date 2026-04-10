@@ -52,7 +52,7 @@ class BudgetHeader extends HookConsumerWidget {
         ? OpenBudgetPalette.fgPrimaryFor(theme)
         : OpenBudgetPalette.fgErrorFor(theme);
 
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
@@ -570,8 +570,7 @@ class _SummaryColumn extends HookWidget {
   final Color? valueColor;
 
   @override
-  Widget build(BuildContext context) {
-    return Column(
+  Widget build(BuildContext context) => Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
@@ -590,5 +589,4 @@ class _SummaryColumn extends HookWidget {
         ),
       ],
     );
-  }
 }

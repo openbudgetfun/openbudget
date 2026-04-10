@@ -274,14 +274,12 @@ class SpendingByPayeeScreen extends HookConsumerWidget {
     return '$name $year';
   }
 
-  String _presetLabel(int months) {
-    return switch (months) {
+  String _presetLabel(int months) => switch (months) {
       3 => 'Last 3 Months',
       6 => 'Last 6 Months',
       12 => 'Last 12 Months',
       _ => 'Last $months Months',
     };
-  }
 
   String _presetRangeLabel(
     AppLocalizations l10n,

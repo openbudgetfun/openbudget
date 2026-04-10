@@ -33,8 +33,7 @@ class ObTextField extends HookWidget {
   final bool enabled;
 
   @override
-  Widget build(BuildContext context) {
-    return TextField(
+  Widget build(BuildContext context) => TextField(
       controller: controller,
       obscureText: obscureText,
       keyboardType: keyboardType,
@@ -50,5 +49,4 @@ class ObTextField extends HookWidget {
         suffixIcon: suffixIcon,
       ),
     );
-  }
 }

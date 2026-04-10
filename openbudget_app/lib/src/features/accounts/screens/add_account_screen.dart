@@ -713,8 +713,7 @@ class _StepFrame extends StatelessWidget {
   final double maxWidth;
 
   @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
+  Widget build(BuildContext context) => LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth >= 900
             ? constraints.maxWidth.clamp(0, maxWidth).toDouble()
@@ -728,7 +727,6 @@ class _StepFrame extends StatelessWidget {
         );
       },
     );
-  }
 }
 
 enum _LoadingStepKey { loading, loadingInstitutions }
@@ -1015,8 +1013,7 @@ class _InstitutionTile extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) {
-    return InkWell(
+  Widget build(BuildContext context) => InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(RadiusTokens.md),
       child: Container(
@@ -1038,7 +1035,6 @@ class _InstitutionTile extends StatelessWidget {
         ),
       ),
     );
-  }
 }
 
 class _MyAccountTile extends StatelessWidget {
@@ -1368,8 +1364,7 @@ class _AccountTypeStep extends StatelessWidget {
   final ValueChanged<_AccountTypeOption> onSelected;
 
   @override
-  Widget build(BuildContext context) {
-    return ListView(
+  Widget build(BuildContext context) => ListView(
       controller: scrollController,
       primary: false,
       padding: const EdgeInsets.fromLTRB(
@@ -1421,7 +1416,6 @@ class _AccountTypeStep extends StatelessWidget {
         ],
       ],
     );
-  }
 }
 
 class _SuccessStep extends StatelessWidget {
@@ -1526,8 +1520,7 @@ class _AccountTypeSection {
   final List<_AccountTypeOption> options;
 }
 
-List<_AccountTypeSection> _accountTypeSections(AppLocalizations l10n) {
-  return [
+List<_AccountTypeSection> _accountTypeSections(AppLocalizations l10n) => [
     _AccountTypeSection(
       title: l10n.addAccountSectionCashAccounts,
       subtitle: l10n.addAccountSectionCashAccountsHint,
@@ -1657,7 +1650,6 @@ List<_AccountTypeSection> _accountTypeSections(AppLocalizations l10n) {
       ],
     ),
   ];
-}
 
 double _pow10(int exponent) {
   var result = 1.0;
