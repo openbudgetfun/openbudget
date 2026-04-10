@@ -407,14 +407,16 @@ in
         # Create a wrapper script that uses npx as a reliable fallback.
         # The nix-provided pnpm-standalone SEA binary can be incompatible
         # across node versions or architectures (e.g. CI Linux runners).
+        # Always remove first — previous runs may leave a symlink to the
+        # read-only nix store.
+        rm -f "$DEVENV_ROOT/.eget/bin/pnpm"
+
         if command -v pnpm >/dev/null 2>&1 && pnpm --version >/dev/null 2>&1; then
           ln -sf "$(command -v pnpm)" "$DEVENV_ROOT/.eget/bin/pnpm"
         else
           echo "Creating pnpm wrapper using npx..."
-          cat > "$DEVENV_ROOT/.eget/bin/pnpm" << 'WRAPPER'
-        #!/usr/bin/env bash
-        exec npx --yes pnpm@latest-10 "$@"
-        WRAPPER
+          printf '#!/usr/bin/env bash\nexec npx --yes pnpm@latest-10 "$@"\n' \
+            > "$DEVENV_ROOT/.eget/bin/pnpm"
           chmod +x "$DEVENV_ROOT/.eget/bin/pnpm"
         fi
       '';
