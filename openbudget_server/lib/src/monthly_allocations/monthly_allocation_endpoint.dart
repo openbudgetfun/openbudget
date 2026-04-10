@@ -1,3 +1,4 @@
+import 'package:openbudget_server/src/budgets/budget_realtime_notifier.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:openbudget_server/src/monthly_allocations/monthly_allocation_service.dart';
 import 'package:serverpod/serverpod.dart';
@@ -19,7 +20,7 @@ class MonthlyAllocationEndpoint extends Endpoint {
     int allocatedCents, {
     int carryoverCents = 0,
   }) async {
-    return MonthlyAllocationService.upsert(
+    final allocation = await MonthlyAllocationService.upsert(
       session,
       envelopeId: envelopeId,
       budgetId: budgetId,
@@ -28,6 +29,8 @@ class MonthlyAllocationEndpoint extends Endpoint {
       allocatedCents: allocatedCents,
       carryoverCents: carryoverCents,
     );
+    BudgetRealtimeNotifier.notifyBudgetChanged(allocation.budgetId);
+    return allocation;
   }
 
   /// Lists all allocations for a budget in a given month.
@@ -54,7 +57,7 @@ class MonthlyAllocationEndpoint extends Endpoint {
     int targetYear,
     int targetMonth,
   ) async {
-    return MonthlyAllocationService.copyMonth(
+    final allocations = await MonthlyAllocationService.copyMonth(
       session,
       budgetId: budgetId,
       sourceYear: sourceYear,
@@ -62,6 +65,8 @@ class MonthlyAllocationEndpoint extends Endpoint {
       targetYear: targetYear,
       targetMonth: targetMonth,
     );
+    BudgetRealtimeNotifier.notifyBudgetChanged(budgetId);
+    return allocations;
   }
 
   /// Moves money between two envelopes in the same budget and month.
@@ -74,7 +79,7 @@ class MonthlyAllocationEndpoint extends Endpoint {
     int month,
     int amountCents,
   ) async {
-    return MonthlyAllocationService.moveMoney(
+    final allocations = await MonthlyAllocationService.moveMoney(
       session,
       fromEnvelopeId: fromEnvelopeId,
       toEnvelopeId: toEnvelopeId,
@@ -83,6 +88,8 @@ class MonthlyAllocationEndpoint extends Endpoint {
       month: month,
       amountCents: amountCents,
     );
+    BudgetRealtimeNotifier.notifyBudgetChanged(budgetId);
+    return allocations;
   }
 
   /// Deletes a monthly allocation by ID.
@@ -90,6 +97,11 @@ class MonthlyAllocationEndpoint extends Endpoint {
     Session session,
     UuidValue allocationId,
   ) async {
-    return MonthlyAllocationService.delete(session, allocationId: allocationId);
+    final allocation = await MonthlyAllocationService.delete(
+      session,
+      allocationId: allocationId,
+    );
+    BudgetRealtimeNotifier.notifyBudgetChanged(allocation.budgetId);
+    return allocation;
   }
 }

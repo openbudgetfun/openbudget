@@ -1,4 +1,5 @@
 import 'package:openbudget_server/src/budget_templates/budget_template_service.dart';
+import 'package:openbudget_server/src/budgets/budget_realtime_notifier.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
 
@@ -17,13 +18,15 @@ class BudgetTemplateEndpoint extends Endpoint {
     int year,
     int month,
   ) async {
-    return BudgetTemplateService.saveFromMonth(
+    final template = await BudgetTemplateService.saveFromMonth(
       session,
       budgetId: budgetId,
       name: name,
       year: year,
       month: month,
     );
+    BudgetRealtimeNotifier.notifyBudgetChanged(template.budgetId);
+    return template;
   }
 
   /// Lists all templates for a budget.
@@ -39,17 +42,24 @@ class BudgetTemplateEndpoint extends Endpoint {
     int year,
     int month,
   ) async {
-    return BudgetTemplateService.applyToMonth(
+    final allocations = await BudgetTemplateService.applyToMonth(
       session,
       templateId: templateId,
       budgetId: budgetId,
       year: year,
       month: month,
     );
+    BudgetRealtimeNotifier.notifyBudgetChanged(budgetId);
+    return allocations;
   }
 
   /// Deletes a template by ID.
   Future<BudgetTemplate> delete(Session session, UuidValue templateId) async {
-    return BudgetTemplateService.delete(session, templateId: templateId);
+    final template = await BudgetTemplateService.delete(
+      session,
+      templateId: templateId,
+    );
+    BudgetRealtimeNotifier.notifyBudgetChanged(template.budgetId);
+    return template;
   }
 }

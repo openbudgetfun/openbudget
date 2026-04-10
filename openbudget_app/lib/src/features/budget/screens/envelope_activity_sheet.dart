@@ -115,29 +115,6 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
                       ),
                     ],
                   ),
-                  // Note (if present)
-                  if (envelope.note != null && envelope.note!.isNotEmpty) ...[
-                    const SizedBox(height: SpacingTokens.sm),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(
-                          Icons.note_outlined,
-                          size: 14,
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                        const SizedBox(width: SpacingTokens.xs),
-                        Expanded(
-                          child: Text(
-                            envelope.note!,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
                   const SizedBox(height: SpacingTokens.md),
                   // Balance breakdown grid (2x2)
                   _BalanceGrid(
@@ -159,6 +136,38 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
                       currencyCode: currencyCode,
                       hideAmounts: hideAmounts,
                       hideProgressBars: hideProgressBars,
+                    ),
+                  ],
+                  if (envelope.note != null && envelope.note!.isNotEmpty) ...[
+                    const SizedBox(height: SpacingTokens.sm),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(SpacingTokens.sm),
+                      decoration: BoxDecoration(
+                        color: colorScheme.surfaceContainerHighest.withAlpha(
+                          80,
+                        ),
+                        borderRadius: BorderRadius.circular(RadiusTokens.sm),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(
+                            Icons.note_outlined,
+                            size: 16,
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                          const SizedBox(width: SpacingTokens.xs),
+                          Expanded(
+                            child: Text(
+                              envelope.note!,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                   const SizedBox(height: SpacingTokens.md),

@@ -1598,6 +1598,46 @@ class Endpoints extends _i1.EndpointDispatch {
                         params['targetMonth'],
                       ),
         ),
+        'copyMonth': _i1.MethodConnector(
+          name: 'copyMonth',
+          params: {
+            'budgetId': _i1.ParameterDescription(
+              name: 'budgetId',
+              type: _i1.getType<_i1.UuidValue>(),
+              nullable: false,
+            ),
+            'sourceYear': _i1.ParameterDescription(
+              name: 'sourceYear',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'sourceMonth': _i1.ParameterDescription(
+              name: 'sourceMonth',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'targetYear': _i1.ParameterDescription(
+              name: 'targetYear',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'targetMonth': _i1.ParameterDescription(
+              name: 'targetMonth',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call: (_i1.Session session, Map<String, dynamic> params) async =>
+              (endpoints['monthlyAllocation'] as _i15.MonthlyAllocationEndpoint)
+                  .copyMonth(
+                    session,
+                    params['budgetId'],
+                    params['sourceYear'],
+                    params['sourceMonth'],
+                    params['targetYear'],
+                    params['targetMonth'],
+                  ),
+        ),
         'moveMoney': _i1.MethodConnector(
           name: 'moveMoney',
           params: {

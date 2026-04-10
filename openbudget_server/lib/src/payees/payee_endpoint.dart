@@ -1,3 +1,4 @@
+import 'package:openbudget_server/src/budgets/budget_realtime_notifier.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:openbudget_server/src/payees/payee_service.dart';
 import 'package:serverpod/serverpod.dart';
@@ -11,7 +12,13 @@ class PayeeEndpoint extends Endpoint {
 
   /// Creates a new payee within a budget.
   Future<Payee> create(Session session, String name, UuidValue budgetId) async {
-    return PayeeService.create(session, name: name, budgetId: budgetId);
+    final payee = await PayeeService.create(
+      session,
+      name: name,
+      budgetId: budgetId,
+    );
+    BudgetRealtimeNotifier.notifyBudgetChanged(payee.budgetId);
+    return payee;
   }
 
   /// Lists all payees for a budget.
@@ -30,7 +37,13 @@ class PayeeEndpoint extends Endpoint {
     UuidValue payeeId, {
     String? name,
   }) async {
-    return PayeeService.update(session, payeeId: payeeId, name: name);
+    final payee = await PayeeService.update(
+      session,
+      payeeId: payeeId,
+      name: name,
+    );
+    BudgetRealtimeNotifier.notifyBudgetChanged(payee.budgetId);
+    return payee;
   }
 
   /// Returns the envelope ID from the most recent transaction for a payee.
@@ -56,15 +69,23 @@ class PayeeEndpoint extends Endpoint {
     UuidValue sourcePayeeId,
     UuidValue targetPayeeId,
   ) async {
-    return PayeeService.merge(
+    final sourcePayee = await PayeeService.getById(
+      session,
+      payeeId: sourcePayeeId,
+    );
+    final mergedCount = await PayeeService.merge(
       session,
       sourcePayeeId: sourcePayeeId,
       targetPayeeId: targetPayeeId,
     );
+    BudgetRealtimeNotifier.notifyBudgetChanged(sourcePayee.budgetId);
+    return mergedCount;
   }
 
   /// Deletes a payee by ID.
   Future<Payee> delete(Session session, UuidValue payeeId) async {
-    return PayeeService.delete(session, payeeId: payeeId);
+    final payee = await PayeeService.delete(session, payeeId: payeeId);
+    BudgetRealtimeNotifier.notifyBudgetChanged(payee.budgetId);
+    return payee;
   }
 }

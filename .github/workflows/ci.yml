@@ -51,11 +51,15 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: install infra dependencies
-        run: install:infra
+        run: |
+          cd "$DEVENV_ROOT/infra"
+          npx --yes pnpm@latest-10 install
         shell: devenv shell -- bash -e {0}
 
       - name: type-check infra
-        run: infra:build
+        run: |
+          cd "$DEVENV_ROOT/infra"
+          npx --yes pnpm@latest-10 build
         shell: devenv shell -- bash -e {0}
 
   server-test:

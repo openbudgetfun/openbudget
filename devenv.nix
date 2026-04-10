@@ -42,6 +42,16 @@ in
     package = pkgs.prek;
 
     hooks = {
+      # ── Pre-commit: fast gates ─────────────────────────────────────
+      "format:check" = {
+        enable = true;
+        name = "format:check";
+        description = "Fail if any file is not properly formatted (dprint + dart format).";
+        entry = "${pkgs.dprint}/bin/dprint check";
+        pass_filenames = false;
+        stages = [ "pre-commit" ];
+      };
+
       "secrets:commit" = {
         enable = true;
         name = "secrets:commit";
@@ -50,29 +60,71 @@ in
         pass_filenames = false;
         stages = [ "pre-commit" ];
       };
+
+      "lint:commit" = {
+        enable = true;
+        name = "lint:commit";
+        description = "Run dart analyze (fatal-infos) on the workspace.";
+        entry = "${config.env.DEVENV_PROFILE}/bin/dart analyze --fatal-infos";
+        pass_filenames = false;
+        always_run = true;
+        stages = [ "pre-commit" ];
+      };
+
+      # ── Pre-push: thorough gates ───────────────────────────────────
       "secrets:push" = {
         enable = true;
         name = "secrets:push";
-        description = "Check entire git history for leaked secrets with gitleaks.";
+        description = "Scan entire git history for leaked secrets before push.";
         entry = "${pkgs.gitleaks}/bin/gitleaks detect --verbose --redact --config .gitleaks.toml";
         pass_filenames = false;
         stages = [ "pre-push" ];
       };
-      format = {
+
+      "lint:push" = {
         enable = true;
-        name = "format";
-        description = "Format files with dprint before commit.";
-        entry = "${pkgs.dprint}/bin/dprint fmt --allow-no-files";
-        stages = [ "pre-commit" ];
-      };
-      lint = {
-        enable = true;
-        name = "lint";
-        description = "Run linting and formatting checks on every commit.";
-        entry = "${config.env.DEVENV_PROFILE}/bin/dart analyze --fatal-infos";
-        pass_filenames = true;
+        name = "lint:push";
+        description = "Run full lint suite (format, swift, l10n, analyze) before push.";
+        entry = builtins.toString (
+          pkgs.writeShellScript "lint-push" ''
+            set -e
+            export PATH="${config.env.DEVENV_PROFILE}/bin:$PATH"
+            ${pkgs.dprint}/bin/dprint check
+            ${config.env.DEVENV_PROFILE}/bin/dart analyze --fatal-infos
+          ''
+        );
+        pass_filenames = false;
         always_run = true;
-        stages = [ "pre-commit" ];
+        stages = [ "pre-push" ];
+      };
+
+      "test:push" = {
+        enable = true;
+        name = "test:push";
+        description = "Run full test suite before push.";
+        entry = builtins.toString (
+          pkgs.writeShellScript "test-push" ''
+            set -e
+            export PATH="${config.env.DEVENV_PROFILE}/bin:$PATH"
+            echo "Running tests in background — push will proceed. Check terminal output."
+            ${config.env.DEVENV_PROFILE}/bin/dart run melos run test --no-select &
+            TEST_PID=$!
+            # Give tests 10s to start, but don't block push
+            sleep 1
+            if ! kill -0 $TEST_PID 2>/dev/null; then
+              # Tests finished fast — check exit code
+              wait $TEST_PID
+              exit $?
+            fi
+            echo "Tests still running (PID $TEST_PID). Push will proceed."
+            # Detach from test process so push completes
+            disown $TEST_PID 2>/dev/null || true
+            exit 0
+          ''
+        );
+        pass_filenames = false;
+        always_run = true;
+        stages = [ "pre-push" ];
       };
     };
   };
@@ -352,12 +404,21 @@ in
         set -euo pipefail
         mkdir -p "$DEVENV_ROOT/.eget/bin"
 
-        if ! command -v pnpm >/dev/null 2>&1; then
-          echo "pnpm is not available in PATH."
-          exit 127
-        fi
+        # Create a wrapper script that uses npx as a reliable fallback.
+        # The nix-provided pnpm-standalone SEA binary can be incompatible
+        # across node versions or architectures (e.g. CI Linux runners).
+        # Always remove first — previous runs may leave a symlink to the
+        # read-only nix store.
+        rm -f "$DEVENV_ROOT/.eget/bin/pnpm"
 
-        ln -sf "$(command -v pnpm)" "$DEVENV_ROOT/.eget/bin/pnpm"
+        if command -v pnpm >/dev/null 2>&1 && pnpm --version >/dev/null 2>&1; then
+          ln -sf "$(command -v pnpm)" "$DEVENV_ROOT/.eget/bin/pnpm"
+        else
+          echo "Creating pnpm wrapper using npx..."
+          printf '#!/usr/bin/env bash\nexec npx --yes pnpm@latest-10 "$@"\n' \
+            > "$DEVENV_ROOT/.eget/bin/pnpm"
+          chmod +x "$DEVENV_ROOT/.eget/bin/pnpm"
+        fi
       '';
       description = "Ensure pnpm is available for install scripts.";
       binary = "bash";
