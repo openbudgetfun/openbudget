@@ -1,5 +1,5 @@
 # Build stage — context must be the repo root so path dependencies resolve
-FROM dart:3.8.0 AS build
+FROM dart:3.11 AS build
 WORKDIR /workspace
 COPY . .
 
