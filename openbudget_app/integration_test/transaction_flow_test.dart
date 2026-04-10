@@ -50,37 +50,33 @@ Transaction _makeTransaction({
   DateTime? transactionDate,
   bool cleared = false,
   bool reconciled = false,
-}) {
-  return Transaction(
-    id: UuidValue.fromString(id),
-    description: description,
-    amountCents: amountCents,
-    currencyCode: 'USD',
-    budgetId: _budgetUuid,
-    accountId: UuidValue.fromString('00000000-0000-0000-0000-000000000111'),
-    transactionDate: transactionDate ?? DateTime(2026, 9, 4),
-    cleared: cleared,
-    reconciled: reconciled,
-  );
-}
+}) => Transaction(
+  id: UuidValue.fromString(id),
+  description: description,
+  amountCents: amountCents,
+  currencyCode: 'USD',
+  budgetId: _budgetUuid,
+  accountId: UuidValue.fromString('00000000-0000-0000-0000-000000000111'),
+  transactionDate: transactionDate ?? DateTime(2026, 9, 4),
+  cleared: cleared,
+  reconciled: reconciled,
+);
 
 Account _makeAccount({
   required String id,
   required String name,
   required String currencyCode,
-}) {
-  return Account(
-    id: UuidValue.fromString(id),
-    name: name,
-    accountType: 'checking',
-    balanceCents: 0,
-    currencyCode: currencyCode,
-    budgetId: _budgetUuid,
-    onBudget: true,
-    sortOrder: 0,
-    isClosed: false,
-  );
-}
+}) => Account(
+  id: UuidValue.fromString(id),
+  name: name,
+  accountType: 'checking',
+  balanceCents: 0,
+  currencyCode: currencyCode,
+  budgetId: _budgetUuid,
+  onBudget: true,
+  sortOrder: 0,
+  isClosed: false,
+);
 
 Widget _buildApp({String? initialLocation}) {
   final router = GoRouter(

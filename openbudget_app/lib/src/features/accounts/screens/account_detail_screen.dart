@@ -439,13 +439,11 @@ class AccountDetailScreen extends HookConsumerWidget {
     );
   }
 
-  static bool _isSameDay(DateTime a, DateTime b) {
-    return a.year == b.year && a.month == b.month && a.day == b.day;
-  }
+  static bool _isSameDay(DateTime a, DateTime b) =>
+      a.year == b.year && a.month == b.month && a.day == b.day;
 
-  static String _formatDayHeader(DateTime date) {
-    return DateFormat.yMMMMd().format(date);
-  }
+  static String _formatDayHeader(DateTime date) =>
+      DateFormat.yMMMMd().format(date);
 
   static bool _isLoanStyleAccount(Account account) {
     final name = account.name.toLowerCase();
@@ -952,7 +950,7 @@ class _LoanAccountDetailBody extends StatelessWidget {
 
     return Column(
       children: [
-        Container(
+        DecoratedBox(
           decoration: BoxDecoration(
             border: Border(
               bottom: BorderSide(
@@ -1244,20 +1242,18 @@ class _LoanSectionTitle extends StatelessWidget {
   final String title;
 
   @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(
-        bottom: SpacingTokens.sm,
-        left: SpacingTokens.xs,
-      ),
-      child: Text(
-        title,
-        style: Theme.of(
-          context,
-        ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(
+      bottom: SpacingTokens.sm,
+      left: SpacingTokens.xs,
+    ),
+    child: Text(
+      title,
+      style: Theme.of(
+        context,
+      ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+    ),
+  );
 }
 
 class _LoanCard extends StatelessWidget {
@@ -1266,18 +1262,16 @@ class _LoanCard extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
-        borderRadius: BorderRadius.circular(RadiusTokens.md),
-        border: Border.all(
-          color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
-        ),
+  Widget build(BuildContext context) => DecoratedBox(
+    decoration: BoxDecoration(
+      color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
+      borderRadius: BorderRadius.circular(RadiusTokens.md),
+      border: Border.all(
+        color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
       ),
-      child: child,
-    );
-  }
+    ),
+    child: child,
+  );
 }
 
 class _LoanDetailRow extends StatelessWidget {
@@ -1644,7 +1638,7 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
               SpacingTokens.xl,
             ),
             children: [
-              Container(
+              DecoratedBox(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
@@ -3130,11 +3124,10 @@ String? _suggestedCategoryForWalletTransaction(SolanaWalletTransaction tx) {
     tx.programsJson,
   ).map((program) => program.toLowerCase());
 
-  bool containsSignal(String signal) {
-    return type.contains(signal) ||
-        source.contains(signal) ||
-        programs.any((program) => program.contains(signal));
-  }
+  bool containsSignal(String signal) =>
+      type.contains(signal) ||
+      source.contains(signal) ||
+      programs.any((program) => program.contains(signal));
 
   if (containsSignal('swap') ||
       containsSignal('jupiter') ||

@@ -266,22 +266,20 @@ BudgetSummary _makeReorderSummary() {
   );
 }
 
-List<Transaction> _makeMonthlyTransactions() {
-  return [
-    Transaction(
-      id: UuidValue.fromString('00000000-0000-0000-0000-000000000907'),
-      description: 'Landlord',
-      amountCents: -10000,
-      currencyCode: 'USD',
-      budgetId: UuidValue.fromString(_budgetId),
-      accountId: UuidValue.fromString(_accountId),
-      envelopeId: UuidValue.fromString(_utilitiesEnvelopeId),
-      transactionDate: DateTime(2026, 2, 22),
-      cleared: false,
-      reconciled: false,
-    ),
-  ];
-}
+List<Transaction> _makeMonthlyTransactions() => [
+  Transaction(
+    id: UuidValue.fromString('00000000-0000-0000-0000-000000000907'),
+    description: 'Landlord',
+    amountCents: -10000,
+    currencyCode: 'USD',
+    budgetId: UuidValue.fromString(_budgetId),
+    accountId: UuidValue.fromString(_accountId),
+    envelopeId: UuidValue.fromString(_utilitiesEnvelopeId),
+    transactionDate: DateTime(2026, 2, 22),
+    cleared: false,
+    reconciled: false,
+  ),
+];
 
 void main() {
   GoogleFonts.config.allowRuntimeFetching = false;
@@ -292,9 +290,9 @@ void main() {
     final tester = $.tester;
     final container = ProviderContainer(
       overrides: [
-        budgetMonthlySummaryProvider.overrideWith((ref, _) async {
-          return _makeSummary();
-        }),
+        budgetMonthlySummaryProvider.overrideWith(
+          (ref, _) async => _makeSummary(),
+        ),
         budgetGoalsProvider.overrideWith((ref, _) async => {}),
         creditCardPaymentsProvider.overrideWith((ref, _) async => const []),
         monthlyTransactionsProvider.overrideWith(
@@ -546,9 +544,9 @@ void main() {
     final tester = $.tester;
     final container = ProviderContainer(
       overrides: [
-        budgetMonthlySummaryProvider.overrideWith((ref, _) async {
-          return _makeOverspentSummary();
-        }),
+        budgetMonthlySummaryProvider.overrideWith(
+          (ref, _) async => _makeOverspentSummary(),
+        ),
         budgetGoalsProvider.overrideWith((ref, _) async => {}),
         creditCardPaymentsProvider.overrideWith((ref, _) async => const []),
         monthlyTransactionsProvider.overrideWith((ref, _) async => const []),
@@ -604,9 +602,9 @@ void main() {
 
     final container = ProviderContainer(
       overrides: [
-        budgetMonthlySummaryProvider.overrideWith((ref, _) async {
-          return _makeSummary();
-        }),
+        budgetMonthlySummaryProvider.overrideWith(
+          (ref, _) async => _makeSummary(),
+        ),
         budgetGoalsProvider.overrideWith((ref, _) async => {}),
         creditCardPaymentsProvider.overrideWith((ref, _) async => const []),
         monthlyTransactionsProvider.overrideWith(
@@ -698,9 +696,9 @@ void main() {
     final tester = $.tester;
     final container = ProviderContainer(
       overrides: [
-        budgetMonthlySummaryProvider.overrideWith((ref, _) async {
-          return _makeReorderSummary();
-        }),
+        budgetMonthlySummaryProvider.overrideWith(
+          (ref, _) async => _makeReorderSummary(),
+        ),
         budgetGoalsProvider.overrideWith((ref, _) async => {}),
         creditCardPaymentsProvider.overrideWith((ref, _) async => const []),
         monthlyTransactionsProvider.overrideWith((ref, _) async => const []),

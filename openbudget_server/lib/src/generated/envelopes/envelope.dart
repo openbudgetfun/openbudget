@@ -56,7 +56,9 @@ abstract class Envelope
       currencyCode: jsonSerialization['currencyCode'] as String,
       sortOrder: jsonSerialization['sortOrder'] as int,
       note: jsonSerialization['note'] as String?,
-      isHidden: jsonSerialization['isHidden'] as bool?,
+      isHidden: jsonSerialization['isHidden'] == null
+          ? null
+          : _i1.BoolJsonExtension.fromJson(jsonSerialization['isHidden']),
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
@@ -237,96 +239,47 @@ class _EnvelopeImpl extends Envelope {
 class EnvelopeUpdateTable extends _i1.UpdateTable<EnvelopeTable> {
   EnvelopeUpdateTable(super.table);
 
-  _i1.ColumnValue<String, String> name(String value) => _i1.ColumnValue(
-    table.name,
-    value,
-  );
+  _i1.ColumnValue<String, String> name(String value) =>
+      _i1.ColumnValue(table.name, value);
 
   _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> categoryId(
     _i1.UuidValue value,
-  ) => _i1.ColumnValue(
-    table.categoryId,
-    value,
-  );
+  ) => _i1.ColumnValue(table.categoryId, value);
 
-  _i1.ColumnValue<int, int> budgetedAmountCents(int value) => _i1.ColumnValue(
-    table.budgetedAmountCents,
-    value,
-  );
+  _i1.ColumnValue<int, int> budgetedAmountCents(int value) =>
+      _i1.ColumnValue(table.budgetedAmountCents, value);
 
-  _i1.ColumnValue<int, int> spentAmountCents(int value) => _i1.ColumnValue(
-    table.spentAmountCents,
-    value,
-  );
+  _i1.ColumnValue<int, int> spentAmountCents(int value) =>
+      _i1.ColumnValue(table.spentAmountCents, value);
 
-  _i1.ColumnValue<String, String> currencyCode(String value) => _i1.ColumnValue(
-    table.currencyCode,
-    value,
-  );
+  _i1.ColumnValue<String, String> currencyCode(String value) =>
+      _i1.ColumnValue(table.currencyCode, value);
 
-  _i1.ColumnValue<int, int> sortOrder(int value) => _i1.ColumnValue(
-    table.sortOrder,
-    value,
-  );
+  _i1.ColumnValue<int, int> sortOrder(int value) =>
+      _i1.ColumnValue(table.sortOrder, value);
 
-  _i1.ColumnValue<String, String> note(String? value) => _i1.ColumnValue(
-    table.note,
-    value,
-  );
+  _i1.ColumnValue<String, String> note(String? value) =>
+      _i1.ColumnValue(table.note, value);
 
-  _i1.ColumnValue<bool, bool> isHidden(bool? value) => _i1.ColumnValue(
-    table.isHidden,
-    value,
-  );
+  _i1.ColumnValue<bool, bool> isHidden(bool? value) =>
+      _i1.ColumnValue(table.isHidden, value);
 
   _i1.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
-      _i1.ColumnValue(
-        table.createdAt,
-        value,
-      );
+      _i1.ColumnValue(table.createdAt, value);
 }
 
 class EnvelopeTable extends _i1.Table<_i1.UuidValue?> {
   EnvelopeTable({super.tableRelation}) : super(tableName: 'envelope') {
     updateTable = EnvelopeUpdateTable(this);
-    name = _i1.ColumnString(
-      'name',
-      this,
-    );
-    categoryId = _i1.ColumnUuid(
-      'categoryId',
-      this,
-    );
-    budgetedAmountCents = _i1.ColumnInt(
-      'budgetedAmountCents',
-      this,
-    );
-    spentAmountCents = _i1.ColumnInt(
-      'spentAmountCents',
-      this,
-    );
-    currencyCode = _i1.ColumnString(
-      'currencyCode',
-      this,
-    );
-    sortOrder = _i1.ColumnInt(
-      'sortOrder',
-      this,
-    );
-    note = _i1.ColumnString(
-      'note',
-      this,
-    );
-    isHidden = _i1.ColumnBool(
-      'isHidden',
-      this,
-      hasDefault: true,
-    );
-    createdAt = _i1.ColumnDateTime(
-      'createdAt',
-      this,
-      hasDefault: true,
-    );
+    name = _i1.ColumnString('name', this);
+    categoryId = _i1.ColumnUuid('categoryId', this);
+    budgetedAmountCents = _i1.ColumnInt('budgetedAmountCents', this);
+    spentAmountCents = _i1.ColumnInt('spentAmountCents', this);
+    currencyCode = _i1.ColumnString('currencyCode', this);
+    sortOrder = _i1.ColumnInt('sortOrder', this);
+    note = _i1.ColumnString('note', this);
+    isHidden = _i1.ColumnBool('isHidden', this, hasDefault: true);
+    createdAt = _i1.ColumnDateTime('createdAt', this, hasDefault: true);
   }
 
   late final EnvelopeUpdateTable updateTable;
@@ -426,7 +379,7 @@ class EnvelopeRepository {
   /// );
   /// ```
   Future<List<Envelope>> find(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     _i1.WhereExpressionBuilder<EnvelopeTable>? where,
     int? limit,
     int? offset,
@@ -434,6 +387,8 @@ class EnvelopeRepository {
     bool orderDescending = false,
     _i1.OrderByListBuilder<EnvelopeTable>? orderByList,
     _i1.Transaction? transaction,
+    _i1.LockMode? lockMode,
+    _i1.LockBehavior? lockBehavior,
   }) async {
     return session.db.find<Envelope>(
       where: where?.call(Envelope.t),
@@ -443,6 +398,8 @@ class EnvelopeRepository {
       limit: limit,
       offset: offset,
       transaction: transaction,
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
     );
   }
 
@@ -464,13 +421,15 @@ class EnvelopeRepository {
   /// );
   /// ```
   Future<Envelope?> findFirstRow(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     _i1.WhereExpressionBuilder<EnvelopeTable>? where,
     int? offset,
     _i1.OrderByBuilder<EnvelopeTable>? orderBy,
     bool orderDescending = false,
     _i1.OrderByListBuilder<EnvelopeTable>? orderByList,
     _i1.Transaction? transaction,
+    _i1.LockMode? lockMode,
+    _i1.LockBehavior? lockBehavior,
   }) async {
     return session.db.findFirstRow<Envelope>(
       where: where?.call(Envelope.t),
@@ -479,18 +438,24 @@ class EnvelopeRepository {
       orderDescending: orderDescending,
       offset: offset,
       transaction: transaction,
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
     );
   }
 
   /// Finds a single [Envelope] by its [id] or null if no such row exists.
   Future<Envelope?> findById(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     _i1.UuidValue id, {
     _i1.Transaction? transaction,
+    _i1.LockMode? lockMode,
+    _i1.LockBehavior? lockBehavior,
   }) async {
     return session.db.findById<Envelope>(
       id,
       transaction: transaction,
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
     );
   }
 
@@ -500,14 +465,20 @@ class EnvelopeRepository {
   ///
   /// This is an atomic operation, meaning that if one of the rows fails to
   /// insert, none of the rows will be inserted.
+  ///
+  /// If [ignoreConflicts] is set to `true`, rows that conflict with existing
+  /// rows are silently skipped, and only the successfully inserted rows are
+  /// returned.
   Future<List<Envelope>> insert(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     List<Envelope> rows, {
     _i1.Transaction? transaction,
+    bool ignoreConflicts = false,
   }) async {
     return session.db.insert<Envelope>(
       rows,
       transaction: transaction,
+      ignoreConflicts: ignoreConflicts,
     );
   }
 
@@ -515,14 +486,11 @@ class EnvelopeRepository {
   ///
   /// The returned [Envelope] will have its `id` field set.
   Future<Envelope> insertRow(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     Envelope row, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.insertRow<Envelope>(
-      row,
-      transaction: transaction,
-    );
+    return session.db.insertRow<Envelope>(row, transaction: transaction);
   }
 
   /// Updates all [Envelope]s in the list and returns the updated rows. If
@@ -531,7 +499,7 @@ class EnvelopeRepository {
   /// This is an atomic operation, meaning that if one of the rows fails to
   /// update, none of the rows will be updated.
   Future<List<Envelope>> update(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     List<Envelope> rows, {
     _i1.ColumnSelections<EnvelopeTable>? columns,
     _i1.Transaction? transaction,
@@ -547,7 +515,7 @@ class EnvelopeRepository {
   /// Optionally, a list of [columns] can be provided to only update those
   /// columns. Defaults to all columns.
   Future<Envelope> updateRow(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     Envelope row, {
     _i1.ColumnSelections<EnvelopeTable>? columns,
     _i1.Transaction? transaction,
@@ -562,7 +530,7 @@ class EnvelopeRepository {
   /// Updates a single [Envelope] by its [id] with the specified [columnValues].
   /// Returns the updated row or null if no row with the given id exists.
   Future<Envelope?> updateById(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     _i1.UuidValue id, {
     required _i1.ColumnValueListBuilder<EnvelopeUpdateTable> columnValues,
     _i1.Transaction? transaction,
@@ -577,7 +545,7 @@ class EnvelopeRepository {
   /// Updates all [Envelope]s matching the [where] expression with the specified [columnValues].
   /// Returns the list of updated rows.
   Future<List<Envelope>> updateWhere(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     required _i1.ColumnValueListBuilder<EnvelopeUpdateTable> columnValues,
     required _i1.WhereExpressionBuilder<EnvelopeTable> where,
     int? limit,
@@ -603,31 +571,25 @@ class EnvelopeRepository {
   /// This is an atomic operation, meaning that if one of the rows fail to
   /// be deleted, none of the rows will be deleted.
   Future<List<Envelope>> delete(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     List<Envelope> rows, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.delete<Envelope>(
-      rows,
-      transaction: transaction,
-    );
+    return session.db.delete<Envelope>(rows, transaction: transaction);
   }
 
   /// Deletes a single [Envelope].
   Future<Envelope> deleteRow(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     Envelope row, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.deleteRow<Envelope>(
-      row,
-      transaction: transaction,
-    );
+    return session.db.deleteRow<Envelope>(row, transaction: transaction);
   }
 
   /// Deletes all rows matching the [where] expression.
   Future<List<Envelope>> deleteWhere(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     required _i1.WhereExpressionBuilder<EnvelopeTable> where,
     _i1.Transaction? transaction,
   }) async {
@@ -640,7 +602,7 @@ class EnvelopeRepository {
   /// Counts the number of rows matching the [where] expression. If omitted,
   /// will return the count of all rows in the table.
   Future<int> count(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     _i1.WhereExpressionBuilder<EnvelopeTable>? where,
     int? limit,
     _i1.Transaction? transaction,
@@ -648,6 +610,22 @@ class EnvelopeRepository {
     return session.db.count<Envelope>(
       where: where?.call(Envelope.t),
       limit: limit,
+      transaction: transaction,
+    );
+  }
+
+  /// Acquires row-level locks on [Envelope] rows matching the [where] expression.
+  Future<void> lockRows(
+    _i1.DatabaseSession session, {
+    required _i1.WhereExpressionBuilder<EnvelopeTable> where,
+    required _i1.LockMode lockMode,
+    required _i1.Transaction transaction,
+    _i1.LockBehavior lockBehavior = _i1.LockBehavior.wait,
+  }) async {
+    return session.db.lockRows<Envelope>(
+      where: where(Envelope.t),
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
       transaction: transaction,
     );
   }

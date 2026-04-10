@@ -77,13 +77,11 @@ Future<void> run(List<String> args) async {
                 required accountRequestId,
                 required verificationCode,
                 required transaction,
-              }) {
-                return emailSender.sendVerificationCode(
-                  session,
-                  email: email,
-                  code: verificationCode,
-                );
-              },
+              }) => emailSender.sendVerificationCode(
+                session,
+                email: email,
+                code: verificationCode,
+              ),
           sendPasswordResetVerificationCode:
               (
                 session, {
@@ -91,13 +89,11 @@ Future<void> run(List<String> args) async {
                 required passwordResetRequestId,
                 required verificationCode,
                 required transaction,
-              }) {
-                return emailSender.sendPasswordResetCode(
-                  session,
-                  email: email,
-                  code: verificationCode,
-                );
-              },
+              }) => emailSender.sendPasswordResetCode(
+                session,
+                email: email,
+                code: verificationCode,
+              ),
         ),
       if (googleIdpEnabled) GoogleIdpConfigFromPasswords(),
       if (appleIdpEnabled) AppleIdpConfigFromPasswords(),
@@ -199,9 +195,8 @@ bool? _readBoolPassword(Serverpod pod, String key) {
   }
 }
 
-bool _hasRequiredPasswords(Serverpod pod, List<String> keys) {
-  return keys.every((key) => _readPassword(pod, key) != null);
-}
+bool _hasRequiredPasswords(Serverpod pod, List<String> keys) =>
+    keys.every((key) => _readPassword(pod, key) != null);
 
 Future<void> _seedInstitutions(Serverpod pod) async {
   final session = await pod.createSession(enableLogging: false);
@@ -249,7 +244,5 @@ EmailSender? createEmailSender({
   );
 }
 
-bool _isLocalRunMode(String runMode) {
-  return runMode == ServerpodRunMode.development ||
-      runMode == ServerpodRunMode.test;
-}
+bool _isLocalRunMode(String runMode) =>
+    runMode == ServerpodRunMode.development || runMode == ServerpodRunMode.test;

@@ -246,105 +246,50 @@ class WalletHoldingUpdateTable extends _i1.UpdateTable<WalletHoldingTable> {
 
   _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> walletConnectionId(
     _i1.UuidValue value,
-  ) => _i1.ColumnValue(
-    table.walletConnectionId,
-    value,
-  );
+  ) => _i1.ColumnValue(table.walletConnectionId, value);
 
-  _i1.ColumnValue<String, String> chain(String value) => _i1.ColumnValue(
-    table.chain,
-    value,
-  );
+  _i1.ColumnValue<String, String> chain(String value) =>
+      _i1.ColumnValue(table.chain, value);
 
-  _i1.ColumnValue<String, String> assetId(String value) => _i1.ColumnValue(
-    table.assetId,
-    value,
-  );
+  _i1.ColumnValue<String, String> assetId(String value) =>
+      _i1.ColumnValue(table.assetId, value);
 
-  _i1.ColumnValue<String, String> symbol(String value) => _i1.ColumnValue(
-    table.symbol,
-    value,
-  );
+  _i1.ColumnValue<String, String> symbol(String value) =>
+      _i1.ColumnValue(table.symbol, value);
 
-  _i1.ColumnValue<int, int> decimals(int value) => _i1.ColumnValue(
-    table.decimals,
-    value,
-  );
+  _i1.ColumnValue<int, int> decimals(int value) =>
+      _i1.ColumnValue(table.decimals, value);
 
   _i1.ColumnValue<String, String> quantityBaseUnits(String value) =>
-      _i1.ColumnValue(
-        table.quantityBaseUnits,
-        value,
-      );
+      _i1.ColumnValue(table.quantityBaseUnits, value);
 
   _i1.ColumnValue<double, double> quantityDisplay(double value) =>
-      _i1.ColumnValue(
-        table.quantityDisplay,
-        value,
-      );
+      _i1.ColumnValue(table.quantityDisplay, value);
 
-  _i1.ColumnValue<double, double> usdPrice(double? value) => _i1.ColumnValue(
-    table.usdPrice,
-    value,
-  );
+  _i1.ColumnValue<double, double> usdPrice(double? value) =>
+      _i1.ColumnValue(table.usdPrice, value);
 
-  _i1.ColumnValue<double, double> usdValue(double? value) => _i1.ColumnValue(
-    table.usdValue,
-    value,
-  );
+  _i1.ColumnValue<double, double> usdValue(double? value) =>
+      _i1.ColumnValue(table.usdValue, value);
 
   _i1.ColumnValue<DateTime, DateTime> lastSyncedAt(DateTime value) =>
-      _i1.ColumnValue(
-        table.lastSyncedAt,
-        value,
-      );
+      _i1.ColumnValue(table.lastSyncedAt, value);
 }
 
 class WalletHoldingTable extends _i1.Table<_i1.UuidValue?> {
   WalletHoldingTable({super.tableRelation})
     : super(tableName: 'wallet_holding') {
     updateTable = WalletHoldingUpdateTable(this);
-    walletConnectionId = _i1.ColumnUuid(
-      'walletConnectionId',
-      this,
-    );
-    chain = _i1.ColumnString(
-      'chain',
-      this,
-    );
-    assetId = _i1.ColumnString(
-      'assetId',
-      this,
-    );
-    symbol = _i1.ColumnString(
-      'symbol',
-      this,
-    );
-    decimals = _i1.ColumnInt(
-      'decimals',
-      this,
-    );
-    quantityBaseUnits = _i1.ColumnString(
-      'quantityBaseUnits',
-      this,
-    );
-    quantityDisplay = _i1.ColumnDouble(
-      'quantityDisplay',
-      this,
-    );
-    usdPrice = _i1.ColumnDouble(
-      'usdPrice',
-      this,
-    );
-    usdValue = _i1.ColumnDouble(
-      'usdValue',
-      this,
-    );
-    lastSyncedAt = _i1.ColumnDateTime(
-      'lastSyncedAt',
-      this,
-      hasDefault: true,
-    );
+    walletConnectionId = _i1.ColumnUuid('walletConnectionId', this);
+    chain = _i1.ColumnString('chain', this);
+    assetId = _i1.ColumnString('assetId', this);
+    symbol = _i1.ColumnString('symbol', this);
+    decimals = _i1.ColumnInt('decimals', this);
+    quantityBaseUnits = _i1.ColumnString('quantityBaseUnits', this);
+    quantityDisplay = _i1.ColumnDouble('quantityDisplay', this);
+    usdPrice = _i1.ColumnDouble('usdPrice', this);
+    usdValue = _i1.ColumnDouble('usdValue', this);
+    lastSyncedAt = _i1.ColumnDateTime('lastSyncedAt', this, hasDefault: true);
   }
 
   late final WalletHoldingUpdateTable updateTable;
@@ -441,7 +386,7 @@ class WalletHoldingRepository {
   /// );
   /// ```
   Future<List<WalletHolding>> find(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     _i1.WhereExpressionBuilder<WalletHoldingTable>? where,
     int? limit,
     int? offset,
@@ -449,6 +394,8 @@ class WalletHoldingRepository {
     bool orderDescending = false,
     _i1.OrderByListBuilder<WalletHoldingTable>? orderByList,
     _i1.Transaction? transaction,
+    _i1.LockMode? lockMode,
+    _i1.LockBehavior? lockBehavior,
   }) async {
     return session.db.find<WalletHolding>(
       where: where?.call(WalletHolding.t),
@@ -458,6 +405,8 @@ class WalletHoldingRepository {
       limit: limit,
       offset: offset,
       transaction: transaction,
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
     );
   }
 
@@ -479,13 +428,15 @@ class WalletHoldingRepository {
   /// );
   /// ```
   Future<WalletHolding?> findFirstRow(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     _i1.WhereExpressionBuilder<WalletHoldingTable>? where,
     int? offset,
     _i1.OrderByBuilder<WalletHoldingTable>? orderBy,
     bool orderDescending = false,
     _i1.OrderByListBuilder<WalletHoldingTable>? orderByList,
     _i1.Transaction? transaction,
+    _i1.LockMode? lockMode,
+    _i1.LockBehavior? lockBehavior,
   }) async {
     return session.db.findFirstRow<WalletHolding>(
       where: where?.call(WalletHolding.t),
@@ -494,18 +445,24 @@ class WalletHoldingRepository {
       orderDescending: orderDescending,
       offset: offset,
       transaction: transaction,
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
     );
   }
 
   /// Finds a single [WalletHolding] by its [id] or null if no such row exists.
   Future<WalletHolding?> findById(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     _i1.UuidValue id, {
     _i1.Transaction? transaction,
+    _i1.LockMode? lockMode,
+    _i1.LockBehavior? lockBehavior,
   }) async {
     return session.db.findById<WalletHolding>(
       id,
       transaction: transaction,
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
     );
   }
 
@@ -515,14 +472,20 @@ class WalletHoldingRepository {
   ///
   /// This is an atomic operation, meaning that if one of the rows fails to
   /// insert, none of the rows will be inserted.
+  ///
+  /// If [ignoreConflicts] is set to `true`, rows that conflict with existing
+  /// rows are silently skipped, and only the successfully inserted rows are
+  /// returned.
   Future<List<WalletHolding>> insert(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     List<WalletHolding> rows, {
     _i1.Transaction? transaction,
+    bool ignoreConflicts = false,
   }) async {
     return session.db.insert<WalletHolding>(
       rows,
       transaction: transaction,
+      ignoreConflicts: ignoreConflicts,
     );
   }
 
@@ -530,14 +493,11 @@ class WalletHoldingRepository {
   ///
   /// The returned [WalletHolding] will have its `id` field set.
   Future<WalletHolding> insertRow(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     WalletHolding row, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.insertRow<WalletHolding>(
-      row,
-      transaction: transaction,
-    );
+    return session.db.insertRow<WalletHolding>(row, transaction: transaction);
   }
 
   /// Updates all [WalletHolding]s in the list and returns the updated rows. If
@@ -546,7 +506,7 @@ class WalletHoldingRepository {
   /// This is an atomic operation, meaning that if one of the rows fails to
   /// update, none of the rows will be updated.
   Future<List<WalletHolding>> update(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     List<WalletHolding> rows, {
     _i1.ColumnSelections<WalletHoldingTable>? columns,
     _i1.Transaction? transaction,
@@ -562,7 +522,7 @@ class WalletHoldingRepository {
   /// Optionally, a list of [columns] can be provided to only update those
   /// columns. Defaults to all columns.
   Future<WalletHolding> updateRow(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     WalletHolding row, {
     _i1.ColumnSelections<WalletHoldingTable>? columns,
     _i1.Transaction? transaction,
@@ -577,7 +537,7 @@ class WalletHoldingRepository {
   /// Updates a single [WalletHolding] by its [id] with the specified [columnValues].
   /// Returns the updated row or null if no row with the given id exists.
   Future<WalletHolding?> updateById(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     _i1.UuidValue id, {
     required _i1.ColumnValueListBuilder<WalletHoldingUpdateTable> columnValues,
     _i1.Transaction? transaction,
@@ -592,7 +552,7 @@ class WalletHoldingRepository {
   /// Updates all [WalletHolding]s matching the [where] expression with the specified [columnValues].
   /// Returns the list of updated rows.
   Future<List<WalletHolding>> updateWhere(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     required _i1.ColumnValueListBuilder<WalletHoldingUpdateTable> columnValues,
     required _i1.WhereExpressionBuilder<WalletHoldingTable> where,
     int? limit,
@@ -618,31 +578,25 @@ class WalletHoldingRepository {
   /// This is an atomic operation, meaning that if one of the rows fail to
   /// be deleted, none of the rows will be deleted.
   Future<List<WalletHolding>> delete(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     List<WalletHolding> rows, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.delete<WalletHolding>(
-      rows,
-      transaction: transaction,
-    );
+    return session.db.delete<WalletHolding>(rows, transaction: transaction);
   }
 
   /// Deletes a single [WalletHolding].
   Future<WalletHolding> deleteRow(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     WalletHolding row, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.deleteRow<WalletHolding>(
-      row,
-      transaction: transaction,
-    );
+    return session.db.deleteRow<WalletHolding>(row, transaction: transaction);
   }
 
   /// Deletes all rows matching the [where] expression.
   Future<List<WalletHolding>> deleteWhere(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     required _i1.WhereExpressionBuilder<WalletHoldingTable> where,
     _i1.Transaction? transaction,
   }) async {
@@ -655,7 +609,7 @@ class WalletHoldingRepository {
   /// Counts the number of rows matching the [where] expression. If omitted,
   /// will return the count of all rows in the table.
   Future<int> count(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     _i1.WhereExpressionBuilder<WalletHoldingTable>? where,
     int? limit,
     _i1.Transaction? transaction,
@@ -663,6 +617,22 @@ class WalletHoldingRepository {
     return session.db.count<WalletHolding>(
       where: where?.call(WalletHolding.t),
       limit: limit,
+      transaction: transaction,
+    );
+  }
+
+  /// Acquires row-level locks on [WalletHolding] rows matching the [where] expression.
+  Future<void> lockRows(
+    _i1.DatabaseSession session, {
+    required _i1.WhereExpressionBuilder<WalletHoldingTable> where,
+    required _i1.LockMode lockMode,
+    required _i1.Transaction transaction,
+    _i1.LockBehavior lockBehavior = _i1.LockBehavior.wait,
+  }) async {
+    return session.db.lockRows<WalletHolding>(
+      where: where(WalletHolding.t),
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
       transaction: transaction,
     );
   }

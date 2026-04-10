@@ -48,7 +48,9 @@ abstract class TransactionRule
       targetEnvelopeId: _i1.UuidValueJsonExtension.fromJson(
         jsonSerialization['targetEnvelopeId'],
       ),
-      enabled: jsonSerialization['enabled'] as bool?,
+      enabled: jsonSerialization['enabled'] == null
+          ? null
+          : _i1.BoolJsonExtension.fromJson(jsonSerialization['enabled']),
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
@@ -191,62 +193,31 @@ class TransactionRuleUpdateTable extends _i1.UpdateTable<TransactionRuleTable> {
   TransactionRuleUpdateTable(super.table);
 
   _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> budgetId(_i1.UuidValue value) =>
-      _i1.ColumnValue(
-        table.budgetId,
-        value,
-      );
+      _i1.ColumnValue(table.budgetId, value);
 
   _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> payeeId(_i1.UuidValue value) =>
-      _i1.ColumnValue(
-        table.payeeId,
-        value,
-      );
+      _i1.ColumnValue(table.payeeId, value);
 
   _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> targetEnvelopeId(
     _i1.UuidValue value,
-  ) => _i1.ColumnValue(
-    table.targetEnvelopeId,
-    value,
-  );
+  ) => _i1.ColumnValue(table.targetEnvelopeId, value);
 
-  _i1.ColumnValue<bool, bool> enabled(bool value) => _i1.ColumnValue(
-    table.enabled,
-    value,
-  );
+  _i1.ColumnValue<bool, bool> enabled(bool value) =>
+      _i1.ColumnValue(table.enabled, value);
 
   _i1.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
-      _i1.ColumnValue(
-        table.createdAt,
-        value,
-      );
+      _i1.ColumnValue(table.createdAt, value);
 }
 
 class TransactionRuleTable extends _i1.Table<_i1.UuidValue?> {
   TransactionRuleTable({super.tableRelation})
     : super(tableName: 'transaction_rule') {
     updateTable = TransactionRuleUpdateTable(this);
-    budgetId = _i1.ColumnUuid(
-      'budgetId',
-      this,
-    );
-    payeeId = _i1.ColumnUuid(
-      'payeeId',
-      this,
-    );
-    targetEnvelopeId = _i1.ColumnUuid(
-      'targetEnvelopeId',
-      this,
-    );
-    enabled = _i1.ColumnBool(
-      'enabled',
-      this,
-      hasDefault: true,
-    );
-    createdAt = _i1.ColumnDateTime(
-      'createdAt',
-      this,
-      hasDefault: true,
-    );
+    budgetId = _i1.ColumnUuid('budgetId', this);
+    payeeId = _i1.ColumnUuid('payeeId', this);
+    targetEnvelopeId = _i1.ColumnUuid('targetEnvelopeId', this);
+    enabled = _i1.ColumnBool('enabled', this, hasDefault: true);
+    createdAt = _i1.ColumnDateTime('createdAt', this, hasDefault: true);
   }
 
   late final TransactionRuleUpdateTable updateTable;
@@ -331,7 +302,7 @@ class TransactionRuleRepository {
   /// );
   /// ```
   Future<List<TransactionRule>> find(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     _i1.WhereExpressionBuilder<TransactionRuleTable>? where,
     int? limit,
     int? offset,
@@ -339,6 +310,8 @@ class TransactionRuleRepository {
     bool orderDescending = false,
     _i1.OrderByListBuilder<TransactionRuleTable>? orderByList,
     _i1.Transaction? transaction,
+    _i1.LockMode? lockMode,
+    _i1.LockBehavior? lockBehavior,
   }) async {
     return session.db.find<TransactionRule>(
       where: where?.call(TransactionRule.t),
@@ -348,6 +321,8 @@ class TransactionRuleRepository {
       limit: limit,
       offset: offset,
       transaction: transaction,
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
     );
   }
 
@@ -369,13 +344,15 @@ class TransactionRuleRepository {
   /// );
   /// ```
   Future<TransactionRule?> findFirstRow(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     _i1.WhereExpressionBuilder<TransactionRuleTable>? where,
     int? offset,
     _i1.OrderByBuilder<TransactionRuleTable>? orderBy,
     bool orderDescending = false,
     _i1.OrderByListBuilder<TransactionRuleTable>? orderByList,
     _i1.Transaction? transaction,
+    _i1.LockMode? lockMode,
+    _i1.LockBehavior? lockBehavior,
   }) async {
     return session.db.findFirstRow<TransactionRule>(
       where: where?.call(TransactionRule.t),
@@ -384,18 +361,24 @@ class TransactionRuleRepository {
       orderDescending: orderDescending,
       offset: offset,
       transaction: transaction,
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
     );
   }
 
   /// Finds a single [TransactionRule] by its [id] or null if no such row exists.
   Future<TransactionRule?> findById(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     _i1.UuidValue id, {
     _i1.Transaction? transaction,
+    _i1.LockMode? lockMode,
+    _i1.LockBehavior? lockBehavior,
   }) async {
     return session.db.findById<TransactionRule>(
       id,
       transaction: transaction,
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
     );
   }
 
@@ -405,14 +388,20 @@ class TransactionRuleRepository {
   ///
   /// This is an atomic operation, meaning that if one of the rows fails to
   /// insert, none of the rows will be inserted.
+  ///
+  /// If [ignoreConflicts] is set to `true`, rows that conflict with existing
+  /// rows are silently skipped, and only the successfully inserted rows are
+  /// returned.
   Future<List<TransactionRule>> insert(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     List<TransactionRule> rows, {
     _i1.Transaction? transaction,
+    bool ignoreConflicts = false,
   }) async {
     return session.db.insert<TransactionRule>(
       rows,
       transaction: transaction,
+      ignoreConflicts: ignoreConflicts,
     );
   }
 
@@ -420,14 +409,11 @@ class TransactionRuleRepository {
   ///
   /// The returned [TransactionRule] will have its `id` field set.
   Future<TransactionRule> insertRow(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     TransactionRule row, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.insertRow<TransactionRule>(
-      row,
-      transaction: transaction,
-    );
+    return session.db.insertRow<TransactionRule>(row, transaction: transaction);
   }
 
   /// Updates all [TransactionRule]s in the list and returns the updated rows. If
@@ -436,7 +422,7 @@ class TransactionRuleRepository {
   /// This is an atomic operation, meaning that if one of the rows fails to
   /// update, none of the rows will be updated.
   Future<List<TransactionRule>> update(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     List<TransactionRule> rows, {
     _i1.ColumnSelections<TransactionRuleTable>? columns,
     _i1.Transaction? transaction,
@@ -452,7 +438,7 @@ class TransactionRuleRepository {
   /// Optionally, a list of [columns] can be provided to only update those
   /// columns. Defaults to all columns.
   Future<TransactionRule> updateRow(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     TransactionRule row, {
     _i1.ColumnSelections<TransactionRuleTable>? columns,
     _i1.Transaction? transaction,
@@ -467,7 +453,7 @@ class TransactionRuleRepository {
   /// Updates a single [TransactionRule] by its [id] with the specified [columnValues].
   /// Returns the updated row or null if no row with the given id exists.
   Future<TransactionRule?> updateById(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     _i1.UuidValue id, {
     required _i1.ColumnValueListBuilder<TransactionRuleUpdateTable>
     columnValues,
@@ -483,7 +469,7 @@ class TransactionRuleRepository {
   /// Updates all [TransactionRule]s matching the [where] expression with the specified [columnValues].
   /// Returns the list of updated rows.
   Future<List<TransactionRule>> updateWhere(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     required _i1.ColumnValueListBuilder<TransactionRuleUpdateTable>
     columnValues,
     required _i1.WhereExpressionBuilder<TransactionRuleTable> where,
@@ -510,31 +496,25 @@ class TransactionRuleRepository {
   /// This is an atomic operation, meaning that if one of the rows fail to
   /// be deleted, none of the rows will be deleted.
   Future<List<TransactionRule>> delete(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     List<TransactionRule> rows, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.delete<TransactionRule>(
-      rows,
-      transaction: transaction,
-    );
+    return session.db.delete<TransactionRule>(rows, transaction: transaction);
   }
 
   /// Deletes a single [TransactionRule].
   Future<TransactionRule> deleteRow(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     TransactionRule row, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.deleteRow<TransactionRule>(
-      row,
-      transaction: transaction,
-    );
+    return session.db.deleteRow<TransactionRule>(row, transaction: transaction);
   }
 
   /// Deletes all rows matching the [where] expression.
   Future<List<TransactionRule>> deleteWhere(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     required _i1.WhereExpressionBuilder<TransactionRuleTable> where,
     _i1.Transaction? transaction,
   }) async {
@@ -547,7 +527,7 @@ class TransactionRuleRepository {
   /// Counts the number of rows matching the [where] expression. If omitted,
   /// will return the count of all rows in the table.
   Future<int> count(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     _i1.WhereExpressionBuilder<TransactionRuleTable>? where,
     int? limit,
     _i1.Transaction? transaction,
@@ -555,6 +535,22 @@ class TransactionRuleRepository {
     return session.db.count<TransactionRule>(
       where: where?.call(TransactionRule.t),
       limit: limit,
+      transaction: transaction,
+    );
+  }
+
+  /// Acquires row-level locks on [TransactionRule] rows matching the [where] expression.
+  Future<void> lockRows(
+    _i1.DatabaseSession session, {
+    required _i1.WhereExpressionBuilder<TransactionRuleTable> where,
+    required _i1.LockMode lockMode,
+    required _i1.Transaction transaction,
+    _i1.LockBehavior lockBehavior = _i1.LockBehavior.wait,
+  }) async {
+    return session.db.lockRows<TransactionRule>(
+      where: where(TransactionRule.t),
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
       transaction: transaction,
     );
   }

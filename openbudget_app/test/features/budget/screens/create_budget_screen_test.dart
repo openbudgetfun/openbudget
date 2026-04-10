@@ -13,16 +13,14 @@ void main() {
     GoogleFonts.config.allowRuntimeFetching = false;
   });
 
-  Widget buildSubject() {
-    return ProviderScope(
-      child: MaterialApp(
-        theme: OpenBudgetTheme.light,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: const CreateBudgetScreen(),
-      ),
-    );
-  }
+  Widget buildSubject() => ProviderScope(
+    child: MaterialApp(
+      theme: OpenBudgetTheme.light,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: const CreateBudgetScreen(),
+    ),
+  );
 
   group('CreateBudgetScreen', () {
     testWidgets('renders welcome onboarding layout', (tester) async {

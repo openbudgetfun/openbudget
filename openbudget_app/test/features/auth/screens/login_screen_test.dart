@@ -12,16 +12,14 @@ void main() {
     GoogleFonts.config.allowRuntimeFetching = false;
   });
 
-  Widget buildSubject() {
-    return ProviderScope(
-      child: MaterialApp(
-        theme: OpenBudgetTheme.light,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: const LoginScreen(),
-      ),
-    );
-  }
+  Widget buildSubject() => ProviderScope(
+    child: MaterialApp(
+      theme: OpenBudgetTheme.light,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: const LoginScreen(),
+    ),
+  );
 
   group('LoginScreen', () {
     testWidgets('renders OpenBudget login fields', (tester) async {

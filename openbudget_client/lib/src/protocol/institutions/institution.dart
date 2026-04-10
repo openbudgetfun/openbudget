@@ -44,7 +44,9 @@ abstract class Institution implements _i1.SerializableModel {
       name: jsonSerialization['name'] as String,
       website: jsonSerialization['website'] as String?,
       plaidInstitutionId: jsonSerialization['plaidInstitutionId'] as String?,
-      isDigitalBank: jsonSerialization['isDigitalBank'] as bool?,
+      isDigitalBank: jsonSerialization['isDigitalBank'] == null
+          ? null
+          : _i1.BoolJsonExtension.fromJson(jsonSerialization['isDigitalBank']),
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),

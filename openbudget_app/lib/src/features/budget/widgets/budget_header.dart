@@ -52,7 +52,7 @@ class BudgetHeader extends HookConsumerWidget {
         ? OpenBudgetPalette.fgPrimaryFor(theme)
         : OpenBudgetPalette.fgErrorFor(theme);
 
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
@@ -570,25 +570,23 @@ class _SummaryColumn extends HookWidget {
   final Color? valueColor;
 
   @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          label,
-          style: theme.textTheme.labelSmall?.copyWith(
-            color: OpenBudgetPalette.fgSecondaryFor(theme),
-          ),
+  Widget build(BuildContext context) => Column(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Text(
+        label,
+        style: theme.textTheme.labelSmall?.copyWith(
+          color: OpenBudgetPalette.fgSecondaryFor(theme),
         ),
-        const SizedBox(height: 2),
-        Text(
-          value,
-          style: theme.textTheme.bodySmall?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: valueColor,
-          ),
+      ),
+      const SizedBox(height: 2),
+      Text(
+        value,
+        style: theme.textTheme.bodySmall?.copyWith(
+          fontWeight: FontWeight.w600,
+          color: valueColor,
         ),
-      ],
-    );
-  }
+      ),
+    ],
+  );
 }

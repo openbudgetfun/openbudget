@@ -32,22 +32,20 @@ class ObTextField extends StatelessWidget {
   final bool enabled;
 
   @override
-  Widget build(BuildContext context) {
-    return TextField(
-      controller: controller,
-      obscureText: obscureText,
-      keyboardType: keyboardType,
-      autofocus: autofocus,
-      enabled: enabled,
-      onChanged: onChanged,
-      onSubmitted: onSubmitted,
-      decoration: InputDecoration(
-        hintText: hintText,
-        labelText: labelText,
-        prefixText: prefixText,
-        prefixIcon: prefixIcon,
-        suffixIcon: suffixIcon,
-      ),
-    );
-  }
+  Widget build(BuildContext context) => TextField(
+    controller: controller,
+    obscureText: obscureText,
+    keyboardType: keyboardType,
+    autofocus: autofocus,
+    enabled: enabled,
+    onChanged: onChanged,
+    onSubmitted: onSubmitted,
+    decoration: InputDecoration(
+      hintText: hintText,
+      labelText: labelText,
+      prefixText: prefixText,
+      prefixIcon: prefixIcon,
+      suffixIcon: suffixIcon,
+    ),
+  );
 }

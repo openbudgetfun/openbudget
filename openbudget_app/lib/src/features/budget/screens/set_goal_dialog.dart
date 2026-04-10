@@ -589,17 +589,15 @@ class SetGoalDialog extends HookConsumerWidget {
     int amountCents,
     int repeatEvery,
     _RepeatUnit repeatUnit,
-  ) {
-    return switch (cadence) {
-      _GoalCadence.weekly => ((amountCents * 52) / 12).round(),
-      _GoalCadence.monthly => amountCents,
-      _GoalCadence.yearly => (amountCents / 12).round(),
-      _GoalCadence.custom => switch (repeatUnit) {
-        _RepeatUnit.month => (amountCents / repeatEvery).round(),
-        _RepeatUnit.year => (amountCents / (repeatEvery * 12)).round(),
-      },
-    };
-  }
+  ) => switch (cadence) {
+    _GoalCadence.weekly => ((amountCents * 52) / 12).round(),
+    _GoalCadence.monthly => amountCents,
+    _GoalCadence.yearly => (amountCents / 12).round(),
+    _GoalCadence.custom => switch (repeatUnit) {
+      _RepeatUnit.month => (amountCents / repeatEvery).round(),
+      _RepeatUnit.year => (amountCents / (repeatEvery * 12)).round(),
+    },
+  };
 
   _GoalPayload _buildGoalPayload({
     required _GoalCadence cadence,
@@ -670,16 +668,14 @@ class _GoalCard extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
-        borderRadius: BorderRadius.circular(RadiusTokens.md),
-        border: Border.all(
-          color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
-        ),
+  Widget build(BuildContext context) => DecoratedBox(
+    decoration: BoxDecoration(
+      color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
+      borderRadius: BorderRadius.circular(RadiusTokens.md),
+      border: Border.all(
+        color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
       ),
-      child: child,
-    );
-  }
+    ),
+    child: child,
+  );
 }

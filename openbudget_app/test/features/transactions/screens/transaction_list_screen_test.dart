@@ -98,39 +98,37 @@ void main() {
     List<Payee>? payees,
     List<Account>? accounts,
     BudgetSummary? summary,
-  }) {
-    return ProviderScope(
-      overrides: [
-        transactionListProvider.overrideWith(
-          (ref, id) async => transactions ?? sampleTransactions,
-        ),
-        budgetDetailProvider.overrideWith((ref, id) async => makeBudget()),
-        budgetSummaryProvider.overrideWith(
-          (ref, id) async =>
-              summary ??
-              BudgetSummary(
-                budget: makeBudget(),
-                categories: const [],
-                totalIncomeCents: 0,
-                totalBudgetedCents: 0,
-                readyToAssignCents: 0,
-                year: 2026,
-                month: 2,
-              ),
-        ),
-        payeeListProvider.overrideWith((ref, id) async => payees ?? <Payee>[]),
-        accountListProvider.overrideWith(
-          (ref, id) async => accounts ?? <Account>[],
-        ),
-      ],
-      child: MaterialApp(
-        theme: OpenBudgetTheme.light,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: const TransactionListScreen(budgetId: budgetId),
+  }) => ProviderScope(
+    overrides: [
+      transactionListProvider.overrideWith(
+        (ref, id) async => transactions ?? sampleTransactions,
       ),
-    );
-  }
+      budgetDetailProvider.overrideWith((ref, id) async => makeBudget()),
+      budgetSummaryProvider.overrideWith(
+        (ref, id) async =>
+            summary ??
+            BudgetSummary(
+              budget: makeBudget(),
+              categories: const [],
+              totalIncomeCents: 0,
+              totalBudgetedCents: 0,
+              readyToAssignCents: 0,
+              year: 2026,
+              month: 2,
+            ),
+      ),
+      payeeListProvider.overrideWith((ref, id) async => payees ?? <Payee>[]),
+      accountListProvider.overrideWith(
+        (ref, id) async => accounts ?? <Account>[],
+      ),
+    ],
+    child: MaterialApp(
+      theme: OpenBudgetTheme.light,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: const TransactionListScreen(budgetId: budgetId),
+    ),
+  );
 
   group('TransactionListScreen', () {
     testWidgets('renders loading state initially', (tester) async {

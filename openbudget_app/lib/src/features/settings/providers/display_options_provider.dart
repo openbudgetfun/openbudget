@@ -99,12 +99,11 @@ class AppIconStyleNotifier extends Notifier<AppIconStyle> {
 
 class HideAmountsNotifier extends Notifier<bool> {
   @override
-  bool build() {
-    return ref
-            .watch(uiPreferencesStoreProvider)
-            .readBool(UiPreferenceKeys.hideAmounts) ??
-        false;
-  }
+  bool build() =>
+      ref
+          .watch(uiPreferencesStoreProvider)
+          .readBool(UiPreferenceKeys.hideAmounts) ??
+      false;
 
   // ignore: use_setters_to_change_properties, Keep explicit command-style API for consistency with other notifiers.
   void setHideAmounts({required bool value}) {
@@ -115,12 +114,11 @@ class HideAmountsNotifier extends Notifier<bool> {
 
 class HideProgressBarsNotifier extends Notifier<bool> {
   @override
-  bool build() {
-    return ref
-            .watch(uiPreferencesStoreProvider)
-            .readBool(UiPreferenceKeys.hideProgressBars) ??
-        false;
-  }
+  bool build() =>
+      ref
+          .watch(uiPreferencesStoreProvider)
+          .readBool(UiPreferenceKeys.hideProgressBars) ??
+      false;
 
   // ignore: use_setters_to_change_properties, Keep explicit command-style API for consistency with other notifiers.
   void setHideProgressBars({required bool value}) {

@@ -241,97 +241,46 @@ class WalletConnectionUpdateTable
   WalletConnectionUpdateTable(super.table);
 
   _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> budgetId(_i1.UuidValue value) =>
-      _i1.ColumnValue(
-        table.budgetId,
-        value,
-      );
+      _i1.ColumnValue(table.budgetId, value);
 
-  _i1.ColumnValue<String, String> chain(String value) => _i1.ColumnValue(
-    table.chain,
-    value,
-  );
+  _i1.ColumnValue<String, String> chain(String value) =>
+      _i1.ColumnValue(table.chain, value);
 
-  _i1.ColumnValue<String, String> address(String value) => _i1.ColumnValue(
-    table.address,
-    value,
-  );
+  _i1.ColumnValue<String, String> address(String value) =>
+      _i1.ColumnValue(table.address, value);
 
-  _i1.ColumnValue<String, String> label(String? value) => _i1.ColumnValue(
-    table.label,
-    value,
-  );
+  _i1.ColumnValue<String, String> label(String? value) =>
+      _i1.ColumnValue(table.label, value);
 
   _i1.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
-      _i1.ColumnValue(
-        table.createdAt,
-        value,
-      );
+      _i1.ColumnValue(table.createdAt, value);
 
   _i1.ColumnValue<DateTime, DateTime> updatedAt(DateTime value) =>
-      _i1.ColumnValue(
-        table.updatedAt,
-        value,
-      );
+      _i1.ColumnValue(table.updatedAt, value);
 
   _i1.ColumnValue<DateTime, DateTime> lastSyncedAt(DateTime? value) =>
-      _i1.ColumnValue(
-        table.lastSyncedAt,
-        value,
-      );
+      _i1.ColumnValue(table.lastSyncedAt, value);
 
-  _i1.ColumnValue<String, String> syncStatus(String? value) => _i1.ColumnValue(
-    table.syncStatus,
-    value,
-  );
+  _i1.ColumnValue<String, String> syncStatus(String? value) =>
+      _i1.ColumnValue(table.syncStatus, value);
 
-  _i1.ColumnValue<String, String> lastError(String? value) => _i1.ColumnValue(
-    table.lastError,
-    value,
-  );
+  _i1.ColumnValue<String, String> lastError(String? value) =>
+      _i1.ColumnValue(table.lastError, value);
 }
 
 class WalletConnectionTable extends _i1.Table<_i1.UuidValue?> {
   WalletConnectionTable({super.tableRelation})
     : super(tableName: 'wallet_connection') {
     updateTable = WalletConnectionUpdateTable(this);
-    budgetId = _i1.ColumnUuid(
-      'budgetId',
-      this,
-    );
-    chain = _i1.ColumnString(
-      'chain',
-      this,
-    );
-    address = _i1.ColumnString(
-      'address',
-      this,
-    );
-    label = _i1.ColumnString(
-      'label',
-      this,
-    );
-    createdAt = _i1.ColumnDateTime(
-      'createdAt',
-      this,
-      hasDefault: true,
-    );
-    updatedAt = _i1.ColumnDateTime(
-      'updatedAt',
-      this,
-      hasDefault: true,
-    );
-    lastSyncedAt = _i1.ColumnDateTime(
-      'lastSyncedAt',
-      this,
-    );
-    syncStatus = _i1.ColumnString(
-      'syncStatus',
-      this,
-    );
-    lastError = _i1.ColumnString(
-      'lastError',
-      this,
-    );
+    budgetId = _i1.ColumnUuid('budgetId', this);
+    chain = _i1.ColumnString('chain', this);
+    address = _i1.ColumnString('address', this);
+    label = _i1.ColumnString('label', this);
+    createdAt = _i1.ColumnDateTime('createdAt', this, hasDefault: true);
+    updatedAt = _i1.ColumnDateTime('updatedAt', this, hasDefault: true);
+    lastSyncedAt = _i1.ColumnDateTime('lastSyncedAt', this);
+    syncStatus = _i1.ColumnString('syncStatus', this);
+    lastError = _i1.ColumnString('lastError', this);
   }
 
   late final WalletConnectionUpdateTable updateTable;
@@ -425,7 +374,7 @@ class WalletConnectionRepository {
   /// );
   /// ```
   Future<List<WalletConnection>> find(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     _i1.WhereExpressionBuilder<WalletConnectionTable>? where,
     int? limit,
     int? offset,
@@ -433,6 +382,8 @@ class WalletConnectionRepository {
     bool orderDescending = false,
     _i1.OrderByListBuilder<WalletConnectionTable>? orderByList,
     _i1.Transaction? transaction,
+    _i1.LockMode? lockMode,
+    _i1.LockBehavior? lockBehavior,
   }) async {
     return session.db.find<WalletConnection>(
       where: where?.call(WalletConnection.t),
@@ -442,6 +393,8 @@ class WalletConnectionRepository {
       limit: limit,
       offset: offset,
       transaction: transaction,
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
     );
   }
 
@@ -463,13 +416,15 @@ class WalletConnectionRepository {
   /// );
   /// ```
   Future<WalletConnection?> findFirstRow(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     _i1.WhereExpressionBuilder<WalletConnectionTable>? where,
     int? offset,
     _i1.OrderByBuilder<WalletConnectionTable>? orderBy,
     bool orderDescending = false,
     _i1.OrderByListBuilder<WalletConnectionTable>? orderByList,
     _i1.Transaction? transaction,
+    _i1.LockMode? lockMode,
+    _i1.LockBehavior? lockBehavior,
   }) async {
     return session.db.findFirstRow<WalletConnection>(
       where: where?.call(WalletConnection.t),
@@ -478,18 +433,24 @@ class WalletConnectionRepository {
       orderDescending: orderDescending,
       offset: offset,
       transaction: transaction,
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
     );
   }
 
   /// Finds a single [WalletConnection] by its [id] or null if no such row exists.
   Future<WalletConnection?> findById(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     _i1.UuidValue id, {
     _i1.Transaction? transaction,
+    _i1.LockMode? lockMode,
+    _i1.LockBehavior? lockBehavior,
   }) async {
     return session.db.findById<WalletConnection>(
       id,
       transaction: transaction,
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
     );
   }
 
@@ -499,14 +460,20 @@ class WalletConnectionRepository {
   ///
   /// This is an atomic operation, meaning that if one of the rows fails to
   /// insert, none of the rows will be inserted.
+  ///
+  /// If [ignoreConflicts] is set to `true`, rows that conflict with existing
+  /// rows are silently skipped, and only the successfully inserted rows are
+  /// returned.
   Future<List<WalletConnection>> insert(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     List<WalletConnection> rows, {
     _i1.Transaction? transaction,
+    bool ignoreConflicts = false,
   }) async {
     return session.db.insert<WalletConnection>(
       rows,
       transaction: transaction,
+      ignoreConflicts: ignoreConflicts,
     );
   }
 
@@ -514,7 +481,7 @@ class WalletConnectionRepository {
   ///
   /// The returned [WalletConnection] will have its `id` field set.
   Future<WalletConnection> insertRow(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     WalletConnection row, {
     _i1.Transaction? transaction,
   }) async {
@@ -530,7 +497,7 @@ class WalletConnectionRepository {
   /// This is an atomic operation, meaning that if one of the rows fails to
   /// update, none of the rows will be updated.
   Future<List<WalletConnection>> update(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     List<WalletConnection> rows, {
     _i1.ColumnSelections<WalletConnectionTable>? columns,
     _i1.Transaction? transaction,
@@ -546,7 +513,7 @@ class WalletConnectionRepository {
   /// Optionally, a list of [columns] can be provided to only update those
   /// columns. Defaults to all columns.
   Future<WalletConnection> updateRow(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     WalletConnection row, {
     _i1.ColumnSelections<WalletConnectionTable>? columns,
     _i1.Transaction? transaction,
@@ -561,7 +528,7 @@ class WalletConnectionRepository {
   /// Updates a single [WalletConnection] by its [id] with the specified [columnValues].
   /// Returns the updated row or null if no row with the given id exists.
   Future<WalletConnection?> updateById(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     _i1.UuidValue id, {
     required _i1.ColumnValueListBuilder<WalletConnectionUpdateTable>
     columnValues,
@@ -577,7 +544,7 @@ class WalletConnectionRepository {
   /// Updates all [WalletConnection]s matching the [where] expression with the specified [columnValues].
   /// Returns the list of updated rows.
   Future<List<WalletConnection>> updateWhere(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     required _i1.ColumnValueListBuilder<WalletConnectionUpdateTable>
     columnValues,
     required _i1.WhereExpressionBuilder<WalletConnectionTable> where,
@@ -604,19 +571,16 @@ class WalletConnectionRepository {
   /// This is an atomic operation, meaning that if one of the rows fail to
   /// be deleted, none of the rows will be deleted.
   Future<List<WalletConnection>> delete(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     List<WalletConnection> rows, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.delete<WalletConnection>(
-      rows,
-      transaction: transaction,
-    );
+    return session.db.delete<WalletConnection>(rows, transaction: transaction);
   }
 
   /// Deletes a single [WalletConnection].
   Future<WalletConnection> deleteRow(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     WalletConnection row, {
     _i1.Transaction? transaction,
   }) async {
@@ -628,7 +592,7 @@ class WalletConnectionRepository {
 
   /// Deletes all rows matching the [where] expression.
   Future<List<WalletConnection>> deleteWhere(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     required _i1.WhereExpressionBuilder<WalletConnectionTable> where,
     _i1.Transaction? transaction,
   }) async {
@@ -641,7 +605,7 @@ class WalletConnectionRepository {
   /// Counts the number of rows matching the [where] expression. If omitted,
   /// will return the count of all rows in the table.
   Future<int> count(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     _i1.WhereExpressionBuilder<WalletConnectionTable>? where,
     int? limit,
     _i1.Transaction? transaction,
@@ -649,6 +613,22 @@ class WalletConnectionRepository {
     return session.db.count<WalletConnection>(
       where: where?.call(WalletConnection.t),
       limit: limit,
+      transaction: transaction,
+    );
+  }
+
+  /// Acquires row-level locks on [WalletConnection] rows matching the [where] expression.
+  Future<void> lockRows(
+    _i1.DatabaseSession session, {
+    required _i1.WhereExpressionBuilder<WalletConnectionTable> where,
+    required _i1.LockMode lockMode,
+    required _i1.Transaction transaction,
+    _i1.LockBehavior lockBehavior = _i1.LockBehavior.wait,
+  }) async {
+    return session.db.lockRows<WalletConnection>(
+      where: where(WalletConnection.t),
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
       transaction: transaction,
     );
   }

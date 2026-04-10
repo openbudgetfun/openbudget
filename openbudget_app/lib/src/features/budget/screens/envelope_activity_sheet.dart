@@ -71,221 +71,156 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
       minChildSize: 0.3,
       maxChildSize: 0.9,
       expand: false,
-      builder: (context, scrollController) {
-        return Column(
-          children: [
-            // Drag handle
-            Container(
-              margin: const EdgeInsets.only(top: SpacingTokens.sm),
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: colorScheme.outlineVariant,
-                borderRadius: BorderRadius.circular(2),
-              ),
+      builder: (context, scrollController) => Column(
+        children: [
+          // Drag handle
+          Container(
+            margin: const EdgeInsets.only(top: SpacingTokens.sm),
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: colorScheme.outlineVariant,
+              borderRadius: BorderRadius.circular(2),
             ),
-            // Header: Name + Available pill
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                SpacingTokens.md,
-                SpacingTokens.md,
-                SpacingTokens.md,
-                0,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Row 1: Envelope name + Available pill
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          envelope.name,
-                          style: theme.textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+          ),
+          // Header: Name + Available pill
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              SpacingTokens.md,
+              SpacingTokens.md,
+              SpacingTokens.md,
+              0,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Row 1: Envelope name + Available pill
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        envelope.name,
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(width: SpacingTokens.sm),
-                      _AvailablePill(
-                        amount: hideAmounts
-                            ? hiddenAmountPlaceholder
-                            : formatCents(available, currencyCode),
-                        color: availableColor,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: SpacingTokens.md),
-                  // Balance breakdown grid (2x2)
-                  _BalanceGrid(
-                    carryover: carryover,
-                    assigned: budgeted,
-                    activity: spent,
-                    available: available,
-                    currencyCode: currencyCode,
-                    availableColor: availableColor,
-                    hideAmounts: hideAmounts,
-                  ),
-                  // Goal progress bar (if goal set)
-                  if (goal != null) ...[
-                    const SizedBox(height: SpacingTokens.md),
-                    _GoalSummary(
-                      goal: goal!,
-                      budgetedCents: budgeted,
-                      availableCents: available,
-                      currencyCode: currencyCode,
-                      hideAmounts: hideAmounts,
-                      hideProgressBars: hideProgressBars,
+                    ),
+                    const SizedBox(width: SpacingTokens.sm),
+                    _AvailablePill(
+                      amount: hideAmounts
+                          ? hiddenAmountPlaceholder
+                          : formatCents(available, currencyCode),
+                      color: availableColor,
                     ),
                   ],
-                  if (envelope.note != null && envelope.note!.isNotEmpty) ...[
-                    const SizedBox(height: SpacingTokens.sm),
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(SpacingTokens.sm),
-                      decoration: BoxDecoration(
-                        color: colorScheme.surfaceContainerHighest.withAlpha(
-                          80,
+                ),
+                const SizedBox(height: SpacingTokens.md),
+                // Balance breakdown grid (2x2)
+                _BalanceGrid(
+                  carryover: carryover,
+                  assigned: budgeted,
+                  activity: spent,
+                  available: available,
+                  currencyCode: currencyCode,
+                  availableColor: availableColor,
+                  hideAmounts: hideAmounts,
+                ),
+                // Goal progress bar (if goal set)
+                if (goal != null) ...[
+                  const SizedBox(height: SpacingTokens.md),
+                  _GoalSummary(
+                    goal: goal!,
+                    budgetedCents: budgeted,
+                    availableCents: available,
+                    currencyCode: currencyCode,
+                    hideAmounts: hideAmounts,
+                    hideProgressBars: hideProgressBars,
+                  ),
+                ],
+                if (envelope.note != null && envelope.note!.isNotEmpty) ...[
+                  const SizedBox(height: SpacingTokens.sm),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(SpacingTokens.sm),
+                    decoration: BoxDecoration(
+                      color: colorScheme.surfaceContainerHighest.withAlpha(80),
+                      borderRadius: BorderRadius.circular(RadiusTokens.sm),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          Icons.note_outlined,
+                          size: 16,
+                          color: colorScheme.onSurfaceVariant,
                         ),
-                        borderRadius: BorderRadius.circular(RadiusTokens.sm),
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(
-                            Icons.note_outlined,
-                            size: 16,
-                            color: colorScheme.onSurfaceVariant,
-                          ),
-                          const SizedBox(width: SpacingTokens.xs),
-                          Expanded(
-                            child: Text(
-                              envelope.note!,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: colorScheme.onSurfaceVariant,
-                              ),
+                        const SizedBox(width: SpacingTokens.xs),
+                        Expanded(
+                          child: Text(
+                            envelope.note!,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                  ],
-                  const SizedBox(height: SpacingTokens.md),
-                  // Action button row
-                  _ActionButtonRow(
-                    onMoveMoney: () => _showMoveMoney(context),
-                    onSetGoal: () => _showSetGoal(context),
-                    onEditEnvelope: () => _showEditEnvelope(context),
-                  ),
-                  const SizedBox(height: SpacingTokens.md),
-                  Text(
-                    l10n.envelopeActivityTitle,
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
+                        ),
+                      ],
                     ),
                   ),
                 ],
-              ),
+                const SizedBox(height: SpacingTokens.md),
+                // Action button row
+                _ActionButtonRow(
+                  onMoveMoney: () => _showMoveMoney(context),
+                  onSetGoal: () => _showSetGoal(context),
+                  onEditEnvelope: () => _showEditEnvelope(context),
+                ),
+                const SizedBox(height: SpacingTokens.md),
+                Text(
+                  l10n.envelopeActivityTitle,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
             ),
-            const Divider(height: 1),
-            // Transaction list
-            Expanded(
-              child: transactionsAsync.when(
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (_, __) =>
-                    Center(child: Text(l10n.transactionLoadError)),
-                data: (allTransactions) {
-                  final envelopeId = envelope.id?.toString();
-                  final transactions =
-                      allTransactions
-                          .where((t) => t.envelopeId?.toString() == envelopeId)
-                          .toList()
-                        ..sort(
-                          (a, b) =>
-                              b.transactionDate.compareTo(a.transactionDate),
-                        );
+          ),
+          const Divider(height: 1),
+          // Transaction list
+          Expanded(
+            child: transactionsAsync.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (_, __) => Center(child: Text(l10n.transactionLoadError)),
+              data: (allTransactions) {
+                final envelopeId = envelope.id?.toString();
+                final transactions =
+                    allTransactions
+                        .where((t) => t.envelopeId?.toString() == envelopeId)
+                        .toList()
+                      ..sort(
+                        (a, b) =>
+                            b.transactionDate.compareTo(a.transactionDate),
+                      );
 
-                  if (transactions.isEmpty) {
-                    return LayoutBuilder(
-                      builder: (context, constraints) {
-                        final showIcon = constraints.maxHeight >= 72;
-                        return Center(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              if (showIcon) ...[
-                                Icon(
-                                  Icons.receipt_long_rounded,
-                                  size: 40,
-                                  color: colorScheme.outlineVariant,
-                                ),
-                                const SizedBox(height: SpacingTokens.sm),
-                              ],
-                              Text(
-                                l10n.envelopeNoActivity,
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: colorScheme.onSurfaceVariant,
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    );
-                  }
-
-                  return ListView.builder(
-                    controller: scrollController,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: SpacingTokens.md,
-                    ),
-                    itemCount: transactions.length,
-                    itemBuilder: (context, index) {
-                      final tx = transactions[index];
-                      final isIncome = tx.amountCents > 0;
-                      final color = isIncome
-                          ? ColorTokens.secondary
-                          : ColorTokens.error;
-
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: SpacingTokens.xs,
-                        ),
-                        child: Row(
+                if (transactions.isEmpty) {
+                  return LayoutBuilder(
+                    builder: (context, constraints) {
+                      final showIcon = constraints.maxHeight >= 72;
+                      return Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(
-                              isIncome
-                                  ? Icons.arrow_downward_rounded
-                                  : Icons.arrow_upward_rounded,
-                              color: color,
-                              size: 16,
-                            ),
-                            const SizedBox(width: SpacingTokens.sm),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    tx.description,
-                                    style: theme.textTheme.bodyMedium,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  Text(
-                                    _formatDate(tx.transactionDate),
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: colorScheme.onSurfaceVariant,
-                                    ),
-                                  ),
-                                ],
+                            if (showIcon) ...[
+                              Icon(
+                                Icons.receipt_long_rounded,
+                                size: 40,
+                                color: colorScheme.outlineVariant,
                               ),
-                            ),
+                              const SizedBox(height: SpacingTokens.sm),
+                            ],
                             Text(
-                              hideAmounts
-                                  ? hiddenAmountPlaceholder
-                                  : formatCents(tx.amountCents, currencyCode),
+                              l10n.envelopeNoActivity,
                               style: theme.textTheme.bodyMedium?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: color,
+                                color: colorScheme.onSurfaceVariant,
                               ),
                             ),
                           ],
@@ -293,12 +228,72 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
                       );
                     },
                   );
-                },
-              ),
+                }
+
+                return ListView.builder(
+                  controller: scrollController,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: SpacingTokens.md,
+                  ),
+                  itemCount: transactions.length,
+                  itemBuilder: (context, index) {
+                    final tx = transactions[index];
+                    final isIncome = tx.amountCents > 0;
+                    final color = isIncome
+                        ? ColorTokens.secondary
+                        : ColorTokens.error;
+
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: SpacingTokens.xs,
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            isIncome
+                                ? Icons.arrow_downward_rounded
+                                : Icons.arrow_upward_rounded,
+                            color: color,
+                            size: 16,
+                          ),
+                          const SizedBox(width: SpacingTokens.sm),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  tx.description,
+                                  style: theme.textTheme.bodyMedium,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                Text(
+                                  _formatDate(tx.transactionDate),
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Text(
+                            hideAmounts
+                                ? hiddenAmountPlaceholder
+                                : formatCents(tx.amountCents, currencyCode),
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: color,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                );
+              },
             ),
-          ],
-        );
-      },
+          ),
+        ],
+      ),
     );
   }
 
@@ -341,9 +336,8 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
     );
   }
 
-  String _formatDate(DateTime date) {
-    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
-  }
+  String _formatDate(DateTime date) =>
+      '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
 }
 
 class _AvailablePill extends HookWidget {

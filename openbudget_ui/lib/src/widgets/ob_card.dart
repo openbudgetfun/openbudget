@@ -8,9 +8,7 @@ class ObCard extends StatelessWidget {
   final EdgeInsetsGeometry? padding;
 
   @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: padding != null ? Padding(padding: padding!, child: child) : child,
-    );
-  }
+  Widget build(BuildContext context) => Card(
+    child: padding != null ? Padding(padding: padding!, child: child) : child,
+  );
 }

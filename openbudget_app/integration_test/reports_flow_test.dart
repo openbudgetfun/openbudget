@@ -26,54 +26,51 @@ final _budgetUuid = UuidValue.fromString(
   '00000000-0000-0000-0000-000000000601',
 );
 
-SpendingReport _makeReportForMonth(int year, int month) {
-  return switch ((year, month)) {
-    (2026, 2) => const SpendingReport(
-      totalIncome: 800000,
-      totalExpenses: 222000,
-      netIncome: 578000,
-      transactionCount: 9,
-      categorySpending: {'Rent': 120000, 'Clothing': 80000, 'Utilities': 22000},
-      currencyCode: 'USD',
-    ),
-    (2026, 1) => const SpendingReport(
-      totalIncome: 800000,
-      totalExpenses: 162000,
-      netIncome: 638000,
-      transactionCount: 8,
-      categorySpending: {'Rent': 90000, 'Clothing': 50000, 'Utilities': 22000},
-      currencyCode: 'USD',
-    ),
-    (2025, 12) => const SpendingReport(
-      totalIncome: 800000,
-      totalExpenses: 282000,
-      netIncome: 518000,
-      transactionCount: 10,
-      categorySpending: {
-        'Rent': 150000,
-        'Clothing': 100000,
-        'Utilities': 32000,
-      },
-      currencyCode: 'USD',
-    ),
-    (2025, 11) => const SpendingReport(
-      totalIncome: 730000,
-      totalExpenses: 152000,
-      netIncome: 578000,
-      transactionCount: 8,
-      categorySpending: {'Rent': 80000, 'Clothing': 50000, 'Utilities': 22000},
-      currencyCode: 'USD',
-    ),
-    _ => const SpendingReport(
-      totalIncome: 0,
-      totalExpenses: 0,
-      netIncome: 0,
-      transactionCount: 0,
-      categorySpending: {},
-      currencyCode: 'USD',
-    ),
-  };
-}
+SpendingReport _makeReportForMonth(int year, int month) => switch ((
+  year,
+  month,
+)) {
+  (2026, 2) => const SpendingReport(
+    totalIncome: 800000,
+    totalExpenses: 222000,
+    netIncome: 578000,
+    transactionCount: 9,
+    categorySpending: {'Rent': 120000, 'Clothing': 80000, 'Utilities': 22000},
+    currencyCode: 'USD',
+  ),
+  (2026, 1) => const SpendingReport(
+    totalIncome: 800000,
+    totalExpenses: 162000,
+    netIncome: 638000,
+    transactionCount: 8,
+    categorySpending: {'Rent': 90000, 'Clothing': 50000, 'Utilities': 22000},
+    currencyCode: 'USD',
+  ),
+  (2025, 12) => const SpendingReport(
+    totalIncome: 800000,
+    totalExpenses: 282000,
+    netIncome: 518000,
+    transactionCount: 10,
+    categorySpending: {'Rent': 150000, 'Clothing': 100000, 'Utilities': 32000},
+    currencyCode: 'USD',
+  ),
+  (2025, 11) => const SpendingReport(
+    totalIncome: 730000,
+    totalExpenses: 152000,
+    netIncome: 578000,
+    transactionCount: 8,
+    categorySpending: {'Rent': 80000, 'Clothing': 50000, 'Utilities': 22000},
+    currencyCode: 'USD',
+  ),
+  _ => const SpendingReport(
+    totalIncome: 0,
+    totalExpenses: 0,
+    netIncome: 0,
+    transactionCount: 0,
+    categorySpending: {},
+    currencyCode: 'USD',
+  ),
+};
 
 NetWorthData _makeNetWorthData() {
   final checking = Account(

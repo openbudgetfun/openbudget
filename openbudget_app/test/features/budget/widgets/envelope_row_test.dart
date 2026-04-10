@@ -31,34 +31,30 @@ void main() {
     int spentAmountCents = 20000,
     String? note,
     bool? isHidden,
-  }) {
-    return Envelope(
-      id: testEnvelopeId,
-      name: name,
-      categoryId: testCategoryId,
-      budgetedAmountCents: budgetedAmountCents,
-      spentAmountCents: spentAmountCents,
-      currencyCode: 'USD',
-      sortOrder: 0,
-      note: note,
-      isHidden: isHidden,
-    );
-  }
+  }) => Envelope(
+    id: testEnvelopeId,
+    name: name,
+    categoryId: testCategoryId,
+    budgetedAmountCents: budgetedAmountCents,
+    spentAmountCents: spentAmountCents,
+    currencyCode: 'USD',
+    sortOrder: 0,
+    note: note,
+    isHidden: isHidden,
+  );
 
   EnvelopeGoal makeGoal({
     String goalType = 'target_balance',
     int targetAmountCents = 100000,
     int? monthlyFundingCents,
     DateTime? targetDate,
-  }) {
-    return EnvelopeGoal(
-      envelopeId: testEnvelopeId,
-      goalType: goalType,
-      targetAmountCents: targetAmountCents,
-      monthlyFundingCents: monthlyFundingCents,
-      targetDate: targetDate,
-    );
-  }
+  }) => EnvelopeGoal(
+    envelopeId: testEnvelopeId,
+    goalType: goalType,
+    targetAmountCents: targetAmountCents,
+    monthlyFundingCents: monthlyFundingCents,
+    targetDate: targetDate,
+  );
 
   Widget buildSubject({
     required Envelope envelope,
@@ -68,28 +64,26 @@ void main() {
     VoidCallback? onQuickBudget,
     bool hideAmounts = false,
     bool hideProgressBars = false,
-  }) {
-    return ProviderScope(
-      child: MaterialApp(
-        theme: OpenBudgetTheme.light,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: Scaffold(
-          body: EnvelopeRow(
-            envelope: envelope,
-            currencyCode: currencyCode,
-            onTap: () {},
-            onLongPress: () {},
-            monthlyData: monthlyData,
-            goal: goal,
-            onQuickBudget: onQuickBudget,
-            hideAmounts: hideAmounts,
-            hideProgressBars: hideProgressBars,
-          ),
+  }) => ProviderScope(
+    child: MaterialApp(
+      theme: OpenBudgetTheme.light,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: Scaffold(
+        body: EnvelopeRow(
+          envelope: envelope,
+          currencyCode: currencyCode,
+          onTap: () {},
+          onLongPress: () {},
+          monthlyData: monthlyData,
+          goal: goal,
+          onQuickBudget: onQuickBudget,
+          hideAmounts: hideAmounts,
+          hideProgressBars: hideProgressBars,
         ),
       ),
-    );
-  }
+    ),
+  );
 
   group('EnvelopeRow', () {
     testWidgets('renders envelope name and amounts', (tester) async {

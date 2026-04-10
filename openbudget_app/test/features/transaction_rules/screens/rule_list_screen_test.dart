@@ -26,62 +26,52 @@ final _categoryUuid = UuidValue.fromString(
   '00000000-0000-0000-0000-000000000040',
 );
 
-Budget _makeBudget() {
-  return Budget(name: 'Test Budget', currencyCode: 'USD', ownerId: _ownerUuid);
-}
+Budget _makeBudget() =>
+    Budget(name: 'Test Budget', currencyCode: 'USD', ownerId: _ownerUuid);
 
-Payee _makePayee({String name = 'Test Payee', UuidValue? id}) {
-  return Payee(id: id ?? _payeeUuid, name: name, budgetId: _budgetUuid);
-}
+Payee _makePayee({String name = 'Test Payee', UuidValue? id}) =>
+    Payee(id: id ?? _payeeUuid, name: name, budgetId: _budgetUuid);
 
 TransactionRule _makeRule({
   UuidValue? id,
   UuidValue? payeeId,
   UuidValue? targetEnvelopeId,
   bool enabled = true,
-}) {
-  return TransactionRule(
-    id: id,
-    budgetId: _budgetUuid,
-    payeeId: payeeId ?? _payeeUuid,
-    targetEnvelopeId: targetEnvelopeId ?? _envelopeUuid,
-    enabled: enabled,
-  );
-}
+}) => TransactionRule(
+  id: id,
+  budgetId: _budgetUuid,
+  payeeId: payeeId ?? _payeeUuid,
+  targetEnvelopeId: targetEnvelopeId ?? _envelopeUuid,
+  enabled: enabled,
+);
 
-Envelope _makeEnvelope({String name = 'Groceries', UuidValue? id}) {
-  return Envelope(
-    id: id ?? _envelopeUuid,
-    name: name,
-    budgetedAmountCents: 0,
-    spentAmountCents: 0,
-    currencyCode: 'USD',
-    categoryId: _categoryUuid,
-    sortOrder: 0,
-  );
-}
+Envelope _makeEnvelope({String name = 'Groceries', UuidValue? id}) => Envelope(
+  id: id ?? _envelopeUuid,
+  name: name,
+  budgetedAmountCents: 0,
+  spentAmountCents: 0,
+  currencyCode: 'USD',
+  categoryId: _categoryUuid,
+  sortOrder: 0,
+);
 
-Category _makeCategory({String name = 'Food'}) {
-  return Category(
-    id: _categoryUuid,
-    name: name,
-    budgetId: _budgetUuid,
-    sortOrder: 0,
-    isHidden: false,
-  );
-}
+Category _makeCategory({String name = 'Food'}) => Category(
+  id: _categoryUuid,
+  name: name,
+  budgetId: _budgetUuid,
+  sortOrder: 0,
+  isHidden: false,
+);
 
-BudgetSummary _makeEmptySummary() {
-  return BudgetSummary(
-    budget: _makeBudget(),
-    categories: const [],
-    totalIncomeCents: 0,
-    totalBudgetedCents: 0,
-    readyToAssignCents: 0,
-    year: 2026,
-    month: 2,
-  );
-}
+BudgetSummary _makeEmptySummary() => BudgetSummary(
+  budget: _makeBudget(),
+  categories: const [],
+  totalIncomeCents: 0,
+  totalBudgetedCents: 0,
+  readyToAssignCents: 0,
+  year: 2026,
+  month: 2,
+);
 
 BudgetSummary _makeSummaryWithEnvelope({
   String categoryName = 'Food',

@@ -129,12 +129,7 @@ class _PayeeImpl extends Payee {
     required String name,
     required _i1.UuidValue budgetId,
     DateTime? createdAt,
-  }) : super._(
-         id: id,
-         name: name,
-         budgetId: budgetId,
-         createdAt: createdAt,
-       );
+  }) : super._(id: id, name: name, budgetId: budgetId, createdAt: createdAt);
 
   /// Returns a shallow copy of this [Payee]
   /// with some or all fields replaced by the given arguments.
@@ -158,40 +153,22 @@ class _PayeeImpl extends Payee {
 class PayeeUpdateTable extends _i1.UpdateTable<PayeeTable> {
   PayeeUpdateTable(super.table);
 
-  _i1.ColumnValue<String, String> name(String value) => _i1.ColumnValue(
-    table.name,
-    value,
-  );
+  _i1.ColumnValue<String, String> name(String value) =>
+      _i1.ColumnValue(table.name, value);
 
   _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> budgetId(_i1.UuidValue value) =>
-      _i1.ColumnValue(
-        table.budgetId,
-        value,
-      );
+      _i1.ColumnValue(table.budgetId, value);
 
   _i1.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
-      _i1.ColumnValue(
-        table.createdAt,
-        value,
-      );
+      _i1.ColumnValue(table.createdAt, value);
 }
 
 class PayeeTable extends _i1.Table<_i1.UuidValue?> {
   PayeeTable({super.tableRelation}) : super(tableName: 'payee') {
     updateTable = PayeeUpdateTable(this);
-    name = _i1.ColumnString(
-      'name',
-      this,
-    );
-    budgetId = _i1.ColumnUuid(
-      'budgetId',
-      this,
-    );
-    createdAt = _i1.ColumnDateTime(
-      'createdAt',
-      this,
-      hasDefault: true,
-    );
+    name = _i1.ColumnString('name', this);
+    budgetId = _i1.ColumnUuid('budgetId', this);
+    createdAt = _i1.ColumnDateTime('createdAt', this, hasDefault: true);
   }
 
   late final PayeeUpdateTable updateTable;
@@ -203,12 +180,7 @@ class PayeeTable extends _i1.Table<_i1.UuidValue?> {
   late final _i1.ColumnDateTime createdAt;
 
   @override
-  List<_i1.Column> get columns => [
-    id,
-    name,
-    budgetId,
-    createdAt,
-  ];
+  List<_i1.Column> get columns => [id, name, budgetId, createdAt];
 }
 
 class PayeeInclude extends _i1.IncludeObject {
@@ -267,7 +239,7 @@ class PayeeRepository {
   /// );
   /// ```
   Future<List<Payee>> find(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     _i1.WhereExpressionBuilder<PayeeTable>? where,
     int? limit,
     int? offset,
@@ -275,6 +247,8 @@ class PayeeRepository {
     bool orderDescending = false,
     _i1.OrderByListBuilder<PayeeTable>? orderByList,
     _i1.Transaction? transaction,
+    _i1.LockMode? lockMode,
+    _i1.LockBehavior? lockBehavior,
   }) async {
     return session.db.find<Payee>(
       where: where?.call(Payee.t),
@@ -284,6 +258,8 @@ class PayeeRepository {
       limit: limit,
       offset: offset,
       transaction: transaction,
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
     );
   }
 
@@ -305,13 +281,15 @@ class PayeeRepository {
   /// );
   /// ```
   Future<Payee?> findFirstRow(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     _i1.WhereExpressionBuilder<PayeeTable>? where,
     int? offset,
     _i1.OrderByBuilder<PayeeTable>? orderBy,
     bool orderDescending = false,
     _i1.OrderByListBuilder<PayeeTable>? orderByList,
     _i1.Transaction? transaction,
+    _i1.LockMode? lockMode,
+    _i1.LockBehavior? lockBehavior,
   }) async {
     return session.db.findFirstRow<Payee>(
       where: where?.call(Payee.t),
@@ -320,18 +298,24 @@ class PayeeRepository {
       orderDescending: orderDescending,
       offset: offset,
       transaction: transaction,
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
     );
   }
 
   /// Finds a single [Payee] by its [id] or null if no such row exists.
   Future<Payee?> findById(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     _i1.UuidValue id, {
     _i1.Transaction? transaction,
+    _i1.LockMode? lockMode,
+    _i1.LockBehavior? lockBehavior,
   }) async {
     return session.db.findById<Payee>(
       id,
       transaction: transaction,
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
     );
   }
 
@@ -341,14 +325,20 @@ class PayeeRepository {
   ///
   /// This is an atomic operation, meaning that if one of the rows fails to
   /// insert, none of the rows will be inserted.
+  ///
+  /// If [ignoreConflicts] is set to `true`, rows that conflict with existing
+  /// rows are silently skipped, and only the successfully inserted rows are
+  /// returned.
   Future<List<Payee>> insert(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     List<Payee> rows, {
     _i1.Transaction? transaction,
+    bool ignoreConflicts = false,
   }) async {
     return session.db.insert<Payee>(
       rows,
       transaction: transaction,
+      ignoreConflicts: ignoreConflicts,
     );
   }
 
@@ -356,14 +346,11 @@ class PayeeRepository {
   ///
   /// The returned [Payee] will have its `id` field set.
   Future<Payee> insertRow(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     Payee row, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.insertRow<Payee>(
-      row,
-      transaction: transaction,
-    );
+    return session.db.insertRow<Payee>(row, transaction: transaction);
   }
 
   /// Updates all [Payee]s in the list and returns the updated rows. If
@@ -372,7 +359,7 @@ class PayeeRepository {
   /// This is an atomic operation, meaning that if one of the rows fails to
   /// update, none of the rows will be updated.
   Future<List<Payee>> update(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     List<Payee> rows, {
     _i1.ColumnSelections<PayeeTable>? columns,
     _i1.Transaction? transaction,
@@ -388,7 +375,7 @@ class PayeeRepository {
   /// Optionally, a list of [columns] can be provided to only update those
   /// columns. Defaults to all columns.
   Future<Payee> updateRow(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     Payee row, {
     _i1.ColumnSelections<PayeeTable>? columns,
     _i1.Transaction? transaction,
@@ -403,7 +390,7 @@ class PayeeRepository {
   /// Updates a single [Payee] by its [id] with the specified [columnValues].
   /// Returns the updated row or null if no row with the given id exists.
   Future<Payee?> updateById(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     _i1.UuidValue id, {
     required _i1.ColumnValueListBuilder<PayeeUpdateTable> columnValues,
     _i1.Transaction? transaction,
@@ -418,7 +405,7 @@ class PayeeRepository {
   /// Updates all [Payee]s matching the [where] expression with the specified [columnValues].
   /// Returns the list of updated rows.
   Future<List<Payee>> updateWhere(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     required _i1.ColumnValueListBuilder<PayeeUpdateTable> columnValues,
     required _i1.WhereExpressionBuilder<PayeeTable> where,
     int? limit,
@@ -444,31 +431,25 @@ class PayeeRepository {
   /// This is an atomic operation, meaning that if one of the rows fail to
   /// be deleted, none of the rows will be deleted.
   Future<List<Payee>> delete(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     List<Payee> rows, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.delete<Payee>(
-      rows,
-      transaction: transaction,
-    );
+    return session.db.delete<Payee>(rows, transaction: transaction);
   }
 
   /// Deletes a single [Payee].
   Future<Payee> deleteRow(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     Payee row, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.deleteRow<Payee>(
-      row,
-      transaction: transaction,
-    );
+    return session.db.deleteRow<Payee>(row, transaction: transaction);
   }
 
   /// Deletes all rows matching the [where] expression.
   Future<List<Payee>> deleteWhere(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     required _i1.WhereExpressionBuilder<PayeeTable> where,
     _i1.Transaction? transaction,
   }) async {
@@ -481,7 +462,7 @@ class PayeeRepository {
   /// Counts the number of rows matching the [where] expression. If omitted,
   /// will return the count of all rows in the table.
   Future<int> count(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     _i1.WhereExpressionBuilder<PayeeTable>? where,
     int? limit,
     _i1.Transaction? transaction,
@@ -489,6 +470,22 @@ class PayeeRepository {
     return session.db.count<Payee>(
       where: where?.call(Payee.t),
       limit: limit,
+      transaction: transaction,
+    );
+  }
+
+  /// Acquires row-level locks on [Payee] rows matching the [where] expression.
+  Future<void> lockRows(
+    _i1.DatabaseSession session, {
+    required _i1.WhereExpressionBuilder<PayeeTable> where,
+    required _i1.LockMode lockMode,
+    required _i1.Transaction transaction,
+    _i1.LockBehavior lockBehavior = _i1.LockBehavior.wait,
+  }) async {
+    return session.db.lockRows<Payee>(
+      where: where(Payee.t),
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
       transaction: transaction,
     );
   }

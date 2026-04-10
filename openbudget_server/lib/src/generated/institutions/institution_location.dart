@@ -43,7 +43,9 @@ abstract class InstitutionLocation
         jsonSerialization['institutionId'],
       ),
       locationCode: jsonSerialization['locationCode'] as String,
-      isPopular: jsonSerialization['isPopular'] as bool?,
+      isPopular: jsonSerialization['isPopular'] == null
+          ? null
+          : _i1.BoolJsonExtension.fromJson(jsonSerialization['isPopular']),
       popularityRank: jsonSerialization['popularityRank'] as int?,
       createdAt: jsonSerialization['createdAt'] == null
           ? null
@@ -191,59 +193,30 @@ class InstitutionLocationUpdateTable
 
   _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> institutionId(
     _i1.UuidValue value,
-  ) => _i1.ColumnValue(
-    table.institutionId,
-    value,
-  );
+  ) => _i1.ColumnValue(table.institutionId, value);
 
-  _i1.ColumnValue<String, String> locationCode(String value) => _i1.ColumnValue(
-    table.locationCode,
-    value,
-  );
+  _i1.ColumnValue<String, String> locationCode(String value) =>
+      _i1.ColumnValue(table.locationCode, value);
 
-  _i1.ColumnValue<bool, bool> isPopular(bool value) => _i1.ColumnValue(
-    table.isPopular,
-    value,
-  );
+  _i1.ColumnValue<bool, bool> isPopular(bool value) =>
+      _i1.ColumnValue(table.isPopular, value);
 
-  _i1.ColumnValue<int, int> popularityRank(int? value) => _i1.ColumnValue(
-    table.popularityRank,
-    value,
-  );
+  _i1.ColumnValue<int, int> popularityRank(int? value) =>
+      _i1.ColumnValue(table.popularityRank, value);
 
   _i1.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
-      _i1.ColumnValue(
-        table.createdAt,
-        value,
-      );
+      _i1.ColumnValue(table.createdAt, value);
 }
 
 class InstitutionLocationTable extends _i1.Table<_i1.UuidValue?> {
   InstitutionLocationTable({super.tableRelation})
     : super(tableName: 'institution_location') {
     updateTable = InstitutionLocationUpdateTable(this);
-    institutionId = _i1.ColumnUuid(
-      'institutionId',
-      this,
-    );
-    locationCode = _i1.ColumnString(
-      'locationCode',
-      this,
-    );
-    isPopular = _i1.ColumnBool(
-      'isPopular',
-      this,
-      hasDefault: true,
-    );
-    popularityRank = _i1.ColumnInt(
-      'popularityRank',
-      this,
-    );
-    createdAt = _i1.ColumnDateTime(
-      'createdAt',
-      this,
-      hasDefault: true,
-    );
+    institutionId = _i1.ColumnUuid('institutionId', this);
+    locationCode = _i1.ColumnString('locationCode', this);
+    isPopular = _i1.ColumnBool('isPopular', this, hasDefault: true);
+    popularityRank = _i1.ColumnInt('popularityRank', this);
+    createdAt = _i1.ColumnDateTime('createdAt', this, hasDefault: true);
   }
 
   late final InstitutionLocationUpdateTable updateTable;
@@ -328,7 +301,7 @@ class InstitutionLocationRepository {
   /// );
   /// ```
   Future<List<InstitutionLocation>> find(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     _i1.WhereExpressionBuilder<InstitutionLocationTable>? where,
     int? limit,
     int? offset,
@@ -336,6 +309,8 @@ class InstitutionLocationRepository {
     bool orderDescending = false,
     _i1.OrderByListBuilder<InstitutionLocationTable>? orderByList,
     _i1.Transaction? transaction,
+    _i1.LockMode? lockMode,
+    _i1.LockBehavior? lockBehavior,
   }) async {
     return session.db.find<InstitutionLocation>(
       where: where?.call(InstitutionLocation.t),
@@ -345,6 +320,8 @@ class InstitutionLocationRepository {
       limit: limit,
       offset: offset,
       transaction: transaction,
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
     );
   }
 
@@ -366,13 +343,15 @@ class InstitutionLocationRepository {
   /// );
   /// ```
   Future<InstitutionLocation?> findFirstRow(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     _i1.WhereExpressionBuilder<InstitutionLocationTable>? where,
     int? offset,
     _i1.OrderByBuilder<InstitutionLocationTable>? orderBy,
     bool orderDescending = false,
     _i1.OrderByListBuilder<InstitutionLocationTable>? orderByList,
     _i1.Transaction? transaction,
+    _i1.LockMode? lockMode,
+    _i1.LockBehavior? lockBehavior,
   }) async {
     return session.db.findFirstRow<InstitutionLocation>(
       where: where?.call(InstitutionLocation.t),
@@ -381,18 +360,24 @@ class InstitutionLocationRepository {
       orderDescending: orderDescending,
       offset: offset,
       transaction: transaction,
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
     );
   }
 
   /// Finds a single [InstitutionLocation] by its [id] or null if no such row exists.
   Future<InstitutionLocation?> findById(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     _i1.UuidValue id, {
     _i1.Transaction? transaction,
+    _i1.LockMode? lockMode,
+    _i1.LockBehavior? lockBehavior,
   }) async {
     return session.db.findById<InstitutionLocation>(
       id,
       transaction: transaction,
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
     );
   }
 
@@ -402,14 +387,20 @@ class InstitutionLocationRepository {
   ///
   /// This is an atomic operation, meaning that if one of the rows fails to
   /// insert, none of the rows will be inserted.
+  ///
+  /// If [ignoreConflicts] is set to `true`, rows that conflict with existing
+  /// rows are silently skipped, and only the successfully inserted rows are
+  /// returned.
   Future<List<InstitutionLocation>> insert(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     List<InstitutionLocation> rows, {
     _i1.Transaction? transaction,
+    bool ignoreConflicts = false,
   }) async {
     return session.db.insert<InstitutionLocation>(
       rows,
       transaction: transaction,
+      ignoreConflicts: ignoreConflicts,
     );
   }
 
@@ -417,7 +408,7 @@ class InstitutionLocationRepository {
   ///
   /// The returned [InstitutionLocation] will have its `id` field set.
   Future<InstitutionLocation> insertRow(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     InstitutionLocation row, {
     _i1.Transaction? transaction,
   }) async {
@@ -433,7 +424,7 @@ class InstitutionLocationRepository {
   /// This is an atomic operation, meaning that if one of the rows fails to
   /// update, none of the rows will be updated.
   Future<List<InstitutionLocation>> update(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     List<InstitutionLocation> rows, {
     _i1.ColumnSelections<InstitutionLocationTable>? columns,
     _i1.Transaction? transaction,
@@ -449,7 +440,7 @@ class InstitutionLocationRepository {
   /// Optionally, a list of [columns] can be provided to only update those
   /// columns. Defaults to all columns.
   Future<InstitutionLocation> updateRow(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     InstitutionLocation row, {
     _i1.ColumnSelections<InstitutionLocationTable>? columns,
     _i1.Transaction? transaction,
@@ -464,7 +455,7 @@ class InstitutionLocationRepository {
   /// Updates a single [InstitutionLocation] by its [id] with the specified [columnValues].
   /// Returns the updated row or null if no row with the given id exists.
   Future<InstitutionLocation?> updateById(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     _i1.UuidValue id, {
     required _i1.ColumnValueListBuilder<InstitutionLocationUpdateTable>
     columnValues,
@@ -480,7 +471,7 @@ class InstitutionLocationRepository {
   /// Updates all [InstitutionLocation]s matching the [where] expression with the specified [columnValues].
   /// Returns the list of updated rows.
   Future<List<InstitutionLocation>> updateWhere(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     required _i1.ColumnValueListBuilder<InstitutionLocationUpdateTable>
     columnValues,
     required _i1.WhereExpressionBuilder<InstitutionLocationTable> where,
@@ -507,7 +498,7 @@ class InstitutionLocationRepository {
   /// This is an atomic operation, meaning that if one of the rows fail to
   /// be deleted, none of the rows will be deleted.
   Future<List<InstitutionLocation>> delete(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     List<InstitutionLocation> rows, {
     _i1.Transaction? transaction,
   }) async {
@@ -519,7 +510,7 @@ class InstitutionLocationRepository {
 
   /// Deletes a single [InstitutionLocation].
   Future<InstitutionLocation> deleteRow(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     InstitutionLocation row, {
     _i1.Transaction? transaction,
   }) async {
@@ -531,7 +522,7 @@ class InstitutionLocationRepository {
 
   /// Deletes all rows matching the [where] expression.
   Future<List<InstitutionLocation>> deleteWhere(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     required _i1.WhereExpressionBuilder<InstitutionLocationTable> where,
     _i1.Transaction? transaction,
   }) async {
@@ -544,7 +535,7 @@ class InstitutionLocationRepository {
   /// Counts the number of rows matching the [where] expression. If omitted,
   /// will return the count of all rows in the table.
   Future<int> count(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     _i1.WhereExpressionBuilder<InstitutionLocationTable>? where,
     int? limit,
     _i1.Transaction? transaction,
@@ -552,6 +543,22 @@ class InstitutionLocationRepository {
     return session.db.count<InstitutionLocation>(
       where: where?.call(InstitutionLocation.t),
       limit: limit,
+      transaction: transaction,
+    );
+  }
+
+  /// Acquires row-level locks on [InstitutionLocation] rows matching the [where] expression.
+  Future<void> lockRows(
+    _i1.DatabaseSession session, {
+    required _i1.WhereExpressionBuilder<InstitutionLocationTable> where,
+    required _i1.LockMode lockMode,
+    required _i1.Transaction transaction,
+    _i1.LockBehavior lockBehavior = _i1.LockBehavior.wait,
+  }) async {
+    return session.db.lockRows<InstitutionLocation>(
+      where: where(InstitutionLocation.t),
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
       transaction: transaction,
     );
   }

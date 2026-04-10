@@ -43,17 +43,15 @@ void main() {
     isClosed: false,
   );
 
-  Widget buildSubject(NetWorthData data) {
-    return ProviderScope(
-      overrides: [netWorthProvider.overrideWith((ref, id) async => data)],
-      child: MaterialApp(
-        theme: OpenBudgetTheme.light,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: const NetWorthScreen(budgetId: budgetId),
-      ),
-    );
-  }
+  Widget buildSubject(NetWorthData data) => ProviderScope(
+    overrides: [netWorthProvider.overrideWith((ref, id) async => data)],
+    child: MaterialApp(
+      theme: OpenBudgetTheme.light,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: const NetWorthScreen(budgetId: budgetId),
+    ),
+  );
 
   testWidgets('renders single-currency net worth summary', (tester) async {
     final usdAccount = makeAccount(

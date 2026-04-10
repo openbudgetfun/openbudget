@@ -8,6 +8,10 @@ analyzer:
     unused_element: error
     unused_import: error
     unused_local_variable: error
+    unused_field: error
+    unnecessary_null_comparison: error
+    invalid_use_of_protected_member: error
+    invalid_override: error
     todo: ignore
   exclude:
     - "**/*.g.dart"
@@ -21,6 +25,90 @@ linter:
     # Relax rules that conflict with Serverpod generated code
     public_member_api_docs: false
     lines_longer_than_80_chars: false
+
+    # ── Strictness & safety ──
+    always_declare_return_types: true
+    always_put_required_named_parameters_first: true
+    annotate_redeclares: true
+    avoid_bool_literals_in_conditional_expressions: true
+    avoid_double_and_int_checks: true
+    avoid_equals_and_hash_code_on_mutable_classes: true
+    avoid_escaping_inner_quotes: true
+    avoid_field_initializers_in_const_classes: true
+    avoid_implementing_value_types: true
+    avoid_multiple_declarations_per_line: true
+    avoid_positional_boolean_parameters: true
+    avoid_private_typedef_functions: true
+    avoid_redundant_argument_values: true
+    avoid_returning_this: true
+    avoid_setters_without_getters: true
+    avoid_slow_async_io: true
+    avoid_type_to_string: true
+    avoid_types_on_closure_parameters: true
+    avoid_unused_constructor_parameters: true
+    avoid_void_async: true
+    cancel_subscriptions: true
+    close_sinks: true
+    combinators_ordering: true
+    comment_references: true
+    conditional_uri_does_not_exist: true
+    deprecated_consistency: true
+    directives_ordering: true
+    # Disabled: project uses String.fromEnvironment for compile-time --dart-define config
+    do_not_use_environment: false
+    eol_at_end_of_file: true
+    implicit_call_tearoffs: true
+    join_return_with_assignment: true
+    leading_newlines_in_multiline_strings: true
+    literal_only_boolean_expressions: true
+    missing_code_block_language_in_doc_comment: true
+    no_adjacent_strings_in_list: true
+    no_literal_bool_comparisons: true
+    no_self_assignments: true
+    no_wildcard_variable_uses: true
+    noop_primitive_operations: true
+    omit_local_variable_types: true
+    only_throw_errors: true
+    parameter_assignments: true
+    prefer_asserts_in_initializer_lists: true
+    prefer_constructors_over_static_methods: true
+    prefer_expression_function_bodies: true
+    prefer_final_in_for_each: true
+    prefer_final_locals: true
+    prefer_if_elements_to_conditional_expressions: true
+    prefer_int_literals: true
+    prefer_mixin: true
+    prefer_null_aware_method_calls: true
+    prefer_single_quotes: true
+    require_trailing_commas: true
+    sort_constructors_first: true
+    sort_pub_dependencies: true
+    sort_unnamed_constructors_first: true
+    test_types_in_equals: true
+    throw_in_finally: true
+    tighten_type_of_initializing_formals: true
+    type_annotate_public_apis: true
+    unawaited_futures: true
+    unnecessary_await_in_return: true
+    unnecessary_breaks: true
+    unnecessary_lambdas: true
+    unnecessary_null_aware_assignments: true
+    unnecessary_null_aware_operator_on_extension_on_nullable: true
+    unnecessary_parenthesis: true
+    unnecessary_raw_strings: true
+    unnecessary_statements: true
+    unnecessary_to_list_in_spreads: true
+    unreachable_from_main: true
+    use_colored_box: true
+    use_decorated_box: true
+    use_enums: true
+    use_is_even_rather_than_modulo: true
+    use_named_constants: true
+    use_raw_strings: true
+    use_string_buffers: true
+    use_string_in_part_of_directives: true
+    use_super_parameters: true
+    use_to_and_as_if_applicable: true
 
 analyzer_plugins:
   - riverpod_lint

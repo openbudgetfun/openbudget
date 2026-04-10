@@ -190,29 +190,27 @@ class CreateBudgetScreen extends HookConsumerWidget {
   Future<CurrencyCode?> _selectCurrency(
     BuildContext context,
     CurrencyCode current,
-  ) {
-    return showModalBottomSheet<CurrencyCode>(
-      context: context,
-      showDragHandle: true,
-      builder: (context) => SafeArea(
-        child: ListView.separated(
-          shrinkWrap: true,
-          itemCount: CurrencyCode.values.length,
-          separatorBuilder: (_, __) => const Divider(height: 1),
-          itemBuilder: (context, index) {
-            final currency = CurrencyCode.values[index];
-            return ListTile(
-              title: Text('${currency.displayName} (${currency.code})'),
-              trailing: currency == current
-                  ? const Icon(Icons.check_rounded)
-                  : null,
-              onTap: () => Navigator.of(context).pop(currency),
-            );
-          },
-        ),
+  ) => showModalBottomSheet<CurrencyCode>(
+    context: context,
+    showDragHandle: true,
+    builder: (context) => SafeArea(
+      child: ListView.separated(
+        shrinkWrap: true,
+        itemCount: CurrencyCode.values.length,
+        separatorBuilder: (_, __) => const Divider(height: 1),
+        itemBuilder: (context, index) {
+          final currency = CurrencyCode.values[index];
+          return ListTile(
+            title: Text('${currency.displayName} (${currency.code})'),
+            trailing: currency == current
+                ? const Icon(Icons.check_rounded)
+                : null,
+            onTap: () => Navigator.of(context).pop(currency),
+          );
+        },
       ),
-    );
-  }
+    ),
+  );
 }
 
 class _WelcomeHeroCard extends HookWidget {

@@ -713,22 +713,20 @@ class _StepFrame extends StatelessWidget {
   final double maxWidth;
 
   @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final width = constraints.maxWidth >= 900
-            ? constraints.maxWidth.clamp(0, maxWidth).toDouble()
-            : constraints.maxWidth;
-        final horizontalPadding = (constraints.maxWidth - width) / 2;
-        return Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: horizontalPadding > 0 ? horizontalPadding : 0,
-          ),
-          child: child,
-        );
-      },
-    );
-  }
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) {
+      final width = constraints.maxWidth >= 900
+          ? constraints.maxWidth.clamp(0, maxWidth).toDouble()
+          : constraints.maxWidth;
+      final horizontalPadding = (constraints.maxWidth - width) / 2;
+      return Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: horizontalPadding > 0 ? horizontalPadding : 0,
+        ),
+        child: child,
+      );
+    },
+  );
 }
 
 enum _LoadingStepKey { loading, loadingInstitutions }
@@ -1015,30 +1013,28 @@ class _InstitutionTile extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(RadiusTokens.md),
-      child: Container(
-        height: 84,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
-          border: Border.all(
-            color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
-          ),
-          borderRadius: BorderRadius.circular(RadiusTokens.md),
+  Widget build(BuildContext context) => InkWell(
+    onTap: onTap,
+    borderRadius: BorderRadius.circular(RadiusTokens.md),
+    child: Container(
+      height: 84,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
+        border: Border.all(
+          color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
         ),
-        child: Text(
-          option.name,
-          style: Theme.of(
-            context,
-          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
-          textAlign: TextAlign.center,
-        ),
+        borderRadius: BorderRadius.circular(RadiusTokens.md),
       ),
-    );
-  }
+      child: Text(
+        option.name,
+        style: Theme.of(
+          context,
+        ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+        textAlign: TextAlign.center,
+      ),
+    ),
+  );
 }
 
 class _MyAccountTile extends StatelessWidget {
@@ -1368,60 +1364,58 @@ class _AccountTypeStep extends StatelessWidget {
   final ValueChanged<_AccountTypeOption> onSelected;
 
   @override
-  Widget build(BuildContext context) {
-    return ListView(
-      controller: scrollController,
-      primary: false,
-      padding: const EdgeInsets.fromLTRB(
-        SpacingTokens.md,
-        SpacingTokens.sm,
-        SpacingTokens.md,
-        SpacingTokens.xl,
-      ),
-      children: [
-        for (final section in sections) ...[
-          Text(
-            section.title,
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+  Widget build(BuildContext context) => ListView(
+    controller: scrollController,
+    primary: false,
+    padding: const EdgeInsets.fromLTRB(
+      SpacingTokens.md,
+      SpacingTokens.sm,
+      SpacingTokens.md,
+      SpacingTokens.xl,
+    ),
+    children: [
+      for (final section in sections) ...[
+        Text(
+          section.title,
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+        ),
+        const SizedBox(height: SpacingTokens.xs),
+        Text(
+          section.subtitle,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
+          ),
+        ),
+        const SizedBox(height: SpacingTokens.sm),
+        for (final option in section.options) ...[
+          ListTile(
+            key: ValueKey('add-account-type-option-${option.key}'),
+            onTap: () => onSelected(option),
+            title: Text(option.label),
+            trailing: option.key == selectedTypeKey
+                ? Icon(
+                    Icons.check_rounded,
+                    color: OpenBudgetPalette.bgBrandFor(Theme.of(context)),
+                  )
+                : null,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: SpacingTokens.sm,
+            ),
+            shape: RoundedRectangleBorder(
+              side: BorderSide(
+                color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
+              ),
+              borderRadius: BorderRadius.circular(RadiusTokens.md),
+            ),
           ),
           const SizedBox(height: SpacingTokens.xs),
-          Text(
-            section.subtitle,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
-            ),
-          ),
-          const SizedBox(height: SpacingTokens.sm),
-          for (final option in section.options) ...[
-            ListTile(
-              key: ValueKey('add-account-type-option-${option.key}'),
-              onTap: () => onSelected(option),
-              title: Text(option.label),
-              trailing: option.key == selectedTypeKey
-                  ? Icon(
-                      Icons.check_rounded,
-                      color: OpenBudgetPalette.bgBrandFor(Theme.of(context)),
-                    )
-                  : null,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: SpacingTokens.sm,
-              ),
-              shape: RoundedRectangleBorder(
-                side: BorderSide(
-                  color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
-                ),
-                borderRadius: BorderRadius.circular(RadiusTokens.md),
-              ),
-            ),
-            const SizedBox(height: SpacingTokens.xs),
-          ],
-          const SizedBox(height: SpacingTokens.md),
         ],
+        const SizedBox(height: SpacingTokens.md),
       ],
-    );
-  }
+    ],
+  );
 }
 
 class _SuccessStep extends StatelessWidget {
@@ -1526,138 +1520,136 @@ class _AccountTypeSection {
   final List<_AccountTypeOption> options;
 }
 
-List<_AccountTypeSection> _accountTypeSections(AppLocalizations l10n) {
-  return [
-    _AccountTypeSection(
-      title: l10n.addAccountSectionCashAccounts,
-      subtitle: l10n.addAccountSectionCashAccountsHint,
-      options: [
-        _AccountTypeOption(
-          key: 'checking',
-          label: l10n.accountTypeChecking,
-          serverType: 'checking',
-          onBudgetDefault: true,
-          isDebt: false,
-        ),
-        _AccountTypeOption(
-          key: 'savings',
-          label: l10n.accountTypeSavings,
-          serverType: 'savings',
-          onBudgetDefault: true,
-          isDebt: false,
-        ),
-        _AccountTypeOption(
-          key: 'cash',
-          label: l10n.accountTypeCash,
-          serverType: 'cash',
-          onBudgetDefault: true,
-          isDebt: false,
-        ),
-      ],
-    ),
-    _AccountTypeSection(
-      title: l10n.addAccountSectionCreditAccounts,
-      subtitle: l10n.addAccountSectionCreditAccountsHint,
-      options: [
-        _AccountTypeOption(
-          key: 'creditCard',
-          label: l10n.accountTypeCreditCard,
-          serverType: 'creditCard',
-          onBudgetDefault: true,
-          isDebt: true,
-        ),
-        _AccountTypeOption(
-          key: 'lineOfCredit',
-          label: l10n.addAccountTypeLineOfCredit,
-          serverType: 'other',
-          onBudgetDefault: true,
-          isDebt: true,
-        ),
-      ],
-    ),
-    _AccountTypeSection(
-      title: l10n.addAccountSectionMortgagesAndLoans,
-      subtitle: l10n.addAccountSectionMortgagesAndLoansHint,
-      options: [
-        _AccountTypeOption(
-          key: 'mortgage',
-          label: l10n.addAccountTypeMortgage,
-          serverType: 'other',
-          onBudgetDefault: false,
-          isDebt: true,
-        ),
-        _AccountTypeOption(
-          key: 'autoLoan',
-          label: l10n.addAccountTypeAutoLoan,
-          serverType: 'other',
-          onBudgetDefault: false,
-          isDebt: true,
-        ),
-        _AccountTypeOption(
-          key: 'studentLoan',
-          label: l10n.addAccountTypeStudentLoan,
-          serverType: 'other',
-          onBudgetDefault: false,
-          isDebt: true,
-        ),
-        _AccountTypeOption(
-          key: 'personalLoan',
-          label: l10n.addAccountTypePersonalLoan,
-          serverType: 'other',
-          onBudgetDefault: false,
-          isDebt: true,
-        ),
-        _AccountTypeOption(
-          key: 'medicalDebt',
-          label: l10n.addAccountTypeMedicalDebt,
-          serverType: 'other',
-          onBudgetDefault: false,
-          isDebt: true,
-        ),
-        _AccountTypeOption(
-          key: 'otherDebt',
-          label: l10n.addAccountTypeOtherDebt,
-          serverType: 'other',
-          onBudgetDefault: false,
-          isDebt: true,
-        ),
-      ],
-    ),
-    _AccountTypeSection(
-      title: l10n.addAccountSectionTrackingAccounts,
-      subtitle: l10n.addAccountSectionTrackingAccountsHint,
-      options: [
-        _AccountTypeOption(
-          key: 'asset',
-          label: l10n.addAccountTypeAssetExample,
-          serverType: 'investment',
-          onBudgetDefault: false,
-          isDebt: false,
-        ),
-        _AccountTypeOption(
-          key: 'liability',
-          label: l10n.addAccountTypeLiability,
-          serverType: 'other',
-          onBudgetDefault: false,
-          isDebt: true,
-        ),
-      ],
-    ),
-    _AccountTypeSection(
-      title: l10n.addAccountSectionDigitalAssets,
-      subtitle: l10n.addAccountSectionDigitalAssetsHint,
-      options: [
-        _AccountTypeOption(
-          key: 'cryptoWallet',
-          label: l10n.addAccountTypeSolanaWallet,
-          serverType: 'cryptoWallet',
-          onBudgetDefault: false,
-          isDebt: false,
-        ),
-      ],
-    ),
-  ];
-}
+List<_AccountTypeSection> _accountTypeSections(AppLocalizations l10n) => [
+  _AccountTypeSection(
+    title: l10n.addAccountSectionCashAccounts,
+    subtitle: l10n.addAccountSectionCashAccountsHint,
+    options: [
+      _AccountTypeOption(
+        key: 'checking',
+        label: l10n.accountTypeChecking,
+        serverType: 'checking',
+        onBudgetDefault: true,
+        isDebt: false,
+      ),
+      _AccountTypeOption(
+        key: 'savings',
+        label: l10n.accountTypeSavings,
+        serverType: 'savings',
+        onBudgetDefault: true,
+        isDebt: false,
+      ),
+      _AccountTypeOption(
+        key: 'cash',
+        label: l10n.accountTypeCash,
+        serverType: 'cash',
+        onBudgetDefault: true,
+        isDebt: false,
+      ),
+    ],
+  ),
+  _AccountTypeSection(
+    title: l10n.addAccountSectionCreditAccounts,
+    subtitle: l10n.addAccountSectionCreditAccountsHint,
+    options: [
+      _AccountTypeOption(
+        key: 'creditCard',
+        label: l10n.accountTypeCreditCard,
+        serverType: 'creditCard',
+        onBudgetDefault: true,
+        isDebt: true,
+      ),
+      _AccountTypeOption(
+        key: 'lineOfCredit',
+        label: l10n.addAccountTypeLineOfCredit,
+        serverType: 'other',
+        onBudgetDefault: true,
+        isDebt: true,
+      ),
+    ],
+  ),
+  _AccountTypeSection(
+    title: l10n.addAccountSectionMortgagesAndLoans,
+    subtitle: l10n.addAccountSectionMortgagesAndLoansHint,
+    options: [
+      _AccountTypeOption(
+        key: 'mortgage',
+        label: l10n.addAccountTypeMortgage,
+        serverType: 'other',
+        onBudgetDefault: false,
+        isDebt: true,
+      ),
+      _AccountTypeOption(
+        key: 'autoLoan',
+        label: l10n.addAccountTypeAutoLoan,
+        serverType: 'other',
+        onBudgetDefault: false,
+        isDebt: true,
+      ),
+      _AccountTypeOption(
+        key: 'studentLoan',
+        label: l10n.addAccountTypeStudentLoan,
+        serverType: 'other',
+        onBudgetDefault: false,
+        isDebt: true,
+      ),
+      _AccountTypeOption(
+        key: 'personalLoan',
+        label: l10n.addAccountTypePersonalLoan,
+        serverType: 'other',
+        onBudgetDefault: false,
+        isDebt: true,
+      ),
+      _AccountTypeOption(
+        key: 'medicalDebt',
+        label: l10n.addAccountTypeMedicalDebt,
+        serverType: 'other',
+        onBudgetDefault: false,
+        isDebt: true,
+      ),
+      _AccountTypeOption(
+        key: 'otherDebt',
+        label: l10n.addAccountTypeOtherDebt,
+        serverType: 'other',
+        onBudgetDefault: false,
+        isDebt: true,
+      ),
+    ],
+  ),
+  _AccountTypeSection(
+    title: l10n.addAccountSectionTrackingAccounts,
+    subtitle: l10n.addAccountSectionTrackingAccountsHint,
+    options: [
+      _AccountTypeOption(
+        key: 'asset',
+        label: l10n.addAccountTypeAssetExample,
+        serverType: 'investment',
+        onBudgetDefault: false,
+        isDebt: false,
+      ),
+      _AccountTypeOption(
+        key: 'liability',
+        label: l10n.addAccountTypeLiability,
+        serverType: 'other',
+        onBudgetDefault: false,
+        isDebt: true,
+      ),
+    ],
+  ),
+  _AccountTypeSection(
+    title: l10n.addAccountSectionDigitalAssets,
+    subtitle: l10n.addAccountSectionDigitalAssetsHint,
+    options: [
+      _AccountTypeOption(
+        key: 'cryptoWallet',
+        label: l10n.addAccountTypeSolanaWallet,
+        serverType: 'cryptoWallet',
+        onBudgetDefault: false,
+        isDebt: false,
+      ),
+    ],
+  ),
+];
 
 double _pow10(int exponent) {
   var result = 1.0;

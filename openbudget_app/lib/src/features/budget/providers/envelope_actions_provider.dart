@@ -9,9 +9,7 @@ part 'envelope_actions_provider.g.dart';
 @Riverpod(keepAlive: true)
 class EnvelopeActions extends _$EnvelopeActions {
   @override
-  AsyncValue<void> build() {
-    return const AsyncValue.data(null);
-  }
+  AsyncValue<void> build() => const AsyncValue.data(null);
 
   Future<Envelope> createEnvelope({
     required String name,

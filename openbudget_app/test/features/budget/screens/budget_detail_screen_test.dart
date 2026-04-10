@@ -44,28 +44,26 @@ void main() {
     month: 2,
   );
 
-  Widget buildSubject({BudgetSummary? summary}) {
-    return ProviderScope(
-      overrides: [
-        budgetMonthlySummaryProvider.overrideWith(
-          (ref, id) async => summary ?? makeSummary(),
-        ),
-        creditCardPaymentsProvider.overrideWith(
-          (ref, id) async => <CreditCardPaymentInfo>[],
-        ),
-        budgetGoalsProvider.overrideWith(
-          (ref, id) async => <String, EnvelopeGoal>{},
-        ),
-        recurringDueCountProvider.overrideWith((ref, id) async => 0),
-      ],
-      child: MaterialApp(
-        theme: OpenBudgetTheme.light,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: const BudgetDetailScreen(budgetId: budgetId),
+  Widget buildSubject({BudgetSummary? summary}) => ProviderScope(
+    overrides: [
+      budgetMonthlySummaryProvider.overrideWith(
+        (ref, id) async => summary ?? makeSummary(),
       ),
-    );
-  }
+      creditCardPaymentsProvider.overrideWith(
+        (ref, id) async => <CreditCardPaymentInfo>[],
+      ),
+      budgetGoalsProvider.overrideWith(
+        (ref, id) async => <String, EnvelopeGoal>{},
+      ),
+      recurringDueCountProvider.overrideWith((ref, id) async => 0),
+    ],
+    child: MaterialApp(
+      theme: OpenBudgetTheme.light,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: const BudgetDetailScreen(budgetId: budgetId),
+    ),
+  );
 
   group('BudgetDetailScreen', () {
     testWidgets('renders loading state initially', (tester) async {

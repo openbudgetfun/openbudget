@@ -136,9 +136,7 @@ Future<AutoAssignProposal> autoAssignProposal(Ref ref, String budgetId) async {
 @Riverpod(keepAlive: true)
 class AutoAssignActions extends _$AutoAssignActions {
   @override
-  AsyncValue<void> build() {
-    return const AsyncValue.data(null);
-  }
+  AsyncValue<void> build() => const AsyncValue.data(null);
 
   /// Executes the auto-assign proposal by upserting allocations for each item.
   Future<int> execute({

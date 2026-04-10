@@ -14,18 +14,16 @@ void main() {
 
   const budgetId = 'test-budget-1';
 
-  Widget buildSubject() {
-    return MaterialApp(
-      theme: OpenBudgetTheme.light,
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      home: const Scaffold(
-        // Render the sheet directly as a child instead of via
-        // showModalBottomSheet to avoid layout overflow in tests.
-        body: AddTransactionSheet(budgetId: budgetId),
-      ),
-    );
-  }
+  Widget buildSubject() => MaterialApp(
+    theme: OpenBudgetTheme.light,
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
+    home: const Scaffold(
+      // Render the sheet directly as a child instead of via
+      // showModalBottomSheet to avoid layout overflow in tests.
+      body: AddTransactionSheet(budgetId: budgetId),
+    ),
+  );
 
   Widget buildRoutingSubject() {
     final router = GoRouter(

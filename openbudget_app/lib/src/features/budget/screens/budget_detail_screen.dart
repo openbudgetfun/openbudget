@@ -1447,19 +1447,17 @@ class _BudgetAppBarMenu extends HookConsumerWidget {
       required IconData icon,
       required String label,
       bool checked = false,
-    }) {
-      return Row(
-        children: [
-          Icon(icon, size: 18),
-          const SizedBox(width: SpacingTokens.sm),
-          Expanded(child: Text(label)),
-          if (checked) ...[
-            const SizedBox(width: SpacingTokens.md),
-            const Icon(Icons.check_rounded, size: 18),
-          ],
+    }) => Row(
+      children: [
+        Icon(icon, size: 18),
+        const SizedBox(width: SpacingTokens.sm),
+        Expanded(child: Text(label)),
+        if (checked) ...[
+          const SizedBox(width: SpacingTokens.md),
+          const Icon(Icons.check_rounded, size: 18),
         ],
-      );
-    }
+      ],
+    );
 
     return PopupMenuButton<_PlanMenuAction>(
       icon: const Icon(Icons.more_horiz_rounded),
@@ -1948,32 +1946,30 @@ class _ToggleButton extends HookWidget {
   final ThemeData theme;
 
   @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: selected
-          ? OpenBudgetPalette.bgSecondaryFor(Theme.of(context))
-          : OpenBudgetPalette.transparentFor(Theme.of(context)),
+  Widget build(BuildContext context) => Material(
+    color: selected
+        ? OpenBudgetPalette.bgSecondaryFor(Theme.of(context))
+        : OpenBudgetPalette.transparentFor(Theme.of(context)),
+    borderRadius: BorderRadius.circular(RadiusTokens.sm),
+    child: InkWell(
+      onTap: onTap,
       borderRadius: BorderRadius.circular(RadiusTokens.sm),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(RadiusTokens.sm),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: SpacingTokens.sm),
-          child: Center(
-            child: Text(
-              label,
-              style: theme.textTheme.labelLarge?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: selected
-                    ? OpenBudgetPalette.fgPrimaryFor(Theme.of(context))
-                    : OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
-              ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: SpacingTokens.sm),
+        child: Center(
+          child: Text(
+            label,
+            style: theme.textTheme.labelLarge?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: selected
+                  ? OpenBudgetPalette.fgPrimaryFor(Theme.of(context))
+                  : OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
             ),
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
 }
 
 class _SpotlightOverview extends HookWidget {
@@ -2366,26 +2362,21 @@ class _SpotlightPriorityIcon extends HookWidget {
   final double rotation;
 
   @override
-  Widget build(BuildContext context) {
-    return Transform.rotate(
-      angle: rotation,
-      child: Container(
-        width: 56,
-        height: 56,
-        decoration: BoxDecoration(
-          color: OpenBudgetPalette.bgBrandFor(Theme.of(context)).withAlpha(26),
-          borderRadius: BorderRadius.circular(RadiusTokens.md),
-          border: Border.all(
-            color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
-          ),
-        ),
-        child: Icon(
-          icon,
-          color: OpenBudgetPalette.bgBrandFor(Theme.of(context)),
+  Widget build(BuildContext context) => Transform.rotate(
+    angle: rotation,
+    child: Container(
+      width: 56,
+      height: 56,
+      decoration: BoxDecoration(
+        color: OpenBudgetPalette.bgBrandFor(Theme.of(context)).withAlpha(26),
+        borderRadius: BorderRadius.circular(RadiusTokens.md),
+        border: Border.all(
+          color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
         ),
       ),
-    );
-  }
+      child: Icon(icon, color: OpenBudgetPalette.bgBrandFor(Theme.of(context))),
+    ),
+  );
 }
 
 class _InlineEditorSelection {
@@ -2443,39 +2434,35 @@ class _InlineAmountEditor extends HookWidget {
       bool accent = false,
       Widget? child,
       double minHeight = 48,
-    }) {
-      return Expanded(
-        child: Padding(
-          padding: const EdgeInsets.all(SpacingTokens.xs),
-          child: FilledButton(
-            onPressed: onPressed,
-            style: FilledButton.styleFrom(
-              backgroundColor: primary
-                  ? OpenBudgetPalette.bgBrandFor(Theme.of(context))
-                  : OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
-              foregroundColor: primary
-                  ? OpenBudgetPalette.fgOnBrandFor(Theme.of(context))
-                  : accent
-                  ? OpenBudgetPalette.bgBrandFor(Theme.of(context))
-                  : OpenBudgetPalette.fgPrimaryEmphasisFor(Theme.of(context)),
-              side: primary
-                  ? BorderSide.none
-                  : BorderSide(
-                      color: OpenBudgetPalette.borderSubtleFor(
-                        Theme.of(context),
-                      ),
-                    ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(RadiusTokens.sm),
-              ),
-              fixedSize: Size.fromHeight(minHeight),
-              elevation: 0,
+    }) => Expanded(
+      child: Padding(
+        padding: const EdgeInsets.all(SpacingTokens.xs),
+        child: FilledButton(
+          onPressed: onPressed,
+          style: FilledButton.styleFrom(
+            backgroundColor: primary
+                ? OpenBudgetPalette.bgBrandFor(Theme.of(context))
+                : OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
+            foregroundColor: primary
+                ? OpenBudgetPalette.fgOnBrandFor(Theme.of(context))
+                : accent
+                ? OpenBudgetPalette.bgBrandFor(Theme.of(context))
+                : OpenBudgetPalette.fgPrimaryEmphasisFor(Theme.of(context)),
+            side: primary
+                ? BorderSide.none
+                : BorderSide(
+                    color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
+                  ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(RadiusTokens.sm),
             ),
-            child: child ?? Text(label),
+            fixedSize: Size.fromHeight(minHeight),
+            elevation: 0,
           ),
+          child: child ?? Text(label),
         ),
-      );
-    }
+      ),
+    );
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -3004,7 +2991,7 @@ class _CoverOverspendingSheet extends HookConsumerWidget {
                       padding: const EdgeInsets.all(SpacingTokens.md),
                       itemBuilder: (context, index) {
                         final item = remainingItems.value[index];
-                        return Container(
+                        return DecoratedBox(
                           decoration: BoxDecoration(
                             color: OpenBudgetPalette.bgSecondaryFor(
                               Theme.of(context),

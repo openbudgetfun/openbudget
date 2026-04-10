@@ -476,7 +476,7 @@ class EndpointBudget extends _i1.EndpointRef {
 
 /// Streaming endpoint for real-time budget updates.
 ///
-/// Client sends budget IDs, server streams back the current budget state.
+/// Client sends a budget ID once, server streams live budget snapshots.
 /// {@category Endpoint}
 class EndpointBudgetStream extends _i1.EndpointRef {
   EndpointBudgetStream(_i1.EndpointCaller caller) : super(caller);
@@ -486,9 +486,9 @@ class EndpointBudgetStream extends _i1.EndpointRef {
 
   /// Streams budget updates to the connected client.
   ///
-  /// Client sends [UuidValue] budget IDs, server responds with the current
-  /// [Budget] state for each requested ID. Ownership is verified on each
-  /// request.
+  /// Client sends a [UuidValue] budget ID. The stream yields an initial
+  /// [Budget] snapshot and then emits fresh snapshots whenever that budget
+  /// changes.
   _i2.Stream<_i8.Budget> budgetUpdates(
     _i2.Stream<_i1.UuidValue> budgetIdStream,
   ) => caller.callStreamingServerEndpoint<_i2.Stream<_i8.Budget>, _i8.Budget>(

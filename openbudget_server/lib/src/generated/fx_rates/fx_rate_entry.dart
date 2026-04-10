@@ -172,48 +172,25 @@ class FxRateEntryUpdateTable extends _i1.UpdateTable<FxRateEntryTable> {
 
   _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> snapshotId(
     _i1.UuidValue value,
-  ) => _i1.ColumnValue(
-    table.snapshotId,
-    value,
-  );
+  ) => _i1.ColumnValue(table.snapshotId, value);
 
-  _i1.ColumnValue<String, String> currencyCode(String value) => _i1.ColumnValue(
-    table.currencyCode,
-    value,
-  );
+  _i1.ColumnValue<String, String> currencyCode(String value) =>
+      _i1.ColumnValue(table.currencyCode, value);
 
-  _i1.ColumnValue<double, double> rate(double value) => _i1.ColumnValue(
-    table.rate,
-    value,
-  );
+  _i1.ColumnValue<double, double> rate(double value) =>
+      _i1.ColumnValue(table.rate, value);
 
   _i1.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
-      _i1.ColumnValue(
-        table.createdAt,
-        value,
-      );
+      _i1.ColumnValue(table.createdAt, value);
 }
 
 class FxRateEntryTable extends _i1.Table<_i1.UuidValue?> {
   FxRateEntryTable({super.tableRelation}) : super(tableName: 'fx_rate_entry') {
     updateTable = FxRateEntryUpdateTable(this);
-    snapshotId = _i1.ColumnUuid(
-      'snapshotId',
-      this,
-    );
-    currencyCode = _i1.ColumnString(
-      'currencyCode',
-      this,
-    );
-    rate = _i1.ColumnDouble(
-      'rate',
-      this,
-    );
-    createdAt = _i1.ColumnDateTime(
-      'createdAt',
-      this,
-      hasDefault: true,
-    );
+    snapshotId = _i1.ColumnUuid('snapshotId', this);
+    currencyCode = _i1.ColumnString('currencyCode', this);
+    rate = _i1.ColumnDouble('rate', this);
+    createdAt = _i1.ColumnDateTime('createdAt', this, hasDefault: true);
   }
 
   late final FxRateEntryUpdateTable updateTable;
@@ -292,7 +269,7 @@ class FxRateEntryRepository {
   /// );
   /// ```
   Future<List<FxRateEntry>> find(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     _i1.WhereExpressionBuilder<FxRateEntryTable>? where,
     int? limit,
     int? offset,
@@ -300,6 +277,8 @@ class FxRateEntryRepository {
     bool orderDescending = false,
     _i1.OrderByListBuilder<FxRateEntryTable>? orderByList,
     _i1.Transaction? transaction,
+    _i1.LockMode? lockMode,
+    _i1.LockBehavior? lockBehavior,
   }) async {
     return session.db.find<FxRateEntry>(
       where: where?.call(FxRateEntry.t),
@@ -309,6 +288,8 @@ class FxRateEntryRepository {
       limit: limit,
       offset: offset,
       transaction: transaction,
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
     );
   }
 
@@ -330,13 +311,15 @@ class FxRateEntryRepository {
   /// );
   /// ```
   Future<FxRateEntry?> findFirstRow(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     _i1.WhereExpressionBuilder<FxRateEntryTable>? where,
     int? offset,
     _i1.OrderByBuilder<FxRateEntryTable>? orderBy,
     bool orderDescending = false,
     _i1.OrderByListBuilder<FxRateEntryTable>? orderByList,
     _i1.Transaction? transaction,
+    _i1.LockMode? lockMode,
+    _i1.LockBehavior? lockBehavior,
   }) async {
     return session.db.findFirstRow<FxRateEntry>(
       where: where?.call(FxRateEntry.t),
@@ -345,18 +328,24 @@ class FxRateEntryRepository {
       orderDescending: orderDescending,
       offset: offset,
       transaction: transaction,
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
     );
   }
 
   /// Finds a single [FxRateEntry] by its [id] or null if no such row exists.
   Future<FxRateEntry?> findById(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     _i1.UuidValue id, {
     _i1.Transaction? transaction,
+    _i1.LockMode? lockMode,
+    _i1.LockBehavior? lockBehavior,
   }) async {
     return session.db.findById<FxRateEntry>(
       id,
       transaction: transaction,
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
     );
   }
 
@@ -366,14 +355,20 @@ class FxRateEntryRepository {
   ///
   /// This is an atomic operation, meaning that if one of the rows fails to
   /// insert, none of the rows will be inserted.
+  ///
+  /// If [ignoreConflicts] is set to `true`, rows that conflict with existing
+  /// rows are silently skipped, and only the successfully inserted rows are
+  /// returned.
   Future<List<FxRateEntry>> insert(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     List<FxRateEntry> rows, {
     _i1.Transaction? transaction,
+    bool ignoreConflicts = false,
   }) async {
     return session.db.insert<FxRateEntry>(
       rows,
       transaction: transaction,
+      ignoreConflicts: ignoreConflicts,
     );
   }
 
@@ -381,14 +376,11 @@ class FxRateEntryRepository {
   ///
   /// The returned [FxRateEntry] will have its `id` field set.
   Future<FxRateEntry> insertRow(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     FxRateEntry row, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.insertRow<FxRateEntry>(
-      row,
-      transaction: transaction,
-    );
+    return session.db.insertRow<FxRateEntry>(row, transaction: transaction);
   }
 
   /// Updates all [FxRateEntry]s in the list and returns the updated rows. If
@@ -397,7 +389,7 @@ class FxRateEntryRepository {
   /// This is an atomic operation, meaning that if one of the rows fails to
   /// update, none of the rows will be updated.
   Future<List<FxRateEntry>> update(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     List<FxRateEntry> rows, {
     _i1.ColumnSelections<FxRateEntryTable>? columns,
     _i1.Transaction? transaction,
@@ -413,7 +405,7 @@ class FxRateEntryRepository {
   /// Optionally, a list of [columns] can be provided to only update those
   /// columns. Defaults to all columns.
   Future<FxRateEntry> updateRow(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     FxRateEntry row, {
     _i1.ColumnSelections<FxRateEntryTable>? columns,
     _i1.Transaction? transaction,
@@ -428,7 +420,7 @@ class FxRateEntryRepository {
   /// Updates a single [FxRateEntry] by its [id] with the specified [columnValues].
   /// Returns the updated row or null if no row with the given id exists.
   Future<FxRateEntry?> updateById(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     _i1.UuidValue id, {
     required _i1.ColumnValueListBuilder<FxRateEntryUpdateTable> columnValues,
     _i1.Transaction? transaction,
@@ -443,7 +435,7 @@ class FxRateEntryRepository {
   /// Updates all [FxRateEntry]s matching the [where] expression with the specified [columnValues].
   /// Returns the list of updated rows.
   Future<List<FxRateEntry>> updateWhere(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     required _i1.ColumnValueListBuilder<FxRateEntryUpdateTable> columnValues,
     required _i1.WhereExpressionBuilder<FxRateEntryTable> where,
     int? limit,
@@ -469,31 +461,25 @@ class FxRateEntryRepository {
   /// This is an atomic operation, meaning that if one of the rows fail to
   /// be deleted, none of the rows will be deleted.
   Future<List<FxRateEntry>> delete(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     List<FxRateEntry> rows, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.delete<FxRateEntry>(
-      rows,
-      transaction: transaction,
-    );
+    return session.db.delete<FxRateEntry>(rows, transaction: transaction);
   }
 
   /// Deletes a single [FxRateEntry].
   Future<FxRateEntry> deleteRow(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     FxRateEntry row, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.deleteRow<FxRateEntry>(
-      row,
-      transaction: transaction,
-    );
+    return session.db.deleteRow<FxRateEntry>(row, transaction: transaction);
   }
 
   /// Deletes all rows matching the [where] expression.
   Future<List<FxRateEntry>> deleteWhere(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     required _i1.WhereExpressionBuilder<FxRateEntryTable> where,
     _i1.Transaction? transaction,
   }) async {
@@ -506,7 +492,7 @@ class FxRateEntryRepository {
   /// Counts the number of rows matching the [where] expression. If omitted,
   /// will return the count of all rows in the table.
   Future<int> count(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     _i1.WhereExpressionBuilder<FxRateEntryTable>? where,
     int? limit,
     _i1.Transaction? transaction,
@@ -514,6 +500,22 @@ class FxRateEntryRepository {
     return session.db.count<FxRateEntry>(
       where: where?.call(FxRateEntry.t),
       limit: limit,
+      transaction: transaction,
+    );
+  }
+
+  /// Acquires row-level locks on [FxRateEntry] rows matching the [where] expression.
+  Future<void> lockRows(
+    _i1.DatabaseSession session, {
+    required _i1.WhereExpressionBuilder<FxRateEntryTable> where,
+    required _i1.LockMode lockMode,
+    required _i1.Transaction transaction,
+    _i1.LockBehavior lockBehavior = _i1.LockBehavior.wait,
+  }) async {
+    return session.db.lockRows<FxRateEntry>(
+      where: where(FxRateEntry.t),
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
       transaction: transaction,
     );
   }

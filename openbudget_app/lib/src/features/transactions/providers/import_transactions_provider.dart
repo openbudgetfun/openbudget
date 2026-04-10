@@ -9,9 +9,7 @@ part 'import_transactions_provider.g.dart';
 @Riverpod(keepAlive: true)
 class ImportTransactions extends _$ImportTransactions {
   @override
-  AsyncValue<void> build() {
-    return const AsyncValue.data(null);
-  }
+  AsyncValue<void> build() => const AsyncValue.data(null);
 
   Future<int> importRows({
     required String budgetId,

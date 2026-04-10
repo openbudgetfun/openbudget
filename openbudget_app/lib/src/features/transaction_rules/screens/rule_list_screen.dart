@@ -116,13 +116,15 @@ class RuleListScreen extends HookConsumerWidget {
 
           final enabledCount = rules.where((rule) => rule.enabled).length;
           final disabledCount = rules.length - enabledCount;
-          final filteredRules = rules.where((rule) {
-            return switch (viewFilter.value) {
-              RuleViewFilter.all => true,
-              RuleViewFilter.enabled => rule.enabled,
-              RuleViewFilter.disabled => !rule.enabled,
-            };
-          }).toList();
+          final filteredRules = rules
+              .where(
+                (rule) => switch (viewFilter.value) {
+                  RuleViewFilter.all => true,
+                  RuleViewFilter.enabled => rule.enabled,
+                  RuleViewFilter.disabled => !rule.enabled,
+                },
+              )
+              .toList();
 
           return ListView(
             padding: const EdgeInsets.all(SpacingTokens.md),

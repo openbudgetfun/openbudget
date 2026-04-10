@@ -38,9 +38,8 @@ class TransactionEndpoint extends Endpoint {
   }
 
   /// Lists all transactions for a budget.
-  Future<List<Transaction>> list(Session session, UuidValue budgetId) async {
-    return TransactionService.listForBudget(session, budgetId: budgetId);
-  }
+  Future<List<Transaction>> list(Session session, UuidValue budgetId) async =>
+      TransactionService.listForBudget(session, budgetId: budgetId);
 
   /// Lists transactions for a budget within a specific month.
   Future<List<Transaction>> listByMonth(
@@ -48,19 +47,16 @@ class TransactionEndpoint extends Endpoint {
     UuidValue budgetId,
     int year,
     int month,
-  ) async {
-    return TransactionService.listForBudgetMonth(
-      session,
-      budgetId: budgetId,
-      year: year,
-      month: month,
-    );
-  }
+  ) async => TransactionService.listForBudgetMonth(
+    session,
+    budgetId: budgetId,
+    year: year,
+    month: month,
+  );
 
   /// Gets a single transaction by ID.
-  Future<Transaction> get(Session session, UuidValue transactionId) async {
-    return TransactionService.getById(session, transactionId: transactionId);
-  }
+  Future<Transaction> get(Session session, UuidValue transactionId) async =>
+      TransactionService.getById(session, transactionId: transactionId);
 
   /// Updates a transaction by ID.
   Future<Transaction> update(
@@ -134,13 +130,11 @@ class TransactionEndpoint extends Endpoint {
     Session session,
     UuidValue accountId,
     UuidValue budgetId,
-  ) async {
-    return TransactionService.listForAccount(
-      session,
-      accountId: accountId,
-      budgetId: budgetId,
-    );
-  }
+  ) async => TransactionService.listForAccount(
+    session,
+    accountId: accountId,
+    budgetId: budgetId,
+  );
 
   /// Toggles the cleared status of a transaction.
   Future<Transaction> toggleCleared(
@@ -194,9 +188,8 @@ class TransactionEndpoint extends Endpoint {
   ///
   /// Returns the average days between income and spending, or null if
   /// there is insufficient data.
-  Future<int?> ageOfMoney(Session session, UuidValue budgetId) async {
-    return TransactionService.ageOfMoney(session, budgetId: budgetId);
-  }
+  Future<int?> ageOfMoney(Session session, UuidValue budgetId) async =>
+      TransactionService.ageOfMoney(session, budgetId: budgetId);
 
   /// Creates a split transaction with multiple envelope assignments.
   Future<List<Transaction>> createSplit(
@@ -229,12 +222,10 @@ class TransactionEndpoint extends Endpoint {
   Future<List<Transaction>> listSplits(
     Session session,
     UuidValue parentTransactionId,
-  ) async {
-    return TransactionService.listSplits(
-      session,
-      parentTransactionId: parentTransactionId,
-    );
-  }
+  ) async => TransactionService.listSplits(
+    session,
+    parentTransactionId: parentTransactionId,
+  );
 
   /// Bulk creates transactions from imported data.
   ///
@@ -263,14 +254,12 @@ class TransactionEndpoint extends Endpoint {
     UuidValue budgetId,
     int amountCents,
     DateTime transactionDate,
-  ) async {
-    return TransactionService.findDuplicates(
-      session,
-      budgetId: budgetId,
-      amountCents: amountCents,
-      transactionDate: transactionDate,
-    );
-  }
+  ) async => TransactionService.findDuplicates(
+    session,
+    budgetId: budgetId,
+    amountCents: amountCents,
+    transactionDate: transactionDate,
+  );
 
   /// Deletes a transaction by ID.
   Future<Transaction> delete(Session session, UuidValue transactionId) async {

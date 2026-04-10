@@ -112,36 +112,32 @@ void main() {
     BudgetSummary? summary,
     String? Function(Ref, (String, String))? ruleMatchOverride,
     String? Function(Ref, (String, String))? payeeLastEnvelopeOverride,
-  }) {
-    return ProviderScope(
-      overrides: [
-        budgetDetailProvider.overrideWith(
-          (ref, id) async => budget ?? makeBudget(),
-        ),
-        payeeListProvider.overrideWith(
-          (ref, id) async => payees ?? makePayees(),
-        ),
-        budgetSummaryProvider.overrideWith(
-          (ref, id) async => summary ?? makeSummary(),
-        ),
-        ruleMatchEnvelopeProvider.overrideWith(
-          (ref, args) async =>
-              ruleMatchOverride != null ? ruleMatchOverride(ref, args) : null,
-        ),
-        payeeLastEnvelopeProvider.overrideWith(
-          (ref, args) async => payeeLastEnvelopeOverride != null
-              ? payeeLastEnvelopeOverride(ref, args)
-              : null,
-        ),
-      ],
-      child: MaterialApp(
-        theme: OpenBudgetTheme.light,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: const AddExpenseScreen(budgetId: budgetId),
+  }) => ProviderScope(
+    overrides: [
+      budgetDetailProvider.overrideWith(
+        (ref, id) async => budget ?? makeBudget(),
       ),
-    );
-  }
+      payeeListProvider.overrideWith((ref, id) async => payees ?? makePayees()),
+      budgetSummaryProvider.overrideWith(
+        (ref, id) async => summary ?? makeSummary(),
+      ),
+      ruleMatchEnvelopeProvider.overrideWith(
+        (ref, args) async =>
+            ruleMatchOverride != null ? ruleMatchOverride(ref, args) : null,
+      ),
+      payeeLastEnvelopeProvider.overrideWith(
+        (ref, args) async => payeeLastEnvelopeOverride != null
+            ? payeeLastEnvelopeOverride(ref, args)
+            : null,
+      ),
+    ],
+    child: MaterialApp(
+      theme: OpenBudgetTheme.light,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: const AddExpenseScreen(budgetId: budgetId),
+    ),
+  );
 
   Widget buildRoutedSubject({
     Budget? budget,

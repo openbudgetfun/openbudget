@@ -29,18 +29,16 @@ Envelope _makeEnvelope({
   int spentAmountCents = 12000,
   String? note,
   UuidValue? id,
-}) {
-  return Envelope(
-    id: id ?? _envelopeUuid,
-    name: name,
-    categoryId: _categoryUuid,
-    budgetedAmountCents: budgetedAmountCents,
-    spentAmountCents: spentAmountCents,
-    currencyCode: 'USD',
-    sortOrder: 0,
-    note: note,
-  );
-}
+}) => Envelope(
+  id: id ?? _envelopeUuid,
+  name: name,
+  categoryId: _categoryUuid,
+  budgetedAmountCents: budgetedAmountCents,
+  spentAmountCents: spentAmountCents,
+  currencyCode: 'USD',
+  sortOrder: 0,
+  note: note,
+);
 
 MonthlyEnvelopeData _makeMonthlyData({
   Envelope? envelope,
@@ -48,65 +46,55 @@ MonthlyEnvelopeData _makeMonthlyData({
   int spentCents = 12000,
   int availableCents = 38000,
   int carryoverCents = 5000,
-}) {
-  return MonthlyEnvelopeData(
-    envelope: envelope ?? _makeEnvelope(),
-    allocatedCents: allocatedCents,
-    spentCents: spentCents,
-    availableCents: availableCents,
-    carryoverCents: carryoverCents,
-  );
-}
+}) => MonthlyEnvelopeData(
+  envelope: envelope ?? _makeEnvelope(),
+  allocatedCents: allocatedCents,
+  spentCents: spentCents,
+  availableCents: availableCents,
+  carryoverCents: carryoverCents,
+);
 
 EnvelopeGoal _makeGoal({
   String goalType = 'target_balance',
   int targetAmountCents = 100000,
-}) {
-  return EnvelopeGoal(
-    envelopeId: _envelopeUuid,
-    goalType: goalType,
-    targetAmountCents: targetAmountCents,
-  );
-}
+}) => EnvelopeGoal(
+  envelopeId: _envelopeUuid,
+  goalType: goalType,
+  targetAmountCents: targetAmountCents,
+);
 
-Category _makeCategory({String name = 'Food'}) {
-  return Category(
-    id: _categoryUuid,
-    name: name,
-    budgetId: _budgetUuid,
-    sortOrder: 0,
-    isHidden: false,
-  );
-}
+Category _makeCategory({String name = 'Food'}) => Category(
+  id: _categoryUuid,
+  name: name,
+  budgetId: _budgetUuid,
+  sortOrder: 0,
+  isHidden: false,
+);
 
-List<CategoryWithEnvelopes> _makeCategories() {
-  return [
-    CategoryWithEnvelopes(
-      category: _makeCategory(),
-      envelopes: [_makeEnvelope()],
-      monthlyEnvelopes: [_makeMonthlyData()],
-      totalBudgetedCents: 50000,
-      totalSpentCents: 12000,
-      totalAvailableCents: 38000,
-    ),
-  ];
-}
+List<CategoryWithEnvelopes> _makeCategories() => [
+  CategoryWithEnvelopes(
+    category: _makeCategory(),
+    envelopes: [_makeEnvelope()],
+    monthlyEnvelopes: [_makeMonthlyData()],
+    totalBudgetedCents: 50000,
+    totalSpentCents: 12000,
+    totalAvailableCents: 38000,
+  ),
+];
 
 Transaction _makeTransaction({
   String description = 'Whole Foods',
   int amountCents = -3500,
   UuidValue? envelopeId,
   DateTime? transactionDate,
-}) {
-  return Transaction(
-    description: description,
-    amountCents: amountCents,
-    currencyCode: 'USD',
-    budgetId: _budgetUuid,
-    envelopeId: envelopeId ?? _envelopeUuid,
-    transactionDate: transactionDate ?? DateTime(2026, 2, 15),
-  );
-}
+}) => Transaction(
+  description: description,
+  amountCents: amountCents,
+  currencyCode: 'USD',
+  budgetId: _budgetUuid,
+  envelopeId: envelopeId ?? _envelopeUuid,
+  transactionDate: transactionDate ?? DateTime(2026, 2, 15),
+);
 
 void main() {
   setUpAll(() {

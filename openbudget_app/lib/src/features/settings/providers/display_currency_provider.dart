@@ -67,28 +67,27 @@ typedef UpdateDisplayCurrency =
     });
 
 @riverpod
-UpdateDisplayCurrency updateDisplayCurrency(Ref ref) {
-  return ({
-    required String budgetId,
-    required bool clearDisplayCurrencyCode,
-    String? displayCurrencyCode,
-  }) async {
-    final client = ref.read(serverpodClientProvider);
-    await client.budget.update(
-      UuidValue.fromString(budgetId),
-      displayCurrencyCode: displayCurrencyCode,
-      clearDisplayCurrencyCode: clearDisplayCurrencyCode,
-    );
+UpdateDisplayCurrency updateDisplayCurrency(Ref ref) =>
+    ({
+      required budgetId,
+      required clearDisplayCurrencyCode,
+      displayCurrencyCode,
+    }) async {
+      final client = ref.read(serverpodClientProvider);
+      await client.budget.update(
+        UuidValue.fromString(budgetId),
+        displayCurrencyCode: displayCurrencyCode,
+        clearDisplayCurrencyCode: clearDisplayCurrencyCode,
+      );
 
-    ref
-      ..invalidate(budgetDetailProvider(budgetId))
-      ..invalidate(budgetSummaryProvider(budgetId))
-      ..invalidate(displayCurrencyProvider(budgetId))
-      ..invalidate(displayCurrencyConverterProvider(budgetId))
-      ..invalidate(budgetListProvider)
-      ..invalidate(fxLatestRatesProvider);
-  };
-}
+      ref
+        ..invalidate(budgetDetailProvider(budgetId))
+        ..invalidate(budgetSummaryProvider(budgetId))
+        ..invalidate(displayCurrencyProvider(budgetId))
+        ..invalidate(displayCurrencyConverterProvider(budgetId))
+        ..invalidate(budgetListProvider)
+        ..invalidate(fxLatestRatesProvider);
+    };
 
 class DisplayCurrencyConverter {
   const DisplayCurrencyConverter({
@@ -159,7 +158,5 @@ class DisplayCurrencyConverter {
     return null;
   }
 
-  static int _pow10(int exponent) {
-    return math.pow(10, exponent).toInt();
-  }
+  static int _pow10(int exponent) => math.pow(10, exponent).toInt();
 }

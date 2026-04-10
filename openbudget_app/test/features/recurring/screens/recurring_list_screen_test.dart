@@ -34,18 +34,16 @@ RecurringTransaction _makeRecurring({
   DateTime? nextOccurrence,
   bool isActive = true,
   UuidValue? id,
-}) {
-  return RecurringTransaction(
-    id: id,
-    description: description,
-    amountCents: amountCents,
-    currencyCode: currencyCode,
-    budgetId: _budgetUuid,
-    frequency: frequency,
-    nextOccurrence: nextOccurrence ?? DateTime(2099, 12, 31),
-    isActive: isActive,
-  );
-}
+}) => RecurringTransaction(
+  id: id,
+  description: description,
+  amountCents: amountCents,
+  currencyCode: currencyCode,
+  budgetId: _budgetUuid,
+  frequency: frequency,
+  nextOccurrence: nextOccurrence ?? DateTime(2099, 12, 31),
+  isActive: isActive,
+);
 
 void main() {
   setUpAll(() {

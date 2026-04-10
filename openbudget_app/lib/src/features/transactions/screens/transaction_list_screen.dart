@@ -1283,17 +1283,16 @@ class _StatusFilterChip extends HookWidget {
   }
 }
 
-Color? _flagColorFromString(String? flagColor, ThemeData theme) {
-  return switch (flagColor) {
-    'red' => OpenBudgetPalette.bgFlagCriticalFor(theme),
-    'orange' => OpenBudgetPalette.bgFlagHighFor(theme),
-    'yellow' => OpenBudgetPalette.bgFlagMediumFor(theme),
-    'green' => OpenBudgetPalette.bgFlagPositiveFor(theme),
-    'blue' => OpenBudgetPalette.bgFlagInfoFor(theme),
-    'purple' => OpenBudgetPalette.bgFlagAccentFor(theme),
-    _ => null,
-  };
-}
+Color? _flagColorFromString(String? flagColor, ThemeData theme) =>
+    switch (flagColor) {
+      'red' => OpenBudgetPalette.bgFlagCriticalFor(theme),
+      'orange' => OpenBudgetPalette.bgFlagHighFor(theme),
+      'yellow' => OpenBudgetPalette.bgFlagMediumFor(theme),
+      'green' => OpenBudgetPalette.bgFlagPositiveFor(theme),
+      'blue' => OpenBudgetPalette.bgFlagInfoFor(theme),
+      'purple' => OpenBudgetPalette.bgFlagAccentFor(theme),
+      _ => null,
+    };
 
 class _TransactionTile extends HookConsumerWidget {
   const _TransactionTile({
@@ -1527,31 +1526,29 @@ class _TransactionTile extends HookConsumerWidget {
     BuildContext context,
     AppLocalizations l10n,
     ColorScheme colorScheme,
-  ) async {
-    return showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.deleteConfirmTitle),
-        content: Text(
-          '${l10n.deleteConfirmMessage}\n\n"${transaction.description}"',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(l10n.dialogCancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            style: FilledButton.styleFrom(
-              backgroundColor: colorScheme.error,
-              foregroundColor: colorScheme.onError,
-            ),
-            child: Text(l10n.deleteConfirmButton),
-          ),
-        ],
+  ) async => showDialog<bool>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: Text(l10n.deleteConfirmTitle),
+      content: Text(
+        '${l10n.deleteConfirmMessage}\n\n"${transaction.description}"',
       ),
-    );
-  }
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(ctx).pop(false),
+          child: Text(l10n.dialogCancel),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.of(ctx).pop(true),
+          style: FilledButton.styleFrom(
+            backgroundColor: colorScheme.error,
+            foregroundColor: colorScheme.onError,
+          ),
+          child: Text(l10n.deleteConfirmButton),
+        ),
+      ],
+    ),
+  );
 
   Future<void> _deleteTransaction(
     BuildContext context,
@@ -1755,18 +1752,16 @@ class _FlagChip extends HookWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) {
-    return ActionChip(
-      avatar: Icon(
-        selected ? Icons.flag_rounded : Icons.flag_outlined,
-        color: color,
-        size: 18,
-      ),
-      label: Text(label),
-      side: selected ? BorderSide(color: color, width: 2) : null,
-      onPressed: onTap,
-    );
-  }
+  Widget build(BuildContext context) => ActionChip(
+    avatar: Icon(
+      selected ? Icons.flag_rounded : Icons.flag_outlined,
+      color: color,
+      size: 18,
+    ),
+    label: Text(label),
+    side: selected ? BorderSide(color: color, width: 2) : null,
+    onPressed: onTap,
+  );
 }
 
 class _GroupedTransactionList extends HookWidget {

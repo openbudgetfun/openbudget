@@ -74,9 +74,9 @@ abstract class Account implements _i1.SerializableModel {
           : _i1.UuidValueJsonExtension.fromJson(
               jsonSerialization['institutionId'],
             ),
-      onBudget: jsonSerialization['onBudget'] as bool,
+      onBudget: _i1.BoolJsonExtension.fromJson(jsonSerialization['onBudget']),
       sortOrder: jsonSerialization['sortOrder'] as int,
-      isClosed: jsonSerialization['isClosed'] as bool,
+      isClosed: _i1.BoolJsonExtension.fromJson(jsonSerialization['isClosed']),
       sourceType: jsonSerialization['sourceType'] as String?,
       externalAccountId: jsonSerialization['externalAccountId'] as String?,
       connectionId: jsonSerialization['connectionId'] == null

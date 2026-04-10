@@ -232,90 +232,42 @@ class PlaidConnectionUpdateTable extends _i1.UpdateTable<PlaidConnectionTable> {
   PlaidConnectionUpdateTable(super.table);
 
   _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> budgetId(_i1.UuidValue value) =>
-      _i1.ColumnValue(
-        table.budgetId,
-        value,
-      );
+      _i1.ColumnValue(table.budgetId, value);
 
-  _i1.ColumnValue<String, String> plaidItemId(String value) => _i1.ColumnValue(
-    table.plaidItemId,
-    value,
-  );
+  _i1.ColumnValue<String, String> plaidItemId(String value) =>
+      _i1.ColumnValue(table.plaidItemId, value);
 
-  _i1.ColumnValue<String, String> accessToken(String value) => _i1.ColumnValue(
-    table.accessToken,
-    value,
-  );
+  _i1.ColumnValue<String, String> accessToken(String value) =>
+      _i1.ColumnValue(table.accessToken, value);
 
   _i1.ColumnValue<String, String> institutionName(String? value) =>
-      _i1.ColumnValue(
-        table.institutionName,
-        value,
-      );
+      _i1.ColumnValue(table.institutionName, value);
 
   _i1.ColumnValue<String, String> institutionId(String? value) =>
-      _i1.ColumnValue(
-        table.institutionId,
-        value,
-      );
+      _i1.ColumnValue(table.institutionId, value);
 
   _i1.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
-      _i1.ColumnValue(
-        table.createdAt,
-        value,
-      );
+      _i1.ColumnValue(table.createdAt, value);
 
   _i1.ColumnValue<DateTime, DateTime> updatedAt(DateTime value) =>
-      _i1.ColumnValue(
-        table.updatedAt,
-        value,
-      );
+      _i1.ColumnValue(table.updatedAt, value);
 
   _i1.ColumnValue<DateTime, DateTime> lastSyncedAt(DateTime? value) =>
-      _i1.ColumnValue(
-        table.lastSyncedAt,
-        value,
-      );
+      _i1.ColumnValue(table.lastSyncedAt, value);
 }
 
 class PlaidConnectionTable extends _i1.Table<_i1.UuidValue?> {
   PlaidConnectionTable({super.tableRelation})
     : super(tableName: 'plaid_connection') {
     updateTable = PlaidConnectionUpdateTable(this);
-    budgetId = _i1.ColumnUuid(
-      'budgetId',
-      this,
-    );
-    plaidItemId = _i1.ColumnString(
-      'plaidItemId',
-      this,
-    );
-    accessToken = _i1.ColumnString(
-      'accessToken',
-      this,
-    );
-    institutionName = _i1.ColumnString(
-      'institutionName',
-      this,
-    );
-    institutionId = _i1.ColumnString(
-      'institutionId',
-      this,
-    );
-    createdAt = _i1.ColumnDateTime(
-      'createdAt',
-      this,
-      hasDefault: true,
-    );
-    updatedAt = _i1.ColumnDateTime(
-      'updatedAt',
-      this,
-      hasDefault: true,
-    );
-    lastSyncedAt = _i1.ColumnDateTime(
-      'lastSyncedAt',
-      this,
-    );
+    budgetId = _i1.ColumnUuid('budgetId', this);
+    plaidItemId = _i1.ColumnString('plaidItemId', this);
+    accessToken = _i1.ColumnString('accessToken', this);
+    institutionName = _i1.ColumnString('institutionName', this);
+    institutionId = _i1.ColumnString('institutionId', this);
+    createdAt = _i1.ColumnDateTime('createdAt', this, hasDefault: true);
+    updatedAt = _i1.ColumnDateTime('updatedAt', this, hasDefault: true);
+    lastSyncedAt = _i1.ColumnDateTime('lastSyncedAt', this);
   }
 
   late final PlaidConnectionUpdateTable updateTable;
@@ -406,7 +358,7 @@ class PlaidConnectionRepository {
   /// );
   /// ```
   Future<List<PlaidConnection>> find(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     _i1.WhereExpressionBuilder<PlaidConnectionTable>? where,
     int? limit,
     int? offset,
@@ -414,6 +366,8 @@ class PlaidConnectionRepository {
     bool orderDescending = false,
     _i1.OrderByListBuilder<PlaidConnectionTable>? orderByList,
     _i1.Transaction? transaction,
+    _i1.LockMode? lockMode,
+    _i1.LockBehavior? lockBehavior,
   }) async {
     return session.db.find<PlaidConnection>(
       where: where?.call(PlaidConnection.t),
@@ -423,6 +377,8 @@ class PlaidConnectionRepository {
       limit: limit,
       offset: offset,
       transaction: transaction,
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
     );
   }
 
@@ -444,13 +400,15 @@ class PlaidConnectionRepository {
   /// );
   /// ```
   Future<PlaidConnection?> findFirstRow(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     _i1.WhereExpressionBuilder<PlaidConnectionTable>? where,
     int? offset,
     _i1.OrderByBuilder<PlaidConnectionTable>? orderBy,
     bool orderDescending = false,
     _i1.OrderByListBuilder<PlaidConnectionTable>? orderByList,
     _i1.Transaction? transaction,
+    _i1.LockMode? lockMode,
+    _i1.LockBehavior? lockBehavior,
   }) async {
     return session.db.findFirstRow<PlaidConnection>(
       where: where?.call(PlaidConnection.t),
@@ -459,18 +417,24 @@ class PlaidConnectionRepository {
       orderDescending: orderDescending,
       offset: offset,
       transaction: transaction,
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
     );
   }
 
   /// Finds a single [PlaidConnection] by its [id] or null if no such row exists.
   Future<PlaidConnection?> findById(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     _i1.UuidValue id, {
     _i1.Transaction? transaction,
+    _i1.LockMode? lockMode,
+    _i1.LockBehavior? lockBehavior,
   }) async {
     return session.db.findById<PlaidConnection>(
       id,
       transaction: transaction,
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
     );
   }
 
@@ -480,14 +444,20 @@ class PlaidConnectionRepository {
   ///
   /// This is an atomic operation, meaning that if one of the rows fails to
   /// insert, none of the rows will be inserted.
+  ///
+  /// If [ignoreConflicts] is set to `true`, rows that conflict with existing
+  /// rows are silently skipped, and only the successfully inserted rows are
+  /// returned.
   Future<List<PlaidConnection>> insert(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     List<PlaidConnection> rows, {
     _i1.Transaction? transaction,
+    bool ignoreConflicts = false,
   }) async {
     return session.db.insert<PlaidConnection>(
       rows,
       transaction: transaction,
+      ignoreConflicts: ignoreConflicts,
     );
   }
 
@@ -495,14 +465,11 @@ class PlaidConnectionRepository {
   ///
   /// The returned [PlaidConnection] will have its `id` field set.
   Future<PlaidConnection> insertRow(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     PlaidConnection row, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.insertRow<PlaidConnection>(
-      row,
-      transaction: transaction,
-    );
+    return session.db.insertRow<PlaidConnection>(row, transaction: transaction);
   }
 
   /// Updates all [PlaidConnection]s in the list and returns the updated rows. If
@@ -511,7 +478,7 @@ class PlaidConnectionRepository {
   /// This is an atomic operation, meaning that if one of the rows fails to
   /// update, none of the rows will be updated.
   Future<List<PlaidConnection>> update(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     List<PlaidConnection> rows, {
     _i1.ColumnSelections<PlaidConnectionTable>? columns,
     _i1.Transaction? transaction,
@@ -527,7 +494,7 @@ class PlaidConnectionRepository {
   /// Optionally, a list of [columns] can be provided to only update those
   /// columns. Defaults to all columns.
   Future<PlaidConnection> updateRow(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     PlaidConnection row, {
     _i1.ColumnSelections<PlaidConnectionTable>? columns,
     _i1.Transaction? transaction,
@@ -542,7 +509,7 @@ class PlaidConnectionRepository {
   /// Updates a single [PlaidConnection] by its [id] with the specified [columnValues].
   /// Returns the updated row or null if no row with the given id exists.
   Future<PlaidConnection?> updateById(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     _i1.UuidValue id, {
     required _i1.ColumnValueListBuilder<PlaidConnectionUpdateTable>
     columnValues,
@@ -558,7 +525,7 @@ class PlaidConnectionRepository {
   /// Updates all [PlaidConnection]s matching the [where] expression with the specified [columnValues].
   /// Returns the list of updated rows.
   Future<List<PlaidConnection>> updateWhere(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     required _i1.ColumnValueListBuilder<PlaidConnectionUpdateTable>
     columnValues,
     required _i1.WhereExpressionBuilder<PlaidConnectionTable> where,
@@ -585,31 +552,25 @@ class PlaidConnectionRepository {
   /// This is an atomic operation, meaning that if one of the rows fail to
   /// be deleted, none of the rows will be deleted.
   Future<List<PlaidConnection>> delete(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     List<PlaidConnection> rows, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.delete<PlaidConnection>(
-      rows,
-      transaction: transaction,
-    );
+    return session.db.delete<PlaidConnection>(rows, transaction: transaction);
   }
 
   /// Deletes a single [PlaidConnection].
   Future<PlaidConnection> deleteRow(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     PlaidConnection row, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.deleteRow<PlaidConnection>(
-      row,
-      transaction: transaction,
-    );
+    return session.db.deleteRow<PlaidConnection>(row, transaction: transaction);
   }
 
   /// Deletes all rows matching the [where] expression.
   Future<List<PlaidConnection>> deleteWhere(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     required _i1.WhereExpressionBuilder<PlaidConnectionTable> where,
     _i1.Transaction? transaction,
   }) async {
@@ -622,7 +583,7 @@ class PlaidConnectionRepository {
   /// Counts the number of rows matching the [where] expression. If omitted,
   /// will return the count of all rows in the table.
   Future<int> count(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     _i1.WhereExpressionBuilder<PlaidConnectionTable>? where,
     int? limit,
     _i1.Transaction? transaction,
@@ -630,6 +591,22 @@ class PlaidConnectionRepository {
     return session.db.count<PlaidConnection>(
       where: where?.call(PlaidConnection.t),
       limit: limit,
+      transaction: transaction,
+    );
+  }
+
+  /// Acquires row-level locks on [PlaidConnection] rows matching the [where] expression.
+  Future<void> lockRows(
+    _i1.DatabaseSession session, {
+    required _i1.WhereExpressionBuilder<PlaidConnectionTable> where,
+    required _i1.LockMode lockMode,
+    required _i1.Transaction transaction,
+    _i1.LockBehavior lockBehavior = _i1.LockBehavior.wait,
+  }) async {
+    return session.db.lockRows<PlaidConnection>(
+      where: where(PlaidConnection.t),
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
       transaction: transaction,
     );
   }

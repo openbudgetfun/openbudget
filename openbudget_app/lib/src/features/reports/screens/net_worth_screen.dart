@@ -461,27 +461,23 @@ class _AccountTile extends HookWidget {
     );
   }
 
-  IconData _accountIcon(String type) {
-    return switch (type) {
-      'checking' => Icons.account_balance_rounded,
-      'savings' => Icons.savings_rounded,
-      'creditCard' => Icons.credit_card_rounded,
-      'cash' => Icons.money_rounded,
-      'investment' => Icons.trending_up_rounded,
-      'cryptoWallet' => SimpleIcons.solana,
-      _ => Icons.account_balance_wallet_rounded,
-    };
-  }
+  IconData _accountIcon(String type) => switch (type) {
+    'checking' => Icons.account_balance_rounded,
+    'savings' => Icons.savings_rounded,
+    'creditCard' => Icons.credit_card_rounded,
+    'cash' => Icons.money_rounded,
+    'investment' => Icons.trending_up_rounded,
+    'cryptoWallet' => SimpleIcons.solana,
+    _ => Icons.account_balance_wallet_rounded,
+  };
 
-  String _accountTypeLabel(String type) {
-    return switch (type) {
-      'checking' => 'Checking',
-      'savings' => 'Savings',
-      'creditCard' => 'Credit Card',
-      'cash' => 'Cash',
-      'investment' => 'Investment',
-      'cryptoWallet' => 'Solana Wallet',
-      _ => 'Other',
-    };
-  }
+  String _accountTypeLabel(String type) => switch (type) {
+    'checking' => 'Checking',
+    'savings' => 'Savings',
+    'creditCard' => 'Credit Card',
+    'cash' => 'Cash',
+    'investment' => 'Investment',
+    'cryptoWallet' => 'Solana Wallet',
+    _ => 'Other',
+  };
 }

@@ -230,88 +230,42 @@ class MonthlyAllocationUpdateTable
 
   _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> envelopeId(
     _i1.UuidValue value,
-  ) => _i1.ColumnValue(
-    table.envelopeId,
-    value,
-  );
+  ) => _i1.ColumnValue(table.envelopeId, value);
 
   _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> budgetId(_i1.UuidValue value) =>
-      _i1.ColumnValue(
-        table.budgetId,
-        value,
-      );
+      _i1.ColumnValue(table.budgetId, value);
 
-  _i1.ColumnValue<int, int> year(int value) => _i1.ColumnValue(
-    table.year,
-    value,
-  );
+  _i1.ColumnValue<int, int> year(int value) =>
+      _i1.ColumnValue(table.year, value);
 
-  _i1.ColumnValue<int, int> month(int value) => _i1.ColumnValue(
-    table.month,
-    value,
-  );
+  _i1.ColumnValue<int, int> month(int value) =>
+      _i1.ColumnValue(table.month, value);
 
-  _i1.ColumnValue<int, int> allocatedCents(int value) => _i1.ColumnValue(
-    table.allocatedCents,
-    value,
-  );
+  _i1.ColumnValue<int, int> allocatedCents(int value) =>
+      _i1.ColumnValue(table.allocatedCents, value);
 
-  _i1.ColumnValue<int, int> carryoverCents(int value) => _i1.ColumnValue(
-    table.carryoverCents,
-    value,
-  );
+  _i1.ColumnValue<int, int> carryoverCents(int value) =>
+      _i1.ColumnValue(table.carryoverCents, value);
 
   _i1.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
-      _i1.ColumnValue(
-        table.createdAt,
-        value,
-      );
+      _i1.ColumnValue(table.createdAt, value);
 
   _i1.ColumnValue<DateTime, DateTime> updatedAt(DateTime value) =>
-      _i1.ColumnValue(
-        table.updatedAt,
-        value,
-      );
+      _i1.ColumnValue(table.updatedAt, value);
 }
 
 class MonthlyAllocationTable extends _i1.Table<_i1.UuidValue?> {
   MonthlyAllocationTable({super.tableRelation})
     : super(tableName: 'monthly_allocation') {
     updateTable = MonthlyAllocationUpdateTable(this);
-    envelopeId = _i1.ColumnUuid(
-      'envelopeId',
-      this,
-    );
-    budgetId = _i1.ColumnUuid(
-      'budgetId',
-      this,
-    );
-    year = _i1.ColumnInt(
-      'year',
-      this,
-    );
-    month = _i1.ColumnInt(
-      'month',
-      this,
-    );
-    allocatedCents = _i1.ColumnInt(
-      'allocatedCents',
-      this,
-    );
-    carryoverCents = _i1.ColumnInt(
-      'carryoverCents',
-      this,
-    );
-    createdAt = _i1.ColumnDateTime(
-      'createdAt',
-      this,
-      hasDefault: true,
-    );
-    updatedAt = _i1.ColumnDateTime(
-      'updatedAt',
-      this,
-      hasDefault: true,
-    );
+    envelopeId = _i1.ColumnUuid('envelopeId', this);
+    budgetId = _i1.ColumnUuid('budgetId', this);
+    year = _i1.ColumnInt('year', this);
+    month = _i1.ColumnInt('month', this);
+    allocatedCents = _i1.ColumnInt('allocatedCents', this);
+    carryoverCents = _i1.ColumnInt('carryoverCents', this);
+    createdAt = _i1.ColumnDateTime('createdAt', this, hasDefault: true);
+    updatedAt = _i1.ColumnDateTime('updatedAt', this, hasDefault: true);
   }
 
   late final MonthlyAllocationUpdateTable updateTable;
@@ -406,7 +360,7 @@ class MonthlyAllocationRepository {
   /// );
   /// ```
   Future<List<MonthlyAllocation>> find(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     _i1.WhereExpressionBuilder<MonthlyAllocationTable>? where,
     int? limit,
     int? offset,
@@ -414,6 +368,8 @@ class MonthlyAllocationRepository {
     bool orderDescending = false,
     _i1.OrderByListBuilder<MonthlyAllocationTable>? orderByList,
     _i1.Transaction? transaction,
+    _i1.LockMode? lockMode,
+    _i1.LockBehavior? lockBehavior,
   }) async {
     return session.db.find<MonthlyAllocation>(
       where: where?.call(MonthlyAllocation.t),
@@ -423,6 +379,8 @@ class MonthlyAllocationRepository {
       limit: limit,
       offset: offset,
       transaction: transaction,
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
     );
   }
 
@@ -444,13 +402,15 @@ class MonthlyAllocationRepository {
   /// );
   /// ```
   Future<MonthlyAllocation?> findFirstRow(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     _i1.WhereExpressionBuilder<MonthlyAllocationTable>? where,
     int? offset,
     _i1.OrderByBuilder<MonthlyAllocationTable>? orderBy,
     bool orderDescending = false,
     _i1.OrderByListBuilder<MonthlyAllocationTable>? orderByList,
     _i1.Transaction? transaction,
+    _i1.LockMode? lockMode,
+    _i1.LockBehavior? lockBehavior,
   }) async {
     return session.db.findFirstRow<MonthlyAllocation>(
       where: where?.call(MonthlyAllocation.t),
@@ -459,18 +419,24 @@ class MonthlyAllocationRepository {
       orderDescending: orderDescending,
       offset: offset,
       transaction: transaction,
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
     );
   }
 
   /// Finds a single [MonthlyAllocation] by its [id] or null if no such row exists.
   Future<MonthlyAllocation?> findById(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     _i1.UuidValue id, {
     _i1.Transaction? transaction,
+    _i1.LockMode? lockMode,
+    _i1.LockBehavior? lockBehavior,
   }) async {
     return session.db.findById<MonthlyAllocation>(
       id,
       transaction: transaction,
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
     );
   }
 
@@ -480,14 +446,20 @@ class MonthlyAllocationRepository {
   ///
   /// This is an atomic operation, meaning that if one of the rows fails to
   /// insert, none of the rows will be inserted.
+  ///
+  /// If [ignoreConflicts] is set to `true`, rows that conflict with existing
+  /// rows are silently skipped, and only the successfully inserted rows are
+  /// returned.
   Future<List<MonthlyAllocation>> insert(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     List<MonthlyAllocation> rows, {
     _i1.Transaction? transaction,
+    bool ignoreConflicts = false,
   }) async {
     return session.db.insert<MonthlyAllocation>(
       rows,
       transaction: transaction,
+      ignoreConflicts: ignoreConflicts,
     );
   }
 
@@ -495,7 +467,7 @@ class MonthlyAllocationRepository {
   ///
   /// The returned [MonthlyAllocation] will have its `id` field set.
   Future<MonthlyAllocation> insertRow(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     MonthlyAllocation row, {
     _i1.Transaction? transaction,
   }) async {
@@ -511,7 +483,7 @@ class MonthlyAllocationRepository {
   /// This is an atomic operation, meaning that if one of the rows fails to
   /// update, none of the rows will be updated.
   Future<List<MonthlyAllocation>> update(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     List<MonthlyAllocation> rows, {
     _i1.ColumnSelections<MonthlyAllocationTable>? columns,
     _i1.Transaction? transaction,
@@ -527,7 +499,7 @@ class MonthlyAllocationRepository {
   /// Optionally, a list of [columns] can be provided to only update those
   /// columns. Defaults to all columns.
   Future<MonthlyAllocation> updateRow(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     MonthlyAllocation row, {
     _i1.ColumnSelections<MonthlyAllocationTable>? columns,
     _i1.Transaction? transaction,
@@ -542,7 +514,7 @@ class MonthlyAllocationRepository {
   /// Updates a single [MonthlyAllocation] by its [id] with the specified [columnValues].
   /// Returns the updated row or null if no row with the given id exists.
   Future<MonthlyAllocation?> updateById(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     _i1.UuidValue id, {
     required _i1.ColumnValueListBuilder<MonthlyAllocationUpdateTable>
     columnValues,
@@ -558,7 +530,7 @@ class MonthlyAllocationRepository {
   /// Updates all [MonthlyAllocation]s matching the [where] expression with the specified [columnValues].
   /// Returns the list of updated rows.
   Future<List<MonthlyAllocation>> updateWhere(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     required _i1.ColumnValueListBuilder<MonthlyAllocationUpdateTable>
     columnValues,
     required _i1.WhereExpressionBuilder<MonthlyAllocationTable> where,
@@ -585,19 +557,16 @@ class MonthlyAllocationRepository {
   /// This is an atomic operation, meaning that if one of the rows fail to
   /// be deleted, none of the rows will be deleted.
   Future<List<MonthlyAllocation>> delete(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     List<MonthlyAllocation> rows, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.delete<MonthlyAllocation>(
-      rows,
-      transaction: transaction,
-    );
+    return session.db.delete<MonthlyAllocation>(rows, transaction: transaction);
   }
 
   /// Deletes a single [MonthlyAllocation].
   Future<MonthlyAllocation> deleteRow(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     MonthlyAllocation row, {
     _i1.Transaction? transaction,
   }) async {
@@ -609,7 +578,7 @@ class MonthlyAllocationRepository {
 
   /// Deletes all rows matching the [where] expression.
   Future<List<MonthlyAllocation>> deleteWhere(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     required _i1.WhereExpressionBuilder<MonthlyAllocationTable> where,
     _i1.Transaction? transaction,
   }) async {
@@ -622,7 +591,7 @@ class MonthlyAllocationRepository {
   /// Counts the number of rows matching the [where] expression. If omitted,
   /// will return the count of all rows in the table.
   Future<int> count(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     _i1.WhereExpressionBuilder<MonthlyAllocationTable>? where,
     int? limit,
     _i1.Transaction? transaction,
@@ -630,6 +599,22 @@ class MonthlyAllocationRepository {
     return session.db.count<MonthlyAllocation>(
       where: where?.call(MonthlyAllocation.t),
       limit: limit,
+      transaction: transaction,
+    );
+  }
+
+  /// Acquires row-level locks on [MonthlyAllocation] rows matching the [where] expression.
+  Future<void> lockRows(
+    _i1.DatabaseSession session, {
+    required _i1.WhereExpressionBuilder<MonthlyAllocationTable> where,
+    required _i1.LockMode lockMode,
+    required _i1.Transaction transaction,
+    _i1.LockBehavior lockBehavior = _i1.LockBehavior.wait,
+  }) async {
+    return session.db.lockRows<MonthlyAllocation>(
+      where: where(MonthlyAllocation.t),
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
       transaction: transaction,
     );
   }

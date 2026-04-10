@@ -11,16 +11,14 @@ void main() {
     GoogleFonts.config.allowRuntimeFetching = false;
   });
 
-  Widget buildSubject() {
-    return ProviderScope(
-      child: MaterialApp(
-        theme: OpenBudgetTheme.light,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: const RegisterScreen(),
-      ),
-    );
-  }
+  Widget buildSubject() => ProviderScope(
+    child: MaterialApp(
+      theme: OpenBudgetTheme.light,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: const RegisterScreen(),
+    ),
+  );
 
   group('RegisterScreen', () {
     group('step 0 - email', () {

@@ -44,7 +44,9 @@ abstract class FxRateSnapshot
       fetchedAt: _i1.DateTimeJsonExtension.fromJson(
         jsonSerialization['fetchedAt'],
       ),
-      isLatest: jsonSerialization['isLatest'] as bool?,
+      isLatest: jsonSerialization['isLatest'] == null
+          ? null
+          : _i1.BoolJsonExtension.fromJson(jsonSerialization['isLatest']),
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
@@ -183,61 +185,31 @@ class _FxRateSnapshotImpl extends FxRateSnapshot {
 class FxRateSnapshotUpdateTable extends _i1.UpdateTable<FxRateSnapshotTable> {
   FxRateSnapshotUpdateTable(super.table);
 
-  _i1.ColumnValue<String, String> provider(String value) => _i1.ColumnValue(
-    table.provider,
-    value,
-  );
+  _i1.ColumnValue<String, String> provider(String value) =>
+      _i1.ColumnValue(table.provider, value);
 
   _i1.ColumnValue<String, String> baseCurrencyCode(String value) =>
-      _i1.ColumnValue(
-        table.baseCurrencyCode,
-        value,
-      );
+      _i1.ColumnValue(table.baseCurrencyCode, value);
 
   _i1.ColumnValue<DateTime, DateTime> fetchedAt(DateTime value) =>
-      _i1.ColumnValue(
-        table.fetchedAt,
-        value,
-      );
+      _i1.ColumnValue(table.fetchedAt, value);
 
-  _i1.ColumnValue<bool, bool> isLatest(bool value) => _i1.ColumnValue(
-    table.isLatest,
-    value,
-  );
+  _i1.ColumnValue<bool, bool> isLatest(bool value) =>
+      _i1.ColumnValue(table.isLatest, value);
 
   _i1.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
-      _i1.ColumnValue(
-        table.createdAt,
-        value,
-      );
+      _i1.ColumnValue(table.createdAt, value);
 }
 
 class FxRateSnapshotTable extends _i1.Table<_i1.UuidValue?> {
   FxRateSnapshotTable({super.tableRelation})
     : super(tableName: 'fx_rate_snapshot') {
     updateTable = FxRateSnapshotUpdateTable(this);
-    provider = _i1.ColumnString(
-      'provider',
-      this,
-    );
-    baseCurrencyCode = _i1.ColumnString(
-      'baseCurrencyCode',
-      this,
-    );
-    fetchedAt = _i1.ColumnDateTime(
-      'fetchedAt',
-      this,
-    );
-    isLatest = _i1.ColumnBool(
-      'isLatest',
-      this,
-      hasDefault: true,
-    );
-    createdAt = _i1.ColumnDateTime(
-      'createdAt',
-      this,
-      hasDefault: true,
-    );
+    provider = _i1.ColumnString('provider', this);
+    baseCurrencyCode = _i1.ColumnString('baseCurrencyCode', this);
+    fetchedAt = _i1.ColumnDateTime('fetchedAt', this);
+    isLatest = _i1.ColumnBool('isLatest', this, hasDefault: true);
+    createdAt = _i1.ColumnDateTime('createdAt', this, hasDefault: true);
   }
 
   late final FxRateSnapshotUpdateTable updateTable;
@@ -319,7 +291,7 @@ class FxRateSnapshotRepository {
   /// );
   /// ```
   Future<List<FxRateSnapshot>> find(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     _i1.WhereExpressionBuilder<FxRateSnapshotTable>? where,
     int? limit,
     int? offset,
@@ -327,6 +299,8 @@ class FxRateSnapshotRepository {
     bool orderDescending = false,
     _i1.OrderByListBuilder<FxRateSnapshotTable>? orderByList,
     _i1.Transaction? transaction,
+    _i1.LockMode? lockMode,
+    _i1.LockBehavior? lockBehavior,
   }) async {
     return session.db.find<FxRateSnapshot>(
       where: where?.call(FxRateSnapshot.t),
@@ -336,6 +310,8 @@ class FxRateSnapshotRepository {
       limit: limit,
       offset: offset,
       transaction: transaction,
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
     );
   }
 
@@ -357,13 +333,15 @@ class FxRateSnapshotRepository {
   /// );
   /// ```
   Future<FxRateSnapshot?> findFirstRow(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     _i1.WhereExpressionBuilder<FxRateSnapshotTable>? where,
     int? offset,
     _i1.OrderByBuilder<FxRateSnapshotTable>? orderBy,
     bool orderDescending = false,
     _i1.OrderByListBuilder<FxRateSnapshotTable>? orderByList,
     _i1.Transaction? transaction,
+    _i1.LockMode? lockMode,
+    _i1.LockBehavior? lockBehavior,
   }) async {
     return session.db.findFirstRow<FxRateSnapshot>(
       where: where?.call(FxRateSnapshot.t),
@@ -372,18 +350,24 @@ class FxRateSnapshotRepository {
       orderDescending: orderDescending,
       offset: offset,
       transaction: transaction,
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
     );
   }
 
   /// Finds a single [FxRateSnapshot] by its [id] or null if no such row exists.
   Future<FxRateSnapshot?> findById(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     _i1.UuidValue id, {
     _i1.Transaction? transaction,
+    _i1.LockMode? lockMode,
+    _i1.LockBehavior? lockBehavior,
   }) async {
     return session.db.findById<FxRateSnapshot>(
       id,
       transaction: transaction,
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
     );
   }
 
@@ -393,14 +377,20 @@ class FxRateSnapshotRepository {
   ///
   /// This is an atomic operation, meaning that if one of the rows fails to
   /// insert, none of the rows will be inserted.
+  ///
+  /// If [ignoreConflicts] is set to `true`, rows that conflict with existing
+  /// rows are silently skipped, and only the successfully inserted rows are
+  /// returned.
   Future<List<FxRateSnapshot>> insert(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     List<FxRateSnapshot> rows, {
     _i1.Transaction? transaction,
+    bool ignoreConflicts = false,
   }) async {
     return session.db.insert<FxRateSnapshot>(
       rows,
       transaction: transaction,
+      ignoreConflicts: ignoreConflicts,
     );
   }
 
@@ -408,14 +398,11 @@ class FxRateSnapshotRepository {
   ///
   /// The returned [FxRateSnapshot] will have its `id` field set.
   Future<FxRateSnapshot> insertRow(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     FxRateSnapshot row, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.insertRow<FxRateSnapshot>(
-      row,
-      transaction: transaction,
-    );
+    return session.db.insertRow<FxRateSnapshot>(row, transaction: transaction);
   }
 
   /// Updates all [FxRateSnapshot]s in the list and returns the updated rows. If
@@ -424,7 +411,7 @@ class FxRateSnapshotRepository {
   /// This is an atomic operation, meaning that if one of the rows fails to
   /// update, none of the rows will be updated.
   Future<List<FxRateSnapshot>> update(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     List<FxRateSnapshot> rows, {
     _i1.ColumnSelections<FxRateSnapshotTable>? columns,
     _i1.Transaction? transaction,
@@ -440,7 +427,7 @@ class FxRateSnapshotRepository {
   /// Optionally, a list of [columns] can be provided to only update those
   /// columns. Defaults to all columns.
   Future<FxRateSnapshot> updateRow(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     FxRateSnapshot row, {
     _i1.ColumnSelections<FxRateSnapshotTable>? columns,
     _i1.Transaction? transaction,
@@ -455,7 +442,7 @@ class FxRateSnapshotRepository {
   /// Updates a single [FxRateSnapshot] by its [id] with the specified [columnValues].
   /// Returns the updated row or null if no row with the given id exists.
   Future<FxRateSnapshot?> updateById(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     _i1.UuidValue id, {
     required _i1.ColumnValueListBuilder<FxRateSnapshotUpdateTable> columnValues,
     _i1.Transaction? transaction,
@@ -470,7 +457,7 @@ class FxRateSnapshotRepository {
   /// Updates all [FxRateSnapshot]s matching the [where] expression with the specified [columnValues].
   /// Returns the list of updated rows.
   Future<List<FxRateSnapshot>> updateWhere(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     required _i1.ColumnValueListBuilder<FxRateSnapshotUpdateTable> columnValues,
     required _i1.WhereExpressionBuilder<FxRateSnapshotTable> where,
     int? limit,
@@ -496,31 +483,25 @@ class FxRateSnapshotRepository {
   /// This is an atomic operation, meaning that if one of the rows fail to
   /// be deleted, none of the rows will be deleted.
   Future<List<FxRateSnapshot>> delete(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     List<FxRateSnapshot> rows, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.delete<FxRateSnapshot>(
-      rows,
-      transaction: transaction,
-    );
+    return session.db.delete<FxRateSnapshot>(rows, transaction: transaction);
   }
 
   /// Deletes a single [FxRateSnapshot].
   Future<FxRateSnapshot> deleteRow(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     FxRateSnapshot row, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.deleteRow<FxRateSnapshot>(
-      row,
-      transaction: transaction,
-    );
+    return session.db.deleteRow<FxRateSnapshot>(row, transaction: transaction);
   }
 
   /// Deletes all rows matching the [where] expression.
   Future<List<FxRateSnapshot>> deleteWhere(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     required _i1.WhereExpressionBuilder<FxRateSnapshotTable> where,
     _i1.Transaction? transaction,
   }) async {
@@ -533,7 +514,7 @@ class FxRateSnapshotRepository {
   /// Counts the number of rows matching the [where] expression. If omitted,
   /// will return the count of all rows in the table.
   Future<int> count(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     _i1.WhereExpressionBuilder<FxRateSnapshotTable>? where,
     int? limit,
     _i1.Transaction? transaction,
@@ -541,6 +522,22 @@ class FxRateSnapshotRepository {
     return session.db.count<FxRateSnapshot>(
       where: where?.call(FxRateSnapshot.t),
       limit: limit,
+      transaction: transaction,
+    );
+  }
+
+  /// Acquires row-level locks on [FxRateSnapshot] rows matching the [where] expression.
+  Future<void> lockRows(
+    _i1.DatabaseSession session, {
+    required _i1.WhereExpressionBuilder<FxRateSnapshotTable> where,
+    required _i1.LockMode lockMode,
+    required _i1.Transaction transaction,
+    _i1.LockBehavior lockBehavior = _i1.LockBehavior.wait,
+  }) async {
+    return session.db.lockRows<FxRateSnapshot>(
+      where: where(FxRateSnapshot.t),
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
       transaction: transaction,
     );
   }

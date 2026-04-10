@@ -230,20 +230,18 @@ EnhancedTransaction _buildTx({
   List<NativeTransfer> nativeTransfers = const [],
   List<TokenTransfer> tokenTransfers = const [],
   List<InnerInstruction> instructions = const [],
-}) {
-  return EnhancedTransaction(
-    description: description,
-    type: type,
-    source: source,
-    fee: 5000,
-    feePayer: 0,
-    signature: 'Sig11111111111111111111111111111111111111111111111111',
-    slot: 1,
-    timestamp: 1700000000,
-    nativeTransfers: nativeTransfers,
-    tokenTransfers: tokenTransfers,
-    accountData: const [],
-    instructions: instructions,
-    events: const {},
-  );
-}
+}) => EnhancedTransaction(
+  description: description,
+  type: type,
+  source: source,
+  fee: 5000,
+  feePayer: 0,
+  signature: 'Sig11111111111111111111111111111111111111111111111111',
+  slot: 1,
+  timestamp: 1700000000,
+  nativeTransfers: nativeTransfers,
+  tokenTransfers: tokenTransfers,
+  accountData: const [],
+  instructions: instructions,
+  events: const {},
+);

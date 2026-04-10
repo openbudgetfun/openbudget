@@ -453,39 +453,37 @@ class _RecentMovesTabButton extends HookWidget {
   final ThemeData theme;
 
   @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: OpenBudgetPalette.transparentFor(theme),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(RadiusTokens.sm),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          curve: Curves.easeOut,
-          margin: const EdgeInsets.all(4),
-          padding: const EdgeInsets.symmetric(vertical: SpacingTokens.xs),
-          decoration: BoxDecoration(
+  Widget build(BuildContext context) => Material(
+    color: OpenBudgetPalette.transparentFor(theme),
+    child: InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(RadiusTokens.sm),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        curve: Curves.easeOut,
+        margin: const EdgeInsets.all(4),
+        padding: const EdgeInsets.symmetric(vertical: SpacingTokens.xs),
+        decoration: BoxDecoration(
+          color: selected
+              ? OpenBudgetPalette.bgBrandFor(
+                  theme,
+                ).withAlpha(theme.brightness == Brightness.dark ? 62 : 28)
+              : OpenBudgetPalette.transparentFor(theme),
+          borderRadius: BorderRadius.circular(RadiusTokens.sm),
+        ),
+        child: Text(
+          label,
+          textAlign: TextAlign.center,
+          style: theme.textTheme.titleSmall?.copyWith(
+            fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
             color: selected
-                ? OpenBudgetPalette.bgBrandFor(
-                    theme,
-                  ).withAlpha(theme.brightness == Brightness.dark ? 62 : 28)
-                : OpenBudgetPalette.transparentFor(theme),
-            borderRadius: BorderRadius.circular(RadiusTokens.sm),
-          ),
-          child: Text(
-            label,
-            textAlign: TextAlign.center,
-            style: theme.textTheme.titleSmall?.copyWith(
-              fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-              color: selected
-                  ? OpenBudgetPalette.bgBrandFor(theme)
-                  : OpenBudgetPalette.fgSecondaryFor(theme),
-            ),
+                ? OpenBudgetPalette.bgBrandFor(theme)
+                : OpenBudgetPalette.fgSecondaryFor(theme),
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
 }
 
 class _RecentMovesList extends HookWidget {

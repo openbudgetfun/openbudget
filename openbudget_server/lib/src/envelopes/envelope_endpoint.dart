@@ -33,14 +33,12 @@ class EnvelopeEndpoint extends Endpoint {
   }
 
   /// Lists all envelopes for a category.
-  Future<List<Envelope>> list(Session session, UuidValue categoryId) async {
-    return EnvelopeService.listForCategory(session, categoryId: categoryId);
-  }
+  Future<List<Envelope>> list(Session session, UuidValue categoryId) async =>
+      EnvelopeService.listForCategory(session, categoryId: categoryId);
 
   /// Gets a single envelope by ID.
-  Future<Envelope> get(Session session, UuidValue envelopeId) async {
-    return EnvelopeService.getById(session, envelopeId: envelopeId);
-  }
+  Future<Envelope> get(Session session, UuidValue envelopeId) async =>
+      EnvelopeService.getById(session, envelopeId: envelopeId);
 
   /// Updates an envelope by ID.
   Future<Envelope> update(
