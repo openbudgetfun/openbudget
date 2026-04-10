@@ -1,3 +1,4 @@
+import 'package:openbudget_server/src/budgets/budget_realtime_notifier.dart';
 import 'package:openbudget_server/src/budgets/budget_service.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
@@ -15,11 +16,16 @@ class BudgetEndpoint extends Endpoint {
     String name,
     String currencyCode,
   ) async {
-    return BudgetService.create(
+    final budget = await BudgetService.create(
       session,
       name: name,
       currencyCode: currencyCode,
     );
+    final createdBudgetId = budget.id;
+    if (createdBudgetId != null) {
+      BudgetRealtimeNotifier.notifyBudgetChanged(createdBudgetId);
+    }
+    return budget;
   }
 
   /// Lists all budgets for the authenticated user.
@@ -41,7 +47,7 @@ class BudgetEndpoint extends Endpoint {
     String? displayCurrencyCode,
     bool? clearDisplayCurrencyCode,
   }) async {
-    return BudgetService.update(
+    final budget = await BudgetService.update(
       session,
       budgetId: budgetId,
       name: name,
@@ -49,11 +55,15 @@ class BudgetEndpoint extends Endpoint {
       displayCurrencyCode: displayCurrencyCode,
       clearDisplayCurrencyCode: clearDisplayCurrencyCode ?? false,
     );
+    BudgetRealtimeNotifier.notifyBudgetChanged(budgetId);
+    return budget;
   }
 
   /// Deletes a budget by ID, verifying ownership.
   Future<Budget> delete(Session session, UuidValue budgetId) async {
-    return BudgetService.delete(session, budgetId: budgetId);
+    final budget = await BudgetService.delete(session, budgetId: budgetId);
+    BudgetRealtimeNotifier.notifyBudgetChanged(budgetId);
+    return budget;
   }
 
   /// Exports all budget data as a JSON string for data portability.

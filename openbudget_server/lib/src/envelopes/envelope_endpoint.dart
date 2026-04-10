@@ -1,3 +1,4 @@
+import 'package:openbudget_server/src/budgets/budget_realtime_notifier.dart';
 import 'package:openbudget_server/src/envelopes/envelope_service.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
@@ -17,13 +18,18 @@ class EnvelopeEndpoint extends Endpoint {
     int budgetedAmountCents,
     String currencyCode,
   ) async {
-    return EnvelopeService.create(
+    final envelope = await EnvelopeService.create(
       session,
       name: name,
       categoryId: categoryId,
       budgetedAmountCents: budgetedAmountCents,
       currencyCode: currencyCode,
     );
+    await BudgetRealtimeNotifier.notifyCategoryChanged(
+      session,
+      envelope.categoryId,
+    );
+    return envelope;
   }
 
   /// Lists all envelopes for a category.
@@ -46,7 +52,7 @@ class EnvelopeEndpoint extends Endpoint {
     String? note,
     bool? isHidden,
   }) async {
-    return EnvelopeService.update(
+    final envelope = await EnvelopeService.update(
       session,
       envelopeId: envelopeId,
       name: name,
@@ -55,6 +61,11 @@ class EnvelopeEndpoint extends Endpoint {
       note: note,
       isHidden: isHidden,
     );
+    await BudgetRealtimeNotifier.notifyCategoryChanged(
+      session,
+      envelope.categoryId,
+    );
+    return envelope;
   }
 
   /// Reorders envelopes within a category.
@@ -63,15 +74,25 @@ class EnvelopeEndpoint extends Endpoint {
     UuidValue categoryId,
     List<String> envelopeIds,
   ) async {
-    return EnvelopeService.reorder(
+    final envelopes = await EnvelopeService.reorder(
       session,
       categoryId: categoryId,
       envelopeIds: envelopeIds.map(UuidValue.fromString).toList(),
     );
+    await BudgetRealtimeNotifier.notifyCategoryChanged(session, categoryId);
+    return envelopes;
   }
 
   /// Deletes an envelope by ID.
   Future<Envelope> delete(Session session, UuidValue envelopeId) async {
-    return EnvelopeService.delete(session, envelopeId: envelopeId);
+    final envelope = await EnvelopeService.delete(
+      session,
+      envelopeId: envelopeId,
+    );
+    await BudgetRealtimeNotifier.notifyCategoryChanged(
+      session,
+      envelope.categoryId,
+    );
+    return envelope;
   }
 }

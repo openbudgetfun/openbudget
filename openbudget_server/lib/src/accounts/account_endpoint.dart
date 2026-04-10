@@ -1,4 +1,5 @@
 import 'package:openbudget_server/src/accounts/account_service.dart';
+import 'package:openbudget_server/src/budgets/budget_realtime_notifier.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
 
@@ -21,7 +22,7 @@ class AccountEndpoint extends Endpoint {
     required int sortOrder,
     UuidValue? institutionId,
   }) async {
-    return AccountService.create(
+    final account = await AccountService.create(
       session,
       name: name,
       accountType: accountType,
@@ -32,6 +33,8 @@ class AccountEndpoint extends Endpoint {
       sortOrder: sortOrder,
       institutionId: institutionId,
     );
+    BudgetRealtimeNotifier.notifyBudgetChanged(account.budgetId);
+    return account;
   }
 
   /// Lists all accounts for a budget.
@@ -53,11 +56,13 @@ class AccountEndpoint extends Endpoint {
     UuidValue sourceAccountId,
     UuidValue budgetId,
   ) async {
-    return AccountService.addMineToBudget(
+    final account = await AccountService.addMineToBudget(
       session,
       sourceAccountId: sourceAccountId,
       budgetId: budgetId,
     );
+    BudgetRealtimeNotifier.notifyBudgetChanged(account.budgetId);
+    return account;
   }
 
   /// Gets a single account by ID.
@@ -76,7 +81,7 @@ class AccountEndpoint extends Endpoint {
     int? sortOrder,
     bool? isClosed,
   }) async {
-    return AccountService.update(
+    final account = await AccountService.update(
       session,
       accountId: accountId,
       name: name,
@@ -86,10 +91,14 @@ class AccountEndpoint extends Endpoint {
       sortOrder: sortOrder,
       isClosed: isClosed,
     );
+    BudgetRealtimeNotifier.notifyBudgetChanged(account.budgetId);
+    return account;
   }
 
   /// Deletes an account by ID.
   Future<Account> delete(Session session, UuidValue accountId) async {
-    return AccountService.delete(session, accountId: accountId);
+    final account = await AccountService.delete(session, accountId: accountId);
+    BudgetRealtimeNotifier.notifyBudgetChanged(account.budgetId);
+    return account;
   }
 }

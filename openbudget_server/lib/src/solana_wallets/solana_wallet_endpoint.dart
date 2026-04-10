@@ -1,3 +1,4 @@
+import 'package:openbudget_server/src/budgets/budget_realtime_notifier.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:openbudget_server/src/solana_wallets/solana_wallet_service.dart';
 import 'package:serverpod/serverpod.dart';
@@ -16,7 +17,7 @@ class SolanaWalletEndpoint extends Endpoint {
     String? label,
     String cluster = 'mainnet',
   }) async {
-    return SolanaWalletService.attachWallet(
+    final wallet = await SolanaWalletService.attachWallet(
       session,
       budgetId: budgetId,
       accountId: accountId,
@@ -24,6 +25,8 @@ class SolanaWalletEndpoint extends Endpoint {
       label: label,
       cluster: cluster,
     );
+    BudgetRealtimeNotifier.notifyBudgetChanged(wallet.budgetId);
+    return wallet;
   }
 
   /// Returns all Solana wallets for a budget.
@@ -51,12 +54,14 @@ class SolanaWalletEndpoint extends Endpoint {
     UuidValue walletId, {
     int limit = 200,
   }) async {
-    return SolanaWalletService.syncWallet(
+    final syncResult = await SolanaWalletService.syncWallet(
       session,
       budgetId: budgetId,
       walletId: walletId,
       limit: limit,
     );
+    BudgetRealtimeNotifier.notifyBudgetChanged(budgetId);
+    return syncResult;
   }
 
   /// Lists parsed wallet transactions.
@@ -109,7 +114,7 @@ class SolanaWalletEndpoint extends Endpoint {
     String? tagsCsv,
     String? memo,
   }) async {
-    return SolanaWalletService.updateTransactionMetadata(
+    final transaction = await SolanaWalletService.updateTransactionMetadata(
       session,
       budgetId: budgetId,
       transactionId: transactionId,
@@ -117,5 +122,7 @@ class SolanaWalletEndpoint extends Endpoint {
       tagsCsv: tagsCsv,
       memo: memo,
     );
+    BudgetRealtimeNotifier.notifyBudgetChanged(transaction.budgetId);
+    return transaction;
   }
 }

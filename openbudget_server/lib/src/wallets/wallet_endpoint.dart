@@ -1,3 +1,4 @@
+import 'package:openbudget_server/src/budgets/budget_realtime_notifier.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:openbudget_server/src/wallets/wallet_service.dart';
 import 'package:serverpod/serverpod.dart';
@@ -15,13 +16,15 @@ class WalletEndpoint extends Endpoint {
     String? label,
     bool onBudget = false,
   }) async {
-    return WalletService.connectSolanaWallet(
+    final result = await WalletService.connectSolanaWallet(
       session,
       budgetId: budgetId,
       address: address,
       label: label,
       onBudget: onBudget,
     );
+    BudgetRealtimeNotifier.notifyBudgetChanged(budgetId);
+    return result;
   }
 
   /// Refreshes holdings and account balance for a wallet connection.
@@ -30,11 +33,13 @@ class WalletEndpoint extends Endpoint {
     UuidValue budgetId,
     UuidValue connectionId,
   ) async {
-    return WalletService.refreshSolanaWallet(
+    final result = await WalletService.refreshSolanaWallet(
       session,
       budgetId: budgetId,
       connectionId: connectionId,
     );
+    BudgetRealtimeNotifier.notifyBudgetChanged(budgetId);
+    return result;
   }
 
   /// Returns the latest persisted holdings for a wallet connection.
