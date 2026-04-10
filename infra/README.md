@@ -213,7 +213,7 @@ pipeline to build and deploy the Serverpod Docker image.
 aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin <ecr-url>
 
 # Build and push
-docker build -t <ecr-url>:latest -f openbudget_server/Dockerfile openbudget_server/
+docker build -t <ecr-url>:latest -f openbudget_server/Dockerfile .
 docker push <ecr-url>:latest
 
 # Force new deployment
@@ -227,7 +227,7 @@ aws ecs update-service --cluster <cluster-name> --service <service-name> --force
 gcloud auth configure-docker <region>-docker.pkg.dev
 
 # Build and push
-docker build -t <registry-url>/serverpod:latest -f openbudget_server/Dockerfile openbudget_server/
+docker build -t <registry-url>/serverpod:latest -f openbudget_server/Dockerfile .
 docker push <registry-url>/serverpod:latest
 
 # Cloud Run auto-deploys on new image (if configured)

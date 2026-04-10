@@ -1,0 +1,49 @@
+# Repo metadata and tooling
+.git/
+.github/
+.claude/
+.specify/
+.changeset/
+.fvm/
+
+# Packages not needed for the server build
+openbudget_app/
+openbudget_ui/
+openbudget_test_utils/
+openbudget_scripts/
+openbudget_lints/
+openbudget_wired/
+
+# Server test directory
+openbudget_server/test/
+
+# Infrastructure and docs
+infra/
+docs/
+tools/
+
+# Config files not needed in the image
+.envrc
+.fvmrc
+.gitignore
+.gitleaks.toml
+.swiftlint.yml
+analysis_options.yaml
+docker-compose.yaml
+dprint.json
+knope.toml
+mdt.toml
+package.json
+pnpm-lock.yaml
+pnpm-workspace.yaml
+devenv.lock
+devenv.nix
+devenv.yaml
+
+# Documentation
+*.md
+!openbudget_server/README.md
+
+# Misc
+*.log
+.DS_Store

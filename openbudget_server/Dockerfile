@@ -1,9 +1,10 @@
-# Build stage
+# Build stage — context must be the repo root so path dependencies resolve
 FROM dart:3.8.0 AS build
-WORKDIR /app
+WORKDIR /workspace
 COPY . .
 
 # Install dependencies and compile the server executable
+WORKDIR /workspace/openbudget_server
 RUN dart pub get
 RUN dart compile exe bin/main.dart -o bin/server
 
@@ -20,15 +21,15 @@ ENV role=monolith
 COPY --from=build /runtime/ /
 
 # Copy compiled server executable
-COPY --from=build /app/bin/server server
+COPY --from=build /workspace/openbudget_server/bin/server server
 
 # Copy configuration files and resources
-COPY --from=build /app/config/ config/
-COPY --from=build /app/web/ web/
-COPY --from=build /app/migrations/ migrations/
+COPY --from=build /workspace/openbudget_server/config/ config/
+COPY --from=build /workspace/openbudget_server/web/ web/
+COPY --from=build /workspace/openbudget_server/migrations/ migrations/
 
 # This file is required to enable the endpoint log filter in Insights.
-COPY --from=build /app/lib/src/generated/protocol.yaml lib/src/generated/protocol.yaml
+COPY --from=build /workspace/openbudget_server/lib/src/generated/protocol.yaml lib/src/generated/protocol.yaml
 
 # Expose ports
 EXPOSE 8080
