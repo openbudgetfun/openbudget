@@ -1,3 +1,4 @@
+import 'package:openbudget_server/src/budgets/budget_realtime_notifier.dart';
 import 'package:openbudget_server/src/categories/category_service.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
@@ -16,12 +17,14 @@ class CategoryEndpoint extends Endpoint {
     UuidValue budgetId,
     int sortOrder,
   ) async {
-    return CategoryService.create(
+    final category = await CategoryService.create(
       session,
       name: name,
       budgetId: budgetId,
       sortOrder: sortOrder,
     );
+    BudgetRealtimeNotifier.notifyBudgetChanged(category.budgetId);
+    return category;
   }
 
   /// Lists all categories for a budget.
@@ -42,13 +45,15 @@ class CategoryEndpoint extends Endpoint {
     int? sortOrder,
     bool? isHidden,
   }) async {
-    return CategoryService.update(
+    final category = await CategoryService.update(
       session,
       categoryId: categoryId,
       name: name,
       sortOrder: sortOrder,
       isHidden: isHidden,
     );
+    BudgetRealtimeNotifier.notifyBudgetChanged(category.budgetId);
+    return category;
   }
 
   /// Batch-reorders categories by their new position.
@@ -60,15 +65,22 @@ class CategoryEndpoint extends Endpoint {
     UuidValue budgetId,
     List<UuidValue> categoryIds,
   ) async {
-    return CategoryService.reorder(
+    final categories = await CategoryService.reorder(
       session,
       budgetId: budgetId,
       categoryIds: categoryIds,
     );
+    BudgetRealtimeNotifier.notifyBudgetChanged(budgetId);
+    return categories;
   }
 
   /// Deletes a category by ID.
   Future<Category> delete(Session session, UuidValue categoryId) async {
-    return CategoryService.delete(session, categoryId: categoryId);
+    final category = await CategoryService.delete(
+      session,
+      categoryId: categoryId,
+    );
+    BudgetRealtimeNotifier.notifyBudgetChanged(category.budgetId);
+    return category;
   }
 }

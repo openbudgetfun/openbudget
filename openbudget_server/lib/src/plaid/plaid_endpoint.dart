@@ -1,3 +1,4 @@
+import 'package:openbudget_server/src/budgets/budget_realtime_notifier.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:openbudget_server/src/plaid/plaid_service.dart';
 import 'package:serverpod/serverpod.dart';
@@ -18,11 +19,13 @@ class PlaidEndpoint extends Endpoint {
     UuidValue budgetId,
     String publicToken,
   ) async {
-    return PlaidService.exchangePublicTokenAndImportAccounts(
+    final accounts = await PlaidService.exchangePublicTokenAndImportAccounts(
       session,
       budgetId: budgetId,
       publicToken: publicToken,
     );
+    BudgetRealtimeNotifier.notifyBudgetChanged(budgetId);
+    return accounts;
   }
 
   /// Refreshes an existing Plaid item connection and updates imported accounts.
@@ -31,11 +34,13 @@ class PlaidEndpoint extends Endpoint {
     UuidValue budgetId,
     UuidValue connectionId,
   ) async {
-    return PlaidService.syncConnection(
+    final accounts = await PlaidService.syncConnection(
       session,
       budgetId: budgetId,
       connectionId: connectionId,
     );
+    BudgetRealtimeNotifier.notifyBudgetChanged(budgetId);
+    return accounts;
   }
 
   /// Creates a Plaid sandbox item and imports accounts without client-side Link.
@@ -44,10 +49,12 @@ class PlaidEndpoint extends Endpoint {
     UuidValue budgetId, {
     String? plaidInstitutionId,
   }) async {
-    return PlaidService.importSandboxAccounts(
+    final accounts = await PlaidService.importSandboxAccounts(
       session,
       budgetId: budgetId,
       plaidInstitutionId: plaidInstitutionId,
     );
+    BudgetRealtimeNotifier.notifyBudgetChanged(budgetId);
+    return accounts;
   }
 }

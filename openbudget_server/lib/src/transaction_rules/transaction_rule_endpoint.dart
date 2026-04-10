@@ -1,3 +1,4 @@
+import 'package:openbudget_server/src/budgets/budget_realtime_notifier.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:openbudget_server/src/transaction_rules/transaction_rule_service.dart';
 import 'package:serverpod/serverpod.dart';
@@ -16,12 +17,14 @@ class TransactionRuleEndpoint extends Endpoint {
     UuidValue payeeId,
     UuidValue targetEnvelopeId,
   ) async {
-    return TransactionRuleService.create(
+    final rule = await TransactionRuleService.create(
       session,
       budgetId: budgetId,
       payeeId: payeeId,
       targetEnvelopeId: targetEnvelopeId,
     );
+    BudgetRealtimeNotifier.notifyBudgetChanged(rule.budgetId);
+    return rule;
   }
 
   /// Lists all transaction rules for a budget.
@@ -44,12 +47,14 @@ class TransactionRuleEndpoint extends Endpoint {
     UuidValue? targetEnvelopeId,
     bool? enabled,
   }) async {
-    return TransactionRuleService.update(
+    final rule = await TransactionRuleService.update(
       session,
       ruleId: ruleId,
       targetEnvelopeId: targetEnvelopeId,
       enabled: enabled,
     );
+    BudgetRealtimeNotifier.notifyBudgetChanged(rule.budgetId);
+    return rule;
   }
 
   /// Finds the matching envelope for a payee (used for client-side preview).
@@ -67,6 +72,8 @@ class TransactionRuleEndpoint extends Endpoint {
 
   /// Deletes a transaction rule.
   Future<TransactionRule> delete(Session session, UuidValue ruleId) async {
-    return TransactionRuleService.delete(session, ruleId: ruleId);
+    final rule = await TransactionRuleService.delete(session, ruleId: ruleId);
+    BudgetRealtimeNotifier.notifyBudgetChanged(rule.budgetId);
+    return rule;
   }
 }

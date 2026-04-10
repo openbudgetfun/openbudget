@@ -1,3 +1,4 @@
+import 'package:openbudget_server/src/budgets/budget_realtime_notifier.dart';
 import 'package:openbudget_server/src/envelope_goals/envelope_goal_service.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
@@ -18,7 +19,7 @@ class EnvelopeGoalEndpoint extends Endpoint {
     DateTime? targetDate,
     int? monthlyFundingCents,
   }) async {
-    return EnvelopeGoalService.upsert(
+    final goal = await EnvelopeGoalService.upsert(
       session,
       envelopeId: envelopeId,
       goalType: goalType,
@@ -26,6 +27,11 @@ class EnvelopeGoalEndpoint extends Endpoint {
       targetDate: targetDate,
       monthlyFundingCents: monthlyFundingCents,
     );
+    await BudgetRealtimeNotifier.notifyEnvelopeChanged(
+      session,
+      goal.envelopeId,
+    );
+    return goal;
   }
 
   /// Gets the goal for an envelope.
@@ -46,6 +52,11 @@ class EnvelopeGoalEndpoint extends Endpoint {
 
   /// Deletes a goal by ID.
   Future<EnvelopeGoal> delete(Session session, UuidValue goalId) async {
-    return EnvelopeGoalService.delete(session, goalId: goalId);
+    final goal = await EnvelopeGoalService.delete(session, goalId: goalId);
+    await BudgetRealtimeNotifier.notifyEnvelopeChanged(
+      session,
+      goal.envelopeId,
+    );
+    return goal;
   }
 }

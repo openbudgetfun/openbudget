@@ -1,3 +1,4 @@
+import 'package:openbudget_server/src/budgets/budget_realtime_notifier.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:openbudget_server/src/recurring_transactions/recurring_transaction_service.dart';
 import 'package:serverpod/serverpod.dart';
@@ -23,7 +24,7 @@ class RecurringTransactionEndpoint extends Endpoint {
     UuidValue? payeeId,
     DateTime? endDate,
   }) async {
-    return RecurringTransactionService.create(
+    final recurring = await RecurringTransactionService.create(
       session,
       description: description,
       amountCents: amountCents,
@@ -36,6 +37,8 @@ class RecurringTransactionEndpoint extends Endpoint {
       payeeId: payeeId,
       endDate: endDate,
     );
+    BudgetRealtimeNotifier.notifyBudgetChanged(recurring.budgetId);
+    return recurring;
   }
 
   /// Lists recurring transactions for a budget.
@@ -76,7 +79,7 @@ class RecurringTransactionEndpoint extends Endpoint {
     DateTime? endDate,
     bool? isActive,
   }) async {
-    return RecurringTransactionService.update(
+    final recurring = await RecurringTransactionService.update(
       session,
       recurringTransactionId: recurringTransactionId,
       description: description,
@@ -89,6 +92,8 @@ class RecurringTransactionEndpoint extends Endpoint {
       endDate: endDate,
       isActive: isActive,
     );
+    BudgetRealtimeNotifier.notifyBudgetChanged(recurring.budgetId);
+    return recurring;
   }
 
   /// Deletes a recurring transaction.
@@ -96,10 +101,12 @@ class RecurringTransactionEndpoint extends Endpoint {
     Session session,
     UuidValue recurringTransactionId,
   ) async {
-    return RecurringTransactionService.delete(
+    final recurring = await RecurringTransactionService.delete(
       session,
       recurringTransactionId: recurringTransactionId,
     );
+    BudgetRealtimeNotifier.notifyBudgetChanged(recurring.budgetId);
+    return recurring;
   }
 
   /// Skips the next occurrence of a recurring transaction by advancing the
@@ -108,17 +115,24 @@ class RecurringTransactionEndpoint extends Endpoint {
     Session session,
     UuidValue recurringTransactionId,
   ) async {
-    return RecurringTransactionService.skipOccurrence(
+    final recurring = await RecurringTransactionService.skipOccurrence(
       session,
       recurringTransactionId: recurringTransactionId,
     );
+    BudgetRealtimeNotifier.notifyBudgetChanged(recurring.budgetId);
+    return recurring;
   }
 
   /// Posts all due recurring transactions for a budget, creating actual
   /// transactions and advancing the schedule. Returns the count of created
   /// transactions.
   Future<int> postDue(Session session, UuidValue budgetId) async {
-    return RecurringTransactionService.postDue(session, budgetId: budgetId);
+    final postedCount = await RecurringTransactionService.postDue(
+      session,
+      budgetId: budgetId,
+    );
+    BudgetRealtimeNotifier.notifyBudgetChanged(budgetId);
+    return postedCount;
   }
 
   /// Returns the count of active recurring transactions that are currently due.

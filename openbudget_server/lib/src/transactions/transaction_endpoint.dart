@@ -1,3 +1,4 @@
+import 'package:openbudget_server/src/budgets/budget_realtime_notifier.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:openbudget_server/src/transactions/transaction_service.dart';
 import 'package:serverpod/serverpod.dart' hide Transaction;
@@ -21,7 +22,7 @@ class TransactionEndpoint extends Endpoint {
     UuidValue? payeeId,
     String? memo,
   }) async {
-    return TransactionService.create(
+    final transaction = await TransactionService.create(
       session,
       description: description,
       amountCents: amountCents,
@@ -32,6 +33,8 @@ class TransactionEndpoint extends Endpoint {
       payeeId: payeeId,
       memo: memo,
     );
+    BudgetRealtimeNotifier.notifyBudgetChanged(transaction.budgetId);
+    return transaction;
   }
 
   /// Lists all transactions for a budget.
@@ -71,7 +74,7 @@ class TransactionEndpoint extends Endpoint {
     String? memo,
     String? flagColor,
   }) async {
-    return TransactionService.update(
+    final transaction = await TransactionService.update(
       session,
       transactionId: transactionId,
       description: description,
@@ -82,6 +85,8 @@ class TransactionEndpoint extends Endpoint {
       memo: memo,
       flagColor: flagColor,
     );
+    BudgetRealtimeNotifier.notifyBudgetChanged(transaction.budgetId);
+    return transaction;
   }
 
   /// Sets or clears the flag color on a transaction.
@@ -90,11 +95,13 @@ class TransactionEndpoint extends Endpoint {
     UuidValue transactionId, {
     String? flagColor,
   }) async {
-    return TransactionService.setFlag(
+    final transaction = await TransactionService.setFlag(
       session,
       transactionId: transactionId,
       flagColor: flagColor,
     );
+    BudgetRealtimeNotifier.notifyBudgetChanged(transaction.budgetId);
+    return transaction;
   }
 
   /// Creates a transfer between two accounts.
@@ -108,7 +115,7 @@ class TransactionEndpoint extends Endpoint {
     UuidValue toAccountId,
     DateTime transactionDate,
   ) async {
-    return TransactionService.createTransfer(
+    final transactions = await TransactionService.createTransfer(
       session,
       description: description,
       amountCents: amountCents,
@@ -118,6 +125,8 @@ class TransactionEndpoint extends Endpoint {
       toAccountId: toAccountId,
       transactionDate: transactionDate,
     );
+    BudgetRealtimeNotifier.notifyBudgetChanged(budgetId);
+    return transactions;
   }
 
   /// Lists transactions for a specific account.
@@ -138,10 +147,12 @@ class TransactionEndpoint extends Endpoint {
     Session session,
     UuidValue transactionId,
   ) async {
-    return TransactionService.toggleCleared(
+    final transaction = await TransactionService.toggleCleared(
       session,
       transactionId: transactionId,
     );
+    BudgetRealtimeNotifier.notifyBudgetChanged(transaction.budgetId);
+    return transaction;
   }
 
   /// Reconciles all cleared transactions for an account.
@@ -150,11 +161,13 @@ class TransactionEndpoint extends Endpoint {
     UuidValue accountId,
     UuidValue budgetId,
   ) async {
-    return TransactionService.reconcileAccount(
+    final reconciledCount = await TransactionService.reconcileAccount(
       session,
       accountId: accountId,
       budgetId: budgetId,
     );
+    BudgetRealtimeNotifier.notifyBudgetChanged(budgetId);
+    return reconciledCount;
   }
 
   /// Reconciles an account with a statement balance.
@@ -167,12 +180,14 @@ class TransactionEndpoint extends Endpoint {
     UuidValue budgetId,
     int statementBalanceCents,
   ) async {
-    return TransactionService.reconcileWithBalance(
+    final result = await TransactionService.reconcileWithBalance(
       session,
       accountId: accountId,
       budgetId: budgetId,
       statementBalanceCents: statementBalanceCents,
     );
+    BudgetRealtimeNotifier.notifyBudgetChanged(budgetId);
+    return result;
   }
 
   /// Calculates the "Age of Money" for a budget.
@@ -195,7 +210,7 @@ class TransactionEndpoint extends Endpoint {
     UuidValue? payeeId,
     UuidValue? accountId,
   }) async {
-    return TransactionService.createSplit(
+    final transactions = await TransactionService.createSplit(
       session,
       description: description,
       totalAmountCents: totalAmountCents,
@@ -206,6 +221,8 @@ class TransactionEndpoint extends Endpoint {
       payeeId: payeeId,
       accountId: accountId,
     );
+    BudgetRealtimeNotifier.notifyBudgetChanged(budgetId);
+    return transactions;
   }
 
   /// Lists the sub-transactions (splits) for a parent transaction.
@@ -229,13 +246,15 @@ class TransactionEndpoint extends Endpoint {
     List<ImportRow> rows, {
     UuidValue? accountId,
   }) async {
-    return TransactionService.bulkCreate(
+    final importedCount = await TransactionService.bulkCreate(
       session,
       budgetId: budgetId,
       currencyCode: currencyCode,
       rows: rows,
       accountId: accountId,
     );
+    BudgetRealtimeNotifier.notifyBudgetChanged(budgetId);
+    return importedCount;
   }
 
   /// Finds potential duplicate transactions with the same amount near a date.
@@ -255,6 +274,11 @@ class TransactionEndpoint extends Endpoint {
 
   /// Deletes a transaction by ID.
   Future<Transaction> delete(Session session, UuidValue transactionId) async {
-    return TransactionService.delete(session, transactionId: transactionId);
+    final transaction = await TransactionService.delete(
+      session,
+      transactionId: transactionId,
+    );
+    BudgetRealtimeNotifier.notifyBudgetChanged(transaction.budgetId);
+    return transaction;
   }
 }
