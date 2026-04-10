@@ -11,6 +11,7 @@ import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_actions_provider.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_transactions_provider.dart';
+import 'package:openbudget_app/src/features/accounts/providers/institution_catalog_provider.dart';
 import 'package:openbudget_app/src/features/accounts/screens/account_detail_screen.dart';
 import 'package:openbudget_app/src/features/accounts/screens/account_list_screen.dart';
 import 'package:openbudget_app/src/features/accounts/screens/add_account_screen.dart';
@@ -27,6 +28,26 @@ const _budgetId = 'test-budget-id';
 final _budgetUuid = UuidValue.fromString(
   '00000000-0000-0000-0000-000000000010',
 );
+
+final _testInstitutions = <Institution>[
+  Institution(slug: 'chase', name: 'Chase', website: 'chase.com'),
+  Institution(slug: 'citi', name: 'Citi', website: 'citi.com'),
+  Institution(
+    slug: 'bank-of-america',
+    name: 'Bank of America',
+    website: 'bankofamerica.com',
+  ),
+  Institution(
+    slug: 'wells-fargo',
+    name: 'Wells Fargo',
+    website: 'wellsfargo.com',
+  ),
+  Institution(
+    slug: 'capital-one',
+    name: 'Capital One',
+    website: 'capitalone.com',
+  ),
+];
 const _addAccountUnlinkedButtonKey = Key('add-account-add-unlinked-button');
 const _addAccountUnlinkedScrollKey = Key('add-account-unlinked-scroll');
 const _addAccountNicknameFieldKey = Key('add-account-unlinked-nickname-field');
@@ -176,6 +197,9 @@ Widget _buildApp({
       ),
       budgetDetailProvider.overrideWith(
         (ref, budgetId) async => _makeBudget(currencyCode: budgetCurrencyCode),
+      ),
+      institutionCatalogProvider.overrideWith(
+        (ref, locationCode) async => _testInstitutions,
       ),
     ],
     child: MaterialApp.router(
