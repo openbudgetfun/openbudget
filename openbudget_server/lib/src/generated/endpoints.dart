@@ -1628,7 +1628,7 @@ class Endpoints extends _i1.EndpointDispatch {
             ),
           },
           call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['monthlyAllocation'] as _i11.MonthlyAllocationEndpoint)
+              (endpoints['monthlyAllocation'] as _i15.MonthlyAllocationEndpoint)
                   .copyMonth(
                     session,
                     params['budgetId'],
