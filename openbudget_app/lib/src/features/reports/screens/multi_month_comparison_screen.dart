@@ -164,8 +164,7 @@ class _ComparisonTable extends HookWidget {
     AppLocalizations l10n,
     ThemeData theme,
     List<MonthColumn> months,
-  ) {
-    return Row(
+  ) => Row(
       children: [
         SizedBox(
           width: 160,
@@ -189,7 +188,6 @@ class _ComparisonTable extends HookWidget {
           ),
       ],
     );
-  }
 
   Widget _buildTotalRow(
     AppLocalizations l10n,
@@ -197,8 +195,7 @@ class _ComparisonTable extends HookWidget {
     ColorScheme colorScheme,
     List<MonthColumn> months,
     List<String> monthKeys,
-  ) {
-    return Container(
+  ) => Container(
       padding: const EdgeInsets.symmetric(vertical: SpacingTokens.xs),
       decoration: BoxDecoration(
         color: colorScheme.primaryContainer.withAlpha(40),
@@ -237,15 +234,13 @@ class _ComparisonTable extends HookWidget {
         ],
       ),
     );
-  }
 
   Widget _buildCategoryRow(
     ThemeData theme,
     ColorScheme colorScheme,
     CategoryComparison cat,
     List<String> monthKeys,
-  ) {
-    return Container(
+  ) => Container(
       padding: const EdgeInsets.symmetric(vertical: SpacingTokens.xs),
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainerHighest.withAlpha(60),
@@ -284,15 +279,13 @@ class _ComparisonTable extends HookWidget {
         ],
       ),
     );
-  }
 
   Widget _buildEnvelopeRow(
     ThemeData theme,
     ColorScheme colorScheme,
     EnvelopeComparison env,
     List<String> monthKeys,
-  ) {
-    return Padding(
+  ) => Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
       child: Row(
         children: [
@@ -327,7 +320,6 @@ class _ComparisonTable extends HookWidget {
         ],
       ),
     );
-  }
 
   String _shortMonthName(AppLocalizations l10n, int month, int year) {
     final name = switch (month) {

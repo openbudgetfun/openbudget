@@ -29,14 +29,10 @@ class BudgetEndpoint extends Endpoint {
   }
 
   /// Lists all budgets for the authenticated user.
-  Future<List<Budget>> list(Session session) async {
-    return BudgetService.listForUser(session);
-  }
+  Future<List<Budget>> list(Session session) async => BudgetService.listForUser(session);
 
   /// Gets a single budget by ID, verifying ownership.
-  Future<Budget> get(Session session, UuidValue budgetId) async {
-    return BudgetService.getById(session, budgetId: budgetId);
-  }
+  Future<Budget> get(Session session, UuidValue budgetId) async => BudgetService.getById(session, budgetId: budgetId);
 
   /// Updates a budget by ID, verifying ownership.
   Future<Budget> update(
@@ -67,7 +63,5 @@ class BudgetEndpoint extends Endpoint {
   }
 
   /// Exports all budget data as a JSON string for data portability.
-  Future<String> exportData(Session session, UuidValue budgetId) async {
-    return BudgetService.exportData(session, budgetId: budgetId);
-  }
+  Future<String> exportData(Session session, UuidValue budgetId) async => BudgetService.exportData(session, budgetId: budgetId);
 }

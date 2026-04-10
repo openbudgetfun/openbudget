@@ -63,8 +63,7 @@ class _GlowOrb extends StatelessWidget {
   final double size;
 
   @override
-  Widget build(BuildContext context) {
-    return IgnorePointer(
+  Widget build(BuildContext context) => IgnorePointer(
       child: Container(
         width: size,
         height: size,
@@ -77,5 +76,4 @@ class _GlowOrb extends StatelessWidget {
         ),
       ),
     );
-  }
 }

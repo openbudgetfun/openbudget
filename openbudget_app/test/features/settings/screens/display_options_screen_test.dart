@@ -17,14 +17,12 @@ void main() {
   Budget makeBudget({
     String currencyCode = 'USD',
     String? displayCurrencyCode,
-  }) {
-    return Budget(
+  }) => Budget(
       name: "Alex's Plan",
       currencyCode: currencyCode,
       displayCurrencyCode: displayCurrencyCode,
       ownerId: ownerId,
     );
-  }
 
   setUpAll(() {
     GoogleFonts.config.allowRuntimeFetching = false;
@@ -142,9 +140,9 @@ void main() {
             updateDisplayCurrencyProvider.overrideWith(
               (ref) =>
                   ({
-                    required String budgetId,
-                    required bool clearDisplayCurrencyCode,
-                    String? displayCurrencyCode,
+                    required budgetId,
+                    required clearDisplayCurrencyCode,
+                    displayCurrencyCode,
                   }) async {
                     capturedBudgetId = budgetId;
                     capturedDisplayCurrencyCode = displayCurrencyCode;
@@ -188,9 +186,9 @@ void main() {
             updateDisplayCurrencyProvider.overrideWith(
               (ref) =>
                   ({
-                    required String budgetId,
-                    required bool clearDisplayCurrencyCode,
-                    String? displayCurrencyCode,
+                    required budgetId,
+                    required clearDisplayCurrencyCode,
+                    displayCurrencyCode,
                   }) async {
                     capturedDisplayCurrencyCode = displayCurrencyCode;
                     capturedClearFlag = clearDisplayCurrencyCode;

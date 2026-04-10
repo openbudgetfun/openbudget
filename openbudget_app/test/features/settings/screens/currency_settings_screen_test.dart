@@ -14,9 +14,7 @@ import 'package:openbudget_ui/openbudget_ui.dart';
 const _budgetId = 'test-budget-id';
 final _ownerUuid = UuidValue.fromString('00000000-0000-0000-0000-000000000321');
 
-Budget _makeBudget({String name = "Sam's Plan", String currencyCode = 'USD'}) {
-  return Budget(name: name, currencyCode: currencyCode, ownerId: _ownerUuid);
-}
+Budget _makeBudget({String name = "Sam's Plan", String currencyCode = 'USD'}) => Budget(name: name, currencyCode: currencyCode, ownerId: _ownerUuid);
 
 void main() {
   setUpAll(() {

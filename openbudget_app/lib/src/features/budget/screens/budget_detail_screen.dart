@@ -1948,8 +1948,7 @@ class _ToggleButton extends HookWidget {
   final ThemeData theme;
 
   @override
-  Widget build(BuildContext context) {
-    return Material(
+  Widget build(BuildContext context) => Material(
       color: selected
           ? OpenBudgetPalette.bgSecondaryFor(Theme.of(context))
           : OpenBudgetPalette.transparentFor(Theme.of(context)),
@@ -1973,7 +1972,6 @@ class _ToggleButton extends HookWidget {
         ),
       ),
     );
-  }
 }
 
 class _SpotlightOverview extends HookWidget {
@@ -2366,8 +2364,7 @@ class _SpotlightPriorityIcon extends HookWidget {
   final double rotation;
 
   @override
-  Widget build(BuildContext context) {
-    return Transform.rotate(
+  Widget build(BuildContext context) => Transform.rotate(
       angle: rotation,
       child: Container(
         width: 56,
@@ -2385,7 +2382,6 @@ class _SpotlightPriorityIcon extends HookWidget {
         ),
       ),
     );
-  }
 }
 
 class _InlineEditorSelection {
@@ -2443,8 +2439,7 @@ class _InlineAmountEditor extends HookWidget {
       bool accent = false,
       Widget? child,
       double minHeight = 48,
-    }) {
-      return Expanded(
+    }) => Expanded(
         child: Padding(
           padding: const EdgeInsets.all(SpacingTokens.xs),
           child: FilledButton(
@@ -2475,7 +2470,6 @@ class _InlineAmountEditor extends HookWidget {
           ),
         ),
       );
-    }
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -3004,7 +2998,7 @@ class _CoverOverspendingSheet extends HookConsumerWidget {
                       padding: const EdgeInsets.all(SpacingTokens.md),
                       itemBuilder: (context, index) {
                         final item = remainingItems.value[index];
-                        return Container(
+                        return DecoratedBox(
                           decoration: BoxDecoration(
                             color: OpenBudgetPalette.bgSecondaryFor(
                               Theme.of(context),

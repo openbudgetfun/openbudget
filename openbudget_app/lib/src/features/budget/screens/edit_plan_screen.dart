@@ -472,12 +472,10 @@ class _EditPlanContent extends HookConsumerWidget {
     return total;
   }
 
-  int _goalTargetCents(EnvelopeGoal goal) {
-    return switch (goal.goalType) {
+  int _goalTargetCents(EnvelopeGoal goal) => switch (goal.goalType) {
       'monthly_funding' => goal.monthlyFundingCents ?? goal.targetAmountCents,
       _ => goal.targetAmountCents,
     };
-  }
 
   Future<void> _showSetGoalDialog({
     required BuildContext context,
@@ -541,8 +539,7 @@ class _EditPlanContent extends HookConsumerWidget {
       context: context,
       backgroundColor: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
       isScrollControlled: true,
-      builder: (sheetContext) {
-        return SafeArea(
+      builder: (sheetContext) => SafeArea(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(
               SpacingTokens.md,
@@ -651,8 +648,7 @@ class _EditPlanContent extends HookConsumerWidget {
               ],
             ),
           ),
-        );
-      },
+        ),
     );
   }
 

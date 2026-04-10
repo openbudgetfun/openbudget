@@ -16,9 +16,7 @@ final _budgetUuid = UuidValue.fromString(
   '00000000-0000-0000-0000-000000000010',
 );
 
-Payee _makePayee({String name = 'Grocery Store', UuidValue? id}) {
-  return Payee(id: id, name: name, budgetId: _budgetUuid);
-}
+Payee _makePayee({String name = 'Grocery Store', UuidValue? id}) => Payee(id: id, name: name, budgetId: _budgetUuid);
 
 void main() {
   setUpAll(() {

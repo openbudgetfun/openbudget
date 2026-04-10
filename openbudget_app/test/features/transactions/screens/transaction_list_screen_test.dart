@@ -98,8 +98,7 @@ void main() {
     List<Payee>? payees,
     List<Account>? accounts,
     BudgetSummary? summary,
-  }) {
-    return ProviderScope(
+  }) => ProviderScope(
       overrides: [
         transactionListProvider.overrideWith(
           (ref, id) async => transactions ?? sampleTransactions,
@@ -130,7 +129,6 @@ void main() {
         home: const TransactionListScreen(budgetId: budgetId),
       ),
     );
-  }
 
   group('TransactionListScreen', () {
     testWidgets('renders loading state initially', (tester) async {

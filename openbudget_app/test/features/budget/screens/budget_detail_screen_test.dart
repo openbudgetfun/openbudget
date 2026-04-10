@@ -44,8 +44,7 @@ void main() {
     month: 2,
   );
 
-  Widget buildSubject({BudgetSummary? summary}) {
-    return ProviderScope(
+  Widget buildSubject({BudgetSummary? summary}) => ProviderScope(
       overrides: [
         budgetMonthlySummaryProvider.overrideWith(
           (ref, id) async => summary ?? makeSummary(),
@@ -65,7 +64,6 @@ void main() {
         home: const BudgetDetailScreen(budgetId: budgetId),
       ),
     );
-  }
 
   group('BudgetDetailScreen', () {
     testWidgets('renders loading state initially', (tester) async {

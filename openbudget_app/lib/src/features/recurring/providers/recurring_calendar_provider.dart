@@ -98,8 +98,7 @@ List<DateTime> _generateOccurrences(
   return results;
 }
 
-DateTime _addFrequency(DateTime date, String frequency) {
-  return switch (frequency) {
+DateTime _addFrequency(DateTime date, String frequency) => switch (frequency) {
     'daily' => date.add(const Duration(days: 1)),
     'weekly' => date.add(const Duration(days: 7)),
     'biweekly' => date.add(const Duration(days: 14)),
@@ -107,10 +106,8 @@ DateTime _addFrequency(DateTime date, String frequency) {
     'yearly' => DateTime(date.year + 1, date.month, date.day),
     _ => date.add(const Duration(days: 30)),
   };
-}
 
-DateTime _subtractFrequency(DateTime date, String frequency) {
-  return switch (frequency) {
+DateTime _subtractFrequency(DateTime date, String frequency) => switch (frequency) {
     'daily' => date.subtract(const Duration(days: 1)),
     'weekly' => date.subtract(const Duration(days: 7)),
     'biweekly' => date.subtract(const Duration(days: 14)),
@@ -118,4 +115,3 @@ DateTime _subtractFrequency(DateTime date, String frequency) {
     'yearly' => DateTime(date.year - 1, date.month, date.day),
     _ => date.subtract(const Duration(days: 30)),
   };
-}

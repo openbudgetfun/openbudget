@@ -11,8 +11,7 @@ void main() {
     GoogleFonts.config.allowRuntimeFetching = false;
   });
 
-  Widget buildSubject() {
-    return ProviderScope(
+  Widget buildSubject() => ProviderScope(
       child: MaterialApp(
         theme: OpenBudgetTheme.light,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -20,7 +19,6 @@ void main() {
         home: const RegisterScreen(),
       ),
     );
-  }
 
   group('RegisterScreen', () {
     group('step 0 - email', () {

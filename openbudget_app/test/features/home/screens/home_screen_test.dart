@@ -22,14 +22,12 @@ Budget _makeBudget({
   String? id,
   String name = 'My Budget',
   String currencyCode = 'USD',
-}) {
-  return Budget(
+}) => Budget(
     id: id != null ? UuidValue.fromString(id) : null,
     name: name,
     currencyCode: currencyCode,
     ownerId: _ownerId,
   );
-}
 
 Account _makeAccount({
   String name = 'Checking',
@@ -39,8 +37,7 @@ Account _makeAccount({
   bool isClosed = false,
   bool onBudget = true,
   String accountType = 'checking',
-}) {
-  return Account(
+}) => Account(
     name: name,
     accountType: accountType,
     balanceCents: balanceCents,
@@ -50,10 +47,8 @@ Account _makeAccount({
     sortOrder: 0,
     isClosed: isClosed,
   );
-}
 
-BudgetSummary _emptySummary(Budget budget) {
-  return BudgetSummary(
+BudgetSummary _emptySummary(Budget budget) => BudgetSummary(
     budget: budget,
     categories: const [],
     totalIncomeCents: 0,
@@ -62,7 +57,6 @@ BudgetSummary _emptySummary(Budget budget) {
     year: 2026,
     month: 2,
   );
-}
 
 void main() {
   setUpAll(() {

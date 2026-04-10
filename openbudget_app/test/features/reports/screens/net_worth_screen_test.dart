@@ -43,8 +43,7 @@ void main() {
     isClosed: false,
   );
 
-  Widget buildSubject(NetWorthData data) {
-    return ProviderScope(
+  Widget buildSubject(NetWorthData data) => ProviderScope(
       overrides: [netWorthProvider.overrideWith((ref, id) async => data)],
       child: MaterialApp(
         theme: OpenBudgetTheme.light,
@@ -53,7 +52,6 @@ void main() {
         home: const NetWorthScreen(budgetId: budgetId),
       ),
     );
-  }
 
   testWidgets('renders single-currency net worth summary', (tester) async {
     final usdAccount = makeAccount(

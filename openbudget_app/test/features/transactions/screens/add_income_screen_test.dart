@@ -42,8 +42,7 @@ void main() {
     ),
   ];
 
-  Widget buildSubject({Budget? budget, List<Payee>? payees}) {
-    return ProviderScope(
+  Widget buildSubject({Budget? budget, List<Payee>? payees}) => ProviderScope(
       overrides: [
         budgetDetailProvider.overrideWith(
           (ref, id) async => budget ?? makeBudget(),
@@ -59,7 +58,6 @@ void main() {
         home: const AddIncomeScreen(budgetId: budgetId),
       ),
     );
-  }
 
   Widget buildRoutedSubject({Budget? budget, List<Payee>? payees}) {
     final router = GoRouter(

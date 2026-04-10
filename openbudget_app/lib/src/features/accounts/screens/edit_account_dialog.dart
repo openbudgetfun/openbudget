@@ -536,8 +536,7 @@ class _SectionLabel extends StatelessWidget {
   final String text;
 
   @override
-  Widget build(BuildContext context) {
-    return Padding(
+  Widget build(BuildContext context) => Padding(
       padding: const EdgeInsets.only(bottom: SpacingTokens.xs),
       child: Text(
         text,
@@ -546,7 +545,6 @@ class _SectionLabel extends StatelessWidget {
         ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
       ),
     );
-  }
 }
 
 String _formatInitialAmount({required int cents, required int decimals}) {

@@ -190,8 +190,7 @@ class CreateBudgetScreen extends HookConsumerWidget {
   Future<CurrencyCode?> _selectCurrency(
     BuildContext context,
     CurrencyCode current,
-  ) {
-    return showModalBottomSheet<CurrencyCode>(
+  ) => showModalBottomSheet<CurrencyCode>(
       context: context,
       showDragHandle: true,
       builder: (context) => SafeArea(
@@ -212,7 +211,6 @@ class CreateBudgetScreen extends HookConsumerWidget {
         ),
       ),
     );
-  }
 }
 
 class _WelcomeHeroCard extends HookWidget {

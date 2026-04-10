@@ -10,9 +10,7 @@ part 'transaction_actions_provider.g.dart';
 @Riverpod(keepAlive: true)
 class TransactionActions extends _$TransactionActions {
   @override
-  AsyncValue<void> build() {
-    return const AsyncValue.data(null);
-  }
+  AsyncValue<void> build() => const AsyncValue.data(null);
 
   Future<Transaction> addIncome({
     required String description,

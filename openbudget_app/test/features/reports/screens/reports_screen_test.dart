@@ -89,8 +89,7 @@ Widget _buildSubject({
   Future<int?> Function(Ref ref, String budgetId)? ageBuilder,
   Future<DisplayCurrencyConverter> Function(Ref ref, String budgetId)?
   converterBuilder,
-}) {
-  return ProviderScope(
+}) => ProviderScope(
     overrides: [
       spendingReportProvider.overrideWith(spendingBuilder),
       netWorthProvider.overrideWith(
@@ -107,7 +106,6 @@ Widget _buildSubject({
       home: const ReportsScreen(budgetId: _budgetId),
     ),
   );
-}
 
 void main() {
   setUpAll(() {

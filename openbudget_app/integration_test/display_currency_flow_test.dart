@@ -34,18 +34,15 @@ const _budgetId = '00000000-0000-0000-0000-000000000711';
 final _budgetUuid = UuidValue.fromString(_budgetId);
 final _ownerUuid = UuidValue.fromString('00000000-0000-0000-0000-000000000712');
 
-Budget _makeBudget({String? displayCurrencyCode}) {
-  return Budget(
+Budget _makeBudget({String? displayCurrencyCode}) => Budget(
     id: _budgetUuid,
     name: 'FX Plan',
     currencyCode: 'USD',
     displayCurrencyCode: displayCurrencyCode,
     ownerId: _ownerUuid,
   );
-}
 
-List<Account> _makeAccounts() {
-  return [
+List<Account> _makeAccounts() => [
     Account(
       id: UuidValue.fromString('00000000-0000-0000-0000-000000000713'),
       name: 'USD Checking',
@@ -69,10 +66,8 @@ List<Account> _makeAccounts() {
       isClosed: false,
     ),
   ];
-}
 
-BudgetSummary _makeSummary(Budget budget) {
-  return BudgetSummary(
+BudgetSummary _makeSummary(Budget budget) => BudgetSummary(
     budget: budget,
     categories: const [],
     totalIncomeCents: 10000,
@@ -81,10 +76,8 @@ BudgetSummary _makeSummary(Budget budget) {
     year: 2026,
     month: 2,
   );
-}
 
-SpendingReport _makeReport() {
-  return const SpendingReport(
+SpendingReport _makeReport() => const SpendingReport(
     totalIncome: 800000,
     totalExpenses: 222000,
     netIncome: 578000,
@@ -92,7 +85,6 @@ SpendingReport _makeReport() {
     categorySpending: {'Rent': 120000},
     currencyCode: 'USD',
   );
-}
 
 NetWorthData _makeNetWorthData(List<Account> accounts) {
   final usd = accounts.firstWhere((account) => account.currencyCode == 'USD');
@@ -133,15 +125,13 @@ void main() {
 
     final container = ProviderContainer(
       overrides: [
-        budgetDetailProvider.overrideWith((ref, id) async {
-          return _makeBudget(displayCurrencyCode: displayCurrencyOverride[id]);
-        }),
+        budgetDetailProvider.overrideWith((ref, id) async => _makeBudget(displayCurrencyCode: displayCurrencyOverride[id])),
         updateDisplayCurrencyProvider.overrideWith(
           (ref) =>
               ({
-                required String budgetId,
-                required bool clearDisplayCurrencyCode,
-                String? displayCurrencyCode,
+                required budgetId,
+                required clearDisplayCurrencyCode,
+                displayCurrencyCode,
               }) async {
                 displayCurrencyOverride[budgetId] = clearDisplayCurrencyCode
                     ? null

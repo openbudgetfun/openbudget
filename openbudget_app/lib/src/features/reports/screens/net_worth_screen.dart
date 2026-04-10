@@ -461,8 +461,7 @@ class _AccountTile extends HookWidget {
     );
   }
 
-  IconData _accountIcon(String type) {
-    return switch (type) {
+  IconData _accountIcon(String type) => switch (type) {
       'checking' => Icons.account_balance_rounded,
       'savings' => Icons.savings_rounded,
       'creditCard' => Icons.credit_card_rounded,
@@ -471,10 +470,8 @@ class _AccountTile extends HookWidget {
       'cryptoWallet' => SimpleIcons.solana,
       _ => Icons.account_balance_wallet_rounded,
     };
-  }
 
-  String _accountTypeLabel(String type) {
-    return switch (type) {
+  String _accountTypeLabel(String type) => switch (type) {
       'checking' => 'Checking',
       'savings' => 'Savings',
       'creditCard' => 'Credit Card',
@@ -483,5 +480,4 @@ class _AccountTile extends HookWidget {
       'cryptoWallet' => 'Solana Wallet',
       _ => 'Other',
     };
-  }
 }

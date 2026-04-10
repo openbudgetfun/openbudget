@@ -1283,8 +1283,7 @@ class _StatusFilterChip extends HookWidget {
   }
 }
 
-Color? _flagColorFromString(String? flagColor, ThemeData theme) {
-  return switch (flagColor) {
+Color? _flagColorFromString(String? flagColor, ThemeData theme) => switch (flagColor) {
     'red' => OpenBudgetPalette.bgFlagCriticalFor(theme),
     'orange' => OpenBudgetPalette.bgFlagHighFor(theme),
     'yellow' => OpenBudgetPalette.bgFlagMediumFor(theme),
@@ -1293,7 +1292,6 @@ Color? _flagColorFromString(String? flagColor, ThemeData theme) {
     'purple' => OpenBudgetPalette.bgFlagAccentFor(theme),
     _ => null,
   };
-}
 
 class _TransactionTile extends HookConsumerWidget {
   const _TransactionTile({
@@ -1527,8 +1525,7 @@ class _TransactionTile extends HookConsumerWidget {
     BuildContext context,
     AppLocalizations l10n,
     ColorScheme colorScheme,
-  ) async {
-    return showDialog<bool>(
+  ) async => showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(l10n.deleteConfirmTitle),
@@ -1551,7 +1548,6 @@ class _TransactionTile extends HookConsumerWidget {
         ],
       ),
     );
-  }
 
   Future<void> _deleteTransaction(
     BuildContext context,
@@ -1755,8 +1751,7 @@ class _FlagChip extends HookWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) {
-    return ActionChip(
+  Widget build(BuildContext context) => ActionChip(
       avatar: Icon(
         selected ? Icons.flag_rounded : Icons.flag_outlined,
         color: color,
@@ -1766,7 +1761,6 @@ class _FlagChip extends HookWidget {
       side: selected ? BorderSide(color: color, width: 2) : null,
       onPressed: onTap,
     );
-  }
 }
 
 class _GroupedTransactionList extends HookWidget {

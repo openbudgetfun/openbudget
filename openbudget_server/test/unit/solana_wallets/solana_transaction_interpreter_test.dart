@@ -230,8 +230,7 @@ EnhancedTransaction _buildTx({
   List<NativeTransfer> nativeTransfers = const [],
   List<TokenTransfer> tokenTransfers = const [],
   List<InnerInstruction> instructions = const [],
-}) {
-  return EnhancedTransaction(
+}) => EnhancedTransaction(
     description: description,
     type: type,
     source: source,
@@ -246,4 +245,3 @@ EnhancedTransaction _buildTx({
     instructions: instructions,
     events: const {},
   );
-}

@@ -50,8 +50,7 @@ Transaction _makeTransaction({
   DateTime? transactionDate,
   bool cleared = false,
   bool reconciled = false,
-}) {
-  return Transaction(
+}) => Transaction(
     id: UuidValue.fromString(id),
     description: description,
     amountCents: amountCents,
@@ -62,14 +61,12 @@ Transaction _makeTransaction({
     cleared: cleared,
     reconciled: reconciled,
   );
-}
 
 Account _makeAccount({
   required String id,
   required String name,
   required String currencyCode,
-}) {
-  return Account(
+}) => Account(
     id: UuidValue.fromString(id),
     name: name,
     accountType: 'checking',
@@ -80,7 +77,6 @@ Account _makeAccount({
     sortOrder: 0,
     isClosed: false,
   );
-}
 
 Widget _buildApp({String? initialLocation}) {
   final router = GoRouter(

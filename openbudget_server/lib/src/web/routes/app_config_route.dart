@@ -11,9 +11,7 @@ class AppConfigRoute extends WidgetRoute {
   final AppConfigWidget widget;
 
   @override
-  Future<WebWidget> build(Session session, Request request) async {
-    return widget;
-  }
+  Future<WebWidget> build(Session session, Request request) async => widget;
 }
 
 extension on ServerConfig {

@@ -15,8 +15,7 @@ import 'package:openbudget_client/openbudget_client.dart';
 const _budgetId = '00000000-0000-0000-0000-000000000010';
 final _budgetUuid = UuidValue.fromString(_budgetId);
 
-Account _makeAccount({bool isClosed = false}) {
-  return Account(
+Account _makeAccount({bool isClosed = false}) => Account(
     id: UuidValue.fromString('00000000-0000-0000-0000-000000000111'),
     name: 'Daily',
     accountType: 'checking',
@@ -27,7 +26,6 @@ Account _makeAccount({bool isClosed = false}) {
     sortOrder: 0,
     isClosed: isClosed,
   );
-}
 
 class _FakeAccountActions extends AccountActions {
   _FakeAccountActions({this.onDelete, this.throwOnDelete = false});
@@ -60,9 +58,7 @@ class _FakeAccountActions extends AccountActions {
     bool? onBudget,
     int? sortOrder,
     bool? isClosed,
-  }) async {
-    return _makeAccount(isClosed: isClosed ?? false);
-  }
+  }) async => _makeAccount(isClosed: isClosed ?? false);
 }
 
 Widget _buildSubject({
@@ -71,8 +67,7 @@ Widget _buildSubject({
   VoidCallback? onDeleteAction,
   bool throwOnDelete = false,
   List<Account>? accountListOverride,
-}) {
-  return ProviderScope(
+}) => ProviderScope(
     overrides: [
       accountActionsProvider.overrideWith(
         () => _FakeAccountActions(
@@ -81,9 +76,7 @@ Widget _buildSubject({
         ),
       ),
       if (accountListOverride != null)
-        accountListProvider(_budgetId).overrideWith((ref) async {
-          return accountListOverride;
-        }),
+        accountListProvider(_budgetId).overrideWith((ref) async => accountListOverride),
     ],
     child: MaterialApp(
       theme: ThemeData.light(useMaterial3: true),
@@ -108,7 +101,6 @@ Widget _buildSubject({
       ),
     ),
   );
-}
 
 void main() {
   group('EditAccountDialog', () {

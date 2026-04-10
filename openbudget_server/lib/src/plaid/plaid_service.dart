@@ -204,8 +204,7 @@ class PlaidService {
   static Future<Map<String, dynamic>> _fetchAccounts({
     required _PlaidCredentials credentials,
     required String accessToken,
-  }) async {
-    return _postJson(
+  }) async => _postJson(
       uri: credentials.baseUri.replace(path: '/accounts/get'),
       payload: {
         'client_id': credentials.clientId,
@@ -213,7 +212,6 @@ class PlaidService {
         'access_token': accessToken,
       },
     );
-  }
 
   static Future<List<Account>> _importAccounts(
     Session session, {

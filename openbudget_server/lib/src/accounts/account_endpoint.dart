@@ -38,17 +38,13 @@ class AccountEndpoint extends Endpoint {
   }
 
   /// Lists all accounts for a budget.
-  Future<List<Account>> list(Session session, UuidValue budgetId) async {
-    return AccountService.listForBudget(session, budgetId: budgetId);
-  }
+  Future<List<Account>> list(Session session, UuidValue budgetId) async => AccountService.listForBudget(session, budgetId: budgetId);
 
   /// Lists creator-owned reusable accounts that can be added to another budget.
   Future<List<Account>> listMine(
     Session session, {
     UuidValue? excludeBudgetId,
-  }) async {
-    return AccountService.listMine(session, excludeBudgetId: excludeBudgetId);
-  }
+  }) async => AccountService.listMine(session, excludeBudgetId: excludeBudgetId);
 
   /// Adds one of the creator's existing accounts to another owned budget.
   Future<Account> addMineToBudget(
@@ -66,9 +62,7 @@ class AccountEndpoint extends Endpoint {
   }
 
   /// Gets a single account by ID.
-  Future<Account> get(Session session, UuidValue accountId) async {
-    return AccountService.getById(session, accountId: accountId);
-  }
+  Future<Account> get(Session session, UuidValue accountId) async => AccountService.getById(session, accountId: accountId);
 
   /// Updates an account by ID.
   Future<Account> update(

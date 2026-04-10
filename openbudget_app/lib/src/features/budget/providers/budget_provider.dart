@@ -8,9 +8,7 @@ part 'budget_provider.g.dart';
 @riverpod
 class CreateBudget extends _$CreateBudget {
   @override
-  AsyncValue<String?> build() {
-    return const AsyncValue.data(null);
-  }
+  AsyncValue<String?> build() => const AsyncValue.data(null);
 
   Future<String> create({
     required String name,

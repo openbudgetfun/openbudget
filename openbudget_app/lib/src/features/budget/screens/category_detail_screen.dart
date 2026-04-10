@@ -581,8 +581,7 @@ class _Card extends HookWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
+  Widget build(BuildContext context) => DecoratedBox(
       decoration: BoxDecoration(
         color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
         borderRadius: BorderRadius.circular(RadiusTokens.md),
@@ -592,7 +591,6 @@ class _Card extends HookWidget {
       ),
       child: child,
     );
-  }
 }
 
 class _DetailRow extends HookWidget {

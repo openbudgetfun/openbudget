@@ -279,8 +279,7 @@ class _PayeeTile extends HookConsumerWidget {
     BuildContext context,
     AppLocalizations l10n,
     ColorScheme colorScheme,
-  ) async {
-    return showDialog<bool>(
+  ) async => showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(l10n.deleteConfirmTitle),
@@ -301,7 +300,6 @@ class _PayeeTile extends HookConsumerWidget {
         ],
       ),
     );
-  }
 
   Future<void> _deletePayee(
     BuildContext context,

@@ -198,15 +198,13 @@ class WalletService {
     Session session, {
     required UuidValue budgetId,
     required UuidValue connectionId,
-  }) {
-    return Account.db.findFirstRow(
+  }) => Account.db.findFirstRow(
       session,
       where: (t) =>
           t.budgetId.equals(budgetId) &
           t.sourceType.equals('solana') &
           t.connectionId.equals(connectionId),
     );
-  }
 
   static Future<Account> _upsertWalletAccount(
     Session session, {

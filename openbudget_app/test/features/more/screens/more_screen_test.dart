@@ -12,14 +12,12 @@ void main() {
 
   const budgetId = 'test-budget-1';
 
-  Widget buildSubject() {
-    return MaterialApp(
+  Widget buildSubject() => MaterialApp(
       theme: OpenBudgetTheme.light,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: const MoreScreen(budgetId: budgetId),
     );
-  }
 
   group('MoreScreen', () {
     testWidgets('renders More title in app bar', (tester) async {

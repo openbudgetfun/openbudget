@@ -12,8 +12,7 @@ Future<String?> showBudgetAmountKeypadSheet({
   required String initialInput,
   String? title,
   bool allowNegative = true,
-}) {
-  return showModalBottomSheet<String>(
+}) => showModalBottomSheet<String>(
     context: context,
     isScrollControlled: true,
     backgroundColor: OpenBudgetPalette.transparentFor(Theme.of(context)),
@@ -24,7 +23,6 @@ Future<String?> showBudgetAmountKeypadSheet({
       allowNegative: allowNegative,
     ),
   );
-}
 
 class BudgetAmountField extends StatelessWidget {
   const BudgetAmountField({
@@ -100,8 +98,7 @@ class BudgetAmountKeypad extends StatelessWidget {
       bool accent = false,
       Widget? child,
       Key? buttonKey,
-    }) {
-      return Expanded(
+    }) => Expanded(
         child: Padding(
           padding: const EdgeInsets.all(SpacingTokens.xs),
           child: FilledButton(
@@ -133,7 +130,6 @@ class BudgetAmountKeypad extends StatelessWidget {
           ),
         ),
       );
-    }
 
     void appendDigit(String digit) {
       if (inputValue.length >= 9) return;
