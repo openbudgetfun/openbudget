@@ -14,11 +14,7 @@ import 'package:serverpod_client/serverpod_client.dart' as _i1;
 
 /// A single split within a split transaction.
 abstract class SplitItem implements _i1.SerializableModel {
-  SplitItem._({
-    required this.amountCents,
-    this.envelopeId,
-    this.memo,
-  });
+  SplitItem._({required this.amountCents, this.envelopeId, this.memo});
 
   factory SplitItem({
     required int amountCents,
@@ -78,11 +74,7 @@ class _SplitItemImpl extends SplitItem {
     required int amountCents,
     _i1.UuidValue? envelopeId,
     String? memo,
-  }) : super._(
-         amountCents: amountCents,
-         envelopeId: envelopeId,
-         memo: memo,
-       );
+  }) : super._(amountCents: amountCents, envelopeId: envelopeId, memo: memo);
 
   /// Returns a shallow copy of this [SplitItem]
   /// with some or all fields replaced by the given arguments.
