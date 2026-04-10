@@ -18,12 +18,6 @@ dev_dependencies:
   melos: ^7.4.0
   serverpod_cli: 3.4.6
 
-# relic_core >=1.0.0 exports a Cache class that collides with serverpod
-# 3.3.1's own Cache class in insights.dart. Pin to 0.x until serverpod
-# resolves this upstream.
-dependency_overrides:
-  relic_core: ">=0.15.0 <1.0.0"
-
 melos:
   name: openbudget
   sdkPath: .fvm/flutter_sdk
