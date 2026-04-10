@@ -16,7 +16,7 @@ workspace:
 
 dev_dependencies:
   melos: ^7.4.0
-  serverpod_cli: 3.3.1
+  serverpod_cli: 3.4.6
 
 melos:
   name: openbudget
