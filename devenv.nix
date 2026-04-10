@@ -42,6 +42,16 @@ in
     package = pkgs.prek;
 
     hooks = {
+      # ── Pre-commit: fast gates ─────────────────────────────────────
+      "format:check" = {
+        enable = true;
+        name = "format:check";
+        description = "Fail if any file is not properly formatted (dprint + dart format).";
+        entry = "${pkgs.dprint}/bin/dprint check";
+        pass_filenames = false;
+        stages = [ "pre-commit" ];
+      };
+
       "secrets:commit" = {
         enable = true;
         name = "secrets:commit";
@@ -50,29 +60,45 @@ in
         pass_filenames = false;
         stages = [ "pre-commit" ];
       };
+
+      "lint:commit" = {
+        enable = true;
+        name = "lint:commit";
+        description = "Run dart analyze (fatal-infos) on the workspace.";
+        entry = "${config.env.DEVENV_PROFILE}/bin/dart analyze --fatal-infos";
+        pass_filenames = false;
+        always_run = true;
+        stages = [ "pre-commit" ];
+      };
+
+      # ── Pre-push: thorough gates ───────────────────────────────────
       "secrets:push" = {
         enable = true;
         name = "secrets:push";
-        description = "Check entire git history for leaked secrets with gitleaks.";
+        description = "Scan entire git history for leaked secrets before push.";
         entry = "${pkgs.gitleaks}/bin/gitleaks detect --verbose --redact --config .gitleaks.toml";
         pass_filenames = false;
         stages = [ "pre-push" ];
       };
-      format = {
+
+      "lint:push" = {
         enable = true;
-        name = "format";
-        description = "Format files with dprint before commit.";
-        entry = "${pkgs.dprint}/bin/dprint fmt --allow-no-files";
-        stages = [ "pre-commit" ];
-      };
-      lint = {
-        enable = true;
-        name = "lint";
-        description = "Run linting and formatting checks on every commit.";
-        entry = "${config.env.DEVENV_PROFILE}/bin/dart analyze --fatal-infos";
-        pass_filenames = true;
+        name = "lint:push";
+        description = "Run full lint suite (format, swift, l10n, analyze) before push.";
+        entry = "${config.env.DEVENV_PROFILE}/bin/lint:all";
+        pass_filenames = false;
         always_run = true;
-        stages = [ "pre-commit" ];
+        stages = [ "pre-push" ];
+      };
+
+      "test:push" = {
+        enable = true;
+        name = "test:push";
+        description = "Run full test suite before push.";
+        entry = "${config.env.DEVENV_PROFILE}/bin/test:all";
+        pass_filenames = false;
+        always_run = true;
+        stages = [ "pre-push" ];
       };
     };
   };
