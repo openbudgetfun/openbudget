@@ -60,9 +60,8 @@ class BudgetDetailScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final summaryAsync = ref.watch(budgetMonthlySummaryProvider(budgetId));
-    final ccPayments = ref.watch(creditCardPaymentsProvider(budgetId));
     final goalsAsync = ref.watch(budgetGoalsProvider(budgetId));
-    final dueCountAsync = ref.watch(recurringDueCountProvider(budgetId));
+    final hideAmounts = ref.watch(hideAmountsProvider);
     final isPosting = useState(false);
     final hasAutoPosted = useState(false);
     final isReordering = useState(false);
@@ -78,21 +77,10 @@ class BudgetDetailScreen extends HookConsumerWidget {
     final inlineEditorSheetOpen = useState(false);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final hideAmounts = ref.watch(hideAmountsProvider);
-    final hideProgressBars = ref.watch(hideProgressBarsProvider);
-    final recentMoves = ref.watch(recentMovesForBudgetProvider(budgetId));
-    final currentThemeMode = ref.watch(themeModeProvider);
-    final isDarkMode =
-        currentThemeMode == ThemeMode.dark ||
-        (currentThemeMode == ThemeMode.system &&
-            theme.brightness == Brightness.dark);
 
-    void navigateAfterMenuClose(VoidCallback callback) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!context.mounted) return;
-        callback();
-      });
-    }
+    // Only watch whether due count has a positive value; the actual count
+    // is consumed inside _DueBannerLoader which watches independently.
+    final dueCountAsync = ref.watch(recurringDueCountProvider(budgetId));
 
     void toggleSearchMode() {
       isSearching.value = !isSearching.value;
@@ -102,24 +90,6 @@ class BudgetDetailScreen extends HookConsumerWidget {
         searchController.clear();
         searchQuery.value = '';
       }
-    }
-
-    Widget buildMenuLabel({
-      required IconData icon,
-      required String label,
-      bool checked = false,
-    }) {
-      return Row(
-        children: [
-          Icon(icon, size: 18),
-          const SizedBox(width: SpacingTokens.sm),
-          Expanded(child: Text(label)),
-          if (checked) ...[
-            const SizedBox(width: SpacingTokens.md),
-            const Icon(Icons.check_rounded, size: 18),
-          ],
-        ],
-      );
     }
 
     // Auto-post due recurring transactions when the budget opens.
@@ -412,20 +382,6 @@ class BudgetDetailScreen extends HookConsumerWidget {
           summary: summary,
           onboardingComplete: onboardingComplete.value,
         );
-        final reviewTransactionCount = ref
-            .watch(
-              monthlyTransactionsProvider(
-                budgetId,
-                summary.year,
-                summary.month,
-              ),
-            )
-            .when(
-              data: (transactions) =>
-                  transactions.where((t) => !t.cleared && !t.reconciled).length,
-              loading: () => 0,
-              error: (_, __) => 0,
-            );
         final showBudgetHeader =
             showSpotlight.value ||
             onboardingType == null ||
@@ -459,184 +415,39 @@ class BudgetDetailScreen extends HookConsumerWidget {
                   onPressed: () => isReordering.value = false,
                   child: Text(l10n.budgetReorderDone),
                 ),
-              PopupMenuButton<_PlanMenuAction>(
-                icon: const Icon(Icons.more_horiz_rounded),
-                position: PopupMenuPosition.under,
-                offset: const Offset(0, 8),
-                onSelected: (action) => switch (action) {
-                  _PlanMenuAction.undoLastMove =>
-                    ref
-                        .read(recentMovesProvider.notifier)
-                        .undoLast(budgetId: budgetId),
-                  _PlanMenuAction.recentMoves => navigateAfterMenuClose(() {
-                    context.pushNamed(
-                      recentMovesRoute,
-                      pathParameters: {'id': budgetId},
-                    );
-                  }),
-                  _PlanMenuAction.toggleSearch => toggleSearchMode(),
-                  _PlanMenuAction.toggleHidden =>
+              _BudgetAppBarMenu(
+                budgetId: budgetId,
+                isSearching: isSearching.value,
+                showHidden: showHidden.value,
+                hiddenCount: hiddenCount,
+                isReordering: isReordering.value,
+                filteredCategories: filteredCategories,
+                collapsedCategoryIds: collapsedCategoryIds,
+                onToggleSearch: toggleSearchMode,
+                onToggleHidden: () =>
                     showHidden.value = !showHidden.value,
-                  _PlanMenuAction.reorderCategories =>
+                onReorderCategories: () =>
                     isReordering.value = true,
-                  _PlanMenuAction.saveTemplate => navigateAfterMenuClose(() {
-                    showDialog<void>(
-                      context: context,
-                      barrierColor: _dialogBarrierColor(context),
-                      builder: (_) => BudgetTemplateDialog(budgetId: budgetId),
-                    );
-                  }),
-                  _PlanMenuAction.toggleTheme =>
-                    ref
-                        .read(themeModeProvider.notifier)
-                        .setThemeMode(
-                          isDarkMode ? ThemeMode.light : ThemeMode.dark,
-                        ),
-                  _PlanMenuAction.collapseExpand => (() {
-                    final visibleIds = filteredCategories
-                        .map((entry) => entry.category.id?.toString() ?? '')
-                        .where((id) => id.isNotEmpty)
-                        .toSet();
-                    if (visibleIds.isEmpty) return;
-
-                    final next = Set<String>.from(collapsedCategoryIds.value);
-                    final allVisibleCollapsed = visibleIds.every(next.contains);
-                    if (allVisibleCollapsed) {
-                      next.removeAll(visibleIds);
-                    } else {
-                      next.addAll(visibleIds);
-                    }
-                    collapsedCategoryIds.value = next;
-                  })(),
-                  _PlanMenuAction.hideProgressBars =>
-                    ref
-                        .read(hideProgressBarsProvider.notifier)
-                        .setHideProgressBars(value: !hideProgressBars),
-                  _PlanMenuAction.hideAmounts =>
-                    ref
-                        .read(hideAmountsProvider.notifier)
-                        .setHideAmounts(value: !hideAmounts),
-                  _PlanMenuAction.planSettings => navigateAfterMenuClose(() {
-                    context.goNamed(
-                      planSettingsRoute,
-                      pathParameters: {'id': budgetId},
-                    );
-                  }),
+                onPlanSettings: () {
+                  context.goNamed(
+                    planSettingsRoute,
+                    pathParameters: {'id': budgetId},
+                  );
                 },
-                itemBuilder: (context) => [
-                  PopupMenuItem<_PlanMenuAction>(
-                    value: _PlanMenuAction.recentMoves,
-                    child: Row(
-                      children: [
-                        const Icon(Icons.history_rounded, size: 18),
-                        const SizedBox(width: SpacingTokens.sm),
-                        Text(l10n.recentMovesTitle),
-                      ],
-                    ),
-                  ),
-                  PopupMenuItem<_PlanMenuAction>(
-                    value: _PlanMenuAction.undoLastMove,
-                    enabled: recentMoves.isNotEmpty,
-                    child: Row(
-                      children: [
-                        const Icon(Icons.undo_rounded, size: 18),
-                        const SizedBox(width: SpacingTokens.sm),
-                        Text(l10n.undoAction),
-                      ],
-                    ),
-                  ),
-                  const PopupMenuDivider(),
-                  PopupMenuItem<_PlanMenuAction>(
-                    value: _PlanMenuAction.toggleSearch,
-                    child: buildMenuLabel(
-                      icon: Icons.search_rounded,
-                      label: l10n.budgetSearchHint,
-                      checked: isSearching.value,
-                    ),
-                  ),
-                  PopupMenuItem<_PlanMenuAction>(
-                    value: _PlanMenuAction.toggleHidden,
-                    child: buildMenuLabel(
-                      icon: Icons.visibility_off_rounded,
-                      label: showHidden.value
-                          ? l10n.budgetShowHidden
-                          : hiddenCount > 0
-                          ? l10n.budgetHiddenCount(hiddenCount)
-                          : l10n.budgetShowHidden,
-                      checked: showHidden.value,
-                    ),
-                  ),
-                  PopupMenuItem<_PlanMenuAction>(
-                    value: _PlanMenuAction.reorderCategories,
-                    enabled: !isReordering.value,
-                    child: Row(
-                      children: [
-                        const Icon(Icons.swap_vert_rounded, size: 18),
-                        const SizedBox(width: SpacingTokens.sm),
-                        Text(l10n.budgetReorderCategories),
-                      ],
-                    ),
-                  ),
-                  PopupMenuItem<_PlanMenuAction>(
-                    value: _PlanMenuAction.saveTemplate,
-                    child: Row(
-                      children: [
-                        const Icon(Icons.bookmark_border_rounded, size: 18),
-                        const SizedBox(width: SpacingTokens.sm),
-                        Text(l10n.templateTitle),
-                      ],
-                    ),
-                  ),
-                  const PopupMenuDivider(),
-                  PopupMenuItem<_PlanMenuAction>(
-                    value: _PlanMenuAction.toggleTheme,
-                    child: buildMenuLabel(
-                      icon: isDarkMode
-                          ? Icons.light_mode_rounded
-                          : Icons.dark_mode_rounded,
-                      label: isDarkMode ? l10n.themeLight : l10n.themeDark,
-                    ),
-                  ),
-                  const PopupMenuDivider(),
-                  PopupMenuItem<_PlanMenuAction>(
-                    value: _PlanMenuAction.collapseExpand,
-                    child: Row(
-                      children: [
-                        const Icon(Icons.unfold_more_rounded, size: 18),
-                        const SizedBox(width: SpacingTokens.sm),
-                        Text(l10n.budgetCollapseExpand),
-                      ],
-                    ),
-                  ),
-                  const PopupMenuDivider(),
-                  PopupMenuItem<_PlanMenuAction>(
-                    value: _PlanMenuAction.hideProgressBars,
-                    child: buildMenuLabel(
-                      icon: Icons.linear_scale_rounded,
-                      label: l10n.settingsHideProgressBars,
-                      checked: hideProgressBars,
-                    ),
-                  ),
-                  PopupMenuItem<_PlanMenuAction>(
-                    value: _PlanMenuAction.hideAmounts,
-                    child: buildMenuLabel(
-                      icon: Icons.visibility_off_rounded,
-                      label: l10n.settingsHideAmounts,
-                      checked: hideAmounts,
-                    ),
-                  ),
-                  const PopupMenuDivider(),
-                  PopupMenuItem<_PlanMenuAction>(
-                    value: _PlanMenuAction.planSettings,
-                    child: Row(
-                      children: [
-                        const Icon(Icons.settings_outlined, size: 18),
-                        const SizedBox(width: SpacingTokens.sm),
-                        Text(l10n.settingsPlanSettings),
-                      ],
-                    ),
-                  ),
-                ],
+                onSaveTemplate: () {
+                  showDialog<void>(
+                    context: context,
+                    barrierColor: _dialogBarrierColor(context),
+                    builder: (_) =>
+                        BudgetTemplateDialog(budgetId: budgetId),
+                  );
+                },
+                onRecentMoves: () {
+                  context.pushNamed(
+                    recentMovesRoute,
+                    pathParameters: {'id': budgetId},
+                  );
+                },
               ),
             ],
           ),
@@ -728,18 +539,12 @@ class BudgetDetailScreen extends HookConsumerWidget {
                   ),
                   const SizedBox(height: SpacingTokens.md),
                 ],
-                if (!showSpotlight.value && reviewTransactionCount > 0) ...[
-                  _ReviewTransactionsBanner(
-                    count: reviewTransactionCount,
-                    onTap: () => showReviewTransactionsSheet(
-                      context,
-                      budgetId: budgetId,
-                      year: summary.year,
-                      month: summary.month,
-                    ),
+                if (!showSpotlight.value)
+                  _ReviewTransactionsBannerLoader(
+                    budgetId: budgetId,
+                    year: summary.year,
+                    month: summary.month,
                   ),
-                  const SizedBox(height: SpacingTokens.sm),
-                ],
                 if (!showSpotlight.value && overspentEnvelopes.isNotEmpty) ...[
                   _CoverOverspentBanner(
                     count: overspentEnvelopes.length,
@@ -753,19 +558,14 @@ class BudgetDetailScreen extends HookConsumerWidget {
                   ),
                   const SizedBox(height: SpacingTokens.sm),
                 ],
-                if (dueCountAsync.hasValue && dueCountAsync.value! > 0)
-                  _DueBanner(
-                    count: dueCountAsync.value!,
-                    isPosting: isPosting.value,
-                    onPost: () => _postDueTransactions(context, ref, isPosting),
-                  ),
-                if (ccPayments.hasValue && ccPayments.value!.isNotEmpty) ...[
-                  CreditCardSection(
-                    payments: ccPayments.value!,
-                    currencyCode: currencyCode,
-                  ),
-                  const SizedBox(height: SpacingTokens.md),
-                ],
+                _DueBannerLoader(
+                  budgetId: budgetId,
+                  isPosting: isPosting,
+                ),
+                _CreditCardSectionLoader(
+                  budgetId: budgetId,
+                  currencyCode: currencyCode,
+                ),
                 if (showSpotlight.value)
                   _SpotlightOverview(
                     summary: summary,
@@ -1437,37 +1237,6 @@ class BudgetDetailScreen extends HookConsumerWidget {
     }
   }
 
-  Future<void> _postDueTransactions(
-    BuildContext context,
-    WidgetRef ref,
-    ValueNotifier<bool> isPosting,
-  ) async {
-    final l10n = AppLocalizations.of(context);
-    isPosting.value = true;
-    try {
-      final count = await ref
-          .read(recurringAutoPostActionsProvider.notifier)
-          .postDue(budgetId: budgetId);
-      if (context.mounted) {
-        showAppToast(
-          context,
-          message: l10n.recurringPostSuccess(count),
-          variant: AppToastVariant.success,
-        );
-      }
-    } on Exception catch (_) {
-      if (context.mounted) {
-        showAppToast(
-          context,
-          message: l10n.recurringPostError,
-          variant: AppToastVariant.error,
-        );
-      }
-    } finally {
-      isPosting.value = false;
-    }
-  }
-
   Future<void> _confirmCopyLastMonth(
     BuildContext context,
     WidgetRef ref,
@@ -1619,6 +1388,380 @@ class BudgetDetailScreen extends HookConsumerWidget {
         );
       }
     }
+  }
+}
+
+/// Extracted popup-menu widget that independently watches display-option and
+/// theme providers so changes to those providers do not rebuild the entire
+/// [BudgetDetailScreen] widget tree.
+class _BudgetAppBarMenu extends HookConsumerWidget {
+  const _BudgetAppBarMenu({
+    required this.budgetId,
+    required this.isSearching,
+    required this.showHidden,
+    required this.hiddenCount,
+    required this.isReordering,
+    required this.filteredCategories,
+    required this.collapsedCategoryIds,
+    required this.onToggleSearch,
+    required this.onToggleHidden,
+    required this.onReorderCategories,
+    required this.onPlanSettings,
+    required this.onSaveTemplate,
+    required this.onRecentMoves,
+  });
+
+  final String budgetId;
+  final bool isSearching;
+  final bool showHidden;
+  final int hiddenCount;
+  final bool isReordering;
+  final List<CategoryWithEnvelopes> filteredCategories;
+  final ValueNotifier<Set<String>> collapsedCategoryIds;
+  final VoidCallback onToggleSearch;
+  final VoidCallback onToggleHidden;
+  final VoidCallback onReorderCategories;
+  final VoidCallback onPlanSettings;
+  final VoidCallback onSaveTemplate;
+  final VoidCallback onRecentMoves;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final hideAmounts = ref.watch(hideAmountsProvider);
+    final hideProgressBars = ref.watch(hideProgressBarsProvider);
+    final hasRecentMoves = ref.watch(
+      recentMovesForBudgetProvider(budgetId).select((moves) => moves.isNotEmpty),
+    );
+    final currentThemeMode = ref.watch(themeModeProvider);
+    final isDarkMode =
+        currentThemeMode == ThemeMode.dark ||
+        (currentThemeMode == ThemeMode.system &&
+            theme.brightness == Brightness.dark);
+
+    void navigateAfterMenuClose(VoidCallback callback) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!context.mounted) return;
+        callback();
+      });
+    }
+
+    Widget buildMenuLabel({
+      required IconData icon,
+      required String label,
+      bool checked = false,
+    }) {
+      return Row(
+        children: [
+          Icon(icon, size: 18),
+          const SizedBox(width: SpacingTokens.sm),
+          Expanded(child: Text(label)),
+          if (checked) ...[
+            const SizedBox(width: SpacingTokens.md),
+            const Icon(Icons.check_rounded, size: 18),
+          ],
+        ],
+      );
+    }
+
+    return PopupMenuButton<_PlanMenuAction>(
+      icon: const Icon(Icons.more_horiz_rounded),
+      position: PopupMenuPosition.under,
+      offset: const Offset(0, 8),
+      onSelected: (action) => switch (action) {
+        _PlanMenuAction.undoLastMove =>
+          ref
+              .read(recentMovesProvider.notifier)
+              .undoLast(budgetId: budgetId),
+        _PlanMenuAction.recentMoves =>
+          navigateAfterMenuClose(onRecentMoves),
+        _PlanMenuAction.toggleSearch => onToggleSearch(),
+        _PlanMenuAction.toggleHidden => onToggleHidden(),
+        _PlanMenuAction.reorderCategories => onReorderCategories(),
+        _PlanMenuAction.saveTemplate =>
+          navigateAfterMenuClose(onSaveTemplate),
+        _PlanMenuAction.toggleTheme =>
+          ref
+              .read(themeModeProvider.notifier)
+              .setThemeMode(
+                isDarkMode ? ThemeMode.light : ThemeMode.dark,
+              ),
+        _PlanMenuAction.collapseExpand => (() {
+          final visibleIds = filteredCategories
+              .map((entry) => entry.category.id?.toString() ?? '')
+              .where((id) => id.isNotEmpty)
+              .toSet();
+          if (visibleIds.isEmpty) return;
+
+          final next = Set<String>.from(collapsedCategoryIds.value);
+          final allVisibleCollapsed = visibleIds.every(next.contains);
+          if (allVisibleCollapsed) {
+            next.removeAll(visibleIds);
+          } else {
+            next.addAll(visibleIds);
+          }
+          collapsedCategoryIds.value = next;
+        })(),
+        _PlanMenuAction.hideProgressBars =>
+          ref
+              .read(hideProgressBarsProvider.notifier)
+              .setHideProgressBars(value: !hideProgressBars),
+        _PlanMenuAction.hideAmounts =>
+          ref
+              .read(hideAmountsProvider.notifier)
+              .setHideAmounts(value: !hideAmounts),
+        _PlanMenuAction.planSettings =>
+          navigateAfterMenuClose(onPlanSettings),
+      },
+      itemBuilder: (context) => [
+        PopupMenuItem<_PlanMenuAction>(
+          value: _PlanMenuAction.recentMoves,
+          child: Row(
+            children: [
+              const Icon(Icons.history_rounded, size: 18),
+              const SizedBox(width: SpacingTokens.sm),
+              Text(l10n.recentMovesTitle),
+            ],
+          ),
+        ),
+        PopupMenuItem<_PlanMenuAction>(
+          value: _PlanMenuAction.undoLastMove,
+          enabled: hasRecentMoves,
+          child: Row(
+            children: [
+              const Icon(Icons.undo_rounded, size: 18),
+              const SizedBox(width: SpacingTokens.sm),
+              Text(l10n.undoAction),
+            ],
+          ),
+        ),
+        const PopupMenuDivider(),
+        PopupMenuItem<_PlanMenuAction>(
+          value: _PlanMenuAction.toggleSearch,
+          child: buildMenuLabel(
+            icon: Icons.search_rounded,
+            label: l10n.budgetSearchHint,
+            checked: isSearching,
+          ),
+        ),
+        PopupMenuItem<_PlanMenuAction>(
+          value: _PlanMenuAction.toggleHidden,
+          child: buildMenuLabel(
+            icon: Icons.visibility_off_rounded,
+            label: showHidden
+                ? l10n.budgetShowHidden
+                : hiddenCount > 0
+                ? l10n.budgetHiddenCount(hiddenCount)
+                : l10n.budgetShowHidden,
+            checked: showHidden,
+          ),
+        ),
+        PopupMenuItem<_PlanMenuAction>(
+          value: _PlanMenuAction.reorderCategories,
+          enabled: !isReordering,
+          child: Row(
+            children: [
+              const Icon(Icons.swap_vert_rounded, size: 18),
+              const SizedBox(width: SpacingTokens.sm),
+              Text(l10n.budgetReorderCategories),
+            ],
+          ),
+        ),
+        PopupMenuItem<_PlanMenuAction>(
+          value: _PlanMenuAction.saveTemplate,
+          child: Row(
+            children: [
+              const Icon(Icons.bookmark_border_rounded, size: 18),
+              const SizedBox(width: SpacingTokens.sm),
+              Text(l10n.templateTitle),
+            ],
+          ),
+        ),
+        const PopupMenuDivider(),
+        PopupMenuItem<_PlanMenuAction>(
+          value: _PlanMenuAction.toggleTheme,
+          child: buildMenuLabel(
+            icon: isDarkMode
+                ? Icons.light_mode_rounded
+                : Icons.dark_mode_rounded,
+            label: isDarkMode ? l10n.themeLight : l10n.themeDark,
+          ),
+        ),
+        const PopupMenuDivider(),
+        PopupMenuItem<_PlanMenuAction>(
+          value: _PlanMenuAction.collapseExpand,
+          child: Row(
+            children: [
+              const Icon(Icons.unfold_more_rounded, size: 18),
+              const SizedBox(width: SpacingTokens.sm),
+              Text(l10n.budgetCollapseExpand),
+            ],
+          ),
+        ),
+        const PopupMenuDivider(),
+        PopupMenuItem<_PlanMenuAction>(
+          value: _PlanMenuAction.hideProgressBars,
+          child: buildMenuLabel(
+            icon: Icons.linear_scale_rounded,
+            label: l10n.settingsHideProgressBars,
+            checked: hideProgressBars,
+          ),
+        ),
+        PopupMenuItem<_PlanMenuAction>(
+          value: _PlanMenuAction.hideAmounts,
+          child: buildMenuLabel(
+            icon: Icons.visibility_off_rounded,
+            label: l10n.settingsHideAmounts,
+            checked: hideAmounts,
+          ),
+        ),
+        const PopupMenuDivider(),
+        PopupMenuItem<_PlanMenuAction>(
+          value: _PlanMenuAction.planSettings,
+          child: Row(
+            children: [
+              const Icon(Icons.settings_outlined, size: 18),
+              const SizedBox(width: SpacingTokens.sm),
+              Text(l10n.settingsPlanSettings),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Watches [creditCardPaymentsProvider] independently so credit card data
+/// changes do not rebuild the entire budget detail screen.
+class _CreditCardSectionLoader extends HookConsumerWidget {
+  const _CreditCardSectionLoader({
+    required this.budgetId,
+    required this.currencyCode,
+  });
+
+  final String budgetId;
+  final CurrencyCode currencyCode;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ccPayments = ref.watch(creditCardPaymentsProvider(budgetId));
+
+    if (!ccPayments.hasValue || ccPayments.value!.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: SpacingTokens.md),
+      child: CreditCardSection(
+        payments: ccPayments.value!,
+        currencyCode: currencyCode,
+      ),
+    );
+  }
+}
+
+/// Watches [recurringDueCountProvider] independently so recurring-due changes
+/// do not rebuild the entire budget detail screen.
+class _DueBannerLoader extends HookConsumerWidget {
+  const _DueBannerLoader({
+    required this.budgetId,
+    required this.isPosting,
+  });
+
+  final String budgetId;
+  final ValueNotifier<bool> isPosting;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final dueCountAsync = ref.watch(recurringDueCountProvider(budgetId));
+
+    if (!dueCountAsync.hasValue || dueCountAsync.value! <= 0) {
+      return const SizedBox.shrink();
+    }
+
+    return _DueBanner(
+      count: dueCountAsync.value!,
+      isPosting: isPosting.value,
+      onPost: () => _postDueTransactions(context, ref, isPosting),
+    );
+  }
+
+  Future<void> _postDueTransactions(
+    BuildContext context,
+    WidgetRef ref,
+    ValueNotifier<bool> isPosting,
+  ) async {
+    final l10n = AppLocalizations.of(context);
+    isPosting.value = true;
+    try {
+      final count = await ref
+          .read(recurringAutoPostActionsProvider.notifier)
+          .postDue(budgetId: budgetId);
+      if (context.mounted) {
+        showAppToast(
+          context,
+          message: l10n.recurringPostSuccess(count),
+          variant: AppToastVariant.success,
+        );
+      }
+    } on Exception catch (_) {
+      if (context.mounted) {
+        showAppToast(
+          context,
+          message: l10n.recurringPostError,
+          variant: AppToastVariant.error,
+        );
+      }
+    } finally {
+      isPosting.value = false;
+    }
+  }
+}
+
+/// Watches [monthlyTransactionsProvider] independently so transaction-review
+/// count changes do not rebuild the entire budget detail screen.
+class _ReviewTransactionsBannerLoader extends HookConsumerWidget {
+  const _ReviewTransactionsBannerLoader({
+    required this.budgetId,
+    required this.year,
+    required this.month,
+  });
+
+  final String budgetId;
+  final int year;
+  final int month;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final reviewTransactionCount = ref
+        .watch(
+          monthlyTransactionsProvider(budgetId, year, month).select(
+            (asyncValue) => asyncValue.when(
+              data: (transactions) =>
+                  transactions.where((t) => !t.cleared && !t.reconciled).length,
+              loading: () => 0,
+              error: (_, __) => 0,
+            ),
+          ),
+        );
+
+    if (reviewTransactionCount <= 0) {
+      return const SizedBox.shrink();
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: SpacingTokens.sm),
+      child: _ReviewTransactionsBanner(
+        count: reviewTransactionCount,
+        onTap: () => showReviewTransactionsSheet(
+          context,
+          budgetId: budgetId,
+          year: year,
+          month: month,
+        ),
+      ),
+    );
   }
 }
 
