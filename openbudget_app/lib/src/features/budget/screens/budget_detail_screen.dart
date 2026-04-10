@@ -424,10 +424,8 @@ class BudgetDetailScreen extends HookConsumerWidget {
                 filteredCategories: filteredCategories,
                 collapsedCategoryIds: collapsedCategoryIds,
                 onToggleSearch: toggleSearchMode,
-                onToggleHidden: () =>
-                    showHidden.value = !showHidden.value,
-                onReorderCategories: () =>
-                    isReordering.value = true,
+                onToggleHidden: () => showHidden.value = !showHidden.value,
+                onReorderCategories: () => isReordering.value = true,
                 onPlanSettings: () {
                   context.goNamed(
                     planSettingsRoute,
@@ -438,8 +436,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
                   showDialog<void>(
                     context: context,
                     barrierColor: _dialogBarrierColor(context),
-                    builder: (_) =>
-                        BudgetTemplateDialog(budgetId: budgetId),
+                    builder: (_) => BudgetTemplateDialog(budgetId: budgetId),
                   );
                 },
                 onRecentMoves: () {
@@ -558,10 +555,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
                   ),
                   const SizedBox(height: SpacingTokens.sm),
                 ],
-                _DueBannerLoader(
-                  budgetId: budgetId,
-                  isPosting: isPosting,
-                ),
+                _DueBannerLoader(budgetId: budgetId, isPosting: isPosting),
                 _CreditCardSectionLoader(
                   budgetId: budgetId,
                   currencyCode: currencyCode,
@@ -1432,7 +1426,9 @@ class _BudgetAppBarMenu extends HookConsumerWidget {
     final hideAmounts = ref.watch(hideAmountsProvider);
     final hideProgressBars = ref.watch(hideProgressBarsProvider);
     final hasRecentMoves = ref.watch(
-      recentMovesForBudgetProvider(budgetId).select((moves) => moves.isNotEmpty),
+      recentMovesForBudgetProvider(
+        budgetId,
+      ).select((moves) => moves.isNotEmpty),
     );
     final currentThemeMode = ref.watch(themeModeProvider);
     final isDarkMode =
@@ -1471,22 +1467,16 @@ class _BudgetAppBarMenu extends HookConsumerWidget {
       offset: const Offset(0, 8),
       onSelected: (action) => switch (action) {
         _PlanMenuAction.undoLastMove =>
-          ref
-              .read(recentMovesProvider.notifier)
-              .undoLast(budgetId: budgetId),
-        _PlanMenuAction.recentMoves =>
-          navigateAfterMenuClose(onRecentMoves),
+          ref.read(recentMovesProvider.notifier).undoLast(budgetId: budgetId),
+        _PlanMenuAction.recentMoves => navigateAfterMenuClose(onRecentMoves),
         _PlanMenuAction.toggleSearch => onToggleSearch(),
         _PlanMenuAction.toggleHidden => onToggleHidden(),
         _PlanMenuAction.reorderCategories => onReorderCategories(),
-        _PlanMenuAction.saveTemplate =>
-          navigateAfterMenuClose(onSaveTemplate),
+        _PlanMenuAction.saveTemplate => navigateAfterMenuClose(onSaveTemplate),
         _PlanMenuAction.toggleTheme =>
           ref
               .read(themeModeProvider.notifier)
-              .setThemeMode(
-                isDarkMode ? ThemeMode.light : ThemeMode.dark,
-              ),
+              .setThemeMode(isDarkMode ? ThemeMode.light : ThemeMode.dark),
         _PlanMenuAction.collapseExpand => (() {
           final visibleIds = filteredCategories
               .map((entry) => entry.category.id?.toString() ?? '')
@@ -1511,8 +1501,7 @@ class _BudgetAppBarMenu extends HookConsumerWidget {
           ref
               .read(hideAmountsProvider.notifier)
               .setHideAmounts(value: !hideAmounts),
-        _PlanMenuAction.planSettings =>
-          navigateAfterMenuClose(onPlanSettings),
+        _PlanMenuAction.planSettings => navigateAfterMenuClose(onPlanSettings),
       },
       itemBuilder: (context) => [
         PopupMenuItem<_PlanMenuAction>(
@@ -1664,10 +1653,7 @@ class _CreditCardSectionLoader extends HookConsumerWidget {
 /// Watches [recurringDueCountProvider] independently so recurring-due changes
 /// do not rebuild the entire budget detail screen.
 class _DueBannerLoader extends HookConsumerWidget {
-  const _DueBannerLoader({
-    required this.budgetId,
-    required this.isPosting,
-  });
+  const _DueBannerLoader({required this.budgetId, required this.isPosting});
 
   final String budgetId;
   final ValueNotifier<bool> isPosting;
@@ -1734,17 +1720,16 @@ class _ReviewTransactionsBannerLoader extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final reviewTransactionCount = ref
-        .watch(
-          monthlyTransactionsProvider(budgetId, year, month).select(
-            (asyncValue) => asyncValue.when(
-              data: (transactions) =>
-                  transactions.where((t) => !t.cleared && !t.reconciled).length,
-              loading: () => 0,
-              error: (_, __) => 0,
-            ),
-          ),
-        );
+    final reviewTransactionCount = ref.watch(
+      monthlyTransactionsProvider(budgetId, year, month).select(
+        (asyncValue) => asyncValue.when(
+          data: (transactions) =>
+              transactions.where((t) => !t.cleared && !t.reconciled).length,
+          loading: () => 0,
+          error: (_, __) => 0,
+        ),
+      ),
+    );
 
     if (reviewTransactionCount <= 0) {
       return const SizedBox.shrink();
