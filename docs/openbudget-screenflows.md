@@ -4,6 +4,8 @@ Last updated: 2026-02-26
 
 Progress checklist: `docs/openbudget-migration-progress.md`
 
+Progress checklist: `docs/openbudget-migration-progress.md`
+
 ## Status
 
 - Migration from the reference `ynab-ui` set is complete for core and advanced flows.
