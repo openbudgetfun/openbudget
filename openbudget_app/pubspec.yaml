@@ -32,8 +32,8 @@ dependencies:
   plaid_flutter: 5.0.5
   posthog_flutter: 5.14.0
   riverpod_annotation: 4.0.2
-  serverpod_auth_idp_flutter: 3.3.1
-  serverpod_flutter: 3.3.1
+  serverpod_auth_idp_flutter: 3.4.6
+  serverpod_flutter: 3.4.6
   shared_preferences: 2.5.3
   shorebird_code_push: 2.0.5
   simple_icons: 14.6.1
