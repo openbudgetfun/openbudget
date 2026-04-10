@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 
 /// A themed filled button for primary actions.
-class ObFilledButton extends HookWidget {
+class ObFilledButton extends StatelessWidget {
   const ObFilledButton({
     required this.onPressed,
     required this.child,
@@ -30,7 +29,7 @@ class ObFilledButton extends HookWidget {
 }
 
 /// A themed outlined button for secondary actions.
-class ObOutlinedButton extends HookWidget {
+class ObOutlinedButton extends StatelessWidget {
   const ObOutlinedButton({
     required this.onPressed,
     required this.child,
@@ -47,7 +46,7 @@ class ObOutlinedButton extends HookWidget {
 }
 
 /// A themed text button for tertiary actions.
-class ObTextButton extends HookWidget {
+class ObTextButton extends StatelessWidget {
   const ObTextButton({required this.onPressed, required this.child, super.key});
 
   final VoidCallback? onPressed;
