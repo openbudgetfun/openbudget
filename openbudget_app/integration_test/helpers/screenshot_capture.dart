@@ -98,8 +98,8 @@ Future<_CaptureResult> _captureWithBackendPreference({
 
   const fallbackOrder = [
     _ScreenshotBackend.integration,
-    _ScreenshotBackend.repaint,
     _ScreenshotBackend.renderView,
+    _ScreenshotBackend.repaint,
   ];
   for (final option in fallbackOrder) {
     final result = await attempt(option);
