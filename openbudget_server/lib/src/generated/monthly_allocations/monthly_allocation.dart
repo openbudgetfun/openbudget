@@ -230,88 +230,42 @@ class MonthlyAllocationUpdateTable
 
   _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> envelopeId(
     _i1.UuidValue value,
-  ) => _i1.ColumnValue(
-    table.envelopeId,
-    value,
-  );
+  ) => _i1.ColumnValue(table.envelopeId, value);
 
   _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> budgetId(_i1.UuidValue value) =>
-      _i1.ColumnValue(
-        table.budgetId,
-        value,
-      );
+      _i1.ColumnValue(table.budgetId, value);
 
-  _i1.ColumnValue<int, int> year(int value) => _i1.ColumnValue(
-    table.year,
-    value,
-  );
+  _i1.ColumnValue<int, int> year(int value) =>
+      _i1.ColumnValue(table.year, value);
 
-  _i1.ColumnValue<int, int> month(int value) => _i1.ColumnValue(
-    table.month,
-    value,
-  );
+  _i1.ColumnValue<int, int> month(int value) =>
+      _i1.ColumnValue(table.month, value);
 
-  _i1.ColumnValue<int, int> allocatedCents(int value) => _i1.ColumnValue(
-    table.allocatedCents,
-    value,
-  );
+  _i1.ColumnValue<int, int> allocatedCents(int value) =>
+      _i1.ColumnValue(table.allocatedCents, value);
 
-  _i1.ColumnValue<int, int> carryoverCents(int value) => _i1.ColumnValue(
-    table.carryoverCents,
-    value,
-  );
+  _i1.ColumnValue<int, int> carryoverCents(int value) =>
+      _i1.ColumnValue(table.carryoverCents, value);
 
   _i1.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
-      _i1.ColumnValue(
-        table.createdAt,
-        value,
-      );
+      _i1.ColumnValue(table.createdAt, value);
 
   _i1.ColumnValue<DateTime, DateTime> updatedAt(DateTime value) =>
-      _i1.ColumnValue(
-        table.updatedAt,
-        value,
-      );
+      _i1.ColumnValue(table.updatedAt, value);
 }
 
 class MonthlyAllocationTable extends _i1.Table<_i1.UuidValue?> {
   MonthlyAllocationTable({super.tableRelation})
     : super(tableName: 'monthly_allocation') {
     updateTable = MonthlyAllocationUpdateTable(this);
-    envelopeId = _i1.ColumnUuid(
-      'envelopeId',
-      this,
-    );
-    budgetId = _i1.ColumnUuid(
-      'budgetId',
-      this,
-    );
-    year = _i1.ColumnInt(
-      'year',
-      this,
-    );
-    month = _i1.ColumnInt(
-      'month',
-      this,
-    );
-    allocatedCents = _i1.ColumnInt(
-      'allocatedCents',
-      this,
-    );
-    carryoverCents = _i1.ColumnInt(
-      'carryoverCents',
-      this,
-    );
-    createdAt = _i1.ColumnDateTime(
-      'createdAt',
-      this,
-      hasDefault: true,
-    );
-    updatedAt = _i1.ColumnDateTime(
-      'updatedAt',
-      this,
-      hasDefault: true,
-    );
+    envelopeId = _i1.ColumnUuid('envelopeId', this);
+    budgetId = _i1.ColumnUuid('budgetId', this);
+    year = _i1.ColumnInt('year', this);
+    month = _i1.ColumnInt('month', this);
+    allocatedCents = _i1.ColumnInt('allocatedCents', this);
+    carryoverCents = _i1.ColumnInt('carryoverCents', this);
+    createdAt = _i1.ColumnDateTime('createdAt', this, hasDefault: true);
+    updatedAt = _i1.ColumnDateTime('updatedAt', this, hasDefault: true);
   }
 
   late final MonthlyAllocationUpdateTable updateTable;
@@ -607,10 +561,7 @@ class MonthlyAllocationRepository {
     List<MonthlyAllocation> rows, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.delete<MonthlyAllocation>(
-      rows,
-      transaction: transaction,
-    );
+    return session.db.delete<MonthlyAllocation>(rows, transaction: transaction);
   }
 
   /// Deletes a single [MonthlyAllocation].

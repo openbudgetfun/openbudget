@@ -98,7 +98,9 @@ void main() {
     ) async {
       final container = ProviderContainer(
         overrides: [
-          budgetMonthlySummaryProvider.overrideWith((ref, _) async => _makeSummary()),
+          budgetMonthlySummaryProvider.overrideWith(
+            (ref, _) async => _makeSummary(),
+          ),
           budgetGoalsProvider.overrideWith((ref, _) async => {}),
         ],
       );
@@ -157,7 +159,9 @@ void main() {
     testWidgets('shows envelope-specific move history', (tester) async {
       final container = ProviderContainer(
         overrides: [
-          budgetMonthlySummaryProvider.overrideWith((ref, _) async => _makeSummary()),
+          budgetMonthlySummaryProvider.overrideWith(
+            (ref, _) async => _makeSummary(),
+          ),
           budgetGoalsProvider.overrideWith((ref, _) async => {}),
         ],
       );

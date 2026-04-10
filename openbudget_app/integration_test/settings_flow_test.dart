@@ -24,7 +24,10 @@ import 'package:patrol/patrol.dart';
 const _budgetId = 'test-budget-id';
 final _ownerUuid = UuidValue.fromString('00000000-0000-0000-0000-000000000311');
 
-Budget _makeBudget({String name = "Alex's Plan", String currencyCode = 'USD'}) => Budget(name: name, currencyCode: currencyCode, ownerId: _ownerUuid);
+Budget _makeBudget({
+  String name = "Alex's Plan",
+  String currencyCode = 'USD',
+}) => Budget(name: name, currencyCode: currencyCode, ownerId: _ownerUuid);
 
 void main() {
   patrolWidgetTest(

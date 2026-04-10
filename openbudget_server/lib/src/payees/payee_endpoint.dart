@@ -22,10 +22,12 @@ class PayeeEndpoint extends Endpoint {
   }
 
   /// Lists all payees for a budget.
-  Future<List<Payee>> list(Session session, UuidValue budgetId) async => PayeeService.listForBudget(session, budgetId: budgetId);
+  Future<List<Payee>> list(Session session, UuidValue budgetId) async =>
+      PayeeService.listForBudget(session, budgetId: budgetId);
 
   /// Gets a single payee by ID.
-  Future<Payee> get(Session session, UuidValue payeeId) async => PayeeService.getById(session, payeeId: payeeId);
+  Future<Payee> get(Session session, UuidValue payeeId) async =>
+      PayeeService.getById(session, payeeId: payeeId);
 
   /// Updates a payee by ID.
   Future<Payee> update(
@@ -48,10 +50,10 @@ class PayeeEndpoint extends Endpoint {
     UuidValue payeeId,
     UuidValue budgetId,
   ) async => PayeeService.lastUsedEnvelopeId(
-      session,
-      payeeId: payeeId,
-      budgetId: budgetId,
-    );
+    session,
+    payeeId: payeeId,
+    budgetId: budgetId,
+  );
 
   /// Merges the source payee into the target payee.
   ///

@@ -11,11 +11,11 @@ void main() {
   });
 
   Widget buildSubject() => MaterialApp(
-      theme: OpenBudgetTheme.light,
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      home: const DeleteAccountScreen(budgetId: 'test-budget-id'),
-    );
+    theme: OpenBudgetTheme.light,
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
+    home: const DeleteAccountScreen(budgetId: 'test-budget-id'),
+  );
 
   group('DeleteAccountScreen', () {
     testWidgets('renders unavailable state and disables delete action', (

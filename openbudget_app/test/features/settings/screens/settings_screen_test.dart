@@ -14,14 +14,15 @@ import 'package:openbudget_ui/openbudget_ui.dart';
 const _budgetId = 'test-budget-id';
 final _ownerUuid = UuidValue.fromString('00000000-0000-0000-0000-000000000001');
 
-Budget _makeBudget({String name = 'My Budget', String currencyCode = 'USD'}) => Budget(name: name, currencyCode: currencyCode, ownerId: _ownerUuid);
+Budget _makeBudget({String name = 'My Budget', String currencyCode = 'USD'}) =>
+    Budget(name: name, currencyCode: currencyCode, ownerId: _ownerUuid);
 
 Widget _materialShell() => MaterialApp(
-    theme: OpenBudgetTheme.light,
-    localizationsDelegates: AppLocalizations.localizationsDelegates,
-    supportedLocales: AppLocalizations.supportedLocales,
-    home: const SettingsScreen(budgetId: _budgetId),
-  );
+  theme: OpenBudgetTheme.light,
+  localizationsDelegates: AppLocalizations.localizationsDelegates,
+  supportedLocales: AppLocalizations.supportedLocales,
+  home: const SettingsScreen(budgetId: _budgetId),
+);
 
 void main() {
   setUpAll(() {

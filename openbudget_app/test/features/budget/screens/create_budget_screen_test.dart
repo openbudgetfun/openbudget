@@ -14,13 +14,13 @@ void main() {
   });
 
   Widget buildSubject() => ProviderScope(
-      child: MaterialApp(
-        theme: OpenBudgetTheme.light,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: const CreateBudgetScreen(),
-      ),
-    );
+    child: MaterialApp(
+      theme: OpenBudgetTheme.light,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: const CreateBudgetScreen(),
+    ),
+  );
 
   group('CreateBudgetScreen', () {
     testWidgets('renders welcome onboarding layout', (tester) async {

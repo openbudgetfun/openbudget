@@ -412,7 +412,8 @@ class AddIncomeScreen extends HookConsumerWidget {
     );
   }
 
-  static String _formatDate(DateTime date) => '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+  static String _formatDate(DateTime date) =>
+      '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
 }
 
 class _ModeChip extends HookWidget {

@@ -35,56 +35,56 @@ final _budgetUuid = UuidValue.fromString(_budgetId);
 final _ownerUuid = UuidValue.fromString('00000000-0000-0000-0000-000000000712');
 
 Budget _makeBudget({String? displayCurrencyCode}) => Budget(
-    id: _budgetUuid,
-    name: 'FX Plan',
-    currencyCode: 'USD',
-    displayCurrencyCode: displayCurrencyCode,
-    ownerId: _ownerUuid,
-  );
+  id: _budgetUuid,
+  name: 'FX Plan',
+  currencyCode: 'USD',
+  displayCurrencyCode: displayCurrencyCode,
+  ownerId: _ownerUuid,
+);
 
 List<Account> _makeAccounts() => [
-    Account(
-      id: UuidValue.fromString('00000000-0000-0000-0000-000000000713'),
-      name: 'USD Checking',
-      accountType: 'checking',
-      balanceCents: 10000,
-      currencyCode: 'USD',
-      budgetId: _budgetUuid,
-      onBudget: true,
-      sortOrder: 0,
-      isClosed: false,
-    ),
-    Account(
-      id: UuidValue.fromString('00000000-0000-0000-0000-000000000714'),
-      name: 'EUR Savings',
-      accountType: 'savings',
-      balanceCents: 10000,
-      currencyCode: 'EUR',
-      budgetId: _budgetUuid,
-      onBudget: true,
-      sortOrder: 1,
-      isClosed: false,
-    ),
-  ];
+  Account(
+    id: UuidValue.fromString('00000000-0000-0000-0000-000000000713'),
+    name: 'USD Checking',
+    accountType: 'checking',
+    balanceCents: 10000,
+    currencyCode: 'USD',
+    budgetId: _budgetUuid,
+    onBudget: true,
+    sortOrder: 0,
+    isClosed: false,
+  ),
+  Account(
+    id: UuidValue.fromString('00000000-0000-0000-0000-000000000714'),
+    name: 'EUR Savings',
+    accountType: 'savings',
+    balanceCents: 10000,
+    currencyCode: 'EUR',
+    budgetId: _budgetUuid,
+    onBudget: true,
+    sortOrder: 1,
+    isClosed: false,
+  ),
+];
 
 BudgetSummary _makeSummary(Budget budget) => BudgetSummary(
-    budget: budget,
-    categories: const [],
-    totalIncomeCents: 10000,
-    totalBudgetedCents: 0,
-    readyToAssignCents: 10000,
-    year: 2026,
-    month: 2,
-  );
+  budget: budget,
+  categories: const [],
+  totalIncomeCents: 10000,
+  totalBudgetedCents: 0,
+  readyToAssignCents: 10000,
+  year: 2026,
+  month: 2,
+);
 
 SpendingReport _makeReport() => const SpendingReport(
-    totalIncome: 800000,
-    totalExpenses: 222000,
-    netIncome: 578000,
-    transactionCount: 9,
-    categorySpending: {'Rent': 120000},
-    currencyCode: 'USD',
-  );
+  totalIncome: 800000,
+  totalExpenses: 222000,
+  netIncome: 578000,
+  transactionCount: 9,
+  categorySpending: {'Rent': 120000},
+  currencyCode: 'USD',
+);
 
 NetWorthData _makeNetWorthData(List<Account> accounts) {
   final usd = accounts.firstWhere((account) => account.currencyCode == 'USD');
@@ -125,7 +125,10 @@ void main() {
 
     final container = ProviderContainer(
       overrides: [
-        budgetDetailProvider.overrideWith((ref, id) async => _makeBudget(displayCurrencyCode: displayCurrencyOverride[id])),
+        budgetDetailProvider.overrideWith(
+          (ref, id) async =>
+              _makeBudget(displayCurrencyCode: displayCurrencyOverride[id]),
+        ),
         updateDisplayCurrencyProvider.overrideWith(
           (ref) =>
               ({

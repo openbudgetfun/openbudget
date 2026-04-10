@@ -185,61 +185,31 @@ class _FxRateSnapshotImpl extends FxRateSnapshot {
 class FxRateSnapshotUpdateTable extends _i1.UpdateTable<FxRateSnapshotTable> {
   FxRateSnapshotUpdateTable(super.table);
 
-  _i1.ColumnValue<String, String> provider(String value) => _i1.ColumnValue(
-    table.provider,
-    value,
-  );
+  _i1.ColumnValue<String, String> provider(String value) =>
+      _i1.ColumnValue(table.provider, value);
 
   _i1.ColumnValue<String, String> baseCurrencyCode(String value) =>
-      _i1.ColumnValue(
-        table.baseCurrencyCode,
-        value,
-      );
+      _i1.ColumnValue(table.baseCurrencyCode, value);
 
   _i1.ColumnValue<DateTime, DateTime> fetchedAt(DateTime value) =>
-      _i1.ColumnValue(
-        table.fetchedAt,
-        value,
-      );
+      _i1.ColumnValue(table.fetchedAt, value);
 
-  _i1.ColumnValue<bool, bool> isLatest(bool value) => _i1.ColumnValue(
-    table.isLatest,
-    value,
-  );
+  _i1.ColumnValue<bool, bool> isLatest(bool value) =>
+      _i1.ColumnValue(table.isLatest, value);
 
   _i1.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
-      _i1.ColumnValue(
-        table.createdAt,
-        value,
-      );
+      _i1.ColumnValue(table.createdAt, value);
 }
 
 class FxRateSnapshotTable extends _i1.Table<_i1.UuidValue?> {
   FxRateSnapshotTable({super.tableRelation})
     : super(tableName: 'fx_rate_snapshot') {
     updateTable = FxRateSnapshotUpdateTable(this);
-    provider = _i1.ColumnString(
-      'provider',
-      this,
-    );
-    baseCurrencyCode = _i1.ColumnString(
-      'baseCurrencyCode',
-      this,
-    );
-    fetchedAt = _i1.ColumnDateTime(
-      'fetchedAt',
-      this,
-    );
-    isLatest = _i1.ColumnBool(
-      'isLatest',
-      this,
-      hasDefault: true,
-    );
-    createdAt = _i1.ColumnDateTime(
-      'createdAt',
-      this,
-      hasDefault: true,
-    );
+    provider = _i1.ColumnString('provider', this);
+    baseCurrencyCode = _i1.ColumnString('baseCurrencyCode', this);
+    fetchedAt = _i1.ColumnDateTime('fetchedAt', this);
+    isLatest = _i1.ColumnBool('isLatest', this, hasDefault: true);
+    createdAt = _i1.ColumnDateTime('createdAt', this, hasDefault: true);
   }
 
   late final FxRateSnapshotUpdateTable updateTable;
@@ -432,10 +402,7 @@ class FxRateSnapshotRepository {
     FxRateSnapshot row, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.insertRow<FxRateSnapshot>(
-      row,
-      transaction: transaction,
-    );
+    return session.db.insertRow<FxRateSnapshot>(row, transaction: transaction);
   }
 
   /// Updates all [FxRateSnapshot]s in the list and returns the updated rows. If
@@ -520,10 +487,7 @@ class FxRateSnapshotRepository {
     List<FxRateSnapshot> rows, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.delete<FxRateSnapshot>(
-      rows,
-      transaction: transaction,
-    );
+    return session.db.delete<FxRateSnapshot>(rows, transaction: transaction);
   }
 
   /// Deletes a single [FxRateSnapshot].
@@ -532,10 +496,7 @@ class FxRateSnapshotRepository {
     FxRateSnapshot row, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.deleteRow<FxRateSnapshot>(
-      row,
-      transaction: transaction,
-    );
+    return session.db.deleteRow<FxRateSnapshot>(row, transaction: transaction);
   }
 
   /// Deletes all rows matching the [where] expression.

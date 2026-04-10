@@ -354,16 +354,16 @@ class _OpenBudgetMark extends HookConsumerWidget {
         appIconStyle.previewAssetPathFor(theme.brightness),
         fit: BoxFit.contain,
         errorBuilder: (context, error, stackTrace) => DecoratedBox(
-            decoration: BoxDecoration(
-              color: fallbackColor.withAlpha(22),
-              borderRadius: BorderRadius.circular(RadiusTokens.md),
-            ),
-            child: Icon(
-              Icons.account_balance_wallet_outlined,
-              color: fallbackColor,
-              size: 44,
-            ),
+          decoration: BoxDecoration(
+            color: fallbackColor.withAlpha(22),
+            borderRadius: BorderRadius.circular(RadiusTokens.md),
           ),
+          child: Icon(
+            Icons.account_balance_wallet_outlined,
+            color: fallbackColor,
+            size: 44,
+          ),
+        ),
       ),
     );
   }
@@ -382,38 +382,33 @@ class _LoginBackdrop extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Stack(
-      children: [
-        Positioned.fill(
-          child: DecoratedBox(
-            decoration: BoxDecoration(color: backgroundColor),
+    children: [
+      Positioned.fill(
+        child: DecoratedBox(decoration: BoxDecoration(color: backgroundColor)),
+      ),
+      Positioned(
+        top: -140,
+        left: -90,
+        child: Container(
+          width: 280,
+          height: 280,
+          decoration: BoxDecoration(color: accentColor, shape: BoxShape.circle),
+        ),
+      ),
+      Positioned(
+        bottom: -110,
+        right: -80,
+        child: Container(
+          width: 250,
+          height: 250,
+          decoration: BoxDecoration(
+            color: secondaryAccentColor,
+            shape: BoxShape.circle,
           ),
         ),
-        Positioned(
-          top: -140,
-          left: -90,
-          child: Container(
-            width: 280,
-            height: 280,
-            decoration: BoxDecoration(
-              color: accentColor,
-              shape: BoxShape.circle,
-            ),
-          ),
-        ),
-        Positioned(
-          bottom: -110,
-          right: -80,
-          child: Container(
-            width: 250,
-            height: 250,
-            decoration: BoxDecoration(
-              color: secondaryAccentColor,
-              shape: BoxShape.circle,
-            ),
-          ),
-        ),
-      ],
-    );
+      ),
+    ],
+  );
 }
 
 class _LoginTextField extends HookWidget {

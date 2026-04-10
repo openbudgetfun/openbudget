@@ -9,7 +9,8 @@ class PlaidEndpoint extends Endpoint {
   bool get requireLogin => true;
 
   /// Creates a short-lived link token for starting Plaid Link in the client.
-  Future<String> createLinkToken(Session session, UuidValue budgetId) async => PlaidService.createLinkToken(session, budgetId: budgetId);
+  Future<String> createLinkToken(Session session, UuidValue budgetId) async =>
+      PlaidService.createLinkToken(session, budgetId: budgetId);
 
   /// Exchanges a public token and imports linked bank accounts into OpenBudget.
   Future<List<Account>> exchangePublicToken(

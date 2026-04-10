@@ -188,61 +188,30 @@ class BudgetTemplateUpdateTable extends _i1.UpdateTable<BudgetTemplateTable> {
   BudgetTemplateUpdateTable(super.table);
 
   _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> budgetId(_i1.UuidValue value) =>
-      _i1.ColumnValue(
-        table.budgetId,
-        value,
-      );
+      _i1.ColumnValue(table.budgetId, value);
 
-  _i1.ColumnValue<String, String> name(String value) => _i1.ColumnValue(
-    table.name,
-    value,
-  );
+  _i1.ColumnValue<String, String> name(String value) =>
+      _i1.ColumnValue(table.name, value);
 
   _i1.ColumnValue<String, String> allocationData(String value) =>
-      _i1.ColumnValue(
-        table.allocationData,
-        value,
-      );
+      _i1.ColumnValue(table.allocationData, value);
 
   _i1.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
-      _i1.ColumnValue(
-        table.createdAt,
-        value,
-      );
+      _i1.ColumnValue(table.createdAt, value);
 
   _i1.ColumnValue<DateTime, DateTime> updatedAt(DateTime value) =>
-      _i1.ColumnValue(
-        table.updatedAt,
-        value,
-      );
+      _i1.ColumnValue(table.updatedAt, value);
 }
 
 class BudgetTemplateTable extends _i1.Table<_i1.UuidValue?> {
   BudgetTemplateTable({super.tableRelation})
     : super(tableName: 'budget_template') {
     updateTable = BudgetTemplateUpdateTable(this);
-    budgetId = _i1.ColumnUuid(
-      'budgetId',
-      this,
-    );
-    name = _i1.ColumnString(
-      'name',
-      this,
-    );
-    allocationData = _i1.ColumnString(
-      'allocationData',
-      this,
-    );
-    createdAt = _i1.ColumnDateTime(
-      'createdAt',
-      this,
-      hasDefault: true,
-    );
-    updatedAt = _i1.ColumnDateTime(
-      'updatedAt',
-      this,
-      hasDefault: true,
-    );
+    budgetId = _i1.ColumnUuid('budgetId', this);
+    name = _i1.ColumnString('name', this);
+    allocationData = _i1.ColumnString('allocationData', this);
+    createdAt = _i1.ColumnDateTime('createdAt', this, hasDefault: true);
+    updatedAt = _i1.ColumnDateTime('updatedAt', this, hasDefault: true);
   }
 
   late final BudgetTemplateUpdateTable updateTable;
@@ -437,10 +406,7 @@ class BudgetTemplateRepository {
     BudgetTemplate row, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.insertRow<BudgetTemplate>(
-      row,
-      transaction: transaction,
-    );
+    return session.db.insertRow<BudgetTemplate>(row, transaction: transaction);
   }
 
   /// Updates all [BudgetTemplate]s in the list and returns the updated rows. If
@@ -525,10 +491,7 @@ class BudgetTemplateRepository {
     List<BudgetTemplate> rows, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.delete<BudgetTemplate>(
-      rows,
-      transaction: transaction,
-    );
+    return session.db.delete<BudgetTemplate>(rows, transaction: transaction);
   }
 
   /// Deletes a single [BudgetTemplate].
@@ -537,10 +500,7 @@ class BudgetTemplateRepository {
     BudgetTemplate row, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.deleteRow<BudgetTemplate>(
-      row,
-      transaction: transaction,
-    );
+    return session.db.deleteRow<BudgetTemplate>(row, transaction: transaction);
   }
 
   /// Deletes all rows matching the [where] expression.

@@ -537,14 +537,14 @@ class _SectionLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-      padding: const EdgeInsets.only(bottom: SpacingTokens.xs),
-      child: Text(
-        text,
-        style: Theme.of(
-          context,
-        ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
-      ),
-    );
+    padding: const EdgeInsets.only(bottom: SpacingTokens.xs),
+    child: Text(
+      text,
+      style: Theme.of(
+        context,
+      ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+    ),
+  );
 }
 
 String _formatInitialAmount({required int cents, required int decimals}) {

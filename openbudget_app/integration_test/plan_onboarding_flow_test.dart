@@ -52,11 +52,13 @@ void main() {
     final tester = $.tester;
     final container = ProviderContainer(
       overrides: [
-        budgetMonthlySummaryProvider.overrideWith((ref, _) async => _makeSummary(
+        budgetMonthlySummaryProvider.overrideWith(
+          (ref, _) async => _makeSummary(
             totalIncomeCents: 0,
             totalBudgetedCents: 0,
             readyToAssignCents: 0,
-          )),
+          ),
+        ),
         budgetGoalsProvider.overrideWith((ref, _) async => {}),
         creditCardPaymentsProvider.overrideWith((ref, _) async => const []),
         recurringDueCountProvider.overrideWith((ref, _) async => 0),
@@ -107,11 +109,13 @@ void main() {
       final tester = $.tester;
       final container = ProviderContainer(
         overrides: [
-          budgetMonthlySummaryProvider.overrideWith((ref, _) async => _makeSummary(
+          budgetMonthlySummaryProvider.overrideWith(
+            (ref, _) async => _makeSummary(
               totalIncomeCents: 5000000,
               totalBudgetedCents: 0,
               readyToAssignCents: 5000000,
-            )),
+            ),
+          ),
           budgetGoalsProvider.overrideWith((ref, _) async => {}),
           creditCardPaymentsProvider.overrideWith((ref, _) async => const []),
           recurringDueCountProvider.overrideWith((ref, _) async => 0),

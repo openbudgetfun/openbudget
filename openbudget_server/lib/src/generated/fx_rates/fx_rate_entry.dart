@@ -172,48 +172,25 @@ class FxRateEntryUpdateTable extends _i1.UpdateTable<FxRateEntryTable> {
 
   _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> snapshotId(
     _i1.UuidValue value,
-  ) => _i1.ColumnValue(
-    table.snapshotId,
-    value,
-  );
+  ) => _i1.ColumnValue(table.snapshotId, value);
 
-  _i1.ColumnValue<String, String> currencyCode(String value) => _i1.ColumnValue(
-    table.currencyCode,
-    value,
-  );
+  _i1.ColumnValue<String, String> currencyCode(String value) =>
+      _i1.ColumnValue(table.currencyCode, value);
 
-  _i1.ColumnValue<double, double> rate(double value) => _i1.ColumnValue(
-    table.rate,
-    value,
-  );
+  _i1.ColumnValue<double, double> rate(double value) =>
+      _i1.ColumnValue(table.rate, value);
 
   _i1.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
-      _i1.ColumnValue(
-        table.createdAt,
-        value,
-      );
+      _i1.ColumnValue(table.createdAt, value);
 }
 
 class FxRateEntryTable extends _i1.Table<_i1.UuidValue?> {
   FxRateEntryTable({super.tableRelation}) : super(tableName: 'fx_rate_entry') {
     updateTable = FxRateEntryUpdateTable(this);
-    snapshotId = _i1.ColumnUuid(
-      'snapshotId',
-      this,
-    );
-    currencyCode = _i1.ColumnString(
-      'currencyCode',
-      this,
-    );
-    rate = _i1.ColumnDouble(
-      'rate',
-      this,
-    );
-    createdAt = _i1.ColumnDateTime(
-      'createdAt',
-      this,
-      hasDefault: true,
-    );
+    snapshotId = _i1.ColumnUuid('snapshotId', this);
+    currencyCode = _i1.ColumnString('currencyCode', this);
+    rate = _i1.ColumnDouble('rate', this);
+    createdAt = _i1.ColumnDateTime('createdAt', this, hasDefault: true);
   }
 
   late final FxRateEntryUpdateTable updateTable;
@@ -403,10 +380,7 @@ class FxRateEntryRepository {
     FxRateEntry row, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.insertRow<FxRateEntry>(
-      row,
-      transaction: transaction,
-    );
+    return session.db.insertRow<FxRateEntry>(row, transaction: transaction);
   }
 
   /// Updates all [FxRateEntry]s in the list and returns the updated rows. If
@@ -491,10 +465,7 @@ class FxRateEntryRepository {
     List<FxRateEntry> rows, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.delete<FxRateEntry>(
-      rows,
-      transaction: transaction,
-    );
+    return session.db.delete<FxRateEntry>(rows, transaction: transaction);
   }
 
   /// Deletes a single [FxRateEntry].
@@ -503,10 +474,7 @@ class FxRateEntryRepository {
     FxRateEntry row, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.deleteRow<FxRateEntry>(
-      row,
-      transaction: transaction,
-    );
+    return session.db.deleteRow<FxRateEntry>(row, transaction: transaction);
   }
 
   /// Deletes all rows matching the [where] expression.

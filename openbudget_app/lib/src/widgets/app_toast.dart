@@ -117,37 +117,35 @@ class _ToastStyleConfig {
     required ThemeData theme,
     required AppToastVariant variant,
   }) => switch (variant) {
-      AppToastVariant.info => _ToastStyleConfig(
-        icon: Icons.info_rounded,
-        backgroundColor: OpenBudgetPalette.bgInfoFor(theme).withAlpha(220),
-        borderColor: OpenBudgetPalette.bgBrandFor(theme).withAlpha(150),
-        iconColor: OpenBudgetPalette.bgBrandFor(theme),
-        textColor: OpenBudgetPalette.fgPrimaryFor(theme),
-      ),
-      AppToastVariant.success => _ToastStyleConfig(
-        icon: Icons.check_circle_rounded,
-        backgroundColor: OpenBudgetPalette.bgTagSuccessFor(
-          theme,
-        ).withAlpha(230),
-        borderColor: OpenBudgetPalette.fgSuccessFor(theme).withAlpha(160),
-        iconColor: OpenBudgetPalette.fgSuccessFor(theme),
-        textColor: OpenBudgetPalette.fgPrimaryFor(theme),
-      ),
-      AppToastVariant.warning => _ToastStyleConfig(
-        icon: Icons.warning_amber_rounded,
-        backgroundColor: OpenBudgetPalette.bgWarningFor(theme).withAlpha(50),
-        borderColor: OpenBudgetPalette.bgWarningFor(theme).withAlpha(190),
-        iconColor: OpenBudgetPalette.fgTagWarningFor(theme),
-        textColor: OpenBudgetPalette.fgPrimaryFor(theme),
-      ),
-      AppToastVariant.error => _ToastStyleConfig(
-        icon: Icons.error_rounded,
-        backgroundColor: OpenBudgetPalette.bgTagErrorFor(theme).withAlpha(220),
-        borderColor: OpenBudgetPalette.fgErrorFor(theme).withAlpha(160),
-        iconColor: OpenBudgetPalette.fgErrorFor(theme),
-        textColor: OpenBudgetPalette.fgPrimaryFor(theme),
-      ),
-    };
+    AppToastVariant.info => _ToastStyleConfig(
+      icon: Icons.info_rounded,
+      backgroundColor: OpenBudgetPalette.bgInfoFor(theme).withAlpha(220),
+      borderColor: OpenBudgetPalette.bgBrandFor(theme).withAlpha(150),
+      iconColor: OpenBudgetPalette.bgBrandFor(theme),
+      textColor: OpenBudgetPalette.fgPrimaryFor(theme),
+    ),
+    AppToastVariant.success => _ToastStyleConfig(
+      icon: Icons.check_circle_rounded,
+      backgroundColor: OpenBudgetPalette.bgTagSuccessFor(theme).withAlpha(230),
+      borderColor: OpenBudgetPalette.fgSuccessFor(theme).withAlpha(160),
+      iconColor: OpenBudgetPalette.fgSuccessFor(theme),
+      textColor: OpenBudgetPalette.fgPrimaryFor(theme),
+    ),
+    AppToastVariant.warning => _ToastStyleConfig(
+      icon: Icons.warning_amber_rounded,
+      backgroundColor: OpenBudgetPalette.bgWarningFor(theme).withAlpha(50),
+      borderColor: OpenBudgetPalette.bgWarningFor(theme).withAlpha(190),
+      iconColor: OpenBudgetPalette.fgTagWarningFor(theme),
+      textColor: OpenBudgetPalette.fgPrimaryFor(theme),
+    ),
+    AppToastVariant.error => _ToastStyleConfig(
+      icon: Icons.error_rounded,
+      backgroundColor: OpenBudgetPalette.bgTagErrorFor(theme).withAlpha(220),
+      borderColor: OpenBudgetPalette.fgErrorFor(theme).withAlpha(160),
+      iconColor: OpenBudgetPalette.fgErrorFor(theme),
+      textColor: OpenBudgetPalette.fgPrimaryFor(theme),
+    ),
+  };
 
   final IconData icon;
   final Color backgroundColor;

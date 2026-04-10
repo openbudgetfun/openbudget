@@ -289,15 +289,15 @@ class _SettingsCard extends HookWidget {
 
   @override
   Widget build(BuildContext context) => DecoratedBox(
-      decoration: BoxDecoration(
-        color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
-        borderRadius: BorderRadius.circular(RadiusTokens.md),
-        border: Border.all(
-          color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
-        ),
+    decoration: BoxDecoration(
+      color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
+      borderRadius: BorderRadius.circular(RadiusTokens.md),
+      border: Border.all(
+        color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
       ),
-      child: child,
-    );
+    ),
+    child: child,
+  );
 }
 
 class _SectionLabel extends HookWidget {
@@ -338,19 +338,19 @@ class _BalanceStyleTile extends HookWidget {
 
   @override
   Widget build(BuildContext context) => ListTile(
-      onTap: onTap,
-      leading: selected
-          ? Icon(
-              Icons.check_rounded,
-              color: OpenBudgetPalette.bgBrandFor(Theme.of(context)),
-            )
-          : const SizedBox(width: 24),
-      title: Text(label),
-      subtitle: Padding(
-        padding: const EdgeInsets.only(top: SpacingTokens.xs),
-        child: preview,
-      ),
-    );
+    onTap: onTap,
+    leading: selected
+        ? Icon(
+            Icons.check_rounded,
+            color: OpenBudgetPalette.bgBrandFor(Theme.of(context)),
+          )
+        : const SizedBox(width: 24),
+    title: Text(label),
+    subtitle: Padding(
+      padding: const EdgeInsets.only(top: SpacingTokens.xs),
+      child: preview,
+    ),
+  );
 }
 
 class _BalanceStylePreview extends HookWidget {
@@ -360,27 +360,27 @@ class _BalanceStylePreview extends HookWidget {
 
   @override
   Widget build(BuildContext context) => Wrap(
-      spacing: SpacingTokens.xs,
-      runSpacing: SpacingTokens.xs,
-      children: [
-        _SampleBalancePill(
-          label: r'-$10.00',
-          color: OpenBudgetPalette.bgTagErrorFor(Theme.of(context)),
-          textColor: OpenBudgetPalette.fgTagErrorFor(Theme.of(context)),
-          emphasize: style == BalanceStyle.differentiateWithoutColor,
-        ),
-        _SampleBalancePill(
-          label: r'$10.00',
-          color: OpenBudgetPalette.bgWarningFor(Theme.of(context)),
-          textColor: OpenBudgetPalette.fgTagWarningFor(Theme.of(context)),
-        ),
-        _SampleBalancePill(
-          label: r'$10.00',
-          color: OpenBudgetPalette.bgTagSuccessFor(Theme.of(context)),
-          textColor: OpenBudgetPalette.fgTagSuccessFor(Theme.of(context)),
-        ),
-      ],
-    );
+    spacing: SpacingTokens.xs,
+    runSpacing: SpacingTokens.xs,
+    children: [
+      _SampleBalancePill(
+        label: r'-$10.00',
+        color: OpenBudgetPalette.bgTagErrorFor(Theme.of(context)),
+        textColor: OpenBudgetPalette.fgTagErrorFor(Theme.of(context)),
+        emphasize: style == BalanceStyle.differentiateWithoutColor,
+      ),
+      _SampleBalancePill(
+        label: r'$10.00',
+        color: OpenBudgetPalette.bgWarningFor(Theme.of(context)),
+        textColor: OpenBudgetPalette.fgTagWarningFor(Theme.of(context)),
+      ),
+      _SampleBalancePill(
+        label: r'$10.00',
+        color: OpenBudgetPalette.bgTagSuccessFor(Theme.of(context)),
+        textColor: OpenBudgetPalette.fgTagSuccessFor(Theme.of(context)),
+      ),
+    ],
+  );
 }
 
 class _ValuePickerTile extends HookWidget {
@@ -429,13 +429,13 @@ class _ToggleTile extends HookWidget {
 
   @override
   Widget build(BuildContext context) => SwitchListTile(
-      value: value,
-      onChanged: onChanged,
-      title: Text(label),
-      subtitle: Text(subtitle),
-      activeThumbColor: OpenBudgetPalette.bgBrandFor(Theme.of(context)),
-      contentPadding: const EdgeInsets.symmetric(horizontal: SpacingTokens.sm),
-    );
+    value: value,
+    onChanged: onChanged,
+    title: Text(label),
+    subtitle: Text(subtitle),
+    activeThumbColor: OpenBudgetPalette.bgBrandFor(Theme.of(context)),
+    contentPadding: const EdgeInsets.symmetric(horizontal: SpacingTokens.sm),
+  );
 }
 
 class _SampleBalancePill extends HookWidget {
@@ -453,24 +453,24 @@ class _SampleBalancePill extends HookWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(999),
-        border: emphasize
-            ? Border.all(
-                color: OpenBudgetPalette.fgErrorFor(Theme.of(context)),
-                width: 1.5,
-              )
-            : null,
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+    decoration: BoxDecoration(
+      color: color,
+      borderRadius: BorderRadius.circular(999),
+      border: emphasize
+          ? Border.all(
+              color: OpenBudgetPalette.fgErrorFor(Theme.of(context)),
+              width: 1.5,
+            )
+          : null,
+    ),
+    child: Text(
+      label,
+      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+        color: textColor,
+        fontWeight: FontWeight.w700,
+        decoration: emphasize ? TextDecoration.underline : null,
       ),
-      child: Text(
-        label,
-        style: Theme.of(context).textTheme.labelMedium?.copyWith(
-          color: textColor,
-          fontWeight: FontWeight.w700,
-          decoration: emphasize ? TextDecoration.underline : null,
-        ),
-      ),
-    );
+    ),
+  );
 }

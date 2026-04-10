@@ -571,22 +571,22 @@ class _SummaryColumn extends HookWidget {
 
   @override
   Widget build(BuildContext context) => Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          label,
-          style: theme.textTheme.labelSmall?.copyWith(
-            color: OpenBudgetPalette.fgSecondaryFor(theme),
-          ),
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Text(
+        label,
+        style: theme.textTheme.labelSmall?.copyWith(
+          color: OpenBudgetPalette.fgSecondaryFor(theme),
         ),
-        const SizedBox(height: 2),
-        Text(
-          value,
-          style: theme.textTheme.bodySmall?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: valueColor,
-          ),
+      ),
+      const SizedBox(height: 2),
+      Text(
+        value,
+        style: theme.textTheme.bodySmall?.copyWith(
+          fontWeight: FontWeight.w600,
+          color: valueColor,
         ),
-      ],
-    );
+      ),
+    ],
+  );
 }

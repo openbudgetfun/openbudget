@@ -260,7 +260,8 @@ class ImportTransactionsScreen extends HookConsumerWidget {
     }
   }
 
-  static String _formatDate(DateTime date) => '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+  static String _formatDate(DateTime date) =>
+      '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
 
   static String _formatAmount(int cents, CurrencyCode currency) {
     final sign = cents < 0 ? '-' : '';

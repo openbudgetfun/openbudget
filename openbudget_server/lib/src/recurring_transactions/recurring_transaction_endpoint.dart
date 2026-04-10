@@ -47,19 +47,19 @@ class RecurringTransactionEndpoint extends Endpoint {
     UuidValue budgetId, {
     bool? activeOnly,
   }) async => RecurringTransactionService.listForBudget(
-      session,
-      budgetId: budgetId,
-      activeOnly: activeOnly,
-    );
+    session,
+    budgetId: budgetId,
+    activeOnly: activeOnly,
+  );
 
   /// Gets a recurring transaction by ID.
   Future<RecurringTransaction> get(
     Session session,
     UuidValue recurringTransactionId,
   ) async => RecurringTransactionService.getById(
-      session,
-      recurringTransactionId: recurringTransactionId,
-    );
+    session,
+    recurringTransactionId: recurringTransactionId,
+  );
 
   /// Updates a recurring transaction.
   Future<RecurringTransaction> update(
@@ -132,5 +132,6 @@ class RecurringTransactionEndpoint extends Endpoint {
   }
 
   /// Returns the count of active recurring transactions that are currently due.
-  Future<int> countDue(Session session, UuidValue budgetId) async => RecurringTransactionService.countDue(session, budgetId: budgetId);
+  Future<int> countDue(Session session, UuidValue budgetId) async =>
+      RecurringTransactionService.countDue(session, budgetId: budgetId);
 }

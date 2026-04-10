@@ -205,13 +205,13 @@ class PlaidService {
     required _PlaidCredentials credentials,
     required String accessToken,
   }) async => _postJson(
-      uri: credentials.baseUri.replace(path: '/accounts/get'),
-      payload: {
-        'client_id': credentials.clientId,
-        'secret': credentials.secret,
-        'access_token': accessToken,
-      },
-    );
+    uri: credentials.baseUri.replace(path: '/accounts/get'),
+    payload: {
+      'client_id': credentials.clientId,
+      'secret': credentials.secret,
+      'access_token': accessToken,
+    },
+  );
 
   static Future<List<Account>> _importAccounts(
     Session session, {

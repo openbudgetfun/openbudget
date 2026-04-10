@@ -193,59 +193,30 @@ class InstitutionLocationUpdateTable
 
   _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> institutionId(
     _i1.UuidValue value,
-  ) => _i1.ColumnValue(
-    table.institutionId,
-    value,
-  );
+  ) => _i1.ColumnValue(table.institutionId, value);
 
-  _i1.ColumnValue<String, String> locationCode(String value) => _i1.ColumnValue(
-    table.locationCode,
-    value,
-  );
+  _i1.ColumnValue<String, String> locationCode(String value) =>
+      _i1.ColumnValue(table.locationCode, value);
 
-  _i1.ColumnValue<bool, bool> isPopular(bool value) => _i1.ColumnValue(
-    table.isPopular,
-    value,
-  );
+  _i1.ColumnValue<bool, bool> isPopular(bool value) =>
+      _i1.ColumnValue(table.isPopular, value);
 
-  _i1.ColumnValue<int, int> popularityRank(int? value) => _i1.ColumnValue(
-    table.popularityRank,
-    value,
-  );
+  _i1.ColumnValue<int, int> popularityRank(int? value) =>
+      _i1.ColumnValue(table.popularityRank, value);
 
   _i1.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
-      _i1.ColumnValue(
-        table.createdAt,
-        value,
-      );
+      _i1.ColumnValue(table.createdAt, value);
 }
 
 class InstitutionLocationTable extends _i1.Table<_i1.UuidValue?> {
   InstitutionLocationTable({super.tableRelation})
     : super(tableName: 'institution_location') {
     updateTable = InstitutionLocationUpdateTable(this);
-    institutionId = _i1.ColumnUuid(
-      'institutionId',
-      this,
-    );
-    locationCode = _i1.ColumnString(
-      'locationCode',
-      this,
-    );
-    isPopular = _i1.ColumnBool(
-      'isPopular',
-      this,
-      hasDefault: true,
-    );
-    popularityRank = _i1.ColumnInt(
-      'popularityRank',
-      this,
-    );
-    createdAt = _i1.ColumnDateTime(
-      'createdAt',
-      this,
-      hasDefault: true,
-    );
+    institutionId = _i1.ColumnUuid('institutionId', this);
+    locationCode = _i1.ColumnString('locationCode', this);
+    isPopular = _i1.ColumnBool('isPopular', this, hasDefault: true);
+    popularityRank = _i1.ColumnInt('popularityRank', this);
+    createdAt = _i1.ColumnDateTime('createdAt', this, hasDefault: true);
   }
 
   late final InstitutionLocationUpdateTable updateTable;

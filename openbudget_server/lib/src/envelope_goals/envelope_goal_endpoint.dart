@@ -38,13 +38,15 @@ class EnvelopeGoalEndpoint extends Endpoint {
   Future<EnvelopeGoal?> getForEnvelope(
     Session session,
     UuidValue envelopeId,
-  ) async => EnvelopeGoalService.getForEnvelope(session, envelopeId: envelopeId);
+  ) async =>
+      EnvelopeGoalService.getForEnvelope(session, envelopeId: envelopeId);
 
   /// Lists all goals for a set of envelope IDs.
   Future<List<EnvelopeGoal>> listForEnvelopes(
     Session session,
     List<UuidValue> envelopeIds,
-  ) async => EnvelopeGoalService.listForBudget(session, envelopeIds: envelopeIds);
+  ) async =>
+      EnvelopeGoalService.listForBudget(session, envelopeIds: envelopeIds);
 
   /// Deletes a goal by ID.
   Future<EnvelopeGoal> delete(Session session, UuidValue goalId) async {

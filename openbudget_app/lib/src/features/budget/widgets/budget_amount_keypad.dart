@@ -13,16 +13,16 @@ Future<String?> showBudgetAmountKeypadSheet({
   String? title,
   bool allowNegative = true,
 }) => showModalBottomSheet<String>(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: OpenBudgetPalette.transparentFor(Theme.of(context)),
-    builder: (sheetContext) => _BudgetAmountSheet(
-      currencyCode: currencyCode,
-      initialInput: initialInput,
-      title: title,
-      allowNegative: allowNegative,
-    ),
-  );
+  context: context,
+  isScrollControlled: true,
+  backgroundColor: OpenBudgetPalette.transparentFor(Theme.of(context)),
+  builder: (sheetContext) => _BudgetAmountSheet(
+    currencyCode: currencyCode,
+    initialInput: initialInput,
+    title: title,
+    allowNegative: allowNegative,
+  ),
+);
 
 class BudgetAmountField extends StatelessWidget {
   const BudgetAmountField({
@@ -99,37 +99,35 @@ class BudgetAmountKeypad extends StatelessWidget {
       Widget? child,
       Key? buttonKey,
     }) => Expanded(
-        child: Padding(
-          padding: const EdgeInsets.all(SpacingTokens.xs),
-          child: FilledButton(
-            key: buttonKey,
-            onPressed: onPressed,
-            style: FilledButton.styleFrom(
-              backgroundColor: primary
-                  ? OpenBudgetPalette.bgBrandFor(Theme.of(context))
-                  : OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
-              foregroundColor: primary
-                  ? OpenBudgetPalette.fgOnBrandFor(Theme.of(context))
-                  : accent
-                  ? OpenBudgetPalette.bgBrandFor(Theme.of(context))
-                  : OpenBudgetPalette.fgPrimaryEmphasisFor(Theme.of(context)),
-              side: primary
-                  ? BorderSide.none
-                  : BorderSide(
-                      color: OpenBudgetPalette.borderSubtleFor(
-                        Theme.of(context),
-                      ),
-                    ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(RadiusTokens.sm),
-              ),
-              minimumSize: const Size.fromHeight(48),
-              elevation: 0,
+      child: Padding(
+        padding: const EdgeInsets.all(SpacingTokens.xs),
+        child: FilledButton(
+          key: buttonKey,
+          onPressed: onPressed,
+          style: FilledButton.styleFrom(
+            backgroundColor: primary
+                ? OpenBudgetPalette.bgBrandFor(Theme.of(context))
+                : OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
+            foregroundColor: primary
+                ? OpenBudgetPalette.fgOnBrandFor(Theme.of(context))
+                : accent
+                ? OpenBudgetPalette.bgBrandFor(Theme.of(context))
+                : OpenBudgetPalette.fgPrimaryEmphasisFor(Theme.of(context)),
+            side: primary
+                ? BorderSide.none
+                : BorderSide(
+                    color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
+                  ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(RadiusTokens.sm),
             ),
-            child: child ?? Text(label),
+            minimumSize: const Size.fromHeight(48),
+            elevation: 0,
           ),
+          child: child ?? Text(label),
         ),
-      );
+      ),
+    );
 
     void appendDigit(String digit) {
       if (inputValue.length >= 9) return;

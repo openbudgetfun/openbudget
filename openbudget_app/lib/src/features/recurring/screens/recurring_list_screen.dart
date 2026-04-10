@@ -150,13 +150,17 @@ class RecurringListScreen extends HookConsumerWidget {
             currencyCodeOf: (item) => item.currencyCode,
             amountCentsOf: (item) => item.amountCents,
           );
-          final filteredItems = items.where((item) => switch (viewFilter.value) {
-              RecurringViewFilter.all => true,
-              RecurringViewFilter.expenses => item.amountCents < 0,
-              RecurringViewFilter.income => item.amountCents > 0,
-              RecurringViewFilter.due =>
-                item.isActive && !item.nextOccurrence.isAfter(now),
-            }).toList();
+          final filteredItems = items
+              .where(
+                (item) => switch (viewFilter.value) {
+                  RecurringViewFilter.all => true,
+                  RecurringViewFilter.expenses => item.amountCents < 0,
+                  RecurringViewFilter.income => item.amountCents > 0,
+                  RecurringViewFilter.due =>
+                    item.isActive && !item.nextOccurrence.isAfter(now),
+                },
+              )
+              .toList();
 
           return RefreshIndicator(
             onRefresh: () async {

@@ -90,22 +90,22 @@ Widget _buildSubject({
   Future<DisplayCurrencyConverter> Function(Ref ref, String budgetId)?
   converterBuilder,
 }) => ProviderScope(
-    overrides: [
-      spendingReportProvider.overrideWith(spendingBuilder),
-      netWorthProvider.overrideWith(
-        netWorthBuilder ?? (ref, _) async => _makeNetWorthData(),
-      ),
-      ageOfMoneyProvider.overrideWith(ageBuilder ?? (ref, _) async => 2),
-      if (converterBuilder != null)
-        displayCurrencyConverterProvider.overrideWith(converterBuilder),
-    ],
-    child: MaterialApp(
-      theme: OpenBudgetTheme.light,
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      home: const ReportsScreen(budgetId: _budgetId),
+  overrides: [
+    spendingReportProvider.overrideWith(spendingBuilder),
+    netWorthProvider.overrideWith(
+      netWorthBuilder ?? (ref, _) async => _makeNetWorthData(),
     ),
-  );
+    ageOfMoneyProvider.overrideWith(ageBuilder ?? (ref, _) async => 2),
+    if (converterBuilder != null)
+      displayCurrencyConverterProvider.overrideWith(converterBuilder),
+  ],
+  child: MaterialApp(
+    theme: OpenBudgetTheme.light,
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
+    home: const ReportsScreen(budgetId: _budgetId),
+  ),
+);
 
 void main() {
   setUpAll(() {

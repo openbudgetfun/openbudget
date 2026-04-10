@@ -336,12 +336,13 @@ class RecurringTransactionService {
   }
 
   /// Calculates the next occurrence based on frequency and current date.
-  static DateTime calculateNextOccurrence(String frequency, DateTime current) => switch (frequency) {
-      'daily' => current.add(const Duration(days: 1)),
-      'weekly' => current.add(const Duration(days: 7)),
-      'biweekly' => current.add(const Duration(days: 14)),
-      'monthly' => DateTime(current.year, current.month + 1, current.day),
-      'yearly' => DateTime(current.year + 1, current.month, current.day),
-      _ => current.add(const Duration(days: 30)),
-    };
+  static DateTime calculateNextOccurrence(String frequency, DateTime current) =>
+      switch (frequency) {
+        'daily' => current.add(const Duration(days: 1)),
+        'weekly' => current.add(const Duration(days: 7)),
+        'biweekly' => current.add(const Duration(days: 14)),
+        'monthly' => DateTime(current.year, current.month + 1, current.day),
+        'yearly' => DateTime(current.year + 1, current.month, current.day),
+        _ => current.add(const Duration(days: 30)),
+      };
 }

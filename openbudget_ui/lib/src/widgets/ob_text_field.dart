@@ -33,19 +33,19 @@ class ObTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => TextField(
-      controller: controller,
-      obscureText: obscureText,
-      keyboardType: keyboardType,
-      autofocus: autofocus,
-      enabled: enabled,
-      onChanged: onChanged,
-      onSubmitted: onSubmitted,
-      decoration: InputDecoration(
-        hintText: hintText,
-        labelText: labelText,
-        prefixText: prefixText,
-        prefixIcon: prefixIcon,
-        suffixIcon: suffixIcon,
-      ),
-    );
+    controller: controller,
+    obscureText: obscureText,
+    keyboardType: keyboardType,
+    autofocus: autofocus,
+    enabled: enabled,
+    onChanged: onChanged,
+    onSubmitted: onSubmitted,
+    decoration: InputDecoration(
+      hintText: hintText,
+      labelText: labelText,
+      prefixText: prefixText,
+      prefixIcon: prefixIcon,
+      suffixIcon: suffixIcon,
+    ),
+  );
 }

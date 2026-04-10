@@ -19,10 +19,10 @@ class ObDropdown<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => DropdownButtonFormField<T>(
-      initialValue: value,
-      items: items,
-      onChanged: onChanged,
-      decoration: InputDecoration(hintText: hintText, labelText: labelText),
-      isExpanded: true,
-    );
+    initialValue: value,
+    items: items,
+    onChanged: onChanged,
+    decoration: InputDecoration(hintText: hintText, labelText: labelText),
+    isExpanded: true,
+  );
 }

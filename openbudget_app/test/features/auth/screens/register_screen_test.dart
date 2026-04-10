@@ -12,13 +12,13 @@ void main() {
   });
 
   Widget buildSubject() => ProviderScope(
-      child: MaterialApp(
-        theme: OpenBudgetTheme.light,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: const RegisterScreen(),
-      ),
-    );
+    child: MaterialApp(
+      theme: OpenBudgetTheme.light,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: const RegisterScreen(),
+    ),
+  );
 
   group('RegisterScreen', () {
     group('step 0 - email', () {

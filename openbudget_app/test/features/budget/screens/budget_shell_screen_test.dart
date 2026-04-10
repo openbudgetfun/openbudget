@@ -21,9 +21,9 @@ void main() {
       routes: [
         StatefulShellRoute.indexedStack(
           builder: (context, state, navigationShell) => BudgetShellScreen(
-              navigationShell: navigationShell,
-              budgetId: budgetId,
-            ),
+            navigationShell: navigationShell,
+            budgetId: budgetId,
+          ),
           branches: [
             StatefulShellBranch(
               routes: [

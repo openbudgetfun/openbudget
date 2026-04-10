@@ -49,15 +49,15 @@ void main() {
   ];
 
   Widget buildSubject({required List<Account> accounts}) => ProviderScope(
-      overrides: [
-        accountListProvider.overrideWith((ref, budgetId) async => accounts),
-      ],
-      child: const MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: CreateTransferScreen(budgetId: screenBudgetId),
-      ),
-    );
+    overrides: [
+      accountListProvider.overrideWith((ref, budgetId) async => accounts),
+    ],
+    child: const MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: CreateTransferScreen(budgetId: screenBudgetId),
+    ),
+  );
 
   test(
     'transferDestinationAccounts excludes source and keeps currency match',

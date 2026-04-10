@@ -67,26 +67,27 @@ typedef UpdateDisplayCurrency =
     });
 
 @riverpod
-UpdateDisplayCurrency updateDisplayCurrency(Ref ref) => ({
-    required budgetId,
-    required clearDisplayCurrencyCode,
-    displayCurrencyCode,
-  }) async {
-    final client = ref.read(serverpodClientProvider);
-    await client.budget.update(
-      UuidValue.fromString(budgetId),
-      displayCurrencyCode: displayCurrencyCode,
-      clearDisplayCurrencyCode: clearDisplayCurrencyCode,
-    );
+UpdateDisplayCurrency updateDisplayCurrency(Ref ref) =>
+    ({
+      required budgetId,
+      required clearDisplayCurrencyCode,
+      displayCurrencyCode,
+    }) async {
+      final client = ref.read(serverpodClientProvider);
+      await client.budget.update(
+        UuidValue.fromString(budgetId),
+        displayCurrencyCode: displayCurrencyCode,
+        clearDisplayCurrencyCode: clearDisplayCurrencyCode,
+      );
 
-    ref
-      ..invalidate(budgetDetailProvider(budgetId))
-      ..invalidate(budgetSummaryProvider(budgetId))
-      ..invalidate(displayCurrencyProvider(budgetId))
-      ..invalidate(displayCurrencyConverterProvider(budgetId))
-      ..invalidate(budgetListProvider)
-      ..invalidate(fxLatestRatesProvider);
-  };
+      ref
+        ..invalidate(budgetDetailProvider(budgetId))
+        ..invalidate(budgetSummaryProvider(budgetId))
+        ..invalidate(displayCurrencyProvider(budgetId))
+        ..invalidate(displayCurrencyConverterProvider(budgetId))
+        ..invalidate(budgetListProvider)
+        ..invalidate(fxLatestRatesProvider);
+    };
 
 class DisplayCurrencyConverter {
   const DisplayCurrencyConverter({

@@ -317,11 +317,11 @@ class RegisterScreen extends HookConsumerWidget {
   }
 
   String _stepSubtitle(AppLocalizations l10n, int step) => switch (step) {
-      0 => l10n.registerStepEmail,
-      1 => l10n.registerStepCode,
-      2 => l10n.registerStepPassword,
-      _ => '',
-    };
+    0 => l10n.registerStepEmail,
+    1 => l10n.registerStepCode,
+    2 => l10n.registerStepPassword,
+    _ => '',
+  };
 }
 
 class _StepIndicator extends HookWidget {

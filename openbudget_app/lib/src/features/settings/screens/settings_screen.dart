@@ -329,20 +329,21 @@ class SettingsScreen extends HookConsumerWidget {
     required AuthState authState,
     required Budget budget,
   }) => switch (authState) {
-      Authenticated(:final userId) => userId,
-      _ => budget.ownerId.toString(),
-    };
+    Authenticated(:final userId) => userId,
+    _ => budget.ownerId.toString(),
+  };
 
   String _themeModeLabel({
     required AppLocalizations l10n,
     required ThemeMode themeMode,
   }) => switch (themeMode) {
-      ThemeMode.system => l10n.themeSystem,
-      ThemeMode.light => l10n.themeLight,
-      ThemeMode.dark => l10n.themeDark,
-    };
+    ThemeMode.system => l10n.themeSystem,
+    ThemeMode.light => l10n.themeLight,
+    ThemeMode.dark => l10n.themeDark,
+  };
 
-  String _formatDateTime(DateTime timestamp) => DateFormat.yMMMd().add_jm().format(timestamp.toLocal());
+  String _formatDateTime(DateTime timestamp) =>
+      DateFormat.yMMMd().add_jm().format(timestamp.toLocal());
 
   Future<void> _selectThemeMode({
     required BuildContext context,

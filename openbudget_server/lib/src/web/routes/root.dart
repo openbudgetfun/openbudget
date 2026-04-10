@@ -3,5 +3,6 @@ import 'package:serverpod/serverpod.dart';
 
 class RootRoute extends WidgetRoute {
   @override
-  Future<TemplateWidget> build(Session session, Request request) async => BuiltWithServerpodPageWidget();
+  Future<TemplateWidget> build(Session session, Request request) async =>
+      BuiltWithServerpodPageWidget();
 }

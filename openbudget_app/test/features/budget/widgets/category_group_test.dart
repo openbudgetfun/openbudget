@@ -79,24 +79,24 @@ void main() {
   }
 
   Widget buildSubject() => ProviderScope(
-      child: MaterialApp(
-        theme: OpenBudgetTheme.light,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: Scaffold(
-          body: CategoryGroup(
-            categoryWithEnvelopes: makeCategoryWithEnvelopes(),
-            currencyCode: CurrencyCode.usd,
-            onAddEnvelope: () {},
-            onDeleteCategory: () {},
-            onEditCategory: () {},
-            onEditEnvelope: (_) {},
-            onDeleteEnvelope: (_) {},
-            onReorderEnvelopes: (_) {},
-          ),
+    child: MaterialApp(
+      theme: OpenBudgetTheme.light,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: Scaffold(
+        body: CategoryGroup(
+          categoryWithEnvelopes: makeCategoryWithEnvelopes(),
+          currencyCode: CurrencyCode.usd,
+          onAddEnvelope: () {},
+          onDeleteCategory: () {},
+          onEditCategory: () {},
+          onEditEnvelope: (_) {},
+          onDeleteEnvelope: (_) {},
+          onReorderEnvelopes: (_) {},
         ),
       ),
-    );
+    ),
+  );
 
   group('CategoryGroup', () {
     testWidgets('enters reorder mode from category long-press menu', (

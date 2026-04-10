@@ -278,117 +278,53 @@ class SolanaWalletUpdateTable extends _i1.UpdateTable<SolanaWalletTable> {
 
   _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> accountId(
     _i1.UuidValue value,
-  ) => _i1.ColumnValue(
-    table.accountId,
-    value,
-  );
+  ) => _i1.ColumnValue(table.accountId, value);
 
   _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> budgetId(_i1.UuidValue value) =>
-      _i1.ColumnValue(
-        table.budgetId,
-        value,
-      );
+      _i1.ColumnValue(table.budgetId, value);
 
-  _i1.ColumnValue<String, String> address(String value) => _i1.ColumnValue(
-    table.address,
-    value,
-  );
+  _i1.ColumnValue<String, String> address(String value) =>
+      _i1.ColumnValue(table.address, value);
 
-  _i1.ColumnValue<String, String> label(String? value) => _i1.ColumnValue(
-    table.label,
-    value,
-  );
+  _i1.ColumnValue<String, String> label(String? value) =>
+      _i1.ColumnValue(table.label, value);
 
-  _i1.ColumnValue<String, String> cluster(String value) => _i1.ColumnValue(
-    table.cluster,
-    value,
-  );
+  _i1.ColumnValue<String, String> cluster(String value) =>
+      _i1.ColumnValue(table.cluster, value);
 
   _i1.ColumnValue<String, String> lastSignature(String? value) =>
-      _i1.ColumnValue(
-        table.lastSignature,
-        value,
-      );
+      _i1.ColumnValue(table.lastSignature, value);
 
   _i1.ColumnValue<DateTime, DateTime> lastSyncedAt(DateTime? value) =>
-      _i1.ColumnValue(
-        table.lastSyncedAt,
-        value,
-      );
+      _i1.ColumnValue(table.lastSyncedAt, value);
 
-  _i1.ColumnValue<String, String> syncStatus(String value) => _i1.ColumnValue(
-    table.syncStatus,
-    value,
-  );
+  _i1.ColumnValue<String, String> syncStatus(String value) =>
+      _i1.ColumnValue(table.syncStatus, value);
 
   _i1.ColumnValue<String, String> lastSyncError(String? value) =>
-      _i1.ColumnValue(
-        table.lastSyncError,
-        value,
-      );
+      _i1.ColumnValue(table.lastSyncError, value);
 
   _i1.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
-      _i1.ColumnValue(
-        table.createdAt,
-        value,
-      );
+      _i1.ColumnValue(table.createdAt, value);
 
   _i1.ColumnValue<DateTime, DateTime> updatedAt(DateTime value) =>
-      _i1.ColumnValue(
-        table.updatedAt,
-        value,
-      );
+      _i1.ColumnValue(table.updatedAt, value);
 }
 
 class SolanaWalletTable extends _i1.Table<_i1.UuidValue?> {
   SolanaWalletTable({super.tableRelation}) : super(tableName: 'solana_wallet') {
     updateTable = SolanaWalletUpdateTable(this);
-    accountId = _i1.ColumnUuid(
-      'accountId',
-      this,
-    );
-    budgetId = _i1.ColumnUuid(
-      'budgetId',
-      this,
-    );
-    address = _i1.ColumnString(
-      'address',
-      this,
-    );
-    label = _i1.ColumnString(
-      'label',
-      this,
-    );
-    cluster = _i1.ColumnString(
-      'cluster',
-      this,
-    );
-    lastSignature = _i1.ColumnString(
-      'lastSignature',
-      this,
-    );
-    lastSyncedAt = _i1.ColumnDateTime(
-      'lastSyncedAt',
-      this,
-    );
-    syncStatus = _i1.ColumnString(
-      'syncStatus',
-      this,
-    );
-    lastSyncError = _i1.ColumnString(
-      'lastSyncError',
-      this,
-    );
-    createdAt = _i1.ColumnDateTime(
-      'createdAt',
-      this,
-      hasDefault: true,
-    );
-    updatedAt = _i1.ColumnDateTime(
-      'updatedAt',
-      this,
-      hasDefault: true,
-    );
+    accountId = _i1.ColumnUuid('accountId', this);
+    budgetId = _i1.ColumnUuid('budgetId', this);
+    address = _i1.ColumnString('address', this);
+    label = _i1.ColumnString('label', this);
+    cluster = _i1.ColumnString('cluster', this);
+    lastSignature = _i1.ColumnString('lastSignature', this);
+    lastSyncedAt = _i1.ColumnDateTime('lastSyncedAt', this);
+    syncStatus = _i1.ColumnString('syncStatus', this);
+    lastSyncError = _i1.ColumnString('lastSyncError', this);
+    createdAt = _i1.ColumnDateTime('createdAt', this, hasDefault: true);
+    updatedAt = _i1.ColumnDateTime('updatedAt', this, hasDefault: true);
   }
 
   late final SolanaWalletUpdateTable updateTable;
@@ -606,10 +542,7 @@ class SolanaWalletRepository {
     SolanaWallet row, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.insertRow<SolanaWallet>(
-      row,
-      transaction: transaction,
-    );
+    return session.db.insertRow<SolanaWallet>(row, transaction: transaction);
   }
 
   /// Updates all [SolanaWallet]s in the list and returns the updated rows. If
@@ -694,10 +627,7 @@ class SolanaWalletRepository {
     List<SolanaWallet> rows, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.delete<SolanaWallet>(
-      rows,
-      transaction: transaction,
-    );
+    return session.db.delete<SolanaWallet>(rows, transaction: transaction);
   }
 
   /// Deletes a single [SolanaWallet].
@@ -706,10 +636,7 @@ class SolanaWalletRepository {
     SolanaWallet row, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.deleteRow<SolanaWallet>(
-      row,
-      transaction: transaction,
-    );
+    return session.db.deleteRow<SolanaWallet>(row, transaction: transaction);
   }
 
   /// Deletes all rows matching the [where] expression.

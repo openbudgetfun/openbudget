@@ -9,6 +9,6 @@ class ObCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Card(
-      child: padding != null ? Padding(padding: padding!, child: child) : child,
-    );
+    child: padding != null ? Padding(padding: padding!, child: child) : child,
+  );
 }

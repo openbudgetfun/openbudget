@@ -13,13 +13,13 @@ void main() {
   });
 
   Widget buildSubject() => ProviderScope(
-      child: MaterialApp(
-        theme: OpenBudgetTheme.light,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: const LoginScreen(),
-      ),
-    );
+    child: MaterialApp(
+      theme: OpenBudgetTheme.light,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: const LoginScreen(),
+    ),
+  );
 
   group('LoginScreen', () {
     testWidgets('renders OpenBudget login fields', (tester) async {

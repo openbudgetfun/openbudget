@@ -241,97 +241,46 @@ class WalletConnectionUpdateTable
   WalletConnectionUpdateTable(super.table);
 
   _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> budgetId(_i1.UuidValue value) =>
-      _i1.ColumnValue(
-        table.budgetId,
-        value,
-      );
+      _i1.ColumnValue(table.budgetId, value);
 
-  _i1.ColumnValue<String, String> chain(String value) => _i1.ColumnValue(
-    table.chain,
-    value,
-  );
+  _i1.ColumnValue<String, String> chain(String value) =>
+      _i1.ColumnValue(table.chain, value);
 
-  _i1.ColumnValue<String, String> address(String value) => _i1.ColumnValue(
-    table.address,
-    value,
-  );
+  _i1.ColumnValue<String, String> address(String value) =>
+      _i1.ColumnValue(table.address, value);
 
-  _i1.ColumnValue<String, String> label(String? value) => _i1.ColumnValue(
-    table.label,
-    value,
-  );
+  _i1.ColumnValue<String, String> label(String? value) =>
+      _i1.ColumnValue(table.label, value);
 
   _i1.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
-      _i1.ColumnValue(
-        table.createdAt,
-        value,
-      );
+      _i1.ColumnValue(table.createdAt, value);
 
   _i1.ColumnValue<DateTime, DateTime> updatedAt(DateTime value) =>
-      _i1.ColumnValue(
-        table.updatedAt,
-        value,
-      );
+      _i1.ColumnValue(table.updatedAt, value);
 
   _i1.ColumnValue<DateTime, DateTime> lastSyncedAt(DateTime? value) =>
-      _i1.ColumnValue(
-        table.lastSyncedAt,
-        value,
-      );
+      _i1.ColumnValue(table.lastSyncedAt, value);
 
-  _i1.ColumnValue<String, String> syncStatus(String? value) => _i1.ColumnValue(
-    table.syncStatus,
-    value,
-  );
+  _i1.ColumnValue<String, String> syncStatus(String? value) =>
+      _i1.ColumnValue(table.syncStatus, value);
 
-  _i1.ColumnValue<String, String> lastError(String? value) => _i1.ColumnValue(
-    table.lastError,
-    value,
-  );
+  _i1.ColumnValue<String, String> lastError(String? value) =>
+      _i1.ColumnValue(table.lastError, value);
 }
 
 class WalletConnectionTable extends _i1.Table<_i1.UuidValue?> {
   WalletConnectionTable({super.tableRelation})
     : super(tableName: 'wallet_connection') {
     updateTable = WalletConnectionUpdateTable(this);
-    budgetId = _i1.ColumnUuid(
-      'budgetId',
-      this,
-    );
-    chain = _i1.ColumnString(
-      'chain',
-      this,
-    );
-    address = _i1.ColumnString(
-      'address',
-      this,
-    );
-    label = _i1.ColumnString(
-      'label',
-      this,
-    );
-    createdAt = _i1.ColumnDateTime(
-      'createdAt',
-      this,
-      hasDefault: true,
-    );
-    updatedAt = _i1.ColumnDateTime(
-      'updatedAt',
-      this,
-      hasDefault: true,
-    );
-    lastSyncedAt = _i1.ColumnDateTime(
-      'lastSyncedAt',
-      this,
-    );
-    syncStatus = _i1.ColumnString(
-      'syncStatus',
-      this,
-    );
-    lastError = _i1.ColumnString(
-      'lastError',
-      this,
-    );
+    budgetId = _i1.ColumnUuid('budgetId', this);
+    chain = _i1.ColumnString('chain', this);
+    address = _i1.ColumnString('address', this);
+    label = _i1.ColumnString('label', this);
+    createdAt = _i1.ColumnDateTime('createdAt', this, hasDefault: true);
+    updatedAt = _i1.ColumnDateTime('updatedAt', this, hasDefault: true);
+    lastSyncedAt = _i1.ColumnDateTime('lastSyncedAt', this);
+    syncStatus = _i1.ColumnString('syncStatus', this);
+    lastError = _i1.ColumnString('lastError', this);
   }
 
   late final WalletConnectionUpdateTable updateTable;
@@ -626,10 +575,7 @@ class WalletConnectionRepository {
     List<WalletConnection> rows, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.delete<WalletConnection>(
-      rows,
-      transaction: transaction,
-    );
+    return session.db.delete<WalletConnection>(rows, transaction: transaction);
   }
 
   /// Deletes a single [WalletConnection].

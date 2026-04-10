@@ -15,15 +15,15 @@ class ObFilledButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => FilledButton(
-      onPressed: isLoading ? null : onPressed,
-      child: isLoading
-          ? const SizedBox(
-              height: 20,
-              width: 20,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            )
-          : child,
-    );
+    onPressed: isLoading ? null : onPressed,
+    child: isLoading
+        ? const SizedBox(
+            height: 20,
+            width: 20,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          )
+        : child,
+  );
 }
 
 /// A themed outlined button for secondary actions.
@@ -38,7 +38,8 @@ class ObOutlinedButton extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) => OutlinedButton(onPressed: onPressed, child: child);
+  Widget build(BuildContext context) =>
+      OutlinedButton(onPressed: onPressed, child: child);
 }
 
 /// A themed text button for tertiary actions.
@@ -49,5 +50,6 @@ class ObTextButton extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) => TextButton(onPressed: onPressed, child: child);
+  Widget build(BuildContext context) =>
+      TextButton(onPressed: onPressed, child: child);
 }

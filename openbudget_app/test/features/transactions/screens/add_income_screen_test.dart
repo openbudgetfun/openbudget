@@ -43,21 +43,19 @@ void main() {
   ];
 
   Widget buildSubject({Budget? budget, List<Payee>? payees}) => ProviderScope(
-      overrides: [
-        budgetDetailProvider.overrideWith(
-          (ref, id) async => budget ?? makeBudget(),
-        ),
-        payeeListProvider.overrideWith(
-          (ref, id) async => payees ?? makePayees(),
-        ),
-      ],
-      child: MaterialApp(
-        theme: OpenBudgetTheme.light,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: const AddIncomeScreen(budgetId: budgetId),
+    overrides: [
+      budgetDetailProvider.overrideWith(
+        (ref, id) async => budget ?? makeBudget(),
       ),
-    );
+      payeeListProvider.overrideWith((ref, id) async => payees ?? makePayees()),
+    ],
+    child: MaterialApp(
+      theme: OpenBudgetTheme.light,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: const AddIncomeScreen(budgetId: budgetId),
+    ),
+  );
 
   Widget buildRoutedSubject({Budget? budget, List<Payee>? payees}) {
     final router = GoRouter(

@@ -349,165 +349,77 @@ class _AccountImpl extends Account {
 class AccountUpdateTable extends _i1.UpdateTable<AccountTable> {
   AccountUpdateTable(super.table);
 
-  _i1.ColumnValue<String, String> name(String value) => _i1.ColumnValue(
-    table.name,
-    value,
-  );
+  _i1.ColumnValue<String, String> name(String value) =>
+      _i1.ColumnValue(table.name, value);
 
-  _i1.ColumnValue<String, String> accountType(String value) => _i1.ColumnValue(
-    table.accountType,
-    value,
-  );
+  _i1.ColumnValue<String, String> accountType(String value) =>
+      _i1.ColumnValue(table.accountType, value);
 
-  _i1.ColumnValue<int, int> balanceCents(int value) => _i1.ColumnValue(
-    table.balanceCents,
-    value,
-  );
+  _i1.ColumnValue<int, int> balanceCents(int value) =>
+      _i1.ColumnValue(table.balanceCents, value);
 
-  _i1.ColumnValue<String, String> currencyCode(String value) => _i1.ColumnValue(
-    table.currencyCode,
-    value,
-  );
+  _i1.ColumnValue<String, String> currencyCode(String value) =>
+      _i1.ColumnValue(table.currencyCode, value);
 
   _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> budgetId(_i1.UuidValue value) =>
-      _i1.ColumnValue(
-        table.budgetId,
-        value,
-      );
+      _i1.ColumnValue(table.budgetId, value);
 
   _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> creatorId(
     _i1.UuidValue? value,
-  ) => _i1.ColumnValue(
-    table.creatorId,
-    value,
-  );
+  ) => _i1.ColumnValue(table.creatorId, value);
 
   _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> institutionId(
     _i1.UuidValue? value,
-  ) => _i1.ColumnValue(
-    table.institutionId,
-    value,
-  );
+  ) => _i1.ColumnValue(table.institutionId, value);
 
-  _i1.ColumnValue<bool, bool> onBudget(bool value) => _i1.ColumnValue(
-    table.onBudget,
-    value,
-  );
+  _i1.ColumnValue<bool, bool> onBudget(bool value) =>
+      _i1.ColumnValue(table.onBudget, value);
 
-  _i1.ColumnValue<int, int> sortOrder(int value) => _i1.ColumnValue(
-    table.sortOrder,
-    value,
-  );
+  _i1.ColumnValue<int, int> sortOrder(int value) =>
+      _i1.ColumnValue(table.sortOrder, value);
 
-  _i1.ColumnValue<bool, bool> isClosed(bool value) => _i1.ColumnValue(
-    table.isClosed,
-    value,
-  );
+  _i1.ColumnValue<bool, bool> isClosed(bool value) =>
+      _i1.ColumnValue(table.isClosed, value);
 
-  _i1.ColumnValue<String, String> sourceType(String? value) => _i1.ColumnValue(
-    table.sourceType,
-    value,
-  );
+  _i1.ColumnValue<String, String> sourceType(String? value) =>
+      _i1.ColumnValue(table.sourceType, value);
 
   _i1.ColumnValue<String, String> externalAccountId(String? value) =>
-      _i1.ColumnValue(
-        table.externalAccountId,
-        value,
-      );
+      _i1.ColumnValue(table.externalAccountId, value);
 
   _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> connectionId(
     _i1.UuidValue? value,
-  ) => _i1.ColumnValue(
-    table.connectionId,
-    value,
-  );
+  ) => _i1.ColumnValue(table.connectionId, value);
 
   _i1.ColumnValue<DateTime, DateTime> lastSyncedAt(DateTime? value) =>
-      _i1.ColumnValue(
-        table.lastSyncedAt,
-        value,
-      );
+      _i1.ColumnValue(table.lastSyncedAt, value);
 
-  _i1.ColumnValue<String, String> syncStatus(String? value) => _i1.ColumnValue(
-    table.syncStatus,
-    value,
-  );
+  _i1.ColumnValue<String, String> syncStatus(String? value) =>
+      _i1.ColumnValue(table.syncStatus, value);
 
   _i1.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
-      _i1.ColumnValue(
-        table.createdAt,
-        value,
-      );
+      _i1.ColumnValue(table.createdAt, value);
 }
 
 class AccountTable extends _i1.Table<_i1.UuidValue?> {
   AccountTable({super.tableRelation}) : super(tableName: 'account') {
     updateTable = AccountUpdateTable(this);
-    name = _i1.ColumnString(
-      'name',
-      this,
-    );
-    accountType = _i1.ColumnString(
-      'accountType',
-      this,
-    );
-    balanceCents = _i1.ColumnInt(
-      'balanceCents',
-      this,
-    );
-    currencyCode = _i1.ColumnString(
-      'currencyCode',
-      this,
-    );
-    budgetId = _i1.ColumnUuid(
-      'budgetId',
-      this,
-    );
-    creatorId = _i1.ColumnUuid(
-      'creatorId',
-      this,
-    );
-    institutionId = _i1.ColumnUuid(
-      'institutionId',
-      this,
-    );
-    onBudget = _i1.ColumnBool(
-      'onBudget',
-      this,
-    );
-    sortOrder = _i1.ColumnInt(
-      'sortOrder',
-      this,
-    );
-    isClosed = _i1.ColumnBool(
-      'isClosed',
-      this,
-    );
-    sourceType = _i1.ColumnString(
-      'sourceType',
-      this,
-    );
-    externalAccountId = _i1.ColumnString(
-      'externalAccountId',
-      this,
-    );
-    connectionId = _i1.ColumnUuid(
-      'connectionId',
-      this,
-    );
-    lastSyncedAt = _i1.ColumnDateTime(
-      'lastSyncedAt',
-      this,
-    );
-    syncStatus = _i1.ColumnString(
-      'syncStatus',
-      this,
-    );
-    createdAt = _i1.ColumnDateTime(
-      'createdAt',
-      this,
-      hasDefault: true,
-    );
+    name = _i1.ColumnString('name', this);
+    accountType = _i1.ColumnString('accountType', this);
+    balanceCents = _i1.ColumnInt('balanceCents', this);
+    currencyCode = _i1.ColumnString('currencyCode', this);
+    budgetId = _i1.ColumnUuid('budgetId', this);
+    creatorId = _i1.ColumnUuid('creatorId', this);
+    institutionId = _i1.ColumnUuid('institutionId', this);
+    onBudget = _i1.ColumnBool('onBudget', this);
+    sortOrder = _i1.ColumnInt('sortOrder', this);
+    isClosed = _i1.ColumnBool('isClosed', this);
+    sourceType = _i1.ColumnString('sourceType', this);
+    externalAccountId = _i1.ColumnString('externalAccountId', this);
+    connectionId = _i1.ColumnUuid('connectionId', this);
+    lastSyncedAt = _i1.ColumnDateTime('lastSyncedAt', this);
+    syncStatus = _i1.ColumnString('syncStatus', this);
+    createdAt = _i1.ColumnDateTime('createdAt', this, hasDefault: true);
   }
 
   late final AccountUpdateTable updateTable;
@@ -746,10 +658,7 @@ class AccountRepository {
     Account row, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.insertRow<Account>(
-      row,
-      transaction: transaction,
-    );
+    return session.db.insertRow<Account>(row, transaction: transaction);
   }
 
   /// Updates all [Account]s in the list and returns the updated rows. If
@@ -834,10 +743,7 @@ class AccountRepository {
     List<Account> rows, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.delete<Account>(
-      rows,
-      transaction: transaction,
-    );
+    return session.db.delete<Account>(rows, transaction: transaction);
   }
 
   /// Deletes a single [Account].
@@ -846,10 +752,7 @@ class AccountRepository {
     Account row, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.deleteRow<Account>(
-      row,
-      transaction: transaction,
-    );
+    return session.db.deleteRow<Account>(row, transaction: transaction);
   }
 
   /// Deletes all rows matching the [where] expression.

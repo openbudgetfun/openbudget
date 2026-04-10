@@ -11,5 +11,6 @@ class InstitutionEndpoint extends Endpoint {
   Future<List<Institution>> list(
     Session session, {
     String? locationCode,
-  }) async => InstitutionService.listCatalog(session, locationCode: locationCode);
+  }) async =>
+      InstitutionService.listCatalog(session, locationCode: locationCode);
 }

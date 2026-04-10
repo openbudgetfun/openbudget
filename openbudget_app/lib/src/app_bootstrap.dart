@@ -81,38 +81,40 @@ class _DismissKeyboardOnTap extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Listener(
-      behavior: HitTestBehavior.translucent,
-      onPointerDown: (event) {
-        final focusedNode = FocusManager.instance.primaryFocus;
-        if (focusedNode == null) {
-          return;
-        }
+    behavior: HitTestBehavior.translucent,
+    onPointerDown: (event) {
+      final focusedNode = FocusManager.instance.primaryFocus;
+      if (focusedNode == null) {
+        return;
+      }
 
-        final focusedContext = focusedNode.context;
-        if (focusedContext == null) {
-          return;
-        }
+      final focusedContext = focusedNode.context;
+      if (focusedContext == null) {
+        return;
+      }
 
-        final focusedRenderObject = focusedContext.findRenderObject();
-        if (focusedRenderObject is! RenderBox) {
-          focusedNode.unfocus();
-          return;
-        }
+      final focusedRenderObject = focusedContext.findRenderObject();
+      if (focusedRenderObject is! RenderBox) {
+        focusedNode.unfocus();
+        return;
+      }
 
-        final localOffset = focusedRenderObject.globalToLocal(event.position);
-        final isTapInsideFocusedField = focusedRenderObject.paintBounds
-            .contains(localOffset);
-        if (!isTapInsideFocusedField) {
-          focusedNode.unfocus();
-        }
-      },
-      child: child ?? const SizedBox.shrink(),
-    );
+      final localOffset = focusedRenderObject.globalToLocal(event.position);
+      final isTapInsideFocusedField = focusedRenderObject.paintBounds.contains(
+        localOffset,
+      );
+      if (!isTapInsideFocusedField) {
+        focusedNode.unfocus();
+      }
+    },
+    child: child ?? const SizedBox.shrink(),
+  );
 }
 
 class _AuthBootstrapScreen extends StatelessWidget {
   const _AuthBootstrapScreen();
 
   @override
-  Widget build(BuildContext context) => const Scaffold(body: Center(child: CircularProgressIndicator()));
+  Widget build(BuildContext context) =>
+      const Scaffold(body: Center(child: CircularProgressIndicator()));
 }

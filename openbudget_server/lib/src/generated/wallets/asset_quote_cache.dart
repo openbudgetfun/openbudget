@@ -194,68 +194,35 @@ class _AssetQuoteCacheImpl extends AssetQuoteCache {
 class AssetQuoteCacheUpdateTable extends _i1.UpdateTable<AssetQuoteCacheTable> {
   AssetQuoteCacheUpdateTable(super.table);
 
-  _i1.ColumnValue<String, String> chain(String value) => _i1.ColumnValue(
-    table.chain,
-    value,
-  );
+  _i1.ColumnValue<String, String> chain(String value) =>
+      _i1.ColumnValue(table.chain, value);
 
-  _i1.ColumnValue<String, String> assetId(String value) => _i1.ColumnValue(
-    table.assetId,
-    value,
-  );
+  _i1.ColumnValue<String, String> assetId(String value) =>
+      _i1.ColumnValue(table.assetId, value);
 
-  _i1.ColumnValue<String, String> symbol(String value) => _i1.ColumnValue(
-    table.symbol,
-    value,
-  );
+  _i1.ColumnValue<String, String> symbol(String value) =>
+      _i1.ColumnValue(table.symbol, value);
 
-  _i1.ColumnValue<double, double> usdPrice(double value) => _i1.ColumnValue(
-    table.usdPrice,
-    value,
-  );
+  _i1.ColumnValue<double, double> usdPrice(double value) =>
+      _i1.ColumnValue(table.usdPrice, value);
 
   _i1.ColumnValue<DateTime, DateTime> fetchedAt(DateTime value) =>
-      _i1.ColumnValue(
-        table.fetchedAt,
-        value,
-      );
+      _i1.ColumnValue(table.fetchedAt, value);
 
   _i1.ColumnValue<DateTime, DateTime> expiresAt(DateTime value) =>
-      _i1.ColumnValue(
-        table.expiresAt,
-        value,
-      );
+      _i1.ColumnValue(table.expiresAt, value);
 }
 
 class AssetQuoteCacheTable extends _i1.Table<_i1.UuidValue?> {
   AssetQuoteCacheTable({super.tableRelation})
     : super(tableName: 'asset_quote_cache') {
     updateTable = AssetQuoteCacheUpdateTable(this);
-    chain = _i1.ColumnString(
-      'chain',
-      this,
-    );
-    assetId = _i1.ColumnString(
-      'assetId',
-      this,
-    );
-    symbol = _i1.ColumnString(
-      'symbol',
-      this,
-    );
-    usdPrice = _i1.ColumnDouble(
-      'usdPrice',
-      this,
-    );
-    fetchedAt = _i1.ColumnDateTime(
-      'fetchedAt',
-      this,
-      hasDefault: true,
-    );
-    expiresAt = _i1.ColumnDateTime(
-      'expiresAt',
-      this,
-    );
+    chain = _i1.ColumnString('chain', this);
+    assetId = _i1.ColumnString('assetId', this);
+    symbol = _i1.ColumnString('symbol', this);
+    usdPrice = _i1.ColumnDouble('usdPrice', this);
+    fetchedAt = _i1.ColumnDateTime('fetchedAt', this, hasDefault: true);
+    expiresAt = _i1.ColumnDateTime('expiresAt', this);
   }
 
   late final AssetQuoteCacheUpdateTable updateTable;
@@ -451,10 +418,7 @@ class AssetQuoteCacheRepository {
     AssetQuoteCache row, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.insertRow<AssetQuoteCache>(
-      row,
-      transaction: transaction,
-    );
+    return session.db.insertRow<AssetQuoteCache>(row, transaction: transaction);
   }
 
   /// Updates all [AssetQuoteCache]s in the list and returns the updated rows. If
@@ -541,10 +505,7 @@ class AssetQuoteCacheRepository {
     List<AssetQuoteCache> rows, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.delete<AssetQuoteCache>(
-      rows,
-      transaction: transaction,
-    );
+    return session.db.delete<AssetQuoteCache>(rows, transaction: transaction);
   }
 
   /// Deletes a single [AssetQuoteCache].
@@ -553,10 +514,7 @@ class AssetQuoteCacheRepository {
     AssetQuoteCache row, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.deleteRow<AssetQuoteCache>(
-      row,
-      transaction: transaction,
-    );
+    return session.db.deleteRow<AssetQuoteCache>(row, transaction: transaction);
   }
 
   /// Deletes all rows matching the [where] expression.

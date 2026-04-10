@@ -18,11 +18,11 @@ void main() {
     String currencyCode = 'USD',
     String? displayCurrencyCode,
   }) => Budget(
-      name: "Alex's Plan",
-      currencyCode: currencyCode,
-      displayCurrencyCode: displayCurrencyCode,
-      ownerId: ownerId,
-    );
+    name: "Alex's Plan",
+    currencyCode: currencyCode,
+    displayCurrencyCode: displayCurrencyCode,
+    ownerId: ownerId,
+  );
 
   setUpAll(() {
     GoogleFonts.config.allowRuntimeFetching = false;

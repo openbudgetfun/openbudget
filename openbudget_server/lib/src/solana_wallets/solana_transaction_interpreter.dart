@@ -116,7 +116,10 @@ class SolanaTransactionInterpreter {
       final readableType = transaction.type
           .toLowerCase()
           .replaceAll('_', ' ')
-          .replaceAllMapped(RegExp(r'\b\w'), (match) => match.group(0)!.toUpperCase());
+          .replaceAllMapped(
+            RegExp(r'\b\w'),
+            (match) => match.group(0)!.toUpperCase(),
+          );
       action = '$readableType via $source';
     }
 

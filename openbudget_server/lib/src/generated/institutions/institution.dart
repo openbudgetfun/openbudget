@@ -202,68 +202,34 @@ class _InstitutionImpl extends Institution {
 class InstitutionUpdateTable extends _i1.UpdateTable<InstitutionTable> {
   InstitutionUpdateTable(super.table);
 
-  _i1.ColumnValue<String, String> slug(String value) => _i1.ColumnValue(
-    table.slug,
-    value,
-  );
+  _i1.ColumnValue<String, String> slug(String value) =>
+      _i1.ColumnValue(table.slug, value);
 
-  _i1.ColumnValue<String, String> name(String value) => _i1.ColumnValue(
-    table.name,
-    value,
-  );
+  _i1.ColumnValue<String, String> name(String value) =>
+      _i1.ColumnValue(table.name, value);
 
-  _i1.ColumnValue<String, String> website(String? value) => _i1.ColumnValue(
-    table.website,
-    value,
-  );
+  _i1.ColumnValue<String, String> website(String? value) =>
+      _i1.ColumnValue(table.website, value);
 
   _i1.ColumnValue<String, String> plaidInstitutionId(String? value) =>
-      _i1.ColumnValue(
-        table.plaidInstitutionId,
-        value,
-      );
+      _i1.ColumnValue(table.plaidInstitutionId, value);
 
-  _i1.ColumnValue<bool, bool> isDigitalBank(bool value) => _i1.ColumnValue(
-    table.isDigitalBank,
-    value,
-  );
+  _i1.ColumnValue<bool, bool> isDigitalBank(bool value) =>
+      _i1.ColumnValue(table.isDigitalBank, value);
 
   _i1.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
-      _i1.ColumnValue(
-        table.createdAt,
-        value,
-      );
+      _i1.ColumnValue(table.createdAt, value);
 }
 
 class InstitutionTable extends _i1.Table<_i1.UuidValue?> {
   InstitutionTable({super.tableRelation}) : super(tableName: 'institution') {
     updateTable = InstitutionUpdateTable(this);
-    slug = _i1.ColumnString(
-      'slug',
-      this,
-    );
-    name = _i1.ColumnString(
-      'name',
-      this,
-    );
-    website = _i1.ColumnString(
-      'website',
-      this,
-    );
-    plaidInstitutionId = _i1.ColumnString(
-      'plaidInstitutionId',
-      this,
-    );
-    isDigitalBank = _i1.ColumnBool(
-      'isDigitalBank',
-      this,
-      hasDefault: true,
-    );
-    createdAt = _i1.ColumnDateTime(
-      'createdAt',
-      this,
-      hasDefault: true,
-    );
+    slug = _i1.ColumnString('slug', this);
+    name = _i1.ColumnString('name', this);
+    website = _i1.ColumnString('website', this);
+    plaidInstitutionId = _i1.ColumnString('plaidInstitutionId', this);
+    isDigitalBank = _i1.ColumnBool('isDigitalBank', this, hasDefault: true);
+    createdAt = _i1.ColumnDateTime('createdAt', this, hasDefault: true);
   }
 
   late final InstitutionUpdateTable updateTable;
@@ -464,10 +430,7 @@ class InstitutionRepository {
     Institution row, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.insertRow<Institution>(
-      row,
-      transaction: transaction,
-    );
+    return session.db.insertRow<Institution>(row, transaction: transaction);
   }
 
   /// Updates all [Institution]s in the list and returns the updated rows. If
@@ -552,10 +515,7 @@ class InstitutionRepository {
     List<Institution> rows, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.delete<Institution>(
-      rows,
-      transaction: transaction,
-    );
+    return session.db.delete<Institution>(rows, transaction: transaction);
   }
 
   /// Deletes a single [Institution].
@@ -564,10 +524,7 @@ class InstitutionRepository {
     Institution row, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.deleteRow<Institution>(
-      row,
-      transaction: transaction,
-    );
+    return session.db.deleteRow<Institution>(row, transaction: transaction);
   }
 
   /// Deletes all rows matching the [where] expression.

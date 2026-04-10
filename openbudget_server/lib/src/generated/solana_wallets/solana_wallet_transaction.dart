@@ -450,231 +450,105 @@ class SolanaWalletTransactionUpdateTable
   SolanaWalletTransactionUpdateTable(super.table);
 
   _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> walletId(_i1.UuidValue value) =>
-      _i1.ColumnValue(
-        table.walletId,
-        value,
-      );
+      _i1.ColumnValue(table.walletId, value);
 
   _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> budgetId(_i1.UuidValue value) =>
-      _i1.ColumnValue(
-        table.budgetId,
-        value,
-      );
+      _i1.ColumnValue(table.budgetId, value);
 
-  _i1.ColumnValue<String, String> signature(String value) => _i1.ColumnValue(
-    table.signature,
-    value,
-  );
+  _i1.ColumnValue<String, String> signature(String value) =>
+      _i1.ColumnValue(table.signature, value);
 
-  _i1.ColumnValue<int, int> slot(int value) => _i1.ColumnValue(
-    table.slot,
-    value,
-  );
+  _i1.ColumnValue<int, int> slot(int value) =>
+      _i1.ColumnValue(table.slot, value);
 
   _i1.ColumnValue<DateTime, DateTime> occurredAt(DateTime? value) =>
-      _i1.ColumnValue(
-        table.occurredAt,
-        value,
-      );
+      _i1.ColumnValue(table.occurredAt, value);
 
-  _i1.ColumnValue<String, String> description(String value) => _i1.ColumnValue(
-    table.description,
-    value,
-  );
+  _i1.ColumnValue<String, String> description(String value) =>
+      _i1.ColumnValue(table.description, value);
 
-  _i1.ColumnValue<String, String> txType(String value) => _i1.ColumnValue(
-    table.txType,
-    value,
-  );
+  _i1.ColumnValue<String, String> txType(String value) =>
+      _i1.ColumnValue(table.txType, value);
 
-  _i1.ColumnValue<String, String> source(String value) => _i1.ColumnValue(
-    table.source,
-    value,
-  );
+  _i1.ColumnValue<String, String> source(String value) =>
+      _i1.ColumnValue(table.source, value);
 
   _i1.ColumnValue<String, String> interpretationConfidence(String? value) =>
-      _i1.ColumnValue(
-        table.interpretationConfidence,
-        value,
-      );
+      _i1.ColumnValue(table.interpretationConfidence, value);
 
   _i1.ColumnValue<String, String> programsJson(String? value) =>
-      _i1.ColumnValue(
-        table.programsJson,
-        value,
-      );
+      _i1.ColumnValue(table.programsJson, value);
 
   _i1.ColumnValue<String, String> nativeTransfersJson(String? value) =>
-      _i1.ColumnValue(
-        table.nativeTransfersJson,
-        value,
-      );
+      _i1.ColumnValue(table.nativeTransfersJson, value);
 
   _i1.ColumnValue<String, String> tokenTransfersJson(String? value) =>
-      _i1.ColumnValue(
-        table.tokenTransfersJson,
-        value,
-      );
+      _i1.ColumnValue(table.tokenTransfersJson, value);
 
   _i1.ColumnValue<double, double> estimatedCostBasis(double? value) =>
-      _i1.ColumnValue(
-        table.estimatedCostBasis,
-        value,
-      );
+      _i1.ColumnValue(table.estimatedCostBasis, value);
 
   _i1.ColumnValue<double, double> estimatedProceeds(double? value) =>
-      _i1.ColumnValue(
-        table.estimatedProceeds,
-        value,
-      );
+      _i1.ColumnValue(table.estimatedProceeds, value);
 
   _i1.ColumnValue<double, double> estimatedRealizedPnl(double? value) =>
-      _i1.ColumnValue(
-        table.estimatedRealizedPnl,
-        value,
-      );
+      _i1.ColumnValue(table.estimatedRealizedPnl, value);
 
-  _i1.ColumnValue<String, String> pnlCurrency(String? value) => _i1.ColumnValue(
-    table.pnlCurrency,
-    value,
-  );
+  _i1.ColumnValue<String, String> pnlCurrency(String? value) =>
+      _i1.ColumnValue(table.pnlCurrency, value);
 
-  _i1.ColumnValue<int, int> taxYear(int? value) => _i1.ColumnValue(
-    table.taxYear,
-    value,
-  );
+  _i1.ColumnValue<int, int> taxYear(int? value) =>
+      _i1.ColumnValue(table.taxYear, value);
 
-  _i1.ColumnValue<String, String> category(String? value) => _i1.ColumnValue(
-    table.category,
-    value,
-  );
+  _i1.ColumnValue<String, String> category(String? value) =>
+      _i1.ColumnValue(table.category, value);
 
-  _i1.ColumnValue<String, String> tagsCsv(String? value) => _i1.ColumnValue(
-    table.tagsCsv,
-    value,
-  );
+  _i1.ColumnValue<String, String> tagsCsv(String? value) =>
+      _i1.ColumnValue(table.tagsCsv, value);
 
-  _i1.ColumnValue<String, String> memo(String? value) => _i1.ColumnValue(
-    table.memo,
-    value,
-  );
+  _i1.ColumnValue<String, String> memo(String? value) =>
+      _i1.ColumnValue(table.memo, value);
 
-  _i1.ColumnValue<String, String> rawJson(String value) => _i1.ColumnValue(
-    table.rawJson,
-    value,
-  );
+  _i1.ColumnValue<String, String> rawJson(String value) =>
+      _i1.ColumnValue(table.rawJson, value);
 
   _i1.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
-      _i1.ColumnValue(
-        table.createdAt,
-        value,
-      );
+      _i1.ColumnValue(table.createdAt, value);
 
   _i1.ColumnValue<DateTime, DateTime> updatedAt(DateTime value) =>
-      _i1.ColumnValue(
-        table.updatedAt,
-        value,
-      );
+      _i1.ColumnValue(table.updatedAt, value);
 }
 
 class SolanaWalletTransactionTable extends _i1.Table<_i1.UuidValue?> {
   SolanaWalletTransactionTable({super.tableRelation})
     : super(tableName: 'solana_wallet_transaction') {
     updateTable = SolanaWalletTransactionUpdateTable(this);
-    walletId = _i1.ColumnUuid(
-      'walletId',
-      this,
-    );
-    budgetId = _i1.ColumnUuid(
-      'budgetId',
-      this,
-    );
-    signature = _i1.ColumnString(
-      'signature',
-      this,
-    );
-    slot = _i1.ColumnInt(
-      'slot',
-      this,
-    );
-    occurredAt = _i1.ColumnDateTime(
-      'occurredAt',
-      this,
-    );
-    description = _i1.ColumnString(
-      'description',
-      this,
-    );
-    txType = _i1.ColumnString(
-      'txType',
-      this,
-    );
-    source = _i1.ColumnString(
-      'source',
-      this,
-    );
+    walletId = _i1.ColumnUuid('walletId', this);
+    budgetId = _i1.ColumnUuid('budgetId', this);
+    signature = _i1.ColumnString('signature', this);
+    slot = _i1.ColumnInt('slot', this);
+    occurredAt = _i1.ColumnDateTime('occurredAt', this);
+    description = _i1.ColumnString('description', this);
+    txType = _i1.ColumnString('txType', this);
+    source = _i1.ColumnString('source', this);
     interpretationConfidence = _i1.ColumnString(
       'interpretationConfidence',
       this,
     );
-    programsJson = _i1.ColumnString(
-      'programsJson',
-      this,
-    );
-    nativeTransfersJson = _i1.ColumnString(
-      'nativeTransfersJson',
-      this,
-    );
-    tokenTransfersJson = _i1.ColumnString(
-      'tokenTransfersJson',
-      this,
-    );
-    estimatedCostBasis = _i1.ColumnDouble(
-      'estimatedCostBasis',
-      this,
-    );
-    estimatedProceeds = _i1.ColumnDouble(
-      'estimatedProceeds',
-      this,
-    );
-    estimatedRealizedPnl = _i1.ColumnDouble(
-      'estimatedRealizedPnl',
-      this,
-    );
-    pnlCurrency = _i1.ColumnString(
-      'pnlCurrency',
-      this,
-    );
-    taxYear = _i1.ColumnInt(
-      'taxYear',
-      this,
-    );
-    category = _i1.ColumnString(
-      'category',
-      this,
-    );
-    tagsCsv = _i1.ColumnString(
-      'tagsCsv',
-      this,
-    );
-    memo = _i1.ColumnString(
-      'memo',
-      this,
-    );
-    rawJson = _i1.ColumnString(
-      'rawJson',
-      this,
-    );
-    createdAt = _i1.ColumnDateTime(
-      'createdAt',
-      this,
-      hasDefault: true,
-    );
-    updatedAt = _i1.ColumnDateTime(
-      'updatedAt',
-      this,
-      hasDefault: true,
-    );
+    programsJson = _i1.ColumnString('programsJson', this);
+    nativeTransfersJson = _i1.ColumnString('nativeTransfersJson', this);
+    tokenTransfersJson = _i1.ColumnString('tokenTransfersJson', this);
+    estimatedCostBasis = _i1.ColumnDouble('estimatedCostBasis', this);
+    estimatedProceeds = _i1.ColumnDouble('estimatedProceeds', this);
+    estimatedRealizedPnl = _i1.ColumnDouble('estimatedRealizedPnl', this);
+    pnlCurrency = _i1.ColumnString('pnlCurrency', this);
+    taxYear = _i1.ColumnInt('taxYear', this);
+    category = _i1.ColumnString('category', this);
+    tagsCsv = _i1.ColumnString('tagsCsv', this);
+    memo = _i1.ColumnString('memo', this);
+    rawJson = _i1.ColumnString('rawJson', this);
+    createdAt = _i1.ColumnDateTime('createdAt', this, hasDefault: true);
+    updatedAt = _i1.ColumnDateTime('updatedAt', this, hasDefault: true);
   }
 
   late final SolanaWalletTransactionUpdateTable updateTable;

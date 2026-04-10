@@ -89,8 +89,12 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          budgetMonthlySummaryProvider.overrideWith((ref, _) async => _makeSummary()),
-          budgetGoalsProvider.overrideWith((ref, _) async => {_envelopeId: goal}),
+          budgetMonthlySummaryProvider.overrideWith(
+            (ref, _) async => _makeSummary(),
+          ),
+          budgetGoalsProvider.overrideWith(
+            (ref, _) async => {_envelopeId: goal},
+          ),
         ],
         child: MaterialApp(
           theme: OpenBudgetTheme.light,

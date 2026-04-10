@@ -246,105 +246,50 @@ class WalletHoldingUpdateTable extends _i1.UpdateTable<WalletHoldingTable> {
 
   _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> walletConnectionId(
     _i1.UuidValue value,
-  ) => _i1.ColumnValue(
-    table.walletConnectionId,
-    value,
-  );
+  ) => _i1.ColumnValue(table.walletConnectionId, value);
 
-  _i1.ColumnValue<String, String> chain(String value) => _i1.ColumnValue(
-    table.chain,
-    value,
-  );
+  _i1.ColumnValue<String, String> chain(String value) =>
+      _i1.ColumnValue(table.chain, value);
 
-  _i1.ColumnValue<String, String> assetId(String value) => _i1.ColumnValue(
-    table.assetId,
-    value,
-  );
+  _i1.ColumnValue<String, String> assetId(String value) =>
+      _i1.ColumnValue(table.assetId, value);
 
-  _i1.ColumnValue<String, String> symbol(String value) => _i1.ColumnValue(
-    table.symbol,
-    value,
-  );
+  _i1.ColumnValue<String, String> symbol(String value) =>
+      _i1.ColumnValue(table.symbol, value);
 
-  _i1.ColumnValue<int, int> decimals(int value) => _i1.ColumnValue(
-    table.decimals,
-    value,
-  );
+  _i1.ColumnValue<int, int> decimals(int value) =>
+      _i1.ColumnValue(table.decimals, value);
 
   _i1.ColumnValue<String, String> quantityBaseUnits(String value) =>
-      _i1.ColumnValue(
-        table.quantityBaseUnits,
-        value,
-      );
+      _i1.ColumnValue(table.quantityBaseUnits, value);
 
   _i1.ColumnValue<double, double> quantityDisplay(double value) =>
-      _i1.ColumnValue(
-        table.quantityDisplay,
-        value,
-      );
+      _i1.ColumnValue(table.quantityDisplay, value);
 
-  _i1.ColumnValue<double, double> usdPrice(double? value) => _i1.ColumnValue(
-    table.usdPrice,
-    value,
-  );
+  _i1.ColumnValue<double, double> usdPrice(double? value) =>
+      _i1.ColumnValue(table.usdPrice, value);
 
-  _i1.ColumnValue<double, double> usdValue(double? value) => _i1.ColumnValue(
-    table.usdValue,
-    value,
-  );
+  _i1.ColumnValue<double, double> usdValue(double? value) =>
+      _i1.ColumnValue(table.usdValue, value);
 
   _i1.ColumnValue<DateTime, DateTime> lastSyncedAt(DateTime value) =>
-      _i1.ColumnValue(
-        table.lastSyncedAt,
-        value,
-      );
+      _i1.ColumnValue(table.lastSyncedAt, value);
 }
 
 class WalletHoldingTable extends _i1.Table<_i1.UuidValue?> {
   WalletHoldingTable({super.tableRelation})
     : super(tableName: 'wallet_holding') {
     updateTable = WalletHoldingUpdateTable(this);
-    walletConnectionId = _i1.ColumnUuid(
-      'walletConnectionId',
-      this,
-    );
-    chain = _i1.ColumnString(
-      'chain',
-      this,
-    );
-    assetId = _i1.ColumnString(
-      'assetId',
-      this,
-    );
-    symbol = _i1.ColumnString(
-      'symbol',
-      this,
-    );
-    decimals = _i1.ColumnInt(
-      'decimals',
-      this,
-    );
-    quantityBaseUnits = _i1.ColumnString(
-      'quantityBaseUnits',
-      this,
-    );
-    quantityDisplay = _i1.ColumnDouble(
-      'quantityDisplay',
-      this,
-    );
-    usdPrice = _i1.ColumnDouble(
-      'usdPrice',
-      this,
-    );
-    usdValue = _i1.ColumnDouble(
-      'usdValue',
-      this,
-    );
-    lastSyncedAt = _i1.ColumnDateTime(
-      'lastSyncedAt',
-      this,
-      hasDefault: true,
-    );
+    walletConnectionId = _i1.ColumnUuid('walletConnectionId', this);
+    chain = _i1.ColumnString('chain', this);
+    assetId = _i1.ColumnString('assetId', this);
+    symbol = _i1.ColumnString('symbol', this);
+    decimals = _i1.ColumnInt('decimals', this);
+    quantityBaseUnits = _i1.ColumnString('quantityBaseUnits', this);
+    quantityDisplay = _i1.ColumnDouble('quantityDisplay', this);
+    usdPrice = _i1.ColumnDouble('usdPrice', this);
+    usdValue = _i1.ColumnDouble('usdValue', this);
+    lastSyncedAt = _i1.ColumnDateTime('lastSyncedAt', this, hasDefault: true);
   }
 
   late final WalletHoldingUpdateTable updateTable;
@@ -552,10 +497,7 @@ class WalletHoldingRepository {
     WalletHolding row, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.insertRow<WalletHolding>(
-      row,
-      transaction: transaction,
-    );
+    return session.db.insertRow<WalletHolding>(row, transaction: transaction);
   }
 
   /// Updates all [WalletHolding]s in the list and returns the updated rows. If
@@ -640,10 +582,7 @@ class WalletHoldingRepository {
     List<WalletHolding> rows, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.delete<WalletHolding>(
-      rows,
-      transaction: transaction,
-    );
+    return session.db.delete<WalletHolding>(rows, transaction: transaction);
   }
 
   /// Deletes a single [WalletHolding].
@@ -652,10 +591,7 @@ class WalletHoldingRepository {
     WalletHolding row, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.deleteRow<WalletHolding>(
-      row,
-      transaction: transaction,
-    );
+    return session.db.deleteRow<WalletHolding>(row, transaction: transaction);
   }
 
   /// Deletes all rows matching the [where] expression.

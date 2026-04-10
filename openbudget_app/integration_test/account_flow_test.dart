@@ -66,34 +66,34 @@ Account _makeAccount({
   bool onBudget = true,
   bool isClosed = false,
 }) => Account(
-    id: id,
-    name: name,
-    accountType: accountType,
-    balanceCents: balanceCents,
-    currencyCode: currencyCode,
-    budgetId: _budgetUuid,
-    onBudget: onBudget,
-    sortOrder: 0,
-    isClosed: isClosed,
-  );
+  id: id,
+  name: name,
+  accountType: accountType,
+  balanceCents: balanceCents,
+  currencyCode: currencyCode,
+  budgetId: _budgetUuid,
+  onBudget: onBudget,
+  sortOrder: 0,
+  isClosed: isClosed,
+);
 
 Budget _makeBudget({String currencyCode = 'USD'}) => Budget(
-    id: _budgetUuid,
-    name: 'OpenBudget',
-    currencyCode: currencyCode,
-    ownerId: UuidValue.fromString('00000000-0000-0000-0000-000000000099'),
-    createdAt: DateTime(2026),
-  );
+  id: _budgetUuid,
+  name: 'OpenBudget',
+  currencyCode: currencyCode,
+  ownerId: UuidValue.fromString('00000000-0000-0000-0000-000000000099'),
+  createdAt: DateTime(2026),
+);
 
 BudgetSummary _makeSummary({String currencyCode = 'USD'}) => BudgetSummary(
-    budget: _makeBudget(currencyCode: currencyCode),
-    categories: const [],
-    totalIncomeCents: 0,
-    totalBudgetedCents: 0,
-    readyToAssignCents: 0,
-    year: 2026,
-    month: 9,
-  );
+  budget: _makeBudget(currencyCode: currencyCode),
+  categories: const [],
+  totalIncomeCents: 0,
+  totalBudgetedCents: 0,
+  readyToAssignCents: 0,
+  year: 2026,
+  month: 9,
+);
 
 Transaction _makeTransaction({
   required String id,
@@ -104,16 +104,16 @@ Transaction _makeTransaction({
   bool reconciled = false,
   DateTime? transactionDate,
 }) => Transaction(
-    id: UuidValue.fromString(id),
-    description: description,
-    amountCents: amountCents,
-    currencyCode: 'USD',
-    budgetId: _budgetUuid,
-    accountId: accountId,
-    transactionDate: transactionDate ?? DateTime(2026, 9, 3),
-    cleared: cleared,
-    reconciled: reconciled,
-  );
+  id: UuidValue.fromString(id),
+  description: description,
+  amountCents: amountCents,
+  currencyCode: 'USD',
+  budgetId: _budgetUuid,
+  accountId: accountId,
+  transactionDate: transactionDate ?? DateTime(2026, 9, 3),
+  cleared: cleared,
+  reconciled: reconciled,
+);
 
 class _FakeAccountActions extends AccountActions {
   @override
@@ -131,16 +131,16 @@ class _FakeAccountActions extends AccountActions {
     String? walletAddress,
     String? institutionId,
   }) async => Account(
-      id: UuidValue.fromString('00000000-0000-0000-0000-000000000777'),
-      name: name,
-      accountType: accountType,
-      balanceCents: balanceCents,
-      currencyCode: currencyCode,
-      budgetId: _budgetUuid,
-      onBudget: onBudget,
-      sortOrder: sortOrder,
-      isClosed: false,
-    );
+    id: UuidValue.fromString('00000000-0000-0000-0000-000000000777'),
+    name: name,
+    accountType: accountType,
+    balanceCents: balanceCents,
+    currencyCode: currencyCode,
+    budgetId: _budgetUuid,
+    onBudget: onBudget,
+    sortOrder: sortOrder,
+    isClosed: false,
+  );
 }
 
 Widget _buildApp({
@@ -1241,7 +1241,7 @@ Future<void> _captureAddAccountStepScreenshot(
   WidgetTester tester,
   String name,
 ) => captureIntegrationScreenshot(
-    tester,
-    name,
-    captureTarget: find.byKey(addAccountScreenCaptureBoundaryKey),
-  );
+  tester,
+  name,
+  captureTarget: find.byKey(addAccountScreenCaptureBoundaryKey),
+);

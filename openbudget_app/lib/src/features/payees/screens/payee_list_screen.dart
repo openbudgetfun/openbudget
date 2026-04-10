@@ -280,26 +280,26 @@ class _PayeeTile extends HookConsumerWidget {
     AppLocalizations l10n,
     ColorScheme colorScheme,
   ) async => showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.deleteConfirmTitle),
-        content: Text('${l10n.deleteConfirmMessage}\n\n"${payee.name}"'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(l10n.dialogCancel),
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: Text(l10n.deleteConfirmTitle),
+      content: Text('${l10n.deleteConfirmMessage}\n\n"${payee.name}"'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(ctx).pop(false),
+          child: Text(l10n.dialogCancel),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.of(ctx).pop(true),
+          style: FilledButton.styleFrom(
+            backgroundColor: colorScheme.error,
+            foregroundColor: colorScheme.onError,
           ),
-          FilledButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            style: FilledButton.styleFrom(
-              backgroundColor: colorScheme.error,
-              foregroundColor: colorScheme.onError,
-            ),
-            child: Text(l10n.deleteConfirmButton),
-          ),
-        ],
-      ),
-    );
+          child: Text(l10n.deleteConfirmButton),
+        ),
+      ],
+    ),
+  );
 
   Future<void> _deletePayee(
     BuildContext context,

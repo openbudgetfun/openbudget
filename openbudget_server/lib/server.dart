@@ -78,10 +78,10 @@ Future<void> run(List<String> args) async {
                 required verificationCode,
                 required transaction,
               }) => emailSender.sendVerificationCode(
-                  session,
-                  email: email,
-                  code: verificationCode,
-                ),
+                session,
+                email: email,
+                code: verificationCode,
+              ),
           sendPasswordResetVerificationCode:
               (
                 session, {
@@ -90,10 +90,10 @@ Future<void> run(List<String> args) async {
                 required verificationCode,
                 required transaction,
               }) => emailSender.sendPasswordResetCode(
-                  session,
-                  email: email,
-                  code: verificationCode,
-                ),
+                session,
+                email: email,
+                code: verificationCode,
+              ),
         ),
       if (googleIdpEnabled) GoogleIdpConfigFromPasswords(),
       if (appleIdpEnabled) AppleIdpConfigFromPasswords(),
@@ -195,7 +195,8 @@ bool? _readBoolPassword(Serverpod pod, String key) {
   }
 }
 
-bool _hasRequiredPasswords(Serverpod pod, List<String> keys) => keys.every((key) => _readPassword(pod, key) != null);
+bool _hasRequiredPasswords(Serverpod pod, List<String> keys) =>
+    keys.every((key) => _readPassword(pod, key) != null);
 
 Future<void> _seedInstitutions(Serverpod pod) async {
   final session = await pod.createSession(enableLogging: false);
@@ -243,5 +244,5 @@ EmailSender? createEmailSender({
   );
 }
 
-bool _isLocalRunMode(String runMode) => runMode == ServerpodRunMode.development ||
-      runMode == ServerpodRunMode.test;
+bool _isLocalRunMode(String runMode) =>
+    runMode == ServerpodRunMode.development || runMode == ServerpodRunMode.test;

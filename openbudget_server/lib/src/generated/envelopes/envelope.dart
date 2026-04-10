@@ -239,96 +239,47 @@ class _EnvelopeImpl extends Envelope {
 class EnvelopeUpdateTable extends _i1.UpdateTable<EnvelopeTable> {
   EnvelopeUpdateTable(super.table);
 
-  _i1.ColumnValue<String, String> name(String value) => _i1.ColumnValue(
-    table.name,
-    value,
-  );
+  _i1.ColumnValue<String, String> name(String value) =>
+      _i1.ColumnValue(table.name, value);
 
   _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> categoryId(
     _i1.UuidValue value,
-  ) => _i1.ColumnValue(
-    table.categoryId,
-    value,
-  );
+  ) => _i1.ColumnValue(table.categoryId, value);
 
-  _i1.ColumnValue<int, int> budgetedAmountCents(int value) => _i1.ColumnValue(
-    table.budgetedAmountCents,
-    value,
-  );
+  _i1.ColumnValue<int, int> budgetedAmountCents(int value) =>
+      _i1.ColumnValue(table.budgetedAmountCents, value);
 
-  _i1.ColumnValue<int, int> spentAmountCents(int value) => _i1.ColumnValue(
-    table.spentAmountCents,
-    value,
-  );
+  _i1.ColumnValue<int, int> spentAmountCents(int value) =>
+      _i1.ColumnValue(table.spentAmountCents, value);
 
-  _i1.ColumnValue<String, String> currencyCode(String value) => _i1.ColumnValue(
-    table.currencyCode,
-    value,
-  );
+  _i1.ColumnValue<String, String> currencyCode(String value) =>
+      _i1.ColumnValue(table.currencyCode, value);
 
-  _i1.ColumnValue<int, int> sortOrder(int value) => _i1.ColumnValue(
-    table.sortOrder,
-    value,
-  );
+  _i1.ColumnValue<int, int> sortOrder(int value) =>
+      _i1.ColumnValue(table.sortOrder, value);
 
-  _i1.ColumnValue<String, String> note(String? value) => _i1.ColumnValue(
-    table.note,
-    value,
-  );
+  _i1.ColumnValue<String, String> note(String? value) =>
+      _i1.ColumnValue(table.note, value);
 
-  _i1.ColumnValue<bool, bool> isHidden(bool? value) => _i1.ColumnValue(
-    table.isHidden,
-    value,
-  );
+  _i1.ColumnValue<bool, bool> isHidden(bool? value) =>
+      _i1.ColumnValue(table.isHidden, value);
 
   _i1.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
-      _i1.ColumnValue(
-        table.createdAt,
-        value,
-      );
+      _i1.ColumnValue(table.createdAt, value);
 }
 
 class EnvelopeTable extends _i1.Table<_i1.UuidValue?> {
   EnvelopeTable({super.tableRelation}) : super(tableName: 'envelope') {
     updateTable = EnvelopeUpdateTable(this);
-    name = _i1.ColumnString(
-      'name',
-      this,
-    );
-    categoryId = _i1.ColumnUuid(
-      'categoryId',
-      this,
-    );
-    budgetedAmountCents = _i1.ColumnInt(
-      'budgetedAmountCents',
-      this,
-    );
-    spentAmountCents = _i1.ColumnInt(
-      'spentAmountCents',
-      this,
-    );
-    currencyCode = _i1.ColumnString(
-      'currencyCode',
-      this,
-    );
-    sortOrder = _i1.ColumnInt(
-      'sortOrder',
-      this,
-    );
-    note = _i1.ColumnString(
-      'note',
-      this,
-    );
-    isHidden = _i1.ColumnBool(
-      'isHidden',
-      this,
-      hasDefault: true,
-    );
-    createdAt = _i1.ColumnDateTime(
-      'createdAt',
-      this,
-      hasDefault: true,
-    );
+    name = _i1.ColumnString('name', this);
+    categoryId = _i1.ColumnUuid('categoryId', this);
+    budgetedAmountCents = _i1.ColumnInt('budgetedAmountCents', this);
+    spentAmountCents = _i1.ColumnInt('spentAmountCents', this);
+    currencyCode = _i1.ColumnString('currencyCode', this);
+    sortOrder = _i1.ColumnInt('sortOrder', this);
+    note = _i1.ColumnString('note', this);
+    isHidden = _i1.ColumnBool('isHidden', this, hasDefault: true);
+    createdAt = _i1.ColumnDateTime('createdAt', this, hasDefault: true);
   }
 
   late final EnvelopeUpdateTable updateTable;
@@ -539,10 +490,7 @@ class EnvelopeRepository {
     Envelope row, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.insertRow<Envelope>(
-      row,
-      transaction: transaction,
-    );
+    return session.db.insertRow<Envelope>(row, transaction: transaction);
   }
 
   /// Updates all [Envelope]s in the list and returns the updated rows. If
@@ -627,10 +575,7 @@ class EnvelopeRepository {
     List<Envelope> rows, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.delete<Envelope>(
-      rows,
-      transaction: transaction,
-    );
+    return session.db.delete<Envelope>(rows, transaction: transaction);
   }
 
   /// Deletes a single [Envelope].
@@ -639,10 +584,7 @@ class EnvelopeRepository {
     Envelope row, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.deleteRow<Envelope>(
-      row,
-      transaction: transaction,
-    );
+    return session.db.deleteRow<Envelope>(row, transaction: transaction);
   }
 
   /// Deletes all rows matching the [where] expression.

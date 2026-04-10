@@ -28,10 +28,12 @@ class CategoryEndpoint extends Endpoint {
   }
 
   /// Lists all categories for a budget.
-  Future<List<Category>> list(Session session, UuidValue budgetId) async => CategoryService.listForBudget(session, budgetId: budgetId);
+  Future<List<Category>> list(Session session, UuidValue budgetId) async =>
+      CategoryService.listForBudget(session, budgetId: budgetId);
 
   /// Gets a single category by ID.
-  Future<Category> get(Session session, UuidValue categoryId) async => CategoryService.getById(session, categoryId: categoryId);
+  Future<Category> get(Session session, UuidValue categoryId) async =>
+      CategoryService.getById(session, categoryId: categoryId);
 
   /// Updates a category by ID.
   Future<Category> update(

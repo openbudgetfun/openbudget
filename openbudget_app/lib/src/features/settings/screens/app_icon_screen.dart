@@ -131,15 +131,15 @@ class _SettingsCard extends HookWidget {
 
   @override
   Widget build(BuildContext context) => DecoratedBox(
-      decoration: BoxDecoration(
-        color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
-        borderRadius: BorderRadius.circular(RadiusTokens.md),
-        border: Border.all(
-          color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
-        ),
+    decoration: BoxDecoration(
+      color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
+      borderRadius: BorderRadius.circular(RadiusTokens.md),
+      border: Border.all(
+        color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
       ),
-      child: child,
-    );
+    ),
+    child: child,
+  );
 }
 
 class _AppIconStyleTile extends HookWidget {
@@ -159,25 +159,25 @@ class _AppIconStyleTile extends HookWidget {
 
   @override
   Widget build(BuildContext context) => ListTile(
-      onTap: onTap,
-      leading: selected
-          ? Icon(
-              Icons.check_rounded,
-              color: OpenBudgetPalette.bgBrandFor(Theme.of(context)),
-            )
-          : const SizedBox(width: 24),
-      title: Text(label),
-      trailing: Container(
-        height: 34,
-        width: 34,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
-          ),
+    onTap: onTap,
+    leading: selected
+        ? Icon(
+            Icons.check_rounded,
+            color: OpenBudgetPalette.bgBrandFor(Theme.of(context)),
+          )
+        : const SizedBox(width: 24),
+    title: Text(label),
+    trailing: Container(
+      height: 34,
+      width: 34,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
         ),
-        clipBehavior: Clip.antiAlias,
-        child: Image.asset(previewAssetPath, fit: BoxFit.cover),
       ),
-    );
+      clipBehavior: Clip.antiAlias,
+      child: Image.asset(previewAssetPath, fit: BoxFit.cover),
+    ),
+  );
 }

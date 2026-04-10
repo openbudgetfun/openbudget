@@ -131,37 +131,38 @@ void main() {
   });
 }
 
-SpendingReport _reportFor({required int year, required int month}) => switch ((year, month)) {
-    (2025, 9) => const SpendingReport(
-      totalIncome: 3000,
-      totalExpenses: 300,
-      netIncome: 2700,
-      transactionCount: 9,
-      categorySpending: {'Rent': 120, 'Utilities': 180},
-      currencyCode: 'USD',
-    ),
-    (2025, 8) => const SpendingReport(
-      totalIncome: 2000,
-      totalExpenses: 200,
-      netIncome: 1800,
-      transactionCount: 8,
-      categorySpending: {'Rent': 100, 'Utilities': 80, 'Groceries': 20},
-      currencyCode: 'USD',
-    ),
-    (2025, 7) => const SpendingReport(
-      totalIncome: 1000,
-      totalExpenses: 100,
-      netIncome: 900,
-      transactionCount: 7,
-      categorySpending: {'Rent': 80, 'Groceries': 40},
-      currencyCode: 'USD',
-    ),
-    _ => const SpendingReport(
-      totalIncome: 0,
-      totalExpenses: 0,
-      netIncome: 0,
-      transactionCount: 0,
-      categorySpending: {},
-      currencyCode: 'USD',
-    ),
-  };
+SpendingReport _reportFor({required int year, required int month}) =>
+    switch ((year, month)) {
+      (2025, 9) => const SpendingReport(
+        totalIncome: 3000,
+        totalExpenses: 300,
+        netIncome: 2700,
+        transactionCount: 9,
+        categorySpending: {'Rent': 120, 'Utilities': 180},
+        currencyCode: 'USD',
+      ),
+      (2025, 8) => const SpendingReport(
+        totalIncome: 2000,
+        totalExpenses: 200,
+        netIncome: 1800,
+        transactionCount: 8,
+        categorySpending: {'Rent': 100, 'Utilities': 80, 'Groceries': 20},
+        currencyCode: 'USD',
+      ),
+      (2025, 7) => const SpendingReport(
+        totalIncome: 1000,
+        totalExpenses: 100,
+        netIncome: 900,
+        transactionCount: 7,
+        categorySpending: {'Rent': 80, 'Groceries': 40},
+        currencyCode: 'USD',
+      ),
+      _ => const SpendingReport(
+        totalIncome: 0,
+        totalExpenses: 0,
+        netIncome: 0,
+        transactionCount: 0,
+        categorySpending: {},
+        currencyCode: 'USD',
+      ),
+    };

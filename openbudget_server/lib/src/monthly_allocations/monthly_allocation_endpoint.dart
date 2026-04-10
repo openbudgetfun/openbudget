@@ -40,11 +40,11 @@ class MonthlyAllocationEndpoint extends Endpoint {
     int year,
     int month,
   ) async => MonthlyAllocationService.listForBudgetMonth(
-      session,
-      budgetId: budgetId,
-      year: year,
-      month: month,
-    );
+    session,
+    budgetId: budgetId,
+    year: year,
+    month: month,
+  );
 
   /// Copies all allocations from a source month to a target month.
   Future<List<MonthlyAllocation>> copyMonth(

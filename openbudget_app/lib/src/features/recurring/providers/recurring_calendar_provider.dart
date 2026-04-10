@@ -99,19 +99,20 @@ List<DateTime> _generateOccurrences(
 }
 
 DateTime _addFrequency(DateTime date, String frequency) => switch (frequency) {
-    'daily' => date.add(const Duration(days: 1)),
-    'weekly' => date.add(const Duration(days: 7)),
-    'biweekly' => date.add(const Duration(days: 14)),
-    'monthly' => DateTime(date.year, date.month + 1, date.day),
-    'yearly' => DateTime(date.year + 1, date.month, date.day),
-    _ => date.add(const Duration(days: 30)),
-  };
+  'daily' => date.add(const Duration(days: 1)),
+  'weekly' => date.add(const Duration(days: 7)),
+  'biweekly' => date.add(const Duration(days: 14)),
+  'monthly' => DateTime(date.year, date.month + 1, date.day),
+  'yearly' => DateTime(date.year + 1, date.month, date.day),
+  _ => date.add(const Duration(days: 30)),
+};
 
-DateTime _subtractFrequency(DateTime date, String frequency) => switch (frequency) {
-    'daily' => date.subtract(const Duration(days: 1)),
-    'weekly' => date.subtract(const Duration(days: 7)),
-    'biweekly' => date.subtract(const Duration(days: 14)),
-    'monthly' => DateTime(date.year, date.month - 1, date.day),
-    'yearly' => DateTime(date.year - 1, date.month, date.day),
-    _ => date.subtract(const Duration(days: 30)),
-  };
+DateTime _subtractFrequency(DateTime date, String frequency) =>
+    switch (frequency) {
+      'daily' => date.subtract(const Duration(days: 1)),
+      'weekly' => date.subtract(const Duration(days: 7)),
+      'biweekly' => date.subtract(const Duration(days: 14)),
+      'monthly' => DateTime(date.year, date.month - 1, date.day),
+      'yearly' => DateTime(date.year - 1, date.month, date.day),
+      _ => date.subtract(const Duration(days: 30)),
+    };

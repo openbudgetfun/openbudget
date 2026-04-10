@@ -473,9 +473,9 @@ class _EditPlanContent extends HookConsumerWidget {
   }
 
   int _goalTargetCents(EnvelopeGoal goal) => switch (goal.goalType) {
-      'monthly_funding' => goal.monthlyFundingCents ?? goal.targetAmountCents,
-      _ => goal.targetAmountCents,
-    };
+    'monthly_funding' => goal.monthlyFundingCents ?? goal.targetAmountCents,
+    _ => goal.targetAmountCents,
+  };
 
   Future<void> _showSetGoalDialog({
     required BuildContext context,
@@ -540,115 +540,113 @@ class _EditPlanContent extends HookConsumerWidget {
       backgroundColor: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
       isScrollControlled: true,
       builder: (sheetContext) => SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(
-              SpacingTokens.md,
-              SpacingTokens.md,
-              SpacingTokens.md,
-              SpacingTokens.lg,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      l10n.editPlanDetails,
-                      style: theme.textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const Spacer(),
-                    IconButton(
-                      onPressed: () => Navigator.of(sheetContext).pop(),
-                      icon: const Icon(Icons.close_rounded),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: SpacingTokens.sm),
-                Text(
-                  l10n.editPlanCategoryGroupName,
-                  style: theme.textTheme.labelLarge?.copyWith(
-                    color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
-                  ),
-                ),
-                const SizedBox(height: SpacingTokens.xs),
-                DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
-                    borderRadius: BorderRadius.circular(RadiusTokens.md),
-                    border: Border.all(
-                      color: OpenBudgetPalette.borderSubtleFor(
-                        Theme.of(context),
-                      ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            SpacingTokens.md,
+            SpacingTokens.md,
+            SpacingTokens.md,
+            SpacingTokens.lg,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  Text(
+                    l10n.editPlanDetails,
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: SpacingTokens.md,
-                      vertical: SpacingTokens.sm + 2,
-                    ),
-                    child: Text(
-                      category.name,
-                      style: theme.textTheme.titleMedium,
-                    ),
+                  const Spacer(),
+                  IconButton(
+                    onPressed: () => Navigator.of(sheetContext).pop(),
+                    icon: const Icon(Icons.close_rounded),
+                  ),
+                ],
+              ),
+              const SizedBox(height: SpacingTokens.sm),
+              Text(
+                l10n.editPlanCategoryGroupName,
+                style: theme.textTheme.labelLarge?.copyWith(
+                  color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
+                ),
+              ),
+              const SizedBox(height: SpacingTokens.xs),
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
+                  borderRadius: BorderRadius.circular(RadiusTokens.md),
+                  border: Border.all(
+                    color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
                   ),
                 ),
-                const SizedBox(height: SpacingTokens.md),
-                Row(
-                  children: [
-                    Expanded(
-                      child: FilledButton.icon(
-                        onPressed: () {
-                          Navigator.of(sheetContext).pop();
-                          _confirmHideGroup(
-                            context: context,
-                            ref: ref,
-                            categoryWithEnvelopes: categoryWithEnvelopes,
-                          );
-                        },
-                        icon: const Icon(Icons.visibility_off_rounded),
-                        label: Text(l10n.editPlanHide),
-                        style: FilledButton.styleFrom(
-                          backgroundColor: OpenBudgetPalette.bgTertiaryFor(
-                            Theme.of(context),
-                          ),
-                          foregroundColor: OpenBudgetPalette.bgBrandFor(
-                            Theme.of(context),
-                          ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: SpacingTokens.md,
+                    vertical: SpacingTokens.sm + 2,
+                  ),
+                  child: Text(
+                    category.name,
+                    style: theme.textTheme.titleMedium,
+                  ),
+                ),
+              ),
+              const SizedBox(height: SpacingTokens.md),
+              Row(
+                children: [
+                  Expanded(
+                    child: FilledButton.icon(
+                      onPressed: () {
+                        Navigator.of(sheetContext).pop();
+                        _confirmHideGroup(
+                          context: context,
+                          ref: ref,
+                          categoryWithEnvelopes: categoryWithEnvelopes,
+                        );
+                      },
+                      icon: const Icon(Icons.visibility_off_rounded),
+                      label: Text(l10n.editPlanHide),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: OpenBudgetPalette.bgTertiaryFor(
+                          Theme.of(context),
+                        ),
+                        foregroundColor: OpenBudgetPalette.bgBrandFor(
+                          Theme.of(context),
                         ),
                       ),
                     ),
-                    const SizedBox(width: SpacingTokens.sm),
-                    Expanded(
-                      child: FilledButton.icon(
-                        onPressed: () {
-                          Navigator.of(sheetContext).pop();
-                          _confirmDeleteGroup(
-                            context: context,
-                            ref: ref,
-                            categoryWithEnvelopes: categoryWithEnvelopes,
-                          );
-                        },
-                        icon: const Icon(Icons.delete_rounded),
-                        label: Text(l10n.editPlanDelete),
-                        style: FilledButton.styleFrom(
-                          backgroundColor: OpenBudgetPalette.bgTertiaryFor(
-                            Theme.of(context),
-                          ),
-                          foregroundColor: OpenBudgetPalette.fgErrorFor(
-                            Theme.of(context),
-                          ),
+                  ),
+                  const SizedBox(width: SpacingTokens.sm),
+                  Expanded(
+                    child: FilledButton.icon(
+                      onPressed: () {
+                        Navigator.of(sheetContext).pop();
+                        _confirmDeleteGroup(
+                          context: context,
+                          ref: ref,
+                          categoryWithEnvelopes: categoryWithEnvelopes,
+                        );
+                      },
+                      icon: const Icon(Icons.delete_rounded),
+                      label: Text(l10n.editPlanDelete),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: OpenBudgetPalette.bgTertiaryFor(
+                          Theme.of(context),
+                        ),
+                        foregroundColor: OpenBudgetPalette.fgErrorFor(
+                          Theme.of(context),
                         ),
                       ),
                     ),
-                  ],
-                ),
-              ],
-            ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
+      ),
     );
   }
 

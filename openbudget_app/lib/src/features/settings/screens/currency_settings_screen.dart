@@ -214,39 +214,40 @@ class CurrencySettingsScreen extends HookConsumerWidget {
     required T current,
     required String Function(T option) labelBuilder,
   }) => showModalBottomSheet<T>(
-      context: context,
-      showDragHandle: true,
-      builder: (context) => SafeArea(
-        child: ListView.separated(
-          shrinkWrap: true,
-          itemCount: options.length,
-          separatorBuilder: (_, __) => const Divider(height: 1),
-          itemBuilder: (context, index) {
-            final option = options[index];
-            final selected = option == current;
-            return ListTile(
-              title: Text(labelBuilder(option)),
-              trailing: selected ? const Icon(Icons.check_rounded) : null,
-              onTap: () => Navigator.of(context).pop(option),
-            );
-          },
-        ),
+    context: context,
+    showDragHandle: true,
+    builder: (context) => SafeArea(
+      child: ListView.separated(
+        shrinkWrap: true,
+        itemCount: options.length,
+        separatorBuilder: (_, __) => const Divider(height: 1),
+        itemBuilder: (context, index) {
+          final option = options[index];
+          final selected = option == current;
+          return ListTile(
+            title: Text(labelBuilder(option)),
+            trailing: selected ? const Icon(Icons.check_rounded) : null,
+            onTap: () => Navigator.of(context).pop(option),
+          );
+        },
       ),
-    );
+    ),
+  );
 }
 
-String _numberFormatLabel(AppLocalizations l10n, NumberFormatStyle style) => switch (style) {
-    NumberFormatStyle.standard => l10n.settingsNumberFormatStandard,
-    NumberFormatStyle.european => l10n.settingsNumberFormatEuropean,
-  };
+String _numberFormatLabel(AppLocalizations l10n, NumberFormatStyle style) =>
+    switch (style) {
+      NumberFormatStyle.standard => l10n.settingsNumberFormatStandard,
+      NumberFormatStyle.european => l10n.settingsNumberFormatEuropean,
+    };
 
 String _currencyPlacementLabel(
   AppLocalizations l10n,
   CurrencyPlacementStyle style,
 ) => switch (style) {
-    CurrencyPlacementStyle.beforeAmount => l10n.settingsCurrencyPlacementBefore,
-    CurrencyPlacementStyle.afterAmount => l10n.settingsCurrencyPlacementAfter,
-  };
+  CurrencyPlacementStyle.beforeAmount => l10n.settingsCurrencyPlacementBefore,
+  CurrencyPlacementStyle.afterAmount => l10n.settingsCurrencyPlacementAfter,
+};
 
 class _SettingsCard extends HookWidget {
   const _SettingsCard({required this.child});
@@ -255,15 +256,15 @@ class _SettingsCard extends HookWidget {
 
   @override
   Widget build(BuildContext context) => DecoratedBox(
-      decoration: BoxDecoration(
-        color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
-        borderRadius: BorderRadius.circular(RadiusTokens.md),
-        border: Border.all(
-          color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
-        ),
+    decoration: BoxDecoration(
+      color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
+      borderRadius: BorderRadius.circular(RadiusTokens.md),
+      border: Border.all(
+        color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
       ),
-      child: child,
-    );
+    ),
+    child: child,
+  );
 }
 
 class _SettingsTile extends HookWidget {

@@ -28,16 +28,16 @@ Account _makeAccount({
   bool isClosed = false,
   int sortOrder = 0,
 }) => Account(
-    id: id,
-    name: name,
-    accountType: accountType,
-    balanceCents: balanceCents,
-    currencyCode: currencyCode,
-    budgetId: _budgetUuid,
-    onBudget: onBudget,
-    sortOrder: sortOrder,
-    isClosed: isClosed,
-  );
+  id: id,
+  name: name,
+  accountType: accountType,
+  balanceCents: balanceCents,
+  currencyCode: currencyCode,
+  budgetId: _budgetUuid,
+  onBudget: onBudget,
+  sortOrder: sortOrder,
+  isClosed: isClosed,
+);
 
 Widget _buildRoutedSubject({required List<Account> accounts}) {
   final router = GoRouter(

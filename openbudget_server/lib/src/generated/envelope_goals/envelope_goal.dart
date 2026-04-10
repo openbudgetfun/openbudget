@@ -221,78 +221,37 @@ class EnvelopeGoalUpdateTable extends _i1.UpdateTable<EnvelopeGoalTable> {
 
   _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> envelopeId(
     _i1.UuidValue value,
-  ) => _i1.ColumnValue(
-    table.envelopeId,
-    value,
-  );
+  ) => _i1.ColumnValue(table.envelopeId, value);
 
-  _i1.ColumnValue<String, String> goalType(String value) => _i1.ColumnValue(
-    table.goalType,
-    value,
-  );
+  _i1.ColumnValue<String, String> goalType(String value) =>
+      _i1.ColumnValue(table.goalType, value);
 
-  _i1.ColumnValue<int, int> targetAmountCents(int value) => _i1.ColumnValue(
-    table.targetAmountCents,
-    value,
-  );
+  _i1.ColumnValue<int, int> targetAmountCents(int value) =>
+      _i1.ColumnValue(table.targetAmountCents, value);
 
   _i1.ColumnValue<DateTime, DateTime> targetDate(DateTime? value) =>
-      _i1.ColumnValue(
-        table.targetDate,
-        value,
-      );
+      _i1.ColumnValue(table.targetDate, value);
 
-  _i1.ColumnValue<int, int> monthlyFundingCents(int? value) => _i1.ColumnValue(
-    table.monthlyFundingCents,
-    value,
-  );
+  _i1.ColumnValue<int, int> monthlyFundingCents(int? value) =>
+      _i1.ColumnValue(table.monthlyFundingCents, value);
 
   _i1.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
-      _i1.ColumnValue(
-        table.createdAt,
-        value,
-      );
+      _i1.ColumnValue(table.createdAt, value);
 
   _i1.ColumnValue<DateTime, DateTime> updatedAt(DateTime value) =>
-      _i1.ColumnValue(
-        table.updatedAt,
-        value,
-      );
+      _i1.ColumnValue(table.updatedAt, value);
 }
 
 class EnvelopeGoalTable extends _i1.Table<_i1.UuidValue?> {
   EnvelopeGoalTable({super.tableRelation}) : super(tableName: 'envelope_goal') {
     updateTable = EnvelopeGoalUpdateTable(this);
-    envelopeId = _i1.ColumnUuid(
-      'envelopeId',
-      this,
-    );
-    goalType = _i1.ColumnString(
-      'goalType',
-      this,
-    );
-    targetAmountCents = _i1.ColumnInt(
-      'targetAmountCents',
-      this,
-    );
-    targetDate = _i1.ColumnDateTime(
-      'targetDate',
-      this,
-    );
-    monthlyFundingCents = _i1.ColumnInt(
-      'monthlyFundingCents',
-      this,
-    );
-    createdAt = _i1.ColumnDateTime(
-      'createdAt',
-      this,
-      hasDefault: true,
-    );
-    updatedAt = _i1.ColumnDateTime(
-      'updatedAt',
-      this,
-      hasDefault: true,
-    );
+    envelopeId = _i1.ColumnUuid('envelopeId', this);
+    goalType = _i1.ColumnString('goalType', this);
+    targetAmountCents = _i1.ColumnInt('targetAmountCents', this);
+    targetDate = _i1.ColumnDateTime('targetDate', this);
+    monthlyFundingCents = _i1.ColumnInt('monthlyFundingCents', this);
+    createdAt = _i1.ColumnDateTime('createdAt', this, hasDefault: true);
+    updatedAt = _i1.ColumnDateTime('updatedAt', this, hasDefault: true);
   }
 
   late final EnvelopeGoalUpdateTable updateTable;
@@ -495,10 +454,7 @@ class EnvelopeGoalRepository {
     EnvelopeGoal row, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.insertRow<EnvelopeGoal>(
-      row,
-      transaction: transaction,
-    );
+    return session.db.insertRow<EnvelopeGoal>(row, transaction: transaction);
   }
 
   /// Updates all [EnvelopeGoal]s in the list and returns the updated rows. If
@@ -583,10 +539,7 @@ class EnvelopeGoalRepository {
     List<EnvelopeGoal> rows, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.delete<EnvelopeGoal>(
-      rows,
-      transaction: transaction,
-    );
+    return session.db.delete<EnvelopeGoal>(rows, transaction: transaction);
   }
 
   /// Deletes a single [EnvelopeGoal].
@@ -595,10 +548,7 @@ class EnvelopeGoalRepository {
     EnvelopeGoal row, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.deleteRow<EnvelopeGoal>(
-      row,
-      transaction: transaction,
-    );
+    return session.db.deleteRow<EnvelopeGoal>(row, transaction: transaction);
   }
 
   /// Deletes all rows matching the [where] expression.

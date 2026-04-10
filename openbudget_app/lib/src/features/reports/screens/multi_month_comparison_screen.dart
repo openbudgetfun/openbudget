@@ -165,29 +165,29 @@ class _ComparisonTable extends HookWidget {
     ThemeData theme,
     List<MonthColumn> months,
   ) => Row(
-      children: [
+    children: [
+      SizedBox(
+        width: 160,
+        child: Text(
+          l10n.comparisonCategoryLabel,
+          style: theme.textTheme.labelLarge?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+      for (final m in months)
         SizedBox(
-          width: 160,
+          width: 120,
           child: Text(
-            l10n.comparisonCategoryLabel,
+            _shortMonthName(l10n, m.month, m.year),
             style: theme.textTheme.labelLarge?.copyWith(
               fontWeight: FontWeight.w600,
             ),
+            textAlign: TextAlign.right,
           ),
         ),
-        for (final m in months)
-          SizedBox(
-            width: 120,
-            child: Text(
-              _shortMonthName(l10n, m.month, m.year),
-              style: theme.textTheme.labelLarge?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-              textAlign: TextAlign.right,
-            ),
-          ),
-      ],
-    );
+    ],
+  );
 
   Widget _buildTotalRow(
     AppLocalizations l10n,
@@ -196,44 +196,44 @@ class _ComparisonTable extends HookWidget {
     List<MonthColumn> months,
     List<String> monthKeys,
   ) => Container(
-      padding: const EdgeInsets.symmetric(vertical: SpacingTokens.xs),
-      decoration: BoxDecoration(
-        color: colorScheme.primaryContainer.withAlpha(40),
-        borderRadius: BorderRadius.circular(RadiusTokens.sm),
-      ),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 160,
-            child: Padding(
-              padding: const EdgeInsets.only(left: SpacingTokens.xs),
-              child: Text(
-                l10n.comparisonTotalLabel,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+    padding: const EdgeInsets.symmetric(vertical: SpacingTokens.xs),
+    decoration: BoxDecoration(
+      color: colorScheme.primaryContainer.withAlpha(40),
+      borderRadius: BorderRadius.circular(RadiusTokens.sm),
+    ),
+    child: Row(
+      children: [
+        SizedBox(
+          width: 160,
+          child: Padding(
+            padding: const EdgeInsets.only(left: SpacingTokens.xs),
+            child: Text(
+              l10n.comparisonTotalLabel,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.bold,
               ),
             ),
           ),
-          for (final m in months)
-            SizedBox(
-              width: 120,
-              child: Text(
-                converter?.formatAmount(
-                      amountCents: m.totalSpentCents,
-                      sourceCurrency: sourceCurrency,
-                    ) ??
-                    formatCents(m.totalSpentCents, sourceCurrency),
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: ColorTokens.error,
-                ),
-                textAlign: TextAlign.right,
+        ),
+        for (final m in months)
+          SizedBox(
+            width: 120,
+            child: Text(
+              converter?.formatAmount(
+                    amountCents: m.totalSpentCents,
+                    sourceCurrency: sourceCurrency,
+                  ) ??
+                  formatCents(m.totalSpentCents, sourceCurrency),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: ColorTokens.error,
               ),
+              textAlign: TextAlign.right,
             ),
-        ],
-      ),
-    );
+          ),
+      ],
+    ),
+  );
 
   Widget _buildCategoryRow(
     ThemeData theme,
@@ -241,44 +241,44 @@ class _ComparisonTable extends HookWidget {
     CategoryComparison cat,
     List<String> monthKeys,
   ) => Container(
-      padding: const EdgeInsets.symmetric(vertical: SpacingTokens.xs),
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest.withAlpha(60),
-        borderRadius: BorderRadius.circular(RadiusTokens.sm),
-      ),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 160,
-            child: Padding(
-              padding: const EdgeInsets.only(left: SpacingTokens.xs),
-              child: Text(
-                cat.category.name,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-                overflow: TextOverflow.ellipsis,
+    padding: const EdgeInsets.symmetric(vertical: SpacingTokens.xs),
+    decoration: BoxDecoration(
+      color: colorScheme.surfaceContainerHighest.withAlpha(60),
+      borderRadius: BorderRadius.circular(RadiusTokens.sm),
+    ),
+    child: Row(
+      children: [
+        SizedBox(
+          width: 160,
+          child: Padding(
+            padding: const EdgeInsets.only(left: SpacingTokens.xs),
+            child: Text(
+              cat.category.name,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w600,
               ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
-          for (final key in monthKeys)
-            SizedBox(
-              width: 120,
-              child: Text(
-                converter?.formatAmount(
-                      amountCents: cat.monthTotals[key]?[1] ?? 0,
-                      sourceCurrency: sourceCurrency,
-                    ) ??
-                    formatCents(cat.monthTotals[key]?[1] ?? 0, sourceCurrency),
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-                textAlign: TextAlign.right,
+        ),
+        for (final key in monthKeys)
+          SizedBox(
+            width: 120,
+            child: Text(
+              converter?.formatAmount(
+                    amountCents: cat.monthTotals[key]?[1] ?? 0,
+                    sourceCurrency: sourceCurrency,
+                  ) ??
+                  formatCents(cat.monthTotals[key]?[1] ?? 0, sourceCurrency),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w600,
               ),
+              textAlign: TextAlign.right,
             ),
-        ],
-      ),
-    );
+          ),
+      ],
+    ),
+  );
 
   Widget _buildEnvelopeRow(
     ThemeData theme,
@@ -286,40 +286,40 @@ class _ComparisonTable extends HookWidget {
     EnvelopeComparison env,
     List<String> monthKeys,
   ) => Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 160,
-            child: Padding(
-              padding: const EdgeInsets.only(left: SpacingTokens.lg),
-              child: Text(
-                env.envelope.name,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
-                overflow: TextOverflow.ellipsis,
+    padding: const EdgeInsets.symmetric(vertical: 2),
+    child: Row(
+      children: [
+        SizedBox(
+          width: 160,
+          child: Padding(
+            padding: const EdgeInsets.only(left: SpacingTokens.lg),
+            child: Text(
+              env.envelope.name,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
               ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
-          for (final key in monthKeys)
-            SizedBox(
-              width: 120,
-              child: Text(
-                converter?.formatAmount(
-                      amountCents: env.monthData[key]?[1] ?? 0,
-                      sourceCurrency: sourceCurrency,
-                    ) ??
-                    formatCents(env.monthData[key]?[1] ?? 0, sourceCurrency),
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
-                textAlign: TextAlign.right,
+        ),
+        for (final key in monthKeys)
+          SizedBox(
+            width: 120,
+            child: Text(
+              converter?.formatAmount(
+                    amountCents: env.monthData[key]?[1] ?? 0,
+                    sourceCurrency: sourceCurrency,
+                  ) ??
+                  formatCents(env.monthData[key]?[1] ?? 0, sourceCurrency),
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
               ),
+              textAlign: TextAlign.right,
             ),
-        ],
-      ),
-    );
+          ),
+      ],
+    ),
+  );
 
   String _shortMonthName(AppLocalizations l10n, int month, int year) {
     final name = switch (month) {

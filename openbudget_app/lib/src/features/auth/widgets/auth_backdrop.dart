@@ -64,16 +64,16 @@ class _GlowOrb extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => IgnorePointer(
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: RadialGradient(
-            colors: [color.withAlpha(150), color.withAlpha(0)],
-            stops: const [0, 1],
-          ),
+    child: Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: RadialGradient(
+          colors: [color.withAlpha(150), color.withAlpha(0)],
+          stops: const [0, 1],
         ),
       ),
-    );
+    ),
+  );
 }

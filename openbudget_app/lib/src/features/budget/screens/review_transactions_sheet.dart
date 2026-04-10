@@ -21,19 +21,19 @@ Future<void> showReviewTransactionsSheet(
   required int year,
   required int month,
 }) => showModalBottomSheet<void>(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: OpenBudgetPalette.transparentFor(Theme.of(context)),
-    barrierColor: OpenBudgetPalette.overlayScrimFor(Theme.of(context)),
-    builder: (context) => FractionallySizedBox(
-      heightFactor: 0.95,
-      child: ReviewTransactionsSheet(
-        budgetId: budgetId,
-        year: year,
-        month: month,
-      ),
+  context: context,
+  isScrollControlled: true,
+  backgroundColor: OpenBudgetPalette.transparentFor(Theme.of(context)),
+  barrierColor: OpenBudgetPalette.overlayScrimFor(Theme.of(context)),
+  builder: (context) => FractionallySizedBox(
+    heightFactor: 0.95,
+    child: ReviewTransactionsSheet(
+      budgetId: budgetId,
+      year: year,
+      month: month,
     ),
-  );
+  ),
+);
 
 class ReviewTransactionsSheet extends HookConsumerWidget {
   const ReviewTransactionsSheet({
@@ -542,9 +542,10 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
     return queue;
   }
 
-  static bool _isSameDay(Transaction a, Transaction b) => a.transactionDate.year == b.transactionDate.year &&
-        a.transactionDate.month == b.transactionDate.month &&
-        a.transactionDate.day == b.transactionDate.day;
+  static bool _isSameDay(Transaction a, Transaction b) =>
+      a.transactionDate.year == b.transactionDate.year &&
+      a.transactionDate.month == b.transactionDate.month &&
+      a.transactionDate.day == b.transactionDate.day;
 
   Future<_EnvelopeChoice?> _showEnvelopePicker(
     BuildContext context, {
@@ -555,32 +556,32 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
       context: context,
       showDragHandle: true,
       builder: (context) => SafeArea(
-          child: ListView(
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  SpacingTokens.md,
-                  0,
-                  SpacingTokens.md,
-                  SpacingTokens.xs,
-                ),
-                child: Text(
-                  l10n.reviewTransactionsSelectCategory,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                  ),
+        child: ListView(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                SpacingTokens.md,
+                0,
+                SpacingTokens.md,
+                SpacingTokens.xs,
+              ),
+              child: Text(
+                l10n.reviewTransactionsSelectCategory,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
-              for (final choice in envelopeChoices)
-                ListTile(
-                  title: Text(choice.name),
-                  subtitle: Text(choice.categoryName),
-                  onTap: () => Navigator.of(context).pop(choice),
-                ),
-            ],
-          ),
+            ),
+            for (final choice in envelopeChoices)
+              ListTile(
+                title: Text(choice.name),
+                subtitle: Text(choice.categoryName),
+                onTap: () => Navigator.of(context).pop(choice),
+              ),
+          ],
         ),
+      ),
     );
   }
 }
@@ -697,31 +698,31 @@ class _ToolbarAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Expanded(
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(RadiusTokens.sm),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: SpacingTokens.xs),
-          child: Column(
-            children: [
-              Icon(
-                icon,
-                size: 20,
+    child: InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(RadiusTokens.sm),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: SpacingTokens.xs),
+        child: Column(
+          children: [
+            Icon(
+              icon,
+              size: 20,
+              color: OpenBudgetPalette.bgBrandFor(Theme.of(context)),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
                 color: OpenBudgetPalette.bgBrandFor(Theme.of(context)),
+                fontWeight: FontWeight.w700,
               ),
-              const SizedBox(height: 2),
-              Text(
-                label,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: OpenBudgetPalette.bgBrandFor(Theme.of(context)),
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
-    );
+    ),
+  );
 }
 
 enum _MoreAction { delete }

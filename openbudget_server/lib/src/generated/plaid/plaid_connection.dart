@@ -232,90 +232,42 @@ class PlaidConnectionUpdateTable extends _i1.UpdateTable<PlaidConnectionTable> {
   PlaidConnectionUpdateTable(super.table);
 
   _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> budgetId(_i1.UuidValue value) =>
-      _i1.ColumnValue(
-        table.budgetId,
-        value,
-      );
+      _i1.ColumnValue(table.budgetId, value);
 
-  _i1.ColumnValue<String, String> plaidItemId(String value) => _i1.ColumnValue(
-    table.plaidItemId,
-    value,
-  );
+  _i1.ColumnValue<String, String> plaidItemId(String value) =>
+      _i1.ColumnValue(table.plaidItemId, value);
 
-  _i1.ColumnValue<String, String> accessToken(String value) => _i1.ColumnValue(
-    table.accessToken,
-    value,
-  );
+  _i1.ColumnValue<String, String> accessToken(String value) =>
+      _i1.ColumnValue(table.accessToken, value);
 
   _i1.ColumnValue<String, String> institutionName(String? value) =>
-      _i1.ColumnValue(
-        table.institutionName,
-        value,
-      );
+      _i1.ColumnValue(table.institutionName, value);
 
   _i1.ColumnValue<String, String> institutionId(String? value) =>
-      _i1.ColumnValue(
-        table.institutionId,
-        value,
-      );
+      _i1.ColumnValue(table.institutionId, value);
 
   _i1.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
-      _i1.ColumnValue(
-        table.createdAt,
-        value,
-      );
+      _i1.ColumnValue(table.createdAt, value);
 
   _i1.ColumnValue<DateTime, DateTime> updatedAt(DateTime value) =>
-      _i1.ColumnValue(
-        table.updatedAt,
-        value,
-      );
+      _i1.ColumnValue(table.updatedAt, value);
 
   _i1.ColumnValue<DateTime, DateTime> lastSyncedAt(DateTime? value) =>
-      _i1.ColumnValue(
-        table.lastSyncedAt,
-        value,
-      );
+      _i1.ColumnValue(table.lastSyncedAt, value);
 }
 
 class PlaidConnectionTable extends _i1.Table<_i1.UuidValue?> {
   PlaidConnectionTable({super.tableRelation})
     : super(tableName: 'plaid_connection') {
     updateTable = PlaidConnectionUpdateTable(this);
-    budgetId = _i1.ColumnUuid(
-      'budgetId',
-      this,
-    );
-    plaidItemId = _i1.ColumnString(
-      'plaidItemId',
-      this,
-    );
-    accessToken = _i1.ColumnString(
-      'accessToken',
-      this,
-    );
-    institutionName = _i1.ColumnString(
-      'institutionName',
-      this,
-    );
-    institutionId = _i1.ColumnString(
-      'institutionId',
-      this,
-    );
-    createdAt = _i1.ColumnDateTime(
-      'createdAt',
-      this,
-      hasDefault: true,
-    );
-    updatedAt = _i1.ColumnDateTime(
-      'updatedAt',
-      this,
-      hasDefault: true,
-    );
-    lastSyncedAt = _i1.ColumnDateTime(
-      'lastSyncedAt',
-      this,
-    );
+    budgetId = _i1.ColumnUuid('budgetId', this);
+    plaidItemId = _i1.ColumnString('plaidItemId', this);
+    accessToken = _i1.ColumnString('accessToken', this);
+    institutionName = _i1.ColumnString('institutionName', this);
+    institutionId = _i1.ColumnString('institutionId', this);
+    createdAt = _i1.ColumnDateTime('createdAt', this, hasDefault: true);
+    updatedAt = _i1.ColumnDateTime('updatedAt', this, hasDefault: true);
+    lastSyncedAt = _i1.ColumnDateTime('lastSyncedAt', this);
   }
 
   late final PlaidConnectionUpdateTable updateTable;
@@ -517,10 +469,7 @@ class PlaidConnectionRepository {
     PlaidConnection row, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.insertRow<PlaidConnection>(
-      row,
-      transaction: transaction,
-    );
+    return session.db.insertRow<PlaidConnection>(row, transaction: transaction);
   }
 
   /// Updates all [PlaidConnection]s in the list and returns the updated rows. If
@@ -607,10 +556,7 @@ class PlaidConnectionRepository {
     List<PlaidConnection> rows, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.delete<PlaidConnection>(
-      rows,
-      transaction: transaction,
-    );
+    return session.db.delete<PlaidConnection>(rows, transaction: transaction);
   }
 
   /// Deletes a single [PlaidConnection].
@@ -619,10 +565,7 @@ class PlaidConnectionRepository {
     PlaidConnection row, {
     _i1.Transaction? transaction,
   }) async {
-    return session.db.deleteRow<PlaidConnection>(
-      row,
-      transaction: transaction,
-    );
+    return session.db.deleteRow<PlaidConnection>(row, transaction: transaction);
   }
 
   /// Deletes all rows matching the [where] expression.
