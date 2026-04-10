@@ -85,7 +85,14 @@ in
         enable = true;
         name = "lint:push";
         description = "Run full lint suite (format, swift, l10n, analyze) before push.";
-        entry = "${config.env.DEVENV_PROFILE}/bin/lint:all";
+        entry = builtins.toString (
+          pkgs.writeShellScript "lint-push" ''
+            set -e
+            export PATH="${config.env.DEVENV_PROFILE}/bin:$PATH"
+            ${pkgs.dprint}/bin/dprint check
+            ${config.env.DEVENV_PROFILE}/bin/dart analyze --fatal-infos
+          ''
+        );
         pass_filenames = false;
         always_run = true;
         stages = [ "pre-push" ];
@@ -95,7 +102,13 @@ in
         enable = true;
         name = "test:push";
         description = "Run full test suite before push.";
-        entry = "${config.env.DEVENV_PROFILE}/bin/test:all";
+        entry = builtins.toString (
+          pkgs.writeShellScript "test-push" ''
+            set -e
+            export PATH="${config.env.DEVENV_PROFILE}/bin:$PATH"
+            ${config.env.DEVENV_PROFILE}/bin/dart run melos run test --no-select
+          ''
+        );
         pass_filenames = false;
         always_run = true;
         stages = [ "pre-push" ];
