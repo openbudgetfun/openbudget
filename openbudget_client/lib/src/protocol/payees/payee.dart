@@ -88,7 +88,12 @@ class _PayeeImpl extends Payee {
     required String name,
     required _i1.UuidValue budgetId,
     DateTime? createdAt,
-  }) : super._(id: id, name: name, budgetId: budgetId, createdAt: createdAt);
+  }) : super._(
+         id: id,
+         name: name,
+         budgetId: budgetId,
+         createdAt: createdAt,
+       );
 
   /// Returns a shallow copy of this [Payee]
   /// with some or all fields replaced by the given arguments.

@@ -92,7 +92,7 @@ abstract class SolanaWalletHolding implements _i1.SerializableModel {
       decimals: jsonSerialization['decimals'] as int,
       balanceRaw: jsonSerialization['balanceRaw'] as String,
       balanceUi: jsonSerialization['balanceUi'] as String,
-      isNft: jsonSerialization['isNft'] as bool,
+      isNft: _i1.BoolJsonExtension.fromJson(jsonSerialization['isNft']),
       priceCurrency: jsonSerialization['priceCurrency'] as String?,
       pricePerToken: (jsonSerialization['pricePerToken'] as num?)?.toDouble(),
       totalValue: (jsonSerialization['totalValue'] as num?)?.toDouble(),
@@ -112,7 +112,9 @@ abstract class SolanaWalletHolding implements _i1.SerializableModel {
       priceSource: jsonSerialization['priceSource'] as String?,
       priceQuality: jsonSerialization['priceQuality'] as String?,
       priceConfidence: jsonSerialization['priceConfidence'] as String?,
-      isPriceStale: jsonSerialization['isPriceStale'] as bool?,
+      isPriceStale: jsonSerialization['isPriceStale'] == null
+          ? null
+          : _i1.BoolJsonExtension.fromJson(jsonSerialization['isPriceStale']),
       priceAsOf: jsonSerialization['priceAsOf'] == null
           ? null
           : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['priceAsOf']),

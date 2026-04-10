@@ -47,7 +47,9 @@ abstract class TransactionRule implements _i1.SerializableModel {
       targetEnvelopeId: _i1.UuidValueJsonExtension.fromJson(
         jsonSerialization['targetEnvelopeId'],
       ),
-      enabled: jsonSerialization['enabled'] as bool?,
+      enabled: jsonSerialization['enabled'] == null
+          ? null
+          : _i1.BoolJsonExtension.fromJson(jsonSerialization['enabled']),
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),

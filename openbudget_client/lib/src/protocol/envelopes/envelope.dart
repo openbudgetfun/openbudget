@@ -55,7 +55,9 @@ abstract class Envelope implements _i1.SerializableModel {
       currencyCode: jsonSerialization['currencyCode'] as String,
       sortOrder: jsonSerialization['sortOrder'] as int,
       note: jsonSerialization['note'] as String?,
-      isHidden: jsonSerialization['isHidden'] as bool?,
+      isHidden: jsonSerialization['isHidden'] == null
+          ? null
+          : _i1.BoolJsonExtension.fromJson(jsonSerialization['isHidden']),
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),

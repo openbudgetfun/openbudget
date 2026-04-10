@@ -91,8 +91,12 @@ abstract class Transaction
               jsonSerialization['parentTransactionId'],
             ),
       memo: jsonSerialization['memo'] as String?,
-      cleared: jsonSerialization['cleared'] as bool?,
-      reconciled: jsonSerialization['reconciled'] as bool?,
+      cleared: jsonSerialization['cleared'] == null
+          ? null
+          : _i1.BoolJsonExtension.fromJson(jsonSerialization['cleared']),
+      reconciled: jsonSerialization['reconciled'] == null
+          ? null
+          : _i1.BoolJsonExtension.fromJson(jsonSerialization['reconciled']),
       flagColor: jsonSerialization['flagColor'] as String?,
       createdAt: jsonSerialization['createdAt'] == null
           ? null
@@ -613,7 +617,7 @@ class TransactionRepository {
   /// );
   /// ```
   Future<List<Transaction>> find(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     _i1.WhereExpressionBuilder<TransactionTable>? where,
     int? limit,
     int? offset,
@@ -621,6 +625,8 @@ class TransactionRepository {
     bool orderDescending = false,
     _i1.OrderByListBuilder<TransactionTable>? orderByList,
     _i1.Transaction? transaction,
+    _i1.LockMode? lockMode,
+    _i1.LockBehavior? lockBehavior,
   }) async {
     return session.db.find<Transaction>(
       where: where?.call(Transaction.t),
@@ -630,6 +636,8 @@ class TransactionRepository {
       limit: limit,
       offset: offset,
       transaction: transaction,
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
     );
   }
 
@@ -651,13 +659,15 @@ class TransactionRepository {
   /// );
   /// ```
   Future<Transaction?> findFirstRow(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     _i1.WhereExpressionBuilder<TransactionTable>? where,
     int? offset,
     _i1.OrderByBuilder<TransactionTable>? orderBy,
     bool orderDescending = false,
     _i1.OrderByListBuilder<TransactionTable>? orderByList,
     _i1.Transaction? transaction,
+    _i1.LockMode? lockMode,
+    _i1.LockBehavior? lockBehavior,
   }) async {
     return session.db.findFirstRow<Transaction>(
       where: where?.call(Transaction.t),
@@ -666,18 +676,24 @@ class TransactionRepository {
       orderDescending: orderDescending,
       offset: offset,
       transaction: transaction,
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
     );
   }
 
   /// Finds a single [Transaction] by its [id] or null if no such row exists.
   Future<Transaction?> findById(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     _i1.UuidValue id, {
     _i1.Transaction? transaction,
+    _i1.LockMode? lockMode,
+    _i1.LockBehavior? lockBehavior,
   }) async {
     return session.db.findById<Transaction>(
       id,
       transaction: transaction,
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
     );
   }
 
@@ -687,14 +703,20 @@ class TransactionRepository {
   ///
   /// This is an atomic operation, meaning that if one of the rows fails to
   /// insert, none of the rows will be inserted.
+  ///
+  /// If [ignoreConflicts] is set to `true`, rows that conflict with existing
+  /// rows are silently skipped, and only the successfully inserted rows are
+  /// returned.
   Future<List<Transaction>> insert(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     List<Transaction> rows, {
     _i1.Transaction? transaction,
+    bool ignoreConflicts = false,
   }) async {
     return session.db.insert<Transaction>(
       rows,
       transaction: transaction,
+      ignoreConflicts: ignoreConflicts,
     );
   }
 
@@ -702,7 +724,7 @@ class TransactionRepository {
   ///
   /// The returned [Transaction] will have its `id` field set.
   Future<Transaction> insertRow(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     Transaction row, {
     _i1.Transaction? transaction,
   }) async {
@@ -718,7 +740,7 @@ class TransactionRepository {
   /// This is an atomic operation, meaning that if one of the rows fails to
   /// update, none of the rows will be updated.
   Future<List<Transaction>> update(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     List<Transaction> rows, {
     _i1.ColumnSelections<TransactionTable>? columns,
     _i1.Transaction? transaction,
@@ -734,7 +756,7 @@ class TransactionRepository {
   /// Optionally, a list of [columns] can be provided to only update those
   /// columns. Defaults to all columns.
   Future<Transaction> updateRow(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     Transaction row, {
     _i1.ColumnSelections<TransactionTable>? columns,
     _i1.Transaction? transaction,
@@ -749,7 +771,7 @@ class TransactionRepository {
   /// Updates a single [Transaction] by its [id] with the specified [columnValues].
   /// Returns the updated row or null if no row with the given id exists.
   Future<Transaction?> updateById(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     _i1.UuidValue id, {
     required _i1.ColumnValueListBuilder<TransactionUpdateTable> columnValues,
     _i1.Transaction? transaction,
@@ -764,7 +786,7 @@ class TransactionRepository {
   /// Updates all [Transaction]s matching the [where] expression with the specified [columnValues].
   /// Returns the list of updated rows.
   Future<List<Transaction>> updateWhere(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     required _i1.ColumnValueListBuilder<TransactionUpdateTable> columnValues,
     required _i1.WhereExpressionBuilder<TransactionTable> where,
     int? limit,
@@ -790,7 +812,7 @@ class TransactionRepository {
   /// This is an atomic operation, meaning that if one of the rows fail to
   /// be deleted, none of the rows will be deleted.
   Future<List<Transaction>> delete(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     List<Transaction> rows, {
     _i1.Transaction? transaction,
   }) async {
@@ -802,7 +824,7 @@ class TransactionRepository {
 
   /// Deletes a single [Transaction].
   Future<Transaction> deleteRow(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     Transaction row, {
     _i1.Transaction? transaction,
   }) async {
@@ -814,7 +836,7 @@ class TransactionRepository {
 
   /// Deletes all rows matching the [where] expression.
   Future<List<Transaction>> deleteWhere(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     required _i1.WhereExpressionBuilder<TransactionTable> where,
     _i1.Transaction? transaction,
   }) async {
@@ -827,7 +849,7 @@ class TransactionRepository {
   /// Counts the number of rows matching the [where] expression. If omitted,
   /// will return the count of all rows in the table.
   Future<int> count(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     _i1.WhereExpressionBuilder<TransactionTable>? where,
     int? limit,
     _i1.Transaction? transaction,
@@ -835,6 +857,22 @@ class TransactionRepository {
     return session.db.count<Transaction>(
       where: where?.call(Transaction.t),
       limit: limit,
+      transaction: transaction,
+    );
+  }
+
+  /// Acquires row-level locks on [Transaction] rows matching the [where] expression.
+  Future<void> lockRows(
+    _i1.DatabaseSession session, {
+    required _i1.WhereExpressionBuilder<TransactionTable> where,
+    required _i1.LockMode lockMode,
+    required _i1.Transaction transaction,
+    _i1.LockBehavior lockBehavior = _i1.LockBehavior.wait,
+  }) async {
+    return session.db.lockRows<Transaction>(
+      where: where(Transaction.t),
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
       transaction: transaction,
     );
   }

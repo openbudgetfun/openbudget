@@ -81,7 +81,7 @@ abstract class RecurringTransaction
       endDate: jsonSerialization['endDate'] == null
           ? null
           : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['endDate']),
-      isActive: jsonSerialization['isActive'] as bool,
+      isActive: _i1.BoolJsonExtension.fromJson(jsonSerialization['isActive']),
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
@@ -547,7 +547,7 @@ class RecurringTransactionRepository {
   /// );
   /// ```
   Future<List<RecurringTransaction>> find(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     _i1.WhereExpressionBuilder<RecurringTransactionTable>? where,
     int? limit,
     int? offset,
@@ -555,6 +555,8 @@ class RecurringTransactionRepository {
     bool orderDescending = false,
     _i1.OrderByListBuilder<RecurringTransactionTable>? orderByList,
     _i1.Transaction? transaction,
+    _i1.LockMode? lockMode,
+    _i1.LockBehavior? lockBehavior,
   }) async {
     return session.db.find<RecurringTransaction>(
       where: where?.call(RecurringTransaction.t),
@@ -564,6 +566,8 @@ class RecurringTransactionRepository {
       limit: limit,
       offset: offset,
       transaction: transaction,
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
     );
   }
 
@@ -585,13 +589,15 @@ class RecurringTransactionRepository {
   /// );
   /// ```
   Future<RecurringTransaction?> findFirstRow(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     _i1.WhereExpressionBuilder<RecurringTransactionTable>? where,
     int? offset,
     _i1.OrderByBuilder<RecurringTransactionTable>? orderBy,
     bool orderDescending = false,
     _i1.OrderByListBuilder<RecurringTransactionTable>? orderByList,
     _i1.Transaction? transaction,
+    _i1.LockMode? lockMode,
+    _i1.LockBehavior? lockBehavior,
   }) async {
     return session.db.findFirstRow<RecurringTransaction>(
       where: where?.call(RecurringTransaction.t),
@@ -600,18 +606,24 @@ class RecurringTransactionRepository {
       orderDescending: orderDescending,
       offset: offset,
       transaction: transaction,
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
     );
   }
 
   /// Finds a single [RecurringTransaction] by its [id] or null if no such row exists.
   Future<RecurringTransaction?> findById(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     _i1.UuidValue id, {
     _i1.Transaction? transaction,
+    _i1.LockMode? lockMode,
+    _i1.LockBehavior? lockBehavior,
   }) async {
     return session.db.findById<RecurringTransaction>(
       id,
       transaction: transaction,
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
     );
   }
 
@@ -621,14 +633,20 @@ class RecurringTransactionRepository {
   ///
   /// This is an atomic operation, meaning that if one of the rows fails to
   /// insert, none of the rows will be inserted.
+  ///
+  /// If [ignoreConflicts] is set to `true`, rows that conflict with existing
+  /// rows are silently skipped, and only the successfully inserted rows are
+  /// returned.
   Future<List<RecurringTransaction>> insert(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     List<RecurringTransaction> rows, {
     _i1.Transaction? transaction,
+    bool ignoreConflicts = false,
   }) async {
     return session.db.insert<RecurringTransaction>(
       rows,
       transaction: transaction,
+      ignoreConflicts: ignoreConflicts,
     );
   }
 
@@ -636,7 +654,7 @@ class RecurringTransactionRepository {
   ///
   /// The returned [RecurringTransaction] will have its `id` field set.
   Future<RecurringTransaction> insertRow(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     RecurringTransaction row, {
     _i1.Transaction? transaction,
   }) async {
@@ -652,7 +670,7 @@ class RecurringTransactionRepository {
   /// This is an atomic operation, meaning that if one of the rows fails to
   /// update, none of the rows will be updated.
   Future<List<RecurringTransaction>> update(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     List<RecurringTransaction> rows, {
     _i1.ColumnSelections<RecurringTransactionTable>? columns,
     _i1.Transaction? transaction,
@@ -668,7 +686,7 @@ class RecurringTransactionRepository {
   /// Optionally, a list of [columns] can be provided to only update those
   /// columns. Defaults to all columns.
   Future<RecurringTransaction> updateRow(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     RecurringTransaction row, {
     _i1.ColumnSelections<RecurringTransactionTable>? columns,
     _i1.Transaction? transaction,
@@ -683,7 +701,7 @@ class RecurringTransactionRepository {
   /// Updates a single [RecurringTransaction] by its [id] with the specified [columnValues].
   /// Returns the updated row or null if no row with the given id exists.
   Future<RecurringTransaction?> updateById(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     _i1.UuidValue id, {
     required _i1.ColumnValueListBuilder<RecurringTransactionUpdateTable>
     columnValues,
@@ -699,7 +717,7 @@ class RecurringTransactionRepository {
   /// Updates all [RecurringTransaction]s matching the [where] expression with the specified [columnValues].
   /// Returns the list of updated rows.
   Future<List<RecurringTransaction>> updateWhere(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     required _i1.ColumnValueListBuilder<RecurringTransactionUpdateTable>
     columnValues,
     required _i1.WhereExpressionBuilder<RecurringTransactionTable> where,
@@ -726,7 +744,7 @@ class RecurringTransactionRepository {
   /// This is an atomic operation, meaning that if one of the rows fail to
   /// be deleted, none of the rows will be deleted.
   Future<List<RecurringTransaction>> delete(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     List<RecurringTransaction> rows, {
     _i1.Transaction? transaction,
   }) async {
@@ -738,7 +756,7 @@ class RecurringTransactionRepository {
 
   /// Deletes a single [RecurringTransaction].
   Future<RecurringTransaction> deleteRow(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     RecurringTransaction row, {
     _i1.Transaction? transaction,
   }) async {
@@ -750,7 +768,7 @@ class RecurringTransactionRepository {
 
   /// Deletes all rows matching the [where] expression.
   Future<List<RecurringTransaction>> deleteWhere(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     required _i1.WhereExpressionBuilder<RecurringTransactionTable> where,
     _i1.Transaction? transaction,
   }) async {
@@ -763,7 +781,7 @@ class RecurringTransactionRepository {
   /// Counts the number of rows matching the [where] expression. If omitted,
   /// will return the count of all rows in the table.
   Future<int> count(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     _i1.WhereExpressionBuilder<RecurringTransactionTable>? where,
     int? limit,
     _i1.Transaction? transaction,
@@ -771,6 +789,22 @@ class RecurringTransactionRepository {
     return session.db.count<RecurringTransaction>(
       where: where?.call(RecurringTransaction.t),
       limit: limit,
+      transaction: transaction,
+    );
+  }
+
+  /// Acquires row-level locks on [RecurringTransaction] rows matching the [where] expression.
+  Future<void> lockRows(
+    _i1.DatabaseSession session, {
+    required _i1.WhereExpressionBuilder<RecurringTransactionTable> where,
+    required _i1.LockMode lockMode,
+    required _i1.Transaction transaction,
+    _i1.LockBehavior lockBehavior = _i1.LockBehavior.wait,
+  }) async {
+    return session.db.lockRows<RecurringTransaction>(
+      where: where(RecurringTransaction.t),
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
       transaction: transaction,
     );
   }

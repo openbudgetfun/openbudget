@@ -42,7 +42,9 @@ abstract class InstitutionLocation implements _i1.SerializableModel {
         jsonSerialization['institutionId'],
       ),
       locationCode: jsonSerialization['locationCode'] as String,
-      isPopular: jsonSerialization['isPopular'] as bool?,
+      isPopular: jsonSerialization['isPopular'] == null
+          ? null
+          : _i1.BoolJsonExtension.fromJson(jsonSerialization['isPopular']),
       popularityRank: jsonSerialization['popularityRank'] as int?,
       createdAt: jsonSerialization['createdAt'] == null
           ? null

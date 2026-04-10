@@ -43,7 +43,9 @@ abstract class Category implements _i1.SerializableModel {
         jsonSerialization['budgetId'],
       ),
       sortOrder: jsonSerialization['sortOrder'] as int,
-      isHidden: jsonSerialization['isHidden'] as bool?,
+      isHidden: jsonSerialization['isHidden'] == null
+          ? null
+          : _i1.BoolJsonExtension.fromJson(jsonSerialization['isHidden']),
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
