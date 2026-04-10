@@ -75,9 +75,9 @@ abstract class Account
           : _i1.UuidValueJsonExtension.fromJson(
               jsonSerialization['institutionId'],
             ),
-      onBudget: jsonSerialization['onBudget'] as bool,
+      onBudget: _i1.BoolJsonExtension.fromJson(jsonSerialization['onBudget']),
       sortOrder: jsonSerialization['sortOrder'] as int,
-      isClosed: jsonSerialization['isClosed'] as bool,
+      isClosed: _i1.BoolJsonExtension.fromJson(jsonSerialization['isClosed']),
       sourceType: jsonSerialization['sourceType'] as String?,
       externalAccountId: jsonSerialization['externalAccountId'] as String?,
       connectionId: jsonSerialization['connectionId'] == null
@@ -635,7 +635,7 @@ class AccountRepository {
   /// );
   /// ```
   Future<List<Account>> find(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     _i1.WhereExpressionBuilder<AccountTable>? where,
     int? limit,
     int? offset,
@@ -643,6 +643,8 @@ class AccountRepository {
     bool orderDescending = false,
     _i1.OrderByListBuilder<AccountTable>? orderByList,
     _i1.Transaction? transaction,
+    _i1.LockMode? lockMode,
+    _i1.LockBehavior? lockBehavior,
   }) async {
     return session.db.find<Account>(
       where: where?.call(Account.t),
@@ -652,6 +654,8 @@ class AccountRepository {
       limit: limit,
       offset: offset,
       transaction: transaction,
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
     );
   }
 
@@ -673,13 +677,15 @@ class AccountRepository {
   /// );
   /// ```
   Future<Account?> findFirstRow(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     _i1.WhereExpressionBuilder<AccountTable>? where,
     int? offset,
     _i1.OrderByBuilder<AccountTable>? orderBy,
     bool orderDescending = false,
     _i1.OrderByListBuilder<AccountTable>? orderByList,
     _i1.Transaction? transaction,
+    _i1.LockMode? lockMode,
+    _i1.LockBehavior? lockBehavior,
   }) async {
     return session.db.findFirstRow<Account>(
       where: where?.call(Account.t),
@@ -688,18 +694,24 @@ class AccountRepository {
       orderDescending: orderDescending,
       offset: offset,
       transaction: transaction,
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
     );
   }
 
   /// Finds a single [Account] by its [id] or null if no such row exists.
   Future<Account?> findById(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     _i1.UuidValue id, {
     _i1.Transaction? transaction,
+    _i1.LockMode? lockMode,
+    _i1.LockBehavior? lockBehavior,
   }) async {
     return session.db.findById<Account>(
       id,
       transaction: transaction,
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
     );
   }
 
@@ -709,14 +721,20 @@ class AccountRepository {
   ///
   /// This is an atomic operation, meaning that if one of the rows fails to
   /// insert, none of the rows will be inserted.
+  ///
+  /// If [ignoreConflicts] is set to `true`, rows that conflict with existing
+  /// rows are silently skipped, and only the successfully inserted rows are
+  /// returned.
   Future<List<Account>> insert(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     List<Account> rows, {
     _i1.Transaction? transaction,
+    bool ignoreConflicts = false,
   }) async {
     return session.db.insert<Account>(
       rows,
       transaction: transaction,
+      ignoreConflicts: ignoreConflicts,
     );
   }
 
@@ -724,7 +742,7 @@ class AccountRepository {
   ///
   /// The returned [Account] will have its `id` field set.
   Future<Account> insertRow(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     Account row, {
     _i1.Transaction? transaction,
   }) async {
@@ -740,7 +758,7 @@ class AccountRepository {
   /// This is an atomic operation, meaning that if one of the rows fails to
   /// update, none of the rows will be updated.
   Future<List<Account>> update(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     List<Account> rows, {
     _i1.ColumnSelections<AccountTable>? columns,
     _i1.Transaction? transaction,
@@ -756,7 +774,7 @@ class AccountRepository {
   /// Optionally, a list of [columns] can be provided to only update those
   /// columns. Defaults to all columns.
   Future<Account> updateRow(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     Account row, {
     _i1.ColumnSelections<AccountTable>? columns,
     _i1.Transaction? transaction,
@@ -771,7 +789,7 @@ class AccountRepository {
   /// Updates a single [Account] by its [id] with the specified [columnValues].
   /// Returns the updated row or null if no row with the given id exists.
   Future<Account?> updateById(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     _i1.UuidValue id, {
     required _i1.ColumnValueListBuilder<AccountUpdateTable> columnValues,
     _i1.Transaction? transaction,
@@ -786,7 +804,7 @@ class AccountRepository {
   /// Updates all [Account]s matching the [where] expression with the specified [columnValues].
   /// Returns the list of updated rows.
   Future<List<Account>> updateWhere(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     required _i1.ColumnValueListBuilder<AccountUpdateTable> columnValues,
     required _i1.WhereExpressionBuilder<AccountTable> where,
     int? limit,
@@ -812,7 +830,7 @@ class AccountRepository {
   /// This is an atomic operation, meaning that if one of the rows fail to
   /// be deleted, none of the rows will be deleted.
   Future<List<Account>> delete(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     List<Account> rows, {
     _i1.Transaction? transaction,
   }) async {
@@ -824,7 +842,7 @@ class AccountRepository {
 
   /// Deletes a single [Account].
   Future<Account> deleteRow(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     Account row, {
     _i1.Transaction? transaction,
   }) async {
@@ -836,7 +854,7 @@ class AccountRepository {
 
   /// Deletes all rows matching the [where] expression.
   Future<List<Account>> deleteWhere(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     required _i1.WhereExpressionBuilder<AccountTable> where,
     _i1.Transaction? transaction,
   }) async {
@@ -849,7 +867,7 @@ class AccountRepository {
   /// Counts the number of rows matching the [where] expression. If omitted,
   /// will return the count of all rows in the table.
   Future<int> count(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     _i1.WhereExpressionBuilder<AccountTable>? where,
     int? limit,
     _i1.Transaction? transaction,
@@ -857,6 +875,22 @@ class AccountRepository {
     return session.db.count<Account>(
       where: where?.call(Account.t),
       limit: limit,
+      transaction: transaction,
+    );
+  }
+
+  /// Acquires row-level locks on [Account] rows matching the [where] expression.
+  Future<void> lockRows(
+    _i1.DatabaseSession session, {
+    required _i1.WhereExpressionBuilder<AccountTable> where,
+    required _i1.LockMode lockMode,
+    required _i1.Transaction transaction,
+    _i1.LockBehavior lockBehavior = _i1.LockBehavior.wait,
+  }) async {
+    return session.db.lockRows<Account>(
+      where: where(Account.t),
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
       transaction: transaction,
     );
   }

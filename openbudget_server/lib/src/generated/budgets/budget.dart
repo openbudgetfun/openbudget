@@ -357,7 +357,7 @@ class BudgetRepository {
   /// );
   /// ```
   Future<List<Budget>> find(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     _i1.WhereExpressionBuilder<BudgetTable>? where,
     int? limit,
     int? offset,
@@ -365,6 +365,8 @@ class BudgetRepository {
     bool orderDescending = false,
     _i1.OrderByListBuilder<BudgetTable>? orderByList,
     _i1.Transaction? transaction,
+    _i1.LockMode? lockMode,
+    _i1.LockBehavior? lockBehavior,
   }) async {
     return session.db.find<Budget>(
       where: where?.call(Budget.t),
@@ -374,6 +376,8 @@ class BudgetRepository {
       limit: limit,
       offset: offset,
       transaction: transaction,
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
     );
   }
 
@@ -395,13 +399,15 @@ class BudgetRepository {
   /// );
   /// ```
   Future<Budget?> findFirstRow(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     _i1.WhereExpressionBuilder<BudgetTable>? where,
     int? offset,
     _i1.OrderByBuilder<BudgetTable>? orderBy,
     bool orderDescending = false,
     _i1.OrderByListBuilder<BudgetTable>? orderByList,
     _i1.Transaction? transaction,
+    _i1.LockMode? lockMode,
+    _i1.LockBehavior? lockBehavior,
   }) async {
     return session.db.findFirstRow<Budget>(
       where: where?.call(Budget.t),
@@ -410,18 +416,24 @@ class BudgetRepository {
       orderDescending: orderDescending,
       offset: offset,
       transaction: transaction,
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
     );
   }
 
   /// Finds a single [Budget] by its [id] or null if no such row exists.
   Future<Budget?> findById(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     _i1.UuidValue id, {
     _i1.Transaction? transaction,
+    _i1.LockMode? lockMode,
+    _i1.LockBehavior? lockBehavior,
   }) async {
     return session.db.findById<Budget>(
       id,
       transaction: transaction,
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
     );
   }
 
@@ -431,14 +443,20 @@ class BudgetRepository {
   ///
   /// This is an atomic operation, meaning that if one of the rows fails to
   /// insert, none of the rows will be inserted.
+  ///
+  /// If [ignoreConflicts] is set to `true`, rows that conflict with existing
+  /// rows are silently skipped, and only the successfully inserted rows are
+  /// returned.
   Future<List<Budget>> insert(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     List<Budget> rows, {
     _i1.Transaction? transaction,
+    bool ignoreConflicts = false,
   }) async {
     return session.db.insert<Budget>(
       rows,
       transaction: transaction,
+      ignoreConflicts: ignoreConflicts,
     );
   }
 
@@ -446,7 +464,7 @@ class BudgetRepository {
   ///
   /// The returned [Budget] will have its `id` field set.
   Future<Budget> insertRow(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     Budget row, {
     _i1.Transaction? transaction,
   }) async {
@@ -462,7 +480,7 @@ class BudgetRepository {
   /// This is an atomic operation, meaning that if one of the rows fails to
   /// update, none of the rows will be updated.
   Future<List<Budget>> update(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     List<Budget> rows, {
     _i1.ColumnSelections<BudgetTable>? columns,
     _i1.Transaction? transaction,
@@ -478,7 +496,7 @@ class BudgetRepository {
   /// Optionally, a list of [columns] can be provided to only update those
   /// columns. Defaults to all columns.
   Future<Budget> updateRow(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     Budget row, {
     _i1.ColumnSelections<BudgetTable>? columns,
     _i1.Transaction? transaction,
@@ -493,7 +511,7 @@ class BudgetRepository {
   /// Updates a single [Budget] by its [id] with the specified [columnValues].
   /// Returns the updated row or null if no row with the given id exists.
   Future<Budget?> updateById(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     _i1.UuidValue id, {
     required _i1.ColumnValueListBuilder<BudgetUpdateTable> columnValues,
     _i1.Transaction? transaction,
@@ -508,7 +526,7 @@ class BudgetRepository {
   /// Updates all [Budget]s matching the [where] expression with the specified [columnValues].
   /// Returns the list of updated rows.
   Future<List<Budget>> updateWhere(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     required _i1.ColumnValueListBuilder<BudgetUpdateTable> columnValues,
     required _i1.WhereExpressionBuilder<BudgetTable> where,
     int? limit,
@@ -534,7 +552,7 @@ class BudgetRepository {
   /// This is an atomic operation, meaning that if one of the rows fail to
   /// be deleted, none of the rows will be deleted.
   Future<List<Budget>> delete(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     List<Budget> rows, {
     _i1.Transaction? transaction,
   }) async {
@@ -546,7 +564,7 @@ class BudgetRepository {
 
   /// Deletes a single [Budget].
   Future<Budget> deleteRow(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     Budget row, {
     _i1.Transaction? transaction,
   }) async {
@@ -558,7 +576,7 @@ class BudgetRepository {
 
   /// Deletes all rows matching the [where] expression.
   Future<List<Budget>> deleteWhere(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     required _i1.WhereExpressionBuilder<BudgetTable> where,
     _i1.Transaction? transaction,
   }) async {
@@ -571,7 +589,7 @@ class BudgetRepository {
   /// Counts the number of rows matching the [where] expression. If omitted,
   /// will return the count of all rows in the table.
   Future<int> count(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     _i1.WhereExpressionBuilder<BudgetTable>? where,
     int? limit,
     _i1.Transaction? transaction,
@@ -579,6 +597,22 @@ class BudgetRepository {
     return session.db.count<Budget>(
       where: where?.call(Budget.t),
       limit: limit,
+      transaction: transaction,
+    );
+  }
+
+  /// Acquires row-level locks on [Budget] rows matching the [where] expression.
+  Future<void> lockRows(
+    _i1.DatabaseSession session, {
+    required _i1.WhereExpressionBuilder<BudgetTable> where,
+    required _i1.LockMode lockMode,
+    required _i1.Transaction transaction,
+    _i1.LockBehavior lockBehavior = _i1.LockBehavior.wait,
+  }) async {
+    return session.db.lockRows<Budget>(
+      where: where(Budget.t),
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
       transaction: transaction,
     );
   }

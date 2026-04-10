@@ -43,7 +43,9 @@ abstract class FxRateSnapshot implements _i1.SerializableModel {
       fetchedAt: _i1.DateTimeJsonExtension.fromJson(
         jsonSerialization['fetchedAt'],
       ),
-      isLatest: jsonSerialization['isLatest'] as bool?,
+      isLatest: jsonSerialization['isLatest'] == null
+          ? null
+          : _i1.BoolJsonExtension.fromJson(jsonSerialization['isLatest']),
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),

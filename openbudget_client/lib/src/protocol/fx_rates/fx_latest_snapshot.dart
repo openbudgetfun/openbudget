@@ -36,7 +36,7 @@ abstract class FxLatestSnapshot implements _i1.SerializableModel {
       fetchedAt: _i1.DateTimeJsonExtension.fromJson(
         jsonSerialization['fetchedAt'],
       ),
-      isStale: jsonSerialization['isStale'] as bool,
+      isStale: _i1.BoolJsonExtension.fromJson(jsonSerialization['isStale']),
       rates: _i3.Protocol().deserialize<List<_i2.FxRateQuote>>(
         jsonSerialization['rates'],
       ),

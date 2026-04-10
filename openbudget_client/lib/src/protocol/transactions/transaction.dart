@@ -90,8 +90,12 @@ abstract class Transaction implements _i1.SerializableModel {
               jsonSerialization['parentTransactionId'],
             ),
       memo: jsonSerialization['memo'] as String?,
-      cleared: jsonSerialization['cleared'] as bool?,
-      reconciled: jsonSerialization['reconciled'] as bool?,
+      cleared: jsonSerialization['cleared'] == null
+          ? null
+          : _i1.BoolJsonExtension.fromJson(jsonSerialization['cleared']),
+      reconciled: jsonSerialization['reconciled'] == null
+          ? null
+          : _i1.BoolJsonExtension.fromJson(jsonSerialization['reconciled']),
       flagColor: jsonSerialization['flagColor'] as String?,
       createdAt: jsonSerialization['createdAt'] == null
           ? null

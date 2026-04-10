@@ -44,7 +44,9 @@ abstract class Category
         jsonSerialization['budgetId'],
       ),
       sortOrder: jsonSerialization['sortOrder'] as int,
-      isHidden: jsonSerialization['isHidden'] as bool?,
+      isHidden: jsonSerialization['isHidden'] == null
+          ? null
+          : _i1.BoolJsonExtension.fromJson(jsonSerialization['isHidden']),
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
@@ -319,7 +321,7 @@ class CategoryRepository {
   /// );
   /// ```
   Future<List<Category>> find(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     _i1.WhereExpressionBuilder<CategoryTable>? where,
     int? limit,
     int? offset,
@@ -327,6 +329,8 @@ class CategoryRepository {
     bool orderDescending = false,
     _i1.OrderByListBuilder<CategoryTable>? orderByList,
     _i1.Transaction? transaction,
+    _i1.LockMode? lockMode,
+    _i1.LockBehavior? lockBehavior,
   }) async {
     return session.db.find<Category>(
       where: where?.call(Category.t),
@@ -336,6 +340,8 @@ class CategoryRepository {
       limit: limit,
       offset: offset,
       transaction: transaction,
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
     );
   }
 
@@ -357,13 +363,15 @@ class CategoryRepository {
   /// );
   /// ```
   Future<Category?> findFirstRow(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     _i1.WhereExpressionBuilder<CategoryTable>? where,
     int? offset,
     _i1.OrderByBuilder<CategoryTable>? orderBy,
     bool orderDescending = false,
     _i1.OrderByListBuilder<CategoryTable>? orderByList,
     _i1.Transaction? transaction,
+    _i1.LockMode? lockMode,
+    _i1.LockBehavior? lockBehavior,
   }) async {
     return session.db.findFirstRow<Category>(
       where: where?.call(Category.t),
@@ -372,18 +380,24 @@ class CategoryRepository {
       orderDescending: orderDescending,
       offset: offset,
       transaction: transaction,
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
     );
   }
 
   /// Finds a single [Category] by its [id] or null if no such row exists.
   Future<Category?> findById(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     _i1.UuidValue id, {
     _i1.Transaction? transaction,
+    _i1.LockMode? lockMode,
+    _i1.LockBehavior? lockBehavior,
   }) async {
     return session.db.findById<Category>(
       id,
       transaction: transaction,
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
     );
   }
 
@@ -393,14 +407,20 @@ class CategoryRepository {
   ///
   /// This is an atomic operation, meaning that if one of the rows fails to
   /// insert, none of the rows will be inserted.
+  ///
+  /// If [ignoreConflicts] is set to `true`, rows that conflict with existing
+  /// rows are silently skipped, and only the successfully inserted rows are
+  /// returned.
   Future<List<Category>> insert(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     List<Category> rows, {
     _i1.Transaction? transaction,
+    bool ignoreConflicts = false,
   }) async {
     return session.db.insert<Category>(
       rows,
       transaction: transaction,
+      ignoreConflicts: ignoreConflicts,
     );
   }
 
@@ -408,7 +428,7 @@ class CategoryRepository {
   ///
   /// The returned [Category] will have its `id` field set.
   Future<Category> insertRow(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     Category row, {
     _i1.Transaction? transaction,
   }) async {
@@ -424,7 +444,7 @@ class CategoryRepository {
   /// This is an atomic operation, meaning that if one of the rows fails to
   /// update, none of the rows will be updated.
   Future<List<Category>> update(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     List<Category> rows, {
     _i1.ColumnSelections<CategoryTable>? columns,
     _i1.Transaction? transaction,
@@ -440,7 +460,7 @@ class CategoryRepository {
   /// Optionally, a list of [columns] can be provided to only update those
   /// columns. Defaults to all columns.
   Future<Category> updateRow(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     Category row, {
     _i1.ColumnSelections<CategoryTable>? columns,
     _i1.Transaction? transaction,
@@ -455,7 +475,7 @@ class CategoryRepository {
   /// Updates a single [Category] by its [id] with the specified [columnValues].
   /// Returns the updated row or null if no row with the given id exists.
   Future<Category?> updateById(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     _i1.UuidValue id, {
     required _i1.ColumnValueListBuilder<CategoryUpdateTable> columnValues,
     _i1.Transaction? transaction,
@@ -470,7 +490,7 @@ class CategoryRepository {
   /// Updates all [Category]s matching the [where] expression with the specified [columnValues].
   /// Returns the list of updated rows.
   Future<List<Category>> updateWhere(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     required _i1.ColumnValueListBuilder<CategoryUpdateTable> columnValues,
     required _i1.WhereExpressionBuilder<CategoryTable> where,
     int? limit,
@@ -496,7 +516,7 @@ class CategoryRepository {
   /// This is an atomic operation, meaning that if one of the rows fail to
   /// be deleted, none of the rows will be deleted.
   Future<List<Category>> delete(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     List<Category> rows, {
     _i1.Transaction? transaction,
   }) async {
@@ -508,7 +528,7 @@ class CategoryRepository {
 
   /// Deletes a single [Category].
   Future<Category> deleteRow(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     Category row, {
     _i1.Transaction? transaction,
   }) async {
@@ -520,7 +540,7 @@ class CategoryRepository {
 
   /// Deletes all rows matching the [where] expression.
   Future<List<Category>> deleteWhere(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     required _i1.WhereExpressionBuilder<CategoryTable> where,
     _i1.Transaction? transaction,
   }) async {
@@ -533,7 +553,7 @@ class CategoryRepository {
   /// Counts the number of rows matching the [where] expression. If omitted,
   /// will return the count of all rows in the table.
   Future<int> count(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     _i1.WhereExpressionBuilder<CategoryTable>? where,
     int? limit,
     _i1.Transaction? transaction,
@@ -541,6 +561,22 @@ class CategoryRepository {
     return session.db.count<Category>(
       where: where?.call(Category.t),
       limit: limit,
+      transaction: transaction,
+    );
+  }
+
+  /// Acquires row-level locks on [Category] rows matching the [where] expression.
+  Future<void> lockRows(
+    _i1.DatabaseSession session, {
+    required _i1.WhereExpressionBuilder<CategoryTable> where,
+    required _i1.LockMode lockMode,
+    required _i1.Transaction transaction,
+    _i1.LockBehavior lockBehavior = _i1.LockBehavior.wait,
+  }) async {
+    return session.db.lockRows<Category>(
+      where: where(Category.t),
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
       transaction: transaction,
     );
   }

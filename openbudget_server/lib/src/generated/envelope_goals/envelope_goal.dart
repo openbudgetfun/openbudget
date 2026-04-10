@@ -384,7 +384,7 @@ class EnvelopeGoalRepository {
   /// );
   /// ```
   Future<List<EnvelopeGoal>> find(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     _i1.WhereExpressionBuilder<EnvelopeGoalTable>? where,
     int? limit,
     int? offset,
@@ -392,6 +392,8 @@ class EnvelopeGoalRepository {
     bool orderDescending = false,
     _i1.OrderByListBuilder<EnvelopeGoalTable>? orderByList,
     _i1.Transaction? transaction,
+    _i1.LockMode? lockMode,
+    _i1.LockBehavior? lockBehavior,
   }) async {
     return session.db.find<EnvelopeGoal>(
       where: where?.call(EnvelopeGoal.t),
@@ -401,6 +403,8 @@ class EnvelopeGoalRepository {
       limit: limit,
       offset: offset,
       transaction: transaction,
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
     );
   }
 
@@ -422,13 +426,15 @@ class EnvelopeGoalRepository {
   /// );
   /// ```
   Future<EnvelopeGoal?> findFirstRow(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     _i1.WhereExpressionBuilder<EnvelopeGoalTable>? where,
     int? offset,
     _i1.OrderByBuilder<EnvelopeGoalTable>? orderBy,
     bool orderDescending = false,
     _i1.OrderByListBuilder<EnvelopeGoalTable>? orderByList,
     _i1.Transaction? transaction,
+    _i1.LockMode? lockMode,
+    _i1.LockBehavior? lockBehavior,
   }) async {
     return session.db.findFirstRow<EnvelopeGoal>(
       where: where?.call(EnvelopeGoal.t),
@@ -437,18 +443,24 @@ class EnvelopeGoalRepository {
       orderDescending: orderDescending,
       offset: offset,
       transaction: transaction,
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
     );
   }
 
   /// Finds a single [EnvelopeGoal] by its [id] or null if no such row exists.
   Future<EnvelopeGoal?> findById(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     _i1.UuidValue id, {
     _i1.Transaction? transaction,
+    _i1.LockMode? lockMode,
+    _i1.LockBehavior? lockBehavior,
   }) async {
     return session.db.findById<EnvelopeGoal>(
       id,
       transaction: transaction,
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
     );
   }
 
@@ -458,14 +470,20 @@ class EnvelopeGoalRepository {
   ///
   /// This is an atomic operation, meaning that if one of the rows fails to
   /// insert, none of the rows will be inserted.
+  ///
+  /// If [ignoreConflicts] is set to `true`, rows that conflict with existing
+  /// rows are silently skipped, and only the successfully inserted rows are
+  /// returned.
   Future<List<EnvelopeGoal>> insert(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     List<EnvelopeGoal> rows, {
     _i1.Transaction? transaction,
+    bool ignoreConflicts = false,
   }) async {
     return session.db.insert<EnvelopeGoal>(
       rows,
       transaction: transaction,
+      ignoreConflicts: ignoreConflicts,
     );
   }
 
@@ -473,7 +491,7 @@ class EnvelopeGoalRepository {
   ///
   /// The returned [EnvelopeGoal] will have its `id` field set.
   Future<EnvelopeGoal> insertRow(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     EnvelopeGoal row, {
     _i1.Transaction? transaction,
   }) async {
@@ -489,7 +507,7 @@ class EnvelopeGoalRepository {
   /// This is an atomic operation, meaning that if one of the rows fails to
   /// update, none of the rows will be updated.
   Future<List<EnvelopeGoal>> update(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     List<EnvelopeGoal> rows, {
     _i1.ColumnSelections<EnvelopeGoalTable>? columns,
     _i1.Transaction? transaction,
@@ -505,7 +523,7 @@ class EnvelopeGoalRepository {
   /// Optionally, a list of [columns] can be provided to only update those
   /// columns. Defaults to all columns.
   Future<EnvelopeGoal> updateRow(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     EnvelopeGoal row, {
     _i1.ColumnSelections<EnvelopeGoalTable>? columns,
     _i1.Transaction? transaction,
@@ -520,7 +538,7 @@ class EnvelopeGoalRepository {
   /// Updates a single [EnvelopeGoal] by its [id] with the specified [columnValues].
   /// Returns the updated row or null if no row with the given id exists.
   Future<EnvelopeGoal?> updateById(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     _i1.UuidValue id, {
     required _i1.ColumnValueListBuilder<EnvelopeGoalUpdateTable> columnValues,
     _i1.Transaction? transaction,
@@ -535,7 +553,7 @@ class EnvelopeGoalRepository {
   /// Updates all [EnvelopeGoal]s matching the [where] expression with the specified [columnValues].
   /// Returns the list of updated rows.
   Future<List<EnvelopeGoal>> updateWhere(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     required _i1.ColumnValueListBuilder<EnvelopeGoalUpdateTable> columnValues,
     required _i1.WhereExpressionBuilder<EnvelopeGoalTable> where,
     int? limit,
@@ -561,7 +579,7 @@ class EnvelopeGoalRepository {
   /// This is an atomic operation, meaning that if one of the rows fail to
   /// be deleted, none of the rows will be deleted.
   Future<List<EnvelopeGoal>> delete(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     List<EnvelopeGoal> rows, {
     _i1.Transaction? transaction,
   }) async {
@@ -573,7 +591,7 @@ class EnvelopeGoalRepository {
 
   /// Deletes a single [EnvelopeGoal].
   Future<EnvelopeGoal> deleteRow(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     EnvelopeGoal row, {
     _i1.Transaction? transaction,
   }) async {
@@ -585,7 +603,7 @@ class EnvelopeGoalRepository {
 
   /// Deletes all rows matching the [where] expression.
   Future<List<EnvelopeGoal>> deleteWhere(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     required _i1.WhereExpressionBuilder<EnvelopeGoalTable> where,
     _i1.Transaction? transaction,
   }) async {
@@ -598,7 +616,7 @@ class EnvelopeGoalRepository {
   /// Counts the number of rows matching the [where] expression. If omitted,
   /// will return the count of all rows in the table.
   Future<int> count(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     _i1.WhereExpressionBuilder<EnvelopeGoalTable>? where,
     int? limit,
     _i1.Transaction? transaction,
@@ -606,6 +624,22 @@ class EnvelopeGoalRepository {
     return session.db.count<EnvelopeGoal>(
       where: where?.call(EnvelopeGoal.t),
       limit: limit,
+      transaction: transaction,
+    );
+  }
+
+  /// Acquires row-level locks on [EnvelopeGoal] rows matching the [where] expression.
+  Future<void> lockRows(
+    _i1.DatabaseSession session, {
+    required _i1.WhereExpressionBuilder<EnvelopeGoalTable> where,
+    required _i1.LockMode lockMode,
+    required _i1.Transaction transaction,
+    _i1.LockBehavior lockBehavior = _i1.LockBehavior.wait,
+  }) async {
+    return session.db.lockRows<EnvelopeGoal>(
+      where: where(EnvelopeGoal.t),
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
       transaction: transaction,
     );
   }

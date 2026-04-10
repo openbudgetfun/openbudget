@@ -93,7 +93,7 @@ abstract class SolanaWalletHolding
       decimals: jsonSerialization['decimals'] as int,
       balanceRaw: jsonSerialization['balanceRaw'] as String,
       balanceUi: jsonSerialization['balanceUi'] as String,
-      isNft: jsonSerialization['isNft'] as bool,
+      isNft: _i1.BoolJsonExtension.fromJson(jsonSerialization['isNft']),
       priceCurrency: jsonSerialization['priceCurrency'] as String?,
       pricePerToken: (jsonSerialization['pricePerToken'] as num?)?.toDouble(),
       totalValue: (jsonSerialization['totalValue'] as num?)?.toDouble(),
@@ -113,7 +113,9 @@ abstract class SolanaWalletHolding
       priceSource: jsonSerialization['priceSource'] as String?,
       priceQuality: jsonSerialization['priceQuality'] as String?,
       priceConfidence: jsonSerialization['priceConfidence'] as String?,
-      isPriceStale: jsonSerialization['isPriceStale'] as bool?,
+      isPriceStale: jsonSerialization['isPriceStale'] == null
+          ? null
+          : _i1.BoolJsonExtension.fromJson(jsonSerialization['isPriceStale']),
       priceAsOf: jsonSerialization['priceAsOf'] == null
           ? null
           : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['priceAsOf']),
@@ -896,7 +898,7 @@ class SolanaWalletHoldingRepository {
   /// );
   /// ```
   Future<List<SolanaWalletHolding>> find(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     _i1.WhereExpressionBuilder<SolanaWalletHoldingTable>? where,
     int? limit,
     int? offset,
@@ -904,6 +906,8 @@ class SolanaWalletHoldingRepository {
     bool orderDescending = false,
     _i1.OrderByListBuilder<SolanaWalletHoldingTable>? orderByList,
     _i1.Transaction? transaction,
+    _i1.LockMode? lockMode,
+    _i1.LockBehavior? lockBehavior,
   }) async {
     return session.db.find<SolanaWalletHolding>(
       where: where?.call(SolanaWalletHolding.t),
@@ -913,6 +917,8 @@ class SolanaWalletHoldingRepository {
       limit: limit,
       offset: offset,
       transaction: transaction,
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
     );
   }
 
@@ -934,13 +940,15 @@ class SolanaWalletHoldingRepository {
   /// );
   /// ```
   Future<SolanaWalletHolding?> findFirstRow(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     _i1.WhereExpressionBuilder<SolanaWalletHoldingTable>? where,
     int? offset,
     _i1.OrderByBuilder<SolanaWalletHoldingTable>? orderBy,
     bool orderDescending = false,
     _i1.OrderByListBuilder<SolanaWalletHoldingTable>? orderByList,
     _i1.Transaction? transaction,
+    _i1.LockMode? lockMode,
+    _i1.LockBehavior? lockBehavior,
   }) async {
     return session.db.findFirstRow<SolanaWalletHolding>(
       where: where?.call(SolanaWalletHolding.t),
@@ -949,18 +957,24 @@ class SolanaWalletHoldingRepository {
       orderDescending: orderDescending,
       offset: offset,
       transaction: transaction,
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
     );
   }
 
   /// Finds a single [SolanaWalletHolding] by its [id] or null if no such row exists.
   Future<SolanaWalletHolding?> findById(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     _i1.UuidValue id, {
     _i1.Transaction? transaction,
+    _i1.LockMode? lockMode,
+    _i1.LockBehavior? lockBehavior,
   }) async {
     return session.db.findById<SolanaWalletHolding>(
       id,
       transaction: transaction,
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
     );
   }
 
@@ -970,14 +984,20 @@ class SolanaWalletHoldingRepository {
   ///
   /// This is an atomic operation, meaning that if one of the rows fails to
   /// insert, none of the rows will be inserted.
+  ///
+  /// If [ignoreConflicts] is set to `true`, rows that conflict with existing
+  /// rows are silently skipped, and only the successfully inserted rows are
+  /// returned.
   Future<List<SolanaWalletHolding>> insert(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     List<SolanaWalletHolding> rows, {
     _i1.Transaction? transaction,
+    bool ignoreConflicts = false,
   }) async {
     return session.db.insert<SolanaWalletHolding>(
       rows,
       transaction: transaction,
+      ignoreConflicts: ignoreConflicts,
     );
   }
 
@@ -985,7 +1005,7 @@ class SolanaWalletHoldingRepository {
   ///
   /// The returned [SolanaWalletHolding] will have its `id` field set.
   Future<SolanaWalletHolding> insertRow(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     SolanaWalletHolding row, {
     _i1.Transaction? transaction,
   }) async {
@@ -1001,7 +1021,7 @@ class SolanaWalletHoldingRepository {
   /// This is an atomic operation, meaning that if one of the rows fails to
   /// update, none of the rows will be updated.
   Future<List<SolanaWalletHolding>> update(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     List<SolanaWalletHolding> rows, {
     _i1.ColumnSelections<SolanaWalletHoldingTable>? columns,
     _i1.Transaction? transaction,
@@ -1017,7 +1037,7 @@ class SolanaWalletHoldingRepository {
   /// Optionally, a list of [columns] can be provided to only update those
   /// columns. Defaults to all columns.
   Future<SolanaWalletHolding> updateRow(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     SolanaWalletHolding row, {
     _i1.ColumnSelections<SolanaWalletHoldingTable>? columns,
     _i1.Transaction? transaction,
@@ -1032,7 +1052,7 @@ class SolanaWalletHoldingRepository {
   /// Updates a single [SolanaWalletHolding] by its [id] with the specified [columnValues].
   /// Returns the updated row or null if no row with the given id exists.
   Future<SolanaWalletHolding?> updateById(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     _i1.UuidValue id, {
     required _i1.ColumnValueListBuilder<SolanaWalletHoldingUpdateTable>
     columnValues,
@@ -1048,7 +1068,7 @@ class SolanaWalletHoldingRepository {
   /// Updates all [SolanaWalletHolding]s matching the [where] expression with the specified [columnValues].
   /// Returns the list of updated rows.
   Future<List<SolanaWalletHolding>> updateWhere(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     required _i1.ColumnValueListBuilder<SolanaWalletHoldingUpdateTable>
     columnValues,
     required _i1.WhereExpressionBuilder<SolanaWalletHoldingTable> where,
@@ -1075,7 +1095,7 @@ class SolanaWalletHoldingRepository {
   /// This is an atomic operation, meaning that if one of the rows fail to
   /// be deleted, none of the rows will be deleted.
   Future<List<SolanaWalletHolding>> delete(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     List<SolanaWalletHolding> rows, {
     _i1.Transaction? transaction,
   }) async {
@@ -1087,7 +1107,7 @@ class SolanaWalletHoldingRepository {
 
   /// Deletes a single [SolanaWalletHolding].
   Future<SolanaWalletHolding> deleteRow(
-    _i1.Session session,
+    _i1.DatabaseSession session,
     SolanaWalletHolding row, {
     _i1.Transaction? transaction,
   }) async {
@@ -1099,7 +1119,7 @@ class SolanaWalletHoldingRepository {
 
   /// Deletes all rows matching the [where] expression.
   Future<List<SolanaWalletHolding>> deleteWhere(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     required _i1.WhereExpressionBuilder<SolanaWalletHoldingTable> where,
     _i1.Transaction? transaction,
   }) async {
@@ -1112,7 +1132,7 @@ class SolanaWalletHoldingRepository {
   /// Counts the number of rows matching the [where] expression. If omitted,
   /// will return the count of all rows in the table.
   Future<int> count(
-    _i1.Session session, {
+    _i1.DatabaseSession session, {
     _i1.WhereExpressionBuilder<SolanaWalletHoldingTable>? where,
     int? limit,
     _i1.Transaction? transaction,
@@ -1120,6 +1140,22 @@ class SolanaWalletHoldingRepository {
     return session.db.count<SolanaWalletHolding>(
       where: where?.call(SolanaWalletHolding.t),
       limit: limit,
+      transaction: transaction,
+    );
+  }
+
+  /// Acquires row-level locks on [SolanaWalletHolding] rows matching the [where] expression.
+  Future<void> lockRows(
+    _i1.DatabaseSession session, {
+    required _i1.WhereExpressionBuilder<SolanaWalletHoldingTable> where,
+    required _i1.LockMode lockMode,
+    required _i1.Transaction transaction,
+    _i1.LockBehavior lockBehavior = _i1.LockBehavior.wait,
+  }) async {
+    return session.db.lockRows<SolanaWalletHolding>(
+      where: where(SolanaWalletHolding.t),
+      lockMode: lockMode,
+      lockBehavior: lockBehavior,
       transaction: transaction,
     );
   }
