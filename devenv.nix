@@ -404,23 +404,18 @@ in
         set -euo pipefail
         mkdir -p "$DEVENV_ROOT/.eget/bin"
 
-        if ! command -v pnpm >/dev/null 2>&1; then
-          echo "pnpm is not available in PATH. Installing via npm..."
-          npm install -g pnpm@latest-10 2>/dev/null || {
-            echo "pnpm is not available and npm install failed."
-            exit 127
-          }
-        fi
-
-        PNPM_PATH="$(command -v pnpm)"
-        ln -sf "$PNPM_PATH" "$DEVENV_ROOT/.eget/bin/pnpm"
-
-        # Verify the linked binary actually works (SEA binaries may be
-        # incompatible across node versions or architectures).
-        if ! "$DEVENV_ROOT/.eget/bin/pnpm" --version >/dev/null 2>&1; then
-          echo "Linked pnpm binary is not executable. Installing via npm..."
-          npm install -g pnpm@latest-10
+        # Create a wrapper script that uses npx as a reliable fallback.
+        # The nix-provided pnpm-standalone SEA binary can be incompatible
+        # across node versions or architectures (e.g. CI Linux runners).
+        if command -v pnpm >/dev/null 2>&1 && pnpm --version >/dev/null 2>&1; then
           ln -sf "$(command -v pnpm)" "$DEVENV_ROOT/.eget/bin/pnpm"
+        else
+          echo "Creating pnpm wrapper using npx..."
+          cat > "$DEVENV_ROOT/.eget/bin/pnpm" << 'WRAPPER'
+        #!/usr/bin/env bash
+        exec npx --yes pnpm@latest-10 "$@"
+        WRAPPER
+          chmod +x "$DEVENV_ROOT/.eget/bin/pnpm"
         fi
       '';
       description = "Ensure pnpm is available for install scripts.";
