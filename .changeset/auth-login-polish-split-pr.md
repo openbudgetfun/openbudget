@@ -1,5 +1,5 @@
 ---
-default: patch
+all: patch
 ---
 
 # Refresh login screen UX polish

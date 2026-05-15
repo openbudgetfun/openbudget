@@ -1,5 +1,7 @@
 ---
-type: minor
+all: minor
 ---
 
-Add account transfer support with paired linked transactions between accounts.
+# Add account transfer support with paired linked transactions between accounts.
+
+

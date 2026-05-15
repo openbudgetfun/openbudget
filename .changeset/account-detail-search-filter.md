@@ -1,5 +1,5 @@
 ---
-default: minor
+all: minor
 ---
 
 # Account detail search and status filtering

@@ -16,7 +16,7 @@ in
     [
       dprint
       extra.agave
-      extra.knope
+      extra.monochange
       extra.mdt
       extra.pnpm-standalone
       fvm

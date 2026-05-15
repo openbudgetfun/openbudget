@@ -1,5 +1,7 @@
 ---
-default: minor
+all: minor
 ---
 
-Add running balance column to account transaction list
+# Add running balance column to account transaction list
+
+

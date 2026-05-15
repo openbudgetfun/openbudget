@@ -1,5 +1,5 @@
 ---
-default: patch
+all: patch
 ---
 
 # Wire add-transaction sheet actions through host navigation

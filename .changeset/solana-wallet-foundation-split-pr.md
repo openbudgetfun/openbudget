@@ -1,5 +1,5 @@
 ---
-default: minor
+all: minor
 ---
 
 # Solana wallet foundation and flavor bootstrap

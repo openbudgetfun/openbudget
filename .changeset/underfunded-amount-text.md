@@ -1,5 +1,5 @@
 ---
-default: patch
+all: patch
 ---
 
 # Underfunded amount text on envelope rows

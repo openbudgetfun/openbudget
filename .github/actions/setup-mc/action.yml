@@ -1,5 +1,5 @@
-name: devenv
-description: "Setup development environment with devenv and Flutter"
+name: setup-mc
+description: "Setup development environment with devenv, Flutter, and monochange CLI"
 inputs:
   github-token:
     description: Provide a github token

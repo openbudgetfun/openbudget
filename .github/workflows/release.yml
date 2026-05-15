@@ -3,15 +3,16 @@ name: release
 on:
   push:
     branches: [main]
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
-  prepare-release:
+  release-pr:
     # Run on every push to main EXCEPT when the release PR was just merged.
-    if: "!startsWith(github.event.head_commit.message, 'chore: prepare releases')"
+    if: "!startsWith(github.event.head_commit.message, 'chore(release): prepare release')"
     runs-on: blacksmith-2vcpu-ubuntu-2404
     timeout-minutes: 30
     permissions:
@@ -23,31 +24,19 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: ./.github/actions/devenv
+      - uses: ./.github/actions/setup-mc
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: check for pending changesets
-        id: changesets
-        run: |
-          if knope release --dry-run 2>&1; then
-            echo "has_changesets=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "has_changesets=false" >> "$GITHUB_OUTPUT"
-            echo "No pending changesets — skipping release preparation."
-          fi
-        shell: devenv shell -- bash -e {0}
-
       - name: prepare release PR
-        if: steps.changesets.outputs.has_changesets == 'true'
-        run: knope release
+        run: mc release-pr
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: devenv shell -- bash -e {0}
 
-  publish-release:
+  tag-release:
     # Run only when the release PR commit lands on main.
-    if: "startsWith(github.event.head_commit.message, 'chore: prepare releases')"
+    if: "startsWith(github.event.head_commit.message, 'chore(release): prepare release')"
     runs-on: blacksmith-2vcpu-ubuntu-2404
     timeout-minutes: 30
     permissions:
@@ -57,20 +46,12 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: ./.github/actions/devenv
+      - uses: ./.github/actions/setup-mc
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: create GitHub releases and tags
-        run: knope forced-release
+        run: mc step:tag-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: devenv shell -- bash -e {0}
-
-      # Uncomment when packages are publishable (publish_to: none removed).
-      # Requires a PUB_CREDENTIALS secret with valid pub.dev credentials.
-      # - name: publish packages to pub.dev
-      #   run: melos run publish --no-select
-      #   env:
-      #     PUB_CREDENTIALS: ${{ secrets.PUB_CREDENTIALS }}
-      #   shell: devenv shell -- bash -e {0}

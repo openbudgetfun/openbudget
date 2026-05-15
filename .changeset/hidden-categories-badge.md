@@ -1,5 +1,5 @@
 ---
-default: patch
+all: patch
 ---
 
 # Hidden categories badge
