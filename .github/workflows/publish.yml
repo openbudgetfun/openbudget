@@ -46,7 +46,7 @@ jobs:
           ref: ${{ steps.release_tag.outputs.tag }}
           fetch-depth: 0
 
-      - uses: ./.github/actions/setup-mc
+      - uses: ./.github/actions/devenv
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 

@@ -20,14 +20,6 @@ runs:
         restore-keys: |
           ${{ runner.os }}-pub-${{ inputs.cache-version }}-
 
-    - name: cache eget
-      uses: actions/cache@v4
-      with:
-        path: ./.eget/bin
-        key: ${{ runner.os }}-eget-${{ inputs.cache-version }}-${{ github.job }}-${{ hashFiles('.eget/.eget.toml') }}
-        restore-keys: |
-          ${{ runner.os }}-eget-${{ inputs.cache-version }}-${{ github.job }}-
-
     - name: install nix
       uses: cachix/install-nix-action@v31
       with:
@@ -49,11 +41,3 @@ runs:
     - name: install dependencies
       run: install:all
       shell: devenv shell -- bash -e {0}
-
-    - name: install monochange CLI
-      run: |
-        set -euo pipefail
-        mkdir -p "$RUNNER_TEMP/bin"
-        eget monochange/monochange --to "$RUNNER_TEMP/bin" --asset-name mc
-        echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
-      shell: bash
