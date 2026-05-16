@@ -51,9 +51,23 @@ runs:
       shell: devenv shell -- bash -e {0}
 
     - name: install monochange CLI
+      shell: bash
       run: |
         set -euo pipefail
-        mkdir -p "$RUNNER_TEMP/bin"
-        eget monochange/monochange --to "$RUNNER_TEMP/bin" --asset-name mc
-        echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
-      shell: bash
+        MC_VERSION=$(curl -fsSL https://api.github.com/repos/monochange/monochange/releases/latest | grep '"tag_name"' | sed -E 's/.*"v([^"]+)".*/\1/')
+        ARCH=$(uname -m)
+        OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+        case "$ARCH" in
+          x86_64)  RUST_ARCH="x86_64" ;;
+          aarch64) RUST_ARCH="aarch64" ;;
+          *)       echo "Unsupported architecture: $ARCH"; exit 1 ;;
+        esac
+        case "$OS" in
+          linux)   RUST_OS="unknown-linux-gnu" ;;
+          darwin)  RUST_OS="apple-darwin" ;;
+          *)       echo "Unsupported OS: $OS"; exit 1 ;;
+        esac
+        TARBALL="monochange-${RUST_ARCH}-${RUST_OS}-v${MC_VERSION}.tar.gz"
+        curl -fsSL "https://github.com/monochange/monochange/releases/download/v${MC_VERSION}/${TARBALL}" | tar xz -C /usr/local/bin
+        ln -sf /usr/local/bin/monochange /usr/local/bin/mc
+        mc --version
