@@ -2,7 +2,6 @@
   pkgs,
   lib,
   config,
-  inputs,
   ...
 }:
 
@@ -16,7 +15,7 @@ in
     [
       dprint
       extra.agave
-      extra.monochange
+      monochange
       extra.mdt
       extra.pnpm-standalone
       fvm
