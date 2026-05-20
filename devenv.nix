@@ -17,7 +17,7 @@ in
     [
       dprint
       extra.agave
-      monochangePkgs.monochange
+      (monochangePkgs.monochange)
       extra.mdt
       extra.pnpm-standalone
       fvm
