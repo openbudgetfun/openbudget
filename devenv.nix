@@ -7,6 +7,7 @@
 }:
 
 let
+  monochangePkgs = inputs.ifiokjr-nixpkgs.packages.${pkgs.stdenv.system};
   isCI = builtins.getEnv "CI" != "";
   extra = inputs.ifiokjr-nixpkgs.packages.${pkgs.stdenv.hostPlatform.system};
 in
@@ -16,7 +17,7 @@ in
     [
       dprint
       extra.agave
-      extra.knope
+      (monochangePkgs.monochange)
       extra.mdt
       extra.pnpm-standalone
       fvm

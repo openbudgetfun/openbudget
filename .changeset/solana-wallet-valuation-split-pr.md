@@ -1,5 +1,5 @@
 ---
-default: minor
+all: minor
 ---
 
 # Solana wallet valuation and tax-year rollups

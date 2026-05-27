@@ -54,9 +54,10 @@ melos run serverpod:generate # Run Serverpod code generation
 server:start                 # Start Serverpod dev server (devenv script)
 
 # Versioning & Publishing
-knope document-change        # Create a changeset file for version bumps
-melos run publish:dry        # Dry-run publish (validate publishable packages)
-melos run publish            # Publish packages to pub.dev
+mc change                     # Create a changeset file for version bumps
+mc release-pr                 # Prepare a release pull request
+mc step:tag-release           # Create GitHub releases and tags
+mc step:publish-packages      # Publish packages to pub.dev
 ```
 
 ## Architecture Decisions
@@ -120,38 +121,38 @@ Use `GoRouter` for all navigation. Routes are defined in `app_router.dart` with 
 
 ## Version Management & Releases
 
-### Changeset Workflow (Knope)
+### Changeset Workflow (monochange)
 
-The project uses [knope](https://knope.tech) for **changeset-only** version management. Conventional commits do **not** trigger version bumps — only explicit changeset files do.
+The project uses [monochange](https://github.com/monochange/monochange) for **changeset-only** version management. Conventional commits do **not** trigger version bumps — only explicit changeset files do.
 
-- Run `knope document-change` to create a changeset file in `.changeset/`
+- Run `mc change` to create a changeset file in `.changeset/`
 - Every PR with user-facing changes **must** include a changeset
-- On push to `main`, a bot workflow creates/updates a release PR on the `knope/release` branch
-- Merging the release PR triggers `knope forced-release`, which creates GitHub releases and git tags
+- On push to `main`, a bot workflow opens/updates a release PR via `mc release-pr`
+- Merging the release PR triggers `mc step:tag-release`, which creates GitHub releases and git tags
 
-### Publishing with Melos
+### Publishing with monochange
 
-Knope manages **git tags and GitHub releases**. Melos manages **package publishing**.
+monochange manages **git tags, GitHub releases, and package publishing**.
 
 ```bash
-melos run publish:dry           # Dry-run — validate all publishable packages
-melos run publish               # Publish all publishable packages to pub.dev
-melos run publish --no-select   # Non-interactive (used in CI)
+mc step:publish-readiness       # Check publish readiness (dry-run)
+mc step:publish-packages        # Publish all publishable packages to pub.dev
 ```
 
 **How it works:**
 
-- Melos filters on `noPrivate: true`, so only packages **without** `publish_to: none` are published.
-- Currently all packages have `publish_to: none`. To make a package publishable, remove that line from its `pubspec.yaml`.
-- The `release.yml` workflow runs `melos run publish --no-select` automatically after knope creates the GitHub releases.
-- CI publishing requires a `PUB_CREDENTIALS` secret with a valid pub.dev credential JSON.
+- monochange filters on packages with `publish.enabled = true` in `monochange.toml`.
+- Currently only `openbudget_client` has publish enabled. Other packages have `publish = { enabled = false }`.
+- The `publish.yml` workflow runs `mc step:publish-packages` after a release tag is created.
+- CI publishing uses pub.dev OIDC trusted publishing with a `publisher` GitHub environment.
 
 **Making a package publishable:**
 
-1. Remove `publish_to: none` from the package's `pubspec.yaml`
-2. Ensure the package has a proper `description`, `repository`, and `homepage` field
-3. Run `melos run publish:dry` to validate
-4. The next release will automatically publish it
+1. Set `publish = { enabled = true }` (or remove `publish = { enabled = false }`) in `monochange.toml`
+2. Remove `publish_to: none` from the package's `pubspec.yaml`
+3. Ensure the package has a proper `description`, `repository`, and `homepage` field
+4. Run `mc step:publish-readiness` to validate
+5. The next release will automatically publish it
 
 ### App Versioning Rules (`openbudget_app`)
 
@@ -212,4 +213,4 @@ See `.specify/memory/constitution.md` for the full project constitution (v1.0.0)
 - **Melos** 7.x — monorepo tooling (config in root `pubspec.yaml`, no `melos.yaml`)
 - **Patrol** — E2E integration testing
 - **dprint** — non-Dart formatting
-- **Knope** — changeset-based version management and release automation
+- **monochange** — changeset-based version management and release automation

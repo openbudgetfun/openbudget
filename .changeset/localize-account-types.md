@@ -1,5 +1,5 @@
 ---
-default: patch
+all: patch
 ---
 
 # Localize account type labels

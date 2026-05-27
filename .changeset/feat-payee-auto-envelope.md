@@ -1,5 +1,5 @@
 ---
-default: minor
+all: minor
 ---
 
-Add payee auto-suggest with last-used envelope on expense screen
+# Add payee auto-suggest with last-used envelope on expense screen

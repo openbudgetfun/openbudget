@@ -1,5 +1,5 @@
 ---
-default: minor
+all: minor
 ---
 
-Add envelope notes. Users can add optional text notes to envelopes for context, visible in the envelope activity sheet and editable in the edit envelope dialog.
+# Add envelope notes. Users can add optional text notes to envelopes for context, visible in the envelope activity sheet and editable in the edit envelope dialog.

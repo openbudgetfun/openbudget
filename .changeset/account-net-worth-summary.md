@@ -1,5 +1,5 @@
 ---
-default: minor
+all: minor
 ---
 
 # Account net worth summary

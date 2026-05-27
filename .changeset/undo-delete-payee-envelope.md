@@ -1,5 +1,5 @@
 ---
-default: minor
+all: minor
 ---
 
 # Undo deletion for payees, categories, and envelopes

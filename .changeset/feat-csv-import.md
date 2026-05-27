@@ -1,5 +1,5 @@
 ---
-default: minor
+all: minor
 ---
 
-Add CSV transaction import with paste-and-preview workflow
+# Add CSV transaction import with paste-and-preview workflow

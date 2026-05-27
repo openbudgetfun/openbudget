@@ -1,5 +1,5 @@
 ---
-default: minor
+all: minor
 ---
 
 # Budget month picker

@@ -1,5 +1,5 @@
 ---
-default: minor
+all: minor
 ---
 
 # Transaction row details

@@ -1,5 +1,5 @@
 ---
-default: minor
+all: minor
 ---
 
-Add transaction search bar and income/expense filter chips to the transaction list screen.
+# Add transaction search bar and income/expense filter chips to the transaction list screen.

@@ -1,5 +1,5 @@
 ---
-default: patch
+all: patch
 ---
 
 # Enforce localization usage and migrate hardcoded app text

@@ -1,5 +1,5 @@
 ---
-default: minor
+all: minor
 ---
 
-feat: add auto-posting of due recurring/scheduled transactions
+# feat: add auto-posting of due recurring/scheduled transactions
