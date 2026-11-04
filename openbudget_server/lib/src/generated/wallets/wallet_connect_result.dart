@@ -10,14 +10,15 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:serverpod/serverpod.dart' as _i1;
-import '../accounts/account.dart' as _i2;
-import '../wallets/wallet_holding.dart' as _i3;
-import 'package:openbudget_server/src/generated/protocol.dart' as _i4;
+import 'package:openbudget_server/src/generated/protocol.dart' as _is0sbm8r;
+import 'package:serverpod/serverpod.dart' as _is;
+
+import '../accounts/account.dart' as _ijs1hrmc;
+import '../wallets/wallet_holding.dart' as _iqp3sgqk;
 
 /// Result payload after connecting or refreshing a wallet.
 abstract class WalletConnectResult
-    implements _i1.SerializableModel, _i1.ProtocolSerialization {
+    implements _is.SerializableModel, _is.ProtocolSerialization {
   WalletConnectResult._({
     required this.account,
     required this.holdings,
@@ -25,35 +26,35 @@ abstract class WalletConnectResult
   });
 
   factory WalletConnectResult({
-    required _i2.Account account,
-    required List<_i3.WalletHolding> holdings,
+    required _ijs1hrmc.Account account,
+    required List<_iqp3sgqk.WalletHolding> holdings,
     required double totalUsdValue,
   }) = _WalletConnectResultImpl;
 
   factory WalletConnectResult.fromJson(Map<String, dynamic> jsonSerialization) {
     return WalletConnectResult(
-      account: _i4.Protocol().deserialize<_i2.Account>(
+      account: _is0sbm8r.Protocol().deserialize<_ijs1hrmc.Account>(
         jsonSerialization['account'],
       ),
-      holdings: _i4.Protocol().deserialize<List<_i3.WalletHolding>>(
+      holdings: _is0sbm8r.Protocol().deserialize<List<_iqp3sgqk.WalletHolding>>(
         jsonSerialization['holdings'],
       ),
       totalUsdValue: (jsonSerialization['totalUsdValue'] as num).toDouble(),
     );
   }
 
-  _i2.Account account;
+  _ijs1hrmc.Account account;
 
-  List<_i3.WalletHolding> holdings;
+  List<_iqp3sgqk.WalletHolding> holdings;
 
   double totalUsdValue;
 
   /// Returns a shallow copy of this [WalletConnectResult]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_is.useResult
   WalletConnectResult copyWith({
-    _i2.Account? account,
-    List<_i3.WalletHolding>? holdings,
+    _ijs1hrmc.Account? account,
+    List<_iqp3sgqk.WalletHolding>? holdings,
     double? totalUsdValue,
   });
   @override
@@ -78,14 +79,14 @@ abstract class WalletConnectResult
 
   @override
   String toString() {
-    return _i1.SerializationManager.encode(this);
+    return _is.SerializationManager.encode(this);
   }
 }
 
 class _WalletConnectResultImpl extends WalletConnectResult {
   _WalletConnectResultImpl({
-    required _i2.Account account,
-    required List<_i3.WalletHolding> holdings,
+    required _ijs1hrmc.Account account,
+    required List<_iqp3sgqk.WalletHolding> holdings,
     required double totalUsdValue,
   }) : super._(
          account: account,
@@ -95,11 +96,11 @@ class _WalletConnectResultImpl extends WalletConnectResult {
 
   /// Returns a shallow copy of this [WalletConnectResult]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_is.useResult
   @override
   WalletConnectResult copyWith({
-    _i2.Account? account,
-    List<_i3.WalletHolding>? holdings,
+    _ijs1hrmc.Account? account,
+    List<_iqp3sgqk.WalletHolding>? holdings,
     double? totalUsdValue,
   }) {
     return WalletConnectResult(

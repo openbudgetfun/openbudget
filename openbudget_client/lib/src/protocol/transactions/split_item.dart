@@ -10,15 +10,20 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:serverpod_client/serverpod_client.dart' as _i1;
+import 'package:serverpod_client/serverpod_client.dart' as _isc;
 
 /// A single split within a split transaction.
-abstract class SplitItem implements _i1.SerializableModel {
-  SplitItem._({required this.amountCents, this.envelopeId, this.memo});
+abstract class SplitItem
+    implements _isc.SerializableModel, _isc.ProtocolSerialization {
+  SplitItem._({
+    required this.amountCents,
+    this.envelopeId,
+    this.memo,
+  });
 
   factory SplitItem({
     required int amountCents,
-    _i1.UuidValue? envelopeId,
+    _isc.UuidValue? envelopeId,
     String? memo,
   }) = _SplitItemImpl;
 
@@ -27,7 +32,7 @@ abstract class SplitItem implements _i1.SerializableModel {
       amountCents: jsonSerialization['amountCents'] as int,
       envelopeId: jsonSerialization['envelopeId'] == null
           ? null
-          : _i1.UuidValueJsonExtension.fromJson(
+          : _isc.UuidValueJsonExtension.fromJson(
               jsonSerialization['envelopeId'],
             ),
       memo: jsonSerialization['memo'] as String?,
@@ -38,17 +43,17 @@ abstract class SplitItem implements _i1.SerializableModel {
   int amountCents;
 
   /// The envelope to assign this split to.
-  _i1.UuidValue? envelopeId;
+  _isc.UuidValue? envelopeId;
 
   /// Optional memo for this specific split.
   String? memo;
 
   /// Returns a shallow copy of this [SplitItem]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_isc.useResult
   SplitItem copyWith({
     int? amountCents,
-    _i1.UuidValue? envelopeId,
+    _isc.UuidValue? envelopeId = const _isc.$UndefinedUuidValue(),
     String? memo,
   });
   @override
@@ -62,8 +67,18 @@ abstract class SplitItem implements _i1.SerializableModel {
   }
 
   @override
+  Map<String, dynamic> toJsonForProtocol() {
+    return {
+      '__className__': 'SplitItem',
+      'amountCents': amountCents,
+      if (envelopeId != null) 'envelopeId': envelopeId?.toJson(),
+      if (memo != null) 'memo': memo,
+    };
+  }
+
+  @override
   String toString() {
-    return _i1.SerializationManager.encode(this);
+    return _isc.SerializationManager.encode(this);
   }
 }
 
@@ -72,22 +87,28 @@ class _Undefined {}
 class _SplitItemImpl extends SplitItem {
   _SplitItemImpl({
     required int amountCents,
-    _i1.UuidValue? envelopeId,
+    _isc.UuidValue? envelopeId,
     String? memo,
-  }) : super._(amountCents: amountCents, envelopeId: envelopeId, memo: memo);
+  }) : super._(
+         amountCents: amountCents,
+         envelopeId: envelopeId,
+         memo: memo,
+       );
 
   /// Returns a shallow copy of this [SplitItem]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_isc.useResult
   @override
   SplitItem copyWith({
     int? amountCents,
-    Object? envelopeId = _Undefined,
+    _isc.UuidValue? envelopeId = const _isc.$UndefinedUuidValue(),
     Object? memo = _Undefined,
   }) {
     return SplitItem(
       amountCents: amountCents ?? this.amountCents,
-      envelopeId: envelopeId is _i1.UuidValue? ? envelopeId : this.envelopeId,
+      envelopeId: envelopeId is _isc.UndefinedSentinel
+          ? this.envelopeId
+          : envelopeId,
       memo: memo is String? ? memo : this.memo,
     );
   }

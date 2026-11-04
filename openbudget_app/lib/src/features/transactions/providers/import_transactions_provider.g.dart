@@ -42,13 +42,13 @@ final class ImportTransactionsProvider
 }
 
 String _$importTransactionsHash() =>
-    r'f18832061bfbd8c9f9ca34e5b0f7c0be53637d47';
+    r'2cabfddc1d8f0d8fdb9025ed2207232cb861129c';
 
 abstract class _$ImportTransactions extends $Notifier<AsyncValue<void>> {
   AsyncValue<void> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<void>, AsyncValue<void>>;
     final element =
         ref.element
@@ -58,6 +58,6 @@ abstract class _$ImportTransactions extends $Notifier<AsyncValue<void>> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

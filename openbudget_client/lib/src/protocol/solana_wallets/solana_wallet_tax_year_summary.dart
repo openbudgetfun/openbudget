@@ -10,10 +10,11 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:serverpod_client/serverpod_client.dart' as _i1;
+import 'package:serverpod_client/serverpod_client.dart' as _isc;
 
 /// Estimated realized wallet P&L grouped by tax year.
-abstract class SolanaWalletTaxYearSummary implements _i1.SerializableModel {
+abstract class SolanaWalletTaxYearSummary
+    implements _isc.SerializableModel, _isc.ProtocolSerialization {
   SolanaWalletTaxYearSummary._({
     required this.walletId,
     required this.taxYear,
@@ -25,7 +26,7 @@ abstract class SolanaWalletTaxYearSummary implements _i1.SerializableModel {
   });
 
   factory SolanaWalletTaxYearSummary({
-    required _i1.UuidValue walletId,
+    required _isc.UuidValue walletId,
     required int taxYear,
     required int transactionCount,
     required double estimatedRealizedPnl,
@@ -38,7 +39,7 @@ abstract class SolanaWalletTaxYearSummary implements _i1.SerializableModel {
     Map<String, dynamic> jsonSerialization,
   ) {
     return SolanaWalletTaxYearSummary(
-      walletId: _i1.UuidValueJsonExtension.fromJson(
+      walletId: _isc.UuidValueJsonExtension.fromJson(
         jsonSerialization['walletId'],
       ),
       taxYear: jsonSerialization['taxYear'] as int,
@@ -53,7 +54,7 @@ abstract class SolanaWalletTaxYearSummary implements _i1.SerializableModel {
     );
   }
 
-  _i1.UuidValue walletId;
+  _isc.UuidValue walletId;
 
   int taxYear;
 
@@ -69,9 +70,9 @@ abstract class SolanaWalletTaxYearSummary implements _i1.SerializableModel {
 
   /// Returns a shallow copy of this [SolanaWalletTaxYearSummary]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_isc.useResult
   SolanaWalletTaxYearSummary copyWith({
-    _i1.UuidValue? walletId,
+    _isc.UuidValue? walletId,
     int? taxYear,
     int? transactionCount,
     double? estimatedRealizedPnl,
@@ -94,14 +95,28 @@ abstract class SolanaWalletTaxYearSummary implements _i1.SerializableModel {
   }
 
   @override
+  Map<String, dynamic> toJsonForProtocol() {
+    return {
+      '__className__': 'SolanaWalletTaxYearSummary',
+      'walletId': walletId.toJson(),
+      'taxYear': taxYear,
+      'transactionCount': transactionCount,
+      'estimatedRealizedPnl': estimatedRealizedPnl,
+      'estimatedProceeds': estimatedProceeds,
+      'estimatedCostBasis': estimatedCostBasis,
+      'pnlCurrency': pnlCurrency,
+    };
+  }
+
+  @override
   String toString() {
-    return _i1.SerializationManager.encode(this);
+    return _isc.SerializationManager.encode(this);
   }
 }
 
 class _SolanaWalletTaxYearSummaryImpl extends SolanaWalletTaxYearSummary {
   _SolanaWalletTaxYearSummaryImpl({
-    required _i1.UuidValue walletId,
+    required _isc.UuidValue walletId,
     required int taxYear,
     required int transactionCount,
     required double estimatedRealizedPnl,
@@ -120,10 +135,10 @@ class _SolanaWalletTaxYearSummaryImpl extends SolanaWalletTaxYearSummary {
 
   /// Returns a shallow copy of this [SolanaWalletTaxYearSummary]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_isc.useResult
   @override
   SolanaWalletTaxYearSummary copyWith({
-    _i1.UuidValue? walletId,
+    _isc.UuidValue? walletId,
     int? taxYear,
     int? transactionCount,
     double? estimatedRealizedPnl,

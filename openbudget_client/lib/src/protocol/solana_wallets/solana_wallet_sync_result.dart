@@ -10,10 +10,11 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:serverpod_client/serverpod_client.dart' as _i1;
+import 'package:serverpod_client/serverpod_client.dart' as _isc;
 
 /// Sync response payload for Solana wallet refreshes.
-abstract class SolanaWalletSyncResult implements _i1.SerializableModel {
+abstract class SolanaWalletSyncResult
+    implements _isc.SerializableModel, _isc.ProtocolSerialization {
   SolanaWalletSyncResult._({
     required this.walletId,
     required this.insertedTransactions,
@@ -34,7 +35,7 @@ abstract class SolanaWalletSyncResult implements _i1.SerializableModel {
   });
 
   factory SolanaWalletSyncResult({
-    required _i1.UuidValue walletId,
+    required _isc.UuidValue walletId,
     required int insertedTransactions,
     required int updatedTransactions,
     required int holdingCount,
@@ -56,7 +57,7 @@ abstract class SolanaWalletSyncResult implements _i1.SerializableModel {
     Map<String, dynamic> jsonSerialization,
   ) {
     return SolanaWalletSyncResult(
-      walletId: _i1.UuidValueJsonExtension.fromJson(
+      walletId: _isc.UuidValueJsonExtension.fromJson(
         jsonSerialization['walletId'],
       ),
       insertedTransactions: jsonSerialization['insertedTransactions'] as int,
@@ -74,14 +75,14 @@ abstract class SolanaWalletSyncResult implements _i1.SerializableModel {
           (jsonSerialization['valuationCoverageRatio'] as num?)?.toDouble(),
       totalValuation: (jsonSerialization['totalValuation'] as num?)?.toDouble(),
       valuationCurrency: jsonSerialization['valuationCurrency'] as String?,
-      syncedAt: _i1.DateTimeJsonExtension.fromJson(
+      syncedAt: _isc.DateTimeJsonExtension.fromJson(
         jsonSerialization['syncedAt'],
       ),
       warnings: jsonSerialization['warnings'] as String?,
     );
   }
 
-  _i1.UuidValue walletId;
+  _isc.UuidValue walletId;
 
   int insertedTransactions;
 
@@ -115,9 +116,9 @@ abstract class SolanaWalletSyncResult implements _i1.SerializableModel {
 
   /// Returns a shallow copy of this [SolanaWalletSyncResult]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_isc.useResult
   SolanaWalletSyncResult copyWith({
-    _i1.UuidValue? walletId,
+    _isc.UuidValue? walletId,
     int? insertedTransactions,
     int? updatedTransactions,
     int? holdingCount,
@@ -159,8 +160,32 @@ abstract class SolanaWalletSyncResult implements _i1.SerializableModel {
   }
 
   @override
+  Map<String, dynamic> toJsonForProtocol() {
+    return {
+      '__className__': 'SolanaWalletSyncResult',
+      'walletId': walletId.toJson(),
+      'insertedTransactions': insertedTransactions,
+      'updatedTransactions': updatedTransactions,
+      'holdingCount': holdingCount,
+      'pricedHoldingCount': pricedHoldingCount,
+      'staleHoldingCount': staleHoldingCount,
+      'unpricedHoldingCount': unpricedHoldingCount,
+      'nftHoldingCount': nftHoldingCount,
+      'pricedNftHoldingCount': pricedNftHoldingCount,
+      'staleNftHoldingCount': staleNftHoldingCount,
+      'unpricedNftHoldingCount': unpricedNftHoldingCount,
+      if (valuationCoverageRatio != null)
+        'valuationCoverageRatio': valuationCoverageRatio,
+      if (totalValuation != null) 'totalValuation': totalValuation,
+      if (valuationCurrency != null) 'valuationCurrency': valuationCurrency,
+      'syncedAt': syncedAt.toJson(),
+      if (warnings != null) 'warnings': warnings,
+    };
+  }
+
+  @override
   String toString() {
-    return _i1.SerializationManager.encode(this);
+    return _isc.SerializationManager.encode(this);
   }
 }
 
@@ -168,7 +193,7 @@ class _Undefined {}
 
 class _SolanaWalletSyncResultImpl extends SolanaWalletSyncResult {
   _SolanaWalletSyncResultImpl({
-    required _i1.UuidValue walletId,
+    required _isc.UuidValue walletId,
     required int insertedTransactions,
     required int updatedTransactions,
     required int holdingCount,
@@ -205,10 +230,10 @@ class _SolanaWalletSyncResultImpl extends SolanaWalletSyncResult {
 
   /// Returns a shallow copy of this [SolanaWalletSyncResult]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_isc.useResult
   @override
   SolanaWalletSyncResult copyWith({
-    _i1.UuidValue? walletId,
+    _isc.UuidValue? walletId,
     int? insertedTransactions,
     int? updatedTransactions,
     int? holdingCount,

@@ -194,13 +194,13 @@ final class EnvelopeGoalActionsProvider
 }
 
 String _$envelopeGoalActionsHash() =>
-    r'37ebd985d5c0652a978d0307fdbe3e71dea181db';
+    r'696a2b4c84d3bab2d606c5ea4d55e84ad94809c0';
 
 abstract class _$EnvelopeGoalActions extends $Notifier<AsyncValue<void>> {
   AsyncValue<void> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<void>, AsyncValue<void>>;
     final element =
         ref.element
@@ -210,6 +210,6 @@ abstract class _$EnvelopeGoalActions extends $Notifier<AsyncValue<void>> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

@@ -10,11 +10,11 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:serverpod/serverpod.dart' as _i1;
+import 'package:serverpod/serverpod.dart' as _is;
 
 /// A single row of data for bulk transaction import.
 abstract class ImportRow
-    implements _i1.SerializableModel, _i1.ProtocolSerialization {
+    implements _is.SerializableModel, _is.ProtocolSerialization {
   ImportRow._({
     required this.description,
     required this.amountCents,
@@ -31,7 +31,7 @@ abstract class ImportRow
     return ImportRow(
       description: jsonSerialization['description'] as String,
       amountCents: jsonSerialization['amountCents'] as int,
-      transactionDate: _i1.DateTimeJsonExtension.fromJson(
+      transactionDate: _is.DateTimeJsonExtension.fromJson(
         jsonSerialization['transactionDate'],
       ),
     );
@@ -45,7 +45,7 @@ abstract class ImportRow
 
   /// Returns a shallow copy of this [ImportRow]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_is.useResult
   ImportRow copyWith({
     String? description,
     int? amountCents,
@@ -73,7 +73,7 @@ abstract class ImportRow
 
   @override
   String toString() {
-    return _i1.SerializationManager.encode(this);
+    return _is.SerializationManager.encode(this);
   }
 }
 
@@ -90,7 +90,7 @@ class _ImportRowImpl extends ImportRow {
 
   /// Returns a shallow copy of this [ImportRow]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_is.useResult
   @override
   ImportRow copyWith({
     String? description,

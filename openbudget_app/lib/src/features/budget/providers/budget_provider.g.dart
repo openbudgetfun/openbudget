@@ -41,13 +41,13 @@ final class CreateBudgetProvider
   }
 }
 
-String _$createBudgetHash() => r'087140c351c01bc5b84d3efda4befcd773412129';
+String _$createBudgetHash() => r'14f75bef27b19ed2eaad26f6b7185f19935a1f5b';
 
 abstract class _$CreateBudget extends $Notifier<AsyncValue<String?>> {
   AsyncValue<String?> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<String?>, AsyncValue<String?>>;
     final element =
         ref.element
@@ -57,6 +57,6 @@ abstract class _$CreateBudget extends $Notifier<AsyncValue<String?>> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

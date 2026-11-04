@@ -10,11 +10,13 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:serverpod/serverpod.dart' as _i1;
+import 'dart:async' as _ida;
+
+import 'package:serverpod/serverpod.dart' as _is;
 
 /// A recurring/scheduled transaction template that generates transactions on a schedule.
 abstract class RecurringTransaction
-    implements _i1.TableRow<_i1.UuidValue?>, _i1.ProtocolSerialization {
+    implements _is.TableRow<_is.UuidValue?>, _is.ProtocolSerialization {
   RecurringTransaction._({
     this.id,
     required this.description,
@@ -34,14 +36,14 @@ abstract class RecurringTransaction
        updatedAt = updatedAt ?? DateTime.now();
 
   factory RecurringTransaction({
-    _i1.UuidValue? id,
+    _is.UuidValue? id,
     required String description,
     required int amountCents,
     required String currencyCode,
-    _i1.UuidValue? envelopeId,
-    required _i1.UuidValue budgetId,
-    _i1.UuidValue? accountId,
-    _i1.UuidValue? payeeId,
+    _is.UuidValue? envelopeId,
+    required _is.UuidValue budgetId,
+    _is.UuidValue? accountId,
+    _is.UuidValue? payeeId,
     required String frequency,
     required DateTime nextOccurrence,
     DateTime? endDate,
@@ -56,38 +58,38 @@ abstract class RecurringTransaction
     return RecurringTransaction(
       id: jsonSerialization['id'] == null
           ? null
-          : _i1.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
+          : _is.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
       description: jsonSerialization['description'] as String,
       amountCents: jsonSerialization['amountCents'] as int,
       currencyCode: jsonSerialization['currencyCode'] as String,
       envelopeId: jsonSerialization['envelopeId'] == null
           ? null
-          : _i1.UuidValueJsonExtension.fromJson(
+          : _is.UuidValueJsonExtension.fromJson(
               jsonSerialization['envelopeId'],
             ),
-      budgetId: _i1.UuidValueJsonExtension.fromJson(
+      budgetId: _is.UuidValueJsonExtension.fromJson(
         jsonSerialization['budgetId'],
       ),
       accountId: jsonSerialization['accountId'] == null
           ? null
-          : _i1.UuidValueJsonExtension.fromJson(jsonSerialization['accountId']),
+          : _is.UuidValueJsonExtension.fromJson(jsonSerialization['accountId']),
       payeeId: jsonSerialization['payeeId'] == null
           ? null
-          : _i1.UuidValueJsonExtension.fromJson(jsonSerialization['payeeId']),
+          : _is.UuidValueJsonExtension.fromJson(jsonSerialization['payeeId']),
       frequency: jsonSerialization['frequency'] as String,
-      nextOccurrence: _i1.DateTimeJsonExtension.fromJson(
+      nextOccurrence: _is.DateTimeJsonExtension.fromJson(
         jsonSerialization['nextOccurrence'],
       ),
       endDate: jsonSerialization['endDate'] == null
           ? null
-          : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['endDate']),
-      isActive: _i1.BoolJsonExtension.fromJson(jsonSerialization['isActive']),
+          : _is.DateTimeJsonExtension.fromJson(jsonSerialization['endDate']),
+      isActive: _is.BoolJsonExtension.fromJson(jsonSerialization['isActive']),
       createdAt: jsonSerialization['createdAt'] == null
           ? null
-          : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
+          : _is.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
       updatedAt: jsonSerialization['updatedAt'] == null
           ? null
-          : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['updatedAt']),
+          : _is.DateTimeJsonExtension.fromJson(jsonSerialization['updatedAt']),
     );
   }
 
@@ -96,7 +98,7 @@ abstract class RecurringTransaction
   static const db = RecurringTransactionRepository._();
 
   @override
-  _i1.UuidValue? id;
+  _is.UuidValue? id;
 
   String description;
 
@@ -106,13 +108,13 @@ abstract class RecurringTransaction
   /// ISO 4217 currency code.
   String currencyCode;
 
-  _i1.UuidValue? envelopeId;
+  _is.UuidValue? envelopeId;
 
-  _i1.UuidValue budgetId;
+  _is.UuidValue budgetId;
 
-  _i1.UuidValue? accountId;
+  _is.UuidValue? accountId;
 
-  _i1.UuidValue? payeeId;
+  _is.UuidValue? payeeId;
 
   /// Recurrence frequency: daily, weekly, biweekly, monthly, yearly.
   String frequency;
@@ -131,23 +133,23 @@ abstract class RecurringTransaction
   DateTime updatedAt;
 
   @override
-  _i1.Table<_i1.UuidValue?> get table => t;
+  _is.Table<_is.UuidValue?> get table => t;
 
   /// Returns a shallow copy of this [RecurringTransaction]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_is.useResult
   RecurringTransaction copyWith({
-    _i1.UuidValue? id,
+    _is.UuidValue? id = const _is.$UndefinedUuidValue(),
     String? description,
     int? amountCents,
     String? currencyCode,
-    _i1.UuidValue? envelopeId,
-    _i1.UuidValue? budgetId,
-    _i1.UuidValue? accountId,
-    _i1.UuidValue? payeeId,
+    _is.UuidValue? envelopeId = const _is.$UndefinedUuidValue(),
+    _is.UuidValue? budgetId,
+    _is.UuidValue? accountId = const _is.$UndefinedUuidValue(),
+    _is.UuidValue? payeeId = const _is.$UndefinedUuidValue(),
     String? frequency,
     DateTime? nextOccurrence,
-    DateTime? endDate,
+    DateTime? endDate = const _is.$UndefinedDateTime(),
     bool? isActive,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -199,12 +201,11 @@ abstract class RecurringTransaction
   }
 
   static RecurringTransactionIncludeList includeList({
-    _i1.WhereExpressionBuilder<RecurringTransactionTable>? where,
+    _is.WhereExpressionBuilder<RecurringTransactionTable>? where,
     int? limit,
     int? offset,
-    _i1.OrderByBuilder<RecurringTransactionTable>? orderBy,
-    bool orderDescending = false,
-    _i1.OrderByListBuilder<RecurringTransactionTable>? orderByList,
+    _is.OrderByBuilder<RecurringTransactionTable>? orderBy,
+    _is.OrderByListBuilder<RecurringTransactionTable>? orderByList,
     RecurringTransactionInclude? include,
   }) {
     return RecurringTransactionIncludeList._(
@@ -212,7 +213,6 @@ abstract class RecurringTransaction
       limit: limit,
       offset: offset,
       orderBy: orderBy?.call(RecurringTransaction.t),
-      orderDescending: orderDescending,
       orderByList: orderByList?.call(RecurringTransaction.t),
       include: include,
     );
@@ -220,22 +220,20 @@ abstract class RecurringTransaction
 
   @override
   String toString() {
-    return _i1.SerializationManager.encode(this);
+    return _is.SerializationManager.encode(this);
   }
 }
 
-class _Undefined {}
-
 class _RecurringTransactionImpl extends RecurringTransaction {
   _RecurringTransactionImpl({
-    _i1.UuidValue? id,
+    _is.UuidValue? id,
     required String description,
     required int amountCents,
     required String currencyCode,
-    _i1.UuidValue? envelopeId,
-    required _i1.UuidValue budgetId,
-    _i1.UuidValue? accountId,
-    _i1.UuidValue? payeeId,
+    _is.UuidValue? envelopeId,
+    required _is.UuidValue budgetId,
+    _is.UuidValue? accountId,
+    _is.UuidValue? payeeId,
     required String frequency,
     required DateTime nextOccurrence,
     DateTime? endDate,
@@ -261,36 +259,40 @@ class _RecurringTransactionImpl extends RecurringTransaction {
 
   /// Returns a shallow copy of this [RecurringTransaction]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_is.useResult
   @override
   RecurringTransaction copyWith({
-    Object? id = _Undefined,
+    _is.UuidValue? id = const _is.$UndefinedUuidValue(),
     String? description,
     int? amountCents,
     String? currencyCode,
-    Object? envelopeId = _Undefined,
-    _i1.UuidValue? budgetId,
-    Object? accountId = _Undefined,
-    Object? payeeId = _Undefined,
+    _is.UuidValue? envelopeId = const _is.$UndefinedUuidValue(),
+    _is.UuidValue? budgetId,
+    _is.UuidValue? accountId = const _is.$UndefinedUuidValue(),
+    _is.UuidValue? payeeId = const _is.$UndefinedUuidValue(),
     String? frequency,
     DateTime? nextOccurrence,
-    Object? endDate = _Undefined,
+    DateTime? endDate = const _is.$UndefinedDateTime(),
     bool? isActive,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
     return RecurringTransaction(
-      id: id is _i1.UuidValue? ? id : this.id,
+      id: id is _is.UndefinedSentinel ? this.id : id,
       description: description ?? this.description,
       amountCents: amountCents ?? this.amountCents,
       currencyCode: currencyCode ?? this.currencyCode,
-      envelopeId: envelopeId is _i1.UuidValue? ? envelopeId : this.envelopeId,
+      envelopeId: envelopeId is _is.UndefinedSentinel
+          ? this.envelopeId
+          : envelopeId,
       budgetId: budgetId ?? this.budgetId,
-      accountId: accountId is _i1.UuidValue? ? accountId : this.accountId,
-      payeeId: payeeId is _i1.UuidValue? ? payeeId : this.payeeId,
+      accountId: accountId is _is.UndefinedSentinel
+          ? this.accountId
+          : accountId,
+      payeeId: payeeId is _is.UndefinedSentinel ? this.payeeId : payeeId,
       frequency: frequency ?? this.frequency,
       nextOccurrence: nextOccurrence ?? this.nextOccurrence,
-      endDate: endDate is DateTime? ? endDate : this.endDate,
+      endDate: endDate is _is.UndefinedSentinel ? this.endDate : endDate,
       isActive: isActive ?? this.isActive,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -299,106 +301,181 @@ class _RecurringTransactionImpl extends RecurringTransaction {
 }
 
 class RecurringTransactionUpdateTable
-    extends _i1.UpdateTable<RecurringTransactionTable> {
+    extends _is.UpdateTable<RecurringTransactionTable> {
   RecurringTransactionUpdateTable(super.table);
 
-  _i1.ColumnValue<String, String> description(String value) =>
-      _i1.ColumnValue(table.description, value);
+  _is.ColumnValue<String, String> description(String value) => _is.ColumnValue(
+    table.description,
+    value,
+  );
 
-  _i1.ColumnValue<int, int> amountCents(int value) =>
-      _i1.ColumnValue(table.amountCents, value);
+  _is.ColumnValue<int, int> amountCents(int value) => _is.ColumnValue(
+    table.amountCents,
+    value,
+  );
 
-  _i1.ColumnValue<String, String> currencyCode(String value) =>
-      _i1.ColumnValue(table.currencyCode, value);
+  _is.ColumnValue<String, String> currencyCode(String value) => _is.ColumnValue(
+    table.currencyCode,
+    value,
+  );
 
-  _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> envelopeId(
-    _i1.UuidValue? value,
-  ) => _i1.ColumnValue(table.envelopeId, value);
+  _is.ColumnValue<_is.UuidValue, _is.UuidValue> envelopeId(
+    _is.UuidValue? value,
+  ) => _is.ColumnValue(
+    table.envelopeId,
+    value,
+  );
 
-  _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> budgetId(_i1.UuidValue value) =>
-      _i1.ColumnValue(table.budgetId, value);
+  _is.ColumnValue<_is.UuidValue, _is.UuidValue> budgetId(_is.UuidValue value) =>
+      _is.ColumnValue(
+        table.budgetId,
+        value,
+      );
 
-  _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> accountId(
-    _i1.UuidValue? value,
-  ) => _i1.ColumnValue(table.accountId, value);
+  _is.ColumnValue<_is.UuidValue, _is.UuidValue> accountId(
+    _is.UuidValue? value,
+  ) => _is.ColumnValue(
+    table.accountId,
+    value,
+  );
 
-  _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> payeeId(_i1.UuidValue? value) =>
-      _i1.ColumnValue(table.payeeId, value);
+  _is.ColumnValue<_is.UuidValue, _is.UuidValue> payeeId(_is.UuidValue? value) =>
+      _is.ColumnValue(
+        table.payeeId,
+        value,
+      );
 
-  _i1.ColumnValue<String, String> frequency(String value) =>
-      _i1.ColumnValue(table.frequency, value);
+  _is.ColumnValue<String, String> frequency(String value) => _is.ColumnValue(
+    table.frequency,
+    value,
+  );
 
-  _i1.ColumnValue<DateTime, DateTime> nextOccurrence(DateTime value) =>
-      _i1.ColumnValue(table.nextOccurrence, value);
+  _is.ColumnValue<DateTime, DateTime> nextOccurrence(DateTime value) =>
+      _is.ColumnValue(
+        table.nextOccurrence,
+        value,
+      );
 
-  _i1.ColumnValue<DateTime, DateTime> endDate(DateTime? value) =>
-      _i1.ColumnValue(table.endDate, value);
+  _is.ColumnValue<DateTime, DateTime> endDate(DateTime? value) =>
+      _is.ColumnValue(
+        table.endDate,
+        value,
+      );
 
-  _i1.ColumnValue<bool, bool> isActive(bool value) =>
-      _i1.ColumnValue(table.isActive, value);
+  _is.ColumnValue<bool, bool> isActive(bool value) => _is.ColumnValue(
+    table.isActive,
+    value,
+  );
 
-  _i1.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
-      _i1.ColumnValue(table.createdAt, value);
+  _is.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
+      _is.ColumnValue(
+        table.createdAt,
+        value,
+      );
 
-  _i1.ColumnValue<DateTime, DateTime> updatedAt(DateTime value) =>
-      _i1.ColumnValue(table.updatedAt, value);
+  _is.ColumnValue<DateTime, DateTime> updatedAt(DateTime value) =>
+      _is.ColumnValue(
+        table.updatedAt,
+        value,
+      );
 }
 
-class RecurringTransactionTable extends _i1.Table<_i1.UuidValue?> {
+class RecurringTransactionTable extends _is.Table<_is.UuidValue?> {
   RecurringTransactionTable({super.tableRelation})
     : super(tableName: 'recurring_transaction') {
     updateTable = RecurringTransactionUpdateTable(this);
-    description = _i1.ColumnString('description', this);
-    amountCents = _i1.ColumnInt('amountCents', this);
-    currencyCode = _i1.ColumnString('currencyCode', this);
-    envelopeId = _i1.ColumnUuid('envelopeId', this);
-    budgetId = _i1.ColumnUuid('budgetId', this);
-    accountId = _i1.ColumnUuid('accountId', this);
-    payeeId = _i1.ColumnUuid('payeeId', this);
-    frequency = _i1.ColumnString('frequency', this);
-    nextOccurrence = _i1.ColumnDateTime('nextOccurrence', this);
-    endDate = _i1.ColumnDateTime('endDate', this);
-    isActive = _i1.ColumnBool('isActive', this);
-    createdAt = _i1.ColumnDateTime('createdAt', this, hasDefault: true);
-    updatedAt = _i1.ColumnDateTime('updatedAt', this, hasDefault: true);
+    description = _is.ColumnString(
+      'description',
+      this,
+    );
+    amountCents = _is.ColumnInt(
+      'amountCents',
+      this,
+    );
+    currencyCode = _is.ColumnString(
+      'currencyCode',
+      this,
+    );
+    envelopeId = _is.ColumnUuid(
+      'envelopeId',
+      this,
+    );
+    budgetId = _is.ColumnUuid(
+      'budgetId',
+      this,
+    );
+    accountId = _is.ColumnUuid(
+      'accountId',
+      this,
+    );
+    payeeId = _is.ColumnUuid(
+      'payeeId',
+      this,
+    );
+    frequency = _is.ColumnString(
+      'frequency',
+      this,
+    );
+    nextOccurrence = _is.ColumnDateTime(
+      'nextOccurrence',
+      this,
+    );
+    endDate = _is.ColumnDateTime(
+      'endDate',
+      this,
+    );
+    isActive = _is.ColumnBool(
+      'isActive',
+      this,
+    );
+    createdAt = _is.ColumnDateTime(
+      'createdAt',
+      this,
+      hasDefault: true,
+    );
+    updatedAt = _is.ColumnDateTime(
+      'updatedAt',
+      this,
+      hasDefault: true,
+    );
   }
 
   late final RecurringTransactionUpdateTable updateTable;
 
-  late final _i1.ColumnString description;
+  late final _is.ColumnString description;
 
   /// Amount in integer cents. Positive = inflow, negative = outflow.
-  late final _i1.ColumnInt amountCents;
+  late final _is.ColumnInt amountCents;
 
   /// ISO 4217 currency code.
-  late final _i1.ColumnString currencyCode;
+  late final _is.ColumnString currencyCode;
 
-  late final _i1.ColumnUuid envelopeId;
+  late final _is.ColumnUuid envelopeId;
 
-  late final _i1.ColumnUuid budgetId;
+  late final _is.ColumnUuid budgetId;
 
-  late final _i1.ColumnUuid accountId;
+  late final _is.ColumnUuid accountId;
 
-  late final _i1.ColumnUuid payeeId;
+  late final _is.ColumnUuid payeeId;
 
   /// Recurrence frequency: daily, weekly, biweekly, monthly, yearly.
-  late final _i1.ColumnString frequency;
+  late final _is.ColumnString frequency;
 
   /// The next date a transaction should be created.
-  late final _i1.ColumnDateTime nextOccurrence;
+  late final _is.ColumnDateTime nextOccurrence;
 
   /// Optional end date after which no more transactions are generated.
-  late final _i1.ColumnDateTime endDate;
+  late final _is.ColumnDateTime endDate;
 
   /// Whether this recurring transaction is active.
-  late final _i1.ColumnBool isActive;
+  late final _is.ColumnBool isActive;
 
-  late final _i1.ColumnDateTime createdAt;
+  late final _is.ColumnDateTime createdAt;
 
-  late final _i1.ColumnDateTime updatedAt;
+  late final _is.ColumnDateTime updatedAt;
 
   @override
-  List<_i1.Column> get columns => [
+  List<_is.Column> get columns => [
     id,
     description,
     amountCents,
@@ -416,23 +493,22 @@ class RecurringTransactionTable extends _i1.Table<_i1.UuidValue?> {
   ];
 }
 
-class RecurringTransactionInclude extends _i1.IncludeObject {
+class RecurringTransactionInclude extends _is.IncludeObject {
   RecurringTransactionInclude._();
 
   @override
-  Map<String, _i1.Include?> get includes => {};
+  Map<String, _is.Include?> get includes => {};
 
   @override
-  _i1.Table<_i1.UuidValue?> get table => RecurringTransaction.t;
+  _is.Table<_is.UuidValue?> get table => RecurringTransaction.t;
 }
 
-class RecurringTransactionIncludeList extends _i1.IncludeList {
+class RecurringTransactionIncludeList extends _is.IncludeList {
   RecurringTransactionIncludeList._({
-    _i1.WhereExpressionBuilder<RecurringTransactionTable>? where,
+    _is.WhereExpressionBuilder<RecurringTransactionTable>? where,
     super.limit,
     super.offset,
     super.orderBy,
-    super.orderDescending,
     super.orderByList,
     super.include,
   }) {
@@ -440,10 +516,10 @@ class RecurringTransactionIncludeList extends _i1.IncludeList {
   }
 
   @override
-  Map<String, _i1.Include?> get includes => include?.includes ?? {};
+  Map<String, _is.Include?> get includes => include?.includes ?? {};
 
   @override
-  _i1.Table<_i1.UuidValue?> get table => RecurringTransaction.t;
+  _is.Table<_is.UuidValue?> get table => RecurringTransaction.t;
 }
 
 class RecurringTransactionRepository {
@@ -472,27 +548,88 @@ class RecurringTransactionRepository {
   /// );
   /// ```
   Future<List<RecurringTransaction>> find(
-    _i1.DatabaseSession session, {
-    _i1.WhereExpressionBuilder<RecurringTransactionTable>? where,
+    _is.DatabaseSession session, {
+    _is.WhereExpressionBuilder<RecurringTransactionTable>? where,
     int? limit,
     int? offset,
-    _i1.OrderByBuilder<RecurringTransactionTable>? orderBy,
-    bool orderDescending = false,
-    _i1.OrderByListBuilder<RecurringTransactionTable>? orderByList,
-    _i1.Transaction? transaction,
-    _i1.LockMode? lockMode,
-    _i1.LockBehavior? lockBehavior,
+    _is.OrderByBuilder<RecurringTransactionTable>? orderBy,
+    _is.OrderByListBuilder<RecurringTransactionTable>? orderByList,
+    _is.Transaction? transaction,
+    _is.LockMode? lockMode,
+    _is.LockBehavior? lockBehavior,
   }) async {
     return session.db.find<RecurringTransaction>(
       where: where?.call(RecurringTransaction.t),
       orderBy: orderBy?.call(RecurringTransaction.t),
       orderByList: orderByList?.call(RecurringTransaction.t),
-      orderDescending: orderDescending,
       limit: limit,
       offset: offset,
       transaction: transaction,
       lockMode: lockMode,
       lockBehavior: lockBehavior,
+    );
+  }
+
+  /// Emits [RecurringTransaction]s matching the given query parameters every time the
+  /// source tables are modified.
+  ///
+  /// Use [where] to specify which items to include in the return value.
+  /// If none is specified, all items will be returned.
+  ///
+  /// To specify the order of the items use [orderBy] or [orderByList]
+  /// when sorting by multiple columns.
+  ///
+  /// The maximum number of items can be set by [limit]. If no limit is set,
+  /// all items matching the query will be returned.
+  ///
+  /// [offset] defines how many items to skip, after which [limit] (or all)
+  /// items are read from the database.
+  ///
+  /// Use [throttle] to specify the minimum interval between queries. It can
+  /// also be set to `null`, in which case the stream will only be throttled
+  /// when its subscription is paused.
+  ///
+  /// Source tables are collected from the queried table, [where], [orderBy],
+  /// [orderByList], and the [include] graph. [alsoTriggerOnTables] is added
+  /// to that set. Pass [Table] instances such as `RecurringTransaction.t`.
+  ///
+  /// Raw [Expression] SQL is not inspected. Tables referenced only in raw
+  /// SQL must be passed via [alsoTriggerOnTables].
+  ///
+  /// The stream always reads committed state and never joins an ambient
+  /// [Transaction]. Emissions for a write fire after that write commits.
+  ///
+  /// Currently only supported on SQLite. Calling this method on PostgreSQL
+  /// throws an [UnsupportedError].
+  ///
+  /// ```dart
+  /// var subscription = Persons.db.watch(
+  ///   session,
+  ///   where: (t) => t.lastName.equals('Jones'),
+  ///   orderBy: (t) => t.firstName,
+  ///   limit: 100,
+  /// ).listen((persons) {
+  ///   // Handle the latest matching rows.
+  /// });
+  /// ```
+  _ida.Stream<List<RecurringTransaction>> watch(
+    _is.DatabaseSession session, {
+    _is.WhereExpressionBuilder<RecurringTransactionTable>? where,
+    int? limit,
+    int? offset,
+    _is.OrderByBuilder<RecurringTransactionTable>? orderBy,
+    _is.OrderByListBuilder<RecurringTransactionTable>? orderByList,
+    Duration? throttle = const Duration(milliseconds: 30),
+    Iterable<_is.Table>? alsoTriggerOnTables,
+  }) {
+    return session.db.watch<RecurringTransaction>(
+      where: where?.call(RecurringTransaction.t),
+      orderBy: orderBy?.call(RecurringTransaction.t),
+      orderByList: orderByList?.call(RecurringTransaction.t),
+      limit: limit,
+      offset: offset,
+      throttle: throttle,
+      alsoTriggerOnTables: alsoTriggerOnTables,
     );
   }
 
@@ -514,21 +651,19 @@ class RecurringTransactionRepository {
   /// );
   /// ```
   Future<RecurringTransaction?> findFirstRow(
-    _i1.DatabaseSession session, {
-    _i1.WhereExpressionBuilder<RecurringTransactionTable>? where,
+    _is.DatabaseSession session, {
+    _is.WhereExpressionBuilder<RecurringTransactionTable>? where,
     int? offset,
-    _i1.OrderByBuilder<RecurringTransactionTable>? orderBy,
-    bool orderDescending = false,
-    _i1.OrderByListBuilder<RecurringTransactionTable>? orderByList,
-    _i1.Transaction? transaction,
-    _i1.LockMode? lockMode,
-    _i1.LockBehavior? lockBehavior,
+    _is.OrderByBuilder<RecurringTransactionTable>? orderBy,
+    _is.OrderByListBuilder<RecurringTransactionTable>? orderByList,
+    _is.Transaction? transaction,
+    _is.LockMode? lockMode,
+    _is.LockBehavior? lockBehavior,
   }) async {
     return session.db.findFirstRow<RecurringTransaction>(
       where: where?.call(RecurringTransaction.t),
       orderBy: orderBy?.call(RecurringTransaction.t),
       orderByList: orderByList?.call(RecurringTransaction.t),
-      orderDescending: orderDescending,
       offset: offset,
       transaction: transaction,
       lockMode: lockMode,
@@ -538,11 +673,11 @@ class RecurringTransactionRepository {
 
   /// Finds a single [RecurringTransaction] by its [id] or null if no such row exists.
   Future<RecurringTransaction?> findById(
-    _i1.DatabaseSession session,
-    _i1.UuidValue id, {
-    _i1.Transaction? transaction,
-    _i1.LockMode? lockMode,
-    _i1.LockBehavior? lockBehavior,
+    _is.DatabaseSession session,
+    _is.UuidValue id, {
+    _is.Transaction? transaction,
+    _is.LockMode? lockMode,
+    _is.LockBehavior? lockBehavior,
   }) async {
     return session.db.findById<RecurringTransaction>(
       id,
@@ -562,16 +697,22 @@ class RecurringTransactionRepository {
   /// If [ignoreConflicts] is set to `true`, rows that conflict with existing
   /// rows are silently skipped, and only the successfully inserted rows are
   /// returned.
+  ///
+  /// If [noReturn] is set to `true`, the inserted rows are not read back from
+  /// the database and an empty list is returned. This avoids the overhead of
+  /// transferring and deserializing the rows when the result is not needed.
   Future<List<RecurringTransaction>> insert(
-    _i1.DatabaseSession session,
+    _is.DatabaseSession session,
     List<RecurringTransaction> rows, {
-    _i1.Transaction? transaction,
+    _is.Transaction? transaction,
     bool ignoreConflicts = false,
+    bool noReturn = false,
   }) async {
     return session.db.insert<RecurringTransaction>(
       rows,
       transaction: transaction,
       ignoreConflicts: ignoreConflicts,
+      noReturn: noReturn,
     );
   }
 
@@ -579,12 +720,81 @@ class RecurringTransactionRepository {
   ///
   /// The returned [RecurringTransaction] will have its `id` field set.
   Future<RecurringTransaction> insertRow(
-    _i1.DatabaseSession session,
+    _is.DatabaseSession session,
     RecurringTransaction row, {
-    _i1.Transaction? transaction,
+    _is.Transaction? transaction,
   }) async {
     return session.db.insertRow<RecurringTransaction>(
       row,
+      transaction: transaction,
+    );
+  }
+
+  /// Upserts all [RecurringTransaction]s in the list and returns the resulting rows.
+  ///
+  /// If a row conflicts on the given [conflictColumns], the existing row is
+  /// updated with the new values. Otherwise, a new row is inserted.
+  ///
+  /// If [updateColumns] is provided, only those columns will be updated on
+  /// conflict. If null, all non-conflict, non-id columns are updated.
+  ///
+  /// If [updateWhere] is provided, the update only applies to rows matching the
+  /// given expression. Conflicting rows that don't match are skipped and not
+  /// returned, so the resulting list may be shorter than [rows].
+  ///
+  /// The returned [RecurringTransaction]s will have their `id` fields set.
+  ///
+  /// This is an atomic operation, meaning that if one of the rows fails,
+  /// none of the rows will be affected.
+  ///
+  /// If [noReturn] is set to `true`, the resulting rows are not read back from
+  /// the database and an empty list is returned. This avoids the overhead of
+  /// transferring and deserializing the rows when the result is not needed.
+  Future<List<RecurringTransaction>> upsert(
+    _is.DatabaseSession session,
+    List<RecurringTransaction> rows, {
+    required _is.ColumnSelections<RecurringTransactionTable> conflictColumns,
+    _is.ColumnSelections<RecurringTransactionTable>? updateColumns,
+    _is.WhereExpressionBuilder<RecurringTransactionTable>? updateWhere,
+    _is.Transaction? transaction,
+    bool noReturn = false,
+  }) async {
+    return session.db.upsert<RecurringTransaction>(
+      rows,
+      conflictColumns: conflictColumns(RecurringTransaction.t),
+      updateColumns: updateColumns?.call(RecurringTransaction.t),
+      updateWhere: updateWhere?.call(RecurringTransaction.t),
+      transaction: transaction,
+      noReturn: noReturn,
+    );
+  }
+
+  /// Upserts a single [RecurringTransaction] and returns the resulting row.
+  ///
+  /// If the row conflicts on the given [conflictColumns], the existing row is
+  /// updated. Otherwise, a new row is inserted.
+  ///
+  /// If [updateColumns] is provided, only those columns will be updated on
+  /// conflict. If null, all non-conflict, non-id columns are updated.
+  ///
+  /// If [updateWhere] is provided, the update only applies when the existing
+  /// row matches the expression. Returns `null` if no row was affected — for
+  /// example when [updateWhere] does not match the conflicting row.
+  ///
+  /// The returned [RecurringTransaction] will have its `id` field set.
+  Future<RecurringTransaction?> upsertRow(
+    _is.DatabaseSession session,
+    RecurringTransaction row, {
+    required _is.ColumnSelections<RecurringTransactionTable> conflictColumns,
+    _is.ColumnSelections<RecurringTransactionTable>? updateColumns,
+    _is.WhereExpressionBuilder<RecurringTransactionTable>? updateWhere,
+    _is.Transaction? transaction,
+  }) async {
+    return session.db.upsertRow<RecurringTransaction>(
+      row,
+      conflictColumns: conflictColumns(RecurringTransaction.t),
+      updateColumns: updateColumns?.call(RecurringTransaction.t),
+      updateWhere: updateWhere?.call(RecurringTransaction.t),
       transaction: transaction,
     );
   }
@@ -594,16 +804,22 @@ class RecurringTransactionRepository {
   /// all columns.
   /// This is an atomic operation, meaning that if one of the rows fails to
   /// update, none of the rows will be updated.
+  ///
+  /// If [noReturn] is set to `true`, the updated rows are not read back from
+  /// the database and an empty list is returned. This avoids the overhead of
+  /// transferring and deserializing the rows when the result is not needed.
   Future<List<RecurringTransaction>> update(
-    _i1.DatabaseSession session,
+    _is.DatabaseSession session,
     List<RecurringTransaction> rows, {
-    _i1.ColumnSelections<RecurringTransactionTable>? columns,
-    _i1.Transaction? transaction,
+    _is.ColumnSelections<RecurringTransactionTable>? columns,
+    _is.Transaction? transaction,
+    bool noReturn = false,
   }) async {
     return session.db.update<RecurringTransaction>(
       rows,
       columns: columns?.call(RecurringTransaction.t),
       transaction: transaction,
+      noReturn: noReturn,
     );
   }
 
@@ -611,10 +827,10 @@ class RecurringTransactionRepository {
   /// Optionally, a list of [columns] can be provided to only update those
   /// columns. Defaults to all columns.
   Future<RecurringTransaction> updateRow(
-    _i1.DatabaseSession session,
+    _is.DatabaseSession session,
     RecurringTransaction row, {
-    _i1.ColumnSelections<RecurringTransactionTable>? columns,
-    _i1.Transaction? transaction,
+    _is.ColumnSelections<RecurringTransactionTable>? columns,
+    _is.Transaction? transaction,
   }) async {
     return session.db.updateRow<RecurringTransaction>(
       row,
@@ -626,11 +842,11 @@ class RecurringTransactionRepository {
   /// Updates a single [RecurringTransaction] by its [id] with the specified [columnValues].
   /// Returns the updated row or null if no row with the given id exists.
   Future<RecurringTransaction?> updateById(
-    _i1.DatabaseSession session,
-    _i1.UuidValue id, {
-    required _i1.ColumnValueListBuilder<RecurringTransactionUpdateTable>
+    _is.DatabaseSession session,
+    _is.UuidValue id, {
+    required _is.ColumnValueListBuilder<RecurringTransactionUpdateTable>
     columnValues,
-    _i1.Transaction? transaction,
+    _is.Transaction? transaction,
   }) async {
     return session.db.updateById<RecurringTransaction>(
       id,
@@ -641,17 +857,21 @@ class RecurringTransactionRepository {
 
   /// Updates all [RecurringTransaction]s matching the [where] expression with the specified [columnValues].
   /// Returns the list of updated rows.
+  ///
+  /// If [noReturn] is set to `true`, the updated rows are not read back from
+  /// the database and an empty list is returned. This avoids the overhead of
+  /// transferring and deserializing the rows when the result is not needed.
   Future<List<RecurringTransaction>> updateWhere(
-    _i1.DatabaseSession session, {
-    required _i1.ColumnValueListBuilder<RecurringTransactionUpdateTable>
+    _is.DatabaseSession session, {
+    required _is.ColumnValueListBuilder<RecurringTransactionUpdateTable>
     columnValues,
-    required _i1.WhereExpressionBuilder<RecurringTransactionTable> where,
+    required _is.WhereExpressionBuilder<RecurringTransactionTable> where,
     int? limit,
     int? offset,
-    _i1.OrderByBuilder<RecurringTransactionTable>? orderBy,
-    _i1.OrderByListBuilder<RecurringTransactionTable>? orderByList,
-    bool orderDescending = false,
-    _i1.Transaction? transaction,
+    _is.OrderByBuilder<RecurringTransactionTable>? orderBy,
+    _is.OrderByListBuilder<RecurringTransactionTable>? orderByList,
+    _is.Transaction? transaction,
+    bool noReturn = false,
   }) async {
     return session.db.updateWhere<RecurringTransaction>(
       columnValues: columnValues(RecurringTransaction.t.updateTable),
@@ -660,30 +880,44 @@ class RecurringTransactionRepository {
       offset: offset,
       orderBy: orderBy?.call(RecurringTransaction.t),
       orderByList: orderByList?.call(RecurringTransaction.t),
-      orderDescending: orderDescending,
       transaction: transaction,
+      noReturn: noReturn,
     );
   }
 
   /// Deletes all [RecurringTransaction]s in the list and returns the deleted rows.
+  ///
+  /// To specify the order of the returned rows use [orderBy] or [orderByList]
+  /// when sorting by multiple columns.
+  ///
   /// This is an atomic operation, meaning that if one of the rows fail to
   /// be deleted, none of the rows will be deleted.
+  ///
+  /// If [noReturn] is set to `true`, the deleted rows are not read back from
+  /// the database and an empty list is returned. This avoids the overhead of
+  /// transferring and deserializing the rows when the result is not needed.
   Future<List<RecurringTransaction>> delete(
-    _i1.DatabaseSession session,
+    _is.DatabaseSession session,
     List<RecurringTransaction> rows, {
-    _i1.Transaction? transaction,
+    _is.OrderByBuilder<RecurringTransactionTable>? orderBy,
+    _is.OrderByListBuilder<RecurringTransactionTable>? orderByList,
+    _is.Transaction? transaction,
+    bool noReturn = false,
   }) async {
     return session.db.delete<RecurringTransaction>(
       rows,
+      orderBy: orderBy?.call(RecurringTransaction.t),
+      orderByList: orderByList?.call(RecurringTransaction.t),
       transaction: transaction,
+      noReturn: noReturn,
     );
   }
 
   /// Deletes a single [RecurringTransaction].
   Future<RecurringTransaction> deleteRow(
-    _i1.DatabaseSession session,
+    _is.DatabaseSession session,
     RecurringTransaction row, {
-    _i1.Transaction? transaction,
+    _is.Transaction? transaction,
   }) async {
     return session.db.deleteRow<RecurringTransaction>(
       row,
@@ -692,24 +926,37 @@ class RecurringTransactionRepository {
   }
 
   /// Deletes all rows matching the [where] expression.
+  ///
+  /// To specify the order of the returned rows use [orderBy] or [orderByList]
+  /// when sorting by multiple columns.
+  ///
+  /// If [noReturn] is set to `true`, the deleted rows are not read back from
+  /// the database and an empty list is returned. This avoids the overhead of
+  /// transferring and deserializing the rows when the result is not needed.
   Future<List<RecurringTransaction>> deleteWhere(
-    _i1.DatabaseSession session, {
-    required _i1.WhereExpressionBuilder<RecurringTransactionTable> where,
-    _i1.Transaction? transaction,
+    _is.DatabaseSession session, {
+    required _is.WhereExpressionBuilder<RecurringTransactionTable> where,
+    _is.OrderByBuilder<RecurringTransactionTable>? orderBy,
+    _is.OrderByListBuilder<RecurringTransactionTable>? orderByList,
+    _is.Transaction? transaction,
+    bool noReturn = false,
   }) async {
     return session.db.deleteWhere<RecurringTransaction>(
       where: where(RecurringTransaction.t),
+      orderBy: orderBy?.call(RecurringTransaction.t),
+      orderByList: orderByList?.call(RecurringTransaction.t),
       transaction: transaction,
+      noReturn: noReturn,
     );
   }
 
   /// Counts the number of rows matching the [where] expression. If omitted,
   /// will return the count of all rows in the table.
   Future<int> count(
-    _i1.DatabaseSession session, {
-    _i1.WhereExpressionBuilder<RecurringTransactionTable>? where,
+    _is.DatabaseSession session, {
+    _is.WhereExpressionBuilder<RecurringTransactionTable>? where,
     int? limit,
-    _i1.Transaction? transaction,
+    _is.Transaction? transaction,
   }) async {
     return session.db.count<RecurringTransaction>(
       where: where?.call(RecurringTransaction.t),
@@ -720,11 +967,11 @@ class RecurringTransactionRepository {
 
   /// Acquires row-level locks on [RecurringTransaction] rows matching the [where] expression.
   Future<void> lockRows(
-    _i1.DatabaseSession session, {
-    required _i1.WhereExpressionBuilder<RecurringTransactionTable> where,
-    required _i1.LockMode lockMode,
-    required _i1.Transaction transaction,
-    _i1.LockBehavior lockBehavior = _i1.LockBehavior.wait,
+    _is.DatabaseSession session, {
+    required _is.WhereExpressionBuilder<RecurringTransactionTable> where,
+    required _is.LockMode lockMode,
+    required _is.Transaction transaction,
+    _is.LockBehavior lockBehavior = _is.LockBehavior.wait,
   }) async {
     return session.db.lockRows<RecurringTransaction>(
       where: where(RecurringTransaction.t),

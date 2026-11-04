@@ -10,11 +10,13 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:serverpod/serverpod.dart' as _i1;
+import 'dart:async' as _ida;
+
+import 'package:serverpod/serverpod.dart' as _is;
 
 /// Read-only blockchain wallet connection.
 abstract class WalletConnection
-    implements _i1.TableRow<_i1.UuidValue?>, _i1.ProtocolSerialization {
+    implements _is.TableRow<_is.UuidValue?>, _is.ProtocolSerialization {
   WalletConnection._({
     this.id,
     required this.budgetId,
@@ -30,8 +32,8 @@ abstract class WalletConnection
        updatedAt = updatedAt ?? DateTime.now();
 
   factory WalletConnection({
-    _i1.UuidValue? id,
-    required _i1.UuidValue budgetId,
+    _is.UuidValue? id,
+    required _is.UuidValue budgetId,
     required String chain,
     required String address,
     String? label,
@@ -46,8 +48,8 @@ abstract class WalletConnection
     return WalletConnection(
       id: jsonSerialization['id'] == null
           ? null
-          : _i1.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
-      budgetId: _i1.UuidValueJsonExtension.fromJson(
+          : _is.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
+      budgetId: _is.UuidValueJsonExtension.fromJson(
         jsonSerialization['budgetId'],
       ),
       chain: jsonSerialization['chain'] as String,
@@ -55,13 +57,13 @@ abstract class WalletConnection
       label: jsonSerialization['label'] as String?,
       createdAt: jsonSerialization['createdAt'] == null
           ? null
-          : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
+          : _is.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
       updatedAt: jsonSerialization['updatedAt'] == null
           ? null
-          : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['updatedAt']),
+          : _is.DateTimeJsonExtension.fromJson(jsonSerialization['updatedAt']),
       lastSyncedAt: jsonSerialization['lastSyncedAt'] == null
           ? null
-          : _i1.DateTimeJsonExtension.fromJson(
+          : _is.DateTimeJsonExtension.fromJson(
               jsonSerialization['lastSyncedAt'],
             ),
       syncStatus: jsonSerialization['syncStatus'] as String?,
@@ -74,9 +76,9 @@ abstract class WalletConnection
   static const db = WalletConnectionRepository._();
 
   @override
-  _i1.UuidValue? id;
+  _is.UuidValue? id;
 
-  _i1.UuidValue budgetId;
+  _is.UuidValue budgetId;
 
   String chain;
 
@@ -95,20 +97,20 @@ abstract class WalletConnection
   String? lastError;
 
   @override
-  _i1.Table<_i1.UuidValue?> get table => t;
+  _is.Table<_is.UuidValue?> get table => t;
 
   /// Returns a shallow copy of this [WalletConnection]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_is.useResult
   WalletConnection copyWith({
-    _i1.UuidValue? id,
-    _i1.UuidValue? budgetId,
+    _is.UuidValue? id = const _is.$UndefinedUuidValue(),
+    _is.UuidValue? budgetId,
     String? chain,
     String? address,
     String? label,
     DateTime? createdAt,
     DateTime? updatedAt,
-    DateTime? lastSyncedAt,
+    DateTime? lastSyncedAt = const _is.$UndefinedDateTime(),
     String? syncStatus,
     String? lastError,
   });
@@ -151,12 +153,11 @@ abstract class WalletConnection
   }
 
   static WalletConnectionIncludeList includeList({
-    _i1.WhereExpressionBuilder<WalletConnectionTable>? where,
+    _is.WhereExpressionBuilder<WalletConnectionTable>? where,
     int? limit,
     int? offset,
-    _i1.OrderByBuilder<WalletConnectionTable>? orderBy,
-    bool orderDescending = false,
-    _i1.OrderByListBuilder<WalletConnectionTable>? orderByList,
+    _is.OrderByBuilder<WalletConnectionTable>? orderBy,
+    _is.OrderByListBuilder<WalletConnectionTable>? orderByList,
     WalletConnectionInclude? include,
   }) {
     return WalletConnectionIncludeList._(
@@ -164,7 +165,6 @@ abstract class WalletConnection
       limit: limit,
       offset: offset,
       orderBy: orderBy?.call(WalletConnection.t),
-      orderDescending: orderDescending,
       orderByList: orderByList?.call(WalletConnection.t),
       include: include,
     );
@@ -172,7 +172,7 @@ abstract class WalletConnection
 
   @override
   String toString() {
-    return _i1.SerializationManager.encode(this);
+    return _is.SerializationManager.encode(this);
   }
 }
 
@@ -180,8 +180,8 @@ class _Undefined {}
 
 class _WalletConnectionImpl extends WalletConnection {
   _WalletConnectionImpl({
-    _i1.UuidValue? id,
-    required _i1.UuidValue budgetId,
+    _is.UuidValue? id,
+    required _is.UuidValue budgetId,
     required String chain,
     required String address,
     String? label,
@@ -205,31 +205,31 @@ class _WalletConnectionImpl extends WalletConnection {
 
   /// Returns a shallow copy of this [WalletConnection]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_is.useResult
   @override
   WalletConnection copyWith({
-    Object? id = _Undefined,
-    _i1.UuidValue? budgetId,
+    _is.UuidValue? id = const _is.$UndefinedUuidValue(),
+    _is.UuidValue? budgetId,
     String? chain,
     String? address,
     Object? label = _Undefined,
     DateTime? createdAt,
     DateTime? updatedAt,
-    Object? lastSyncedAt = _Undefined,
+    DateTime? lastSyncedAt = const _is.$UndefinedDateTime(),
     Object? syncStatus = _Undefined,
     Object? lastError = _Undefined,
   }) {
     return WalletConnection(
-      id: id is _i1.UuidValue? ? id : this.id,
+      id: id is _is.UndefinedSentinel ? this.id : id,
       budgetId: budgetId ?? this.budgetId,
       chain: chain ?? this.chain,
       address: address ?? this.address,
       label: label is String? ? label : this.label,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
-      lastSyncedAt: lastSyncedAt is DateTime?
-          ? lastSyncedAt
-          : this.lastSyncedAt,
+      lastSyncedAt: lastSyncedAt is _is.UndefinedSentinel
+          ? this.lastSyncedAt
+          : lastSyncedAt,
       syncStatus: syncStatus is String? ? syncStatus : this.syncStatus,
       lastError: lastError is String? ? lastError : this.lastError,
     );
@@ -237,74 +237,125 @@ class _WalletConnectionImpl extends WalletConnection {
 }
 
 class WalletConnectionUpdateTable
-    extends _i1.UpdateTable<WalletConnectionTable> {
+    extends _is.UpdateTable<WalletConnectionTable> {
   WalletConnectionUpdateTable(super.table);
 
-  _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> budgetId(_i1.UuidValue value) =>
-      _i1.ColumnValue(table.budgetId, value);
+  _is.ColumnValue<_is.UuidValue, _is.UuidValue> budgetId(_is.UuidValue value) =>
+      _is.ColumnValue(
+        table.budgetId,
+        value,
+      );
 
-  _i1.ColumnValue<String, String> chain(String value) =>
-      _i1.ColumnValue(table.chain, value);
+  _is.ColumnValue<String, String> chain(String value) => _is.ColumnValue(
+    table.chain,
+    value,
+  );
 
-  _i1.ColumnValue<String, String> address(String value) =>
-      _i1.ColumnValue(table.address, value);
+  _is.ColumnValue<String, String> address(String value) => _is.ColumnValue(
+    table.address,
+    value,
+  );
 
-  _i1.ColumnValue<String, String> label(String? value) =>
-      _i1.ColumnValue(table.label, value);
+  _is.ColumnValue<String, String> label(String? value) => _is.ColumnValue(
+    table.label,
+    value,
+  );
 
-  _i1.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
-      _i1.ColumnValue(table.createdAt, value);
+  _is.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
+      _is.ColumnValue(
+        table.createdAt,
+        value,
+      );
 
-  _i1.ColumnValue<DateTime, DateTime> updatedAt(DateTime value) =>
-      _i1.ColumnValue(table.updatedAt, value);
+  _is.ColumnValue<DateTime, DateTime> updatedAt(DateTime value) =>
+      _is.ColumnValue(
+        table.updatedAt,
+        value,
+      );
 
-  _i1.ColumnValue<DateTime, DateTime> lastSyncedAt(DateTime? value) =>
-      _i1.ColumnValue(table.lastSyncedAt, value);
+  _is.ColumnValue<DateTime, DateTime> lastSyncedAt(DateTime? value) =>
+      _is.ColumnValue(
+        table.lastSyncedAt,
+        value,
+      );
 
-  _i1.ColumnValue<String, String> syncStatus(String? value) =>
-      _i1.ColumnValue(table.syncStatus, value);
+  _is.ColumnValue<String, String> syncStatus(String? value) => _is.ColumnValue(
+    table.syncStatus,
+    value,
+  );
 
-  _i1.ColumnValue<String, String> lastError(String? value) =>
-      _i1.ColumnValue(table.lastError, value);
+  _is.ColumnValue<String, String> lastError(String? value) => _is.ColumnValue(
+    table.lastError,
+    value,
+  );
 }
 
-class WalletConnectionTable extends _i1.Table<_i1.UuidValue?> {
+class WalletConnectionTable extends _is.Table<_is.UuidValue?> {
   WalletConnectionTable({super.tableRelation})
     : super(tableName: 'wallet_connection') {
     updateTable = WalletConnectionUpdateTable(this);
-    budgetId = _i1.ColumnUuid('budgetId', this);
-    chain = _i1.ColumnString('chain', this);
-    address = _i1.ColumnString('address', this);
-    label = _i1.ColumnString('label', this);
-    createdAt = _i1.ColumnDateTime('createdAt', this, hasDefault: true);
-    updatedAt = _i1.ColumnDateTime('updatedAt', this, hasDefault: true);
-    lastSyncedAt = _i1.ColumnDateTime('lastSyncedAt', this);
-    syncStatus = _i1.ColumnString('syncStatus', this);
-    lastError = _i1.ColumnString('lastError', this);
+    budgetId = _is.ColumnUuid(
+      'budgetId',
+      this,
+    );
+    chain = _is.ColumnString(
+      'chain',
+      this,
+    );
+    address = _is.ColumnString(
+      'address',
+      this,
+    );
+    label = _is.ColumnString(
+      'label',
+      this,
+    );
+    createdAt = _is.ColumnDateTime(
+      'createdAt',
+      this,
+      hasDefault: true,
+    );
+    updatedAt = _is.ColumnDateTime(
+      'updatedAt',
+      this,
+      hasDefault: true,
+    );
+    lastSyncedAt = _is.ColumnDateTime(
+      'lastSyncedAt',
+      this,
+    );
+    syncStatus = _is.ColumnString(
+      'syncStatus',
+      this,
+    );
+    lastError = _is.ColumnString(
+      'lastError',
+      this,
+    );
   }
 
   late final WalletConnectionUpdateTable updateTable;
 
-  late final _i1.ColumnUuid budgetId;
+  late final _is.ColumnUuid budgetId;
 
-  late final _i1.ColumnString chain;
+  late final _is.ColumnString chain;
 
-  late final _i1.ColumnString address;
+  late final _is.ColumnString address;
 
-  late final _i1.ColumnString label;
+  late final _is.ColumnString label;
 
-  late final _i1.ColumnDateTime createdAt;
+  late final _is.ColumnDateTime createdAt;
 
-  late final _i1.ColumnDateTime updatedAt;
+  late final _is.ColumnDateTime updatedAt;
 
-  late final _i1.ColumnDateTime lastSyncedAt;
+  late final _is.ColumnDateTime lastSyncedAt;
 
-  late final _i1.ColumnString syncStatus;
+  late final _is.ColumnString syncStatus;
 
-  late final _i1.ColumnString lastError;
+  late final _is.ColumnString lastError;
 
   @override
-  List<_i1.Column> get columns => [
+  List<_is.Column> get columns => [
     id,
     budgetId,
     chain,
@@ -318,23 +369,22 @@ class WalletConnectionTable extends _i1.Table<_i1.UuidValue?> {
   ];
 }
 
-class WalletConnectionInclude extends _i1.IncludeObject {
+class WalletConnectionInclude extends _is.IncludeObject {
   WalletConnectionInclude._();
 
   @override
-  Map<String, _i1.Include?> get includes => {};
+  Map<String, _is.Include?> get includes => {};
 
   @override
-  _i1.Table<_i1.UuidValue?> get table => WalletConnection.t;
+  _is.Table<_is.UuidValue?> get table => WalletConnection.t;
 }
 
-class WalletConnectionIncludeList extends _i1.IncludeList {
+class WalletConnectionIncludeList extends _is.IncludeList {
   WalletConnectionIncludeList._({
-    _i1.WhereExpressionBuilder<WalletConnectionTable>? where,
+    _is.WhereExpressionBuilder<WalletConnectionTable>? where,
     super.limit,
     super.offset,
     super.orderBy,
-    super.orderDescending,
     super.orderByList,
     super.include,
   }) {
@@ -342,10 +392,10 @@ class WalletConnectionIncludeList extends _i1.IncludeList {
   }
 
   @override
-  Map<String, _i1.Include?> get includes => include?.includes ?? {};
+  Map<String, _is.Include?> get includes => include?.includes ?? {};
 
   @override
-  _i1.Table<_i1.UuidValue?> get table => WalletConnection.t;
+  _is.Table<_is.UuidValue?> get table => WalletConnection.t;
 }
 
 class WalletConnectionRepository {
@@ -374,27 +424,88 @@ class WalletConnectionRepository {
   /// );
   /// ```
   Future<List<WalletConnection>> find(
-    _i1.DatabaseSession session, {
-    _i1.WhereExpressionBuilder<WalletConnectionTable>? where,
+    _is.DatabaseSession session, {
+    _is.WhereExpressionBuilder<WalletConnectionTable>? where,
     int? limit,
     int? offset,
-    _i1.OrderByBuilder<WalletConnectionTable>? orderBy,
-    bool orderDescending = false,
-    _i1.OrderByListBuilder<WalletConnectionTable>? orderByList,
-    _i1.Transaction? transaction,
-    _i1.LockMode? lockMode,
-    _i1.LockBehavior? lockBehavior,
+    _is.OrderByBuilder<WalletConnectionTable>? orderBy,
+    _is.OrderByListBuilder<WalletConnectionTable>? orderByList,
+    _is.Transaction? transaction,
+    _is.LockMode? lockMode,
+    _is.LockBehavior? lockBehavior,
   }) async {
     return session.db.find<WalletConnection>(
       where: where?.call(WalletConnection.t),
       orderBy: orderBy?.call(WalletConnection.t),
       orderByList: orderByList?.call(WalletConnection.t),
-      orderDescending: orderDescending,
       limit: limit,
       offset: offset,
       transaction: transaction,
       lockMode: lockMode,
       lockBehavior: lockBehavior,
+    );
+  }
+
+  /// Emits [WalletConnection]s matching the given query parameters every time the
+  /// source tables are modified.
+  ///
+  /// Use [where] to specify which items to include in the return value.
+  /// If none is specified, all items will be returned.
+  ///
+  /// To specify the order of the items use [orderBy] or [orderByList]
+  /// when sorting by multiple columns.
+  ///
+  /// The maximum number of items can be set by [limit]. If no limit is set,
+  /// all items matching the query will be returned.
+  ///
+  /// [offset] defines how many items to skip, after which [limit] (or all)
+  /// items are read from the database.
+  ///
+  /// Use [throttle] to specify the minimum interval between queries. It can
+  /// also be set to `null`, in which case the stream will only be throttled
+  /// when its subscription is paused.
+  ///
+  /// Source tables are collected from the queried table, [where], [orderBy],
+  /// [orderByList], and the [include] graph. [alsoTriggerOnTables] is added
+  /// to that set. Pass [Table] instances such as `WalletConnection.t`.
+  ///
+  /// Raw [Expression] SQL is not inspected. Tables referenced only in raw
+  /// SQL must be passed via [alsoTriggerOnTables].
+  ///
+  /// The stream always reads committed state and never joins an ambient
+  /// [Transaction]. Emissions for a write fire after that write commits.
+  ///
+  /// Currently only supported on SQLite. Calling this method on PostgreSQL
+  /// throws an [UnsupportedError].
+  ///
+  /// ```dart
+  /// var subscription = Persons.db.watch(
+  ///   session,
+  ///   where: (t) => t.lastName.equals('Jones'),
+  ///   orderBy: (t) => t.firstName,
+  ///   limit: 100,
+  /// ).listen((persons) {
+  ///   // Handle the latest matching rows.
+  /// });
+  /// ```
+  _ida.Stream<List<WalletConnection>> watch(
+    _is.DatabaseSession session, {
+    _is.WhereExpressionBuilder<WalletConnectionTable>? where,
+    int? limit,
+    int? offset,
+    _is.OrderByBuilder<WalletConnectionTable>? orderBy,
+    _is.OrderByListBuilder<WalletConnectionTable>? orderByList,
+    Duration? throttle = const Duration(milliseconds: 30),
+    Iterable<_is.Table>? alsoTriggerOnTables,
+  }) {
+    return session.db.watch<WalletConnection>(
+      where: where?.call(WalletConnection.t),
+      orderBy: orderBy?.call(WalletConnection.t),
+      orderByList: orderByList?.call(WalletConnection.t),
+      limit: limit,
+      offset: offset,
+      throttle: throttle,
+      alsoTriggerOnTables: alsoTriggerOnTables,
     );
   }
 
@@ -416,21 +527,19 @@ class WalletConnectionRepository {
   /// );
   /// ```
   Future<WalletConnection?> findFirstRow(
-    _i1.DatabaseSession session, {
-    _i1.WhereExpressionBuilder<WalletConnectionTable>? where,
+    _is.DatabaseSession session, {
+    _is.WhereExpressionBuilder<WalletConnectionTable>? where,
     int? offset,
-    _i1.OrderByBuilder<WalletConnectionTable>? orderBy,
-    bool orderDescending = false,
-    _i1.OrderByListBuilder<WalletConnectionTable>? orderByList,
-    _i1.Transaction? transaction,
-    _i1.LockMode? lockMode,
-    _i1.LockBehavior? lockBehavior,
+    _is.OrderByBuilder<WalletConnectionTable>? orderBy,
+    _is.OrderByListBuilder<WalletConnectionTable>? orderByList,
+    _is.Transaction? transaction,
+    _is.LockMode? lockMode,
+    _is.LockBehavior? lockBehavior,
   }) async {
     return session.db.findFirstRow<WalletConnection>(
       where: where?.call(WalletConnection.t),
       orderBy: orderBy?.call(WalletConnection.t),
       orderByList: orderByList?.call(WalletConnection.t),
-      orderDescending: orderDescending,
       offset: offset,
       transaction: transaction,
       lockMode: lockMode,
@@ -440,11 +549,11 @@ class WalletConnectionRepository {
 
   /// Finds a single [WalletConnection] by its [id] or null if no such row exists.
   Future<WalletConnection?> findById(
-    _i1.DatabaseSession session,
-    _i1.UuidValue id, {
-    _i1.Transaction? transaction,
-    _i1.LockMode? lockMode,
-    _i1.LockBehavior? lockBehavior,
+    _is.DatabaseSession session,
+    _is.UuidValue id, {
+    _is.Transaction? transaction,
+    _is.LockMode? lockMode,
+    _is.LockBehavior? lockBehavior,
   }) async {
     return session.db.findById<WalletConnection>(
       id,
@@ -464,16 +573,22 @@ class WalletConnectionRepository {
   /// If [ignoreConflicts] is set to `true`, rows that conflict with existing
   /// rows are silently skipped, and only the successfully inserted rows are
   /// returned.
+  ///
+  /// If [noReturn] is set to `true`, the inserted rows are not read back from
+  /// the database and an empty list is returned. This avoids the overhead of
+  /// transferring and deserializing the rows when the result is not needed.
   Future<List<WalletConnection>> insert(
-    _i1.DatabaseSession session,
+    _is.DatabaseSession session,
     List<WalletConnection> rows, {
-    _i1.Transaction? transaction,
+    _is.Transaction? transaction,
     bool ignoreConflicts = false,
+    bool noReturn = false,
   }) async {
     return session.db.insert<WalletConnection>(
       rows,
       transaction: transaction,
       ignoreConflicts: ignoreConflicts,
+      noReturn: noReturn,
     );
   }
 
@@ -481,12 +596,81 @@ class WalletConnectionRepository {
   ///
   /// The returned [WalletConnection] will have its `id` field set.
   Future<WalletConnection> insertRow(
-    _i1.DatabaseSession session,
+    _is.DatabaseSession session,
     WalletConnection row, {
-    _i1.Transaction? transaction,
+    _is.Transaction? transaction,
   }) async {
     return session.db.insertRow<WalletConnection>(
       row,
+      transaction: transaction,
+    );
+  }
+
+  /// Upserts all [WalletConnection]s in the list and returns the resulting rows.
+  ///
+  /// If a row conflicts on the given [conflictColumns], the existing row is
+  /// updated with the new values. Otherwise, a new row is inserted.
+  ///
+  /// If [updateColumns] is provided, only those columns will be updated on
+  /// conflict. If null, all non-conflict, non-id columns are updated.
+  ///
+  /// If [updateWhere] is provided, the update only applies to rows matching the
+  /// given expression. Conflicting rows that don't match are skipped and not
+  /// returned, so the resulting list may be shorter than [rows].
+  ///
+  /// The returned [WalletConnection]s will have their `id` fields set.
+  ///
+  /// This is an atomic operation, meaning that if one of the rows fails,
+  /// none of the rows will be affected.
+  ///
+  /// If [noReturn] is set to `true`, the resulting rows are not read back from
+  /// the database and an empty list is returned. This avoids the overhead of
+  /// transferring and deserializing the rows when the result is not needed.
+  Future<List<WalletConnection>> upsert(
+    _is.DatabaseSession session,
+    List<WalletConnection> rows, {
+    required _is.ColumnSelections<WalletConnectionTable> conflictColumns,
+    _is.ColumnSelections<WalletConnectionTable>? updateColumns,
+    _is.WhereExpressionBuilder<WalletConnectionTable>? updateWhere,
+    _is.Transaction? transaction,
+    bool noReturn = false,
+  }) async {
+    return session.db.upsert<WalletConnection>(
+      rows,
+      conflictColumns: conflictColumns(WalletConnection.t),
+      updateColumns: updateColumns?.call(WalletConnection.t),
+      updateWhere: updateWhere?.call(WalletConnection.t),
+      transaction: transaction,
+      noReturn: noReturn,
+    );
+  }
+
+  /// Upserts a single [WalletConnection] and returns the resulting row.
+  ///
+  /// If the row conflicts on the given [conflictColumns], the existing row is
+  /// updated. Otherwise, a new row is inserted.
+  ///
+  /// If [updateColumns] is provided, only those columns will be updated on
+  /// conflict. If null, all non-conflict, non-id columns are updated.
+  ///
+  /// If [updateWhere] is provided, the update only applies when the existing
+  /// row matches the expression. Returns `null` if no row was affected — for
+  /// example when [updateWhere] does not match the conflicting row.
+  ///
+  /// The returned [WalletConnection] will have its `id` field set.
+  Future<WalletConnection?> upsertRow(
+    _is.DatabaseSession session,
+    WalletConnection row, {
+    required _is.ColumnSelections<WalletConnectionTable> conflictColumns,
+    _is.ColumnSelections<WalletConnectionTable>? updateColumns,
+    _is.WhereExpressionBuilder<WalletConnectionTable>? updateWhere,
+    _is.Transaction? transaction,
+  }) async {
+    return session.db.upsertRow<WalletConnection>(
+      row,
+      conflictColumns: conflictColumns(WalletConnection.t),
+      updateColumns: updateColumns?.call(WalletConnection.t),
+      updateWhere: updateWhere?.call(WalletConnection.t),
       transaction: transaction,
     );
   }
@@ -496,16 +680,22 @@ class WalletConnectionRepository {
   /// all columns.
   /// This is an atomic operation, meaning that if one of the rows fails to
   /// update, none of the rows will be updated.
+  ///
+  /// If [noReturn] is set to `true`, the updated rows are not read back from
+  /// the database and an empty list is returned. This avoids the overhead of
+  /// transferring and deserializing the rows when the result is not needed.
   Future<List<WalletConnection>> update(
-    _i1.DatabaseSession session,
+    _is.DatabaseSession session,
     List<WalletConnection> rows, {
-    _i1.ColumnSelections<WalletConnectionTable>? columns,
-    _i1.Transaction? transaction,
+    _is.ColumnSelections<WalletConnectionTable>? columns,
+    _is.Transaction? transaction,
+    bool noReturn = false,
   }) async {
     return session.db.update<WalletConnection>(
       rows,
       columns: columns?.call(WalletConnection.t),
       transaction: transaction,
+      noReturn: noReturn,
     );
   }
 
@@ -513,10 +703,10 @@ class WalletConnectionRepository {
   /// Optionally, a list of [columns] can be provided to only update those
   /// columns. Defaults to all columns.
   Future<WalletConnection> updateRow(
-    _i1.DatabaseSession session,
+    _is.DatabaseSession session,
     WalletConnection row, {
-    _i1.ColumnSelections<WalletConnectionTable>? columns,
-    _i1.Transaction? transaction,
+    _is.ColumnSelections<WalletConnectionTable>? columns,
+    _is.Transaction? transaction,
   }) async {
     return session.db.updateRow<WalletConnection>(
       row,
@@ -528,11 +718,11 @@ class WalletConnectionRepository {
   /// Updates a single [WalletConnection] by its [id] with the specified [columnValues].
   /// Returns the updated row or null if no row with the given id exists.
   Future<WalletConnection?> updateById(
-    _i1.DatabaseSession session,
-    _i1.UuidValue id, {
-    required _i1.ColumnValueListBuilder<WalletConnectionUpdateTable>
+    _is.DatabaseSession session,
+    _is.UuidValue id, {
+    required _is.ColumnValueListBuilder<WalletConnectionUpdateTable>
     columnValues,
-    _i1.Transaction? transaction,
+    _is.Transaction? transaction,
   }) async {
     return session.db.updateById<WalletConnection>(
       id,
@@ -543,17 +733,21 @@ class WalletConnectionRepository {
 
   /// Updates all [WalletConnection]s matching the [where] expression with the specified [columnValues].
   /// Returns the list of updated rows.
+  ///
+  /// If [noReturn] is set to `true`, the updated rows are not read back from
+  /// the database and an empty list is returned. This avoids the overhead of
+  /// transferring and deserializing the rows when the result is not needed.
   Future<List<WalletConnection>> updateWhere(
-    _i1.DatabaseSession session, {
-    required _i1.ColumnValueListBuilder<WalletConnectionUpdateTable>
+    _is.DatabaseSession session, {
+    required _is.ColumnValueListBuilder<WalletConnectionUpdateTable>
     columnValues,
-    required _i1.WhereExpressionBuilder<WalletConnectionTable> where,
+    required _is.WhereExpressionBuilder<WalletConnectionTable> where,
     int? limit,
     int? offset,
-    _i1.OrderByBuilder<WalletConnectionTable>? orderBy,
-    _i1.OrderByListBuilder<WalletConnectionTable>? orderByList,
-    bool orderDescending = false,
-    _i1.Transaction? transaction,
+    _is.OrderByBuilder<WalletConnectionTable>? orderBy,
+    _is.OrderByListBuilder<WalletConnectionTable>? orderByList,
+    _is.Transaction? transaction,
+    bool noReturn = false,
   }) async {
     return session.db.updateWhere<WalletConnection>(
       columnValues: columnValues(WalletConnection.t.updateTable),
@@ -562,27 +756,44 @@ class WalletConnectionRepository {
       offset: offset,
       orderBy: orderBy?.call(WalletConnection.t),
       orderByList: orderByList?.call(WalletConnection.t),
-      orderDescending: orderDescending,
       transaction: transaction,
+      noReturn: noReturn,
     );
   }
 
   /// Deletes all [WalletConnection]s in the list and returns the deleted rows.
+  ///
+  /// To specify the order of the returned rows use [orderBy] or [orderByList]
+  /// when sorting by multiple columns.
+  ///
   /// This is an atomic operation, meaning that if one of the rows fail to
   /// be deleted, none of the rows will be deleted.
+  ///
+  /// If [noReturn] is set to `true`, the deleted rows are not read back from
+  /// the database and an empty list is returned. This avoids the overhead of
+  /// transferring and deserializing the rows when the result is not needed.
   Future<List<WalletConnection>> delete(
-    _i1.DatabaseSession session,
+    _is.DatabaseSession session,
     List<WalletConnection> rows, {
-    _i1.Transaction? transaction,
+    _is.OrderByBuilder<WalletConnectionTable>? orderBy,
+    _is.OrderByListBuilder<WalletConnectionTable>? orderByList,
+    _is.Transaction? transaction,
+    bool noReturn = false,
   }) async {
-    return session.db.delete<WalletConnection>(rows, transaction: transaction);
+    return session.db.delete<WalletConnection>(
+      rows,
+      orderBy: orderBy?.call(WalletConnection.t),
+      orderByList: orderByList?.call(WalletConnection.t),
+      transaction: transaction,
+      noReturn: noReturn,
+    );
   }
 
   /// Deletes a single [WalletConnection].
   Future<WalletConnection> deleteRow(
-    _i1.DatabaseSession session,
+    _is.DatabaseSession session,
     WalletConnection row, {
-    _i1.Transaction? transaction,
+    _is.Transaction? transaction,
   }) async {
     return session.db.deleteRow<WalletConnection>(
       row,
@@ -591,24 +802,37 @@ class WalletConnectionRepository {
   }
 
   /// Deletes all rows matching the [where] expression.
+  ///
+  /// To specify the order of the returned rows use [orderBy] or [orderByList]
+  /// when sorting by multiple columns.
+  ///
+  /// If [noReturn] is set to `true`, the deleted rows are not read back from
+  /// the database and an empty list is returned. This avoids the overhead of
+  /// transferring and deserializing the rows when the result is not needed.
   Future<List<WalletConnection>> deleteWhere(
-    _i1.DatabaseSession session, {
-    required _i1.WhereExpressionBuilder<WalletConnectionTable> where,
-    _i1.Transaction? transaction,
+    _is.DatabaseSession session, {
+    required _is.WhereExpressionBuilder<WalletConnectionTable> where,
+    _is.OrderByBuilder<WalletConnectionTable>? orderBy,
+    _is.OrderByListBuilder<WalletConnectionTable>? orderByList,
+    _is.Transaction? transaction,
+    bool noReturn = false,
   }) async {
     return session.db.deleteWhere<WalletConnection>(
       where: where(WalletConnection.t),
+      orderBy: orderBy?.call(WalletConnection.t),
+      orderByList: orderByList?.call(WalletConnection.t),
       transaction: transaction,
+      noReturn: noReturn,
     );
   }
 
   /// Counts the number of rows matching the [where] expression. If omitted,
   /// will return the count of all rows in the table.
   Future<int> count(
-    _i1.DatabaseSession session, {
-    _i1.WhereExpressionBuilder<WalletConnectionTable>? where,
+    _is.DatabaseSession session, {
+    _is.WhereExpressionBuilder<WalletConnectionTable>? where,
     int? limit,
-    _i1.Transaction? transaction,
+    _is.Transaction? transaction,
   }) async {
     return session.db.count<WalletConnection>(
       where: where?.call(WalletConnection.t),
@@ -619,11 +843,11 @@ class WalletConnectionRepository {
 
   /// Acquires row-level locks on [WalletConnection] rows matching the [where] expression.
   Future<void> lockRows(
-    _i1.DatabaseSession session, {
-    required _i1.WhereExpressionBuilder<WalletConnectionTable> where,
-    required _i1.LockMode lockMode,
-    required _i1.Transaction transaction,
-    _i1.LockBehavior lockBehavior = _i1.LockBehavior.wait,
+    _is.DatabaseSession session, {
+    required _is.WhereExpressionBuilder<WalletConnectionTable> where,
+    required _is.LockMode lockMode,
+    required _is.Transaction transaction,
+    _is.LockBehavior lockBehavior = _is.LockBehavior.wait,
   }) async {
     return session.db.lockRows<WalletConnection>(
       where: where(WalletConnection.t),

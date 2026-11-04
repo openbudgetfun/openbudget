@@ -10,10 +10,11 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:serverpod_client/serverpod_client.dart' as _i1;
+import 'package:serverpod_client/serverpod_client.dart' as _isc;
 
 /// A parsed Solana transaction associated with a wallet.
-abstract class SolanaWalletTransaction implements _i1.SerializableModel {
+abstract class SolanaWalletTransaction
+    implements _isc.SerializableModel, _isc.ProtocolSerialization {
   SolanaWalletTransaction._({
     this.id,
     required this.walletId,
@@ -43,9 +44,9 @@ abstract class SolanaWalletTransaction implements _i1.SerializableModel {
        updatedAt = updatedAt ?? DateTime.now();
 
   factory SolanaWalletTransaction({
-    _i1.UuidValue? id,
-    required _i1.UuidValue walletId,
-    required _i1.UuidValue budgetId,
+    _isc.UuidValue? id,
+    required _isc.UuidValue walletId,
+    required _isc.UuidValue budgetId,
     required String signature,
     required int slot,
     DateTime? occurredAt,
@@ -75,18 +76,20 @@ abstract class SolanaWalletTransaction implements _i1.SerializableModel {
     return SolanaWalletTransaction(
       id: jsonSerialization['id'] == null
           ? null
-          : _i1.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
-      walletId: _i1.UuidValueJsonExtension.fromJson(
+          : _isc.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
+      walletId: _isc.UuidValueJsonExtension.fromJson(
         jsonSerialization['walletId'],
       ),
-      budgetId: _i1.UuidValueJsonExtension.fromJson(
+      budgetId: _isc.UuidValueJsonExtension.fromJson(
         jsonSerialization['budgetId'],
       ),
       signature: jsonSerialization['signature'] as String,
       slot: jsonSerialization['slot'] as int,
       occurredAt: jsonSerialization['occurredAt'] == null
           ? null
-          : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['occurredAt']),
+          : _isc.DateTimeJsonExtension.fromJson(
+              jsonSerialization['occurredAt'],
+            ),
       description: jsonSerialization['description'] as String,
       txType: jsonSerialization['txType'] as String,
       source: jsonSerialization['source'] as String,
@@ -109,21 +112,21 @@ abstract class SolanaWalletTransaction implements _i1.SerializableModel {
       rawJson: jsonSerialization['rawJson'] as String,
       createdAt: jsonSerialization['createdAt'] == null
           ? null
-          : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
+          : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
       updatedAt: jsonSerialization['updatedAt'] == null
           ? null
-          : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['updatedAt']),
+          : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['updatedAt']),
     );
   }
 
   /// The database id, set if the object has been inserted into the
   /// database or if it has been fetched from the database. Otherwise,
   /// the id will be null.
-  _i1.UuidValue? id;
+  _isc.UuidValue? id;
 
-  _i1.UuidValue walletId;
+  _isc.UuidValue walletId;
 
-  _i1.UuidValue budgetId;
+  _isc.UuidValue budgetId;
 
   /// Transaction signature.
   String signature;
@@ -188,14 +191,14 @@ abstract class SolanaWalletTransaction implements _i1.SerializableModel {
 
   /// Returns a shallow copy of this [SolanaWalletTransaction]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_isc.useResult
   SolanaWalletTransaction copyWith({
-    _i1.UuidValue? id,
-    _i1.UuidValue? walletId,
-    _i1.UuidValue? budgetId,
+    _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
+    _isc.UuidValue? walletId,
+    _isc.UuidValue? budgetId,
     String? signature,
     int? slot,
-    DateTime? occurredAt,
+    DateTime? occurredAt = const _isc.$UndefinedDateTime(),
     String? description,
     String? txType,
     String? source,
@@ -250,8 +253,42 @@ abstract class SolanaWalletTransaction implements _i1.SerializableModel {
   }
 
   @override
+  Map<String, dynamic> toJsonForProtocol() {
+    return {
+      '__className__': 'SolanaWalletTransaction',
+      if (id != null) 'id': id?.toJson(),
+      'walletId': walletId.toJson(),
+      'budgetId': budgetId.toJson(),
+      'signature': signature,
+      'slot': slot,
+      if (occurredAt != null) 'occurredAt': occurredAt?.toJson(),
+      'description': description,
+      'txType': txType,
+      'source': source,
+      if (interpretationConfidence != null)
+        'interpretationConfidence': interpretationConfidence,
+      if (programsJson != null) 'programsJson': programsJson,
+      if (nativeTransfersJson != null)
+        'nativeTransfersJson': nativeTransfersJson,
+      if (tokenTransfersJson != null) 'tokenTransfersJson': tokenTransfersJson,
+      if (estimatedCostBasis != null) 'estimatedCostBasis': estimatedCostBasis,
+      if (estimatedProceeds != null) 'estimatedProceeds': estimatedProceeds,
+      if (estimatedRealizedPnl != null)
+        'estimatedRealizedPnl': estimatedRealizedPnl,
+      if (pnlCurrency != null) 'pnlCurrency': pnlCurrency,
+      if (taxYear != null) 'taxYear': taxYear,
+      if (category != null) 'category': category,
+      if (tagsCsv != null) 'tagsCsv': tagsCsv,
+      if (memo != null) 'memo': memo,
+      'rawJson': rawJson,
+      'createdAt': createdAt.toJson(),
+      'updatedAt': updatedAt.toJson(),
+    };
+  }
+
+  @override
   String toString() {
-    return _i1.SerializationManager.encode(this);
+    return _isc.SerializationManager.encode(this);
   }
 }
 
@@ -259,9 +296,9 @@ class _Undefined {}
 
 class _SolanaWalletTransactionImpl extends SolanaWalletTransaction {
   _SolanaWalletTransactionImpl({
-    _i1.UuidValue? id,
-    required _i1.UuidValue walletId,
-    required _i1.UuidValue budgetId,
+    _isc.UuidValue? id,
+    required _isc.UuidValue walletId,
+    required _isc.UuidValue budgetId,
     required String signature,
     required int slot,
     DateTime? occurredAt,
@@ -312,15 +349,15 @@ class _SolanaWalletTransactionImpl extends SolanaWalletTransaction {
 
   /// Returns a shallow copy of this [SolanaWalletTransaction]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_isc.useResult
   @override
   SolanaWalletTransaction copyWith({
-    Object? id = _Undefined,
-    _i1.UuidValue? walletId,
-    _i1.UuidValue? budgetId,
+    _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
+    _isc.UuidValue? walletId,
+    _isc.UuidValue? budgetId,
     String? signature,
     int? slot,
-    Object? occurredAt = _Undefined,
+    DateTime? occurredAt = const _isc.$UndefinedDateTime(),
     String? description,
     String? txType,
     String? source,
@@ -341,12 +378,14 @@ class _SolanaWalletTransactionImpl extends SolanaWalletTransaction {
     DateTime? updatedAt,
   }) {
     return SolanaWalletTransaction(
-      id: id is _i1.UuidValue? ? id : this.id,
+      id: id is _isc.UndefinedSentinel ? this.id : id,
       walletId: walletId ?? this.walletId,
       budgetId: budgetId ?? this.budgetId,
       signature: signature ?? this.signature,
       slot: slot ?? this.slot,
-      occurredAt: occurredAt is DateTime? ? occurredAt : this.occurredAt,
+      occurredAt: occurredAt is _isc.UndefinedSentinel
+          ? this.occurredAt
+          : occurredAt,
       description: description ?? this.description,
       txType: txType ?? this.txType,
       source: source ?? this.source,

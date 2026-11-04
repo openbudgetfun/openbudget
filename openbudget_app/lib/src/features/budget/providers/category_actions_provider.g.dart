@@ -41,13 +41,13 @@ final class CategoryActionsProvider
   }
 }
 
-String _$categoryActionsHash() => r'05c09c9e5bffe3e9928059b517001170b66d0ff4';
+String _$categoryActionsHash() => r'12f9c7245bbea22ff03303d42355b092b3e8017c';
 
 abstract class _$CategoryActions extends $Notifier<AsyncValue<void>> {
   AsyncValue<void> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<void>, AsyncValue<void>>;
     final element =
         ref.element
@@ -57,6 +57,6 @@ abstract class _$CategoryActions extends $Notifier<AsyncValue<void>> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

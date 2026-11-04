@@ -10,11 +10,13 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:serverpod/serverpod.dart' as _i1;
+import 'dart:async' as _ida;
+
+import 'package:serverpod/serverpod.dart' as _is;
 
 /// A savings goal or target for an envelope.
 abstract class EnvelopeGoal
-    implements _i1.TableRow<_i1.UuidValue?>, _i1.ProtocolSerialization {
+    implements _is.TableRow<_is.UuidValue?>, _is.ProtocolSerialization {
   EnvelopeGoal._({
     this.id,
     required this.envelopeId,
@@ -28,8 +30,8 @@ abstract class EnvelopeGoal
        updatedAt = updatedAt ?? DateTime.now();
 
   factory EnvelopeGoal({
-    _i1.UuidValue? id,
-    required _i1.UuidValue envelopeId,
+    _is.UuidValue? id,
+    required _is.UuidValue envelopeId,
     required String goalType,
     required int targetAmountCents,
     DateTime? targetDate,
@@ -42,22 +44,22 @@ abstract class EnvelopeGoal
     return EnvelopeGoal(
       id: jsonSerialization['id'] == null
           ? null
-          : _i1.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
-      envelopeId: _i1.UuidValueJsonExtension.fromJson(
+          : _is.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
+      envelopeId: _is.UuidValueJsonExtension.fromJson(
         jsonSerialization['envelopeId'],
       ),
       goalType: jsonSerialization['goalType'] as String,
       targetAmountCents: jsonSerialization['targetAmountCents'] as int,
       targetDate: jsonSerialization['targetDate'] == null
           ? null
-          : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['targetDate']),
+          : _is.DateTimeJsonExtension.fromJson(jsonSerialization['targetDate']),
       monthlyFundingCents: jsonSerialization['monthlyFundingCents'] as int?,
       createdAt: jsonSerialization['createdAt'] == null
           ? null
-          : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
+          : _is.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
       updatedAt: jsonSerialization['updatedAt'] == null
           ? null
-          : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['updatedAt']),
+          : _is.DateTimeJsonExtension.fromJson(jsonSerialization['updatedAt']),
     );
   }
 
@@ -66,9 +68,9 @@ abstract class EnvelopeGoal
   static const db = EnvelopeGoalRepository._();
 
   @override
-  _i1.UuidValue? id;
+  _is.UuidValue? id;
 
-  _i1.UuidValue envelopeId;
+  _is.UuidValue envelopeId;
 
   /// Goal type: 'target_balance', 'monthly_funding', or 'target_by_date'.
   String goalType;
@@ -87,17 +89,17 @@ abstract class EnvelopeGoal
   DateTime updatedAt;
 
   @override
-  _i1.Table<_i1.UuidValue?> get table => t;
+  _is.Table<_is.UuidValue?> get table => t;
 
   /// Returns a shallow copy of this [EnvelopeGoal]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_is.useResult
   EnvelopeGoal copyWith({
-    _i1.UuidValue? id,
-    _i1.UuidValue? envelopeId,
+    _is.UuidValue? id = const _is.$UndefinedUuidValue(),
+    _is.UuidValue? envelopeId,
     String? goalType,
     int? targetAmountCents,
-    DateTime? targetDate,
+    DateTime? targetDate = const _is.$UndefinedDateTime(),
     int? monthlyFundingCents,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -139,12 +141,11 @@ abstract class EnvelopeGoal
   }
 
   static EnvelopeGoalIncludeList includeList({
-    _i1.WhereExpressionBuilder<EnvelopeGoalTable>? where,
+    _is.WhereExpressionBuilder<EnvelopeGoalTable>? where,
     int? limit,
     int? offset,
-    _i1.OrderByBuilder<EnvelopeGoalTable>? orderBy,
-    bool orderDescending = false,
-    _i1.OrderByListBuilder<EnvelopeGoalTable>? orderByList,
+    _is.OrderByBuilder<EnvelopeGoalTable>? orderBy,
+    _is.OrderByListBuilder<EnvelopeGoalTable>? orderByList,
     EnvelopeGoalInclude? include,
   }) {
     return EnvelopeGoalIncludeList._(
@@ -152,7 +153,6 @@ abstract class EnvelopeGoal
       limit: limit,
       offset: offset,
       orderBy: orderBy?.call(EnvelopeGoal.t),
-      orderDescending: orderDescending,
       orderByList: orderByList?.call(EnvelopeGoal.t),
       include: include,
     );
@@ -160,7 +160,7 @@ abstract class EnvelopeGoal
 
   @override
   String toString() {
-    return _i1.SerializationManager.encode(this);
+    return _is.SerializationManager.encode(this);
   }
 }
 
@@ -168,8 +168,8 @@ class _Undefined {}
 
 class _EnvelopeGoalImpl extends EnvelopeGoal {
   _EnvelopeGoalImpl({
-    _i1.UuidValue? id,
-    required _i1.UuidValue envelopeId,
+    _is.UuidValue? id,
+    required _is.UuidValue envelopeId,
     required String goalType,
     required int targetAmountCents,
     DateTime? targetDate,
@@ -189,24 +189,26 @@ class _EnvelopeGoalImpl extends EnvelopeGoal {
 
   /// Returns a shallow copy of this [EnvelopeGoal]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_is.useResult
   @override
   EnvelopeGoal copyWith({
-    Object? id = _Undefined,
-    _i1.UuidValue? envelopeId,
+    _is.UuidValue? id = const _is.$UndefinedUuidValue(),
+    _is.UuidValue? envelopeId,
     String? goalType,
     int? targetAmountCents,
-    Object? targetDate = _Undefined,
+    DateTime? targetDate = const _is.$UndefinedDateTime(),
     Object? monthlyFundingCents = _Undefined,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
     return EnvelopeGoal(
-      id: id is _i1.UuidValue? ? id : this.id,
+      id: id is _is.UndefinedSentinel ? this.id : id,
       envelopeId: envelopeId ?? this.envelopeId,
       goalType: goalType ?? this.goalType,
       targetAmountCents: targetAmountCents ?? this.targetAmountCents,
-      targetDate: targetDate is DateTime? ? targetDate : this.targetDate,
+      targetDate: targetDate is _is.UndefinedSentinel
+          ? this.targetDate
+          : targetDate,
       monthlyFundingCents: monthlyFundingCents is int?
           ? monthlyFundingCents
           : this.monthlyFundingCents,
@@ -216,66 +218,107 @@ class _EnvelopeGoalImpl extends EnvelopeGoal {
   }
 }
 
-class EnvelopeGoalUpdateTable extends _i1.UpdateTable<EnvelopeGoalTable> {
+class EnvelopeGoalUpdateTable extends _is.UpdateTable<EnvelopeGoalTable> {
   EnvelopeGoalUpdateTable(super.table);
 
-  _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> envelopeId(
-    _i1.UuidValue value,
-  ) => _i1.ColumnValue(table.envelopeId, value);
+  _is.ColumnValue<_is.UuidValue, _is.UuidValue> envelopeId(
+    _is.UuidValue value,
+  ) => _is.ColumnValue(
+    table.envelopeId,
+    value,
+  );
 
-  _i1.ColumnValue<String, String> goalType(String value) =>
-      _i1.ColumnValue(table.goalType, value);
+  _is.ColumnValue<String, String> goalType(String value) => _is.ColumnValue(
+    table.goalType,
+    value,
+  );
 
-  _i1.ColumnValue<int, int> targetAmountCents(int value) =>
-      _i1.ColumnValue(table.targetAmountCents, value);
+  _is.ColumnValue<int, int> targetAmountCents(int value) => _is.ColumnValue(
+    table.targetAmountCents,
+    value,
+  );
 
-  _i1.ColumnValue<DateTime, DateTime> targetDate(DateTime? value) =>
-      _i1.ColumnValue(table.targetDate, value);
+  _is.ColumnValue<DateTime, DateTime> targetDate(DateTime? value) =>
+      _is.ColumnValue(
+        table.targetDate,
+        value,
+      );
 
-  _i1.ColumnValue<int, int> monthlyFundingCents(int? value) =>
-      _i1.ColumnValue(table.monthlyFundingCents, value);
+  _is.ColumnValue<int, int> monthlyFundingCents(int? value) => _is.ColumnValue(
+    table.monthlyFundingCents,
+    value,
+  );
 
-  _i1.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
-      _i1.ColumnValue(table.createdAt, value);
+  _is.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
+      _is.ColumnValue(
+        table.createdAt,
+        value,
+      );
 
-  _i1.ColumnValue<DateTime, DateTime> updatedAt(DateTime value) =>
-      _i1.ColumnValue(table.updatedAt, value);
+  _is.ColumnValue<DateTime, DateTime> updatedAt(DateTime value) =>
+      _is.ColumnValue(
+        table.updatedAt,
+        value,
+      );
 }
 
-class EnvelopeGoalTable extends _i1.Table<_i1.UuidValue?> {
+class EnvelopeGoalTable extends _is.Table<_is.UuidValue?> {
   EnvelopeGoalTable({super.tableRelation}) : super(tableName: 'envelope_goal') {
     updateTable = EnvelopeGoalUpdateTable(this);
-    envelopeId = _i1.ColumnUuid('envelopeId', this);
-    goalType = _i1.ColumnString('goalType', this);
-    targetAmountCents = _i1.ColumnInt('targetAmountCents', this);
-    targetDate = _i1.ColumnDateTime('targetDate', this);
-    monthlyFundingCents = _i1.ColumnInt('monthlyFundingCents', this);
-    createdAt = _i1.ColumnDateTime('createdAt', this, hasDefault: true);
-    updatedAt = _i1.ColumnDateTime('updatedAt', this, hasDefault: true);
+    envelopeId = _is.ColumnUuid(
+      'envelopeId',
+      this,
+    );
+    goalType = _is.ColumnString(
+      'goalType',
+      this,
+    );
+    targetAmountCents = _is.ColumnInt(
+      'targetAmountCents',
+      this,
+    );
+    targetDate = _is.ColumnDateTime(
+      'targetDate',
+      this,
+    );
+    monthlyFundingCents = _is.ColumnInt(
+      'monthlyFundingCents',
+      this,
+    );
+    createdAt = _is.ColumnDateTime(
+      'createdAt',
+      this,
+      hasDefault: true,
+    );
+    updatedAt = _is.ColumnDateTime(
+      'updatedAt',
+      this,
+      hasDefault: true,
+    );
   }
 
   late final EnvelopeGoalUpdateTable updateTable;
 
-  late final _i1.ColumnUuid envelopeId;
+  late final _is.ColumnUuid envelopeId;
 
   /// Goal type: 'target_balance', 'monthly_funding', or 'target_by_date'.
-  late final _i1.ColumnString goalType;
+  late final _is.ColumnString goalType;
 
   /// Target amount in integer cents.
-  late final _i1.ColumnInt targetAmountCents;
+  late final _is.ColumnInt targetAmountCents;
 
   /// Target date for 'target_by_date' goals (nullable for other types).
-  late final _i1.ColumnDateTime targetDate;
+  late final _is.ColumnDateTime targetDate;
 
   /// Monthly funding amount in cents for 'monthly_funding' goals.
-  late final _i1.ColumnInt monthlyFundingCents;
+  late final _is.ColumnInt monthlyFundingCents;
 
-  late final _i1.ColumnDateTime createdAt;
+  late final _is.ColumnDateTime createdAt;
 
-  late final _i1.ColumnDateTime updatedAt;
+  late final _is.ColumnDateTime updatedAt;
 
   @override
-  List<_i1.Column> get columns => [
+  List<_is.Column> get columns => [
     id,
     envelopeId,
     goalType,
@@ -287,23 +330,22 @@ class EnvelopeGoalTable extends _i1.Table<_i1.UuidValue?> {
   ];
 }
 
-class EnvelopeGoalInclude extends _i1.IncludeObject {
+class EnvelopeGoalInclude extends _is.IncludeObject {
   EnvelopeGoalInclude._();
 
   @override
-  Map<String, _i1.Include?> get includes => {};
+  Map<String, _is.Include?> get includes => {};
 
   @override
-  _i1.Table<_i1.UuidValue?> get table => EnvelopeGoal.t;
+  _is.Table<_is.UuidValue?> get table => EnvelopeGoal.t;
 }
 
-class EnvelopeGoalIncludeList extends _i1.IncludeList {
+class EnvelopeGoalIncludeList extends _is.IncludeList {
   EnvelopeGoalIncludeList._({
-    _i1.WhereExpressionBuilder<EnvelopeGoalTable>? where,
+    _is.WhereExpressionBuilder<EnvelopeGoalTable>? where,
     super.limit,
     super.offset,
     super.orderBy,
-    super.orderDescending,
     super.orderByList,
     super.include,
   }) {
@@ -311,10 +353,10 @@ class EnvelopeGoalIncludeList extends _i1.IncludeList {
   }
 
   @override
-  Map<String, _i1.Include?> get includes => include?.includes ?? {};
+  Map<String, _is.Include?> get includes => include?.includes ?? {};
 
   @override
-  _i1.Table<_i1.UuidValue?> get table => EnvelopeGoal.t;
+  _is.Table<_is.UuidValue?> get table => EnvelopeGoal.t;
 }
 
 class EnvelopeGoalRepository {
@@ -343,27 +385,88 @@ class EnvelopeGoalRepository {
   /// );
   /// ```
   Future<List<EnvelopeGoal>> find(
-    _i1.DatabaseSession session, {
-    _i1.WhereExpressionBuilder<EnvelopeGoalTable>? where,
+    _is.DatabaseSession session, {
+    _is.WhereExpressionBuilder<EnvelopeGoalTable>? where,
     int? limit,
     int? offset,
-    _i1.OrderByBuilder<EnvelopeGoalTable>? orderBy,
-    bool orderDescending = false,
-    _i1.OrderByListBuilder<EnvelopeGoalTable>? orderByList,
-    _i1.Transaction? transaction,
-    _i1.LockMode? lockMode,
-    _i1.LockBehavior? lockBehavior,
+    _is.OrderByBuilder<EnvelopeGoalTable>? orderBy,
+    _is.OrderByListBuilder<EnvelopeGoalTable>? orderByList,
+    _is.Transaction? transaction,
+    _is.LockMode? lockMode,
+    _is.LockBehavior? lockBehavior,
   }) async {
     return session.db.find<EnvelopeGoal>(
       where: where?.call(EnvelopeGoal.t),
       orderBy: orderBy?.call(EnvelopeGoal.t),
       orderByList: orderByList?.call(EnvelopeGoal.t),
-      orderDescending: orderDescending,
       limit: limit,
       offset: offset,
       transaction: transaction,
       lockMode: lockMode,
       lockBehavior: lockBehavior,
+    );
+  }
+
+  /// Emits [EnvelopeGoal]s matching the given query parameters every time the
+  /// source tables are modified.
+  ///
+  /// Use [where] to specify which items to include in the return value.
+  /// If none is specified, all items will be returned.
+  ///
+  /// To specify the order of the items use [orderBy] or [orderByList]
+  /// when sorting by multiple columns.
+  ///
+  /// The maximum number of items can be set by [limit]. If no limit is set,
+  /// all items matching the query will be returned.
+  ///
+  /// [offset] defines how many items to skip, after which [limit] (or all)
+  /// items are read from the database.
+  ///
+  /// Use [throttle] to specify the minimum interval between queries. It can
+  /// also be set to `null`, in which case the stream will only be throttled
+  /// when its subscription is paused.
+  ///
+  /// Source tables are collected from the queried table, [where], [orderBy],
+  /// [orderByList], and the [include] graph. [alsoTriggerOnTables] is added
+  /// to that set. Pass [Table] instances such as `EnvelopeGoal.t`.
+  ///
+  /// Raw [Expression] SQL is not inspected. Tables referenced only in raw
+  /// SQL must be passed via [alsoTriggerOnTables].
+  ///
+  /// The stream always reads committed state and never joins an ambient
+  /// [Transaction]. Emissions for a write fire after that write commits.
+  ///
+  /// Currently only supported on SQLite. Calling this method on PostgreSQL
+  /// throws an [UnsupportedError].
+  ///
+  /// ```dart
+  /// var subscription = Persons.db.watch(
+  ///   session,
+  ///   where: (t) => t.lastName.equals('Jones'),
+  ///   orderBy: (t) => t.firstName,
+  ///   limit: 100,
+  /// ).listen((persons) {
+  ///   // Handle the latest matching rows.
+  /// });
+  /// ```
+  _ida.Stream<List<EnvelopeGoal>> watch(
+    _is.DatabaseSession session, {
+    _is.WhereExpressionBuilder<EnvelopeGoalTable>? where,
+    int? limit,
+    int? offset,
+    _is.OrderByBuilder<EnvelopeGoalTable>? orderBy,
+    _is.OrderByListBuilder<EnvelopeGoalTable>? orderByList,
+    Duration? throttle = const Duration(milliseconds: 30),
+    Iterable<_is.Table>? alsoTriggerOnTables,
+  }) {
+    return session.db.watch<EnvelopeGoal>(
+      where: where?.call(EnvelopeGoal.t),
+      orderBy: orderBy?.call(EnvelopeGoal.t),
+      orderByList: orderByList?.call(EnvelopeGoal.t),
+      limit: limit,
+      offset: offset,
+      throttle: throttle,
+      alsoTriggerOnTables: alsoTriggerOnTables,
     );
   }
 
@@ -385,21 +488,19 @@ class EnvelopeGoalRepository {
   /// );
   /// ```
   Future<EnvelopeGoal?> findFirstRow(
-    _i1.DatabaseSession session, {
-    _i1.WhereExpressionBuilder<EnvelopeGoalTable>? where,
+    _is.DatabaseSession session, {
+    _is.WhereExpressionBuilder<EnvelopeGoalTable>? where,
     int? offset,
-    _i1.OrderByBuilder<EnvelopeGoalTable>? orderBy,
-    bool orderDescending = false,
-    _i1.OrderByListBuilder<EnvelopeGoalTable>? orderByList,
-    _i1.Transaction? transaction,
-    _i1.LockMode? lockMode,
-    _i1.LockBehavior? lockBehavior,
+    _is.OrderByBuilder<EnvelopeGoalTable>? orderBy,
+    _is.OrderByListBuilder<EnvelopeGoalTable>? orderByList,
+    _is.Transaction? transaction,
+    _is.LockMode? lockMode,
+    _is.LockBehavior? lockBehavior,
   }) async {
     return session.db.findFirstRow<EnvelopeGoal>(
       where: where?.call(EnvelopeGoal.t),
       orderBy: orderBy?.call(EnvelopeGoal.t),
       orderByList: orderByList?.call(EnvelopeGoal.t),
-      orderDescending: orderDescending,
       offset: offset,
       transaction: transaction,
       lockMode: lockMode,
@@ -409,11 +510,11 @@ class EnvelopeGoalRepository {
 
   /// Finds a single [EnvelopeGoal] by its [id] or null if no such row exists.
   Future<EnvelopeGoal?> findById(
-    _i1.DatabaseSession session,
-    _i1.UuidValue id, {
-    _i1.Transaction? transaction,
-    _i1.LockMode? lockMode,
-    _i1.LockBehavior? lockBehavior,
+    _is.DatabaseSession session,
+    _is.UuidValue id, {
+    _is.Transaction? transaction,
+    _is.LockMode? lockMode,
+    _is.LockBehavior? lockBehavior,
   }) async {
     return session.db.findById<EnvelopeGoal>(
       id,
@@ -433,16 +534,22 @@ class EnvelopeGoalRepository {
   /// If [ignoreConflicts] is set to `true`, rows that conflict with existing
   /// rows are silently skipped, and only the successfully inserted rows are
   /// returned.
+  ///
+  /// If [noReturn] is set to `true`, the inserted rows are not read back from
+  /// the database and an empty list is returned. This avoids the overhead of
+  /// transferring and deserializing the rows when the result is not needed.
   Future<List<EnvelopeGoal>> insert(
-    _i1.DatabaseSession session,
+    _is.DatabaseSession session,
     List<EnvelopeGoal> rows, {
-    _i1.Transaction? transaction,
+    _is.Transaction? transaction,
     bool ignoreConflicts = false,
+    bool noReturn = false,
   }) async {
     return session.db.insert<EnvelopeGoal>(
       rows,
       transaction: transaction,
       ignoreConflicts: ignoreConflicts,
+      noReturn: noReturn,
     );
   }
 
@@ -450,11 +557,83 @@ class EnvelopeGoalRepository {
   ///
   /// The returned [EnvelopeGoal] will have its `id` field set.
   Future<EnvelopeGoal> insertRow(
-    _i1.DatabaseSession session,
+    _is.DatabaseSession session,
     EnvelopeGoal row, {
-    _i1.Transaction? transaction,
+    _is.Transaction? transaction,
   }) async {
-    return session.db.insertRow<EnvelopeGoal>(row, transaction: transaction);
+    return session.db.insertRow<EnvelopeGoal>(
+      row,
+      transaction: transaction,
+    );
+  }
+
+  /// Upserts all [EnvelopeGoal]s in the list and returns the resulting rows.
+  ///
+  /// If a row conflicts on the given [conflictColumns], the existing row is
+  /// updated with the new values. Otherwise, a new row is inserted.
+  ///
+  /// If [updateColumns] is provided, only those columns will be updated on
+  /// conflict. If null, all non-conflict, non-id columns are updated.
+  ///
+  /// If [updateWhere] is provided, the update only applies to rows matching the
+  /// given expression. Conflicting rows that don't match are skipped and not
+  /// returned, so the resulting list may be shorter than [rows].
+  ///
+  /// The returned [EnvelopeGoal]s will have their `id` fields set.
+  ///
+  /// This is an atomic operation, meaning that if one of the rows fails,
+  /// none of the rows will be affected.
+  ///
+  /// If [noReturn] is set to `true`, the resulting rows are not read back from
+  /// the database and an empty list is returned. This avoids the overhead of
+  /// transferring and deserializing the rows when the result is not needed.
+  Future<List<EnvelopeGoal>> upsert(
+    _is.DatabaseSession session,
+    List<EnvelopeGoal> rows, {
+    required _is.ColumnSelections<EnvelopeGoalTable> conflictColumns,
+    _is.ColumnSelections<EnvelopeGoalTable>? updateColumns,
+    _is.WhereExpressionBuilder<EnvelopeGoalTable>? updateWhere,
+    _is.Transaction? transaction,
+    bool noReturn = false,
+  }) async {
+    return session.db.upsert<EnvelopeGoal>(
+      rows,
+      conflictColumns: conflictColumns(EnvelopeGoal.t),
+      updateColumns: updateColumns?.call(EnvelopeGoal.t),
+      updateWhere: updateWhere?.call(EnvelopeGoal.t),
+      transaction: transaction,
+      noReturn: noReturn,
+    );
+  }
+
+  /// Upserts a single [EnvelopeGoal] and returns the resulting row.
+  ///
+  /// If the row conflicts on the given [conflictColumns], the existing row is
+  /// updated. Otherwise, a new row is inserted.
+  ///
+  /// If [updateColumns] is provided, only those columns will be updated on
+  /// conflict. If null, all non-conflict, non-id columns are updated.
+  ///
+  /// If [updateWhere] is provided, the update only applies when the existing
+  /// row matches the expression. Returns `null` if no row was affected — for
+  /// example when [updateWhere] does not match the conflicting row.
+  ///
+  /// The returned [EnvelopeGoal] will have its `id` field set.
+  Future<EnvelopeGoal?> upsertRow(
+    _is.DatabaseSession session,
+    EnvelopeGoal row, {
+    required _is.ColumnSelections<EnvelopeGoalTable> conflictColumns,
+    _is.ColumnSelections<EnvelopeGoalTable>? updateColumns,
+    _is.WhereExpressionBuilder<EnvelopeGoalTable>? updateWhere,
+    _is.Transaction? transaction,
+  }) async {
+    return session.db.upsertRow<EnvelopeGoal>(
+      row,
+      conflictColumns: conflictColumns(EnvelopeGoal.t),
+      updateColumns: updateColumns?.call(EnvelopeGoal.t),
+      updateWhere: updateWhere?.call(EnvelopeGoal.t),
+      transaction: transaction,
+    );
   }
 
   /// Updates all [EnvelopeGoal]s in the list and returns the updated rows. If
@@ -462,16 +641,22 @@ class EnvelopeGoalRepository {
   /// all columns.
   /// This is an atomic operation, meaning that if one of the rows fails to
   /// update, none of the rows will be updated.
+  ///
+  /// If [noReturn] is set to `true`, the updated rows are not read back from
+  /// the database and an empty list is returned. This avoids the overhead of
+  /// transferring and deserializing the rows when the result is not needed.
   Future<List<EnvelopeGoal>> update(
-    _i1.DatabaseSession session,
+    _is.DatabaseSession session,
     List<EnvelopeGoal> rows, {
-    _i1.ColumnSelections<EnvelopeGoalTable>? columns,
-    _i1.Transaction? transaction,
+    _is.ColumnSelections<EnvelopeGoalTable>? columns,
+    _is.Transaction? transaction,
+    bool noReturn = false,
   }) async {
     return session.db.update<EnvelopeGoal>(
       rows,
       columns: columns?.call(EnvelopeGoal.t),
       transaction: transaction,
+      noReturn: noReturn,
     );
   }
 
@@ -479,10 +664,10 @@ class EnvelopeGoalRepository {
   /// Optionally, a list of [columns] can be provided to only update those
   /// columns. Defaults to all columns.
   Future<EnvelopeGoal> updateRow(
-    _i1.DatabaseSession session,
+    _is.DatabaseSession session,
     EnvelopeGoal row, {
-    _i1.ColumnSelections<EnvelopeGoalTable>? columns,
-    _i1.Transaction? transaction,
+    _is.ColumnSelections<EnvelopeGoalTable>? columns,
+    _is.Transaction? transaction,
   }) async {
     return session.db.updateRow<EnvelopeGoal>(
       row,
@@ -494,10 +679,10 @@ class EnvelopeGoalRepository {
   /// Updates a single [EnvelopeGoal] by its [id] with the specified [columnValues].
   /// Returns the updated row or null if no row with the given id exists.
   Future<EnvelopeGoal?> updateById(
-    _i1.DatabaseSession session,
-    _i1.UuidValue id, {
-    required _i1.ColumnValueListBuilder<EnvelopeGoalUpdateTable> columnValues,
-    _i1.Transaction? transaction,
+    _is.DatabaseSession session,
+    _is.UuidValue id, {
+    required _is.ColumnValueListBuilder<EnvelopeGoalUpdateTable> columnValues,
+    _is.Transaction? transaction,
   }) async {
     return session.db.updateById<EnvelopeGoal>(
       id,
@@ -508,16 +693,20 @@ class EnvelopeGoalRepository {
 
   /// Updates all [EnvelopeGoal]s matching the [where] expression with the specified [columnValues].
   /// Returns the list of updated rows.
+  ///
+  /// If [noReturn] is set to `true`, the updated rows are not read back from
+  /// the database and an empty list is returned. This avoids the overhead of
+  /// transferring and deserializing the rows when the result is not needed.
   Future<List<EnvelopeGoal>> updateWhere(
-    _i1.DatabaseSession session, {
-    required _i1.ColumnValueListBuilder<EnvelopeGoalUpdateTable> columnValues,
-    required _i1.WhereExpressionBuilder<EnvelopeGoalTable> where,
+    _is.DatabaseSession session, {
+    required _is.ColumnValueListBuilder<EnvelopeGoalUpdateTable> columnValues,
+    required _is.WhereExpressionBuilder<EnvelopeGoalTable> where,
     int? limit,
     int? offset,
-    _i1.OrderByBuilder<EnvelopeGoalTable>? orderBy,
-    _i1.OrderByListBuilder<EnvelopeGoalTable>? orderByList,
-    bool orderDescending = false,
-    _i1.Transaction? transaction,
+    _is.OrderByBuilder<EnvelopeGoalTable>? orderBy,
+    _is.OrderByListBuilder<EnvelopeGoalTable>? orderByList,
+    _is.Transaction? transaction,
+    bool noReturn = false,
   }) async {
     return session.db.updateWhere<EnvelopeGoal>(
       columnValues: columnValues(EnvelopeGoal.t.updateTable),
@@ -526,50 +715,83 @@ class EnvelopeGoalRepository {
       offset: offset,
       orderBy: orderBy?.call(EnvelopeGoal.t),
       orderByList: orderByList?.call(EnvelopeGoal.t),
-      orderDescending: orderDescending,
       transaction: transaction,
+      noReturn: noReturn,
     );
   }
 
   /// Deletes all [EnvelopeGoal]s in the list and returns the deleted rows.
+  ///
+  /// To specify the order of the returned rows use [orderBy] or [orderByList]
+  /// when sorting by multiple columns.
+  ///
   /// This is an atomic operation, meaning that if one of the rows fail to
   /// be deleted, none of the rows will be deleted.
+  ///
+  /// If [noReturn] is set to `true`, the deleted rows are not read back from
+  /// the database and an empty list is returned. This avoids the overhead of
+  /// transferring and deserializing the rows when the result is not needed.
   Future<List<EnvelopeGoal>> delete(
-    _i1.DatabaseSession session,
+    _is.DatabaseSession session,
     List<EnvelopeGoal> rows, {
-    _i1.Transaction? transaction,
+    _is.OrderByBuilder<EnvelopeGoalTable>? orderBy,
+    _is.OrderByListBuilder<EnvelopeGoalTable>? orderByList,
+    _is.Transaction? transaction,
+    bool noReturn = false,
   }) async {
-    return session.db.delete<EnvelopeGoal>(rows, transaction: transaction);
+    return session.db.delete<EnvelopeGoal>(
+      rows,
+      orderBy: orderBy?.call(EnvelopeGoal.t),
+      orderByList: orderByList?.call(EnvelopeGoal.t),
+      transaction: transaction,
+      noReturn: noReturn,
+    );
   }
 
   /// Deletes a single [EnvelopeGoal].
   Future<EnvelopeGoal> deleteRow(
-    _i1.DatabaseSession session,
+    _is.DatabaseSession session,
     EnvelopeGoal row, {
-    _i1.Transaction? transaction,
+    _is.Transaction? transaction,
   }) async {
-    return session.db.deleteRow<EnvelopeGoal>(row, transaction: transaction);
+    return session.db.deleteRow<EnvelopeGoal>(
+      row,
+      transaction: transaction,
+    );
   }
 
   /// Deletes all rows matching the [where] expression.
+  ///
+  /// To specify the order of the returned rows use [orderBy] or [orderByList]
+  /// when sorting by multiple columns.
+  ///
+  /// If [noReturn] is set to `true`, the deleted rows are not read back from
+  /// the database and an empty list is returned. This avoids the overhead of
+  /// transferring and deserializing the rows when the result is not needed.
   Future<List<EnvelopeGoal>> deleteWhere(
-    _i1.DatabaseSession session, {
-    required _i1.WhereExpressionBuilder<EnvelopeGoalTable> where,
-    _i1.Transaction? transaction,
+    _is.DatabaseSession session, {
+    required _is.WhereExpressionBuilder<EnvelopeGoalTable> where,
+    _is.OrderByBuilder<EnvelopeGoalTable>? orderBy,
+    _is.OrderByListBuilder<EnvelopeGoalTable>? orderByList,
+    _is.Transaction? transaction,
+    bool noReturn = false,
   }) async {
     return session.db.deleteWhere<EnvelopeGoal>(
       where: where(EnvelopeGoal.t),
+      orderBy: orderBy?.call(EnvelopeGoal.t),
+      orderByList: orderByList?.call(EnvelopeGoal.t),
       transaction: transaction,
+      noReturn: noReturn,
     );
   }
 
   /// Counts the number of rows matching the [where] expression. If omitted,
   /// will return the count of all rows in the table.
   Future<int> count(
-    _i1.DatabaseSession session, {
-    _i1.WhereExpressionBuilder<EnvelopeGoalTable>? where,
+    _is.DatabaseSession session, {
+    _is.WhereExpressionBuilder<EnvelopeGoalTable>? where,
     int? limit,
-    _i1.Transaction? transaction,
+    _is.Transaction? transaction,
   }) async {
     return session.db.count<EnvelopeGoal>(
       where: where?.call(EnvelopeGoal.t),
@@ -580,11 +802,11 @@ class EnvelopeGoalRepository {
 
   /// Acquires row-level locks on [EnvelopeGoal] rows matching the [where] expression.
   Future<void> lockRows(
-    _i1.DatabaseSession session, {
-    required _i1.WhereExpressionBuilder<EnvelopeGoalTable> where,
-    required _i1.LockMode lockMode,
-    required _i1.Transaction transaction,
-    _i1.LockBehavior lockBehavior = _i1.LockBehavior.wait,
+    _is.DatabaseSession session, {
+    required _is.WhereExpressionBuilder<EnvelopeGoalTable> where,
+    required _is.LockMode lockMode,
+    required _is.Transaction transaction,
+    _is.LockBehavior lockBehavior = _is.LockBehavior.wait,
   }) async {
     return session.db.lockRows<EnvelopeGoal>(
       where: where(EnvelopeGoal.t),

@@ -41,13 +41,13 @@ final class RecurringActionsProvider
   }
 }
 
-String _$recurringActionsHash() => r'7c9fd93135c6779bb492d6acda33805f094d6f7c';
+String _$recurringActionsHash() => r'2c47c7bfd888cdc7ea4b48ad0fa86f49f2328226';
 
 abstract class _$RecurringActions extends $Notifier<AsyncValue<void>> {
   AsyncValue<void> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<void>, AsyncValue<void>>;
     final element =
         ref.element
@@ -57,6 +57,6 @@ abstract class _$RecurringActions extends $Notifier<AsyncValue<void>> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

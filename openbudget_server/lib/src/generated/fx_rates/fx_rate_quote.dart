@@ -10,15 +10,20 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:serverpod/serverpod.dart' as _i1;
+import 'package:serverpod/serverpod.dart' as _is;
 
 /// Currency exchange rate pair used in API responses.
 abstract class FxRateQuote
-    implements _i1.SerializableModel, _i1.ProtocolSerialization {
-  FxRateQuote._({required this.currencyCode, required this.rate});
+    implements _is.SerializableModel, _is.ProtocolSerialization {
+  FxRateQuote._({
+    required this.currencyCode,
+    required this.rate,
+  });
 
-  factory FxRateQuote({required String currencyCode, required double rate}) =
-      _FxRateQuoteImpl;
+  factory FxRateQuote({
+    required String currencyCode,
+    required double rate,
+  }) = _FxRateQuoteImpl;
 
   factory FxRateQuote.fromJson(Map<String, dynamic> jsonSerialization) {
     return FxRateQuote(
@@ -33,8 +38,11 @@ abstract class FxRateQuote
 
   /// Returns a shallow copy of this [FxRateQuote]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
-  FxRateQuote copyWith({String? currencyCode, double? rate});
+  @_is.useResult
+  FxRateQuote copyWith({
+    String? currencyCode,
+    double? rate,
+  });
   @override
   Map<String, dynamic> toJson() {
     return {
@@ -55,19 +63,27 @@ abstract class FxRateQuote
 
   @override
   String toString() {
-    return _i1.SerializationManager.encode(this);
+    return _is.SerializationManager.encode(this);
   }
 }
 
 class _FxRateQuoteImpl extends FxRateQuote {
-  _FxRateQuoteImpl({required String currencyCode, required double rate})
-    : super._(currencyCode: currencyCode, rate: rate);
+  _FxRateQuoteImpl({
+    required String currencyCode,
+    required double rate,
+  }) : super._(
+         currencyCode: currencyCode,
+         rate: rate,
+       );
 
   /// Returns a shallow copy of this [FxRateQuote]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_is.useResult
   @override
-  FxRateQuote copyWith({String? currencyCode, double? rate}) {
+  FxRateQuote copyWith({
+    String? currencyCode,
+    double? rate,
+  }) {
     return FxRateQuote(
       currencyCode: currencyCode ?? this.currencyCode,
       rate: rate ?? this.rate,

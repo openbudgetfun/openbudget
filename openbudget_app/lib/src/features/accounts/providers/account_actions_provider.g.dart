@@ -33,13 +33,13 @@ final class AccountActionsProvider
   AccountActions create() => AccountActions();
 }
 
-String _$accountActionsHash() => r'3a0b8cf96525cf3996f9e0752da270fbcaae9d0c';
+String _$accountActionsHash() => r'7986829d32c0a6235aa15450ce9bdf7825f9c2d2';
 
 abstract class _$AccountActions extends $AsyncNotifier<void> {
   FutureOr<void> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<void>, void>;
     final element =
         ref.element
@@ -49,6 +49,6 @@ abstract class _$AccountActions extends $AsyncNotifier<void> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

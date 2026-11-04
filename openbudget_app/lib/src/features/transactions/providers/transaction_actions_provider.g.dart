@@ -42,13 +42,13 @@ final class TransactionActionsProvider
 }
 
 String _$transactionActionsHash() =>
-    r'a57d1751e4b06b6efe4b58a493e5ad48cf6a5a7f';
+    r'34956ed4033f6e964a3d72e2068352c893bfb805';
 
 abstract class _$TransactionActions extends $Notifier<AsyncValue<void>> {
   AsyncValue<void> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<void>, AsyncValue<void>>;
     final element =
         ref.element
@@ -58,6 +58,6 @@ abstract class _$TransactionActions extends $Notifier<AsyncValue<void>> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

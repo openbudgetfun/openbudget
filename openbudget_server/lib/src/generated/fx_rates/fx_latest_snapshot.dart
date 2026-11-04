@@ -10,13 +10,14 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:serverpod/serverpod.dart' as _i1;
-import '../fx_rates/fx_rate_quote.dart' as _i2;
-import 'package:openbudget_server/src/generated/protocol.dart' as _i3;
+import 'package:openbudget_server/src/generated/protocol.dart' as _is0sbm8r;
+import 'package:serverpod/serverpod.dart' as _is;
+
+import '../fx_rates/fx_rate_quote.dart' as _i2nu4x3y;
 
 /// Latest FX rates payload returned to clients.
 abstract class FxLatestSnapshot
-    implements _i1.SerializableModel, _i1.ProtocolSerialization {
+    implements _is.SerializableModel, _is.ProtocolSerialization {
   FxLatestSnapshot._({
     required this.baseCurrencyCode,
     required this.fetchedAt,
@@ -28,17 +29,17 @@ abstract class FxLatestSnapshot
     required String baseCurrencyCode,
     required DateTime fetchedAt,
     required bool isStale,
-    required List<_i2.FxRateQuote> rates,
+    required List<_i2nu4x3y.FxRateQuote> rates,
   }) = _FxLatestSnapshotImpl;
 
   factory FxLatestSnapshot.fromJson(Map<String, dynamic> jsonSerialization) {
     return FxLatestSnapshot(
       baseCurrencyCode: jsonSerialization['baseCurrencyCode'] as String,
-      fetchedAt: _i1.DateTimeJsonExtension.fromJson(
+      fetchedAt: _is.DateTimeJsonExtension.fromJson(
         jsonSerialization['fetchedAt'],
       ),
-      isStale: _i1.BoolJsonExtension.fromJson(jsonSerialization['isStale']),
-      rates: _i3.Protocol().deserialize<List<_i2.FxRateQuote>>(
+      isStale: _is.BoolJsonExtension.fromJson(jsonSerialization['isStale']),
+      rates: _is0sbm8r.Protocol().deserialize<List<_i2nu4x3y.FxRateQuote>>(
         jsonSerialization['rates'],
       ),
     );
@@ -50,16 +51,16 @@ abstract class FxLatestSnapshot
 
   bool isStale;
 
-  List<_i2.FxRateQuote> rates;
+  List<_i2nu4x3y.FxRateQuote> rates;
 
   /// Returns a shallow copy of this [FxLatestSnapshot]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_is.useResult
   FxLatestSnapshot copyWith({
     String? baseCurrencyCode,
     DateTime? fetchedAt,
     bool? isStale,
-    List<_i2.FxRateQuote>? rates,
+    List<_i2nu4x3y.FxRateQuote>? rates,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -85,7 +86,7 @@ abstract class FxLatestSnapshot
 
   @override
   String toString() {
-    return _i1.SerializationManager.encode(this);
+    return _is.SerializationManager.encode(this);
   }
 }
 
@@ -94,7 +95,7 @@ class _FxLatestSnapshotImpl extends FxLatestSnapshot {
     required String baseCurrencyCode,
     required DateTime fetchedAt,
     required bool isStale,
-    required List<_i2.FxRateQuote> rates,
+    required List<_i2nu4x3y.FxRateQuote> rates,
   }) : super._(
          baseCurrencyCode: baseCurrencyCode,
          fetchedAt: fetchedAt,
@@ -104,13 +105,13 @@ class _FxLatestSnapshotImpl extends FxLatestSnapshot {
 
   /// Returns a shallow copy of this [FxLatestSnapshot]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_is.useResult
   @override
   FxLatestSnapshot copyWith({
     String? baseCurrencyCode,
     DateTime? fetchedAt,
     bool? isStale,
-    List<_i2.FxRateQuote>? rates,
+    List<_i2nu4x3y.FxRateQuote>? rates,
   }) {
     return FxLatestSnapshot(
       baseCurrencyCode: baseCurrencyCode ?? this.baseCurrencyCode,

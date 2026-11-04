@@ -10,10 +10,11 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:serverpod_client/serverpod_client.dart' as _i1;
+import 'package:serverpod_client/serverpod_client.dart' as _isc;
 
 /// Read-only blockchain wallet connection.
-abstract class WalletConnection implements _i1.SerializableModel {
+abstract class WalletConnection
+    implements _isc.SerializableModel, _isc.ProtocolSerialization {
   WalletConnection._({
     this.id,
     required this.budgetId,
@@ -29,8 +30,8 @@ abstract class WalletConnection implements _i1.SerializableModel {
        updatedAt = updatedAt ?? DateTime.now();
 
   factory WalletConnection({
-    _i1.UuidValue? id,
-    required _i1.UuidValue budgetId,
+    _isc.UuidValue? id,
+    required _isc.UuidValue budgetId,
     required String chain,
     required String address,
     String? label,
@@ -45,8 +46,8 @@ abstract class WalletConnection implements _i1.SerializableModel {
     return WalletConnection(
       id: jsonSerialization['id'] == null
           ? null
-          : _i1.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
-      budgetId: _i1.UuidValueJsonExtension.fromJson(
+          : _isc.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
+      budgetId: _isc.UuidValueJsonExtension.fromJson(
         jsonSerialization['budgetId'],
       ),
       chain: jsonSerialization['chain'] as String,
@@ -54,13 +55,13 @@ abstract class WalletConnection implements _i1.SerializableModel {
       label: jsonSerialization['label'] as String?,
       createdAt: jsonSerialization['createdAt'] == null
           ? null
-          : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
+          : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
       updatedAt: jsonSerialization['updatedAt'] == null
           ? null
-          : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['updatedAt']),
+          : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['updatedAt']),
       lastSyncedAt: jsonSerialization['lastSyncedAt'] == null
           ? null
-          : _i1.DateTimeJsonExtension.fromJson(
+          : _isc.DateTimeJsonExtension.fromJson(
               jsonSerialization['lastSyncedAt'],
             ),
       syncStatus: jsonSerialization['syncStatus'] as String?,
@@ -71,9 +72,9 @@ abstract class WalletConnection implements _i1.SerializableModel {
   /// The database id, set if the object has been inserted into the
   /// database or if it has been fetched from the database. Otherwise,
   /// the id will be null.
-  _i1.UuidValue? id;
+  _isc.UuidValue? id;
 
-  _i1.UuidValue budgetId;
+  _isc.UuidValue budgetId;
 
   String chain;
 
@@ -93,16 +94,16 @@ abstract class WalletConnection implements _i1.SerializableModel {
 
   /// Returns a shallow copy of this [WalletConnection]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_isc.useResult
   WalletConnection copyWith({
-    _i1.UuidValue? id,
-    _i1.UuidValue? budgetId,
+    _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
+    _isc.UuidValue? budgetId,
     String? chain,
     String? address,
     String? label,
     DateTime? createdAt,
     DateTime? updatedAt,
-    DateTime? lastSyncedAt,
+    DateTime? lastSyncedAt = const _isc.$UndefinedDateTime(),
     String? syncStatus,
     String? lastError,
   });
@@ -124,8 +125,25 @@ abstract class WalletConnection implements _i1.SerializableModel {
   }
 
   @override
+  Map<String, dynamic> toJsonForProtocol() {
+    return {
+      '__className__': 'WalletConnection',
+      if (id != null) 'id': id?.toJson(),
+      'budgetId': budgetId.toJson(),
+      'chain': chain,
+      'address': address,
+      if (label != null) 'label': label,
+      'createdAt': createdAt.toJson(),
+      'updatedAt': updatedAt.toJson(),
+      if (lastSyncedAt != null) 'lastSyncedAt': lastSyncedAt?.toJson(),
+      if (syncStatus != null) 'syncStatus': syncStatus,
+      if (lastError != null) 'lastError': lastError,
+    };
+  }
+
+  @override
   String toString() {
-    return _i1.SerializationManager.encode(this);
+    return _isc.SerializationManager.encode(this);
   }
 }
 
@@ -133,8 +151,8 @@ class _Undefined {}
 
 class _WalletConnectionImpl extends WalletConnection {
   _WalletConnectionImpl({
-    _i1.UuidValue? id,
-    required _i1.UuidValue budgetId,
+    _isc.UuidValue? id,
+    required _isc.UuidValue budgetId,
     required String chain,
     required String address,
     String? label,
@@ -158,31 +176,31 @@ class _WalletConnectionImpl extends WalletConnection {
 
   /// Returns a shallow copy of this [WalletConnection]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_isc.useResult
   @override
   WalletConnection copyWith({
-    Object? id = _Undefined,
-    _i1.UuidValue? budgetId,
+    _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
+    _isc.UuidValue? budgetId,
     String? chain,
     String? address,
     Object? label = _Undefined,
     DateTime? createdAt,
     DateTime? updatedAt,
-    Object? lastSyncedAt = _Undefined,
+    DateTime? lastSyncedAt = const _isc.$UndefinedDateTime(),
     Object? syncStatus = _Undefined,
     Object? lastError = _Undefined,
   }) {
     return WalletConnection(
-      id: id is _i1.UuidValue? ? id : this.id,
+      id: id is _isc.UndefinedSentinel ? this.id : id,
       budgetId: budgetId ?? this.budgetId,
       chain: chain ?? this.chain,
       address: address ?? this.address,
       label: label is String? ? label : this.label,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
-      lastSyncedAt: lastSyncedAt is DateTime?
-          ? lastSyncedAt
-          : this.lastSyncedAt,
+      lastSyncedAt: lastSyncedAt is _isc.UndefinedSentinel
+          ? this.lastSyncedAt
+          : lastSyncedAt,
       syncStatus: syncStatus is String? ? syncStatus : this.syncStatus,
       lastError: lastError is String? ? lastError : this.lastError,
     );

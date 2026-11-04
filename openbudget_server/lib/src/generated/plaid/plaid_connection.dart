@@ -10,11 +10,13 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:serverpod/serverpod.dart' as _i1;
+import 'dart:async' as _ida;
+
+import 'package:serverpod/serverpod.dart' as _is;
 
 /// Plaid item connection persisted for syncing linked bank accounts.
 abstract class PlaidConnection
-    implements _i1.TableRow<_i1.UuidValue?>, _i1.ProtocolSerialization {
+    implements _is.TableRow<_is.UuidValue?>, _is.ProtocolSerialization {
   PlaidConnection._({
     this.id,
     required this.budgetId,
@@ -29,8 +31,8 @@ abstract class PlaidConnection
        updatedAt = updatedAt ?? DateTime.now();
 
   factory PlaidConnection({
-    _i1.UuidValue? id,
-    required _i1.UuidValue budgetId,
+    _is.UuidValue? id,
+    required _is.UuidValue budgetId,
     required String plaidItemId,
     required String accessToken,
     String? institutionName,
@@ -44,8 +46,8 @@ abstract class PlaidConnection
     return PlaidConnection(
       id: jsonSerialization['id'] == null
           ? null
-          : _i1.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
-      budgetId: _i1.UuidValueJsonExtension.fromJson(
+          : _is.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
+      budgetId: _is.UuidValueJsonExtension.fromJson(
         jsonSerialization['budgetId'],
       ),
       plaidItemId: jsonSerialization['plaidItemId'] as String,
@@ -54,13 +56,13 @@ abstract class PlaidConnection
       institutionId: jsonSerialization['institutionId'] as String?,
       createdAt: jsonSerialization['createdAt'] == null
           ? null
-          : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
+          : _is.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
       updatedAt: jsonSerialization['updatedAt'] == null
           ? null
-          : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['updatedAt']),
+          : _is.DateTimeJsonExtension.fromJson(jsonSerialization['updatedAt']),
       lastSyncedAt: jsonSerialization['lastSyncedAt'] == null
           ? null
-          : _i1.DateTimeJsonExtension.fromJson(
+          : _is.DateTimeJsonExtension.fromJson(
               jsonSerialization['lastSyncedAt'],
             ),
     );
@@ -71,9 +73,9 @@ abstract class PlaidConnection
   static const db = PlaidConnectionRepository._();
 
   @override
-  _i1.UuidValue? id;
+  _is.UuidValue? id;
 
-  _i1.UuidValue budgetId;
+  _is.UuidValue budgetId;
 
   String plaidItemId;
 
@@ -90,21 +92,21 @@ abstract class PlaidConnection
   DateTime? lastSyncedAt;
 
   @override
-  _i1.Table<_i1.UuidValue?> get table => t;
+  _is.Table<_is.UuidValue?> get table => t;
 
   /// Returns a shallow copy of this [PlaidConnection]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_is.useResult
   PlaidConnection copyWith({
-    _i1.UuidValue? id,
-    _i1.UuidValue? budgetId,
+    _is.UuidValue? id = const _is.$UndefinedUuidValue(),
+    _is.UuidValue? budgetId,
     String? plaidItemId,
     String? accessToken,
     String? institutionName,
     String? institutionId,
     DateTime? createdAt,
     DateTime? updatedAt,
-    DateTime? lastSyncedAt,
+    DateTime? lastSyncedAt = const _is.$UndefinedDateTime(),
   });
   @override
   Map<String, dynamic> toJson() {
@@ -143,12 +145,11 @@ abstract class PlaidConnection
   }
 
   static PlaidConnectionIncludeList includeList({
-    _i1.WhereExpressionBuilder<PlaidConnectionTable>? where,
+    _is.WhereExpressionBuilder<PlaidConnectionTable>? where,
     int? limit,
     int? offset,
-    _i1.OrderByBuilder<PlaidConnectionTable>? orderBy,
-    bool orderDescending = false,
-    _i1.OrderByListBuilder<PlaidConnectionTable>? orderByList,
+    _is.OrderByBuilder<PlaidConnectionTable>? orderBy,
+    _is.OrderByListBuilder<PlaidConnectionTable>? orderByList,
     PlaidConnectionInclude? include,
   }) {
     return PlaidConnectionIncludeList._(
@@ -156,7 +157,6 @@ abstract class PlaidConnection
       limit: limit,
       offset: offset,
       orderBy: orderBy?.call(PlaidConnection.t),
-      orderDescending: orderDescending,
       orderByList: orderByList?.call(PlaidConnection.t),
       include: include,
     );
@@ -164,7 +164,7 @@ abstract class PlaidConnection
 
   @override
   String toString() {
-    return _i1.SerializationManager.encode(this);
+    return _is.SerializationManager.encode(this);
   }
 }
 
@@ -172,8 +172,8 @@ class _Undefined {}
 
 class _PlaidConnectionImpl extends PlaidConnection {
   _PlaidConnectionImpl({
-    _i1.UuidValue? id,
-    required _i1.UuidValue budgetId,
+    _is.UuidValue? id,
+    required _is.UuidValue budgetId,
     required String plaidItemId,
     required String accessToken,
     String? institutionName,
@@ -195,21 +195,21 @@ class _PlaidConnectionImpl extends PlaidConnection {
 
   /// Returns a shallow copy of this [PlaidConnection]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_is.useResult
   @override
   PlaidConnection copyWith({
-    Object? id = _Undefined,
-    _i1.UuidValue? budgetId,
+    _is.UuidValue? id = const _is.$UndefinedUuidValue(),
+    _is.UuidValue? budgetId,
     String? plaidItemId,
     String? accessToken,
     Object? institutionName = _Undefined,
     Object? institutionId = _Undefined,
     DateTime? createdAt,
     DateTime? updatedAt,
-    Object? lastSyncedAt = _Undefined,
+    DateTime? lastSyncedAt = const _is.$UndefinedDateTime(),
   }) {
     return PlaidConnection(
-      id: id is _i1.UuidValue? ? id : this.id,
+      id: id is _is.UndefinedSentinel ? this.id : id,
       budgetId: budgetId ?? this.budgetId,
       plaidItemId: plaidItemId ?? this.plaidItemId,
       accessToken: accessToken ?? this.accessToken,
@@ -221,75 +221,123 @@ class _PlaidConnectionImpl extends PlaidConnection {
           : this.institutionId,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
-      lastSyncedAt: lastSyncedAt is DateTime?
-          ? lastSyncedAt
-          : this.lastSyncedAt,
+      lastSyncedAt: lastSyncedAt is _is.UndefinedSentinel
+          ? this.lastSyncedAt
+          : lastSyncedAt,
     );
   }
 }
 
-class PlaidConnectionUpdateTable extends _i1.UpdateTable<PlaidConnectionTable> {
+class PlaidConnectionUpdateTable extends _is.UpdateTable<PlaidConnectionTable> {
   PlaidConnectionUpdateTable(super.table);
 
-  _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> budgetId(_i1.UuidValue value) =>
-      _i1.ColumnValue(table.budgetId, value);
+  _is.ColumnValue<_is.UuidValue, _is.UuidValue> budgetId(_is.UuidValue value) =>
+      _is.ColumnValue(
+        table.budgetId,
+        value,
+      );
 
-  _i1.ColumnValue<String, String> plaidItemId(String value) =>
-      _i1.ColumnValue(table.plaidItemId, value);
+  _is.ColumnValue<String, String> plaidItemId(String value) => _is.ColumnValue(
+    table.plaidItemId,
+    value,
+  );
 
-  _i1.ColumnValue<String, String> accessToken(String value) =>
-      _i1.ColumnValue(table.accessToken, value);
+  _is.ColumnValue<String, String> accessToken(String value) => _is.ColumnValue(
+    table.accessToken,
+    value,
+  );
 
-  _i1.ColumnValue<String, String> institutionName(String? value) =>
-      _i1.ColumnValue(table.institutionName, value);
+  _is.ColumnValue<String, String> institutionName(String? value) =>
+      _is.ColumnValue(
+        table.institutionName,
+        value,
+      );
 
-  _i1.ColumnValue<String, String> institutionId(String? value) =>
-      _i1.ColumnValue(table.institutionId, value);
+  _is.ColumnValue<String, String> institutionId(String? value) =>
+      _is.ColumnValue(
+        table.institutionId,
+        value,
+      );
 
-  _i1.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
-      _i1.ColumnValue(table.createdAt, value);
+  _is.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
+      _is.ColumnValue(
+        table.createdAt,
+        value,
+      );
 
-  _i1.ColumnValue<DateTime, DateTime> updatedAt(DateTime value) =>
-      _i1.ColumnValue(table.updatedAt, value);
+  _is.ColumnValue<DateTime, DateTime> updatedAt(DateTime value) =>
+      _is.ColumnValue(
+        table.updatedAt,
+        value,
+      );
 
-  _i1.ColumnValue<DateTime, DateTime> lastSyncedAt(DateTime? value) =>
-      _i1.ColumnValue(table.lastSyncedAt, value);
+  _is.ColumnValue<DateTime, DateTime> lastSyncedAt(DateTime? value) =>
+      _is.ColumnValue(
+        table.lastSyncedAt,
+        value,
+      );
 }
 
-class PlaidConnectionTable extends _i1.Table<_i1.UuidValue?> {
+class PlaidConnectionTable extends _is.Table<_is.UuidValue?> {
   PlaidConnectionTable({super.tableRelation})
     : super(tableName: 'plaid_connection') {
     updateTable = PlaidConnectionUpdateTable(this);
-    budgetId = _i1.ColumnUuid('budgetId', this);
-    plaidItemId = _i1.ColumnString('plaidItemId', this);
-    accessToken = _i1.ColumnString('accessToken', this);
-    institutionName = _i1.ColumnString('institutionName', this);
-    institutionId = _i1.ColumnString('institutionId', this);
-    createdAt = _i1.ColumnDateTime('createdAt', this, hasDefault: true);
-    updatedAt = _i1.ColumnDateTime('updatedAt', this, hasDefault: true);
-    lastSyncedAt = _i1.ColumnDateTime('lastSyncedAt', this);
+    budgetId = _is.ColumnUuid(
+      'budgetId',
+      this,
+    );
+    plaidItemId = _is.ColumnString(
+      'plaidItemId',
+      this,
+    );
+    accessToken = _is.ColumnString(
+      'accessToken',
+      this,
+    );
+    institutionName = _is.ColumnString(
+      'institutionName',
+      this,
+    );
+    institutionId = _is.ColumnString(
+      'institutionId',
+      this,
+    );
+    createdAt = _is.ColumnDateTime(
+      'createdAt',
+      this,
+      hasDefault: true,
+    );
+    updatedAt = _is.ColumnDateTime(
+      'updatedAt',
+      this,
+      hasDefault: true,
+    );
+    lastSyncedAt = _is.ColumnDateTime(
+      'lastSyncedAt',
+      this,
+    );
   }
 
   late final PlaidConnectionUpdateTable updateTable;
 
-  late final _i1.ColumnUuid budgetId;
+  late final _is.ColumnUuid budgetId;
 
-  late final _i1.ColumnString plaidItemId;
+  late final _is.ColumnString plaidItemId;
 
-  late final _i1.ColumnString accessToken;
+  late final _is.ColumnString accessToken;
 
-  late final _i1.ColumnString institutionName;
+  late final _is.ColumnString institutionName;
 
-  late final _i1.ColumnString institutionId;
+  late final _is.ColumnString institutionId;
 
-  late final _i1.ColumnDateTime createdAt;
+  late final _is.ColumnDateTime createdAt;
 
-  late final _i1.ColumnDateTime updatedAt;
+  late final _is.ColumnDateTime updatedAt;
 
-  late final _i1.ColumnDateTime lastSyncedAt;
+  late final _is.ColumnDateTime lastSyncedAt;
 
   @override
-  List<_i1.Column> get columns => [
+  List<_is.Column> get columns => [
     id,
     budgetId,
     plaidItemId,
@@ -302,23 +350,22 @@ class PlaidConnectionTable extends _i1.Table<_i1.UuidValue?> {
   ];
 }
 
-class PlaidConnectionInclude extends _i1.IncludeObject {
+class PlaidConnectionInclude extends _is.IncludeObject {
   PlaidConnectionInclude._();
 
   @override
-  Map<String, _i1.Include?> get includes => {};
+  Map<String, _is.Include?> get includes => {};
 
   @override
-  _i1.Table<_i1.UuidValue?> get table => PlaidConnection.t;
+  _is.Table<_is.UuidValue?> get table => PlaidConnection.t;
 }
 
-class PlaidConnectionIncludeList extends _i1.IncludeList {
+class PlaidConnectionIncludeList extends _is.IncludeList {
   PlaidConnectionIncludeList._({
-    _i1.WhereExpressionBuilder<PlaidConnectionTable>? where,
+    _is.WhereExpressionBuilder<PlaidConnectionTable>? where,
     super.limit,
     super.offset,
     super.orderBy,
-    super.orderDescending,
     super.orderByList,
     super.include,
   }) {
@@ -326,10 +373,10 @@ class PlaidConnectionIncludeList extends _i1.IncludeList {
   }
 
   @override
-  Map<String, _i1.Include?> get includes => include?.includes ?? {};
+  Map<String, _is.Include?> get includes => include?.includes ?? {};
 
   @override
-  _i1.Table<_i1.UuidValue?> get table => PlaidConnection.t;
+  _is.Table<_is.UuidValue?> get table => PlaidConnection.t;
 }
 
 class PlaidConnectionRepository {
@@ -358,27 +405,88 @@ class PlaidConnectionRepository {
   /// );
   /// ```
   Future<List<PlaidConnection>> find(
-    _i1.DatabaseSession session, {
-    _i1.WhereExpressionBuilder<PlaidConnectionTable>? where,
+    _is.DatabaseSession session, {
+    _is.WhereExpressionBuilder<PlaidConnectionTable>? where,
     int? limit,
     int? offset,
-    _i1.OrderByBuilder<PlaidConnectionTable>? orderBy,
-    bool orderDescending = false,
-    _i1.OrderByListBuilder<PlaidConnectionTable>? orderByList,
-    _i1.Transaction? transaction,
-    _i1.LockMode? lockMode,
-    _i1.LockBehavior? lockBehavior,
+    _is.OrderByBuilder<PlaidConnectionTable>? orderBy,
+    _is.OrderByListBuilder<PlaidConnectionTable>? orderByList,
+    _is.Transaction? transaction,
+    _is.LockMode? lockMode,
+    _is.LockBehavior? lockBehavior,
   }) async {
     return session.db.find<PlaidConnection>(
       where: where?.call(PlaidConnection.t),
       orderBy: orderBy?.call(PlaidConnection.t),
       orderByList: orderByList?.call(PlaidConnection.t),
-      orderDescending: orderDescending,
       limit: limit,
       offset: offset,
       transaction: transaction,
       lockMode: lockMode,
       lockBehavior: lockBehavior,
+    );
+  }
+
+  /// Emits [PlaidConnection]s matching the given query parameters every time the
+  /// source tables are modified.
+  ///
+  /// Use [where] to specify which items to include in the return value.
+  /// If none is specified, all items will be returned.
+  ///
+  /// To specify the order of the items use [orderBy] or [orderByList]
+  /// when sorting by multiple columns.
+  ///
+  /// The maximum number of items can be set by [limit]. If no limit is set,
+  /// all items matching the query will be returned.
+  ///
+  /// [offset] defines how many items to skip, after which [limit] (or all)
+  /// items are read from the database.
+  ///
+  /// Use [throttle] to specify the minimum interval between queries. It can
+  /// also be set to `null`, in which case the stream will only be throttled
+  /// when its subscription is paused.
+  ///
+  /// Source tables are collected from the queried table, [where], [orderBy],
+  /// [orderByList], and the [include] graph. [alsoTriggerOnTables] is added
+  /// to that set. Pass [Table] instances such as `PlaidConnection.t`.
+  ///
+  /// Raw [Expression] SQL is not inspected. Tables referenced only in raw
+  /// SQL must be passed via [alsoTriggerOnTables].
+  ///
+  /// The stream always reads committed state and never joins an ambient
+  /// [Transaction]. Emissions for a write fire after that write commits.
+  ///
+  /// Currently only supported on SQLite. Calling this method on PostgreSQL
+  /// throws an [UnsupportedError].
+  ///
+  /// ```dart
+  /// var subscription = Persons.db.watch(
+  ///   session,
+  ///   where: (t) => t.lastName.equals('Jones'),
+  ///   orderBy: (t) => t.firstName,
+  ///   limit: 100,
+  /// ).listen((persons) {
+  ///   // Handle the latest matching rows.
+  /// });
+  /// ```
+  _ida.Stream<List<PlaidConnection>> watch(
+    _is.DatabaseSession session, {
+    _is.WhereExpressionBuilder<PlaidConnectionTable>? where,
+    int? limit,
+    int? offset,
+    _is.OrderByBuilder<PlaidConnectionTable>? orderBy,
+    _is.OrderByListBuilder<PlaidConnectionTable>? orderByList,
+    Duration? throttle = const Duration(milliseconds: 30),
+    Iterable<_is.Table>? alsoTriggerOnTables,
+  }) {
+    return session.db.watch<PlaidConnection>(
+      where: where?.call(PlaidConnection.t),
+      orderBy: orderBy?.call(PlaidConnection.t),
+      orderByList: orderByList?.call(PlaidConnection.t),
+      limit: limit,
+      offset: offset,
+      throttle: throttle,
+      alsoTriggerOnTables: alsoTriggerOnTables,
     );
   }
 
@@ -400,21 +508,19 @@ class PlaidConnectionRepository {
   /// );
   /// ```
   Future<PlaidConnection?> findFirstRow(
-    _i1.DatabaseSession session, {
-    _i1.WhereExpressionBuilder<PlaidConnectionTable>? where,
+    _is.DatabaseSession session, {
+    _is.WhereExpressionBuilder<PlaidConnectionTable>? where,
     int? offset,
-    _i1.OrderByBuilder<PlaidConnectionTable>? orderBy,
-    bool orderDescending = false,
-    _i1.OrderByListBuilder<PlaidConnectionTable>? orderByList,
-    _i1.Transaction? transaction,
-    _i1.LockMode? lockMode,
-    _i1.LockBehavior? lockBehavior,
+    _is.OrderByBuilder<PlaidConnectionTable>? orderBy,
+    _is.OrderByListBuilder<PlaidConnectionTable>? orderByList,
+    _is.Transaction? transaction,
+    _is.LockMode? lockMode,
+    _is.LockBehavior? lockBehavior,
   }) async {
     return session.db.findFirstRow<PlaidConnection>(
       where: where?.call(PlaidConnection.t),
       orderBy: orderBy?.call(PlaidConnection.t),
       orderByList: orderByList?.call(PlaidConnection.t),
-      orderDescending: orderDescending,
       offset: offset,
       transaction: transaction,
       lockMode: lockMode,
@@ -424,11 +530,11 @@ class PlaidConnectionRepository {
 
   /// Finds a single [PlaidConnection] by its [id] or null if no such row exists.
   Future<PlaidConnection?> findById(
-    _i1.DatabaseSession session,
-    _i1.UuidValue id, {
-    _i1.Transaction? transaction,
-    _i1.LockMode? lockMode,
-    _i1.LockBehavior? lockBehavior,
+    _is.DatabaseSession session,
+    _is.UuidValue id, {
+    _is.Transaction? transaction,
+    _is.LockMode? lockMode,
+    _is.LockBehavior? lockBehavior,
   }) async {
     return session.db.findById<PlaidConnection>(
       id,
@@ -448,16 +554,22 @@ class PlaidConnectionRepository {
   /// If [ignoreConflicts] is set to `true`, rows that conflict with existing
   /// rows are silently skipped, and only the successfully inserted rows are
   /// returned.
+  ///
+  /// If [noReturn] is set to `true`, the inserted rows are not read back from
+  /// the database and an empty list is returned. This avoids the overhead of
+  /// transferring and deserializing the rows when the result is not needed.
   Future<List<PlaidConnection>> insert(
-    _i1.DatabaseSession session,
+    _is.DatabaseSession session,
     List<PlaidConnection> rows, {
-    _i1.Transaction? transaction,
+    _is.Transaction? transaction,
     bool ignoreConflicts = false,
+    bool noReturn = false,
   }) async {
     return session.db.insert<PlaidConnection>(
       rows,
       transaction: transaction,
       ignoreConflicts: ignoreConflicts,
+      noReturn: noReturn,
     );
   }
 
@@ -465,11 +577,83 @@ class PlaidConnectionRepository {
   ///
   /// The returned [PlaidConnection] will have its `id` field set.
   Future<PlaidConnection> insertRow(
-    _i1.DatabaseSession session,
+    _is.DatabaseSession session,
     PlaidConnection row, {
-    _i1.Transaction? transaction,
+    _is.Transaction? transaction,
   }) async {
-    return session.db.insertRow<PlaidConnection>(row, transaction: transaction);
+    return session.db.insertRow<PlaidConnection>(
+      row,
+      transaction: transaction,
+    );
+  }
+
+  /// Upserts all [PlaidConnection]s in the list and returns the resulting rows.
+  ///
+  /// If a row conflicts on the given [conflictColumns], the existing row is
+  /// updated with the new values. Otherwise, a new row is inserted.
+  ///
+  /// If [updateColumns] is provided, only those columns will be updated on
+  /// conflict. If null, all non-conflict, non-id columns are updated.
+  ///
+  /// If [updateWhere] is provided, the update only applies to rows matching the
+  /// given expression. Conflicting rows that don't match are skipped and not
+  /// returned, so the resulting list may be shorter than [rows].
+  ///
+  /// The returned [PlaidConnection]s will have their `id` fields set.
+  ///
+  /// This is an atomic operation, meaning that if one of the rows fails,
+  /// none of the rows will be affected.
+  ///
+  /// If [noReturn] is set to `true`, the resulting rows are not read back from
+  /// the database and an empty list is returned. This avoids the overhead of
+  /// transferring and deserializing the rows when the result is not needed.
+  Future<List<PlaidConnection>> upsert(
+    _is.DatabaseSession session,
+    List<PlaidConnection> rows, {
+    required _is.ColumnSelections<PlaidConnectionTable> conflictColumns,
+    _is.ColumnSelections<PlaidConnectionTable>? updateColumns,
+    _is.WhereExpressionBuilder<PlaidConnectionTable>? updateWhere,
+    _is.Transaction? transaction,
+    bool noReturn = false,
+  }) async {
+    return session.db.upsert<PlaidConnection>(
+      rows,
+      conflictColumns: conflictColumns(PlaidConnection.t),
+      updateColumns: updateColumns?.call(PlaidConnection.t),
+      updateWhere: updateWhere?.call(PlaidConnection.t),
+      transaction: transaction,
+      noReturn: noReturn,
+    );
+  }
+
+  /// Upserts a single [PlaidConnection] and returns the resulting row.
+  ///
+  /// If the row conflicts on the given [conflictColumns], the existing row is
+  /// updated. Otherwise, a new row is inserted.
+  ///
+  /// If [updateColumns] is provided, only those columns will be updated on
+  /// conflict. If null, all non-conflict, non-id columns are updated.
+  ///
+  /// If [updateWhere] is provided, the update only applies when the existing
+  /// row matches the expression. Returns `null` if no row was affected — for
+  /// example when [updateWhere] does not match the conflicting row.
+  ///
+  /// The returned [PlaidConnection] will have its `id` field set.
+  Future<PlaidConnection?> upsertRow(
+    _is.DatabaseSession session,
+    PlaidConnection row, {
+    required _is.ColumnSelections<PlaidConnectionTable> conflictColumns,
+    _is.ColumnSelections<PlaidConnectionTable>? updateColumns,
+    _is.WhereExpressionBuilder<PlaidConnectionTable>? updateWhere,
+    _is.Transaction? transaction,
+  }) async {
+    return session.db.upsertRow<PlaidConnection>(
+      row,
+      conflictColumns: conflictColumns(PlaidConnection.t),
+      updateColumns: updateColumns?.call(PlaidConnection.t),
+      updateWhere: updateWhere?.call(PlaidConnection.t),
+      transaction: transaction,
+    );
   }
 
   /// Updates all [PlaidConnection]s in the list and returns the updated rows. If
@@ -477,16 +661,22 @@ class PlaidConnectionRepository {
   /// all columns.
   /// This is an atomic operation, meaning that if one of the rows fails to
   /// update, none of the rows will be updated.
+  ///
+  /// If [noReturn] is set to `true`, the updated rows are not read back from
+  /// the database and an empty list is returned. This avoids the overhead of
+  /// transferring and deserializing the rows when the result is not needed.
   Future<List<PlaidConnection>> update(
-    _i1.DatabaseSession session,
+    _is.DatabaseSession session,
     List<PlaidConnection> rows, {
-    _i1.ColumnSelections<PlaidConnectionTable>? columns,
-    _i1.Transaction? transaction,
+    _is.ColumnSelections<PlaidConnectionTable>? columns,
+    _is.Transaction? transaction,
+    bool noReturn = false,
   }) async {
     return session.db.update<PlaidConnection>(
       rows,
       columns: columns?.call(PlaidConnection.t),
       transaction: transaction,
+      noReturn: noReturn,
     );
   }
 
@@ -494,10 +684,10 @@ class PlaidConnectionRepository {
   /// Optionally, a list of [columns] can be provided to only update those
   /// columns. Defaults to all columns.
   Future<PlaidConnection> updateRow(
-    _i1.DatabaseSession session,
+    _is.DatabaseSession session,
     PlaidConnection row, {
-    _i1.ColumnSelections<PlaidConnectionTable>? columns,
-    _i1.Transaction? transaction,
+    _is.ColumnSelections<PlaidConnectionTable>? columns,
+    _is.Transaction? transaction,
   }) async {
     return session.db.updateRow<PlaidConnection>(
       row,
@@ -509,11 +699,11 @@ class PlaidConnectionRepository {
   /// Updates a single [PlaidConnection] by its [id] with the specified [columnValues].
   /// Returns the updated row or null if no row with the given id exists.
   Future<PlaidConnection?> updateById(
-    _i1.DatabaseSession session,
-    _i1.UuidValue id, {
-    required _i1.ColumnValueListBuilder<PlaidConnectionUpdateTable>
+    _is.DatabaseSession session,
+    _is.UuidValue id, {
+    required _is.ColumnValueListBuilder<PlaidConnectionUpdateTable>
     columnValues,
-    _i1.Transaction? transaction,
+    _is.Transaction? transaction,
   }) async {
     return session.db.updateById<PlaidConnection>(
       id,
@@ -524,17 +714,21 @@ class PlaidConnectionRepository {
 
   /// Updates all [PlaidConnection]s matching the [where] expression with the specified [columnValues].
   /// Returns the list of updated rows.
+  ///
+  /// If [noReturn] is set to `true`, the updated rows are not read back from
+  /// the database and an empty list is returned. This avoids the overhead of
+  /// transferring and deserializing the rows when the result is not needed.
   Future<List<PlaidConnection>> updateWhere(
-    _i1.DatabaseSession session, {
-    required _i1.ColumnValueListBuilder<PlaidConnectionUpdateTable>
+    _is.DatabaseSession session, {
+    required _is.ColumnValueListBuilder<PlaidConnectionUpdateTable>
     columnValues,
-    required _i1.WhereExpressionBuilder<PlaidConnectionTable> where,
+    required _is.WhereExpressionBuilder<PlaidConnectionTable> where,
     int? limit,
     int? offset,
-    _i1.OrderByBuilder<PlaidConnectionTable>? orderBy,
-    _i1.OrderByListBuilder<PlaidConnectionTable>? orderByList,
-    bool orderDescending = false,
-    _i1.Transaction? transaction,
+    _is.OrderByBuilder<PlaidConnectionTable>? orderBy,
+    _is.OrderByListBuilder<PlaidConnectionTable>? orderByList,
+    _is.Transaction? transaction,
+    bool noReturn = false,
   }) async {
     return session.db.updateWhere<PlaidConnection>(
       columnValues: columnValues(PlaidConnection.t.updateTable),
@@ -543,50 +737,83 @@ class PlaidConnectionRepository {
       offset: offset,
       orderBy: orderBy?.call(PlaidConnection.t),
       orderByList: orderByList?.call(PlaidConnection.t),
-      orderDescending: orderDescending,
       transaction: transaction,
+      noReturn: noReturn,
     );
   }
 
   /// Deletes all [PlaidConnection]s in the list and returns the deleted rows.
+  ///
+  /// To specify the order of the returned rows use [orderBy] or [orderByList]
+  /// when sorting by multiple columns.
+  ///
   /// This is an atomic operation, meaning that if one of the rows fail to
   /// be deleted, none of the rows will be deleted.
+  ///
+  /// If [noReturn] is set to `true`, the deleted rows are not read back from
+  /// the database and an empty list is returned. This avoids the overhead of
+  /// transferring and deserializing the rows when the result is not needed.
   Future<List<PlaidConnection>> delete(
-    _i1.DatabaseSession session,
+    _is.DatabaseSession session,
     List<PlaidConnection> rows, {
-    _i1.Transaction? transaction,
+    _is.OrderByBuilder<PlaidConnectionTable>? orderBy,
+    _is.OrderByListBuilder<PlaidConnectionTable>? orderByList,
+    _is.Transaction? transaction,
+    bool noReturn = false,
   }) async {
-    return session.db.delete<PlaidConnection>(rows, transaction: transaction);
+    return session.db.delete<PlaidConnection>(
+      rows,
+      orderBy: orderBy?.call(PlaidConnection.t),
+      orderByList: orderByList?.call(PlaidConnection.t),
+      transaction: transaction,
+      noReturn: noReturn,
+    );
   }
 
   /// Deletes a single [PlaidConnection].
   Future<PlaidConnection> deleteRow(
-    _i1.DatabaseSession session,
+    _is.DatabaseSession session,
     PlaidConnection row, {
-    _i1.Transaction? transaction,
+    _is.Transaction? transaction,
   }) async {
-    return session.db.deleteRow<PlaidConnection>(row, transaction: transaction);
+    return session.db.deleteRow<PlaidConnection>(
+      row,
+      transaction: transaction,
+    );
   }
 
   /// Deletes all rows matching the [where] expression.
+  ///
+  /// To specify the order of the returned rows use [orderBy] or [orderByList]
+  /// when sorting by multiple columns.
+  ///
+  /// If [noReturn] is set to `true`, the deleted rows are not read back from
+  /// the database and an empty list is returned. This avoids the overhead of
+  /// transferring and deserializing the rows when the result is not needed.
   Future<List<PlaidConnection>> deleteWhere(
-    _i1.DatabaseSession session, {
-    required _i1.WhereExpressionBuilder<PlaidConnectionTable> where,
-    _i1.Transaction? transaction,
+    _is.DatabaseSession session, {
+    required _is.WhereExpressionBuilder<PlaidConnectionTable> where,
+    _is.OrderByBuilder<PlaidConnectionTable>? orderBy,
+    _is.OrderByListBuilder<PlaidConnectionTable>? orderByList,
+    _is.Transaction? transaction,
+    bool noReturn = false,
   }) async {
     return session.db.deleteWhere<PlaidConnection>(
       where: where(PlaidConnection.t),
+      orderBy: orderBy?.call(PlaidConnection.t),
+      orderByList: orderByList?.call(PlaidConnection.t),
       transaction: transaction,
+      noReturn: noReturn,
     );
   }
 
   /// Counts the number of rows matching the [where] expression. If omitted,
   /// will return the count of all rows in the table.
   Future<int> count(
-    _i1.DatabaseSession session, {
-    _i1.WhereExpressionBuilder<PlaidConnectionTable>? where,
+    _is.DatabaseSession session, {
+    _is.WhereExpressionBuilder<PlaidConnectionTable>? where,
     int? limit,
-    _i1.Transaction? transaction,
+    _is.Transaction? transaction,
   }) async {
     return session.db.count<PlaidConnection>(
       where: where?.call(PlaidConnection.t),
@@ -597,11 +824,11 @@ class PlaidConnectionRepository {
 
   /// Acquires row-level locks on [PlaidConnection] rows matching the [where] expression.
   Future<void> lockRows(
-    _i1.DatabaseSession session, {
-    required _i1.WhereExpressionBuilder<PlaidConnectionTable> where,
-    required _i1.LockMode lockMode,
-    required _i1.Transaction transaction,
-    _i1.LockBehavior lockBehavior = _i1.LockBehavior.wait,
+    _is.DatabaseSession session, {
+    required _is.WhereExpressionBuilder<PlaidConnectionTable> where,
+    required _is.LockMode lockMode,
+    required _is.Transaction transaction,
+    _is.LockBehavior lockBehavior = _is.LockBehavior.wait,
   }) async {
     return session.db.lockRows<PlaidConnection>(
       where: where(PlaidConnection.t),

@@ -10,10 +10,11 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:serverpod_client/serverpod_client.dart' as _i1;
+import 'package:serverpod_client/serverpod_client.dart' as _isc;
 
 /// A savings goal or target for an envelope.
-abstract class EnvelopeGoal implements _i1.SerializableModel {
+abstract class EnvelopeGoal
+    implements _isc.SerializableModel, _isc.ProtocolSerialization {
   EnvelopeGoal._({
     this.id,
     required this.envelopeId,
@@ -27,8 +28,8 @@ abstract class EnvelopeGoal implements _i1.SerializableModel {
        updatedAt = updatedAt ?? DateTime.now();
 
   factory EnvelopeGoal({
-    _i1.UuidValue? id,
-    required _i1.UuidValue envelopeId,
+    _isc.UuidValue? id,
+    required _isc.UuidValue envelopeId,
     required String goalType,
     required int targetAmountCents,
     DateTime? targetDate,
@@ -41,31 +42,33 @@ abstract class EnvelopeGoal implements _i1.SerializableModel {
     return EnvelopeGoal(
       id: jsonSerialization['id'] == null
           ? null
-          : _i1.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
-      envelopeId: _i1.UuidValueJsonExtension.fromJson(
+          : _isc.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
+      envelopeId: _isc.UuidValueJsonExtension.fromJson(
         jsonSerialization['envelopeId'],
       ),
       goalType: jsonSerialization['goalType'] as String,
       targetAmountCents: jsonSerialization['targetAmountCents'] as int,
       targetDate: jsonSerialization['targetDate'] == null
           ? null
-          : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['targetDate']),
+          : _isc.DateTimeJsonExtension.fromJson(
+              jsonSerialization['targetDate'],
+            ),
       monthlyFundingCents: jsonSerialization['monthlyFundingCents'] as int?,
       createdAt: jsonSerialization['createdAt'] == null
           ? null
-          : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
+          : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
       updatedAt: jsonSerialization['updatedAt'] == null
           ? null
-          : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['updatedAt']),
+          : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['updatedAt']),
     );
   }
 
   /// The database id, set if the object has been inserted into the
   /// database or if it has been fetched from the database. Otherwise,
   /// the id will be null.
-  _i1.UuidValue? id;
+  _isc.UuidValue? id;
 
-  _i1.UuidValue envelopeId;
+  _isc.UuidValue envelopeId;
 
   /// Goal type: 'target_balance', 'monthly_funding', or 'target_by_date'.
   String goalType;
@@ -85,13 +88,13 @@ abstract class EnvelopeGoal implements _i1.SerializableModel {
 
   /// Returns a shallow copy of this [EnvelopeGoal]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_isc.useResult
   EnvelopeGoal copyWith({
-    _i1.UuidValue? id,
-    _i1.UuidValue? envelopeId,
+    _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
+    _isc.UuidValue? envelopeId,
     String? goalType,
     int? targetAmountCents,
-    DateTime? targetDate,
+    DateTime? targetDate = const _isc.$UndefinedDateTime(),
     int? monthlyFundingCents,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -113,8 +116,24 @@ abstract class EnvelopeGoal implements _i1.SerializableModel {
   }
 
   @override
+  Map<String, dynamic> toJsonForProtocol() {
+    return {
+      '__className__': 'EnvelopeGoal',
+      if (id != null) 'id': id?.toJson(),
+      'envelopeId': envelopeId.toJson(),
+      'goalType': goalType,
+      'targetAmountCents': targetAmountCents,
+      if (targetDate != null) 'targetDate': targetDate?.toJson(),
+      if (monthlyFundingCents != null)
+        'monthlyFundingCents': monthlyFundingCents,
+      'createdAt': createdAt.toJson(),
+      'updatedAt': updatedAt.toJson(),
+    };
+  }
+
+  @override
   String toString() {
-    return _i1.SerializationManager.encode(this);
+    return _isc.SerializationManager.encode(this);
   }
 }
 
@@ -122,8 +141,8 @@ class _Undefined {}
 
 class _EnvelopeGoalImpl extends EnvelopeGoal {
   _EnvelopeGoalImpl({
-    _i1.UuidValue? id,
-    required _i1.UuidValue envelopeId,
+    _isc.UuidValue? id,
+    required _isc.UuidValue envelopeId,
     required String goalType,
     required int targetAmountCents,
     DateTime? targetDate,
@@ -143,24 +162,26 @@ class _EnvelopeGoalImpl extends EnvelopeGoal {
 
   /// Returns a shallow copy of this [EnvelopeGoal]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_isc.useResult
   @override
   EnvelopeGoal copyWith({
-    Object? id = _Undefined,
-    _i1.UuidValue? envelopeId,
+    _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
+    _isc.UuidValue? envelopeId,
     String? goalType,
     int? targetAmountCents,
-    Object? targetDate = _Undefined,
+    DateTime? targetDate = const _isc.$UndefinedDateTime(),
     Object? monthlyFundingCents = _Undefined,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
     return EnvelopeGoal(
-      id: id is _i1.UuidValue? ? id : this.id,
+      id: id is _isc.UndefinedSentinel ? this.id : id,
       envelopeId: envelopeId ?? this.envelopeId,
       goalType: goalType ?? this.goalType,
       targetAmountCents: targetAmountCents ?? this.targetAmountCents,
-      targetDate: targetDate is DateTime? ? targetDate : this.targetDate,
+      targetDate: targetDate is _isc.UndefinedSentinel
+          ? this.targetDate
+          : targetDate,
       monthlyFundingCents: monthlyFundingCents is int?
           ? monthlyFundingCents
           : this.monthlyFundingCents,

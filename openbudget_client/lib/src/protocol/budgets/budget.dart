@@ -10,10 +10,11 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:serverpod_client/serverpod_client.dart' as _i1;
+import 'package:serverpod_client/serverpod_client.dart' as _isc;
 
 /// A budget owned by a user, representing a financial plan in a specific currency.
-abstract class Budget implements _i1.SerializableModel {
+abstract class Budget
+    implements _isc.SerializableModel, _isc.ProtocolSerialization {
   Budget._({
     this.id,
     required this.name,
@@ -26,11 +27,11 @@ abstract class Budget implements _i1.SerializableModel {
        updatedAt = updatedAt ?? DateTime.now();
 
   factory Budget({
-    _i1.UuidValue? id,
+    _isc.UuidValue? id,
     required String name,
     required String currencyCode,
     String? displayCurrencyCode,
-    required _i1.UuidValue ownerId,
+    required _isc.UuidValue ownerId,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) = _BudgetImpl;
@@ -39,26 +40,26 @@ abstract class Budget implements _i1.SerializableModel {
     return Budget(
       id: jsonSerialization['id'] == null
           ? null
-          : _i1.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
+          : _isc.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
       name: jsonSerialization['name'] as String,
       currencyCode: jsonSerialization['currencyCode'] as String,
       displayCurrencyCode: jsonSerialization['displayCurrencyCode'] as String?,
-      ownerId: _i1.UuidValueJsonExtension.fromJson(
+      ownerId: _isc.UuidValueJsonExtension.fromJson(
         jsonSerialization['ownerId'],
       ),
       createdAt: jsonSerialization['createdAt'] == null
           ? null
-          : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
+          : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
       updatedAt: jsonSerialization['updatedAt'] == null
           ? null
-          : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['updatedAt']),
+          : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['updatedAt']),
     );
   }
 
   /// The database id, set if the object has been inserted into the
   /// database or if it has been fetched from the database. Otherwise,
   /// the id will be null.
-  _i1.UuidValue? id;
+  _isc.UuidValue? id;
 
   String name;
 
@@ -70,7 +71,7 @@ abstract class Budget implements _i1.SerializableModel {
   String? displayCurrencyCode;
 
   /// The user who owns this budget.
-  _i1.UuidValue ownerId;
+  _isc.UuidValue ownerId;
 
   DateTime createdAt;
 
@@ -78,13 +79,13 @@ abstract class Budget implements _i1.SerializableModel {
 
   /// Returns a shallow copy of this [Budget]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_isc.useResult
   Budget copyWith({
-    _i1.UuidValue? id,
+    _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
     String? name,
     String? currencyCode,
     String? displayCurrencyCode,
-    _i1.UuidValue? ownerId,
+    _isc.UuidValue? ownerId,
     DateTime? createdAt,
     DateTime? updatedAt,
   });
@@ -104,8 +105,23 @@ abstract class Budget implements _i1.SerializableModel {
   }
 
   @override
+  Map<String, dynamic> toJsonForProtocol() {
+    return {
+      '__className__': 'Budget',
+      if (id != null) 'id': id?.toJson(),
+      'name': name,
+      'currencyCode': currencyCode,
+      if (displayCurrencyCode != null)
+        'displayCurrencyCode': displayCurrencyCode,
+      'ownerId': ownerId.toJson(),
+      'createdAt': createdAt.toJson(),
+      'updatedAt': updatedAt.toJson(),
+    };
+  }
+
+  @override
   String toString() {
-    return _i1.SerializationManager.encode(this);
+    return _isc.SerializationManager.encode(this);
   }
 }
 
@@ -113,11 +129,11 @@ class _Undefined {}
 
 class _BudgetImpl extends Budget {
   _BudgetImpl({
-    _i1.UuidValue? id,
+    _isc.UuidValue? id,
     required String name,
     required String currencyCode,
     String? displayCurrencyCode,
-    required _i1.UuidValue ownerId,
+    required _isc.UuidValue ownerId,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) : super._(
@@ -132,19 +148,19 @@ class _BudgetImpl extends Budget {
 
   /// Returns a shallow copy of this [Budget]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_isc.useResult
   @override
   Budget copyWith({
-    Object? id = _Undefined,
+    _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
     String? name,
     String? currencyCode,
     Object? displayCurrencyCode = _Undefined,
-    _i1.UuidValue? ownerId,
+    _isc.UuidValue? ownerId,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
     return Budget(
-      id: id is _i1.UuidValue? ? id : this.id,
+      id: id is _isc.UndefinedSentinel ? this.id : id,
       name: name ?? this.name,
       currencyCode: currencyCode ?? this.currencyCode,
       displayCurrencyCode: displayCurrencyCode is String?

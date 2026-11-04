@@ -10,10 +10,11 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:serverpod_client/serverpod_client.dart' as _i1;
+import 'package:serverpod_client/serverpod_client.dart' as _isc;
 
 /// Individual currency exchange rate value in a snapshot.
-abstract class FxRateEntry implements _i1.SerializableModel {
+abstract class FxRateEntry
+    implements _isc.SerializableModel, _isc.ProtocolSerialization {
   FxRateEntry._({
     this.id,
     required this.snapshotId,
@@ -23,8 +24,8 @@ abstract class FxRateEntry implements _i1.SerializableModel {
   }) : createdAt = createdAt ?? DateTime.now();
 
   factory FxRateEntry({
-    _i1.UuidValue? id,
-    required _i1.UuidValue snapshotId,
+    _isc.UuidValue? id,
+    required _isc.UuidValue snapshotId,
     required String currencyCode,
     required double rate,
     DateTime? createdAt,
@@ -34,24 +35,24 @@ abstract class FxRateEntry implements _i1.SerializableModel {
     return FxRateEntry(
       id: jsonSerialization['id'] == null
           ? null
-          : _i1.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
-      snapshotId: _i1.UuidValueJsonExtension.fromJson(
+          : _isc.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
+      snapshotId: _isc.UuidValueJsonExtension.fromJson(
         jsonSerialization['snapshotId'],
       ),
       currencyCode: jsonSerialization['currencyCode'] as String,
       rate: (jsonSerialization['rate'] as num).toDouble(),
       createdAt: jsonSerialization['createdAt'] == null
           ? null
-          : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
+          : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
     );
   }
 
   /// The database id, set if the object has been inserted into the
   /// database or if it has been fetched from the database. Otherwise,
   /// the id will be null.
-  _i1.UuidValue? id;
+  _isc.UuidValue? id;
 
-  _i1.UuidValue snapshotId;
+  _isc.UuidValue snapshotId;
 
   String currencyCode;
 
@@ -61,10 +62,10 @@ abstract class FxRateEntry implements _i1.SerializableModel {
 
   /// Returns a shallow copy of this [FxRateEntry]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_isc.useResult
   FxRateEntry copyWith({
-    _i1.UuidValue? id,
-    _i1.UuidValue? snapshotId,
+    _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
+    _isc.UuidValue? snapshotId,
     String? currencyCode,
     double? rate,
     DateTime? createdAt,
@@ -82,17 +83,27 @@ abstract class FxRateEntry implements _i1.SerializableModel {
   }
 
   @override
+  Map<String, dynamic> toJsonForProtocol() {
+    return {
+      '__className__': 'FxRateEntry',
+      if (id != null) 'id': id?.toJson(),
+      'snapshotId': snapshotId.toJson(),
+      'currencyCode': currencyCode,
+      'rate': rate,
+      'createdAt': createdAt.toJson(),
+    };
+  }
+
+  @override
   String toString() {
-    return _i1.SerializationManager.encode(this);
+    return _isc.SerializationManager.encode(this);
   }
 }
 
-class _Undefined {}
-
 class _FxRateEntryImpl extends FxRateEntry {
   _FxRateEntryImpl({
-    _i1.UuidValue? id,
-    required _i1.UuidValue snapshotId,
+    _isc.UuidValue? id,
+    required _isc.UuidValue snapshotId,
     required String currencyCode,
     required double rate,
     DateTime? createdAt,
@@ -106,17 +117,17 @@ class _FxRateEntryImpl extends FxRateEntry {
 
   /// Returns a shallow copy of this [FxRateEntry]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_isc.useResult
   @override
   FxRateEntry copyWith({
-    Object? id = _Undefined,
-    _i1.UuidValue? snapshotId,
+    _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
+    _isc.UuidValue? snapshotId,
     String? currencyCode,
     double? rate,
     DateTime? createdAt,
   }) {
     return FxRateEntry(
-      id: id is _i1.UuidValue? ? id : this.id,
+      id: id is _isc.UndefinedSentinel ? this.id : id,
       snapshotId: snapshotId ?? this.snapshotId,
       currencyCode: currencyCode ?? this.currencyCode,
       rate: rate ?? this.rate,

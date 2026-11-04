@@ -10,10 +10,11 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:serverpod_client/serverpod_client.dart' as _i1;
+import 'package:serverpod_client/serverpod_client.dart' as _isc;
 
 /// A financial account within a budget (checking, savings, credit card, cash, etc.).
-abstract class Account implements _i1.SerializableModel {
+abstract class Account
+    implements _isc.SerializableModel, _isc.ProtocolSerialization {
   Account._({
     this.id,
     required this.name,
@@ -35,20 +36,20 @@ abstract class Account implements _i1.SerializableModel {
   }) : createdAt = createdAt ?? DateTime.now();
 
   factory Account({
-    _i1.UuidValue? id,
+    _isc.UuidValue? id,
     required String name,
     required String accountType,
     required int balanceCents,
     required String currencyCode,
-    required _i1.UuidValue budgetId,
-    _i1.UuidValue? creatorId,
-    _i1.UuidValue? institutionId,
+    required _isc.UuidValue budgetId,
+    _isc.UuidValue? creatorId,
+    _isc.UuidValue? institutionId,
     required bool onBudget,
     required int sortOrder,
     required bool isClosed,
     String? sourceType,
     String? externalAccountId,
-    _i1.UuidValue? connectionId,
+    _isc.UuidValue? connectionId,
     DateTime? lastSyncedAt,
     String? syncStatus,
     DateTime? createdAt,
@@ -58,48 +59,50 @@ abstract class Account implements _i1.SerializableModel {
     return Account(
       id: jsonSerialization['id'] == null
           ? null
-          : _i1.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
+          : _isc.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
       name: jsonSerialization['name'] as String,
       accountType: jsonSerialization['accountType'] as String,
       balanceCents: jsonSerialization['balanceCents'] as int,
       currencyCode: jsonSerialization['currencyCode'] as String,
-      budgetId: _i1.UuidValueJsonExtension.fromJson(
+      budgetId: _isc.UuidValueJsonExtension.fromJson(
         jsonSerialization['budgetId'],
       ),
       creatorId: jsonSerialization['creatorId'] == null
           ? null
-          : _i1.UuidValueJsonExtension.fromJson(jsonSerialization['creatorId']),
+          : _isc.UuidValueJsonExtension.fromJson(
+              jsonSerialization['creatorId'],
+            ),
       institutionId: jsonSerialization['institutionId'] == null
           ? null
-          : _i1.UuidValueJsonExtension.fromJson(
+          : _isc.UuidValueJsonExtension.fromJson(
               jsonSerialization['institutionId'],
             ),
-      onBudget: _i1.BoolJsonExtension.fromJson(jsonSerialization['onBudget']),
+      onBudget: _isc.BoolJsonExtension.fromJson(jsonSerialization['onBudget']),
       sortOrder: jsonSerialization['sortOrder'] as int,
-      isClosed: _i1.BoolJsonExtension.fromJson(jsonSerialization['isClosed']),
+      isClosed: _isc.BoolJsonExtension.fromJson(jsonSerialization['isClosed']),
       sourceType: jsonSerialization['sourceType'] as String?,
       externalAccountId: jsonSerialization['externalAccountId'] as String?,
       connectionId: jsonSerialization['connectionId'] == null
           ? null
-          : _i1.UuidValueJsonExtension.fromJson(
+          : _isc.UuidValueJsonExtension.fromJson(
               jsonSerialization['connectionId'],
             ),
       lastSyncedAt: jsonSerialization['lastSyncedAt'] == null
           ? null
-          : _i1.DateTimeJsonExtension.fromJson(
+          : _isc.DateTimeJsonExtension.fromJson(
               jsonSerialization['lastSyncedAt'],
             ),
       syncStatus: jsonSerialization['syncStatus'] as String?,
       createdAt: jsonSerialization['createdAt'] == null
           ? null
-          : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
+          : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
     );
   }
 
   /// The database id, set if the object has been inserted into the
   /// database or if it has been fetched from the database. Otherwise,
   /// the id will be null.
-  _i1.UuidValue? id;
+  _isc.UuidValue? id;
 
   String name;
 
@@ -112,13 +115,13 @@ abstract class Account implements _i1.SerializableModel {
   /// ISO 4217 currency code.
   String currencyCode;
 
-  _i1.UuidValue budgetId;
+  _isc.UuidValue budgetId;
 
   /// The authenticated user that created this account record.
-  _i1.UuidValue? creatorId;
+  _isc.UuidValue? creatorId;
 
   /// Optional linked financial institution for this account.
-  _i1.UuidValue? institutionId;
+  _isc.UuidValue? institutionId;
 
   /// Whether this account is included in the budget's "on budget" calculations.
   bool onBudget;
@@ -136,7 +139,7 @@ abstract class Account implements _i1.SerializableModel {
   String? externalAccountId;
 
   /// Connection identifier used by external account sync providers.
-  _i1.UuidValue? connectionId;
+  _isc.UuidValue? connectionId;
 
   /// Last time the account was synchronized from an external provider.
   DateTime? lastSyncedAt;
@@ -148,23 +151,23 @@ abstract class Account implements _i1.SerializableModel {
 
   /// Returns a shallow copy of this [Account]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_isc.useResult
   Account copyWith({
-    _i1.UuidValue? id,
+    _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
     String? name,
     String? accountType,
     int? balanceCents,
     String? currencyCode,
-    _i1.UuidValue? budgetId,
-    _i1.UuidValue? creatorId,
-    _i1.UuidValue? institutionId,
+    _isc.UuidValue? budgetId,
+    _isc.UuidValue? creatorId = const _isc.$UndefinedUuidValue(),
+    _isc.UuidValue? institutionId = const _isc.$UndefinedUuidValue(),
     bool? onBudget,
     int? sortOrder,
     bool? isClosed,
     String? sourceType,
     String? externalAccountId,
-    _i1.UuidValue? connectionId,
-    DateTime? lastSyncedAt,
+    _isc.UuidValue? connectionId = const _isc.$UndefinedUuidValue(),
+    DateTime? lastSyncedAt = const _isc.$UndefinedDateTime(),
     String? syncStatus,
     DateTime? createdAt,
   });
@@ -193,8 +196,32 @@ abstract class Account implements _i1.SerializableModel {
   }
 
   @override
+  Map<String, dynamic> toJsonForProtocol() {
+    return {
+      '__className__': 'Account',
+      if (id != null) 'id': id?.toJson(),
+      'name': name,
+      'accountType': accountType,
+      'balanceCents': balanceCents,
+      'currencyCode': currencyCode,
+      'budgetId': budgetId.toJson(),
+      if (creatorId != null) 'creatorId': creatorId?.toJson(),
+      if (institutionId != null) 'institutionId': institutionId?.toJson(),
+      'onBudget': onBudget,
+      'sortOrder': sortOrder,
+      'isClosed': isClosed,
+      if (sourceType != null) 'sourceType': sourceType,
+      if (externalAccountId != null) 'externalAccountId': externalAccountId,
+      if (connectionId != null) 'connectionId': connectionId?.toJson(),
+      if (lastSyncedAt != null) 'lastSyncedAt': lastSyncedAt?.toJson(),
+      if (syncStatus != null) 'syncStatus': syncStatus,
+      'createdAt': createdAt.toJson(),
+    };
+  }
+
+  @override
   String toString() {
-    return _i1.SerializationManager.encode(this);
+    return _isc.SerializationManager.encode(this);
   }
 }
 
@@ -202,20 +229,20 @@ class _Undefined {}
 
 class _AccountImpl extends Account {
   _AccountImpl({
-    _i1.UuidValue? id,
+    _isc.UuidValue? id,
     required String name,
     required String accountType,
     required int balanceCents,
     required String currencyCode,
-    required _i1.UuidValue budgetId,
-    _i1.UuidValue? creatorId,
-    _i1.UuidValue? institutionId,
+    required _isc.UuidValue budgetId,
+    _isc.UuidValue? creatorId,
+    _isc.UuidValue? institutionId,
     required bool onBudget,
     required int sortOrder,
     required bool isClosed,
     String? sourceType,
     String? externalAccountId,
-    _i1.UuidValue? connectionId,
+    _isc.UuidValue? connectionId,
     DateTime? lastSyncedAt,
     String? syncStatus,
     DateTime? createdAt,
@@ -241,38 +268,40 @@ class _AccountImpl extends Account {
 
   /// Returns a shallow copy of this [Account]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_isc.useResult
   @override
   Account copyWith({
-    Object? id = _Undefined,
+    _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
     String? name,
     String? accountType,
     int? balanceCents,
     String? currencyCode,
-    _i1.UuidValue? budgetId,
-    Object? creatorId = _Undefined,
-    Object? institutionId = _Undefined,
+    _isc.UuidValue? budgetId,
+    _isc.UuidValue? creatorId = const _isc.$UndefinedUuidValue(),
+    _isc.UuidValue? institutionId = const _isc.$UndefinedUuidValue(),
     bool? onBudget,
     int? sortOrder,
     bool? isClosed,
     Object? sourceType = _Undefined,
     Object? externalAccountId = _Undefined,
-    Object? connectionId = _Undefined,
-    Object? lastSyncedAt = _Undefined,
+    _isc.UuidValue? connectionId = const _isc.$UndefinedUuidValue(),
+    DateTime? lastSyncedAt = const _isc.$UndefinedDateTime(),
     Object? syncStatus = _Undefined,
     DateTime? createdAt,
   }) {
     return Account(
-      id: id is _i1.UuidValue? ? id : this.id,
+      id: id is _isc.UndefinedSentinel ? this.id : id,
       name: name ?? this.name,
       accountType: accountType ?? this.accountType,
       balanceCents: balanceCents ?? this.balanceCents,
       currencyCode: currencyCode ?? this.currencyCode,
       budgetId: budgetId ?? this.budgetId,
-      creatorId: creatorId is _i1.UuidValue? ? creatorId : this.creatorId,
-      institutionId: institutionId is _i1.UuidValue?
-          ? institutionId
-          : this.institutionId,
+      creatorId: creatorId is _isc.UndefinedSentinel
+          ? this.creatorId
+          : creatorId,
+      institutionId: institutionId is _isc.UndefinedSentinel
+          ? this.institutionId
+          : institutionId,
       onBudget: onBudget ?? this.onBudget,
       sortOrder: sortOrder ?? this.sortOrder,
       isClosed: isClosed ?? this.isClosed,
@@ -280,12 +309,12 @@ class _AccountImpl extends Account {
       externalAccountId: externalAccountId is String?
           ? externalAccountId
           : this.externalAccountId,
-      connectionId: connectionId is _i1.UuidValue?
-          ? connectionId
-          : this.connectionId,
-      lastSyncedAt: lastSyncedAt is DateTime?
-          ? lastSyncedAt
-          : this.lastSyncedAt,
+      connectionId: connectionId is _isc.UndefinedSentinel
+          ? this.connectionId
+          : connectionId,
+      lastSyncedAt: lastSyncedAt is _isc.UndefinedSentinel
+          ? this.lastSyncedAt
+          : lastSyncedAt,
       syncStatus: syncStatus is String? ? syncStatus : this.syncStatus,
       createdAt: createdAt ?? this.createdAt,
     );

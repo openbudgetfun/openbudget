@@ -212,13 +212,13 @@ final class MonthlyAllocationActionsProvider
 }
 
 String _$monthlyAllocationActionsHash() =>
-    r'118cb861316ec91b700f851010dae46144b64b3b';
+    r'0377dcd39673d4a73bbb37a9cd3163fd99842533';
 
 abstract class _$MonthlyAllocationActions extends $Notifier<AsyncValue<void>> {
   AsyncValue<void> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<void>, AsyncValue<void>>;
     final element =
         ref.element
@@ -228,6 +228,6 @@ abstract class _$MonthlyAllocationActions extends $Notifier<AsyncValue<void>> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

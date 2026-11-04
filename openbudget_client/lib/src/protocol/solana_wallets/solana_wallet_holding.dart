@@ -10,10 +10,11 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:serverpod_client/serverpod_client.dart' as _i1;
+import 'package:serverpod_client/serverpod_client.dart' as _isc;
 
 /// Current holding state for an asset in a Solana wallet.
-abstract class SolanaWalletHolding implements _i1.SerializableModel {
+abstract class SolanaWalletHolding
+    implements _isc.SerializableModel, _isc.ProtocolSerialization {
   SolanaWalletHolding._({
     this.id,
     required this.walletId,
@@ -45,9 +46,9 @@ abstract class SolanaWalletHolding implements _i1.SerializableModel {
   }) : updatedAt = updatedAt ?? DateTime.now();
 
   factory SolanaWalletHolding({
-    _i1.UuidValue? id,
-    required _i1.UuidValue walletId,
-    required _i1.UuidValue budgetId,
+    _isc.UuidValue? id,
+    required _isc.UuidValue walletId,
+    required _isc.UuidValue budgetId,
     required String assetId,
     String? symbol,
     String? name,
@@ -78,11 +79,11 @@ abstract class SolanaWalletHolding implements _i1.SerializableModel {
     return SolanaWalletHolding(
       id: jsonSerialization['id'] == null
           ? null
-          : _i1.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
-      walletId: _i1.UuidValueJsonExtension.fromJson(
+          : _isc.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
+      walletId: _isc.UuidValueJsonExtension.fromJson(
         jsonSerialization['walletId'],
       ),
-      budgetId: _i1.UuidValueJsonExtension.fromJson(
+      budgetId: _isc.UuidValueJsonExtension.fromJson(
         jsonSerialization['budgetId'],
       ),
       assetId: jsonSerialization['assetId'] as String,
@@ -92,7 +93,7 @@ abstract class SolanaWalletHolding implements _i1.SerializableModel {
       decimals: jsonSerialization['decimals'] as int,
       balanceRaw: jsonSerialization['balanceRaw'] as String,
       balanceUi: jsonSerialization['balanceUi'] as String,
-      isNft: _i1.BoolJsonExtension.fromJson(jsonSerialization['isNft']),
+      isNft: _isc.BoolJsonExtension.fromJson(jsonSerialization['isNft']),
       priceCurrency: jsonSerialization['priceCurrency'] as String?,
       pricePerToken: (jsonSerialization['pricePerToken'] as num?)?.toDouble(),
       totalValue: (jsonSerialization['totalValue'] as num?)?.toDouble(),
@@ -108,31 +109,31 @@ abstract class SolanaWalletHolding implements _i1.SerializableModel {
       pnlCurrency: jsonSerialization['pnlCurrency'] as String?,
       pnlAsOf: jsonSerialization['pnlAsOf'] == null
           ? null
-          : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['pnlAsOf']),
+          : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['pnlAsOf']),
       priceSource: jsonSerialization['priceSource'] as String?,
       priceQuality: jsonSerialization['priceQuality'] as String?,
       priceConfidence: jsonSerialization['priceConfidence'] as String?,
       isPriceStale: jsonSerialization['isPriceStale'] == null
           ? null
-          : _i1.BoolJsonExtension.fromJson(jsonSerialization['isPriceStale']),
+          : _isc.BoolJsonExtension.fromJson(jsonSerialization['isPriceStale']),
       priceAsOf: jsonSerialization['priceAsOf'] == null
           ? null
-          : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['priceAsOf']),
+          : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['priceAsOf']),
       metadataJson: jsonSerialization['metadataJson'] as String?,
       updatedAt: jsonSerialization['updatedAt'] == null
           ? null
-          : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['updatedAt']),
+          : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['updatedAt']),
     );
   }
 
   /// The database id, set if the object has been inserted into the
   /// database or if it has been fetched from the database. Otherwise,
   /// the id will be null.
-  _i1.UuidValue? id;
+  _isc.UuidValue? id;
 
-  _i1.UuidValue walletId;
+  _isc.UuidValue walletId;
 
-  _i1.UuidValue budgetId;
+  _isc.UuidValue budgetId;
 
   /// Asset identifier (mint address for fungible tokens / NFT ID).
   String assetId;
@@ -199,11 +200,11 @@ abstract class SolanaWalletHolding implements _i1.SerializableModel {
 
   /// Returns a shallow copy of this [SolanaWalletHolding]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_isc.useResult
   SolanaWalletHolding copyWith({
-    _i1.UuidValue? id,
-    _i1.UuidValue? walletId,
-    _i1.UuidValue? budgetId,
+    _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
+    _isc.UuidValue? walletId,
+    _isc.UuidValue? budgetId,
     String? assetId,
     String? symbol,
     String? name,
@@ -220,12 +221,12 @@ abstract class SolanaWalletHolding implements _i1.SerializableModel {
     double? estimatedUnrealizedPnlPercent,
     double? estimatedRealizedPnl,
     String? pnlCurrency,
-    DateTime? pnlAsOf,
+    DateTime? pnlAsOf = const _isc.$UndefinedDateTime(),
     String? priceSource,
     String? priceQuality,
     String? priceConfidence,
     bool? isPriceStale,
-    DateTime? priceAsOf,
+    DateTime? priceAsOf = const _isc.$UndefinedDateTime(),
     String? metadataJson,
     DateTime? updatedAt,
   });
@@ -267,8 +268,45 @@ abstract class SolanaWalletHolding implements _i1.SerializableModel {
   }
 
   @override
+  Map<String, dynamic> toJsonForProtocol() {
+    return {
+      '__className__': 'SolanaWalletHolding',
+      if (id != null) 'id': id?.toJson(),
+      'walletId': walletId.toJson(),
+      'budgetId': budgetId.toJson(),
+      'assetId': assetId,
+      if (symbol != null) 'symbol': symbol,
+      if (name != null) 'name': name,
+      if (tokenProgram != null) 'tokenProgram': tokenProgram,
+      'decimals': decimals,
+      'balanceRaw': balanceRaw,
+      'balanceUi': balanceUi,
+      'isNft': isNft,
+      if (priceCurrency != null) 'priceCurrency': priceCurrency,
+      if (pricePerToken != null) 'pricePerToken': pricePerToken,
+      if (totalValue != null) 'totalValue': totalValue,
+      if (estimatedCostBasis != null) 'estimatedCostBasis': estimatedCostBasis,
+      if (estimatedUnrealizedPnl != null)
+        'estimatedUnrealizedPnl': estimatedUnrealizedPnl,
+      if (estimatedUnrealizedPnlPercent != null)
+        'estimatedUnrealizedPnlPercent': estimatedUnrealizedPnlPercent,
+      if (estimatedRealizedPnl != null)
+        'estimatedRealizedPnl': estimatedRealizedPnl,
+      if (pnlCurrency != null) 'pnlCurrency': pnlCurrency,
+      if (pnlAsOf != null) 'pnlAsOf': pnlAsOf?.toJson(),
+      if (priceSource != null) 'priceSource': priceSource,
+      if (priceQuality != null) 'priceQuality': priceQuality,
+      if (priceConfidence != null) 'priceConfidence': priceConfidence,
+      if (isPriceStale != null) 'isPriceStale': isPriceStale,
+      if (priceAsOf != null) 'priceAsOf': priceAsOf?.toJson(),
+      if (metadataJson != null) 'metadataJson': metadataJson,
+      'updatedAt': updatedAt.toJson(),
+    };
+  }
+
+  @override
   String toString() {
-    return _i1.SerializationManager.encode(this);
+    return _isc.SerializationManager.encode(this);
   }
 }
 
@@ -276,9 +314,9 @@ class _Undefined {}
 
 class _SolanaWalletHoldingImpl extends SolanaWalletHolding {
   _SolanaWalletHoldingImpl({
-    _i1.UuidValue? id,
-    required _i1.UuidValue walletId,
-    required _i1.UuidValue budgetId,
+    _isc.UuidValue? id,
+    required _isc.UuidValue walletId,
+    required _isc.UuidValue budgetId,
     required String assetId,
     String? symbol,
     String? name,
@@ -335,12 +373,12 @@ class _SolanaWalletHoldingImpl extends SolanaWalletHolding {
 
   /// Returns a shallow copy of this [SolanaWalletHolding]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_isc.useResult
   @override
   SolanaWalletHolding copyWith({
-    Object? id = _Undefined,
-    _i1.UuidValue? walletId,
-    _i1.UuidValue? budgetId,
+    _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
+    _isc.UuidValue? walletId,
+    _isc.UuidValue? budgetId,
     String? assetId,
     Object? symbol = _Undefined,
     Object? name = _Undefined,
@@ -357,17 +395,17 @@ class _SolanaWalletHoldingImpl extends SolanaWalletHolding {
     Object? estimatedUnrealizedPnlPercent = _Undefined,
     Object? estimatedRealizedPnl = _Undefined,
     Object? pnlCurrency = _Undefined,
-    Object? pnlAsOf = _Undefined,
+    DateTime? pnlAsOf = const _isc.$UndefinedDateTime(),
     Object? priceSource = _Undefined,
     Object? priceQuality = _Undefined,
     Object? priceConfidence = _Undefined,
     Object? isPriceStale = _Undefined,
-    Object? priceAsOf = _Undefined,
+    DateTime? priceAsOf = const _isc.$UndefinedDateTime(),
     Object? metadataJson = _Undefined,
     DateTime? updatedAt,
   }) {
     return SolanaWalletHolding(
-      id: id is _i1.UuidValue? ? id : this.id,
+      id: id is _isc.UndefinedSentinel ? this.id : id,
       walletId: walletId ?? this.walletId,
       budgetId: budgetId ?? this.budgetId,
       assetId: assetId ?? this.assetId,
@@ -398,14 +436,16 @@ class _SolanaWalletHoldingImpl extends SolanaWalletHolding {
           ? estimatedRealizedPnl
           : this.estimatedRealizedPnl,
       pnlCurrency: pnlCurrency is String? ? pnlCurrency : this.pnlCurrency,
-      pnlAsOf: pnlAsOf is DateTime? ? pnlAsOf : this.pnlAsOf,
+      pnlAsOf: pnlAsOf is _isc.UndefinedSentinel ? this.pnlAsOf : pnlAsOf,
       priceSource: priceSource is String? ? priceSource : this.priceSource,
       priceQuality: priceQuality is String? ? priceQuality : this.priceQuality,
       priceConfidence: priceConfidence is String?
           ? priceConfidence
           : this.priceConfidence,
       isPriceStale: isPriceStale is bool? ? isPriceStale : this.isPriceStale,
-      priceAsOf: priceAsOf is DateTime? ? priceAsOf : this.priceAsOf,
+      priceAsOf: priceAsOf is _isc.UndefinedSentinel
+          ? this.priceAsOf
+          : priceAsOf,
       metadataJson: metadataJson is String? ? metadataJson : this.metadataJson,
       updatedAt: updatedAt ?? this.updatedAt,
     );

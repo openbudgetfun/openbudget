@@ -250,4 +250,4 @@ final class UpdateDisplayCurrencyProvider
 }
 
 String _$updateDisplayCurrencyHash() =>
-    r'b7fc36310bed2bfcc453c8df0b7cace6c537d0b7';
+    r'4b99c61d927b5f123c5183f5830cdd8ade47f680';
