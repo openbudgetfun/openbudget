@@ -271,15 +271,28 @@ void main() {
       });
 
       test(
-        'when no pack exists then throws TaxRulesUnavailableException',
+        'when the real United Kingdom pack is used then SA103F boxes are listed',
         () async {
-          final personal = await createBudget(authedSession, 'Personal');
-          await saveProfile(authedSession, personal, TaxEntityKind.individual);
+          final business = await createBudget(authedSession, 'Studio');
+          await saveProfile(authedSession, business, TaxEntityKind.soleTrader);
           TaxService.packFor = TaxRules.forJurisdiction;
 
-          await expectLater(
-            endpoints.tax.listCategories(authedSession, personal.id!),
-            throwsA(isA<TaxRulesUnavailableException>()),
+          final categories = await endpoints.tax.listCategories(
+            authedSession,
+            business.id!,
+          );
+
+          expect(categories, isNotEmpty);
+          expect(
+            categories.map((category) => category.code),
+            everyElement(startsWith('gb.')),
+          );
+          expect(
+            categories.any(
+              (category) =>
+                  category.reportReference?.contains('SA103F') ?? false,
+            ),
+            isTrue,
           );
         },
       );
@@ -699,7 +712,7 @@ void main() {
       });
 
       test(
-        'when no pack exists then throws TaxRulesUnavailableException',
+        'when the year has no rates then throws TaxRulesUnavailableException',
         () async {
           final budget = await createBudget(authedSession, 'Personal');
           await saveProfile(
@@ -710,9 +723,50 @@ void main() {
           TaxService.packFor = TaxRules.forJurisdiction;
 
           await expectLater(
-            endpoints.tax.getReport(authedSession, budget.id!),
+            endpoints.tax.getReport(authedSession, budget.id!, startYear: 2019),
             throwsA(isA<TaxRulesUnavailableException>()),
           );
+        },
+      );
+
+      test(
+        'when using the shipped UK pack then a £50,000 salary owes £7,486',
+        () async {
+          final budget = await createBudget(authedSession, 'Personal');
+          await saveProfile(
+            authedSession,
+            budget,
+            TaxEntityKind.individual,
+          );
+          TaxService.packFor = TaxRules.forJurisdiction;
+          final salary = await endpoints.transaction.create(
+            authedSession,
+            'Salary',
+            5000000,
+            'GBP',
+            budget.id!,
+            DateTime.utc(2026, 6, 10),
+          );
+          await endpoints.tax.setTransactionTax(
+            authedSession,
+            salary.id!,
+            code: 'gb.ind.employment',
+          );
+
+          final report = await endpoints.tax.getReport(
+            authedSession,
+            budget.id!,
+            startYear: 2026,
+          );
+
+          expect(report.yearLabel, '2026/27');
+          expect(report.uncategorizedCount, 0);
+          final incomeTax = report.liabilities.firstWhere(
+            (liability) =>
+                liability.label == 'Income Tax on non-savings income',
+          );
+          expect(incomeTax.amountMinor, 748600);
+          expect(report.totalLiabilityMinor, 748600);
         },
       );
 

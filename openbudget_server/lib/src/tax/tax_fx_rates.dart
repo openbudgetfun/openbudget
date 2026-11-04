@@ -1,3 +1,6 @@
+import 'dart:math' as math;
+
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_server/src/exceptions/exceptions.dart';
 
 /// The rates from one FX snapshot, relative to [baseCurrencyCode].
@@ -56,7 +59,24 @@ class TaxFxRates {
 
     final fromRate = _rateFor(snapshot, fromCurrencyCode, date);
     final toRate = _rateFor(snapshot, toCurrencyCode, date);
-    return (amountMinor * toRate / fromRate).round();
+    // Amounts are in each currency's own minor unit, so 1,000 JPY minor
+    // units (no decimals) are 1,000 yen while 1,000 GBP minor units are
+    // ten pounds. Rescale between the two exponents.
+    final exponentShift =
+        _decimalsOf(toCurrencyCode) - _decimalsOf(fromCurrencyCode);
+    final scale = math.pow(10, exponentShift);
+    return (amountMinor * toRate / fromRate * scale).round();
+  }
+
+  static int _decimalsOf(String currencyCode) {
+    final currency = CurrencyCode.tryParse(currencyCode);
+    if (currency == null) {
+      throw TaxRateUnavailableException(
+        'OpenBudget does not know the minor unit of $currencyCode, so it '
+        'cannot convert amounts in it.',
+      );
+    }
+    return currency.decimals;
   }
 
   TaxFxSnapshotRates? _snapshotFor(DateTime date) {

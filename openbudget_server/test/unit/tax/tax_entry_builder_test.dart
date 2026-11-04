@@ -304,6 +304,57 @@ void main() {
       );
     });
 
+    test('when currencies have different minor units then amounts rescale', () {
+      final rates = TaxFxRates([
+        TaxFxSnapshotRates(
+          baseCurrencyCode: 'USD',
+          fetchedAt: DateTime.utc(2026, 1, 10),
+          rates: const {'JPY': 150, 'GBP': 0.8},
+        ),
+      ]);
+
+      // 15,000 yen (JPY has no minor unit) is 100 dollars, so 80 pounds.
+      expect(
+        rates.convert(
+          amountMinor: 15000,
+          fromCurrencyCode: 'JPY',
+          toCurrencyCode: 'GBP',
+          date: DateTime.utc(2026, 1, 15),
+        ),
+        8000,
+      );
+      // And back: 80 pounds is 15,000 yen.
+      expect(
+        rates.convert(
+          amountMinor: 8000,
+          fromCurrencyCode: 'GBP',
+          toCurrencyCode: 'JPY',
+          date: DateTime.utc(2026, 1, 15),
+        ),
+        15000,
+      );
+    });
+
+    test('when a currency is not supported then conversion throws', () {
+      final rates = TaxFxRates([
+        TaxFxSnapshotRates(
+          baseCurrencyCode: 'USD',
+          fetchedAt: DateTime.utc(2026, 1, 10),
+          rates: const {'XYZ': 2, 'GBP': 0.8},
+        ),
+      ]);
+
+      expect(
+        () => rates.convert(
+          amountMinor: 100,
+          fromCurrencyCode: 'XYZ',
+          toCurrencyCode: 'GBP',
+          date: DateTime.utc(2026, 1, 15),
+        ),
+        throwsA(isA<TaxRateUnavailableException>()),
+      );
+    });
+
     test('when a snapshot predates the date then the latest one wins', () {
       final rates = _rates();
       final converted = rates.convert(

@@ -41,7 +41,7 @@ class TaxService {
   ///
   /// Tests replace this with a fake pack; production uses [TaxRules].
   @visibleForTesting
-  static TaxRulePack? Function(TaxJurisdiction jurisdiction) packFor =
+  static TaxRulePack Function(TaxJurisdiction jurisdiction) packFor =
       TaxRules.forJurisdiction;
 
   /// Returns the budget's tax profile, or null when none is set.
@@ -313,15 +313,8 @@ class TaxService {
     return record;
   }
 
-  static TaxRulePack _requirePack(TaxJurisdiction jurisdiction) {
-    final pack = packFor(jurisdiction);
-    if (pack == null) {
-      throw TaxRulesUnavailableException(
-        'No ${jurisdiction.countryCode} tax rules are available yet.',
-      );
-    }
-    return pack;
-  }
+  static TaxRulePack _requirePack(TaxJurisdiction jurisdiction) =>
+      packFor(jurisdiction);
 
   static TaxJurisdiction _parseJurisdiction(String value) {
     final jurisdiction = TaxJurisdiction.fromCountryCode(value);
