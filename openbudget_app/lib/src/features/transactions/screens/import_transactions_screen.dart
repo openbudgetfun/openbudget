@@ -20,7 +20,7 @@ class ImportTransactionsScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final palette = theme.ob;
     final csvController = useTextEditingController();
     final parsedRows = useState<List<ImportRow>>([]);
     final isSubmitting = useState(false);
@@ -36,7 +36,8 @@ class ImportTransactionsScreen extends HookConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const SkribbleIcon(data: OpenBudgetIcons.back),
+          tooltip: l10n.transactionsBack,
           onPressed: () =>
               context.goNamed(moreRoute, pathParameters: {'id': budgetId}),
         ),
@@ -50,171 +51,183 @@ class ImportTransactionsScreen extends HookConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(SpacingTokens.lg),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Center(
-                          child: Container(
-                            width: 48,
-                            height: 48,
-                            decoration: BoxDecoration(
-                              color: colorScheme.primaryContainer.withAlpha(80),
-                              borderRadius: BorderRadius.circular(
-                                RadiusTokens.md,
-                              ),
+                ObCard(
+                  padding: const EdgeInsets.all(SpacingTokens.lg),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Center(
+                        child: Container(
+                          width: 52,
+                          height: 52,
+                          decoration: ObRoughDecoration(
+                            color: palette.wash(ObTone.brand),
+                            outline: palette.quietPen,
+                            seed: 37,
+                          ),
+                          child: Center(
+                            child: SkribbleIcon(
+                              data: OpenBudgetIcons.importFile,
+                              color: palette.brand,
                             ),
-                            child: Icon(
-                              Icons.upload_file_rounded,
-                              color: colorScheme.primary,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: SpacingTokens.md),
+                      Text(
+                        l10n.importTitle,
+                        style: theme.textTheme.titleLarge,
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: SpacingTokens.xs),
+                      Text(
+                        l10n.importInstructions,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: palette.mutedInk,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: SpacingTokens.lg),
+                      TextField(
+                        controller: csvController,
+                        decoration: InputDecoration(
+                          labelText: l10n.importCsvLabel,
+                          hintText: l10n.importCsvHint,
+                          alignLabelWithHint: true,
+                        ),
+                        maxLines: 8,
+                        textInputAction: TextInputAction.newline,
+                      ),
+                      const SizedBox(height: SpacingTokens.md),
+                      ObOutlinedButton(
+                        onPressed: () {
+                          final text = csvController.text.trim();
+                          if (text.isEmpty) return;
+                          parsedRows.value = parseCsvText(text, currencyCode);
+                        },
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const SkribbleIcon(
+                              data: OpenBudgetIcons.preview,
+                              size: 18,
                             ),
-                          ),
+                            const SizedBox(width: SpacingTokens.xs),
+                            Text(l10n.importPreview),
+                          ],
                         ),
-                        const SizedBox(height: SpacingTokens.md),
-                        Text(
-                          l10n.importTitle,
-                          style: theme.textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: SpacingTokens.xs),
-                        Text(
-                          l10n.importInstructions,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: SpacingTokens.lg),
-                        TextField(
-                          controller: csvController,
-                          decoration: InputDecoration(
-                            labelText: l10n.importCsvLabel,
-                            hintText: l10n.importCsvHint,
-                            alignLabelWithHint: true,
-                          ),
-                          maxLines: 8,
-                          textInputAction: TextInputAction.newline,
-                        ),
-                        const SizedBox(height: SpacingTokens.md),
-                        OutlinedButton.icon(
-                          onPressed: () {
-                            final text = csvController.text.trim();
-                            if (text.isEmpty) return;
-                            parsedRows.value = parseCsvText(text, currencyCode);
-                          },
-                          icon: const Icon(Icons.preview_rounded),
-                          label: Text(l10n.importPreview),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
                 if (parsedRows.value.isNotEmpty) ...[
                   const SizedBox(height: SpacingTokens.md),
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(SpacingTokens.md),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Text(
-                            l10n.importPreviewCount(parsedRows.value.length),
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: SpacingTokens.sm),
-                          const Divider(),
-                          ...parsedRows.value
-                              .take(20)
-                              .map(
-                                (row) => Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: SpacingTokens.xs,
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Expanded(
-                                        flex: 3,
-                                        child: Text(
-                                          _formatDate(row.transactionDate),
-                                          style: theme.textTheme.bodySmall,
-                                        ),
+                  ObCard(
+                    padding: const EdgeInsets.all(SpacingTokens.md),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          l10n.importPreviewCount(parsedRows.value.length),
+                          style: theme.textTheme.titleMedium,
+                        ),
+                        const SizedBox(height: SpacingTokens.sm),
+                        const Divider(),
+                        ...parsedRows.value
+                            .take(20)
+                            .map(
+                              (row) => Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: SpacingTokens.xs,
+                                ),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      flex: 3,
+                                      child: Text(
+                                        _formatDate(row.transactionDate),
+                                        style: theme.textTheme.bodySmall
+                                            ?.copyWith(
+                                              color: palette.mutedInk,
+                                            ),
                                       ),
-                                      Expanded(
-                                        flex: 5,
-                                        child: Text(
-                                          row.description,
-                                          style: theme.textTheme.bodySmall,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
+                                    ),
+                                    Expanded(
+                                      flex: 5,
+                                      child: Text(
+                                        row.description,
+                                        style: theme.textTheme.bodySmall,
+                                        overflow: TextOverflow.ellipsis,
                                       ),
-                                      Expanded(
-                                        flex: 3,
-                                        child: Text(
+                                    ),
+                                    Expanded(
+                                      flex: 3,
+                                      child: Align(
+                                        alignment: Alignment.centerRight,
+                                        child: ObAmount(
                                           _formatAmount(
                                             row.amountCents,
                                             currencyCode,
                                           ),
-                                          textAlign: TextAlign.right,
-                                          style: theme.textTheme.bodySmall
-                                              ?.copyWith(
-                                                fontWeight: FontWeight.w600,
-                                                color: row.amountCents >= 0
-                                                    ? Theme.of(context)
-                                                          .ob
-                                                          .funded
-                                                    : colorScheme.error,
-                                              ),
+                                          tone: row.amountCents >= 0
+                                              ? ObTone.funded
+                                              : ObTone.neutral,
+                                          style: theme.textTheme.bodySmall,
+                                          textAlign: TextAlign.end,
                                         ),
                                       ),
-                                    ],
-                                  ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                          if (parsedRows.value.length > 20) ...[
-                            const Divider(),
-                            Text(
-                              l10n.importMoreRows(parsedRows.value.length - 20),
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: colorScheme.onSurfaceVariant,
-                                fontStyle: FontStyle.italic,
-                              ),
-                              textAlign: TextAlign.center,
                             ),
-                          ],
-                          const SizedBox(height: SpacingTokens.md),
-                          FilledButton.icon(
-                            onPressed: isSubmitting.value
-                                ? null
-                                : () => _import(
-                                    context,
-                                    ref,
-                                    parsedRows.value,
-                                    currencyCode,
-                                    isSubmitting,
-                                  ),
-                            icon: isSubmitting.value
-                                ? const SizedBox(
-                                    height: 18,
-                                    width: 18,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                    ),
-                                  )
-                                : const Icon(Icons.file_download_done_rounded),
-                            label: Text(
-                              isSubmitting.value
-                                  ? l10n.importImporting
-                                  : l10n.importButton(parsedRows.value.length),
+                        if (parsedRows.value.length > 20) ...[
+                          const Divider(),
+                          Text(
+                            l10n.importMoreRows(parsedRows.value.length - 20),
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: palette.mutedInk,
+                              fontStyle: FontStyle.italic,
                             ),
+                            textAlign: TextAlign.center,
                           ),
                         ],
-                      ),
+                        const SizedBox(height: SpacingTokens.md),
+                        ObFilledButton(
+                          onPressed: isSubmitting.value
+                              ? null
+                              : () => _import(
+                                  context,
+                                  ref,
+                                  parsedRows.value,
+                                  currencyCode,
+                                  isSubmitting,
+                                ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (isSubmitting.value)
+                                WiredLoadingIndicator(
+                                  size: 18,
+                                  color: palette.mutedInk,
+                                )
+                              else
+                                const SkribbleIcon(
+                                  data: OpenBudgetIcons.fileDone,
+                                  size: 18,
+                                ),
+                              const SizedBox(width: SpacingTokens.xs),
+                              Text(
+                                isSubmitting.value
+                                    ? l10n.importImporting
+                                    : l10n.importButton(
+                                        parsedRows.value.length,
+                                      ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],

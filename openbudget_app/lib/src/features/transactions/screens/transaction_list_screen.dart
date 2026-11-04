@@ -14,7 +14,6 @@ import 'package:openbudget_app/src/features/payees/providers/payee_list_provider
 import 'package:openbudget_app/src/features/transactions/providers/transaction_actions_provider.dart';
 import 'package:openbudget_app/src/features/transactions/screens/edit_transaction_dialog.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
-import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
@@ -27,6 +26,9 @@ enum TransactionStatusFilter { all, cleared, uncleared, reconciled }
 
 enum TransactionSort { dateDesc, dateAsc, amountDesc, amountAsc, description }
 
+/// The key on the empty state shown when the ledger has no rows to draw.
+const transactionListEmptyKey = Key('transaction-list-empty');
+
 class TransactionListScreen extends HookConsumerWidget {
   const TransactionListScreen({required this.budgetId, super.key});
 
@@ -35,9 +37,9 @@ class TransactionListScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
+    final palette = Theme.of(context).ob;
     final transactionsAsync = ref.watch(transactionListProvider(budgetId));
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
 
     final searchController = useTextEditingController();
     final searchQuery = useState('');
@@ -60,7 +62,8 @@ class TransactionListScreen extends HookConsumerWidget {
       appBar: selectionMode.value
           ? AppBar(
               leading: IconButton(
-                icon: const Icon(Icons.close),
+                icon: const SkribbleIcon(data: OpenBudgetIcons.close),
+                tooltip: l10n.dialogCancel,
                 onPressed: () {
                   selectionMode.value = false;
                   selectedIds.value = {};
@@ -69,7 +72,7 @@ class TransactionListScreen extends HookConsumerWidget {
               title: Text(l10n.bulkSelectedCount(selectedIds.value.length)),
               actions: [
                 IconButton(
-                  icon: const Icon(Icons.select_all_rounded),
+                  icon: const SkribbleIcon(data: OpenBudgetIcons.selectAll),
                   tooltip: l10n.bulkSelectAll,
                   onPressed: () {
                     final allIds =
@@ -85,7 +88,7 @@ class TransactionListScreen extends HookConsumerWidget {
                   },
                 ),
                 IconButton(
-                  icon: const Icon(Icons.deselect_rounded),
+                  icon: const SkribbleIcon(data: OpenBudgetIcons.deselect),
                   tooltip: l10n.bulkDeselectAll,
                   onPressed: () => selectedIds.value = {},
                 ),
@@ -93,7 +96,8 @@ class TransactionListScreen extends HookConsumerWidget {
             )
           : AppBar(
               leading: IconButton(
-                icon: const Icon(Icons.arrow_back),
+                icon: const SkribbleIcon(data: OpenBudgetIcons.back),
+                tooltip: l10n.transactionsBack,
                 onPressed: () => context.goNamed(
                   planRoute,
                   pathParameters: {'id': budgetId},
@@ -107,18 +111,24 @@ class TransactionListScreen extends HookConsumerWidget {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 IconButton(
-                                  icon: const Icon(Icons.sort_rounded),
+                                  icon: const SkribbleIcon(
+                                    data: OpenBudgetIcons.sort,
+                                  ),
                                   tooltip: l10n.transactionSortTitle,
                                   onPressed: () =>
                                       _showSortMenu(context, sortOrder),
                                 ),
                                 IconButton(
-                                  icon: const Icon(Icons.checklist_rounded),
+                                  icon: const SkribbleIcon(
+                                    data: OpenBudgetIcons.checkAll,
+                                  ),
                                   tooltip: l10n.bulkAssignEnvelope,
                                   onPressed: () => selectionMode.value = true,
                                 ),
                                 IconButton(
-                                  icon: const Icon(Icons.copy_rounded),
+                                  icon: const SkribbleIcon(
+                                    data: OpenBudgetIcons.copy,
+                                  ),
                                   tooltip: l10n.transactionExportCsv,
                                   onPressed: () => _exportToCsv(context, txs),
                                 ),
@@ -130,24 +140,21 @@ class TransactionListScreen extends HookConsumerWidget {
               ],
             ),
       body: transactionsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => Center(
+          child: ObLoadingPanel(label: l10n.transactionsLoading),
+        ),
         error: (error, _) => Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.error_outline_rounded,
-                size: 48,
-                color: colorScheme.error,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(SpacingTokens.md),
+            child: ObStatePanel.problem(
+              title: l10n.transactionLoadError,
+              message: error.toString(),
+              action: ObStateAction(
+                label: l10n.homeRetry,
+                onPressed: () =>
+                    ref.invalidate(transactionListProvider(budgetId)),
               ),
-              const SizedBox(height: SpacingTokens.md),
-              Text(
-                l10n.transactionLoadError,
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: colorScheme.error,
-                ),
-              ),
-            ],
+            ),
           ),
         ),
         data: (transactions) {
@@ -267,29 +274,23 @@ class TransactionListScreen extends HookConsumerWidget {
                   SpacingTokens.md,
                   0,
                 ),
-                child: TextField(
+                child: ObTextField(
                   controller: searchController,
-                  decoration: InputDecoration(
-                    hintText: l10n.transactionSearchHint,
-                    prefixIcon: const Icon(Icons.search),
-                    suffixIcon: searchQuery.value.isNotEmpty
-                        ? IconButton(
-                            icon: const Icon(Icons.clear),
-                            onPressed: () {
-                              searchController.clear();
-                              searchQuery.value = '';
-                            },
-                          )
-                        : null,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(RadiusTokens.md),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: SpacingTokens.md,
-                      vertical: SpacingTokens.sm,
-                    ),
-                    isDense: true,
-                  ),
+                  hintText: l10n.transactionSearchHint,
+                  prefixIcon: const SkribbleIcon(data: OpenBudgetIcons.search),
+                  suffixIcon: searchQuery.value.isNotEmpty
+                      ? IconButton(
+                          key: const Key('transaction-search-clear'),
+                          icon: const SkribbleIcon(
+                            data: OpenBudgetIcons.close,
+                          ),
+                          tooltip: l10n.transactionsSearchClear,
+                          onPressed: () {
+                            searchController.clear();
+                            searchQuery.value = '';
+                          },
+                        )
+                      : null,
                 ),
               ),
               Padding(
@@ -301,12 +302,13 @@ class TransactionListScreen extends HookConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     SizedBox(
-                      height: 36,
+                      height: 48,
                       child: ListView(
                         scrollDirection: Axis.horizontal,
                         children: [
                           _FilterChip(
                             label: l10n.transactionFilterAll,
+                            icon: OpenBudgetIcons.list,
                             selected: filter.value == TransactionFilter.all,
                             onSelected: () =>
                                 filter.value = TransactionFilter.all,
@@ -314,24 +316,25 @@ class TransactionListScreen extends HookConsumerWidget {
                           const SizedBox(width: SpacingTokens.sm),
                           _FilterChip(
                             label: l10n.transactionFilterIncome,
+                            icon: OpenBudgetIcons.inflow,
                             selected: filter.value == TransactionFilter.income,
                             onSelected: () =>
                                 filter.value = TransactionFilter.income,
-                            color: Theme.of(context).ob.funded,
                           ),
                           const SizedBox(width: SpacingTokens.sm),
                           _FilterChip(
                             label: l10n.transactionFilterExpense,
+                            icon: OpenBudgetIcons.outflow,
                             selected: filter.value == TransactionFilter.expense,
                             onSelected: () =>
                                 filter.value = TransactionFilter.expense,
-                            color: Theme.of(context).ob.overspent,
                           ),
                           const SizedBox(width: SpacingTokens.sm),
                           _FilterChip(
                             label: dateRangeStart.value != null
                                 ? _formatShortDate(dateRangeStart.value!)
                                 : l10n.transactionDateRangeFilter,
+                            icon: OpenBudgetIcons.calendar,
                             selected: dateRangeStart.value != null,
                             onSelected: () => _pickDateRange(
                               context,
@@ -340,13 +343,11 @@ class TransactionListScreen extends HookConsumerWidget {
                               transactions,
                             ),
                           ),
-                          if (dateRangeStart.value != null) ...[
+                          if (dateRangeStart.value != null)
                             IconButton(
-                              icon: const Icon(Icons.clear, size: 16),
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(
-                                minWidth: 24,
-                                minHeight: 24,
+                              icon: const SkribbleIcon(
+                                data: OpenBudgetIcons.close,
+                                size: 20,
                               ),
                               tooltip: l10n.transactionDateRangeClear,
                               onPressed: () {
@@ -354,7 +355,6 @@ class TransactionListScreen extends HookConsumerWidget {
                                 dateRangeEnd.value = null;
                               },
                             ),
-                          ],
                           const SizedBox(width: SpacingTokens.sm),
                           _FlagFilterChip(
                             selectedFlag: flagFilter.value,
@@ -374,7 +374,7 @@ class TransactionListScreen extends HookConsumerWidget {
                       child: Text(
                         l10n.transactionResultCount(filtered.length),
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
+                          color: palette.mutedInk,
                         ),
                       ),
                     ),
@@ -384,24 +384,17 @@ class TransactionListScreen extends HookConsumerWidget {
               if (filtered.isEmpty)
                 Expanded(
                   child: Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.receipt_long_rounded,
-                          size: 48,
-                          color: colorScheme.outlineVariant,
-                        ),
-                        const SizedBox(height: SpacingTokens.md),
-                        Text(
-                          transactions.isEmpty
-                              ? l10n.transactionEmpty
-                              : l10n.transactionNoResults,
-                          style: theme.textTheme.bodyLarge?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(SpacingTokens.md),
+                      child: ObStatePanel.empty(
+                        key: transactionListEmptyKey,
+                        title: transactions.isEmpty
+                            ? l10n.transactionEmpty
+                            : l10n.transactionNoResults,
+                        doodle: transactions.isEmpty
+                            ? WiredDoodleKind.leaf
+                            : WiredDoodleKind.cloud,
+                      ),
                     ),
                   ),
                 )
@@ -436,6 +429,7 @@ class TransactionListScreen extends HookConsumerWidget {
         },
       ),
       floatingActionButton: FloatingActionButton(
+        tooltip: l10n.addTransactionSheetTitle,
         onPressed: () async {
           final action = await showModalBottomSheet<AddTransactionAction>(
             context: context,
@@ -459,69 +453,85 @@ class TransactionListScreen extends HookConsumerWidget {
               );
           }
         },
-        child: const Icon(Icons.add),
+        child: const SkribbleIcon(data: OpenBudgetIcons.add),
       ),
       bottomNavigationBar: selectionMode.value && selectedIds.value.isNotEmpty
           ? SafeArea(
               child: Padding(
                 padding: const EdgeInsets.all(SpacingTokens.md),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: FilledButton.icon(
-                        onPressed: () => _showEnvelopePicker(
+                child: ObCard(
+                  padding: const EdgeInsets.all(SpacingTokens.sm),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: ObFilledButton(
+                          onPressed: () => _showEnvelopePicker(
+                            context,
+                            ref,
+                            selectedIds.value,
+                            selectionMode,
+                            selectedIds,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const SkribbleIcon(
+                                data: OpenBudgetIcons.envelope,
+                                size: 18,
+                              ),
+                              const SizedBox(width: SpacingTokens.xs),
+                              Flexible(
+                                child: Text(l10n.bulkAssignEnvelope),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: SpacingTokens.sm),
+                      IconButton(
+                        key: const Key('bulk-flag-button'),
+                        onPressed: () => _showBulkFlagMenu(
                           context,
                           ref,
                           selectedIds.value,
                           selectionMode,
                           selectedIds,
                         ),
-                        icon: const Icon(Icons.mail_outlined, size: 18),
-                        label: Text(l10n.bulkAssignEnvelope),
+                        icon: const SkribbleIcon(data: OpenBudgetIcons.flag),
+                        tooltip: l10n.bulkSetFlag,
                       ),
-                    ),
-                    const SizedBox(width: SpacingTokens.sm),
-                    IconButton.filled(
-                      onPressed: () => _showBulkFlagMenu(
-                        context,
-                        ref,
-                        selectedIds.value,
-                        selectionMode,
-                        selectedIds,
+                      const SizedBox(width: SpacingTokens.sm),
+                      IconButton(
+                        key: const Key('bulk-clear-button'),
+                        onPressed: () => _bulkMarkCleared(
+                          context,
+                          ref,
+                          transactionsAsync,
+                          selectedIds.value,
+                          selectionMode,
+                          selectedIds,
+                        ),
+                        icon: const SkribbleIcon(
+                          data: OpenBudgetIcons.checkCircle,
+                        ),
+                        tooltip: l10n.bulkMarkCleared,
                       ),
-                      icon: const Icon(Icons.flag_rounded),
-                      tooltip: l10n.bulkSetFlag,
-                    ),
-                    const SizedBox(width: SpacingTokens.sm),
-                    IconButton.filled(
-                      onPressed: () => _bulkMarkCleared(
-                        context,
-                        ref,
-                        transactionsAsync,
-                        selectedIds.value,
-                        selectionMode,
-                        selectedIds,
+                      const SizedBox(width: SpacingTokens.sm),
+                      IconButton(
+                        key: const Key('bulk-delete-button'),
+                        onPressed: () => _confirmBulkDelete(
+                          context,
+                          ref,
+                          selectedIds.value,
+                          selectionMode,
+                          selectedIds,
+                        ),
+                        icon: const SkribbleIcon(data: OpenBudgetIcons.delete),
+                        color: palette.overspent,
+                        tooltip: l10n.bulkDeleteTitle,
                       ),
-                      icon: const Icon(Icons.check_circle_outline),
-                      tooltip: l10n.bulkMarkCleared,
-                    ),
-                    const SizedBox(width: SpacingTokens.sm),
-                    IconButton.filled(
-                      onPressed: () => _confirmBulkDelete(
-                        context,
-                        ref,
-                        selectedIds.value,
-                        selectionMode,
-                        selectedIds,
-                      ),
-                      icon: const Icon(Icons.delete_outline_rounded),
-                      tooltip: l10n.bulkDeleteTitle,
-                      style: IconButton.styleFrom(
-                        backgroundColor: colorScheme.error,
-                        foregroundColor: colorScheme.onError,
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             )
@@ -572,7 +582,9 @@ class TransactionListScreen extends HookConsumerWidget {
                 itemBuilder: (ctx, index) {
                   final (id, label) = envelopeItems[index];
                   return ListTile(
-                    leading: const Icon(Icons.mail_outlined),
+                    leading: const SkribbleIcon(
+                      data: OpenBudgetIcons.envelope,
+                    ),
                     title: Text(label),
                     onTap: () => Navigator.of(ctx).pop(id),
                   );
@@ -622,39 +634,8 @@ class TransactionListScreen extends HookConsumerWidget {
     ValueNotifier<Set<String>> selectedIds,
   ) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
-    final flags = <(String, String, Color)>[
-      (
-        'red',
-        l10n.transactionFlagRed,
-        OpenBudgetPalette.bgFlagCriticalFor(theme),
-      ),
-      (
-        'orange',
-        l10n.transactionFlagOrange,
-        OpenBudgetPalette.bgFlagHighFor(theme),
-      ),
-      (
-        'yellow',
-        l10n.transactionFlagYellow,
-        OpenBudgetPalette.bgFlagMediumFor(theme),
-      ),
-      (
-        'green',
-        l10n.transactionFlagGreen,
-        OpenBudgetPalette.bgFlagPositiveFor(theme),
-      ),
-      (
-        'blue',
-        l10n.transactionFlagBlue,
-        OpenBudgetPalette.bgFlagInfoFor(theme),
-      ),
-      (
-        'purple',
-        l10n.transactionFlagPurple,
-        OpenBudgetPalette.bgFlagAccentFor(theme),
-      ),
-    ];
+    final palette = Theme.of(context).ob;
+    final flags = _flagOptions(l10n);
 
     unawaited(
       showModalBottomSheet<void>(
@@ -675,9 +656,13 @@ class TransactionListScreen extends HookConsumerWidget {
                 runSpacing: SpacingTokens.sm,
                 alignment: WrapAlignment.center,
                 children: [
-                  for (final (value, label, color) in flags)
+                  for (final (value, label, tone) in flags)
                     ActionChip(
-                      avatar: Icon(Icons.flag_rounded, color: color, size: 18),
+                      avatar: SkribbleIcon(
+                        data: OpenBudgetIcons.flag,
+                        color: palette.hue(tone),
+                        size: 18,
+                      ),
                       label: Text(label),
                       onPressed: () {
                         Navigator.of(ctx).pop();
@@ -697,7 +682,7 @@ class TransactionListScreen extends HookConsumerWidget {
               ),
               const Divider(),
               ListTile(
-                leading: const Icon(Icons.flag_outlined),
+                leading: const SkribbleIcon(data: OpenBudgetIcons.flag),
                 title: Text(l10n.bulkClearFlag),
                 onTap: () {
                   Navigator.of(ctx).pop();
@@ -848,22 +833,22 @@ class TransactionListScreen extends HookConsumerWidget {
     ValueNotifier<Set<String>> selectedIds,
   ) async {
     final l10n = AppLocalizations.of(context);
-    final colorScheme = Theme.of(context).colorScheme;
+    final palette = Theme.of(context).ob;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(l10n.bulkDeleteTitle),
         content: Text(l10n.bulkDeleteConfirm(ids.length)),
         actions: [
-          TextButton(
+          ObTextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
             child: Text(l10n.dialogCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(ctx).pop(true),
             style: FilledButton.styleFrom(
-              backgroundColor: colorScheme.error,
-              foregroundColor: colorScheme.onError,
+              backgroundColor: palette.overspent,
+              foregroundColor: palette.onAction,
             ),
             child: Text(l10n.deleteConfirmButton),
           ),
@@ -976,31 +961,31 @@ class TransactionListScreen extends HookConsumerWidget {
     ValueNotifier<TransactionSort> sortOrder,
   ) {
     final l10n = AppLocalizations.of(context);
-    final sortOptions = <(TransactionSort, String, IconData)>[
+    final sortOptions = <(TransactionSort, String, WiredSvgIconData)>[
       (
         TransactionSort.dateDesc,
         l10n.transactionSortDateDesc,
-        Icons.arrow_downward_rounded,
+        OpenBudgetIcons.chevronDown,
       ),
       (
         TransactionSort.dateAsc,
         l10n.transactionSortDateAsc,
-        Icons.arrow_upward_rounded,
+        OpenBudgetIcons.chevronUp,
       ),
       (
         TransactionSort.amountDesc,
         l10n.transactionSortAmountDesc,
-        Icons.arrow_downward_rounded,
+        OpenBudgetIcons.chevronDown,
       ),
       (
         TransactionSort.amountAsc,
         l10n.transactionSortAmountAsc,
-        Icons.arrow_upward_rounded,
+        OpenBudgetIcons.chevronUp,
       ),
       (
         TransactionSort.description,
         l10n.transactionSortDescription,
-        Icons.sort_by_alpha_rounded,
+        OpenBudgetIcons.sortAlphabetical,
       ),
     ];
 
@@ -1021,13 +1006,10 @@ class TransactionListScreen extends HookConsumerWidget {
               const Divider(height: 1),
               for (final (value, label, icon) in sortOptions)
                 ListTile(
-                  leading: Icon(icon),
+                  leading: SkribbleIcon(data: icon),
                   title: Text(label),
                   trailing: sortOrder.value == value
-                      ? Icon(
-                          Icons.check_rounded,
-                          color: Theme.of(ctx).colorScheme.primary,
-                        )
+                      ? const SkribbleIcon(data: OpenBudgetIcons.check)
                       : null,
                   onTap: () {
                     sortOrder.value = value;
@@ -1042,34 +1024,51 @@ class TransactionListScreen extends HookConsumerWidget {
   }
 }
 
+List<(String, String, ObTone)> _flagOptions(AppLocalizations l10n) => [
+  ('red', l10n.transactionFlagRed, ObTone.overspent),
+  ('orange', l10n.transactionFlagOrange, ObTone.underfunded),
+  ('yellow', l10n.transactionFlagYellow, ObTone.underfunded),
+  ('green', l10n.transactionFlagGreen, ObTone.funded),
+  ('blue', l10n.transactionFlagBlue, ObTone.brand),
+  ('purple', l10n.transactionFlagPurple, ObTone.review),
+];
+
+String? _flagLabel(String? flagColor, AppLocalizations l10n) =>
+    switch (flagColor) {
+      'red' => l10n.transactionFlagRed,
+      'orange' => l10n.transactionFlagOrange,
+      'yellow' => l10n.transactionFlagYellow,
+      'green' => l10n.transactionFlagGreen,
+      'blue' => l10n.transactionFlagBlue,
+      'purple' => l10n.transactionFlagPurple,
+      _ => null,
+    };
+
 class _FilterChip extends HookWidget {
   const _FilterChip({
     required this.label,
+    required this.icon,
     required this.selected,
     required this.onSelected,
-    this.color,
   });
 
   final String label;
+  final WiredSvgIconData icon;
   final bool selected;
   final VoidCallback onSelected;
-  final Color? color;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final chipColor = color ?? theme.colorScheme.primary;
-
+    final palette = Theme.of(context).ob;
     return FilterChip(
+      avatar: SkribbleIcon(
+        data: icon,
+        size: 18,
+        color: selected ? palette.ink : palette.mutedInk,
+      ),
       label: Text(label),
       selected: selected,
       onSelected: (_) => onSelected(),
-      selectedColor: chipColor.withAlpha(30),
-      checkmarkColor: chipColor,
-      labelStyle: TextStyle(
-        color: selected ? chipColor : theme.colorScheme.onSurfaceVariant,
-        fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
-      ),
     );
   }
 }
@@ -1083,62 +1082,25 @@ class _FlagFilterChip extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
-    final flagColor = _flagColorFromString(selectedFlag, theme);
-    final isActive = selectedFlag != null;
+    final palette = Theme.of(context).ob;
+    final flagTone = _flagToneFromString(selectedFlag);
+    final isActive = flagTone != null;
 
     return FilterChip(
-      avatar: Icon(
-        isActive ? Icons.flag_rounded : Icons.flag_outlined,
-        size: 16,
-        color: flagColor ?? theme.colorScheme.onSurfaceVariant,
+      avatar: SkribbleIcon(
+        data: OpenBudgetIcons.flag,
+        size: 18,
+        color: flagTone == null ? palette.mutedInk : palette.hue(flagTone),
       ),
       label: Text(l10n.transactionFilterFlagged),
       selected: isActive,
-      selectedColor: (flagColor ?? theme.colorScheme.primary).withAlpha(30),
-      checkmarkColor: flagColor,
-      labelStyle: TextStyle(
-        color: isActive ? flagColor : theme.colorScheme.onSurfaceVariant,
-        fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
-      ),
       onSelected: (_) => _showFlagPicker(context, l10n),
     );
   }
 
   void _showFlagPicker(BuildContext context, AppLocalizations l10n) {
-    final theme = Theme.of(context);
-    final flags = <(String, String, Color)>[
-      (
-        'red',
-        l10n.transactionFlagRed,
-        OpenBudgetPalette.bgFlagCriticalFor(theme),
-      ),
-      (
-        'orange',
-        l10n.transactionFlagOrange,
-        OpenBudgetPalette.bgFlagHighFor(theme),
-      ),
-      (
-        'yellow',
-        l10n.transactionFlagYellow,
-        OpenBudgetPalette.bgFlagMediumFor(theme),
-      ),
-      (
-        'green',
-        l10n.transactionFlagGreen,
-        OpenBudgetPalette.bgFlagPositiveFor(theme),
-      ),
-      (
-        'blue',
-        l10n.transactionFlagBlue,
-        OpenBudgetPalette.bgFlagInfoFor(theme),
-      ),
-      (
-        'purple',
-        l10n.transactionFlagPurple,
-        OpenBudgetPalette.bgFlagAccentFor(theme),
-      ),
-    ];
+    final palette = Theme.of(context).ob;
+    final flags = _flagOptions(l10n);
 
     unawaited(
       showModalBottomSheet<void>(
@@ -1159,18 +1121,16 @@ class _FlagFilterChip extends HookWidget {
                 runSpacing: SpacingTokens.sm,
                 alignment: WrapAlignment.center,
                 children: [
-                  for (final (value, label, color) in flags)
+                  for (final (value, label, tone) in flags)
                     ActionChip(
-                      avatar: Icon(
-                        selectedFlag == value
-                            ? Icons.flag_rounded
-                            : Icons.flag_outlined,
-                        color: color,
+                      avatar: SkribbleIcon(
+                        data: OpenBudgetIcons.flag,
+                        color: palette.hue(tone),
                         size: 18,
                       ),
                       label: Text(label),
                       side: selectedFlag == value
-                          ? BorderSide(color: color, width: 2)
+                          ? BorderSide(color: palette.ink, width: 2)
                           : null,
                       onPressed: () {
                         Navigator.of(ctx).pop();
@@ -1182,7 +1142,7 @@ class _FlagFilterChip extends HookWidget {
               if (selectedFlag != null) ...[
                 const Divider(),
                 ListTile(
-                  leading: const Icon(Icons.clear_rounded),
+                  leading: const SkribbleIcon(data: OpenBudgetIcons.close),
                   title: Text(l10n.transactionFlagClear),
                   onTap: () {
                     Navigator.of(ctx).pop();
@@ -1208,7 +1168,7 @@ class _StatusFilterChip extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
+    final palette = Theme.of(context).ob;
     final isActive = value != TransactionStatusFilter.all;
     final label = switch (value) {
       TransactionStatusFilter.all => l10n.transactionFilterStatus,
@@ -1218,50 +1178,38 @@ class _StatusFilterChip extends HookWidget {
     };
 
     return FilterChip(
-      avatar: Icon(
-        isActive
-            ? Icons.check_circle_rounded
-            : Icons.check_circle_outline_rounded,
-        size: 16,
-        color: isActive
-            ? theme.colorScheme.primary
-            : theme.colorScheme.onSurfaceVariant,
+      avatar: SkribbleIcon(
+        data: isActive ? OpenBudgetIcons.checkCircle : OpenBudgetIcons.circle,
+        size: 18,
+        color: isActive ? palette.ink : palette.mutedInk,
       ),
       label: Text(label),
       selected: isActive,
-      selectedColor: theme.colorScheme.primary.withAlpha(30),
-      checkmarkColor: theme.colorScheme.primary,
-      labelStyle: TextStyle(
-        color: isActive
-            ? theme.colorScheme.primary
-            : theme.colorScheme.onSurfaceVariant,
-        fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
-      ),
       onSelected: (_) => _showStatusPicker(context, l10n),
     );
   }
 
   void _showStatusPicker(BuildContext context, AppLocalizations l10n) {
-    final options = <(TransactionStatusFilter, String, IconData)>[
+    final options = <(TransactionStatusFilter, String, WiredSvgIconData)>[
       (
         TransactionStatusFilter.all,
         l10n.transactionFilterAll,
-        Icons.list_rounded,
+        OpenBudgetIcons.list,
       ),
       (
         TransactionStatusFilter.cleared,
         l10n.transactionFilterCleared,
-        Icons.check_circle_outline,
+        OpenBudgetIcons.checkCircle,
       ),
       (
         TransactionStatusFilter.uncleared,
         l10n.transactionFilterUncleared,
-        Icons.circle_outlined,
+        OpenBudgetIcons.circle,
       ),
       (
         TransactionStatusFilter.reconciled,
         l10n.transactionFilterReconciled,
-        Icons.lock_outline_rounded,
+        OpenBudgetIcons.lock,
       ),
     ];
 
@@ -1282,13 +1230,10 @@ class _StatusFilterChip extends HookWidget {
               const Divider(height: 1),
               for (final (filterValue, label, icon) in options)
                 ListTile(
-                  leading: Icon(icon),
+                  leading: SkribbleIcon(data: icon),
                   title: Text(label),
                   trailing: value == filterValue
-                      ? Icon(
-                          Icons.check_rounded,
-                          color: Theme.of(ctx).colorScheme.primary,
-                        )
+                      ? const SkribbleIcon(data: OpenBudgetIcons.check)
                       : null,
                   onTap: () {
                     Navigator.of(ctx).pop();
@@ -1303,16 +1248,15 @@ class _StatusFilterChip extends HookWidget {
   }
 }
 
-Color? _flagColorFromString(String? flagColor, ThemeData theme) =>
-    switch (flagColor) {
-      'red' => OpenBudgetPalette.bgFlagCriticalFor(theme),
-      'orange' => OpenBudgetPalette.bgFlagHighFor(theme),
-      'yellow' => OpenBudgetPalette.bgFlagMediumFor(theme),
-      'green' => OpenBudgetPalette.bgFlagPositiveFor(theme),
-      'blue' => OpenBudgetPalette.bgFlagInfoFor(theme),
-      'purple' => OpenBudgetPalette.bgFlagAccentFor(theme),
-      _ => null,
-    };
+ObTone? _flagToneFromString(String? flagColor) => switch (flagColor) {
+  'red' => ObTone.overspent,
+  'orange' => ObTone.underfunded,
+  'yellow' => ObTone.underfunded,
+  'green' => ObTone.funded,
+  'blue' => ObTone.brand,
+  'purple' => ObTone.review,
+  _ => null,
+};
 
 class _TransactionTile extends HookConsumerWidget {
   const _TransactionTile({
@@ -1341,118 +1285,195 @@ class _TransactionTile extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final palette = theme.ob;
     final isIncome = transaction.amountCents > 0;
-    final color = isIncome
-        ? Theme.of(context).ob.funded
-        : Theme.of(context).ob.overspent;
-    final icon = isIncome
-        ? Icons.arrow_downward_rounded
-        : Icons.arrow_upward_rounded;
+    final tone = isIncome ? ObTone.funded : ObTone.neutral;
     final transactionCurrency = parseCurrencyCode(transaction.currencyCode);
 
     final statusIcon = transaction.reconciled
-        ? Icons.lock_outline_rounded
+        ? OpenBudgetIcons.lock
         : transaction.cleared
-        ? Icons.check_circle_outline
-        : Icons.circle_outlined;
+        ? OpenBudgetIcons.checkCircle
+        : OpenBudgetIcons.circle;
     final statusColor = transaction.reconciled
-        ? colorScheme.primary
+        ? palette.brand
         : transaction.cleared
-        ? Theme.of(context).ob.funded
-        : colorScheme.outline;
-    final statusTooltip = transaction.reconciled
+        ? palette.funded
+        : palette.mutedInk;
+    final statusTone = transaction.reconciled
+        ? ObTone.brand
+        : transaction.cleared
+        ? ObTone.funded
+        : ObTone.neutral;
+    final statusLabel = transaction.reconciled
         ? l10n.transactionReconciled
         : transaction.cleared
         ? l10n.transactionCleared
         : l10n.transactionUncleared;
 
-    final flagColor = _flagColorFromString(transaction.flagColor, theme);
+    final flagTone = _flagToneFromString(transaction.flagColor);
+    final flagLabel = _flagLabel(transaction.flagColor, l10n);
 
-    final card = Card(
-      margin: const EdgeInsets.only(bottom: SpacingTokens.sm),
-      color: isSelected ? colorScheme.primaryContainer.withAlpha(80) : null,
-      child: ListTile(
+    final card = GestureDetector(
+      onLongPress: selectionMode
+          ? null
+          : () => _showFlagMenu(context, ref, l10n),
+      child: ObCard(
+        margin: const EdgeInsets.only(bottom: SpacingTokens.sm),
+        tone: isSelected ? ObTone.brand : null,
         onTap: selectionMode
             ? onToggleSelection
             : () => _showEditDialog(context),
-        onLongPress: selectionMode
-            ? null
-            : () => _showFlagMenu(context, ref, l10n),
-        leading: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (selectionMode)
-              Checkbox(
-                value: isSelected,
-                onChanged: (_) => onToggleSelection?.call(),
-              )
-            else ...[
-              if (flagColor != null)
-                Container(
-                  width: 4,
-                  height: 36,
-                  margin: const EdgeInsets.only(right: SpacingTokens.xs),
-                  decoration: BoxDecoration(
-                    color: flagColor,
-                    borderRadius: BorderRadius.circular(2),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            SpacingTokens.xs,
+            SpacingTokens.sm,
+            SpacingTokens.md,
+            SpacingTokens.sm,
+          ),
+          child: Row(
+            children: [
+              if (selectionMode)
+                Checkbox(
+                  value: isSelected,
+                  onChanged: (_) => onToggleSelection?.call(),
+                )
+              else
+                Tooltip(
+                  message: statusLabel,
+                  child: InkWell(
+                    customBorder: const CircleBorder(),
+                    onTap: transaction.reconciled
+                        ? null
+                        : () => _toggleCleared(context, ref, l10n),
+                    child: SizedBox(
+                      width: 48,
+                      height: 48,
+                      child: Center(
+                        child: SkribbleIcon(
+                          data: statusIcon,
+                          size: 22,
+                          color: statusColor,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-              Tooltip(
-                message: statusTooltip,
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(RadiusTokens.xl),
-                  onTap: transaction.reconciled
-                      ? null
-                      : () => _toggleCleared(context, ref, l10n),
-                  child: Padding(
-                    padding: const EdgeInsets.all(4),
-                    child: Icon(statusIcon, size: 20, color: statusColor),
-                  ),
-                ),
-              ),
-            ],
-            const SizedBox(width: SpacingTokens.xs),
-            CircleAvatar(
-              backgroundColor: color.withAlpha(25),
-              child: Icon(icon, color: color, size: 20),
-            ),
-          ],
-        ),
-        title: Row(
-          children: [
-            Flexible(
-              child: Text(
-                transaction.description,
-                style: theme.textTheme.bodyMedium,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            if (isSplit) ...[
               const SizedBox(width: SpacingTokens.xs),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: colorScheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(4),
+                width: 36,
+                height: 36,
+                decoration: ObRoughDecoration(
+                  color: palette.wash(tone),
+                  outline: palette.quietPen,
+                  radius: 18,
+                  strokeWidth: 1.6,
+                  seed: 11,
                 ),
-                child: Text(
-                  l10n.splitLabel,
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: colorScheme.onPrimaryContainer,
-                    fontSize: 10,
+                child: Center(
+                  child: SkribbleIcon(
+                    data: isIncome
+                        ? OpenBudgetIcons.inflow
+                        : OpenBudgetIcons.outflow,
+                    size: 20,
+                    color: palette.hue(tone),
+                    semanticLabel: isIncome
+                        ? l10n.transactionAddIncome
+                        : l10n.transactionAddExpense,
                   ),
                 ),
               ),
+              const SizedBox(width: SpacingTokens.sm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      transaction.description,
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        color: palette.ink,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    _buildMeta(theme, palette),
+                    if (isSplit ||
+                        (!isIncome && (envelopeName?.isEmpty ?? true)) ||
+                        (flagTone != null && flagLabel != null))
+                      Padding(
+                        padding: const EdgeInsets.only(top: SpacingTokens.xs),
+                        child: Wrap(
+                          spacing: SpacingTokens.xs,
+                          runSpacing: SpacingTokens.xs,
+                          children: [
+                            if (isSplit)
+                              ConstrainedBox(
+                                constraints: const BoxConstraints(
+                                  maxWidth: 180,
+                                ),
+                                child: ObToneChip(
+                                  label: l10n.splitLabel,
+                                  tone: ObTone.review,
+                                  icon: const SkribbleIcon(
+                                    data: OpenBudgetIcons.split,
+                                    size: 14,
+                                  ),
+                                ),
+                              ),
+                            if (!isIncome && (envelopeName?.isEmpty ?? true))
+                              ConstrainedBox(
+                                constraints: const BoxConstraints(
+                                  maxWidth: 180,
+                                ),
+                                child: ObToneChip(
+                                  label: l10n.transactionUnassigned,
+                                  tone: ObTone.review,
+                                  icon: const SkribbleIcon(
+                                    data: OpenBudgetIcons.envelope,
+                                    size: 14,
+                                  ),
+                                ),
+                              ),
+                            if (flagTone != null && flagLabel != null)
+                              ConstrainedBox(
+                                constraints: const BoxConstraints(
+                                  maxWidth: 180,
+                                ),
+                                child: ObToneChip(
+                                  label: flagLabel,
+                                  tone: flagTone,
+                                  icon: const SkribbleIcon(
+                                    data: OpenBudgetIcons.flag,
+                                    size: 14,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: SpacingTokens.sm),
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 132),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    ObAmount(
+                      formatCents(transaction.amountCents, transactionCurrency),
+                      tone: tone,
+                      style: theme.textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: SpacingTokens.xs),
+                    ObToneChip(label: statusLabel, tone: statusTone),
+                  ],
+                ),
+              ),
             ],
-          ],
-        ),
-        subtitle: _buildSubtitle(theme, colorScheme),
-        trailing: Text(
-          formatCents(transaction.amountCents, transactionCurrency),
-          style: theme.textTheme.titleSmall?.copyWith(
-            color: color,
-            fontWeight: FontWeight.bold,
           ),
         ),
       ),
@@ -1467,42 +1488,54 @@ class _TransactionTile extends HookConsumerWidget {
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: SpacingTokens.lg),
         margin: const EdgeInsets.only(bottom: SpacingTokens.sm),
-        decoration: BoxDecoration(
-          color: colorScheme.error,
-          borderRadius: BorderRadius.circular(RadiusTokens.md),
+        decoration: ObRoughDecoration(
+          color: palette.overspent,
+          outline: palette.overspent,
+          seed: 23,
         ),
-        child: Icon(Icons.delete_rounded, color: colorScheme.onError),
+        child: SkribbleIcon(
+          data: OpenBudgetIcons.delete,
+          color: palette.onAction,
+        ),
       ),
-      confirmDismiss: (_) => _confirmDelete(context, l10n, colorScheme),
-      onDismissed: (_) => _deleteTransaction(context, ref, l10n, colorScheme),
+      confirmDismiss: (_) => _confirmDelete(context, l10n),
+      onDismissed: (_) => _deleteTransaction(context, ref, l10n),
       child: card,
     );
   }
 
-  Widget? _buildSubtitle(ThemeData theme, ColorScheme colorScheme) {
-    final parts = <String>[];
-    if (accountName != null && accountName!.isNotEmpty) {
-      parts.add(accountName!);
-    }
-    if (payeeName != null && payeeName!.isNotEmpty) {
-      parts.add(payeeName!);
-    }
-    if (envelopeName != null && envelopeName!.isNotEmpty) {
-      parts.add(envelopeName!);
-    }
+  Widget _buildMeta(ThemeData theme, ObPalette palette) {
     final hasMemo = transaction.memo != null && transaction.memo!.isNotEmpty;
+    final hasEnvelope = envelopeName != null && envelopeName!.isNotEmpty;
+    final hasAccount = accountName != null && accountName!.isNotEmpty;
+    final hasPayee = payeeName != null && payeeName!.isNotEmpty;
+    if (!hasMemo && !hasEnvelope && !hasAccount && !hasPayee) {
+      return const SizedBox.shrink();
+    }
 
-    if (parts.isEmpty && !hasMemo) return null;
+    final contextParts = [
+      if (hasEnvelope) envelopeName!,
+      if (hasAccount) accountName!,
+    ];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (parts.isNotEmpty)
+        if (hasPayee)
           Text(
-            parts.join(' \u2022 '),
+            payeeName!,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: palette.mutedInk,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        if (contextParts.isNotEmpty)
+          Text(
+            contextParts.join(' \u2022 '),
             style: theme.textTheme.bodySmall?.copyWith(
-              color: colorScheme.onSurfaceVariant,
+              color: palette.mutedInk,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -1511,7 +1544,7 @@ class _TransactionTile extends HookConsumerWidget {
           Text(
             transaction.memo!,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: colorScheme.onSurfaceVariant,
+              color: palette.mutedInk,
               fontStyle: FontStyle.italic,
             ),
             maxLines: 1,
@@ -1547,36 +1580,37 @@ class _TransactionTile extends HookConsumerWidget {
   Future<bool?> _confirmDelete(
     BuildContext context,
     AppLocalizations l10n,
-    ColorScheme colorScheme,
-  ) async => showDialog<bool>(
-    context: context,
-    builder: (ctx) => AlertDialog(
-      title: Text(l10n.deleteConfirmTitle),
-      content: Text(
-        '${l10n.deleteConfirmMessage}\n\n"${transaction.description}"',
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(ctx).pop(false),
-          child: Text(l10n.dialogCancel),
+  ) async {
+    final palette = Theme.of(context).ob;
+    return showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.deleteConfirmTitle),
+        content: Text(
+          '${l10n.deleteConfirmMessage}\n\n"${transaction.description}"',
         ),
-        FilledButton(
-          onPressed: () => Navigator.of(ctx).pop(true),
-          style: FilledButton.styleFrom(
-            backgroundColor: colorScheme.error,
-            foregroundColor: colorScheme.onError,
+        actions: [
+          ObTextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l10n.dialogCancel),
           ),
-          child: Text(l10n.deleteConfirmButton),
-        ),
-      ],
-    ),
-  );
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            style: FilledButton.styleFrom(
+              backgroundColor: palette.overspent,
+              foregroundColor: palette.onAction,
+            ),
+            child: Text(l10n.deleteConfirmButton),
+          ),
+        ],
+      ),
+    );
+  }
 
   Future<void> _deleteTransaction(
     BuildContext context,
     WidgetRef ref,
     AppLocalizations l10n,
-    ColorScheme colorScheme,
   ) async {
     try {
       final deleted = await ref
@@ -1641,39 +1675,7 @@ class _TransactionTile extends HookConsumerWidget {
     WidgetRef ref,
     AppLocalizations l10n,
   ) {
-    final theme = Theme.of(context);
-    final flags = <(String, String, Color)>[
-      (
-        'red',
-        l10n.transactionFlagRed,
-        OpenBudgetPalette.bgFlagCriticalFor(theme),
-      ),
-      (
-        'orange',
-        l10n.transactionFlagOrange,
-        OpenBudgetPalette.bgFlagHighFor(theme),
-      ),
-      (
-        'yellow',
-        l10n.transactionFlagYellow,
-        OpenBudgetPalette.bgFlagMediumFor(theme),
-      ),
-      (
-        'green',
-        l10n.transactionFlagGreen,
-        OpenBudgetPalette.bgFlagPositiveFor(theme),
-      ),
-      (
-        'blue',
-        l10n.transactionFlagBlue,
-        OpenBudgetPalette.bgFlagInfoFor(theme),
-      ),
-      (
-        'purple',
-        l10n.transactionFlagPurple,
-        OpenBudgetPalette.bgFlagAccentFor(theme),
-      ),
-    ];
+    final flags = _flagOptions(l10n);
 
     unawaited(
       showModalBottomSheet<void>(
@@ -1694,10 +1696,10 @@ class _TransactionTile extends HookConsumerWidget {
                 runSpacing: SpacingTokens.sm,
                 alignment: WrapAlignment.center,
                 children: [
-                  for (final (value, label, color) in flags)
+                  for (final (value, label, tone) in flags)
                     _FlagChip(
                       label: label,
-                      color: color,
+                      tone: tone,
                       selected: transaction.flagColor == value,
                       onTap: () {
                         Navigator.of(ctx).pop();
@@ -1711,7 +1713,7 @@ class _TransactionTile extends HookConsumerWidget {
               if (transaction.flagColor != null) ...[
                 const Divider(),
                 ListTile(
-                  leading: const Icon(Icons.flag_outlined),
+                  leading: const SkribbleIcon(data: OpenBudgetIcons.flag),
                   title: Text(l10n.transactionFlagClear),
                   onTap: () {
                     Navigator.of(ctx).pop();
@@ -1769,27 +1771,30 @@ class _TransactionTile extends HookConsumerWidget {
 class _FlagChip extends HookWidget {
   const _FlagChip({
     required this.label,
-    required this.color,
+    required this.tone,
     required this.selected,
     required this.onTap,
   });
 
   final String label;
-  final Color color;
+  final ObTone tone;
   final bool selected;
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => ActionChip(
-    avatar: Icon(
-      selected ? Icons.flag_rounded : Icons.flag_outlined,
-      color: color,
-      size: 18,
-    ),
-    label: Text(label),
-    side: selected ? BorderSide(color: color, width: 2) : null,
-    onPressed: onTap,
-  );
+  Widget build(BuildContext context) {
+    final palette = Theme.of(context).ob;
+    return ActionChip(
+      avatar: SkribbleIcon(
+        data: OpenBudgetIcons.flag,
+        color: palette.hue(tone),
+        size: 18,
+      ),
+      label: Text(label),
+      side: selected ? BorderSide(color: palette.ink, width: 2) : null,
+      onPressed: onTap,
+    );
+  }
 }
 
 class _GroupedTransactionList extends HookWidget {
@@ -1898,8 +1903,6 @@ class _DateHeader extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final dateOnly = DateTime(date.year, date.month, date.day);
@@ -1911,17 +1914,11 @@ class _DateHeader extends HookWidget {
       _ => _formatFullDate(date, l10n),
     };
 
-    return Padding(
+    return ObSectionHeader(
+      title: label,
       padding: const EdgeInsets.only(
         top: SpacingTokens.md,
         bottom: SpacingTokens.xs,
-      ),
-      child: Text(
-        label,
-        style: theme.textTheme.labelLarge?.copyWith(
-          color: colorScheme.onSurfaceVariant,
-          fontWeight: FontWeight.w600,
-        ),
       ),
     );
   }

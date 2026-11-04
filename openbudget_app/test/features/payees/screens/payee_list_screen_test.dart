@@ -32,7 +32,7 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.byType(ObLoadingPanel), findsOneWidget);
     });
 
     testWidgets('renders error state with error icon', (tester) async {
@@ -54,7 +54,13 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Could not load payees'), findsOneWidget);
-      expect(find.byIcon(Icons.error_outline_rounded), findsOneWidget);
+      expect(find.byType(ObStatePanel), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is WiredDoodle && w.kind == WiredDoodleKind.cloud,
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('renders empty state with add payee button', (tester) async {
@@ -79,7 +85,39 @@ void main() {
         findsOneWidget,
       );
       expect(find.text('Add Payee'), findsOneWidget);
-      expect(find.byIcon(Icons.store_rounded), findsOneWidget);
+      expect(find.byKey(payeeListEmptyKey), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is WiredDoodle && w.kind == WiredDoodleKind.cupcake,
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('add payee action opens a hand-drawn name field', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            payeeListProvider.overrideWith((ref, budgetId) async => <Payee>[]),
+          ],
+          child: MaterialApp(
+            theme: OpenBudgetTheme.light,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: const PayeeListScreen(budgetId: _budgetId),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Add Payee'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AlertDialog), findsOneWidget);
+      expect(find.byType(ObTextField), findsOneWidget);
+      expect(find.byType(ObFilledButton), findsOneWidget);
     });
 
     testWidgets('renders payee list with payee names', (tester) async {
@@ -142,7 +180,12 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(TextField), findsOneWidget);
-      expect(find.byIcon(Icons.search_rounded), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.search,
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('renders app bar with payees title', (tester) async {
@@ -181,7 +224,12 @@ void main() {
       await tester.pumpAndSettle();
 
       // The add icon appears in the app bar action button.
-      expect(find.byIcon(Icons.add), findsWidgets);
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.add,
+        ),
+        findsWidgets,
+      );
     });
 
     testWidgets('renders store icon for each payee', (tester) async {
@@ -211,7 +259,12 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.byIcon(Icons.store_rounded), findsWidgets);
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.store,
+        ),
+        findsWidgets,
+      );
     });
   });
 }

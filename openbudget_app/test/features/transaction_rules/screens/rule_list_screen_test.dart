@@ -113,7 +113,7 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.byType(ObLoadingPanel), findsOneWidget);
     });
 
     testWidgets('renders error state when rules fail to load', (tester) async {
@@ -171,7 +171,13 @@ void main() {
         ),
         findsOneWidget,
       );
-      expect(find.byIcon(Icons.rule_rounded), findsOneWidget);
+      expect(find.byKey(ruleListEmptyKey), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is WiredDoodle && w.kind == WiredDoodleKind.sparkle,
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('renders FAB add button', (tester) async {
@@ -197,6 +203,38 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(FloatingActionButton), findsOneWidget);
+    });
+
+    testWidgets('add rule action opens hand-drawn payee and envelope fields', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            ruleListProvider.overrideWith(
+              (ref, budgetId) async => <TransactionRule>[],
+            ),
+            payeeListProvider.overrideWith((ref, budgetId) async => <Payee>[]),
+            budgetSummaryProvider.overrideWith(
+              (ref, budgetId) async => _makeEmptySummary(),
+            ),
+          ],
+          child: MaterialApp(
+            theme: OpenBudgetTheme.light,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: const RuleListScreen(budgetId: _budgetId),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byType(FloatingActionButton));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AlertDialog), findsOneWidget);
+      expect(find.byType(ObDropdown<String>), findsNWidgets(2));
+      expect(find.byType(ObFilledButton), findsOneWidget);
     });
 
     testWidgets('renders rule list with payee names', (tester) async {
@@ -281,6 +319,37 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Transaction Rules'), findsOneWidget);
+    });
+
+    testWidgets('renders hand-drawn back action to More', (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            ruleListProvider.overrideWith(
+              (ref, budgetId) async => <TransactionRule>[],
+            ),
+            payeeListProvider.overrideWith((ref, budgetId) async => <Payee>[]),
+            budgetSummaryProvider.overrideWith(
+              (ref, budgetId) async => _makeEmptySummary(),
+            ),
+          ],
+          child: MaterialApp(
+            theme: OpenBudgetTheme.light,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: const RuleListScreen(budgetId: _budgetId),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byTooltip('Back'), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.back,
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('renders toggle switch for each rule', (tester) async {

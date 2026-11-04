@@ -5825,6 +5825,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Day {day}'**
   String budgetDayOfMonth(int day);
+
+  /// No description provided for @transactionsLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading transactions'**
+  String get transactionsLoading;
+
+  /// No description provided for @payeesLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading payees'**
+  String get payeesLoading;
+
+  /// No description provided for @rulesLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading rules'**
+  String get rulesLoading;
+
+  /// No description provided for @transactionsBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get transactionsBack;
+
+  /// No description provided for @transactionsSearchClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear search'**
+  String get transactionsSearchClear;
+
+  /// No description provided for @transactionsUnknownPayee.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown payee'**
+  String get transactionsUnknownPayee;
+
+  /// No description provided for @transactionsUnknownEnvelope.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown envelope'**
+  String get transactionsUnknownEnvelope;
 }
 
 class _AppLocalizationsDelegate

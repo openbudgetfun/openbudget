@@ -25,6 +25,7 @@ class EditTransactionDialog extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
+    final palette = Theme.of(context).ob;
     final descriptionController = useTextEditingController(
       text: transaction.description,
     );
@@ -87,30 +88,26 @@ class EditTransactionDialog extends HookConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(
+            ObTextField(
               controller: descriptionController,
-              decoration: InputDecoration(
-                labelText: l10n.transactionDescriptionLabel,
-                prefixIcon: const Icon(Icons.description_outlined),
+              labelText: l10n.transactionDescriptionLabel,
+              prefixIcon: const SkribbleIcon(
+                data: OpenBudgetIcons.document,
               ),
-              textInputAction: TextInputAction.next,
             ),
             const SizedBox(height: SpacingTokens.md),
-            TextField(
+            ObTextField(
               controller: amountController,
-              decoration: InputDecoration(
-                labelText: l10n.transactionAmountLabel,
-                prefixIcon: const Icon(Icons.attach_money_rounded),
-              ),
+              labelText: l10n.transactionAmountLabel,
+              prefixIcon: const SkribbleIcon(data: OpenBudgetIcons.money),
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
               ),
-              textInputAction: TextInputAction.next,
             ),
             const SizedBox(height: SpacingTokens.md),
             ListTile(
               contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.calendar_today_rounded),
+              leading: const SkribbleIcon(data: OpenBudgetIcons.calendar),
               title: Text(
                 '${selectedDate.value.year}-'
                 '${selectedDate.value.month.toString().padLeft(2, '0')}-'
@@ -129,33 +126,49 @@ class EditTransactionDialog extends HookConsumerWidget {
               },
             ),
             const SizedBox(height: SpacingTokens.md),
-            DropdownButtonFormField<String>(
-              initialValue: selectedPayeeId.value ?? '',
-              items: payeeItems,
-              onChanged: (value) {
-                selectedPayeeId.value = (value != null && value.isNotEmpty)
-                    ? value
-                    : null;
-              },
-              decoration: InputDecoration(
-                labelText: l10n.payeeLabel,
-                prefixIcon: const Icon(Icons.person_outlined),
-              ),
+            Row(
+              children: [
+                SkribbleIcon(
+                  data: OpenBudgetIcons.person,
+                  size: 20,
+                  color: palette.brand,
+                ),
+                const SizedBox(width: SpacingTokens.sm),
+                Expanded(
+                  child: ObDropdown<String>(
+                    value: selectedPayeeId.value ?? '',
+                    items: payeeItems,
+                    labelText: l10n.payeeLabel,
+                    onChanged: (value) {
+                      selectedPayeeId.value =
+                          (value != null && value.isNotEmpty) ? value : null;
+                    },
+                  ),
+                ),
+              ],
             ),
             if (!isIncome) ...[
               const SizedBox(height: SpacingTokens.md),
-              DropdownButtonFormField<String>(
-                initialValue: selectedEnvelopeId.value ?? '',
-                items: envelopeItems,
-                onChanged: (value) {
-                  selectedEnvelopeId.value = (value != null && value.isNotEmpty)
-                      ? value
-                      : null;
-                },
-                decoration: InputDecoration(
-                  labelText: l10n.splitEnvelopeLabel,
-                  prefixIcon: const Icon(Icons.mail_outlined),
-                ),
+              Row(
+                children: [
+                  SkribbleIcon(
+                    data: OpenBudgetIcons.envelope,
+                    size: 20,
+                    color: palette.brand,
+                  ),
+                  const SizedBox(width: SpacingTokens.sm),
+                  Expanded(
+                    child: ObDropdown<String>(
+                      value: selectedEnvelopeId.value ?? '',
+                      items: envelopeItems,
+                      labelText: l10n.splitEnvelopeLabel,
+                      onChanged: (value) {
+                        selectedEnvelopeId.value =
+                            (value != null && value.isNotEmpty) ? value : null;
+                      },
+                    ),
+                  ),
+                ],
               ),
             ],
             const SizedBox(height: SpacingTokens.md),
@@ -164,7 +177,7 @@ class EditTransactionDialog extends HookConsumerWidget {
               decoration: InputDecoration(
                 labelText: l10n.transactionMemoLabel,
                 hintText: l10n.transactionMemoHint,
-                prefixIcon: const Icon(Icons.notes_rounded),
+                prefixIcon: const SkribbleIcon(data: OpenBudgetIcons.note),
               ),
               maxLines: 2,
               textInputAction: TextInputAction.done,
@@ -173,63 +186,57 @@ class EditTransactionDialog extends HookConsumerWidget {
         ),
       ),
       actions: [
-        TextButton(
+        ObTextButton(
           onPressed: () => Navigator.of(context).pop(),
           child: Text(l10n.dialogCancel),
         ),
-        FilledButton(
-          onPressed: isSubmitting.value
-              ? null
-              : () async {
-                  final description = descriptionController.text.trim();
-                  final amountText = amountController.text.trim();
-                  final amount = double.tryParse(amountText) ?? 0;
-                  if (description.isEmpty || amount <= 0) return;
+        ObFilledButton(
+          isLoading: isSubmitting.value,
+          loadingLabel: l10n.dialogSave,
+          onPressed: () async {
+            final description = descriptionController.text.trim();
+            final amountText = amountController.text.trim();
+            final amount = double.tryParse(amountText) ?? 0;
+            if (description.isEmpty || amount <= 0) return;
 
-                  final amountCents = (amount * _pow10(currencyCode.decimals))
-                      .round();
-                  final signedAmount = isIncome ? amountCents : -amountCents;
-                  final memo = memoController.text.trim();
+            final amountCents = (amount * _pow10(currencyCode.decimals))
+                .round();
+            final signedAmount = isIncome ? amountCents : -amountCents;
+            final memo = memoController.text.trim();
 
-                  isSubmitting.value = true;
-                  final navigator = Navigator.of(context);
-                  try {
-                    await ref
-                        .read(transactionActionsProvider.notifier)
-                        .updateTransaction(
-                          transactionId: transaction.id?.toString() ?? '',
-                          budgetId: budgetId,
-                          description: description,
-                          amountCents: signedAmount,
-                          transactionDate: selectedDate.value,
-                          payeeId: selectedPayeeId.value,
-                          envelopeId: selectedEnvelopeId.value,
-                          memo: memo.isNotEmpty ? memo : null,
-                        );
-                    if (!context.mounted) return;
-                    showAppToast(
-                      context,
-                      message: l10n.transactionEditSuccess,
-                      variant: AppToastVariant.success,
-                    );
-                    navigator.pop();
-                  } on Exception catch (_) {
-                    isSubmitting.value = false;
-                    if (!context.mounted) return;
-                    showAppToast(
-                      context,
-                      message: l10n.transactionEditError,
-                      variant: AppToastVariant.error,
-                    );
-                  }
-                },
-          child: isSubmitting.value
-              ? const SizedBox(
-                  height: 20,
-                  width: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : Text(l10n.dialogSave),
+            isSubmitting.value = true;
+            final navigator = Navigator.of(context);
+            try {
+              await ref
+                  .read(transactionActionsProvider.notifier)
+                  .updateTransaction(
+                    transactionId: transaction.id?.toString() ?? '',
+                    budgetId: budgetId,
+                    description: description,
+                    amountCents: signedAmount,
+                    transactionDate: selectedDate.value,
+                    payeeId: selectedPayeeId.value,
+                    envelopeId: selectedEnvelopeId.value,
+                    memo: memo.isNotEmpty ? memo : null,
+                  );
+              if (!context.mounted) return;
+              showAppToast(
+                context,
+                message: l10n.transactionEditSuccess,
+                variant: AppToastVariant.success,
+              );
+              navigator.pop();
+            } on Exception catch (_) {
+              isSubmitting.value = false;
+              if (!context.mounted) return;
+              showAppToast(
+                context,
+                message: l10n.transactionEditError,
+                variant: AppToastVariant.error,
+              );
+            }
+          },
+          child: Text(l10n.dialogSave),
         ),
       ],
     );

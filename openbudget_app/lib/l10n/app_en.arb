@@ -1652,5 +1652,12 @@
         "type": "int"
       }
     }
-  }
+  },
+  "transactionsLoading": "Loading transactions",
+  "payeesLoading": "Loading payees",
+  "rulesLoading": "Loading rules",
+  "transactionsBack": "Back",
+  "transactionsSearchClear": "Clear search",
+  "transactionsUnknownPayee": "Unknown payee",
+  "transactionsUnknownEnvelope": "Unknown envelope"
 }

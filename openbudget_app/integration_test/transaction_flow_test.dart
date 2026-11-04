@@ -414,7 +414,7 @@ void main() {
 
     await tester.tap(find.text('Status'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Uncleared'));
+    await tester.tap(find.widgetWithText(ListTile, 'Uncleared'));
     await tester.pumpAndSettle();
 
     expect(find.text('Grocery Store'), findsOneWidget);
@@ -463,6 +463,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Set Flag'), findsOneWidget);
-    expect(find.text('Red'), findsOneWidget);
+    expect(find.widgetWithText(ActionChip, 'Red'), findsOneWidget);
   });
 }

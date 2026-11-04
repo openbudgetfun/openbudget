@@ -221,7 +221,12 @@ void main() {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
-      expect(find.byIcon(Icons.arrow_upward_rounded), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.outflow,
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('shows cancel button', (tester) async {
@@ -236,7 +241,12 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Description'), findsOneWidget);
-      expect(find.byIcon(Icons.description_outlined), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.document,
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('shows amount text field', (tester) async {
@@ -244,7 +254,12 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Amount'), findsOneWidget);
-      expect(find.byIcon(Icons.attach_money_rounded), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.money,
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('shows payee dropdown with No Payee option', (tester) async {
@@ -252,7 +267,12 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Payee'), findsOneWidget);
-      expect(find.byIcon(Icons.store_rounded), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.store,
+        ),
+        findsOneWidget,
+      );
       expect(find.text('No Payee'), findsOneWidget);
     });
 
@@ -264,7 +284,12 @@ void main() {
 
       // The envelope dropdown label and the default selected item.
       expect(find.text('Unassigned'), findsNWidgets(2));
-      expect(find.byIcon(Icons.mail_outlined), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.envelope,
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('shows memo text field with hint', (tester) async {
@@ -272,7 +297,12 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Memo'), findsOneWidget);
-      expect(find.byIcon(Icons.note_outlined), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.note,
+        ),
+        findsOneWidget,
+      );
       expect(find.text('Add a note (optional)'), findsOneWidget);
     });
 

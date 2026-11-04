@@ -3432,4 +3432,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String budgetDayOfMonth(int day) {
     return 'Day $day';
   }
+
+  @override
+  String get transactionsLoading => 'Loading transactions';
+
+  @override
+  String get payeesLoading => 'Loading payees';
+
+  @override
+  String get rulesLoading => 'Loading rules';
+
+  @override
+  String get transactionsBack => 'Back';
+
+  @override
+  String get transactionsSearchClear => 'Clear search';
+
+  @override
+  String get transactionsUnknownPayee => 'Unknown payee';
+
+  @override
+  String get transactionsUnknownEnvelope => 'Unknown envelope';
 }
