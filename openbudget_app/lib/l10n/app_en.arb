@@ -1659,5 +1659,64 @@
   "transactionsBack": "Back",
   "transactionsSearchClear": "Clear search",
   "transactionsUnknownPayee": "Unknown payee",
-  "transactionsUnknownEnvelope": "Unknown envelope"
+  "transactionsUnknownEnvelope": "Unknown envelope",
+  "reportsAgeOfMoneyHint": "How long your money lasts after it arrives",
+  "reportsAgeOfMoneyTitle": "Age of Money",
+  "reportsDays": "{count, plural, =1{1 day} other{{count} days}}",
+  "@reportsDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reportsLoading": "Adding up the month…",
+  "reportsNetWorthCurrent": "Right now",
+  "reportsNetWorthExplainerBody": "Net worth adds up every active account in this plan: what you own minus what you owe. Think of it as a snapshot of today, not a score.",
+  "reportsNetWorthExplainerTitle": "What net worth counts",
+  "reportsNextMonth": "Next month",
+  "reportsOtherCategories": "Other categories",
+  "reportsPositiveInflowTotal": "Income this period",
+  "reportsPreviousMonth": "Previous month",
+  "recurringCalendarDayCount": "{count, plural, =1{1 scheduled item} other{{count} scheduled items}}",
+  "@recurringCalendarDayCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recurringActiveLabel": "Active",
+  "recurringLoading": "Fetching the schedule…",
+  "recurringNextMonth": "Next month",
+  "recurringPausedLabel": "Paused",
+  "recurringPostedLabel": "Posted",
+  "recurringPreviousMonth": "Previous month",
+  "recurringSavingLabel": "Saving…",
+  "recurringScheduledLabel": "Scheduled",
+  "recurringSummaryTitle": "Scheduled totals",
+  "reportsChartEmptyMessage": "Add a few transactions and this drawing fills in.",
+  "reportsChartEmptyTitle": "Nothing to chart yet",
+  "reportsChartSeriesEntry": "{label}: {amount}",
+  "@reportsChartSeriesEntry": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "reportsChartSummary": "{title}. {entries}",
+  "@reportsChartSummary": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "entries": {
+        "type": "String"
+      }
+    }
+  }
 }

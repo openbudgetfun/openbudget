@@ -120,7 +120,7 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.byType(CircularProgressIndicator), findsWidgets);
+      expect(find.byType(ObLoadingPanel), findsWidgets);
     });
 
     testWidgets('renders reflect dashboard cards', (tester) async {
@@ -179,7 +179,11 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('Could not load report data'), findsOneWidget);
+      expect(find.textContaining('Could not load report data'), findsWidgets);
+      expect(
+        find.textContaining('Exception: Could not load report data'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('renders age of money preview with days', (tester) async {
@@ -191,6 +195,11 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      await tester.scrollUntilVisible(
+        find.text('7 days'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
       expect(find.text('7 days'), findsOneWidget);
     });
 

@@ -228,7 +228,7 @@ void main() {
       expect(find.text('December 2025–February 2026'), findsOneWidget);
       expect(find.textContaining(r'$6,660.00'), findsOneWidget);
 
-      await tester.tap(find.byIcon(Icons.chevron_left_rounded));
+      await tester.tap(find.byKey(SpendingByPayeeScreen.previousMonthKey));
       await tester.pumpAndSettle();
 
       expect(find.text('January 2026'), findsOneWidget);
@@ -303,12 +303,12 @@ void main() {
       expect(find.textContaining(r'$2,800.00'), findsOneWidget);
       expect(find.textContaining(r'$980.00'), findsOneWidget);
       await tester.scrollUntilVisible(
-        find.text('Positive Inflow Total'),
+        find.text('Income this period'),
         200,
         scrollable: find.byType(Scrollable).first,
       );
       await tester.pumpAndSettle();
-      expect(find.text('Positive Inflow Total'), findsOneWidget);
+      expect(find.text('Income this period'), findsOneWidget);
 
       await captureIntegrationScreenshot(
         tester,

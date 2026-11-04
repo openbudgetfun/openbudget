@@ -60,7 +60,7 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.byType(ObLoadingPanel), findsOneWidget);
     });
 
     testWidgets('renders error state with error icon', (tester) async {
@@ -87,7 +87,7 @@ void main() {
         find.text('Could not load recurring transactions'),
         findsOneWidget,
       );
-      expect(find.byIcon(Icons.error_outline_rounded), findsOneWidget);
+      expect(find.byType(ObStatePanel), findsOneWidget);
     });
 
     testWidgets('renders empty state with add button', (tester) async {
@@ -117,7 +117,13 @@ void main() {
         findsOneWidget,
       );
       expect(find.text('Add Recurring'), findsOneWidget);
-      expect(find.byIcon(Icons.repeat_rounded), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is WiredDoodle && widget.kind == WiredDoodleKind.sun,
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('renders recurring list with descriptions', (tester) async {
@@ -258,9 +264,15 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // The add icon appears in the app bar action button (empty state also
-      // shows an Add Recurring button).
-      expect(find.byIcon(Icons.add), findsWidgets);
+      // The add action lives in the app bar; the empty state repeats it as
+      // a labelled button without an icon.
+      expect(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is SkribbleIcon && widget.data == OpenBudgetIcons.add,
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('renders calendar button in app bar', (tester) async {
@@ -282,7 +294,14 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.byIcon(Icons.calendar_month_rounded), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is SkribbleIcon &&
+              widget.data == OpenBudgetIcons.calendarMonth,
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('renders toggle switch for each recurring item', (

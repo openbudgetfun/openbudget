@@ -5867,6 +5867,156 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unknown envelope'**
   String get transactionsUnknownEnvelope;
+
+  /// No description provided for @reportsAgeOfMoneyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'How long your money lasts after it arrives'**
+  String get reportsAgeOfMoneyHint;
+
+  /// No description provided for @reportsAgeOfMoneyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Age of Money'**
+  String get reportsAgeOfMoneyTitle;
+
+  /// No description provided for @reportsDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 day} other{{count} days}}'**
+  String reportsDays(int count);
+
+  /// No description provided for @reportsLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Adding up the month…'**
+  String get reportsLoading;
+
+  /// No description provided for @reportsNetWorthCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'Right now'**
+  String get reportsNetWorthCurrent;
+
+  /// No description provided for @reportsNetWorthExplainerBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Net worth adds up every active account in this plan: what you own minus what you owe. Think of it as a snapshot of today, not a score.'**
+  String get reportsNetWorthExplainerBody;
+
+  /// No description provided for @reportsNetWorthExplainerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What net worth counts'**
+  String get reportsNetWorthExplainerTitle;
+
+  /// No description provided for @reportsNextMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Next month'**
+  String get reportsNextMonth;
+
+  /// No description provided for @reportsOtherCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Other categories'**
+  String get reportsOtherCategories;
+
+  /// No description provided for @reportsPositiveInflowTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Income this period'**
+  String get reportsPositiveInflowTotal;
+
+  /// No description provided for @reportsPreviousMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous month'**
+  String get reportsPreviousMonth;
+
+  /// No description provided for @recurringCalendarDayCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 scheduled item} other{{count} scheduled items}}'**
+  String recurringCalendarDayCount(int count);
+
+  /// No description provided for @recurringActiveLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get recurringActiveLabel;
+
+  /// No description provided for @recurringLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetching the schedule…'**
+  String get recurringLoading;
+
+  /// No description provided for @recurringNextMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Next month'**
+  String get recurringNextMonth;
+
+  /// No description provided for @recurringPausedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused'**
+  String get recurringPausedLabel;
+
+  /// No description provided for @recurringPostedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Posted'**
+  String get recurringPostedLabel;
+
+  /// No description provided for @recurringPreviousMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous month'**
+  String get recurringPreviousMonth;
+
+  /// No description provided for @recurringSavingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving…'**
+  String get recurringSavingLabel;
+
+  /// No description provided for @recurringScheduledLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled'**
+  String get recurringScheduledLabel;
+
+  /// No description provided for @recurringSummaryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled totals'**
+  String get recurringSummaryTitle;
+
+  /// No description provided for @reportsChartEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a few transactions and this drawing fills in.'**
+  String get reportsChartEmptyMessage;
+
+  /// No description provided for @reportsChartEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to chart yet'**
+  String get reportsChartEmptyTitle;
+
+  /// No description provided for @reportsChartSeriesEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'{label}: {amount}'**
+  String reportsChartSeriesEntry(String label, String amount);
+
+  /// No description provided for @reportsChartSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{title}. {entries}'**
+  String reportsChartSummary(String title, String entries);
 }
 
 class _AppLocalizationsDelegate

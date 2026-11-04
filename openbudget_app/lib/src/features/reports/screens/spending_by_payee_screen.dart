@@ -3,13 +3,15 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/reports/providers/spending_report_provider.dart';
+import 'package:openbudget_app/src/features/reports/utils/report_month_label.dart';
+import 'package:openbudget_app/src/features/reports/widgets/report_charts.dart';
 import 'package:openbudget_app/src/features/settings/providers/display_currency_provider.dart';
-import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
+/// A month or a range of months, split across the envelopes it was spent in.
 class SpendingByPayeeScreen extends HookConsumerWidget {
   const SpendingByPayeeScreen({
     required this.budgetId,
@@ -18,6 +20,14 @@ class SpendingByPayeeScreen extends HookConsumerWidget {
     this.initialMonth,
     super.key,
   });
+
+  /// Moves the statement back one month.
+  static const Key previousMonthKey = ValueKey(
+    'spendingByPayee.previousMonth',
+  );
+
+  /// Moves the statement forward one month.
+  static const Key nextMonthKey = ValueKey('spendingByPayee.nextMonth');
 
   final String budgetId;
   final bool initialUsePreset;
@@ -28,8 +38,7 @@ class SpendingByPayeeScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final chartColors = OpenBudgetPalette.chartSeriesFor(Theme.of(context));
-    final colorScheme = theme.colorScheme;
+    final palette = theme.ob;
     final now = DateTime.now();
     final selectedYear = useState(initialYear ?? now.year);
     final normalizedInitialMonth = initialMonth?.clamp(1, 12) ?? now.month;
@@ -57,53 +66,112 @@ class SpendingByPayeeScreen extends HookConsumerWidget {
               selectedMonth.value,
             ),
           );
-    final presetRangeLabel = _presetRangeLabel(
-      l10n,
-      selectedYear.value,
-      selectedMonth.value,
-      presetMonths.value,
-    );
 
     return Scaffold(
-      backgroundColor: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
-      appBar: AppBar(
-        backgroundColor: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
-        surfaceTintColor: OpenBudgetPalette.transparentFor(Theme.of(context)),
-        title: Text(l10n.spendingByPayeeBreakdown),
-      ),
+      backgroundColor: palette.canvas,
+      appBar: AppBar(title: Text(l10n.spendingByPayeeBreakdown)),
       body: reportAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(
-          child: Text(
-            error.toString(),
-            style: theme.textTheme.bodyLarge?.copyWith(
-              color: colorScheme.error,
+        loading: () =>
+            Center(child: ObLoadingPanel(label: l10n.reportsLoading)),
+        error: (error, _) => ListView(
+          padding: const EdgeInsets.all(SpacingTokens.md),
+          children: [
+            ObStatePanel.problem(
+              title: l10n.reportsLoadError,
+              message: error.toString(),
             ),
-          ),
+          ],
         ),
         data: (report) {
           final sourceCurrency = parseCurrencyCode(report.currencyCode);
           final sortedEntries = report.categorySpending.entries.toList()
             ..sort((a, b) => b.value.compareTo(a.value));
           final totalSpent = report.totalExpenses;
+          final series = reportSeriesColors(theme);
+          String format(int cents) =>
+              converter?.formatAmount(
+                amountCents: cents,
+                sourceCurrency: sourceCurrency,
+              ) ??
+              formatCents(cents, sourceCurrency);
+          final topEntries = sortedEntries.take(series.length).toList();
+          final listedTotal = topEntries.fold<int>(
+            0,
+            (sum, entry) => sum + entry.value,
+          );
+          final segments = [
+            for (final (index, entry) in topEntries.indexed)
+              ReportChartDatum(
+                label: entry.key,
+                amountLabel: format(entry.value),
+                value: entry.value,
+                color: series[index],
+              ),
+            if (totalSpent > listedTotal)
+              ReportChartDatum(
+                label: l10n.reportsOtherCategories,
+                amountLabel: format(totalSpent - listedTotal),
+                value: totalSpent - listedTotal,
+                color: palette.mutedInk,
+              ),
+          ];
+          final rangeLabel = _presetRangeLabel(
+            l10n,
+            selectedYear.value,
+            selectedMonth.value,
+            presetMonths.value,
+          );
+          final periodLabel = usePreset.value
+              ? l10n.spendingByPayeeLastMonths(presetMonths.value)
+              : reportMonthLabel(
+                  l10n,
+                  selectedMonth.value,
+                  selectedYear.value,
+                );
 
           return ListView(
-            padding: const EdgeInsets.all(SpacingTokens.md),
+            padding: const EdgeInsets.fromLTRB(
+              SpacingTokens.md,
+              SpacingTokens.sm,
+              SpacingTokens.md,
+              SpacingTokens.xl,
+            ),
             children: [
-              _ModeToggle(
-                usePreset: usePreset.value,
-                onModeChanged: (value) => usePreset.value = value,
+              SegmentedButton<bool>(
+                segments: [
+                  ButtonSegment(
+                    value: false,
+                    label: Text(l10n.spendingByPayeeMonth),
+                  ),
+                  ButtonSegment(
+                    value: true,
+                    label: Text(l10n.spendingByPayeePreset),
+                  ),
+                ],
+                selected: {usePreset.value},
+                onSelectionChanged: (selection) =>
+                    usePreset.value = selection.first,
               ),
-              const SizedBox(height: SpacingTokens.sm),
               if (usePreset.value) ...[
-                _PresetSelector(
-                  presetMonths: presetMonths.value,
-                  onChanged: (value) => presetMonths.value = value,
+                const SizedBox(height: SpacingTokens.sm),
+                ObDropdown<int>(
+                  value: presetMonths.value,
+                  labelText: l10n.spendingByPayeePresetRange,
+                  items: [
+                    for (final months in const [3, 6, 12])
+                      DropdownMenuItem(
+                        value: months,
+                        child: Text(l10n.spendingByPayeeLastMonths(months)),
+                      ),
+                  ],
+                  onChanged: (value) {
+                    if (value != null) presetMonths.value = value;
+                  },
                 ),
-                const SizedBox(height: SpacingTokens.xs),
               ],
+              const SizedBox(height: SpacingTokens.sm),
               _MonthSelector(
-                label: _monthName(
+                label: reportMonthLabel(
                   l10n,
                   selectedMonth.value,
                   selectedYear.value,
@@ -126,126 +194,120 @@ class SpendingByPayeeScreen extends HookConsumerWidget {
                 },
               ),
               const SizedBox(height: SpacingTokens.sm),
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(SpacingTokens.md),
-                  child: Column(
-                    children: [
-                      Text(
-                        usePreset.value
-                            ? _presetLabel(presetMonths.value)
-                            : _monthName(
-                                l10n,
-                                selectedMonth.value,
-                                selectedYear.value,
-                              ),
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          color: OpenBudgetPalette.bgBrandFor(
-                            Theme.of(context),
-                          ),
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      if (usePreset.value) ...[
-                        const SizedBox(height: SpacingTokens.xs),
-                        Text(
-                          presetRangeLabel,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: OpenBudgetPalette.fgSecondaryFor(
-                              Theme.of(context),
-                            ),
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                      const SizedBox(height: SpacingTokens.sm),
-                      Text(
-                        converter?.formatAmount(
-                              amountCents: totalSpent,
-                              sourceCurrency: sourceCurrency,
-                            ) ??
-                            formatCents(totalSpent, sourceCurrency),
-                        style: theme.textTheme.headlineLarge?.copyWith(
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
+              ObCard(
+                padding: const EdgeInsets.all(SpacingTokens.md),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (usePreset.value) ...[
+                      Text(periodLabel, style: theme.textTheme.titleMedium),
                       const SizedBox(height: SpacingTokens.xs),
                       Text(
-                        l10n.spendingByPayeeTotalSpent,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: OpenBudgetPalette.fgSecondaryFor(
-                            Theme.of(context),
-                          ),
+                        rangeLabel,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: palette.mutedInk,
                         ),
-                      ),
-                      const SizedBox(height: SpacingTokens.md),
-                      _CategoryStrip(
-                        categoryEntries: sortedEntries,
-                        totalSpent: totalSpent,
                       ),
                     ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: SpacingTokens.md),
-              Text(
-                l10n.reportsSpendingByCategory,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: SpacingTokens.sm),
-              if (sortedEntries.isEmpty)
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(SpacingTokens.lg),
-                    child: Text(
-                      l10n.reportsEmptySubtitle,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: OpenBudgetPalette.fgSecondaryFor(
-                          Theme.of(context),
+                    const SizedBox(height: SpacingTokens.sm),
+                    ObAmount(
+                      format(totalSpent),
+                      style: theme.textTheme.headlineLarge,
+                    ),
+                    const SizedBox(height: SpacingTokens.xs),
+                    Text(
+                      l10n.spendingByPayeeTotalSpent,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: palette.mutedInk,
+                      ),
+                    ),
+                    if (segments.isEmpty) ...[
+                      const SizedBox(height: SpacingTokens.sm),
+                      ObStatePanel.empty(
+                        title: l10n.spendingByPayeeEmptyTitle,
+                        message: l10n.spendingByPayeeEmptySubtitle,
+                        doodle: WiredDoodleKind.rainbow,
+                      ),
+                    ] else ...[
+                      const SizedBox(height: SpacingTokens.md),
+                      ReportShareBar(
+                        segments: segments,
+                        semanticsLabel: reportChartSummary(
+                          l10n,
+                          title: l10n.spendingByPayeeBreakdown,
+                          entries: [
+                            for (final segment in segments)
+                              (segment.label, segment.amountLabel),
+                          ],
                         ),
                       ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
+                    ],
+                  ],
+                ),
+              ),
+              ObSectionHeader(
+                title: l10n.reportsSpendingByCategory,
+                padding: const EdgeInsets.fromLTRB(
+                  0,
+                  SpacingTokens.lg,
+                  0,
+                  SpacingTokens.sm,
+                ),
+              ),
+              if (sortedEntries.isEmpty)
+                ObStatePanel.empty(
+                  title: l10n.spendingByPayeeEmptyTitle,
+                  message: l10n.spendingByPayeeEmptySubtitle,
+                  doodle: WiredDoodleKind.rainbow,
                 )
               else
-                Card(
+                ObCard(
                   child: Column(
                     children: [
-                      for (var index = 0; index < sortedEntries.length; index++)
+                      for (final (index, entry) in sortedEntries.indexed) ...[
                         _CategoryRow(
-                          categoryName: sortedEntries[index].key,
-                          amountCents: sortedEntries[index].value,
+                          categoryName: entry.key,
+                          amountCents: entry.value,
                           totalCents: totalSpent,
                           sourceCurrency: sourceCurrency,
                           converter: converter,
-                          color: chartColors[index % chartColors.length],
-                          showDivider: index < sortedEntries.length - 1,
+                          color: series[index % series.length],
+                          seed: 61 + index,
                         ),
+                        if (index < sortedEntries.length - 1)
+                          Divider(height: 1, color: palette.line),
+                      ],
                     ],
                   ),
                 ),
               const SizedBox(height: SpacingTokens.md),
-              Card(
-                child: ListTile(
-                  leading: const Icon(Icons.add_chart_rounded),
-                  title: Text(
-                    'Positive Inflow Total',
-                    style: theme.textTheme.titleSmall,
-                  ),
-                  trailing: Text(
-                    converter?.formatAmount(
-                          amountCents: report.totalIncome,
-                          sourceCurrency: sourceCurrency,
-                        ) ??
-                        formatCents(report.totalIncome, sourceCurrency),
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      color: OpenBudgetPalette.fgSuccessFor(Theme.of(context)),
-                      fontWeight: FontWeight.w700,
+              ObCard(
+                padding: const EdgeInsets.all(SpacingTokens.md),
+                child: Row(
+                  children: [
+                    SkribbleIcon(
+                      data: OpenBudgetIcons.addChart,
+                      size: 20,
+                      color: palette.funded,
                     ),
-                  ),
+                    const SizedBox(width: SpacingTokens.sm),
+                    Expanded(
+                      child: Text(
+                        l10n.reportsPositiveInflowTotal,
+                        style: theme.textTheme.titleSmall,
+                      ),
+                    ),
+                    const SizedBox(width: SpacingTokens.sm),
+                    ObAmount(
+                      converter?.formatAmount(
+                            amountCents: report.totalIncome,
+                            sourceCurrency: sourceCurrency,
+                          ) ??
+                          formatCents(report.totalIncome, sourceCurrency),
+                      tone: ObTone.funded,
+                      style: theme.textTheme.titleSmall,
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -254,32 +316,6 @@ class SpendingByPayeeScreen extends HookConsumerWidget {
       ),
     );
   }
-
-  String _monthName(AppLocalizations l10n, int month, int year) {
-    final name = switch (month) {
-      1 => l10n.budgetMonthJanuary,
-      2 => l10n.budgetMonthFebruary,
-      3 => l10n.budgetMonthMarch,
-      4 => l10n.budgetMonthApril,
-      5 => l10n.budgetMonthMay,
-      6 => l10n.budgetMonthJune,
-      7 => l10n.budgetMonthJuly,
-      8 => l10n.budgetMonthAugust,
-      9 => l10n.budgetMonthSeptember,
-      10 => l10n.budgetMonthOctober,
-      11 => l10n.budgetMonthNovember,
-      12 => l10n.budgetMonthDecember,
-      _ => '',
-    };
-    return '$name $year';
-  }
-
-  String _presetLabel(int months) => switch (months) {
-    3 => 'Last 3 Months',
-    6 => 'Last 6 Months',
-    12 => 'Last 12 Months',
-    _ => 'Last $months Months',
-  };
 
   String _presetRangeLabel(
     AppLocalizations l10n,
@@ -299,88 +335,13 @@ class SpendingByPayeeScreen extends HookConsumerWidget {
       }
     }
 
-    final startLabel = _monthName(l10n, startMonth, startYear);
-    final endLabel = _monthName(l10n, endMonth, endYear);
+    final startLabel = reportMonthLabel(l10n, startMonth, startYear);
+    final endLabel = reportMonthLabel(l10n, endMonth, endYear);
     return '$startLabel\u2013$endLabel';
   }
 }
 
-class _ModeToggle extends StatelessWidget {
-  const _ModeToggle({required this.usePreset, required this.onModeChanged});
-
-  final bool usePreset;
-  final ValueChanged<bool> onModeChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    return Container(
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: OpenBudgetPalette.bgTertiaryFor(Theme.of(context)),
-        borderRadius: BorderRadius.circular(RadiusTokens.md),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: _ModeButton(
-              label: l10n.spendingByPayeeMonth,
-              selected: !usePreset,
-              onTap: () => onModeChanged(false),
-            ),
-          ),
-          const SizedBox(width: SpacingTokens.xs),
-          Expanded(
-            child: _ModeButton(
-              label: l10n.spendingByPayeePreset,
-              selected: usePreset,
-              onTap: () => onModeChanged(true),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ModeButton extends StatelessWidget {
-  const _ModeButton({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(RadiusTokens.sm),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: SpacingTokens.xs),
-        decoration: BoxDecoration(
-          color: selected
-              ? OpenBudgetPalette.bgSecondaryFor(Theme.of(context))
-              : OpenBudgetPalette.transparentFor(Theme.of(context)),
-          borderRadius: BorderRadius.circular(RadiusTokens.sm),
-        ),
-        child: Text(
-          label,
-          textAlign: TextAlign.center,
-          style: theme.textTheme.labelLarge?.copyWith(
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _MonthSelector extends StatelessWidget {
+class _MonthSelector extends HookWidget {
   const _MonthSelector({
     required this.label,
     required this.onPrevious,
@@ -393,132 +354,35 @@ class _MonthSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     return Row(
       children: [
         IconButton(
+          key: SpendingByPayeeScreen.previousMonthKey,
           onPressed: onPrevious,
-          icon: const Icon(Icons.chevron_left_rounded),
+          tooltip: l10n.reportsPreviousMonth,
+          icon: const SkribbleIcon(data: OpenBudgetIcons.chevronLeft),
         ),
         Expanded(
           child: Text(
             label,
             textAlign: TextAlign.center,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-            ),
+            style: theme.textTheme.titleMedium,
           ),
         ),
         IconButton(
+          key: SpendingByPayeeScreen.nextMonthKey,
           onPressed: onNext,
-          icon: const Icon(Icons.chevron_right_rounded),
+          tooltip: l10n.reportsNextMonth,
+          icon: const SkribbleIcon(data: OpenBudgetIcons.chevronRight),
         ),
       ],
     );
   }
 }
 
-class _PresetSelector extends StatelessWidget {
-  const _PresetSelector({required this.presetMonths, required this.onChanged});
-
-  final int presetMonths;
-  final ValueChanged<int> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
-    return Row(
-      children: [
-        const SizedBox(width: SpacingTokens.sm),
-        Expanded(
-          child: Text(
-            l10n.spendingByPayeePresetRange,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ),
-        DropdownButton<int>(
-          value: presetMonths,
-          onChanged: (value) {
-            if (value != null) onChanged(value);
-          },
-          items: [
-            DropdownMenuItem(
-              value: 3,
-              child: Text(l10n.spendingByPayeeLastMonths(3)),
-            ),
-            DropdownMenuItem(
-              value: 6,
-              child: Text(l10n.spendingByPayeeLastMonths(6)),
-            ),
-            DropdownMenuItem(
-              value: 12,
-              child: Text(l10n.spendingByPayeeLastMonths(12)),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class _CategoryStrip extends StatelessWidget {
-  const _CategoryStrip({
-    required this.categoryEntries,
-    required this.totalSpent,
-  });
-
-  final List<MapEntry<String, int>> categoryEntries;
-  final int totalSpent;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = OpenBudgetPalette.chartSeriesFor(Theme.of(context));
-    final top = categoryEntries.take(colors.length).toList();
-    if (top.isEmpty || totalSpent <= 0) {
-      return Container(
-        height: 16,
-        decoration: BoxDecoration(
-          color: OpenBudgetPalette.bgTertiaryFor(Theme.of(context)),
-          borderRadius: BorderRadius.circular(6),
-        ),
-      );
-    }
-
-    final segments = <Widget>[];
-    var used = 0;
-    for (var index = 0; index < top.length; index++) {
-      final value = top[index].value < 1 ? 1 : top[index].value;
-      segments.add(
-        Expanded(
-          flex: value,
-          child: Container(color: colors[index]),
-        ),
-      );
-      used += value;
-    }
-
-    if (totalSpent > used) {
-      segments.add(
-        Expanded(
-          flex: totalSpent - used,
-          child: Container(
-            color: OpenBudgetPalette.bgTertiaryFor(Theme.of(context)),
-          ),
-        ),
-      );
-    }
-
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(6),
-      child: SizedBox(height: 16, child: Row(children: segments)),
-    );
-  }
-}
-
-class _CategoryRow extends StatelessWidget {
+class _CategoryRow extends HookWidget {
   const _CategoryRow({
     required this.categoryName,
     required this.amountCents,
@@ -526,7 +390,7 @@ class _CategoryRow extends StatelessWidget {
     required this.sourceCurrency,
     required this.converter,
     required this.color,
-    required this.showDivider,
+    required this.seed,
   });
 
   final String categoryName;
@@ -535,48 +399,44 @@ class _CategoryRow extends StatelessWidget {
   final CurrencyCode sourceCurrency;
   final DisplayCurrencyConverter? converter;
   final Color color;
-  final bool showDivider;
+  final int seed;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final palette = theme.ob;
     final percentage = totalCents > 0 ? (amountCents / totalCents) * 100 : 0.0;
 
-    return Column(
-      children: [
-        ListTile(
-          leading: Container(
-            width: 10,
-            height: 10,
-            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-          ),
-          title: Text(categoryName),
-          subtitle: Text(
-            '${percentage.toStringAsFixed(percentage >= 10 ? 0 : 1)}%',
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
-            ),
-          ),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                converter?.formatAmount(
-                      amountCents: amountCents,
-                      sourceCurrency: sourceCurrency,
-                    ) ??
-                    formatCents(amountCents, sourceCurrency),
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(width: SpacingTokens.xs),
-              const Icon(Icons.chevron_right_rounded, size: 18),
-            ],
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: SpacingTokens.md,
+        vertical: SpacingTokens.xs,
+      ),
+      leading: SizedBox.square(
+        dimension: 20,
+        child: DecoratedBox(
+          decoration: ObRoughDecoration(
+            color: color,
+            outline: palette.ink,
+            radius: 4,
+            strokeWidth: 1.6,
+            seed: seed,
           ),
         ),
-        if (showDivider) const Divider(height: 1),
-      ],
+      ),
+      title: Text(categoryName),
+      subtitle: Text(
+        '${percentage.toStringAsFixed(percentage >= 10 ? 0 : 1)}%',
+        style: theme.textTheme.bodySmall?.copyWith(color: palette.mutedInk),
+      ),
+      trailing: ObAmount(
+        converter?.formatAmount(
+              amountCents: amountCents,
+              sourceCurrency: sourceCurrency,
+            ) ??
+            formatCents(amountCents, sourceCurrency),
+        style: theme.textTheme.titleSmall,
+      ),
     );
   }
 }

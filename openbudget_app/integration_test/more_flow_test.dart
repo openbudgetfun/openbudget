@@ -176,7 +176,7 @@ void main() {
 
     expect(find.text('Recurring Transactions'), findsWidgets);
 
-    await tester.tap(find.byIcon(Icons.add).first);
+    await tester.tap(find.byKey(RecurringListScreen.addButtonKey));
     await tester.pumpAndSettle();
 
     expect(find.byType(AlertDialog), findsOneWidget);

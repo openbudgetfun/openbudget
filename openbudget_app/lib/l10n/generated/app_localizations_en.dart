@@ -3453,4 +3453,102 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get transactionsUnknownEnvelope => 'Unknown envelope';
+
+  @override
+  String get reportsAgeOfMoneyHint =>
+      'How long your money lasts after it arrives';
+
+  @override
+  String get reportsAgeOfMoneyTitle => 'Age of Money';
+
+  @override
+  String reportsDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days',
+      one: '1 day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get reportsLoading => 'Adding up the month…';
+
+  @override
+  String get reportsNetWorthCurrent => 'Right now';
+
+  @override
+  String get reportsNetWorthExplainerBody =>
+      'Net worth adds up every active account in this plan: what you own minus what you owe. Think of it as a snapshot of today, not a score.';
+
+  @override
+  String get reportsNetWorthExplainerTitle => 'What net worth counts';
+
+  @override
+  String get reportsNextMonth => 'Next month';
+
+  @override
+  String get reportsOtherCategories => 'Other categories';
+
+  @override
+  String get reportsPositiveInflowTotal => 'Income this period';
+
+  @override
+  String get reportsPreviousMonth => 'Previous month';
+
+  @override
+  String recurringCalendarDayCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count scheduled items',
+      one: '1 scheduled item',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get recurringActiveLabel => 'Active';
+
+  @override
+  String get recurringLoading => 'Fetching the schedule…';
+
+  @override
+  String get recurringNextMonth => 'Next month';
+
+  @override
+  String get recurringPausedLabel => 'Paused';
+
+  @override
+  String get recurringPostedLabel => 'Posted';
+
+  @override
+  String get recurringPreviousMonth => 'Previous month';
+
+  @override
+  String get recurringSavingLabel => 'Saving…';
+
+  @override
+  String get recurringScheduledLabel => 'Scheduled';
+
+  @override
+  String get recurringSummaryTitle => 'Scheduled totals';
+
+  @override
+  String get reportsChartEmptyMessage =>
+      'Add a few transactions and this drawing fills in.';
+
+  @override
+  String get reportsChartEmptyTitle => 'Nothing to chart yet';
+
+  @override
+  String reportsChartSeriesEntry(String label, String amount) {
+    return '$label: $amount';
+  }
+
+  @override
+  String reportsChartSummary(String title, String entries) {
+    return '$title. $entries';
+  }
 }
