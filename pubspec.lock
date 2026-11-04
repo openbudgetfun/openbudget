@@ -2073,6 +2073,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.11.1"
+  solana_kit_subscriptions:
+    dependency: transitive
+    description:
+      name: solana_kit_subscriptions
+      sha256: "9297b18a35968c4b8989ea9edeb18a573b52f074b4467ef7937d34bd42c1fefc"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.4.1"
   solana_kit_surfpool:
     dependency: transitive
     description:

@@ -26,6 +26,11 @@ jwtRefresh:
   - refreshAccessToken:
 billing:
   - getEntitlement:
+  - createStripeCheckout:
+  - createStripePortal:
+  - getSolanaPlan:
+  - solanaSubscriptionChallenge:
+  - confirmSolanaSubscription:
 budgetTemplate:
   - saveFromMonth:
   - list:

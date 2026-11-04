@@ -17,6 +17,8 @@ import 'package:openbudget_client/src/protocol/accounts/account.dart'
     as _iqudaadl;
 import 'package:openbudget_client/src/protocol/billing/entitlement.dart'
     as _iyhncv6f;
+import 'package:openbudget_client/src/protocol/billing/solana_plan_view.dart'
+    as _ij0nbz0v;
 import 'package:openbudget_client/src/protocol/budget_templates/budget_template.dart'
     as _itiojbb0;
 import 'package:openbudget_client/src/protocol/budgets/budget.dart'
@@ -477,6 +479,58 @@ class EndpointBilling extends _isc.EndpointRef {
         'getEntitlement',
         {},
       );
+
+  /// Creates a Stripe Checkout session and returns its hosted URL.
+  _ida.Future<String> createStripeCheckout(
+    String successUrl,
+    String cancelUrl,
+  ) => caller.callServerEndpoint<String>(
+    'billing',
+    'createStripeCheckout',
+    {
+      'successUrl': successUrl,
+      'cancelUrl': cancelUrl,
+    },
+  );
+
+  /// Creates a Stripe billing portal session and returns its hosted URL.
+  _ida.Future<String> createStripePortal(String returnUrl) =>
+      caller.callServerEndpoint<String>(
+        'billing',
+        'createStripePortal',
+        {'returnUrl': returnUrl},
+      );
+
+  /// Returns the Solana plan terms the app needs to subscribe on chain.
+  _ida.Future<_ij0nbz0v.SolanaPlanView> getSolanaPlan() =>
+      caller.callServerEndpoint<_ij0nbz0v.SolanaPlanView>(
+        'billing',
+        'getSolanaPlan',
+        {},
+      );
+
+  /// Returns a one-time message the subscriber signs with their wallet.
+  _ida.Future<String> solanaSubscriptionChallenge() =>
+      caller.callServerEndpoint<String>(
+        'billing',
+        'solanaSubscriptionChallenge',
+        {},
+      );
+
+  /// Verifies the signed challenge and records the on-chain subscription.
+  _ida.Future<_iyhncv6f.Entitlement> confirmSolanaSubscription(
+    String subscriberAddress,
+    String message,
+    String signatureBase58,
+  ) => caller.callServerEndpoint<_iyhncv6f.Entitlement>(
+    'billing',
+    'confirmSolanaSubscription',
+    {
+      'subscriberAddress': subscriberAddress,
+      'message': message,
+      'signatureBase58': signatureBase58,
+    },
+  );
 }
 
 /// API surface for budget template operations.
