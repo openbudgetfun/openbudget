@@ -17,13 +17,19 @@ class MoreScreen extends HookWidget {
     return Scaffold(
       appBar: AppBar(title: Text(l10n.moreScreenTitle)),
       body: ListView(
-        padding: const EdgeInsets.all(SpacingTokens.md),
+        padding: const EdgeInsets.fromLTRB(
+          SpacingTokens.md,
+          SpacingTokens.md,
+          SpacingTokens.md,
+          SpacingTokens.xl,
+        ),
         children: [
           Card(
+            clipBehavior: Clip.antiAlias,
             child: Column(
               children: [
                 _MoreTile(
-                  icon: Icons.repeat_rounded,
+                  icon: OpenBudgetIcons.recurring,
                   label: l10n.moreRecurring,
                   onTap: () => context.goNamed(
                     recurringListRoute,
@@ -32,7 +38,7 @@ class MoreScreen extends HookWidget {
                 ),
                 const Divider(height: 1),
                 _MoreTile(
-                  icon: Icons.people_outline_rounded,
+                  icon: OpenBudgetIcons.people,
                   label: l10n.morePayees,
                   onTap: () => context.goNamed(
                     payeeListRoute,
@@ -41,7 +47,7 @@ class MoreScreen extends HookWidget {
                 ),
                 const Divider(height: 1),
                 _MoreTile(
-                  icon: Icons.rule_rounded,
+                  icon: OpenBudgetIcons.rule,
                   label: l10n.moreRules,
                   onTap: () => context.goNamed(
                     transactionRulesRoute,
@@ -50,7 +56,7 @@ class MoreScreen extends HookWidget {
                 ),
                 const Divider(height: 1),
                 _MoreTile(
-                  icon: Icons.file_upload_outlined,
+                  icon: OpenBudgetIcons.upload,
                   label: l10n.moreImport,
                   onTap: () => context.goNamed(
                     importTransactionsRoute,
@@ -59,7 +65,7 @@ class MoreScreen extends HookWidget {
                 ),
                 const Divider(height: 1),
                 _MoreTile(
-                  icon: Icons.settings_outlined,
+                  icon: OpenBudgetIcons.settings,
                   label: l10n.moreSettings,
                   onTap: () => context.goNamed(
                     settingsRoute,
@@ -82,21 +88,22 @@ class _MoreTile extends HookWidget {
     required this.onTap,
   });
 
-  final IconData icon;
+  final WiredSvgIconData icon;
   final String label;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final palette = theme.ob;
 
     return ListTile(
-      leading: Icon(icon, color: colorScheme.onSurfaceVariant),
+      leading: SkribbleIcon(data: icon, color: palette.ink),
       title: Text(label, style: theme.textTheme.bodyLarge),
-      trailing: Icon(
-        Icons.chevron_right_rounded,
-        color: colorScheme.onSurfaceVariant,
+      trailing: SkribbleIcon(
+        data: OpenBudgetIcons.chevronRight,
+        size: 20,
+        color: palette.mutedInk,
       ),
       onTap: onTap,
     );

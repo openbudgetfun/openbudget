@@ -22,6 +22,9 @@ void main() {
       await tester.pump();
 
       expect(find.byKey(const Key('login-openbudget-mark')), findsOneWidget);
+      expect(find.text('Welcome back'), findsOneWidget);
+      expect(find.byType(ObHighlighter), findsOneWidget);
+      expect(find.byType(WiredDoodle), findsOneWidget);
       expect(find.text('Continue with Apple'), findsNothing);
       expect(find.text('Continue with Google'), findsNothing);
       expect(find.text('Forgot Password?'), findsOneWidget);

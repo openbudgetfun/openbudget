@@ -8,7 +8,6 @@ import 'package:openbudget_app/src/features/settings/providers/display_currency_
 import 'package:openbudget_app/src/features/settings/providers/display_options_provider.dart';
 import 'package:openbudget_app/src/providers/theme_mode_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
-import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
@@ -26,12 +25,20 @@ class DisplayOptionsScreen extends HookConsumerWidget {
     CurrencyCode.btc,
   ];
 
+  static const _sectionHeaderPadding = EdgeInsets.fromLTRB(
+    SpacingTokens.xs,
+    SpacingTokens.lg,
+    SpacingTokens.xs,
+    SpacingTokens.sm,
+  );
+
   final String budgetId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
+    final palette = theme.ob;
     final currentThemeMode = ref.watch(themeModeProvider);
     final isDarkMode =
         currentThemeMode == ThemeMode.dark ||
@@ -43,65 +50,40 @@ class DisplayOptionsScreen extends HookConsumerWidget {
     final budgetAsync = ref.watch(budgetDetailProvider(budgetId));
 
     return Scaffold(
-      backgroundColor: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
       appBar: AppBar(
-        backgroundColor: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
-        surfaceTintColor: OpenBudgetPalette.transparentFor(Theme.of(context)),
-        automaticallyImplyLeading: false,
-        centerTitle: true,
-        leadingWidth: 120,
-        leading: TextButton(
-          onPressed: () =>
-              context.goNamed(settingsRoute, pathParameters: {'id': budgetId}),
-          style: TextButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: SpacingTokens.xs),
+        leading: IconButton(
+          tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+          onPressed: () => context.goNamed(
+            settingsRoute,
+            pathParameters: {'id': budgetId},
           ),
-          child: Row(
-            children: [
-              Icon(
-                Icons.chevron_left_rounded,
-                size: 20,
-                color: theme.colorScheme.onSurface,
-              ),
-              Flexible(
-                child: Text(
-                  l10n.settingsTitle,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    color: theme.colorScheme.onSurface,
-                  ),
-                ),
-              ),
-            ],
-          ),
+          icon: const SkribbleIcon(data: OpenBudgetIcons.back),
         ),
-        title: Text(
-          l10n.settingsDisplayOptions,
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.w700,
-          ),
-        ),
+        title: Text(l10n.settingsDisplayOptions),
         actions: [
           TextButton(
             onPressed: () => context.goNamed(
               settingsRoute,
               pathParameters: {'id': budgetId},
             ),
-            child: Text(
-              l10n.dialogDone,
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: theme.colorScheme.onSurface,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+            child: Text(l10n.dialogDone),
           ),
         ],
       ),
       body: ListView(
-        padding: const EdgeInsets.all(SpacingTokens.md),
+        padding: const EdgeInsets.fromLTRB(
+          SpacingTokens.md,
+          0,
+          SpacingTokens.md,
+          SpacingTokens.xl,
+        ),
         children: [
-          _SectionLabel(label: l10n.themeTitle),
-          _SettingsCard(
+          ObSectionHeader(
+            title: l10n.themeTitle,
+            padding: _sectionHeaderPadding,
+          ),
+          Card(
+            clipBehavior: Clip.antiAlias,
             child: _ToggleTile(
               label: l10n.themeTitle,
               subtitle: isDarkMode ? l10n.themeDark : l10n.themeLight,
@@ -111,9 +93,12 @@ class DisplayOptionsScreen extends HookConsumerWidget {
                   .setThemeMode(value ? ThemeMode.dark : ThemeMode.light),
             ),
           ),
-          const SizedBox(height: SpacingTokens.lg),
-          _SectionLabel(label: l10n.settingsBalanceStyle),
-          _SettingsCard(
+          ObSectionHeader(
+            title: l10n.settingsBalanceStyle,
+            padding: _sectionHeaderPadding,
+          ),
+          Card(
+            clipBehavior: Clip.antiAlias,
             child: Column(
               children: [
                 _BalanceStyleTile(
@@ -142,16 +127,21 @@ class DisplayOptionsScreen extends HookConsumerWidget {
               ],
             ),
           ),
-          const SizedBox(height: SpacingTokens.lg),
-          _SectionLabel(label: l10n.settingsDisplayCurrency),
-          _SettingsCard(
+          ObSectionHeader(
+            title: l10n.settingsDisplayCurrency,
+            padding: _sectionHeaderPadding,
+          ),
+          Card(
+            clipBehavior: Clip.antiAlias,
             child: budgetAsync.when(
               loading: () => ListTile(
                 title: Text(l10n.settingsDisplayCurrency),
-                trailing: const SizedBox(
-                  width: 18,
-                  height: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+                trailing: Semantics(
+                  label: l10n.settingsLoading,
+                  child: WiredLoadingIndicator(
+                    size: 20,
+                    color: palette.ink,
+                  ),
                 ),
               ),
               error: (_, _) => ListTile(
@@ -165,9 +155,12 @@ class DisplayOptionsScreen extends HookConsumerWidget {
               ),
             ),
           ),
-          const SizedBox(height: SpacingTokens.lg),
-          _SectionLabel(label: l10n.settingsPrivacySection),
-          _SettingsCard(
+          ObSectionHeader(
+            title: l10n.settingsPrivacySection,
+            padding: _sectionHeaderPadding,
+          ),
+          Card(
+            clipBehavior: Clip.antiAlias,
             child: Column(
               children: [
                 _ToggleTile(
@@ -190,11 +183,11 @@ class DisplayOptionsScreen extends HookConsumerWidget {
               ],
             ),
           ),
-          const SizedBox(height: SpacingTokens.lg),
+          const SizedBox(height: SpacingTokens.md),
           Text(
             l10n.settingsDisplayOptionsHint,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
+              color: palette.mutedInk,
             ),
           ),
         ],
@@ -228,8 +221,9 @@ class DisplayOptionsScreen extends HookConsumerWidget {
           children: [
             ListTile(
               title: Text(l10n.settingsDisplayCurrencyMatchDefault),
+              selected: budget.displayCurrencyCode == null,
               trailing: budget.displayCurrencyCode == null
-                  ? const Icon(Icons.check_rounded)
+                  ? const SkribbleIcon(data: OpenBudgetIcons.check)
                   : null,
               onTap: () => Navigator.of(context).pop(defaultSelection),
             ),
@@ -237,8 +231,9 @@ class DisplayOptionsScreen extends HookConsumerWidget {
             for (final currency in _supportedDisplayCurrencies) ...[
               ListTile(
                 title: Text('${currency.displayName} (${currency.code})'),
+                selected: budget.displayCurrencyCode == currency.code,
                 trailing: budget.displayCurrencyCode == currency.code
-                    ? const Icon(Icons.check_rounded)
+                    ? const SkribbleIcon(data: OpenBudgetIcons.check)
                     : null,
                 onTap: () => Navigator.of(context).pop(currency.code),
               ),
@@ -282,47 +277,6 @@ class DisplayOptionsScreen extends HookConsumerWidget {
   }
 }
 
-class _SettingsCard extends HookWidget {
-  const _SettingsCard({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) => DecoratedBox(
-    decoration: BoxDecoration(
-      color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
-      borderRadius: BorderRadius.circular(RadiusTokens.md),
-      border: Border.all(
-        color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
-      ),
-    ),
-    child: Material(type: MaterialType.transparency, child: child),
-  );
-}
-
-class _SectionLabel extends HookWidget {
-  const _SectionLabel({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.only(
-        left: SpacingTokens.xs,
-        bottom: SpacingTokens.xs,
-      ),
-      child: Text(
-        label,
-        style: theme.textTheme.titleSmall?.copyWith(
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-  }
-}
-
 class _BalanceStyleTile extends HookWidget {
   const _BalanceStyleTile({
     required this.label,
@@ -337,20 +291,24 @@ class _BalanceStyleTile extends HookWidget {
   final Widget preview;
 
   @override
-  Widget build(BuildContext context) => ListTile(
-    onTap: onTap,
-    leading: selected
-        ? Icon(
-            Icons.check_rounded,
-            color: OpenBudgetPalette.bgBrandFor(Theme.of(context)),
-          )
-        : const SizedBox(width: 24),
-    title: Text(label),
-    subtitle: Padding(
-      padding: const EdgeInsets.only(top: SpacingTokens.xs),
-      child: preview,
-    ),
-  );
+  Widget build(BuildContext context) {
+    final palette = Theme.of(context).ob;
+    return ListTile(
+      onTap: onTap,
+      selected: selected,
+      leading: selected
+          ? SkribbleIcon(
+              data: OpenBudgetIcons.check,
+              color: palette.brand,
+            )
+          : const SizedBox(width: 24),
+      title: Text(label),
+      subtitle: Padding(
+        padding: const EdgeInsets.only(top: SpacingTokens.xs),
+        child: preview,
+      ),
+    );
+  }
 }
 
 class _BalanceStylePreview extends HookWidget {
@@ -359,28 +317,28 @@ class _BalanceStylePreview extends HookWidget {
   final BalanceStyle style;
 
   @override
-  Widget build(BuildContext context) => Wrap(
-    spacing: SpacingTokens.xs,
-    runSpacing: SpacingTokens.xs,
-    children: [
-      _SampleBalancePill(
-        label: r'-$10.00',
-        color: OpenBudgetPalette.bgTagErrorFor(Theme.of(context)),
-        textColor: OpenBudgetPalette.fgTagErrorFor(Theme.of(context)),
-        emphasize: style == BalanceStyle.differentiateWithoutColor,
-      ),
-      _SampleBalancePill(
-        label: r'$10.00',
-        color: OpenBudgetPalette.bgWarningFor(Theme.of(context)),
-        textColor: OpenBudgetPalette.fgTagWarningFor(Theme.of(context)),
-      ),
-      _SampleBalancePill(
-        label: r'$10.00',
-        color: OpenBudgetPalette.bgTagSuccessFor(Theme.of(context)),
-        textColor: OpenBudgetPalette.fgTagSuccessFor(Theme.of(context)),
-      ),
-    ],
-  );
+  Widget build(BuildContext context) {
+    final emphasize = style == BalanceStyle.differentiateWithoutColor;
+    return Wrap(
+      spacing: SpacingTokens.xs,
+      runSpacing: SpacingTokens.xs,
+      children: [
+        _SampleBalancePill(
+          label: r'-$10.00',
+          tone: ObTone.overspent,
+          emphasize: emphasize,
+        ),
+        const _SampleBalancePill(
+          label: r'$10.00',
+          tone: ObTone.underfunded,
+        ),
+        const _SampleBalancePill(
+          label: r'$10.00',
+          tone: ObTone.funded,
+        ),
+      ],
+    );
+  }
 }
 
 class _ValuePickerTile extends HookWidget {
@@ -397,6 +355,7 @@ class _ValuePickerTile extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final palette = theme.ob;
     return ListTile(
       onTap: onTap,
       title: Text(title),
@@ -406,9 +365,10 @@ class _ValuePickerTile extends HookWidget {
           fontWeight: FontWeight.w500,
         ),
       ),
-      trailing: Icon(
-        Icons.chevron_right_rounded,
-        color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
+      trailing: SkribbleIcon(
+        data: OpenBudgetIcons.chevronRight,
+        size: 20,
+        color: palette.mutedInk,
       ),
     );
   }
@@ -433,7 +393,6 @@ class _ToggleTile extends HookWidget {
     onChanged: onChanged,
     title: Text(label),
     subtitle: Text(subtitle),
-    activeThumbColor: OpenBudgetPalette.bgBrandFor(Theme.of(context)),
     contentPadding: const EdgeInsets.symmetric(horizontal: SpacingTokens.sm),
   );
 }
@@ -441,36 +400,35 @@ class _ToggleTile extends HookWidget {
 class _SampleBalancePill extends HookWidget {
   const _SampleBalancePill({
     required this.label,
-    required this.color,
-    required this.textColor,
+    required this.tone,
     this.emphasize = false,
   });
 
   final String label;
-  final Color color;
-  final Color textColor;
+  final ObTone tone;
   final bool emphasize;
 
   @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-    decoration: BoxDecoration(
-      color: color,
-      borderRadius: BorderRadius.circular(999),
-      border: emphasize
-          ? Border.all(
-              color: OpenBudgetPalette.fgErrorFor(Theme.of(context)),
-              width: 1.5,
-            )
-          : null,
-    ),
-    child: Text(
-      label,
-      style: Theme.of(context).textTheme.labelMedium?.copyWith(
-        color: textColor,
-        fontWeight: FontWeight.w700,
-        decoration: emphasize ? TextDecoration.underline : null,
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final palette = theme.ob;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+      decoration: ObRoughDecoration(
+        color: palette.wash(tone),
+        outline: emphasize ? palette.firmPen : palette.quietPen,
+        radius: 14,
+        strokeWidth: emphasize ? 2.2 : ObPen.strokeWidth,
+        seed: 27,
       ),
-    ),
-  );
+      child: Text(
+        label,
+        style: theme.textTheme.labelMedium?.copyWith(
+          color: palette.hue(tone),
+          fontWeight: FontWeight.w700,
+          decoration: emphasize ? TextDecoration.underline : null,
+        ),
+      ),
+    );
+  }
 }

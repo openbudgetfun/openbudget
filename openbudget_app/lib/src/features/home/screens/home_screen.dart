@@ -25,74 +25,45 @@ class HomeScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final budgets = ref.watch(budgetListProvider);
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.appTitle),
         actions: [
           IconButton(
-            icon: const Icon(Icons.logout_rounded),
+            icon: const SkribbleIcon(data: OpenBudgetIcons.logout),
             tooltip: l10n.homeLogout,
             onPressed: () => ref.read(authProvider.notifier).logout(),
           ),
         ],
       ),
       body: budgets.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.error_outline_rounded,
-                size: 48,
-                color: colorScheme.error,
-              ),
-              const SizedBox(height: SpacingTokens.md),
-              Text(
-                l10n.homeLoadError,
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: colorScheme.error,
-                ),
-              ),
-              const SizedBox(height: SpacingTokens.md),
-              FilledButton.icon(
-                onPressed: () => ref.invalidate(budgetListProvider),
-                icon: const Icon(Icons.refresh_rounded),
-                label: Text(l10n.homeRetry),
-              ),
-            ],
+        loading: () => ObLoadingPanel(label: l10n.homeLoadingBudgets),
+        error: (error, _) => Padding(
+          padding: const EdgeInsets.all(SpacingTokens.md),
+          child: ObStatePanel.problem(
+            title: l10n.homeLoadError,
+            action: ObStateAction(
+              label: l10n.homeRetry,
+              onPressed: () => ref.invalidate(budgetListProvider),
+            ),
           ),
         ),
         data: (budgetList) {
           if (budgetList.isEmpty) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(SpacingTokens.xl),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.savings_rounded,
-                      size: 64,
-                      color: colorScheme.outlineVariant,
-                    ),
-                    const SizedBox(height: SpacingTokens.lg),
-                    Text(
-                      l10n.homeNoBudgets,
-                      style: theme.textTheme.titleMedium,
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: SpacingTokens.lg),
-                    FilledButton.icon(
+            return Padding(
+              padding: const EdgeInsets.all(SpacingTokens.xl),
+              child: Center(
+                child: SingleChildScrollView(
+                  child: ObStatePanel.empty(
+                    title: l10n.homeNoBudgets,
+                    message: l10n.homeNoBudgetsHint,
+                    action: ObStateAction(
+                      label: l10n.homeCreateBudget,
                       onPressed: () =>
                           unawaited(context.pushNamed(createBudgetRoute)),
-                      icon: const Icon(Icons.add),
-                      label: Text(l10n.homeCreateBudget),
                     ),
-                  ],
+                  ),
                 ),
               ),
             );
@@ -140,9 +111,10 @@ class HomeScreen extends HookConsumerWidget {
       floatingActionButton: budgets.maybeWhen(
         data: (list) => list.isNotEmpty
             ? FloatingActionButton(
+                tooltip: l10n.homeCreateBudget,
                 onPressed: () =>
                     unawaited(context.pushNamed(createBudgetRoute)),
-                child: const Icon(Icons.add),
+                child: const SkribbleIcon(data: OpenBudgetIcons.add),
               )
             : null,
         orElse: () => null,
@@ -157,7 +129,7 @@ class HomeScreen extends HookConsumerWidget {
     String budgetName,
   ) async {
     final l10n = AppLocalizations.of(context);
-    final colorScheme = Theme.of(context).colorScheme;
+    final palette = Theme.of(context).ob;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -171,8 +143,8 @@ class HomeScreen extends HookConsumerWidget {
           FilledButton(
             onPressed: () => Navigator.of(ctx).pop(true),
             style: FilledButton.styleFrom(
-              backgroundColor: colorScheme.error,
-              foregroundColor: colorScheme.onError,
+              backgroundColor: palette.overspentWash,
+              foregroundColor: palette.overspent,
             ),
             child: Text(l10n.budgetDeleteButton),
           ),
@@ -224,7 +196,7 @@ class _BudgetCard extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final palette = theme.ob;
     final accountsAsync = ref.watch(accountListProvider(budgetId));
     final summaryAsync = ref.watch(budgetSummaryProvider(budgetId));
     final converter = ref
@@ -239,10 +211,10 @@ class _BudgetCard extends HookConsumerWidget {
 
     return Card(
       margin: const EdgeInsets.only(bottom: SpacingTokens.md),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
         onLongPress: onLongPress,
-        borderRadius: BorderRadius.circular(RadiusTokens.md),
         child: Padding(
           padding: const EdgeInsets.all(SpacingTokens.md),
           child: Column(
@@ -250,12 +222,17 @@ class _BudgetCard extends HookConsumerWidget {
             children: [
               Row(
                 children: [
-                  CircleAvatar(
-                    backgroundColor: colorScheme.primaryContainer,
-                    child: Icon(
-                      Icons.account_balance_wallet_rounded,
-                      color: colorScheme.onPrimaryContainer,
-                      size: 20,
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: ObRoughDecoration(
+                      color: palette.wash(ObTone.brand),
+                      outline: palette.quietPen,
+                      seed: 17,
+                    ),
+                    child: SkribbleIcon(
+                      data: OpenBudgetIcons.wallet,
+                      color: palette.hue(ObTone.brand),
+                      size: 22,
                     ),
                   ),
                   const SizedBox(width: SpacingTokens.md),
@@ -264,18 +241,15 @@ class _BudgetCard extends HookConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(budgetName, style: theme.textTheme.titleMedium),
-                        Text(
-                          currencyCode,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
-                          ),
-                        ),
+                        const SizedBox(height: 2),
+                        ObToneChip(label: currencyCode),
                       ],
                     ),
                   ),
-                  Icon(
-                    Icons.chevron_right_rounded,
-                    color: colorScheme.onSurfaceVariant,
+                  SkribbleIcon(
+                    data: OpenBudgetIcons.chevronRight,
+                    size: 20,
+                    color: palette.mutedInk,
                   ),
                 ],
               ),
@@ -310,6 +284,12 @@ class _BudgetCard extends HookConsumerWidget {
                           ? formatCents(singleTotal, singleCurrency)
                           : formatCurrencyBreakdown(totalsByCurrency);
                       final totalForColor = convertedTotal ?? singleTotal;
+                      final totalTone =
+                          (hasSingleCurrency || convertedTotal != null)
+                          ? totalForColor >= 0
+                                ? ObTone.funded
+                                : ObTone.overspent
+                          : ObTone.neutral;
 
                       return Padding(
                         padding: const EdgeInsets.only(top: SpacingTokens.md),
@@ -317,30 +297,20 @@ class _BudgetCard extends HookConsumerWidget {
                           children: [
                             Expanded(
                               child: _SummaryChip(
-                                icon: Icons.account_balance_rounded,
+                                icon: OpenBudgetIcons.bank,
                                 label: l10n.homeBudgetAccounts(
                                   activeAccounts.length,
                                 ),
-                                color: colorScheme.onSurfaceVariant,
+                                color: palette.mutedInk,
                               ),
                             ),
                             const SizedBox(width: SpacingTokens.sm),
                             Flexible(
-                              child: Text(
+                              child: ObAmount(
                                 totalLabel,
-                                style: theme.textTheme.titleSmall?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color:
-                                      (hasSingleCurrency ||
-                                          convertedTotal != null)
-                                      ? totalForColor >= 0
-                                            ? Theme.of(context).ob.funded
-                                            : Theme.of(context).ob.overspent
-                                      : colorScheme.onSurfaceVariant,
-                                ),
+                                tone: totalTone,
                                 textAlign: TextAlign.end,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
+                                style: theme.textTheme.titleSmall,
                               ),
                             ),
                           ],
@@ -363,6 +333,24 @@ class _BudgetCard extends HookConsumerWidget {
                           if (available < 0) overspentCount++;
                         }
                       }
+                      final readyTone = readyToAssign > 0
+                          ? ObTone.funded
+                          : readyToAssign < 0
+                          ? ObTone.overspent
+                          : ObTone.neutral;
+                      final readyLabel = Text(
+                        l10n.homeBudgetReadyToAssign(
+                          converter?.formatAmount(
+                                amountCents: readyToAssign,
+                                sourceCurrency: currency,
+                              ) ??
+                              formatCents(readyToAssign, currency),
+                        ),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: palette.hue(readyTone),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      );
 
                       return Padding(
                         padding: const EdgeInsets.only(top: SpacingTokens.sm),
@@ -371,32 +359,21 @@ class _BudgetCard extends HookConsumerWidget {
                             Expanded(
                               child: Row(
                                 children: [
-                                  Icon(
-                                    Icons.assignment_rounded,
-                                    size: 14,
-                                    color: readyToAssign > 0
-                                        ? Theme.of(context).ob.funded
-                                        : readyToAssign < 0
-                                        ? Theme.of(context).ob.overspent
-                                        : colorScheme.onSurfaceVariant,
+                                  SkribbleIcon(
+                                    data: OpenBudgetIcons.autoAssign,
+                                    size: 16,
+                                    color: palette.hue(readyTone),
                                   ),
                                   const SizedBox(width: SpacingTokens.xs),
-                                  Text(
-                                    l10n.homeBudgetReadyToAssign(
-                                      converter?.formatAmount(
-                                            amountCents: readyToAssign,
-                                            sourceCurrency: currency,
-                                          ) ??
-                                          formatCents(readyToAssign, currency),
-                                    ),
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: readyToAssign > 0
-                                          ? Theme.of(context).ob.funded
-                                          : readyToAssign < 0
-                                          ? Theme.of(context).ob.overspent
-                                          : colorScheme.onSurfaceVariant,
-                                      fontWeight: FontWeight.w500,
-                                    ),
+                                  Flexible(
+                                    child: readyToAssign > 0
+                                        ? ObHighlighter(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 3,
+                                            ),
+                                            child: readyLabel,
+                                          )
+                                        : readyLabel,
                                   ),
                                 ],
                               ),
@@ -405,17 +382,17 @@ class _BudgetCard extends HookConsumerWidget {
                               Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(
-                                    Icons.warning_amber_rounded,
-                                    size: 14,
-                                    color: Theme.of(context).ob.overspent,
+                                  SkribbleIcon(
+                                    data: OpenBudgetIcons.warning,
+                                    size: 16,
+                                    color: palette.overspent,
                                   ),
                                   const SizedBox(width: 2),
                                   Text(
                                     l10n.homeBudgetOverspent(overspentCount),
                                     style: theme.textTheme.bodySmall?.copyWith(
-                                      color: Theme.of(context).ob.overspent,
-                                      fontWeight: FontWeight.w500,
+                                      color: palette.overspent,
+                                      fontWeight: FontWeight.w600,
                                     ),
                                   ),
                                 ],
@@ -443,7 +420,7 @@ class _NetWorthSummary extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final palette = theme.ob;
 
     final totalsByCurrency = <CurrencyCode, int>{};
     var totalAccounts = 0;
@@ -470,6 +447,7 @@ class _NetWorthSummary extends HookConsumerWidget {
         ? (totalsByCurrency.values.firstOrNull ?? 0)
         : 0;
     final isPositive = !isSingleCurrency || singleTotal >= 0;
+    final tone = isPositive ? ObTone.funded : ObTone.overspent;
     final totalLabel = isSingleCurrency
         ? formatCents(
             singleTotal,
@@ -477,63 +455,40 @@ class _NetWorthSummary extends HookConsumerWidget {
           )
         : formatCurrencyBreakdown(totalsByCurrency);
 
-    return Container(
-      width: double.infinity,
+    return ObCard(
+      tone: tone,
       padding: const EdgeInsets.all(SpacingTokens.md),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: isPositive
-              ? [
-                  Theme.of(context).ob.brand.withAlpha(15),
-                  Theme.of(context).ob.funded.withAlpha(15),
-                ]
-              : [
-                  Theme.of(context).ob.overspent.withAlpha(15),
-                  Theme.of(context).ob.overspent.withAlpha(8),
-                ],
-        ),
-        borderRadius: BorderRadius.circular(RadiusTokens.md),
-        border: Border.all(
-          color: isPositive
-              ? Theme.of(context).ob.brand.withAlpha(40)
-              : Theme.of(context).ob.overspent.withAlpha(40),
-        ),
-      ),
       child: Column(
         children: [
           Row(
             children: [
-              Icon(
-                Icons.account_balance_wallet_rounded,
+              SkribbleIcon(
+                data: OpenBudgetIcons.wallet,
                 size: 18,
-                color: colorScheme.onSurfaceVariant,
+                color: palette.hue(tone),
               ),
               const SizedBox(width: SpacingTokens.xs),
               Text(
                 l10n.homeNetWorthLabel,
                 style: theme.textTheme.labelMedium?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
+                  color: palette.ink,
                 ),
               ),
               const Spacer(),
               Text(
                 l10n.homeNetWorthAccounts(totalAccounts),
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: palette.ink,
                 ),
               ),
             ],
           ),
           const SizedBox(height: SpacingTokens.xs),
-          Text(
+          ObAmount(
             totalLabel,
-            style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: isPositive
-                  ? Theme.of(context).ob.funded
-                  : Theme.of(context).ob.overspent,
-            ),
+            tone: tone,
             textAlign: TextAlign.center,
+            style: theme.textTheme.headlineSmall,
           ),
         ],
       ),
@@ -548,7 +503,7 @@ class _SummaryChip extends HookWidget {
     required this.color,
   });
 
-  final IconData icon;
+  final WiredSvgIconData icon;
   final String label;
   final Color color;
 
@@ -558,7 +513,7 @@ class _SummaryChip extends HookWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 14, color: color),
+        SkribbleIcon(data: icon, size: 16, color: color),
         const SizedBox(width: SpacingTokens.xs),
         Text(label, style: theme.textTheme.bodySmall?.copyWith(color: color)),
       ],

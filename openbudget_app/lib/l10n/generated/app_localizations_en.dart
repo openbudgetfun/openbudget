@@ -3325,4 +3325,36 @@ class AppLocalizationsEn extends AppLocalizations {
   String accountsInstitutionLabel(String institution) {
     return 'Institution: $institution';
   }
+
+  @override
+  String get authLoginHeadline => 'Welcome back';
+
+  @override
+  String get authLoginSubtitle => 'Continue building better money habits.';
+
+  @override
+  String get authShowPassword => 'Show password';
+
+  @override
+  String get authHidePassword => 'Hide password';
+
+  @override
+  String authStepProgress(int step, int total) {
+    return 'Step $step of $total';
+  }
+
+  @override
+  String get homeLoadingBudgets => 'Loading budgets';
+
+  @override
+  String get homeNoBudgetsHint =>
+      'Start a plan for this month and give every dollar a job.';
+
+  @override
+  String settingsLastUpdated(String label) {
+    return 'Last updated: $label';
+  }
+
+  @override
+  String get settingsLoading => 'Loading settings';
 }

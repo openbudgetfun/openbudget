@@ -31,11 +31,11 @@ void main() {
         expect(find.text('Enter your email to get started'), findsOneWidget);
       });
 
-      testWidgets('shows person add icon', (tester) async {
+      testWidgets('shows person add doodle', (tester) async {
         await tester.pumpWidget(buildSubject());
         await tester.pump();
 
-        expect(find.byIcon(Icons.person_add_rounded), findsOneWidget);
+        expect(find.byType(WiredDoodle), findsOneWidget);
       });
 
       testWidgets('shows email text field', (tester) async {
@@ -43,7 +43,13 @@ void main() {
         await tester.pump();
 
         expect(find.text('Email'), findsOneWidget);
-        expect(find.byIcon(Icons.email_outlined), findsOneWidget);
+        expect(
+          find.byWidgetPredicate(
+            (widget) =>
+                widget is SkribbleIcon && widget.data == OpenBudgetIcons.email,
+          ),
+          findsOneWidget,
+        );
       });
 
       testWidgets('shows Send Verification Code button', (tester) async {

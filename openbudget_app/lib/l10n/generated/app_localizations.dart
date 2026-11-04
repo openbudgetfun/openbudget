@@ -5693,6 +5693,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Institution: {institution}'**
   String accountsInstitutionLabel(String institution);
+
+  /// No description provided for @authLoginHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome back'**
+  String get authLoginHeadline;
+
+  /// No description provided for @authLoginSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue building better money habits.'**
+  String get authLoginSubtitle;
+
+  /// No description provided for @authShowPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Show password'**
+  String get authShowPassword;
+
+  /// No description provided for @authHidePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide password'**
+  String get authHidePassword;
+
+  /// No description provided for @authStepProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Step {step} of {total}'**
+  String authStepProgress(int step, int total);
+
+  /// No description provided for @homeLoadingBudgets.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading budgets'**
+  String get homeLoadingBudgets;
+
+  /// No description provided for @homeNoBudgetsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Start a plan for this month and give every dollar a job.'**
+  String get homeNoBudgetsHint;
+
+  /// No description provided for @settingsLastUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Last updated: {label}'**
+  String settingsLastUpdated(String label);
+
+  /// No description provided for @settingsLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading settings'**
+  String get settingsLoading;
 }
 
 class _AppLocalizationsDelegate

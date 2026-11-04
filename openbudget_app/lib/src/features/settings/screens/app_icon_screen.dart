@@ -5,7 +5,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/settings/providers/display_options_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
-import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 class AppIconScreen extends HookConsumerWidget {
@@ -17,66 +16,40 @@ class AppIconScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
+    final palette = theme.ob;
     final currentStyle = ref.watch(appIconStyleProvider);
 
     return Scaffold(
-      backgroundColor: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
       appBar: AppBar(
-        backgroundColor: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
-        surfaceTintColor: OpenBudgetPalette.transparentFor(Theme.of(context)),
-        centerTitle: true,
-        leadingWidth: 120,
-        leading: TextButton(
-          onPressed: () =>
-              context.goNamed(settingsRoute, pathParameters: {'id': budgetId}),
-          style: TextButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: SpacingTokens.xs),
+        leading: IconButton(
+          tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+          onPressed: () => context.goNamed(
+            settingsRoute,
+            pathParameters: {'id': budgetId},
           ),
-          child: Row(
-            children: [
-              Icon(
-                Icons.chevron_left_rounded,
-                size: 20,
-                color: theme.colorScheme.onSurface,
-              ),
-              Flexible(
-                child: Text(
-                  l10n.settingsTitle,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    color: theme.colorScheme.onSurface,
-                  ),
-                ),
-              ),
-            ],
-          ),
+          icon: const SkribbleIcon(data: OpenBudgetIcons.back),
         ),
-        title: Text(
-          l10n.settingsAppIcon,
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.w700,
-          ),
-        ),
+        title: Text(l10n.settingsAppIcon),
         actions: [
           TextButton(
             onPressed: () => context.goNamed(
               settingsRoute,
               pathParameters: {'id': budgetId},
             ),
-            child: Text(
-              l10n.dialogDone,
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: theme.colorScheme.onSurface,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+            child: Text(l10n.dialogDone),
           ),
         ],
       ),
       body: ListView(
-        padding: const EdgeInsets.all(SpacingTokens.md),
+        padding: const EdgeInsets.fromLTRB(
+          SpacingTokens.md,
+          SpacingTokens.md,
+          SpacingTokens.md,
+          SpacingTokens.xl,
+        ),
         children: [
-          _SettingsCard(
+          Card(
+            clipBehavior: Clip.antiAlias,
             child: Column(
               children: AppIconStyle.values
                   .map(
@@ -101,11 +74,11 @@ class AppIconScreen extends HookConsumerWidget {
                   .toList(),
             ),
           ),
-          const SizedBox(height: SpacingTokens.lg),
+          const SizedBox(height: SpacingTokens.md),
           Text(
             l10n.settingsAppIconHint,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
+              color: palette.mutedInk,
             ),
           ),
         ],
@@ -124,24 +97,6 @@ class AppIconScreen extends HookConsumerWidget {
       };
 }
 
-class _SettingsCard extends HookWidget {
-  const _SettingsCard({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) => DecoratedBox(
-    decoration: BoxDecoration(
-      color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
-      borderRadius: BorderRadius.circular(RadiusTokens.md),
-      border: Border.all(
-        color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
-      ),
-    ),
-    child: Material(type: MaterialType.transparency, child: child),
-  );
-}
-
 class _AppIconStyleTile extends HookWidget {
   const _AppIconStyleTile({
     required this.style,
@@ -158,26 +113,29 @@ class _AppIconStyleTile extends HookWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => ListTile(
-    onTap: onTap,
-    leading: selected
-        ? Icon(
-            Icons.check_rounded,
-            color: OpenBudgetPalette.bgBrandFor(Theme.of(context)),
-          )
-        : const SizedBox(width: 24),
-    title: Text(label),
-    trailing: Container(
-      height: 34,
-      width: 34,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
+  Widget build(BuildContext context) {
+    final palette = Theme.of(context).ob;
+    return ListTile(
+      onTap: onTap,
+      selected: selected,
+      leading: selected
+          ? SkribbleIcon(
+              data: OpenBudgetIcons.check,
+              color: palette.brand,
+            )
+          : const SizedBox(width: 24),
+      title: Text(label),
+      trailing: Container(
+        height: 34,
+        width: 34,
+        decoration: ObRoughDecoration(
+          outline: palette.quietPen,
+          radius: 8,
+          seed: 19,
         ),
+        clipBehavior: Clip.antiAlias,
+        child: Image.asset(previewAssetPath, fit: BoxFit.cover),
       ),
-      clipBehavior: Clip.antiAlias,
-      child: Image.asset(previewAssetPath, fit: BoxFit.cover),
-    ),
-  );
+    );
+  }
 }

@@ -28,7 +28,7 @@ void main() {
       await tester.pumpWidget(ProviderScope(child: _materialShell()));
       await tester.pump();
 
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.byType(ObLoadingPanel), findsOneWidget);
     });
 
     testWidgets('renders error state when budget fails to load', (

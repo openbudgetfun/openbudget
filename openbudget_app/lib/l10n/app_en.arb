@@ -1547,5 +1547,31 @@
         "type": "String"
       }
     }
-  }
+  },
+  "authLoginHeadline": "Welcome back",
+  "authLoginSubtitle": "Continue building better money habits.",
+  "authShowPassword": "Show password",
+  "authHidePassword": "Hide password",
+  "authStepProgress": "Step {step} of {total}",
+  "@authStepProgress": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "homeLoadingBudgets": "Loading budgets",
+  "homeNoBudgetsHint": "Start a plan for this month and give every dollar a job.",
+  "settingsLastUpdated": "Last updated: {label}",
+  "@settingsLastUpdated": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsLoading": "Loading settings"
 }
