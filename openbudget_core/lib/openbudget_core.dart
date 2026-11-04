@@ -10,3 +10,4 @@ export 'src/tax/tax_model.dart';
 export 'src/tax/tax_profile.dart';
 export 'src/tax/tax_rule_pack.dart';
 export 'src/tax/tax_rules.dart';
+export 'src/tax/us/us_tax_rules.dart';
