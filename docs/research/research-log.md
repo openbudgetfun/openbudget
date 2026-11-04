@@ -35,7 +35,6 @@
 ### Source Pointers
 
 - `docs/openbudget-screenflows.md`
-- `docs/openbudget-migration-progress.md`
 - `docs/how-to-use-openbudget-plan-and-priorities.md`
 
 ## 2026-02-27 - Server Capability Surface (Current)

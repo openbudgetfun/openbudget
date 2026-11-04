@@ -58,8 +58,7 @@
     "**/Pods/",
     "**/test_tools/serverpod_test_tools.dart",
     "pubspec.lock",
-    "**/pubspec.lock",
-    "**/pnpm-lock.yaml"
+    "**/pubspec.lock"
   ],
   "plugins": [
     "https://plugins.dprint.dev/typescript-0.95.15.wasm",

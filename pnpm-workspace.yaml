@@ -1,9 +1,0 @@
-packages:
-  - infra
-
-onlyBuiltDependencies:
-  - "@pulumi/docker"
-  - "@pulumi/docker-build"
-  - protobufjs
-
-useNodeVersion: 24.14.0

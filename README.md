@@ -3,7 +3,6 @@
 [![CI](https://github.com/openbudgetfun/openbudget/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/openbudgetfun/openbudget/actions/workflows/ci.yml)
 [![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?logo=flutter)](https://flutter.dev)
 [![Serverpod](https://img.shields.io/badge/Serverpod-3.3-blue)](https://serverpod.dev)
-[![Pulumi](https://img.shields.io/badge/Pulumi-IaC-8A3391?logo=pulumi)](https://www.pulumi.com)
 [![License](https://img.shields.io/github/license/openbudgetfun/openbudget)](LICENSE)
 
 Cross-platform envelope budgeting app with AI-driven financial intelligence.

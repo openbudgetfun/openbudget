@@ -41,27 +41,6 @@ jobs:
         run: melos exec --scope="openbudget_core" -- dart test
         shell: devenv shell -- bash -e {0}
 
-  infra-validate:
-    runs-on: blacksmith-2vcpu-ubuntu-2404
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/devenv
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: install infra dependencies
-        run: |
-          cd "$DEVENV_ROOT/infra"
-          npx --yes pnpm@latest-10 install
-        shell: devenv shell -- bash -e {0}
-
-      - name: type-check infra
-        run: |
-          cd "$DEVENV_ROOT/infra"
-          npx --yes pnpm@latest-10 build
-        shell: devenv shell -- bash -e {0}
-
   server-test:
     runs-on: blacksmith-2vcpu-ubuntu-2404
     timeout-minutes: 60
