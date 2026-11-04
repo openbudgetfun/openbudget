@@ -70,5 +70,6 @@ flutter:
   default-flavor: dev
   uses-material-design: true
   assets:
-    - assets/config.json
     - assets/branding/logos/
+    - assets/config.json
+    - assets/release_notes/
