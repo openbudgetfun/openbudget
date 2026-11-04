@@ -226,7 +226,7 @@ class _ComparisonTable extends HookWidget {
                   formatCents(m.totalSpentCents, sourceCurrency),
               style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: ColorTokens.error,
+                color: theme.ob.overspent,
               ),
               textAlign: TextAlign.right,
             ),

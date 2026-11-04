@@ -15,7 +15,6 @@ import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
-import 'package:simple_icons/simple_icons.dart';
 
 class AccountListScreen extends HookConsumerWidget {
   const AccountListScreen({required this.budgetId, super.key});
@@ -402,7 +401,11 @@ class _AccountTile extends HookWidget {
         ),
         leading: CircleAvatar(
           backgroundColor: colorScheme.secondaryContainer,
-          child: Icon(icon, color: colorScheme.onSecondaryContainer, size: 20),
+          child: SkribbleIcon(
+            data: icon,
+            color: colorScheme.onSecondaryContainer,
+            size: 20,
+          ),
         ),
         title: Row(
           children: [
@@ -445,24 +448,15 @@ class _AccountTile extends HookWidget {
     );
   }
 
-  static IconData _iconForType(String type) {
-    switch (type) {
-      case 'checking':
-        return Icons.account_balance_rounded;
-      case 'savings':
-        return Icons.savings_rounded;
-      case 'creditCard':
-        return Icons.credit_card_rounded;
-      case 'cash':
-        return Icons.payments_rounded;
-      case 'investment':
-        return Icons.trending_up_rounded;
-      case 'cryptoWallet':
-        return SimpleIcons.solana;
-      default:
-        return Icons.account_balance_wallet_rounded;
-    }
-  }
+  static WiredSvgIconData _iconForType(String type) => switch (type) {
+    'checking' => OpenBudgetIcons.bank,
+    'savings' => OpenBudgetIcons.savings,
+    'creditCard' => OpenBudgetIcons.creditCard,
+    'cash' => OpenBudgetIcons.cash,
+    'investment' => OpenBudgetIcons.trendingUp,
+    'cryptoWallet' => OpenBudgetIcons.solana,
+    _ => OpenBudgetIcons.wallet,
+  };
 
   static String _labelForType(String type, AppLocalizations l10n) =>
       switch (type) {
@@ -559,7 +553,7 @@ class _NetWorthCard extends HookWidget {
                     label: l10n.accountTotalAssets,
                     amount: convertedAssets,
                     currencyCode: converter!.displayCurrency,
-                    color: ColorTokens.secondary,
+                    color: Theme.of(context).ob.funded,
                   ),
                   Container(
                     width: 1,
@@ -570,7 +564,7 @@ class _NetWorthCard extends HookWidget {
                     label: l10n.accountTotalLiabilities,
                     amount: convertedLiabilities,
                     currencyCode: converter!.displayCurrency,
-                    color: ColorTokens.error,
+                    color: Theme.of(context).ob.overspent,
                   ),
                 ],
               )
@@ -582,7 +576,7 @@ class _NetWorthCard extends HookWidget {
                     label: l10n.accountTotalAssets,
                     amount: totalsByCurrency.first.assets,
                     currencyCode: totalsByCurrency.first.currency,
-                    color: ColorTokens.secondary,
+                    color: Theme.of(context).ob.funded,
                   ),
                   Container(
                     width: 1,
@@ -593,7 +587,7 @@ class _NetWorthCard extends HookWidget {
                     label: l10n.accountTotalLiabilities,
                     amount: totalsByCurrency.first.liabilities,
                     currencyCode: totalsByCurrency.first.currency,
-                    color: ColorTokens.error,
+                    color: Theme.of(context).ob.overspent,
                   ),
                 ],
               )
@@ -624,8 +618,8 @@ class _NetWorthCurrencyRow extends HookWidget {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context);
     final netColor = totals.netWorth >= 0
-        ? ColorTokens.secondary
-        : ColorTokens.error;
+        ? Theme.of(context).ob.funded
+        : Theme.of(context).ob.overspent;
 
     return Container(
       padding: const EdgeInsets.symmetric(

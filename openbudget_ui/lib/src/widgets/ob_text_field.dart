@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 
 /// A themed text field with consistent styling.
-class ObTextField extends StatelessWidget {
+class ObTextField extends HookWidget {
   const ObTextField({
     this.controller,
     this.hintText,

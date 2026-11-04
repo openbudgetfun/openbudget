@@ -9,7 +9,6 @@ import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
-import 'package:simple_icons/simple_icons.dart';
 
 class NetWorthScreen extends HookConsumerWidget {
   const NetWorthScreen({required this.budgetId, super.key});
@@ -94,8 +93,8 @@ class NetWorthScreen extends HookConsumerWidget {
           final netWorthColor = hasMultipleDisplayCurrencies
               ? colorScheme.primary
               : primaryNetWorth >= 0
-              ? ColorTokens.secondary
-              : ColorTokens.error;
+              ? Theme.of(context).ob.funded
+              : Theme.of(context).ob.overspent;
           final heroAmountLabel = hasMultipleDisplayCurrencies
               ? formatCurrencyBreakdown({
                   for (final breakdown in data.currencyBreakdown)
@@ -138,7 +137,7 @@ class NetWorthScreen extends HookConsumerWidget {
                           child: Text(
                             '${l10n.netWorthAssets} ${formatCents(primaryAssets, primaryCurrency)}',
                             style: theme.textTheme.bodyMedium?.copyWith(
-                              color: ColorTokens.secondary,
+                              color: Theme.of(context).ob.funded,
                             ),
                           ),
                         ),
@@ -146,7 +145,7 @@ class NetWorthScreen extends HookConsumerWidget {
                           child: Text(
                             '${l10n.netWorthLiabilities} ${formatCents(primaryLiabilities, primaryCurrency)}',
                             style: theme.textTheme.bodyMedium?.copyWith(
-                              color: ColorTokens.error,
+                              color: Theme.of(context).ob.overspent,
                             ),
                             textAlign: TextAlign.right,
                           ),
@@ -166,7 +165,7 @@ class NetWorthScreen extends HookConsumerWidget {
                       child: _SummaryChip(
                         label: l10n.netWorthAssets,
                         amount: formatCents(primaryAssets, primaryCurrency),
-                        color: ColorTokens.secondary,
+                        color: Theme.of(context).ob.funded,
                       ),
                     ),
                     const SizedBox(width: SpacingTokens.sm),
@@ -177,7 +176,7 @@ class NetWorthScreen extends HookConsumerWidget {
                           primaryLiabilities,
                           primaryCurrency,
                         ),
-                        color: ColorTokens.error,
+                        color: Theme.of(context).ob.overspent,
                       ),
                     ),
                   ],
@@ -396,8 +395,8 @@ class _CurrencySummaryRow extends HookWidget {
                 style: theme.textTheme.labelLarge?.copyWith(
                   fontWeight: FontWeight.w700,
                   color: assets + liabilities >= 0
-                      ? ColorTokens.secondary
-                      : ColorTokens.error,
+                      ? Theme.of(context).ob.funded
+                      : Theme.of(context).ob.overspent,
                 ),
               ),
             ],
@@ -436,12 +435,12 @@ class _AccountTile extends HookWidget {
     final theme = Theme.of(context);
     final currency = parseCurrencyCode(account.currencyCode);
     final balanceColor = account.balanceCents >= 0
-        ? ColorTokens.secondary
-        : ColorTokens.error;
+        ? Theme.of(context).ob.funded
+        : Theme.of(context).ob.overspent;
 
     return ListTile(
-      leading: Icon(
-        _accountIcon(account.accountType),
+      leading: SkribbleIcon(
+        data: _accountIcon(account.accountType),
         color: theme.colorScheme.primary,
       ),
       title: Text(account.name),
@@ -461,14 +460,14 @@ class _AccountTile extends HookWidget {
     );
   }
 
-  IconData _accountIcon(String type) => switch (type) {
-    'checking' => Icons.account_balance_rounded,
-    'savings' => Icons.savings_rounded,
-    'creditCard' => Icons.credit_card_rounded,
-    'cash' => Icons.money_rounded,
-    'investment' => Icons.trending_up_rounded,
-    'cryptoWallet' => SimpleIcons.solana,
-    _ => Icons.account_balance_wallet_rounded,
+  WiredSvgIconData _accountIcon(String type) => switch (type) {
+    'checking' => OpenBudgetIcons.bank,
+    'savings' => OpenBudgetIcons.savings,
+    'creditCard' => OpenBudgetIcons.creditCard,
+    'cash' => OpenBudgetIcons.cash,
+    'investment' => OpenBudgetIcons.trendingUp,
+    'cryptoWallet' => OpenBudgetIcons.solana,
+    _ => OpenBudgetIcons.wallet,
   };
 
   String _accountTypeLabel(String type) => switch (type) {

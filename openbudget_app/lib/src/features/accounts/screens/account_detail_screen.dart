@@ -3288,7 +3288,7 @@ class _ReconcileDialog extends HookWidget {
                     fontWeight: FontWeight.w600,
                     color: differenceCents != 0
                         ? colorScheme.error
-                        : ColorTokens.secondary,
+                        : Theme.of(context).ob.funded,
                   ),
                 ),
               ],

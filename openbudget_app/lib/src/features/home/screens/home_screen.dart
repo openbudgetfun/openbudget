@@ -334,8 +334,8 @@ class _BudgetCard extends HookConsumerWidget {
                                       (hasSingleCurrency ||
                                           convertedTotal != null)
                                       ? totalForColor >= 0
-                                            ? ColorTokens.secondary
-                                            : ColorTokens.error
+                                            ? Theme.of(context).ob.funded
+                                            : Theme.of(context).ob.overspent
                                       : colorScheme.onSurfaceVariant,
                                 ),
                                 textAlign: TextAlign.end,
@@ -375,9 +375,9 @@ class _BudgetCard extends HookConsumerWidget {
                                     Icons.assignment_rounded,
                                     size: 14,
                                     color: readyToAssign > 0
-                                        ? ColorTokens.secondary
+                                        ? Theme.of(context).ob.funded
                                         : readyToAssign < 0
-                                        ? ColorTokens.error
+                                        ? Theme.of(context).ob.overspent
                                         : colorScheme.onSurfaceVariant,
                                   ),
                                   const SizedBox(width: SpacingTokens.xs),
@@ -391,9 +391,9 @@ class _BudgetCard extends HookConsumerWidget {
                                     ),
                                     style: theme.textTheme.bodySmall?.copyWith(
                                       color: readyToAssign > 0
-                                          ? ColorTokens.secondary
+                                          ? Theme.of(context).ob.funded
                                           : readyToAssign < 0
-                                          ? ColorTokens.error
+                                          ? Theme.of(context).ob.overspent
                                           : colorScheme.onSurfaceVariant,
                                       fontWeight: FontWeight.w500,
                                     ),
@@ -405,16 +405,16 @@ class _BudgetCard extends HookConsumerWidget {
                               Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  const Icon(
+                                  Icon(
                                     Icons.warning_amber_rounded,
                                     size: 14,
-                                    color: ColorTokens.error,
+                                    color: Theme.of(context).ob.overspent,
                                   ),
                                   const SizedBox(width: 2),
                                   Text(
                                     l10n.homeBudgetOverspent(overspentCount),
                                     style: theme.textTheme.bodySmall?.copyWith(
-                                      color: ColorTokens.error,
+                                      color: Theme.of(context).ob.overspent,
                                       fontWeight: FontWeight.w500,
                                     ),
                                   ),
@@ -484,19 +484,19 @@ class _NetWorthSummary extends HookConsumerWidget {
         gradient: LinearGradient(
           colors: isPositive
               ? [
-                  ColorTokens.primary.withAlpha(15),
-                  ColorTokens.secondary.withAlpha(15),
+                  Theme.of(context).ob.brand.withAlpha(15),
+                  Theme.of(context).ob.funded.withAlpha(15),
                 ]
               : [
-                  ColorTokens.error.withAlpha(15),
-                  ColorTokens.error.withAlpha(8),
+                  Theme.of(context).ob.overspent.withAlpha(15),
+                  Theme.of(context).ob.overspent.withAlpha(8),
                 ],
         ),
         borderRadius: BorderRadius.circular(RadiusTokens.md),
         border: Border.all(
           color: isPositive
-              ? ColorTokens.primary.withAlpha(40)
-              : ColorTokens.error.withAlpha(40),
+              ? Theme.of(context).ob.brand.withAlpha(40)
+              : Theme.of(context).ob.overspent.withAlpha(40),
         ),
       ),
       child: Column(
@@ -529,7 +529,9 @@ class _NetWorthSummary extends HookConsumerWidget {
             totalLabel,
             style: theme.textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.bold,
-              color: isPositive ? ColorTokens.secondary : ColorTokens.error,
+              color: isPositive
+                  ? Theme.of(context).ob.funded
+                  : Theme.of(context).ob.overspent,
             ),
             textAlign: TextAlign.center,
           ),

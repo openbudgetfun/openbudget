@@ -47,10 +47,10 @@ class EnvelopeRow extends HookConsumerWidget {
     final carryover = monthlyData?.carryoverCents ?? 0;
     final balanceStyle = ref.watch(balanceStyleProvider);
     final availableColor = available > 0
-        ? ColorTokens.secondary
+        ? Theme.of(context).ob.funded
         : available < 0
-        ? ColorTokens.error
-        : ColorTokens.tertiary;
+        ? Theme.of(context).ob.overspent
+        : Theme.of(context).ob.underfunded;
     final shouldDifferentiateWithoutColor =
         balanceStyle == BalanceStyle.differentiateWithoutColor &&
         available != 0;
@@ -282,7 +282,7 @@ class _SpendingProgressBar extends HookWidget {
     if (ratio > 1.0) {
       barColor = OpenBudgetPalette.fgErrorFor(Theme.of(context));
     } else if (ratio >= 0.8) {
-      barColor = ColorTokens.tertiary;
+      barColor = Theme.of(context).ob.underfunded;
     } else {
       barColor = OpenBudgetPalette.fgSuccessFor(Theme.of(context));
     }
@@ -344,7 +344,7 @@ class _GoalProgressBar extends HookWidget {
     if (progress >= 1.0) {
       barColor = OpenBudgetPalette.fgSuccessFor(Theme.of(context));
     } else if (progress >= 0.5) {
-      barColor = ColorTokens.tertiary;
+      barColor = Theme.of(context).ob.underfunded;
     } else {
       barColor = OpenBudgetPalette.fgErrorFor(Theme.of(context));
     }

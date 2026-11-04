@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 
 /// A themed dropdown field with consistent styling.
-class ObDropdown<T> extends StatelessWidget {
+class ObDropdown<T> extends HookWidget {
   const ObDropdown({
     required this.value,
     required this.items,

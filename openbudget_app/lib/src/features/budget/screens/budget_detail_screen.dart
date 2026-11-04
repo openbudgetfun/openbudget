@@ -2644,23 +2644,23 @@ class _DueBanner extends HookWidget {
           vertical: SpacingTokens.sm,
         ),
         decoration: BoxDecoration(
-          color: ColorTokens.primary.withAlpha(15),
+          color: Theme.of(context).ob.brand.withAlpha(15),
           borderRadius: BorderRadius.circular(RadiusTokens.md),
-          border: Border.all(color: ColorTokens.primary.withAlpha(60)),
+          border: Border.all(color: Theme.of(context).ob.brand.withAlpha(60)),
         ),
         child: Row(
           children: [
-            const Icon(
+            Icon(
               Icons.schedule_rounded,
               size: 20,
-              color: ColorTokens.primary,
+              color: Theme.of(context).ob.brand,
             ),
             const SizedBox(width: SpacingTokens.sm),
             Expanded(
               child: Text(
                 l10n.recurringDueBanner(count),
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: ColorTokens.primary,
+                  color: Theme.of(context).ob.brand,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -2684,7 +2684,7 @@ class _DueBanner extends HookWidget {
                 isPosting ? l10n.recurringPosting : l10n.recurringPostDue,
               ),
               style: FilledButton.styleFrom(
-                backgroundColor: ColorTokens.primary,
+                backgroundColor: Theme.of(context).ob.brand,
                 foregroundColor: OpenBudgetPalette.fgOnBrandFor(
                   Theme.of(context),
                 ),

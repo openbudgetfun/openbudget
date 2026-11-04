@@ -2,7 +2,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
@@ -58,10 +57,6 @@ BudgetSummary _emptySummary(Budget budget) => BudgetSummary(
 );
 
 void main() {
-  setUpAll(() {
-    GoogleFonts.config.allowRuntimeFetching = false;
-  });
-
   group('HomeScreen', () {
     testWidgets('renders loading indicator while budgets load', (tester) async {
       await tester.pumpWidget(

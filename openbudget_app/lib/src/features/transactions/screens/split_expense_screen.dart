@@ -142,8 +142,8 @@ class SplitExpenseScreen extends HookConsumerWidget {
                       ),
                       decoration: BoxDecoration(
                         color: remaining.abs() < 0.005
-                            ? ColorTokens.secondary.withAlpha(30)
-                            : ColorTokens.tertiary.withAlpha(30),
+                            ? Theme.of(context).ob.funded.withAlpha(30)
+                            : Theme.of(context).ob.underfunded.withAlpha(30),
                         borderRadius: BorderRadius.circular(RadiusTokens.sm),
                       ),
                       child: Row(
@@ -160,8 +160,8 @@ class SplitExpenseScreen extends HookConsumerWidget {
                             style: theme.textTheme.bodyMedium?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: remaining.abs() < 0.005
-                                  ? ColorTokens.secondary
-                                  : ColorTokens.tertiary,
+                                  ? Theme.of(context).ob.funded
+                                  : Theme.of(context).ob.underfunded,
                             ),
                           ),
                         ],

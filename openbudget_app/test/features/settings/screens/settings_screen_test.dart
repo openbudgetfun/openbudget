@@ -2,7 +2,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
@@ -24,10 +23,6 @@ Widget _materialShell() => MaterialApp(
 );
 
 void main() {
-  setUpAll(() {
-    GoogleFonts.config.allowRuntimeFetching = false;
-  });
-
   group('SettingsScreen', () {
     testWidgets('renders loading indicator while budget loads', (tester) async {
       await tester.pumpWidget(ProviderScope(child: _materialShell()));

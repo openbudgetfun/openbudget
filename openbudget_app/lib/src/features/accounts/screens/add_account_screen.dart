@@ -20,7 +20,6 @@ import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 import 'package:plaid_flutter/plaid_flutter.dart';
-import 'package:simple_icons/simple_icons.dart';
 
 enum _AddAccountStep {
   loading,
@@ -999,7 +998,7 @@ class _BankSearchStep extends StatelessWidget {
         const SizedBox(height: SpacingTokens.sm),
         FilledButton.icon(
           onPressed: onConnectSolana,
-          icon: const Icon(SimpleIcons.solana),
+          icon: const SkribbleIcon(data: OpenBudgetIcons.solana),
           label: Text(l10n.addAccountConnectWallet),
         ),
       ],

@@ -2,7 +2,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/payees/providers/payee_list_provider.dart';
@@ -19,10 +18,6 @@ Payee _makePayee({String name = 'Grocery Store', UuidValue? id}) =>
     Payee(id: id, name: name, budgetId: _budgetUuid);
 
 void main() {
-  setUpAll(() {
-    GoogleFonts.config.allowRuntimeFetching = false;
-  });
-
   group('PayeeListScreen', () {
     testWidgets('renders loading indicator while payees load', (tester) async {
       await tester.pumpWidget(

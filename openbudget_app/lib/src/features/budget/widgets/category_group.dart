@@ -428,13 +428,13 @@ class CategoryGroup extends HookConsumerWidget {
                   },
                 ),
               ListTile(
-                leading: const Icon(
+                leading: Icon(
                   Icons.delete_rounded,
-                  color: ColorTokens.error,
+                  color: Theme.of(context).ob.overspent,
                 ),
                 title: Text(
                   l10n.deleteConfirmButton,
-                  style: const TextStyle(color: ColorTokens.error),
+                  style: TextStyle(color: Theme.of(context).ob.overspent),
                 ),
                 onTap: () {
                   Navigator.of(ctx).pop();
@@ -508,13 +508,13 @@ class CategoryGroup extends HookConsumerWidget {
                   },
                 ),
               ListTile(
-                leading: const Icon(
+                leading: Icon(
                   Icons.delete_rounded,
-                  color: ColorTokens.error,
+                  color: Theme.of(context).ob.overspent,
                 ),
                 title: Text(
                   l10n.deleteConfirmButton,
-                  style: const TextStyle(color: ColorTokens.error),
+                  style: TextStyle(color: Theme.of(context).ob.overspent),
                 ),
                 onTap: () {
                   Navigator.of(ctx).pop();

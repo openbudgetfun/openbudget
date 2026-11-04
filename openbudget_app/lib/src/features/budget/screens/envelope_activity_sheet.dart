@@ -63,10 +63,10 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
     final spent = monthlyData?.spentCents ?? envelope.spentAmountCents;
     final available = monthlyData?.availableCents ?? (budgeted - spent);
     final availableColor = available > 0
-        ? ColorTokens.secondary
+        ? Theme.of(context).ob.funded
         : available < 0
-        ? ColorTokens.error
-        : ColorTokens.tertiary;
+        ? Theme.of(context).ob.overspent
+        : Theme.of(context).ob.underfunded;
 
     return DraggableScrollableSheet(
       initialChildSize: 0.7,
@@ -242,8 +242,8 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
                     final tx = transactions[index];
                     final isIncome = tx.amountCents > 0;
                     final color = isIncome
-                        ? ColorTokens.secondary
-                        : ColorTokens.error;
+                        ? Theme.of(context).ob.funded
+                        : Theme.of(context).ob.overspent;
 
                     return Padding(
                       padding: const EdgeInsets.symmetric(
@@ -441,7 +441,7 @@ class _BalanceGrid extends HookWidget {
                   amount: hideAmounts
                       ? hiddenAmountPlaceholder
                       : formatCents(assigned, currencyCode),
-                  color: ColorTokens.primary,
+                  color: Theme.of(context).ob.brand,
                 ),
               ),
             ],
@@ -455,7 +455,7 @@ class _BalanceGrid extends HookWidget {
                   amount: hideAmounts
                       ? hiddenAmountPlaceholder
                       : formatCents(activity, currencyCode),
-                  color: ColorTokens.error,
+                  color: Theme.of(context).ob.overspent,
                 ),
               ),
               const SizedBox(width: SpacingTokens.sm),
@@ -546,11 +546,11 @@ class _GoalSummary extends HookWidget {
 
     final Color barColor;
     if (progress >= 1.0) {
-      barColor = ColorTokens.secondary;
+      barColor = Theme.of(context).ob.funded;
     } else if (progress >= 0.5) {
-      barColor = ColorTokens.tertiary;
+      barColor = Theme.of(context).ob.underfunded;
     } else {
-      barColor = ColorTokens.error;
+      barColor = Theme.of(context).ob.overspent;
     }
 
     final goalLabel = switch (goal.goalType) {
@@ -582,7 +582,7 @@ class _GoalSummary extends HookWidget {
               Text(
                 '${hideAmounts ? hiddenAmountPlaceholder : formatCents(underfunded, currencyCode)} needed',
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: ColorTokens.error,
+                  color: Theme.of(context).ob.overspent,
                 ),
               ),
             ],

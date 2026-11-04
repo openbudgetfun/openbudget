@@ -165,7 +165,9 @@ class ImportTransactionsScreen extends HookConsumerWidget {
                                               ?.copyWith(
                                                 fontWeight: FontWeight.w600,
                                                 color: row.amountCents >= 0
-                                                    ? ColorTokens.secondary
+                                                    ? Theme.of(context)
+                                                          .ob
+                                                          .funded
                                                     : colorScheme.error,
                                               ),
                                         ),

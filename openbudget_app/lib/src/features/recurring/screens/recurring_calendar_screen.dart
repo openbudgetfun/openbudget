@@ -274,7 +274,7 @@ class _CalendarGrid extends HookWidget {
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     color: hasDue
-                                        ? ColorTokens.error
+                                        ? Theme.of(context).ob.overspent
                                         : colorScheme.primary,
                                   ),
                                 ),
@@ -313,7 +313,9 @@ class _DayDetail extends HookConsumerWidget {
         final occurrence = occurrences[index];
         final recurring = occurrence.recurring;
         final isIncome = recurring.amountCents > 0;
-        final color = isIncome ? ColorTokens.secondary : ColorTokens.error;
+        final color = isIncome
+            ? Theme.of(context).ob.funded
+            : Theme.of(context).ob.overspent;
         final currency = CurrencyCode.values.firstWhere(
           (c) => c.code == recurring.currencyCode,
           orElse: () => CurrencyCode.usd,
@@ -361,13 +363,13 @@ class _DayDetail extends HookConsumerWidget {
                       vertical: 2,
                     ),
                     decoration: BoxDecoration(
-                      color: ColorTokens.error.withAlpha(20),
+                      color: Theme.of(context).ob.overspent.withAlpha(20),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
                       l10n.recurringDueLabel,
                       style: theme.textTheme.labelSmall?.copyWith(
-                        color: ColorTokens.error,
+                        color: Theme.of(context).ob.overspent,
                         fontSize: 10,
                       ),
                     ),

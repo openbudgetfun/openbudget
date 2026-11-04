@@ -31,9 +31,9 @@ class AutoAssignDialog extends HookConsumerWidget {
       constraints: const BoxConstraints(maxWidth: 560),
       title: Row(
         children: [
-          const Icon(
+          Icon(
             Icons.auto_fix_high_rounded,
-            color: ColorTokens.primary,
+            color: Theme.of(context).ob.brand,
             size: 24,
           ),
           const SizedBox(width: SpacingTokens.sm),
@@ -51,10 +51,10 @@ class AutoAssignDialog extends HookConsumerWidget {
             return Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(
+                Icon(
                   Icons.check_circle_outline_rounded,
                   size: 48,
-                  color: ColorTokens.secondary,
+                  color: Theme.of(context).ob.funded,
                 ),
                 const SizedBox(height: SpacingTokens.md),
                 Text(
@@ -77,7 +77,7 @@ class AutoAssignDialog extends HookConsumerWidget {
                 Container(
                   padding: const EdgeInsets.all(SpacingTokens.sm),
                   decoration: BoxDecoration(
-                    color: ColorTokens.secondary.withAlpha(20),
+                    color: Theme.of(context).ob.funded.withAlpha(20),
                     borderRadius: BorderRadius.circular(RadiusTokens.sm),
                   ),
                   child: Row(
@@ -92,7 +92,7 @@ class AutoAssignDialog extends HookConsumerWidget {
                         formatCents(proposal.totalAssignedCents, currencyCode),
                         style: theme.textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: ColorTokens.secondary,
+                          color: Theme.of(context).ob.funded,
                         ),
                       ),
                     ],
@@ -132,7 +132,7 @@ class AutoAssignDialog extends HookConsumerWidget {
                               '+${formatCents(item.addedCents, currencyCode)}',
                               style: theme.textTheme.bodyMedium?.copyWith(
                                 fontWeight: FontWeight.w600,
-                                color: ColorTokens.secondary,
+                                color: Theme.of(context).ob.funded,
                               ),
                             ),
                           ],

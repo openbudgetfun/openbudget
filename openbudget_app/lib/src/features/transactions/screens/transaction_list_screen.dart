@@ -317,7 +317,7 @@ class TransactionListScreen extends HookConsumerWidget {
                             selected: filter.value == TransactionFilter.income,
                             onSelected: () =>
                                 filter.value = TransactionFilter.income,
-                            color: ColorTokens.secondary,
+                            color: Theme.of(context).ob.funded,
                           ),
                           const SizedBox(width: SpacingTokens.sm),
                           _FilterChip(
@@ -325,7 +325,7 @@ class TransactionListScreen extends HookConsumerWidget {
                             selected: filter.value == TransactionFilter.expense,
                             onSelected: () =>
                                 filter.value = TransactionFilter.expense,
-                            color: ColorTokens.error,
+                            color: Theme.of(context).ob.overspent,
                           ),
                           const SizedBox(width: SpacingTokens.sm),
                           _FilterChip(
@@ -1343,7 +1343,9 @@ class _TransactionTile extends HookConsumerWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final isIncome = transaction.amountCents > 0;
-    final color = isIncome ? ColorTokens.secondary : ColorTokens.error;
+    final color = isIncome
+        ? Theme.of(context).ob.funded
+        : Theme.of(context).ob.overspent;
     final icon = isIncome
         ? Icons.arrow_downward_rounded
         : Icons.arrow_upward_rounded;
@@ -1357,7 +1359,7 @@ class _TransactionTile extends HookConsumerWidget {
     final statusColor = transaction.reconciled
         ? colorScheme.primary
         : transaction.cleared
-        ? ColorTokens.secondary
+        ? Theme.of(context).ob.funded
         : colorScheme.outline;
     final statusTooltip = transaction.reconciled
         ? l10n.transactionReconciled
