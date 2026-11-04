@@ -1,0 +1,23 @@
+### A user's own OpenAI-compatible provider for the financial assistant.
+###
+### The API key is encrypted with AES-256-GCM before it reaches the database
+### and is never returned to a client.
+class: AgentProviderSettings
+table: agent_provider_settings
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  userId: UuidValue
+  ### HTTPS base URL of the provider's OpenAI-compatible API.
+  baseUrl: String
+  model: String
+  ### Base64 AES-GCM ciphertext of the API key, including its MAC tag.
+  encryptedApiKey: String
+  ### Base64 nonce used for [encryptedApiKey].
+  nonce: String
+  ### The last four characters of the key, for display only.
+  keyHint: String
+  updatedAt: DateTime, default=now
+indexes:
+  agent_provider_settings_user_unique_idx:
+    fields: userId
+    unique: true

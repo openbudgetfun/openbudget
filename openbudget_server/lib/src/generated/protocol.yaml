@@ -6,6 +6,18 @@ account:
   - get:
   - update:
   - delete:
+agent:
+  - chat:
+  - listConversations:
+  - getMessages:
+  - deleteConversation:
+  - getUsage:
+  - saveProviderSettings:
+  - getProviderSettings:
+  - clearProviderSettings:
+  - listProposals:
+  - applyProposal:
+  - dismissProposal:
 appleIdp:
   - login:
   - hasAccount:

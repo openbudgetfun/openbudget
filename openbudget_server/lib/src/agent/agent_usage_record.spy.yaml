@@ -1,0 +1,21 @@
+### Token usage and cost of one model call.
+class: AgentUsageRecord
+table: agent_usage_record
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  userId: UuidValue
+  conversationId: UuidValue?
+  provider: AgentProvider
+  model: String
+  promptTokens: int
+  ### Prompt tokens served from the provider's cache.
+  cachedTokens: int
+  completionTokens: int
+  ### Cost in micro-dollars. BYO calls are recorded at zero.
+  costMicroUsd: int
+  createdAt: DateTime, default=now
+indexes:
+  agent_usage_user_idx:
+    fields: userId, createdAt
+  agent_usage_conversation_idx:
+    fields: conversationId

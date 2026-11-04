@@ -1,0 +1,14 @@
+### One event in a streamed agent turn.
+class: AgentEvent
+fields:
+  kind: AgentEventKind
+  conversationId: UuidValue
+  ### Assistant text, for [AgentEventKind.textDelta].
+  text: String?
+  ### The tool being called, for [AgentEventKind.toolCall].
+  toolName: String?
+  ### The proposed change, for [AgentEventKind.proposal].
+  proposal: AgentProposal?
+  ### Cost of the model call that just finished, for
+  ### [AgentEventKind.usage]. Zero for BYO calls.
+  costMicroUsd: int?

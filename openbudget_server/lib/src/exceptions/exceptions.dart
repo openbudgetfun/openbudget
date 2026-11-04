@@ -100,3 +100,38 @@ class BillingProviderException implements Exception {
       ? 'BillingProviderException: $provider request failed'
       : 'BillingProviderException: $provider request failed ($details)';
 }
+
+/// Thrown when the built-in agent allowance for the current period is spent.
+class AgentAllowanceExhaustedException implements Exception {
+  AgentAllowanceExhaustedException([
+    this.message = 'The included OpenBudget Plus agent usage is used up',
+  ]);
+
+  final String message;
+
+  @override
+  String toString() => 'AgentAllowanceExhaustedException: $message';
+}
+
+/// Thrown when the assistant has no usable provider, such as a missing
+/// server-side Zen key.
+class AgentProviderUnavailableException implements Exception {
+  AgentProviderUnavailableException([
+    this.message = 'The agent provider is not available',
+  ]);
+
+  final String message;
+
+  @override
+  String toString() => 'AgentProviderUnavailableException: $message';
+}
+
+/// Thrown when a provider call fails or answers with something unusable.
+class AgentProviderException implements Exception {
+  AgentProviderException([this.message = 'The agent provider call failed']);
+
+  final String message;
+
+  @override
+  String toString() => 'AgentProviderException: $message';
+}

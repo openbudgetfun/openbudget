@@ -22,6 +22,7 @@ import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
     as _iais;
 
 import '../accounts/account_endpoint.dart' as _izzfgwyn;
+import '../agent/agent_endpoint.dart' as _i6aufbii;
 import '../auth/apple_idp_endpoint.dart' as _ilq63su8;
 import '../auth/email_idp_endpoint.dart' as _iuc1hd5t;
 import '../auth/google_idp_endpoint.dart' as _i71axiz0;
@@ -55,6 +56,12 @@ class Endpoints extends _is.EndpointDispatch {
         ..initialize(
           server,
           'account',
+          null,
+        ),
+      'agent': _i6aufbii.AgentEndpoint()
+        ..initialize(
+          server,
+          'agent',
           null,
         ),
       'appleIdp': _ilq63su8.AppleIdpEndpoint()
@@ -410,6 +417,226 @@ class Endpoints extends _is.EndpointDispatch {
                     session,
                     params['accountId'],
                   ),
+        ),
+      },
+    );
+    connectors['agent'] = _is.EndpointConnector(
+      name: 'agent',
+      endpoint: endpoints['agent']!,
+      methodConnectors: {
+        'listConversations': _is.MethodConnector(
+          name: 'listConversations',
+          params: {
+            'budgetId': _is.ParameterDescription(
+              name: 'budgetId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['agent'] as _i6aufbii.AgentEndpoint)
+                  .listConversations(
+                    session,
+                    params['budgetId'],
+                  ),
+        ),
+        'getMessages': _is.MethodConnector(
+          name: 'getMessages',
+          params: {
+            'conversationId': _is.ParameterDescription(
+              name: 'conversationId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['agent'] as _i6aufbii.AgentEndpoint).getMessages(
+                    session,
+                    params['conversationId'],
+                  ),
+        ),
+        'deleteConversation': _is.MethodConnector(
+          name: 'deleteConversation',
+          params: {
+            'conversationId': _is.ParameterDescription(
+              name: 'conversationId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['agent'] as _i6aufbii.AgentEndpoint)
+                  .deleteConversation(
+                    session,
+                    params['conversationId'],
+                  ),
+        ),
+        'getUsage': _is.MethodConnector(
+          name: 'getUsage',
+          params: {},
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['agent'] as _i6aufbii.AgentEndpoint)
+                  .getUsage(session),
+        ),
+        'saveProviderSettings': _is.MethodConnector(
+          name: 'saveProviderSettings',
+          params: {
+            'baseUrl': _is.ParameterDescription(
+              name: 'baseUrl',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'model': _is.ParameterDescription(
+              name: 'model',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'apiKey': _is.ParameterDescription(
+              name: 'apiKey',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['agent'] as _i6aufbii.AgentEndpoint)
+                  .saveProviderSettings(
+                    session,
+                    params['baseUrl'],
+                    params['model'],
+                    params['apiKey'],
+                  ),
+        ),
+        'getProviderSettings': _is.MethodConnector(
+          name: 'getProviderSettings',
+          params: {},
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['agent'] as _i6aufbii.AgentEndpoint)
+                  .getProviderSettings(session),
+        ),
+        'clearProviderSettings': _is.MethodConnector(
+          name: 'clearProviderSettings',
+          params: {},
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['agent'] as _i6aufbii.AgentEndpoint)
+                  .clearProviderSettings(session),
+        ),
+        'listProposals': _is.MethodConnector(
+          name: 'listProposals',
+          params: {
+            'budgetId': _is.ParameterDescription(
+              name: 'budgetId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'pendingOnly': _is.ParameterDescription(
+              name: 'pendingOnly',
+              type: _is.getType<bool>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['agent'] as _i6aufbii.AgentEndpoint).listProposals(
+                    session,
+                    params['budgetId'],
+                    pendingOnly: params['pendingOnly'],
+                  ),
+        ),
+        'applyProposal': _is.MethodConnector(
+          name: 'applyProposal',
+          params: {
+            'proposalId': _is.ParameterDescription(
+              name: 'proposalId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['agent'] as _i6aufbii.AgentEndpoint).applyProposal(
+                    session,
+                    params['proposalId'],
+                  ),
+        ),
+        'dismissProposal': _is.MethodConnector(
+          name: 'dismissProposal',
+          params: {
+            'proposalId': _is.ParameterDescription(
+              name: 'proposalId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['agent'] as _i6aufbii.AgentEndpoint)
+                  .dismissProposal(
+                    session,
+                    params['proposalId'],
+                  ),
+        ),
+        'chat': _is.MethodStreamConnector(
+          name: 'chat',
+          params: {
+            'budgetId': _is.ParameterDescription(
+              name: 'budgetId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'conversationId': _is.ParameterDescription(
+              name: 'conversationId',
+              type: _is.getType<_is.UuidValue?>(),
+              nullable: true,
+            ),
+            'message': _is.ParameterDescription(
+              name: 'message',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+          },
+          streamParams: {},
+          returnType: _is.MethodStreamReturnType.streamType,
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+                Map<String, Stream> streamParams,
+              ) => (endpoints['agent'] as _i6aufbii.AgentEndpoint).chat(
+                session,
+                params['budgetId'],
+                params['conversationId'],
+                params['message'],
+              ),
         ),
       },
     );

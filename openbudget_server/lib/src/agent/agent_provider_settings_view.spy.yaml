@@ -1,0 +1,7 @@
+### The user's own provider settings, without the API key.
+class: AgentProviderSettingsView
+fields:
+  baseUrl: String
+  model: String
+  ### Last four characters of the stored key.
+  keyHint: String

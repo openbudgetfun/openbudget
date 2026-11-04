@@ -15,6 +15,18 @@ import 'dart:async' as _ida;
 import 'package:http/http.dart' as _i85jenna;
 import 'package:openbudget_client/src/protocol/accounts/account.dart'
     as _iqudaadl;
+import 'package:openbudget_client/src/protocol/agent/agent_conversation.dart'
+    as _in44ixo7;
+import 'package:openbudget_client/src/protocol/agent/agent_event.dart'
+    as _isrqm714;
+import 'package:openbudget_client/src/protocol/agent/agent_message.dart'
+    as _i8fbky0c;
+import 'package:openbudget_client/src/protocol/agent/agent_proposal.dart'
+    as _icv7zzda;
+import 'package:openbudget_client/src/protocol/agent/agent_provider_settings_view.dart'
+    as _i8qcy504;
+import 'package:openbudget_client/src/protocol/agent/agent_usage_view.dart'
+    as _igs7yvae;
 import 'package:openbudget_client/src/protocol/billing/entitlement.dart'
     as _iyhncv6f;
 import 'package:openbudget_client/src/protocol/billing/solana_plan_view.dart'
@@ -177,6 +189,142 @@ class EndpointAccount extends _isc.EndpointRef {
         'delete',
         {'accountId': accountId},
       );
+}
+
+/// The financial assistant: chat, its history, its proposals and the user's
+/// own provider settings.
+///
+/// Every method requires a signed-in user and checks that the budget, chat or
+/// proposal belongs to them. The assistant never changes financial data; it
+/// creates proposals that `applyProposal` carries out on the user's behalf.
+/// {@category Endpoint}
+class EndpointAgent extends _isc.EndpointRef {
+  EndpointAgent(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'agent';
+
+  /// Streams one assistant turn in budget `budgetId`.
+  ///
+  /// A null [conversationId] starts a conversation titled from [message].
+  /// Events are `usage` after each model call, `toolCall` before a tool runs,
+  /// `proposal` for each change suggested, one `textDelta` with the reply, and
+  /// a final `done`.
+  _ida.Stream<_isrqm714.AgentEvent> chat(
+    _isc.UuidValue budgetId,
+    _isc.UuidValue? conversationId,
+    String message,
+  ) =>
+      caller.callStreamingServerEndpoint<
+        _ida.Stream<_isrqm714.AgentEvent>,
+        _isrqm714.AgentEvent
+      >(
+        'agent',
+        'chat',
+        {
+          'budgetId': budgetId,
+          'conversationId': conversationId,
+          'message': message,
+        },
+        {},
+      );
+
+  /// Lists the user's conversations in one budget, newest first.
+  _ida.Future<List<_in44ixo7.AgentConversation>> listConversations(
+    _isc.UuidValue budgetId,
+  ) => caller.callServerEndpoint<List<_in44ixo7.AgentConversation>>(
+    'agent',
+    'listConversations',
+    {'budgetId': budgetId},
+  );
+
+  /// Returns the visible user and assistant messages of a conversation.
+  _ida.Future<List<_i8fbky0c.AgentMessage>> getMessages(
+    _isc.UuidValue conversationId,
+  ) => caller.callServerEndpoint<List<_i8fbky0c.AgentMessage>>(
+    'agent',
+    'getMessages',
+    {'conversationId': conversationId},
+  );
+
+  /// Deletes a conversation and its messages, keeping its proposals.
+  _ida.Future<void> deleteConversation(_isc.UuidValue conversationId) =>
+      caller.callServerEndpoint<void>(
+        'agent',
+        'deleteConversation',
+        {'conversationId': conversationId},
+      );
+
+  /// Returns how much of the included agent allowance is left.
+  _ida.Future<_igs7yvae.AgentUsageView> getUsage() =>
+      caller.callServerEndpoint<_igs7yvae.AgentUsageView>(
+        'agent',
+        'getUsage',
+        {},
+      );
+
+  /// Saves the user's own OpenAI-compatible provider and returns it without
+  /// the API key.
+  _ida.Future<_i8qcy504.AgentProviderSettingsView> saveProviderSettings(
+    String baseUrl,
+    String model,
+    String apiKey,
+  ) => caller.callServerEndpoint<_i8qcy504.AgentProviderSettingsView>(
+    'agent',
+    'saveProviderSettings',
+    {
+      'baseUrl': baseUrl,
+      'model': model,
+      'apiKey': apiKey,
+    },
+  );
+
+  /// Returns the user's provider settings, or null when they use the
+  /// built-in provider.
+  _ida.Future<_i8qcy504.AgentProviderSettingsView?> getProviderSettings() =>
+      caller.callServerEndpoint<_i8qcy504.AgentProviderSettingsView?>(
+        'agent',
+        'getProviderSettings',
+        {},
+      );
+
+  /// Removes the user's provider settings so the built-in provider is used.
+  _ida.Future<void> clearProviderSettings() => caller.callServerEndpoint<void>(
+    'agent',
+    'clearProviderSettings',
+    {},
+  );
+
+  /// Lists the changes the assistant proposed for one budget.
+  _ida.Future<List<_icv7zzda.AgentProposal>> listProposals(
+    _isc.UuidValue budgetId, {
+    required bool pendingOnly,
+  }) => caller.callServerEndpoint<List<_icv7zzda.AgentProposal>>(
+    'agent',
+    'listProposals',
+    {
+      'budgetId': budgetId,
+      'pendingOnly': pendingOnly,
+    },
+  );
+
+  /// Applies a pending proposal through the normal budget and tax services.
+  _ida.Future<_icv7zzda.AgentProposal> applyProposal(
+    _isc.UuidValue proposalId,
+  ) => caller.callServerEndpoint<_icv7zzda.AgentProposal>(
+    'agent',
+    'applyProposal',
+    {'proposalId': proposalId},
+  );
+
+  /// Dismisses a pending proposal without changing any data.
+  _ida.Future<_icv7zzda.AgentProposal> dismissProposal(
+    _isc.UuidValue proposalId,
+  ) => caller.callServerEndpoint<_icv7zzda.AgentProposal>(
+    'agent',
+    'dismissProposal',
+    {'proposalId': proposalId},
+  );
 }
 
 /// By extending [AppleIdpBaseEndpoint], the Apple identity provider endpoint
@@ -1990,6 +2138,7 @@ class Client extends _isc.ServerpodClientShared {
          httpClientOverride: httpClientOverride,
        ) {
     account = EndpointAccount(this);
+    agent = EndpointAgent(this);
     appleIdp = EndpointAppleIdp(this);
     emailIdp = EndpointEmailIdp(this);
     googleIdp = EndpointGoogleIdp(this);
@@ -2016,6 +2165,8 @@ class Client extends _isc.ServerpodClientShared {
   }
 
   late final EndpointAccount account;
+
+  late final EndpointAgent agent;
 
   late final EndpointAppleIdp appleIdp;
 
@@ -2066,6 +2217,7 @@ class Client extends _isc.ServerpodClientShared {
   @override
   Map<String, _isc.EndpointRef> get endpointRefLookup => {
     'account': account,
+    'agent': agent,
     'appleIdp': appleIdp,
     'emailIdp': emailIdp,
     'googleIdp': googleIdp,

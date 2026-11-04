@@ -1,0 +1,8 @@
+### Who wrote one message in an agent conversation.
+enum: AgentMessageRole
+serialized: byName
+values:
+  - user
+  - assistant
+  ### A tool result answering an assistant tool call.
+  - tool

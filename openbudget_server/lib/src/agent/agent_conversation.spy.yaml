@@ -1,0 +1,16 @@
+### One chat between a user and the financial assistant about a budget.
+class: AgentConversation
+table: agent_conversation
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  userId: UuidValue
+  budgetId: UuidValue, relation(parent=budget, onDelete=cascade)
+  ### Short title, taken from the first message.
+  title: String
+  createdAt: DateTime, default=now
+  updatedAt: DateTime, default=now
+indexes:
+  agent_conversation_budget_idx:
+    fields: budgetId, updatedAt
+  agent_conversation_user_idx:
+    fields: userId
