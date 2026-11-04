@@ -30,17 +30,24 @@ class EditPlanScreen extends HookConsumerWidget {
     final summaryAsync = ref.watch(budgetMonthlySummaryProvider(budgetId));
     final goalsAsync = ref.watch(budgetGoalsProvider(budgetId));
 
+    final l10n = AppLocalizations.of(context);
+    final palette = Theme.of(context).ob;
+
     return summaryAsync.when(
       loading: () => Scaffold(
-        backgroundColor: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
+        backgroundColor: palette.canvas,
         appBar: _EditPlanAppBar(budgetId: budgetId),
-        body: const Center(child: CircularProgressIndicator()),
+        body: Center(child: ObLoadingPanel(label: l10n.loadingTitle)),
       ),
       error: (_, _) => Scaffold(
-        backgroundColor: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
+        backgroundColor: palette.canvas,
         appBar: _EditPlanAppBar(budgetId: budgetId),
-        body: Center(
-          child: Text(AppLocalizations.of(context).editPlanLoadError),
+        body: Padding(
+          padding: const EdgeInsets.all(SpacingTokens.md),
+          child: ObStatePanel.problem(
+            title: l10n.editPlanTitle,
+            message: l10n.editPlanLoadError,
+          ),
         ),
       ),
       data: (summary) {
@@ -123,327 +130,202 @@ class _EditPlanContent extends HookConsumerWidget {
       }
     }
 
+    final palette = theme.ob;
+
     return Scaffold(
-      backgroundColor: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
+      backgroundColor: palette.canvas,
       appBar: _EditPlanAppBar(budgetId: budgetId),
       body: ListView(
-        padding: EdgeInsets.zero,
+        padding: const EdgeInsets.all(SpacingTokens.md),
         children: [
-          Container(
-            color: OpenBudgetPalette.bgBrandFor(Theme.of(context)),
-            padding: const EdgeInsets.fromLTRB(
-              SpacingTokens.md,
-              SpacingTokens.md,
-              SpacingTokens.md,
-              SpacingTokens.xxl,
-            ),
+          ObCard(
+            tone: ObTone.brand,
+            padding: const EdgeInsets.all(SpacingTokens.lg),
             child: Column(
               children: [
-                Text(
+                ObAmount(
                   formatCents(monthlyTargetsCents, currencyCode),
-                  style: theme.textTheme.displaySmall?.copyWith(
-                    color: OpenBudgetPalette.fgOnBrandFor(Theme.of(context)),
-                    fontWeight: FontWeight.w800,
-                  ),
+                  style: theme.textTheme.displaySmall,
                 ),
                 const SizedBox(height: SpacingTokens.xs),
                 Text(
                   l10n.editPlanCostToBeMe,
                   style: theme.textTheme.titleLarge?.copyWith(
-                    color: OpenBudgetPalette.fgOnBrandFor(
-                      Theme.of(context),
-                    ).withAlpha(240),
+                    color: palette.ink,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
               ],
             ),
           ),
-          Transform.translate(
-            offset: const Offset(0, -SpacingTokens.lg),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: SpacingTokens.md),
-              child: Column(
-                children: [
-                  DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: OpenBudgetPalette.bgSecondaryFor(
-                        Theme.of(context),
-                      ),
-                      borderRadius: BorderRadius.circular(RadiusTokens.lg),
-                      border: Border.all(
-                        color: OpenBudgetPalette.borderSubtleFor(
-                          Theme.of(context),
-                        ),
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          blurRadius: 8,
-                          color: OpenBudgetPalette.fgPrimaryFor(
-                            theme,
-                          ).withAlpha(20),
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(SpacingTokens.md),
-                      child: Column(
-                        children: [
-                          Row(
-                            children: [
-                              Text(
-                                l10n.editPlanMonthlyTargets,
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              const Spacer(),
-                              Text(
-                                formatCents(monthlyTargetsCents, currencyCode),
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                  color: OpenBudgetPalette.fgSuccessFor(
-                                    Theme.of(context),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: SpacingTokens.sm),
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(
-                              RadiusTokens.sm,
-                            ),
-                            child: LinearProgressIndicator(
-                              value: monthlyTargetsProgress,
-                              minHeight: 12,
-                              backgroundColor:
-                                  OpenBudgetPalette.borderSubtleFor(
-                                    Theme.of(context),
-                                  ),
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                OpenBudgetPalette.fgSuccessFor(
-                                  Theme.of(context),
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: SpacingTokens.sm),
-                          Row(
-                            children: [
-                              Text(
-                                l10n.editPlanMonthlyIncome,
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              const Spacer(),
-                              Icon(
-                                Icons.edit_rounded,
-                                size: 16,
-                                color: OpenBudgetPalette.fgSecondaryFor(
-                                  Theme.of(context),
-                                ),
-                              ),
-                              const SizedBox(width: SpacingTokens.xs),
-                              Text(
-                                formatCents(monthlyIncomeCents, currencyCode),
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: SpacingTokens.xs),
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(
-                              RadiusTokens.sm,
-                            ),
-                            child: LinearProgressIndicator(
-                              value: 1,
-                              minHeight: 12,
-                              backgroundColor:
-                                  OpenBudgetPalette.borderSubtleFor(
-                                    Theme.of(context),
-                                  ),
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                OpenBudgetPalette.borderSubtleFor(
-                                  Theme.of(context),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+          const SizedBox(height: SpacingTokens.md),
+          ObCard(
+            padding: const EdgeInsets.all(SpacingTokens.md),
+            child: Column(
+              children: [
+                _TargetRow(
+                  label: l10n.editPlanMonthlyTargets,
+                  amount: formatCents(monthlyTargetsCents, currencyCode),
+                  fraction: monthlyTargetsProgress,
+                  tone: ObTone.funded,
+                ),
+                const Divider(height: SpacingTokens.lg),
+                _TargetRow(
+                  label: l10n.editPlanMonthlyIncome,
+                  amount: formatCents(monthlyIncomeCents, currencyCode),
+                  fraction: 1,
+                  tone: ObTone.neutral,
+                  trailing: SkribbleIcon(
+                    data: OpenBudgetIcons.edit,
+                    size: 16,
+                    color: palette.mutedInk,
                   ),
-                  const SizedBox(height: SpacingTokens.md),
-                  DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: OpenBudgetPalette.bgAccentFor(
-                        Theme.of(context),
-                      ).withAlpha(50),
-                      borderRadius: BorderRadius.circular(RadiusTokens.md),
-                      border: Border.all(
-                        color: OpenBudgetPalette.borderSubtleFor(
-                          Theme.of(context),
-                        ),
-                      ),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(SpacingTokens.md),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                            width: 46,
-                            height: 46,
-                            decoration: BoxDecoration(
-                              color: OpenBudgetPalette.bgBrandFor(
-                                Theme.of(context),
-                              ),
-                              borderRadius: BorderRadius.circular(
-                                RadiusTokens.xl,
-                              ),
-                            ),
-                            child: Icon(
-                              Icons.attach_money_rounded,
-                              color: OpenBudgetPalette.fgOnBrandFor(
-                                Theme.of(context),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: SpacingTokens.sm),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  l10n.editPlanCostPromptTitle,
-                                  style: theme.textTheme.titleLarge?.copyWith(
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                                const SizedBox(height: SpacingTokens.xs),
-                                Text(
-                                  l10n.editPlanCostPromptSubtitle,
-                                  style: theme.textTheme.bodyMedium?.copyWith(
-                                    color: OpenBudgetPalette.fgSecondaryFor(
-                                      Theme.of(context),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: SpacingTokens.md),
+          ObCard(
+            tone: ObTone.review,
+            padding: const EdgeInsets.all(SpacingTokens.md),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 46,
+                  height: 46,
+                  alignment: Alignment.center,
+                  decoration: ObRoughDecoration(
+                    color: palette.surface,
+                    outline: palette.quietPen,
+                    seed: 59,
                   ),
-                  const SizedBox(height: SpacingTokens.md),
-                  Row(
+                  child: SkribbleIcon(
+                    data: OpenBudgetIcons.money,
+                    color: palette.review,
+                  ),
+                ),
+                const SizedBox(width: SpacingTokens.sm),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: FilledButton.icon(
-                          onPressed: () => _showAddCategoryDialog(
-                            context,
-                            summary.categories.length,
-                          ),
-                          icon: const Icon(Icons.create_new_folder_rounded),
-                          label: Text(l10n.editPlanNewGroup),
-                          style: FilledButton.styleFrom(
-                            backgroundColor: OpenBudgetPalette.bgTertiaryFor(
-                              Theme.of(context),
-                            ),
-                            foregroundColor:
-                                OpenBudgetPalette.fgPrimaryEmphasisFor(theme),
-                          ),
+                      Text(
+                        l10n.editPlanCostPromptTitle,
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: palette.ink,
                         ),
                       ),
-                      const SizedBox(width: SpacingTokens.sm),
-                      Expanded(
-                        child: FilledButton.icon(
-                          onPressed: isSavingReorder.value
-                              ? null
-                              : () async {
-                                  if (isReordering.value) {
-                                    await saveCategoryOrder();
-                                    return;
-                                  }
-                                  isReordering.value = true;
-                                },
-                          icon: isReordering.value
-                              ? const Icon(Icons.check_rounded)
-                              : const Icon(Icons.swap_vert_rounded),
-                          label: Text(
-                            isReordering.value
-                                ? l10n.budgetReorderDone
-                                : l10n.editPlanReorder,
-                          ),
-                          style: FilledButton.styleFrom(
-                            backgroundColor: OpenBudgetPalette.bgTertiaryFor(
-                              Theme.of(context),
-                            ),
-                            foregroundColor:
-                                OpenBudgetPalette.fgPrimaryEmphasisFor(theme),
-                          ),
+                      const SizedBox(height: SpacingTokens.xs),
+                      Text(
+                        l10n.editPlanCostPromptSubtitle,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: palette.ink,
                         ),
                       ),
                     ],
                   ),
-                  if (isReordering.value) ...[
-                    const SizedBox(height: SpacingTokens.sm),
-                    Text(
-                      l10n.budgetReorderHint,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: OpenBudgetPalette.fgSecondaryFor(
-                          Theme.of(context),
-                        ),
-                      ),
-                    ),
-                  ],
-                  const SizedBox(height: SpacingTokens.md),
-                  ...orderedCategories.value.map(
-                    (categoryWithEnvelopes) => Padding(
-                      padding: const EdgeInsets.only(bottom: SpacingTokens.md),
-                      child: _EditPlanCategoryCard(
-                        categoryWithEnvelopes: categoryWithEnvelopes,
-                        goalsMap: goalsMap,
-                        currencyCode: currencyCode,
-                        reordering: isReordering.value,
-                        onMoveUp: () => _moveCategory(
-                          orderedCategories,
-                          categoryWithEnvelopes,
-                          moveUp: true,
-                        ),
-                        onMoveDown: () => _moveCategory(
-                          orderedCategories,
-                          categoryWithEnvelopes,
-                          moveUp: false,
-                        ),
-                        onAddEnvelope: () => _showAddEnvelopeDialog(
-                          context,
-                          categoryWithEnvelopes.category.id?.toString() ?? '',
-                          currencyCode,
-                          year: summary.year,
-                          month: summary.month,
-                        ),
-                        onEditDetails: () => _showCategoryDetailsSheet(
-                          context: context,
-                          ref: ref,
-                          categoryWithEnvelopes: categoryWithEnvelopes,
-                        ),
-                        onOpenTarget: (envelope, existingGoal) =>
-                            _showSetGoalDialog(
-                              context: context,
-                              envelope: envelope,
-                              existingGoal: existingGoal,
-                            ),
-                      ),
-                    ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: SpacingTokens.md),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () => _showAddCategoryDialog(
+                    context,
+                    summary.categories.length,
                   ),
-                ],
+                  icon: SkribbleIcon(
+                    data: OpenBudgetIcons.newFolder,
+                    size: 18,
+                    color: palette.brand,
+                  ),
+                  label: Text(l10n.editPlanNewGroup),
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size.fromHeight(48),
+                  ),
+                ),
+              ),
+              const SizedBox(width: SpacingTokens.sm),
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: isSavingReorder.value
+                      ? null
+                      : () async {
+                          if (isReordering.value) {
+                            await saveCategoryOrder();
+                            return;
+                          }
+                          isReordering.value = true;
+                        },
+                  icon: SkribbleIcon(
+                    data: isReordering.value
+                        ? OpenBudgetIcons.check
+                        : OpenBudgetIcons.sort,
+                    size: 18,
+                    color: palette.brand,
+                  ),
+                  label: Text(
+                    isReordering.value
+                        ? l10n.budgetReorderDone
+                        : l10n.editPlanReorder,
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size.fromHeight(48),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (isReordering.value) ...[
+            const SizedBox(height: SpacingTokens.sm),
+            Text(
+              l10n.budgetReorderHint,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: palette.mutedInk,
+              ),
+            ),
+          ],
+          const SizedBox(height: SpacingTokens.md),
+          ...orderedCategories.value.map(
+            (categoryWithEnvelopes) => Padding(
+              padding: const EdgeInsets.only(bottom: SpacingTokens.md),
+              child: _EditPlanCategoryCard(
+                categoryWithEnvelopes: categoryWithEnvelopes,
+                goalsMap: goalsMap,
+                currencyCode: currencyCode,
+                reordering: isReordering.value,
+                onMoveUp: () => _moveCategory(
+                  orderedCategories,
+                  categoryWithEnvelopes,
+                  moveUp: true,
+                ),
+                onMoveDown: () => _moveCategory(
+                  orderedCategories,
+                  categoryWithEnvelopes,
+                  moveUp: false,
+                ),
+                onAddEnvelope: () => _showAddEnvelopeDialog(
+                  context,
+                  categoryWithEnvelopes.category.id?.toString() ?? '',
+                  currencyCode,
+                  year: summary.year,
+                  month: summary.month,
+                ),
+                onEditDetails: () => _showCategoryDetailsSheet(
+                  context: context,
+                  ref: ref,
+                  categoryWithEnvelopes: categoryWithEnvelopes,
+                ),
+                onOpenTarget: (envelope, existingGoal) => _showSetGoalDialog(
+                  context: context,
+                  envelope: envelope,
+                  existingGoal: existingGoal,
+                ),
               ),
             ),
           ),
@@ -541,9 +423,10 @@ class _EditPlanContent extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final category = categoryWithEnvelopes.category;
     final theme = Theme.of(context);
+    final palette = theme.ob;
     await showModalBottomSheet<void>(
       context: context,
-      backgroundColor: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
+      backgroundColor: palette.canvas,
       isScrollControlled: true,
       builder: (sheetContext) => SafeArea(
         child: Padding(
@@ -568,7 +451,13 @@ class _EditPlanContent extends HookConsumerWidget {
                   const Spacer(),
                   IconButton(
                     onPressed: () => Navigator.of(sheetContext).pop(),
-                    icon: const Icon(Icons.close_rounded),
+                    tooltip: MaterialLocalizations.of(
+                      sheetContext,
+                    ).closeButtonTooltip,
+                    icon: SkribbleIcon(
+                      data: OpenBudgetIcons.close,
+                      color: palette.ink,
+                    ),
                   ),
                 ],
               ),
@@ -576,34 +465,25 @@ class _EditPlanContent extends HookConsumerWidget {
               Text(
                 l10n.editPlanCategoryGroupName,
                 style: theme.textTheme.labelLarge?.copyWith(
-                  color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
+                  color: palette.mutedInk,
                 ),
               ),
               const SizedBox(height: SpacingTokens.xs),
-              DecoratedBox(
-                decoration: BoxDecoration(
-                  color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
-                  borderRadius: BorderRadius.circular(RadiusTokens.md),
-                  border: Border.all(
-                    color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
-                  ),
+              ObCard(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: SpacingTokens.md,
+                  vertical: SpacingTokens.sm + 2,
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: SpacingTokens.md,
-                    vertical: SpacingTokens.sm + 2,
-                  ),
-                  child: Text(
-                    category.name,
-                    style: theme.textTheme.titleMedium,
-                  ),
+                child: Text(
+                  category.name,
+                  style: theme.textTheme.titleMedium,
                 ),
               ),
               const SizedBox(height: SpacingTokens.md),
               Row(
                 children: [
                   Expanded(
-                    child: FilledButton.icon(
+                    child: OutlinedButton.icon(
                       onPressed: () {
                         Navigator.of(sheetContext).pop();
                         unawaited(
@@ -614,21 +494,20 @@ class _EditPlanContent extends HookConsumerWidget {
                           ),
                         );
                       },
-                      icon: const Icon(Icons.visibility_off_rounded),
+                      icon: SkribbleIcon(
+                        data: OpenBudgetIcons.hidden,
+                        size: 18,
+                        color: palette.brand,
+                      ),
                       label: Text(l10n.editPlanHide),
-                      style: FilledButton.styleFrom(
-                        backgroundColor: OpenBudgetPalette.bgTertiaryFor(
-                          Theme.of(context),
-                        ),
-                        foregroundColor: OpenBudgetPalette.bgBrandFor(
-                          Theme.of(context),
-                        ),
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size.fromHeight(48),
                       ),
                     ),
                   ),
                   const SizedBox(width: SpacingTokens.sm),
                   Expanded(
-                    child: FilledButton.icon(
+                    child: OutlinedButton.icon(
                       onPressed: () {
                         Navigator.of(sheetContext).pop();
                         unawaited(
@@ -639,15 +518,15 @@ class _EditPlanContent extends HookConsumerWidget {
                           ),
                         );
                       },
-                      icon: const Icon(Icons.delete_rounded),
+                      icon: SkribbleIcon(
+                        data: OpenBudgetIcons.delete,
+                        size: 18,
+                        color: palette.overspent,
+                      ),
                       label: Text(l10n.editPlanDelete),
-                      style: FilledButton.styleFrom(
-                        backgroundColor: OpenBudgetPalette.bgTertiaryFor(
-                          Theme.of(context),
-                        ),
-                        foregroundColor: OpenBudgetPalette.fgErrorFor(
-                          Theme.of(context),
-                        ),
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size.fromHeight(48),
+                        foregroundColor: palette.overspent,
                       ),
                     ),
                   ),
@@ -827,29 +706,23 @@ class _EditPlanCategoryCard extends HookWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
+    final palette = theme.ob;
     final categoryId = categoryWithEnvelopes.category.id?.toString() ?? '';
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
-        borderRadius: BorderRadius.circular(RadiusTokens.md),
-        border: Border.all(
-          color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
-        ),
-      ),
+    return ObCard(
+      padding: EdgeInsets.zero,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Container(
             padding: const EdgeInsets.symmetric(
-              horizontal: SpacingTokens.md,
-              vertical: SpacingTokens.sm + 2,
+              horizontal: SpacingTokens.sm,
+              vertical: SpacingTokens.xs,
             ),
-            decoration: BoxDecoration(
-              color: OpenBudgetPalette.bgTertiaryFor(Theme.of(context)),
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(RadiusTokens.md),
-              ),
+            decoration: ObRoughDecoration(
+              color: palette.highlight,
+              radius: 10,
+              seed: 61,
             ),
             child: Row(
               children: [
@@ -858,30 +731,41 @@ class _EditPlanCategoryCard extends HookWidget {
                     categoryWithEnvelopes.category.name,
                     style: theme.textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.w700,
+                      color: palette.ink,
                     ),
                   ),
                 ),
                 if (reordering) ...[
                   IconButton(
                     onPressed: onMoveUp,
-                    icon: const Icon(Icons.arrow_upward_rounded),
+                    icon: const SkribbleIcon(
+                      data: OpenBudgetIcons.chevronUp,
+                    ),
                     tooltip: l10n.editPlanMoveUp,
                   ),
                   IconButton(
                     onPressed: onMoveDown,
-                    icon: const Icon(Icons.arrow_downward_rounded),
+                    icon: const SkribbleIcon(
+                      data: OpenBudgetIcons.chevronDown,
+                    ),
                     tooltip: l10n.editPlanMoveDown,
                   ),
                 ] else ...[
                   IconButton(
                     onPressed: onAddEnvelope,
-                    icon: const Icon(Icons.add_circle_outline_rounded),
+                    icon: SkribbleIcon(
+                      data: OpenBudgetIcons.addCircle,
+                      color: palette.brand,
+                    ),
                     tooltip: l10n.editPlanAddEnvelope,
                   ),
                   IconButton(
                     key: Key('edit-plan-group-menu-$categoryId'),
                     onPressed: onEditDetails,
-                    icon: const Icon(Icons.more_horiz_rounded),
+                    icon: SkribbleIcon(
+                      data: OpenBudgetIcons.more,
+                      color: palette.ink,
+                    ),
                     tooltip: l10n.editPlanGroupDetails,
                   ),
                 ],
@@ -908,49 +792,39 @@ class _EditPlanCategoryCard extends HookWidget {
               child: Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: SpacingTokens.md,
-                  vertical: SpacingTokens.sm + 1,
+                  vertical: SpacingTokens.sm,
                 ),
                 child: Row(
                   children: [
-                    Icon(
-                      Icons.label_rounded,
-                      size: 16,
-                      color: OpenBudgetPalette.fgSecondaryFor(
-                        Theme.of(context),
-                      ),
+                    SkribbleIcon(
+                      data: OpenBudgetIcons.envelope,
+                      size: 18,
+                      color: palette.mutedInk,
                     ),
                     const SizedBox(width: SpacingTokens.sm),
                     Expanded(
                       child: Text(
                         envelope.name,
-                        style: theme.textTheme.titleLarge?.copyWith(
+                        style: theme.textTheme.bodyLarge?.copyWith(
                           fontWeight: FontWeight.w500,
+                          color: palette.ink,
                         ),
                       ),
                     ),
                     if (!reordering && targetCents == null)
                       TextButton.icon(
                         onPressed: () => onOpenTarget(envelope, goal),
-                        icon: const Icon(Icons.add_circle, size: 16),
-                        label: Text(l10n.editPlanAddTarget),
-                        style: TextButton.styleFrom(
-                          foregroundColor: OpenBudgetPalette.bgBrandFor(
-                            Theme.of(context),
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: SpacingTokens.xs,
-                          ),
+                        icon: SkribbleIcon(
+                          data: OpenBudgetIcons.addCircle,
+                          size: 18,
+                          color: palette.brand,
                         ),
+                        label: Text(l10n.editPlanAddTarget),
                       ),
                     if (!reordering && targetCents != null)
-                      Text(
+                      ObAmount(
                         formatCents(targetCents, currencyCode),
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: OpenBudgetPalette.fgSecondaryFor(
-                            Theme.of(context),
-                          ),
-                        ),
+                        style: theme.textTheme.titleMedium,
                       ),
                   ],
                 ),
@@ -958,14 +832,59 @@ class _EditPlanCategoryCard extends HookWidget {
             );
 
             if (index < categoryWithEnvelopes.envelopes.length - 1) {
-              yield Divider(
-                height: 1,
-                color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
-              );
+              yield Divider(height: 1, color: palette.line);
             }
           }),
         ],
       ),
+    );
+  }
+}
+
+class _TargetRow extends HookWidget {
+  const _TargetRow({
+    required this.label,
+    required this.amount,
+    required this.fraction,
+    required this.tone,
+    this.trailing,
+  });
+
+  final String label;
+  final String amount;
+  final double fraction;
+  final ObTone tone;
+  final Widget? trailing;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final palette = theme.ob;
+    return Row(
+      children: [
+        ObEnvelopeGauge(
+          fraction: fraction,
+          semanticLabel: label,
+          tone: tone,
+          width: 46,
+          seed: 7,
+        ),
+        const SizedBox(width: SpacingTokens.sm),
+        Expanded(
+          child: Text(
+            label,
+            style: theme.textTheme.bodyLarge?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: palette.ink,
+            ),
+          ),
+        ),
+        if (trailing != null) ...[
+          trailing!,
+          const SizedBox(width: SpacingTokens.xs),
+        ],
+        ObAmount(amount, tone: tone, style: theme.textTheme.titleMedium),
+      ],
     );
   }
 }
@@ -978,31 +897,32 @@ class _EditPlanAppBar extends HookWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final palette = Theme.of(context).ob;
     return AppBar(
-      backgroundColor: OpenBudgetPalette.bgBrandFor(Theme.of(context)),
-      foregroundColor: OpenBudgetPalette.fgOnBrandFor(Theme.of(context)),
-      leadingWidth: 102,
+      backgroundColor: palette.canvas,
+      foregroundColor: palette.ink,
+      surfaceTintColor: palette.canvas,
+      leadingWidth: 108,
       leading: TextButton.icon(
         onPressed: () =>
             context.goNamed(planRoute, pathParameters: {'id': budgetId}),
-        style: TextButton.styleFrom(
-          foregroundColor: OpenBudgetPalette.fgOnBrandFor(Theme.of(context)),
+        style: TextButton.styleFrom(foregroundColor: palette.ink),
+        icon: SkribbleIcon(
+          data: OpenBudgetIcons.back,
+          size: 16,
+          color: palette.ink,
         ),
-        icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 16),
         label: Text(l10n.planTitle),
       ),
       centerTitle: true,
       title: Text(
         l10n.editPlanTitle,
-        style: const TextStyle(fontWeight: FontWeight.w700),
+        style: TextStyle(fontWeight: FontWeight.w700, color: palette.ink),
       ),
       actions: [
         TextButton(
           onPressed: () =>
               context.goNamed(planRoute, pathParameters: {'id': budgetId}),
-          style: TextButton.styleFrom(
-            foregroundColor: OpenBudgetPalette.fgOnBrandFor(Theme.of(context)),
-          ),
           child: Text(l10n.dialogNext),
         ),
         const SizedBox(width: SpacingTokens.xs),

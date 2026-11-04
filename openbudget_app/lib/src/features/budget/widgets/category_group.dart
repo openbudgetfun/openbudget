@@ -7,7 +7,6 @@ import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
 import 'package:openbudget_app/src/features/budget/widgets/envelope_row.dart';
 import 'package:openbudget_app/src/features/settings/providers/display_options_provider.dart';
-import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
@@ -61,6 +60,7 @@ class CategoryGroup extends HookConsumerWidget {
     final category = categoryWithEnvelopes.category;
     final envelopes = categoryWithEnvelopes.envelopes;
     final theme = Theme.of(context);
+    final palette = theme.ob;
     final hideAmounts = ref.watch(hideAmountsProvider);
     final hideProgressBars = ref.watch(hideProgressBarsProvider);
     final isReorderingEnvelopes = useState(false);
@@ -71,127 +71,104 @@ class CategoryGroup extends HookConsumerWidget {
       return null;
     }, [envelopes]);
 
-    return Card(
-      margin: EdgeInsets.zero,
-      elevation: theme.brightness == Brightness.dark ? 0 : 1,
-      shadowColor: OpenBudgetPalette.overlayScrimFor(theme).withAlpha(26),
-      color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(RadiusTokens.md),
-        side: BorderSide(
-          color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
-        ),
-      ),
+    final totalAvailable = categoryWithEnvelopes.totalAvailableCents;
+    final availableTone = totalAvailable < 0
+        ? ObTone.overspent
+        : totalAvailable > 0
+        ? ObTone.funded
+        : ObTone.neutral;
+
+    return ObCard(
+      padding: EdgeInsets.zero,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: [
-          GestureDetector(
-            onTap: isReorderingEnvelopes.value
-                ? () => isReorderingEnvelopes.value = false
-                : onToggleCollapsed,
-            onLongPress: () =>
-                _showCategoryMenu(context, isReorderingEnvelopes),
-            child: Opacity(
-              opacity: (category.isHidden ?? false) ? 0.5 : 1.0,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: SpacingTokens.md,
-                  vertical: SpacingTokens.sm + SpacingTokens.xs,
-                ),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      OpenBudgetPalette.bgTertiaryFor(Theme.of(context)),
-                      OpenBudgetPalette.bgAccentFor(
-                        Theme.of(context),
-                      ).withAlpha(
-                        Theme.of(context).brightness == Brightness.dark
-                            ? 82
-                            : 44,
-                      ),
-                    ],
+          Material(
+            type: MaterialType.transparency,
+            child: InkWell(
+              onTap: isReorderingEnvelopes.value
+                  ? () => isReorderingEnvelopes.value = false
+                  : onToggleCollapsed,
+              onLongPress: () =>
+                  _showCategoryMenu(context, isReorderingEnvelopes),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(12),
+              ),
+              child: Opacity(
+                opacity: (category.isHidden ?? false) ? 0.55 : 1.0,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: SpacingTokens.sm,
+                    vertical: SpacingTokens.sm,
                   ),
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(RadiusTokens.md),
+                  decoration: ObRoughDecoration(
+                    color: palette.highlight,
+                    radius: 10,
+                    seed: 17,
                   ),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      collapsed
-                          ? Icons.chevron_right_rounded
-                          : Icons.expand_more_rounded,
-                      size: 18,
-                      color: OpenBudgetPalette.fgSecondaryFor(
-                        Theme.of(context),
-                      ),
-                    ),
-                    const SizedBox(width: SpacingTokens.xs),
-                    if (category.isHidden ?? false) ...[
-                      Icon(
-                        Icons.visibility_off_rounded,
-                        size: 14,
-                        color: OpenBudgetPalette.fgSecondaryFor(
-                          Theme.of(context),
-                        ),
+                  child: Row(
+                    children: [
+                      SkribbleIcon(
+                        data: collapsed
+                            ? OpenBudgetIcons.chevronRight
+                            : OpenBudgetIcons.chevronDown,
+                        size: 18,
+                        color: palette.mutedInk,
                       ),
                       const SizedBox(width: SpacingTokens.xs),
-                    ],
-                    Expanded(
-                      child: Text(
-                        category.name,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
+                      if (category.isHidden ?? false) ...[
+                        SkribbleIcon(
+                          data: OpenBudgetIcons.hidden,
+                          size: 16,
+                          color: palette.mutedInk,
                         ),
-                      ),
-                    ),
-                    const SizedBox(width: SpacingTokens.sm),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          l10n.budgetColumnAvailable,
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: OpenBudgetPalette.fgSecondaryFor(
-                              Theme.of(context),
-                            ),
-                          ),
-                        ),
-                        Text(
-                          hideAmounts
-                              ? hiddenAmountPlaceholder
-                              : formatCents(
-                                  categoryWithEnvelopes.totalAvailableCents,
-                                  currencyCode,
-                                ),
-                          style: theme.textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w700,
-                            color: _availableColor(
-                              categoryWithEnvelopes.totalAvailableCents,
-                              theme,
-                            ),
-                          ),
-                        ),
+                        const SizedBox(width: SpacingTokens.xs),
                       ],
-                    ),
-                    const SizedBox(width: SpacingTokens.xs),
-                    IconButton(
-                      onPressed: onEditCategory,
-                      tooltip: l10n.budgetEditCategoryTitle,
-                      icon: const Icon(Icons.edit_rounded, size: 18),
-                      style: IconButton.styleFrom(
-                        minimumSize: const Size(44, 44),
-                        padding: const EdgeInsets.all(SpacingTokens.sm),
-                        tapTargetSize: MaterialTapTargetSize.padded,
-                        foregroundColor: OpenBudgetPalette.bgBrandFor(
-                          Theme.of(context),
+                      Expanded(
+                        child: Text(
+                          category.name,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: palette.ink,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: SpacingTokens.sm),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            l10n.budgetColumnAvailable,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: palette.mutedInk,
+                            ),
+                          ),
+                          ObAmount(
+                            hideAmounts
+                                ? hiddenAmountPlaceholder
+                                : formatCents(totalAvailable, currencyCode),
+                            tone: availableTone,
+                            style: theme.textTheme.titleSmall,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(width: SpacingTokens.xs),
+                      IconButton(
+                        onPressed: onEditCategory,
+                        tooltip: l10n.budgetEditCategoryTitle,
+                        icon: SkribbleIcon(
+                          data: OpenBudgetIcons.edit,
+                          size: 20,
+                          color: palette.brand,
+                        ),
+                        constraints: const BoxConstraints(
+                          minWidth: 48,
+                          minHeight: 48,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -206,19 +183,17 @@ class CategoryGroup extends HookConsumerWidget {
               ),
               child: Row(
                 children: [
-                  Icon(
-                    Icons.info_outline_rounded,
-                    size: 14,
-                    color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
+                  SkribbleIcon(
+                    data: OpenBudgetIcons.info,
+                    size: 16,
+                    color: palette.mutedInk,
                   ),
                   const SizedBox(width: SpacingTokens.xs),
                   Expanded(
                     child: Text(
                       l10n.envelopeReorderHint,
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: OpenBudgetPalette.fgSecondaryFor(
-                          Theme.of(context),
-                        ),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: palette.mutedInk,
                       ),
                     ),
                   ),
@@ -235,21 +210,26 @@ class CategoryGroup extends HookConsumerWidget {
               return ListTile(
                 key: ValueKey(envelope.id),
                 dense: true,
-                leading: Icon(
-                  Icons.drag_handle_rounded,
-                  color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
+                leading: SkribbleIcon(
+                  data: OpenBudgetIcons.drag,
+                  color: palette.mutedInk,
                 ),
                 title: Text(
                   envelope.name,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w500,
+                    color: palette.ink,
                   ),
                 ),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.arrow_upward_rounded),
+                      icon: const SkribbleIcon(
+                        data: OpenBudgetIcons.chevronUp,
+                        size: 20,
+                      ),
+                      tooltip: l10n.editPlanMoveUp,
                       onPressed: index > 0
                           ? () => _swapEnvelopes(
                               orderedEnvelopes,
@@ -257,10 +237,13 @@ class CategoryGroup extends HookConsumerWidget {
                               index - 1,
                             )
                           : null,
-                      iconSize: 20,
                     ),
                     IconButton(
-                      icon: const Icon(Icons.arrow_downward_rounded),
+                      icon: const SkribbleIcon(
+                        data: OpenBudgetIcons.chevronDown,
+                        size: 20,
+                      ),
+                      tooltip: l10n.editPlanMoveDown,
                       onPressed: index < orderedEnvelopes.value.length - 1
                           ? () => _swapEnvelopes(
                               orderedEnvelopes,
@@ -268,7 +251,6 @@ class CategoryGroup extends HookConsumerWidget {
                               index + 1,
                             )
                           : null,
-                      iconSize: 20,
                     ),
                   ],
                 ),
@@ -284,55 +266,37 @@ class CategoryGroup extends HookConsumerWidget {
                   ? categoryWithEnvelopes.monthlyEnvelopes[entry.key]
                   : null;
               final envelopeGoal = goalsMap[envelopeId];
-              yield Opacity(
-                opacity: (envelope.isHidden ?? false) ? 0.5 : 1.0,
-                child: EnvelopeRow(
-                  envelope: envelope,
-                  currencyCode: currencyCode,
-                  isSelected: selectedEnvelopeId == envelopeId,
-                  monthlyData: monthlyData,
-                  goal: envelopeGoal,
-                  hideAmounts: hideAmounts,
-                  hideProgressBars: hideProgressBars,
-                  onTap: onShowActivity != null
-                      ? () =>
-                            onShowActivity!(envelope, monthlyData, envelopeGoal)
-                      : () => onEditEnvelope(envelope),
-                  onLongPress: () => _showEnvelopeMenu(
-                    context,
-                    envelope,
-                    isReorderingEnvelopes,
-                  ),
-                  onQuickBudget: onQuickBudget != null
-                      ? () => onQuickBudget!(envelope)
-                      : null,
+              yield EnvelopeRow(
+                envelope: envelope,
+                currencyCode: currencyCode,
+                isSelected: selectedEnvelopeId == envelopeId,
+                monthlyData: monthlyData,
+                goal: envelopeGoal,
+                hideAmounts: hideAmounts,
+                hideProgressBars: hideProgressBars,
+                onTap: onShowActivity != null
+                    ? () => onShowActivity!(envelope, monthlyData, envelopeGoal)
+                    : () => onEditEnvelope(envelope),
+                onLongPress: () => _showEnvelopeMenu(
+                  context,
+                  envelope,
+                  isReorderingEnvelopes,
                 ),
+                onQuickBudget: onQuickBudget != null
+                    ? () => onQuickBudget!(envelope)
+                    : null,
               );
               if (entry.key < envelopes.length - 1) {
-                yield Divider(
-                  height: 1,
-                  color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
-                );
+                yield Divider(height: 1, color: palette.line);
               }
             }),
           if (!collapsed)
-            Container(
+            Padding(
               padding: const EdgeInsets.fromLTRB(
                 SpacingTokens.md,
+                SpacingTokens.xs,
+                SpacingTokens.md,
                 SpacingTokens.sm,
-                SpacingTokens.md,
-                SpacingTokens.md,
-              ),
-              decoration: BoxDecoration(
-                color: OpenBudgetPalette.bgPrimaryFor(Theme.of(context))
-                    .withAlpha(
-                      Theme.of(context).brightness == Brightness.dark ? 36 : 56,
-                    ),
-                border: Border(
-                  top: BorderSide(
-                    color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
-                  ),
-                ),
               ),
               child: Row(
                 children: [
@@ -340,34 +304,19 @@ class CategoryGroup extends HookConsumerWidget {
                     child: Text(
                       l10n.budgetCategoryTotal,
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: OpenBudgetPalette.fgSecondaryFor(
-                          Theme.of(context),
-                        ),
+                        color: palette.mutedInk,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
                   OutlinedButton.icon(
                     onPressed: onAddEnvelope,
-                    icon: const Icon(Icons.add, size: 16),
-                    label: Text(l10n.budgetAddEnvelope),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: OpenBudgetPalette.bgBrandFor(
-                        Theme.of(context),
-                      ),
-                      side: BorderSide(
-                        color: OpenBudgetPalette.borderSubtleFor(
-                          Theme.of(context),
-                        ),
-                      ),
-                      backgroundColor: OpenBudgetPalette.bgTertiaryFor(
-                        Theme.of(context),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: SpacingTokens.sm,
-                        vertical: SpacingTokens.xs,
-                      ),
+                    icon: SkribbleIcon(
+                      data: OpenBudgetIcons.add,
+                      size: 18,
+                      color: palette.brand,
                     ),
+                    label: Text(l10n.budgetAddEnvelope),
                   ),
                 ],
               ),
@@ -382,6 +331,7 @@ class CategoryGroup extends HookConsumerWidget {
     ValueNotifier<bool> isReorderingEnvelopes,
   ) {
     final l10n = AppLocalizations.of(context);
+    final palette = Theme.of(context).ob;
     final category = categoryWithEnvelopes.category;
     final isHidden = category.isHidden ?? false;
 
@@ -393,7 +343,10 @@ class CategoryGroup extends HookConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                leading: const Icon(Icons.edit_rounded),
+                leading: SkribbleIcon(
+                  data: OpenBudgetIcons.edit,
+                  color: palette.brand,
+                ),
                 title: Text(l10n.budgetEditCategoryTitle),
                 onTap: () {
                   Navigator.of(ctx).pop();
@@ -403,7 +356,10 @@ class CategoryGroup extends HookConsumerWidget {
               if (onReorderEnvelopes != null &&
                   categoryWithEnvelopes.envelopes.length > 1)
                 ListTile(
-                  leading: const Icon(Icons.swap_vert_rounded),
+                  leading: SkribbleIcon(
+                    data: OpenBudgetIcons.sort,
+                    color: palette.ink,
+                  ),
                   title: Text(l10n.envelopeReorderHint),
                   onTap: () {
                     Navigator.of(ctx).pop();
@@ -412,10 +368,11 @@ class CategoryGroup extends HookConsumerWidget {
                 ),
               if (onToggleHideCategory != null)
                 ListTile(
-                  leading: Icon(
-                    isHidden
-                        ? Icons.visibility_rounded
-                        : Icons.visibility_off_rounded,
+                  leading: SkribbleIcon(
+                    data: isHidden
+                        ? OpenBudgetIcons.visible
+                        : OpenBudgetIcons.hidden,
+                    color: palette.ink,
                   ),
                   title: Text(
                     isHidden
@@ -428,13 +385,13 @@ class CategoryGroup extends HookConsumerWidget {
                   },
                 ),
               ListTile(
-                leading: Icon(
-                  Icons.delete_rounded,
-                  color: Theme.of(context).ob.overspent,
+                leading: SkribbleIcon(
+                  data: OpenBudgetIcons.delete,
+                  color: palette.overspent,
                 ),
                 title: Text(
                   l10n.deleteConfirmButton,
-                  style: TextStyle(color: Theme.of(context).ob.overspent),
+                  style: TextStyle(color: palette.overspent),
                 ),
                 onTap: () {
                   Navigator.of(ctx).pop();
@@ -454,6 +411,7 @@ class CategoryGroup extends HookConsumerWidget {
     ValueNotifier<bool> isReorderingEnvelopes,
   ) {
     final l10n = AppLocalizations.of(context);
+    final palette = Theme.of(context).ob;
     final isHidden = envelope.isHidden ?? false;
 
     unawaited(
@@ -464,7 +422,10 @@ class CategoryGroup extends HookConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                leading: const Icon(Icons.edit_rounded),
+                leading: SkribbleIcon(
+                  data: OpenBudgetIcons.edit,
+                  color: palette.brand,
+                ),
                 title: Text(l10n.editEnvelopeTitle),
                 onTap: () {
                   Navigator.of(ctx).pop();
@@ -473,7 +434,10 @@ class CategoryGroup extends HookConsumerWidget {
               ),
               if (onQuickBudget != null)
                 ListTile(
-                  leading: const Icon(Icons.flash_on_rounded),
+                  leading: SkribbleIcon(
+                    data: OpenBudgetIcons.quick,
+                    color: palette.brand,
+                  ),
                   title: Text(l10n.quickBudgetTitle),
                   onTap: () {
                     Navigator.of(ctx).pop();
@@ -483,7 +447,10 @@ class CategoryGroup extends HookConsumerWidget {
               if (onReorderEnvelopes != null &&
                   categoryWithEnvelopes.envelopes.length > 1)
                 ListTile(
-                  leading: const Icon(Icons.swap_vert_rounded),
+                  leading: SkribbleIcon(
+                    data: OpenBudgetIcons.sort,
+                    color: palette.ink,
+                  ),
                   title: Text(l10n.envelopeReorderHint),
                   onTap: () {
                     Navigator.of(ctx).pop();
@@ -492,10 +459,11 @@ class CategoryGroup extends HookConsumerWidget {
                 ),
               if (onToggleHideEnvelope != null)
                 ListTile(
-                  leading: Icon(
-                    isHidden
-                        ? Icons.visibility_rounded
-                        : Icons.visibility_off_rounded,
+                  leading: SkribbleIcon(
+                    data: isHidden
+                        ? OpenBudgetIcons.visible
+                        : OpenBudgetIcons.hidden,
+                    color: palette.ink,
                   ),
                   title: Text(
                     isHidden
@@ -508,13 +476,13 @@ class CategoryGroup extends HookConsumerWidget {
                   },
                 ),
               ListTile(
-                leading: Icon(
-                  Icons.delete_rounded,
-                  color: Theme.of(context).ob.overspent,
+                leading: SkribbleIcon(
+                  data: OpenBudgetIcons.delete,
+                  color: palette.overspent,
                 ),
                 title: Text(
                   l10n.deleteConfirmButton,
-                  style: TextStyle(color: Theme.of(context).ob.overspent),
+                  style: TextStyle(color: palette.overspent),
                 ),
                 onTap: () {
                   Navigator.of(ctx).pop();
@@ -544,11 +512,5 @@ class CategoryGroup extends HookConsumerWidget {
         .toList();
 
     onReorderEnvelopes?.call(envelopeIds);
-  }
-
-  Color _availableColor(int cents, ThemeData theme) {
-    if (cents > 0) return OpenBudgetPalette.fgSuccessFor(theme);
-    if (cents < 0) return OpenBudgetPalette.fgErrorFor(theme);
-    return OpenBudgetPalette.fgSecondaryFor(theme);
   }
 }

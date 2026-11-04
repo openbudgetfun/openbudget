@@ -105,9 +105,27 @@ void main() {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
-      expect(find.byIcon(Icons.arrow_downward_rounded), findsOneWidget);
-      expect(find.byIcon(Icons.arrow_upward_rounded), findsOneWidget);
-      expect(find.byIcon(Icons.swap_horiz_rounded), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is SkribbleIcon && widget.data == OpenBudgetIcons.inflow,
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is SkribbleIcon && widget.data == OpenBudgetIcons.outflow,
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is SkribbleIcon && widget.data == OpenBudgetIcons.transfer,
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('renders three action cards', (tester) async {
@@ -122,7 +140,14 @@ void main() {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
-      expect(find.byIcon(Icons.chevron_right_rounded), findsNWidgets(3));
+      expect(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is SkribbleIcon &&
+              widget.data == OpenBudgetIcons.chevronRight,
+        ),
+        findsNWidgets(3),
+      );
     });
 
     testWidgets('navigates to add income route from sheet action', (

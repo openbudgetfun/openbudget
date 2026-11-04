@@ -61,7 +61,7 @@ class BudgetAmountField extends StatelessWidget {
           hintText: hintText,
           prefixIcon: prefixIcon,
           prefixText: '${currencyCode.symbol} ',
-          suffixIcon: const Icon(Icons.dialpad_rounded),
+          suffixIcon: const SkribbleIcon(data: OpenBudgetIcons.keypad),
           enabled: enabled,
         ),
         child: Text(displayText, style: Theme.of(context).textTheme.bodyLarge),
@@ -95,36 +95,24 @@ class BudgetAmountKeypad extends StatelessWidget {
       String label, {
       VoidCallback? onPressed,
       bool primary = false,
-      bool accent = false,
       Widget? child,
       Key? buttonKey,
     }) => Expanded(
       child: Padding(
         padding: const EdgeInsets.all(SpacingTokens.xs),
-        child: FilledButton(
-          key: buttonKey,
-          onPressed: onPressed,
-          style: FilledButton.styleFrom(
-            backgroundColor: primary
-                ? OpenBudgetPalette.bgBrandFor(Theme.of(context))
-                : OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
-            foregroundColor: primary
-                ? OpenBudgetPalette.fgOnBrandFor(Theme.of(context))
-                : accent
-                ? OpenBudgetPalette.bgBrandFor(Theme.of(context))
-                : OpenBudgetPalette.fgPrimaryEmphasisFor(Theme.of(context)),
-            side: primary
-                ? BorderSide.none
-                : BorderSide(
-                    color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
-                  ),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(RadiusTokens.sm),
-            ),
-            minimumSize: const Size.fromHeight(48),
-            elevation: 0,
-          ),
-          child: child ?? Text(label),
+        child: SizedBox(
+          height: 48,
+          child: primary
+              ? FilledButton(
+                  key: buttonKey,
+                  onPressed: onPressed,
+                  child: child ?? Text(label),
+                )
+              : OutlinedButton(
+                  key: buttonKey,
+                  onPressed: onPressed,
+                  child: child ?? Text(label),
+                ),
         ),
       ),
     );
@@ -142,19 +130,16 @@ class BudgetAmountKeypad extends StatelessWidget {
             key(
               '7',
               onPressed: () => appendDigit('7'),
-              accent: true,
               buttonKey: const Key('budget-keypad-digit-7'),
             ),
             key(
               '8',
               onPressed: () => appendDigit('8'),
-              accent: true,
               buttonKey: const Key('budget-keypad-digit-8'),
             ),
             key(
               '9',
               onPressed: () => appendDigit('9'),
-              accent: true,
               buttonKey: const Key('budget-keypad-digit-9'),
             ),
             key(
@@ -169,7 +154,6 @@ class BudgetAmountKeypad extends StatelessWidget {
                       );
                     }
                   : null,
-              accent: true,
               buttonKey: const Key('budget-keypad-minus'),
             ),
           ],
@@ -179,19 +163,16 @@ class BudgetAmountKeypad extends StatelessWidget {
             key(
               '4',
               onPressed: () => appendDigit('4'),
-              accent: true,
               buttonKey: const Key('budget-keypad-digit-4'),
             ),
             key(
               '5',
               onPressed: () => appendDigit('5'),
-              accent: true,
               buttonKey: const Key('budget-keypad-digit-5'),
             ),
             key(
               '6',
               onPressed: () => appendDigit('6'),
-              accent: true,
               buttonKey: const Key('budget-keypad-digit-6'),
             ),
             key(
@@ -201,7 +182,6 @@ class BudgetAmountKeypad extends StatelessWidget {
                   onChanged(inputValue.substring(1));
                 }
               },
-              accent: true,
               buttonKey: const Key('budget-keypad-plus'),
             ),
           ],
@@ -211,25 +191,21 @@ class BudgetAmountKeypad extends StatelessWidget {
             key(
               '1',
               onPressed: () => appendDigit('1'),
-              accent: true,
               buttonKey: const Key('budget-keypad-digit-1'),
             ),
             key(
               '2',
               onPressed: () => appendDigit('2'),
-              accent: true,
               buttonKey: const Key('budget-keypad-digit-2'),
             ),
             key(
               '3',
               onPressed: () => appendDigit('3'),
-              accent: true,
               buttonKey: const Key('budget-keypad-digit-3'),
             ),
             key(
               '=',
               onPressed: canSubmit ? onSubmit : null,
-              accent: true,
               buttonKey: const Key('budget-keypad-equals'),
             ),
           ],
@@ -239,13 +215,12 @@ class BudgetAmountKeypad extends StatelessWidget {
             key(
               'x',
               onPressed: onClear ?? () => onChanged(''),
-              child: const Icon(Icons.close_rounded),
+              child: const SkribbleIcon(data: OpenBudgetIcons.close),
               buttonKey: const Key('budget-keypad-clear'),
             ),
             key(
               '0',
               onPressed: () => appendDigit('0'),
-              accent: true,
               buttonKey: const Key('budget-keypad-digit-0'),
             ),
             key(
@@ -254,14 +229,14 @@ class BudgetAmountKeypad extends StatelessWidget {
                 if (inputValue.isEmpty) return;
                 onChanged(inputValue.substring(0, inputValue.length - 1));
               },
-              child: const Icon(Icons.backspace_outlined),
+              child: const SkribbleIcon(data: OpenBudgetIcons.backspace),
               buttonKey: const Key('budget-keypad-backspace'),
             ),
             key(
               l10n.dialogDone,
               onPressed: canSubmit ? onSubmit : null,
               primary: true,
-              child: const Icon(Icons.subdirectory_arrow_left_rounded),
+              child: const SkribbleIcon(data: OpenBudgetIcons.enter),
               buttonKey: const Key('budget-keypad-done'),
             ),
           ],
@@ -297,15 +272,11 @@ class _BudgetAmountSheet extends HookWidget {
       top: false,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: OpenBudgetPalette.bgTertiaryFor(Theme.of(context)),
+          color: Theme.of(context).ob.canvas,
           border: Border(
-            top: BorderSide(
-              color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
-            ),
+            top: BorderSide(color: Theme.of(context).ob.line),
           ),
-          borderRadius: const BorderRadius.vertical(
-            top: Radius.circular(RadiusTokens.md),
-          ),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
         ),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(
@@ -321,24 +292,22 @@ class _BudgetAmountSheet extends HookWidget {
                 width: 40,
                 height: 4,
                 margin: const EdgeInsets.only(bottom: SpacingTokens.sm),
-                decoration: BoxDecoration(
-                  color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
-                  borderRadius: BorderRadius.circular(999),
+                decoration: ObRoughDecoration(
+                  color: Theme.of(context).ob.line,
+                  radius: 4,
+                  seed: 97,
                 ),
               ),
               Text(
                 title ?? l10n.transactionAmountLabel,
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
+                  color: Theme.of(context).ob.mutedInk,
                 ),
               ),
               const SizedBox(height: SpacingTokens.xs),
-              Text(
+              ObAmount(
                 formatCents(cents ?? 0, currencyCode),
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  color: OpenBudgetPalette.bgBrandFor(Theme.of(context)),
-                ),
+                style: Theme.of(context).textTheme.headlineSmall,
               ),
               const SizedBox(height: SpacingTokens.xs),
               BudgetAmountKeypad(

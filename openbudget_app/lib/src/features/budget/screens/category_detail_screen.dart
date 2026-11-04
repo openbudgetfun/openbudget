@@ -12,7 +12,6 @@ import 'package:openbudget_app/src/features/budget/screens/edit_envelope_dialog.
 import 'package:openbudget_app/src/features/budget/screens/quick_budget_dialog.dart';
 import 'package:openbudget_app/src/features/budget/screens/set_goal_dialog.dart';
 import 'package:openbudget_app/src/features/settings/providers/display_options_provider.dart';
-import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
@@ -34,6 +33,7 @@ class CategoryDetailScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
+    final palette = theme.ob;
     final summaryAsync = ref.watch(budgetMonthlySummaryProvider(budgetId));
     final goalsAsync = ref.watch(budgetGoalsProvider(budgetId));
     final hideAmounts = ref.watch(hideAmountsProvider);
@@ -41,10 +41,10 @@ class CategoryDetailScreen extends HookConsumerWidget {
     final isSnoozed = useState(false);
 
     return Scaffold(
-      backgroundColor: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
+      backgroundColor: palette.canvas,
       appBar: AppBar(
-        backgroundColor: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
-        surfaceTintColor: OpenBudgetPalette.transparentFor(Theme.of(context)),
+        backgroundColor: palette.canvas,
+        surfaceTintColor: palette.canvas,
         automaticallyImplyLeading: false,
         actions: [
           TextButton(
@@ -52,7 +52,7 @@ class CategoryDetailScreen extends HookConsumerWidget {
             child: Text(
               l10n.dialogDone,
               style: theme.textTheme.titleMedium?.copyWith(
-                color: theme.colorScheme.onSurface,
+                color: palette.ink,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -60,13 +60,12 @@ class CategoryDetailScreen extends HookConsumerWidget {
         ],
       ),
       body: summaryAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => Center(
-          child: Text(
-            l10n.budgetLoadError,
-            style: theme.textTheme.bodyLarge?.copyWith(
-              color: theme.colorScheme.error,
-            ),
+        loading: () => Center(child: ObLoadingPanel(label: l10n.loadingTitle)),
+        error: (_, _) => Padding(
+          padding: const EdgeInsets.all(SpacingTokens.md),
+          child: ObStatePanel.problem(
+            title: l10n.appTitle,
+            message: l10n.budgetLoadError,
           ),
         ),
         data: (summary) {
@@ -95,10 +94,13 @@ class CategoryDetailScreen extends HookConsumerWidget {
           }
 
           if (envelope == null) {
-            return Center(
-              child: Text(
-                l10n.budgetSearchNoResults,
-                style: theme.textTheme.bodyLarge,
+            return Padding(
+              padding: const EdgeInsets.all(SpacingTokens.md),
+              child: ObStatePanel.empty(
+                title: l10n.budgetSearchNoResults,
+                message: l10n.budgetSearchHint,
+                doodle: WiredDoodleKind.cloud,
+                tone: ObTone.neutral,
               ),
             );
           }
@@ -114,22 +116,20 @@ class CategoryDetailScreen extends HookConsumerWidget {
           final spent =
               monthlyData?.spentCents ?? selectedEnvelope.spentAmountCents;
           final available = monthlyData?.availableCents ?? (assigned - spent);
-          final availableColor = available >= 0
-              ? OpenBudgetPalette.fgSuccessFor(Theme.of(context))
-              : OpenBudgetPalette.fgErrorFor(Theme.of(context));
+          final availableTone = available > 0
+              ? ObTone.funded
+              : available < 0
+              ? ObTone.overspent
+              : ObTone.neutral;
 
           return ListView(
-            padding: const EdgeInsets.fromLTRB(
-              SpacingTokens.md,
-              0,
-              SpacingTokens.md,
-              SpacingTokens.md,
-            ),
+            padding: const EdgeInsets.all(SpacingTokens.md),
             children: [
               Text(
                 selectedEnvelope.name,
                 style: theme.textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.w800,
+                  color: palette.ink,
                 ),
               ),
               const SizedBox(height: SpacingTokens.md),
@@ -163,7 +163,7 @@ class CategoryDetailScreen extends HookConsumerWidget {
                       value: hideAmounts
                           ? hiddenAmountPlaceholder
                           : formatCents(available, currencyCode),
-                      valueColor: availableColor,
+                      tone: availableTone,
                       emphasize: true,
                     ),
                   ],
@@ -175,16 +175,21 @@ class CategoryDetailScreen extends HookConsumerWidget {
                 _Card(
                   child: Padding(
                     padding: const EdgeInsets.all(SpacingTokens.md),
-                    child: FilledButton(
+                    child: FilledButton.icon(
                       onPressed: () => _showSetGoalDialog(
                         context,
                         selectedEnvelope,
                         currencyCode,
                       ),
-                      style: FilledButton.styleFrom(
-                        minimumSize: const Size.fromHeight(44),
+                      icon: SkribbleIcon(
+                        data: OpenBudgetIcons.flag,
+                        size: 18,
+                        color: palette.onAction,
                       ),
-                      child: Text(l10n.goalSetGoal),
+                      label: Text(l10n.goalSetGoal),
+                      style: FilledButton.styleFrom(
+                        minimumSize: const Size.fromHeight(48),
+                      ),
                     ),
                   ),
                 )
@@ -219,11 +224,9 @@ class CategoryDetailScreen extends HookConsumerWidget {
                     value: isSnoozed.value,
                     onChanged: (value) => isSnoozed.value = value,
                     title: Text(l10n.categoryDetailSnoozeGoal),
-                    secondary: Icon(
-                      Icons.snooze_rounded,
-                      color: OpenBudgetPalette.fgSecondaryFor(
-                        Theme.of(context),
-                      ),
+                    secondary: SkribbleIcon(
+                      data: OpenBudgetIcons.snooze,
+                      color: palette.mutedInk,
                     ),
                   ),
                 ),
@@ -238,12 +241,16 @@ class CategoryDetailScreen extends HookConsumerWidget {
                         : l10n.envelopeNoteHint,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: (selectedEnvelope.note?.isNotEmpty ?? false)
-                          ? null
-                          : OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
+                          ? palette.ink
+                          : palette.mutedInk,
                     ),
                   ),
                   trailing: IconButton(
-                    icon: const Icon(Icons.edit_rounded),
+                    icon: SkribbleIcon(
+                      data: OpenBudgetIcons.edit,
+                      color: palette.brand,
+                    ),
+                    tooltip: l10n.editEnvelopeTitle,
                     onPressed: () => _showEditEnvelopeDialog(
                       context,
                       selectedEnvelope,
@@ -287,12 +294,8 @@ class CategoryDetailScreen extends HookConsumerWidget {
               FilledButton.tonal(
                 onPressed: () => _confirmDeleteEnvelope(context, ref),
                 style: FilledButton.styleFrom(
-                  backgroundColor: OpenBudgetPalette.fgErrorFor(
-                    Theme.of(context),
-                  ).withAlpha(24),
-                  foregroundColor: OpenBudgetPalette.fgErrorFor(
-                    Theme.of(context),
-                  ),
+                  backgroundColor: palette.overspentWash,
+                  foregroundColor: palette.overspent,
                 ),
                 child: Text(l10n.categoryDetailDeleteEnvelope),
               ),
@@ -369,6 +372,7 @@ class CategoryDetailScreen extends HookConsumerWidget {
 
   void _confirmDeleteEnvelope(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
+    final palette = Theme.of(context).ob;
     unawaited(
       showDialog<void>(
         context: context,
@@ -395,9 +399,8 @@ class CategoryDetailScreen extends HookConsumerWidget {
                 }
               },
               style: FilledButton.styleFrom(
-                backgroundColor: OpenBudgetPalette.fgErrorFor(
-                  Theme.of(context),
-                ),
+                backgroundColor: palette.overspent,
+                foregroundColor: palette.onAction,
               ),
               child: Text(l10n.deleteConfirmButton),
             ),
@@ -433,12 +436,12 @@ class _GoalCard extends HookWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
+    final palette = theme.ob;
     final progress = computeFundingProgress(
       goal: goal,
       budgetedCents: budgetedCents,
       availableCents: availableCents,
     );
-    final clampedProgress = progress.clamp(0.0, 1.0);
     final underfunded = computeUnderfundedCents(
       goal: goal,
       budgetedCents: budgetedCents,
@@ -450,9 +453,6 @@ class _GoalCard extends HookWidget {
     };
 
     final isComplete = underfunded <= 0;
-    final statusColor = isComplete
-        ? OpenBudgetPalette.fgSuccessFor(Theme.of(context))
-        : OpenBudgetPalette.bgWarningFor(Theme.of(context));
 
     return _Card(
       child: Padding(
@@ -460,38 +460,13 @@ class _GoalCard extends HookWidget {
         child: Column(
           children: [
             if (!hideProgressBars)
-              SizedBox(
-                width: 84,
-                height: 84,
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    CircularProgressIndicator(
-                      value: clampedProgress,
-                      strokeWidth: 8,
-                      color: statusColor,
-                      backgroundColor: OpenBudgetPalette.borderSubtleFor(
-                        Theme.of(context),
-                      ),
-                    ),
-                    Center(
-                      child: isComplete
-                          ? Icon(
-                              Icons.check_rounded,
-                              color: OpenBudgetPalette.fgSuccessFor(
-                                Theme.of(context),
-                              ),
-                              size: 36,
-                            )
-                          : Text(
-                              '${(clampedProgress * 100).round()}%',
-                              style: theme.textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                    ),
-                  ],
+              ObEnvelopeGauge(
+                fraction: progress,
+                semanticLabel: l10n.budgetEnvelopeProgress(
+                  (progress.clamp(0.0, 1.0) * 100).round(),
                 ),
+                width: 76,
+                seed: 11,
               ),
             if (!hideProgressBars) const SizedBox(height: SpacingTokens.md),
             Container(
@@ -500,9 +475,12 @@ class _GoalCard extends HookWidget {
                 horizontal: SpacingTokens.md,
                 vertical: SpacingTokens.sm,
               ),
-              decoration: BoxDecoration(
-                color: statusColor.withAlpha(38),
-                borderRadius: BorderRadius.circular(RadiusTokens.sm),
+              decoration: ObRoughDecoration(
+                color: isComplete
+                    ? palette.fundedWash
+                    : palette.underfundedWash,
+                radius: 10,
+                seed: 47,
               ),
               child: Text(
                 isComplete
@@ -515,6 +493,7 @@ class _GoalCard extends HookWidget {
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodyLarge?.copyWith(
                   fontWeight: FontWeight.w600,
+                  color: palette.ink,
                 ),
               ),
             ),
@@ -523,10 +502,7 @@ class _GoalCard extends HookWidget {
               FilledButton(
                 onPressed: onAssign,
                 style: FilledButton.styleFrom(
-                  minimumSize: const Size.fromHeight(44),
-                  backgroundColor: OpenBudgetPalette.bgBrandFor(
-                    Theme.of(context),
-                  ),
+                  minimumSize: const Size.fromHeight(48),
                 ),
                 child: Text(l10n.budgetAssignMoney),
               ),
@@ -551,6 +527,7 @@ class _GoalCard extends HookWidget {
               value: hideAmounts
                   ? hiddenAmountPlaceholder
                   : formatCents(underfunded, currencyCode),
+              tone: isComplete ? ObTone.funded : ObTone.underfunded,
             ),
             const SizedBox(height: SpacingTokens.md),
             FilledButton.tonal(
@@ -570,21 +547,13 @@ class _SectionTitle extends HookWidget {
   final String title;
 
   @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.only(
-        left: SpacingTokens.xs,
-        bottom: SpacingTokens.xs,
-      ),
-      child: Text(
-        title,
-        style: theme.textTheme.titleMedium?.copyWith(
-          fontWeight: FontWeight.w700,
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => ObSectionHeader(
+    title: title,
+    padding: const EdgeInsets.only(
+      left: SpacingTokens.xs,
+      bottom: SpacingTokens.xs,
+    ),
+  );
 }
 
 class _Card extends HookWidget {
@@ -593,34 +562,26 @@ class _Card extends HookWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) => DecoratedBox(
-    decoration: BoxDecoration(
-      color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
-      borderRadius: BorderRadius.circular(RadiusTokens.md),
-      border: Border.all(
-        color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
-      ),
-    ),
-    child: Material(type: MaterialType.transparency, child: child),
-  );
+  Widget build(BuildContext context) => ObCard(child: child);
 }
 
 class _DetailRow extends HookWidget {
   const _DetailRow({
     required this.label,
     required this.value,
-    this.valueColor,
+    this.tone = ObTone.neutral,
     this.emphasize = false,
   });
 
   final String label;
   final String value;
-  final Color? valueColor;
+  final ObTone tone;
   final bool emphasize;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final palette = theme.ob;
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: SpacingTokens.md,
@@ -628,30 +589,18 @@ class _DetailRow extends HookWidget {
       ),
       child: Row(
         children: [
-          Expanded(child: Text(label, style: theme.textTheme.titleMedium)),
-          Container(
-            padding: emphasize
-                ? const EdgeInsets.symmetric(
-                    horizontal: SpacingTokens.sm,
-                    vertical: 2,
-                  )
-                : EdgeInsets.zero,
-            decoration: emphasize
-                ? BoxDecoration(
-                    color:
-                        (valueColor ??
-                                OpenBudgetPalette.bgBrandFor(Theme.of(context)))
-                            .withAlpha(32),
-                    borderRadius: BorderRadius.circular(999),
-                  )
-                : null,
+          Expanded(
             child: Text(
-              value,
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: valueColor,
-              ),
+              label,
+              style: theme.textTheme.bodyLarge?.copyWith(color: palette.ink),
             ),
+          ),
+          ObAmount(
+            value,
+            tone: tone,
+            style: emphasize
+                ? theme.textTheme.titleLarge
+                : theme.textTheme.titleMedium,
           ),
         ],
       ),

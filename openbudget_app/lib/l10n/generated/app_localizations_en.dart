@@ -3357,4 +3357,79 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsLoading => 'Loading settings';
+
+  @override
+  String get budgetStatusOverspent => 'Overspent';
+
+  @override
+  String get budgetStatusFunded => 'Funded';
+
+  @override
+  String get budgetStatusUnderfunded => 'Underfunded';
+
+  @override
+  String budgetEnvelopeProgress(int percent) {
+    return '$percent% funded';
+  }
+
+  @override
+  String budgetEnvelopeCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count envelopes',
+      one: '1 envelope',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String budgetReviewTransactions(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Review $count transactions',
+      one: 'Review 1 transaction',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String budgetCoverOverspentCategories(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Cover $count overspent categories',
+      one: 'Cover 1 overspent category',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String budgetCategoryAllocated(String amount) {
+    return '$amount allocated';
+  }
+
+  @override
+  String budgetGoalTarget(String amount) {
+    return 'Target: $amount';
+  }
+
+  @override
+  String budgetGoalMonthly(String amount) {
+    return 'Monthly: $amount';
+  }
+
+  @override
+  String budgetGoalTargetBy(String amount, String date) {
+    return 'Target: $amount by $date';
+  }
+
+  @override
+  String get budgetBackspaceLabel => 'Delete digit';
+
+  @override
+  String budgetDayOfMonth(int day) {
+    return 'Day $day';
+  }
 }

@@ -8,6 +8,7 @@ import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_realtime_provider.dart';
 import 'package:openbudget_app/src/features/budget/widgets/add_transaction_sheet.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
+import 'package:openbudget_ui/openbudget_ui.dart';
 
 class BudgetShellScreen extends HookConsumerWidget {
   const BudgetShellScreen({
@@ -41,28 +42,30 @@ class BudgetShellScreen extends HookConsumerWidget {
               unawaited(_onTap(context, index, tabHistory)),
           destinations: [
             NavigationDestination(
-              icon: const Icon(Icons.savings_outlined),
-              selectedIcon: const Icon(Icons.savings_rounded),
+              icon: const SkribbleIcon(data: OpenBudgetIcons.envelope),
+              selectedIcon: const SkribbleIcon(
+                data: OpenBudgetIcons.envelopeOpen,
+              ),
               label: l10n.tabPlan,
             ),
             NavigationDestination(
-              icon: const Icon(Icons.account_balance_outlined),
-              selectedIcon: const Icon(Icons.account_balance_rounded),
+              icon: const SkribbleIcon(data: OpenBudgetIcons.wallet),
+              selectedIcon: const SkribbleIcon(data: OpenBudgetIcons.bank),
               label: l10n.tabAccounts,
             ),
             NavigationDestination(
-              icon: const Icon(Icons.add_circle_outline_rounded),
-              selectedIcon: const Icon(Icons.add_circle_rounded),
+              icon: const SkribbleIcon(data: OpenBudgetIcons.addCircle),
+              selectedIcon: const SkribbleIcon(data: OpenBudgetIcons.addCircle),
               label: l10n.tabAdd,
             ),
             NavigationDestination(
-              icon: const Icon(Icons.bar_chart_outlined),
-              selectedIcon: const Icon(Icons.bar_chart_rounded),
+              icon: const SkribbleIcon(data: OpenBudgetIcons.barChart),
+              selectedIcon: const SkribbleIcon(data: OpenBudgetIcons.pieChart),
               label: l10n.tabReflect,
             ),
             NavigationDestination(
-              icon: const Icon(Icons.more_horiz_rounded),
-              selectedIcon: const Icon(Icons.more_horiz_rounded),
+              icon: const SkribbleIcon(data: OpenBudgetIcons.more),
+              selectedIcon: const SkribbleIcon(data: OpenBudgetIcons.more),
               label: l10n.tabMore,
             ),
           ],
@@ -166,18 +169,27 @@ class BudgetShellScreen extends HookConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.settings_outlined),
+              leading: SkribbleIcon(
+                data: OpenBudgetIcons.settings,
+                color: Theme.of(context).ob.ink,
+              ),
               title: Text(l10n.moreSettings),
               onTap: () => Navigator.of(context).pop(_MoreQuickAction.settings),
             ),
             ListTile(
-              leading: const Icon(Icons.repeat_rounded),
+              leading: SkribbleIcon(
+                data: OpenBudgetIcons.recurring,
+                color: Theme.of(context).ob.ink,
+              ),
               title: Text(l10n.moreRecurring),
               onTap: () =>
                   Navigator.of(context).pop(_MoreQuickAction.recurring),
             ),
             ListTile(
-              leading: const Icon(Icons.people_outline_rounded),
+              leading: SkribbleIcon(
+                data: OpenBudgetIcons.people,
+                color: Theme.of(context).ob.ink,
+              ),
               title: Text(l10n.morePayees),
               onTap: () => Navigator.of(context).pop(_MoreQuickAction.payees),
             ),

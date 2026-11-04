@@ -5,7 +5,6 @@ import 'package:intl/intl.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/envelope_goal_provider.dart';
 import 'package:openbudget_app/src/features/budget/widgets/budget_amount_keypad.dart';
-import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
@@ -71,13 +70,15 @@ class SetGoalDialog extends HookConsumerWidget {
       repeatUnit.value,
     );
 
+    final palette = Theme.of(context).ob;
+
     return Dialog.fullscreen(
-      backgroundColor: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
+      backgroundColor: palette.canvas,
       child: Scaffold(
-        backgroundColor: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
+        backgroundColor: palette.canvas,
         appBar: AppBar(
-          backgroundColor: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
-          surfaceTintColor: OpenBudgetPalette.transparentFor(Theme.of(context)),
+          backgroundColor: palette.canvas,
+          surfaceTintColor: palette.canvas,
           leadingWidth: 96,
           leading: TextButton(
             onPressed: isSubmitting.value
@@ -89,10 +90,10 @@ class SetGoalDialog extends HookConsumerWidget {
           title: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                Icons.flag_rounded,
+              SkribbleIcon(
+                data: OpenBudgetIcons.flag,
                 size: 16,
-                color: OpenBudgetPalette.bgBrandFor(Theme.of(context)),
+                color: palette.brand,
               ),
               const SizedBox(width: SpacingTokens.xs),
               Text(
@@ -159,11 +160,9 @@ class SetGoalDialog extends HookConsumerWidget {
                           input: '0',
                           currencyCode: currencyCode,
                         ),
-                        prefixIcon: Icon(
-                          Icons.payments_outlined,
-                          color: OpenBudgetPalette.bgBrandFor(
-                            Theme.of(context),
-                          ),
+                        prefixIcon: SkribbleIcon(
+                          data: OpenBudgetIcons.payment,
+                          color: palette.brand,
                         ),
                         enabled: !isSubmitting.value,
                         onTap: () async {
@@ -189,11 +188,9 @@ class SetGoalDialog extends HookConsumerWidget {
                         ),
                         child: Row(
                           children: [
-                            Icon(
-                              Icons.calendar_month_outlined,
-                              color: OpenBudgetPalette.bgBrandFor(
-                                Theme.of(context),
-                              ),
+                            SkribbleIcon(
+                              data: OpenBudgetIcons.calendarMonth,
+                              color: palette.brand,
                             ),
                             const SizedBox(width: SpacingTokens.sm),
                             Expanded(
@@ -206,10 +203,7 @@ class SetGoalDialog extends HookConsumerWidget {
                                         .textTheme
                                         .labelLarge
                                         ?.copyWith(
-                                          color:
-                                              OpenBudgetPalette.fgSecondaryFor(
-                                                Theme.of(context),
-                                              ),
+                                          color: palette.mutedInk,
                                         ),
                                   ),
                                   DropdownButtonHideUnderline(
@@ -226,7 +220,9 @@ class SetGoalDialog extends HookConsumerWidget {
                                         for (var day = 31; day >= 1; day--)
                                           DropdownMenuItem<int?>(
                                             value: day,
-                                            child: Text(_ordinalDay(day)),
+                                            child: Text(
+                                              l10n.budgetDayOfMonth(day),
+                                            ),
                                           ),
                                       ],
                                       onChanged: (value) =>
@@ -241,19 +237,15 @@ class SetGoalDialog extends HookConsumerWidget {
                       ),
                       const Divider(height: 1),
                       ListTile(
-                        leading: Icon(
-                          Icons.repeat_rounded,
-                          color: OpenBudgetPalette.bgBrandFor(
-                            Theme.of(context),
-                          ),
+                        leading: SkribbleIcon(
+                          data: OpenBudgetIcons.recurring,
+                          color: palette.brand,
                         ),
                         title: Text(
                           l10n.setGoalNextMonthINeedTo,
                           style: Theme.of(context).textTheme.labelLarge
                               ?.copyWith(
-                                color: OpenBudgetPalette.fgSecondaryFor(
-                                  Theme.of(context),
-                                ),
+                                color: palette.mutedInk,
                               ),
                         ),
                         subtitle: Text(
@@ -263,24 +255,22 @@ class SetGoalDialog extends HookConsumerWidget {
                           style: Theme.of(context).textTheme.titleMedium
                               ?.copyWith(fontWeight: FontWeight.w500),
                         ),
-                        trailing: const Icon(Icons.chevron_right_rounded),
+                        trailing: const SkribbleIcon(
+                          data: OpenBudgetIcons.chevronRight,
+                        ),
                       ),
                     ] else ...[
                       const Divider(height: 1),
                       ListTile(
-                        leading: Icon(
-                          Icons.adjust_rounded,
-                          color: OpenBudgetPalette.bgBrandFor(
-                            Theme.of(context),
-                          ),
+                        leading: SkribbleIcon(
+                          data: OpenBudgetIcons.adjust,
+                          color: palette.brand,
                         ),
                         title: Text(
                           l10n.setGoalIWantTo,
                           style: Theme.of(context).textTheme.labelLarge
                               ?.copyWith(
-                                color: OpenBudgetPalette.fgSecondaryFor(
-                                  Theme.of(context),
-                                ),
+                                color: palette.mutedInk,
                               ),
                         ),
                         subtitle: Text(
@@ -290,7 +280,9 @@ class SetGoalDialog extends HookConsumerWidget {
                           style: Theme.of(context).textTheme.titleMedium
                               ?.copyWith(fontWeight: FontWeight.w500),
                         ),
-                        trailing: const Icon(Icons.chevron_right_rounded),
+                        trailing: const SkribbleIcon(
+                          data: OpenBudgetIcons.chevronRight,
+                        ),
                       ),
                     ],
                   ],
@@ -302,11 +294,9 @@ class SetGoalDialog extends HookConsumerWidget {
                   child: Column(
                     children: [
                       ListTile(
-                        leading: Icon(
-                          Icons.event_outlined,
-                          color: OpenBudgetPalette.bgBrandFor(
-                            Theme.of(context),
-                          ),
+                        leading: SkribbleIcon(
+                          data: OpenBudgetIcons.event,
+                          color: palette.brand,
                         ),
                         title: Text(l10n.setGoalDueOn),
                         subtitle: Text(
@@ -328,11 +318,9 @@ class SetGoalDialog extends HookConsumerWidget {
                       ),
                       const Divider(height: 1),
                       SwitchListTile.adaptive(
-                        secondary: Icon(
-                          Icons.repeat_rounded,
-                          color: OpenBudgetPalette.bgBrandFor(
-                            Theme.of(context),
-                          ),
+                        secondary: SkribbleIcon(
+                          data: OpenBudgetIcons.recurring,
+                          color: palette.brand,
                         ),
                         title: Text(l10n.setGoalRepeats),
                         value: repeats.value,
@@ -349,12 +337,10 @@ class SetGoalDialog extends HookConsumerWidget {
                           ),
                           child: Row(
                             children: [
-                              Icon(
-                                Icons.calendar_today_outlined,
+                              SkribbleIcon(
+                                data: OpenBudgetIcons.calendar,
                                 size: 20,
-                                color: OpenBudgetPalette.bgBrandFor(
-                                  Theme.of(context),
-                                ),
+                                color: palette.brand,
                               ),
                               const SizedBox(width: SpacingTokens.sm),
                               Expanded(
@@ -367,10 +353,7 @@ class SetGoalDialog extends HookConsumerWidget {
                                           .textTheme
                                           .labelLarge
                                           ?.copyWith(
-                                            color:
-                                                OpenBudgetPalette.fgSecondaryFor(
-                                                  Theme.of(context),
-                                                ),
+                                            color: palette.mutedInk,
                                           ),
                                     ),
                                     Row(
@@ -441,9 +424,7 @@ class SetGoalDialog extends HookConsumerWidget {
                         ? null
                         : () => _deleteGoal(context, ref, isSubmitting),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: OpenBudgetPalette.fgErrorFor(
-                        Theme.of(context),
-                      ),
+                      foregroundColor: palette.overspent,
                     ),
                     child: Text(l10n.goalRemove),
                   ),
@@ -471,7 +452,7 @@ class SetGoalDialog extends HookConsumerWidget {
                           width: 16,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Icon(Icons.check_circle_rounded),
+                      : const SkribbleIcon(data: OpenBudgetIcons.checkCircle),
                   label: Text(l10n.setGoalSaveTarget),
                 ),
               ),
@@ -638,16 +619,6 @@ double _pow10(int exponent) {
   return result;
 }
 
-String _ordinalDay(int day) {
-  final suffix = switch (day % 10) {
-    1 when day % 100 != 11 => 'st',
-    2 when day % 100 != 12 => 'nd',
-    3 when day % 100 != 13 => 'rd',
-    _ => 'th',
-  };
-  return '$day$suffix';
-}
-
 class _GoalPayload {
   const _GoalPayload({
     required this.goalType,
@@ -668,14 +639,5 @@ class _GoalCard extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) => DecoratedBox(
-    decoration: BoxDecoration(
-      color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
-      borderRadius: BorderRadius.circular(RadiusTokens.md),
-      border: Border.all(
-        color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
-      ),
-    ),
-    child: child,
-  );
+  Widget build(BuildContext context) => ObCard(child: child);
 }

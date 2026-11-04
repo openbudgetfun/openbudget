@@ -92,17 +92,15 @@ class BudgetShellPage {
 
   Finder get navigationBar => find.byType(NavigationBar);
   Finder get planTab =>
-      _destination(Icons.savings_rounded, Icons.savings_outlined);
-  Finder get accountsTab => _destination(
-    Icons.account_balance_rounded,
-    Icons.account_balance_outlined,
-  );
+      _destination(OpenBudgetIcons.envelopeOpen, OpenBudgetIcons.envelope);
+  Finder get accountsTab =>
+      _destination(OpenBudgetIcons.bank, OpenBudgetIcons.wallet);
   Finder get addTab =>
-      _destination(Icons.add_circle_rounded, Icons.add_circle_outline_rounded);
+      _destination(OpenBudgetIcons.addCircle, OpenBudgetIcons.addCircle);
   Finder get reflectTab =>
-      _destination(Icons.bar_chart_rounded, Icons.bar_chart_outlined);
+      _destination(OpenBudgetIcons.pieChart, OpenBudgetIcons.barChart);
   Finder get moreTab =>
-      _destination(Icons.more_horiz_rounded, Icons.more_horiz_rounded);
+      _destination(OpenBudgetIcons.more, OpenBudgetIcons.more);
 
   Future<void> tapPlanTab() async {
     await tester.tap(planTab);
@@ -129,17 +127,20 @@ class BudgetShellPage {
     await tester.pumpAndSettle();
   }
 
-  Finder _destination(IconData selectedIcon, IconData unselectedIcon) {
+  Finder _destination(
+    WiredSvgIconData selectedIcon,
+    WiredSvgIconData unselectedIcon,
+  ) {
     final selected = find.descendant(
       of: navigationBar,
-      matching: find.byIcon(selectedIcon),
+      matching: _iconFinder(selectedIcon),
     );
     if (selected.evaluate().isNotEmpty) {
       return selected.first;
     }
     final unselected = find.descendant(
       of: navigationBar,
-      matching: find.byIcon(unselectedIcon),
+      matching: _iconFinder(unselectedIcon),
     );
     if (unselected.evaluate().isNotEmpty) {
       return unselected.first;
@@ -179,9 +180,9 @@ class AddTransactionSheetPage {
   Finder get incomeOption => find.text('Add Income');
   Finder get expenseOption => find.text('Add Expense');
   Finder get transferOption => find.text('Transfer');
-  Finder get incomeIcon => find.byIcon(Icons.arrow_downward_rounded);
-  Finder get expenseIcon => find.byIcon(Icons.arrow_upward_rounded);
-  Finder get transferIcon => find.byIcon(Icons.swap_horiz_rounded);
+  Finder get incomeIcon => _iconFinder(OpenBudgetIcons.inflow);
+  Finder get expenseIcon => _iconFinder(OpenBudgetIcons.outflow);
+  Finder get transferIcon => _iconFinder(OpenBudgetIcons.transfer);
 
   Future<void> tapIncome() async {
     await tester.tap(incomeOption);
@@ -225,3 +226,8 @@ class MoreTabPage {
   Finder get importTile => find.text('Import Transactions');
   Finder get settingsTile => find.text('Settings');
 }
+
+/// Matches a hand-drawn [SkribbleIcon] by its catalog artwork.
+Finder _iconFinder(WiredSvgIconData data) => find.byWidgetPredicate(
+  (widget) => widget is SkribbleIcon && widget.data == data,
+);

@@ -9,7 +9,6 @@ import 'package:openbudget_app/src/features/budget/providers/budget_summary_prov
 import 'package:openbudget_app/src/features/budget/providers/recent_moves_provider.dart';
 import 'package:openbudget_app/src/features/settings/providers/display_options_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
-import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -48,16 +47,19 @@ class RecentMovesScreen extends HookConsumerWidget {
       return null;
     }, [introSeen, allEvents.isEmpty]);
 
+    final palette = theme.ob;
+
     return Scaffold(
-      backgroundColor: OpenBudgetPalette.bgPrimaryFor(theme),
+      backgroundColor: palette.canvas,
       appBar: AppBar(
-        backgroundColor: OpenBudgetPalette.bgPrimaryFor(theme),
-        surfaceTintColor: OpenBudgetPalette.transparentFor(theme),
+        backgroundColor: palette.canvas,
+        surfaceTintColor: palette.canvas,
         automaticallyImplyLeading: false,
         title: Text(
           l10n.recentMovesTitle,
           style: theme.textTheme.headlineMedium?.copyWith(
             fontWeight: FontWeight.w800,
+            color: palette.ink,
           ),
         ),
         actions: [
@@ -66,7 +68,7 @@ class RecentMovesScreen extends HookConsumerWidget {
             child: Text(
               l10n.dialogDone,
               style: theme.textTheme.titleMedium?.copyWith(
-                color: theme.colorScheme.onSurface,
+                color: palette.ink,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -74,13 +76,12 @@ class RecentMovesScreen extends HookConsumerWidget {
         ],
       ),
       body: summaryAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => Center(
-          child: Text(
-            l10n.reportsLoadError,
-            style: theme.textTheme.bodyLarge?.copyWith(
-              color: theme.colorScheme.error,
-            ),
+        loading: () => Center(child: ObLoadingPanel(label: l10n.loadingTitle)),
+        error: (_, _) => Padding(
+          padding: const EdgeInsets.all(SpacingTokens.md),
+          child: ObStatePanel.problem(
+            title: l10n.recentMovesTitle,
+            message: l10n.reportsLoadError,
           ),
         ),
         data: (summary) {
@@ -172,65 +173,58 @@ class _RecentMovesIntroDialog extends HookWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
+    final palette = theme.ob;
     return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(RadiusTokens.lg),
-      ),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 320),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: SpacingTokens.lg),
-              decoration: BoxDecoration(
-                color: OpenBudgetPalette.bgBrandFor(theme).withAlpha(34),
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(RadiusTokens.lg),
+        child: Padding(
+          padding: const EdgeInsets.all(SpacingTokens.md),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ExcludeSemantics(
+                child: WiredDoodle(
+                  kind: WiredDoodleKind.sprout,
+                  size: 72,
+                  seed: 13,
+                  color: palette.brand,
                 ),
               ),
-              child: Icon(
-                Icons.savings_rounded,
-                size: 48,
-                color: OpenBudgetPalette.bgBrandFor(theme),
+              const SizedBox(height: SpacingTokens.sm),
+              Text(
+                l10n.recentMovesCoachTitle,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: palette.ink,
+                ),
+                textAlign: TextAlign.center,
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(SpacingTokens.md),
-              child: Column(
-                children: [
-                  Text(
-                    l10n.recentMovesCoachTitle,
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: SpacingTokens.sm),
-                  Text(
-                    l10n.recentMovesCoachBody,
-                    style: theme.textTheme.bodyMedium,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: SpacingTokens.sm),
-                  Text(
-                    l10n.recentMovesCoachHint,
-                    style: theme.textTheme.bodyMedium,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: SpacingTokens.md),
-                  FilledButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    style: FilledButton.styleFrom(
-                      minimumSize: const Size.fromHeight(44),
-                    ),
-                    child: Text(l10n.recentMovesCoachGotIt),
-                  ),
-                ],
+              const SizedBox(height: SpacingTokens.sm),
+              Text(
+                l10n.recentMovesCoachBody,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: palette.ink,
+                ),
+                textAlign: TextAlign.center,
               ),
-            ),
-          ],
+              const SizedBox(height: SpacingTokens.sm),
+              Text(
+                l10n.recentMovesCoachHint,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: palette.mutedInk,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: SpacingTokens.md),
+              FilledButton(
+                onPressed: () => Navigator.of(context).pop(),
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size.fromHeight(48),
+                ),
+                child: Text(l10n.recentMovesCoachGotIt),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -255,13 +249,16 @@ class EnvelopeMovesScreen extends HookConsumerWidget {
     final allEvents = ref.watch(recentMovesForBudgetProvider(budgetId));
     final hideAmounts = ref.watch(hideAmountsProvider);
 
+    final palette = theme.ob;
+
     return Scaffold(
-      backgroundColor: OpenBudgetPalette.bgPrimaryFor(theme),
+      backgroundColor: palette.canvas,
       appBar: AppBar(
-        backgroundColor: OpenBudgetPalette.bgPrimaryFor(theme),
-        surfaceTintColor: OpenBudgetPalette.transparentFor(theme),
+        backgroundColor: palette.canvas,
+        surfaceTintColor: palette.canvas,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded),
+          tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+          icon: SkribbleIcon(data: OpenBudgetIcons.back, color: palette.ink),
           onPressed: () => context.pop(),
         ),
         centerTitle: true,
@@ -269,6 +266,7 @@ class EnvelopeMovesScreen extends HookConsumerWidget {
           l10n.recentMovesDetailTitle,
           style: theme.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w700,
+            color: palette.ink,
           ),
         ),
         actions: [
@@ -277,7 +275,7 @@ class EnvelopeMovesScreen extends HookConsumerWidget {
             child: Text(
               l10n.dialogDone,
               style: theme.textTheme.titleMedium?.copyWith(
-                color: theme.colorScheme.onSurface,
+                color: palette.ink,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -285,13 +283,12 @@ class EnvelopeMovesScreen extends HookConsumerWidget {
         ],
       ),
       body: summaryAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => Center(
-          child: Text(
-            l10n.reportsLoadError,
-            style: theme.textTheme.bodyLarge?.copyWith(
-              color: theme.colorScheme.error,
-            ),
+        loading: () => Center(child: ObLoadingPanel(label: l10n.loadingTitle)),
+        error: (_, _) => Padding(
+          padding: const EdgeInsets.all(SpacingTokens.md),
+          child: ObStatePanel.problem(
+            title: l10n.recentMovesDetailTitle,
+            message: l10n.reportsLoadError,
           ),
         ),
         data: (summary) {
@@ -344,17 +341,18 @@ class EnvelopeMovesScreen extends HookConsumerWidget {
             padding: const EdgeInsets.only(bottom: SpacingTokens.md),
             children: [
               for (final day in sortedDays) ...[
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: SpacingTokens.md,
-                    vertical: SpacingTokens.sm,
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    SpacingTokens.md,
+                    SpacingTokens.md,
+                    SpacingTokens.md,
+                    SpacingTokens.xs,
                   ),
-                  color: OpenBudgetPalette.bgTertiaryFor(theme),
                   child: Text(
                     _formatLongDate(l10n, day),
                     style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w700,
+                      color: palette.ink,
                     ),
                   ),
                 ),
@@ -403,14 +401,9 @@ class _RecentMovesTabs extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: OpenBudgetPalette.bgSecondaryFor(theme),
-        borderRadius: BorderRadius.circular(RadiusTokens.md),
-        border: Border.all(color: OpenBudgetPalette.borderSubtleFor(theme)),
-      ),
+    return ObCard(
+      padding: const EdgeInsets.all(3),
       child: Row(
         children: [
           Expanded(
@@ -418,7 +411,6 @@ class _RecentMovesTabs extends HookWidget {
               label: l10n.recentMovesTabAll,
               selected: selected == _RecentMovesTab.all,
               onTap: () => onSelected(_RecentMovesTab.all),
-              theme: theme,
             ),
           ),
           Expanded(
@@ -426,7 +418,6 @@ class _RecentMovesTabs extends HookWidget {
               label: l10n.recentMovesTabMoved,
               selected: selected == _RecentMovesTab.moved,
               onTap: () => onSelected(_RecentMovesTab.moved),
-              theme: theme,
             ),
           ),
           Expanded(
@@ -434,7 +425,6 @@ class _RecentMovesTabs extends HookWidget {
               label: l10n.recentMovesTabAssigned,
               selected: selected == _RecentMovesTab.assigned,
               onTap: () => onSelected(_RecentMovesTab.assigned),
-              theme: theme,
             ),
           ),
         ],
@@ -448,46 +438,47 @@ class _RecentMovesTabButton extends HookWidget {
     required this.label,
     required this.selected,
     required this.onTap,
-    required this.theme,
   });
 
   final String label;
   final bool selected;
   final VoidCallback onTap;
-  final ThemeData theme;
 
   @override
-  Widget build(BuildContext context) => Material(
-    color: OpenBudgetPalette.transparentFor(theme),
-    child: InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(RadiusTokens.sm),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        curve: Curves.easeOut,
-        margin: const EdgeInsets.all(4),
-        padding: const EdgeInsets.symmetric(vertical: SpacingTokens.xs),
-        decoration: BoxDecoration(
-          color: selected
-              ? OpenBudgetPalette.bgBrandFor(
-                  theme,
-                ).withAlpha(theme.brightness == Brightness.dark ? 62 : 28)
-              : OpenBudgetPalette.transparentFor(theme),
-          borderRadius: BorderRadius.circular(RadiusTokens.sm),
-        ),
-        child: Text(
-          label,
-          textAlign: TextAlign.center,
-          style: theme.textTheme.titleSmall?.copyWith(
-            fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-            color: selected
-                ? OpenBudgetPalette.bgBrandFor(theme)
-                : OpenBudgetPalette.fgSecondaryFor(theme),
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final palette = theme.ob;
+    return Semantics(
+      selected: selected,
+      button: true,
+      child: Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(8),
+          child: Container(
+            margin: const EdgeInsets.all(2),
+            padding: const EdgeInsets.symmetric(vertical: SpacingTokens.sm),
+            decoration: ObRoughDecoration(
+              color: selected ? palette.highlight : null,
+              outline: selected ? palette.quietPen : null,
+              radius: 8,
+              strokeWidth: 1.4,
+              seed: 73,
+            ),
+            child: Text(
+              label,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.labelLarge?.copyWith(
+                fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                color: selected ? palette.ink : palette.mutedInk,
+              ),
+            ),
           ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 class _RecentMovesList extends HookWidget {
@@ -575,7 +566,7 @@ class _RecentMovesList extends HookWidget {
           heading.relativeLabel!,
           style: theme.textTheme.bodyLarge?.copyWith(
             fontWeight: FontWeight.w500,
-            color: OpenBudgetPalette.fgSecondaryFor(theme),
+            color: theme.ob.mutedInk,
           ),
         ),
         const SizedBox(height: 2),
@@ -651,6 +642,7 @@ class _RecentMoveRow extends HookWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
+    final palette = theme.ob;
     final amountText = hideAmounts
         ? hiddenAmountPlaceholder
         : formatCents(event.amountCents, currencyCode);
@@ -669,64 +661,48 @@ class _RecentMoveRow extends HookWidget {
         SpacingTokens.md,
         showDivider ? SpacingTokens.xs : SpacingTokens.md,
       ),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: OpenBudgetPalette.bgSecondaryFor(theme),
-          borderRadius: BorderRadius.circular(RadiusTokens.md),
-          border: Border.all(color: OpenBudgetPalette.borderSubtleFor(theme)),
-          boxShadow: [
-            BoxShadow(
-              color: OpenBudgetPalette.overlayScrimFor(
-                theme,
-              ).withAlpha(theme.brightness == Brightness.dark ? 54 : 12),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(
-            SpacingTokens.md,
-            SpacingTokens.sm,
-            SpacingTokens.md,
-            SpacingTokens.sm,
-          ),
-          child: Row(
-            children: [
-              _MoveChip(
+      child: ObCard(
+        padding: const EdgeInsets.all(SpacingTokens.sm),
+        child: Row(
+          children: [
+            Flexible(
+              child: _MoveChip(
                 label: fromName,
                 accent: sourceEnvelopeId != null,
                 onTap: sourceEnvelopeId != null
                     ? () => onEnvelopeTap(sourceEnvelopeId)
                     : null,
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: SpacingTokens.xs,
-                ),
-                child: Icon(
-                  Icons.arrow_forward_rounded,
-                  size: 16,
-                  color: OpenBudgetPalette.fgSecondaryFor(theme),
-                ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: SpacingTokens.xs,
               ),
-              _MoveChip(
+              child: SkribbleIcon(
+                data: OpenBudgetIcons.forward,
+                size: 16,
+                color: palette.mutedInk,
+              ),
+            ),
+            Flexible(
+              child: _MoveChip(
                 label: toName,
                 accent: true,
                 onTap: () => onEnvelopeTap(event.toEnvelopeId),
               ),
-              const SizedBox(width: SpacingTokens.sm),
-              Expanded(
-                child: Text(
-                  amountText,
-                  textAlign: TextAlign.right,
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
+            ),
+            const SizedBox(width: SpacingTokens.sm),
+            Expanded(
+              child: ObAmount(
+                amountText,
+                tone: event.type == RecentMoveType.assigned
+                    ? ObTone.funded
+                    : ObTone.neutral,
+                textAlign: TextAlign.right,
+                style: theme.textTheme.titleSmall,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -752,6 +728,7 @@ class _EnvelopeMoveRow extends HookWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
+    final palette = theme.ob;
 
     final fromName = event.fromEnvelopeId != null
         ? envelopeNames[event.fromEnvelopeId!] ??
@@ -778,64 +755,50 @@ class _EnvelopeMoveRow extends HookWidget {
         SpacingTokens.md,
         SpacingTokens.xs,
       ),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: OpenBudgetPalette.bgSecondaryFor(theme),
-          borderRadius: BorderRadius.circular(RadiusTokens.md),
-          border: Border.all(color: OpenBudgetPalette.borderSubtleFor(theme)),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(
-            SpacingTokens.md,
-            SpacingTokens.md,
-            SpacingTokens.md,
-            SpacingTokens.md,
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text.rich(
-                  TextSpan(
-                    children: [
-                      TextSpan(
-                        text: fromName,
-                        style: theme.textTheme.bodyLarge?.copyWith(
-                          fontWeight: FontWeight.w600,
+      child: ObCard(
+        padding: const EdgeInsets.all(SpacingTokens.md),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text.rich(
+                TextSpan(
+                  children: [
+                    TextSpan(
+                      text: fromName,
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: palette.ink,
+                      ),
+                    ),
+                    WidgetSpan(
+                      alignment: PlaceholderAlignment.middle,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 6),
+                        child: SkribbleIcon(
+                          data: OpenBudgetIcons.forward,
+                          size: 16,
+                          color: palette.mutedInk,
                         ),
                       ),
-                      WidgetSpan(
-                        alignment: PlaceholderAlignment.middle,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 6),
-                          child: Icon(
-                            Icons.arrow_forward_rounded,
-                            size: 16,
-                            color: OpenBudgetPalette.fgSecondaryFor(theme),
-                          ),
-                        ),
+                    ),
+                    TextSpan(
+                      text: toName,
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: palette.ink,
                       ),
-                      TextSpan(
-                        text: toName,
-                        style: theme.textTheme.bodyLarge?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(width: SpacingTokens.sm),
-              Text(
-                amountText,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: signedAmount >= 0
-                      ? OpenBudgetPalette.fgSuccessFor(theme)
-                      : OpenBudgetPalette.fgErrorFor(theme),
-                ),
-              ),
-            ],
-          ),
+            ),
+            const SizedBox(width: SpacingTokens.sm),
+            ObAmount(
+              amountText,
+              tone: signedAmount >= 0 ? ObTone.funded : ObTone.overspent,
+              style: theme.textTheme.titleMedium,
+            ),
+          ],
         ),
       ),
     );
@@ -852,40 +815,39 @@ class _MoveChip extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final accentFill = theme.brightness == Brightness.dark
-        ? OpenBudgetPalette.bgBrandFor(theme).withAlpha(38)
-        : OpenBudgetPalette.bgBrandFor(theme).withAlpha(24);
+    final palette = theme.ob;
     final chip = Container(
       constraints: const BoxConstraints(maxWidth: 152),
       padding: const EdgeInsets.symmetric(
         horizontal: SpacingTokens.sm,
         vertical: 7,
       ),
-      decoration: BoxDecoration(
-        color: accent ? accentFill : OpenBudgetPalette.bgTertiaryFor(theme),
-        borderRadius: BorderRadius.circular(RadiusTokens.sm),
-        border: Border.all(
-          color: accent
-              ? OpenBudgetPalette.bgBrandFor(theme).withAlpha(100)
-              : OpenBudgetPalette.borderSubtleFor(theme),
-        ),
+      decoration: ObRoughDecoration(
+        color: accent ? palette.brandWash : palette.highlight,
+        outline: accent ? palette.quietPen : palette.line,
+        radius: 8,
+        strokeWidth: 1.4,
+        seed: 79,
       ),
       child: Text(
         label,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: theme.textTheme.bodyMedium?.copyWith(
-          color: accent ? OpenBudgetPalette.bgBrandFor(theme) : null,
+          color: accent ? palette.brand : palette.ink,
           fontWeight: FontWeight.w600,
         ),
       ),
     );
 
     if (onTap == null) return chip;
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(RadiusTokens.sm),
-      child: chip,
+    return Material(
+      type: MaterialType.transparency,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: chip,
+      ),
     );
   }
 }
@@ -907,35 +869,14 @@ class _EmptyMovesState extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
     return Center(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: SpacingTokens.lg),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.swap_horiz_rounded,
-              size: 40,
-              color: OpenBudgetPalette.fgSecondaryFor(theme),
-            ),
-            const SizedBox(height: SpacingTokens.md),
-            Text(
-              title ?? l10n.recentMovesEmptyTitle,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: SpacingTokens.xs),
-            Text(
-              subtitle ?? l10n.recentMovesEmptySubtitle,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: OpenBudgetPalette.fgSecondaryFor(theme),
-              ),
-            ),
-          ],
+        padding: const EdgeInsets.all(SpacingTokens.md),
+        child: ObStatePanel.empty(
+          title: title ?? l10n.recentMovesEmptyTitle,
+          message: subtitle ?? l10n.recentMovesEmptySubtitle,
+          doodle: WiredDoodleKind.leaf,
+          tone: ObTone.neutral,
         ),
       ),
     );

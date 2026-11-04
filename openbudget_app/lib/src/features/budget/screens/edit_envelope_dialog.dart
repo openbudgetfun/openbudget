@@ -62,7 +62,7 @@ class EditEnvelopeDialog extends HookConsumerWidget {
             controller: nameController,
             decoration: InputDecoration(
               labelText: l10n.budgetEnvelopeNameLabel,
-              prefixIcon: const Icon(Icons.mail_outlined),
+              prefixIcon: const SkribbleIcon(data: OpenBudgetIcons.envelope),
             ),
             autofocus: true,
             textInputAction: TextInputAction.next,
@@ -76,7 +76,7 @@ class EditEnvelopeDialog extends HookConsumerWidget {
               input: '0',
               currencyCode: currencyCode,
             ),
-            prefixIcon: const Icon(Icons.payments_outlined),
+            prefixIcon: const SkribbleIcon(data: OpenBudgetIcons.payment),
             enabled: !isSubmitting.value,
             onTap: () async {
               final nextInput = await showBudgetAmountKeypadSheet(
@@ -96,7 +96,7 @@ class EditEnvelopeDialog extends HookConsumerWidget {
             decoration: InputDecoration(
               labelText: l10n.envelopeNoteLabel,
               hintText: l10n.envelopeNoteHint,
-              prefixIcon: const Icon(Icons.note_outlined),
+              prefixIcon: const SkribbleIcon(data: OpenBudgetIcons.note),
             ),
             maxLines: 3,
             minLines: 1,
@@ -108,7 +108,7 @@ class EditEnvelopeDialog extends HookConsumerWidget {
               Navigator.of(context).pop();
               _showGoalDialog(context, ref);
             },
-            icon: const Icon(Icons.flag_outlined, size: 18),
+            icon: const SkribbleIcon(data: OpenBudgetIcons.flag, size: 18),
             label: Text(l10n.goalSetGoal),
           ),
         ],
@@ -120,7 +120,7 @@ class EditEnvelopeDialog extends HookConsumerWidget {
               : () => _delete(context, ref, isSubmitting),
           child: Text(
             l10n.deleteConfirmButton,
-            style: TextStyle(color: Theme.of(context).colorScheme.error),
+            style: TextStyle(color: Theme.of(context).ob.overspent),
           ),
         ),
         TextButton(
@@ -156,7 +156,7 @@ class EditEnvelopeDialog extends HookConsumerWidget {
     ValueNotifier<bool> isSubmitting,
   ) async {
     final l10n = AppLocalizations.of(context);
-    final colorScheme = Theme.of(context).colorScheme;
+    final palette = Theme.of(context).ob;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -170,8 +170,8 @@ class EditEnvelopeDialog extends HookConsumerWidget {
           FilledButton(
             onPressed: () => Navigator.of(ctx).pop(true),
             style: FilledButton.styleFrom(
-              backgroundColor: colorScheme.error,
-              foregroundColor: colorScheme.onError,
+              backgroundColor: palette.overspent,
+              foregroundColor: palette.onAction,
             ),
             child: Text(l10n.deleteConfirmButton),
           ),

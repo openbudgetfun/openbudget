@@ -71,7 +71,7 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.byType(ObLoadingPanel), findsOneWidget);
     });
 
     testWidgets('shows budget name in app bar when data loads', (tester) async {

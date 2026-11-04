@@ -193,9 +193,21 @@ void main() {
       await _dismissCoachmarkIfVisible(tester);
 
       expect(find.text('Moves'), findsOneWidget);
-      expect(find.byIcon(Icons.arrow_back_rounded), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is SkribbleIcon && widget.data == OpenBudgetIcons.back,
+        ),
+        findsOneWidget,
+      );
       expect(find.textContaining('Groceries'), findsWidgets);
-      expect(find.byIcon(Icons.arrow_forward_rounded), findsWidgets);
+      expect(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is SkribbleIcon && widget.data == OpenBudgetIcons.forward,
+        ),
+        findsWidgets,
+      );
     });
   });
 }

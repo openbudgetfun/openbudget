@@ -5747,6 +5747,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Loading settings'**
   String get settingsLoading;
+
+  /// No description provided for @budgetStatusOverspent.
+  ///
+  /// In en, this message translates to:
+  /// **'Overspent'**
+  String get budgetStatusOverspent;
+
+  /// No description provided for @budgetStatusFunded.
+  ///
+  /// In en, this message translates to:
+  /// **'Funded'**
+  String get budgetStatusFunded;
+
+  /// No description provided for @budgetStatusUnderfunded.
+  ///
+  /// In en, this message translates to:
+  /// **'Underfunded'**
+  String get budgetStatusUnderfunded;
+
+  /// No description provided for @budgetEnvelopeProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% funded'**
+  String budgetEnvelopeProgress(int percent);
+
+  /// No description provided for @budgetEnvelopeCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 envelope} other{{count} envelopes}}'**
+  String budgetEnvelopeCount(int count);
+
+  /// No description provided for @budgetReviewTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Review 1 transaction} other{Review {count} transactions}}'**
+  String budgetReviewTransactions(int count);
+
+  /// No description provided for @budgetCoverOverspentCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Cover 1 overspent category} other{Cover {count} overspent categories}}'**
+  String budgetCoverOverspentCategories(int count);
+
+  /// No description provided for @budgetCategoryAllocated.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} allocated'**
+  String budgetCategoryAllocated(String amount);
+
+  /// No description provided for @budgetGoalTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Target: {amount}'**
+  String budgetGoalTarget(String amount);
+
+  /// No description provided for @budgetGoalMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly: {amount}'**
+  String budgetGoalMonthly(String amount);
+
+  /// No description provided for @budgetGoalTargetBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Target: {amount} by {date}'**
+  String budgetGoalTargetBy(String amount, String date);
+
+  /// No description provided for @budgetBackspaceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete digit'**
+  String get budgetBackspaceLabel;
+
+  /// No description provided for @budgetDayOfMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Day {day}'**
+  String budgetDayOfMonth(int day);
 }
 
 class _AppLocalizationsDelegate

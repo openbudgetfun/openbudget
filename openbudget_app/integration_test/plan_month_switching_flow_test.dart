@@ -128,7 +128,7 @@ void main() {
     );
     expect(find.text(initialReadyText), findsWidgets);
 
-    await tester.tap(find.byIcon(Icons.chevron_left).first);
+    await tester.tap(find.byKey(const Key('budget-month-previous')));
     await tester.pumpAndSettle();
 
     final previousMonth = container.read(selectedMonthProvider(_budgetId));
@@ -143,7 +143,7 @@ void main() {
     );
     expect(find.text(previousReadyText), findsWidgets);
 
-    await tester.tap(find.byIcon(Icons.chevron_right).first);
+    await tester.tap(find.byKey(const Key('budget-month-next')));
     await tester.pumpAndSettle();
 
     final restoredMonth = container.read(selectedMonthProvider(_budgetId));

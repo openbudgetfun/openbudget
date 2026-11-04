@@ -170,9 +170,28 @@ void main() {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
-      expect(find.byIcon(Icons.swap_horiz_rounded), findsOneWidget);
-      expect(find.byIcon(Icons.flag_rounded), findsOneWidget);
-      expect(find.byIcon(Icons.edit_rounded), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is SkribbleIcon &&
+              widget.data == OpenBudgetIcons.moveMoney,
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is SkribbleIcon && widget.data == OpenBudgetIcons.flag,
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is SkribbleIcon && widget.data == OpenBudgetIcons.edit,
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('renders activity title section', (tester) async {
@@ -188,7 +207,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('No transactions this month'), findsOneWidget);
-      expect(find.byIcon(Icons.receipt_long_rounded), findsOneWidget);
+      expect(find.byType(WiredDoodle), findsOneWidget);
     });
 
     testWidgets('renders transactions when available', (tester) async {
@@ -210,17 +229,23 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Goal progress bar should be present
-      expect(find.byType(LinearProgressIndicator), findsOneWidget);
+      // The header gauge and the goal gauge are both present.
+      expect(find.byType(ObEnvelopeGauge), findsNWidgets(2));
       // Flag icon from goal summary
-      expect(find.byIcon(Icons.flag_rounded), findsAtLeast(1));
+      expect(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is SkribbleIcon && widget.data == OpenBudgetIcons.flag,
+        ),
+        findsAtLeast(1),
+      );
     });
 
     testWidgets('does not render goal progress when no goal', (tester) async {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
-      expect(find.byType(LinearProgressIndicator), findsNothing);
+      expect(find.byType(ObEnvelopeGauge), findsOneWidget);
     });
 
     testWidgets('renders note when envelope has a note', (tester) async {
@@ -230,7 +255,13 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Weekly grocery budget'), findsOneWidget);
-      expect(find.byIcon(Icons.note_outlined), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is SkribbleIcon && widget.data == OpenBudgetIcons.note,
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('does not render note when envelope has no note', (
@@ -239,7 +270,13 @@ void main() {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
-      expect(find.byIcon(Icons.note_outlined), findsNothing);
+      expect(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is SkribbleIcon && widget.data == OpenBudgetIcons.note,
+        ),
+        findsNothing,
+      );
     });
 
     testWidgets('renders drag handle', (tester) async {

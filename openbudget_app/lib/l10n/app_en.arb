@@ -1573,5 +1573,84 @@
       }
     }
   },
-  "settingsLoading": "Loading settings"
+  "settingsLoading": "Loading settings",
+  "budgetStatusOverspent": "Overspent",
+  "budgetStatusFunded": "Funded",
+  "budgetStatusUnderfunded": "Underfunded",
+  "budgetEnvelopeProgress": "{percent}% funded",
+  "@budgetEnvelopeProgress": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "budgetEnvelopeCount": "{count, plural, =1{1 envelope} other{{count} envelopes}}",
+  "@budgetEnvelopeCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "budgetReviewTransactions": "{count, plural, =1{Review 1 transaction} other{Review {count} transactions}}",
+  "@budgetReviewTransactions": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "budgetCoverOverspentCategories": "{count, plural, =1{Cover 1 overspent category} other{Cover {count} overspent categories}}",
+  "@budgetCoverOverspentCategories": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "budgetCategoryAllocated": "{amount} allocated",
+  "@budgetCategoryAllocated": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetGoalTarget": "Target: {amount}",
+  "@budgetGoalTarget": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetGoalMonthly": "Monthly: {amount}",
+  "@budgetGoalMonthly": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetGoalTargetBy": "Target: {amount} by {date}",
+  "@budgetGoalTargetBy": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetBackspaceLabel": "Delete digit",
+  "budgetDayOfMonth": "Day {day}",
+  "@budgetDayOfMonth": {
+    "placeholders": {
+      "day": {
+        "type": "int"
+      }
+    }
+  }
 }

@@ -18,6 +18,7 @@ import 'package:openbudget_app/src/features/recurring/providers/recurring_auto_p
 import 'package:openbudget_app/src/features/transactions/providers/transaction_actions_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
+import 'package:openbudget_ui/openbudget_ui.dart';
 import 'package:patrol/patrol.dart';
 
 import 'helpers/screenshot_capture.dart';
@@ -453,16 +454,16 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     await tester.tap(find.text('Categories'));
     await tester.pumpAndSettle();
-    expect(find.byType(LinearProgressIndicator), findsWidgets);
+    expect(find.byType(ObEnvelopeGauge), findsWidgets);
 
-    await tester.tap(find.byIcon(Icons.more_horiz_rounded));
+    await tester.tap(find.byKey(const Key('budget-plan-menu')));
     await tester.pumpAndSettle();
     expect(find.text('Hide Amounts'), findsOneWidget);
     await captureIntegrationScreenshot(tester, 'plan-menu');
     await tester.pump(const Duration(seconds: 1));
 
     await _tapPopupMenuItem(tester, 'Undo');
-    await tester.tap(find.byIcon(Icons.more_horiz_rounded));
+    await tester.tap(find.byKey(const Key('budget-plan-menu')));
     await tester.pumpAndSettle();
     await _tapPopupMenuItem(tester, 'Recent Moves');
     expect(find.text('Hide Progress Bars', skipOffstage: false), findsNothing);
@@ -482,37 +483,37 @@ void main() {
         );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byIcon(Icons.more_horiz_rounded));
+    await tester.tap(find.byKey(const Key('budget-plan-menu')));
     await tester.pumpAndSettle();
     await _tapPopupMenuItem(tester, 'Hide Progress Bars');
-    expect(find.byType(LinearProgressIndicator), findsNothing);
+    expect(find.byType(ObEnvelopeGauge), findsNothing);
 
-    await tester.tap(find.byIcon(Icons.more_horiz_rounded));
+    await tester.tap(find.byKey(const Key('budget-plan-menu')));
     await tester.pumpAndSettle();
     await _tapPopupMenuItem(tester, 'Hide Progress Bars');
-    expect(find.byType(LinearProgressIndicator), findsWidgets);
+    expect(find.byType(ObEnvelopeGauge), findsWidgets);
 
-    await tester.tap(find.byIcon(Icons.more_horiz_rounded));
+    await tester.tap(find.byKey(const Key('budget-plan-menu')));
     await tester.pumpAndSettle();
     await _tapPopupMenuItem(tester, 'Hide Amounts');
     expect(find.text('••••'), findsWidgets);
 
-    await tester.tap(find.byIcon(Icons.more_horiz_rounded));
+    await tester.tap(find.byKey(const Key('budget-plan-menu')));
     await tester.pumpAndSettle();
     await _tapPopupMenuItem(tester, 'Hide Amounts');
     expect(find.text('••••'), findsNothing);
 
-    await tester.tap(find.byIcon(Icons.more_horiz_rounded));
+    await tester.tap(find.byKey(const Key('budget-plan-menu')));
     await tester.pumpAndSettle();
     await _tapPopupMenuItem(tester, 'Collapse/Expand');
     expect(find.textContaining('Auto-pay every month'), findsNothing);
 
-    await tester.tap(find.byIcon(Icons.more_horiz_rounded));
+    await tester.tap(find.byKey(const Key('budget-plan-menu')));
     await tester.pumpAndSettle();
     await _tapPopupMenuItem(tester, 'Collapse/Expand');
     expect(find.textContaining('Auto-pay every month'), findsOneWidget);
 
-    await tester.tap(find.byIcon(Icons.more_horiz_rounded));
+    await tester.tap(find.byKey(const Key('budget-plan-menu')));
     await tester.pumpAndSettle();
     await _tapPopupMenuItem(tester, 'Recent Moves');
     await _dismissCoachmarkIfVisible(tester);
@@ -707,7 +708,7 @@ void main() {
         );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byIcon(Icons.more_horiz_rounded));
+    await tester.tap(find.byKey(const Key('budget-plan-menu')));
     await tester.pumpAndSettle();
     await _tapPopupMenuItem(tester, 'Recent Moves');
     await _dismissCoachmarkIfVisible(tester);
@@ -777,7 +778,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byIcon(Icons.more_horiz_rounded));
+    await tester.tap(find.byKey(const Key('budget-plan-menu')));
     await tester.pumpAndSettle();
     await _tapPopupMenuItem(tester, 'Reorder Categories');
     expect(find.widgetWithText(TextButton, 'Done'), findsOneWidget);
@@ -792,7 +793,15 @@ void main() {
     final groceriesBefore = tester.getTopLeft(find.text('Groceries Group')).dy;
     expect(housingBefore, lessThan(groceriesBefore));
 
-    await tester.tap(find.byIcon(Icons.arrow_upward_rounded).last);
+    await tester.tap(
+      find
+          .byWidgetPredicate(
+            (widget) =>
+                widget is SkribbleIcon &&
+                widget.data == OpenBudgetIcons.chevronUp,
+          )
+          .last,
+    );
     await tester.pumpAndSettle();
 
     final housingAfter = tester.getTopLeft(find.text('Housing')).dy;
@@ -809,7 +818,7 @@ void main() {
           .map((category) => category.category.id.toString())
           .toList(),
     );
-    expect(find.byIcon(Icons.more_horiz_rounded), findsOneWidget);
+    expect(find.byKey(const Key('budget-plan-menu')), findsOneWidget);
   });
 }
 
