@@ -1,4 +1,5 @@
 import 'package:openbudget_core/src/tax/gb/gb_tax_rules.dart';
+import 'package:openbudget_core/src/tax/ng/ng_tax_rules.dart';
 import 'package:openbudget_core/src/tax/tax_model.dart';
 import 'package:openbudget_core/src/tax/tax_rule_pack.dart';
 import 'package:openbudget_core/src/tax/us/us_tax_rules.dart';
@@ -13,7 +14,7 @@ abstract final class TaxRules {
       switch (jurisdiction) {
         TaxJurisdiction.gb => const GbTaxRules(),
         TaxJurisdiction.us => const UsTaxRules(),
-        TaxJurisdiction.ng => null,
+        TaxJurisdiction.ng => const NgTaxRules(),
         TaxJurisdiction.de => null,
       };
 }
