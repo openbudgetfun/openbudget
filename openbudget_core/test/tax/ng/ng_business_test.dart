@@ -185,6 +185,17 @@ void main() {
       );
     });
 
+    test('turnover between the two statutory ceilings flags the conflict', () {
+      bool flagsConflict(int turnoverNaira) => companyReport(
+        entries: [ngEntry('ng.co.revenue.sales', turnoverNaira)],
+      ).assumptions.any((text) => text.contains('section 147'));
+
+      expect(flagsConflict(50_000_000), isFalse);
+      expect(flagsConflict(80_000_000), isTrue);
+      expect(flagsConflict(100_000_000), isTrue);
+      expect(flagsConflict(100_000_001), isFalse);
+    });
+
     test('professional services are never a small company', () {
       final report = companyReport(
         entries: [

@@ -118,4 +118,10 @@ void main() {
     expect(TaxJurisdiction.fromCountryCode('de'), TaxJurisdiction.de);
     expect(TaxJurisdiction.fromCountryCode('FR'), isNull);
   });
+
+  test('every jurisdiction resolves to its own rule pack', () {
+    for (final jurisdiction in TaxJurisdiction.values) {
+      expect(TaxRules.forJurisdiction(jurisdiction).jurisdiction, jurisdiction);
+    }
+  });
 }

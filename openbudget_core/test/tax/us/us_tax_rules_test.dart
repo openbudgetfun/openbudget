@@ -81,7 +81,7 @@ void main() {
     test('returns the US pack for the US jurisdiction', () {
       final pack = TaxRules.forJurisdiction(TaxJurisdiction.us);
       expect(pack, isA<UsTaxRules>());
-      expect(pack!.jurisdiction, TaxJurisdiction.us);
+      expect(pack.jurisdiction, TaxJurisdiction.us);
     });
   });
 

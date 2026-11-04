@@ -81,6 +81,10 @@ TaxReport _companyReport(TaxInput input, _NgTaxTable table) {
     'Accounting period assumed to end on 31 December.',
     'Total fixed assets are assumed not to exceed N250,000,000 unless capital additions in the year already exceed that ceiling; OpenBudget does not track a balance sheet.',
     'Small company status is inferred from turnover and professional-services revenue; a company providing professional services is never small.',
+    if (!small &&
+        position.turnover > table.smallCompanyTurnoverCeilingMinor &&
+        position.turnover <= table.vatSmallBusinessTurnoverCeilingMinor)
+      'Turnover is above the N50,000,000 small company ceiling in section 202 of the Nigeria Tax Act but within the N100,000,000 in section 147 of the Nigeria Tax Administration Act. Official guidance and the reform committee treat N100,000,000 as the intended figure, so this company may qualify for the 0% rate; confirm with the Nigeria Revenue Service before relying on either.',
     'The minimum effective tax rate in section 57 is not modelled: it applies to constituent entities of MNE groups with group turnover of at least EUR 750,000,000 and to other companies with aggregate turnover of N50,000,000,000 or more.',
     'The 30% companies income tax rate applies; the Act allows a Presidential Order, on the advice of the National Economic Council, to reduce it to 25%. No such Order was in force when the rules were checked.',
     'Capital allowance is one year at the First Schedule Table I rates on current-year additions; prior-year assets, disposals and balancing charges are not tracked.',

@@ -31,7 +31,6 @@ void main() {
   group('registration', () {
     test('TaxRules resolves the Nigeria pack', () {
       expect(TaxRules.forJurisdiction(TaxJurisdiction.ng), isA<NgTaxRules>());
-      expect(TaxRules.forJurisdiction(TaxJurisdiction.gb), isNull);
     });
   });
 
