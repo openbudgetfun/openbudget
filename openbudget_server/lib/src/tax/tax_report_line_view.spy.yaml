@@ -1,0 +1,9 @@
+### One figure of a tax report: a category total or a computed amount.
+class: TaxReportLineView
+fields:
+  label: String
+  amountMinor: int
+  ### The TaxCategory code this line totals, when it totals one.
+  code: String?
+  reportReference: String?
+  entryCount: int

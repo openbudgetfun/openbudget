@@ -1,0 +1,12 @@
+### One category of a jurisdiction's tax catalog, for display and assignment.
+class: TaxCategoryView
+fields:
+  ### Stable identifier, prefixed by jurisdiction: `gb.se.office_costs`.
+  code: String
+  ### The name the tax authority uses, in its own language.
+  label: String
+  ### TaxCategoryKind name: income, expense, relief, taxPaid, and so on.
+  kind: String
+  ### Where the total lands on the official return.
+  reportReference: String?
+  description: String?

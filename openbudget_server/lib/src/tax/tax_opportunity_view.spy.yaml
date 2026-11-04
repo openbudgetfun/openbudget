@@ -1,0 +1,13 @@
+### A legal way to owe less, found in the taxpayer's own figures.
+class: TaxOpportunityView
+fields:
+  ### Stable identifier, such as `gb.pension_annual_allowance`.
+  id: String
+  title: String
+  explanation: String
+  ### The estimated tax saved if acted on, when it can be computed.
+  estimatedSavingMinor: int?
+  ### The last day acting on it counts for the year.
+  deadline: DateTime?
+  ### The authority's guidance for it.
+  source: String

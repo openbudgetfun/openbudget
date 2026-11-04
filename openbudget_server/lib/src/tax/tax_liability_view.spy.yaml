@@ -1,0 +1,7 @@
+### One tax a report computes, such as income tax or Class 4 NICs.
+class: TaxLiabilityView
+fields:
+  label: String
+  amountMinor: int
+  ### How amountMinor was built, band by band.
+  bands: List<TaxBandSliceView>
