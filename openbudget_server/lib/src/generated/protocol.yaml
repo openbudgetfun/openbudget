@@ -99,6 +99,13 @@ solanaWallet:
   - listHoldings:
   - listTaxYearSummaries:
   - updateTransactionMetadata:
+tax:
+  - getProfile:
+  - saveProfile:
+  - listCategories:
+  - setEnvelopeTaxCategory:
+  - setTransactionTax:
+  - getReport:
 transactionRule:
   - create:
   - list:

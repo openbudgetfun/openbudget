@@ -24,6 +24,7 @@ abstract class Envelope
     required this.currencyCode,
     required this.sortOrder,
     this.note,
+    this.taxCategoryCode,
     bool? isHidden,
     DateTime? createdAt,
   }) : isHidden = isHidden ?? false,
@@ -38,6 +39,7 @@ abstract class Envelope
     required String currencyCode,
     required int sortOrder,
     String? note,
+    String? taxCategoryCode,
     bool? isHidden,
     DateTime? createdAt,
   }) = _EnvelopeImpl;
@@ -56,6 +58,7 @@ abstract class Envelope
       currencyCode: jsonSerialization['currencyCode'] as String,
       sortOrder: jsonSerialization['sortOrder'] as int,
       note: jsonSerialization['note'] as String?,
+      taxCategoryCode: jsonSerialization['taxCategoryCode'] as String?,
       isHidden: jsonSerialization['isHidden'] == null
           ? null
           : _isc.BoolJsonExtension.fromJson(jsonSerialization['isHidden']),
@@ -89,6 +92,9 @@ abstract class Envelope
   /// Optional user-facing note providing context for the envelope.
   String? note;
 
+  /// Default tax category for transactions in this envelope.
+  String? taxCategoryCode;
+
   /// Whether this envelope is hidden from the default budget view.
   bool? isHidden;
 
@@ -106,6 +112,7 @@ abstract class Envelope
     String? currencyCode,
     int? sortOrder,
     String? note,
+    String? taxCategoryCode,
     bool? isHidden,
     DateTime? createdAt,
   });
@@ -121,6 +128,7 @@ abstract class Envelope
       'currencyCode': currencyCode,
       'sortOrder': sortOrder,
       if (note != null) 'note': note,
+      if (taxCategoryCode != null) 'taxCategoryCode': taxCategoryCode,
       if (isHidden != null) 'isHidden': isHidden,
       'createdAt': createdAt.toJson(),
     };
@@ -138,6 +146,7 @@ abstract class Envelope
       'currencyCode': currencyCode,
       'sortOrder': sortOrder,
       if (note != null) 'note': note,
+      if (taxCategoryCode != null) 'taxCategoryCode': taxCategoryCode,
       if (isHidden != null) 'isHidden': isHidden,
       'createdAt': createdAt.toJson(),
     };
@@ -161,6 +170,7 @@ class _EnvelopeImpl extends Envelope {
     required String currencyCode,
     required int sortOrder,
     String? note,
+    String? taxCategoryCode,
     bool? isHidden,
     DateTime? createdAt,
   }) : super._(
@@ -172,6 +182,7 @@ class _EnvelopeImpl extends Envelope {
          currencyCode: currencyCode,
          sortOrder: sortOrder,
          note: note,
+         taxCategoryCode: taxCategoryCode,
          isHidden: isHidden,
          createdAt: createdAt,
        );
@@ -189,6 +200,7 @@ class _EnvelopeImpl extends Envelope {
     String? currencyCode,
     int? sortOrder,
     Object? note = _Undefined,
+    Object? taxCategoryCode = _Undefined,
     Object? isHidden = _Undefined,
     DateTime? createdAt,
   }) {
@@ -201,6 +213,9 @@ class _EnvelopeImpl extends Envelope {
       currencyCode: currencyCode ?? this.currencyCode,
       sortOrder: sortOrder ?? this.sortOrder,
       note: note is String? ? note : this.note,
+      taxCategoryCode: taxCategoryCode is String?
+          ? taxCategoryCode
+          : this.taxCategoryCode,
       isHidden: isHidden is bool? ? isHidden : this.isHidden,
       createdAt: createdAt ?? this.createdAt,
     );

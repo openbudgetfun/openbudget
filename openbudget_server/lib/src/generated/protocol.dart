@@ -38,6 +38,8 @@ import 'package:openbudget_server/src/generated/solana_wallets/solana_wallet_tax
     as _ik6g6ols;
 import 'package:openbudget_server/src/generated/solana_wallets/solana_wallet_transaction.dart'
     as _imyeu1oa;
+import 'package:openbudget_server/src/generated/tax/tax_category_view.dart'
+    as _i687t6y5;
 import 'package:openbudget_server/src/generated/transaction_rules/transaction_rule.dart'
     as _i4wqhpw2;
 import 'package:openbudget_server/src/generated/transactions/import_row.dart'
@@ -76,6 +78,13 @@ import 'solana_wallets/solana_wallet_holding.dart' as _ivqf8i64;
 import 'solana_wallets/solana_wallet_sync_result.dart' as _ir1c2di9;
 import 'solana_wallets/solana_wallet_tax_year_summary.dart' as _ijmvodfo;
 import 'solana_wallets/solana_wallet_transaction.dart' as _iwwk92r1;
+import 'tax/tax_band_slice_view.dart' as _ic4zfx3b;
+import 'tax/tax_category_view.dart' as _iv5oayw3;
+import 'tax/tax_liability_view.dart' as _ivss6b81;
+import 'tax/tax_opportunity_view.dart' as _iuft4v7q;
+import 'tax/tax_profile.dart' as _i20z9jax;
+import 'tax/tax_report_line_view.dart' as _i6llsezf;
+import 'tax/tax_report_view.dart' as _inb54q20;
 import 'transaction_rules/transaction_rule.dart' as _i6dj6ji0;
 import 'transactions/import_row.dart' as _isp6bezg;
 import 'transactions/split_item.dart' as _i0jd5x9z;
@@ -105,6 +114,13 @@ export 'solana_wallets/solana_wallet_holding.dart';
 export 'solana_wallets/solana_wallet_sync_result.dart';
 export 'solana_wallets/solana_wallet_tax_year_summary.dart';
 export 'solana_wallets/solana_wallet_transaction.dart';
+export 'tax/tax_band_slice_view.dart';
+export 'tax/tax_category_view.dart';
+export 'tax/tax_liability_view.dart';
+export 'tax/tax_opportunity_view.dart';
+export 'tax/tax_profile.dart';
+export 'tax/tax_report_line_view.dart';
+export 'tax/tax_report_view.dart';
 export 'transaction_rules/transaction_rule.dart';
 export 'transactions/import_row.dart';
 export 'transactions/split_item.dart';
@@ -148,6 +164,13 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<_ir1c2di9.SolanaWalletSyncResult>,
           _is.getType<_ijmvodfo.SolanaWalletTaxYearSummary>,
           _is.getType<_iwwk92r1.SolanaWalletTransaction>,
+          _is.getType<_ic4zfx3b.TaxBandSliceView>,
+          _is.getType<_iv5oayw3.TaxCategoryView>,
+          _is.getType<_ivss6b81.TaxLiabilityView>,
+          _is.getType<_iuft4v7q.TaxOpportunityView>,
+          _is.getType<_i20z9jax.TaxProfileRecord>,
+          _is.getType<_i6llsezf.TaxReportLineView>,
+          _is.getType<_inb54q20.TaxReportView>,
           _is.getType<_i6dj6ji0.TransactionRule>,
           _is.getType<_isp6bezg.ImportRow>,
           _is.getType<_i0jd5x9z.SplitItem>,
@@ -177,6 +200,13 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<_ir1c2di9.SolanaWalletSyncResult?>,
           _is.getType<_ijmvodfo.SolanaWalletTaxYearSummary?>,
           _is.getType<_iwwk92r1.SolanaWalletTransaction?>,
+          _is.getType<_ic4zfx3b.TaxBandSliceView?>,
+          _is.getType<_iv5oayw3.TaxCategoryView?>,
+          _is.getType<_ivss6b81.TaxLiabilityView?>,
+          _is.getType<_iuft4v7q.TaxOpportunityView?>,
+          _is.getType<_i20z9jax.TaxProfileRecord?>,
+          _is.getType<_i6llsezf.TaxReportLineView?>,
+          _is.getType<_inb54q20.TaxReportView?>,
           _is.getType<_i6dj6ji0.TransactionRule?>,
           _is.getType<_isp6bezg.ImportRow?>,
           _is.getType<_i0jd5x9z.SplitItem?>,
@@ -186,6 +216,11 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<_i9uqpb1b.WalletConnection?>,
           _is.getType<_iqqppnaa.WalletHolding?>,
           _is.getType<List<_i15udi7x.FxRateQuote>>,
+          _is.getType<List<_ic4zfx3b.TaxBandSliceView>>,
+          _is.getType<List<_i6llsezf.TaxReportLineView>>,
+          _is.getType<List<_ivss6b81.TaxLiabilityView>>,
+          _is.getType<List<String>>,
+          _is.getType<List<_iuft4v7q.TaxOpportunityView>>,
           _is.getType<List<_iqqppnaa.WalletHolding>>,
           _is.getType<List<_i3fh9aci.Account>>,
           _is.getType<List<_ihbdj8p6.BudgetTemplate>>,
@@ -203,6 +238,7 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<List<_imyeu1oa.SolanaWalletTransaction>>,
           _is.getType<List<_iry3zuft.SolanaWalletHolding>>,
           _is.getType<List<_ik6g6ols.SolanaWalletTaxYearSummary>>,
+          _is.getType<List<_i687t6y5.TaxCategoryView>>,
           _is.getType<List<_i4wqhpw2.TransactionRule>>,
           _is.getType<List<_ioie3qid.Transaction>>,
           _is.getType<List<int>>,
@@ -237,6 +273,13 @@ class Protocol extends _is.DatabaseSerializationManager
           'SolanaWalletSyncResult',
           'SolanaWalletTaxYearSummary',
           'SolanaWalletTransaction',
+          'TaxBandSliceView',
+          'TaxCategoryView',
+          'TaxLiabilityView',
+          'TaxOpportunityView',
+          'TaxProfileRecord',
+          'TaxReportLineView',
+          'TaxReportView',
           'TransactionRule',
           'ImportRow',
           'SplitItem',
@@ -773,6 +816,12 @@ class Protocol extends _is.DatabaseSerializationManager
         ),
         _isp.ColumnDefinition(
           name: 'note',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'taxCategoryCode',
           columnType: _isp.ColumnType.text,
           isNullable: true,
           dartType: 'String?',
@@ -2449,6 +2498,106 @@ class Protocol extends _is.DatabaseSerializationManager
       managed: true,
     ),
     _isp.TableDefinition(
+      name: 'tax_profile',
+      dartName: 'TaxProfileRecord',
+      schema: 'public',
+      module: 'openbudget',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue?',
+          columnDefault: 'random_v7',
+        ),
+        _isp.ColumnDefinition(
+          name: 'budgetId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'jurisdiction',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'entityKind',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'profileJson',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'linkedBudgetId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: true,
+          dartType: 'UuidValue?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'now',
+        ),
+        _isp.ColumnDefinition(
+          name: 'updatedAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'now',
+        ),
+      ],
+      foreignKeys: [
+        _isp.ForeignKeyDefinition(
+          constraintName: 'tax_profile_fk_0',
+          columns: ['budgetId'],
+          referenceTable: 'budget',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.noAction,
+          matchType: null,
+        ),
+      ],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'tax_profile_budget_unique_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'budgetId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+        _isp.IndexDefinition(
+          indexName: 'tax_profile_linked_budget_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'linkedBudgetId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _isp.TableDefinition(
       name: 'transaction',
       dartName: 'Transaction',
       schema: 'public',
@@ -2546,6 +2695,24 @@ class Protocol extends _is.DatabaseSerializationManager
           columnType: _isp.ColumnType.text,
           isNullable: true,
           dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'taxCategoryCode',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'businessUsePercent',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: true,
+          dartType: 'int?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'salesTaxCents',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: true,
+          dartType: 'int?',
         ),
         _isp.ColumnDefinition(
           name: 'createdAt',
@@ -3124,6 +3291,27 @@ class Protocol extends _is.DatabaseSerializationManager
     if (t == _iwwk92r1.SolanaWalletTransaction) {
       return _iwwk92r1.SolanaWalletTransaction.fromJson(data) as T;
     }
+    if (t == _ic4zfx3b.TaxBandSliceView) {
+      return _ic4zfx3b.TaxBandSliceView.fromJson(data) as T;
+    }
+    if (t == _iv5oayw3.TaxCategoryView) {
+      return _iv5oayw3.TaxCategoryView.fromJson(data) as T;
+    }
+    if (t == _ivss6b81.TaxLiabilityView) {
+      return _ivss6b81.TaxLiabilityView.fromJson(data) as T;
+    }
+    if (t == _iuft4v7q.TaxOpportunityView) {
+      return _iuft4v7q.TaxOpportunityView.fromJson(data) as T;
+    }
+    if (t == _i20z9jax.TaxProfileRecord) {
+      return _i20z9jax.TaxProfileRecord.fromJson(data) as T;
+    }
+    if (t == _i6llsezf.TaxReportLineView) {
+      return _i6llsezf.TaxReportLineView.fromJson(data) as T;
+    }
+    if (t == _inb54q20.TaxReportView) {
+      return _inb54q20.TaxReportView.fromJson(data) as T;
+    }
     if (t == _i6dj6ji0.TransactionRule) {
       return _i6dj6ji0.TransactionRule.fromJson(data) as T;
     }
@@ -3234,6 +3422,34 @@ class Protocol extends _is.DatabaseSerializationManager
               : null)
           as T;
     }
+    if (t == _is.getType<_ic4zfx3b.TaxBandSliceView?>()) {
+      return (data != null ? _ic4zfx3b.TaxBandSliceView.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_iv5oayw3.TaxCategoryView?>()) {
+      return (data != null ? _iv5oayw3.TaxCategoryView.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_ivss6b81.TaxLiabilityView?>()) {
+      return (data != null ? _ivss6b81.TaxLiabilityView.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_iuft4v7q.TaxOpportunityView?>()) {
+      return (data != null ? _iuft4v7q.TaxOpportunityView.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_i20z9jax.TaxProfileRecord?>()) {
+      return (data != null ? _i20z9jax.TaxProfileRecord.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_i6llsezf.TaxReportLineView?>()) {
+      return (data != null ? _i6llsezf.TaxReportLineView.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_inb54q20.TaxReportView?>()) {
+      return (data != null ? _inb54q20.TaxReportView.fromJson(data) : null)
+          as T;
+    }
     if (t == _is.getType<_i6dj6ji0.TransactionRule?>()) {
       return (data != null ? _i6dj6ji0.TransactionRule.fromJson(data) : null)
           as T;
@@ -3268,6 +3484,33 @@ class Protocol extends _is.DatabaseSerializationManager
     if (t == List<_i15udi7x.FxRateQuote>) {
       return (data as List)
               .map((e) => deserialize<_i15udi7x.FxRateQuote>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_ic4zfx3b.TaxBandSliceView>) {
+      return (data as List)
+              .map((e) => deserialize<_ic4zfx3b.TaxBandSliceView>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_i6llsezf.TaxReportLineView>) {
+      return (data as List)
+              .map((e) => deserialize<_i6llsezf.TaxReportLineView>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_ivss6b81.TaxLiabilityView>) {
+      return (data as List)
+              .map((e) => deserialize<_ivss6b81.TaxLiabilityView>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<String>) {
+      return (data as List).map((e) => deserialize<String>(e)).toList() as T;
+    }
+    if (t == List<_iuft4v7q.TaxOpportunityView>) {
+      return (data as List)
+              .map((e) => deserialize<_iuft4v7q.TaxOpportunityView>(e))
               .toList()
           as T;
     }
@@ -3366,6 +3609,12 @@ class Protocol extends _is.DatabaseSerializationManager
               .toList()
           as T;
     }
+    if (t == List<_i687t6y5.TaxCategoryView>) {
+      return (data as List)
+              .map((e) => deserialize<_i687t6y5.TaxCategoryView>(e))
+              .toList()
+          as T;
+    }
     if (t == List<_i4wqhpw2.TransactionRule>) {
       return (data as List)
               .map((e) => deserialize<_i4wqhpw2.TransactionRule>(e))
@@ -3435,6 +3684,13 @@ class Protocol extends _is.DatabaseSerializationManager
       _ir1c2di9.SolanaWalletSyncResult => 'SolanaWalletSyncResult',
       _ijmvodfo.SolanaWalletTaxYearSummary => 'SolanaWalletTaxYearSummary',
       _iwwk92r1.SolanaWalletTransaction => 'SolanaWalletTransaction',
+      _ic4zfx3b.TaxBandSliceView => 'TaxBandSliceView',
+      _iv5oayw3.TaxCategoryView => 'TaxCategoryView',
+      _ivss6b81.TaxLiabilityView => 'TaxLiabilityView',
+      _iuft4v7q.TaxOpportunityView => 'TaxOpportunityView',
+      _i20z9jax.TaxProfileRecord => 'TaxProfileRecord',
+      _i6llsezf.TaxReportLineView => 'TaxReportLineView',
+      _inb54q20.TaxReportView => 'TaxReportView',
       _i6dj6ji0.TransactionRule => 'TransactionRule',
       _isp6bezg.ImportRow => 'ImportRow',
       _i0jd5x9z.SplitItem => 'SplitItem',
@@ -3499,6 +3755,20 @@ class Protocol extends _is.DatabaseSerializationManager
         return 'SolanaWalletTaxYearSummary';
       case _iwwk92r1.SolanaWalletTransaction():
         return 'SolanaWalletTransaction';
+      case _ic4zfx3b.TaxBandSliceView():
+        return 'TaxBandSliceView';
+      case _iv5oayw3.TaxCategoryView():
+        return 'TaxCategoryView';
+      case _ivss6b81.TaxLiabilityView():
+        return 'TaxLiabilityView';
+      case _iuft4v7q.TaxOpportunityView():
+        return 'TaxOpportunityView';
+      case _i20z9jax.TaxProfileRecord():
+        return 'TaxProfileRecord';
+      case _i6llsezf.TaxReportLineView():
+        return 'TaxReportLineView';
+      case _inb54q20.TaxReportView():
+        return 'TaxReportView';
       case _i6dj6ji0.TransactionRule():
         return 'TransactionRule';
       case _isp6bezg.ImportRow():
@@ -3603,6 +3873,27 @@ class Protocol extends _is.DatabaseSerializationManager
     }
     if (dataClassName == 'SolanaWalletTransaction') {
       return deserialize<_iwwk92r1.SolanaWalletTransaction>(data['data']);
+    }
+    if (dataClassName == 'TaxBandSliceView') {
+      return deserialize<_ic4zfx3b.TaxBandSliceView>(data['data']);
+    }
+    if (dataClassName == 'TaxCategoryView') {
+      return deserialize<_iv5oayw3.TaxCategoryView>(data['data']);
+    }
+    if (dataClassName == 'TaxLiabilityView') {
+      return deserialize<_ivss6b81.TaxLiabilityView>(data['data']);
+    }
+    if (dataClassName == 'TaxOpportunityView') {
+      return deserialize<_iuft4v7q.TaxOpportunityView>(data['data']);
+    }
+    if (dataClassName == 'TaxProfileRecord') {
+      return deserialize<_i20z9jax.TaxProfileRecord>(data['data']);
+    }
+    if (dataClassName == 'TaxReportLineView') {
+      return deserialize<_i6llsezf.TaxReportLineView>(data['data']);
+    }
+    if (dataClassName == 'TaxReportView') {
+      return deserialize<_inb54q20.TaxReportView>(data['data']);
     }
     if (dataClassName == 'TransactionRule') {
       return deserialize<_i6dj6ji0.TransactionRule>(data['data']);
@@ -3709,6 +4000,8 @@ class Protocol extends _is.DatabaseSerializationManager
         return _ivqf8i64.SolanaWalletHolding.t;
       case _iwwk92r1.SolanaWalletTransaction:
         return _iwwk92r1.SolanaWalletTransaction.t;
+      case _i20z9jax.TaxProfileRecord:
+        return _i20z9jax.TaxProfileRecord.t;
       case _i6dj6ji0.TransactionRule:
         return _i6dj6ji0.TransactionRule.t;
       case _iqhl4hru.Transaction:

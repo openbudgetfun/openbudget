@@ -45,6 +45,12 @@ import 'package:openbudget_server/src/generated/solana_wallets/solana_wallet_tax
     as _ik6g6ols;
 import 'package:openbudget_server/src/generated/solana_wallets/solana_wallet_transaction.dart'
     as _imyeu1oa;
+import 'package:openbudget_server/src/generated/tax/tax_category_view.dart'
+    as _i687t6y5;
+import 'package:openbudget_server/src/generated/tax/tax_profile.dart'
+    as _iqcxgux6;
+import 'package:openbudget_server/src/generated/tax/tax_report_view.dart'
+    as _ik01tkfb;
 import 'package:openbudget_server/src/generated/transaction_rules/transaction_rule.dart'
     as _i4wqhpw2;
 import 'package:openbudget_server/src/generated/transactions/import_row.dart'
@@ -230,6 +236,8 @@ class TestEndpoints {
 
   late final _SolanaWalletEndpoint solanaWallet;
 
+  late final _TaxEndpoint tax;
+
   late final _TransactionRuleEndpoint transactionRule;
 
   late final _TransactionEndpoint transaction;
@@ -313,6 +321,10 @@ class _InternalTestEndpoints extends TestEndpoints
       serializationManager,
     );
     solanaWallet = _SolanaWalletEndpoint(
+      endpoints,
+      serializationManager,
+    );
+    tax = _TaxEndpoint(
       endpoints,
       serializationManager,
     );
@@ -3239,6 +3251,217 @@ class _SolanaWalletEndpoint {
           _localUniqueSession,
           _localCallContext.arguments,
         ) as _ida.Future<_imyeu1oa.SolanaWalletTransaction>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+}
+
+class _TaxEndpoint {
+  _TaxEndpoint(
+    this._endpointDispatch,
+    this._serializationManager,
+  );
+
+  final _is.EndpointDispatch _endpointDispatch;
+
+  final _is.SerializationManager _serializationManager;
+
+  _ida.Future<_iqcxgux6.TaxProfileRecord?> getProfile(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue budgetId,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'tax',
+            method: 'getProfile',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'tax',
+          methodName: 'getProfile',
+          parameters: _ist.testObjectToJson({'budgetId': budgetId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _ida.Future<_iqcxgux6.TaxProfileRecord?>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_iqcxgux6.TaxProfileRecord> saveProfile(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue budgetId,
+    String jurisdiction,
+    String entityKind,
+    String profileJson, {
+    _is.UuidValue? linkedBudgetId,
+  }) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'tax',
+            method: 'saveProfile',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'tax',
+          methodName: 'saveProfile',
+          parameters: _ist.testObjectToJson({
+            'budgetId': budgetId,
+            'jurisdiction': jurisdiction,
+            'entityKind': entityKind,
+            'profileJson': profileJson,
+            'linkedBudgetId': linkedBudgetId,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _ida.Future<_iqcxgux6.TaxProfileRecord>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<List<_i687t6y5.TaxCategoryView>> listCategories(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue budgetId,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'tax',
+            method: 'listCategories',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'tax',
+          methodName: 'listCategories',
+          parameters: _ist.testObjectToJson({'budgetId': budgetId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _ida.Future<List<_i687t6y5.TaxCategoryView>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_igwnqatb.Envelope> setEnvelopeTaxCategory(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue envelopeId, {
+    String? code,
+  }) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'tax',
+            method: 'setEnvelopeTaxCategory',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'tax',
+          methodName: 'setEnvelopeTaxCategory',
+          parameters: _ist.testObjectToJson({
+            'envelopeId': envelopeId,
+            'code': code,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _ida.Future<_igwnqatb.Envelope>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_ioie3qid.Transaction> setTransactionTax(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue transactionId, {
+    String? code,
+    int? businessUsePercent,
+    int? salesTaxCents,
+  }) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'tax',
+            method: 'setTransactionTax',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'tax',
+          methodName: 'setTransactionTax',
+          parameters: _ist.testObjectToJson({
+            'transactionId': transactionId,
+            'code': code,
+            'businessUsePercent': businessUsePercent,
+            'salesTaxCents': salesTaxCents,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _ida.Future<_ioie3qid.Transaction>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_ik01tkfb.TaxReportView> getReport(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue budgetId, {
+    int? startYear,
+  }) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'tax',
+            method: 'getReport',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'tax',
+          methodName: 'getReport',
+          parameters: _ist.testObjectToJson({
+            'budgetId': budgetId,
+            'startYear': startYear,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _ida.Future<_ik01tkfb.TaxReportView>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
