@@ -5,8 +5,12 @@ if [ "$#" -eq 0 ]; then
 	exit 0
 fi
 
-# Prefer the active shell toolchain, but fall back to devenv/fvm where possible.
-if command -v dart >/dev/null 2>&1; then
+# Prefer the pinned fvm SDK so every shell formats with the same Dart version,
+# then the active shell toolchain, then devenv.
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+if [ -x "${repo_root}/.fvm/flutter_sdk/bin/dart" ]; then
+	DART_CMD=("${repo_root}/.fvm/flutter_sdk/bin/dart")
+elif command -v dart >/dev/null 2>&1; then
 	DART_CMD=(dart)
 elif [ -n "${DEVENV_PROFILE:-}" ] && [ -x "${DEVENV_PROFILE}/bin/dart" ]; then
 	DART_CMD=("${DEVENV_PROFILE}/bin/dart")

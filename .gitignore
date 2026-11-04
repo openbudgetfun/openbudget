@@ -82,3 +82,6 @@ local.properties
 
 **/node_modules/
 .serena/
+
+# monochange local caches (release records under .monochange/releases stay tracked)
+.monochange/local/
