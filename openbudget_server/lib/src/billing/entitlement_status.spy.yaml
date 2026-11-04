@@ -1,0 +1,12 @@
+### Where a subscription is in its lifecycle on its payment rail.
+enum: EntitlementStatus
+serialized: byName
+values:
+  ### Paid through currentPeriodEnd.
+  - active
+  ### A renewal failed and the rail is retrying; access continues meanwhile.
+  - pastDue
+  ### The subscriber cancelled; access continues until currentPeriodEnd.
+  - canceled
+  ### The period ended without renewal; no access.
+  - expired

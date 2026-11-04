@@ -1,0 +1,24 @@
+### A user's paid OpenBudget Plus subscription on one payment rail.
+###
+### Each rail writes its own row, keyed by the rail's subscription id, so a
+### user who pays twice by mistake keeps two rows and the later period wins.
+class: Entitlement
+table: entitlement
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  userId: UuidValue
+  source: EntitlementSource
+  ### The rail's subscription id: a Stripe subscription, a RevenueCat
+  ### original transaction, or a Solana subscription account address.
+  externalId: String
+  status: EntitlementStatus
+  currentPeriodStart: DateTime
+  currentPeriodEnd: DateTime
+  createdAt: DateTime, default=now
+  updatedAt: DateTime, default=now
+indexes:
+  entitlement_rail_unique_idx:
+    fields: source, externalId
+    unique: true
+  entitlement_user_idx:
+    fields: userId
