@@ -28,6 +28,7 @@ extension PumpApp on WidgetTester {
         darkTheme: OpenBudgetTheme.dark,
         localizationsDelegates: localizationsDelegates,
         supportedLocales: supportedLocales ?? const [Locale('en')],
+        builder: _wiredScope,
         routerConfig: router,
       );
     } else {
@@ -36,6 +37,7 @@ extension PumpApp on WidgetTester {
         darkTheme: OpenBudgetTheme.dark,
         localizationsDelegates: localizationsDelegates,
         supportedLocales: supportedLocales ?? const [Locale('en')],
+        builder: _wiredScope,
         home: widget,
       );
     }
@@ -49,3 +51,8 @@ extension PumpApp on WidgetTester {
     return pumpWidget(ProviderScope(child: app));
   }
 }
+
+/// Installs the Skribble theme the app installs, so hand-drawn components
+/// render in tests exactly as they do in the app.
+Widget _wiredScope(BuildContext context, Widget? child) =>
+    ObWiredScope(child: child ?? const SizedBox.shrink());
