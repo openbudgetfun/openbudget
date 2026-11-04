@@ -6,7 +6,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_actions_provider.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
-import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
@@ -28,7 +27,7 @@ class EditAccountDialog extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final palette = theme.ob;
 
     final nameController = useTextEditingController(text: account.name);
     final notesController = useTextEditingController();
@@ -64,7 +63,7 @@ class EditAccountDialog extends HookConsumerWidget {
       'creditCard' => l10n.accountTypeCreditCard,
       'cash' => l10n.accountTypeCash,
       'investment' => l10n.accountTypeInvestment,
-      'cryptoWallet' => 'Solana Wallet',
+      'cryptoWallet' => l10n.accountTypeCryptoWallet,
       _ => l10n.accountTypeOther,
     };
 
@@ -76,11 +75,7 @@ class EditAccountDialog extends HookConsumerWidget {
 
     return Dialog.fullscreen(
       child: Scaffold(
-        backgroundColor: OpenBudgetPalette.bgPrimaryFor(theme),
         appBar: AppBar(
-          backgroundColor: OpenBudgetPalette.bgPrimaryFor(theme),
-          surfaceTintColor: OpenBudgetPalette.transparentFor(theme),
-          scrolledUnderElevation: 0,
           leadingWidth: 92,
           leading: TextButton(
             onPressed: () => Navigator.of(context).pop(),
@@ -90,6 +85,7 @@ class EditAccountDialog extends HookConsumerWidget {
             l10n.accountEditTitle,
             style: theme.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.w700,
+              color: palette.ink,
             ),
           ),
           actions: [
@@ -194,33 +190,43 @@ class EditAccountDialog extends HookConsumerWidget {
                 horizontal: SpacingTokens.sm,
                 vertical: SpacingTokens.xs,
               ),
-              decoration: BoxDecoration(
-                color: OpenBudgetPalette.bgSecondaryFor(theme),
-                borderRadius: BorderRadius.circular(RadiusTokens.md),
-                border: Border.all(
-                  color: OpenBudgetPalette.borderSubtleFor(theme),
-                ),
+              decoration: ObRoughDecoration(
+                color: palette.surface,
+                outline: palette.quietPen,
+                seed: 31,
               ),
               child: Row(
                 children: [
-                  InkWell(
-                    borderRadius: BorderRadius.circular(RadiusTokens.sm),
-                    onTap: () =>
-                        balanceIsPositive.value = !balanceIsPositive.value,
-                    child: Container(
-                      width: 44,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: balanceIsPositive.value
-                            ? OpenBudgetPalette.fgSuccessFor(theme)
-                            : OpenBudgetPalette.fgErrorFor(theme),
-                        borderRadius: BorderRadius.circular(RadiusTokens.sm),
-                      ),
-                      child: Icon(
-                        balanceIsPositive.value
-                            ? Icons.add_rounded
-                            : Icons.remove_rounded,
-                        color: OpenBudgetPalette.fgOnBrandFor(theme),
+                  Tooltip(
+                    message: l10n.accountsToggleBalanceSign,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(RadiusTokens.sm),
+                      onTap: () =>
+                          balanceIsPositive.value = !balanceIsPositive.value,
+                      child: Container(
+                        width: 48,
+                        height: 48,
+                        alignment: Alignment.center,
+                        decoration: ObRoughDecoration(
+                          color: palette.wash(
+                            balanceIsPositive.value
+                                ? ObTone.funded
+                                : ObTone.overspent,
+                          ),
+                          outline: palette.quietPen,
+                          radius: RadiusTokens.sm,
+                          seed: 33,
+                        ),
+                        child: SkribbleIcon(
+                          data: balanceIsPositive.value
+                              ? OpenBudgetIcons.add
+                              : OpenBudgetIcons.remove,
+                          color: palette.hue(
+                            balanceIsPositive.value
+                                ? ObTone.funded
+                                : ObTone.overspent,
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -229,6 +235,7 @@ class EditAccountDialog extends HookConsumerWidget {
                     currencyCode.symbol,
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w700,
+                      color: palette.ink,
                     ),
                   ),
                   const SizedBox(width: SpacingTokens.xs),
@@ -252,12 +259,12 @@ class EditAccountDialog extends HookConsumerWidget {
             Text(
               l10n.accountEditAdjustmentHint,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: OpenBudgetPalette.fgSecondaryFor(theme),
+                color: palette.mutedInk,
               ),
             ),
             const SizedBox(height: SpacingTokens.md),
             _SectionLabel(text: l10n.accountEditBankConnection),
-            OutlinedButton(
+            OutlinedButton.icon(
               onPressed: null,
               style: OutlinedButton.styleFrom(
                 alignment: Alignment.centerLeft,
@@ -266,13 +273,14 @@ class EditAccountDialog extends HookConsumerWidget {
                   vertical: SpacingTokens.sm,
                 ),
               ),
-              child: Text(l10n.accountEditLinkAccountUnavailable),
+              icon: const SkribbleIcon(data: OpenBudgetIcons.link, size: 18),
+              label: Text(l10n.accountEditLinkAccountUnavailable),
             ),
             const SizedBox(height: SpacingTokens.xs),
             Text(
               l10n.accountEditLinkAccountUnavailableHint,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: OpenBudgetPalette.fgSecondaryFor(theme),
+                color: palette.mutedInk,
               ),
             ),
             const SizedBox(height: SpacingTokens.md),
@@ -283,8 +291,10 @@ class EditAccountDialog extends HookConsumerWidget {
                     : () => _closeAccount(context, ref),
                 style: OutlinedButton.styleFrom(
                   alignment: Alignment.centerLeft,
-                  foregroundColor: colorScheme.error,
-                  side: BorderSide(color: colorScheme.error.withAlpha(80)),
+                  foregroundColor: palette.hue(ObTone.overspent),
+                  side: BorderSide(
+                    color: palette.hue(ObTone.overspent).withValues(alpha: 0.4),
+                  ),
                 ),
                 child: Text(l10n.accountCloseButton),
               ),
@@ -302,8 +312,8 @@ class EditAccountDialog extends HookConsumerWidget {
                   ? null
                   : () => _deleteAccountPermanently(context, ref),
               style: FilledButton.styleFrom(
-                foregroundColor: colorScheme.error,
-                backgroundColor: colorScheme.errorContainer.withAlpha(120),
+                foregroundColor: palette.hue(ObTone.overspent),
+                backgroundColor: palette.wash(ObTone.overspent),
               ),
               child: Text(l10n.accountDeleteButton),
             ),
@@ -315,7 +325,7 @@ class EditAccountDialog extends HookConsumerWidget {
 
   Future<void> _closeAccount(BuildContext context, WidgetRef ref) async {
     final l10n = AppLocalizations.of(context);
-    final colorScheme = Theme.of(context).colorScheme;
+    final palette = Theme.of(context).ob;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -329,8 +339,8 @@ class EditAccountDialog extends HookConsumerWidget {
           FilledButton(
             onPressed: () => Navigator.of(ctx).pop(true),
             style: FilledButton.styleFrom(
-              backgroundColor: colorScheme.error,
-              foregroundColor: colorScheme.onError,
+              backgroundColor: palette.hue(ObTone.overspent),
+              foregroundColor: palette.surface,
             ),
             child: Text(l10n.accountCloseButton),
           ),
@@ -401,7 +411,7 @@ class EditAccountDialog extends HookConsumerWidget {
     WidgetRef ref,
   ) async {
     final l10n = AppLocalizations.of(context);
-    final colorScheme = Theme.of(context).colorScheme;
+    final palette = Theme.of(context).ob;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -415,8 +425,8 @@ class EditAccountDialog extends HookConsumerWidget {
           FilledButton(
             onPressed: () => Navigator.of(ctx).pop(true),
             style: FilledButton.styleFrom(
-              backgroundColor: colorScheme.error,
-              foregroundColor: colorScheme.onError,
+              backgroundColor: palette.hue(ObTone.overspent),
+              foregroundColor: palette.surface,
             ),
             child: Text(l10n.accountDeleteButton),
           ),
@@ -544,9 +554,10 @@ class _SectionLabel extends StatelessWidget {
     padding: const EdgeInsets.only(bottom: SpacingTokens.xs),
     child: Text(
       text,
-      style: Theme.of(
-        context,
-      ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+        fontWeight: FontWeight.w700,
+        color: Theme.of(context).ob.ink,
+      ),
     ),
   );
 }

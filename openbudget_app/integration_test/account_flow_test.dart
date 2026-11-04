@@ -19,6 +19,7 @@ import 'package:openbudget_app/src/features/payees/providers/payee_list_provider
 import 'package:openbudget_app/src/features/settings/providers/display_currency_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
+import 'package:openbudget_ui/openbudget_ui.dart';
 import 'package:patrol/patrol.dart';
 
 import 'helpers/screenshot_capture.dart';
@@ -797,7 +798,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Rent'), findsOneWidget);
 
-    await tester.tap(find.byIcon(Icons.arrow_back));
+    await tester.tap(_skribbleIcon(OpenBudgetIcons.back));
     await tester.pumpAndSettle();
     expect(find.text('Daily USD'), findsOneWidget);
   });
@@ -843,7 +844,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Starting Balance'), findsOneWidget);
 
-      await tester.tap(find.byIcon(Icons.more_horiz_rounded));
+      await tester.tap(_skribbleIcon(OpenBudgetIcons.more));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Hide Reconciled'), warnIfMissed: false);
       await tester.pumpAndSettle();
@@ -889,7 +890,7 @@ void main() {
     await tester.tap(find.text('Daily USD'));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byIcon(Icons.more_horiz_rounded));
+    await tester.tap(_skribbleIcon(OpenBudgetIcons.more));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Edit Account'));
     await tester.pumpAndSettle();
@@ -927,7 +928,7 @@ void main() {
       await tester.tap(find.text('Loan'));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byIcon(Icons.more_horiz_rounded));
+      await tester.tap(_skribbleIcon(OpenBudgetIcons.more));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Edit Account'));
       await tester.pumpAndSettle();
@@ -971,7 +972,7 @@ void main() {
     await tester.tap(find.text('Daily USD'));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byIcon(Icons.more_horiz_rounded));
+    await tester.tap(_skribbleIcon(OpenBudgetIcons.more));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Reconcile'));
     await tester.pumpAndSettle();
@@ -1027,7 +1028,7 @@ void main() {
     await tester.tap(find.text('Daily USD'));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byIcon(Icons.more_horiz_rounded));
+    await tester.tap(_skribbleIcon(OpenBudgetIcons.more));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Reconcile'));
     await tester.pumpAndSettle();
@@ -1044,7 +1045,7 @@ void main() {
     await tester.tap(find.text('Cancel'));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byIcon(Icons.more_horiz_rounded));
+    await tester.tap(_skribbleIcon(OpenBudgetIcons.more));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Edit Account'));
     await tester.pumpAndSettle();
@@ -1261,4 +1262,8 @@ Future<void> _captureAddAccountStepScreenshot(
   tester,
   name,
   captureTarget: find.byKey(addAccountScreenCaptureBoundaryKey),
+);
+
+Finder _skribbleIcon(WiredSvgIconData data) => find.byWidgetPredicate(
+  (widget) => widget is SkribbleIcon && widget.data == data,
 );

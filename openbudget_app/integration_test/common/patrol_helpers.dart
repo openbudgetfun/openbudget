@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/main.dart';
+import 'package:openbudget_ui/openbudget_ui.dart';
+
+Finder _skribbleIcon(WiredSvgIconData data) => find.byWidgetPredicate(
+  (widget) => widget is SkribbleIcon && widget.data == data,
+);
 
 Future<void> waitForFinder(
   WidgetTester tester,
@@ -161,7 +166,7 @@ class AccountsTabPage {
   Finder get addAccountButton => find.text('Add Account');
   Finder get fab => find.byType(FloatingActionButton);
   Finder get netWorthLabel => find.text('Net Worth');
-  Finder get transferButton => find.byIcon(Icons.swap_horiz_rounded);
+  Finder get transferButton => _skribbleIcon(OpenBudgetIcons.transfer);
 }
 
 /// Page object for the add transaction bottom sheet.

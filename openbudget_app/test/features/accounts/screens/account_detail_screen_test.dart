@@ -308,12 +308,16 @@ Future<void> _scrollToText(
   String text, {
   double delta = 300,
 }) async {
-  final scrollables = find.byType(Scrollable);
-  expect(scrollables, findsWidgets);
+  final scrollable = find
+      .byWidgetPredicate(
+        (widget) =>
+            widget is Scrollable && widget.axisDirection == AxisDirection.down,
+      )
+      .last;
   await tester.scrollUntilVisible(
     find.text(text),
     delta,
-    scrollable: scrollables.last,
+    scrollable: scrollable,
   );
   await tester.pumpAndSettle();
 }
@@ -334,7 +338,7 @@ void main() {
       await tester.pumpWidget(_buildSubject());
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byIcon(Icons.arrow_back));
+      await tester.tap(_skribbleIcon(OpenBudgetIcons.back));
       await tester.pumpAndSettle();
 
       expect(find.text('Accounts Route'), findsOneWidget);
@@ -346,7 +350,7 @@ void main() {
 
       expect(find.text('Payroll'), findsOneWidget);
 
-      await tester.tap(find.byIcon(Icons.more_horiz_rounded));
+      await tester.tap(_skribbleIcon(OpenBudgetIcons.more));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Hide Reconciled'), warnIfMissed: false);
       await tester.pumpAndSettle();
@@ -391,7 +395,7 @@ void main() {
       await tester.pumpWidget(_buildSubject());
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byIcon(Icons.more_horiz_rounded));
+      await tester.tap(_skribbleIcon(OpenBudgetIcons.more));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Reconcile'));
       await tester.pumpAndSettle();
@@ -409,7 +413,7 @@ void main() {
       await tester.pumpWidget(_buildSubject());
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byIcon(Icons.more_horiz_rounded));
+      await tester.tap(_skribbleIcon(OpenBudgetIcons.more));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Edit Account'));
       await tester.pumpAndSettle();
@@ -611,3 +615,7 @@ void main() {
     });
   });
 }
+
+Finder _skribbleIcon(WiredSvgIconData data) => find.byWidgetPredicate(
+  (widget) => widget is SkribbleIcon && widget.data == data,
+);

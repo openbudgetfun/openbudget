@@ -5489,6 +5489,210 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not cover overspending.'**
   String get budgetDetailCoverOverspendingError;
+
+  /// No description provided for @accountsMoreActions.
+  ///
+  /// In en, this message translates to:
+  /// **'More actions'**
+  String get accountsMoreActions;
+
+  /// No description provided for @accountsDismissNotification.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss notification'**
+  String get accountsDismissNotification;
+
+  /// No description provided for @accountsClosedBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get accountsClosedBadge;
+
+  /// No description provided for @accountsSynced.
+  ///
+  /// In en, this message translates to:
+  /// **'Synced'**
+  String get accountsSynced;
+
+  /// No description provided for @accountsNeedsAttention.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs attention'**
+  String get accountsNeedsAttention;
+
+  /// No description provided for @accountsBackAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Go back'**
+  String get accountsBackAction;
+
+  /// No description provided for @accountsCloseAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get accountsCloseAction;
+
+  /// No description provided for @accountsShowUnclearedTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'Show {count} uncleared transactions'**
+  String accountsShowUnclearedTransactions(int count);
+
+  /// No description provided for @accountsNoLoanActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'No loan activity yet'**
+  String get accountsNoLoanActivity;
+
+  /// No description provided for @accountsLoanPayments.
+  ///
+  /// In en, this message translates to:
+  /// **'Payments'**
+  String get accountsLoanPayments;
+
+  /// No description provided for @accountsLoanOtherActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Other Activity'**
+  String get accountsLoanOtherActivity;
+
+  /// No description provided for @accountsUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get accountsUnknown;
+
+  /// No description provided for @accountsNoHoldings.
+  ///
+  /// In en, this message translates to:
+  /// **'No holdings'**
+  String get accountsNoHoldings;
+
+  /// No description provided for @accountsTaxYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax {year}'**
+  String accountsTaxYear(int year);
+
+  /// No description provided for @accountsTaxableTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} taxable tx'**
+  String accountsTaxableTransactions(int count);
+
+  /// No description provided for @accountsProceeds.
+  ///
+  /// In en, this message translates to:
+  /// **'Proceeds {amount}'**
+  String accountsProceeds(String amount);
+
+  /// No description provided for @accountsBasis.
+  ///
+  /// In en, this message translates to:
+  /// **'Basis {amount}'**
+  String accountsBasis(String amount);
+
+  /// No description provided for @accountsUnknownProgram.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown program'**
+  String get accountsUnknownProgram;
+
+  /// No description provided for @accountsSuggestedSwaps.
+  ///
+  /// In en, this message translates to:
+  /// **'Swaps'**
+  String get accountsSuggestedSwaps;
+
+  /// No description provided for @accountsSuggestedStaking.
+  ///
+  /// In en, this message translates to:
+  /// **'Staking'**
+  String get accountsSuggestedStaking;
+
+  /// No description provided for @accountsSuggestedNft.
+  ///
+  /// In en, this message translates to:
+  /// **'NFT'**
+  String get accountsSuggestedNft;
+
+  /// No description provided for @accountsSuggestedLending.
+  ///
+  /// In en, this message translates to:
+  /// **'Lending'**
+  String get accountsSuggestedLending;
+
+  /// No description provided for @accountsSuggestedIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get accountsSuggestedIncome;
+
+  /// No description provided for @accountsSuggestedTransfers.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfers'**
+  String get accountsSuggestedTransfers;
+
+  /// No description provided for @accountsLinkUnavailableMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank connections are currently unavailable in this build. Use unlinked accounts instead.'**
+  String get accountsLinkUnavailableMessage;
+
+  /// No description provided for @accountsToggleBalanceSign.
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle positive or negative balance'**
+  String get accountsToggleBalanceSign;
+
+  /// No description provided for @accountsLinkedMobileOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Linked connections are only available on iOS/Android right now. Add an unlinked account instead.'**
+  String get accountsLinkedMobileOnly;
+
+  /// No description provided for @accountsLinkedNotCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Linked connections for \"{institution}\" were not completed. Add an unlinked account instead.'**
+  String accountsLinkedNotCompleted(String institution);
+
+  /// No description provided for @accountsLinkedNothingImported.
+  ///
+  /// In en, this message translates to:
+  /// **'No accounts were imported from this connection. Add an unlinked account instead.'**
+  String get accountsLinkedNothingImported;
+
+  /// No description provided for @accountsLinkedUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Linked connections for \"{institution}\" are currently unavailable. Add an unlinked account instead.'**
+  String accountsLinkedUnavailable(String institution);
+
+  /// No description provided for @accountsAddExistingError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to add this account to the current budget.'**
+  String get accountsAddExistingError;
+
+  /// No description provided for @accountsMyAccounts.
+  ///
+  /// In en, this message translates to:
+  /// **'My accounts'**
+  String get accountsMyAccounts;
+
+  /// No description provided for @accountsAddExistingAccountHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add this existing account to this budget'**
+  String get accountsAddExistingAccountHint;
+
+  /// No description provided for @accountsInstitutionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Institution: {institution}'**
+  String accountsInstitutionLabel(String institution);
 }
 
 class _AppLocalizationsDelegate

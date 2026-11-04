@@ -3202,4 +3202,127 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get budgetDetailCoverOverspendingError =>
       'Could not cover overspending.';
+
+  @override
+  String get accountsMoreActions => 'More actions';
+
+  @override
+  String get accountsDismissNotification => 'Dismiss notification';
+
+  @override
+  String get accountsClosedBadge => 'Closed';
+
+  @override
+  String get accountsSynced => 'Synced';
+
+  @override
+  String get accountsNeedsAttention => 'Needs attention';
+
+  @override
+  String get accountsBackAction => 'Go back';
+
+  @override
+  String get accountsCloseAction => 'Close';
+
+  @override
+  String accountsShowUnclearedTransactions(int count) {
+    return 'Show $count uncleared transactions';
+  }
+
+  @override
+  String get accountsNoLoanActivity => 'No loan activity yet';
+
+  @override
+  String get accountsLoanPayments => 'Payments';
+
+  @override
+  String get accountsLoanOtherActivity => 'Other Activity';
+
+  @override
+  String get accountsUnknown => 'Unknown';
+
+  @override
+  String get accountsNoHoldings => 'No holdings';
+
+  @override
+  String accountsTaxYear(int year) {
+    return 'Tax $year';
+  }
+
+  @override
+  String accountsTaxableTransactions(int count) {
+    return '$count taxable tx';
+  }
+
+  @override
+  String accountsProceeds(String amount) {
+    return 'Proceeds $amount';
+  }
+
+  @override
+  String accountsBasis(String amount) {
+    return 'Basis $amount';
+  }
+
+  @override
+  String get accountsUnknownProgram => 'Unknown program';
+
+  @override
+  String get accountsSuggestedSwaps => 'Swaps';
+
+  @override
+  String get accountsSuggestedStaking => 'Staking';
+
+  @override
+  String get accountsSuggestedNft => 'NFT';
+
+  @override
+  String get accountsSuggestedLending => 'Lending';
+
+  @override
+  String get accountsSuggestedIncome => 'Income';
+
+  @override
+  String get accountsSuggestedTransfers => 'Transfers';
+
+  @override
+  String get accountsLinkUnavailableMessage =>
+      'Bank connections are currently unavailable in this build. Use unlinked accounts instead.';
+
+  @override
+  String get accountsToggleBalanceSign => 'Toggle positive or negative balance';
+
+  @override
+  String get accountsLinkedMobileOnly =>
+      'Linked connections are only available on iOS/Android right now. Add an unlinked account instead.';
+
+  @override
+  String accountsLinkedNotCompleted(String institution) {
+    return 'Linked connections for \"$institution\" were not completed. Add an unlinked account instead.';
+  }
+
+  @override
+  String get accountsLinkedNothingImported =>
+      'No accounts were imported from this connection. Add an unlinked account instead.';
+
+  @override
+  String accountsLinkedUnavailable(String institution) {
+    return 'Linked connections for \"$institution\" are currently unavailable. Add an unlinked account instead.';
+  }
+
+  @override
+  String get accountsAddExistingError =>
+      'Unable to add this account to the current budget.';
+
+  @override
+  String get accountsMyAccounts => 'My accounts';
+
+  @override
+  String get accountsAddExistingAccountHint =>
+      'Add this existing account to this budget';
+
+  @override
+  String accountsInstitutionLabel(String institution) {
+    return 'Institution: $institution';
+  }
 }

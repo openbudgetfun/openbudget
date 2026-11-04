@@ -60,8 +60,6 @@ class CreateTransferScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
     final accountsAsync = ref.watch(accountListProvider(budgetId));
 
     final descController = useTextEditingController(
@@ -76,11 +74,13 @@ class CreateTransferScreen extends HookConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: Text(l10n.transferTitle)),
       body: accountsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => Center(
+          child: ObLoadingPanel(label: l10n.loadingTitle),
+        ),
         error: (error, _) => Center(
-          child: Text(
-            l10n.accountLoadError,
-            style: TextStyle(color: colorScheme.error),
+          child: Padding(
+            padding: const EdgeInsets.all(SpacingTokens.lg),
+            child: ObStatePanel.problem(title: l10n.accountLoadError),
           ),
         ),
         data: (accounts) {
@@ -97,23 +97,11 @@ class CreateTransferScreen extends HookConsumerWidget {
 
           if (accounts.length < 2) {
             return Center(
-              child: Padding(
+              child: SingleChildScrollView(
                 padding: const EdgeInsets.all(SpacingTokens.lg),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.swap_horiz_rounded,
-                      size: 48,
-                      color: colorScheme.outlineVariant,
-                    ),
-                    const SizedBox(height: SpacingTokens.md),
-                    Text(
-                      l10n.transferNeedTwoAccounts,
-                      style: theme.textTheme.titleMedium,
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
+                child: ObStatePanel.empty(
+                  title: l10n.transferNeedTwoAccounts,
+                  doodle: WiredDoodleKind.balloon,
                 ),
               ),
             );
@@ -126,7 +114,9 @@ class CreateTransferScreen extends HookConsumerWidget {
                 initialValue: fromAccountId.value,
                 decoration: InputDecoration(
                   labelText: l10n.transferFromAccount,
-                  prefixIcon: const Icon(Icons.arrow_upward_rounded),
+                  prefixIcon: const SkribbleIcon(
+                    data: OpenBudgetIcons.outflow,
+                  ),
                 ),
                 items: accounts
                     .map(
@@ -156,7 +146,7 @@ class CreateTransferScreen extends HookConsumerWidget {
                 initialValue: toAccountId.value,
                 decoration: InputDecoration(
                   labelText: l10n.transferToAccount,
-                  prefixIcon: const Icon(Icons.arrow_downward_rounded),
+                  prefixIcon: const SkribbleIcon(data: OpenBudgetIcons.inflow),
                 ),
                 items: toAccountOptions
                     .map(
@@ -176,6 +166,9 @@ class CreateTransferScreen extends HookConsumerWidget {
                       '${l10n.transactionAmountLabel} (${selectedCurrency.code})',
                   prefixText: '${selectedCurrency.symbol} ',
                   hintText: zeroAmountHint,
+                  prefixIcon: const SkribbleIcon(
+                    data: OpenBudgetIcons.coins,
+                  ),
                 ),
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
@@ -187,27 +180,32 @@ class CreateTransferScreen extends HookConsumerWidget {
                 controller: descController,
                 decoration: InputDecoration(
                   labelText: l10n.transactionDescriptionLabel,
-                  prefixIcon: const Icon(Icons.description_outlined),
+                  prefixIcon: const SkribbleIcon(
+                    data: OpenBudgetIcons.note,
+                  ),
                 ),
                 textInputAction: TextInputAction.done,
               ),
               const SizedBox(height: SpacingTokens.md),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.calendar_today),
-                title: Text(l10n.transferDate),
-                subtitle: Text(
-                  '${selectedDate.value.year}-${selectedDate.value.month.toString().padLeft(2, '0')}-${selectedDate.value.day.toString().padLeft(2, '0')}',
+              ObCard(
+                child: ListTile(
+                  leading: const SkribbleIcon(
+                    data: OpenBudgetIcons.calendar,
+                  ),
+                  title: Text(l10n.transferDate),
+                  subtitle: Text(
+                    '${selectedDate.value.year}-${selectedDate.value.month.toString().padLeft(2, '0')}-${selectedDate.value.day.toString().padLeft(2, '0')}',
+                  ),
+                  onTap: () async {
+                    final picked = await showDatePicker(
+                      context: context,
+                      initialDate: selectedDate.value,
+                      firstDate: DateTime(2000),
+                      lastDate: DateTime(2100),
+                    );
+                    if (picked != null) selectedDate.value = picked;
+                  },
                 ),
-                onTap: () async {
-                  final picked = await showDatePicker(
-                    context: context,
-                    initialDate: selectedDate.value,
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime(2100),
-                  );
-                  if (picked != null) selectedDate.value = picked;
-                },
               ),
               const SizedBox(height: SpacingTokens.lg),
               FilledButton.icon(
@@ -230,7 +228,7 @@ class CreateTransferScreen extends HookConsumerWidget {
                         width: 20,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Icon(Icons.swap_horiz_rounded),
+                    : const SkribbleIcon(data: OpenBudgetIcons.transfer),
                 label: Text(l10n.transferButton),
               ),
             ],

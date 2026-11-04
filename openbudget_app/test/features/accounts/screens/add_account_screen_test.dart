@@ -234,8 +234,8 @@ void main() {
       ),
       findsOneWidget,
     );
-    expect(find.byIcon(Icons.account_balance_rounded), findsNothing);
-    expect(find.byIcon(Icons.savings_rounded), findsNothing);
+    expect(_skribbleIcon(OpenBudgetIcons.bank), findsOneWidget);
+    expect(_skribbleIcon(OpenBudgetIcons.savings), findsOneWidget);
   });
 
   testWidgets('next stays disabled until type and balance are provided', (
@@ -416,3 +416,7 @@ Future<void> _tapAccountTypeOption(
   onTap();
   await tester.pumpAndSettle();
 }
+
+Finder _skribbleIcon(WiredSvgIconData data) => find.byWidgetPredicate(
+  (widget) => widget is SkribbleIcon && widget.data == data,
+);
