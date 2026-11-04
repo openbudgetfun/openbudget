@@ -137,6 +137,35 @@ class SolanaBillingService {
       subscriberAddress: subscriber.value,
     );
 
+    // Subscribing only creates the delegation; nothing has been paid yet.
+    // Collect the first period now, unless an earlier confirmation of the
+    // same delegation already did and its period is still running.
+    final existing = await EntitlementService.activeFor(
+      session,
+      userId,
+      now: now,
+    );
+    if (existing != null &&
+        existing.source == EntitlementSource.solana &&
+        existing.externalId == subscriptionPda.value) {
+      await _markChallengeUsed(session, challenge, now);
+      return existing;
+    }
+    try {
+      await chain.transferSubscription(
+        subscriptionAddress: subscriptionPda.value,
+        planAddress: planAddress,
+        subscriberAddress: subscriber.value,
+        mintAddress: usdcMint,
+        amountBaseUnits: SolanaBillingPlan.amountBaseUnits,
+      );
+    } on Exception catch (error) {
+      throw BillingProviderException(
+        'solana',
+        'first payment: ${error.runtimeType}',
+      );
+    }
+
     final entitlement = await EntitlementService.record(
       session,
       userId: userId,
@@ -148,12 +177,18 @@ class SolanaBillingService {
         const Duration(seconds: SolanaBillingPlan.periodSeconds),
       ),
     );
-    await SolanaBillingChallenge.db.updateRow(
-      session,
-      challenge.copyWith(usedAt: now),
-    );
+    await _markChallengeUsed(session, challenge, now);
     return entitlement;
   }
+
+  Future<void> _markChallengeUsed(
+    Session session,
+    SolanaBillingChallenge challenge,
+    DateTime now,
+  ) => SolanaBillingChallenge.db.updateRow(
+    session,
+    challenge.copyWith(usedAt: now),
+  );
 
   void _requireMatchingSubscription(
     SolanaSubscriptionSnapshot? snapshot, {

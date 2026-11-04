@@ -118,6 +118,9 @@ void main() {
         signatureBase58: sign(message, keyPair),
       );
 
+      expect(chain.transfers, hasLength(1));
+      expect(chain.transfers.single.subscriptionAddress, subscription);
+      expect(chain.transfers.single.amountBaseUnits, 10_000_000);
       expect(entitlement.source, EntitlementSource.solana);
       expect(entitlement.externalId, subscription);
       expect(entitlement.status, EntitlementStatus.active);
@@ -133,6 +136,93 @@ void main() {
         where: (t) => t.message.equals(message),
       );
       expect(challenge?.usedAt, isNotNull);
+    });
+
+    test('then a failed first payment grants nothing', () async {
+      final userId = UuidValue.fromString(
+        '30000000-0000-4000-a000-0000000000f1',
+      );
+      final keyPair = generateKeyPair();
+      final subscriber = getAddressFromPublicKey(keyPair.publicKey).value;
+      final subscription = await subscriptionAddress(subscriber);
+      final chain = FakeSolanaBillingChain(
+        subscriptions: {
+          subscription: snapshotFor(
+            subscriptionAddress: subscription,
+            subscriberAddress: subscriber,
+          ),
+        },
+        transferError: Exception('insufficient funds'),
+      );
+      final service = SolanaBillingService(
+        chain: chain,
+        planAddress: planAddress,
+        usdcMint: usdcMint,
+        clock: () => baseNow,
+      );
+      final session = sessionBuilder.build();
+      final message = await service.createChallenge(session, userId);
+
+      await expectLater(
+        service.confirmSubscription(
+          session,
+          userId: userId,
+          subscriberAddress: subscriber,
+          message: message,
+          signatureBase58: sign(message, keyPair),
+        ),
+        throwsA(isA<BillingProviderException>()),
+      );
+      expect(
+        await EntitlementService.activeFor(session, userId, now: baseNow),
+        isNull,
+      );
+      final challenge = await SolanaBillingChallenge.db.findFirstRow(
+        session,
+        where: (t) => t.message.equals(message),
+      );
+      expect(challenge?.usedAt, isNull);
+    });
+
+    test('then confirming again does not charge twice', () async {
+      final userId = UuidValue.fromString(
+        '30000000-0000-4000-a000-0000000000f2',
+      );
+      final keyPair = generateKeyPair();
+      final subscriber = getAddressFromPublicKey(keyPair.publicKey).value;
+      final subscription = await subscriptionAddress(subscriber);
+      final chain = FakeSolanaBillingChain(
+        subscriptions: {
+          subscription: snapshotFor(
+            subscriptionAddress: subscription,
+            subscriberAddress: subscriber,
+          ),
+        },
+      );
+      final service = SolanaBillingService(
+        chain: chain,
+        planAddress: planAddress,
+        usdcMint: usdcMint,
+        clock: () => baseNow,
+      );
+      final session = sessionBuilder.build();
+      Future<Entitlement> confirm() async {
+        final message = await service.createChallenge(session, userId);
+        return service.confirmSubscription(
+          session,
+          userId: userId,
+          subscriberAddress: subscriber,
+          message: message,
+          signatureBase58: sign(message, keyPair),
+        );
+      }
+
+      final first = await confirm();
+      final second = await confirm();
+
+      expect(second.id, first.id);
+      expect(second.currentPeriodEnd, first.currentPeriodEnd);
+      expect(chain.transfers, hasLength(1));
     });
 
     test('then an expired challenge is rejected', () async {
