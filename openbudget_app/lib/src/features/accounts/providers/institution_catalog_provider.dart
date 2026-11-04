@@ -17,8 +17,6 @@ Future<List<Institution>> institutionCatalog(
 Future<List<Account>> myReusableAccounts(Ref ref, String budgetId) async {
   final client = ref.read(serverpodClientProvider);
   return client.account.listMine(
-    // Serverpod API requires UuidValue which is experimental in uuid package.
-    // ignore: experimental_member_use
     excludeBudgetId: UuidValue.fromString(budgetId),
   );
 }

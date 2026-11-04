@@ -14,8 +14,8 @@ Widget _buildAuthApp({String initialLocation = loginPath}) {
   final router = GoRouter(
     initialLocation: initialLocation,
     routes: [
-      GoRoute(path: loginPath, builder: (_, __) => const LoginScreen()),
-      GoRoute(path: registerPath, builder: (_, __) => const RegisterScreen()),
+      GoRoute(path: loginPath, builder: (_, _) => const LoginScreen()),
+      GoRoute(path: registerPath, builder: (_, _) => const RegisterScreen()),
     ],
   );
 

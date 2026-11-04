@@ -138,7 +138,7 @@ class _SettingsCard extends HookWidget {
         color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
       ),
     ),
-    child: child,
+    child: Material(type: MaterialType.transparency, child: child),
   );
 }
 

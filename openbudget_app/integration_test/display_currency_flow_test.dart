@@ -1,6 +1,3 @@
-// Serverpod's UuidValue.fromString is marked experimental.
-// ignore_for_file: experimental_member_use
-
 import 'dart:io';
 import 'dart:ui' as ui;
 
@@ -151,7 +148,7 @@ void main() {
         GoRoute(
           name: settingsRoute,
           path: '/budgets/:id/more/settings',
-          builder: (_, __) => const Scaffold(body: Text('Settings')),
+          builder: (_, _) => const Scaffold(body: Text('Settings')),
           routes: [
             GoRoute(
               name: displayOptionsRoute,
@@ -201,7 +198,7 @@ void main() {
         GoRoute(
           name: homeRoute,
           path: '/',
-          builder: (_, __) => const HomeScreen(),
+          builder: (_, _) => const HomeScreen(),
         ),
         GoRoute(
           name: accountListRoute,

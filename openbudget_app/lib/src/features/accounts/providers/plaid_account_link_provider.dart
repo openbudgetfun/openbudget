@@ -12,8 +12,6 @@ class PlaidAccountLink extends _$PlaidAccountLink {
   Future<String> createLinkToken({required String budgetId}) async {
     final client = ref.read(serverpodClientProvider);
     return client.plaid.createLinkToken(
-      // Serverpod API requires UuidValue which is experimental in uuid package.
-      // ignore: experimental_member_use
       UuidValue.fromString(budgetId),
     );
   }
@@ -24,8 +22,6 @@ class PlaidAccountLink extends _$PlaidAccountLink {
   }) async {
     final client = ref.read(serverpodClientProvider);
     return client.plaid.exchangePublicToken(
-      // Serverpod API requires UuidValue which is experimental in uuid package.
-      // ignore: experimental_member_use
       UuidValue.fromString(budgetId),
       publicToken,
     );
@@ -37,8 +33,6 @@ class PlaidAccountLink extends _$PlaidAccountLink {
   }) async {
     final client = ref.read(serverpodClientProvider);
     return client.plaid.importSandboxAccounts(
-      // Serverpod API requires UuidValue which is experimental in uuid package.
-      // ignore: experimental_member_use
       UuidValue.fromString(budgetId),
       plaidInstitutionId: plaidInstitutionId,
     );

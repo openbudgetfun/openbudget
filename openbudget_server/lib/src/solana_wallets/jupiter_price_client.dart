@@ -4,7 +4,7 @@ import 'dart:io';
 /// Lightweight Jupiter price API client used as a fallback for missing DAS
 /// token prices.
 class JupiterPriceClient {
-  static final _baseUri = Uri.parse('https://lite-api.jup.ag/price/v3');
+  static final Uri _baseUri = Uri.parse('https://lite-api.jup.ag/price/v3');
   static final _base58Mint = RegExp(r'^[1-9A-HJ-NP-Za-km-z]{32,44}$');
   static const _batchSize = 100;
 

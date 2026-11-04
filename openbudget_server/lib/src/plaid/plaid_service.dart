@@ -360,8 +360,7 @@ class PlaidService {
     final last = await Account.db.findFirstRow(
       session,
       where: (t) => t.budgetId.equals(budgetId),
-      orderBy: (t) => t.sortOrder,
-      orderDescending: true,
+      orderBy: (t) => t.sortOrder.desc(),
     );
     return (last?.sortOrder ?? -1) + 1;
   }

@@ -154,7 +154,7 @@ class DisplayOptionsScreen extends HookConsumerWidget {
                   child: CircularProgressIndicator(strokeWidth: 2),
                 ),
               ),
-              error: (_, __) => ListTile(
+              error: (_, _) => ListTile(
                 title: Text(l10n.settingsDisplayCurrency),
                 subtitle: Text(l10n.settingsLoadError),
               ),
@@ -296,7 +296,7 @@ class _SettingsCard extends HookWidget {
         color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
       ),
     ),
-    child: child,
+    child: Material(type: MaterialType.transparency, child: child),
   );
 }
 

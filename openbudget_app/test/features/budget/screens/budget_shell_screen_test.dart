@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
+import 'package:openbudget_app/src/features/budget/providers/budget_realtime_provider.dart';
 import 'package:openbudget_app/src/features/budget/screens/budget_shell_screen.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
@@ -29,7 +30,7 @@ void main() {
               routes: [
                 GoRoute(
                   path: '/plan',
-                  builder: (_, __) =>
+                  builder: (_, _) =>
                       const Scaffold(body: Center(child: Text('Plan Tab'))),
                 ),
               ],
@@ -38,7 +39,7 @@ void main() {
               routes: [
                 GoRoute(
                   path: '/accounts',
-                  builder: (_, __) =>
+                  builder: (_, _) =>
                       const Scaffold(body: Center(child: Text('Accounts Tab'))),
                 ),
               ],
@@ -47,7 +48,7 @@ void main() {
               routes: [
                 GoRoute(
                   path: '/reflect',
-                  builder: (_, __) =>
+                  builder: (_, _) =>
                       const Scaffold(body: Center(child: Text('Reflect Tab'))),
                 ),
               ],
@@ -56,7 +57,7 @@ void main() {
               routes: [
                 GoRoute(
                   path: '/more',
-                  builder: (_, __) =>
+                  builder: (_, _) =>
                       const Scaffold(body: Center(child: Text('More Tab'))),
                 ),
               ],
@@ -67,6 +68,7 @@ void main() {
     );
 
     return ProviderScope(
+      overrides: [budgetRealtimeProvider.overrideWith((ref, budgetId) {})],
       child: MaterialApp.router(
         theme: OpenBudgetTheme.light,
         localizationsDelegates: AppLocalizations.localizationsDelegates,

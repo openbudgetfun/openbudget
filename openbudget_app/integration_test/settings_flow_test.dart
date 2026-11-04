@@ -1,5 +1,4 @@
 // UuidValue is needed for constructing test model data.
-// ignore_for_file: experimental_member_use
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -49,7 +48,7 @@ void main() {
           GoRoute(
             name: moreRoute,
             path: morePath,
-            builder: (_, __) => const Scaffold(body: Text('More')),
+            builder: (_, _) => const Scaffold(body: Text('More')),
           ),
           GoRoute(
             name: settingsRoute,

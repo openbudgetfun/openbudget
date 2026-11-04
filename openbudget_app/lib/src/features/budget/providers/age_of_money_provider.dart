@@ -11,7 +11,5 @@ part 'age_of_money_provider.g.dart';
 @riverpod
 Future<int?> ageOfMoney(Ref ref, String budgetId) async {
   final client = ref.read(serverpodClientProvider);
-  // Serverpod API requires UuidValue which is experimental in uuid package.
-  // ignore: experimental_member_use
   return client.transaction.ageOfMoney(UuidValue.fromString(budgetId));
 }

@@ -254,7 +254,6 @@ class SplitExpenseScreen extends HookConsumerWidget {
                                     envelopeId:
                                         envId != null && envId.isNotEmpty
                                         // UuidValue.fromString is experimental.
-                                        // ignore: experimental_member_use
                                         ? UuidValue.fromString(envId)
                                         : null,
                                     memo: memo.isNotEmpty ? memo : null,

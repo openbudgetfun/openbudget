@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -654,53 +656,65 @@ class TransactionListScreen extends HookConsumerWidget {
       ),
     ];
 
-    showModalBottomSheet<void>(
-      context: context,
-      builder: (ctx) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(SpacingTokens.md),
-              child: Text(
-                l10n.bulkSetFlag,
-                style: Theme.of(ctx).textTheme.titleMedium,
+    unawaited(
+      showModalBottomSheet<void>(
+        context: context,
+        builder: (ctx) => SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(SpacingTokens.md),
+                child: Text(
+                  l10n.bulkSetFlag,
+                  style: Theme.of(ctx).textTheme.titleMedium,
+                ),
               ),
-            ),
-            Wrap(
-              spacing: SpacingTokens.md,
-              runSpacing: SpacingTokens.sm,
-              alignment: WrapAlignment.center,
-              children: [
-                for (final (value, label, color) in flags)
-                  ActionChip(
-                    avatar: Icon(Icons.flag_rounded, color: color, size: 18),
-                    label: Text(label),
-                    onPressed: () {
-                      Navigator.of(ctx).pop();
-                      _applyBulkFlag(
-                        context,
-                        ref,
-                        ids,
-                        selectionMode,
-                        selectedIds,
-                        flagColor: value,
-                      );
-                    },
-                  ),
-              ],
-            ),
-            const Divider(),
-            ListTile(
-              leading: const Icon(Icons.flag_outlined),
-              title: Text(l10n.bulkClearFlag),
-              onTap: () {
-                Navigator.of(ctx).pop();
-                _applyBulkFlag(context, ref, ids, selectionMode, selectedIds);
-              },
-            ),
-            const SizedBox(height: SpacingTokens.sm),
-          ],
+              Wrap(
+                spacing: SpacingTokens.md,
+                runSpacing: SpacingTokens.sm,
+                alignment: WrapAlignment.center,
+                children: [
+                  for (final (value, label, color) in flags)
+                    ActionChip(
+                      avatar: Icon(Icons.flag_rounded, color: color, size: 18),
+                      label: Text(label),
+                      onPressed: () {
+                        Navigator.of(ctx).pop();
+                        unawaited(
+                          _applyBulkFlag(
+                            context,
+                            ref,
+                            ids,
+                            selectionMode,
+                            selectedIds,
+                            flagColor: value,
+                          ),
+                        );
+                      },
+                    ),
+                ],
+              ),
+              const Divider(),
+              ListTile(
+                leading: const Icon(Icons.flag_outlined),
+                title: Text(l10n.bulkClearFlag),
+                onTap: () {
+                  Navigator.of(ctx).pop();
+                  unawaited(
+                    _applyBulkFlag(
+                      context,
+                      ref,
+                      ids,
+                      selectionMode,
+                      selectedIds,
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: SpacingTokens.sm),
+            ],
+          ),
         ),
       ),
     );
@@ -906,7 +920,7 @@ class TransactionListScreen extends HookConsumerWidget {
       buffer.writeln('$date,$desc,$amount,$memo,$status');
     }
 
-    Clipboard.setData(ClipboardData(text: buffer.toString()));
+    unawaited(Clipboard.setData(ClipboardData(text: buffer.toString())));
     showAppToast(
       context,
       message: l10n.transactionExportSuccess(topLevel.length),
@@ -990,36 +1004,38 @@ class TransactionListScreen extends HookConsumerWidget {
       ),
     ];
 
-    showModalBottomSheet<void>(
-      context: context,
-      builder: (ctx) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(SpacingTokens.md),
-              child: Text(
-                l10n.transactionSortTitle,
-                style: Theme.of(ctx).textTheme.titleMedium,
+    unawaited(
+      showModalBottomSheet<void>(
+        context: context,
+        builder: (ctx) => SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(SpacingTokens.md),
+                child: Text(
+                  l10n.transactionSortTitle,
+                  style: Theme.of(ctx).textTheme.titleMedium,
+                ),
               ),
-            ),
-            const Divider(height: 1),
-            for (final (value, label, icon) in sortOptions)
-              ListTile(
-                leading: Icon(icon),
-                title: Text(label),
-                trailing: sortOrder.value == value
-                    ? Icon(
-                        Icons.check_rounded,
-                        color: Theme.of(ctx).colorScheme.primary,
-                      )
-                    : null,
-                onTap: () {
-                  sortOrder.value = value;
-                  Navigator.of(ctx).pop();
-                },
-              ),
-          ],
+              const Divider(height: 1),
+              for (final (value, label, icon) in sortOptions)
+                ListTile(
+                  leading: Icon(icon),
+                  title: Text(label),
+                  trailing: sortOrder.value == value
+                      ? Icon(
+                          Icons.check_rounded,
+                          color: Theme.of(ctx).colorScheme.primary,
+                        )
+                      : null,
+                  onTap: () {
+                    sortOrder.value = value;
+                    Navigator.of(ctx).pop();
+                  },
+                ),
+            ],
+          ),
         ),
       ),
     );
@@ -1124,57 +1140,59 @@ class _FlagFilterChip extends HookWidget {
       ),
     ];
 
-    showModalBottomSheet<void>(
-      context: context,
-      builder: (ctx) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(SpacingTokens.md),
-              child: Text(
-                l10n.transactionFilterFlagged,
-                style: Theme.of(ctx).textTheme.titleMedium,
+    unawaited(
+      showModalBottomSheet<void>(
+        context: context,
+        builder: (ctx) => SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(SpacingTokens.md),
+                child: Text(
+                  l10n.transactionFilterFlagged,
+                  style: Theme.of(ctx).textTheme.titleMedium,
+                ),
               ),
-            ),
-            Wrap(
-              spacing: SpacingTokens.md,
-              runSpacing: SpacingTokens.sm,
-              alignment: WrapAlignment.center,
-              children: [
-                for (final (value, label, color) in flags)
-                  ActionChip(
-                    avatar: Icon(
-                      selectedFlag == value
-                          ? Icons.flag_rounded
-                          : Icons.flag_outlined,
-                      color: color,
-                      size: 18,
+              Wrap(
+                spacing: SpacingTokens.md,
+                runSpacing: SpacingTokens.sm,
+                alignment: WrapAlignment.center,
+                children: [
+                  for (final (value, label, color) in flags)
+                    ActionChip(
+                      avatar: Icon(
+                        selectedFlag == value
+                            ? Icons.flag_rounded
+                            : Icons.flag_outlined,
+                        color: color,
+                        size: 18,
+                      ),
+                      label: Text(label),
+                      side: selectedFlag == value
+                          ? BorderSide(color: color, width: 2)
+                          : null,
+                      onPressed: () {
+                        Navigator.of(ctx).pop();
+                        onSelected(selectedFlag == value ? null : value);
+                      },
                     ),
-                    label: Text(label),
-                    side: selectedFlag == value
-                        ? BorderSide(color: color, width: 2)
-                        : null,
-                    onPressed: () {
-                      Navigator.of(ctx).pop();
-                      onSelected(selectedFlag == value ? null : value);
-                    },
-                  ),
-              ],
-            ),
-            if (selectedFlag != null) ...[
-              const Divider(),
-              ListTile(
-                leading: const Icon(Icons.clear_rounded),
-                title: Text(l10n.transactionFlagClear),
-                onTap: () {
-                  Navigator.of(ctx).pop();
-                  onSelected(null);
-                },
+                ],
               ),
+              if (selectedFlag != null) ...[
+                const Divider(),
+                ListTile(
+                  leading: const Icon(Icons.clear_rounded),
+                  title: Text(l10n.transactionFlagClear),
+                  onTap: () {
+                    Navigator.of(ctx).pop();
+                    onSelected(null);
+                  },
+                ),
+              ],
+              const SizedBox(height: SpacingTokens.sm),
             ],
-            const SizedBox(height: SpacingTokens.sm),
-          ],
+          ),
         ),
       ),
     );
@@ -1247,36 +1265,38 @@ class _StatusFilterChip extends HookWidget {
       ),
     ];
 
-    showModalBottomSheet<void>(
-      context: context,
-      builder: (ctx) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(SpacingTokens.md),
-              child: Text(
-                l10n.transactionFilterStatus,
-                style: Theme.of(ctx).textTheme.titleMedium,
+    unawaited(
+      showModalBottomSheet<void>(
+        context: context,
+        builder: (ctx) => SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(SpacingTokens.md),
+                child: Text(
+                  l10n.transactionFilterStatus,
+                  style: Theme.of(ctx).textTheme.titleMedium,
+                ),
               ),
-            ),
-            const Divider(height: 1),
-            for (final (filterValue, label, icon) in options)
-              ListTile(
-                leading: Icon(icon),
-                title: Text(label),
-                trailing: value == filterValue
-                    ? Icon(
-                        Icons.check_rounded,
-                        color: Theme.of(ctx).colorScheme.primary,
-                      )
-                    : null,
-                onTap: () {
-                  Navigator.of(ctx).pop();
-                  onSelected(filterValue);
-                },
-              ),
-          ],
+              const Divider(height: 1),
+              for (final (filterValue, label, icon) in options)
+                ListTile(
+                  leading: Icon(icon),
+                  title: Text(label),
+                  trailing: value == filterValue
+                      ? Icon(
+                          Icons.check_rounded,
+                          color: Theme.of(ctx).colorScheme.primary,
+                        )
+                      : null,
+                  onTap: () {
+                    Navigator.of(ctx).pop();
+                    onSelected(filterValue);
+                  },
+                ),
+            ],
+          ),
         ),
       ),
     );
@@ -1653,49 +1673,53 @@ class _TransactionTile extends HookConsumerWidget {
       ),
     ];
 
-    showModalBottomSheet<void>(
-      context: context,
-      builder: (ctx) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(SpacingTokens.md),
-              child: Text(
-                l10n.transactionFlagTitle,
-                style: Theme.of(ctx).textTheme.titleMedium,
+    unawaited(
+      showModalBottomSheet<void>(
+        context: context,
+        builder: (ctx) => SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(SpacingTokens.md),
+                child: Text(
+                  l10n.transactionFlagTitle,
+                  style: Theme.of(ctx).textTheme.titleMedium,
+                ),
               ),
-            ),
-            Wrap(
-              spacing: SpacingTokens.md,
-              runSpacing: SpacingTokens.sm,
-              alignment: WrapAlignment.center,
-              children: [
-                for (final (value, label, color) in flags)
-                  _FlagChip(
-                    label: label,
-                    color: color,
-                    selected: transaction.flagColor == value,
-                    onTap: () {
-                      Navigator.of(ctx).pop();
-                      _setFlag(context, ref, l10n, flagColor: value);
-                    },
-                  ),
+              Wrap(
+                spacing: SpacingTokens.md,
+                runSpacing: SpacingTokens.sm,
+                alignment: WrapAlignment.center,
+                children: [
+                  for (final (value, label, color) in flags)
+                    _FlagChip(
+                      label: label,
+                      color: color,
+                      selected: transaction.flagColor == value,
+                      onTap: () {
+                        Navigator.of(ctx).pop();
+                        unawaited(
+                          _setFlag(context, ref, l10n, flagColor: value),
+                        );
+                      },
+                    ),
+                ],
+              ),
+              if (transaction.flagColor != null) ...[
+                const Divider(),
+                ListTile(
+                  leading: const Icon(Icons.flag_outlined),
+                  title: Text(l10n.transactionFlagClear),
+                  onTap: () {
+                    Navigator.of(ctx).pop();
+                    unawaited(_setFlag(context, ref, l10n));
+                  },
+                ),
               ],
-            ),
-            if (transaction.flagColor != null) ...[
-              const Divider(),
-              ListTile(
-                leading: const Icon(Icons.flag_outlined),
-                title: Text(l10n.transactionFlagClear),
-                onTap: () {
-                  Navigator.of(ctx).pop();
-                  _setFlag(context, ref, l10n);
-                },
-              ),
+              const SizedBox(height: SpacingTokens.sm),
             ],
-            const SizedBox(height: SpacingTokens.sm),
-          ],
+          ),
         ),
       ),
     );
@@ -1727,12 +1751,14 @@ class _TransactionTile extends HookConsumerWidget {
   }
 
   void _showEditDialog(BuildContext context) {
-    showDialog<void>(
-      context: context,
-      builder: (_) => EditTransactionDialog(
-        transaction: transaction,
-        budgetId: budgetId,
-        currencyCode: parseCurrencyCode(transaction.currencyCode),
+    unawaited(
+      showDialog<void>(
+        context: context,
+        builder: (_) => EditTransactionDialog(
+          transaction: transaction,
+          budgetId: budgetId,
+          currencyCode: parseCurrencyCode(transaction.currencyCode),
+        ),
       ),
     );
   }

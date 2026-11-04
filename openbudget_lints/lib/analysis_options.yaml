@@ -38,7 +38,6 @@ linter:
     avoid_implementing_value_types: true
     avoid_multiple_declarations_per_line: true
     avoid_positional_boolean_parameters: true
-    avoid_private_typedef_functions: true
     avoid_redundant_argument_values: true
     avoid_returning_this: true
     avoid_setters_without_getters: true
@@ -89,7 +88,6 @@ linter:
     tighten_type_of_initializing_formals: true
     type_annotate_public_apis: true
     unawaited_futures: true
-    unnecessary_await_in_return: true
     unnecessary_breaks: true
     unnecessary_lambdas: true
     unnecessary_null_aware_assignments: true
@@ -109,6 +107,3 @@ linter:
     use_string_in_part_of_directives: true
     use_super_parameters: true
     use_to_and_as_if_applicable: true
-
-analyzer_plugins:
-  - riverpod_lint

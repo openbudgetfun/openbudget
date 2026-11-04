@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -400,10 +402,12 @@ class BudgetHeader extends HookConsumerWidget {
   };
 
   void _showAutoAssignDialog(BuildContext context) {
-    showDialog<void>(
-      context: context,
-      builder: (_) =>
-          AutoAssignDialog(budgetId: budgetId, currencyCode: currencyCode),
+    unawaited(
+      showDialog<void>(
+        context: context,
+        builder: (_) =>
+            AutoAssignDialog(budgetId: budgetId, currencyCode: currencyCode),
+      ),
     );
   }
 
@@ -413,20 +417,22 @@ class BudgetHeader extends HookConsumerWidget {
     AppLocalizations l10n,
   ) {
     final now = DateTime.now();
-    showDialog<void>(
-      context: context,
-      builder: (ctx) => _MonthPickerDialog(
-        currentYear: year,
-        currentMonth: month,
-        todayYear: now.year,
-        todayMonth: now.month,
-        l10n: l10n,
-        onSelect: (selectedYear, selectedMonth) {
-          ref
-              .read(selectedMonthProvider(budgetId).notifier)
-              .setMonth(selectedYear, selectedMonth);
-          Navigator.of(ctx).pop();
-        },
+    unawaited(
+      showDialog<void>(
+        context: context,
+        builder: (ctx) => _MonthPickerDialog(
+          currentYear: year,
+          currentMonth: month,
+          todayYear: now.year,
+          todayMonth: now.month,
+          l10n: l10n,
+          onSelect: (selectedYear, selectedMonth) {
+            ref
+                .read(selectedMonthProvider(budgetId).notifier)
+                .setMonth(selectedYear, selectedMonth);
+            Navigator.of(ctx).pop();
+          },
+        ),
       ),
     );
   }

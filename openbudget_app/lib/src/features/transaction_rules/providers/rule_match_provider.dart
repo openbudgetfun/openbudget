@@ -14,11 +14,7 @@ Future<String?> ruleMatchEnvelope(
   String budgetId,
 ) async {
   final client = ref.read(serverpodClientProvider);
-  // Serverpod API requires UuidValue which is experimental in uuid package.
-  // ignore: experimental_member_use
   final budgetUuid = UuidValue.fromString(budgetId);
-  // Serverpod API requires UuidValue which is experimental in uuid package.
-  // ignore: experimental_member_use
   final payeeUuid = UuidValue.fromString(payeeId);
   final envelopeId = await client.transactionRule.findMatchingEnvelope(
     budgetUuid,

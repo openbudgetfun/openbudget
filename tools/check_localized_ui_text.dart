@@ -53,9 +53,7 @@ void main() {
   stderr.writeln(
     'Found hardcoded UI text. Add strings to openbudget_app/lib/l10n/app_en.arb and use AppLocalizations.',
   );
-  for (final violation in violations) {
-    stderr.writeln(violation);
-  }
+  violations.forEach(stderr.writeln);
   exitCode = 1;
 }
 

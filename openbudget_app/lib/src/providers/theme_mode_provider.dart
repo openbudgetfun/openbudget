@@ -15,7 +15,6 @@ class ThemeModeNotifier extends _$ThemeModeNotifier {
   }
 
   // Riverpod notifiers use methods, not setters, for state mutations.
-  // ignore: use_setters_to_change_properties
   void setThemeMode(ThemeMode mode) {
     state = mode;
     persistString(ref, key: UiPreferenceKeys.themeMode, value: mode.name);

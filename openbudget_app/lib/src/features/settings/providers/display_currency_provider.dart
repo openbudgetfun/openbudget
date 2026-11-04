@@ -1,6 +1,3 @@
-// Serverpod's UuidValue.fromString is marked experimental.
-// ignore_for_file: experimental_member_use
-
 import 'dart:math' as math;
 
 import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
@@ -59,12 +56,11 @@ Future<DisplayCurrencyConverter> displayCurrencyConverter(
   );
 }
 
-typedef UpdateDisplayCurrency =
-    Future<void> Function({
-      required String budgetId,
-      required bool clearDisplayCurrencyCode,
-      String? displayCurrencyCode,
-    });
+typedef UpdateDisplayCurrency = Future<void> Function({
+  required String budgetId,
+  required bool clearDisplayCurrencyCode,
+  String? displayCurrencyCode,
+});
 
 @riverpod
 UpdateDisplayCurrency updateDisplayCurrency(Ref ref) =>
@@ -93,8 +89,8 @@ class DisplayCurrencyConverter {
   const DisplayCurrencyConverter({
     required this.displayCurrency,
     required this.baseCurrencyCode,
-    required Map<String, double> ratesByCode,
-  }) : _ratesByCode = ratesByCode;
+    required this._ratesByCode,
+  });
 
   final CurrencyCode displayCurrency;
   final String? baseCurrencyCode;

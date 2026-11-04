@@ -1,6 +1,3 @@
-// Serverpod's UuidValue.fromString is marked experimental.
-// ignore_for_file: experimental_member_use
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -10,6 +7,7 @@ import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_goals_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
 import 'package:openbudget_app/src/features/budget/screens/edit_plan_screen.dart';
+import 'package:openbudget_app/src/features/budget/widgets/budget_amount_keypad.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:patrol/patrol.dart';
@@ -117,7 +115,7 @@ void main() {
           GoRoute(
             name: planRoute,
             path: '/budgets/:id/plan',
-            builder: (_, __) =>
+            builder: (_, _) =>
                 const Scaffold(body: Center(child: Text('Plan destination'))),
           ),
           GoRoute(
@@ -154,7 +152,7 @@ void main() {
       await tester.tap(find.text('Add Target').first);
       await tester.pumpAndSettle();
       expect(find.text('Save Target'), findsOneWidget);
-      await tester.tap(find.text('I need'));
+      await tester.tap(find.widgetWithText(BudgetAmountField, 'I need'));
       await tester.pumpAndSettle();
       for (final digit in ['2', '8', '0', '0']) {
         await tester.tap(find.byKey(Key('budget-keypad-digit-$digit')));

@@ -21,8 +21,6 @@ class CategoryActions extends _$CategoryActions {
     try {
       final category = await client.category.create(
         name,
-        // Serverpod API requires UuidValue which is experimental in uuid package.
-        // ignore: experimental_member_use
         UuidValue.fromString(budgetId),
         sortOrder,
       );
@@ -49,13 +47,9 @@ class CategoryActions extends _$CategoryActions {
     final client = ref.read(serverpodClientProvider);
     try {
       await client.category.reorder(
-        // Serverpod API requires UuidValue which is experimental in uuid package.
-        // ignore: experimental_member_use
         UuidValue.fromString(budgetId),
         categoryIds
             .map(
-              // Serverpod API requires UuidValue which is experimental in uuid package.
-              // ignore: experimental_member_use
               UuidValue.fromString,
             )
             .toList(),
@@ -84,8 +78,6 @@ class CategoryActions extends _$CategoryActions {
     final client = ref.read(serverpodClientProvider);
     try {
       await client.category.update(
-        // Serverpod API requires UuidValue which is experimental in uuid package.
-        // ignore: experimental_member_use
         UuidValue.fromString(categoryId),
         isHidden: isHidden,
       );
@@ -112,8 +104,6 @@ class CategoryActions extends _$CategoryActions {
     final client = ref.read(serverpodClientProvider);
     try {
       final category = await client.category.update(
-        // Serverpod API requires UuidValue which is experimental in uuid package.
-        // ignore: experimental_member_use
         UuidValue.fromString(categoryId),
         name: name,
       );
@@ -140,11 +130,7 @@ class CategoryActions extends _$CategoryActions {
     state = const AsyncValue.loading();
     final client = ref.read(serverpodClientProvider);
     try {
-      // Serverpod API requires UuidValue which is experimental in uuid package.
-      // ignore: experimental_member_use
       final deleted = await client.category.delete(
-        // Serverpod API requires UuidValue which is experimental in uuid package.
-        // ignore: experimental_member_use
         UuidValue.fromString(categoryId),
       );
       if (ref.mounted) {
@@ -172,8 +158,6 @@ class CategoryActions extends _$CategoryActions {
     try {
       final restored = await client.category.create(
         deletedCategory.name,
-        // Serverpod API requires UuidValue which is experimental in uuid package.
-        // ignore: experimental_member_use
         UuidValue.fromString(budgetId),
         deletedCategory.sortOrder,
       );

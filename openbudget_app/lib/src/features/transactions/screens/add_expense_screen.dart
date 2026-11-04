@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
@@ -208,7 +210,7 @@ class AddExpenseScreen extends HookConsumerWidget {
                       Focus(
                         onFocusChange: (hasFocus) {
                           if (!hasFocus) {
-                            checkDuplicates();
+                            unawaited(checkDuplicates());
                           }
                         },
                         child: TextField(

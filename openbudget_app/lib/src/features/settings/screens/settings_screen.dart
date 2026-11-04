@@ -52,7 +52,7 @@ class SettingsScreen extends HookConsumerWidget {
       ),
       body: budgetAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, __) => Center(
+        error: (_, _) => Center(
           child: Text(
             l10n.settingsLoadError,
             style: theme.textTheme.bodyLarge?.copyWith(
@@ -631,7 +631,7 @@ class _SettingsCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(RadiusTokens.md),
         border: Border.all(color: OpenBudgetPalette.borderSubtleFor(theme)),
       ),
-      child: child,
+      child: Material(type: MaterialType.transparency, child: child),
     );
   }
 }

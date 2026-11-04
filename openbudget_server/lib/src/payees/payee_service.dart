@@ -82,8 +82,7 @@ class PayeeService {
           t.payeeId.equals(payeeId) &
           t.budgetId.equals(budgetId) &
           t.envelopeId.notEquals(null),
-      orderBy: (t) => t.transactionDate,
-      orderDescending: true,
+      orderBy: (t) => t.transactionDate.desc(),
       limit: 1,
     );
 

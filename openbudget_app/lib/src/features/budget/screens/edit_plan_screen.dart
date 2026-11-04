@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
@@ -497,10 +499,12 @@ class _EditPlanContent extends HookConsumerWidget {
   }
 
   void _showAddCategoryDialog(BuildContext context, int nextSortOrder) {
-    showDialog<void>(
-      context: context,
-      builder: (_) =>
-          AddCategoryDialog(budgetId: budgetId, nextSortOrder: nextSortOrder),
+    unawaited(
+      showDialog<void>(
+        context: context,
+        builder: (_) =>
+            AddCategoryDialog(budgetId: budgetId, nextSortOrder: nextSortOrder),
+      ),
     );
   }
 
@@ -512,17 +516,19 @@ class _EditPlanContent extends HookConsumerWidget {
     required int month,
   }) {
     if (categoryId.isEmpty) return;
-    showDialog<void>(
-      context: context,
-      barrierColor: OpenBudgetPalette.overlayScrimFor(
-        Theme.of(context),
-      ).withAlpha(210),
-      builder: (_) => AddEnvelopeDialog(
-        categoryId: categoryId,
-        budgetId: budgetId,
-        currencyCode: currencyCode,
-        year: year,
-        month: month,
+    unawaited(
+      showDialog<void>(
+        context: context,
+        barrierColor: OpenBudgetPalette.overlayScrimFor(
+          Theme.of(context),
+        ).withAlpha(210),
+        builder: (_) => AddEnvelopeDialog(
+          categoryId: categoryId,
+          budgetId: budgetId,
+          currencyCode: currencyCode,
+          year: year,
+          month: month,
+        ),
       ),
     );
   }
@@ -600,10 +606,12 @@ class _EditPlanContent extends HookConsumerWidget {
                     child: FilledButton.icon(
                       onPressed: () {
                         Navigator.of(sheetContext).pop();
-                        _confirmHideGroup(
-                          context: context,
-                          ref: ref,
-                          categoryWithEnvelopes: categoryWithEnvelopes,
+                        unawaited(
+                          _confirmHideGroup(
+                            context: context,
+                            ref: ref,
+                            categoryWithEnvelopes: categoryWithEnvelopes,
+                          ),
                         );
                       },
                       icon: const Icon(Icons.visibility_off_rounded),
@@ -623,10 +631,12 @@ class _EditPlanContent extends HookConsumerWidget {
                     child: FilledButton.icon(
                       onPressed: () {
                         Navigator.of(sheetContext).pop();
-                        _confirmDeleteGroup(
-                          context: context,
-                          ref: ref,
-                          categoryWithEnvelopes: categoryWithEnvelopes,
+                        unawaited(
+                          _confirmDeleteGroup(
+                            context: context,
+                            ref: ref,
+                            categoryWithEnvelopes: categoryWithEnvelopes,
+                          ),
                         );
                       },
                       icon: const Icon(Icons.delete_rounded),
@@ -918,30 +928,30 @@ class _EditPlanCategoryCard extends HookWidget {
                         ),
                       ),
                     ),
-                    if (!reordering)
-                      targetCents == null
-                          ? TextButton.icon(
-                              onPressed: () => onOpenTarget(envelope, goal),
-                              icon: const Icon(Icons.add_circle, size: 16),
-                              label: Text(l10n.editPlanAddTarget),
-                              style: TextButton.styleFrom(
-                                foregroundColor: OpenBudgetPalette.bgBrandFor(
-                                  Theme.of(context),
-                                ),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: SpacingTokens.xs,
-                                ),
-                              ),
-                            )
-                          : Text(
-                              formatCents(targetCents, currencyCode),
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.w700,
-                                color: OpenBudgetPalette.fgSecondaryFor(
-                                  Theme.of(context),
-                                ),
-                              ),
-                            ),
+                    if (!reordering && targetCents == null)
+                      TextButton.icon(
+                        onPressed: () => onOpenTarget(envelope, goal),
+                        icon: const Icon(Icons.add_circle, size: 16),
+                        label: Text(l10n.editPlanAddTarget),
+                        style: TextButton.styleFrom(
+                          foregroundColor: OpenBudgetPalette.bgBrandFor(
+                            Theme.of(context),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: SpacingTokens.xs,
+                          ),
+                        ),
+                      ),
+                    if (!reordering && targetCents != null)
+                      Text(
+                        formatCents(targetCents, currencyCode),
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: OpenBudgetPalette.fgSecondaryFor(
+                            Theme.of(context),
+                          ),
+                        ),
+                      ),
                   ],
                 ),
               ),

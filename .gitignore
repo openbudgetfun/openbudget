@@ -73,9 +73,9 @@ build/
 .screenshots/
 tmp/log.txt
 
-# Lock files — only keep pubspec.lock for the app package
+# Lock the shared Dart workspace resolution.
 pubspec.lock
-!openbudget_app/pubspec.lock
+!/pubspec.lock
 
 # Local properties
 local.properties

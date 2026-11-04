@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
@@ -184,9 +186,11 @@ class PayeeListScreen extends HookConsumerWidget {
   }
 
   void _showAddPayeeDialog(BuildContext context, WidgetRef ref) {
-    showDialog<void>(
-      context: context,
-      builder: (_) => _AddPayeeDialog(budgetId: budgetId),
+    unawaited(
+      showDialog<void>(
+        context: context,
+        builder: (_) => _AddPayeeDialog(budgetId: budgetId),
+      ),
     );
   }
 }
@@ -240,38 +244,43 @@ class _PayeeTile extends HookConsumerWidget {
 
   void _showPayeeMenu(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    showModalBottomSheet<void>(
-      context: context,
-      builder: (ctx) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.edit_rounded),
-              title: Text(l10n.payeeEditTitle),
-              onTap: () {
-                Navigator.of(ctx).pop();
-                _showEditDialog(context);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.merge_rounded),
-              title: Text(l10n.payeeMergeTitle),
-              onTap: () {
-                Navigator.of(ctx).pop();
-                _showMergeDialog(context);
-              },
-            ),
-          ],
+    unawaited(
+      showModalBottomSheet<void>(
+        context: context,
+        builder: (ctx) => SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.edit_rounded),
+                title: Text(l10n.payeeEditTitle),
+                onTap: () {
+                  Navigator.of(ctx).pop();
+                  _showEditDialog(context);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.merge_rounded),
+                title: Text(l10n.payeeMergeTitle),
+                onTap: () {
+                  Navigator.of(ctx).pop();
+                  _showMergeDialog(context);
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
   void _showMergeDialog(BuildContext context) {
-    showDialog<void>(
-      context: context,
-      builder: (_) => _MergePayeeDialog(sourcePayee: payee, budgetId: budgetId),
+    unawaited(
+      showDialog<void>(
+        context: context,
+        builder: (_) =>
+            _MergePayeeDialog(sourcePayee: payee, budgetId: budgetId),
+      ),
     );
   }
 
@@ -360,9 +369,11 @@ class _PayeeTile extends HookConsumerWidget {
   }
 
   void _showEditDialog(BuildContext context) {
-    showDialog<void>(
-      context: context,
-      builder: (_) => _EditPayeeDialog(payee: payee, budgetId: budgetId),
+    unawaited(
+      showDialog<void>(
+        context: context,
+        builder: (_) => _EditPayeeDialog(payee: payee, budgetId: budgetId),
+      ),
     );
   }
 }

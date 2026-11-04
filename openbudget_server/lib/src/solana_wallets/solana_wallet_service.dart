@@ -86,8 +86,7 @@ class SolanaWalletService {
     return SolanaWallet.db.find(
       session,
       where: (t) => t.budgetId.equals(budgetId),
-      orderBy: (t) => t.createdAt,
-      orderDescending: true,
+      orderBy: (t) => t.createdAt.desc(),
     );
   }
 
@@ -123,8 +122,7 @@ class SolanaWalletService {
     return SolanaWalletTransaction.db.find(
       session,
       where: (t) => t.walletId.equals(walletId) & t.budgetId.equals(budgetId),
-      orderBy: (t) => t.occurredAt,
-      orderDescending: true,
+      orderBy: (t) => t.occurredAt.desc(),
       limit: boundedLimit,
     );
   }
@@ -140,8 +138,7 @@ class SolanaWalletService {
     final holdings = await SolanaWalletHolding.db.find(
       session,
       where: (t) => t.walletId.equals(walletId) & t.budgetId.equals(budgetId),
-      orderBy: (t) => t.totalValue,
-      orderDescending: true,
+      orderBy: (t) => t.totalValue.desc(),
     );
 
     return holdings;
@@ -158,8 +155,7 @@ class SolanaWalletService {
     final transactions = await SolanaWalletTransaction.db.find(
       session,
       where: (t) => t.walletId.equals(walletId) & t.budgetId.equals(budgetId),
-      orderBy: (t) => t.taxYear,
-      orderDescending: true,
+      orderBy: (t) => t.taxYear.desc(),
     );
 
     final byYear = <int, _TaxYearAccumulator>{};
@@ -378,7 +374,6 @@ class SolanaWalletService {
     if (passwordValue != null) return passwordValue;
 
     // Fallback for deployments that inject secrets via environment variables.
-    // ignore: do_not_use_environment
     return _trimToNull(Platform.environment['HELIUS_API_KEY']);
   }
 

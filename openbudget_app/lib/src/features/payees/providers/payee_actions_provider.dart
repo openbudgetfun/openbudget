@@ -19,8 +19,6 @@ class PayeeActions extends _$PayeeActions {
     try {
       final payee = await client.payee.create(
         name,
-        // Serverpod API requires UuidValue which is experimental in uuid package.
-        // ignore: experimental_member_use
         UuidValue.fromString(budgetId),
       );
       if (ref.mounted) {
@@ -45,8 +43,6 @@ class PayeeActions extends _$PayeeActions {
     final client = ref.read(serverpodClientProvider);
     try {
       final payee = await client.payee.update(
-        // Serverpod API requires UuidValue which is experimental in uuid package.
-        // ignore: experimental_member_use
         UuidValue.fromString(payeeId),
         name: name,
       );
@@ -72,11 +68,7 @@ class PayeeActions extends _$PayeeActions {
     final client = ref.read(serverpodClientProvider);
     try {
       final count = await client.payee.merge(
-        // Serverpod API requires UuidValue which is experimental in uuid package.
-        // ignore: experimental_member_use
         UuidValue.fromString(sourcePayeeId),
-        // Serverpod API requires UuidValue which is experimental in uuid package.
-        // ignore: experimental_member_use
         UuidValue.fromString(targetPayeeId),
       );
       if (ref.mounted) {
@@ -99,11 +91,7 @@ class PayeeActions extends _$PayeeActions {
     state = const AsyncValue.loading();
     final client = ref.read(serverpodClientProvider);
     try {
-      // Serverpod API requires UuidValue which is experimental in uuid package.
-      // ignore: experimental_member_use
       final deleted = await client.payee.delete(
-        // Serverpod API requires UuidValue which is experimental in uuid package.
-        // ignore: experimental_member_use
         UuidValue.fromString(payeeId),
       );
       if (ref.mounted) {
@@ -129,8 +117,6 @@ class PayeeActions extends _$PayeeActions {
     try {
       final restored = await client.payee.create(
         deletedPayee.name,
-        // Serverpod API requires UuidValue which is experimental in uuid package.
-        // ignore: experimental_member_use
         UuidValue.fromString(budgetId),
       );
       if (ref.mounted) {

@@ -45,7 +45,7 @@ class AutoAssignDialog extends HookConsumerWidget {
           height: 120,
           child: Center(child: CircularProgressIndicator()),
         ),
-        error: (_, __) => Text(l10n.autoAssignError),
+        error: (_, _) => Text(l10n.autoAssignError),
         data: (proposal) {
           if (proposal.items.isEmpty) {
             return Column(
@@ -111,7 +111,7 @@ class AutoAssignDialog extends HookConsumerWidget {
                   child: ListView.separated(
                     shrinkWrap: true,
                     itemCount: proposal.items.length,
-                    separatorBuilder: (_, __) => const Divider(height: 1),
+                    separatorBuilder: (_, _) => const Divider(height: 1),
                     itemBuilder: (context, index) {
                       final item = proposal.items[index];
                       return Padding(

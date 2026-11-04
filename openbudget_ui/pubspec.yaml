@@ -4,8 +4,8 @@ version: 1.0.0
 publish_to: none
 
 environment:
-  sdk: ^3.11.0
-  flutter: ^3.41.0
+  sdk: ^3.13.0
+  flutter: ">=3.47.0"
 
 resolution: workspace
 
@@ -15,8 +15,8 @@ flutter:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_hooks: ^0.21.0
-  google_fonts: ^8.0.1
+  flutter_hooks: ^0.21.3+1
+  google_fonts: ^8.2.1
   openbudget_core:
     path: ../openbudget_core
 

@@ -13,7 +13,6 @@ Future<int> recurringDueCount(Ref ref, String budgetId) async {
   final client = ref.watch(serverpodClientProvider);
   return client.recurringTransaction.countDue(
     // UuidValue is experimental in the uuid package.
-    // ignore: experimental_member_use
     UuidValue.fromString(budgetId),
   );
 }
@@ -30,7 +29,6 @@ class RecurringAutoPostActions extends _$RecurringAutoPostActions {
       final client = ref.read(serverpodClientProvider);
       final count = await client.recurringTransaction.postDue(
         // UuidValue is experimental in the uuid package.
-        // ignore: experimental_member_use
         UuidValue.fromString(budgetId),
       );
 

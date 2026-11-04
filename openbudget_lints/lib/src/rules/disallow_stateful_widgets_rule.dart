@@ -178,12 +178,12 @@ final class _DisallowedClassNamesResolver {
   }
 
   static File? _analysisOptionsFile(Folder packageRoot) {
-    final yamlFile = packageRoot.getChildAssumingFile(_analysisOptionsYaml);
+    final yamlFile = packageRoot.getFile(_analysisOptionsYaml);
     if (yamlFile.exists) {
       return yamlFile;
     }
 
-    final ymlFile = packageRoot.getChildAssumingFile(_analysisOptionsYml);
+    final ymlFile = packageRoot.getFile(_analysisOptionsYml);
     if (ymlFile.exists) {
       return ymlFile;
     }

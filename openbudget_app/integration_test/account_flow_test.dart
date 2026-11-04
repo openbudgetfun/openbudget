@@ -1,8 +1,5 @@
 import 'dart:async';
 
-// Serverpod's UuidValue.fromString is marked experimental.
-// ignore_for_file: experimental_member_use
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -12,12 +9,14 @@ import 'package:openbudget_app/src/features/accounts/providers/account_actions_p
 import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_transactions_provider.dart';
 import 'package:openbudget_app/src/features/accounts/providers/institution_catalog_provider.dart';
+import 'package:openbudget_app/src/features/accounts/providers/plaid_account_link_provider.dart';
 import 'package:openbudget_app/src/features/accounts/screens/account_detail_screen.dart';
 import 'package:openbudget_app/src/features/accounts/screens/account_list_screen.dart';
 import 'package:openbudget_app/src/features/accounts/screens/add_account_screen.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
 import 'package:openbudget_app/src/features/payees/providers/payee_list_provider.dart';
+import 'package:openbudget_app/src/features/settings/providers/display_currency_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:patrol/patrol.dart';
@@ -53,7 +52,9 @@ const _addAccountUnlinkedScrollKey = Key('add-account-unlinked-scroll');
 const _addAccountNicknameFieldKey = Key('add-account-unlinked-nickname-field');
 const _addAccountTypeTileKey = Key('add-account-unlinked-type-tile');
 const _addAccountBalanceFieldKey = Key('add-account-unlinked-balance-field');
-const _addAccountCheckingTypeKey = ValueKey('add-account-type-option-checking');
+const ValueKey<String> _addAccountCheckingTypeKey = ValueKey(
+  'add-account-type-option-checking',
+);
 const _addAccountUnlinkedIntroText =
     'Bank connections are currently unavailable';
 
@@ -143,6 +144,17 @@ class _FakeAccountActions extends AccountActions {
   );
 }
 
+class _UnavailablePlaidAccountLink extends PlaidAccountLink {
+  @override
+  FutureOr<void> build() {}
+
+  @override
+  Future<List<Account>> importSandboxAccounts({
+    required String budgetId,
+    String? plaidInstitutionId,
+  }) async => throw Exception('Bank linking is unavailable in this fixture.');
+}
+
 Widget _buildApp({
   required List<Account> accounts,
   List<Transaction> accountTransactions = const [],
@@ -176,7 +188,12 @@ Widget _buildApp({
 
   return ProviderScope(
     overrides: [
+      fxLatestRatesProvider.overrideWith((ref) async => null),
       accountActionsProvider.overrideWith(_FakeAccountActions.new),
+      plaidAccountLinkProvider.overrideWith(_UnavailablePlaidAccountLink.new),
+      myReusableAccountsProvider.overrideWith(
+        (ref, budgetId) async => const [],
+      ),
       accountListProvider.overrideWith((ref, budgetId) async => accounts),
       accountTransactionsProvider.overrideWith(
         (ref, args) async => accountTransactions,

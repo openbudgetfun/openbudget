@@ -23,8 +23,6 @@ class EnvelopeActions extends _$EnvelopeActions {
     try {
       final envelope = await client.envelope.create(
         name,
-        // Serverpod API requires UuidValue which is experimental in uuid package.
-        // ignore: experimental_member_use
         UuidValue.fromString(categoryId),
         budgetedAmountCents,
         currencyCode,
@@ -57,8 +55,6 @@ class EnvelopeActions extends _$EnvelopeActions {
     final client = ref.read(serverpodClientProvider);
     try {
       await client.envelope.update(
-        // Serverpod API requires UuidValue which is experimental in uuid package.
-        // ignore: experimental_member_use
         UuidValue.fromString(envelopeId),
         name: name,
         budgetedAmountCents: budgetedAmountCents,
@@ -88,8 +84,6 @@ class EnvelopeActions extends _$EnvelopeActions {
     final client = ref.read(serverpodClientProvider);
     try {
       await client.envelope.update(
-        // Serverpod API requires UuidValue which is experimental in uuid package.
-        // ignore: experimental_member_use
         UuidValue.fromString(envelopeId),
         isHidden: isHidden,
       );
@@ -113,8 +107,6 @@ class EnvelopeActions extends _$EnvelopeActions {
     required List<String> envelopeIds,
   }) async {
     final client = ref.read(serverpodClientProvider);
-    // Serverpod API requires UuidValue which is experimental in uuid package.
-    // ignore: experimental_member_use
     final categoryUuid = UuidValue.fromString(categoryId);
     await client.envelope.reorder(categoryUuid, envelopeIds);
     if (ref.mounted) {
@@ -132,11 +124,7 @@ class EnvelopeActions extends _$EnvelopeActions {
     state = const AsyncValue.loading();
     final client = ref.read(serverpodClientProvider);
     try {
-      // Serverpod API requires UuidValue which is experimental in uuid package.
-      // ignore: experimental_member_use
       final deleted = await client.envelope.delete(
-        // Serverpod API requires UuidValue which is experimental in uuid package.
-        // ignore: experimental_member_use
         UuidValue.fromString(envelopeId),
       );
       if (ref.mounted) {
@@ -165,8 +153,6 @@ class EnvelopeActions extends _$EnvelopeActions {
     try {
       final restored = await client.envelope.create(
         deletedEnvelope.name,
-        // Serverpod API requires UuidValue which is experimental in uuid package.
-        // ignore: experimental_member_use
         UuidValue.fromString(categoryId),
         deletedEnvelope.budgetedAmountCents,
         deletedEnvelope.currencyCode,

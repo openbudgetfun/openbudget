@@ -20,7 +20,7 @@ void main() {
       routes: [
         GoRoute(
           path: createBudgetPath,
-          builder: (_, __) => const CreateBudgetScreen(),
+          builder: (_, _) => const CreateBudgetScreen(),
         ),
       ],
     );

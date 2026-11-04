@@ -14,11 +14,7 @@ Future<List<MonthlyAllocation>> monthlyAllocations(
   int month,
 ) async {
   final client = ref.read(serverpodClientProvider);
-  // Serverpod API requires UuidValue which is experimental in uuid package.
-  // ignore: experimental_member_use
   return client.monthlyAllocation.list(
-    // Serverpod API requires UuidValue which is experimental in uuid package.
-    // ignore: experimental_member_use
     UuidValue.fromString(budgetId),
     year,
     month,
@@ -33,11 +29,7 @@ Future<List<Transaction>> monthlyTransactions(
   int month,
 ) async {
   final client = ref.read(serverpodClientProvider);
-  // Serverpod API requires UuidValue which is experimental in uuid package.
-  // ignore: experimental_member_use
   return client.transaction.listByMonth(
-    // Serverpod API requires UuidValue which is experimental in uuid package.
-    // ignore: experimental_member_use
     UuidValue.fromString(budgetId),
     year,
     month,
@@ -61,14 +53,8 @@ class MonthlyAllocationActions extends _$MonthlyAllocationActions {
     final client = ref.read(serverpodClientProvider);
     try {
       final result = await client.monthlyAllocation.moveMoney(
-        // Serverpod API requires UuidValue which is experimental in uuid package.
-        // ignore: experimental_member_use
         UuidValue.fromString(fromEnvelopeId),
-        // Serverpod API requires UuidValue which is experimental in uuid package.
-        // ignore: experimental_member_use
         UuidValue.fromString(toEnvelopeId),
-        // Serverpod API requires UuidValue which is experimental in uuid package.
-        // ignore: experimental_member_use
         UuidValue.fromString(budgetId),
         year,
         month,
@@ -111,8 +97,6 @@ class MonthlyAllocationActions extends _$MonthlyAllocationActions {
 
     try {
       final result = await client.monthlyAllocation.copyMonth(
-        // Serverpod API requires UuidValue which is experimental in uuid package.
-        // ignore: experimental_member_use
         UuidValue.fromString(budgetId),
         prevYear,
         prevMonth,
@@ -148,11 +132,7 @@ class MonthlyAllocationActions extends _$MonthlyAllocationActions {
     final client = ref.read(serverpodClientProvider);
     try {
       final allocation = await client.monthlyAllocation.upsert(
-        // Serverpod API requires UuidValue which is experimental in uuid package.
-        // ignore: experimental_member_use
         UuidValue.fromString(envelopeId),
-        // Serverpod API requires UuidValue which is experimental in uuid package.
-        // ignore: experimental_member_use
         UuidValue.fromString(budgetId),
         year,
         month,

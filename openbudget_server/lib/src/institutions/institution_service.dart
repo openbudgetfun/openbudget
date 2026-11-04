@@ -1221,4 +1221,6 @@ const _institutionCatalog = <_SeedInstitution>[
   ),
 ];
 
-final _seedInstitutions = _institutionCatalog.take(100).toList(growable: false);
+final List<_SeedInstitution> _seedInstitutions = _institutionCatalog
+    .take(100)
+    .toList(growable: false);

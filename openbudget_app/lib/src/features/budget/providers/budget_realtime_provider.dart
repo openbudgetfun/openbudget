@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:hooks_riverpod/misc.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_transactions_provider.dart';
 import 'package:openbudget_app/src/features/accounts/providers/solana_wallet_provider.dart';
@@ -19,41 +20,40 @@ import 'package:openbudget_app/src/features/transaction_rules/providers/rule_lis
 import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 
-final budgetRealtimeProvider = Provider.autoDispose.family<void, String>((
-  ref,
-  budgetId,
-) {
-  final client = ref.watch(serverpodClientProvider);
-  var disposed = false;
+final ProviderFamily<void, String> budgetRealtimeProvider = Provider.autoDispose
+    .family<void, String>((
+      ref,
+      budgetId,
+    ) {
+      final client = ref.watch(serverpodClientProvider);
+      var disposed = false;
 
-  Future<void> listenForBudgetChanges() async {
-    while (!disposed) {
-      try {
-        await for (final _ in client.budgetStream.budgetUpdates(
-          Stream<UuidValue>.value(
-            // Serverpod API requires UuidValue which is experimental in uuid package.
-            // ignore: experimental_member_use
-            UuidValue.fromString(budgetId),
-          ),
-        )) {
+      Future<void> listenForBudgetChanges() async {
+        while (!disposed) {
+          try {
+            await for (final _ in client.budgetStream.budgetUpdates(
+              Stream<UuidValue>.value(
+                UuidValue.fromString(budgetId),
+              ),
+            )) {
+              if (disposed) return;
+              _invalidateBudgetScopedProviders(ref, budgetId);
+            }
+          } on Object {
+            // Reconnect on transient transport errors.
+          }
+
           if (disposed) return;
-          _invalidateBudgetScopedProviders(ref, budgetId);
+          await Future<void>.delayed(const Duration(seconds: 2));
         }
-      } on Object {
-        // Reconnect on transient transport errors.
       }
 
-      if (disposed) return;
-      await Future<void>.delayed(const Duration(seconds: 2));
-    }
-  }
+      unawaited(listenForBudgetChanges());
 
-  unawaited(listenForBudgetChanges());
-
-  ref.onDispose(() {
-    disposed = true;
-  });
-});
+      ref.onDispose(() {
+        disposed = true;
+      });
+    });
 
 void _invalidateBudgetScopedProviders(Ref ref, String budgetId) {
   ref

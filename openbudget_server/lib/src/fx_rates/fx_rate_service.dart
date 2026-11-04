@@ -320,8 +320,7 @@ class FxRateService {
             table.provider.equals(_providerName) &
             table.baseCurrencyCode.equals(_baseCurrencyCode) &
             table.isLatest.equals(true),
-        orderBy: (table) => table.fetchedAt,
-        orderDescending: true,
+        orderBy: (table) => table.fetchedAt.desc(),
       );
 
   static Future<FxLatestSnapshot> _toLatestSnapshot(

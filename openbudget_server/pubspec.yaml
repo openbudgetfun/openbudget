@@ -4,25 +4,25 @@ version: 1.0.0
 publish_to: none
 
 environment:
-  sdk: ^3.11.0
+  sdk: ^3.13.0
 
 resolution: workspace
 
 dependencies:
   logging: ^1.3.0
-  mailer: ^6.5.0
+  mailer: ^7.2.2
   openbudget_core:
     path: ../openbudget_core
-  serverpod: 3.4.6
-  serverpod_auth_idp_server: 3.4.6
-  solana_kit: ^0.2.1
-  solana_kit_helius: ^0.2.1
+  serverpod: 4.1.0
+  serverpod_auth_idp_server: 4.1.0
+  solana_kit: ^0.11.1
+  solana_kit_helius: ^0.8.1
 
 dev_dependencies:
   openbudget_lints:
     path: ../openbudget_lints
-  serverpod_test: 3.4.6
-  test: ^1.25.5
+  serverpod_test: 4.1.0
+  test: ^1.31.1
 
 serverpod:
   scripts:

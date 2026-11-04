@@ -44,7 +44,7 @@ class QuickBudgetDialog extends HookConsumerWidget {
           height: 100,
           child: Center(child: CircularProgressIndicator()),
         ),
-        error: (_, __) => Text(l10n.quickBudgetError),
+        error: (_, _) => Text(l10n.quickBudgetError),
         data: (data) => Column(
           mainAxisSize: MainAxisSize.min,
           children: [

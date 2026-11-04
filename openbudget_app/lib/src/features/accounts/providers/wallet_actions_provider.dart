@@ -18,8 +18,6 @@ class WalletActions extends _$WalletActions {
   }) async {
     final client = ref.read(serverpodClientProvider);
     final result = await client.wallet.connectSolanaWallet(
-      // Serverpod API requires UuidValue which is experimental in uuid package.
-      // ignore: experimental_member_use
       UuidValue.fromString(budgetId),
       address,
       label: label,

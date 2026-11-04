@@ -12,11 +12,7 @@ Future<SolanaWallet?> accountSolanaWallet(
   String accountId,
 ) async {
   final client = ref.read(serverpodClientProvider);
-  // Serverpod API requires UuidValue which is experimental in uuid package.
-  // ignore: experimental_member_use
   final budgetUuid = UuidValue.fromString(budgetId);
-  // Serverpod API requires UuidValue which is experimental in uuid package.
-  // ignore: experimental_member_use
   final accountUuid = UuidValue.fromString(accountId);
 
   return client.solanaWallet.getForAccount(budgetUuid, accountUuid);
@@ -29,11 +25,7 @@ Future<List<SolanaWalletHolding>> solanaWalletHoldings(
   String walletId,
 ) async {
   final client = ref.read(serverpodClientProvider);
-  // Serverpod API requires UuidValue which is experimental in uuid package.
-  // ignore: experimental_member_use
   final budgetUuid = UuidValue.fromString(budgetId);
-  // Serverpod API requires UuidValue which is experimental in uuid package.
-  // ignore: experimental_member_use
   final walletUuid = UuidValue.fromString(walletId);
 
   return client.solanaWallet.listHoldings(budgetUuid, walletUuid);
@@ -46,11 +38,7 @@ Future<List<SolanaWalletTransaction>> solanaWalletTransactions(
   String walletId,
 ) async {
   final client = ref.read(serverpodClientProvider);
-  // Serverpod API requires UuidValue which is experimental in uuid package.
-  // ignore: experimental_member_use
   final budgetUuid = UuidValue.fromString(budgetId);
-  // Serverpod API requires UuidValue which is experimental in uuid package.
-  // ignore: experimental_member_use
   final walletUuid = UuidValue.fromString(walletId);
 
   return client.solanaWallet.listTransactions(
@@ -67,11 +55,7 @@ Future<List<SolanaWalletTaxYearSummary>> solanaWalletTaxYearSummaries(
   String walletId,
 ) async {
   final client = ref.read(serverpodClientProvider);
-  // Serverpod API requires UuidValue which is experimental in uuid package.
-  // ignore: experimental_member_use
   final budgetUuid = UuidValue.fromString(budgetId);
-  // Serverpod API requires UuidValue which is experimental in uuid package.
-  // ignore: experimental_member_use
   final walletUuid = UuidValue.fromString(walletId);
 
   return client.solanaWallet.listTaxYearSummaries(budgetUuid, walletUuid);
@@ -87,11 +71,7 @@ class SolanaWalletActions extends _$SolanaWalletActions {
     required String walletId,
   }) async {
     final client = ref.read(serverpodClientProvider);
-    // Serverpod API requires UuidValue which is experimental in uuid package.
-    // ignore: experimental_member_use
     final budgetUuid = UuidValue.fromString(budgetId);
-    // Serverpod API requires UuidValue which is experimental in uuid package.
-    // ignore: experimental_member_use
     final walletUuid = UuidValue.fromString(walletId);
 
     final result = await client.solanaWallet.sync(
@@ -118,11 +98,7 @@ class SolanaWalletActions extends _$SolanaWalletActions {
     String? memo,
   }) async {
     final client = ref.read(serverpodClientProvider);
-    // Serverpod API requires UuidValue which is experimental in uuid package.
-    // ignore: experimental_member_use
     final budgetUuid = UuidValue.fromString(budgetId);
-    // Serverpod API requires UuidValue which is experimental in uuid package.
-    // ignore: experimental_member_use
     final transactionUuid = UuidValue.fromString(transactionId);
 
     final result = await client.solanaWallet.updateTransactionMetadata(
