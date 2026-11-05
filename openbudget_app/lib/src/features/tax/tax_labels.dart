@@ -67,3 +67,31 @@ String taxHomeOfficeMethodLabel(
   UsHomeOfficeMethod.simplified => l10n.taxUsHomeOfficeSimplified,
   UsHomeOfficeMethod.regular => l10n.taxUsHomeOfficeRegular,
 };
+
+/// The name of a German Land, as the dropdown of church-tax rates shows it.
+String taxDeBundeslandLabel(AppLocalizations l10n, DeBundesland state) =>
+    switch (state) {
+      DeBundesland.badenWuerttemberg => l10n.taxDeBundeslandBw,
+      DeBundesland.bayern => l10n.taxDeBundeslandBy,
+      DeBundesland.berlin => l10n.taxDeBundeslandBe,
+      DeBundesland.brandenburg => l10n.taxDeBundeslandBb,
+      DeBundesland.bremen => l10n.taxDeBundeslandHb,
+      DeBundesland.hamburg => l10n.taxDeBundeslandHh,
+      DeBundesland.hessen => l10n.taxDeBundeslandHe,
+      DeBundesland.mecklenburgVorpommern => l10n.taxDeBundeslandMv,
+      DeBundesland.niedersachsen => l10n.taxDeBundeslandNi,
+      DeBundesland.nordrheinWestfalen => l10n.taxDeBundeslandNw,
+      DeBundesland.rheinlandPfalz => l10n.taxDeBundeslandRp,
+      DeBundesland.saarland => l10n.taxDeBundeslandSl,
+      DeBundesland.sachsen => l10n.taxDeBundeslandSn,
+      DeBundesland.sachsenAnhalt => l10n.taxDeBundeslandSt,
+      DeBundesland.schleswigHolstein => l10n.taxDeBundeslandSh,
+      DeBundesland.thueringen => l10n.taxDeBundeslandTh,
+    };
+
+/// The label for a German sole trader's Einkunftsart.
+String taxDeEinkunftsArtLabel(AppLocalizations l10n, DeEinkunftsArt art) =>
+    switch (art) {
+      DeEinkunftsArt.freiberuflich => l10n.taxDeEinkunftsArtFreiberuflich,
+      DeEinkunftsArt.gewerblich => l10n.taxDeEinkunftsArtGewerblich,
+    };

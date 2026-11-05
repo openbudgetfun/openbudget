@@ -488,13 +488,113 @@ void main() {
       expect(find.text('Joint assessment'), findsOneWidget);
       expect(find.text('Church tax'), findsOneWidget);
       expect(find.text('Small business VAT exemption'), findsOneWidget);
+      expect(find.text('Spouse also earns wages'), findsNothing);
 
       await _save(tester);
 
       final saved = _lastProfileJson(fake);
       expect(saved['jointAssessment'], isFalse);
       expect(saved['churchTax'], isFalse);
+      expect(saved['churchTaxState'], isNull);
       expect(saved['smallBusinessExemption'], isTrue);
+      expect(saved['children'], 0);
+      expect(saved['einkunftsArt'], 'gewerblich');
+    });
+
+    testWidgets('saves a filled-in German individual profile', (tester) async {
+      final fake = FakeTaxRepository();
+      await tester.pumpWidget(_buildApp(fake));
+      await tester.pumpAndSettle();
+
+      await _selectCountry(tester, 'Germany');
+
+      await tester.scrollUntilVisible(
+        find.text('Joint assessment'),
+        -300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Joint assessment'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Spouse also earns wages'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Church tax'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byType(DropdownButtonFormField<String>).last);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Bavaria').last);
+      await tester.pumpAndSettle();
+
+      Future<void> fill(int index, String text) async {
+        await tester.scrollUntilVisible(
+          find.byType(TextField).at(index),
+          200,
+          scrollable: find.byType(Scrollable).first,
+        );
+        await tester.enterText(find.byType(TextField).at(index), text);
+        await tester.pumpAndSettle();
+      }
+
+      await fill(0, '2');
+      await fill(1, '4800');
+      await fill(2, '25');
+      await fill(3, '220');
+
+      await _save(tester);
+
+      final saved = _lastProfileJson(fake);
+      expect(saved['jointAssessment'], isTrue);
+      expect(saved['spouseEmployed'], isTrue);
+      expect(saved['churchTax'], isTrue);
+      expect(saved['churchTaxState'], 'bayern');
+      expect(saved['children'], 2);
+      expect(saved['statutoryPensionMinor'], 480000);
+      expect(saved['commuteKmOneWay'], 25);
+      expect(saved['commuteDays'], 220);
+    });
+
+    testWidgets('rejects a non-numeric German child count', (tester) async {
+      final fake = FakeTaxRepository();
+      await tester.pumpWidget(_buildApp(fake));
+      await tester.pumpAndSettle();
+
+      await _selectCountry(tester, 'Germany');
+      await tester.scrollUntilVisible(
+        find.byType(TextField).first,
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.enterText(find.byType(TextField).first, 'two');
+      await _save(tester);
+
+      expect(find.text('Enter a whole number of 0 or more.'), findsOneWidget);
+      expect(fake.savedProfiles, isEmpty);
+    });
+
+    testWidgets('a German sole trader chooses the Einkunftsart', (
+      tester,
+    ) async {
+      final fake = FakeTaxRepository();
+      await tester.pumpWidget(_buildApp(fake));
+      await tester.pumpAndSettle();
+
+      await _selectCountry(tester, 'Germany');
+      await _selectEntity(tester, 'Sole trader');
+
+      expect(find.text('Type of self-employment'), findsOneWidget);
+      await tester.ensureVisible(
+        find.byType(DropdownButtonFormField<DeEinkunftsArt>),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(DropdownButtonFormField<DeEinkunftsArt>));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Freiberufler (liberal profession)').last);
+      await tester.pumpAndSettle();
+
+      await _save(tester);
+
+      expect(_lastProfileJson(fake)['einkunftsArt'], 'freiberuflich');
     });
 
     testWidgets('prefills an existing profile and its linked budget', (
