@@ -45,7 +45,7 @@ final class AgentAccessTokensProvider
   AgentAccessTokens create() => AgentAccessTokens();
 }
 
-String _$agentAccessTokensHash() => r'49ebc2c508429994f0ebf99f6be4fad81d970f78';
+String _$agentAccessTokensHash() => r'168bf3d07809a15265bbab22cf291e08784476ba';
 
 /// The signed-in user's personal access tokens for external agents.
 ///

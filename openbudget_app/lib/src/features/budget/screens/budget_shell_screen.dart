@@ -7,6 +7,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_realtime_provider.dart';
 import 'package:openbudget_app/src/features/budget/widgets/add_transaction_sheet.dart';
+import 'package:openbudget_app/src/features/whats_new/hooks/use_whats_new_auto_prompt.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
@@ -23,6 +24,7 @@ class BudgetShellScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ref.watch(budgetRealtimeProvider(budgetId));
+    useWhatsNewAutoPrompt(context, ref);
 
     final l10n = AppLocalizations.of(context);
     final tabHistory = useState<List<int>>(<int>[navigationShell.currentIndex]);

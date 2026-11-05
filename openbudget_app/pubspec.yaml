@@ -29,6 +29,7 @@ dependencies:
     path: ../openbudget_core
   openbudget_ui:
     path: ../openbudget_ui
+  package_info_plus: 10.2.2
   plaid_flutter: 5.2.1
   posthog_flutter: 5.58.4
   purchases_flutter: 11.0.0

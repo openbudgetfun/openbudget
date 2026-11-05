@@ -813,7 +813,14 @@
   "settingsTermsOfService": "Terms of Service",
   "settingsTogether": "OpenBudget Together",
   "settingsTitle": "Settings",
-  "settingsVersion": "App Version 1.0.0 (1)",
+  "settingsVersion": "App Version {version}",
+  "@settingsVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
   "settingsWriteAReview": "Write a Review",
   "settingsYourPrivacyChoices": "Your Privacy Choices",
   "spendingByPayeeBreakdown": "Spending Breakdown",
@@ -2175,5 +2182,20 @@
   "agentAccessRetry": "Try again",
   "agentAccessSetupTitle": "Connect a client",
   "agentAccessSetupBody": "Point your MCP client at the server's /mcp route and send the token as a Bearer token. Agents never change your money directly: they propose changes, and you apply or dismiss them in OpenBudget.",
-  "agentAccessSetupExample": "Authorization: Bearer obk_…"
+  "agentAccessSetupExample": "Authorization: Bearer obk_…",
+  "whatsNewTitle": "What's new",
+  "whatsNewVersion": "Version {version}",
+  "whatsNewGotIt": "Got it",
+  "whatsNewSettingHint": "See what changed in this update",
+  "whatsNewEmptyTitle": "Nothing new to read",
+  "whatsNewEmptyMessage": "This version does not have release notes. You're all caught up.",
+  "whatsNewErrorTitle": "We couldn't read these notes",
+  "whatsNewErrorMessage": "The release notes for this version aren't in a format OpenBudget can show.",
+  "@whatsNewVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  }
 }

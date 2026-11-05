@@ -3067,8 +3067,8 @@ abstract class AppLocalizations {
   /// No description provided for @settingsVersion.
   ///
   /// In en, this message translates to:
-  /// **'App Version 1.0.0 (1)'**
-  String get settingsVersion;
+  /// **'App Version {version}'**
+  String settingsVersion(String version);
 
   /// No description provided for @settingsWriteAReview.
   ///
@@ -7841,6 +7841,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Authorization: Bearer obk_…'**
   String get agentAccessSetupExample;
+
+  /// No description provided for @whatsNewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What\'s new'**
+  String get whatsNewTitle;
+
+  /// No description provided for @whatsNewVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version}'**
+  String whatsNewVersion(String version);
+
+  /// No description provided for @whatsNewGotIt.
+  ///
+  /// In en, this message translates to:
+  /// **'Got it'**
+  String get whatsNewGotIt;
+
+  /// No description provided for @whatsNewSettingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'See what changed in this update'**
+  String get whatsNewSettingHint;
+
+  /// No description provided for @whatsNewEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing new to read'**
+  String get whatsNewEmptyTitle;
+
+  /// No description provided for @whatsNewEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This version does not have release notes. You\'re all caught up.'**
+  String get whatsNewEmptyMessage;
+
+  /// No description provided for @whatsNewErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t read these notes'**
+  String get whatsNewErrorTitle;
+
+  /// No description provided for @whatsNewErrorMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The release notes for this version aren\'t in a format OpenBudget can show.'**
+  String get whatsNewErrorMessage;
 }
 
 class _AppLocalizationsDelegate

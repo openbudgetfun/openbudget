@@ -1805,7 +1805,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsTitle => 'Settings';
 
   @override
-  String get settingsVersion => 'App Version 1.0.0 (1)';
+  String settingsVersion(String version) {
+    return 'App Version $version';
+  }
 
   @override
   String get settingsWriteAReview => 'Write a Review';
@@ -4581,4 +4583,32 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get agentAccessSetupExample => 'Authorization: Bearer obk_…';
+
+  @override
+  String get whatsNewTitle => 'What\'s new';
+
+  @override
+  String whatsNewVersion(String version) {
+    return 'Version $version';
+  }
+
+  @override
+  String get whatsNewGotIt => 'Got it';
+
+  @override
+  String get whatsNewSettingHint => 'See what changed in this update';
+
+  @override
+  String get whatsNewEmptyTitle => 'Nothing new to read';
+
+  @override
+  String get whatsNewEmptyMessage =>
+      'This version does not have release notes. You\'re all caught up.';
+
+  @override
+  String get whatsNewErrorTitle => 'We couldn\'t read these notes';
+
+  @override
+  String get whatsNewErrorMessage =>
+      'The release notes for this version aren\'t in a format OpenBudget can show.';
 }
