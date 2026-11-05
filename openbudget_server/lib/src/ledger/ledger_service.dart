@@ -360,10 +360,13 @@ class LedgerService {
           transaction: transaction,
         );
       } else {
+        // Lock the row so a concurrent post cannot validate the old lines
+        // while this edit replaces them.
         final existing = await Journal.db.findById(
           session,
           journalId,
           transaction: transaction,
+          lockMode: LockMode.forUpdate,
         );
         if (existing == null) {
           throw NotFoundException(message: 'Journal not found');
@@ -505,21 +508,38 @@ class LedgerService {
     }
     await _assertDateOpen(session, budget: budget, date: journal.date);
 
-    final storedLines = await JournalLine.db.find(
-      session,
-      where: (l) => l.journalId.equals(journalId),
-    );
-    final draft = await _rebuildDraft(
-      session,
-      budget: budget,
-      lines: storedLines,
-    );
-    _throwIfInvalid(draft);
-
     return session.db.transaction((transaction) async {
+      // Re-read under a row lock: a concurrent post, edit or delete of the
+      // same draft waits here, and the date and lines validated below are
+      // exactly the ones that get posted.
+      final current = await _lockJournal(
+        session,
+        transaction: transaction,
+        journalId: journalId,
+      );
+      if (current.status != JournalStatus.draft.name) {
+        throw ValidationException(
+          message:
+              'Only draft journals can be posted; journal '
+              '${current.reference} is ${current.status}.',
+        );
+      }
+      await _assertDateOpen(session, budget: budget, date: current.date);
+      final storedLines = await JournalLine.db.find(
+        session,
+        where: (l) => l.journalId.equals(journalId),
+        transaction: transaction,
+      );
+      final draft = await _rebuildDraft(
+        session,
+        budget: budget,
+        lines: storedLines,
+      );
+      _throwIfInvalid(draft);
+
       final posted = await Journal.db.updateRow(
         session,
-        journal.copyWith(
+        current.copyWith(
           status: JournalStatus.posted.name,
           postedAt: DateTime.now().toUtc(),
           postedBy: userId,
@@ -535,8 +555,8 @@ class LedgerService {
         entity: 'journal',
         entityId: journalId,
         payload: {
-          'reference': journal.reference,
-          'date': journal.date.toIso8601String(),
+          'reference': current.reference,
+          'date': current.date.toIso8601String(),
           'lineCount': storedLines.length,
           'totalFunctionalDebitMinor': storedLines.fold<int>(
             0,
@@ -616,6 +636,20 @@ class LedgerService {
         : '${original.reference}-REV';
 
     return session.db.transaction((transaction) async {
+      // Re-read under a row lock so two concurrent reversals of the same
+      // journal cannot both pass the status check and reverse it twice.
+      final current = await _lockJournal(
+        session,
+        transaction: transaction,
+        journalId: journalId,
+      );
+      if (current.status != JournalStatus.posted.name) {
+        throw ValidationException(
+          message:
+              'Only posted journals can be reversed; journal '
+              '${current.reference} is ${current.status}.',
+        );
+      }
       final reversal = await Journal.db.insertRow(
         session,
         Journal(
@@ -654,7 +688,7 @@ class LedgerService {
       }
       await Journal.db.updateRow(
         session,
-        original.copyWith(status: JournalStatus.reversed.name),
+        current.copyWith(status: JournalStatus.reversed.name),
         transaction: transaction,
       );
       await _writeAudit(
@@ -856,6 +890,25 @@ class LedgerService {
       throw NotFoundException(message: 'Journal not found');
     }
     await BudgetService.getById(session, budgetId: journal.budgetId);
+    return journal;
+  }
+
+  /// Re-reads a journal inside [transaction] with a row lock, so concurrent
+  /// writers to the same journal wait until the transaction ends.
+  static Future<Journal> _lockJournal(
+    Session session, {
+    required Transaction transaction,
+    required UuidValue journalId,
+  }) async {
+    final journal = await Journal.db.findById(
+      session,
+      journalId,
+      transaction: transaction,
+      lockMode: LockMode.forUpdate,
+    );
+    if (journal == null) {
+      throw NotFoundException(message: 'Journal not found');
+    }
     return journal;
   }
 
