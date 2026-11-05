@@ -23,6 +23,7 @@ import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
 
 import '../accounts/account_endpoint.dart' as _izzfgwyn;
 import '../agent/agent_endpoint.dart' as _i6aufbii;
+import '../agent/agent_token_endpoint.dart' as _i3vp9qdi;
 import '../auth/apple_idp_endpoint.dart' as _ilq63su8;
 import '../auth/email_idp_endpoint.dart' as _iuc1hd5t;
 import '../auth/google_idp_endpoint.dart' as _i71axiz0;
@@ -62,6 +63,12 @@ class Endpoints extends _is.EndpointDispatch {
         ..initialize(
           server,
           'agent',
+          null,
+        ),
+      'agentToken': _i3vp9qdi.AgentTokenEndpoint()
+        ..initialize(
+          server,
+          'agentToken',
           null,
         ),
       'appleIdp': _ilq63su8.AppleIdpEndpoint()
@@ -637,6 +644,69 @@ class Endpoints extends _is.EndpointDispatch {
                 params['conversationId'],
                 params['message'],
               ),
+        ),
+      },
+    );
+    connectors['agentToken'] = _is.EndpointConnector(
+      name: 'agentToken',
+      endpoint: endpoints['agentToken']!,
+      methodConnectors: {
+        'createAccessToken': _is.MethodConnector(
+          name: 'createAccessToken',
+          params: {
+            'name': _is.ParameterDescription(
+              name: 'name',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'canPropose': _is.ParameterDescription(
+              name: 'canPropose',
+              type: _is.getType<bool>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['agentToken'] as _i3vp9qdi.AgentTokenEndpoint)
+                      .createAccessToken(
+                        session,
+                        params['name'],
+                        params['canPropose'],
+                      ),
+        ),
+        'listAccessTokens': _is.MethodConnector(
+          name: 'listAccessTokens',
+          params: {},
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['agentToken'] as _i3vp9qdi.AgentTokenEndpoint)
+                      .listAccessTokens(session),
+        ),
+        'revokeAccessToken': _is.MethodConnector(
+          name: 'revokeAccessToken',
+          params: {
+            'id': _is.ParameterDescription(
+              name: 'id',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['agentToken'] as _i3vp9qdi.AgentTokenEndpoint)
+                      .revokeAccessToken(
+                        session,
+                        params['id'],
+                      ),
         ),
       },
     );

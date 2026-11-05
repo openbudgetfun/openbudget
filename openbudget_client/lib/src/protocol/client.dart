@@ -27,6 +27,10 @@ import 'package:openbudget_client/src/protocol/agent/agent_provider_settings_vie
     as _i8qcy504;
 import 'package:openbudget_client/src/protocol/agent/agent_usage_view.dart'
     as _igs7yvae;
+import 'package:openbudget_client/src/protocol/agent/mcp/agent_access_token_created.dart'
+    as _ie7c2xv8;
+import 'package:openbudget_client/src/protocol/agent/mcp/agent_access_token_view.dart'
+    as _itxn3wek;
 import 'package:openbudget_client/src/protocol/billing/entitlement.dart'
     as _iyhncv6f;
 import 'package:openbudget_client/src/protocol/billing/solana_plan_view.dart'
@@ -324,6 +328,48 @@ class EndpointAgent extends _isc.EndpointRef {
     'agent',
     'dismissProposal',
     {'proposalId': proposalId},
+  );
+}
+
+/// Personal access tokens for external agents connecting over MCP.
+///
+/// Creating a token returns its secret exactly once. The server stores only a
+/// hash, so a lost token is revoked and replaced, never recovered.
+/// {@category Endpoint}
+class EndpointAgentToken extends _isc.EndpointRef {
+  EndpointAgentToken(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'agentToken';
+
+  /// Creates a token and returns its secret, which is never shown again.
+  _ida.Future<_ie7c2xv8.AgentAccessTokenCreated> createAccessToken(
+    String name,
+    bool canPropose,
+  ) => caller.callServerEndpoint<_ie7c2xv8.AgentAccessTokenCreated>(
+    'agentToken',
+    'createAccessToken',
+    {
+      'name': name,
+      'canPropose': canPropose,
+    },
+  );
+
+  /// Lists the user's tokens without their secret.
+  _ida.Future<List<_itxn3wek.AgentAccessTokenView>> listAccessTokens() =>
+      caller.callServerEndpoint<List<_itxn3wek.AgentAccessTokenView>>(
+        'agentToken',
+        'listAccessTokens',
+        {},
+      );
+
+  /// Revokes one of the user's tokens. Revoking twice is harmless.
+  _ida.Future<_itxn3wek.AgentAccessTokenView> revokeAccessToken(
+    _isc.UuidValue id,
+  ) => caller.callServerEndpoint<_itxn3wek.AgentAccessTokenView>(
+    'agentToken',
+    'revokeAccessToken',
+    {'id': id},
   );
 }
 
@@ -2139,6 +2185,7 @@ class Client extends _isc.ServerpodClientShared {
        ) {
     account = EndpointAccount(this);
     agent = EndpointAgent(this);
+    agentToken = EndpointAgentToken(this);
     appleIdp = EndpointAppleIdp(this);
     emailIdp = EndpointEmailIdp(this);
     googleIdp = EndpointGoogleIdp(this);
@@ -2167,6 +2214,8 @@ class Client extends _isc.ServerpodClientShared {
   late final EndpointAccount account;
 
   late final EndpointAgent agent;
+
+  late final EndpointAgentToken agentToken;
 
   late final EndpointAppleIdp appleIdp;
 
@@ -2218,6 +2267,7 @@ class Client extends _isc.ServerpodClientShared {
   Map<String, _isc.EndpointRef> get endpointRefLookup => {
     'account': account,
     'agent': agent,
+    'agentToken': agentToken,
     'appleIdp': appleIdp,
     'emailIdp': emailIdp,
     'googleIdp': googleIdp,

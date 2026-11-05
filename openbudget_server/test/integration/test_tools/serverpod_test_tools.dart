@@ -28,6 +28,10 @@ import 'package:openbudget_server/src/generated/agent/agent_provider_settings_vi
     as _ixg2m9if;
 import 'package:openbudget_server/src/generated/agent/agent_usage_view.dart'
     as _iwi553xc;
+import 'package:openbudget_server/src/generated/agent/mcp/agent_access_token_created.dart'
+    as _ir54shi0;
+import 'package:openbudget_server/src/generated/agent/mcp/agent_access_token_view.dart'
+    as _i8fy0qox;
 import 'package:openbudget_server/src/generated/billing/entitlement.dart'
     as _iiht0r85;
 import 'package:openbudget_server/src/generated/billing/solana_plan_view.dart'
@@ -223,6 +227,8 @@ class TestEndpoints {
 
   late final _AgentEndpoint agent;
 
+  late final _AgentTokenEndpoint agentToken;
+
   late final _AppleIdpEndpoint appleIdp;
 
   late final _EmailIdpEndpoint emailIdp;
@@ -280,6 +286,10 @@ class _InternalTestEndpoints extends TestEndpoints
       serializationManager,
     );
     agent = _AgentEndpoint(
+      endpoints,
+      serializationManager,
+    );
+    agentToken = _AgentTokenEndpoint(
       endpoints,
       serializationManager,
     );
@@ -967,6 +977,107 @@ class _AgentEndpoint {
           _localUniqueSession,
           _localCallContext.arguments,
         ) as _ida.Future<_iqa5uoc4.AgentProposal>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+}
+
+class _AgentTokenEndpoint {
+  _AgentTokenEndpoint(
+    this._endpointDispatch,
+    this._serializationManager,
+  );
+
+  final _is.EndpointDispatch _endpointDispatch;
+
+  final _is.SerializationManager _serializationManager;
+
+  _ida.Future<_ir54shi0.AgentAccessTokenCreated> createAccessToken(
+    _ist.TestSessionBuilder sessionBuilder,
+    String name,
+    bool canPropose,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'agentToken',
+            method: 'createAccessToken',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'agentToken',
+          methodName: 'createAccessToken',
+          parameters: _ist.testObjectToJson({
+            'name': name,
+            'canPropose': canPropose,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _ida.Future<_ir54shi0.AgentAccessTokenCreated>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<List<_i8fy0qox.AgentAccessTokenView>> listAccessTokens(
+    _ist.TestSessionBuilder sessionBuilder,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'agentToken',
+            method: 'listAccessTokens',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'agentToken',
+          methodName: 'listAccessTokens',
+          parameters: _ist.testObjectToJson({}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _ida.Future<List<_i8fy0qox.AgentAccessTokenView>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_i8fy0qox.AgentAccessTokenView> revokeAccessToken(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue id,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'agentToken',
+            method: 'revokeAccessToken',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'agentToken',
+          methodName: 'revokeAccessToken',
+          parameters: _ist.testObjectToJson({'id': id}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _ida.Future<_i8fy0qox.AgentAccessTokenView>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();

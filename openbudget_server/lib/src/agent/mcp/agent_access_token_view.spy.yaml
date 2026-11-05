@@ -1,0 +1,11 @@
+### A personal access token without its secret.
+class: AgentAccessTokenView
+fields:
+  id: UuidValue
+  name: String
+  ### The token's first 12 characters, so the user can recognise it.
+  tokenPrefix: String
+  canPropose: bool
+  createdAt: DateTime
+  lastUsedAt: DateTime?
+  revokedAt: DateTime?
