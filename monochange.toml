@@ -1,0 +1,254 @@
+#:schema https://monochange.github.io/monochange/schemas/monochange.schema.json
+
+# =============================================================================
+# monochange.toml — release planning for the OpenBudget workspace
+# =============================================================================
+#
+# OpenBudget ships as one product: the app, the server it talks to, and the
+# shared packages release together under one version (`group.openbudget`).
+#
+# Every changeset belongs to exactly one audience stream:
+#
+# - `default` (developers): API contracts, migrations, tooling, CI, tests, and
+#   internal maintenance. Rendered into the root `CHANGELOG.md` and the GitHub
+#   release body.
+# - `user` (people using OpenBudget): outcomes someone notices in the app,
+#   written in product language. Rendered into `WHATS_NEW.md` and the JSON
+#   notes the app bundles for its "What's new" sheet.
+#
+# When one change matters to both audiences, write two changesets: one with a
+# developer type and one with a `user_*` type. See CONTRIBUTING in CLAUDE.md.
+
+[defaults]
+package_type = "dart"
+parent_bump = "patch"
+# Every workspace package is `publish_to: none`; they are still versioned.
+include_private = true
+warn_on_group_mismatch = true
+changelog = false
+
+# =============================================================================
+# [package.*] — every workspace package
+# =============================================================================
+
+[package.openbudget_app]
+path = "openbudget_app"
+
+[package.openbudget_server]
+path = "openbudget_server"
+
+[package.openbudget_client]
+path = "openbudget_client"
+
+[package.openbudget_core]
+path = "openbudget_core"
+
+[package.openbudget_ui]
+path = "openbudget_ui"
+
+[package.openbudget_lints]
+path = "openbudget_lints"
+
+[package.openbudget_test_utils]
+path = "openbudget_test_utils"
+
+[package.openbudget_scripts]
+path = "openbudget_scripts"
+
+# =============================================================================
+# [group.*] — the product release identity
+# =============================================================================
+
+[group.openbudget]
+packages = [
+  "openbudget_app",
+  "openbudget_server",
+  "openbudget_client",
+  "openbudget_core",
+  "openbudget_ui",
+  "openbudget_lints",
+  "openbudget_test_utils",
+  "openbudget_scripts",
+]
+tag = true
+release = true
+version_format = "primary"
+changelog = { path = "CHANGELOG.md", format = "keep_a_changelog" }
+bump_propagation = "inherit"
+# An app has no public Dart API contract, so semantic API findings are
+# advisory; the changeset type decides the bump (and `native` means major).
+classification_enforced = false
+
+# =============================================================================
+# [changelog] — audiences, types, and outputs
+# =============================================================================
+
+# Users do not need package labels or the grouped-release preamble.
+[changelog.style]
+package_label_style = "omit"
+
+[changelog.streams.user]
+description = "What changed for people using OpenBudget, in product language"
+
+[changelog.sections]
+native = { heading = "Store release required", description = "Native changes that need a full app store release", priority = 8 }
+user_feat = { heading = "New", description = "Things you can now do", priority = 20 }
+user_improve = { heading = "Improved", description = "Things that work better than before", priority = 25 }
+user_fix = { heading = "Fixed", description = "Problems that are solved", priority = 30 }
+ci = { heading = "Continuous integration", description = "CI and automation", priority = 45 }
+chore = { heading = "Maintenance", description = "Tooling, dependencies, and housekeeping", priority = 45 }
+
+# Developer types (default stream). Major bumps of the app mean a full app
+# store release; minor and patch bumps ship as Shorebird code pushes.
+[changelog.types]
+breaking = { section = "breaking", bump = "major", description = "Incompatible API, protocol, or data change" }
+native = { section = "native", bump = "major", description = "Native dependency or platform change that cannot ship as a Shorebird patch" }
+feat = { section = "feat", bump = "minor", description = "New capability for developers: endpoints, models, packages" }
+fix = { section = "fix", bump = "patch", description = "Bug fix with no user-visible outcome worth announcing" }
+perf = { section = "perf", bump = "patch", description = "Performance improvement" }
+refactor = { section = "refactor", bump = "patch", description = "Internal restructuring with no behaviour change" }
+security = { section = "security", bump = "patch", description = "Security hardening" }
+chore = { section = "chore", bump = "none", description = "Tooling, dependencies, and housekeeping" }
+ci = { section = "ci", bump = "none", description = "CI and automation" }
+docs = { section = "docs", bump = "none", description = "Documentation only" }
+test = { section = "test", bump = "none", description = "Tests only" }
+
+# User types (user stream). Describe the outcome, never the implementation.
+user_feat = { section = "user_feat", bump = "minor", stream = "user", description = "Something new people can do in the app" }
+user_improve = { section = "user_improve", bump = "patch", stream = "user", description = "Something that now looks or works better" }
+user_fix = { section = "user_fix", bump = "patch", stream = "user", description = "A problem people hit that is now solved" }
+
+# The cumulative user changelog, readable on GitHub.
+[changelog.outputs.user]
+stream = "user"
+targets = ["openbudget"]
+format = "monochange"
+mode = "append"
+path = "WHATS_NEW.md"
+initial_header = """
+# What's new in OpenBudget
+
+The changes you will notice in the app, newest first. Developer notes live in
+[CHANGELOG.md](CHANGELOG.md).
+"""
+
+# One JSON file per release, bundled into the app for its "What's new" sheet.
+[changelog.outputs.user_app]
+stream = "user"
+targets = ["openbudget"]
+format = "json"
+mode = "release"
+path = "openbudget_app/assets/release_notes/{{ version }}.json"
+
+# =============================================================================
+# [ecosystems.*]
+# =============================================================================
+
+[ecosystems.dart]
+enabled = true
+publish.enabled = false
+versioned_files = [
+  { path = "**/pubspec.yaml", type = "dart", fields = ["dependencies", "dev_dependencies"] },
+]
+
+# =============================================================================
+# [source] — GitHub release automation
+# =============================================================================
+
+[source]
+provider = "github"
+owner = "openbudgetfun"
+repo = "openbudget"
+
+[source.releases]
+enabled = true
+source = "monochange"
+branches = ["main"]
+
+[source.pull_requests]
+enabled = true
+branch_prefix = "chore/release"
+base = "main"
+title = "chore(release): prepare release"
+commit_subject = "🔖 chore(release): prepare release"
+labels = ["release", "automated"]
+auto_merge = false
+
+# =============================================================================
+# [changesets.affected] — every PR that touches a package needs release intent
+# =============================================================================
+
+[changesets.affected]
+enabled = true
+required = true
+skip_labels = ["no-changeset", "release"]
+comment_on_failure = true
+changed_paths = []
+ignored_paths = [
+  "CHANGELOG.md",
+  "WHATS_NEW.md",
+  "**/test/**",
+  "**/integration_test/**",
+  "openbudget_app/assets/release_notes/**",
+]
+
+[changesets.classification]
+skip_labels = ["release"]
+
+# =============================================================================
+# [lints]
+# =============================================================================
+
+[lints]
+use = ["changesets/recommended", "dart/baseline"]
+
+[lints.rules]
+"dart/internal-path-dependency-policy" = "off"
+"changesets/duplicate" = "error"
+"changesets/no_section_headings" = "error"
+"changesets/summary" = { level = "error", required = true, heading_level = 1, min_length = 8, max_length = 90, forbid_trailing_period = true, forbid_conventional_commit_prefix = true }
+
+# =============================================================================
+# [cli.*] — repository workflows (`monochange run <name>`)
+# =============================================================================
+
+[cli.change]
+help_text = "Create a changeset. Use a user_* type for app-visible outcomes and a developer type for everything else"
+inputs = [
+  { name = "package", type = "string_list", required = true },
+  { name = "bump", type = "choice", choices = ["none", "patch", "minor", "major"] },
+  { name = "type", type = "string", required = true },
+  { name = "reason", type = "string", required = true },
+  { name = "details", type = "string" },
+]
+steps = [
+  { name = "create change file", type = "CreateChangeFile", inputs = ["package", "bump", "type", "reason", "details"] },
+  { name = "format changesets", type = "Command", command = "dprint fmt '.changeset/*.md' --allow-no-files" },
+]
+
+[cli.notes]
+help_text = "Preview the developer and user release notes for the next release"
+steps = [
+  { name = "developer notes", type = "Command", command = "monochange notes --output default --target openbudget" },
+  { name = "user notes", type = "Command", command = "monochange notes --output user --target openbudget" },
+]
+
+# Run by the release workflow on every push to main: prepares the release,
+# commits it on `chore/release/*`, and opens or refreshes the release PR.
+[cli.release-pr]
+help_text = "Prepare, commit, and open or refresh the automated release pull request"
+steps = [
+  { name = "prepare release", type = "PrepareRelease", allow_empty_changesets = true, inputs = { format = "json" } },
+  { name = "format release files", type = "Command", when = "{{ number_of_changesets > 0 }}", command = "dprint fmt CHANGELOG.md WHATS_NEW.md 'openbudget_app/assets/release_notes/*.json' --allow-no-files" },
+  { name = "commit release", type = "CommitRelease", when = "{{ number_of_changesets > 0 }}", inputs = { no_verify = true, stage_all = true } },
+  { name = "open release request", type = "OpenReleaseRequest", when = "{{ number_of_changesets > 0 }}", inputs = { no_verify = true, stage_all = true } },
+]
+
+# Run by the release workflow when the release PR merges: tags the release
+# commit and publishes the GitHub release.
+[cli.publish-release]
+help_text = "Tag the release commit and publish its GitHub release"
+steps = [
+  { name = "tag release", type = "TagRelease", inputs = { from = "HEAD", push = true, format = "json" } },
+  { name = "publish GitHub release", type = "PublishRelease", inputs = { from-ref = "HEAD", draft = false, format = "json" } },
+]

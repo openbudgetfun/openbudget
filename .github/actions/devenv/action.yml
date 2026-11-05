@@ -1,5 +1,5 @@
 name: devenv
-description: "Setup development environment with devenv and Flutter"
+description: "Set up the devenv shell with the pinned Flutter SDK"
 inputs:
   github-token:
     description: Provide a github token
@@ -7,12 +7,17 @@ inputs:
   cache-version:
     description: The version of the cache to use.
     required: false
-    default: "v1"
+    default: "v2"
+  install-dependencies:
+    description: Run `install:all` (Flutter SDK and pub dependencies).
+    required: false
+    default: "true"
 
 runs:
   using: composite
   steps:
     - name: cache pub dependencies
+      if: inputs.install-dependencies == 'true'
       uses: actions/cache@v4
       with:
         path: ~/.pub-cache
@@ -20,13 +25,12 @@ runs:
         restore-keys: |
           ${{ runner.os }}-pub-${{ inputs.cache-version }}-
 
-    - name: cache eget
+    - name: cache flutter sdk
+      if: inputs.install-dependencies == 'true'
       uses: actions/cache@v4
       with:
-        path: ./.eget/bin
-        key: ${{ runner.os }}-eget-${{ inputs.cache-version }}-${{ github.job }}-${{ hashFiles('.eget/.eget.toml') }}
-        restore-keys: |
-          ${{ runner.os }}-eget-${{ inputs.cache-version }}-${{ github.job }}-
+        path: ~/fvm/versions
+        key: ${{ runner.os }}-fvm-${{ inputs.cache-version }}-${{ hashFiles('.fvmrc') }}
 
     - name: install nix
       uses: cachix/install-nix-action@v31
@@ -43,11 +47,13 @@ runs:
       shell: bash
 
     - name: install flutter sdk via fvm
+      if: inputs.install-dependencies == 'true'
       run: |
         fvm install
         fvm use --force
       shell: devenv shell -- bash -e {0}
 
     - name: install dependencies
+      if: inputs.install-dependencies == 'true'
       run: install:all
       shell: devenv shell -- bash -e {0}

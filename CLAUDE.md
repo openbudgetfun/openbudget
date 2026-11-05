@@ -53,10 +53,11 @@ melos run serverpod:generate # Run Serverpod code generation
 # Server
 server:start                 # Start Serverpod dev server (devenv script)
 
-# Versioning & Publishing
-knope document-change        # Create a changeset file for version bumps
-melos run publish:dry        # Dry-run publish (validate publishable packages)
-melos run publish            # Publish packages to pub.dev
+# Releases (monochange)
+monochange run change --package openbudget_app --type user_feat --reason "..."  # Create a changeset
+monochange check             # Validate changesets and manifests
+monochange preview           # Dry-run the next release (also catches mixed-stream changesets)
+monochange run notes         # Render the developer and user release notes
 ```
 
 ## Architecture Decisions
@@ -120,38 +121,22 @@ Use `GoRouter` for all navigation. Routes are defined in `app_router.dart` with 
 
 ## Version Management & Releases
 
-### Changeset Workflow (Knope)
+### Changesets and Audience Streams (monochange)
 
-The project uses [knope](https://knope.tech) for **changeset-only** version management. Conventional commits do **not** trigger version bumps — only explicit changeset files do.
+The project uses [monochange](https://github.com/monochange/monochange) for **changeset-only** version management (`monochange.toml`). Conventional commits do **not** trigger version bumps; only `.changeset/*.md` files do. Every workspace package releases together as the `openbudget` group under one version.
 
-- Run `knope document-change` to create a changeset file in `.changeset/`
-- Every PR with user-facing changes **must** include a changeset
-- On push to `main`, a bot workflow creates/updates a release PR on the `knope/release` branch
-- Merging the release PR triggers `knope forced-release`, which creates GitHub releases and git tags
+Each changeset targets exactly one audience, chosen by its type:
 
-### Publishing with Melos
+| Stream                        | Types                                                                                              | Lands in                                                                                                |
+| ----------------------------- | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `default` (developers)        | `breaking`, `native`, `feat`, `fix`, `perf`, `refactor`, `security`, `chore`, `ci`, `docs`, `test` | `CHANGELOG.md` and the GitHub release body                                                              |
+| `user` (people using the app) | `user_feat`, `user_improve`, `user_fix`                                                            | `WHATS_NEW.md` and `openbudget_app/assets/release_notes/<version>.json` (the in-app "What's new" sheet) |
 
-Knope manages **git tags and GitHub releases**. Melos manages **package publishing**.
-
-```bash
-melos run publish:dry           # Dry-run — validate all publishable packages
-melos run publish               # Publish all publishable packages to pub.dev
-melos run publish --no-select   # Non-interactive (used in CI)
-```
-
-**How it works:**
-
-- Melos filters on `noPrivate: true`, so only packages **without** `publish_to: none` are published.
-- Currently all packages have `publish_to: none`. To make a package publishable, remove that line from its `pubspec.yaml`.
-- The `release.yml` workflow runs `melos run publish --no-select` automatically after knope creates the GitHub releases.
-- CI publishing requires a `PUB_CREDENTIALS` secret with a valid pub.dev credential JSON.
-
-**Making a package publishable:**
-
-1. Remove `publish_to: none` from the package's `pubspec.yaml`
-2. Ensure the package has a proper `description`, `repository`, and `homepage` field
-3. Run `melos run publish:dry` to validate
-4. The next release will automatically publish it
+- Every PR that changes a package **must** include a changeset; CI enforces it with `monochange check` and `monochange preview`.
+- Write user changesets in product language: the outcome someone notices, never the implementation. Keep developer detail in a developer changeset.
+- When one change matters to both audiences, write **two** changesets (one per stream). A single file whose types cross streams fails `monochange preview`.
+- On push to `main`, `.github/workflows/release.yml` runs `monochange run release-pr`, which opens or refreshes the release PR on `chore/release/*`. Merging it lands a release commit, which the next run tags and publishes with `monochange run publish-release`.
+- All packages are `publish_to: none`; nothing is published to pub.dev.
 
 ### App Versioning Rules (`openbudget_app`)
 
@@ -216,4 +201,4 @@ All PRs must pass: analyze, test, format, integration-test, widget-ban, secrets-
 - **Melos** 7.x — monorepo tooling (config in root `pubspec.yaml`, no `melos.yaml`)
 - **Patrol** — E2E integration testing
 - **dprint** — non-Dart formatting
-- **Knope** — changeset-based version management and release automation
+- **monochange** — changeset-based versioning with developer and user release-note streams

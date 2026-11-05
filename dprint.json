@@ -6,7 +6,9 @@
     "useTabs": false
   },
   "markdown": {},
-  "toml": {},
+  "toml": {
+    "comment.forceLeadingSpace": false
+  },
   "yaml": {
     "indentWidth": 2
   },
