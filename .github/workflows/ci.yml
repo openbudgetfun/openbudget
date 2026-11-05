@@ -20,9 +20,79 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: lint all
-        run: lint:all
+      # Formatting, analysis, the widget ban and the secrets scan run as their
+      # own jobs, named as the `main` ruleset requires them.
+      - name: lint swift
+        run: lint:swift
         shell: devenv shell -- bash -e {0}
+
+      - name: check workflow docs
+        run: docs:workflows:check
+        shell: devenv shell -- bash -e {0}
+
+      - name: check localization
+        run: lint:l10n
+        shell: devenv shell -- bash -e {0}
+
+  analyze:
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/devenv
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: dart analyze
+        run: lint:analyze
+        shell: devenv shell -- bash -e {0}
+
+  format:
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/devenv
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: check formatting
+        run: lint:format
+        shell: devenv shell -- bash -e {0}
+
+  widget-ban:
+    name: Ban StatefulWidget and StatelessWidget
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: reject banned widget base classes
+        run: |
+          # StatelessWidget joins this list once the remaining widgets use hooks.
+          banned='extends (StatefulWidget|ConsumerStatefulWidget|StatefulHookConsumerWidget)( |<|$)'
+          if git grep -nE "$banned" -- '*.dart' ':!openbudget_lints/**'; then
+            echo "::error title=Banned widget base class::Extend HookWidget or HookConsumerWidget instead."
+            exit 1
+          fi
+
+  secrets-scan:
+    name: Secrets Detection
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: install gitleaks
+        run: |
+          GITLEAKS_VERSION=8.30.1
+          curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" \
+            | tar xz -C /usr/local/bin gitleaks
+
+      - name: run gitleaks
+        run: gitleaks detect --source . --redact --config .gitleaks.toml
 
   test:
     runs-on: blacksmith-2vcpu-ubuntu-2404
