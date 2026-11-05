@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:openbudget_app/src/features/auth/providers/auth_state.dart';
+import 'package:openbudget_app/src/features/plus/providers/store_purchases_provider.dart';
 import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -24,9 +25,7 @@ class AuthNotifier extends _$AuthNotifier {
       await client.auth.initialize();
       if (!ref.mounted) return;
       if (client.auth.isAuthenticated) {
-        state = Authenticated(
-          userId: client.auth.authInfo!.authUserId.toString(),
-        );
+        _setAuthenticated(client.auth.authInfo!.authUserId.toString());
       } else {
         state = const Unauthenticated();
       }
@@ -56,7 +55,7 @@ class AuthNotifier extends _$AuthNotifier {
         'login.success email=$maskedEmail userId=${authSuccess.authUserId}',
       );
       if (!ref.mounted) return;
-      state = Authenticated(userId: authSuccess.authUserId.toString());
+      _setAuthenticated(authSuccess.authUserId.toString());
     } on Exception catch (error, stackTrace) {
       _log.warning(
         'login.failed email=$maskedEmail error=${error.runtimeType}: $error',
@@ -134,7 +133,7 @@ class AuthNotifier extends _$AuthNotifier {
       await client.auth.updateSignedInUser(authSuccess);
       _log.info('finishRegistration.success userId=${authSuccess.authUserId}');
       if (!ref.mounted) return;
-      state = Authenticated(userId: authSuccess.authUserId.toString());
+      _setAuthenticated(authSuccess.authUserId.toString());
     } on Exception catch (error, stackTrace) {
       _log.warning(
         'finishRegistration.failed tokenLength=${registrationToken.length} error=${error.runtimeType}: $error',
@@ -169,7 +168,7 @@ class AuthNotifier extends _$AuthNotifier {
         return;
       }
 
-      state = Authenticated(userId: authInfo.authUserId.toString());
+      _setAuthenticated(authInfo.authUserId.toString());
     } on Exception catch (error, stackTrace) {
       _log.warning(
         'externalAuth.sync.failed error=${error.runtimeType}: $error',
@@ -193,6 +192,24 @@ class AuthNotifier extends _$AuthNotifier {
       return e.message;
     }
     return 'An unexpected error occurred. Please try again.';
+  }
+
+  /// Marks the user signed in and connects store purchases to their id.
+  ///
+  /// RevenueCat's `app_user_id` must be our UUID so its webhook can record the
+  /// entitlement against the right account. Identifying is best effort: a
+  /// missing key or a store failure must never block sign-in.
+  void _setAuthenticated(String userId) {
+    state = Authenticated(userId: userId);
+    unawaited(_identifyStoreUser(userId));
+  }
+
+  Future<void> _identifyStoreUser(String userId) async {
+    try {
+      await ref.read(storePurchasesProvider).identify(userId);
+    } on Object catch (error) {
+      _log.warning('storeIdentify.failed error=${error.runtimeType}');
+    }
   }
 
   String _friendlyExternalAuthError(Object error) {

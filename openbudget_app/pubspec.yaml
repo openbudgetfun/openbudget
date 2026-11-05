@@ -31,11 +31,19 @@ dependencies:
     path: ../openbudget_ui
   plaid_flutter: 5.2.1
   posthog_flutter: 5.58.4
+  purchases_flutter: 11.0.0
   riverpod_annotation: 4.0.7
   serverpod_auth_idp_flutter: 4.1.0
   serverpod_flutter: 4.1.0
   shared_preferences: 2.5.6
   shorebird_code_push: 2.0.7
+  solana_kit: 0.11.1
+  solana_kit_associated_token_account: 0.9.1
+  solana_kit_subscriptions: 0.4.1
+  solana_kit_wallet_adapter: 0.3.1
+  solana_kit_wallet_standard: 0.3.1
+  solana_kit_wallet_ui: 0.3.1
+  url_launcher: 6.3.3
 
 dev_dependencies:
   build_runner: 2.16.1

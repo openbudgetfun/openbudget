@@ -2035,5 +2035,88 @@
         "type": "String"
       }
     }
-  }
+  },
+  "plusTitle": "OpenBudget Plus",
+  "plusNavSubtitle": "Tax reports, the assistant and more",
+  "plusHeroHeadline": "Get more from every envelope",
+  "plusHeroBody": "Tax reports, a built-in assistant that knows your budget, and room to bring your own agent.",
+  "plusPriceAmount": "$10",
+  "plusPricePeriod": "a month",
+  "plusPriceNote": "Cancel whenever you like.",
+  "plusIncludedUsage": "$1 of assistant usage included every month",
+  "plusBenefitsTitle": "What you get",
+  "plusBenefitTaxTitle": "Tax reports",
+  "plusBenefitTaxBody": "UK, US, Nigeria and Germany, built from your own transactions.",
+  "plusBenefitAssistantTitle": "The assistant",
+  "plusBenefitAssistantBody": "Ask questions about your money, with $1 of usage included each month.",
+  "plusBenefitAgentTitle": "Bring your own agent",
+  "plusBenefitAgentBody": "Connect an OpenAI-compatible provider and use your own key.",
+  "plusChooseRail": "Choose how to pay",
+  "plusStripeButton": "Pay with card",
+  "plusStripeNote": "Secure checkout opens in your browser.",
+  "plusSolanaButton": "Pay with USDC",
+  "plusSolanaNote": "Subscribe from a Solana wallet on this device.",
+  "plusStoreAppleButton": "Subscribe in the App Store",
+  "plusStoreGoogleButton": "Subscribe on Google Play",
+  "plusStoreUnavailable": "Store purchases are unavailable in this build.",
+  "plusStoreHint": "Billed through your store account. Cancel any time in your store settings.",
+  "plusRestorePurchases": "Restore purchases",
+  "plusRestoreSuccess": "Purchases restored.",
+  "plusPurchaseSuccess": "Purchase complete. Your plan will update in a moment.",
+  "plusRefreshButton": "I've paid, refresh",
+  "plusRefreshNote": "After checkout, come back and check your plan.",
+  "plusPlanTitle": "Your OpenBudget Plus plan",
+  "plusSource": "Paid with {source}",
+  "@plusSource": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "plusSourceStripe": "Card",
+  "plusSourceAppStore": "App Store",
+  "plusSourcePlayStore": "Google Play",
+  "plusSourceSolana": "Solana",
+  "plusStatusActive": "Active",
+  "plusStatusPastDue": "Past due",
+  "plusStatusCanceled": "Cancelled",
+  "plusStatusExpired": "Expired",
+  "plusRenewsOn": "Renews on {date}",
+  "@plusRenewsOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "plusEndsOn": "Ends on {date}",
+  "@plusEndsOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "plusEndedOn": "Ended on {date}",
+  "@plusEndedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "plusManage": "Manage",
+  "plusManageSolanaBody": "Cancel from the wallet that approved this subscription. OpenBudget stops charging when the on-chain subscription ends.",
+  "plusLoading": "Loading your plan…",
+  "plusLoadError": "Could not load your plan",
+  "plusLoadErrorBody": "Check your connection, then try again.",
+  "plusRetry": "Try again",
+  "plusCheckoutSuccess": "Payment received. Checking your plan…",
+  "plusCheckoutCancelled": "Checkout cancelled. Nothing was charged.",
+  "plusFailureCancelled": "Nothing was charged.",
+  "plusFailureRejected": "The wallet request was cancelled.",
+  "plusFailureUnavailable": "That payment method is not available right now.",
+  "plusFailureFailed": "That did not work. Try again.",
+  "plusPriceCurrencyNote": "OpenBudget Plus is billed in US dollars."
 }

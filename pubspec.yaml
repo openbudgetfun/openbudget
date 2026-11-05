@@ -21,6 +21,11 @@ dev_dependencies:
 dependency_overrides:
   # Serverpod and coverage need newer APIs; launcher_icons still caps its compatible logger at 0.4.
   cli_util: 0.6.0
+  # solana_kit_wallet_ui asks for the 1.x icon font; 2.0 only adds glyphs.
+  cupertino_icons: 2.0.0
+  # solana_kit_wallet_ui still declares skribble ^0.1.1, while openbudget_ui pins the
+  # 0.3 line. The wallet UI uses only APIs that 0.3 keeps, so resolve one skribble.
+  skribble: 0.3.1
 
 melos:
   name: openbudget
