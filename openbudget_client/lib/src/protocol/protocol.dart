@@ -38,6 +38,8 @@ import 'package:openbudget_client/src/protocol/solana_wallets/solana_wallet_tax_
     as _igj51lwa;
 import 'package:openbudget_client/src/protocol/solana_wallets/solana_wallet_transaction.dart'
     as _isudwq84;
+import 'package:openbudget_client/src/protocol/tax/tax_category_view.dart'
+    as _ic177lol;
 import 'package:openbudget_client/src/protocol/transaction_rules/transaction_rule.dart'
     as _iwxd5v0a;
 import 'package:openbudget_client/src/protocol/transactions/import_row.dart'
@@ -75,6 +77,13 @@ import 'solana_wallets/solana_wallet_holding.dart' as _ivqf8i64;
 import 'solana_wallets/solana_wallet_sync_result.dart' as _ir1c2di9;
 import 'solana_wallets/solana_wallet_tax_year_summary.dart' as _ijmvodfo;
 import 'solana_wallets/solana_wallet_transaction.dart' as _iwwk92r1;
+import 'tax/tax_band_slice_view.dart' as _ic4zfx3b;
+import 'tax/tax_category_view.dart' as _iv5oayw3;
+import 'tax/tax_liability_view.dart' as _ivss6b81;
+import 'tax/tax_opportunity_view.dart' as _iuft4v7q;
+import 'tax/tax_profile.dart' as _i20z9jax;
+import 'tax/tax_report_line_view.dart' as _i6llsezf;
+import 'tax/tax_report_view.dart' as _inb54q20;
 import 'transaction_rules/transaction_rule.dart' as _i6dj6ji0;
 import 'transactions/import_row.dart' as _isp6bezg;
 import 'transactions/split_item.dart' as _i0jd5x9z;
@@ -104,6 +113,13 @@ export 'solana_wallets/solana_wallet_holding.dart';
 export 'solana_wallets/solana_wallet_sync_result.dart';
 export 'solana_wallets/solana_wallet_tax_year_summary.dart';
 export 'solana_wallets/solana_wallet_transaction.dart';
+export 'tax/tax_band_slice_view.dart';
+export 'tax/tax_category_view.dart';
+export 'tax/tax_liability_view.dart';
+export 'tax/tax_opportunity_view.dart';
+export 'tax/tax_profile.dart';
+export 'tax/tax_report_line_view.dart';
+export 'tax/tax_report_view.dart';
 export 'transaction_rules/transaction_rule.dart';
 export 'transactions/import_row.dart';
 export 'transactions/split_item.dart';
@@ -148,6 +164,13 @@ class Protocol extends _isc.SerializationManager
           _isc.getType<_ir1c2di9.SolanaWalletSyncResult>,
           _isc.getType<_ijmvodfo.SolanaWalletTaxYearSummary>,
           _isc.getType<_iwwk92r1.SolanaWalletTransaction>,
+          _isc.getType<_ic4zfx3b.TaxBandSliceView>,
+          _isc.getType<_iv5oayw3.TaxCategoryView>,
+          _isc.getType<_ivss6b81.TaxLiabilityView>,
+          _isc.getType<_iuft4v7q.TaxOpportunityView>,
+          _isc.getType<_i20z9jax.TaxProfileRecord>,
+          _isc.getType<_i6llsezf.TaxReportLineView>,
+          _isc.getType<_inb54q20.TaxReportView>,
           _isc.getType<_i6dj6ji0.TransactionRule>,
           _isc.getType<_isp6bezg.ImportRow>,
           _isc.getType<_i0jd5x9z.SplitItem>,
@@ -177,6 +200,13 @@ class Protocol extends _isc.SerializationManager
           _isc.getType<_ir1c2di9.SolanaWalletSyncResult?>,
           _isc.getType<_ijmvodfo.SolanaWalletTaxYearSummary?>,
           _isc.getType<_iwwk92r1.SolanaWalletTransaction?>,
+          _isc.getType<_ic4zfx3b.TaxBandSliceView?>,
+          _isc.getType<_iv5oayw3.TaxCategoryView?>,
+          _isc.getType<_ivss6b81.TaxLiabilityView?>,
+          _isc.getType<_iuft4v7q.TaxOpportunityView?>,
+          _isc.getType<_i20z9jax.TaxProfileRecord?>,
+          _isc.getType<_i6llsezf.TaxReportLineView?>,
+          _isc.getType<_inb54q20.TaxReportView?>,
           _isc.getType<_i6dj6ji0.TransactionRule?>,
           _isc.getType<_isp6bezg.ImportRow?>,
           _isc.getType<_i0jd5x9z.SplitItem?>,
@@ -186,6 +216,11 @@ class Protocol extends _isc.SerializationManager
           _isc.getType<_i9uqpb1b.WalletConnection?>,
           _isc.getType<_iqqppnaa.WalletHolding?>,
           _isc.getType<List<_i15udi7x.FxRateQuote>>,
+          _isc.getType<List<_ic4zfx3b.TaxBandSliceView>>,
+          _isc.getType<List<_i6llsezf.TaxReportLineView>>,
+          _isc.getType<List<_ivss6b81.TaxLiabilityView>>,
+          _isc.getType<List<String>>,
+          _isc.getType<List<_iuft4v7q.TaxOpportunityView>>,
           _isc.getType<List<_iqqppnaa.WalletHolding>>,
           _isc.getType<List<_iqudaadl.Account>>,
           _isc.getType<List<_itiojbb0.BudgetTemplate>>,
@@ -203,6 +238,7 @@ class Protocol extends _isc.SerializationManager
           _isc.getType<List<_isudwq84.SolanaWalletTransaction>>,
           _isc.getType<List<_i7zpyr5z.SolanaWalletHolding>>,
           _isc.getType<List<_igj51lwa.SolanaWalletTaxYearSummary>>,
+          _isc.getType<List<_ic177lol.TaxCategoryView>>,
           _isc.getType<List<_iwxd5v0a.TransactionRule>>,
           _isc.getType<List<_iio3v7fv.Transaction>>,
           _isc.getType<List<int>>,
@@ -236,6 +272,13 @@ class Protocol extends _isc.SerializationManager
           'SolanaWalletSyncResult',
           'SolanaWalletTaxYearSummary',
           'SolanaWalletTransaction',
+          'TaxBandSliceView',
+          'TaxCategoryView',
+          'TaxLiabilityView',
+          'TaxOpportunityView',
+          'TaxProfileRecord',
+          'TaxReportLineView',
+          'TaxReportView',
           'TransactionRule',
           'ImportRow',
           'SplitItem',
@@ -333,6 +376,27 @@ class Protocol extends _isc.SerializationManager
     }
     if (t == _iwwk92r1.SolanaWalletTransaction) {
       return _iwwk92r1.SolanaWalletTransaction.fromJson(data) as T;
+    }
+    if (t == _ic4zfx3b.TaxBandSliceView) {
+      return _ic4zfx3b.TaxBandSliceView.fromJson(data) as T;
+    }
+    if (t == _iv5oayw3.TaxCategoryView) {
+      return _iv5oayw3.TaxCategoryView.fromJson(data) as T;
+    }
+    if (t == _ivss6b81.TaxLiabilityView) {
+      return _ivss6b81.TaxLiabilityView.fromJson(data) as T;
+    }
+    if (t == _iuft4v7q.TaxOpportunityView) {
+      return _iuft4v7q.TaxOpportunityView.fromJson(data) as T;
+    }
+    if (t == _i20z9jax.TaxProfileRecord) {
+      return _i20z9jax.TaxProfileRecord.fromJson(data) as T;
+    }
+    if (t == _i6llsezf.TaxReportLineView) {
+      return _i6llsezf.TaxReportLineView.fromJson(data) as T;
+    }
+    if (t == _inb54q20.TaxReportView) {
+      return _inb54q20.TaxReportView.fromJson(data) as T;
     }
     if (t == _i6dj6ji0.TransactionRule) {
       return _i6dj6ji0.TransactionRule.fromJson(data) as T;
@@ -444,6 +508,34 @@ class Protocol extends _isc.SerializationManager
               : null)
           as T;
     }
+    if (t == _isc.getType<_ic4zfx3b.TaxBandSliceView?>()) {
+      return (data != null ? _ic4zfx3b.TaxBandSliceView.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_iv5oayw3.TaxCategoryView?>()) {
+      return (data != null ? _iv5oayw3.TaxCategoryView.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_ivss6b81.TaxLiabilityView?>()) {
+      return (data != null ? _ivss6b81.TaxLiabilityView.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_iuft4v7q.TaxOpportunityView?>()) {
+      return (data != null ? _iuft4v7q.TaxOpportunityView.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_i20z9jax.TaxProfileRecord?>()) {
+      return (data != null ? _i20z9jax.TaxProfileRecord.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_i6llsezf.TaxReportLineView?>()) {
+      return (data != null ? _i6llsezf.TaxReportLineView.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_inb54q20.TaxReportView?>()) {
+      return (data != null ? _inb54q20.TaxReportView.fromJson(data) : null)
+          as T;
+    }
     if (t == _isc.getType<_i6dj6ji0.TransactionRule?>()) {
       return (data != null ? _i6dj6ji0.TransactionRule.fromJson(data) : null)
           as T;
@@ -478,6 +570,33 @@ class Protocol extends _isc.SerializationManager
     if (t == List<_i15udi7x.FxRateQuote>) {
       return (data as List)
               .map((e) => deserialize<_i15udi7x.FxRateQuote>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_ic4zfx3b.TaxBandSliceView>) {
+      return (data as List)
+              .map((e) => deserialize<_ic4zfx3b.TaxBandSliceView>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_i6llsezf.TaxReportLineView>) {
+      return (data as List)
+              .map((e) => deserialize<_i6llsezf.TaxReportLineView>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_ivss6b81.TaxLiabilityView>) {
+      return (data as List)
+              .map((e) => deserialize<_ivss6b81.TaxLiabilityView>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<String>) {
+      return (data as List).map((e) => deserialize<String>(e)).toList() as T;
+    }
+    if (t == List<_iuft4v7q.TaxOpportunityView>) {
+      return (data as List)
+              .map((e) => deserialize<_iuft4v7q.TaxOpportunityView>(e))
               .toList()
           as T;
     }
@@ -576,6 +695,12 @@ class Protocol extends _isc.SerializationManager
               .toList()
           as T;
     }
+    if (t == List<_ic177lol.TaxCategoryView>) {
+      return (data as List)
+              .map((e) => deserialize<_ic177lol.TaxCategoryView>(e))
+              .toList()
+          as T;
+    }
     if (t == List<_iwxd5v0a.TransactionRule>) {
       return (data as List)
               .map((e) => deserialize<_iwxd5v0a.TransactionRule>(e))
@@ -645,6 +770,13 @@ class Protocol extends _isc.SerializationManager
       _ir1c2di9.SolanaWalletSyncResult => 'SolanaWalletSyncResult',
       _ijmvodfo.SolanaWalletTaxYearSummary => 'SolanaWalletTaxYearSummary',
       _iwwk92r1.SolanaWalletTransaction => 'SolanaWalletTransaction',
+      _ic4zfx3b.TaxBandSliceView => 'TaxBandSliceView',
+      _iv5oayw3.TaxCategoryView => 'TaxCategoryView',
+      _ivss6b81.TaxLiabilityView => 'TaxLiabilityView',
+      _iuft4v7q.TaxOpportunityView => 'TaxOpportunityView',
+      _i20z9jax.TaxProfileRecord => 'TaxProfileRecord',
+      _i6llsezf.TaxReportLineView => 'TaxReportLineView',
+      _inb54q20.TaxReportView => 'TaxReportView',
       _i6dj6ji0.TransactionRule => 'TransactionRule',
       _isp6bezg.ImportRow => 'ImportRow',
       _i0jd5x9z.SplitItem => 'SplitItem',
@@ -709,6 +841,20 @@ class Protocol extends _isc.SerializationManager
         return 'SolanaWalletTaxYearSummary';
       case _iwwk92r1.SolanaWalletTransaction():
         return 'SolanaWalletTransaction';
+      case _ic4zfx3b.TaxBandSliceView():
+        return 'TaxBandSliceView';
+      case _iv5oayw3.TaxCategoryView():
+        return 'TaxCategoryView';
+      case _ivss6b81.TaxLiabilityView():
+        return 'TaxLiabilityView';
+      case _iuft4v7q.TaxOpportunityView():
+        return 'TaxOpportunityView';
+      case _i20z9jax.TaxProfileRecord():
+        return 'TaxProfileRecord';
+      case _i6llsezf.TaxReportLineView():
+        return 'TaxReportLineView';
+      case _inb54q20.TaxReportView():
+        return 'TaxReportView';
       case _i6dj6ji0.TransactionRule():
         return 'TransactionRule';
       case _isp6bezg.ImportRow():
@@ -809,6 +955,27 @@ class Protocol extends _isc.SerializationManager
     }
     if (dataClassName == 'SolanaWalletTransaction') {
       return deserialize<_iwwk92r1.SolanaWalletTransaction>(data['data']);
+    }
+    if (dataClassName == 'TaxBandSliceView') {
+      return deserialize<_ic4zfx3b.TaxBandSliceView>(data['data']);
+    }
+    if (dataClassName == 'TaxCategoryView') {
+      return deserialize<_iv5oayw3.TaxCategoryView>(data['data']);
+    }
+    if (dataClassName == 'TaxLiabilityView') {
+      return deserialize<_ivss6b81.TaxLiabilityView>(data['data']);
+    }
+    if (dataClassName == 'TaxOpportunityView') {
+      return deserialize<_iuft4v7q.TaxOpportunityView>(data['data']);
+    }
+    if (dataClassName == 'TaxProfileRecord') {
+      return deserialize<_i20z9jax.TaxProfileRecord>(data['data']);
+    }
+    if (dataClassName == 'TaxReportLineView') {
+      return deserialize<_i6llsezf.TaxReportLineView>(data['data']);
+    }
+    if (dataClassName == 'TaxReportView') {
+      return deserialize<_inb54q20.TaxReportView>(data['data']);
     }
     if (dataClassName == 'TransactionRule') {
       return deserialize<_i6dj6ji0.TransactionRule>(data['data']);

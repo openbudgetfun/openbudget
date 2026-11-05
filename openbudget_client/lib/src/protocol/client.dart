@@ -44,6 +44,12 @@ import 'package:openbudget_client/src/protocol/solana_wallets/solana_wallet_tax_
     as _igj51lwa;
 import 'package:openbudget_client/src/protocol/solana_wallets/solana_wallet_transaction.dart'
     as _isudwq84;
+import 'package:openbudget_client/src/protocol/tax/tax_category_view.dart'
+    as _ic177lol;
+import 'package:openbudget_client/src/protocol/tax/tax_profile.dart'
+    as _ibyrfq34;
+import 'package:openbudget_client/src/protocol/tax/tax_report_view.dart'
+    as _ieaa4q0n;
 import 'package:openbudget_client/src/protocol/transaction_rules/transaction_rule.dart'
     as _iwxd5v0a;
 import 'package:openbudget_client/src/protocol/transactions/import_row.dart'
@@ -1380,6 +1386,99 @@ class EndpointSolanaWallet extends _isc.EndpointRef {
   );
 }
 
+/// API surface for tax profiles, categorisation, and reports.
+///
+/// All methods require authentication and check budget ownership.
+/// {@category Endpoint}
+class EndpointTax extends _isc.EndpointRef {
+  EndpointTax(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'tax';
+
+  /// Returns the budget's tax profile, or null when none is set.
+  _ida.Future<_ibyrfq34.TaxProfileRecord?> getProfile(
+    _isc.UuidValue budgetId,
+  ) => caller.callServerEndpoint<_ibyrfq34.TaxProfileRecord?>(
+    'tax',
+    'getProfile',
+    {'budgetId': budgetId},
+  );
+
+  /// Creates or replaces the budget's tax profile.
+  _ida.Future<_ibyrfq34.TaxProfileRecord> saveProfile(
+    _isc.UuidValue budgetId,
+    String jurisdiction,
+    String entityKind,
+    String profileJson, {
+    _isc.UuidValue? linkedBudgetId,
+  }) => caller.callServerEndpoint<_ibyrfq34.TaxProfileRecord>(
+    'tax',
+    'saveProfile',
+    {
+      'budgetId': budgetId,
+      'jurisdiction': jurisdiction,
+      'entityKind': entityKind,
+      'profileJson': profileJson,
+      'linkedBudgetId': linkedBudgetId,
+    },
+  );
+
+  /// Lists the tax categories available to the budget's entity kind.
+  _ida.Future<List<_ic177lol.TaxCategoryView>> listCategories(
+    _isc.UuidValue budgetId,
+  ) => caller.callServerEndpoint<List<_ic177lol.TaxCategoryView>>(
+    'tax',
+    'listCategories',
+    {'budgetId': budgetId},
+  );
+
+  /// Sets or clears the default tax category on an envelope.
+  _ida.Future<_i29jf3by.Envelope> setEnvelopeTaxCategory(
+    _isc.UuidValue envelopeId, {
+    String? code,
+  }) => caller.callServerEndpoint<_i29jf3by.Envelope>(
+    'tax',
+    'setEnvelopeTaxCategory',
+    {
+      'envelopeId': envelopeId,
+      'code': code,
+    },
+  );
+
+  /// Sets or clears a transaction's tax treatment.
+  _ida.Future<_iio3v7fv.Transaction> setTransactionTax(
+    _isc.UuidValue transactionId, {
+    String? code,
+    int? businessUsePercent,
+    int? salesTaxCents,
+  }) => caller.callServerEndpoint<_iio3v7fv.Transaction>(
+    'tax',
+    'setTransactionTax',
+    {
+      'transactionId': transactionId,
+      'code': code,
+      'businessUsePercent': businessUsePercent,
+      'salesTaxCents': salesTaxCents,
+    },
+  );
+
+  /// Computes the budget's tax report for the year starting in [startYear].
+  ///
+  /// When [startYear] is null the tax year containing today is used.
+  _ida.Future<_ieaa4q0n.TaxReportView> getReport(
+    _isc.UuidValue budgetId, {
+    int? startYear,
+  }) => caller.callServerEndpoint<_ieaa4q0n.TaxReportView>(
+    'tax',
+    'getReport',
+    {
+      'budgetId': budgetId,
+      'startYear': startYear,
+    },
+  );
+}
+
 /// API surface for transaction rule operations.
 ///
 /// All methods require authentication.
@@ -1834,6 +1933,7 @@ class Client extends _isc.ServerpodClientShared {
     plaid = EndpointPlaid(this);
     recurringTransaction = EndpointRecurringTransaction(this);
     solanaWallet = EndpointSolanaWallet(this);
+    tax = EndpointTax(this);
     transactionRule = EndpointTransactionRule(this);
     transaction = EndpointTransaction(this);
     wallet = EndpointWallet(this);
@@ -1876,6 +1976,8 @@ class Client extends _isc.ServerpodClientShared {
 
   late final EndpointSolanaWallet solanaWallet;
 
+  late final EndpointTax tax;
+
   late final EndpointTransactionRule transactionRule;
 
   late final EndpointTransaction transaction;
@@ -1904,6 +2006,7 @@ class Client extends _isc.ServerpodClientShared {
     'plaid': plaid,
     'recurringTransaction': recurringTransaction,
     'solanaWallet': solanaWallet,
+    'tax': tax,
     'transactionRule': transactionRule,
     'transaction': transaction,
     'wallet': wallet,

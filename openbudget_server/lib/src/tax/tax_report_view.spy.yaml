@@ -1,0 +1,33 @@
+### The computed tax position for one budget and tax year.
+class: TaxReportView
+fields:
+  ### ISO 3166-1 alpha-2 country code.
+  jurisdiction: String
+  ### The calendar year the tax year starts in.
+  startYear: int
+  ### How the authority writes the year: `2026/27` or `2026`.
+  yearLabel: String
+  yearStart: DateTime
+  yearEnd: DateTime
+  ### TaxEntityKind name.
+  entityKind: String
+  ### ISO 4217 code every amount in this report is in.
+  currencyCode: String
+  ### Category totals and computed figures, in return order.
+  lines: List<TaxReportLineView>
+  liabilities: List<TaxLiabilityView>
+  totalLiabilityMinor: int
+  alreadyPaidMinor: int
+  ### Positive when more is owed, negative when a refund is due.
+  balanceDueMinor: int
+  ### Plain statements of what the computation assumed.
+  assumptions: List<String>
+  ### The authority pages the rates came from.
+  sources: List<String>
+  ### When the rule figures were last checked against the sources.
+  rulesVerifiedOn: DateTime
+  ### Entries the rule pack does not know, plus transactions with no category.
+  uncategorizedCount: int
+  ### Entries converted from another currency at their transaction date.
+  convertedEntryCount: int
+  opportunities: List<TaxOpportunityView>

@@ -39,6 +39,7 @@ import '../plaid/plaid_endpoint.dart' as _i9pkxqxw;
 import '../recurring_transactions/recurring_transaction_endpoint.dart'
     as _ipwgw1dv;
 import '../solana_wallets/solana_wallet_endpoint.dart' as _in77fwrc;
+import '../tax/tax_endpoint.dart' as _i34kr7gr;
 import '../transaction_rules/transaction_rule_endpoint.dart' as _i70s5v1k;
 import '../transactions/transaction_endpoint.dart' as _if8xv4dr;
 import '../wallets/wallet_endpoint.dart' as _i1ub0otr;
@@ -153,6 +154,12 @@ class Endpoints extends _is.EndpointDispatch {
         ..initialize(
           server,
           'solanaWallet',
+          null,
+        ),
+      'tax': _i34kr7gr.TaxEndpoint()
+        ..initialize(
+          server,
+          'tax',
           null,
         ),
       'transactionRule': _i70s5v1k.TransactionRuleEndpoint()
@@ -2527,6 +2534,178 @@ class Endpoints extends _is.EndpointDispatch {
                         tagsCsv: params['tagsCsv'],
                         memo: params['memo'],
                       ),
+        ),
+      },
+    );
+    connectors['tax'] = _is.EndpointConnector(
+      name: 'tax',
+      endpoint: endpoints['tax']!,
+      methodConnectors: {
+        'getProfile': _is.MethodConnector(
+          name: 'getProfile',
+          params: {
+            'budgetId': _is.ParameterDescription(
+              name: 'budgetId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['tax'] as _i34kr7gr.TaxEndpoint).getProfile(
+                session,
+                params['budgetId'],
+              ),
+        ),
+        'saveProfile': _is.MethodConnector(
+          name: 'saveProfile',
+          params: {
+            'budgetId': _is.ParameterDescription(
+              name: 'budgetId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'jurisdiction': _is.ParameterDescription(
+              name: 'jurisdiction',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'entityKind': _is.ParameterDescription(
+              name: 'entityKind',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'profileJson': _is.ParameterDescription(
+              name: 'profileJson',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'linkedBudgetId': _is.ParameterDescription(
+              name: 'linkedBudgetId',
+              type: _is.getType<_is.UuidValue?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['tax'] as _i34kr7gr.TaxEndpoint).saveProfile(
+                    session,
+                    params['budgetId'],
+                    params['jurisdiction'],
+                    params['entityKind'],
+                    params['profileJson'],
+                    linkedBudgetId: params['linkedBudgetId'],
+                  ),
+        ),
+        'listCategories': _is.MethodConnector(
+          name: 'listCategories',
+          params: {
+            'budgetId': _is.ParameterDescription(
+              name: 'budgetId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['tax'] as _i34kr7gr.TaxEndpoint).listCategories(
+                    session,
+                    params['budgetId'],
+                  ),
+        ),
+        'setEnvelopeTaxCategory': _is.MethodConnector(
+          name: 'setEnvelopeTaxCategory',
+          params: {
+            'envelopeId': _is.ParameterDescription(
+              name: 'envelopeId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'code': _is.ParameterDescription(
+              name: 'code',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['tax'] as _i34kr7gr.TaxEndpoint)
+                  .setEnvelopeTaxCategory(
+                    session,
+                    params['envelopeId'],
+                    code: params['code'],
+                  ),
+        ),
+        'setTransactionTax': _is.MethodConnector(
+          name: 'setTransactionTax',
+          params: {
+            'transactionId': _is.ParameterDescription(
+              name: 'transactionId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'code': _is.ParameterDescription(
+              name: 'code',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+            'businessUsePercent': _is.ParameterDescription(
+              name: 'businessUsePercent',
+              type: _is.getType<int?>(),
+              nullable: true,
+            ),
+            'salesTaxCents': _is.ParameterDescription(
+              name: 'salesTaxCents',
+              type: _is.getType<int?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['tax'] as _i34kr7gr.TaxEndpoint).setTransactionTax(
+                    session,
+                    params['transactionId'],
+                    code: params['code'],
+                    businessUsePercent: params['businessUsePercent'],
+                    salesTaxCents: params['salesTaxCents'],
+                  ),
+        ),
+        'getReport': _is.MethodConnector(
+          name: 'getReport',
+          params: {
+            'budgetId': _is.ParameterDescription(
+              name: 'budgetId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'startYear': _is.ParameterDescription(
+              name: 'startYear',
+              type: _is.getType<int?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['tax'] as _i34kr7gr.TaxEndpoint).getReport(
+                session,
+                params['budgetId'],
+                startYear: params['startYear'],
+              ),
         ),
       },
     );

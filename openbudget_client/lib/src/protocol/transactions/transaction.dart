@@ -31,6 +31,9 @@ abstract class Transaction
     bool? cleared,
     bool? reconciled,
     this.flagColor,
+    this.taxCategoryCode,
+    this.businessUsePercent,
+    this.salesTaxCents,
     DateTime? createdAt,
   }) : cleared = cleared ?? false,
        reconciled = reconciled ?? false,
@@ -52,6 +55,9 @@ abstract class Transaction
     bool? cleared,
     bool? reconciled,
     String? flagColor,
+    String? taxCategoryCode,
+    int? businessUsePercent,
+    int? salesTaxCents,
     DateTime? createdAt,
   }) = _TransactionImpl;
 
@@ -100,6 +106,9 @@ abstract class Transaction
           ? null
           : _isc.BoolJsonExtension.fromJson(jsonSerialization['reconciled']),
       flagColor: jsonSerialization['flagColor'] as String?,
+      taxCategoryCode: jsonSerialization['taxCategoryCode'] as String?,
+      businessUsePercent: jsonSerialization['businessUsePercent'] as int?,
+      salesTaxCents: jsonSerialization['salesTaxCents'] as int?,
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
@@ -149,6 +158,15 @@ abstract class Transaction
   /// Optional flag color for marking transactions (red, orange, yellow, green, blue, purple).
   String? flagColor;
 
+  /// Tax category overriding the envelope's default, when set.
+  String? taxCategoryCode;
+
+  /// Percentage of the transaction used for business, from 0 to 100.
+  int? businessUsePercent;
+
+  /// Sales tax included in amountCents, when the receipt shows it.
+  int? salesTaxCents;
+
   DateTime createdAt;
 
   /// Returns a shallow copy of this [Transaction]
@@ -170,6 +188,9 @@ abstract class Transaction
     bool? cleared,
     bool? reconciled,
     String? flagColor,
+    String? taxCategoryCode,
+    int? businessUsePercent,
+    int? salesTaxCents,
     DateTime? createdAt,
   });
   @override
@@ -192,6 +213,9 @@ abstract class Transaction
       'cleared': cleared,
       'reconciled': reconciled,
       if (flagColor != null) 'flagColor': flagColor,
+      if (taxCategoryCode != null) 'taxCategoryCode': taxCategoryCode,
+      if (businessUsePercent != null) 'businessUsePercent': businessUsePercent,
+      if (salesTaxCents != null) 'salesTaxCents': salesTaxCents,
       'createdAt': createdAt.toJson(),
     };
   }
@@ -216,6 +240,9 @@ abstract class Transaction
       'cleared': cleared,
       'reconciled': reconciled,
       if (flagColor != null) 'flagColor': flagColor,
+      if (taxCategoryCode != null) 'taxCategoryCode': taxCategoryCode,
+      if (businessUsePercent != null) 'businessUsePercent': businessUsePercent,
+      if (salesTaxCents != null) 'salesTaxCents': salesTaxCents,
       'createdAt': createdAt.toJson(),
     };
   }
@@ -245,6 +272,9 @@ class _TransactionImpl extends Transaction {
     bool? cleared,
     bool? reconciled,
     String? flagColor,
+    String? taxCategoryCode,
+    int? businessUsePercent,
+    int? salesTaxCents,
     DateTime? createdAt,
   }) : super._(
          id: id,
@@ -262,6 +292,9 @@ class _TransactionImpl extends Transaction {
          cleared: cleared,
          reconciled: reconciled,
          flagColor: flagColor,
+         taxCategoryCode: taxCategoryCode,
+         businessUsePercent: businessUsePercent,
+         salesTaxCents: salesTaxCents,
          createdAt: createdAt,
        );
 
@@ -285,6 +318,9 @@ class _TransactionImpl extends Transaction {
     bool? cleared,
     bool? reconciled,
     Object? flagColor = _Undefined,
+    Object? taxCategoryCode = _Undefined,
+    Object? businessUsePercent = _Undefined,
+    Object? salesTaxCents = _Undefined,
     DateTime? createdAt,
   }) {
     return Transaction(
@@ -311,6 +347,13 @@ class _TransactionImpl extends Transaction {
       cleared: cleared ?? this.cleared,
       reconciled: reconciled ?? this.reconciled,
       flagColor: flagColor is String? ? flagColor : this.flagColor,
+      taxCategoryCode: taxCategoryCode is String?
+          ? taxCategoryCode
+          : this.taxCategoryCode,
+      businessUsePercent: businessUsePercent is int?
+          ? businessUsePercent
+          : this.businessUsePercent,
+      salesTaxCents: salesTaxCents is int? ? salesTaxCents : this.salesTaxCents,
       createdAt: createdAt ?? this.createdAt,
     );
   }

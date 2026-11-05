@@ -39,3 +39,23 @@ class ValidationException implements Exception {
   @override
   String toString() => 'ValidationException: $message';
 }
+
+/// Thrown when no tax rule pack is available for a jurisdiction or year.
+class TaxRulesUnavailableException implements Exception {
+  TaxRulesUnavailableException([this.message = 'Tax rules are not available']);
+
+  final String message;
+
+  @override
+  String toString() => 'TaxRulesUnavailableException: $message';
+}
+
+/// Thrown when an amount cannot be converted to the report's currency.
+class TaxRateUnavailableException implements Exception {
+  TaxRateUnavailableException([this.message = 'Exchange rate not available']);
+
+  final String message;
+
+  @override
+  String toString() => 'TaxRateUnavailableException: $message';
+}

@@ -1,0 +1,8 @@
+### The part of a tax base that fell in one rate band.
+class: TaxBandSliceView
+fields:
+  label: String
+  baseMinor: int
+  ### 2000 is 20%.
+  rateBasisPoints: int
+  taxMinor: int
