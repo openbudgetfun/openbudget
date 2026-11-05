@@ -5,6 +5,9 @@ on:
     branches: [main]
   # Every pull request, including stacked layers that target another branch.
   pull_request:
+  # The release workflow dispatches this run for the release pull request,
+  # because pushes made with `GITHUB_TOKEN` never trigger `pull_request`.
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -135,9 +138,15 @@ jobs:
         shell: devenv shell -- bash -e {0}
 
       # The preview is the only check that rejects a changeset whose targets
-      # cross the developer and user streams.
+      # cross the developer and user streams. A release commit consumes every
+      # changeset, and monochange refuses to preview an empty set.
       - name: preview the release
-        run: monochange preview --format json > /dev/null
+        run: |
+          if ! find .changeset -type f -name '*.md' -print -quit | grep -q .; then
+            echo "No pending changesets to preview."
+            exit 0
+          fi
+          monochange preview --format json > /dev/null
         shell: devenv shell -- bash -e {0}
 
   server-test:

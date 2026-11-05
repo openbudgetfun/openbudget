@@ -28,6 +28,8 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+      # Dispatches CI for the release pull request; see the last step.
+      actions: write
     steps:
       - uses: actions/checkout@v5
         with:
@@ -107,4 +109,18 @@ jobs:
             exit 1
           fi
           printf '%s\n' "$output"
+
+          # A push made with GITHUB_TOKEN starts no workflows, so the release
+          # pull request would never report the checks the `main` ruleset
+          # requires. Dispatching CI on its branch attaches them to its head.
+          release_branch="$(
+            gh pr list --state open --base main --json headRefName \
+              --jq '[.[] | select(.headRefName | startswith("chore/release/"))][0].headRefName // empty'
+          )"
+          if [ -z "$release_branch" ]; then
+            echo "::error::monochange reported a release PR, but none is open on chore/release/*."
+            exit 1
+          fi
+          gh workflow run ci.yml --ref "$release_branch"
+          echo "Dispatched CI for $release_branch."
         shell: devenv shell -- bash -e {0}
