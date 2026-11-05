@@ -47,24 +47,41 @@ abstract final class AgentProposalService {
     }
 
     final payload = _payload(proposal);
-    switch (proposal.kind) {
-      case AgentProposalKind.moveMoney:
-        await _applyMoveMoney(session, proposal, payload);
-      case AgentProposalKind.setTransactionTaxCategory:
-        await _applyTransactionTax(session, payload);
-      case AgentProposalKind.setEnvelopeTaxCategory:
-        await _applyEnvelopeTax(session, payload);
+
+    // Claim the proposal before changing anything, so two concurrent applies
+    // cannot both move the money. Only the call that flips it from pending
+    // goes on to apply it.
+    final claimed = await AgentProposal.db.updateWhere(
+      session,
+      columnValues: (t) => [
+        t.status(AgentProposalStatus.applied),
+        t.resolvedAt(DateTime.now().toUtc()),
+      ],
+      where: (t) =>
+          t.id.equals(proposal.id) &
+          t.status.equals(AgentProposalStatus.pending),
+    );
+    if (claimed.isEmpty) {
+      throw ValidationException('This proposal has already been resolved.');
     }
 
-    final applied = await AgentProposal.db.updateRow(
-      session,
-      proposal.copyWith(
-        status: AgentProposalStatus.applied,
-        resolvedAt: DateTime.now().toUtc(),
-      ),
-    );
+    try {
+      switch (proposal.kind) {
+        case AgentProposalKind.moveMoney:
+          await _applyMoveMoney(session, proposal, payload);
+        case AgentProposalKind.setTransactionTaxCategory:
+          await _applyTransactionTax(session, payload);
+        case AgentProposalKind.setEnvelopeTaxCategory:
+          await _applyEnvelopeTax(session, payload);
+      }
+    } on Object {
+      // The change did not happen; return the proposal to the user.
+      await AgentProposal.db.updateRow(session, proposal);
+      rethrow;
+    }
+
     BudgetRealtimeNotifier.notifyBudgetChanged(proposal.budgetId);
-    return applied;
+    return claimed.single;
   }
 
   /// Dismisses a pending proposal without changing anything.

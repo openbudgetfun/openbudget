@@ -481,6 +481,40 @@ void main() {
         );
       });
 
+      test('then a move that fails leaves the proposal pending', () async {
+        final setup = await setUpMove();
+        final proposal = await chatProposal(
+          setup.budget,
+          setup.from,
+          setup.to,
+          setup.month,
+        );
+        // Point the move at an envelope that no longer exists.
+        final stored = await AgentProposal.db.findById(
+          rawSession,
+          proposal.id!,
+        );
+        final payload = jsonDecode(stored!.payloadJson) as Map<String, Object?>;
+        payload['toEnvelopeId'] = '01900000-0000-7000-8000-000000000000';
+        await AgentProposal.db.updateRow(
+          rawSession,
+          stored.copyWith(payloadJson: jsonEncode(payload)),
+        );
+
+        await expectLater(
+          endpoints.agent.applyProposal(authedSession, proposal.id!),
+          throwsA(anything),
+        );
+
+        final pending = await endpoints.agent.listProposals(
+          authedSession,
+          setup.budget.id!,
+          pendingOnly: true,
+        );
+        expect(pending.single.id, proposal.id);
+        expect(pending.single.resolvedAt, isNull);
+      });
+
       test('then dismissing leaves the allocations alone', () async {
         final setup = await setUpMove();
         final proposal = await chatProposal(
