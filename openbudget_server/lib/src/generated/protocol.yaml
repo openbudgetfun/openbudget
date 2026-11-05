@@ -24,6 +24,8 @@ googleIdp:
   - hasAccount:
 jwtRefresh:
   - refreshAccessToken:
+billing:
+  - getEntitlement:
 budgetTemplate:
   - saveFromMonth:
   - list:

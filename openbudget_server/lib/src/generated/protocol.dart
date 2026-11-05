@@ -58,6 +58,9 @@ import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
     as _iais;
 
 import 'accounts/account.dart' as _iz2jf14v;
+import 'billing/entitlement.dart' as _iq2w1sa5;
+import 'billing/entitlement_source.dart' as _ipnf4x0i;
+import 'billing/entitlement_status.dart' as _imqwzx9j;
 import 'budget_templates/budget_template.dart' as _i01fne9j;
 import 'budgets/budget.dart' as _idtyoogy;
 import 'categories/category.dart' as _iwxpkdmg;
@@ -94,6 +97,9 @@ import 'wallets/wallet_connect_result.dart' as _igiy3v19;
 import 'wallets/wallet_connection.dart' as _i9uqpb1b;
 import 'wallets/wallet_holding.dart' as _iqqppnaa;
 export 'accounts/account.dart';
+export 'billing/entitlement.dart';
+export 'billing/entitlement_source.dart';
+export 'billing/entitlement_status.dart';
 export 'budget_templates/budget_template.dart';
 export 'budgets/budget.dart';
 export 'categories/category.dart';
@@ -144,6 +150,9 @@ class Protocol extends _is.DatabaseSerializationManager
         this,
         types: const [
           _is.getType<_iz2jf14v.Account>,
+          _is.getType<_iq2w1sa5.Entitlement>,
+          _is.getType<_ipnf4x0i.EntitlementSource>,
+          _is.getType<_imqwzx9j.EntitlementStatus>,
           _is.getType<_i01fne9j.BudgetTemplate>,
           _is.getType<_idtyoogy.Budget>,
           _is.getType<_iwxpkdmg.Category>,
@@ -180,6 +189,9 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<_i9uqpb1b.WalletConnection>,
           _is.getType<_iqqppnaa.WalletHolding>,
           _is.getType<_iz2jf14v.Account?>,
+          _is.getType<_iq2w1sa5.Entitlement?>,
+          _is.getType<_ipnf4x0i.EntitlementSource?>,
+          _is.getType<_imqwzx9j.EntitlementStatus?>,
           _is.getType<_i01fne9j.BudgetTemplate?>,
           _is.getType<_idtyoogy.Budget?>,
           _is.getType<_iwxpkdmg.Category?>,
@@ -253,6 +265,9 @@ class Protocol extends _is.DatabaseSerializationManager
         ],
         classNames: const [
           'Account',
+          'Entitlement',
+          'EntitlementSource',
+          'EntitlementStatus',
           'BudgetTemplate',
           'Budget',
           'Category',
@@ -756,6 +771,105 @@ class Protocol extends _is.DatabaseSerializationManager
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
               definition: 'budgetId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _isp.TableDefinition(
+      name: 'entitlement',
+      dartName: 'Entitlement',
+      schema: 'public',
+      module: 'openbudget',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue?',
+          columnDefault: 'random_v7',
+        ),
+        _isp.ColumnDefinition(
+          name: 'userId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'source',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'protocol:EntitlementSource',
+        ),
+        _isp.ColumnDefinition(
+          name: 'externalId',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'status',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'protocol:EntitlementStatus',
+        ),
+        _isp.ColumnDefinition(
+          name: 'currentPeriodStart',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+        _isp.ColumnDefinition(
+          name: 'currentPeriodEnd',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+        _isp.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'now',
+        ),
+        _isp.ColumnDefinition(
+          name: 'updatedAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'now',
+        ),
+      ],
+      foreignKeys: [],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'entitlement_rail_unique_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'source',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'externalId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+        _isp.IndexDefinition(
+          indexName: 'entitlement_user_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'userId',
             ),
           ],
           type: 'btree',
@@ -3231,6 +3345,15 @@ class Protocol extends _is.DatabaseSerializationManager
     if (t == _iz2jf14v.Account) {
       return _iz2jf14v.Account.fromJson(data) as T;
     }
+    if (t == _iq2w1sa5.Entitlement) {
+      return _iq2w1sa5.Entitlement.fromJson(data) as T;
+    }
+    if (t == _ipnf4x0i.EntitlementSource) {
+      return _ipnf4x0i.EntitlementSource.fromJson(data) as T;
+    }
+    if (t == _imqwzx9j.EntitlementStatus) {
+      return _imqwzx9j.EntitlementStatus.fromJson(data) as T;
+    }
     if (t == _i01fne9j.BudgetTemplate) {
       return _i01fne9j.BudgetTemplate.fromJson(data) as T;
     }
@@ -3338,6 +3461,17 @@ class Protocol extends _is.DatabaseSerializationManager
     }
     if (t == _is.getType<_iz2jf14v.Account?>()) {
       return (data != null ? _iz2jf14v.Account.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_iq2w1sa5.Entitlement?>()) {
+      return (data != null ? _iq2w1sa5.Entitlement.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_ipnf4x0i.EntitlementSource?>()) {
+      return (data != null ? _ipnf4x0i.EntitlementSource.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_imqwzx9j.EntitlementStatus?>()) {
+      return (data != null ? _imqwzx9j.EntitlementStatus.fromJson(data) : null)
+          as T;
     }
     if (t == _is.getType<_i01fne9j.BudgetTemplate?>()) {
       return (data != null ? _i01fne9j.BudgetTemplate.fromJson(data) : null)
@@ -3664,6 +3798,9 @@ class Protocol extends _is.DatabaseSerializationManager
   static String? getClassNameForType(Type type) {
     return switch (type) {
       _iz2jf14v.Account => 'Account',
+      _iq2w1sa5.Entitlement => 'Entitlement',
+      _ipnf4x0i.EntitlementSource => 'EntitlementSource',
+      _imqwzx9j.EntitlementStatus => 'EntitlementStatus',
       _i01fne9j.BudgetTemplate => 'BudgetTemplate',
       _idtyoogy.Budget => 'Budget',
       _iwxpkdmg.Category => 'Category',
@@ -3715,6 +3852,12 @@ class Protocol extends _is.DatabaseSerializationManager
     switch (data) {
       case _iz2jf14v.Account():
         return 'Account';
+      case _iq2w1sa5.Entitlement():
+        return 'Entitlement';
+      case _ipnf4x0i.EntitlementSource():
+        return 'EntitlementSource';
+      case _imqwzx9j.EntitlementStatus():
+        return 'EntitlementStatus';
       case _i01fne9j.BudgetTemplate():
         return 'BudgetTemplate';
       case _idtyoogy.Budget():
@@ -3813,6 +3956,15 @@ class Protocol extends _is.DatabaseSerializationManager
     }
     if (dataClassName == 'Account') {
       return deserialize<_iz2jf14v.Account>(data['data']);
+    }
+    if (dataClassName == 'Entitlement') {
+      return deserialize<_iq2w1sa5.Entitlement>(data['data']);
+    }
+    if (dataClassName == 'EntitlementSource') {
+      return deserialize<_ipnf4x0i.EntitlementSource>(data['data']);
+    }
+    if (dataClassName == 'EntitlementStatus') {
+      return deserialize<_imqwzx9j.EntitlementStatus>(data['data']);
     }
     if (dataClassName == 'BudgetTemplate') {
       return deserialize<_i01fne9j.BudgetTemplate>(data['data']);
@@ -3968,6 +4120,8 @@ class Protocol extends _is.DatabaseSerializationManager
     switch (t) {
       case _iz2jf14v.Account:
         return _iz2jf14v.Account.t;
+      case _iq2w1sa5.Entitlement:
+        return _iq2w1sa5.Entitlement.t;
       case _i01fne9j.BudgetTemplate:
         return _i01fne9j.BudgetTemplate.t;
       case _idtyoogy.Budget:

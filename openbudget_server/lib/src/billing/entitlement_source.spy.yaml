@@ -1,0 +1,8 @@
+### The payment rail that granted an entitlement.
+enum: EntitlementSource
+serialized: byName
+values:
+  - stripe
+  - appStore
+  - playStore
+  - solana

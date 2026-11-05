@@ -16,6 +16,8 @@ import 'dart:io' as _idi;
 
 import 'package:openbudget_server/src/generated/accounts/account.dart'
     as _i3fh9aci;
+import 'package:openbudget_server/src/generated/billing/entitlement.dart'
+    as _iiht0r85;
 import 'package:openbudget_server/src/generated/budget_templates/budget_template.dart'
     as _ihbdj8p6;
 import 'package:openbudget_server/src/generated/budgets/budget.dart'
@@ -210,6 +212,8 @@ class TestEndpoints {
 
   late final _JwtRefreshEndpoint jwtRefresh;
 
+  late final _BillingEndpoint billing;
+
   late final _BudgetTemplateEndpoint budgetTemplate;
 
   late final _BudgetEndpoint budget;
@@ -269,6 +273,10 @@ class _InternalTestEndpoints extends TestEndpoints
       serializationManager,
     );
     jwtRefresh = _JwtRefreshEndpoint(
+      endpoints,
+      serializationManager,
+    );
+    billing = _BillingEndpoint(
       endpoints,
       serializationManager,
     );
@@ -1066,6 +1074,45 @@ class _JwtRefreshEndpoint {
           _localUniqueSession,
           _localCallContext.arguments,
         ) as _ida.Future<_iacs.AuthSuccess>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+}
+
+class _BillingEndpoint {
+  _BillingEndpoint(
+    this._endpointDispatch,
+    this._serializationManager,
+  );
+
+  final _is.EndpointDispatch _endpointDispatch;
+
+  final _is.SerializationManager _serializationManager;
+
+  _ida.Future<_iiht0r85.Entitlement?> getEntitlement(
+    _ist.TestSessionBuilder sessionBuilder,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'billing',
+            method: 'getEntitlement',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'billing',
+          methodName: 'getEntitlement',
+          parameters: _ist.testObjectToJson({}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _ida.Future<_iiht0r85.Entitlement?>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();

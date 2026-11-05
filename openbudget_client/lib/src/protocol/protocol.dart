@@ -57,6 +57,9 @@ import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart'
 import 'package:serverpod_client/serverpod_client.dart' as _isc;
 
 import 'accounts/account.dart' as _iz2jf14v;
+import 'billing/entitlement.dart' as _iq2w1sa5;
+import 'billing/entitlement_source.dart' as _ipnf4x0i;
+import 'billing/entitlement_status.dart' as _imqwzx9j;
 import 'budget_templates/budget_template.dart' as _i01fne9j;
 import 'budgets/budget.dart' as _idtyoogy;
 import 'categories/category.dart' as _iwxpkdmg;
@@ -93,6 +96,9 @@ import 'wallets/wallet_connect_result.dart' as _igiy3v19;
 import 'wallets/wallet_connection.dart' as _i9uqpb1b;
 import 'wallets/wallet_holding.dart' as _iqqppnaa;
 export 'accounts/account.dart';
+export 'billing/entitlement.dart';
+export 'billing/entitlement_source.dart';
+export 'billing/entitlement_status.dart';
 export 'budget_templates/budget_template.dart';
 export 'budgets/budget.dart';
 export 'categories/category.dart';
@@ -144,6 +150,9 @@ class Protocol extends _isc.SerializationManager
         this,
         types: const [
           _isc.getType<_iz2jf14v.Account>,
+          _isc.getType<_iq2w1sa5.Entitlement>,
+          _isc.getType<_ipnf4x0i.EntitlementSource>,
+          _isc.getType<_imqwzx9j.EntitlementStatus>,
           _isc.getType<_i01fne9j.BudgetTemplate>,
           _isc.getType<_idtyoogy.Budget>,
           _isc.getType<_iwxpkdmg.Category>,
@@ -180,6 +189,9 @@ class Protocol extends _isc.SerializationManager
           _isc.getType<_i9uqpb1b.WalletConnection>,
           _isc.getType<_iqqppnaa.WalletHolding>,
           _isc.getType<_iz2jf14v.Account?>,
+          _isc.getType<_iq2w1sa5.Entitlement?>,
+          _isc.getType<_ipnf4x0i.EntitlementSource?>,
+          _isc.getType<_imqwzx9j.EntitlementStatus?>,
           _isc.getType<_i01fne9j.BudgetTemplate?>,
           _isc.getType<_idtyoogy.Budget?>,
           _isc.getType<_iwxpkdmg.Category?>,
@@ -252,6 +264,9 @@ class Protocol extends _isc.SerializationManager
         ],
         classNames: const [
           'Account',
+          'Entitlement',
+          'EntitlementSource',
+          'EntitlementStatus',
           'BudgetTemplate',
           'Budget',
           'Category',
@@ -316,6 +331,15 @@ class Protocol extends _isc.SerializationManager
 
     if (t == _iz2jf14v.Account) {
       return _iz2jf14v.Account.fromJson(data) as T;
+    }
+    if (t == _iq2w1sa5.Entitlement) {
+      return _iq2w1sa5.Entitlement.fromJson(data) as T;
+    }
+    if (t == _ipnf4x0i.EntitlementSource) {
+      return _ipnf4x0i.EntitlementSource.fromJson(data) as T;
+    }
+    if (t == _imqwzx9j.EntitlementStatus) {
+      return _imqwzx9j.EntitlementStatus.fromJson(data) as T;
     }
     if (t == _i01fne9j.BudgetTemplate) {
       return _i01fne9j.BudgetTemplate.fromJson(data) as T;
@@ -424,6 +448,17 @@ class Protocol extends _isc.SerializationManager
     }
     if (t == _isc.getType<_iz2jf14v.Account?>()) {
       return (data != null ? _iz2jf14v.Account.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_iq2w1sa5.Entitlement?>()) {
+      return (data != null ? _iq2w1sa5.Entitlement.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_ipnf4x0i.EntitlementSource?>()) {
+      return (data != null ? _ipnf4x0i.EntitlementSource.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_imqwzx9j.EntitlementStatus?>()) {
+      return (data != null ? _imqwzx9j.EntitlementStatus.fromJson(data) : null)
+          as T;
     }
     if (t == _isc.getType<_i01fne9j.BudgetTemplate?>()) {
       return (data != null ? _i01fne9j.BudgetTemplate.fromJson(data) : null)
@@ -750,6 +785,9 @@ class Protocol extends _isc.SerializationManager
   static String? getClassNameForType(Type type) {
     return switch (type) {
       _iz2jf14v.Account => 'Account',
+      _iq2w1sa5.Entitlement => 'Entitlement',
+      _ipnf4x0i.EntitlementSource => 'EntitlementSource',
+      _imqwzx9j.EntitlementStatus => 'EntitlementStatus',
       _i01fne9j.BudgetTemplate => 'BudgetTemplate',
       _idtyoogy.Budget => 'Budget',
       _iwxpkdmg.Category => 'Category',
@@ -801,6 +839,12 @@ class Protocol extends _isc.SerializationManager
     switch (data) {
       case _iz2jf14v.Account():
         return 'Account';
+      case _iq2w1sa5.Entitlement():
+        return 'Entitlement';
+      case _ipnf4x0i.EntitlementSource():
+        return 'EntitlementSource';
+      case _imqwzx9j.EntitlementStatus():
+        return 'EntitlementStatus';
       case _i01fne9j.BudgetTemplate():
         return 'BudgetTemplate';
       case _idtyoogy.Budget():
@@ -895,6 +939,15 @@ class Protocol extends _isc.SerializationManager
     }
     if (dataClassName == 'Account') {
       return deserialize<_iz2jf14v.Account>(data['data']);
+    }
+    if (dataClassName == 'Entitlement') {
+      return deserialize<_iq2w1sa5.Entitlement>(data['data']);
+    }
+    if (dataClassName == 'EntitlementSource') {
+      return deserialize<_ipnf4x0i.EntitlementSource>(data['data']);
+    }
+    if (dataClassName == 'EntitlementStatus') {
+      return deserialize<_imqwzx9j.EntitlementStatus>(data['data']);
     }
     if (dataClassName == 'BudgetTemplate') {
       return deserialize<_i01fne9j.BudgetTemplate>(data['data']);

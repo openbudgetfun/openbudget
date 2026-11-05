@@ -59,3 +59,16 @@ class TaxRateUnavailableException implements Exception {
   @override
   String toString() => 'TaxRateUnavailableException: $message';
 }
+
+/// Thrown when a feature needs OpenBudget Plus and the user has no active
+/// subscription.
+class EntitlementRequiredException implements Exception {
+  EntitlementRequiredException([
+    this.message = 'OpenBudget Plus is required',
+  ]);
+
+  final String message;
+
+  @override
+  String toString() => 'EntitlementRequiredException: $message';
+}

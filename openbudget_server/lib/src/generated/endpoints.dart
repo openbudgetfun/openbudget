@@ -25,6 +25,7 @@ import '../auth/apple_idp_endpoint.dart' as _ilq63su8;
 import '../auth/email_idp_endpoint.dart' as _iuc1hd5t;
 import '../auth/google_idp_endpoint.dart' as _i71axiz0;
 import '../auth/jwt_refresh_endpoint.dart' as _inwq3ztq;
+import '../billing/billing_endpoint.dart' as _irc9lmoc;
 import '../budget_templates/budget_template_endpoint.dart' as _i3p5ie4r;
 import '../budgets/budget_endpoint.dart' as _in8w6wxx;
 import '../budgets/budget_stream.dart' as _i5nzdilh;
@@ -76,6 +77,12 @@ class Endpoints extends _is.EndpointDispatch {
         ..initialize(
           server,
           'jwtRefresh',
+          null,
+        ),
+      'billing': _irc9lmoc.BillingEndpoint()
+        ..initialize(
+          server,
+          'billing',
           null,
         ),
       'budgetTemplate': _i3p5ie4r.BudgetTemplateEndpoint()
@@ -739,6 +746,22 @@ class Endpoints extends _is.EndpointDispatch {
                         session,
                         refreshToken: params['refreshToken'],
                       ),
+        ),
+      },
+    );
+    connectors['billing'] = _is.EndpointConnector(
+      name: 'billing',
+      endpoint: endpoints['billing']!,
+      methodConnectors: {
+        'getEntitlement': _is.MethodConnector(
+          name: 'getEntitlement',
+          params: {},
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['billing'] as _irc9lmoc.BillingEndpoint)
+                  .getEntitlement(session),
         ),
       },
     );

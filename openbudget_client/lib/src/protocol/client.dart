@@ -15,6 +15,8 @@ import 'dart:async' as _ida;
 import 'package:http/http.dart' as _i85jenna;
 import 'package:openbudget_client/src/protocol/accounts/account.dart'
     as _iqudaadl;
+import 'package:openbudget_client/src/protocol/billing/entitlement.dart'
+    as _iyhncv6f;
 import 'package:openbudget_client/src/protocol/budget_templates/budget_template.dart'
     as _itiojbb0;
 import 'package:openbudget_client/src/protocol/budgets/budget.dart'
@@ -456,6 +458,24 @@ class EndpointJwtRefresh extends _iacc.EndpointRefreshJwtTokens {
         'refreshAccessToken',
         {'refreshToken': refreshToken},
         authenticated: false,
+      );
+}
+
+/// Subscription state for the signed-in user.
+/// {@category Endpoint}
+class EndpointBilling extends _isc.EndpointRef {
+  EndpointBilling(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'billing';
+
+  /// Returns the entitlement that currently grants OpenBudget Plus, or null
+  /// when the user is on the free plan.
+  _ida.Future<_iyhncv6f.Entitlement?> getEntitlement() =>
+      caller.callServerEndpoint<_iyhncv6f.Entitlement?>(
+        'billing',
+        'getEntitlement',
+        {},
       );
 }
 
@@ -1920,6 +1940,7 @@ class Client extends _isc.ServerpodClientShared {
     emailIdp = EndpointEmailIdp(this);
     googleIdp = EndpointGoogleIdp(this);
     jwtRefresh = EndpointJwtRefresh(this);
+    billing = EndpointBilling(this);
     budgetTemplate = EndpointBudgetTemplate(this);
     budget = EndpointBudget(this);
     budgetStream = EndpointBudgetStream(this);
@@ -1949,6 +1970,8 @@ class Client extends _isc.ServerpodClientShared {
   late final EndpointGoogleIdp googleIdp;
 
   late final EndpointJwtRefresh jwtRefresh;
+
+  late final EndpointBilling billing;
 
   late final EndpointBudgetTemplate budgetTemplate;
 
@@ -1993,6 +2016,7 @@ class Client extends _isc.ServerpodClientShared {
     'emailIdp': emailIdp,
     'googleIdp': googleIdp,
     'jwtRefresh': jwtRefresh,
+    'billing': billing,
     'budgetTemplate': budgetTemplate,
     'budget': budget,
     'budgetStream': budgetStream,
