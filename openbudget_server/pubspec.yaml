@@ -1,6 +1,6 @@
 name: openbudget_server
 description: Starting point for a Serverpod server.
-version: 1.0.0
+version: 0.0.0
 publish_to: none
 
 environment:
