@@ -7,7 +7,7 @@ import 'package:openbudget_server/src/billing/billing_webhook_result.dart';
 import 'package:openbudget_server/src/billing/entitlement_service.dart';
 import 'package:openbudget_server/src/billing/revenuecat_event_parser.dart';
 import 'package:openbudget_server/src/billing/stripe_signature.dart';
-import 'package:openbudget_server/src/exceptions/exceptions.dart';
+import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
 
 /// Handles RevenueCat webhooks without needing a running HTTP server.

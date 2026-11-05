@@ -1,6 +1,5 @@
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_server/src/budgets/budget_service.dart';
-import 'package:openbudget_server/src/exceptions/exceptions.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart' hide Transaction;
 
@@ -48,7 +47,7 @@ class PayeeService {
   }) async {
     final payee = await Payee.db.findById(session, payeeId);
     if (payee == null) {
-      throw NotFoundException('Payee not found');
+      throw NotFoundException(message: 'Payee not found');
     }
 
     await BudgetService.getById(session, budgetId: payee.budgetId);
@@ -105,7 +104,9 @@ class PayeeService {
     final targetPayee = await getById(session, payeeId: targetPayeeId);
 
     if (sourcePayee.budgetId != targetPayee.budgetId) {
-      throw ValidationException('Payees must belong to the same budget');
+      throw ValidationException(
+        message: 'Payees must belong to the same budget',
+      );
     }
 
     // Reassign all transactions from source to target payee.

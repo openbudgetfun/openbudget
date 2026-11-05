@@ -1,0 +1,5 @@
+### Thrown when the assistant has no usable provider, such as a missing
+### server-side Zen key.
+exception: AgentProviderUnavailableException
+fields:
+  message: String, default='The agent provider is not available'

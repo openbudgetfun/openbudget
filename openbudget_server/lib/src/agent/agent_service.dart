@@ -8,7 +8,6 @@ import 'package:openbudget_server/src/agent/agent_provider_resolver.dart';
 import 'package:openbudget_server/src/agent/agent_tool_registry.dart';
 import 'package:openbudget_server/src/agent/agent_usage_service.dart';
 import 'package:openbudget_server/src/agent/chat_completions_client.dart';
-import 'package:openbudget_server/src/exceptions/exceptions.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
 
@@ -48,7 +47,7 @@ abstract final class AgentService {
     final userId = requireAgentUserId(session);
     final trimmed = message.trim();
     if (trimmed.isEmpty) {
-      throw ValidationException('Message must not be empty.');
+      throw ValidationException(message: 'Message must not be empty.');
     }
 
     // Resolve before writing anything, so a missing plan or key leaves no
@@ -126,7 +125,7 @@ abstract final class AgentService {
       if (reply.toolCalls.isEmpty) {
         if (content.isEmpty) {
           throw AgentProviderException(
-            'The assistant returned an empty reply.',
+            message: 'The assistant returned an empty reply.',
           );
         }
         yield AgentEvent(
@@ -270,7 +269,7 @@ abstract final class AgentService {
     if (conversation == null ||
         conversation.userId != userId ||
         (budgetId != null && conversation.budgetId != budgetId)) {
-      throw NotFoundException('Conversation not found');
+      throw NotFoundException(message: 'Conversation not found');
     }
     return conversation;
   }

@@ -88,6 +88,18 @@ import 'budgets/budget.dart' as _idtyoogy;
 import 'categories/category.dart' as _iwxpkdmg;
 import 'envelope_goals/envelope_goal.dart' as _ifl4yivq;
 import 'envelopes/envelope.dart' as _ikt21dfw;
+import 'exceptions/agent_allowance_exhausted_exception.dart' as _iozei2bz;
+import 'exceptions/agent_provider_exception.dart' as _iurccglg;
+import 'exceptions/agent_provider_unavailable_exception.dart' as _i6p28blo;
+import 'exceptions/authentication_required_exception.dart' as _io2kod1y;
+import 'exceptions/billing_provider_exception.dart' as _i9zkhl6f;
+import 'exceptions/billing_rail_unavailable_exception.dart' as _i5kq7itn;
+import 'exceptions/entitlement_required_exception.dart' as _ik3lny6q;
+import 'exceptions/forbidden_exception.dart' as _iha6yc5u;
+import 'exceptions/not_found_exception.dart' as _izob2ctl;
+import 'exceptions/tax_rate_unavailable_exception.dart' as _in744jyg;
+import 'exceptions/tax_rules_unavailable_exception.dart' as _i4yu9vcq;
+import 'exceptions/validation_exception.dart' as _igpdbyom;
 import 'fx_rates/fx_latest_snapshot.dart' as _i8cxakqz;
 import 'fx_rates/fx_rate_entry.dart' as _i41ek9pv;
 import 'fx_rates/fx_rate_quote.dart' as _i15udi7x;
@@ -143,6 +155,18 @@ export 'budgets/budget.dart';
 export 'categories/category.dart';
 export 'envelope_goals/envelope_goal.dart';
 export 'envelopes/envelope.dart';
+export 'exceptions/agent_allowance_exhausted_exception.dart';
+export 'exceptions/agent_provider_exception.dart';
+export 'exceptions/agent_provider_unavailable_exception.dart';
+export 'exceptions/authentication_required_exception.dart';
+export 'exceptions/billing_provider_exception.dart';
+export 'exceptions/billing_rail_unavailable_exception.dart';
+export 'exceptions/entitlement_required_exception.dart';
+export 'exceptions/forbidden_exception.dart';
+export 'exceptions/not_found_exception.dart';
+export 'exceptions/tax_rate_unavailable_exception.dart';
+export 'exceptions/tax_rules_unavailable_exception.dart';
+export 'exceptions/validation_exception.dart';
 export 'fx_rates/fx_latest_snapshot.dart';
 export 'fx_rates/fx_rate_entry.dart';
 export 'fx_rates/fx_rate_quote.dart';
@@ -212,6 +236,18 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<_iwxpkdmg.Category>,
           _is.getType<_ifl4yivq.EnvelopeGoal>,
           _is.getType<_ikt21dfw.Envelope>,
+          _is.getType<_iozei2bz.AgentAllowanceExhaustedException>,
+          _is.getType<_iurccglg.AgentProviderException>,
+          _is.getType<_i6p28blo.AgentProviderUnavailableException>,
+          _is.getType<_io2kod1y.AuthenticationRequiredException>,
+          _is.getType<_i9zkhl6f.BillingProviderException>,
+          _is.getType<_i5kq7itn.BillingRailUnavailableException>,
+          _is.getType<_ik3lny6q.EntitlementRequiredException>,
+          _is.getType<_iha6yc5u.ForbiddenException>,
+          _is.getType<_izob2ctl.NotFoundException>,
+          _is.getType<_in744jyg.TaxRateUnavailableException>,
+          _is.getType<_i4yu9vcq.TaxRulesUnavailableException>,
+          _is.getType<_igpdbyom.ValidationException>,
           _is.getType<_i8cxakqz.FxLatestSnapshot>,
           _is.getType<_i41ek9pv.FxRateEntry>,
           _is.getType<_i15udi7x.FxRateQuote>,
@@ -267,6 +303,18 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<_iwxpkdmg.Category?>,
           _is.getType<_ifl4yivq.EnvelopeGoal?>,
           _is.getType<_ikt21dfw.Envelope?>,
+          _is.getType<_iozei2bz.AgentAllowanceExhaustedException?>,
+          _is.getType<_iurccglg.AgentProviderException?>,
+          _is.getType<_i6p28blo.AgentProviderUnavailableException?>,
+          _is.getType<_io2kod1y.AuthenticationRequiredException?>,
+          _is.getType<_i9zkhl6f.BillingProviderException?>,
+          _is.getType<_i5kq7itn.BillingRailUnavailableException?>,
+          _is.getType<_ik3lny6q.EntitlementRequiredException?>,
+          _is.getType<_iha6yc5u.ForbiddenException?>,
+          _is.getType<_izob2ctl.NotFoundException?>,
+          _is.getType<_in744jyg.TaxRateUnavailableException?>,
+          _is.getType<_i4yu9vcq.TaxRulesUnavailableException?>,
+          _is.getType<_igpdbyom.ValidationException?>,
           _is.getType<_i8cxakqz.FxLatestSnapshot?>,
           _is.getType<_i41ek9pv.FxRateEntry?>,
           _is.getType<_i15udi7x.FxRateQuote?>,
@@ -362,6 +410,18 @@ class Protocol extends _is.DatabaseSerializationManager
           'Category',
           'EnvelopeGoal',
           'Envelope',
+          'AgentAllowanceExhaustedException',
+          'AgentProviderException',
+          'AgentProviderUnavailableException',
+          'AuthenticationRequiredException',
+          'BillingProviderException',
+          'BillingRailUnavailableException',
+          'EntitlementRequiredException',
+          'ForbiddenException',
+          'NotFoundException',
+          'TaxRateUnavailableException',
+          'TaxRulesUnavailableException',
+          'ValidationException',
           'FxLatestSnapshot',
           'FxRateEntry',
           'FxRateQuote',
@@ -4120,6 +4180,42 @@ class Protocol extends _is.DatabaseSerializationManager
     if (t == _ikt21dfw.Envelope) {
       return _ikt21dfw.Envelope.fromJson(data) as T;
     }
+    if (t == _iozei2bz.AgentAllowanceExhaustedException) {
+      return _iozei2bz.AgentAllowanceExhaustedException.fromJson(data) as T;
+    }
+    if (t == _iurccglg.AgentProviderException) {
+      return _iurccglg.AgentProviderException.fromJson(data) as T;
+    }
+    if (t == _i6p28blo.AgentProviderUnavailableException) {
+      return _i6p28blo.AgentProviderUnavailableException.fromJson(data) as T;
+    }
+    if (t == _io2kod1y.AuthenticationRequiredException) {
+      return _io2kod1y.AuthenticationRequiredException.fromJson(data) as T;
+    }
+    if (t == _i9zkhl6f.BillingProviderException) {
+      return _i9zkhl6f.BillingProviderException.fromJson(data) as T;
+    }
+    if (t == _i5kq7itn.BillingRailUnavailableException) {
+      return _i5kq7itn.BillingRailUnavailableException.fromJson(data) as T;
+    }
+    if (t == _ik3lny6q.EntitlementRequiredException) {
+      return _ik3lny6q.EntitlementRequiredException.fromJson(data) as T;
+    }
+    if (t == _iha6yc5u.ForbiddenException) {
+      return _iha6yc5u.ForbiddenException.fromJson(data) as T;
+    }
+    if (t == _izob2ctl.NotFoundException) {
+      return _izob2ctl.NotFoundException.fromJson(data) as T;
+    }
+    if (t == _in744jyg.TaxRateUnavailableException) {
+      return _in744jyg.TaxRateUnavailableException.fromJson(data) as T;
+    }
+    if (t == _i4yu9vcq.TaxRulesUnavailableException) {
+      return _i4yu9vcq.TaxRulesUnavailableException.fromJson(data) as T;
+    }
+    if (t == _igpdbyom.ValidationException) {
+      return _igpdbyom.ValidationException.fromJson(data) as T;
+    }
     if (t == _i8cxakqz.FxLatestSnapshot) {
       return _i8cxakqz.FxLatestSnapshot.fromJson(data) as T;
     }
@@ -4309,6 +4405,74 @@ class Protocol extends _is.DatabaseSerializationManager
     }
     if (t == _is.getType<_ikt21dfw.Envelope?>()) {
       return (data != null ? _ikt21dfw.Envelope.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_iozei2bz.AgentAllowanceExhaustedException?>()) {
+      return (data != null
+              ? _iozei2bz.AgentAllowanceExhaustedException.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _is.getType<_iurccglg.AgentProviderException?>()) {
+      return (data != null
+              ? _iurccglg.AgentProviderException.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _is.getType<_i6p28blo.AgentProviderUnavailableException?>()) {
+      return (data != null
+              ? _i6p28blo.AgentProviderUnavailableException.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _is.getType<_io2kod1y.AuthenticationRequiredException?>()) {
+      return (data != null
+              ? _io2kod1y.AuthenticationRequiredException.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _is.getType<_i9zkhl6f.BillingProviderException?>()) {
+      return (data != null
+              ? _i9zkhl6f.BillingProviderException.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _is.getType<_i5kq7itn.BillingRailUnavailableException?>()) {
+      return (data != null
+              ? _i5kq7itn.BillingRailUnavailableException.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _is.getType<_ik3lny6q.EntitlementRequiredException?>()) {
+      return (data != null
+              ? _ik3lny6q.EntitlementRequiredException.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _is.getType<_iha6yc5u.ForbiddenException?>()) {
+      return (data != null ? _iha6yc5u.ForbiddenException.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_izob2ctl.NotFoundException?>()) {
+      return (data != null ? _izob2ctl.NotFoundException.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_in744jyg.TaxRateUnavailableException?>()) {
+      return (data != null
+              ? _in744jyg.TaxRateUnavailableException.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _is.getType<_i4yu9vcq.TaxRulesUnavailableException?>()) {
+      return (data != null
+              ? _i4yu9vcq.TaxRulesUnavailableException.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _is.getType<_igpdbyom.ValidationException?>()) {
+      return (data != null
+              ? _igpdbyom.ValidationException.fromJson(data)
+              : null)
+          as T;
     }
     if (t == _is.getType<_i8cxakqz.FxLatestSnapshot?>()) {
       return (data != null ? _i8cxakqz.FxLatestSnapshot.fromJson(data) : null)
@@ -4661,6 +4825,22 @@ class Protocol extends _is.DatabaseSerializationManager
       _iwxpkdmg.Category => 'Category',
       _ifl4yivq.EnvelopeGoal => 'EnvelopeGoal',
       _ikt21dfw.Envelope => 'Envelope',
+      _iozei2bz.AgentAllowanceExhaustedException =>
+        'AgentAllowanceExhaustedException',
+      _iurccglg.AgentProviderException => 'AgentProviderException',
+      _i6p28blo.AgentProviderUnavailableException =>
+        'AgentProviderUnavailableException',
+      _io2kod1y.AuthenticationRequiredException =>
+        'AuthenticationRequiredException',
+      _i9zkhl6f.BillingProviderException => 'BillingProviderException',
+      _i5kq7itn.BillingRailUnavailableException =>
+        'BillingRailUnavailableException',
+      _ik3lny6q.EntitlementRequiredException => 'EntitlementRequiredException',
+      _iha6yc5u.ForbiddenException => 'ForbiddenException',
+      _izob2ctl.NotFoundException => 'NotFoundException',
+      _in744jyg.TaxRateUnavailableException => 'TaxRateUnavailableException',
+      _i4yu9vcq.TaxRulesUnavailableException => 'TaxRulesUnavailableException',
+      _igpdbyom.ValidationException => 'ValidationException',
       _i8cxakqz.FxLatestSnapshot => 'FxLatestSnapshot',
       _i41ek9pv.FxRateEntry => 'FxRateEntry',
       _i15udi7x.FxRateQuote => 'FxRateQuote',
@@ -4755,6 +4935,30 @@ class Protocol extends _is.DatabaseSerializationManager
         return 'EnvelopeGoal';
       case _ikt21dfw.Envelope():
         return 'Envelope';
+      case _iozei2bz.AgentAllowanceExhaustedException():
+        return 'AgentAllowanceExhaustedException';
+      case _iurccglg.AgentProviderException():
+        return 'AgentProviderException';
+      case _i6p28blo.AgentProviderUnavailableException():
+        return 'AgentProviderUnavailableException';
+      case _io2kod1y.AuthenticationRequiredException():
+        return 'AuthenticationRequiredException';
+      case _i9zkhl6f.BillingProviderException():
+        return 'BillingProviderException';
+      case _i5kq7itn.BillingRailUnavailableException():
+        return 'BillingRailUnavailableException';
+      case _ik3lny6q.EntitlementRequiredException():
+        return 'EntitlementRequiredException';
+      case _iha6yc5u.ForbiddenException():
+        return 'ForbiddenException';
+      case _izob2ctl.NotFoundException():
+        return 'NotFoundException';
+      case _in744jyg.TaxRateUnavailableException():
+        return 'TaxRateUnavailableException';
+      case _i4yu9vcq.TaxRulesUnavailableException():
+        return 'TaxRulesUnavailableException';
+      case _igpdbyom.ValidationException():
+        return 'ValidationException';
       case _i8cxakqz.FxLatestSnapshot():
         return 'FxLatestSnapshot';
       case _i41ek9pv.FxRateEntry():
@@ -4915,6 +5119,50 @@ class Protocol extends _is.DatabaseSerializationManager
     }
     if (dataClassName == 'Envelope') {
       return deserialize<_ikt21dfw.Envelope>(data['data']);
+    }
+    if (dataClassName == 'AgentAllowanceExhaustedException') {
+      return deserialize<_iozei2bz.AgentAllowanceExhaustedException>(
+        data['data'],
+      );
+    }
+    if (dataClassName == 'AgentProviderException') {
+      return deserialize<_iurccglg.AgentProviderException>(data['data']);
+    }
+    if (dataClassName == 'AgentProviderUnavailableException') {
+      return deserialize<_i6p28blo.AgentProviderUnavailableException>(
+        data['data'],
+      );
+    }
+    if (dataClassName == 'AuthenticationRequiredException') {
+      return deserialize<_io2kod1y.AuthenticationRequiredException>(
+        data['data'],
+      );
+    }
+    if (dataClassName == 'BillingProviderException') {
+      return deserialize<_i9zkhl6f.BillingProviderException>(data['data']);
+    }
+    if (dataClassName == 'BillingRailUnavailableException') {
+      return deserialize<_i5kq7itn.BillingRailUnavailableException>(
+        data['data'],
+      );
+    }
+    if (dataClassName == 'EntitlementRequiredException') {
+      return deserialize<_ik3lny6q.EntitlementRequiredException>(data['data']);
+    }
+    if (dataClassName == 'ForbiddenException') {
+      return deserialize<_iha6yc5u.ForbiddenException>(data['data']);
+    }
+    if (dataClassName == 'NotFoundException') {
+      return deserialize<_izob2ctl.NotFoundException>(data['data']);
+    }
+    if (dataClassName == 'TaxRateUnavailableException') {
+      return deserialize<_in744jyg.TaxRateUnavailableException>(data['data']);
+    }
+    if (dataClassName == 'TaxRulesUnavailableException') {
+      return deserialize<_i4yu9vcq.TaxRulesUnavailableException>(data['data']);
+    }
+    if (dataClassName == 'ValidationException') {
+      return deserialize<_igpdbyom.ValidationException>(data['data']);
     }
     if (dataClassName == 'FxLatestSnapshot') {
       return deserialize<_i8cxakqz.FxLatestSnapshot>(data['data']);

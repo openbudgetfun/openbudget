@@ -1,6 +1,5 @@
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_server/src/budgets/budget_service.dart';
-import 'package:openbudget_server/src/exceptions/exceptions.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
 
@@ -51,7 +50,7 @@ class CategoryService {
   }) async {
     final category = await Category.db.findById(session, categoryId);
     if (category == null) {
-      throw NotFoundException('Category not found');
+      throw NotFoundException(message: 'Category not found');
     }
 
     // Verify the user owns the parent budget.
@@ -99,7 +98,7 @@ class CategoryService {
 
     if (categories.length != requestedCategoryIds.length) {
       throw NotFoundException(
-        'One or more categories were not found in this budget',
+        message: 'One or more categories were not found in this budget',
       );
     }
 
@@ -112,7 +111,7 @@ class CategoryService {
       final category = categoriesById[orderedCategoryIds[i]];
       if (category == null) {
         throw NotFoundException(
-          'One or more categories were not found in this budget',
+          message: 'One or more categories were not found in this budget',
         );
       }
 

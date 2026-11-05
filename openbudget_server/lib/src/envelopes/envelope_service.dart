@@ -1,6 +1,5 @@
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_server/src/categories/category_service.dart';
-import 'package:openbudget_server/src/exceptions/exceptions.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
 
@@ -60,7 +59,7 @@ class EnvelopeService {
   }) async {
     final envelope = await Envelope.db.findById(session, envelopeId);
     if (envelope == null) {
-      throw NotFoundException('Envelope not found');
+      throw NotFoundException(message: 'Envelope not found');
     }
 
     // Verify the user owns the parent category's budget.
@@ -112,7 +111,7 @@ class EnvelopeService {
 
     if (envelopes.length != requestedEnvelopeIds.length) {
       throw NotFoundException(
-        'One or more envelopes were not found in this category',
+        message: 'One or more envelopes were not found in this category',
       );
     }
 
@@ -125,7 +124,7 @@ class EnvelopeService {
       final envelope = envelopesById[orderedEnvelopeIds[i]];
       if (envelope == null) {
         throw NotFoundException(
-          'One or more envelopes were not found in this category',
+          message: 'One or more envelopes were not found in this category',
         );
       }
 

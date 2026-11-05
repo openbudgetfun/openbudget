@@ -1,0 +1,4 @@
+### Thrown when a provider call fails or answers with something unusable.
+exception: AgentProviderException
+fields:
+  message: String, default='The agent provider call failed'

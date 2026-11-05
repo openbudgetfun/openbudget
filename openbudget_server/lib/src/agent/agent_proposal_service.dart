@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:openbudget_server/src/agent/agent_access.dart';
 import 'package:openbudget_server/src/budgets/budget_realtime_notifier.dart';
-import 'package:openbudget_server/src/exceptions/exceptions.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:openbudget_server/src/monthly_allocations/monthly_allocation_service.dart';
 import 'package:openbudget_server/src/tax/tax_service.dart';
@@ -43,7 +42,9 @@ abstract final class AgentProposalService {
   }) async {
     final proposal = await _requireOwned(session, proposalId);
     if (proposal.status != AgentProposalStatus.pending) {
-      throw ValidationException('This proposal has already been resolved.');
+      throw ValidationException(
+        message: 'This proposal has already been resolved.',
+      );
     }
 
     final payload = _payload(proposal);
@@ -62,7 +63,9 @@ abstract final class AgentProposalService {
           t.status.equals(AgentProposalStatus.pending),
     );
     if (claimed.isEmpty) {
-      throw ValidationException('This proposal has already been resolved.');
+      throw ValidationException(
+        message: 'This proposal has already been resolved.',
+      );
     }
 
     try {
@@ -91,7 +94,9 @@ abstract final class AgentProposalService {
   }) async {
     final proposal = await _requireOwned(session, proposalId);
     if (proposal.status != AgentProposalStatus.pending) {
-      throw ValidationException('This proposal has already been resolved.');
+      throw ValidationException(
+        message: 'This proposal has already been resolved.',
+      );
     }
 
     return AgentProposal.db.updateRow(
@@ -110,7 +115,7 @@ abstract final class AgentProposalService {
     final userId = requireAgentUserId(session);
     final proposal = await AgentProposal.db.findById(session, proposalId);
     if (proposal == null || proposal.userId != userId) {
-      throw NotFoundException('Proposal not found');
+      throw NotFoundException(message: 'Proposal not found');
     }
     return proposal;
   }
@@ -120,10 +125,14 @@ abstract final class AgentProposalService {
     try {
       decoded = jsonDecode(proposal.payloadJson);
     } on FormatException {
-      throw ValidationException('The proposal payload is not valid JSON.');
+      throw ValidationException(
+        message: 'The proposal payload is not valid JSON.',
+      );
     }
     if (decoded is! Map<String, Object?>) {
-      throw ValidationException('The proposal payload is not an object.');
+      throw ValidationException(
+        message: 'The proposal payload is not an object.',
+      );
     }
     return decoded;
   }
@@ -137,17 +146,19 @@ abstract final class AgentProposalService {
     final toEnvelopeId = _requiredUuid(payload, 'toEnvelopeId');
     final amountMinor = _requiredInt(payload, 'amountMinor');
     if (amountMinor <= 0) {
-      throw ValidationException('The proposal amount must be positive.');
+      throw ValidationException(
+        message: 'The proposal amount must be positive.',
+      );
     }
     if (fromEnvelopeId == toEnvelopeId) {
       throw ValidationException(
-        'The proposal must move money between two envelopes.',
+        message: 'The proposal must move money between two envelopes.',
       );
     }
     final month = _requiredString(payload, 'month');
     final match = RegExp(r'^(\d{4})-(0[1-9]|1[0-2])$').firstMatch(month);
     if (match == null) {
-      throw ValidationException('The proposal month is not YYYY-MM.');
+      throw ValidationException(message: 'The proposal month is not YYYY-MM.');
     }
 
     await MonthlyAllocationService.moveMoney(
@@ -199,7 +210,9 @@ abstract final class AgentProposalService {
   static String _requiredString(Map<String, Object?> payload, String key) {
     final value = payload[key];
     if (value is String && value.isNotEmpty) return value;
-    throw ValidationException('The proposal payload is missing "$key".');
+    throw ValidationException(
+      message: 'The proposal payload is missing "$key".',
+    );
   }
 
   static UuidValue _requiredUuid(Map<String, Object?> payload, String key) {
@@ -207,14 +220,18 @@ abstract final class AgentProposalService {
     try {
       return UuidValue.withFormatValidation(value);
     } on FormatException {
-      throw ValidationException('The proposal payload has a bad "$key".');
+      throw ValidationException(
+        message: 'The proposal payload has a bad "$key".',
+      );
     }
   }
 
   static int _requiredInt(Map<String, Object?> payload, String key) {
     final value = _optionalInt(payload, key);
     if (value == null) {
-      throw ValidationException('The proposal payload is missing "$key".');
+      throw ValidationException(
+        message: 'The proposal payload is missing "$key".',
+      );
     }
     return value;
   }
@@ -224,6 +241,8 @@ abstract final class AgentProposalService {
     if (value == null) return null;
     if (value is int) return value;
     if (value is num && value == value.roundToDouble()) return value.toInt();
-    throw ValidationException('The proposal payload has a bad "$key".');
+    throw ValidationException(
+      message: 'The proposal payload has a bad "$key".',
+    );
   }
 }

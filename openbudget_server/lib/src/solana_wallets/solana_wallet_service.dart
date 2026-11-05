@@ -5,7 +5,6 @@ import 'dart:math' as math;
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_server/src/accounts/account_service.dart';
 import 'package:openbudget_server/src/budgets/budget_service.dart';
-import 'package:openbudget_server/src/exceptions/exceptions.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:openbudget_server/src/solana_wallets/jupiter_price_client.dart';
 import 'package:openbudget_server/src/solana_wallets/magic_eden_nft_price_client.dart';
@@ -34,7 +33,7 @@ class SolanaWalletService {
   }) async {
     final normalizedAddress = address.trim();
     if (!_base58Address.hasMatch(normalizedAddress)) {
-      throw ValidationException('Invalid Solana wallet address');
+      throw ValidationException(message: 'Invalid Solana wallet address');
     }
 
     final normalizedCluster = _normalizeCluster(cluster);
@@ -42,7 +41,9 @@ class SolanaWalletService {
     await BudgetService.getById(session, budgetId: budgetId);
     final account = await AccountService.getById(session, accountId: accountId);
     if (account.budgetId != budgetId) {
-      throw ValidationException('Account does not belong to this budget');
+      throw ValidationException(
+        message: 'Account does not belong to this budget',
+      );
     }
 
     final existing = await SolanaWallet.db.findFirstRow(
@@ -100,7 +101,9 @@ class SolanaWalletService {
 
     final account = await AccountService.getById(session, accountId: accountId);
     if (account.budgetId != budgetId) {
-      throw ValidationException('Account does not belong to this budget');
+      throw ValidationException(
+        message: 'Account does not belong to this budget',
+      );
     }
 
     return SolanaWallet.db.findFirstRow(
@@ -216,7 +219,7 @@ class SolanaWalletService {
       transactionId,
     );
     if (transaction == null || transaction.budgetId != budgetId) {
-      throw NotFoundException('Wallet transaction not found');
+      throw NotFoundException(message: 'Wallet transaction not found');
     }
 
     final updated = transaction.copyWith(
@@ -245,7 +248,7 @@ class SolanaWalletService {
     final apiKey = _readHeliusApiKey(session);
     if (apiKey == null) {
       throw ValidationException(
-        'Missing Helius API key. Set HELIUS_API_KEY or passwords.heliusApiKey.',
+        message: 'Missing Helius API key. Set HELIUS_API_KEY or passwords.heliusApiKey.',
       );
     }
 
@@ -356,7 +359,7 @@ class SolanaWalletService {
 
     final wallet = await SolanaWallet.db.findById(session, walletId);
     if (wallet == null || wallet.budgetId != budgetId) {
-      throw NotFoundException('Solana wallet not found');
+      throw NotFoundException(message: 'Solana wallet not found');
     }
     return wallet;
   }
@@ -366,7 +369,7 @@ class SolanaWalletService {
     if (normalized == _clusterMainnet || normalized == _clusterDevnet) {
       return normalized;
     }
-    throw ValidationException('Unsupported Solana cluster "$cluster"');
+    throw ValidationException(message: 'Unsupported Solana cluster "$cluster"');
   }
 
   static String? _readHeliusApiKey(Session session) {

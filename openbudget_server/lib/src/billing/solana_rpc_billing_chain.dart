@@ -2,7 +2,7 @@ import 'dart:typed_data';
 
 import 'package:openbudget_server/src/billing/billing_secrets.dart';
 import 'package:openbudget_server/src/billing/solana_billing_chain.dart';
-import 'package:openbudget_server/src/exceptions/exceptions.dart';
+import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
 import 'package:solana_kit/solana_kit.dart';
 import 'package:solana_kit_associated_token_account/solana_kit_associated_token_account.dart';
@@ -187,7 +187,10 @@ class SolanaRpcBillingChain implements SolanaBillingChain {
     } on BillingProviderException {
       rethrow;
     } on Object catch (error) {
-      throw BillingProviderException('solana', error.runtimeType.toString());
+      throw BillingProviderException(
+        provider: 'solana',
+        details: error.runtimeType.toString(),
+      );
     }
   }
 
@@ -203,7 +206,7 @@ class SolanaRpcBillingChain implements SolanaBillingChain {
     final bytes = Uint8List.fromList(getBase58Encoder().encode(secretKey));
     if (bytes.length != 64) {
       throw BillingRailUnavailableException(
-        '${BillingSecretKeys.solanaCollectorSecretKey} is invalid',
+        message: '${BillingSecretKeys.solanaCollectorSecretKey} is invalid',
       );
     }
     return createSignerFromKeyPair(createKeyPairFromBytes(bytes));

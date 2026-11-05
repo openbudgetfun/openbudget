@@ -1,0 +1,4 @@
+### Thrown when an amount cannot be converted to the report's currency.
+exception: TaxRateUnavailableException
+fields:
+  message: String, default='Exchange rate not available'

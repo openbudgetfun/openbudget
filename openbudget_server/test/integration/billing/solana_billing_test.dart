@@ -6,7 +6,6 @@ import 'package:openbudget_server/src/billing/solana_billing_chain.dart';
 import 'package:openbudget_server/src/billing/solana_billing_collector.dart';
 import 'package:openbudget_server/src/billing/solana_billing_plan.dart';
 import 'package:openbudget_server/src/billing/solana_billing_service.dart';
-import 'package:openbudget_server/src/exceptions/exceptions.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart' show UuidValue;
 import 'package:solana_kit/solana_kit.dart';

@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:openbudget_server/src/exceptions/exceptions.dart';
+import 'package:openbudget_server/src/generated/protocol.dart';
 
 /// Keeps user-supplied provider URLs pointed at the public internet.
 ///
@@ -31,11 +31,15 @@ abstract final class AgentEgressGuard {
   static void checkHostName(String host) {
     final name = host.toLowerCase();
     if (name == 'localhost' || _internalSuffixes.any(name.endsWith)) {
-      throw ValidationException('baseUrl must point at a public host.');
+      throw ValidationException(
+        message: 'baseUrl must point at a public host.',
+      );
     }
     final literal = InternetAddress.tryParse(_stripBrackets(name));
     if (literal != null && isInternal(literal)) {
-      throw ValidationException('baseUrl must point at a public host.');
+      throw ValidationException(
+        message: 'baseUrl must point at a public host.',
+      );
     }
   }
 
@@ -48,12 +52,12 @@ abstract final class AgentEgressGuard {
       addresses = await lookup(_stripBrackets(uri.host));
     } on SocketException {
       throw AgentProviderUnavailableException(
-        'The agent provider host could not be resolved.',
+        message: 'The agent provider host could not be resolved.',
       );
     }
     if (addresses.isEmpty || addresses.any(isInternal)) {
       throw AgentProviderUnavailableException(
-        'The agent provider host is not a public address.',
+        message: 'The agent provider host is not a public address.',
       );
     }
   }

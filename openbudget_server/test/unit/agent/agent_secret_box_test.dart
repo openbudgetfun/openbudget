@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:openbudget_server/src/agent/agent_secret_box.dart';
-import 'package:openbudget_server/src/exceptions/exceptions.dart';
+import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:test/test.dart';
 
 void main() {

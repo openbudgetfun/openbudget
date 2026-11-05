@@ -1,0 +1,4 @@
+### Thrown when a user attempts an action they are not authorized to perform.
+exception: ForbiddenException
+fields:
+  message: String, default='Forbidden'

@@ -1,0 +1,4 @@
+### Thrown when input validation fails.
+exception: ValidationException
+fields:
+  message: String, default='Validation failed'

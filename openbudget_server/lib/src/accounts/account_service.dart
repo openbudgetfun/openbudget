@@ -1,6 +1,5 @@
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_server/src/budgets/budget_service.dart';
-import 'package:openbudget_server/src/exceptions/exceptions.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:openbudget_server/src/institutions/institution_service.dart';
 import 'package:serverpod/serverpod.dart';
@@ -42,7 +41,7 @@ class AccountService {
       await InstitutionService.ensureCatalogSeeded(session);
       final institution = await Institution.db.findById(session, institutionId);
       if (institution == null) {
-        throw NotFoundException('Institution not found');
+        throw NotFoundException(message: 'Institution not found');
       }
     }
 
@@ -123,7 +122,7 @@ class AccountService {
 
     final source = await Account.db.findById(session, sourceAccountId);
     if (source == null || source.creatorId != userId) {
-      throw NotFoundException('My account not found');
+      throw NotFoundException(message: 'My account not found');
     }
 
     if (source.budgetId == budgetId) return source;
@@ -165,7 +164,7 @@ class AccountService {
   }) async {
     final account = await Account.db.findById(session, accountId);
     if (account == null) {
-      throw NotFoundException('Account not found');
+      throw NotFoundException(message: 'Account not found');
     }
 
     await BudgetService.getById(session, budgetId: account.budgetId);

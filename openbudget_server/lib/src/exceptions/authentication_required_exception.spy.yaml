@@ -1,0 +1,5 @@
+### Thrown when an endpoint requires authentication but the user is not
+### authenticated.
+exception: AuthenticationRequiredException
+fields:
+  message: String, default='Authentication required'

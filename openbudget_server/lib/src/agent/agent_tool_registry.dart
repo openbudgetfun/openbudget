@@ -4,7 +4,6 @@ import 'dart:math' as math;
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_server/src/agent/agent_access.dart';
 import 'package:openbudget_server/src/agent/agent_tax_reports.dart';
-import 'package:openbudget_server/src/exceptions/exceptions.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart' hide Transaction;
 
@@ -219,7 +218,9 @@ class AgentToolRegistry {
     Map<String, Object?> args,
   ) {
     if (_isProposeTool(name) && !context.canPropose) {
-      throw ValidationException('The propose tools are not available.');
+      throw ValidationException(
+        message: 'The propose tools are not available.',
+      );
     }
     return switch (name) {
       'list_budgets' => _listBudgets(context),
@@ -378,7 +379,7 @@ class AgentToolRegistry {
     final limit = _optionalInt(args, 'limit') ?? _defaultSearchLimit;
     if (limit < 1 || limit > _maxSearchLimit) {
       throw ValidationException(
-        'limit must be between 1 and $_maxSearchLimit.',
+        message: 'limit must be between 1 and $_maxSearchLimit.',
       );
     }
 
@@ -487,11 +488,13 @@ class AgentToolRegistry {
     final reason = _requireString(args, 'reason');
 
     if (amountMinor <= 0) {
-      throw ValidationException('amountMinor must be greater than zero.');
+      throw ValidationException(
+        message: 'amountMinor must be greater than zero.',
+      );
     }
     if (fromEnvelopeId == toEnvelopeId) {
       throw ValidationException(
-        'fromEnvelopeId and toEnvelopeId must be different.',
+        message: 'fromEnvelopeId and toEnvelopeId must be different.',
       );
     }
 
@@ -543,7 +546,7 @@ class AgentToolRegistry {
     if (businessUsePercent != null &&
         (businessUsePercent < 0 || businessUsePercent > 100)) {
       throw ValidationException(
-        'businessUsePercent must be between 0 and 100.',
+        message: 'businessUsePercent must be between 0 and 100.',
       );
     }
 
@@ -552,7 +555,7 @@ class AgentToolRegistry {
       transactionId,
     );
     if (transaction == null) {
-      throw NotFoundException('Transaction not found');
+      throw NotFoundException(message: 'Transaction not found');
     }
     await requireOwnedBudget(
       context.session,
@@ -596,14 +599,14 @@ class AgentToolRegistry {
 
     final envelope = await Envelope.db.findById(context.session, envelopeId);
     if (envelope == null) {
-      throw NotFoundException('Envelope not found');
+      throw NotFoundException(message: 'Envelope not found');
     }
     final category = await Category.db.findById(
       context.session,
       envelope.categoryId,
     );
     if (category == null) {
-      throw NotFoundException('Category not found');
+      throw NotFoundException(message: 'Category not found');
     }
     await requireOwnedBudget(
       context.session,
@@ -640,14 +643,14 @@ class AgentToolRegistry {
   }) async {
     final envelope = await Envelope.db.findById(context.session, envelopeId);
     if (envelope == null) {
-      throw NotFoundException('Envelope not found');
+      throw NotFoundException(message: 'Envelope not found');
     }
     final category = await Category.db.findById(
       context.session,
       envelope.categoryId,
     );
     if (category == null || category.budgetId != budgetId) {
-      throw NotFoundException('Envelope not found in this budget');
+      throw NotFoundException(message: 'Envelope not found in this budget');
     }
     return envelope;
   }
@@ -662,7 +665,7 @@ class AgentToolRegistry {
       budgetId: budgetId,
     );
     if (!categories.any((category) => category.code == code)) {
-      throw ValidationException('Unknown tax category "$code".');
+      throw ValidationException(message: 'Unknown tax category "$code".');
     }
   }
 
@@ -743,7 +746,9 @@ class AgentToolRegistry {
   static String _requireString(Map<String, Object?> args, String key) {
     final value = args[key];
     if (value is String && value.trim().isNotEmpty) return value.trim();
-    throw ValidationException('Argument "$key" must be a non-empty string.');
+    throw ValidationException(
+      message: 'Argument "$key" must be a non-empty string.',
+    );
   }
 
   static String? _optionalString(Map<String, Object?> args, String key) {
@@ -753,13 +758,13 @@ class AgentToolRegistry {
       final trimmed = value.trim();
       return trimmed.isEmpty ? null : trimmed;
     }
-    throw ValidationException('Argument "$key" must be a string.');
+    throw ValidationException(message: 'Argument "$key" must be a string.');
   }
 
   static int _requireInt(Map<String, Object?> args, String key) {
     final value = _optionalInt(args, key);
     if (value == null) {
-      throw ValidationException('Argument "$key" is required.');
+      throw ValidationException(message: 'Argument "$key" is required.');
     }
     return value;
   }
@@ -769,7 +774,7 @@ class AgentToolRegistry {
     if (value == null) return null;
     if (value is int) return value;
     if (value is num && value == value.roundToDouble()) return value.toInt();
-    throw ValidationException('Argument "$key" must be an integer.');
+    throw ValidationException(message: 'Argument "$key" must be an integer.');
   }
 
   static UuidValue _requireUuid(Map<String, Object?> args, String key) {
@@ -777,7 +782,7 @@ class AgentToolRegistry {
     try {
       return UuidValue.withFormatValidation(value);
     } on FormatException {
-      throw ValidationException('Argument "$key" must be a UUID.');
+      throw ValidationException(message: 'Argument "$key" must be a UUID.');
     }
   }
 
@@ -790,7 +795,9 @@ class AgentToolRegistry {
     if (value == null) return null;
     final parsed = DateTime.tryParse(value);
     if (parsed == null) {
-      throw ValidationException('Argument "$key" must be an ISO 8601 date.');
+      throw ValidationException(
+        message: 'Argument "$key" must be an ISO 8601 date.',
+      );
     }
     if (exclusiveDay && value.length == 10) {
       return DateTime(parsed.year, parsed.month, parsed.day + 1);
@@ -805,7 +812,7 @@ class AgentToolRegistry {
     final value = _requireString(args, key);
     final match = RegExp(r'^(\d{4})-(0[1-9]|1[0-2])$').firstMatch(value);
     if (match == null) {
-      throw ValidationException('Argument "$key" must be YYYY-MM.');
+      throw ValidationException(message: 'Argument "$key" must be YYYY-MM.');
     }
     return (int.parse(match.group(1)!), int.parse(match.group(2)!));
   }

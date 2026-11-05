@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:cryptography/cryptography.dart';
-import 'package:openbudget_server/src/exceptions/exceptions.dart';
+import 'package:openbudget_server/src/generated/protocol.dart';
 
 /// An AES-GCM ciphertext and the nonce that produced it, both base64.
 class AgentSealedSecret {
@@ -56,19 +56,19 @@ abstract final class AgentSecretBox {
       nonceBytes = base64Decode(nonce);
     } on FormatException {
       throw AgentProviderUnavailableException(
-        'The stored agent provider key is not valid base64.',
+        message: 'The stored agent provider key is not valid base64.',
       );
     }
     if (cipherBytes is! List<int> || nonceBytes is! List<int>) {
       throw AgentProviderUnavailableException(
-        'The stored agent provider key is unreadable.',
+        message: 'The stored agent provider key is unreadable.',
       );
     }
 
     final tagLength = _algorithm.macAlgorithm.macLength;
     if (cipherBytes.length <= tagLength) {
       throw AgentProviderUnavailableException(
-        'The stored agent provider key is too short.',
+        message: 'The stored agent provider key is too short.',
       );
     }
     final split = cipherBytes.length - tagLength;
@@ -83,11 +83,11 @@ abstract final class AgentSecretBox {
       return utf8.decode(clearBytes);
     } on SecretBoxAuthenticationError {
       throw AgentProviderUnavailableException(
-        'The stored agent provider key could not be decrypted.',
+        message: 'The stored agent provider key could not be decrypted.',
       );
     } on FormatException {
       throw AgentProviderUnavailableException(
-        'The stored agent provider key is not valid text.',
+        message: 'The stored agent provider key is not valid text.',
       );
     }
   }
@@ -98,12 +98,12 @@ abstract final class AgentSecretBox {
       decoded = base64Decode(base64Key.trim());
     } on FormatException {
       throw AgentProviderUnavailableException(
-        'agentKeyEncryptionKey must be base64.',
+        message: 'agentKeyEncryptionKey must be base64.',
       );
     }
     if (decoded is! List<int> || decoded.length != 32) {
       throw AgentProviderUnavailableException(
-        'agentKeyEncryptionKey must decode to 32 bytes.',
+        message: 'agentKeyEncryptionKey must decode to 32 bytes.',
       );
     }
     return SecretKey(decoded);

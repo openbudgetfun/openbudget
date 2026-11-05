@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
-import 'package:openbudget_server/src/exceptions/exceptions.dart';
+import 'package:openbudget_server/src/generated/protocol.dart';
 
 /// Minimal Stripe API client for the checkout and billing portal flows.
 ///
@@ -40,7 +40,10 @@ class StripeClient {
     );
     final url = response['url'];
     if (url is! String || url.isEmpty) {
-      throw BillingProviderException('stripe', 'missing checkout url');
+      throw BillingProviderException(
+        provider: 'stripe',
+        details: 'missing checkout url',
+      );
     }
     return url;
   }
@@ -58,7 +61,10 @@ class StripeClient {
     );
     final url = response['url'];
     if (url is! String || url.isEmpty) {
-      throw BillingProviderException('stripe', 'missing portal url');
+      throw BillingProviderException(
+        provider: 'stripe',
+        details: 'missing portal url',
+      );
     }
     return url;
   }
@@ -79,13 +85,16 @@ class StripeClient {
     );
     if (response.statusCode < 200 || response.statusCode >= 300) {
       throw BillingProviderException(
-        'stripe',
-        'status ${response.statusCode}',
+        provider: 'stripe',
+        details: 'status ${response.statusCode}',
       );
     }
     final decoded = jsonDecode(response.body);
     if (decoded is! Map<String, dynamic>) {
-      throw BillingProviderException('stripe', 'invalid response');
+      throw BillingProviderException(
+        provider: 'stripe',
+        details: 'invalid response',
+      );
     }
     return decoded;
   }

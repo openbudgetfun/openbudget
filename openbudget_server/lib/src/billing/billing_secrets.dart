@@ -1,4 +1,4 @@
-import 'package:openbudget_server/src/exceptions/exceptions.dart';
+import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
 
 /// Names of the passwords used to configure the billing rails.
@@ -27,7 +27,7 @@ abstract final class BillingSecrets {
   static String require(Session session, String key) {
     final value = read(session, key);
     if (value == null) {
-      throw BillingRailUnavailableException('$key is not configured');
+      throw BillingRailUnavailableException(message: '$key is not configured');
     }
     return value;
   }

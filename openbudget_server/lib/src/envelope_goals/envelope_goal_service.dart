@@ -1,6 +1,5 @@
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_server/src/envelopes/envelope_service.dart';
-import 'package:openbudget_server/src/exceptions/exceptions.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
 
@@ -91,7 +90,7 @@ class EnvelopeGoalService {
     _log.info('Deleting goal id=$goalId');
     final goal = await EnvelopeGoal.db.findById(session, goalId);
     if (goal == null) {
-      throw NotFoundException('Goal not found');
+      throw NotFoundException(message: 'Goal not found');
     }
 
     await EnvelopeService.getById(session, envelopeId: goal.envelopeId);

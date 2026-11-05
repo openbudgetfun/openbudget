@@ -3,7 +3,6 @@ import 'package:openbudget_server/src/accounts/account_service.dart';
 import 'package:openbudget_server/src/budgets/budget_service.dart';
 import 'package:openbudget_server/src/categories/category_service.dart';
 import 'package:openbudget_server/src/envelopes/envelope_service.dart';
-import 'package:openbudget_server/src/exceptions/exceptions.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:openbudget_server/src/payees/payee_service.dart';
 import 'package:serverpod/serverpod.dart' hide Transaction;
@@ -91,7 +90,7 @@ class RecurringTransactionService {
       recurringTransactionId,
     );
     if (recurring == null) {
-      throw NotFoundException('Recurring transaction not found');
+      throw NotFoundException(message: 'Recurring transaction not found');
     }
 
     await BudgetService.getById(session, budgetId: recurring.budgetId);
@@ -270,7 +269,7 @@ class RecurringTransactionService {
   }) async {
     final account = await AccountService.getById(session, accountId: accountId);
     if (account.budgetId != budgetId) {
-      throw NotFoundException('Account not found in this budget');
+      throw NotFoundException(message: 'Account not found in this budget');
     }
   }
 
@@ -288,7 +287,7 @@ class RecurringTransactionService {
       categoryId: envelope.categoryId,
     );
     if (category.budgetId != budgetId) {
-      throw NotFoundException('Envelope not found in this budget');
+      throw NotFoundException(message: 'Envelope not found in this budget');
     }
   }
 
@@ -299,7 +298,7 @@ class RecurringTransactionService {
   }) async {
     final payee = await PayeeService.getById(session, payeeId: payeeId);
     if (payee.budgetId != budgetId) {
-      throw NotFoundException('Payee not found in this budget');
+      throw NotFoundException(message: 'Payee not found in this budget');
     }
   }
 

@@ -1,0 +1,8 @@
+### Thrown when a billing provider accepts a request but fails to complete it.
+###
+### The details never contain response bodies or credentials.
+exception: BillingProviderException
+fields:
+  ### The rail that failed: stripe, revenuecat or solana.
+  provider: String
+  details: String?

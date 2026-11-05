@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_server/src/budgets/budget_service.dart';
-import 'package:openbudget_server/src/exceptions/exceptions.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:openbudget_server/src/institutions/institution_service.dart';
 import 'package:serverpod/serverpod.dart';
@@ -49,7 +48,9 @@ class PlaidService {
 
     final linkToken = response['link_token'] as String?;
     if (linkToken == null || linkToken.isEmpty) {
-      throw ValidationException('Plaid did not return a valid link token.');
+      throw ValidationException(
+        message: 'Plaid did not return a valid link token.',
+      );
     }
     return linkToken;
   }
@@ -60,7 +61,7 @@ class PlaidService {
     required String publicToken,
   }) async {
     if (publicToken.trim().isEmpty) {
-      throw ValidationException('Plaid public token is required.');
+      throw ValidationException(message: 'Plaid public token is required.');
     }
 
     final budget = await BudgetService.getById(session, budgetId: budgetId);
@@ -83,7 +84,7 @@ class PlaidService {
         plaidItemId == null ||
         plaidItemId.isEmpty) {
       throw ValidationException(
-        'Plaid exchange response was missing item credentials.',
+        message: 'Plaid exchange response was missing item credentials.',
       );
     }
 
@@ -144,7 +145,7 @@ class PlaidService {
   }) async {
     final connection = await PlaidConnection.db.findById(session, connectionId);
     if (connection == null || connection.budgetId != budgetId) {
-      throw NotFoundException('Plaid connection not found.');
+      throw NotFoundException(message: 'Plaid connection not found.');
     }
     final budget = await BudgetService.getById(session, budgetId: budgetId);
     final credentials = _resolveCredentials(session);
@@ -191,7 +192,9 @@ class PlaidService {
 
     final publicToken = response['public_token'] as String?;
     if (publicToken == null || publicToken.isEmpty) {
-      throw ValidationException('Plaid sandbox did not return a public token.');
+      throw ValidationException(
+        message: 'Plaid sandbox did not return a public token.',
+      );
     }
 
     return exchangePublicTokenAndImportAccounts(
@@ -224,7 +227,7 @@ class PlaidService {
   }) async {
     final accountsJson = accountsResponse['accounts'];
     if (accountsJson is! List) {
-      throw ValidationException('Plaid accounts payload is invalid.');
+      throw ValidationException(message: 'Plaid accounts payload is invalid.');
     }
 
     final imported = <Account>[];
@@ -432,7 +435,8 @@ class PlaidService {
         secret == null ||
         secret.trim().isEmpty) {
       throw ValidationException(
-        'Plaid credentials are missing. Configure $_plaidClientIdKey and $_plaidSecretKey.',
+        message:
+            'Plaid credentials are missing. Configure $_plaidClientIdKey and $_plaidSecretKey.',
       );
     }
 
@@ -491,13 +495,15 @@ class PlaidService {
       final body = await response.transform(utf8.decoder).join();
       if (response.statusCode < 200 || response.statusCode >= 300) {
         throw ValidationException(
-          'Plaid request failed (${response.statusCode}): $body',
+          message: 'Plaid request failed (${response.statusCode}): $body',
         );
       }
 
       final decoded = jsonDecode(body);
       if (decoded is! Map<String, dynamic>) {
-        throw ValidationException('Plaid returned an unexpected response.');
+        throw ValidationException(
+          message: 'Plaid returned an unexpected response.',
+        );
       }
       return decoded;
     } finally {

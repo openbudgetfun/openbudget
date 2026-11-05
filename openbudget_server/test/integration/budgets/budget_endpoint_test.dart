@@ -1,4 +1,4 @@
-import 'package:openbudget_server/src/exceptions/exceptions.dart';
+import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:test/test.dart';
 
 import '../helpers/auth_helper.dart';

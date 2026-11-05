@@ -1,6 +1,5 @@
 import 'package:openbudget_server/src/agent/agent_egress_guard.dart';
 import 'package:openbudget_server/src/agent/agent_secret_box.dart';
-import 'package:openbudget_server/src/exceptions/exceptions.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
 
@@ -33,7 +32,7 @@ abstract final class AgentProviderSettingsService {
         uri.host.isEmpty ||
         uri.userInfo.isNotEmpty) {
       throw ValidationException(
-        'baseUrl must be an HTTPS URL without credentials.',
+        message: 'baseUrl must be an HTTPS URL without credentials.',
       );
     }
     AgentEgressGuard.checkHostName(uri.host);
@@ -72,7 +71,7 @@ abstract final class AgentProviderSettingsService {
     final encryptionKey = session.passwords[_encryptionKeyPassword];
     if (encryptionKey == null || encryptionKey.trim().isEmpty) {
       throw AgentProviderUnavailableException(
-        'agentKeyEncryptionKey is not configured.',
+        message: 'agentKeyEncryptionKey is not configured.',
       );
     }
     final apiKey = await AgentSecretBox.open(
@@ -115,17 +114,17 @@ abstract final class AgentProviderSettingsService {
     final base = baseUri(baseUrl);
     final trimmedModel = model.trim();
     if (trimmedModel.isEmpty) {
-      throw ValidationException('model must not be empty.');
+      throw ValidationException(message: 'model must not be empty.');
     }
     final trimmedKey = apiKey.trim();
     if (trimmedKey.isEmpty) {
-      throw ValidationException('apiKey must not be empty.');
+      throw ValidationException(message: 'apiKey must not be empty.');
     }
 
     final encryptionKey = session.passwords[_encryptionKeyPassword];
     if (encryptionKey == null || encryptionKey.trim().isEmpty) {
       throw AgentProviderUnavailableException(
-        'agentKeyEncryptionKey is not configured.',
+        message: 'agentKeyEncryptionKey is not configured.',
       );
     }
     final sealed = await AgentSecretBox.seal(
