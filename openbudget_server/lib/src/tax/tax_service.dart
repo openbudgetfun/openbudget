@@ -436,7 +436,34 @@ class TaxService {
                 'profileJson has an unknown filing status "$filingStatus".',
           );
         }
+        final homeOfficeMethod = _optional<String>(json, 'homeOfficeMethod');
+        if (homeOfficeMethod != null &&
+            !UsHomeOfficeMethod.values.any(
+              (method) => method.name == homeOfficeMethod,
+            )) {
+          throw ValidationException(
+            message:
+                'profileJson has an unknown home office method '
+                '"$homeOfficeMethod".',
+          );
+        }
         sanitized['filingStatus'] = filingStatus;
+        sanitized.addAll({
+          'homeOfficeMethod': homeOfficeMethod,
+          'specifiedServiceTrade': _optional<bool>(
+            json,
+            'specifiedServiceTrade',
+          ),
+          'foreignEarnedIncomeExclusionMinor': _optional<int>(
+            json,
+            'foreignEarnedIncomeExclusionMinor',
+          ),
+          'taxpayer65OrOlder': _optional<bool>(json, 'taxpayer65OrOlder'),
+          'spouse65OrOlder': _optional<bool>(json, 'spouse65OrOlder'),
+          'taxpayerHasSsn': _optional<bool>(json, 'taxpayerHasSsn'),
+          'spouseHasSsn': _optional<bool>(json, 'spouseHasSsn'),
+          'dependents': _optional<List<Object?>>(json, 'dependents'),
+        });
       case TaxJurisdiction.ng:
         sanitized['annualRentMinor'] = _optional<int>(json, 'annualRentMinor');
       case TaxJurisdiction.de:
