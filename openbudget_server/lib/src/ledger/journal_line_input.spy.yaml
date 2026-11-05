@@ -1,0 +1,24 @@
+### One proposed journal line as sent to `LedgerEndpoint.saveDraftJournal`.
+class: JournalLineInput
+fields:
+  ledgerAccountId: UuidValue
+  description: String?
+  ### Debit in transaction-currency minor units, or 0.
+  debitMinor: int, default=0
+  ### Credit in transaction-currency minor units, or 0.
+  creditMinor: int, default=0
+  ### ISO 4217 code of the transaction currency.
+  currencyCode: String
+  ### Debit in functional-currency minor units, or 0.
+  functionalDebitMinor: int, default=0
+  ### Credit in functional-currency minor units, or 0.
+  functionalCreditMinor: int, default=0
+  ### Functional per 1 transaction currency, exact decimal string such as
+  ### `1.234567`. Never a double.
+  exchangeRate: String, default='1'
+  ### The calendar date the rate was struck on.
+  rateDate: DateTime?
+  ### Where the rate came from, such as `manual` or a provider name.
+  rateSource: String?
+  ### Optional sales-tax code applied to this line.
+  taxCode: String?

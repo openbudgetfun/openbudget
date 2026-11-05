@@ -1,0 +1,14 @@
+### The computed trial balance for one budget as of one date.
+###
+### A trial balance whose debits differ from its credits is a hard error,
+### so the endpoint throws instead of returning an unbalanced report.
+class: TrialBalanceView
+fields:
+  budgetId: UuidValue
+  ### ISO 4217 functional currency code.
+  currencyCode: String
+  ### The inclusive as-of date the figures run through.
+  asOf: DateTime
+  rows: List<TrialBalanceRowView>
+  totalDebitMinor: int
+  totalCreditMinor: int
