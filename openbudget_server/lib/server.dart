@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:openbudget_server/src/agent/mcp/agent_mcp_route.dart';
 import 'package:openbudget_server/src/auth/apple_oauth_callback_route.dart';
 import 'package:openbudget_server/src/auth/email_sender.dart';
 import 'package:openbudget_server/src/fx_rates/fx_rate_service.dart';
@@ -118,6 +119,9 @@ Future<void> run(List<String> args) async {
   // Payment provider webhooks.
   pod.webServer.addRoute(StripeWebhookRoute(), '/webhooks/stripe');
   pod.webServer.addRoute(RevenueCatWebhookRoute(), '/webhooks/revenuecat');
+
+  // MCP server for external agents, authorised by personal access tokens.
+  pod.webServer.addRoute(AgentMcpRoute(), '/mcp');
 
   if (appleIdpEnabled) {
     pod.webServer.addRoute(

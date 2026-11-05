@@ -18,6 +18,10 @@ agent:
   - listProposals:
   - applyProposal:
   - dismissProposal:
+agentToken:
+  - createAccessToken:
+  - listAccessTokens:
+  - revokeAccessToken:
 appleIdp:
   - login:
   - hasAccount:

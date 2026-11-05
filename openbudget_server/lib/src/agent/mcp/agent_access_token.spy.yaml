@@ -1,0 +1,28 @@
+### A personal access token an external agent uses to reach the MCP server.
+###
+### Only the SHA-256 hash is stored, so a lost token can never be recovered,
+### only revoked and replaced.
+class: AgentAccessToken
+table: agent_access_token
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  userId: UuidValue
+  ### The user's label for the client, such as "Claude Code".
+  name: String
+  ### Lowercase hex SHA-256 of the full token.
+  tokenHash: String
+  ### The token's first 12 characters, for display only.
+  tokenPrefix: String
+  ### Whether the token may call the assistant's propose tools.
+  canPropose: bool
+  createdAt: DateTime, default=now
+  ### Last time the token authenticated an MCP request.
+  lastUsedAt: DateTime?
+  ### When the user revoked it. Revoked tokens never authenticate again.
+  revokedAt: DateTime?
+indexes:
+  agent_access_token_hash_unique_idx:
+    fields: tokenHash
+    unique: true
+  agent_access_token_user_idx:
+    fields: userId, createdAt

@@ -1,0 +1,6 @@
+### A newly created personal access token, with its secret shown once.
+class: AgentAccessTokenCreated
+fields:
+  ### The full token to copy into the client. It cannot be shown again.
+  token: String
+  view: AgentAccessTokenView

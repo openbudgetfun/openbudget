@@ -19,6 +19,8 @@ import 'package:openbudget_server/src/generated/agent/agent_message.dart'
     as _ixbh63dx;
 import 'package:openbudget_server/src/generated/agent/agent_proposal.dart'
     as _iqa5uoc4;
+import 'package:openbudget_server/src/generated/agent/mcp/agent_access_token_view.dart'
+    as _i8fy0qox;
 import 'package:openbudget_server/src/generated/budget_templates/budget_template.dart'
     as _ihbdj8p6;
 import 'package:openbudget_server/src/generated/budgets/budget.dart'
@@ -77,6 +79,9 @@ import 'agent/agent_provider_settings.dart' as _ipqgbdtd;
 import 'agent/agent_provider_settings_view.dart' as _i0760q1h;
 import 'agent/agent_usage_record.dart' as _igo4k2bu;
 import 'agent/agent_usage_view.dart' as _ipqjijih;
+import 'agent/mcp/agent_access_token.dart' as _i8betnj7;
+import 'agent/mcp/agent_access_token_created.dart' as _iis6jewo;
+import 'agent/mcp/agent_access_token_view.dart' as _i4mcrc97;
 import 'billing/entitlement.dart' as _iq2w1sa5;
 import 'billing/entitlement_source.dart' as _ipnf4x0i;
 import 'billing/entitlement_status.dart' as _imqwzx9j;
@@ -144,6 +149,9 @@ export 'agent/agent_provider_settings.dart';
 export 'agent/agent_provider_settings_view.dart';
 export 'agent/agent_usage_record.dart';
 export 'agent/agent_usage_view.dart';
+export 'agent/mcp/agent_access_token.dart';
+export 'agent/mcp/agent_access_token_created.dart';
+export 'agent/mcp/agent_access_token_view.dart';
 export 'billing/entitlement.dart';
 export 'billing/entitlement_source.dart';
 export 'billing/entitlement_status.dart';
@@ -225,6 +233,9 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<_i0760q1h.AgentProviderSettingsView>,
           _is.getType<_igo4k2bu.AgentUsageRecord>,
           _is.getType<_ipqjijih.AgentUsageView>,
+          _is.getType<_i8betnj7.AgentAccessToken>,
+          _is.getType<_iis6jewo.AgentAccessTokenCreated>,
+          _is.getType<_i4mcrc97.AgentAccessTokenView>,
           _is.getType<_iq2w1sa5.Entitlement>,
           _is.getType<_ipnf4x0i.EntitlementSource>,
           _is.getType<_imqwzx9j.EntitlementStatus>,
@@ -292,6 +303,9 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<_i0760q1h.AgentProviderSettingsView?>,
           _is.getType<_igo4k2bu.AgentUsageRecord?>,
           _is.getType<_ipqjijih.AgentUsageView?>,
+          _is.getType<_i8betnj7.AgentAccessToken?>,
+          _is.getType<_iis6jewo.AgentAccessTokenCreated?>,
+          _is.getType<_i4mcrc97.AgentAccessTokenView?>,
           _is.getType<_iq2w1sa5.Entitlement?>,
           _is.getType<_ipnf4x0i.EntitlementSource?>,
           _is.getType<_imqwzx9j.EntitlementStatus?>,
@@ -356,6 +370,7 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<List<_ihq3j0fx.AgentConversation>>,
           _is.getType<List<_ixbh63dx.AgentMessage>>,
           _is.getType<List<_iqa5uoc4.AgentProposal>>,
+          _is.getType<List<_i8fy0qox.AgentAccessTokenView>>,
           _is.getType<List<_ihbdj8p6.BudgetTemplate>>,
           _is.getType<List<_i01zjgtu.MonthlyAllocation>>,
           _is.getType<List<_ihk6o4ea.Budget>>,
@@ -399,6 +414,9 @@ class Protocol extends _is.DatabaseSerializationManager
           'AgentProviderSettingsView',
           'AgentUsageRecord',
           'AgentUsageView',
+          'AgentAccessToken',
+          'AgentAccessTokenCreated',
+          'AgentAccessTokenView',
           'Entitlement',
           'EntitlementSource',
           'EntitlementStatus',
@@ -614,6 +632,104 @@ class Protocol extends _is.DatabaseSerializationManager
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
               definition: 'externalAccountId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _isp.TableDefinition(
+      name: 'agent_access_token',
+      dartName: 'AgentAccessToken',
+      schema: 'public',
+      module: 'openbudget',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue?',
+          columnDefault: 'random_v7',
+        ),
+        _isp.ColumnDefinition(
+          name: 'userId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'name',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'tokenHash',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'tokenPrefix',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'canPropose',
+          columnType: _isp.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+        ),
+        _isp.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'now',
+        ),
+        _isp.ColumnDefinition(
+          name: 'lastUsedAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: true,
+          dartType: 'DateTime?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'revokedAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: true,
+          dartType: 'DateTime?',
+        ),
+      ],
+      foreignKeys: [],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'agent_access_token_hash_unique_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'tokenHash',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+        _isp.IndexDefinition(
+          indexName: 'agent_access_token_user_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'userId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'createdAt',
             ),
           ],
           type: 'btree',
@@ -4147,6 +4263,15 @@ class Protocol extends _is.DatabaseSerializationManager
     if (t == _ipqjijih.AgentUsageView) {
       return _ipqjijih.AgentUsageView.fromJson(data) as T;
     }
+    if (t == _i8betnj7.AgentAccessToken) {
+      return _i8betnj7.AgentAccessToken.fromJson(data) as T;
+    }
+    if (t == _iis6jewo.AgentAccessTokenCreated) {
+      return _iis6jewo.AgentAccessTokenCreated.fromJson(data) as T;
+    }
+    if (t == _i4mcrc97.AgentAccessTokenView) {
+      return _i4mcrc97.AgentAccessTokenView.fromJson(data) as T;
+    }
     if (t == _iq2w1sa5.Entitlement) {
       return _iq2w1sa5.Entitlement.fromJson(data) as T;
     }
@@ -4363,6 +4488,22 @@ class Protocol extends _is.DatabaseSerializationManager
     }
     if (t == _is.getType<_ipqjijih.AgentUsageView?>()) {
       return (data != null ? _ipqjijih.AgentUsageView.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_i8betnj7.AgentAccessToken?>()) {
+      return (data != null ? _i8betnj7.AgentAccessToken.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_iis6jewo.AgentAccessTokenCreated?>()) {
+      return (data != null
+              ? _iis6jewo.AgentAccessTokenCreated.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _is.getType<_i4mcrc97.AgentAccessTokenView?>()) {
+      return (data != null
+              ? _i4mcrc97.AgentAccessTokenView.fromJson(data)
+              : null)
           as T;
     }
     if (t == _is.getType<_iq2w1sa5.Entitlement?>()) {
@@ -4663,6 +4804,12 @@ class Protocol extends _is.DatabaseSerializationManager
               .toList()
           as T;
     }
+    if (t == List<_i8fy0qox.AgentAccessTokenView>) {
+      return (data as List)
+              .map((e) => deserialize<_i8fy0qox.AgentAccessTokenView>(e))
+              .toList()
+          as T;
+    }
     if (t == List<_ihbdj8p6.BudgetTemplate>) {
       return (data as List)
               .map((e) => deserialize<_ihbdj8p6.BudgetTemplate>(e))
@@ -4814,6 +4961,9 @@ class Protocol extends _is.DatabaseSerializationManager
       _i0760q1h.AgentProviderSettingsView => 'AgentProviderSettingsView',
       _igo4k2bu.AgentUsageRecord => 'AgentUsageRecord',
       _ipqjijih.AgentUsageView => 'AgentUsageView',
+      _i8betnj7.AgentAccessToken => 'AgentAccessToken',
+      _iis6jewo.AgentAccessTokenCreated => 'AgentAccessTokenCreated',
+      _i4mcrc97.AgentAccessTokenView => 'AgentAccessTokenView',
       _iq2w1sa5.Entitlement => 'Entitlement',
       _ipnf4x0i.EntitlementSource => 'EntitlementSource',
       _imqwzx9j.EntitlementStatus => 'EntitlementStatus',
@@ -4913,6 +5063,12 @@ class Protocol extends _is.DatabaseSerializationManager
         return 'AgentUsageRecord';
       case _ipqjijih.AgentUsageView():
         return 'AgentUsageView';
+      case _i8betnj7.AgentAccessToken():
+        return 'AgentAccessToken';
+      case _iis6jewo.AgentAccessTokenCreated():
+        return 'AgentAccessTokenCreated';
+      case _i4mcrc97.AgentAccessTokenView():
+        return 'AgentAccessTokenView';
       case _iq2w1sa5.Entitlement():
         return 'Entitlement';
       case _ipnf4x0i.EntitlementSource():
@@ -5086,6 +5242,15 @@ class Protocol extends _is.DatabaseSerializationManager
     }
     if (dataClassName == 'AgentUsageView') {
       return deserialize<_ipqjijih.AgentUsageView>(data['data']);
+    }
+    if (dataClassName == 'AgentAccessToken') {
+      return deserialize<_i8betnj7.AgentAccessToken>(data['data']);
+    }
+    if (dataClassName == 'AgentAccessTokenCreated') {
+      return deserialize<_iis6jewo.AgentAccessTokenCreated>(data['data']);
+    }
+    if (dataClassName == 'AgentAccessTokenView') {
+      return deserialize<_i4mcrc97.AgentAccessTokenView>(data['data']);
     }
     if (dataClassName == 'Entitlement') {
       return deserialize<_iq2w1sa5.Entitlement>(data['data']);
@@ -5313,6 +5478,8 @@ class Protocol extends _is.DatabaseSerializationManager
         return _ipqgbdtd.AgentProviderSettings.t;
       case _igo4k2bu.AgentUsageRecord:
         return _igo4k2bu.AgentUsageRecord.t;
+      case _i8betnj7.AgentAccessToken:
+        return _i8betnj7.AgentAccessToken.t;
       case _iq2w1sa5.Entitlement:
         return _iq2w1sa5.Entitlement.t;
       case _iw7l0hzr.SolanaBillingChallenge:

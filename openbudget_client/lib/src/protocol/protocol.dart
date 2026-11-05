@@ -19,6 +19,8 @@ import 'package:openbudget_client/src/protocol/agent/agent_message.dart'
     as _i8fbky0c;
 import 'package:openbudget_client/src/protocol/agent/agent_proposal.dart'
     as _icv7zzda;
+import 'package:openbudget_client/src/protocol/agent/mcp/agent_access_token_view.dart'
+    as _itxn3wek;
 import 'package:openbudget_client/src/protocol/budget_templates/budget_template.dart'
     as _itiojbb0;
 import 'package:openbudget_client/src/protocol/budgets/budget.dart'
@@ -76,6 +78,9 @@ import 'agent/agent_provider_settings.dart' as _ipqgbdtd;
 import 'agent/agent_provider_settings_view.dart' as _i0760q1h;
 import 'agent/agent_usage_record.dart' as _igo4k2bu;
 import 'agent/agent_usage_view.dart' as _ipqjijih;
+import 'agent/mcp/agent_access_token.dart' as _i8betnj7;
+import 'agent/mcp/agent_access_token_created.dart' as _iis6jewo;
+import 'agent/mcp/agent_access_token_view.dart' as _i4mcrc97;
 import 'billing/entitlement.dart' as _iq2w1sa5;
 import 'billing/entitlement_source.dart' as _ipnf4x0i;
 import 'billing/entitlement_status.dart' as _imqwzx9j;
@@ -143,6 +148,9 @@ export 'agent/agent_provider_settings.dart';
 export 'agent/agent_provider_settings_view.dart';
 export 'agent/agent_usage_record.dart';
 export 'agent/agent_usage_view.dart';
+export 'agent/mcp/agent_access_token.dart';
+export 'agent/mcp/agent_access_token_created.dart';
+export 'agent/mcp/agent_access_token_view.dart';
 export 'billing/entitlement.dart';
 export 'billing/entitlement_source.dart';
 export 'billing/entitlement_status.dart';
@@ -225,6 +233,9 @@ class Protocol extends _isc.SerializationManager
           _isc.getType<_i0760q1h.AgentProviderSettingsView>,
           _isc.getType<_igo4k2bu.AgentUsageRecord>,
           _isc.getType<_ipqjijih.AgentUsageView>,
+          _isc.getType<_i8betnj7.AgentAccessToken>,
+          _isc.getType<_iis6jewo.AgentAccessTokenCreated>,
+          _isc.getType<_i4mcrc97.AgentAccessTokenView>,
           _isc.getType<_iq2w1sa5.Entitlement>,
           _isc.getType<_ipnf4x0i.EntitlementSource>,
           _isc.getType<_imqwzx9j.EntitlementStatus>,
@@ -292,6 +303,9 @@ class Protocol extends _isc.SerializationManager
           _isc.getType<_i0760q1h.AgentProviderSettingsView?>,
           _isc.getType<_igo4k2bu.AgentUsageRecord?>,
           _isc.getType<_ipqjijih.AgentUsageView?>,
+          _isc.getType<_i8betnj7.AgentAccessToken?>,
+          _isc.getType<_iis6jewo.AgentAccessTokenCreated?>,
+          _isc.getType<_i4mcrc97.AgentAccessTokenView?>,
           _isc.getType<_iq2w1sa5.Entitlement?>,
           _isc.getType<_ipnf4x0i.EntitlementSource?>,
           _isc.getType<_imqwzx9j.EntitlementStatus?>,
@@ -356,6 +370,7 @@ class Protocol extends _isc.SerializationManager
           _isc.getType<List<_in44ixo7.AgentConversation>>,
           _isc.getType<List<_i8fbky0c.AgentMessage>>,
           _isc.getType<List<_icv7zzda.AgentProposal>>,
+          _isc.getType<List<_itxn3wek.AgentAccessTokenView>>,
           _isc.getType<List<_itiojbb0.BudgetTemplate>>,
           _isc.getType<List<_iz3b7rge.MonthlyAllocation>>,
           _isc.getType<List<_iro9sz2e.Budget>>,
@@ -398,6 +413,9 @@ class Protocol extends _isc.SerializationManager
           'AgentProviderSettingsView',
           'AgentUsageRecord',
           'AgentUsageView',
+          'AgentAccessToken',
+          'AgentAccessTokenCreated',
+          'AgentAccessTokenView',
           'Entitlement',
           'EntitlementSource',
           'EntitlementStatus',
@@ -519,6 +537,15 @@ class Protocol extends _isc.SerializationManager
     }
     if (t == _ipqjijih.AgentUsageView) {
       return _ipqjijih.AgentUsageView.fromJson(data) as T;
+    }
+    if (t == _i8betnj7.AgentAccessToken) {
+      return _i8betnj7.AgentAccessToken.fromJson(data) as T;
+    }
+    if (t == _iis6jewo.AgentAccessTokenCreated) {
+      return _iis6jewo.AgentAccessTokenCreated.fromJson(data) as T;
+    }
+    if (t == _i4mcrc97.AgentAccessTokenView) {
+      return _i4mcrc97.AgentAccessTokenView.fromJson(data) as T;
     }
     if (t == _iq2w1sa5.Entitlement) {
       return _iq2w1sa5.Entitlement.fromJson(data) as T;
@@ -736,6 +763,22 @@ class Protocol extends _isc.SerializationManager
     }
     if (t == _isc.getType<_ipqjijih.AgentUsageView?>()) {
       return (data != null ? _ipqjijih.AgentUsageView.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_i8betnj7.AgentAccessToken?>()) {
+      return (data != null ? _i8betnj7.AgentAccessToken.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_iis6jewo.AgentAccessTokenCreated?>()) {
+      return (data != null
+              ? _iis6jewo.AgentAccessTokenCreated.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _isc.getType<_i4mcrc97.AgentAccessTokenView?>()) {
+      return (data != null
+              ? _i4mcrc97.AgentAccessTokenView.fromJson(data)
+              : null)
           as T;
     }
     if (t == _isc.getType<_iq2w1sa5.Entitlement?>()) {
@@ -1036,6 +1079,12 @@ class Protocol extends _isc.SerializationManager
               .toList()
           as T;
     }
+    if (t == List<_itxn3wek.AgentAccessTokenView>) {
+      return (data as List)
+              .map((e) => deserialize<_itxn3wek.AgentAccessTokenView>(e))
+              .toList()
+          as T;
+    }
     if (t == List<_itiojbb0.BudgetTemplate>) {
       return (data as List)
               .map((e) => deserialize<_itiojbb0.BudgetTemplate>(e))
@@ -1187,6 +1236,9 @@ class Protocol extends _isc.SerializationManager
       _i0760q1h.AgentProviderSettingsView => 'AgentProviderSettingsView',
       _igo4k2bu.AgentUsageRecord => 'AgentUsageRecord',
       _ipqjijih.AgentUsageView => 'AgentUsageView',
+      _i8betnj7.AgentAccessToken => 'AgentAccessToken',
+      _iis6jewo.AgentAccessTokenCreated => 'AgentAccessTokenCreated',
+      _i4mcrc97.AgentAccessTokenView => 'AgentAccessTokenView',
       _iq2w1sa5.Entitlement => 'Entitlement',
       _ipnf4x0i.EntitlementSource => 'EntitlementSource',
       _imqwzx9j.EntitlementStatus => 'EntitlementStatus',
@@ -1286,6 +1338,12 @@ class Protocol extends _isc.SerializationManager
         return 'AgentUsageRecord';
       case _ipqjijih.AgentUsageView():
         return 'AgentUsageView';
+      case _i8betnj7.AgentAccessToken():
+        return 'AgentAccessToken';
+      case _iis6jewo.AgentAccessTokenCreated():
+        return 'AgentAccessTokenCreated';
+      case _i4mcrc97.AgentAccessTokenView():
+        return 'AgentAccessTokenView';
       case _iq2w1sa5.Entitlement():
         return 'Entitlement';
       case _ipnf4x0i.EntitlementSource():
@@ -1455,6 +1513,15 @@ class Protocol extends _isc.SerializationManager
     }
     if (dataClassName == 'AgentUsageView') {
       return deserialize<_ipqjijih.AgentUsageView>(data['data']);
+    }
+    if (dataClassName == 'AgentAccessToken') {
+      return deserialize<_i8betnj7.AgentAccessToken>(data['data']);
+    }
+    if (dataClassName == 'AgentAccessTokenCreated') {
+      return deserialize<_iis6jewo.AgentAccessTokenCreated>(data['data']);
+    }
+    if (dataClassName == 'AgentAccessTokenView') {
+      return deserialize<_i4mcrc97.AgentAccessTokenView>(data['data']);
     }
     if (dataClassName == 'Entitlement') {
       return deserialize<_iq2w1sa5.Entitlement>(data['data']);
