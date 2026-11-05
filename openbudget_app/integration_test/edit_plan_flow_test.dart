@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_goals_provider.dart';
@@ -11,6 +10,8 @@ import 'package:openbudget_app/src/features/budget/widgets/budget_amount_keypad.
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:patrol/patrol.dart';
+
+import 'common/patrol_helpers.dart';
 
 const _budgetId = '00000000-0000-0000-0000-000000000A01';
 const _categoryId = '00000000-0000-0000-0000-000000000A02';
@@ -93,12 +94,11 @@ BudgetSummary _makeSummary() {
 }
 
 void main() {
-  GoogleFonts.config.allowRuntimeFetching = false;
-
   patrolWidgetTest(
     'edit plan screen supports target entry, group details, and next navigation',
     ($) async {
       final tester = $.tester;
+      final editPlanPage = EditPlanPage(tester);
       final container = ProviderContainer(
         overrides: [
           budgetMonthlySummaryProvider.overrideWith(
@@ -149,9 +149,8 @@ void main() {
       expect(find.text('Needs'), findsOneWidget);
       expect(find.text('Add Target'), findsWidgets);
 
-      await tester.tap(find.text('Add Target').first);
-      await tester.pumpAndSettle();
-      expect(find.text('Save Target'), findsOneWidget);
+      await editPlanPage.openFirstAddTarget();
+      expect(editPlanPage.saveTargetButton, findsOneWidget);
       await tester.tap(find.widgetWithText(BudgetAmountField, 'I need'));
       await tester.pumpAndSettle();
       for (final digit in ['2', '8', '0', '0']) {
@@ -163,10 +162,7 @@ void main() {
       await tester.tap(find.text('Cancel'));
       await tester.pumpAndSettle();
 
-      await tester.tap(
-        find.byKey(Key('edit-plan-group-menu-${_categoryId.toLowerCase()}')),
-      );
-      await tester.pumpAndSettle();
+      await editPlanPage.openGroupDetails(_categoryId);
       expect(find.text('Details'), findsOneWidget);
       expect(find.text('Category Group Name'), findsOneWidget);
       await tester.tap(find.text('Hide'));

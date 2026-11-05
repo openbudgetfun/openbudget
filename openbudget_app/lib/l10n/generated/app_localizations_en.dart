@@ -3202,4 +3202,353 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get budgetDetailCoverOverspendingError =>
       'Could not cover overspending.';
+
+  @override
+  String get accountsMoreActions => 'More actions';
+
+  @override
+  String get accountsDismissNotification => 'Dismiss notification';
+
+  @override
+  String get accountsClosedBadge => 'Closed';
+
+  @override
+  String get accountsSynced => 'Synced';
+
+  @override
+  String get accountsNeedsAttention => 'Needs attention';
+
+  @override
+  String get accountsBackAction => 'Go back';
+
+  @override
+  String get accountsCloseAction => 'Close';
+
+  @override
+  String accountsShowUnclearedTransactions(int count) {
+    return 'Show $count uncleared transactions';
+  }
+
+  @override
+  String get accountsNoLoanActivity => 'No loan activity yet';
+
+  @override
+  String get accountsLoanPayments => 'Payments';
+
+  @override
+  String get accountsLoanOtherActivity => 'Other Activity';
+
+  @override
+  String get accountsUnknown => 'Unknown';
+
+  @override
+  String get accountsNoHoldings => 'No holdings';
+
+  @override
+  String accountsTaxYear(int year) {
+    return 'Tax $year';
+  }
+
+  @override
+  String accountsTaxableTransactions(int count) {
+    return '$count taxable tx';
+  }
+
+  @override
+  String accountsProceeds(String amount) {
+    return 'Proceeds $amount';
+  }
+
+  @override
+  String accountsBasis(String amount) {
+    return 'Basis $amount';
+  }
+
+  @override
+  String get accountsUnknownProgram => 'Unknown program';
+
+  @override
+  String get accountsSuggestedSwaps => 'Swaps';
+
+  @override
+  String get accountsSuggestedStaking => 'Staking';
+
+  @override
+  String get accountsSuggestedNft => 'NFT';
+
+  @override
+  String get accountsSuggestedLending => 'Lending';
+
+  @override
+  String get accountsSuggestedIncome => 'Income';
+
+  @override
+  String get accountsSuggestedTransfers => 'Transfers';
+
+  @override
+  String get accountsLinkUnavailableMessage =>
+      'Bank connections are currently unavailable in this build. Use unlinked accounts instead.';
+
+  @override
+  String get accountsToggleBalanceSign => 'Toggle positive or negative balance';
+
+  @override
+  String get accountsLinkedMobileOnly =>
+      'Linked connections are only available on iOS/Android right now. Add an unlinked account instead.';
+
+  @override
+  String accountsLinkedNotCompleted(String institution) {
+    return 'Linked connections for \"$institution\" were not completed. Add an unlinked account instead.';
+  }
+
+  @override
+  String get accountsLinkedNothingImported =>
+      'No accounts were imported from this connection. Add an unlinked account instead.';
+
+  @override
+  String accountsLinkedUnavailable(String institution) {
+    return 'Linked connections for \"$institution\" are currently unavailable. Add an unlinked account instead.';
+  }
+
+  @override
+  String get accountsAddExistingError =>
+      'Unable to add this account to the current budget.';
+
+  @override
+  String get accountsMyAccounts => 'My accounts';
+
+  @override
+  String get accountsAddExistingAccountHint =>
+      'Add this existing account to this budget';
+
+  @override
+  String accountsInstitutionLabel(String institution) {
+    return 'Institution: $institution';
+  }
+
+  @override
+  String get authLoginHeadline => 'Welcome back';
+
+  @override
+  String get authLoginSubtitle => 'Continue building better money habits.';
+
+  @override
+  String get authShowPassword => 'Show password';
+
+  @override
+  String get authHidePassword => 'Hide password';
+
+  @override
+  String authStepProgress(int step, int total) {
+    return 'Step $step of $total';
+  }
+
+  @override
+  String get homeLoadingBudgets => 'Loading budgets';
+
+  @override
+  String get homeNoBudgetsHint =>
+      'Start a plan for this month and give every dollar a job.';
+
+  @override
+  String settingsLastUpdated(String label) {
+    return 'Last updated: $label';
+  }
+
+  @override
+  String get settingsLoading => 'Loading settings';
+
+  @override
+  String get budgetStatusOverspent => 'Overspent';
+
+  @override
+  String get budgetStatusFunded => 'Funded';
+
+  @override
+  String get budgetStatusUnderfunded => 'Underfunded';
+
+  @override
+  String budgetEnvelopeProgress(int percent) {
+    return '$percent% funded';
+  }
+
+  @override
+  String budgetEnvelopeCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count envelopes',
+      one: '1 envelope',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String budgetReviewTransactions(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Review $count transactions',
+      one: 'Review 1 transaction',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String budgetCoverOverspentCategories(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Cover $count overspent categories',
+      one: 'Cover 1 overspent category',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String budgetCategoryAllocated(String amount) {
+    return '$amount allocated';
+  }
+
+  @override
+  String budgetGoalTarget(String amount) {
+    return 'Target: $amount';
+  }
+
+  @override
+  String budgetGoalMonthly(String amount) {
+    return 'Monthly: $amount';
+  }
+
+  @override
+  String budgetGoalTargetBy(String amount, String date) {
+    return 'Target: $amount by $date';
+  }
+
+  @override
+  String get budgetBackspaceLabel => 'Delete digit';
+
+  @override
+  String budgetDayOfMonth(int day) {
+    return 'Day $day';
+  }
+
+  @override
+  String get transactionsLoading => 'Loading transactions';
+
+  @override
+  String get payeesLoading => 'Loading payees';
+
+  @override
+  String get rulesLoading => 'Loading rules';
+
+  @override
+  String get transactionsBack => 'Back';
+
+  @override
+  String get transactionsSearchClear => 'Clear search';
+
+  @override
+  String get transactionsUnknownPayee => 'Unknown payee';
+
+  @override
+  String get transactionsUnknownEnvelope => 'Unknown envelope';
+
+  @override
+  String get reportsAgeOfMoneyHint =>
+      'How long your money lasts after it arrives';
+
+  @override
+  String get reportsAgeOfMoneyTitle => 'Age of Money';
+
+  @override
+  String reportsDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days',
+      one: '1 day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get reportsLoading => 'Adding up the month…';
+
+  @override
+  String get reportsNetWorthCurrent => 'Right now';
+
+  @override
+  String get reportsNetWorthExplainerBody =>
+      'Net worth adds up every active account in this plan: what you own minus what you owe. Think of it as a snapshot of today, not a score.';
+
+  @override
+  String get reportsNetWorthExplainerTitle => 'What net worth counts';
+
+  @override
+  String get reportsNextMonth => 'Next month';
+
+  @override
+  String get reportsOtherCategories => 'Other categories';
+
+  @override
+  String get reportsPositiveInflowTotal => 'Income this period';
+
+  @override
+  String get reportsPreviousMonth => 'Previous month';
+
+  @override
+  String recurringCalendarDayCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count scheduled items',
+      one: '1 scheduled item',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get recurringActiveLabel => 'Active';
+
+  @override
+  String get recurringLoading => 'Fetching the schedule…';
+
+  @override
+  String get recurringNextMonth => 'Next month';
+
+  @override
+  String get recurringPausedLabel => 'Paused';
+
+  @override
+  String get recurringPostedLabel => 'Posted';
+
+  @override
+  String get recurringPreviousMonth => 'Previous month';
+
+  @override
+  String get recurringSavingLabel => 'Saving…';
+
+  @override
+  String get recurringScheduledLabel => 'Scheduled';
+
+  @override
+  String get recurringSummaryTitle => 'Scheduled totals';
+
+  @override
+  String get reportsChartEmptyMessage =>
+      'Add a few transactions and this drawing fills in.';
+
+  @override
+  String get reportsChartEmptyTitle => 'Nothing to chart yet';
+
+  @override
+  String reportsChartSeriesEntry(String label, String amount) {
+    return '$label: $amount';
+  }
+
+  @override
+  String reportsChartSummary(String title, String entries) {
+    return '$title. $entries';
+  }
 }

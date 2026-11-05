@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_actions_provider.dart';
@@ -34,10 +33,6 @@ class _ThrowingCreateAccountActions extends AccountActions {
 }
 
 void main() {
-  setUpAll(() {
-    GoogleFonts.config.allowRuntimeFetching = false;
-  });
-
   const budgetId = 'test-budget-1';
   const unlinkedTypeTileKey = Key('add-account-unlinked-type-tile');
   const checkingTypeOptionKey = ValueKey('add-account-type-option-checking');
@@ -239,8 +234,8 @@ void main() {
       ),
       findsOneWidget,
     );
-    expect(find.byIcon(Icons.account_balance_rounded), findsNothing);
-    expect(find.byIcon(Icons.savings_rounded), findsNothing);
+    expect(_skribbleIcon(OpenBudgetIcons.bank), findsOneWidget);
+    expect(_skribbleIcon(OpenBudgetIcons.savings), findsOneWidget);
   });
 
   testWidgets('next stays disabled until type and balance are provided', (
@@ -421,3 +416,7 @@ Future<void> _tapAccountTypeOption(
   onTap();
   await tester.pumpAndSettle();
 }
+
+Finder _skribbleIcon(WiredSvgIconData data) => find.byWidgetPredicate(
+  (widget) => widget is SkribbleIcon && widget.data == data,
+);

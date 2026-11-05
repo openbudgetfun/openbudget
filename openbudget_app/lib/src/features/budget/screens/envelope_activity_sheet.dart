@@ -45,7 +45,7 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final palette = theme.ob;
     final selectedMonth = ref.watch(selectedMonthProvider(budgetId));
     final hideAmounts = ref.watch(hideAmountsProvider);
     final hideProgressBars = ref.watch(hideProgressBarsProvider);
@@ -62,11 +62,12 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
         monthlyData?.allocatedCents ?? envelope.budgetedAmountCents;
     final spent = monthlyData?.spentCents ?? envelope.spentAmountCents;
     final available = monthlyData?.availableCents ?? (budgeted - spent);
-    final availableColor = available > 0
-        ? ColorTokens.secondary
+    final availableTone = available > 0
+        ? ObTone.funded
         : available < 0
-        ? ColorTokens.error
-        : ColorTokens.tertiary;
+        ? ObTone.overspent
+        : ObTone.neutral;
+    final isOverspent = available < 0;
 
     return DraggableScrollableSheet(
       initialChildSize: 0.7,
@@ -75,123 +76,155 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
       expand: false,
       builder: (context, scrollController) => Column(
         children: [
-          // Drag handle
-          Container(
-            margin: const EdgeInsets.only(top: SpacingTokens.sm),
-            width: 40,
-            height: 4,
-            decoration: BoxDecoration(
-              color: colorScheme.outlineVariant,
-              borderRadius: BorderRadius.circular(2),
+          Padding(
+            padding: const EdgeInsets.only(top: SpacingTokens.sm),
+            child: Container(
+              width: 40,
+              height: 4,
+              decoration: ObRoughDecoration(
+                color: palette.line,
+                seed: 67,
+              ),
             ),
           ),
-          // Header: Name + Available pill
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              SpacingTokens.md,
-              SpacingTokens.md,
-              SpacingTokens.md,
-              0,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Row 1: Envelope name + Available pill
-                Row(
+          Flexible(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  SpacingTokens.md,
+                  SpacingTokens.md,
+                  SpacingTokens.md,
+                  0,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: Text(
-                        envelope.name,
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: SpacingTokens.sm),
-                    _AvailablePill(
-                      amount: hideAmounts
-                          ? hiddenAmountPlaceholder
-                          : formatCents(available, currencyCode),
-                      color: availableColor,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: SpacingTokens.md),
-                // Balance breakdown grid (2x2)
-                _BalanceGrid(
-                  carryover: carryover,
-                  assigned: budgeted,
-                  activity: spent,
-                  available: available,
-                  currencyCode: currencyCode,
-                  availableColor: availableColor,
-                  hideAmounts: hideAmounts,
-                ),
-                // Goal progress bar (if goal set)
-                if (goal != null) ...[
-                  const SizedBox(height: SpacingTokens.md),
-                  _GoalSummary(
-                    goal: goal!,
-                    budgetedCents: budgeted,
-                    availableCents: available,
-                    currencyCode: currencyCode,
-                    hideAmounts: hideAmounts,
-                    hideProgressBars: hideProgressBars,
-                  ),
-                ],
-                if (envelope.note != null && envelope.note!.isNotEmpty) ...[
-                  const SizedBox(height: SpacingTokens.sm),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(SpacingTokens.sm),
-                    decoration: BoxDecoration(
-                      color: colorScheme.surfaceContainerHighest.withAlpha(80),
-                      borderRadius: BorderRadius.circular(RadiusTokens.sm),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    Row(
                       children: [
-                        Icon(
-                          Icons.note_outlined,
-                          size: 16,
-                          color: colorScheme.onSurfaceVariant,
+                        ObEnvelopeGauge(
+                          fraction: _fundingFraction(
+                            goal: goal,
+                            budgetedCents: budgeted,
+                            spentCents: spent,
+                            availableCents: available,
+                          ),
+                          semanticLabel: l10n.budgetEnvelopeProgress(
+                            (_fundingFraction(
+                                      goal: goal,
+                                      budgetedCents: budgeted,
+                                      spentCents: spent,
+                                      availableCents: available,
+                                    ) *
+                                    100)
+                                .round(),
+                          ),
+                          overspent: isOverspent,
+                          seed: 4,
                         ),
-                        const SizedBox(width: SpacingTokens.xs),
+                        const SizedBox(width: SpacingTokens.sm),
                         Expanded(
                           child: Text(
-                            envelope.note!,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: colorScheme.onSurfaceVariant,
+                            envelope.name,
+                            style: theme.textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: palette.ink,
                             ),
                           ),
                         ),
+                        const SizedBox(width: SpacingTokens.sm),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              l10n.envelopeAvailable,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: palette.mutedInk,
+                              ),
+                            ),
+                            ObAmount(
+                              hideAmounts
+                                  ? hiddenAmountPlaceholder
+                                  : formatCents(available, currencyCode),
+                              tone: availableTone,
+                              style: theme.textTheme.titleLarge,
+                            ),
+                          ],
+                        ),
                       ],
                     ),
-                  ),
-                ],
-                const SizedBox(height: SpacingTokens.md),
-                // Action button row
-                _ActionButtonRow(
-                  onMoveMoney: () => _showMoveMoney(context),
-                  onSetGoal: () => _showSetGoal(context),
-                  onEditEnvelope: () => _showEditEnvelope(context),
+                    const SizedBox(height: SpacingTokens.md),
+                    _BalanceGrid(
+                      carryover: carryover,
+                      assigned: budgeted,
+                      activity: spent,
+                      available: available,
+                      currencyCode: currencyCode,
+                      availableTone: availableTone,
+                      hideAmounts: hideAmounts,
+                    ),
+                    if (goal != null) ...[
+                      const SizedBox(height: SpacingTokens.md),
+                      _GoalSummary(
+                        goal: goal!,
+                        budgetedCents: budgeted,
+                        availableCents: available,
+                        currencyCode: currencyCode,
+                        hideAmounts: hideAmounts,
+                        hideProgressBars: hideProgressBars,
+                      ),
+                    ],
+                    if (envelope.note != null && envelope.note!.isNotEmpty) ...[
+                      const SizedBox(height: SpacingTokens.sm),
+                      ObCard(
+                        tone: ObTone.neutral,
+                        padding: const EdgeInsets.all(SpacingTokens.sm),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SkribbleIcon(
+                              data: OpenBudgetIcons.note,
+                              size: 16,
+                              color: palette.mutedInk,
+                            ),
+                            const SizedBox(width: SpacingTokens.xs),
+                            Expanded(
+                              child: Text(
+                                envelope.note!,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: palette.ink,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: SpacingTokens.md),
+                    _ActionButtonRow(
+                      onMoveMoney: () => _showMoveMoney(context),
+                      onSetGoal: () => _showSetGoal(context),
+                      onEditEnvelope: () => _showEditEnvelope(context),
+                    ),
+                    ObSectionHeader(
+                      title: l10n.envelopeActivityTitle,
+                      padding: const EdgeInsets.only(top: SpacingTokens.sm),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: SpacingTokens.md),
-                Text(
-                  l10n.envelopeActivityTitle,
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
           const Divider(height: 1),
-          // Transaction list
           Expanded(
             child: transactionsAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (_, _) => Center(child: Text(l10n.transactionLoadError)),
+              loading: () =>
+                  Center(child: ObLoadingPanel(label: l10n.loadingTitle)),
+              error: (_, _) => Padding(
+                padding: const EdgeInsets.all(SpacingTokens.md),
+                child: ObStatePanel.problem(
+                  title: l10n.transactionLoadError,
+                ),
+              ),
               data: (allTransactions) {
                 final envelopeId = envelope.id?.toString();
                 final transactions =
@@ -204,31 +237,31 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
                       );
 
                 if (transactions.isEmpty) {
-                  return LayoutBuilder(
-                    builder: (context, constraints) {
-                      final showIcon = constraints.maxHeight >= 72;
-                      return Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            if (showIcon) ...[
-                              Icon(
-                                Icons.receipt_long_rounded,
-                                size: 40,
-                                color: colorScheme.outlineVariant,
-                              ),
-                              const SizedBox(height: SpacingTokens.sm),
-                            ],
-                            Text(
-                              l10n.envelopeNoActivity,
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: colorScheme.onSurfaceVariant,
-                              ),
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(SpacingTokens.md),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ExcludeSemantics(
+                            child: WiredDoodle(
+                              kind: WiredDoodleKind.moon,
+                              size: 48,
+                              seed: 11,
+                              color: palette.mutedInk,
                             ),
-                          ],
-                        ),
-                      );
-                    },
+                          ),
+                          const SizedBox(height: SpacingTokens.sm),
+                          Text(
+                            l10n.envelopeNoActivity,
+                            textAlign: TextAlign.center,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: palette.mutedInk,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   );
                 }
 
@@ -241,9 +274,7 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
                   itemBuilder: (context, index) {
                     final tx = transactions[index];
                     final isIncome = tx.amountCents > 0;
-                    final color = isIncome
-                        ? ColorTokens.secondary
-                        : ColorTokens.error;
+                    final tone = isIncome ? ObTone.funded : ObTone.overspent;
 
                     return Padding(
                       padding: const EdgeInsets.symmetric(
@@ -251,12 +282,12 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
                       ),
                       child: Row(
                         children: [
-                          Icon(
-                            isIncome
-                                ? Icons.arrow_downward_rounded
-                                : Icons.arrow_upward_rounded,
-                            color: color,
-                            size: 16,
+                          SkribbleIcon(
+                            data: isIncome
+                                ? OpenBudgetIcons.inflow
+                                : OpenBudgetIcons.outflow,
+                            color: palette.hue(tone),
+                            size: 18,
                           ),
                           const SizedBox(width: SpacingTokens.sm),
                           Expanded(
@@ -265,26 +296,26 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
                               children: [
                                 Text(
                                   tx.description,
-                                  style: theme.textTheme.bodyMedium,
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: palette.ink,
+                                  ),
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 Text(
                                   _formatDate(tx.transactionDate),
                                   style: theme.textTheme.bodySmall?.copyWith(
-                                    color: colorScheme.onSurfaceVariant,
+                                    color: palette.mutedInk,
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                          Text(
+                          ObAmount(
                             hideAmounts
                                 ? hiddenAmountPlaceholder
                                 : formatCents(tx.amountCents, currencyCode),
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: color,
-                            ),
+                            tone: tone,
+                            style: theme.textTheme.bodyMedium,
                           ),
                         ],
                       ),
@@ -297,6 +328,23 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
         ],
       ),
     );
+  }
+
+  double _fundingFraction({
+    required EnvelopeGoal? goal,
+    required int budgetedCents,
+    required int spentCents,
+    required int availableCents,
+  }) {
+    if (goal != null) {
+      return computeFundingProgress(
+        goal: goal,
+        budgetedCents: budgetedCents,
+        availableCents: availableCents,
+      );
+    }
+    if (budgetedCents <= 0) return 0;
+    return spentCents / budgetedCents;
   }
 
   void _showMoveMoney(BuildContext context) {
@@ -348,48 +396,6 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
       '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
 }
 
-class _AvailablePill extends HookWidget {
-  const _AvailablePill({required this.amount, required this.color});
-
-  final String amount;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: SpacingTokens.md,
-        vertical: SpacingTokens.xs,
-      ),
-      decoration: BoxDecoration(
-        color: color.withAlpha(25),
-        borderRadius: BorderRadius.circular(RadiusTokens.xl),
-        border: Border.all(color: color.withAlpha(60)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            amount,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-          ),
-          Text(
-            l10n.envelopeAvailable,
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: color.withAlpha(180),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _BalanceGrid extends HookWidget {
   const _BalanceGrid({
     required this.carryover,
@@ -397,7 +403,7 @@ class _BalanceGrid extends HookWidget {
     required this.activity,
     required this.available,
     required this.currencyCode,
-    required this.availableColor,
+    required this.availableTone,
     required this.hideAmounts,
   });
 
@@ -406,69 +412,55 @@ class _BalanceGrid extends HookWidget {
   final int activity;
   final int available;
   final CurrencyCode currencyCode;
-  final Color availableColor;
+  final ObTone availableTone;
   final bool hideAmounts;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
 
-    return Container(
-      padding: const EdgeInsets.all(SpacingTokens.sm),
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest.withAlpha(60),
-        borderRadius: BorderRadius.circular(RadiusTokens.md),
+    String amount(int cents) => hideAmounts
+        ? hiddenAmountPlaceholder
+        : formatCents(cents, currencyCode);
+
+    return ObCard(
+      tone: ObTone.neutral,
+      padding: const EdgeInsets.symmetric(
+        horizontal: SpacingTokens.sm,
+        vertical: SpacingTokens.xs,
       ),
-      child: Column(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: _BalanceGridCell(
-                  label: l10n.envelopeFromLastMonth,
-                  amount: hideAmounts
-                      ? hiddenAmountPlaceholder
-                      : formatCents(carryover, currencyCode),
-                  color: colorScheme.onSurface,
-                ),
-              ),
-              const SizedBox(width: SpacingTokens.sm),
-              Expanded(
-                child: _BalanceGridCell(
-                  label: l10n.envelopeAssigned,
-                  amount: hideAmounts
-                      ? hiddenAmountPlaceholder
-                      : formatCents(assigned, currencyCode),
-                  color: ColorTokens.primary,
-                ),
-              ),
-            ],
+          Expanded(
+            child: _BalanceGridCell(
+              label: l10n.envelopeFromLastMonth,
+              amount: amount(carryover),
+            ),
           ),
-          const SizedBox(height: SpacingTokens.sm),
-          Row(
-            children: [
-              Expanded(
-                child: _BalanceGridCell(
-                  label: l10n.envelopeActivityTitle,
-                  amount: hideAmounts
-                      ? hiddenAmountPlaceholder
-                      : formatCents(activity, currencyCode),
-                  color: ColorTokens.error,
-                ),
-              ),
-              const SizedBox(width: SpacingTokens.sm),
-              Expanded(
-                child: _BalanceGridCell(
-                  label: l10n.envelopeAvailable,
-                  amount: hideAmounts
-                      ? hiddenAmountPlaceholder
-                      : formatCents(available, currencyCode),
-                  color: availableColor,
-                ),
-              ),
-            ],
+          const SizedBox(width: SpacingTokens.xs),
+          Expanded(
+            child: _BalanceGridCell(
+              label: l10n.envelopeAssigned,
+              amount: amount(assigned),
+              tone: ObTone.brand,
+            ),
+          ),
+          const SizedBox(width: SpacingTokens.xs),
+          Expanded(
+            child: _BalanceGridCell(
+              label: l10n.envelopeActivityTitle,
+              amount: amount(activity),
+              tone: ObTone.overspent,
+            ),
+          ),
+          const SizedBox(width: SpacingTokens.xs),
+          Expanded(
+            child: _BalanceGridCell(
+              label: l10n.envelopeAvailable,
+              amount: amount(available),
+              tone: availableTone,
+            ),
           ),
         ],
       ),
@@ -480,33 +472,28 @@ class _BalanceGridCell extends HookWidget {
   const _BalanceGridCell({
     required this.label,
     required this.amount,
-    required this.color,
+    this.tone = ObTone.neutral,
   });
 
   final String label;
   final String amount;
-  final Color color;
+  final ObTone tone;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final palette = theme.ob;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: theme.textTheme.labelSmall?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: palette.mutedInk,
           ),
         ),
         const SizedBox(height: 2),
-        Text(
-          amount,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: color,
-          ),
-        ),
+        ObAmount(amount, tone: tone, style: theme.textTheme.titleMedium),
       ],
     );
   }
@@ -531,36 +518,46 @@ class _GoalSummary extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
+    final palette = theme.ob;
     final progress = computeFundingProgress(
       goal: goal,
       budgetedCents: budgetedCents,
       availableCents: availableCents,
     );
-    final clampedProgress = progress.clamp(0.0, 1.0);
     final underfunded = computeUnderfundedCents(
       goal: goal,
       budgetedCents: budgetedCents,
       availableCents: availableCents,
     );
 
-    final Color barColor;
-    if (progress >= 1.0) {
-      barColor = ColorTokens.secondary;
-    } else if (progress >= 0.5) {
-      barColor = ColorTokens.tertiary;
-    } else {
-      barColor = ColorTokens.error;
-    }
+    final goalTone = progress >= 1.0
+        ? ObTone.funded
+        : progress >= 0.5
+        ? ObTone.underfunded
+        : ObTone.overspent;
 
+    final formattedAmount = hideAmounts
+        ? hiddenAmountPlaceholder
+        : formatCents(goal.targetAmountCents, currencyCode);
     final goalLabel = switch (goal.goalType) {
-      'target_balance' =>
-        'Target: ${hideAmounts ? hiddenAmountPlaceholder : formatCents(goal.targetAmountCents, currencyCode)}',
-      'monthly_funding' =>
-        'Monthly: ${hideAmounts ? hiddenAmountPlaceholder : formatCents(goal.monthlyFundingCents ?? goal.targetAmountCents, currencyCode)}',
-      'target_by_date' =>
-        'Target: ${hideAmounts ? hiddenAmountPlaceholder : formatCents(goal.targetAmountCents, currencyCode)}${goal.targetDate != null ? ' by ${goal.targetDate!.year}-${goal.targetDate!.month.toString().padLeft(2, '0')}' : ''}',
-      _ => '',
+      'monthly_funding' => l10n.budgetGoalMonthly(
+        hideAmounts
+            ? hiddenAmountPlaceholder
+            : formatCents(
+                goal.monthlyFundingCents ?? goal.targetAmountCents,
+                currencyCode,
+              ),
+      ),
+      'target_by_date' => l10n.budgetGoalTargetBy(
+        formattedAmount,
+        goal.targetDate == null
+            ? ''
+            : '${goal.targetDate!.year}-'
+                  '${goal.targetDate!.month.toString().padLeft(2, '0')}',
+      ),
+      _ => l10n.budgetGoalTarget(formattedAmount),
     };
 
     return Column(
@@ -568,36 +565,46 @@ class _GoalSummary extends HookWidget {
       children: [
         Row(
           children: [
-            Icon(Icons.flag_rounded, size: 14, color: barColor),
+            SkribbleIcon(
+              data: OpenBudgetIcons.flag,
+              size: 16,
+              color: palette.hue(goalTone),
+            ),
             const SizedBox(width: 4),
-            Text(
-              goalLabel,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: barColor,
-                fontWeight: FontWeight.w500,
+            Expanded(
+              child: Text(
+                goalLabel,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: palette.hue(goalTone),
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
             if (underfunded > 0) ...[
               const Spacer(),
               Text(
-                '${hideAmounts ? hiddenAmountPlaceholder : formatCents(underfunded, currencyCode)} needed',
+                l10n.envelopeUnderfunded(
+                  hideAmounts
+                      ? hiddenAmountPlaceholder
+                      : formatCents(underfunded, currencyCode),
+                ),
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: ColorTokens.error,
+                  color: palette.overspent,
                 ),
               ),
             ],
           ],
         ),
         if (!hideProgressBars) ...[
-          const SizedBox(height: 4),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(3),
-            child: LinearProgressIndicator(
-              value: clampedProgress,
-              minHeight: 6,
-              backgroundColor: barColor.withAlpha(30),
-              valueColor: AlwaysStoppedAnimation<Color>(barColor),
+          const SizedBox(height: SpacingTokens.xs),
+          ObEnvelopeGauge(
+            fraction: progress,
+            semanticLabel: l10n.budgetEnvelopeProgress(
+              (progress.clamp(0.0, 1.0) * 100).round(),
             ),
+            tone: goalTone == ObTone.overspent ? ObTone.underfunded : goalTone,
+            width: 38,
+            seed: 9,
           ),
         ],
       ],
@@ -623,7 +630,7 @@ class _ActionButtonRow extends HookWidget {
       children: [
         Expanded(
           child: _ActionButton(
-            icon: Icons.swap_horiz_rounded,
+            icon: OpenBudgetIcons.moveMoney,
             label: l10n.envelopeActionMoveMoney,
             onTap: onMoveMoney,
           ),
@@ -631,7 +638,7 @@ class _ActionButtonRow extends HookWidget {
         const SizedBox(width: SpacingTokens.sm),
         Expanded(
           child: _ActionButton(
-            icon: Icons.flag_rounded,
+            icon: OpenBudgetIcons.flag,
             label: l10n.envelopeActionSetGoal,
             onTap: onSetGoal,
           ),
@@ -639,7 +646,7 @@ class _ActionButtonRow extends HookWidget {
         const SizedBox(width: SpacingTokens.sm),
         Expanded(
           child: _ActionButton(
-            icon: Icons.edit_rounded,
+            icon: OpenBudgetIcons.edit,
             label: l10n.envelopeActionEditEnvelope,
             onTap: onEditEnvelope,
           ),
@@ -656,37 +663,48 @@ class _ActionButton extends HookWidget {
     required this.onTap,
   });
 
-  final IconData icon;
+  final WiredSvgIconData icon;
   final String label;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(RadiusTokens.sm),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: SpacingTokens.sm),
-        decoration: BoxDecoration(
-          border: Border.all(color: colorScheme.outlineVariant),
-          borderRadius: BorderRadius.circular(RadiusTokens.sm),
-        ),
-        child: Column(
-          children: [
-            Icon(icon, size: 20, color: colorScheme.primary),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: colorScheme.primary,
+    final palette = theme.ob;
+    return Material(
+      type: MaterialType.transparency,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(10),
+        child: Container(
+          constraints: const BoxConstraints(minHeight: 56),
+          padding: const EdgeInsets.symmetric(
+            vertical: SpacingTokens.sm,
+            horizontal: SpacingTokens.xs,
+          ),
+          decoration: ObRoughDecoration(
+            color: palette.surface,
+            outline: palette.quietPen,
+            radius: 10,
+            seed: 71,
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SkribbleIcon(data: icon, size: 20, color: palette.brand),
+              const SizedBox(height: 4),
+              Text(
+                label,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: palette.brand,
+                  fontWeight: FontWeight.w600,
+                ),
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

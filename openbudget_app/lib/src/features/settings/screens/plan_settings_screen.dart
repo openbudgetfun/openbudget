@@ -8,7 +8,6 @@ import 'package:openbudget_app/src/features/home/providers/budget_actions_provid
 import 'package:openbudget_app/src/features/settings/providers/display_options_provider.dart';
 import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
-import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
@@ -27,77 +26,62 @@ class PlanSettingsScreen extends HookConsumerWidget {
     final currencyPlacement = ref.watch(currencyPlacementStyleProvider);
     final dateFormat = ref.watch(dateFormatStyleProvider);
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final palette = theme.ob;
 
     return Scaffold(
-      backgroundColor: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
       appBar: AppBar(
-        backgroundColor: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
-        surfaceTintColor: OpenBudgetPalette.transparentFor(Theme.of(context)),
-        automaticallyImplyLeading: false,
-        centerTitle: true,
-        leadingWidth: 92,
         leading: TextButton(
           onPressed: () =>
               context.goNamed(settingsRoute, pathParameters: {'id': budgetId}),
-          child: Text(
-            l10n.dialogCancel,
-            style: theme.textTheme.titleMedium?.copyWith(
-              color: theme.colorScheme.onSurface,
-            ),
-          ),
+          child: Text(l10n.dialogCancel),
         ),
-        title: Text(
-          l10n.settingsPlanSettings,
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.w700,
-          ),
-        ),
+        leadingWidth: 92,
+        title: Text(l10n.settingsPlanSettings),
+        centerTitle: true,
         actions: [
           TextButton(
             onPressed: () => context.goNamed(
               settingsRoute,
               pathParameters: {'id': budgetId},
             ),
-            child: Text(
-              l10n.dialogDone,
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: theme.colorScheme.onSurface,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+            child: Text(l10n.dialogDone),
           ),
         ],
       ),
       body: budgetAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => Center(
-          child: Text(
-            l10n.settingsLoadError,
-            style: theme.textTheme.bodyLarge?.copyWith(
-              color: colorScheme.error,
-            ),
-          ),
+        loading: () => ObLoadingPanel(label: l10n.settingsLoading),
+        error: (_, _) => Padding(
+          padding: const EdgeInsets.all(SpacingTokens.md),
+          child: ObStatePanel.problem(title: l10n.settingsLoadError),
         ),
         data: (budget) {
           final currency = parseCurrencyCode(budget.currencyCode);
 
           return ListView(
-            padding: const EdgeInsets.all(SpacingTokens.md),
+            padding: const EdgeInsets.fromLTRB(
+              SpacingTokens.md,
+              SpacingTokens.md,
+              SpacingTokens.md,
+              SpacingTokens.xl,
+            ),
             children: [
-              _SettingsCard(
+              ObCard(
                 child: ListTile(
                   title: Text(
                     budget.name,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: theme.textTheme.titleMedium,
+                  ),
+                  trailing: SkribbleIcon(
+                    data: OpenBudgetIcons.edit,
+                    size: 20,
+                    color: palette.mutedInk,
                   ),
                   onTap: () => _showRenameBudgetDialog(context, ref, budget),
                 ),
               ),
               const SizedBox(height: SpacingTokens.md),
-              _SettingsCard(
+              Card(
+                clipBehavior: Clip.antiAlias,
                 child: Column(
                   children: [
                     _SettingChoiceTile(
@@ -125,7 +109,8 @@ class PlanSettingsScreen extends HookConsumerWidget {
                 ),
               ),
               const SizedBox(height: SpacingTokens.md),
-              _SettingsCard(
+              Card(
+                clipBehavior: Clip.antiAlias,
                 child: _SettingChoiceTile(
                   title: l10n.settingsDateFormat,
                   value: _dateFormatLabel(l10n, dateFormat),
@@ -136,17 +121,8 @@ class PlanSettingsScreen extends HookConsumerWidget {
               FilledButton(
                 onPressed: () => _confirmDeletePlan(context, ref, budget),
                 style: FilledButton.styleFrom(
-                  minimumSize: const Size.fromHeight(52),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(RadiusTokens.md),
-                  ),
-                  backgroundColor: OpenBudgetPalette.fgErrorFor(
-                    Theme.of(context),
-                  ).withAlpha(24),
-                  foregroundColor: OpenBudgetPalette.fgErrorFor(
-                    Theme.of(context),
-                  ),
-                  elevation: 0,
+                  backgroundColor: palette.overspentWash,
+                  foregroundColor: palette.overspent,
                 ),
                 child: Text(l10n.settingsDeletePlan),
               ),
@@ -163,6 +139,7 @@ class PlanSettingsScreen extends HookConsumerWidget {
     Budget budget,
   ) async {
     final l10n = AppLocalizations.of(context);
+    final palette = Theme.of(context).ob;
     final controller = TextEditingController(text: budget.name);
     final confirmed = await showDialog<bool>(
       context: context,
@@ -172,7 +149,11 @@ class PlanSettingsScreen extends HookConsumerWidget {
           controller: controller,
           decoration: InputDecoration(
             labelText: l10n.createBudgetNameLabel,
-            prefixIcon: const Icon(Icons.label_outlined),
+            prefixIcon: SkribbleIcon(
+              data: OpenBudgetIcons.label,
+              size: 20,
+              color: palette.mutedInk,
+            ),
           ),
           autofocus: true,
           textInputAction: TextInputAction.done,
@@ -223,7 +204,7 @@ class PlanSettingsScreen extends HookConsumerWidget {
     Budget budget,
   ) async {
     final l10n = AppLocalizations.of(context);
-    final colorScheme = Theme.of(context).colorScheme;
+    final palette = Theme.of(context).ob;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -237,8 +218,8 @@ class PlanSettingsScreen extends HookConsumerWidget {
           FilledButton(
             onPressed: () => Navigator.of(ctx).pop(true),
             style: FilledButton.styleFrom(
-              backgroundColor: colorScheme.error,
-              foregroundColor: colorScheme.onError,
+              backgroundColor: palette.overspentWash,
+              foregroundColor: palette.overspent,
             ),
             child: Text(l10n.budgetDeleteButton),
           ),
@@ -330,7 +311,10 @@ class PlanSettingsScreen extends HookConsumerWidget {
           final selected = option == current;
           return ListTile(
             title: Text(labelBuilder(option)),
-            trailing: selected ? const Icon(Icons.check_rounded) : null,
+            selected: selected,
+            trailing: selected
+                ? const SkribbleIcon(data: OpenBudgetIcons.check)
+                : null,
             onTap: () => Navigator.of(context).pop(option),
           );
         },
@@ -360,24 +344,6 @@ String _dateFormatLabel(AppLocalizations l10n, DateFormatStyle style) =>
       DateFormatStyle.yearMonthDay => l10n.settingsDateFormatYearMonthDay,
     };
 
-class _SettingsCard extends HookWidget {
-  const _SettingsCard({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) => DecoratedBox(
-    decoration: BoxDecoration(
-      color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
-      borderRadius: BorderRadius.circular(RadiusTokens.md),
-      border: Border.all(
-        color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
-      ),
-    ),
-    child: Material(type: MaterialType.transparency, child: child),
-  );
-}
-
 class _SettingChoiceTile extends HookWidget {
   const _SettingChoiceTile({
     required this.title,
@@ -394,6 +360,7 @@ class _SettingChoiceTile extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final palette = theme.ob;
     return ListTile(
       onTap: onTap,
       title: Text(title),
@@ -403,9 +370,12 @@ class _SettingChoiceTile extends HookWidget {
           fontWeight: FontWeight.w500,
         ),
       ),
-      trailing: Icon(
-        isNavigation ? Icons.chevron_right_rounded : Icons.unfold_more_rounded,
-        color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
+      trailing: SkribbleIcon(
+        data: isNavigation
+            ? OpenBudgetIcons.chevronRight
+            : OpenBudgetIcons.expand,
+        size: 20,
+        color: palette.mutedInk,
       ),
     );
   }

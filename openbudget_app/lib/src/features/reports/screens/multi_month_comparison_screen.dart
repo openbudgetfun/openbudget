@@ -3,12 +3,14 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/reports/providers/multi_month_comparison_provider.dart';
+import 'package:openbudget_app/src/features/reports/utils/report_month_label.dart';
 import 'package:openbudget_app/src/features/settings/providers/display_currency_provider.dart';
 import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
+/// Months side by side, written as one wide hand-ruled table.
 class MultiMonthComparisonScreen extends HookConsumerWidget {
   const MultiMonthComparisonScreen({required this.budgetId, super.key});
 
@@ -17,8 +19,6 @@ class MultiMonthComparisonScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
     final monthCount = useState(3);
     final converter = ref
         .watch(displayCurrencyConverterProvider(budgetId))
@@ -34,7 +34,7 @@ class MultiMonthComparisonScreen extends HookConsumerWidget {
         title: Text(l10n.comparisonTitle),
         actions: [
           PopupMenuButton<int>(
-            icon: const Icon(Icons.tune_rounded),
+            icon: const SkribbleIcon(data: OpenBudgetIcons.tune),
             tooltip: l10n.comparisonMonthRange,
             onSelected: (value) => monthCount.value = value,
             itemBuilder: (_) => [
@@ -48,25 +48,16 @@ class MultiMonthComparisonScreen extends HookConsumerWidget {
         ],
       ),
       body: comparisonAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.error_outline_rounded,
-                size: 48,
-                color: colorScheme.error,
-              ),
-              const SizedBox(height: SpacingTokens.md),
-              Text(
-                l10n.comparisonLoadError,
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: colorScheme.error,
-                ),
-              ),
-            ],
-          ),
+        loading: () =>
+            Center(child: ObLoadingPanel(label: l10n.reportsLoading)),
+        error: (error, _) => ListView(
+          padding: const EdgeInsets.all(SpacingTokens.md),
+          children: [
+            ObStatePanel.problem(
+              title: l10n.comparisonLoadError,
+              message: error.toString(),
+            ),
+          ],
         ),
         data: (comparison) {
           final sourceCurrency = parseCurrencyCode(
@@ -74,30 +65,15 @@ class MultiMonthComparisonScreen extends HookConsumerWidget {
           );
 
           if (comparison.categories.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.compare_arrows_rounded,
-                    size: 48,
-                    color: colorScheme.outlineVariant,
-                  ),
-                  const SizedBox(height: SpacingTokens.md),
-                  Text(
-                    l10n.comparisonEmptyTitle,
-                    style: theme.textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: SpacingTokens.sm),
-                  Text(
-                    l10n.comparisonEmptySubtitle,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
+            return ListView(
+              padding: const EdgeInsets.all(SpacingTokens.md),
+              children: [
+                ObStatePanel.empty(
+                  title: l10n.comparisonEmptyTitle,
+                  message: l10n.comparisonEmptySubtitle,
+                  doodle: WiredDoodleKind.comet,
+                ),
+              ],
             );
           }
 
@@ -111,6 +87,9 @@ class MultiMonthComparisonScreen extends HookConsumerWidget {
     );
   }
 }
+
+const double _categoryColumnWidth = 170;
+const double _monthColumnWidth = 112;
 
 class _ComparisonTable extends HookWidget {
   const _ComparisonTable({
@@ -127,218 +106,180 @@ class _ComparisonTable extends HookWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final palette = theme.ob;
     final scrollController = useScrollController();
-
     final months = comparison.months;
     final monthKeys = months.map((m) => '${m.year}-${m.month}').toList();
+    String format(int cents) =>
+        converter?.formatAmount(
+          amountCents: cents,
+          sourceCurrency: sourceCurrency,
+        ) ??
+        formatCents(cents, sourceCurrency);
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(SpacingTokens.sm),
+      padding: const EdgeInsets.all(SpacingTokens.md),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         controller: scrollController,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header row with month names.
-            _buildHeaderRow(l10n, theme, months),
-            const SizedBox(height: SpacingTokens.xs),
-            // Totals row.
-            _buildTotalRow(l10n, theme, colorScheme, months, monthKeys),
-            const Divider(),
-            // Category/envelope rows.
-            for (final cat in comparison.categories) ...[
-              _buildCategoryRow(theme, colorScheme, cat, monthKeys),
-              for (final env in cat.envelopes)
-                _buildEnvelopeRow(theme, colorScheme, env, monthKeys),
+        child: Container(
+          padding: const EdgeInsets.all(SpacingTokens.md),
+          decoration: ObRoughDecoration(
+            color: palette.surface,
+            outline: palette.quietPen,
+            seed: 11,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: SpacingTokens.sm,
+                ),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: _categoryColumnWidth,
+                      child: Text(
+                        l10n.comparisonCategoryLabel,
+                        style: theme.textTheme.labelLarge?.copyWith(
+                          color: palette.mutedInk,
+                        ),
+                      ),
+                    ),
+                    for (final month in months)
+                      SizedBox(
+                        width: _monthColumnWidth,
+                        child: Text(
+                          _monthColumnLabel(l10n, month),
+                          textAlign: TextAlign.end,
+                          style: theme.textTheme.labelLarge?.copyWith(
+                            color: palette.mutedInk,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
               const SizedBox(height: SpacingTokens.sm),
+              DecoratedBox(
+                decoration: ObRoughDecoration(
+                  color: palette.highlight,
+                  outline: palette.quietPen,
+                  radius: RadiusTokens.sm,
+                  strokeWidth: 1.6,
+                  seed: 13,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: SpacingTokens.sm,
+                    vertical: SpacingTokens.sm,
+                  ),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: _categoryColumnWidth - SpacingTokens.sm,
+                        child: Text(
+                          l10n.comparisonTotalLabel,
+                          style: theme.textTheme.labelLarge,
+                        ),
+                      ),
+                      for (final month in months)
+                        SizedBox(
+                          width: _monthColumnWidth,
+                          child: ObAmount(
+                            format(month.totalSpentCents),
+                            style: theme.textTheme.bodyMedium,
+                            textAlign: TextAlign.end,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: SpacingTokens.md),
+              for (final (index, category)
+                  in comparison.categories.indexed) ...[
+                if (index > 0)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: SpacingTokens.sm,
+                    ),
+                    child: Divider(height: 1, color: palette.line),
+                  ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: SpacingTokens.sm,
+                  ),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: _categoryColumnWidth,
+                        child: Text(
+                          category.category.name,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.titleSmall,
+                        ),
+                      ),
+                      for (final key in monthKeys)
+                        SizedBox(
+                          width: _monthColumnWidth,
+                          child: ObAmount(
+                            format(category.monthTotals[key]?[1] ?? 0),
+                            style: theme.textTheme.bodyMedium,
+                            textAlign: TextAlign.end,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                for (final envelope in category.envelopes)
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      top: SpacingTokens.xs,
+                      left: SpacingTokens.sm,
+                      right: SpacingTokens.sm,
+                    ),
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: _categoryColumnWidth,
+                          child: Padding(
+                            padding: const EdgeInsets.only(
+                              left: SpacingTokens.md,
+                            ),
+                            child: Text(
+                              envelope.envelope.name,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: palette.mutedInk,
+                              ),
+                            ),
+                          ),
+                        ),
+                        for (final key in monthKeys)
+                          SizedBox(
+                            width: _monthColumnWidth,
+                            child: ObAmount(
+                              format(envelope.monthData[key]?[1] ?? 0),
+                              style: theme.textTheme.bodySmall,
+                              textAlign: TextAlign.end,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildHeaderRow(
-    AppLocalizations l10n,
-    ThemeData theme,
-    List<MonthColumn> months,
-  ) => Row(
-    children: [
-      SizedBox(
-        width: 160,
-        child: Text(
-          l10n.comparisonCategoryLabel,
-          style: theme.textTheme.labelLarge?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-      for (final m in months)
-        SizedBox(
-          width: 120,
-          child: Text(
-            _shortMonthName(l10n, m.month, m.year),
-            style: theme.textTheme.labelLarge?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
-            textAlign: TextAlign.right,
-          ),
-        ),
-    ],
-  );
-
-  Widget _buildTotalRow(
-    AppLocalizations l10n,
-    ThemeData theme,
-    ColorScheme colorScheme,
-    List<MonthColumn> months,
-    List<String> monthKeys,
-  ) => Container(
-    padding: const EdgeInsets.symmetric(vertical: SpacingTokens.xs),
-    decoration: BoxDecoration(
-      color: colorScheme.primaryContainer.withAlpha(40),
-      borderRadius: BorderRadius.circular(RadiusTokens.sm),
-    ),
-    child: Row(
-      children: [
-        SizedBox(
-          width: 160,
-          child: Padding(
-            padding: const EdgeInsets.only(left: SpacingTokens.xs),
-            child: Text(
-              l10n.comparisonTotalLabel,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ),
-        for (final m in months)
-          SizedBox(
-            width: 120,
-            child: Text(
-              converter?.formatAmount(
-                    amountCents: m.totalSpentCents,
-                    sourceCurrency: sourceCurrency,
-                  ) ??
-                  formatCents(m.totalSpentCents, sourceCurrency),
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: ColorTokens.error,
-              ),
-              textAlign: TextAlign.right,
-            ),
-          ),
-      ],
-    ),
-  );
-
-  Widget _buildCategoryRow(
-    ThemeData theme,
-    ColorScheme colorScheme,
-    CategoryComparison cat,
-    List<String> monthKeys,
-  ) => Container(
-    padding: const EdgeInsets.symmetric(vertical: SpacingTokens.xs),
-    decoration: BoxDecoration(
-      color: colorScheme.surfaceContainerHighest.withAlpha(60),
-      borderRadius: BorderRadius.circular(RadiusTokens.sm),
-    ),
-    child: Row(
-      children: [
-        SizedBox(
-          width: 160,
-          child: Padding(
-            padding: const EdgeInsets.only(left: SpacingTokens.xs),
-            child: Text(
-              cat.category.name,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ),
-        for (final key in monthKeys)
-          SizedBox(
-            width: 120,
-            child: Text(
-              converter?.formatAmount(
-                    amountCents: cat.monthTotals[key]?[1] ?? 0,
-                    sourceCurrency: sourceCurrency,
-                  ) ??
-                  formatCents(cat.monthTotals[key]?[1] ?? 0, sourceCurrency),
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-              textAlign: TextAlign.right,
-            ),
-          ),
-      ],
-    ),
-  );
-
-  Widget _buildEnvelopeRow(
-    ThemeData theme,
-    ColorScheme colorScheme,
-    EnvelopeComparison env,
-    List<String> monthKeys,
-  ) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 2),
-    child: Row(
-      children: [
-        SizedBox(
-          width: 160,
-          child: Padding(
-            padding: const EdgeInsets.only(left: SpacingTokens.lg),
-            child: Text(
-              env.envelope.name,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ),
-        for (final key in monthKeys)
-          SizedBox(
-            width: 120,
-            child: Text(
-              converter?.formatAmount(
-                    amountCents: env.monthData[key]?[1] ?? 0,
-                    sourceCurrency: sourceCurrency,
-                  ) ??
-                  formatCents(env.monthData[key]?[1] ?? 0, sourceCurrency),
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
-              textAlign: TextAlign.right,
-            ),
-          ),
-      ],
-    ),
-  );
-
-  String _shortMonthName(AppLocalizations l10n, int month, int year) {
-    final name = switch (month) {
-      1 => l10n.budgetMonthJanuary,
-      2 => l10n.budgetMonthFebruary,
-      3 => l10n.budgetMonthMarch,
-      4 => l10n.budgetMonthApril,
-      5 => l10n.budgetMonthMay,
-      6 => l10n.budgetMonthJune,
-      7 => l10n.budgetMonthJuly,
-      8 => l10n.budgetMonthAugust,
-      9 => l10n.budgetMonthSeptember,
-      10 => l10n.budgetMonthOctober,
-      11 => l10n.budgetMonthNovember,
-      12 => l10n.budgetMonthDecember,
-      _ => '',
-    };
-    // Abbreviate to first 3 chars.
-    final short = name.length > 3 ? name.substring(0, 3) : name;
-    return "$short '${(year % 100).toString().padLeft(2, '0')}";
+  String _monthColumnLabel(AppLocalizations l10n, MonthColumn month) {
+    final name = reportMonthAxisLabel(l10n, month.month);
+    final year = (month.year % 100).toString().padLeft(2, '0');
+    return "$name '$year";
   }
 }

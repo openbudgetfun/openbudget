@@ -34,6 +34,12 @@ jobs:
         run: lint:l10n
         shell: devenv shell -- bash -e {0}
 
+      # The icon catalog is generated from the Skribble glyph set; fail when the
+      # committed Dart drifts from the generator.
+      - name: check generated icons
+        run: cd openbudget_ui && dart run tool/generate_openbudget_icons.dart --check
+        shell: devenv shell -- bash -e {0}
+
   analyze:
     runs-on: blacksmith-2vcpu-ubuntu-2404
     timeout-minutes: 60

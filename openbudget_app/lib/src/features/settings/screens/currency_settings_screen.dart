@@ -8,7 +8,6 @@ import 'package:openbudget_app/src/features/budget/providers/budget_summary_prov
 import 'package:openbudget_app/src/features/settings/providers/display_options_provider.dart';
 import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
-import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
@@ -26,68 +25,48 @@ class CurrencySettingsScreen extends HookConsumerWidget {
     final budgetAsync = ref.watch(budgetDetailProvider(budgetId));
     final numberFormat = ref.watch(numberFormatStyleProvider);
     final currencyPlacement = ref.watch(currencyPlacementStyleProvider);
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      backgroundColor: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
       appBar: AppBar(
-        backgroundColor: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
-        surfaceTintColor: OpenBudgetPalette.transparentFor(Theme.of(context)),
-        automaticallyImplyLeading: false,
-        centerTitle: true,
-        leadingWidth: 92,
         leading: TextButton(
           onPressed: () => context.goNamed(
             planSettingsRoute,
             pathParameters: {'id': budgetId},
           ),
-          child: Text(
-            l10n.dialogCancel,
-            style: theme.textTheme.titleMedium?.copyWith(
-              color: theme.colorScheme.onSurface,
-            ),
-          ),
+          child: Text(l10n.dialogCancel),
         ),
-        title: Text(
-          l10n.settingsCurrency,
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.w700,
-          ),
-        ),
+        leadingWidth: 92,
+        title: Text(l10n.settingsCurrency),
+        centerTitle: true,
         actions: [
           TextButton(
             onPressed: () => context.goNamed(
               planSettingsRoute,
               pathParameters: {'id': budgetId},
             ),
-            child: Text(
-              l10n.dialogDone,
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: theme.colorScheme.onSurface,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+            child: Text(l10n.dialogDone),
           ),
         ],
       ),
       body: budgetAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => Center(
-          child: Text(
-            l10n.settingsLoadError,
-            style: theme.textTheme.bodyLarge?.copyWith(
-              color: colorScheme.error,
-            ),
-          ),
+        loading: () => ObLoadingPanel(label: l10n.settingsLoading),
+        error: (_, _) => Padding(
+          padding: const EdgeInsets.all(SpacingTokens.md),
+          child: ObStatePanel.problem(title: l10n.settingsLoadError),
         ),
         data: (budget) {
           final selectedCurrency = parseCurrencyCode(budget.currencyCode);
 
           return ListView(
-            padding: const EdgeInsets.all(SpacingTokens.md),
+            padding: const EdgeInsets.fromLTRB(
+              SpacingTokens.md,
+              SpacingTokens.md,
+              SpacingTokens.md,
+              SpacingTokens.xl,
+            ),
             children: [
-              _SettingsCard(
+              Card(
+                clipBehavior: Clip.antiAlias,
                 child: Column(
                   children: [
                     _SettingsTile(
@@ -138,8 +117,9 @@ class CurrencySettingsScreen extends HookConsumerWidget {
             final currency = CurrencyCode.values[index];
             return ListTile(
               title: Text('${currency.displayName} (${currency.code})'),
+              selected: currency == current,
               trailing: currency == current
-                  ? const Icon(Icons.check_rounded)
+                  ? const SkribbleIcon(data: OpenBudgetIcons.check)
                   : null,
               onTap: () => Navigator.of(context).pop(currency),
             );
@@ -223,7 +203,10 @@ class CurrencySettingsScreen extends HookConsumerWidget {
           final selected = option == current;
           return ListTile(
             title: Text(labelBuilder(option)),
-            trailing: selected ? const Icon(Icons.check_rounded) : null,
+            selected: selected,
+            trailing: selected
+                ? const SkribbleIcon(data: OpenBudgetIcons.check)
+                : null,
             onTap: () => Navigator.of(context).pop(option),
           );
         },
@@ -246,24 +229,6 @@ String _currencyPlacementLabel(
   CurrencyPlacementStyle.afterAmount => l10n.settingsCurrencyPlacementAfter,
 };
 
-class _SettingsCard extends HookWidget {
-  const _SettingsCard({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) => DecoratedBox(
-    decoration: BoxDecoration(
-      color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
-      borderRadius: BorderRadius.circular(RadiusTokens.md),
-      border: Border.all(
-        color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
-      ),
-    ),
-    child: Material(type: MaterialType.transparency, child: child),
-  );
-}
-
 class _SettingsTile extends HookWidget {
   const _SettingsTile({
     required this.title,
@@ -280,6 +245,7 @@ class _SettingsTile extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final palette = theme.ob;
     return ListTile(
       onTap: onTap,
       title: Text(title),
@@ -289,9 +255,12 @@ class _SettingsTile extends HookWidget {
           fontWeight: FontWeight.w500,
         ),
       ),
-      trailing: Icon(
-        isNavigation ? Icons.chevron_right_rounded : Icons.unfold_more_rounded,
-        color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
+      trailing: SkribbleIcon(
+        data: isNavigation
+            ? OpenBudgetIcons.chevronRight
+            : OpenBudgetIcons.expand,
+        size: 20,
+        color: palette.mutedInk,
       ),
     );
   }

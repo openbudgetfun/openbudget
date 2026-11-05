@@ -60,7 +60,8 @@
     "**/Pods/",
     "**/test_tools/serverpod_test_tools.dart",
     "pubspec.lock",
-    "**/pubspec.lock"
+    "**/pubspec.lock",
+    ".monochange/local/**"
   ],
   "plugins": [
     "https://plugins.dprint.dev/typescript-0.95.15.wasm",

@@ -2,7 +2,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
@@ -13,10 +12,6 @@ import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 void main() {
-  setUpAll(() {
-    GoogleFonts.config.allowRuntimeFetching = false;
-  });
-
   final testCategoryId = UuidValue.fromString(
     '00000000-0000-0000-0000-000000000001',
   );
@@ -106,7 +101,13 @@ void main() {
       await tester.pumpWidget(buildSubject(envelope: envelope));
       await tester.pump();
 
-      expect(find.byIcon(Icons.sticky_note_2_outlined), findsNothing);
+      expect(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is SkribbleIcon && widget.data == OpenBudgetIcons.note,
+        ),
+        findsNothing,
+      );
     });
 
     testWidgets('renders quick budget button when callback provided', (
@@ -118,7 +119,13 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.byIcon(Icons.bolt_rounded), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is SkribbleIcon && widget.data == OpenBudgetIcons.quick,
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('renders goal progress bar with underfunded text', (
@@ -137,7 +144,13 @@ void main() {
       // Should show underfunded text with "needed" label
       expect(find.textContaining('needed'), findsOneWidget);
       // Should show warning icon
-      expect(find.byIcon(Icons.warning_amber_rounded), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is SkribbleIcon && widget.data == OpenBudgetIcons.warning,
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('does not show underfunded text when fully funded', (
@@ -163,8 +176,8 @@ void main() {
       await tester.pumpWidget(buildSubject(envelope: envelope));
       await tester.pump();
 
-      // Should render a LinearProgressIndicator (spending bar)
-      expect(find.byType(LinearProgressIndicator), findsOneWidget);
+      // Should render the envelope gauge that fills as money is spent.
+      expect(find.byType(ObEnvelopeGauge), findsOneWidget);
     });
 
     testWidgets('renders carryover indicator when present', (tester) async {
@@ -182,7 +195,13 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.byIcon(Icons.arrow_forward_rounded), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is SkribbleIcon && widget.data == OpenBudgetIcons.inflow,
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('renders monthly funding goal underfunded amount', (
@@ -226,7 +245,7 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.byType(LinearProgressIndicator), findsNothing);
+      expect(find.byType(ObEnvelopeGauge), findsNothing);
     });
   });
 }

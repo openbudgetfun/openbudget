@@ -1,17 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/widgets/add_transaction_sheet.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 void main() {
-  setUpAll(() {
-    GoogleFonts.config.allowRuntimeFetching = false;
-  });
-
   const budgetId = 'test-budget-1';
 
   Widget buildSubject() => MaterialApp(
@@ -110,9 +105,27 @@ void main() {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
-      expect(find.byIcon(Icons.arrow_downward_rounded), findsOneWidget);
-      expect(find.byIcon(Icons.arrow_upward_rounded), findsOneWidget);
-      expect(find.byIcon(Icons.swap_horiz_rounded), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is SkribbleIcon && widget.data == OpenBudgetIcons.inflow,
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is SkribbleIcon && widget.data == OpenBudgetIcons.outflow,
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is SkribbleIcon && widget.data == OpenBudgetIcons.transfer,
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('renders three action cards', (tester) async {
@@ -127,7 +140,14 @@ void main() {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
-      expect(find.byIcon(Icons.chevron_right_rounded), findsNWidgets(3));
+      expect(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is SkribbleIcon &&
+              widget.data == OpenBudgetIcons.chevronRight,
+        ),
+        findsNWidgets(3),
+      );
     });
 
     testWidgets('navigates to add income route from sheet action', (

@@ -6,7 +6,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
-import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -23,26 +22,26 @@ class CreateBudgetScreen extends HookConsumerWidget {
     final selectedCurrency = useState(CurrencyCode.usd);
     final isSubmitting = useState(false);
     final theme = Theme.of(context);
-    final bodyTextColor = OpenBudgetPalette.fgSecondaryFor(theme);
+    final palette = theme.ob;
     final statusBarStyle =
         (theme.brightness == Brightness.light
                 ? SystemUiOverlayStyle.dark
                 : SystemUiOverlayStyle.light)
-            .copyWith(statusBarColor: OpenBudgetPalette.transparentFor(theme));
+            .copyWith(statusBarColor: palette.canvas);
 
     ref.watch(createBudgetProvider);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: statusBarStyle,
       child: Scaffold(
-        backgroundColor: OpenBudgetPalette.bgAuthFor(theme),
+        backgroundColor: palette.canvas,
         appBar: AppBar(
-          backgroundColor: OpenBudgetPalette.bgAuthFor(theme),
-          surfaceTintColor: OpenBudgetPalette.transparentFor(theme),
+          backgroundColor: palette.canvas,
+          surfaceTintColor: palette.canvas,
           scrolledUnderElevation: 0,
           leading: IconButton(
             tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
-            icon: const Icon(Icons.close_rounded),
+            icon: SkribbleIcon(data: OpenBudgetIcons.close, color: palette.ink),
             onPressed: () {
               if (context.canPop()) {
                 context.pop();
@@ -70,7 +69,7 @@ class CreateBudgetScreen extends HookConsumerWidget {
                       textAlign: TextAlign.center,
                       style: theme.textTheme.displaySmall?.copyWith(
                         fontWeight: FontWeight.w800,
-                        color: OpenBudgetPalette.fgHeroTitleFor(theme),
+                        color: palette.ink,
                         height: 1.08,
                       ),
                     ),
@@ -79,18 +78,16 @@ class CreateBudgetScreen extends HookConsumerWidget {
                       l10n.createBudgetWelcomeSubtitle,
                       style: theme.textTheme.bodyLarge?.copyWith(
                         height: 1.35,
-                        color: bodyTextColor,
+                        color: palette.mutedInk,
                       ),
-                      textAlign: TextAlign.left,
                     ),
                     const SizedBox(height: SpacingTokens.md),
                     Text(
                       l10n.createBudgetWelcomeBody,
                       style: theme.textTheme.bodyLarge?.copyWith(
                         height: 1.35,
-                        color: bodyTextColor,
+                        color: palette.mutedInk,
                       ),
-                      textAlign: TextAlign.left,
                     ),
                     const SizedBox(height: SpacingTokens.xxl),
                     TextField(
@@ -100,7 +97,10 @@ class CreateBudgetScreen extends HookConsumerWidget {
                       onTapOutside: (_) => FocusScope.of(context).unfocus(),
                       decoration: InputDecoration(
                         labelText: l10n.createBudgetNameLabel,
-                        prefixIcon: const Icon(Icons.label_outlined),
+                        prefixIcon: SkribbleIcon(
+                          data: OpenBudgetIcons.label,
+                          color: palette.mutedInk,
+                        ),
                       ),
                     ),
                     const SizedBox(height: SpacingTokens.md),
@@ -153,26 +153,12 @@ class CreateBudgetScreen extends HookConsumerWidget {
                               }
                             },
                       style: FilledButton.styleFrom(
-                        elevation: 0,
                         minimumSize: const Size.fromHeight(52),
-                        backgroundColor: OpenBudgetPalette.bgBrandFor(theme),
-                        foregroundColor: OpenBudgetPalette.fgOnBrandFor(theme),
-                        disabledBackgroundColor:
-                            OpenBudgetPalette.borderSubtleFor(theme),
-                        disabledForegroundColor:
-                            OpenBudgetPalette.fgSecondaryFor(theme),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(RadiusTokens.sm),
-                        ),
-                        textStyle: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
                       ),
                       child: isSubmitting.value
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
+                          ? WiredLoadingIndicator(
+                              size: 20,
+                              color: palette.onAction,
                             )
                           : Text(l10n.createBudgetPersonalize),
                     ),
@@ -203,7 +189,10 @@ class CreateBudgetScreen extends HookConsumerWidget {
           return ListTile(
             title: Text('${currency.displayName} (${currency.code})'),
             trailing: currency == current
-                ? const Icon(Icons.check_rounded)
+                ? SkribbleIcon(
+                    data: OpenBudgetIcons.check,
+                    color: Theme.of(context).ob.funded,
+                  )
                 : null,
             onTap: () => Navigator.of(context).pop(currency),
           );
@@ -218,56 +207,31 @@ class _WelcomeHeroCard extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final palette = Theme.of(context).ob;
 
-    return Container(
-      height: 172,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            OpenBudgetPalette.bgHeroGradientStartFor(theme),
-            OpenBudgetPalette.bgHeroGradientEndFor(theme),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(RadiusTokens.md),
+    return ObCard(
+      tone: ObTone.brand,
+      padding: const EdgeInsets.symmetric(
+        horizontal: SpacingTokens.md,
+        vertical: SpacingTokens.lg,
       ),
-      child: Stack(
+      child: Column(
         children: [
-          Positioned(
-            left: -26,
-            top: -10,
-            child: Container(
-              width: 190,
-              height: 150,
-              decoration: BoxDecoration(
-                color: OpenBudgetPalette.bgHeroBlobPrimaryFor(
-                  theme,
-                ).withAlpha(130),
-                borderRadius: BorderRadius.circular(44),
-              ),
+          ExcludeSemantics(
+            child: WiredDoodle(
+              kind: WiredDoodleKind.flower,
+              size: 96,
+              seed: 5,
+              color: palette.brand,
             ),
           ),
-          Positioned(
-            right: -34,
-            bottom: -40,
-            child: Container(
-              width: 190,
-              height: 120,
-              decoration: BoxDecoration(
-                color: OpenBudgetPalette.bgHeroBlobSecondaryFor(
-                  theme,
-                ).withAlpha(115),
-                borderRadius: BorderRadius.circular(90),
-              ),
-            ),
-          ),
-          Center(
-            child: Icon(
-              Icons.favorite_rounded,
-              color: OpenBudgetPalette.bgHeroBlobAccentFor(theme),
-              size: 84,
+          const SizedBox(height: SpacingTokens.sm),
+          const ExcludeSemantics(
+            child: ObEnvelopeGauge(
+              fraction: 1,
+              semanticLabel: '',
+              width: 120,
+              seed: 2,
             ),
           ),
         ],
@@ -290,45 +254,48 @@ class _PlanCurrencyRow extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(RadiusTokens.sm),
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: SpacingTokens.md,
-          vertical: SpacingTokens.sm + 2,
-        ),
-        decoration: BoxDecoration(
-          color: OpenBudgetPalette.borderSubtleFor(theme).withAlpha(55),
-          borderRadius: BorderRadius.circular(RadiusTokens.sm),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    label,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      color: OpenBudgetPalette.fgSecondaryFor(theme),
+    final palette = theme.ob;
+    return Material(
+      type: MaterialType.transparency,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(10),
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: SpacingTokens.md,
+            vertical: SpacingTokens.sm + 2,
+          ),
+          decoration: ObRoughDecoration(
+            color: palette.surface,
+            outline: palette.quietPen,
+            radius: 10,
+            seed: 53,
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: palette.mutedInk,
+                      ),
                     ),
-                  ),
-                  Text(
-                    value,
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w500,
-                      color: OpenBudgetPalette.fgHeroBodyFor(theme),
+                    Text(
+                      value,
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: palette.ink,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            Icon(
-              Icons.edit_rounded,
-              color: OpenBudgetPalette.fgSecondaryFor(theme),
-            ),
-          ],
+              SkribbleIcon(data: OpenBudgetIcons.edit, color: palette.ink),
+            ],
+          ),
         ),
       ),
     );

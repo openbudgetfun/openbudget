@@ -2,7 +2,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
@@ -19,10 +18,6 @@ Budget _makeBudget({
 }) => Budget(name: name, currencyCode: currencyCode, ownerId: _ownerUuid);
 
 void main() {
-  setUpAll(() {
-    GoogleFonts.config.allowRuntimeFetching = false;
-  });
-
   group('PlanSettingsScreen', () {
     testWidgets('renders budget details and option rows', (tester) async {
       await tester.pumpWidget(

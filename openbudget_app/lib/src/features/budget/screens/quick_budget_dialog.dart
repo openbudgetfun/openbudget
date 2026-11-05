@@ -40,9 +40,9 @@ class QuickBudgetDialog extends HookConsumerWidget {
       constraints: const BoxConstraints(maxWidth: 560),
       title: Text(l10n.quickBudgetTitle),
       content: suggestion.when(
-        loading: () => const SizedBox(
+        loading: () => SizedBox(
           height: 100,
-          child: Center(child: CircularProgressIndicator()),
+          child: Center(child: ObLoadingPanel(label: l10n.loadingTitle)),
         ),
         error: (_, _) => Text(l10n.quickBudgetError),
         data: (data) => Column(
@@ -134,8 +134,9 @@ class _QuickBudgetOption extends HookWidget {
     final theme = Theme.of(context);
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(RadiusTokens.sm),
-      child: Padding(
+      borderRadius: BorderRadius.circular(10),
+      child: Container(
+        constraints: const BoxConstraints(minHeight: 48),
         padding: const EdgeInsets.symmetric(
           vertical: SpacingTokens.sm,
           horizontal: SpacingTokens.sm,
@@ -143,14 +144,13 @@ class _QuickBudgetOption extends HookWidget {
         child: Row(
           children: [
             Expanded(child: Text(label, style: theme.textTheme.bodyMedium)),
-            Text(
-              amount,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+            ObAmount(amount, style: theme.textTheme.bodyMedium),
             const SizedBox(width: SpacingTokens.xs),
-            const Icon(Icons.arrow_forward_ios, size: 14),
+            SkribbleIcon(
+              data: OpenBudgetIcons.chevronRight,
+              size: 16,
+              color: Theme.of(context).ob.mutedInk,
+            ),
           ],
         ),
       ),

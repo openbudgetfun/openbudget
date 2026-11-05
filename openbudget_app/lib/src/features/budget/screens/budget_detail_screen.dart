@@ -78,7 +78,6 @@ class BudgetDetailScreen extends HookConsumerWidget {
     final editorInput = useState('');
     final inlineEditorSheetOpen = useState(false);
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
 
     // Only watch whether due count has a positive value; the actual count
     // is consumed inside _DueBannerLoader which watches independently.
@@ -302,33 +301,22 @@ class BudgetDetailScreen extends HookConsumerWidget {
     return summaryAsync.when(
       loading: () => Scaffold(
         appBar: AppBar(title: Text(l10n.appTitle)),
-        body: const Center(child: CircularProgressIndicator()),
+        body: Center(child: ObLoadingPanel(label: l10n.loadingTitle)),
       ),
       error: (error, _) => Scaffold(
         appBar: AppBar(
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
+            icon: const SkribbleIcon(data: OpenBudgetIcons.back),
+            tooltip: MaterialLocalizations.of(context).backButtonTooltip,
             onPressed: () => context.go(homePath),
           ),
           title: Text(l10n.appTitle),
         ),
-        body: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.error_outline_rounded,
-                size: 48,
-                color: colorScheme.error,
-              ),
-              const SizedBox(height: SpacingTokens.md),
-              Text(
-                l10n.budgetLoadError,
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: colorScheme.error,
-                ),
-              ),
-            ],
+        body: Padding(
+          padding: const EdgeInsets.all(SpacingTokens.md),
+          child: ObStatePanel.problem(
+            title: l10n.appTitle,
+            message: l10n.budgetLoadError,
           ),
         ),
       ),
@@ -410,7 +398,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
             scrolledUnderElevation: 0,
             leading: IconButton(
               tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
-              icon: const Icon(Icons.close_rounded),
+              icon: const SkribbleIcon(data: OpenBudgetIcons.close),
               onPressed: () => context.goNamed(homeRoute),
             ),
             centerTitle: true,
@@ -601,10 +589,17 @@ class BudgetDetailScreen extends HookConsumerWidget {
                     onChanged: (value) => searchQuery.value = value,
                     decoration: InputDecoration(
                       hintText: l10n.budgetSearchHint,
-                      prefixIcon: const Icon(Icons.search_rounded, size: 20),
+                      prefixIcon: const SkribbleIcon(
+                        data: OpenBudgetIcons.search,
+                        size: 20,
+                      ),
                       suffixIcon: searchQuery.value.isNotEmpty
                           ? IconButton(
-                              icon: const Icon(Icons.clear_rounded, size: 18),
+                              tooltip: l10n.dialogCancel,
+                              icon: const SkribbleIcon(
+                                data: OpenBudgetIcons.close,
+                                size: 18,
+                              ),
                               onPressed: () {
                                 searchController.clear();
                                 searchQuery.value = '';
@@ -612,73 +607,24 @@ class BudgetDetailScreen extends HookConsumerWidget {
                             )
                           : null,
                       isDense: true,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: SpacingTokens.md,
-                        vertical: SpacingTokens.sm,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(RadiusTokens.md),
-                      ),
                     ),
                   ),
                   const SizedBox(height: SpacingTokens.md),
                 ],
                 if (!showSpotlight.value && summary.categories.isEmpty)
-                  Center(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: SpacingTokens.xl,
-                      ),
-                      child: Column(
-                        children: [
-                          Icon(
-                            Icons.category_rounded,
-                            size: 48,
-                            color: colorScheme.outlineVariant,
-                          ),
-                          const SizedBox(height: SpacingTokens.md),
-                          Text(
-                            l10n.budgetEmptyTitle,
-                            style: theme.textTheme.titleMedium,
-                          ),
-                          const SizedBox(height: SpacingTokens.sm),
-                          Text(
-                            l10n.budgetEmptySubtitle,
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: colorScheme.onSurfaceVariant,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                    ),
+                  ObStatePanel.empty(
+                    title: l10n.budgetEmptyTitle,
+                    message: l10n.budgetEmptySubtitle,
                   ),
                 if (!showSpotlight.value &&
                     isSearching.value &&
                     searchQuery.value.isNotEmpty &&
                     filteredCategories.isEmpty)
-                  Center(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: SpacingTokens.xl,
-                      ),
-                      child: Column(
-                        children: [
-                          Icon(
-                            Icons.search_off_rounded,
-                            size: 48,
-                            color: colorScheme.outlineVariant,
-                          ),
-                          const SizedBox(height: SpacingTokens.md),
-                          Text(
-                            l10n.budgetSearchNoResults,
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                  ObStatePanel.empty(
+                    title: l10n.budgetSearchNoResults,
+                    message: l10n.budgetSearchHint,
+                    doodle: WiredDoodleKind.cloud,
+                    tone: ObTone.neutral,
                   ),
                 if (!showSpotlight.value &&
                     isReordering.value &&
@@ -837,7 +783,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
                         context,
                         summary.categories.length,
                       ),
-                      icon: const Icon(Icons.add),
+                      icon: const SkribbleIcon(data: OpenBudgetIcons.add),
                       label: Text(l10n.budgetAddCategory),
                     ),
                   ),
@@ -1166,7 +1112,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
     CurrencyCode currencyCode,
   ) async {
     final l10n = AppLocalizations.of(context);
-    final colorScheme = Theme.of(context).colorScheme;
+    final palette = Theme.of(context).ob;
     final categoryId = categoryWithEnvelopes.category.id?.toString() ?? '';
     if (categoryId.isEmpty) return;
 
@@ -1176,9 +1122,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
       categoryWithEnvelopes.totalBudgetedCents,
       currencyCode,
     );
-    final envelopeSummary = envelopeCount == 1
-        ? '1 envelope'
-        : '$envelopeCount envelopes';
+    final envelopeSummary = l10n.budgetEnvelopeCount(envelopeCount);
     final confirmed = await showDialog<bool>(
       context: context,
       barrierColor: _dialogBarrierColor(context),
@@ -1188,7 +1132,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
           '${l10n.deleteConfirmMessage}\n\n'
           '"$categoryName"\n\n'
           '$envelopeSummary\n'
-          '$totalAllocated allocated',
+          '${l10n.budgetCategoryAllocated(totalAllocated)}',
         ),
         actions: [
           TextButton(
@@ -1198,8 +1142,8 @@ class BudgetDetailScreen extends HookConsumerWidget {
           FilledButton(
             onPressed: () => Navigator.of(ctx).pop(true),
             style: FilledButton.styleFrom(
-              backgroundColor: colorScheme.error,
-              foregroundColor: colorScheme.onError,
+              backgroundColor: palette.overspent,
+              foregroundColor: palette.onAction,
             ),
             child: Text(l10n.deleteConfirmButton),
           ),
@@ -1283,7 +1227,10 @@ class BudgetDetailScreen extends HookConsumerWidget {
           ),
           FilledButton.icon(
             onPressed: () => Navigator.of(ctx).pop(true),
-            icon: const Icon(Icons.content_copy_rounded, size: 16),
+            icon: const SkribbleIcon(
+              data: OpenBudgetIcons.copy,
+              size: 16,
+            ),
             label: Text(l10n.budgetCopyLastMonth),
           ),
         ],
@@ -1326,7 +1273,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
     String envelopeName,
   ) async {
     final l10n = AppLocalizations.of(context);
-    final colorScheme = Theme.of(context).colorScheme;
+    final palette = Theme.of(context).ob;
     final confirmed = await showDialog<bool>(
       context: context,
       barrierColor: _dialogBarrierColor(context),
@@ -1341,8 +1288,8 @@ class BudgetDetailScreen extends HookConsumerWidget {
           FilledButton(
             onPressed: () => Navigator.of(ctx).pop(true),
             style: FilledButton.styleFrom(
-              backgroundColor: colorScheme.error,
-              foregroundColor: colorScheme.onError,
+              backgroundColor: palette.overspent,
+              foregroundColor: palette.onAction,
             ),
             child: Text(l10n.deleteConfirmButton),
           ),
@@ -1475,23 +1422,29 @@ class _BudgetAppBarMenu extends HookConsumerWidget {
     }
 
     Widget buildMenuLabel({
-      required IconData icon,
+      required WiredSvgIconData icon,
       required String label,
       bool checked = false,
     }) => Row(
       children: [
-        Icon(icon, size: 18),
+        SkribbleIcon(data: icon, size: 18, color: theme.ob.ink),
         const SizedBox(width: SpacingTokens.sm),
         Expanded(child: Text(label)),
         if (checked) ...[
           const SizedBox(width: SpacingTokens.md),
-          const Icon(Icons.check_rounded, size: 18),
+          SkribbleIcon(
+            data: OpenBudgetIcons.check,
+            size: 18,
+            color: theme.ob.funded,
+          ),
         ],
       ],
     );
 
     return PopupMenuButton<_PlanMenuAction>(
-      icon: const Icon(Icons.more_horiz_rounded),
+      key: const Key('budget-plan-menu'),
+      icon: SkribbleIcon(data: OpenBudgetIcons.more, color: theme.ob.ink),
+      tooltip: l10n.moreTitle,
       position: PopupMenuPosition.under,
       offset: const Offset(0, 8),
       onSelected: (action) => switch (action) {
@@ -1535,30 +1488,24 @@ class _BudgetAppBarMenu extends HookConsumerWidget {
       itemBuilder: (context) => [
         PopupMenuItem<_PlanMenuAction>(
           value: _PlanMenuAction.recentMoves,
-          child: Row(
-            children: [
-              const Icon(Icons.history_rounded, size: 18),
-              const SizedBox(width: SpacingTokens.sm),
-              Text(l10n.recentMovesTitle),
-            ],
+          child: buildMenuLabel(
+            icon: OpenBudgetIcons.history,
+            label: l10n.recentMovesTitle,
           ),
         ),
         PopupMenuItem<_PlanMenuAction>(
           value: _PlanMenuAction.undoLastMove,
           enabled: hasRecentMoves,
-          child: Row(
-            children: [
-              const Icon(Icons.undo_rounded, size: 18),
-              const SizedBox(width: SpacingTokens.sm),
-              Text(l10n.undoAction),
-            ],
+          child: buildMenuLabel(
+            icon: OpenBudgetIcons.undo,
+            label: l10n.undoAction,
           ),
         ),
         const PopupMenuDivider(),
         PopupMenuItem<_PlanMenuAction>(
           value: _PlanMenuAction.toggleSearch,
           child: buildMenuLabel(
-            icon: Icons.search_rounded,
+            icon: OpenBudgetIcons.search,
             label: l10n.budgetSearchHint,
             checked: isSearching,
           ),
@@ -1566,7 +1513,7 @@ class _BudgetAppBarMenu extends HookConsumerWidget {
         PopupMenuItem<_PlanMenuAction>(
           value: _PlanMenuAction.toggleHidden,
           child: buildMenuLabel(
-            icon: Icons.visibility_off_rounded,
+            icon: OpenBudgetIcons.hidden,
             label: showHidden
                 ? l10n.budgetShowHidden
                 : hiddenCount > 0
@@ -1578,22 +1525,16 @@ class _BudgetAppBarMenu extends HookConsumerWidget {
         PopupMenuItem<_PlanMenuAction>(
           value: _PlanMenuAction.reorderCategories,
           enabled: !isReordering,
-          child: Row(
-            children: [
-              const Icon(Icons.swap_vert_rounded, size: 18),
-              const SizedBox(width: SpacingTokens.sm),
-              Text(l10n.budgetReorderCategories),
-            ],
+          child: buildMenuLabel(
+            icon: OpenBudgetIcons.sort,
+            label: l10n.budgetReorderCategories,
           ),
         ),
         PopupMenuItem<_PlanMenuAction>(
           value: _PlanMenuAction.saveTemplate,
-          child: Row(
-            children: [
-              const Icon(Icons.bookmark_border_rounded, size: 18),
-              const SizedBox(width: SpacingTokens.sm),
-              Text(l10n.templateTitle),
-            ],
+          child: buildMenuLabel(
+            icon: OpenBudgetIcons.bookmark,
+            label: l10n.templateTitle,
           ),
         ),
         const PopupMenuDivider(),
@@ -1601,27 +1542,24 @@ class _BudgetAppBarMenu extends HookConsumerWidget {
           value: _PlanMenuAction.toggleTheme,
           child: buildMenuLabel(
             icon: isDarkMode
-                ? Icons.light_mode_rounded
-                : Icons.dark_mode_rounded,
+                ? OpenBudgetIcons.lightMode
+                : OpenBudgetIcons.darkMode,
             label: isDarkMode ? l10n.themeLight : l10n.themeDark,
           ),
         ),
         const PopupMenuDivider(),
         PopupMenuItem<_PlanMenuAction>(
           value: _PlanMenuAction.collapseExpand,
-          child: Row(
-            children: [
-              const Icon(Icons.unfold_more_rounded, size: 18),
-              const SizedBox(width: SpacingTokens.sm),
-              Text(l10n.budgetCollapseExpand),
-            ],
+          child: buildMenuLabel(
+            icon: OpenBudgetIcons.expand,
+            label: l10n.budgetCollapseExpand,
           ),
         ),
         const PopupMenuDivider(),
         PopupMenuItem<_PlanMenuAction>(
           value: _PlanMenuAction.hideProgressBars,
           child: buildMenuLabel(
-            icon: Icons.linear_scale_rounded,
+            icon: OpenBudgetIcons.scale,
             label: l10n.settingsHideProgressBars,
             checked: hideProgressBars,
           ),
@@ -1629,7 +1567,7 @@ class _BudgetAppBarMenu extends HookConsumerWidget {
         PopupMenuItem<_PlanMenuAction>(
           value: _PlanMenuAction.hideAmounts,
           child: buildMenuLabel(
-            icon: Icons.visibility_off_rounded,
+            icon: OpenBudgetIcons.hidden,
             label: l10n.settingsHideAmounts,
             checked: hideAmounts,
           ),
@@ -1637,12 +1575,9 @@ class _BudgetAppBarMenu extends HookConsumerWidget {
         const PopupMenuDivider(),
         PopupMenuItem<_PlanMenuAction>(
           value: _PlanMenuAction.planSettings,
-          child: Row(
-            children: [
-              const Icon(Icons.settings_outlined, size: 18),
-              const SizedBox(width: SpacingTokens.sm),
-              Text(l10n.settingsPlanSettings),
-            ],
+          child: buildMenuLabel(
+            icon: OpenBudgetIcons.settings,
+            label: l10n.settingsPlanSettings,
           ),
         ),
       ],
@@ -1796,33 +1731,27 @@ class _PlanOnboardingCard extends HookWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final (
-      backgroundColor,
-      iconData,
-      title,
-      body,
-      prompt,
-      primaryLabel,
-    ) = switch (type) {
+    final palette = theme.ob;
+    final (tone, icon, title, body, prompt, primaryLabel) = switch (type) {
       _PlanOnboardingType.addAccounts => (
-        OpenBudgetPalette.bgAccentFor(Theme.of(context)).withAlpha(70),
-        Icons.account_balance_rounded,
+        ObTone.brand,
+        OpenBudgetIcons.bank,
         l10n.budgetOnboardingAddAccountsTitle,
         l10n.budgetOnboardingAddAccountsBody,
         null,
         l10n.budgetOnboardingAddAccountsCta,
       ),
       _PlanOnboardingType.assignMoney => (
-        OpenBudgetPalette.bgSuccessFor(Theme.of(context)),
-        Icons.mail_rounded,
+        ObTone.funded,
+        OpenBudgetIcons.envelopeOpen,
         l10n.budgetOnboardingAssignMoneyTitle(readyToAssign),
         l10n.budgetOnboardingAssignMoneyBody,
         l10n.budgetOnboardingAssignMoneyPrompt,
         l10n.budgetAssignMoney,
       ),
       _PlanOnboardingType.finish => (
-        OpenBudgetPalette.bgAccentFor(Theme.of(context)).withAlpha(70),
-        Icons.auto_awesome_rounded,
+        ObTone.review,
+        OpenBudgetIcons.sparkle,
         l10n.budgetOnboardingFinishTitle,
         l10n.budgetOnboardingFinishBody,
         null,
@@ -1830,52 +1759,32 @@ class _PlanOnboardingCard extends HookWidget {
       ),
     };
 
-    final primaryButtonColor = type == _PlanOnboardingType.assignMoney
-        ? OpenBudgetPalette.fgSuccessStrongFor(Theme.of(context))
-        : OpenBudgetPalette.bgBrandFor(Theme.of(context));
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(SpacingTokens.md),
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(RadiusTokens.lg),
-        border: Border.all(
-          color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
-        ),
-      ),
+    return ObCard(
+      tone: tone,
+      padding: const EdgeInsets.all(SpacingTokens.lg),
       child: Column(
         children: [
-          Icon(
-            iconData,
-            size: 42,
-            color: OpenBudgetPalette.bgBrandFor(Theme.of(context)),
-          ),
+          SkribbleIcon(data: icon, size: 44, color: palette.hue(tone)),
           const SizedBox(height: SpacingTokens.sm),
           Text(
             title,
             style: theme.textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.w800,
+              color: palette.ink,
             ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: SpacingTokens.xs),
           Text(
             body,
-            style: theme.textTheme.bodyLarge?.copyWith(
-              color: OpenBudgetPalette.fgPrimaryEmphasisFor(Theme.of(context)),
-            ),
+            style: theme.textTheme.bodyLarge?.copyWith(color: palette.ink),
             textAlign: TextAlign.center,
           ),
           if (prompt != null) ...[
             const SizedBox(height: SpacingTokens.sm),
             Text(
               prompt,
-              style: theme.textTheme.bodyLarge?.copyWith(
-                color: OpenBudgetPalette.fgPrimaryEmphasisFor(
-                  Theme.of(context),
-                ),
-              ),
+              style: theme.textTheme.bodyLarge?.copyWith(color: palette.ink),
               textAlign: TextAlign.center,
             ),
           ],
@@ -1883,11 +1792,7 @@ class _PlanOnboardingCard extends HookWidget {
           FilledButton(
             onPressed: onPrimaryAction,
             style: FilledButton.styleFrom(
-              minimumSize: const Size.fromHeight(44),
-              backgroundColor: primaryButtonColor,
-              foregroundColor: OpenBudgetPalette.fgOnBrandFor(
-                Theme.of(context),
-              ),
+              minimumSize: const Size.fromHeight(48),
             ),
             child: Text(primaryLabel),
           ),
@@ -1896,16 +1801,7 @@ class _PlanOnboardingCard extends HookWidget {
             OutlinedButton(
               onPressed: onSecondaryAction,
               style: OutlinedButton.styleFrom(
-                minimumSize: const Size.fromHeight(42),
-                side: BorderSide(
-                  color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
-                ),
-                backgroundColor: OpenBudgetPalette.bgSecondaryFor(
-                  Theme.of(context),
-                ),
-                foregroundColor: OpenBudgetPalette.bgBrandFor(
-                  Theme.of(context),
-                ),
+                minimumSize: const Size.fromHeight(48),
               ),
               child: Text(l10n.budgetOnboardingAddAnotherAccount),
             ),
@@ -1928,17 +1824,9 @@ class _BudgetViewToggle extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
 
-    return Container(
-      decoration: BoxDecoration(
-        color: OpenBudgetPalette.bgTertiaryFor(Theme.of(context)),
-        borderRadius: BorderRadius.circular(RadiusTokens.md),
-        border: Border.all(
-          color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
-        ),
-      ),
-      padding: const EdgeInsets.all(2),
+    return ObCard(
+      padding: const EdgeInsets.all(3),
       child: Row(
         children: [
           Expanded(
@@ -1946,7 +1834,6 @@ class _BudgetViewToggle extends HookWidget {
               label: l10n.budgetDetailCategories,
               selected: !showSpotlight,
               onTap: () => onChanged(false),
-              theme: theme,
             ),
           ),
           Expanded(
@@ -1954,7 +1841,6 @@ class _BudgetViewToggle extends HookWidget {
               label: l10n.budgetDetailSpotlight,
               selected: showSpotlight,
               onTap: () => onChanged(true),
-              theme: theme,
             ),
           ),
         ],
@@ -1968,39 +1854,47 @@ class _ToggleButton extends HookWidget {
     required this.label,
     required this.selected,
     required this.onTap,
-    required this.theme,
   });
 
   final String label;
   final bool selected;
   final VoidCallback onTap;
-  final ThemeData theme;
 
   @override
-  Widget build(BuildContext context) => Material(
-    color: selected
-        ? OpenBudgetPalette.bgSecondaryFor(Theme.of(context))
-        : OpenBudgetPalette.transparentFor(Theme.of(context)),
-    borderRadius: BorderRadius.circular(RadiusTokens.sm),
-    child: InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(RadiusTokens.sm),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: SpacingTokens.sm),
-        child: Center(
-          child: Text(
-            label,
-            style: theme.textTheme.labelLarge?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: selected
-                  ? OpenBudgetPalette.fgPrimaryFor(Theme.of(context))
-                  : OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final palette = theme.ob;
+    return Semantics(
+      selected: selected,
+      button: true,
+      child: Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(8),
+          child: Container(
+            decoration: ObRoughDecoration(
+              color: selected ? palette.highlight : null,
+              outline: selected ? palette.quietPen : null,
+              radius: 8,
+              strokeWidth: 1.4,
+              seed: 41,
+            ),
+            padding: const EdgeInsets.symmetric(vertical: SpacingTokens.sm),
+            child: Center(
+              child: Text(
+                label,
+                style: theme.textTheme.labelLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: selected ? palette.ink : palette.mutedInk,
+                ),
+              ),
             ),
           ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 class _SpotlightOverview extends HookWidget {
@@ -2074,33 +1968,25 @@ class _SpotlightOverview extends HookWidget {
 
     return Column(
       children: [
-        Container(
-          width: double.infinity,
+        ObCard(
           padding: const EdgeInsets.all(SpacingTokens.md),
-          decoration: BoxDecoration(
-            color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
-            borderRadius: BorderRadius.circular(RadiusTokens.md),
-            border: Border.all(
-              color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
-            ),
-          ),
           child: Column(
             children: [
               const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   _SpotlightPriorityIcon(
-                    icon: Icons.shopping_basket_rounded,
+                    icon: OpenBudgetIcons.groceries,
                     rotation: -0.12,
                   ),
                   SizedBox(width: SpacingTokens.sm),
                   _SpotlightPriorityIcon(
-                    icon: Icons.directions_bus_rounded,
+                    icon: OpenBudgetIcons.transport,
                     rotation: 0.08,
                   ),
                   SizedBox(width: SpacingTokens.sm),
                   _SpotlightPriorityIcon(
-                    icon: Icons.local_florist_rounded,
+                    icon: OpenBudgetIcons.flower,
                     rotation: -0.08,
                   ),
                 ],
@@ -2118,7 +2004,7 @@ class _SpotlightOverview extends HookWidget {
                 l10n.budgetSpotlightTopPrioritiesHint,
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
+                  color: Theme.of(context).ob.mutedInk,
                 ),
               ),
               const SizedBox(height: SpacingTokens.md),
@@ -2130,16 +2016,8 @@ class _SpotlightOverview extends HookWidget {
           ),
         ),
         const SizedBox(height: SpacingTokens.md),
-        Container(
-          width: double.infinity,
+        ObCard(
           padding: const EdgeInsets.all(SpacingTokens.md),
-          decoration: BoxDecoration(
-            color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
-            borderRadius: BorderRadius.circular(RadiusTokens.md),
-            border: Border.all(
-              color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
-            ),
-          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -2156,8 +2034,9 @@ class _SpotlightOverview extends HookWidget {
                     child: SizedBox(
                       height: 104,
                       child: _SpotlightMetricTile(
-                        icon: Icons.track_changes_rounded,
+                        icon: OpenBudgetIcons.goal,
                         label: l10n.budgetSpotlightTotalTargets,
+                        tone: ObTone.brand,
                         value: hideAmounts
                             ? hiddenAmountPlaceholder
                             : formatCents(totalTargetsCents, currencyCode),
@@ -2171,8 +2050,9 @@ class _SpotlightOverview extends HookWidget {
                     child: SizedBox(
                       height: 104,
                       child: _SpotlightMetricTile(
-                        icon: Icons.pie_chart_rounded,
+                        icon: OpenBudgetIcons.pieChart,
                         label: l10n.budgetSpotlightUnderfunded,
+                        tone: ObTone.underfunded,
                         value: hideAmounts
                             ? hiddenAmountPlaceholder
                             : formatCents(totalUnderfundedCents, currencyCode),
@@ -2188,8 +2068,9 @@ class _SpotlightOverview extends HookWidget {
                     child: SizedBox(
                       height: 104,
                       child: _SpotlightMetricTile(
-                        icon: Icons.fact_check_rounded,
+                        icon: OpenBudgetIcons.checkCircle,
                         label: l10n.budgetSpotlightAssigned,
+                        tone: ObTone.funded,
                         value: hideAmounts
                             ? hiddenAmountPlaceholder
                             : formatCents(
@@ -2206,8 +2087,9 @@ class _SpotlightOverview extends HookWidget {
                     child: SizedBox(
                       height: 104,
                       child: _SpotlightMetricTile(
-                        icon: Icons.payments_outlined,
+                        icon: OpenBudgetIcons.payment,
                         label: l10n.budgetSpotlightSpent,
+                        tone: ObTone.overspent,
                         value: hideAmounts
                             ? hiddenAmountPlaceholder
                             : formatCents(totalActivityCents, currencyCode),
@@ -2249,138 +2131,69 @@ class _SpotlightMetricTile extends HookWidget {
     required this.value,
     this.actionLabel,
     this.onActionTap,
+    this.tone = ObTone.neutral,
   });
 
-  final IconData icon;
+  final WiredSvgIconData icon;
   final String label;
   final String value;
   final String? actionLabel;
   final VoidCallback? onActionTap;
+  final ObTone tone;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final accentColor = switch (icon) {
-      Icons.track_changes_rounded => OpenBudgetPalette.bgFlagInfoFor(theme),
-      Icons.pie_chart_rounded => OpenBudgetPalette.bgFlagCriticalFor(theme),
-      Icons.fact_check_rounded => OpenBudgetPalette.bgFlagPositiveFor(theme),
-      Icons.payments_outlined => OpenBudgetPalette.bgFlagAccentFor(theme),
-      _ => OpenBudgetPalette.bgBrandFor(theme),
-    };
-    final surfaceColor = Color.alphaBlend(
-      accentColor.withAlpha(theme.brightness == Brightness.dark ? 58 : 30),
-      OpenBudgetPalette.bgTertiaryFor(theme),
-    );
+    final palette = theme.ob;
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: surfaceColor,
-        borderRadius: BorderRadius.circular(RadiusTokens.md),
-        border: Border.all(color: accentColor.withAlpha(150)),
-        boxShadow: [
-          BoxShadow(
-            color: accentColor.withAlpha(
-              theme.brightness == Brightness.dark ? 52 : 34,
-            ),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+    return ObCard(
+      tone: tone,
+      padding: const EdgeInsets.all(SpacingTokens.sm),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              SkribbleIcon(data: icon, size: 18, color: palette.hue(tone)),
+              const SizedBox(width: SpacingTokens.xs),
+              Expanded(
+                child: Text(
+                  label,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: palette.ink,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              if (actionLabel != null)
+                TextButton(
+                  onPressed: onActionTap,
+                  style: TextButton.styleFrom(
+                    minimumSize: const Size(48, 48),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: SpacingTokens.xs + 2,
+                      vertical: 2,
+                    ),
+                  ),
+                  child: Text(
+                    actionLabel!,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: palette.hue(tone),
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+            ],
           ),
-          BoxShadow(
-            color: OpenBudgetPalette.fgPrimaryFor(theme).withAlpha(16),
-            blurRadius: 4,
-            offset: const Offset(0, 1),
+          const SizedBox(height: SpacingTokens.xs + 2),
+          ObAmount(
+            value,
+            tone: tone,
+            style: theme.textTheme.titleMedium,
           ),
         ],
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            surfaceColor,
-            Color.alphaBlend(
-              accentColor.withAlpha(
-                theme.brightness == Brightness.dark ? 74 : 38,
-              ),
-              OpenBudgetPalette.bgSecondaryFor(theme),
-            ),
-          ],
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          SpacingTokens.sm,
-          SpacingTokens.sm,
-          SpacingTokens.sm,
-          SpacingTokens.sm + 2,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: 24,
-                  height: 24,
-                  decoration: BoxDecoration(
-                    color: accentColor.withAlpha(
-                      theme.brightness == Brightness.dark ? 54 : 30,
-                    ),
-                    borderRadius: BorderRadius.circular(RadiusTokens.sm),
-                    border: Border.all(color: accentColor.withAlpha(165)),
-                  ),
-                  child: Icon(icon, size: 14, color: accentColor),
-                ),
-                const SizedBox(width: SpacingTokens.xs),
-                Expanded(
-                  child: Text(
-                    label,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: OpenBudgetPalette.fgSecondaryFor(
-                        Theme.of(context),
-                      ),
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-                if (actionLabel != null)
-                  TextButton(
-                    onPressed: onActionTap,
-                    style: TextButton.styleFrom(
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      minimumSize: Size.zero,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: SpacingTokens.xs + 2,
-                        vertical: 2,
-                      ),
-                      backgroundColor: accentColor.withAlpha(
-                        theme.brightness == Brightness.dark ? 58 : 28,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(999),
-                        side: BorderSide(color: accentColor.withAlpha(145)),
-                      ),
-                    ),
-                    child: Text(
-                      actionLabel!,
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: accentColor,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-            const SizedBox(height: SpacingTokens.xs + 2),
-            Text(
-              value,
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.1,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -2389,25 +2202,27 @@ class _SpotlightMetricTile extends HookWidget {
 class _SpotlightPriorityIcon extends HookWidget {
   const _SpotlightPriorityIcon({required this.icon, required this.rotation});
 
-  final IconData icon;
+  final WiredSvgIconData icon;
   final double rotation;
 
   @override
-  Widget build(BuildContext context) => Transform.rotate(
-    angle: rotation,
-    child: Container(
-      width: 56,
-      height: 56,
-      decoration: BoxDecoration(
-        color: OpenBudgetPalette.bgBrandFor(Theme.of(context)).withAlpha(26),
-        borderRadius: BorderRadius.circular(RadiusTokens.md),
-        border: Border.all(
-          color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
+  Widget build(BuildContext context) {
+    final palette = Theme.of(context).ob;
+    return Transform.rotate(
+      angle: rotation,
+      child: Container(
+        width: 56,
+        height: 56,
+        alignment: Alignment.center,
+        decoration: ObRoughDecoration(
+          color: palette.brandWash,
+          outline: palette.quietPen,
+          seed: 43,
         ),
+        child: SkribbleIcon(data: icon, color: palette.brand),
       ),
-      child: Icon(icon, color: OpenBudgetPalette.bgBrandFor(Theme.of(context))),
-    ),
-  );
+    );
+  }
 }
 
 class _InlineEditorSelection {
@@ -2455,6 +2270,7 @@ class _InlineAmountEditor extends HookWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
+    final palette = theme.ob;
     final canApply = inputValue.isNotEmpty && inputValue != '-';
     const actionRowHeight = 70.0;
 
@@ -2462,47 +2278,30 @@ class _InlineAmountEditor extends HookWidget {
       String label, {
       VoidCallback? onPressed,
       bool primary = false,
-      bool accent = false,
       Widget? child,
       double minHeight = 48,
     }) => Expanded(
       child: Padding(
         padding: const EdgeInsets.all(SpacingTokens.xs),
-        child: FilledButton(
-          onPressed: onPressed,
-          style: FilledButton.styleFrom(
-            backgroundColor: primary
-                ? OpenBudgetPalette.bgBrandFor(Theme.of(context))
-                : OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
-            foregroundColor: primary
-                ? OpenBudgetPalette.fgOnBrandFor(Theme.of(context))
-                : accent
-                ? OpenBudgetPalette.bgBrandFor(Theme.of(context))
-                : OpenBudgetPalette.fgPrimaryEmphasisFor(Theme.of(context)),
-            side: primary
-                ? BorderSide.none
-                : BorderSide(
-                    color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
-                  ),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(RadiusTokens.sm),
-            ),
-            fixedSize: Size.fromHeight(minHeight),
-            elevation: 0,
-          ),
-          child: child ?? Text(label),
+        child: SizedBox(
+          height: minHeight,
+          child: primary
+              ? FilledButton(
+                  onPressed: onPressed,
+                  child: child ?? Text(label),
+                )
+              : OutlinedButton(
+                  onPressed: onPressed,
+                  child: child ?? Text(label),
+                ),
         ),
       ),
     );
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: OpenBudgetPalette.bgTertiaryFor(Theme.of(context)),
-        border: Border(
-          top: BorderSide(
-            color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
-          ),
-        ),
+        color: palette.surface,
+        border: Border(top: BorderSide(color: palette.line)),
       ),
       child: SafeArea(
         top: false,
@@ -2518,12 +2317,9 @@ class _InlineAmountEditor extends HookWidget {
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: SpacingTokens.xs),
-                child: Text(
+                child: ObAmount(
                   amountLabel,
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    color: OpenBudgetPalette.bgBrandFor(Theme.of(context)),
-                  ),
+                  style: theme.textTheme.headlineSmall,
                 ),
               ),
               Row(
@@ -2562,40 +2358,52 @@ class _InlineAmountEditor extends HookWidget {
               ),
               Row(
                 children: [
-                  key('7', onPressed: () => onDigit('7'), accent: true),
-                  key('8', onPressed: () => onDigit('8'), accent: true),
-                  key('9', onPressed: () => onDigit('9'), accent: true),
-                  key('-', onPressed: onNegative, accent: true),
+                  key('7', onPressed: () => onDigit('7')),
+                  key('8', onPressed: () => onDigit('8')),
+                  key('9', onPressed: () => onDigit('9')),
+                  key('-', onPressed: onNegative),
                 ],
               ),
               Row(
                 children: [
-                  key('4', onPressed: () => onDigit('4'), accent: true),
-                  key('5', onPressed: () => onDigit('5'), accent: true),
-                  key('6', onPressed: () => onDigit('6'), accent: true),
-                  key('+', onPressed: onPositive, accent: true),
+                  key('4', onPressed: () => onDigit('4')),
+                  key('5', onPressed: () => onDigit('5')),
+                  key('6', onPressed: () => onDigit('6')),
+                  key('+', onPressed: onPositive),
                 ],
               ),
               Row(
                 children: [
-                  key('1', onPressed: () => onDigit('1'), accent: true),
-                  key('2', onPressed: () => onDigit('2'), accent: true),
-                  key('3', onPressed: () => onDigit('3'), accent: true),
-                  key('=', onPressed: canApply ? onApply : null, accent: true),
+                  key('1', onPressed: () => onDigit('1')),
+                  key('2', onPressed: () => onDigit('2')),
+                  key('3', onPressed: () => onDigit('3')),
+                  key('=', onPressed: canApply ? onApply : null),
                 ],
               ),
               Row(
                 children: [
                   key(
-                    'x',
+                    '',
                     onPressed: onCancel,
-                    child: const Icon(Icons.close_rounded),
+                    child: Tooltip(
+                      message: l10n.dialogCancel,
+                      child: SkribbleIcon(
+                        data: OpenBudgetIcons.close,
+                        color: palette.ink,
+                      ),
+                    ),
                   ),
-                  key('0', onPressed: () => onDigit('0'), accent: true),
+                  key('0', onPressed: () => onDigit('0')),
                   key(
                     '',
                     onPressed: onBackspace,
-                    child: const Icon(Icons.backspace_outlined),
+                    child: Tooltip(
+                      message: l10n.budgetBackspaceLabel,
+                      child: SkribbleIcon(
+                        data: OpenBudgetIcons.backspace,
+                        color: palette.ink,
+                      ),
+                    ),
                   ),
                   key(
                     '',
@@ -2603,10 +2411,9 @@ class _InlineAmountEditor extends HookWidget {
                     primary: true,
                     child: Tooltip(
                       message: l10n.dialogDone,
-                      child: Semantics(
-                        button: true,
-                        label: l10n.dialogDone,
-                        child: const Icon(Icons.keyboard_return_rounded),
+                      child: SkribbleIcon(
+                        data: OpenBudgetIcons.enter,
+                        color: palette.onAction,
                       ),
                     ),
                   ),
@@ -2635,32 +2442,26 @@ class _DueBanner extends HookWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
+    final palette = theme.ob;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: SpacingTokens.md),
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: SpacingTokens.md,
-          vertical: SpacingTokens.sm,
-        ),
-        decoration: BoxDecoration(
-          color: ColorTokens.primary.withAlpha(15),
-          borderRadius: BorderRadius.circular(RadiusTokens.md),
-          border: Border.all(color: ColorTokens.primary.withAlpha(60)),
-        ),
+      child: ObCard(
+        tone: ObTone.brand,
+        padding: const EdgeInsets.all(SpacingTokens.sm),
         child: Row(
           children: [
-            const Icon(
-              Icons.schedule_rounded,
+            SkribbleIcon(
+              data: OpenBudgetIcons.recurring,
               size: 20,
-              color: ColorTokens.primary,
+              color: palette.brand,
             ),
             const SizedBox(width: SpacingTokens.sm),
             Expanded(
               child: Text(
                 l10n.recurringDueBanner(count),
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: ColorTokens.primary,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: palette.ink,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -2669,32 +2470,17 @@ class _DueBanner extends HookWidget {
             FilledButton.icon(
               onPressed: isPosting ? null : onPost,
               icon: isPosting
-                  ? SizedBox(
-                      width: 14,
-                      height: 14,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: OpenBudgetPalette.fgOnBrandFor(
-                          Theme.of(context),
-                        ),
-                      ),
+                  ? WiredLoadingIndicator(
+                      size: 16,
+                      color: palette.onAction,
                     )
-                  : const Icon(Icons.play_arrow_rounded, size: 16),
+                  : SkribbleIcon(
+                      data: OpenBudgetIcons.play,
+                      size: 16,
+                      color: palette.onAction,
+                    ),
               label: Text(
                 isPosting ? l10n.recurringPosting : l10n.recurringPostDue,
-              ),
-              style: FilledButton.styleFrom(
-                backgroundColor: ColorTokens.primary,
-                foregroundColor: OpenBudgetPalette.fgOnBrandFor(
-                  Theme.of(context),
-                ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: SpacingTokens.md,
-                  vertical: SpacingTokens.xs,
-                ),
-                textStyle: theme.textTheme.labelSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
               ),
             ),
           ],
@@ -2712,59 +2498,40 @@ class _ReviewTransactionsBanner extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final title = count == 1
-        ? 'Review 1 transaction'
-        : 'Review $count transactions';
+    final palette = theme.ob;
 
-    return Material(
-      color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
-      borderRadius: BorderRadius.circular(RadiusTokens.md),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(RadiusTokens.md),
-        child: Ink(
-          padding: const EdgeInsets.symmetric(
-            horizontal: SpacingTokens.md,
-            vertical: SpacingTokens.sm,
-          ),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(RadiusTokens.md),
-            border: Border.all(
-              color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
+    return ObCard(
+      onTap: onTap,
+      padding: const EdgeInsets.all(SpacingTokens.sm),
+      child: Row(
+        children: [
+          ObToneChip(
+            label: '$count',
+            tone: ObTone.review,
+            icon: SkribbleIcon(
+              data: OpenBudgetIcons.taskDone,
+              size: 14,
+              color: palette.review,
             ),
           ),
-          child: Row(
-            children: [
-              Container(
-                width: 20,
-                height: 20,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: OpenBudgetPalette.bgInfoFor(Theme.of(context)),
-                  borderRadius: BorderRadius.circular(RadiusTokens.sm),
-                ),
-                child: Text(
-                  '$count',
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: OpenBudgetPalette.bgBrandFor(Theme.of(context)),
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
+          const SizedBox(width: SpacingTokens.sm),
+          Expanded(
+            child: Text(
+              l10n.budgetReviewTransactions(count),
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: palette.ink,
               ),
-              const SizedBox(width: SpacingTokens.sm),
-              Expanded(
-                child: Text(
-                  title,
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-              const Icon(Icons.chevron_right_rounded),
-            ],
+            ),
           ),
-        ),
+          SkribbleIcon(
+            data: OpenBudgetIcons.chevronRight,
+            size: 18,
+            color: palette.mutedInk,
+          ),
+        ],
       ),
     );
   }
@@ -2794,59 +2561,40 @@ class _CoverOverspentBanner extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final title = count == 1
-        ? 'Cover 1 overspent category'
-        : 'Cover $count overspent categories';
+    final palette = theme.ob;
 
-    return Material(
-      color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
-      borderRadius: BorderRadius.circular(RadiusTokens.md),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(RadiusTokens.md),
-        child: Ink(
-          padding: const EdgeInsets.symmetric(
-            horizontal: SpacingTokens.md,
-            vertical: SpacingTokens.sm,
-          ),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(RadiusTokens.md),
-            border: Border.all(
-              color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
+    return ObCard(
+      onTap: onTap,
+      padding: const EdgeInsets.all(SpacingTokens.sm),
+      child: Row(
+        children: [
+          ObToneChip(
+            label: '$count',
+            tone: ObTone.overspent,
+            icon: SkribbleIcon(
+              data: OpenBudgetIcons.warning,
+              size: 14,
+              color: palette.overspent,
             ),
           ),
-          child: Row(
-            children: [
-              Container(
-                width: 20,
-                height: 20,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: OpenBudgetPalette.bgErrorFor(Theme.of(context)),
-                  borderRadius: BorderRadius.circular(RadiusTokens.sm),
-                ),
-                child: Text(
-                  '$count',
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: OpenBudgetPalette.fgErrorFor(Theme.of(context)),
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
+          const SizedBox(width: SpacingTokens.sm),
+          Expanded(
+            child: Text(
+              l10n.budgetCoverOverspentCategories(count),
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: palette.ink,
               ),
-              const SizedBox(width: SpacingTokens.sm),
-              Expanded(
-                child: Text(
-                  title,
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-              const Icon(Icons.chevron_right_rounded),
-            ],
+            ),
           ),
-        ),
+          SkribbleIcon(
+            data: OpenBudgetIcons.chevronRight,
+            size: 18,
+            color: palette.mutedInk,
+          ),
+        ],
       ),
     );
   }
@@ -2871,6 +2619,7 @@ class _CoverOverspendingSheet extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
+    final palette = theme.ob;
     final remainingItems = useState(
       List<_OverspentEnvelopeEntry>.of(overspentEnvelopes),
     );
@@ -2939,108 +2688,63 @@ class _CoverOverspendingSheet extends HookConsumerWidget {
       }
     }
 
+    final isApplyingValue = isApplying.value;
+    final items = remainingItems.value;
+
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
-        borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(RadiusTokens.lg),
-        ),
+        color: palette.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
       ),
       child: SafeArea(
         top: false,
         child: Column(
           children: [
-            const SizedBox(height: SpacingTokens.xs),
-            Container(
-              width: 36,
-              height: 4,
-              decoration: BoxDecoration(
-                color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
-                borderRadius: BorderRadius.circular(RadiusTokens.md),
+            const SizedBox(height: SpacingTokens.sm),
+            Text(
+              l10n.budgetDetailCoverOverspendingTitle,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w800,
+                color: palette.ink,
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                SpacingTokens.md,
-                SpacingTokens.sm,
-                SpacingTokens.md,
-                SpacingTokens.sm,
-              ),
-              child: Row(
-                children: [
-                  const SizedBox(width: 56),
-                  Expanded(
-                    child: Text(
-                      l10n.budgetDetailCoverOverspendingTitle,
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ),
-                  SizedBox(
-                    width: 56,
-                    child: TextButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      child: Text(l10n.dialogDone),
-                    ),
-                  ),
-                ],
+            Align(
+              alignment: Alignment.centerRight,
+              child: Padding(
+                padding: const EdgeInsets.only(right: SpacingTokens.sm),
+                child: TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text(l10n.dialogDone),
+                ),
               ),
             ),
             const Divider(height: 1),
             Expanded(
-              child: remainingItems.value.isEmpty
+              child: items.isEmpty
                   ? Center(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
                           horizontal: SpacingTokens.lg,
                         ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.check_circle_rounded,
-                              size: 32,
-                              color: OpenBudgetPalette.fgSuccessFor(
-                                Theme.of(context),
-                              ),
-                            ),
-                            const SizedBox(height: SpacingTokens.md),
-                            Text(
-                              l10n.budgetDetailAllOverspendingCovered,
-                              style: theme.textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.w700,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
+                        child: ObStatePanel.empty(
+                          title: l10n.budgetDetailAllOverspendingCovered,
+                          doodle: WiredDoodleKind.flower,
+                          tone: ObTone.funded,
                         ),
                       ),
                     )
                   : ListView.separated(
                       padding: const EdgeInsets.all(SpacingTokens.md),
                       itemBuilder: (context, index) {
-                        final item = remainingItems.value[index];
-                        return DecoratedBox(
-                          decoration: BoxDecoration(
-                            color: OpenBudgetPalette.bgSecondaryFor(
-                              Theme.of(context),
-                            ),
-                            borderRadius: BorderRadius.circular(
-                              RadiusTokens.md,
-                            ),
-                            border: Border.all(
-                              color: OpenBudgetPalette.borderSubtleFor(
-                                Theme.of(context),
-                              ),
-                            ),
-                          ),
+                        final item = items[index];
+                        return ObCard(
                           child: ListTile(
                             title: Text(
                               item.envelopeName,
                               style: theme.textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.w700,
+                                color: palette.ink,
                               ),
                             ),
                             subtitle: Text(
@@ -3048,13 +2752,11 @@ class _CoverOverspendingSheet extends HookConsumerWidget {
                                 formatCents(item.overspentCents, currencyCode),
                               ),
                               style: theme.textTheme.bodySmall?.copyWith(
-                                color: OpenBudgetPalette.fgSecondaryFor(
-                                  Theme.of(context),
-                                ),
+                                color: palette.mutedInk,
                               ),
                             ),
                             trailing: FilledButton(
-                              onPressed: isApplying.value
+                              onPressed: isApplyingValue
                                   ? null
                                   : () => coverEnvelope(item),
                               child: Text(l10n.budgetDetailCoverButton),
@@ -3064,10 +2766,10 @@ class _CoverOverspendingSheet extends HookConsumerWidget {
                       },
                       separatorBuilder: (_, _) =>
                           const SizedBox(height: SpacingTokens.sm),
-                      itemCount: remainingItems.value.length,
+                      itemCount: items.length,
                     ),
             ),
-            if (remainingItems.value.isNotEmpty)
+            if (items.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.fromLTRB(
                   SpacingTokens.md,
@@ -3076,16 +2778,14 @@ class _CoverOverspendingSheet extends HookConsumerWidget {
                   SpacingTokens.md,
                 ),
                 child: FilledButton(
-                  onPressed: isApplying.value ? null : coverAll,
+                  onPressed: isApplyingValue ? null : coverAll,
                   style: FilledButton.styleFrom(
-                    minimumSize: const Size.fromHeight(46),
+                    minimumSize: const Size.fromHeight(48),
                   ),
                   child: Text(
-                    isApplying.value
+                    isApplyingValue
                         ? l10n.budgetDetailCovering
-                        : l10n.budgetDetailCoverOverspent(
-                            remainingItems.value.length,
-                          ),
+                        : l10n.budgetDetailCoverOverspent(items.length),
                   ),
                 ),
               ),
@@ -3108,8 +2808,6 @@ class _ReorderableCategoryList extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
     final orderedCategories = useState(List.of(categories));
 
     // Sync with provider state when categories change.
@@ -3121,23 +2819,12 @@ class _ReorderableCategoryList extends HookConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.only(bottom: SpacingTokens.sm),
-          child: Row(
-            children: [
-              Icon(
-                Icons.info_outline_rounded,
-                size: 16,
-                color: colorScheme.onSurfaceVariant,
-              ),
-              const SizedBox(width: SpacingTokens.xs),
-              Text(
-                l10n.budgetReorderHint,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
+        ObSectionHeader(
+          title: l10n.budgetReorderCategories,
+          subtitle: l10n.budgetReorderHint,
+          padding: const EdgeInsets.only(
+            left: SpacingTokens.xs,
+            bottom: SpacingTokens.sm,
           ),
         ),
         ...orderedCategories.value.asMap().entries.map((entry) {
@@ -3205,41 +2892,51 @@ class _ReorderableCategoryTile extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final palette = theme.ob;
+    final l10n = AppLocalizations.of(context);
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: SpacingTokens.sm),
-      child: ListTile(
-        leading: Icon(
-          Icons.drag_handle_rounded,
-          color: colorScheme.onSurfaceVariant,
-        ),
-        title: Text(
-          category.category.name,
-          style: theme.textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.w600,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: SpacingTokens.sm),
+      child: ObCard(
+        child: ListTile(
+          leading: SkribbleIcon(
+            data: OpenBudgetIcons.drag,
+            color: palette.mutedInk,
           ),
-        ),
-        subtitle: Text(
-          '${category.envelopes.length} envelopes',
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: colorScheme.onSurfaceVariant,
+          title: Text(
+            category.category.name,
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: palette.ink,
+            ),
           ),
-        ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.arrow_upward_rounded),
-              onPressed: onMoveUp,
-              iconSize: 20,
+          subtitle: Text(
+            l10n.budgetEnvelopeCount(category.envelopes.length),
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: palette.mutedInk,
             ),
-            IconButton(
-              icon: const Icon(Icons.arrow_downward_rounded),
-              onPressed: onMoveDown,
-              iconSize: 20,
-            ),
-          ],
+          ),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: const SkribbleIcon(
+                  data: OpenBudgetIcons.chevronUp,
+                  size: 20,
+                ),
+                tooltip: l10n.editPlanMoveUp,
+                onPressed: onMoveUp,
+              ),
+              IconButton(
+                icon: const SkribbleIcon(
+                  data: OpenBudgetIcons.chevronDown,
+                  size: 20,
+                ),
+                tooltip: l10n.editPlanMoveDown,
+                onPressed: onMoveDown,
+              ),
+            ],
+          ),
         ),
       ),
     );

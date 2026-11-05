@@ -10,7 +10,6 @@ import 'package:openbudget_app/src/features/payees/providers/payee_list_provider
 import 'package:openbudget_app/src/features/transactions/providers/duplicate_check_provider.dart';
 import 'package:openbudget_app/src/features/transactions/providers/transaction_actions_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
-import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
@@ -35,7 +34,7 @@ class AddIncomeScreen extends HookConsumerWidget {
     final budgetAsync = ref.watch(budgetDetailProvider(budgetId));
     final payeesAsync = ref.watch(payeeListProvider(budgetId));
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final palette = theme.ob;
     final budgetCurrency =
         budgetAsync.whenOrNull(
           data: (budget) => parseCurrencyCode(budget.currencyCode),
@@ -91,11 +90,7 @@ class AddIncomeScreen extends HookConsumerWidget {
         : formatCents(amountCentsPreview, budgetCurrency);
 
     return Scaffold(
-      backgroundColor: OpenBudgetPalette.bgPrimaryFor(theme),
       appBar: AppBar(
-        backgroundColor: OpenBudgetPalette.bgPrimaryFor(theme),
-        surfaceTintColor: OpenBudgetPalette.transparentFor(theme),
-        scrolledUnderElevation: 0,
         leadingWidth: 88,
         leading: Align(
           alignment: Alignment.centerLeft,
@@ -124,46 +119,33 @@ class AddIncomeScreen extends HookConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Container(
+                ObCard(
+                  tone: ObTone.funded,
                   padding: const EdgeInsets.all(SpacingTokens.md),
-                  decoration: BoxDecoration(
-                    color: OpenBudgetPalette.bgSuccessFor(theme),
-                    borderRadius: BorderRadius.circular(RadiusTokens.md),
-                  ),
                   child: Column(
                     children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          color: OpenBudgetPalette.fgOnBrandFor(
-                            theme,
-                          ).withAlpha(120),
-                          borderRadius: BorderRadius.circular(RadiusTokens.sm),
-                        ),
-                        padding: const EdgeInsets.all(2),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: _ModeChip(
-                                label: l10n.addTransactionExpense,
-                                icon: Icons.arrow_upward_rounded,
-                                selected: false,
-                                color: OpenBudgetPalette.fgSecondaryFor(theme),
-                                onTap: () => context.goNamed(
-                                  addExpenseRoute,
-                                  pathParameters: {'id': budgetId},
-                                ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _ModeChip(
+                              label: l10n.addTransactionExpense,
+                              icon: OpenBudgetIcons.outflow,
+                              selected: false,
+                              tone: ObTone.overspent,
+                              onTap: () => context.goNamed(
+                                addExpenseRoute,
+                                pathParameters: {'id': budgetId},
                               ),
                             ),
-                            Expanded(
-                              child: _ModeChip(
-                                label: l10n.addTransactionIncome,
-                                icon: Icons.arrow_downward_rounded,
-                                selected: true,
-                                color: OpenBudgetPalette.fgPrimaryFor(theme),
-                              ),
+                          ),
+                          Expanded(
+                            child: _ModeChip(
+                              label: l10n.addTransactionIncome,
+                              icon: OpenBudgetIcons.inflow,
+                              selected: true,
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: SpacingTokens.md),
                       Focus(
@@ -178,23 +160,30 @@ class AddIncomeScreen extends HookConsumerWidget {
                             decimal: true,
                           ),
                           textAlign: TextAlign.center,
-                          style: theme.textTheme.displaySmall?.copyWith(
-                            fontWeight: FontWeight.w800,
-                            color: OpenBudgetPalette.fgPrimaryFor(theme),
-                          ),
+                          style:
+                              ObTextStyles.amount(
+                                theme.textTheme.displaySmall,
+                              ).copyWith(
+                                color: palette.funded,
+                                fontWeight: FontWeight.w800,
+                              ),
                           decoration: InputDecoration(
                             labelText: l10n.transactionAmountLabel,
-                            prefixIcon: const Icon(Icons.attach_money_rounded),
+                            prefixIcon: const SkribbleIcon(
+                              data: OpenBudgetIcons.money,
+                            ),
                             border: InputBorder.none,
+                            filled: false,
                             isDense: true,
                             contentPadding: EdgeInsets.zero,
                             hintText: formatCents(0, budgetCurrency),
-                            hintStyle: theme.textTheme.displaySmall?.copyWith(
-                              color: OpenBudgetPalette.fgPrimaryFor(
-                                theme,
-                              ).withAlpha(120),
-                              fontWeight: FontWeight.w700,
-                            ),
+                            hintStyle:
+                                ObTextStyles.amount(
+                                  theme.textTheme.displaySmall,
+                                ).copyWith(
+                                  color: palette.funded,
+                                  fontWeight: FontWeight.w700,
+                                ),
                           ),
                         ),
                       ),
@@ -202,146 +191,143 @@ class AddIncomeScreen extends HookConsumerWidget {
                       Text(
                         l10n.transactionAddIncome,
                         style: theme.textTheme.labelLarge?.copyWith(
-                          fontWeight: FontWeight.w700,
+                          color: palette.ink,
                         ),
                       ),
                       if (amountText.isNotEmpty)
                         Padding(
                           padding: const EdgeInsets.only(top: 2),
-                          child: Text(
+                          child: ObAmount(
                             formattedAmount,
-                            style: theme.textTheme.labelMedium?.copyWith(
-                              color: OpenBudgetPalette.fgPrimaryFor(
-                                theme,
-                              ).withAlpha(150),
-                            ),
+                            tone: ObTone.funded,
+                            style: theme.textTheme.titleSmall,
                           ),
                         ),
                     ],
                   ),
                 ),
                 const SizedBox(height: SpacingTokens.md),
-                Card(
-                  color: OpenBudgetPalette.bgSecondaryFor(theme),
-                  margin: EdgeInsets.zero,
-                  child: Padding(
-                    padding: const EdgeInsets.all(SpacingTokens.md),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        DropdownButtonFormField<String>(
-                          initialValue: selectedPayeeId.value ?? '',
-                          items: payeeItems,
-                          onChanged: (value) {
-                            selectedPayeeId.value =
-                                (value != null && value.isNotEmpty)
-                                ? value
-                                : null;
-                          },
-                          decoration: InputDecoration(
-                            labelText: l10n.payeeLabel,
-                            prefixIcon: const Icon(Icons.person_outlined),
+                ObCard(
+                  padding: const EdgeInsets.all(SpacingTokens.md),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Row(
+                        children: [
+                          SkribbleIcon(
+                            data: OpenBudgetIcons.person,
+                            size: 20,
+                            color: palette.brand,
                           ),
-                          isExpanded: true,
+                          const SizedBox(width: SpacingTokens.sm),
+                          Expanded(
+                            child: ObDropdown<String>(
+                              value: selectedPayeeId.value ?? '',
+                              items: payeeItems,
+                              labelText: l10n.payeeLabel,
+                              onChanged: (value) {
+                                selectedPayeeId.value =
+                                    (value != null && value.isNotEmpty)
+                                    ? value
+                                    : null;
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: SpacingTokens.sm),
+                      _ReadOnlyRow(
+                        icon: OpenBudgetIcons.savings,
+                        label: l10n.transactionCategoryLabel,
+                        value: l10n.budgetReadyToAssign,
+                      ),
+                      const SizedBox(height: SpacingTokens.sm),
+                      _ReadOnlyRow(
+                        icon: OpenBudgetIcons.bank,
+                        label: l10n.transactionAccountLabel,
+                        value: budgetAsync.value?.name ?? l10n.accountListTitle,
+                      ),
+                      const SizedBox(height: SpacingTokens.sm),
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: const SkribbleIcon(
+                          data: OpenBudgetIcons.calendar,
                         ),
-                        const SizedBox(height: SpacingTokens.sm),
-                        _ReadOnlyRow(
-                          icon: Icons.savings_rounded,
-                          label: l10n.transactionCategoryLabel,
-                          value: l10n.budgetReadyToAssign,
-                        ),
-                        const SizedBox(height: SpacingTokens.sm),
-                        _ReadOnlyRow(
-                          icon: Icons.account_balance_rounded,
-                          label: l10n.transactionAccountLabel,
-                          value:
-                              budgetAsync.value?.name ?? l10n.accountListTitle,
-                        ),
-                        const SizedBox(height: SpacingTokens.sm),
-                        ListTile(
-                          contentPadding: EdgeInsets.zero,
-                          leading: const Icon(Icons.calendar_today_rounded),
-                          title: Text(l10n.transactionDateLabel),
-                          subtitle: Text(_formatDate(selectedDate.value)),
-                          onTap: () async {
-                            final picked = await showDatePicker(
-                              context: context,
-                              initialDate: selectedDate.value,
-                              firstDate: DateTime(2000),
-                              lastDate: DateTime(2100),
-                            );
-                            if (picked != null) {
-                              selectedDate.value = picked;
-                              await checkDuplicates();
-                            }
-                          },
-                        ),
-                      ],
-                    ),
+                        title: Text(l10n.transactionDateLabel),
+                        subtitle: Text(_formatDate(selectedDate.value)),
+                        onTap: () async {
+                          final picked = await showDatePicker(
+                            context: context,
+                            initialDate: selectedDate.value,
+                            firstDate: DateTime(2000),
+                            lastDate: DateTime(2100),
+                          );
+                          if (picked != null) {
+                            selectedDate.value = picked;
+                            await checkDuplicates();
+                          }
+                        },
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: SpacingTokens.md),
-                Card(
-                  color: OpenBudgetPalette.bgSecondaryFor(theme),
-                  margin: EdgeInsets.zero,
-                  child: Padding(
-                    padding: const EdgeInsets.all(SpacingTokens.md),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        TextField(
-                          controller: descriptionController,
-                          decoration: InputDecoration(
-                            labelText: l10n.transactionDescriptionLabel,
-                            prefixIcon: const Icon(Icons.description_outlined),
-                          ),
-                          textInputAction: TextInputAction.next,
+                ObCard(
+                  padding: const EdgeInsets.all(SpacingTokens.md),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      ObTextField(
+                        controller: descriptionController,
+                        labelText: l10n.transactionDescriptionLabel,
+                        prefixIcon: const SkribbleIcon(
+                          data: OpenBudgetIcons.document,
                         ),
-                        const SizedBox(height: SpacingTokens.sm),
-                        TextField(
-                          controller: memoController,
-                          decoration: InputDecoration(
-                            labelText: l10n.transactionMemoLabel,
-                            prefixIcon: const Icon(Icons.note_outlined),
-                            hintText: l10n.transactionMemoHint,
+                      ),
+                      const SizedBox(height: SpacingTokens.sm),
+                      TextField(
+                        controller: memoController,
+                        decoration: InputDecoration(
+                          labelText: l10n.transactionMemoLabel,
+                          prefixIcon: const SkribbleIcon(
+                            data: OpenBudgetIcons.note,
                           ),
-                          maxLines: 2,
-                          textInputAction: TextInputAction.done,
+                          hintText: l10n.transactionMemoHint,
                         ),
-                      ],
-                    ),
+                        maxLines: 2,
+                        textInputAction: TextInputAction.done,
+                      ),
+                    ],
                   ),
                 ),
                 if (duplicateCount.value > 0)
                   Padding(
                     padding: const EdgeInsets.only(top: SpacingTokens.sm),
-                    child: Card(
-                      color: colorScheme.errorContainer,
-                      child: Padding(
-                        padding: const EdgeInsets.all(SpacingTokens.sm),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.warning_amber_rounded,
-                              color: colorScheme.onErrorContainer,
-                              size: 20,
-                            ),
-                            const SizedBox(width: SpacingTokens.sm),
-                            Expanded(
-                              child: Text(
-                                l10n.duplicateWarning(duplicateCount.value),
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: colorScheme.onErrorContainer,
-                                ),
+                    child: ObCard(
+                      tone: ObTone.overspent,
+                      padding: const EdgeInsets.all(SpacingTokens.sm),
+                      child: Row(
+                        children: [
+                          SkribbleIcon(
+                            data: OpenBudgetIcons.warning,
+                            color: palette.overspent,
+                            size: 20,
+                          ),
+                          const SizedBox(width: SpacingTokens.sm),
+                          Expanded(
+                            child: Text(
+                              l10n.duplicateWarning(duplicateCount.value),
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: palette.ink,
                               ),
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
                 const SizedBox(height: SpacingTokens.md),
-                FilledButton.icon(
+                ObFilledButton(
                   onPressed: isSubmitting.value
                       ? null
                       : () async {
@@ -393,17 +379,19 @@ class AddIncomeScreen extends HookConsumerWidget {
                             );
                           }
                         },
-                  icon: isSubmitting.value
-                      ? const SizedBox(
-                          height: 18,
-                          width: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.check_circle_rounded, size: 18),
-                  label: Text(l10n.transactionSave),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: OpenBudgetPalette.bgBrandFor(theme),
-                    foregroundColor: OpenBudgetPalette.fgOnBrandFor(theme),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (isSubmitting.value)
+                        WiredLoadingIndicator(size: 18, color: palette.mutedInk)
+                      else
+                        const SkribbleIcon(
+                          data: OpenBudgetIcons.checkCircle,
+                          size: 18,
+                        ),
+                      const SizedBox(width: SpacingTokens.xs),
+                      Text(l10n.transactionSave),
+                    ],
                   ),
                 ),
               ],
@@ -423,48 +411,56 @@ class _ModeChip extends HookWidget {
     required this.label,
     required this.icon,
     required this.selected,
-    required this.color,
+    this.tone = ObTone.neutral,
     this.onTap,
   });
 
   final String label;
-  final IconData icon;
+  final WiredSvgIconData icon;
   final bool selected;
-  final Color color;
+  final ObTone tone;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Material(
-      color: OpenBudgetPalette.transparentFor(theme),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(RadiusTokens.sm),
-        onTap: onTap,
-        child: Container(
-          decoration: BoxDecoration(
-            color: selected
-                ? OpenBudgetPalette.fgOnBrandFor(theme)
-                : OpenBudgetPalette.transparentFor(theme),
-            borderRadius: BorderRadius.circular(RadiusTokens.sm),
-          ),
-          padding: const EdgeInsets.symmetric(vertical: SpacingTokens.sm),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, size: 16, color: color),
-              const SizedBox(width: 4),
-              Flexible(
-                child: Text(
-                  label,
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    color: color,
-                    fontWeight: FontWeight.w700,
+    final palette = theme.ob;
+    final foreground = selected ? palette.onAction : palette.hue(tone);
+
+    return Semantics(
+      selected: selected,
+      button: true,
+      child: Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+          onTap: onTap,
+          customBorder: const ObRoughBorder(),
+          child: Container(
+            margin: const EdgeInsets.all(2),
+            padding: const EdgeInsets.symmetric(vertical: SpacingTokens.sm),
+            decoration: ObRoughDecoration(
+              color: selected ? palette.action : null,
+              outline: palette.quietPen,
+              radius: RadiusTokens.sm,
+              strokeWidth: 1.6,
+              seed: 31,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SkribbleIcon(data: icon, size: 18, color: foreground),
+                const SizedBox(width: SpacingTokens.xs),
+                Flexible(
+                  child: Text(
+                    label,
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      color: foreground,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -479,16 +475,17 @@ class _ReadOnlyRow extends HookWidget {
     required this.value,
   });
 
-  final IconData icon;
+  final WiredSvgIconData icon;
   final String label;
   final String value;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final palette = theme.ob;
     return Row(
       children: [
-        Icon(icon, size: 20, color: OpenBudgetPalette.bgBrandFor(theme)),
+        SkribbleIcon(data: icon, size: 20, color: palette.brand),
         const SizedBox(width: SpacingTokens.sm),
         Expanded(
           child: Column(
@@ -497,14 +494,12 @@ class _ReadOnlyRow extends HookWidget {
               Text(
                 label,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: OpenBudgetPalette.fgSecondaryFor(theme),
+                  color: palette.mutedInk,
                 ),
               ),
               Text(
                 value,
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+                style: theme.textTheme.bodyLarge,
                 overflow: TextOverflow.ellipsis,
               ),
             ],

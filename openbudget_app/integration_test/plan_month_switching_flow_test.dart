@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/age_of_money_provider.dart';
@@ -81,8 +80,6 @@ BudgetSummary _makeSummaryForMonth(BudgetMonth month) {
 }
 
 void main() {
-  GoogleFonts.config.allowRuntimeFetching = false;
-
   patrolWidgetTest('switching months updates plan header values', ($) async {
     final tester = $.tester;
     final container = ProviderContainer(
@@ -131,7 +128,7 @@ void main() {
     );
     expect(find.text(initialReadyText), findsWidgets);
 
-    await tester.tap(find.byIcon(Icons.chevron_left).first);
+    await tester.tap(find.byKey(const Key('budget-month-previous')));
     await tester.pumpAndSettle();
 
     final previousMonth = container.read(selectedMonthProvider(_budgetId));
@@ -146,7 +143,7 @@ void main() {
     );
     expect(find.text(previousReadyText), findsWidgets);
 
-    await tester.tap(find.byIcon(Icons.chevron_right).first);
+    await tester.tap(find.byKey(const Key('budget-month-next')));
     await tester.pumpAndSettle();
 
     final restoredMonth = container.read(selectedMonthProvider(_budgetId));

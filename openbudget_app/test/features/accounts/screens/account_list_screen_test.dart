@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
@@ -98,10 +97,6 @@ Widget _buildRoutedSubject({required List<Account> accounts}) {
 }
 
 void main() {
-  setUpAll(() {
-    GoogleFonts.config.allowRuntimeFetching = false;
-  });
-
   group('AccountListScreen', () {
     testWidgets('renders loading indicator while accounts load', (
       tester,
@@ -118,7 +113,8 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.byType(ObLoadingPanel), findsOneWidget);
+      expect(find.text('Loading...'), findsOneWidget);
     });
 
     testWidgets('renders error state with retry button', (tester) async {
@@ -141,7 +137,7 @@ void main() {
 
       expect(find.text('Could not load accounts'), findsOneWidget);
       expect(find.text('Retry'), findsOneWidget);
-      expect(find.byIcon(Icons.error_outline_rounded), findsOneWidget);
+      expect(find.byType(ObStatePanel), findsOneWidget);
     });
 
     testWidgets('renders empty state with add account button', (tester) async {
@@ -168,7 +164,7 @@ void main() {
         findsOneWidget,
       );
       expect(find.text('Add Account'), findsOneWidget);
-      expect(find.byIcon(Icons.account_balance_rounded), findsOneWidget);
+      expect(find.byType(ObStatePanel), findsOneWidget);
     });
 
     testWidgets('renders app bar with title and quick action buttons', (
@@ -192,8 +188,14 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Accounts'), findsOneWidget);
-      expect(find.byIcon(Icons.add_circle_outline_rounded), findsOneWidget);
-      expect(find.byIcon(Icons.more_horiz_rounded), findsOneWidget);
+      expect(
+        find.byKey(const Key('account-list-add-button')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const Key('account-list-more-button')),
+        findsOneWidget,
+      );
     });
 
     testWidgets('renders on-budget accounts section', (tester) async {
@@ -275,7 +277,7 @@ void main() {
 
       expect(find.text('Closed Accounts'), findsOneWidget);
       expect(find.text('Old Checking'), findsOneWidget);
-      expect(find.byIcon(Icons.lock_outline_rounded), findsOneWidget);
+      expect(_skribbleIcon(OpenBudgetIcons.lock), findsOneWidget);
     });
 
     testWidgets('renders net worth card with assets and liabilities', (
@@ -417,6 +419,12 @@ void main() {
       expect(find.textContaining('USD'), findsWidgets);
       expect(find.textContaining('EUR'), findsWidgets);
       expect(find.text('USD Checking'), findsOneWidget);
+      await tester.scrollUntilVisible(
+        find.text('EUR Checking'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
       expect(find.text('EUR Checking'), findsOneWidget);
     });
 
@@ -428,7 +436,7 @@ void main() {
 
       expect(find.text('Notifications'), findsOneWidget);
 
-      await tester.tap(find.byIcon(Icons.close_rounded).first);
+      await tester.tap(_skribbleIcon(OpenBudgetIcons.close).first);
       await tester.pumpAndSettle();
 
       expect(find.text('Notifications'), findsNothing);
@@ -478,7 +486,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byIcon(Icons.add_circle_outline_rounded));
+      await tester.tap(find.byKey(const Key('account-list-add-button')));
       await tester.pumpAndSettle();
 
       expect(find.text('Add Account Route'), findsOneWidget);
@@ -490,7 +498,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byIcon(Icons.more_horiz_rounded));
+      await tester.tap(find.byKey(const Key('account-list-more-button')));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Transfer'));
       await tester.pumpAndSettle();
@@ -504,7 +512,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byIcon(Icons.more_horiz_rounded));
+      await tester.tap(find.byKey(const Key('account-list-more-button')));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Settings'));
       await tester.pumpAndSettle();
@@ -546,3 +554,7 @@ void main() {
     });
   });
 }
+
+Finder _skribbleIcon(WiredSvgIconData data) => find.byWidgetPredicate(
+  (widget) => widget is SkribbleIcon && widget.data == data,
+);

@@ -9,13 +9,11 @@ import 'package:openbudget_app/src/features/accounts/providers/account_list_prov
 import 'package:openbudget_app/src/features/accounts/screens/edit_account_dialog.dart';
 import 'package:openbudget_app/src/features/settings/providers/display_currency_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
-import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
-import 'package:simple_icons/simple_icons.dart';
 
 class AccountListScreen extends HookConsumerWidget {
   const AccountListScreen({required this.budgetId, super.key});
@@ -26,8 +24,6 @@ class AccountListScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final accounts = ref.watch(accountListProvider(budgetId));
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
     final showNotificationBanner = useState(true);
     final converter = ref
         .watch(displayCurrencyConverterProvider(budgetId))
@@ -46,7 +42,8 @@ class AccountListScreen extends HookConsumerWidget {
         title: Text(l10n.accountListTitle),
         actions: [
           IconButton(
-            icon: const Icon(Icons.add_circle_outline_rounded),
+            key: const Key('account-list-add-button'),
+            icon: const SkribbleIcon(data: OpenBudgetIcons.addCircle),
             tooltip: l10n.accountAddButton,
             onPressed: () => context.goNamed(
               addAccountRoute,
@@ -54,7 +51,9 @@ class AccountListScreen extends HookConsumerWidget {
             ),
           ),
           PopupMenuButton<String>(
-            icon: const Icon(Icons.more_horiz_rounded),
+            key: const Key('account-list-more-button'),
+            icon: const SkribbleIcon(data: OpenBudgetIcons.more),
+            tooltip: l10n.accountsMoreActions,
             onSelected: (value) {
               switch (value) {
                 case 'transfer':
@@ -78,80 +77,65 @@ class AccountListScreen extends HookConsumerWidget {
             itemBuilder: (context) => [
               PopupMenuItem<String>(
                 value: 'transfer',
-                child: Text(l10n.transferTitle),
+                child: Row(
+                  children: [
+                    const SkribbleIcon(
+                      data: OpenBudgetIcons.transfer,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 12),
+                    Text(l10n.transferTitle),
+                  ],
+                ),
               ),
               PopupMenuItem<String>(
                 value: 'settings',
-                child: Text(l10n.moreSettings),
+                child: Row(
+                  children: [
+                    const SkribbleIcon(
+                      data: OpenBudgetIcons.settings,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 12),
+                    Text(l10n.moreSettings),
+                  ],
+                ),
               ),
             ],
           ),
         ],
       ),
       body: accounts.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => Center(
+          child: ObLoadingPanel(label: l10n.loadingTitle),
+        ),
         error: (error, _) => Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.error_outline_rounded,
-                size: 48,
-                color: colorScheme.error,
-              ),
-              const SizedBox(height: SpacingTokens.md),
-              Text(
-                l10n.accountLoadError,
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: colorScheme.error,
-                ),
-              ),
-              const SizedBox(height: SpacingTokens.md),
-              FilledButton.icon(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(SpacingTokens.lg),
+            child: ObStatePanel.problem(
+              title: l10n.accountLoadError,
+              action: ObStateAction(
+                label: l10n.homeRetry,
                 onPressed: () => ref.invalidate(accountListProvider(budgetId)),
-                icon: const Icon(Icons.refresh_rounded),
-                label: Text(l10n.homeRetry),
               ),
-            ],
+            ),
           ),
         ),
         data: (accountList) {
           if (accountList.isEmpty) {
             return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(SpacingTokens.xl),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.account_balance_rounded,
-                      size: 64,
-                      color: colorScheme.outlineVariant,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(SpacingTokens.lg),
+                child: ObStatePanel.empty(
+                  title: l10n.accountEmptyTitle,
+                  message: l10n.accountEmptySubtitle,
+                  action: ObStateAction(
+                    label: l10n.accountAddButton,
+                    onPressed: () => context.goNamed(
+                      addAccountRoute,
+                      pathParameters: {'id': budgetId},
                     ),
-                    const SizedBox(height: SpacingTokens.lg),
-                    Text(
-                      l10n.accountEmptyTitle,
-                      style: theme.textTheme.titleMedium,
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: SpacingTokens.sm),
-                    Text(
-                      l10n.accountEmptySubtitle,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: SpacingTokens.lg),
-                    FilledButton.icon(
-                      onPressed: () => context.goNamed(
-                        addAccountRoute,
-                        pathParameters: {'id': budgetId},
-                      ),
-                      icon: const Icon(Icons.add),
-                      label: Text(l10n.accountAddButton),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             );
@@ -175,7 +159,12 @@ class AccountListScreen extends HookConsumerWidget {
             onRefresh: () async =>
                 ref.invalidate(accountListProvider(budgetId)),
             child: ListView(
-              padding: const EdgeInsets.all(SpacingTokens.md),
+              padding: const EdgeInsets.fromLTRB(
+                SpacingTokens.md,
+                SpacingTokens.md,
+                SpacingTokens.md,
+                SpacingTokens.xl,
+              ),
               children: [
                 if (showNotificationBanner.value) ...[
                   _NotificationBanner(
@@ -183,12 +172,17 @@ class AccountListScreen extends HookConsumerWidget {
                   ),
                   const SizedBox(height: SpacingTokens.md),
                 ],
-                Card(
+                ObCard(
                   margin: const EdgeInsets.only(bottom: SpacingTokens.md),
                   child: ListTile(
-                    leading: const Icon(Icons.receipt_long_outlined),
+                    leading: const SkribbleIcon(
+                      data: OpenBudgetIcons.receipt,
+                    ),
                     title: Text(l10n.accountListAllTransactions),
-                    trailing: const Icon(Icons.chevron_right_rounded),
+                    trailing: const SkribbleIcon(
+                      data: OpenBudgetIcons.chevronRight,
+                      size: 20,
+                    ),
                     onTap: () => context.goNamed(
                       transactionListRoute,
                       pathParameters: {'id': budgetId},
@@ -201,10 +195,16 @@ class AccountListScreen extends HookConsumerWidget {
                 ),
                 const SizedBox(height: SpacingTokens.md),
                 if (onBudget.isNotEmpty) ...[
-                  _SectionHeader(
+                  ObSectionHeader(
                     title: l10n.accountOnBudget,
-                    totalsByCurrency: onBudgetTotals,
-                    converter: converter,
+                    padding: const EdgeInsets.fromLTRB(0, 16, 0, 8),
+                    trailing: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 200),
+                      child: _SectionTotal(
+                        totalsByCurrency: onBudgetTotals,
+                        converter: converter,
+                      ),
+                    ),
                   ),
                   ...onBudget.map(
                     (account) =>
@@ -213,10 +213,16 @@ class AccountListScreen extends HookConsumerWidget {
                   const SizedBox(height: SpacingTokens.md),
                 ],
                 if (offBudget.isNotEmpty) ...[
-                  _SectionHeader(
+                  ObSectionHeader(
                     title: l10n.accountOffBudget,
-                    totalsByCurrency: offBudgetTotals,
-                    converter: converter,
+                    padding: const EdgeInsets.fromLTRB(0, 16, 0, 8),
+                    trailing: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 200),
+                      child: _SectionTotal(
+                        totalsByCurrency: offBudgetTotals,
+                        converter: converter,
+                      ),
+                    ),
                   ),
                   ...offBudget.map(
                     (account) =>
@@ -225,23 +231,29 @@ class AccountListScreen extends HookConsumerWidget {
                   const SizedBox(height: SpacingTokens.md),
                 ],
                 if (closed.isNotEmpty) ...[
-                  _SectionHeader(
+                  ObSectionHeader(
                     title: l10n.accountClosed,
-                    totalsByCurrency: closedTotals,
-                    converter: converter,
+                    padding: const EdgeInsets.fromLTRB(0, 16, 0, 8),
+                    trailing: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 200),
+                      child: _SectionTotal(
+                        totalsByCurrency: closedTotals,
+                        converter: converter,
+                      ),
+                    ),
                   ),
                   ...closed.map(
                     (account) =>
                         _AccountTile(account: account, budgetId: budgetId),
                   ),
                 ],
-                const SizedBox(height: SpacingTokens.md),
+                const SizedBox(height: SpacingTokens.lg),
                 OutlinedButton.icon(
                   onPressed: () => context.goNamed(
                     addAccountRoute,
                     pathParameters: {'id': budgetId},
                   ),
-                  icon: const Icon(Icons.add_rounded),
+                  icon: const SkribbleIcon(data: OpenBudgetIcons.add),
                   label: Text(l10n.accountAddButton),
                 ),
               ],
@@ -262,112 +274,94 @@ class _NotificationBanner extends HookWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
+    final palette = theme.ob;
 
-    return Container(
-      padding: const EdgeInsets.fromLTRB(
-        SpacingTokens.md,
-        SpacingTokens.md,
-        SpacingTokens.sm,
-        SpacingTokens.md,
-      ),
-      decoration: BoxDecoration(
-        color: OpenBudgetPalette.bgBadgeFor(theme),
-        borderRadius: BorderRadius.circular(RadiusTokens.md),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n.accountListNotificationsTitle,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: SpacingTokens.xs),
-                Text(
-                  l10n.accountListNotificationsMessage,
-                  style: theme.textTheme.bodyMedium,
-                ),
-              ],
+    return ObCard(
+      tone: ObTone.review,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          SpacingTokens.md,
+          SpacingTokens.md,
+          SpacingTokens.xs,
+          SpacingTokens.md,
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SkribbleIcon(
+              data: OpenBudgetIcons.notification,
+              color: palette.hue(ObTone.review),
             ),
-          ),
-          IconButton(onPressed: onClose, icon: const Icon(Icons.close_rounded)),
-        ],
+            const SizedBox(width: SpacingTokens.sm),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.accountListNotificationsTitle,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: palette.ink,
+                    ),
+                  ),
+                  const SizedBox(height: SpacingTokens.xs),
+                  Text(
+                    l10n.accountListNotificationsMessage,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: palette.ink,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            IconButton(
+              tooltip: l10n.accountsDismissNotification,
+              onPressed: onClose,
+              icon: const SkribbleIcon(data: OpenBudgetIcons.close),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-class _SectionHeader extends HookWidget {
-  const _SectionHeader({
-    required this.title,
+class _SectionTotal extends HookWidget {
+  const _SectionTotal({
     required this.totalsByCurrency,
     required this.converter,
   });
 
-  final String title;
   final Map<CurrencyCode, int> totalsByCurrency;
   final DisplayCurrencyConverter? converter;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final palette = theme.ob;
     final convertedTotal = converter?.convertTotalsToDisplay(totalsByCurrency);
     final hasSingleCurrency =
         totalsByCurrency.length == 1 || convertedTotal != null;
+
+    if (!hasSingleCurrency) {
+      return Text(
+        formatCurrencyBreakdown(totalsByCurrency),
+        style: theme.textTheme.titleSmall?.copyWith(color: palette.mutedInk),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        textAlign: TextAlign.end,
+      );
+    }
+
     final singleTotal =
         convertedTotal ??
-        (totalsByCurrency.length == 1 ? totalsByCurrency.values.first : 0);
-    final totalLabel = convertedTotal != null
-        ? formatCents(convertedTotal, converter!.displayCurrency)
-        : formatCurrencyBreakdown(
-            totalsByCurrency,
-            includeCurrencyCode: !hasSingleCurrency,
-          );
-    final labelColor = hasSingleCurrency
-        ? singleTotal >= 0
-              ? colorScheme.primary
-              : colorScheme.error
-        : colorScheme.onSurfaceVariant;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: SpacingTokens.sm,
-        vertical: SpacingTokens.xs,
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              title,
-              style: theme.textTheme.titleSmall?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.w600,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-          const SizedBox(width: SpacingTokens.sm),
-          Flexible(
-            child: Text(
-              totalLabel,
-              style: theme.textTheme.titleSmall?.copyWith(
-                color: labelColor,
-                fontWeight: FontWeight.w600,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.end,
-            ),
-          ),
-        ],
-      ),
+        (totalsByCurrency.isEmpty ? 0 : totalsByCurrency.values.first);
+    return ObAmount(
+      convertedTotal != null
+          ? formatCents(convertedTotal, converter!.displayCurrency)
+          : formatCents(singleTotal, totalsByCurrency.keys.first),
+      tone: singleTotal >= 0 ? ObTone.funded : ObTone.overspent,
+      style: theme.textTheme.titleSmall,
     );
   }
 }
@@ -380,13 +374,19 @@ class _AccountTile extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final palette = theme.ob;
     final icon = _iconForType(account.accountType);
     final currency = parseCurrencyCode(account.currencyCode);
     final accountId = account.id?.toString();
+    final balanceTone = account.balanceCents > 0
+        ? ObTone.funded
+        : account.balanceCents < 0
+        ? ObTone.overspent
+        : ObTone.neutral;
 
-    return Card(
+    return ObCard(
       margin: const EdgeInsets.only(bottom: SpacingTokens.xs),
       child: ListTile(
         onTap: accountId == null
@@ -400,69 +400,94 @@ class _AccountTile extends HookWidget {
           builder: (_) =>
               EditAccountDialog(account: account, budgetId: budgetId),
         ),
-        leading: CircleAvatar(
-          backgroundColor: colorScheme.secondaryContainer,
-          child: Icon(icon, color: colorScheme.onSecondaryContainer, size: 20),
-        ),
-        title: Row(
-          children: [
-            Flexible(
-              child: Text(account.name, style: theme.textTheme.titleMedium),
-            ),
-            if (account.isClosed) ...[
-              const SizedBox(width: SpacingTokens.xs),
-              Icon(
-                Icons.lock_outline_rounded,
-                size: 16,
-                color: colorScheme.outline,
-              ),
-            ],
-          ],
-        ),
-        subtitle: Text(
-          _labelForType(account.accountType, AppLocalizations.of(context)),
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: colorScheme.onSurfaceVariant,
+        leading: Container(
+          width: 40,
+          height: 40,
+          alignment: Alignment.center,
+          decoration: ObRoughDecoration(
+            color: palette.wash(ObTone.brand),
+            outline: palette.quietPen,
+            seed: 11,
+          ),
+          child: SkribbleIcon(
+            data: icon,
+            color: palette.hue(ObTone.brand),
+            size: 20,
           ),
         ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              formatCents(account.balanceCents, currency),
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: account.balanceCents >= 0
-                    ? colorScheme.primary
-                    : colorScheme.error,
+        title: Text(
+          account.name,
+          style: theme.textTheme.titleMedium?.copyWith(color: palette.ink),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        subtitle: Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: Row(
+            children: [
+              Flexible(
+                child: Text(
+                  _labelForType(account.accountType, l10n),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: palette.mutedInk,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
-            ),
-            const SizedBox(width: SpacingTokens.xs),
-            Icon(Icons.edit_outlined, size: 16, color: colorScheme.outline),
-          ],
+              if (_statusChip(context, account) case final chip?) ...[
+                const SizedBox(width: SpacingTokens.xs),
+                chip,
+              ],
+            ],
+          ),
+        ),
+        trailing: ObAmount(
+          formatCents(account.balanceCents, currency),
+          tone: balanceTone,
+          style: theme.textTheme.titleMedium,
         ),
       ),
     );
   }
 
-  static IconData _iconForType(String type) {
-    switch (type) {
-      case 'checking':
-        return Icons.account_balance_rounded;
-      case 'savings':
-        return Icons.savings_rounded;
-      case 'creditCard':
-        return Icons.credit_card_rounded;
-      case 'cash':
-        return Icons.payments_rounded;
-      case 'investment':
-        return Icons.trending_up_rounded;
-      case 'cryptoWallet':
-        return SimpleIcons.solana;
-      default:
-        return Icons.account_balance_wallet_rounded;
+  static Widget? _statusChip(BuildContext context, Account account) {
+    final l10n = AppLocalizations.of(context);
+    if (account.isClosed) {
+      return ObToneChip(
+        label: l10n.accountsClosedBadge,
+        icon: const SkribbleIcon(data: OpenBudgetIcons.lock, size: 16),
+      );
     }
+    return switch (account.syncStatus?.toLowerCase()) {
+      'success' || 'synced' => ObToneChip(
+        label: l10n.accountsSynced,
+        tone: ObTone.funded,
+        icon: const SkribbleIcon(data: OpenBudgetIcons.verified, size: 16),
+      ),
+      'error' || 'failed' => ObToneChip(
+        label: l10n.accountsNeedsAttention,
+        tone: ObTone.overspent,
+        icon: const SkribbleIcon(data: OpenBudgetIcons.warning, size: 16),
+      ),
+      'pending' || 'syncing' => ObToneChip(
+        label: l10n.accountDetailWalletSyncing,
+        tone: ObTone.underfunded,
+        icon: const SkribbleIcon(data: OpenBudgetIcons.sync, size: 16),
+      ),
+      _ => null,
+    };
   }
+
+  static WiredSvgIconData _iconForType(String type) => switch (type) {
+    'checking' => OpenBudgetIcons.bank,
+    'savings' => OpenBudgetIcons.savings,
+    'creditCard' => OpenBudgetIcons.creditCard,
+    'cash' => OpenBudgetIcons.cash,
+    'investment' => OpenBudgetIcons.trendingUp,
+    'cryptoWallet' => OpenBudgetIcons.solana,
+    _ => OpenBudgetIcons.wallet,
+  };
 
   static String _labelForType(String type, AppLocalizations l10n) =>
       switch (type) {
@@ -489,7 +514,7 @@ class _NetWorthCard extends HookWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final palette = theme.ob;
     final netWorthByCurrency = {
       for (final totals in totalsByCurrency) totals.currency: totals.netWorth,
     };
@@ -527,88 +552,98 @@ class _NetWorthCard extends HookWidget {
           )
         : formatCurrencyBreakdown(netWorthByCurrency);
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(SpacingTokens.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              l10n.accountNetWorth,
-              style: theme.textTheme.labelMedium?.copyWith(
-                color: colorScheme.onSurfaceVariant,
+    return ObCard(
+      padding: const EdgeInsets.all(SpacingTokens.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              SkribbleIcon(
+                data: OpenBudgetIcons.scale,
+                size: 20,
+                color: palette.mutedInk,
               ),
-            ),
-            const SizedBox(height: SpacingTokens.xs),
-            Text(
-              overallLabel,
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: isSingleCurrency && primaryNetWorth < 0
-                    ? colorScheme.error
-                    : colorScheme.primary,
+              const SizedBox(width: SpacingTokens.xs),
+              Text(
+                l10n.accountNetWorth,
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: palette.mutedInk,
+                ),
               ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: SpacingTokens.sm),
-            if (showConverted)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _NetWorthMetric(
+            ],
+          ),
+          const SizedBox(height: SpacingTokens.sm),
+          ObAmount(
+            overallLabel,
+            tone: isSingleCurrency && primaryNetWorth < 0
+                ? ObTone.overspent
+                : ObTone.neutral,
+            style: theme.textTheme.headlineSmall,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: SpacingTokens.sm),
+          if (showConverted)
+            Row(
+              children: [
+                Expanded(
+                  child: _NetWorthMetric(
                     label: l10n.accountTotalAssets,
                     amount: convertedAssets,
                     currencyCode: converter!.displayCurrency,
-                    color: ColorTokens.secondary,
+                    tone: ObTone.funded,
                   ),
-                  Container(
-                    width: 1,
-                    height: 24,
-                    color: colorScheme.outlineVariant,
-                  ),
-                  _NetWorthMetric(
+                ),
+                const SizedBox(
+                  height: 32,
+                  child: VerticalDivider(width: 16),
+                ),
+                Expanded(
+                  child: _NetWorthMetric(
                     label: l10n.accountTotalLiabilities,
                     amount: convertedLiabilities,
                     currencyCode: converter!.displayCurrency,
-                    color: ColorTokens.error,
+                    tone: ObTone.overspent,
                   ),
-                ],
-              )
-            else if (isSingleCurrency)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _NetWorthMetric(
+                ),
+              ],
+            )
+          else if (isSingleCurrency)
+            Row(
+              children: [
+                Expanded(
+                  child: _NetWorthMetric(
                     label: l10n.accountTotalAssets,
                     amount: totalsByCurrency.first.assets,
                     currencyCode: totalsByCurrency.first.currency,
-                    color: ColorTokens.secondary,
+                    tone: ObTone.funded,
                   ),
-                  Container(
-                    width: 1,
-                    height: 24,
-                    color: colorScheme.outlineVariant,
-                  ),
-                  _NetWorthMetric(
+                ),
+                const SizedBox(
+                  height: 32,
+                  child: VerticalDivider(width: 16),
+                ),
+                Expanded(
+                  child: _NetWorthMetric(
                     label: l10n.accountTotalLiabilities,
                     amount: totalsByCurrency.first.liabilities,
                     currencyCode: totalsByCurrency.first.currency,
-                    color: ColorTokens.error,
+                    tone: ObTone.overspent,
                   ),
+                ),
+              ],
+            )
+          else
+            Column(
+              children: [
+                for (var i = 0; i < totalsByCurrency.length; i++) ...[
+                  _NetWorthCurrencyRow(totals: totalsByCurrency[i]),
+                  if (i < totalsByCurrency.length - 1)
+                    const SizedBox(height: SpacingTokens.xs),
                 ],
-              )
-            else
-              Column(
-                children: [
-                  for (var i = 0; i < totalsByCurrency.length; i++) ...[
-                    _NetWorthCurrencyRow(totals: totalsByCurrency[i]),
-                    if (i < totalsByCurrency.length - 1)
-                      const SizedBox(height: SpacingTokens.xs),
-                  ],
-                ],
-              ),
-          ],
-        ),
+              ],
+            ),
+        ],
       ),
     );
   }
@@ -622,19 +657,20 @@ class _NetWorthCurrencyRow extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final palette = theme.ob;
     final l10n = AppLocalizations.of(context);
-    final netColor = totals.netWorth >= 0
-        ? ColorTokens.secondary
-        : ColorTokens.error;
+    final netTone = totals.netWorth >= 0 ? ObTone.funded : ObTone.overspent;
 
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: SpacingTokens.sm,
         vertical: SpacingTokens.xs,
       ),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(RadiusTokens.sm),
+      decoration: ObRoughDecoration(
+        color: palette.highlight,
+        outline: palette.quietPen,
+        radius: RadiusTokens.sm,
+        seed: 43,
       ),
       child: Column(
         children: [
@@ -644,15 +680,14 @@ class _NetWorthCurrencyRow extends HookWidget {
                 totals.currency.code,
                 style: theme.textTheme.labelMedium?.copyWith(
                   fontWeight: FontWeight.w700,
+                  color: palette.ink,
                 ),
               ),
               const Spacer(),
-              Text(
+              ObAmount(
                 formatCents(totals.netWorth, totals.currency),
-                style: theme.textTheme.labelLarge?.copyWith(
-                  color: netColor,
-                  fontWeight: FontWeight.w700,
-                ),
+                tone: netTone,
+                style: theme.textTheme.labelLarge,
               ),
             ],
           ),
@@ -661,14 +696,20 @@ class _NetWorthCurrencyRow extends HookWidget {
             children: [
               Expanded(
                 child: Text(
-                  '${l10n.accountTotalAssets}: ${formatCents(totals.assets, totals.currency)}',
-                  style: theme.textTheme.bodySmall,
+                  '${l10n.accountTotalAssets}: '
+                  '${formatCents(totals.assets, totals.currency)}',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: palette.ink,
+                  ),
                 ),
               ),
               Expanded(
                 child: Text(
-                  '${l10n.accountTotalLiabilities}: ${formatCents(totals.liabilities, totals.currency)}',
-                  style: theme.textTheme.bodySmall,
+                  '${l10n.accountTotalLiabilities}: '
+                  '${formatCents(totals.liabilities, totals.currency)}',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: palette.ink,
+                  ),
                   textAlign: TextAlign.end,
                 ),
               ),
@@ -685,34 +726,31 @@ class _NetWorthMetric extends HookWidget {
     required this.label,
     required this.amount,
     required this.currencyCode,
-    required this.color,
+    required this.tone,
   });
 
   final String label;
   final int amount;
   final CurrencyCode currencyCode;
-  final Color color;
+  final ObTone tone;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final palette = theme.ob;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
           label,
-          style: theme.textTheme.labelSmall?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
+          style: theme.textTheme.labelSmall?.copyWith(color: palette.mutedInk),
         ),
         const SizedBox(height: 2),
-        Text(
+        ObAmount(
           formatCents(amount, currencyCode),
-          style: theme.textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: color,
-          ),
+          tone: tone,
+          style: theme.textTheme.titleSmall,
         ),
       ],
     );

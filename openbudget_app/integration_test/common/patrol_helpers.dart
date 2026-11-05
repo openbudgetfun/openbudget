@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/main.dart';
+import 'package:openbudget_ui/openbudget_ui.dart';
+
+Finder _skribbleIcon(WiredSvgIconData data) => find.byWidgetPredicate(
+  (widget) => widget is SkribbleIcon && widget.data == data,
+);
 
 Future<void> waitForFinder(
   WidgetTester tester,
@@ -18,6 +23,73 @@ Future<void> waitForFinder(
     elapsed += step;
   }
   throw StateError('Timed out waiting for finder: $finder');
+}
+
+/// Brings [finder] into the visible viewport, scrolling when necessary.
+///
+/// The Skribble layout is taller than the previous one, so primary actions can
+/// start below the 800x600 surface CI runs Patrol on. Page objects scroll those
+/// controls into view instead of enlarging the surface, which keeps the small
+/// screen constraint part of the test.
+Future<void> scrollIntoView(
+  WidgetTester tester,
+  Finder finder, {
+  Finder? scrollable,
+  double delta = 240,
+  int maxScrolls = 20,
+}) async {
+  if (finder.evaluate().isNotEmpty) {
+    await tester.ensureVisible(finder.first);
+    await tester.pumpAndSettle();
+    return;
+  }
+
+  // The control has not been built yet because it sits past the lazy list's
+  // cache extent, so drag the list until it appears. Only vertical scrollables
+  // are considered so a text field's horizontal scrollable is never dragged by
+  // accident. Scrolling runs forward first, then back, to cover controls that
+  // live above the current offset.
+  final view =
+      scrollable ??
+      find
+          .byWidgetPredicate(
+            (widget) =>
+                widget is Scrollable &&
+                widget.axisDirection == AxisDirection.down,
+          )
+          .first;
+
+  for (final direction in const [-1.0, 1.0]) {
+    for (var scroll = 0; scroll < maxScrolls; scroll++) {
+      if (finder.evaluate().isNotEmpty) break;
+      await tester.drag(
+        view,
+        Offset(0, direction * delta),
+        warnIfMissed: false,
+      );
+      await tester.pumpAndSettle();
+    }
+    if (finder.evaluate().isNotEmpty) break;
+  }
+
+  if (finder.evaluate().isEmpty) {
+    throw StateError('Could not scroll $finder into view.');
+  }
+
+  await tester.ensureVisible(finder.first);
+  await tester.pumpAndSettle();
+}
+
+/// Brings [finder] into view and taps it.
+Future<void> scrollAndTap(
+  WidgetTester tester,
+  Finder finder, {
+  Finder? scrollable,
+  double delta = 240,
+}) async {
+  await scrollIntoView(tester, finder, scrollable: scrollable, delta: delta);
+  await tester.tap(finder.first);
+  await tester.pumpAndSettle();
 }
 
 /// Pumps the full OpenBudget app inside a [ProviderScope] and waits for it
@@ -87,17 +159,15 @@ class BudgetShellPage {
 
   Finder get navigationBar => find.byType(NavigationBar);
   Finder get planTab =>
-      _destination(Icons.savings_rounded, Icons.savings_outlined);
-  Finder get accountsTab => _destination(
-    Icons.account_balance_rounded,
-    Icons.account_balance_outlined,
-  );
+      _destination(OpenBudgetIcons.envelopeOpen, OpenBudgetIcons.envelope);
+  Finder get accountsTab =>
+      _destination(OpenBudgetIcons.bank, OpenBudgetIcons.wallet);
   Finder get addTab =>
-      _destination(Icons.add_circle_rounded, Icons.add_circle_outline_rounded);
+      _destination(OpenBudgetIcons.addCircle, OpenBudgetIcons.addCircle);
   Finder get reflectTab =>
-      _destination(Icons.bar_chart_rounded, Icons.bar_chart_outlined);
+      _destination(OpenBudgetIcons.pieChart, OpenBudgetIcons.barChart);
   Finder get moreTab =>
-      _destination(Icons.more_horiz_rounded, Icons.more_horiz_rounded);
+      _destination(OpenBudgetIcons.more, OpenBudgetIcons.more);
 
   Future<void> tapPlanTab() async {
     await tester.tap(planTab);
@@ -124,17 +194,20 @@ class BudgetShellPage {
     await tester.pumpAndSettle();
   }
 
-  Finder _destination(IconData selectedIcon, IconData unselectedIcon) {
+  Finder _destination(
+    WiredSvgIconData selectedIcon,
+    WiredSvgIconData unselectedIcon,
+  ) {
     final selected = find.descendant(
       of: navigationBar,
-      matching: find.byIcon(selectedIcon),
+      matching: _iconFinder(selectedIcon),
     );
     if (selected.evaluate().isNotEmpty) {
       return selected.first;
     }
     final unselected = find.descendant(
       of: navigationBar,
-      matching: find.byIcon(unselectedIcon),
+      matching: _iconFinder(unselectedIcon),
     );
     if (unselected.evaluate().isNotEmpty) {
       return unselected.first;
@@ -161,7 +234,53 @@ class AccountsTabPage {
   Finder get addAccountButton => find.text('Add Account');
   Finder get fab => find.byType(FloatingActionButton);
   Finder get netWorthLabel => find.text('Net Worth');
-  Finder get transferButton => find.byIcon(Icons.swap_horiz_rounded);
+  Finder get transferButton => _skribbleIcon(OpenBudgetIcons.transfer);
+
+  Finder accountTile(String name) => find.text(name);
+
+  /// Scrolls the mixed-currency account list until [name] is visible.
+  ///
+  /// The restyled net worth card grows with each currency, which can push later
+  /// account tiles below the fold.
+  Future<void> scrollToAccount(String name) =>
+      scrollIntoView(tester, accountTile(name));
+}
+
+/// Page object for the account detail screen.
+class AccountDetailPage {
+  AccountDetailPage(this.tester);
+
+  final WidgetTester tester;
+
+  Finder get moreButton => _skribbleIcon(OpenBudgetIcons.more);
+  Finder get editAccountMenuItem => find.text('Edit Account');
+
+  Future<void> openOverflowMenu() async {
+    await tester.tap(moreButton);
+    await tester.pumpAndSettle();
+  }
+
+  Future<void> openEditAccount() async {
+    await openOverflowMenu();
+    await tester.tap(editAccountMenuItem);
+    await tester.pumpAndSettle();
+  }
+}
+
+/// Page object for the full-screen edit account form.
+class EditAccountFormPage {
+  EditAccountFormPage(this.tester);
+
+  final WidgetTester tester;
+
+  Finder get closeAccountButton => find.text('Close Account');
+
+  /// Scrolls the form until the close action is built and visible.
+  ///
+  /// The restyle added enough sections above it that the button starts past the
+  /// lazy list's cache extent at 800x600.
+  Future<void> scrollToCloseAccount() =>
+      scrollIntoView(tester, closeAccountButton);
 }
 
 /// Page object for the add transaction bottom sheet.
@@ -174,9 +293,9 @@ class AddTransactionSheetPage {
   Finder get incomeOption => find.text('Add Income');
   Finder get expenseOption => find.text('Add Expense');
   Finder get transferOption => find.text('Transfer');
-  Finder get incomeIcon => find.byIcon(Icons.arrow_downward_rounded);
-  Finder get expenseIcon => find.byIcon(Icons.arrow_upward_rounded);
-  Finder get transferIcon => find.byIcon(Icons.swap_horiz_rounded);
+  Finder get incomeIcon => _iconFinder(OpenBudgetIcons.inflow);
+  Finder get expenseIcon => _iconFinder(OpenBudgetIcons.outflow);
+  Finder get transferIcon => _iconFinder(OpenBudgetIcons.transfer);
 
   Future<void> tapIncome() async {
     await tester.tap(incomeOption);
@@ -205,6 +324,43 @@ class PlanTabPage {
       find.text('Add your first envelope category to start budgeting');
   Finder get addCategoryButton => find.text('Add Category');
   Finder get readyToAssign => find.textContaining('Ready to Assign');
+  Finder get finishOnboardingButton => find.text('Finish Onboarding');
+  Finder get reviewTransactionsBanner => find.text('Review 1 transaction');
+  Finder get categoriesToggle => find.text('Categories');
+  Finder get spotlightToggle => find.text('Spotlight');
+
+  /// Dismisses the onboarding card, scrolling it into view first.
+  Future<void> finishOnboarding() =>
+      scrollAndTap(tester, finishOnboardingButton);
+
+  Future<void> openReviewTransactions() =>
+      scrollAndTap(tester, reviewTransactionsBanner);
+
+  Future<void> showCategories() => scrollAndTap(tester, categoriesToggle);
+
+  Future<void> showSpotlight() => scrollAndTap(tester, spotlightToggle);
+}
+
+/// Page object for the edit plan screen.
+class EditPlanPage {
+  EditPlanPage(this.tester);
+
+  final WidgetTester tester;
+
+  Finder get addTargetButtons => find.text('Add Target');
+  Finder get saveTargetButton => find.text('Save Target');
+
+  Finder groupDetailsMenu(String categoryId) =>
+      find.byKey(Key('edit-plan-group-menu-${categoryId.toLowerCase()}'));
+
+  /// Opens the first envelope target dialog, scrolling the envelope rows into
+  /// view because they now start below the fold at 800x600.
+  Future<void> openFirstAddTarget() => scrollAndTap(tester, addTargetButtons);
+
+  /// Opens the category group's details sheet, which can also sit below the
+  /// fold once the target rows are expanded.
+  Future<void> openGroupDetails(String categoryId) =>
+      scrollAndTap(tester, groupDetailsMenu(categoryId));
 }
 
 /// Page object for the More tab.
@@ -220,3 +376,24 @@ class MoreTabPage {
   Finder get importTile => find.text('Import Transactions');
   Finder get settingsTile => find.text('Settings');
 }
+
+/// Page object for the category detail screen.
+class CategoryDetailPage {
+  CategoryDetailPage(this.tester);
+
+  final WidgetTester tester;
+
+  Finder get renameCategoryButton => find.text('Rename Category');
+
+  /// Scrolls the detail list until the rename action is built and visible.
+  ///
+  /// The restyled detail screen is taller than the 800x600 surface CI runs on,
+  /// so the action starts past the lazy list's cache extent.
+  Future<void> scrollToRenameCategory() =>
+      scrollIntoView(tester, renameCategoryButton);
+}
+
+/// Matches a hand-drawn [SkribbleIcon] by its catalog artwork.
+Finder _iconFinder(WiredSvgIconData data) => find.byWidgetPredicate(
+  (widget) => widget is SkribbleIcon && widget.data == data,
+);

@@ -185,7 +185,7 @@ void main() {
 
       expect(find.text('Display Options'), findsWidgets);
       expect(find.text('Done'), findsOneWidget);
-      expect(find.text('Settings'), findsWidgets);
+      expect(find.byTooltip('Back'), findsOneWidget);
 
       await tester.tap(find.byType(Switch).first);
       await tester.pumpAndSettle();

@@ -1457,5 +1457,266 @@
     }
   },
   "editPlanLoadError": "Failed to load plan setup.",
-  "budgetDetailCoverOverspendingError": "Could not cover overspending."
+  "budgetDetailCoverOverspendingError": "Could not cover overspending.",
+  "accountsMoreActions": "More actions",
+  "accountsDismissNotification": "Dismiss notification",
+  "accountsClosedBadge": "Closed",
+  "accountsSynced": "Synced",
+  "accountsNeedsAttention": "Needs attention",
+  "accountsBackAction": "Go back",
+  "accountsCloseAction": "Close",
+  "accountsShowUnclearedTransactions": "Show {count} uncleared transactions",
+  "@accountsShowUnclearedTransactions": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "accountsNoLoanActivity": "No loan activity yet",
+  "accountsLoanPayments": "Payments",
+  "accountsLoanOtherActivity": "Other Activity",
+  "accountsUnknown": "Unknown",
+  "accountsNoHoldings": "No holdings",
+  "accountsTaxYear": "Tax {year}",
+  "@accountsTaxYear": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "accountsTaxableTransactions": "{count} taxable tx",
+  "@accountsTaxableTransactions": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "accountsProceeds": "Proceeds {amount}",
+  "@accountsProceeds": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsBasis": "Basis {amount}",
+  "@accountsBasis": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsUnknownProgram": "Unknown program",
+  "accountsSuggestedSwaps": "Swaps",
+  "accountsSuggestedStaking": "Staking",
+  "accountsSuggestedNft": "NFT",
+  "accountsSuggestedLending": "Lending",
+  "accountsSuggestedIncome": "Income",
+  "accountsSuggestedTransfers": "Transfers",
+  "accountsLinkUnavailableMessage": "Bank connections are currently unavailable in this build. Use unlinked accounts instead.",
+  "accountsToggleBalanceSign": "Toggle positive or negative balance",
+  "accountsLinkedMobileOnly": "Linked connections are only available on iOS/Android right now. Add an unlinked account instead.",
+  "accountsLinkedNotCompleted": "Linked connections for \"{institution}\" were not completed. Add an unlinked account instead.",
+  "@accountsLinkedNotCompleted": {
+    "placeholders": {
+      "institution": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsLinkedNothingImported": "No accounts were imported from this connection. Add an unlinked account instead.",
+  "accountsLinkedUnavailable": "Linked connections for \"{institution}\" are currently unavailable. Add an unlinked account instead.",
+  "@accountsLinkedUnavailable": {
+    "placeholders": {
+      "institution": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsAddExistingError": "Unable to add this account to the current budget.",
+  "accountsMyAccounts": "My accounts",
+  "accountsAddExistingAccountHint": "Add this existing account to this budget",
+  "accountsInstitutionLabel": "Institution: {institution}",
+  "@accountsInstitutionLabel": {
+    "placeholders": {
+      "institution": {
+        "type": "String"
+      }
+    }
+  },
+  "authLoginHeadline": "Welcome back",
+  "authLoginSubtitle": "Continue building better money habits.",
+  "authShowPassword": "Show password",
+  "authHidePassword": "Hide password",
+  "authStepProgress": "Step {step} of {total}",
+  "@authStepProgress": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "homeLoadingBudgets": "Loading budgets",
+  "homeNoBudgetsHint": "Start a plan for this month and give every dollar a job.",
+  "settingsLastUpdated": "Last updated: {label}",
+  "@settingsLastUpdated": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsLoading": "Loading settings",
+  "budgetStatusOverspent": "Overspent",
+  "budgetStatusFunded": "Funded",
+  "budgetStatusUnderfunded": "Underfunded",
+  "budgetEnvelopeProgress": "{percent}% funded",
+  "@budgetEnvelopeProgress": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "budgetEnvelopeCount": "{count, plural, =1{1 envelope} other{{count} envelopes}}",
+  "@budgetEnvelopeCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "budgetReviewTransactions": "{count, plural, =1{Review 1 transaction} other{Review {count} transactions}}",
+  "@budgetReviewTransactions": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "budgetCoverOverspentCategories": "{count, plural, =1{Cover 1 overspent category} other{Cover {count} overspent categories}}",
+  "@budgetCoverOverspentCategories": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "budgetCategoryAllocated": "{amount} allocated",
+  "@budgetCategoryAllocated": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetGoalTarget": "Target: {amount}",
+  "@budgetGoalTarget": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetGoalMonthly": "Monthly: {amount}",
+  "@budgetGoalMonthly": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetGoalTargetBy": "Target: {amount} by {date}",
+  "@budgetGoalTargetBy": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetBackspaceLabel": "Delete digit",
+  "budgetDayOfMonth": "Day {day}",
+  "@budgetDayOfMonth": {
+    "placeholders": {
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+  "transactionsLoading": "Loading transactions",
+  "payeesLoading": "Loading payees",
+  "rulesLoading": "Loading rules",
+  "transactionsBack": "Back",
+  "transactionsSearchClear": "Clear search",
+  "transactionsUnknownPayee": "Unknown payee",
+  "transactionsUnknownEnvelope": "Unknown envelope",
+  "reportsAgeOfMoneyHint": "How long your money lasts after it arrives",
+  "reportsAgeOfMoneyTitle": "Age of Money",
+  "reportsDays": "{count, plural, =1{1 day} other{{count} days}}",
+  "@reportsDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reportsLoading": "Adding up the month…",
+  "reportsNetWorthCurrent": "Right now",
+  "reportsNetWorthExplainerBody": "Net worth adds up every active account in this plan: what you own minus what you owe. Think of it as a snapshot of today, not a score.",
+  "reportsNetWorthExplainerTitle": "What net worth counts",
+  "reportsNextMonth": "Next month",
+  "reportsOtherCategories": "Other categories",
+  "reportsPositiveInflowTotal": "Income this period",
+  "reportsPreviousMonth": "Previous month",
+  "recurringCalendarDayCount": "{count, plural, =1{1 scheduled item} other{{count} scheduled items}}",
+  "@recurringCalendarDayCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recurringActiveLabel": "Active",
+  "recurringLoading": "Fetching the schedule…",
+  "recurringNextMonth": "Next month",
+  "recurringPausedLabel": "Paused",
+  "recurringPostedLabel": "Posted",
+  "recurringPreviousMonth": "Previous month",
+  "recurringSavingLabel": "Saving…",
+  "recurringScheduledLabel": "Scheduled",
+  "recurringSummaryTitle": "Scheduled totals",
+  "reportsChartEmptyMessage": "Add a few transactions and this drawing fills in.",
+  "reportsChartEmptyTitle": "Nothing to chart yet",
+  "reportsChartSeriesEntry": "{label}: {amount}",
+  "@reportsChartSeriesEntry": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "reportsChartSummary": "{title}. {entries}",
+  "@reportsChartSummary": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "entries": {
+        "type": "String"
+      }
+    }
+  }
 }

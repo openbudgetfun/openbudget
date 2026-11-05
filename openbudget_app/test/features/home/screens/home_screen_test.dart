@@ -2,7 +2,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
@@ -16,6 +15,10 @@ import 'package:openbudget_ui/openbudget_ui.dart';
 
 final _ownerId = UuidValue.fromString('00000000-0000-0000-0000-000000000001');
 const _budgetIdStr = '00000000-0000-0000-0000-000000000010';
+
+Finder _skribbleIcon(WiredSvgIconData data) => find.byWidgetPredicate(
+  (widget) => widget is SkribbleIcon && widget.data == data,
+);
 
 Budget _makeBudget({
   String? id,
@@ -58,10 +61,6 @@ BudgetSummary _emptySummary(Budget budget) => BudgetSummary(
 );
 
 void main() {
-  setUpAll(() {
-    GoogleFonts.config.allowRuntimeFetching = false;
-  });
-
   group('HomeScreen', () {
     testWidgets('renders loading indicator while budgets load', (tester) async {
       await tester.pumpWidget(
@@ -76,7 +75,7 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.byType(ObLoadingPanel), findsOneWidget);
     });
 
     testWidgets('renders error state with retry button', (tester) async {
@@ -99,7 +98,7 @@ void main() {
 
       expect(find.text('Could not load budgets'), findsOneWidget);
       expect(find.text('Retry'), findsOneWidget);
-      expect(find.byIcon(Icons.error_outline_rounded), findsOneWidget);
+      expect(find.byType(ObStatePanel), findsOneWidget);
     });
 
     testWidgets('renders empty state when no budgets', (tester) async {
@@ -120,7 +119,7 @@ void main() {
 
       expect(find.text('No Budgets Yet'), findsOneWidget);
       expect(find.text('Create Your First Budget'), findsOneWidget);
-      expect(find.byIcon(Icons.savings_rounded), findsOneWidget);
+      expect(find.byType(WiredDoodle), findsOneWidget);
     });
 
     testWidgets('does not show FAB in empty state', (tester) async {
@@ -330,7 +329,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('1 overspent'), findsOneWidget);
-      expect(find.byIcon(Icons.warning_amber_rounded), findsOneWidget);
+      expect(_skribbleIcon(OpenBudgetIcons.warning), findsOneWidget);
     });
 
     testWidgets('renders net worth summary with total balance', (tester) async {
@@ -475,7 +474,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.byIcon(Icons.logout_rounded), findsOneWidget);
+      expect(_skribbleIcon(OpenBudgetIcons.logout), findsOneWidget);
       expect(find.byTooltip('Sign Out'), findsOneWidget);
     });
 

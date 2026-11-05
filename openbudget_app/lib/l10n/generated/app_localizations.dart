@@ -5489,6 +5489,534 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not cover overspending.'**
   String get budgetDetailCoverOverspendingError;
+
+  /// No description provided for @accountsMoreActions.
+  ///
+  /// In en, this message translates to:
+  /// **'More actions'**
+  String get accountsMoreActions;
+
+  /// No description provided for @accountsDismissNotification.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss notification'**
+  String get accountsDismissNotification;
+
+  /// No description provided for @accountsClosedBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get accountsClosedBadge;
+
+  /// No description provided for @accountsSynced.
+  ///
+  /// In en, this message translates to:
+  /// **'Synced'**
+  String get accountsSynced;
+
+  /// No description provided for @accountsNeedsAttention.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs attention'**
+  String get accountsNeedsAttention;
+
+  /// No description provided for @accountsBackAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Go back'**
+  String get accountsBackAction;
+
+  /// No description provided for @accountsCloseAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get accountsCloseAction;
+
+  /// No description provided for @accountsShowUnclearedTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'Show {count} uncleared transactions'**
+  String accountsShowUnclearedTransactions(int count);
+
+  /// No description provided for @accountsNoLoanActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'No loan activity yet'**
+  String get accountsNoLoanActivity;
+
+  /// No description provided for @accountsLoanPayments.
+  ///
+  /// In en, this message translates to:
+  /// **'Payments'**
+  String get accountsLoanPayments;
+
+  /// No description provided for @accountsLoanOtherActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Other Activity'**
+  String get accountsLoanOtherActivity;
+
+  /// No description provided for @accountsUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get accountsUnknown;
+
+  /// No description provided for @accountsNoHoldings.
+  ///
+  /// In en, this message translates to:
+  /// **'No holdings'**
+  String get accountsNoHoldings;
+
+  /// No description provided for @accountsTaxYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax {year}'**
+  String accountsTaxYear(int year);
+
+  /// No description provided for @accountsTaxableTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} taxable tx'**
+  String accountsTaxableTransactions(int count);
+
+  /// No description provided for @accountsProceeds.
+  ///
+  /// In en, this message translates to:
+  /// **'Proceeds {amount}'**
+  String accountsProceeds(String amount);
+
+  /// No description provided for @accountsBasis.
+  ///
+  /// In en, this message translates to:
+  /// **'Basis {amount}'**
+  String accountsBasis(String amount);
+
+  /// No description provided for @accountsUnknownProgram.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown program'**
+  String get accountsUnknownProgram;
+
+  /// No description provided for @accountsSuggestedSwaps.
+  ///
+  /// In en, this message translates to:
+  /// **'Swaps'**
+  String get accountsSuggestedSwaps;
+
+  /// No description provided for @accountsSuggestedStaking.
+  ///
+  /// In en, this message translates to:
+  /// **'Staking'**
+  String get accountsSuggestedStaking;
+
+  /// No description provided for @accountsSuggestedNft.
+  ///
+  /// In en, this message translates to:
+  /// **'NFT'**
+  String get accountsSuggestedNft;
+
+  /// No description provided for @accountsSuggestedLending.
+  ///
+  /// In en, this message translates to:
+  /// **'Lending'**
+  String get accountsSuggestedLending;
+
+  /// No description provided for @accountsSuggestedIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get accountsSuggestedIncome;
+
+  /// No description provided for @accountsSuggestedTransfers.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfers'**
+  String get accountsSuggestedTransfers;
+
+  /// No description provided for @accountsLinkUnavailableMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank connections are currently unavailable in this build. Use unlinked accounts instead.'**
+  String get accountsLinkUnavailableMessage;
+
+  /// No description provided for @accountsToggleBalanceSign.
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle positive or negative balance'**
+  String get accountsToggleBalanceSign;
+
+  /// No description provided for @accountsLinkedMobileOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Linked connections are only available on iOS/Android right now. Add an unlinked account instead.'**
+  String get accountsLinkedMobileOnly;
+
+  /// No description provided for @accountsLinkedNotCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Linked connections for \"{institution}\" were not completed. Add an unlinked account instead.'**
+  String accountsLinkedNotCompleted(String institution);
+
+  /// No description provided for @accountsLinkedNothingImported.
+  ///
+  /// In en, this message translates to:
+  /// **'No accounts were imported from this connection. Add an unlinked account instead.'**
+  String get accountsLinkedNothingImported;
+
+  /// No description provided for @accountsLinkedUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Linked connections for \"{institution}\" are currently unavailable. Add an unlinked account instead.'**
+  String accountsLinkedUnavailable(String institution);
+
+  /// No description provided for @accountsAddExistingError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to add this account to the current budget.'**
+  String get accountsAddExistingError;
+
+  /// No description provided for @accountsMyAccounts.
+  ///
+  /// In en, this message translates to:
+  /// **'My accounts'**
+  String get accountsMyAccounts;
+
+  /// No description provided for @accountsAddExistingAccountHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add this existing account to this budget'**
+  String get accountsAddExistingAccountHint;
+
+  /// No description provided for @accountsInstitutionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Institution: {institution}'**
+  String accountsInstitutionLabel(String institution);
+
+  /// No description provided for @authLoginHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome back'**
+  String get authLoginHeadline;
+
+  /// No description provided for @authLoginSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue building better money habits.'**
+  String get authLoginSubtitle;
+
+  /// No description provided for @authShowPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Show password'**
+  String get authShowPassword;
+
+  /// No description provided for @authHidePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide password'**
+  String get authHidePassword;
+
+  /// No description provided for @authStepProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Step {step} of {total}'**
+  String authStepProgress(int step, int total);
+
+  /// No description provided for @homeLoadingBudgets.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading budgets'**
+  String get homeLoadingBudgets;
+
+  /// No description provided for @homeNoBudgetsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Start a plan for this month and give every dollar a job.'**
+  String get homeNoBudgetsHint;
+
+  /// No description provided for @settingsLastUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Last updated: {label}'**
+  String settingsLastUpdated(String label);
+
+  /// No description provided for @settingsLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading settings'**
+  String get settingsLoading;
+
+  /// No description provided for @budgetStatusOverspent.
+  ///
+  /// In en, this message translates to:
+  /// **'Overspent'**
+  String get budgetStatusOverspent;
+
+  /// No description provided for @budgetStatusFunded.
+  ///
+  /// In en, this message translates to:
+  /// **'Funded'**
+  String get budgetStatusFunded;
+
+  /// No description provided for @budgetStatusUnderfunded.
+  ///
+  /// In en, this message translates to:
+  /// **'Underfunded'**
+  String get budgetStatusUnderfunded;
+
+  /// No description provided for @budgetEnvelopeProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% funded'**
+  String budgetEnvelopeProgress(int percent);
+
+  /// No description provided for @budgetEnvelopeCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 envelope} other{{count} envelopes}}'**
+  String budgetEnvelopeCount(int count);
+
+  /// No description provided for @budgetReviewTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Review 1 transaction} other{Review {count} transactions}}'**
+  String budgetReviewTransactions(int count);
+
+  /// No description provided for @budgetCoverOverspentCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Cover 1 overspent category} other{Cover {count} overspent categories}}'**
+  String budgetCoverOverspentCategories(int count);
+
+  /// No description provided for @budgetCategoryAllocated.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} allocated'**
+  String budgetCategoryAllocated(String amount);
+
+  /// No description provided for @budgetGoalTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Target: {amount}'**
+  String budgetGoalTarget(String amount);
+
+  /// No description provided for @budgetGoalMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly: {amount}'**
+  String budgetGoalMonthly(String amount);
+
+  /// No description provided for @budgetGoalTargetBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Target: {amount} by {date}'**
+  String budgetGoalTargetBy(String amount, String date);
+
+  /// No description provided for @budgetBackspaceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete digit'**
+  String get budgetBackspaceLabel;
+
+  /// No description provided for @budgetDayOfMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Day {day}'**
+  String budgetDayOfMonth(int day);
+
+  /// No description provided for @transactionsLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading transactions'**
+  String get transactionsLoading;
+
+  /// No description provided for @payeesLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading payees'**
+  String get payeesLoading;
+
+  /// No description provided for @rulesLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading rules'**
+  String get rulesLoading;
+
+  /// No description provided for @transactionsBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get transactionsBack;
+
+  /// No description provided for @transactionsSearchClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear search'**
+  String get transactionsSearchClear;
+
+  /// No description provided for @transactionsUnknownPayee.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown payee'**
+  String get transactionsUnknownPayee;
+
+  /// No description provided for @transactionsUnknownEnvelope.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown envelope'**
+  String get transactionsUnknownEnvelope;
+
+  /// No description provided for @reportsAgeOfMoneyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'How long your money lasts after it arrives'**
+  String get reportsAgeOfMoneyHint;
+
+  /// No description provided for @reportsAgeOfMoneyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Age of Money'**
+  String get reportsAgeOfMoneyTitle;
+
+  /// No description provided for @reportsDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 day} other{{count} days}}'**
+  String reportsDays(int count);
+
+  /// No description provided for @reportsLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Adding up the month…'**
+  String get reportsLoading;
+
+  /// No description provided for @reportsNetWorthCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'Right now'**
+  String get reportsNetWorthCurrent;
+
+  /// No description provided for @reportsNetWorthExplainerBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Net worth adds up every active account in this plan: what you own minus what you owe. Think of it as a snapshot of today, not a score.'**
+  String get reportsNetWorthExplainerBody;
+
+  /// No description provided for @reportsNetWorthExplainerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What net worth counts'**
+  String get reportsNetWorthExplainerTitle;
+
+  /// No description provided for @reportsNextMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Next month'**
+  String get reportsNextMonth;
+
+  /// No description provided for @reportsOtherCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Other categories'**
+  String get reportsOtherCategories;
+
+  /// No description provided for @reportsPositiveInflowTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Income this period'**
+  String get reportsPositiveInflowTotal;
+
+  /// No description provided for @reportsPreviousMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous month'**
+  String get reportsPreviousMonth;
+
+  /// No description provided for @recurringCalendarDayCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 scheduled item} other{{count} scheduled items}}'**
+  String recurringCalendarDayCount(int count);
+
+  /// No description provided for @recurringActiveLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get recurringActiveLabel;
+
+  /// No description provided for @recurringLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetching the schedule…'**
+  String get recurringLoading;
+
+  /// No description provided for @recurringNextMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Next month'**
+  String get recurringNextMonth;
+
+  /// No description provided for @recurringPausedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused'**
+  String get recurringPausedLabel;
+
+  /// No description provided for @recurringPostedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Posted'**
+  String get recurringPostedLabel;
+
+  /// No description provided for @recurringPreviousMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous month'**
+  String get recurringPreviousMonth;
+
+  /// No description provided for @recurringSavingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving…'**
+  String get recurringSavingLabel;
+
+  /// No description provided for @recurringScheduledLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled'**
+  String get recurringScheduledLabel;
+
+  /// No description provided for @recurringSummaryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled totals'**
+  String get recurringSummaryTitle;
+
+  /// No description provided for @reportsChartEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a few transactions and this drawing fills in.'**
+  String get reportsChartEmptyMessage;
+
+  /// No description provided for @reportsChartEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to chart yet'**
+  String get reportsChartEmptyTitle;
+
+  /// No description provided for @reportsChartSeriesEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'{label}: {amount}'**
+  String reportsChartSeriesEntry(String label, String amount);
+
+  /// No description provided for @reportsChartSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{title}. {entries}'**
+  String reportsChartSummary(String title, String entries);
 }
 
 class _AppLocalizationsDelegate

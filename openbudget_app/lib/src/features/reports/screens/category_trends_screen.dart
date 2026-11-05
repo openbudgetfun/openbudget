@@ -1,16 +1,17 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/reports/providers/category_trends_provider.dart';
+import 'package:openbudget_app/src/features/reports/utils/report_month_label.dart';
+import 'package:openbudget_app/src/features/reports/widgets/report_charts.dart';
 import 'package:openbudget_app/src/features/settings/providers/display_currency_provider.dart';
 import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
+/// One line per category, one drawn bar per month.
 class CategoryTrendsScreen extends HookConsumerWidget {
   const CategoryTrendsScreen({required this.budgetId, super.key});
 
@@ -19,8 +20,6 @@ class CategoryTrendsScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
     final trendsAsync = ref.watch(categoryTrendsProvider(budgetId));
     final converter = ref
         .watch(displayCurrencyConverterProvider(budgetId))
@@ -30,73 +29,62 @@ class CategoryTrendsScreen extends HookConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: Text(l10n.categoryTrendsTitle)),
       body: trendsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.error_outline_rounded,
-                size: 48,
-                color: colorScheme.error,
-              ),
-              const SizedBox(height: SpacingTokens.md),
-              Text(
-                l10n.categoryTrendsLoadError,
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: colorScheme.error,
-                ),
-              ),
-            ],
-          ),
+        loading: () =>
+            Center(child: ObLoadingPanel(label: l10n.reportsLoading)),
+        error: (error, _) => ListView(
+          padding: const EdgeInsets.all(SpacingTokens.md),
+          children: [
+            ObStatePanel.problem(
+              title: l10n.categoryTrendsLoadError,
+              message: error.toString(),
+            ),
+          ],
         ),
         data: (data) {
           if (data.categories.isEmpty) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(SpacingTokens.xl),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.category_rounded,
-                      size: 48,
-                      color: colorScheme.outlineVariant,
-                    ),
-                    const SizedBox(height: SpacingTokens.md),
-                    Text(
-                      l10n.categoryTrendsEmptyTitle,
-                      style: theme.textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: SpacingTokens.sm),
-                    Text(
-                      l10n.categoryTrendsEmptySubtitle,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
+            return ListView(
+              padding: const EdgeInsets.all(SpacingTokens.md),
+              children: [
+                ObStatePanel.empty(
+                  title: l10n.categoryTrendsEmptyTitle,
+                  message: l10n.categoryTrendsEmptySubtitle,
+                  doodle: WiredDoodleKind.sparkle,
+                  tone: ObTone.review,
                 ),
-              ),
+              ],
             );
           }
 
           final sourceCurrency = parseCurrencyCode(data.currencyCode);
 
           return ListView(
-            padding: const EdgeInsets.all(SpacingTokens.md),
+            padding: const EdgeInsets.fromLTRB(
+              SpacingTokens.md,
+              SpacingTokens.sm,
+              SpacingTokens.md,
+              SpacingTokens.xl,
+            ),
             children: [
-              _MonthHeaders(months: data.months, l10n: l10n),
-              const SizedBox(height: SpacingTokens.sm),
-              ...data.categories.map(
-                (cat) => _CategoryTrendRow(
-                  category: cat,
-                  months: data.months,
-                  sourceCurrency: sourceCurrency,
-                  converter: converter,
+              ObSectionHeader(
+                title: l10n.reportsSpendingByCategory,
+                subtitle: l10n.spendingTrendsMonthly,
+                padding: const EdgeInsets.fromLTRB(
+                  0,
+                  0,
+                  0,
+                  SpacingTokens.sm,
                 ),
               ),
+              for (final category in data.categories)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: SpacingTokens.sm),
+                  child: _CategoryTrendCard(
+                    category: category,
+                    months: data.months,
+                    sourceCurrency: sourceCurrency,
+                    converter: converter,
+                  ),
+                ),
             ],
           );
         },
@@ -105,56 +93,8 @@ class CategoryTrendsScreen extends HookConsumerWidget {
   }
 }
 
-class _MonthHeaders extends HookWidget {
-  const _MonthHeaders({required this.months, required this.l10n});
-
-  final List<MonthLabel> months;
-  final AppLocalizations l10n;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Row(
-      children: [
-        const SizedBox(width: 120),
-        ...months.map(
-          (m) => Expanded(
-            child: Text(
-              _shortMonth(m.month),
-              textAlign: TextAlign.center,
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(width: 72),
-      ],
-    );
-  }
-
-  String _shortMonth(int month) {
-    const names = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-    return names[month - 1];
-  }
-}
-
-class _CategoryTrendRow extends HookWidget {
-  const _CategoryTrendRow({
+class _CategoryTrendCard extends HookWidget {
+  const _CategoryTrendCard({
     required this.category,
     required this.months,
     required this.sourceCurrency,
@@ -168,131 +108,93 @@ class _CategoryTrendRow extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final maxCents = category.monthlyCents.fold<int>(0, math.max);
+    final maxCents = category.monthlyCents.fold<int>(
+      0,
+      (max, v) => v > max ? v : max,
+    );
+    String format(int cents) =>
+        converter?.formatAmount(
+          amountCents: cents,
+          sourceCurrency: sourceCurrency,
+        ) ??
+        formatCents(cents, sourceCurrency);
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: SpacingTokens.md,
-          vertical: SpacingTokens.sm,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    category.categoryName,
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                Text(
-                  converter?.formatAmount(
-                        amountCents: category.totalCents,
-                        sourceCurrency: sourceCurrency,
-                      ) ??
-                      formatCents(category.totalCents, sourceCurrency),
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: colorScheme.primary,
-                  ),
-                ),
-              ],
+    return Semantics(
+      container: true,
+      label: reportChartSummary(
+        l10n,
+        title: category.categoryName,
+        entries: [
+          for (final (index, month) in months.indexed)
+            (
+              reportMonthLabel(l10n, month.month, month.year),
+              format(category.monthlyCents[index]),
             ),
-            const SizedBox(height: SpacingTokens.sm),
-            Row(
-              children: [
-                for (var i = 0; i < category.monthlyCents.length; i++) ...[
-                  if (i > 0) const SizedBox(width: 4),
+        ],
+      ),
+      child: ExcludeSemantics(
+        child: ObCard(
+          padding: const EdgeInsets.all(SpacingTokens.md),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
                   Expanded(
-                    child: _MiniBar(
-                      value: category.monthlyCents[i],
-                      maxValue: maxCents,
-                      sourceCurrency: sourceCurrency,
-                      converter: converter,
-                      colorScheme: colorScheme,
+                    child: Text(
+                      category.categoryName,
+                      style: theme.textTheme.titleSmall,
+                      overflow: TextOverflow.ellipsis,
                     ),
+                  ),
+                  const SizedBox(width: SpacingTokens.sm),
+                  ObAmount(
+                    format(category.totalCents),
+                    style: theme.textTheme.titleSmall,
                   ),
                 ],
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _MiniBar extends HookWidget {
-  const _MiniBar({
-    required this.value,
-    required this.maxValue,
-    required this.sourceCurrency,
-    required this.converter,
-    required this.colorScheme,
-  });
-
-  final int value;
-  final int maxValue;
-  final CurrencyCode sourceCurrency;
-  final DisplayCurrencyConverter? converter;
-  final ColorScheme colorScheme;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final fraction = maxValue > 0 ? value / maxValue : 0.0;
-
-    return Tooltip(
-      message:
-          converter?.formatAmount(
-            amountCents: value,
-            sourceCurrency: sourceCurrency,
-          ) ??
-          formatCents(value, sourceCurrency),
-      child: Column(
-        children: [
-          SizedBox(
-            height: 48,
-            child: Align(
-              alignment: Alignment.bottomCenter,
-              child: FractionallySizedBox(
-                heightFactor: fraction.clamp(0.05, 1.0),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: value > 0
-                        ? colorScheme.primary
-                        : colorScheme.surfaceContainerHighest,
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(3),
-                    ),
-                  ),
-                ),
               ),
-            ),
+              const SizedBox(height: SpacingTokens.sm),
+              for (final (index, month) in months.indexed) ...[
+                if (index > 0) const SizedBox(height: SpacingTokens.xs),
+                Row(
+                  children: [
+                    SizedBox(
+                      width: 44,
+                      child: Text(
+                        reportMonthAxisLabel(l10n, month.month),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.ob.mutedInk,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: ReportTrackBar(
+                        fraction: maxCents > 0
+                            ? category.monthlyCents[index] / maxCents
+                            : 0,
+                        tone: ObTone.brand,
+                        height: 12,
+                        seed: 91 + index,
+                      ),
+                    ),
+                    const SizedBox(width: SpacingTokens.sm),
+                    SizedBox(
+                      width: 88,
+                      child: ObAmount(
+                        format(category.monthlyCents[index]),
+                        style: theme.textTheme.bodySmall,
+                        textAlign: TextAlign.end,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ],
           ),
-          const SizedBox(height: 2),
-          Text(
-            value > 0
-                ? (converter?.formatAmount(
-                        amountCents: value,
-                        sourceCurrency: sourceCurrency,
-                      ) ??
-                      formatCents(value, sourceCurrency))
-                : '-',
-            style: theme.textTheme.labelSmall?.copyWith(
-              fontSize: 9,
-              color: colorScheme.onSurfaceVariant,
-            ),
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
+        ),
       ),
     );
   }

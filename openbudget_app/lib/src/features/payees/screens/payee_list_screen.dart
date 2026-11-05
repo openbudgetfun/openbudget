@@ -12,6 +12,9 @@ import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
+/// The key on the empty state shown when there are no payees yet.
+const payeeListEmptyKey = Key('payee-list-empty');
+
 class PayeeListScreen extends HookConsumerWidget {
   const PayeeListScreen({required this.budgetId, super.key});
 
@@ -22,7 +25,7 @@ class PayeeListScreen extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final payeesAsync = ref.watch(payeeListProvider(budgetId));
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final palette = theme.ob;
     final searchController = useTextEditingController();
     final searchQuery = useState('');
 
@@ -35,71 +38,52 @@ class PayeeListScreen extends HookConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const SkribbleIcon(data: OpenBudgetIcons.back),
+          tooltip: l10n.transactionsBack,
           onPressed: () =>
               context.goNamed(moreRoute, pathParameters: {'id': budgetId}),
         ),
         title: Text(l10n.payeeListTitle),
         actions: [
           IconButton(
-            icon: const Icon(Icons.add),
+            icon: const SkribbleIcon(data: OpenBudgetIcons.add),
             tooltip: l10n.payeeAddButton,
             onPressed: () => _showAddPayeeDialog(context, ref),
           ),
         ],
       ),
       body: payeesAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => Center(
+          child: ObLoadingPanel(label: l10n.payeesLoading),
+        ),
         error: (error, _) => Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.error_outline_rounded,
-                size: 48,
-                color: colorScheme.error,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(SpacingTokens.md),
+            child: ObStatePanel.problem(
+              title: l10n.payeeLoadError,
+              message: error.toString(),
+              action: ObStateAction(
+                label: l10n.homeRetry,
+                onPressed: () => ref.invalidate(payeeListProvider(budgetId)),
               ),
-              const SizedBox(height: SpacingTokens.md),
-              Text(
-                l10n.payeeLoadError,
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: colorScheme.error,
-                ),
-              ),
-            ],
+            ),
           ),
         ),
         data: (payees) {
           if (payees.isEmpty) {
             return Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.store_rounded,
-                    size: 48,
-                    color: colorScheme.outlineVariant,
-                  ),
-                  const SizedBox(height: SpacingTokens.md),
-                  Text(
-                    l10n.payeeEmptyTitle,
-                    style: theme.textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: SpacingTokens.sm),
-                  Text(
-                    l10n.payeeEmptySubtitle,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: SpacingTokens.lg),
-                  FilledButton.icon(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(SpacingTokens.md),
+                child: ObStatePanel.empty(
+                  key: payeeListEmptyKey,
+                  title: l10n.payeeEmptyTitle,
+                  message: l10n.payeeEmptySubtitle,
+                  doodle: WiredDoodleKind.cupcake,
+                  action: ObStateAction(
+                    label: l10n.payeeAddButton,
                     onPressed: () => _showAddPayeeDialog(context, ref),
-                    icon: const Icon(Icons.add),
-                    label: Text(l10n.payeeAddButton),
                   ),
-                ],
+                ),
               ),
             );
           }
@@ -122,25 +106,22 @@ class PayeeListScreen extends HookConsumerWidget {
                     SpacingTokens.md,
                     SpacingTokens.sm,
                   ),
-                  child: TextField(
+                  child: ObTextField(
                     controller: searchController,
-                    decoration: InputDecoration(
-                      hintText: l10n.payeeSearchHint,
-                      prefixIcon: const Icon(Icons.search_rounded),
-                      suffixIcon: searchQuery.value.isNotEmpty
-                          ? IconButton(
-                              icon: const Icon(Icons.clear_rounded),
-                              onPressed: searchController.clear,
-                            )
-                          : null,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(RadiusTokens.md),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: SpacingTokens.md,
-                        vertical: SpacingTokens.sm,
-                      ),
+                    hintText: l10n.payeeSearchHint,
+                    prefixIcon: const SkribbleIcon(
+                      data: OpenBudgetIcons.search,
                     ),
+                    suffixIcon: searchQuery.value.isNotEmpty
+                        ? IconButton(
+                            key: const Key('payee-search-clear'),
+                            icon: const SkribbleIcon(
+                              data: OpenBudgetIcons.close,
+                            ),
+                            tooltip: l10n.transactionsSearchClear,
+                            onPressed: searchController.clear,
+                          )
+                        : null,
                   ),
                 ),
                 if (query.isNotEmpty)
@@ -153,7 +134,7 @@ class PayeeListScreen extends HookConsumerWidget {
                       child: Text(
                         l10n.payeeSearchResultCount(filtered.length),
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
+                          color: palette.mutedInk,
                         ),
                       ),
                     ),
@@ -161,10 +142,12 @@ class PayeeListScreen extends HookConsumerWidget {
                 Expanded(
                   child: filtered.isEmpty
                       ? Center(
-                          child: Text(
-                            l10n.payeeSearchNoResults,
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: colorScheme.onSurfaceVariant,
+                          child: SingleChildScrollView(
+                            padding: const EdgeInsets.all(SpacingTokens.md),
+                            child: ObStatePanel.empty(
+                              title: l10n.payeeSearchNoResults,
+                              doodle: WiredDoodleKind.cloud,
+                              tone: ObTone.review,
                             ),
                           ),
                         )
@@ -205,7 +188,7 @@ class _PayeeTile extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final palette = theme.ob;
 
     return Dismissible(
       key: ValueKey(payee.id),
@@ -214,29 +197,46 @@ class _PayeeTile extends HookConsumerWidget {
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: SpacingTokens.lg),
         margin: const EdgeInsets.only(bottom: SpacingTokens.sm),
-        decoration: BoxDecoration(
-          color: colorScheme.error,
-          borderRadius: BorderRadius.circular(RadiusTokens.md),
+        decoration: ObRoughDecoration(
+          color: palette.overspent,
+          outline: palette.overspent,
+          seed: 23,
         ),
-        child: Icon(Icons.delete_rounded, color: colorScheme.onError),
+        child: SkribbleIcon(
+          data: OpenBudgetIcons.delete,
+          color: palette.onAction,
+        ),
       ),
-      confirmDismiss: (_) => _confirmDelete(context, l10n, colorScheme),
-      onDismissed: (_) => _deletePayee(context, ref, l10n, colorScheme),
-      child: Card(
+      confirmDismiss: (_) => _confirmDelete(context, l10n),
+      onDismissed: (_) => _deletePayee(context, ref, l10n),
+      child: ObCard(
         margin: const EdgeInsets.only(bottom: SpacingTokens.sm),
         child: ListTile(
           onTap: () => _showEditDialog(context),
           onLongPress: () => _showPayeeMenu(context, ref),
-          leading: CircleAvatar(
-            backgroundColor: colorScheme.primaryContainer,
-            child: Icon(
-              Icons.store_rounded,
-              color: colorScheme.onPrimaryContainer,
-              size: 20,
+          leading: Container(
+            width: 40,
+            height: 40,
+            decoration: ObRoughDecoration(
+              color: palette.wash(ObTone.brand),
+              outline: palette.quietPen,
+              radius: 20,
+              strokeWidth: 1.6,
+              seed: 13,
+            ),
+            child: Center(
+              child: SkribbleIcon(
+                data: OpenBudgetIcons.store,
+                size: 20,
+                color: palette.brand,
+              ),
             ),
           ),
-          title: Text(payee.name, style: theme.textTheme.bodyMedium),
-          trailing: const Icon(Icons.chevron_right_rounded, size: 20),
+          title: Text(payee.name, style: theme.textTheme.titleSmall),
+          trailing: const SkribbleIcon(
+            data: OpenBudgetIcons.chevronRight,
+            size: 20,
+          ),
         ),
       ),
     );
@@ -252,7 +252,7 @@ class _PayeeTile extends HookConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                leading: const Icon(Icons.edit_rounded),
+                leading: const SkribbleIcon(data: OpenBudgetIcons.edit),
                 title: Text(l10n.payeeEditTitle),
                 onTap: () {
                   Navigator.of(ctx).pop();
@@ -260,7 +260,7 @@ class _PayeeTile extends HookConsumerWidget {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.merge_rounded),
+                leading: const SkribbleIcon(data: OpenBudgetIcons.merge),
                 title: Text(l10n.payeeMergeTitle),
                 onTap: () {
                   Navigator.of(ctx).pop();
@@ -287,34 +287,35 @@ class _PayeeTile extends HookConsumerWidget {
   Future<bool?> _confirmDelete(
     BuildContext context,
     AppLocalizations l10n,
-    ColorScheme colorScheme,
-  ) async => showDialog<bool>(
-    context: context,
-    builder: (ctx) => AlertDialog(
-      title: Text(l10n.deleteConfirmTitle),
-      content: Text('${l10n.deleteConfirmMessage}\n\n"${payee.name}"'),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(ctx).pop(false),
-          child: Text(l10n.dialogCancel),
-        ),
-        FilledButton(
-          onPressed: () => Navigator.of(ctx).pop(true),
-          style: FilledButton.styleFrom(
-            backgroundColor: colorScheme.error,
-            foregroundColor: colorScheme.onError,
+  ) async {
+    final palette = Theme.of(context).ob;
+    return showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.deleteConfirmTitle),
+        content: Text('${l10n.deleteConfirmMessage}\n\n"${payee.name}"'),
+        actions: [
+          ObTextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l10n.dialogCancel),
           ),
-          child: Text(l10n.deleteConfirmButton),
-        ),
-      ],
-    ),
-  );
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            style: FilledButton.styleFrom(
+              backgroundColor: palette.overspent,
+              foregroundColor: palette.onAction,
+            ),
+            child: Text(l10n.deleteConfirmButton),
+          ),
+        ],
+      ),
+    );
+  }
 
   Future<void> _deletePayee(
     BuildContext context,
     WidgetRef ref,
     AppLocalizations l10n,
-    ColorScheme colorScheme,
   ) async {
     try {
       final deleted = await ref
@@ -391,34 +392,25 @@ class _AddPayeeDialog extends HookConsumerWidget {
 
     return AlertDialog(
       title: Text(l10n.payeeAddButton),
-      content: TextField(
+      content: ObTextField(
         controller: nameController,
-        decoration: InputDecoration(
-          labelText: l10n.payeeNameLabel,
-          prefixIcon: const Icon(Icons.store_outlined),
-        ),
+        labelText: l10n.payeeNameLabel,
+        prefixIcon: const SkribbleIcon(data: OpenBudgetIcons.store),
         autofocus: true,
-        textInputAction: TextInputAction.done,
         onSubmitted: isSubmitting.value
             ? null
             : (_) => _submit(context, ref, nameController, isSubmitting),
       ),
       actions: [
-        TextButton(
+        ObTextButton(
           onPressed: () => Navigator.of(context).pop(),
           child: Text(l10n.dialogCancel),
         ),
-        FilledButton(
-          onPressed: isSubmitting.value
-              ? null
-              : () => _submit(context, ref, nameController, isSubmitting),
-          child: isSubmitting.value
-              ? const SizedBox(
-                  height: 20,
-                  width: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : Text(l10n.dialogSave),
+        ObFilledButton(
+          isLoading: isSubmitting.value,
+          loadingLabel: l10n.dialogSave,
+          onPressed: () => _submit(context, ref, nameController, isSubmitting),
+          child: Text(l10n.dialogSave),
         ),
       ],
     );
@@ -473,34 +465,25 @@ class _EditPayeeDialog extends HookConsumerWidget {
 
     return AlertDialog(
       title: Text(l10n.payeeEditTitle),
-      content: TextField(
+      content: ObTextField(
         controller: nameController,
-        decoration: InputDecoration(
-          labelText: l10n.payeeNameLabel,
-          prefixIcon: const Icon(Icons.store_outlined),
-        ),
+        labelText: l10n.payeeNameLabel,
+        prefixIcon: const SkribbleIcon(data: OpenBudgetIcons.store),
         autofocus: true,
-        textInputAction: TextInputAction.done,
         onSubmitted: isSubmitting.value
             ? null
             : (_) => _submit(context, ref, nameController, isSubmitting),
       ),
       actions: [
-        TextButton(
+        ObTextButton(
           onPressed: () => Navigator.of(context).pop(),
           child: Text(l10n.dialogCancel),
         ),
-        FilledButton(
-          onPressed: isSubmitting.value
-              ? null
-              : () => _submit(context, ref, nameController, isSubmitting),
-          child: isSubmitting.value
-              ? const SizedBox(
-                  height: 20,
-                  width: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : Text(l10n.dialogSave),
+        ObFilledButton(
+          isLoading: isSubmitting.value,
+          loadingLabel: l10n.dialogSave,
+          onPressed: () => _submit(context, ref, nameController, isSubmitting),
+          child: Text(l10n.dialogSave),
         ),
       ],
     );
@@ -554,6 +537,7 @@ class _MergePayeeDialog extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
     final payeesAsync = ref.watch(payeeListProvider(budgetId));
     final selectedTargetId = useState<String?>(null);
     final isSubmitting = useState(false);
@@ -574,38 +558,43 @@ class _MergePayeeDialog extends HookConsumerWidget {
         children: [
           Text(
             '"${sourcePayee.name}"',
-            style: Theme.of(
-              context,
-            ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+            style: theme.textTheme.titleSmall,
           ),
           const SizedBox(height: SpacingTokens.sm),
           Text(l10n.payeeMergeInto),
           const SizedBox(height: SpacingTokens.sm),
-          DropdownButtonFormField<String>(
-            initialValue: selectedTargetId.value,
-            decoration: InputDecoration(
-              prefixIcon: const Icon(Icons.store_rounded),
-              labelText: l10n.payeeLabel,
-            ),
-            items: targetPayees
-                .map(
-                  (p) => DropdownMenuItem(
-                    value: p.id?.toString() ?? '',
-                    child: Text(p.name),
-                  ),
-                )
-                .toList(),
-            onChanged: (v) => selectedTargetId.value = v,
+          Row(
+            children: [
+              const SkribbleIcon(data: OpenBudgetIcons.store),
+              const SizedBox(width: SpacingTokens.sm),
+              Expanded(
+                child: ObDropdown<String>(
+                  value: selectedTargetId.value,
+                  labelText: l10n.payeeLabel,
+                  items: targetPayees
+                      .map(
+                        (p) => DropdownMenuItem(
+                          value: p.id?.toString() ?? '',
+                          child: Text(p.name),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (v) => selectedTargetId.value = v,
+                ),
+              ),
+            ],
           ),
         ],
       ),
       actions: [
-        TextButton(
+        ObTextButton(
           onPressed: () => Navigator.of(context).pop(),
           child: Text(l10n.dialogCancel),
         ),
-        FilledButton(
-          onPressed: isSubmitting.value || selectedTargetId.value == null
+        ObFilledButton(
+          isLoading: isSubmitting.value,
+          loadingLabel: l10n.payeeMergeButton,
+          onPressed: selectedTargetId.value == null
               ? null
               : () => _submit(
                   context,
@@ -613,13 +602,7 @@ class _MergePayeeDialog extends HookConsumerWidget {
                   selectedTargetId.value!,
                   isSubmitting,
                 ),
-          child: isSubmitting.value
-              ? const SizedBox(
-                  height: 20,
-                  width: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : Text(l10n.payeeMergeButton),
+          child: Text(l10n.payeeMergeButton),
         ),
       ],
     );

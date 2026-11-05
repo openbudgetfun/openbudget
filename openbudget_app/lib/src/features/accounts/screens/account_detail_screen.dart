@@ -15,7 +15,6 @@ import 'package:openbudget_app/src/features/accounts/screens/edit_account_dialog
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
 import 'package:openbudget_app/src/features/payees/providers/payee_list_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
-import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
@@ -42,7 +41,7 @@ class AccountDetailScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final palette = theme.ob;
     final accountsAsync = ref.watch(accountListProvider(budgetId));
     final txnAsync = ref.watch(
       accountTransactionsProvider(budgetId, accountId),
@@ -75,13 +74,10 @@ class AccountDetailScreen extends HookConsumerWidget {
     );
 
     return Scaffold(
-      backgroundColor: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
       appBar: AppBar(
-        backgroundColor: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
-        surfaceTintColor: OpenBudgetPalette.transparentFor(Theme.of(context)),
-        scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const SkribbleIcon(data: OpenBudgetIcons.back),
+          tooltip: l10n.accountsBackAction,
           onPressed: () => context.goNamed(
             accountListRoute,
             pathParameters: {'id': budgetId},
@@ -93,6 +89,7 @@ class AccountDetailScreen extends HookConsumerWidget {
               accountData?.name ?? l10n.accountListTitle,
               style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.w700,
+                color: palette.ink,
               ),
             ),
             if (accountData != null)
@@ -101,7 +98,7 @@ class AccountDetailScreen extends HookConsumerWidget {
                     ? l10n.accountDetailBudgetAccount
                     : l10n.accountDetailTrackingAccount,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
+                  color: palette.mutedInk,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -110,25 +107,19 @@ class AccountDetailScreen extends HookConsumerWidget {
         actions: isLoanAccount
             ? [
                 IconButton(
-                  icon: const Icon(Icons.edit_outlined),
+                  icon: const SkribbleIcon(data: OpenBudgetIcons.edit),
+                  tooltip: l10n.accountEditTitle,
                   onPressed: () => _openEditAccount(context, accountData),
                 ),
               ]
             : [
                 TextButton(
                   onPressed: null,
-                  style: TextButton.styleFrom(
-                    foregroundColor: OpenBudgetPalette.bgBrandFor(
-                      Theme.of(context),
-                    ),
-                    textStyle: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
                   child: Text(l10n.accountDetailSelect),
                 ),
                 PopupMenuButton<_AccountMenuAction>(
-                  icon: const Icon(Icons.more_horiz_rounded),
+                  icon: const SkribbleIcon(data: OpenBudgetIcons.more),
+                  tooltip: l10n.accountsMoreActions,
                   onSelected: (action) {
                     switch (action) {
                       case _AccountMenuAction.reconcile:
@@ -179,12 +170,14 @@ class AccountDetailScreen extends HookConsumerWidget {
       ),
       body: isLoanAccount
           ? txnAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
+              loading: () => Center(
+                child: ObLoadingPanel(label: l10n.loadingTitle),
+              ),
               error: (error, _) => Center(
-                child: Text(
-                  l10n.transactionLoadError,
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: colorScheme.error,
+                child: Padding(
+                  padding: const EdgeInsets.all(SpacingTokens.lg),
+                  child: ObStatePanel.problem(
+                    title: l10n.transactionLoadError,
                   ),
                 ),
               ),
@@ -228,33 +221,24 @@ class AccountDetailScreen extends HookConsumerWidget {
                         textInputAction: TextInputAction.search,
                         decoration: InputDecoration(
                           hintText: l10n.accountDetailSearchHint,
-                          prefixIcon: const Icon(Icons.search_rounded),
+                          prefixIcon: const SkribbleIcon(
+                            data: OpenBudgetIcons.search,
+                          ),
                         ),
                         onChanged: (value) => searchQuery.value = value,
                       ),
                       const SizedBox(height: SpacingTokens.sm),
-                      Material(
-                        color: OpenBudgetPalette.bgSecondaryFor(
-                          Theme.of(context),
-                        ),
-                        borderRadius: BorderRadius.circular(RadiusTokens.md),
+                      ObCard(
                         child: ListTile(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                              RadiusTokens.md,
-                            ),
-                            side: BorderSide(
-                              color: OpenBudgetPalette.borderSubtleFor(
-                                Theme.of(context),
-                              ),
-                            ),
-                          ),
                           title: Text(
-                            'Show ${unclearedCount ?? 0} '
-                            '${l10n.accountFilterUncleared.toLowerCase()} '
-                            'transactions',
+                            l10n.accountsShowUnclearedTransactions(
+                              unclearedCount ?? 0,
+                            ),
                           ),
-                          trailing: const Icon(Icons.chevron_right_rounded),
+                          trailing: const SkribbleIcon(
+                            data: OpenBudgetIcons.chevronRight,
+                            size: 20,
+                          ),
                           onTap: () => statusFilter.value =
                               statusFilter.value == _StatusFilter.uncleared
                               ? _StatusFilter.all
@@ -266,13 +250,14 @@ class AccountDetailScreen extends HookConsumerWidget {
                 ),
                 Expanded(
                   child: txnAsync.when(
-                    loading: () =>
-                        const Center(child: CircularProgressIndicator()),
+                    loading: () => Center(
+                      child: ObLoadingPanel(label: l10n.loadingTitle),
+                    ),
                     error: (error, _) => Center(
-                      child: Text(
-                        l10n.transactionLoadError,
-                        style: theme.textTheme.bodyLarge?.copyWith(
-                          color: colorScheme.error,
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.all(SpacingTokens.lg),
+                        child: ObStatePanel.problem(
+                          title: l10n.transactionLoadError,
                         ),
                       ),
                     ),
@@ -337,14 +322,15 @@ class AccountDetailScreen extends HookConsumerWidget {
 
                       if (filtered.isEmpty) {
                         return Center(
-                          child: Text(
-                            searchQuery.value.isNotEmpty
-                                ? l10n.transactionNoResults
-                                : l10n.transactionEmpty,
-                            style: theme.textTheme.bodyLarge?.copyWith(
-                              color: OpenBudgetPalette.fgSecondaryFor(
-                                Theme.of(context),
-                              ),
+                          child: SingleChildScrollView(
+                            padding: const EdgeInsets.all(SpacingTokens.lg),
+                            child: ObStatePanel.empty(
+                              title: searchQuery.value.isNotEmpty
+                                  ? l10n.transactionNoResults
+                                  : l10n.transactionEmpty,
+                              doodle: searchQuery.value.isNotEmpty
+                                  ? WiredDoodleKind.cloud
+                                  : WiredDoodleKind.sun,
                             ),
                           ),
                         );
@@ -412,10 +398,7 @@ class AccountDetailScreen extends HookConsumerWidget {
                                       style: theme.textTheme.titleSmall
                                           ?.copyWith(
                                             fontWeight: FontWeight.w700,
-                                            color:
-                                                OpenBudgetPalette.fgSecondaryFor(
-                                                  Theme.of(context),
-                                                ),
+                                            color: palette.mutedInk,
                                           ),
                                     ),
                                   ),
@@ -475,9 +458,7 @@ class AccountDetailScreen extends HookConsumerWidget {
   void _showLinkAccountUnavailable(BuildContext context) {
     showAppToast(
       context,
-      message:
-          'Bank connections are currently unavailable in this build. '
-          'Use unlinked accounts instead.',
+      message: AppLocalizations.of(context).accountsLinkUnavailableMessage,
       variant: AppToastVariant.warning,
     );
   }
@@ -622,6 +603,7 @@ class _BalanceHeader extends HookWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
+    final palette = theme.ob;
 
     var clearedCents = 0;
     var unclearedCents = 0;
@@ -635,7 +617,7 @@ class _BalanceHeader extends HookWidget {
       }
     }
 
-    return Container(
+    return ObCard(
       margin: const EdgeInsets.fromLTRB(
         SpacingTokens.md,
         SpacingTokens.sm,
@@ -643,49 +625,41 @@ class _BalanceHeader extends HookWidget {
         SpacingTokens.xs,
       ),
       padding: const EdgeInsets.all(SpacingTokens.md),
-      decoration: BoxDecoration(
-        color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
-        borderRadius: BorderRadius.circular(RadiusTokens.md),
-        border: Border.all(
-          color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
-        ),
-      ),
       child: Column(
         children: [
           Text(
             l10n.accountDetailBalance,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
+              color: palette.mutedInk,
               fontWeight: FontWeight.w600,
             ),
           ),
           const SizedBox(height: SpacingTokens.xs),
-          Text(
+          ObAmount(
             formatCents(accountData.balanceCents, currencyCode),
-            style: theme.textTheme.headlineLarge?.copyWith(
-              fontWeight: FontWeight.w800,
-              color: accountData.balanceCents >= 0
-                  ? OpenBudgetPalette.fgSuccessFor(Theme.of(context))
-                  : OpenBudgetPalette.fgErrorFor(Theme.of(context)),
-            ),
+            tone: accountData.balanceCents >= 0
+                ? ObTone.funded
+                : ObTone.overspent,
+            style: theme.textTheme.headlineLarge,
           ),
           if (transactions != null) ...[
             const SizedBox(height: SpacingTokens.sm),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+            Wrap(
+              alignment: WrapAlignment.center,
+              spacing: SpacingTokens.md,
+              runSpacing: SpacingTokens.xs,
               children: [
-                _BalanceChip(
-                  icon: Icons.check_circle_outline,
+                _BalanceStat(
+                  icon: OpenBudgetIcons.checkCircle,
                   label: l10n.accountBalanceCleared,
                   amount: formatCents(clearedCents, currencyCode),
-                  color: OpenBudgetPalette.fgSuccessFor(Theme.of(context)),
+                  tone: ObTone.funded,
                 ),
-                const SizedBox(width: SpacingTokens.lg),
-                _BalanceChip(
-                  icon: Icons.circle_outlined,
+                _BalanceStat(
+                  icon: OpenBudgetIcons.circle,
                   label: l10n.accountBalanceUncleared,
                   amount: formatCents(unclearedCents, currencyCode),
-                  color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
+                  tone: ObTone.neutral,
                 ),
               ],
             ),
@@ -696,52 +670,56 @@ class _BalanceHeader extends HookWidget {
   }
 }
 
-class _BalanceChip extends HookWidget {
-  const _BalanceChip({
+class _BalanceStat extends HookWidget {
+  const _BalanceStat({
     required this.icon,
     required this.label,
     required this.amount,
-    required this.color,
+    required this.tone,
   });
 
-  final IconData icon;
+  final WiredSvgIconData icon;
   final String label;
   final String amount;
-  final Color color;
+  final ObTone tone;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final palette = theme.ob;
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: SpacingTokens.sm,
         vertical: 6,
       ),
-      decoration: BoxDecoration(
-        color: color.withAlpha(12),
-        borderRadius: BorderRadius.circular(RadiusTokens.sm),
+      decoration: ObRoughDecoration(
+        color: palette.wash(tone),
+        outline: palette.quietPen,
+        radius: RadiusTokens.sm,
+        seed: 5,
       ),
-      child: Column(
+      child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Row(
+          SkribbleIcon(data: icon, size: 16, color: palette.hue(tone)),
+          const SizedBox(width: 6),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, size: 12, color: color),
-              const SizedBox(width: 4),
               Text(
                 label,
-                style: theme.textTheme.labelSmall?.copyWith(color: color),
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: palette.ink,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              ObAmount(
+                amount,
+                tone: tone,
+                style: theme.textTheme.bodySmall,
               ),
             ],
-          ),
-          const SizedBox(height: 2),
-          Text(
-            amount,
-            style: theme.textTheme.bodySmall?.copyWith(
-              fontWeight: FontWeight.w600,
-              color: color,
-            ),
           ),
         ],
       ),
@@ -778,121 +756,109 @@ class _TransactionRow extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final palette = theme.ob;
     final isInflow = transaction.amountCents > 0;
 
     final statusIcon = transaction.reconciled
-        ? Icons.lock_outline_rounded
+        ? OpenBudgetIcons.lock
         : transaction.cleared
-        ? Icons.check_circle_outline
-        : Icons.circle_outlined;
-    final statusColor = transaction.reconciled
-        ? OpenBudgetPalette.bgBrandFor(Theme.of(context))
+        ? OpenBudgetIcons.checkCircle
+        : OpenBudgetIcons.circle;
+    final statusTone = transaction.reconciled
+        ? ObTone.brand
         : transaction.cleared
-        ? OpenBudgetPalette.fgSuccessFor(Theme.of(context))
-        : OpenBudgetPalette.fgSecondaryFor(Theme.of(context));
+        ? ObTone.funded
+        : ObTone.neutral;
 
-    return InkWell(
+    return ObCard(
+      margin: const EdgeInsets.only(bottom: SpacingTokens.xs),
       onTap: onToggleCleared,
-      borderRadius: BorderRadius.circular(RadiusTokens.sm),
-      child: Ink(
-        decoration: BoxDecoration(
-          color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
-          borderRadius: BorderRadius.circular(RadiusTokens.sm),
-          border: Border.all(
-            color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
+      padding: const EdgeInsets.symmetric(
+        horizontal: SpacingTokens.md,
+        vertical: SpacingTokens.sm,
+      ),
+      child: Row(
+        children: [
+          SkribbleIcon(
+            data: statusIcon,
+            size: 18,
+            color: palette.hue(statusTone),
           ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: SpacingTokens.md,
-            vertical: SpacingTokens.sm,
-          ),
-          child: Row(
-            children: [
-              Icon(statusIcon, size: 18, color: statusColor),
-              const SizedBox(width: SpacingTokens.sm),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      transaction.description,
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                      overflow: TextOverflow.ellipsis,
+          const SizedBox(width: SpacingTokens.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  transaction.description,
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: palette.ink,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                if (_detailLine.isNotEmpty)
+                  Text(
+                    _detailLine,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: palette.mutedInk,
                     ),
-                    if (_detailLine.isNotEmpty)
-                      Text(
-                        _detailLine,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: OpenBudgetPalette.fgSecondaryFor(
-                            Theme.of(context),
-                          ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                if (transaction.memo != null &&
+                    transaction.memo!.trim().isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: SpacingTokens.sm,
+                        vertical: 2,
+                      ),
+                      decoration: ObRoughDecoration(
+                        color: palette.highlight,
+                        outline: palette.quietPen,
+                        radius: RadiusTokens.sm,
+                        seed: 31,
+                      ),
+                      child: Text(
+                        transaction.memo!,
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: palette.ink,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                    if (transaction.memo != null &&
-                        transaction.memo!.trim().isNotEmpty)
-                      Container(
-                        margin: const EdgeInsets.only(top: 2),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: SpacingTokens.sm,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: OpenBudgetPalette.bgTertiaryFor(
-                            Theme.of(context),
-                          ),
-                          borderRadius: BorderRadius.circular(RadiusTokens.sm),
-                        ),
-                        child: Text(
-                          transaction.memo!,
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: OpenBudgetPalette.fgSecondaryFor(
-                              Theme.of(context),
-                            ),
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                  ],
-                ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(width: SpacingTokens.sm),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              ObAmount(
+                formatCents(transaction.amountCents, currencyCode),
+                tone: isInflow ? ObTone.funded : ObTone.overspent,
+                style: theme.textTheme.titleMedium,
               ),
-              const SizedBox(width: SpacingTokens.sm),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    formatCents(transaction.amountCents, currencyCode),
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: isInflow
-                          ? OpenBudgetPalette.fgSuccessFor(Theme.of(context))
-                          : OpenBudgetPalette.fgErrorFor(Theme.of(context)),
-                    ),
-                  ),
-                  Text(
-                    formatCents(runningBalanceCents, currencyCode),
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: runningBalanceCents >= 0
-                          ? OpenBudgetPalette.fgSecondaryFor(Theme.of(context))
-                          : OpenBudgetPalette.fgErrorFor(Theme.of(context)),
-                    ),
-                  ),
-                ],
+              ObAmount(
+                formatCents(runningBalanceCents, currencyCode),
+                tone: runningBalanceCents >= 0
+                    ? ObTone.neutral
+                    : ObTone.overspent,
+                style: theme.textTheme.bodySmall,
               ),
             ],
           ),
-        ),
+        ],
       ),
     );
   }
 }
 
-class _LoanAccountDetailBody extends StatelessWidget {
+class _LoanAccountDetailBody extends HookWidget {
   const _LoanAccountDetailBody({
     required this.accountData,
     required this.transactions,
@@ -914,6 +880,8 @@ class _LoanAccountDetailBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final palette = theme.ob;
     final now = DateTime.now();
     final monthStart = DateTime(now.year, now.month);
     final monthEnd = DateTime(now.year, now.month + 1);
@@ -957,38 +925,34 @@ class _LoanAccountDetailBody extends StatelessWidget {
 
     return Column(
       children: [
-        DecoratedBox(
-          decoration: BoxDecoration(
-            border: Border(
-              bottom: BorderSide(
-                color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
-              ),
-            ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+            SpacingTokens.md,
+            SpacingTokens.sm,
+            SpacingTokens.md,
+            SpacingTokens.xs,
           ),
-          child: Row(
-            children: [
-              Expanded(
-                child: _LoanTabButton(
-                  label: l10n.accountDetailLoanOverview,
-                  selected: selectedTab == _LoanDetailTab.overview,
-                  onTap: () => onTabChanged(_LoanDetailTab.overview),
-                ),
+          child: SegmentedButton<_LoanDetailTab>(
+            segments: [
+              ButtonSegment(
+                value: _LoanDetailTab.overview,
+                label: Text(l10n.accountDetailLoanOverview),
               ),
-              Expanded(
-                child: _LoanTabButton(
-                  label: l10n.accountDetailLoanActivity,
-                  selected: selectedTab == _LoanDetailTab.activity,
-                  onTap: () => onTabChanged(_LoanDetailTab.activity),
-                ),
+              ButtonSegment(
+                value: _LoanDetailTab.activity,
+                label: Text(l10n.accountDetailLoanActivity),
               ),
             ],
+            selected: {selectedTab},
+            showSelectedIcon: false,
+            onSelectionChanged: (selection) => onTabChanged(selection.first),
           ),
         ),
         Expanded(
           child: ListView(
             padding: const EdgeInsets.fromLTRB(
               SpacingTokens.md,
-              SpacingTokens.md,
+              SpacingTokens.sm,
               SpacingTokens.md,
               SpacingTokens.lg,
             ),
@@ -1003,13 +967,15 @@ class _LoanAccountDetailBody extends StatelessWidget {
                             currencyCode,
                           ),
                           emphasized: true,
-                          positive: accountData.balanceCents >= 0,
+                          tone: accountData.balanceCents >= 0
+                              ? ObTone.funded
+                              : ObTone.overspent,
                         ),
                         _LoanSummaryEntry(
                           label: l10n.accountDetailLoanPaid,
                           value: formatCents(paidThisMonthCents, currencyCode),
                           emphasized: true,
-                          positive: true,
+                          tone: ObTone.funded,
                         ),
                         _LoanSummaryEntry(
                           label: DateFormat.MMMM().format(now),
@@ -1018,125 +984,128 @@ class _LoanAccountDetailBody extends StatelessWidget {
                             currencyCode,
                           ),
                           emphasized: false,
-                          positive: chargedThisMonthCents >= 0,
+                          tone: chargedThisMonthCents >= 0
+                              ? ObTone.funded
+                              : ObTone.overspent,
                         ),
                         _LoanSummaryEntry(
                           label: l10n.accountDetailLoanTotalBorrowed,
                           value: formatCents(-totalBorrowedCents, currencyCode),
                           emphasized: false,
-                          positive: false,
+                          tone: ObTone.overspent,
                         ),
                       ],
                     ),
                     const SizedBox(height: SpacingTokens.lg),
                     Center(
                       child: SizedBox(
-                        width: 144,
-                        height: 144,
+                        width: 156,
+                        height: 156,
                         child: Stack(
                           alignment: Alignment.center,
                           children: [
                             SizedBox(
-                              width: 120,
-                              height: 120,
+                              width: 132,
+                              height: 132,
                               child: CircularProgressIndicator(
                                 value: paidOffRatio,
                                 strokeWidth: 10,
-                                color: OpenBudgetPalette.bgBrandFor(
-                                  Theme.of(context),
-                                ),
-                                backgroundColor:
-                                    OpenBudgetPalette.bgTertiaryFor(
-                                      Theme.of(context),
-                                    ),
+                                color: palette.hue(ObTone.brand),
+                                backgroundColor: palette.highlight,
                               ),
                             ),
-                            Text(
-                              l10n.accountDetailLoanPaidOff(paidOffPercent),
-                              textAlign: TextAlign.center,
-                              style: Theme.of(context).textTheme.titleMedium
-                                  ?.copyWith(fontWeight: FontWeight.w700),
+                            Padding(
+                              padding: const EdgeInsets.all(SpacingTokens.lg),
+                              child: Text(
+                                l10n.accountDetailLoanPaidOff(paidOffPercent),
+                                textAlign: TextAlign.center,
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  color: palette.ink,
+                                ),
+                              ),
                             ),
                           ],
                         ),
                       ),
                     ),
                     const SizedBox(height: SpacingTokens.lg),
-                    _LoanSectionTitle(
+                    ObSectionHeader(
                       title: l10n.accountDetailLoanPayoffOverview,
+                      padding: const EdgeInsets.fromLTRB(0, 0, 0, 8),
                     ),
-                    _LoanCard(
-                      child: Padding(
-                        padding: const EdgeInsets.all(SpacingTokens.md),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(SpacingTokens.md),
-                              decoration: BoxDecoration(
-                                color: OpenBudgetPalette.bgTertiaryFor(
-                                  Theme.of(context),
-                                ),
-                                borderRadius: BorderRadius.circular(
-                                  RadiusTokens.md,
-                                ),
+                    ObCard(
+                      padding: const EdgeInsets.all(SpacingTokens.md),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(SpacingTokens.md),
+                            decoration: ObRoughDecoration(
+                              color: palette.highlight,
+                              outline: palette.quietPen,
+                              seed: 53,
+                            ),
+                            child: Text(
+                              l10n.accountDetailLoanPayoffEstimate(
+                                monthsToPayoff == 1
+                                    ? l10n.accountDetailLoanOneMonth
+                                    : l10n.accountDetailLoanManyMonths(
+                                        monthsToPayoff,
+                                      ),
                               ),
-                              child: Text(
-                                l10n.accountDetailLoanPayoffEstimate(
-                                  monthsToPayoff == 1
-                                      ? l10n.accountDetailLoanOneMonth
-                                      : l10n.accountDetailLoanManyMonths(
-                                          monthsToPayoff,
-                                        ),
-                                ),
-                                textAlign: TextAlign.center,
-                                style: Theme.of(context).textTheme.bodyLarge
-                                    ?.copyWith(fontWeight: FontWeight.w600),
+                              textAlign: TextAlign.center,
+                              style: theme.textTheme.bodyLarge?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: palette.ink,
                               ),
                             ),
-                            const SizedBox(height: SpacingTokens.md),
-                            _LoanDetailRow(
-                              label: l10n.accountDetailLoanMonthlyTarget,
-                              value: formatCents(
-                                monthlyPaymentBaseline,
-                                currencyCode,
-                              ),
+                          ),
+                          const SizedBox(height: SpacingTokens.md),
+                          _LoanDetailRow(
+                            label: l10n.accountDetailLoanMonthlyTarget,
+                            value: formatCents(
+                              monthlyPaymentBaseline,
+                              currencyCode,
                             ),
-                            const Divider(height: 1),
-                            _LoanDetailRow(
-                              label: l10n.accountDetailLoanDueEvery,
-                              value: l10n.accountDetailLoanMonthly,
+                          ),
+                          const Divider(height: 1),
+                          _LoanDetailRow(
+                            label: l10n.accountDetailLoanDueEvery,
+                            value: l10n.accountDetailLoanMonthly,
+                          ),
+                          const Divider(height: 1),
+                          _LoanDetailRow(
+                            label: l10n.accountDetailLoanDebtFreeDate,
+                            value: DateFormat.yMMM().format(debtFreeDate),
+                            emphasize: true,
+                          ),
+                          const SizedBox(height: SpacingTokens.md),
+                          FilledButton(
+                            onPressed: () async {
+                              final newTarget = await _showLoanTargetDialog(
+                                context,
+                                currencyCode: currencyCode,
+                                monthlyTargetCents: monthlyTargetCents,
+                              );
+                              if (newTarget == null) return;
+                              onMonthlyTargetChanged(newTarget);
+                            },
+                            child: Text(
+                              monthlyTargetCents == null
+                                  ? l10n.accountDetailLoanCreateTarget
+                                  : l10n.accountDetailLoanEditTarget,
                             ),
-                            const Divider(height: 1),
-                            _LoanDetailRow(
-                              label: l10n.accountDetailLoanDebtFreeDate,
-                              value: DateFormat.yMMM().format(debtFreeDate),
-                              emphasize: true,
-                            ),
-                            const SizedBox(height: SpacingTokens.md),
-                            FilledButton(
-                              onPressed: () async {
-                                final newTarget = await _showLoanTargetDialog(
-                                  context,
-                                  currencyCode: currencyCode,
-                                  monthlyTargetCents: monthlyTargetCents,
-                                );
-                                if (newTarget == null) return;
-                                onMonthlyTargetChanged(newTarget);
-                              },
-                              child: Text(
-                                monthlyTargetCents == null
-                                    ? l10n.accountDetailLoanCreateTarget
-                                    : l10n.accountDetailLoanEditTarget,
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
                     const SizedBox(height: SpacingTokens.md),
-                    _LoanSectionTitle(title: l10n.accountDetailLoanDetails),
-                    _LoanCard(
+                    ObSectionHeader(
+                      title: l10n.accountDetailLoanDetails,
+                      padding: const EdgeInsets.fromLTRB(0, 0, 0, 8),
+                    ),
+                    ObCard(
                       child: Column(
                         children: [
                           _LoanDetailRow(
@@ -1165,13 +1134,15 @@ class _LoanAccountDetailBody extends StatelessWidget {
                             currencyCode,
                           ),
                           emphasized: true,
-                          positive: accountData.balanceCents >= 0,
+                          tone: accountData.balanceCents >= 0
+                              ? ObTone.funded
+                              : ObTone.overspent,
                         ),
                         _LoanSummaryEntry(
                           label: l10n.accountDetailLoanPaid,
                           value: formatCents(paidThisMonthCents, currencyCode),
                           emphasized: true,
-                          positive: true,
+                          tone: ObTone.funded,
                         ),
                         _LoanSummaryEntry(
                           label: l10n.accountDetailLoanInMonth(
@@ -1182,7 +1153,9 @@ class _LoanAccountDetailBody extends StatelessWidget {
                             currencyCode,
                           ),
                           emphasized: true,
-                          positive: chargedThisMonthCents >= 0,
+                          tone: chargedThisMonthCents >= 0
+                              ? ObTone.funded
+                              : ObTone.overspent,
                         ),
                       ],
                     ),
@@ -1199,89 +1172,7 @@ class _LoanAccountDetailBody extends StatelessWidget {
   }
 }
 
-class _LoanTabButton extends StatelessWidget {
-  const _LoanTabButton({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final color = selected
-        ? OpenBudgetPalette.bgBrandFor(Theme.of(context))
-        : OpenBudgetPalette.fgSecondaryFor(Theme.of(context));
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: SpacingTokens.md),
-        decoration: BoxDecoration(
-          border: Border(
-            bottom: BorderSide(
-              color: selected
-                  ? OpenBudgetPalette.bgBrandFor(Theme.of(context))
-                  : OpenBudgetPalette.transparentFor(Theme.of(context)),
-              width: 2,
-            ),
-          ),
-        ),
-        child: Text(
-          label,
-          textAlign: TextAlign.center,
-          style: theme.textTheme.titleMedium?.copyWith(
-            color: color,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _LoanSectionTitle extends StatelessWidget {
-  const _LoanSectionTitle({required this.title});
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(
-      bottom: SpacingTokens.sm,
-      left: SpacingTokens.xs,
-    ),
-    child: Text(
-      title,
-      style: Theme.of(
-        context,
-      ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
-    ),
-  );
-}
-
-class _LoanCard extends StatelessWidget {
-  const _LoanCard({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) => DecoratedBox(
-    decoration: BoxDecoration(
-      color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
-      borderRadius: BorderRadius.circular(RadiusTokens.md),
-      border: Border.all(
-        color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
-      ),
-    ),
-    child: child,
-  );
-}
-
-class _LoanDetailRow extends StatelessWidget {
+class _LoanDetailRow extends HookWidget {
   const _LoanDetailRow({
     required this.label,
     required this.value,
@@ -1294,7 +1185,8 @@ class _LoanDetailRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
+    final palette = theme.ob;
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: SpacingTokens.md,
@@ -1305,14 +1197,17 @@ class _LoanDetailRow extends StatelessWidget {
           Expanded(
             child: Text(
               label,
-              style: textTheme.titleMedium?.copyWith(
+              style: theme.textTheme.bodyLarge?.copyWith(
+                color: palette.ink,
                 fontWeight: emphasize ? FontWeight.w700 : FontWeight.w500,
               ),
             ),
           ),
+          const SizedBox(width: SpacingTokens.sm),
           Text(
             value,
-            style: textTheme.titleMedium?.copyWith(
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: palette.ink,
               fontWeight: emphasize ? FontWeight.w800 : FontWeight.w600,
             ),
           ),
@@ -1328,16 +1223,16 @@ class _LoanSummaryEntry {
     required this.label,
     required this.value,
     required this.emphasized,
-    required this.positive,
+    required this.tone,
   });
 
   final String label;
   final String value;
   final bool emphasized;
-  final bool positive;
+  final ObTone tone;
 }
 
-class _LoanSummaryGrid extends StatelessWidget {
+class _LoanSummaryGrid extends HookWidget {
   const _LoanSummaryGrid({required this.entries});
 
   final List<_LoanSummaryEntry> entries;
@@ -1345,57 +1240,49 @@ class _LoanSummaryGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return _LoanCard(
-      child: Padding(
-        padding: const EdgeInsets.all(SpacingTokens.md),
-        child: Wrap(
-          spacing: SpacingTokens.md,
-          runSpacing: SpacingTokens.md,
-          children: entries
-              .map(
-                (entry) => SizedBox(
-                  width:
-                      (MediaQuery.sizeOf(context).width -
-                          (SpacingTokens.md * 4)) /
-                      2,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        entry.label,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: OpenBudgetPalette.fgSecondaryFor(
-                            Theme.of(context),
-                          ),
-                          fontWeight: FontWeight.w600,
-                        ),
+    final palette = theme.ob;
+    return ObCard(
+      padding: const EdgeInsets.all(SpacingTokens.md),
+      child: Wrap(
+        spacing: SpacingTokens.md,
+        runSpacing: SpacingTokens.md,
+        children: entries
+            .map(
+              (entry) => SizedBox(
+                width:
+                    (MediaQuery.sizeOf(context).width -
+                        (SpacingTokens.md * 4) -
+                        SpacingTokens.md) /
+                    2,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      entry.label,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: palette.mutedInk,
+                        fontWeight: FontWeight.w600,
                       ),
-                      const SizedBox(height: 2),
-                      Text(
-                        entry.value,
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          fontWeight: entry.emphasized
-                              ? FontWeight.w800
-                              : FontWeight.w600,
-                          color: entry.positive
-                              ? OpenBudgetPalette.fgSuccessFor(
-                                  Theme.of(context),
-                                )
-                              : OpenBudgetPalette.fgErrorFor(Theme.of(context)),
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 2),
+                    ObAmount(
+                      entry.value,
+                      tone: entry.tone,
+                      style: entry.emphasized
+                          ? theme.textTheme.titleLarge
+                          : theme.textTheme.titleMedium,
+                    ),
+                  ],
                 ),
-              )
-              .toList(),
-        ),
+              ),
+            )
+            .toList(),
       ),
     );
   }
 }
 
-class _LoanActivityList extends StatelessWidget {
+class _LoanActivityList extends HookWidget {
   const _LoanActivityList({
     required this.transactions,
     required this.currencyCode,
@@ -1406,17 +1293,13 @@ class _LoanActivityList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final palette = theme.ob;
     if (transactions.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(SpacingTokens.lg),
-          child: Text(
-            'No loan activity yet',
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
-            ),
-          ),
-        ),
+      return ObStatePanel.empty(
+        title: l10n.accountsNoLoanActivity,
+        doodle: WiredDoodleKind.balloon,
       );
     }
 
@@ -1431,7 +1314,7 @@ class _LoanActivityList extends StatelessWidget {
             DateFormat.yMMMM().parse(b).compareTo(DateFormat.yMMMM().parse(a)),
       );
 
-    return _LoanCard(
+    return ObCard(
       child: Column(
         children: [
           for (final key in orderedKeys) ...[
@@ -1443,12 +1326,13 @@ class _LoanActivityList extends StatelessWidget {
                 SpacingTokens.md,
                 SpacingTokens.sm,
               ),
-              color: OpenBudgetPalette.bgTertiaryFor(Theme.of(context)),
+              color: palette.highlight,
               child: Text(
                 key,
-                style: Theme.of(
-                  context,
-                ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: palette.ink,
+                ),
               ),
             ),
             for (final txn in grouped[key]!) ...[
@@ -1463,7 +1347,7 @@ class _LoanActivityList extends StatelessWidget {
   }
 }
 
-class _LoanActivityRow extends StatelessWidget {
+class _LoanActivityRow extends HookWidget {
   const _LoanActivityRow({
     required this.transaction,
     required this.currencyCode,
@@ -1474,14 +1358,12 @@ class _LoanActivityRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final palette = theme.ob;
     final isPayment = transaction.amountCents > 0;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        SpacingTokens.md,
-        SpacingTokens.md,
-        SpacingTokens.md,
-        SpacingTokens.md,
-      ),
+      padding: const EdgeInsets.all(SpacingTokens.md),
       child: Row(
         children: [
           Expanded(
@@ -1490,27 +1372,27 @@ class _LoanActivityRow extends StatelessWidget {
               children: [
                 Text(
                   transaction.description,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w700,
+                    color: palette.ink,
                   ),
                 ),
                 Text(
-                  isPayment ? 'Payments' : 'Other Activity',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
+                  isPayment
+                      ? l10n.accountsLoanPayments
+                      : l10n.accountsLoanOtherActivity,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: palette.mutedInk,
                   ),
                 ),
               ],
             ),
           ),
-          Text(
+          const SizedBox(width: SpacingTokens.sm),
+          ObAmount(
             formatCents(transaction.amountCents, currencyCode),
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: isPayment
-                  ? OpenBudgetPalette.fgSuccessFor(Theme.of(context))
-                  : OpenBudgetPalette.fgErrorFor(Theme.of(context)),
-              fontWeight: FontWeight.w700,
-            ),
+            tone: isPayment ? ObTone.funded : ObTone.overspent,
+            style: theme.textTheme.titleMedium,
           ),
         ],
       ),
@@ -1533,7 +1415,7 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final palette = theme.ob;
     final isSyncing = useState(false);
     final hideDustAssets = useState(true);
     final transactionSearchController = useTextEditingController();
@@ -1542,31 +1424,33 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
     useListenable(transactionSearchController);
 
     if (account == null) {
-      return Center(child: Text(l10n.accountDetailNotFound));
+      return Center(
+        child: ObStatePanel.problem(title: l10n.accountDetailNotFound),
+      );
     }
 
     final walletAsync = ref.watch(
       accountSolanaWalletProvider(budgetId, accountId),
     );
     return walletAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => Center(
+        child: ObLoadingPanel(label: l10n.loadingTitle),
+      ),
       error: (error, _) => Center(
-        child: Text(
-          l10n.accountDetailWalletLoadError,
-          style: theme.textTheme.bodyLarge?.copyWith(
-            color: theme.colorScheme.error,
+        child: Padding(
+          padding: const EdgeInsets.all(SpacingTokens.lg),
+          child: ObStatePanel.problem(
+            title: l10n.accountDetailWalletLoadError,
           ),
         ),
       ),
       data: (wallet) {
         if (wallet == null || wallet.id == null) {
           return Center(
-            child: Padding(
+            child: SingleChildScrollView(
               padding: const EdgeInsets.all(SpacingTokens.lg),
-              child: Text(
-                l10n.accountDetailWalletNotAttached,
-                style: theme.textTheme.bodyLarge,
-                textAlign: TextAlign.center,
+              child: ObStatePanel.empty(
+                title: l10n.accountDetailWalletNotAttached,
               ),
             ),
           );
@@ -1631,8 +1515,57 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
           }
         }
 
-        final statusLabel = _toLabel(wallet.syncStatus);
-        final statusColor = _statusColor(wallet.syncStatus, theme);
+        final statusLabel = _toLabel(wallet.syncStatus, l10n);
+        final statusTone = _statusTone(wallet.syncStatus);
+        final metrics = <_WalletMetricData>[
+          _WalletMetricData(
+            label: l10n.accountDetailWalletFungibleAssets,
+            value: snapshot.fungibleAssets.toString(),
+            icon: OpenBudgetIcons.coins,
+          ),
+          _WalletMetricData(
+            label: l10n.accountDetailWalletNftAssets,
+            value: snapshot.nftAssets.toString(),
+            icon: OpenBudgetIcons.image,
+          ),
+          _WalletMetricData(
+            label: l10n.accountDetailWalletValuationCoverage,
+            value: _formatCoverage(snapshot, l10n),
+            icon: OpenBudgetIcons.verified,
+          ),
+          _WalletMetricData(
+            label: l10n.accountDetailWalletUnpricedAssets,
+            value: snapshot.unpricedHoldings.toString(),
+            icon: OpenBudgetIcons.warning,
+            tone: snapshot.unpricedHoldings > 0
+                ? ObTone.overspent
+                : ObTone.neutral,
+          ),
+          _WalletMetricData(
+            label: l10n.accountDetailWalletUnrealizedPnl,
+            value: _formatSignedUsd(snapshot.totalUnrealizedPnl),
+            icon: OpenBudgetIcons.trendingUp,
+            tone: _pnlTone(snapshot.totalUnrealizedPnl),
+          ),
+          _WalletMetricData(
+            label: l10n.accountDetailWalletRealizedPnl,
+            value: _formatSignedUsd(snapshot.totalRealizedPnl),
+            icon: OpenBudgetIcons.barChart,
+            tone: _pnlTone(snapshot.totalRealizedPnl),
+          ),
+          _WalletMetricData(
+            label: l10n.accountDetailWalletTaggedTransactions,
+            value: snapshot.taggedTransactions.toString(),
+            icon: OpenBudgetIcons.label,
+          ),
+          _WalletMetricData(
+            label: l10n.accountDetailWalletLastActivity,
+            value: snapshot.lastActivity == null
+                ? l10n.accountDetailWalletNoActivity
+                : DateFormat.yMMMd().format(snapshot.lastActivity!),
+            icon: OpenBudgetIcons.history,
+          ),
+        ];
 
         return RefreshIndicator(
           onRefresh: runSync,
@@ -1645,153 +1578,145 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
               SpacingTokens.xl,
             ),
             children: [
-              DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      colorScheme.primaryContainer,
-                      colorScheme.tertiaryContainer,
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(RadiusTokens.lg),
-                  border: Border.all(color: colorScheme.outlineVariant),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(SpacingTokens.md),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(SpacingTokens.sm),
-                            decoration: BoxDecoration(
-                              color: colorScheme.surface.withAlpha(200),
-                              borderRadius: BorderRadius.circular(
-                                RadiusTokens.md,
+              ObCard(
+                padding: const EdgeInsets.all(SpacingTokens.md),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: 40,
+                          height: 40,
+                          alignment: Alignment.center,
+                          decoration: ObRoughDecoration(
+                            color: palette.wash(ObTone.brand),
+                            outline: palette.quietPen,
+                            seed: 17,
+                          ),
+                          child: SkribbleIcon(
+                            data: OpenBudgetIcons.wallet,
+                            color: palette.hue(ObTone.brand),
+                          ),
+                        ),
+                        const SizedBox(width: SpacingTokens.sm),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                wallet.label ?? account!.name,
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                  color: palette.ink,
+                                ),
                               ),
-                            ),
-                            child: Icon(
-                              Icons.account_balance_wallet_rounded,
-                              color: colorScheme.primary,
-                            ),
-                          ),
-                          const SizedBox(width: SpacingTokens.sm),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  wallet.label ?? account!.name,
-                                  style: theme.textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.w800,
-                                  ),
+                              const SizedBox(height: SpacingTokens.xs),
+                              Text(
+                                _shortAddress(wallet.address),
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: palette.mutedInk,
+                                  fontFamily: 'monospace',
                                 ),
-                                const SizedBox(height: SpacingTokens.xs),
-                                Text(
-                                  _shortAddress(wallet.address),
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: colorScheme.onSurfaceVariant,
-                                    fontFamily: 'monospace',
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          FilledButton.tonalIcon(
-                            onPressed: isSyncing.value ? null : runSync,
-                            icon: isSyncing.value
-                                ? const SizedBox(
-                                    width: 16,
-                                    height: 16,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                    ),
-                                  )
-                                : const Icon(Icons.sync_rounded),
-                            label: Text(
-                              isSyncing.value
-                                  ? l10n.accountDetailWalletSyncing
-                                  : l10n.accountDetailWalletSync,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: SpacingTokens.sm),
-                      Wrap(
-                        spacing: SpacingTokens.xs,
-                        runSpacing: SpacingTokens.xs,
-                        children: [
-                          _MetadataChip(
-                            icon: Icons.hub_outlined,
-                            label: _toLabel(wallet.cluster),
-                          ),
-                          _MetadataChip(
-                            icon: Icons.check_circle_outline_rounded,
-                            label: statusLabel,
-                            color: statusColor.withAlpha(35),
-                            foregroundColor: statusColor,
-                          ),
-                          if (wallet.lastSyncedAt != null)
-                            _MetadataChip(
-                              icon: Icons.schedule_rounded,
-                              label: DateFormat.yMMMd().add_jm().format(
-                                wallet.lastSyncedAt!,
                               ),
-                            ),
-                          _MetadataChip(
-                            icon: Icons.account_tree_outlined,
-                            label: l10n.accountDetailWalletTxCount(
-                              snapshot.transactions,
-                            ),
+                            ],
                           ),
-                        ],
-                      ),
-                      const SizedBox(height: SpacingTokens.md),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  l10n.accountDetailWalletEstimatedValue,
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: colorScheme.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: SpacingTokens.xs),
+                        FilledButton.tonalIcon(
+                          onPressed: isSyncing.value ? null : runSync,
+                          icon: isSyncing.value
+                              ? const SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
                                   ),
+                                )
+                              : const SkribbleIcon(
+                                  data: OpenBudgetIcons.sync,
+                                  size: 18,
                                 ),
-                                const SizedBox(height: SpacingTokens.xs),
-                                Text(
-                                  _formatUsd(snapshot.totalValueUsd),
-                                  style: theme.textTheme.headlineSmall
-                                      ?.copyWith(fontWeight: FontWeight.w800),
-                                ),
-                              ],
+                          label: Text(
+                            isSyncing.value
+                                ? l10n.accountDetailWalletSyncing
+                                : l10n.accountDetailWalletSync,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: SpacingTokens.sm),
+                    Wrap(
+                      spacing: SpacingTokens.xs,
+                      runSpacing: SpacingTokens.xs,
+                      children: [
+                        _MetadataChip(
+                          icon: OpenBudgetIcons.network,
+                          label: _toLabel(wallet.cluster, l10n),
+                        ),
+                        _MetadataChip(
+                          icon: OpenBudgetIcons.verified,
+                          label: statusLabel,
+                          tone: statusTone,
+                        ),
+                        if (wallet.lastSyncedAt != null)
+                          _MetadataChip(
+                            icon: OpenBudgetIcons.schedule,
+                            label: DateFormat.yMMMd().add_jm().format(
+                              wallet.lastSyncedAt!,
                             ),
                           ),
-                          OutlinedButton.icon(
-                            onPressed: () async {
-                              await Clipboard.setData(
-                                ClipboardData(text: wallet.address),
+                        _MetadataChip(
+                          icon: OpenBudgetIcons.tree,
+                          label: l10n.accountDetailWalletTxCount(
+                            snapshot.transactions,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: SpacingTokens.md),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                l10n.accountDetailWalletEstimatedValue,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: palette.mutedInk,
+                                ),
+                              ),
+                              const SizedBox(height: SpacingTokens.xs),
+                              ObAmount(
+                                _formatUsd(snapshot.totalValueUsd),
+                                style: theme.textTheme.headlineSmall,
+                              ),
+                            ],
+                          ),
+                        ),
+                        OutlinedButton.icon(
+                          onPressed: () async {
+                            await Clipboard.setData(
+                              ClipboardData(text: wallet.address),
+                            );
+                            if (context.mounted) {
+                              showAppToast(
+                                context,
+                                message: l10n.accountDetailWalletAddressCopied,
+                                variant: AppToastVariant.success,
                               );
-                              if (context.mounted) {
-                                showAppToast(
-                                  context,
-                                  message:
-                                      l10n.accountDetailWalletAddressCopied,
-                                  variant: AppToastVariant.success,
-                                );
-                              }
-                            },
-                            icon: const Icon(Icons.copy_rounded),
-                            label: Text(l10n.accountDetailWalletCopy),
+                            }
+                          },
+                          icon: const SkribbleIcon(
+                            data: OpenBudgetIcons.copy,
+                            size: 18,
                           ),
-                        ],
-                      ),
-                    ],
-                  ),
+                          label: Text(l10n.accountDetailWalletCopy),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: SpacingTokens.md),
@@ -1805,193 +1730,49 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
                       spacing: gap,
                       runSpacing: gap,
                       children: [
-                        SizedBox(
-                          width: cardWidth,
-                          child: _WalletMetricCard(
-                            label: l10n.accountDetailWalletFungibleAssets,
-                            value: snapshot.fungibleAssets.toString(),
-                            icon: Icons.scatter_plot_outlined,
+                        for (final metric in metrics)
+                          SizedBox(
+                            width: cardWidth,
+                            child: _WalletMetricCard(metric: metric),
                           ),
-                        ),
-                        SizedBox(
-                          width: cardWidth,
-                          child: _WalletMetricCard(
-                            label: l10n.accountDetailWalletNftAssets,
-                            value: snapshot.nftAssets.toString(),
-                            icon: Icons.image_outlined,
-                          ),
-                        ),
-                        SizedBox(
-                          width: cardWidth,
-                          child: _WalletMetricCard(
-                            label: l10n.accountDetailWalletValuationCoverage,
-                            value: _formatCoverage(snapshot),
-                            icon: Icons.verified_rounded,
-                          ),
-                        ),
-                        SizedBox(
-                          width: cardWidth,
-                          child: _WalletMetricCard(
-                            label: l10n.accountDetailWalletUnpricedAssets,
-                            value: snapshot.unpricedHoldings.toString(),
-                            icon: Icons.warning_amber_rounded,
-                            valueColor: snapshot.unpricedHoldings > 0
-                                ? colorScheme.error
-                                : null,
-                          ),
-                        ),
-                        SizedBox(
-                          width: cardWidth,
-                          child: _WalletMetricCard(
-                            label: l10n.accountDetailWalletUnrealizedPnl,
-                            value: _formatSignedUsd(
-                              snapshot.totalUnrealizedPnl,
-                            ),
-                            valueColor: _pnlColor(
-                              snapshot.totalUnrealizedPnl,
-                              colorScheme,
-                            ),
-                            icon: Icons.trending_up_rounded,
-                          ),
-                        ),
-                        SizedBox(
-                          width: cardWidth,
-                          child: _WalletMetricCard(
-                            label: l10n.accountDetailWalletRealizedPnl,
-                            value: _formatSignedUsd(snapshot.totalRealizedPnl),
-                            valueColor: _pnlColor(
-                              snapshot.totalRealizedPnl,
-                              colorScheme,
-                            ),
-                            icon: Icons.analytics_outlined,
-                          ),
-                        ),
-                        SizedBox(
-                          width: cardWidth,
-                          child: _WalletMetricCard(
-                            label: l10n.accountDetailWalletTaggedTransactions,
-                            value: snapshot.taggedTransactions.toString(),
-                            icon: Icons.label_outline_rounded,
-                          ),
-                        ),
-                        SizedBox(
-                          width: cardWidth,
-                          child: _WalletMetricCard(
-                            label: l10n.accountDetailWalletLastActivity,
-                            value: snapshot.lastActivity == null
-                                ? l10n.accountDetailWalletNoActivity
-                                : DateFormat.yMMMd().format(
-                                    snapshot.lastActivity!,
-                                  ),
-                            icon: Icons.history_rounded,
-                          ),
-                        ),
                       ],
                     );
                   }
 
                   return Column(
                     children: [
-                      _WalletMetricCard(
-                        label: l10n.accountDetailWalletFungibleAssets,
-                        value: snapshot.fungibleAssets.toString(),
-                        icon: Icons.scatter_plot_outlined,
-                      ),
-                      const SizedBox(height: gap),
-                      _WalletMetricCard(
-                        label: l10n.accountDetailWalletNftAssets,
-                        value: snapshot.nftAssets.toString(),
-                        icon: Icons.image_outlined,
-                      ),
-                      const SizedBox(height: gap),
-                      _WalletMetricCard(
-                        label: l10n.accountDetailWalletValuationCoverage,
-                        value: _formatCoverage(snapshot),
-                        icon: Icons.verified_rounded,
-                      ),
-                      const SizedBox(height: gap),
-                      _WalletMetricCard(
-                        label: l10n.accountDetailWalletUnpricedAssets,
-                        value: snapshot.unpricedHoldings.toString(),
-                        icon: Icons.warning_amber_rounded,
-                        valueColor: snapshot.unpricedHoldings > 0
-                            ? colorScheme.error
-                            : null,
-                      ),
-                      const SizedBox(height: gap),
-                      _WalletMetricCard(
-                        label: l10n.accountDetailWalletUnrealizedPnl,
-                        value: _formatSignedUsd(snapshot.totalUnrealizedPnl),
-                        valueColor: _pnlColor(
-                          snapshot.totalUnrealizedPnl,
-                          colorScheme,
-                        ),
-                        icon: Icons.trending_up_rounded,
-                      ),
-                      const SizedBox(height: gap),
-                      _WalletMetricCard(
-                        label: l10n.accountDetailWalletRealizedPnl,
-                        value: _formatSignedUsd(snapshot.totalRealizedPnl),
-                        valueColor: _pnlColor(
-                          snapshot.totalRealizedPnl,
-                          colorScheme,
-                        ),
-                        icon: Icons.analytics_outlined,
-                      ),
-                      const SizedBox(height: gap),
-                      _WalletMetricCard(
-                        label: l10n.accountDetailWalletTaggedTransactions,
-                        value: snapshot.taggedTransactions.toString(),
-                        icon: Icons.label_outline_rounded,
-                      ),
-                      const SizedBox(height: gap),
-                      _WalletMetricCard(
-                        label: l10n.accountDetailWalletLastActivity,
-                        value: snapshot.lastActivity == null
-                            ? l10n.accountDetailWalletNoActivity
-                            : DateFormat.yMMMd().format(snapshot.lastActivity!),
-                        icon: Icons.history_rounded,
-                      ),
+                      for (final (index, metric) in metrics.indexed) ...[
+                        if (index > 0) const SizedBox(height: gap),
+                        _WalletMetricCard(metric: metric),
+                      ],
                     ],
                   );
                 },
               ),
-              const SizedBox(height: SpacingTokens.md),
-              Row(
-                children: [
-                  Text(
-                    l10n.accountDetailWalletTaxYearPnl,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  const SizedBox(width: SpacingTokens.xs),
-                  Text(
-                    l10n.accountDetailWalletEstimated,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
+              ObSectionHeader(
+                title: l10n.accountDetailWalletTaxYearPnl,
+                subtitle: l10n.accountDetailWalletEstimated,
+                padding: const EdgeInsets.fromLTRB(0, 16, 0, 8),
               ),
-              const SizedBox(height: SpacingTokens.sm),
               taxYearSummariesAsync.when(
-                loading: () => const Padding(
-                  padding: EdgeInsets.all(SpacingTokens.sm),
-                  child: LinearProgressIndicator(minHeight: 2),
+                loading: () => Padding(
+                  padding: const EdgeInsets.all(SpacingTokens.sm),
+                  child: ObLoadingPanel(
+                    label: l10n.accountDetailWalletTaxYearPnl,
+                  ),
                 ),
                 error: (error, _) => Text(
                   l10n.accountDetailWalletTaxYearLoadError,
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: colorScheme.error,
+                    color: palette.hue(ObTone.overspent),
                   ),
                 ),
                 data: (summaries) {
                   if (summaries.isEmpty) {
-                    return _EmptyStateCard(
+                    return ObStatePanel.empty(
                       title: l10n.accountDetailWalletNoDisposalsYet,
-                      subtitle: l10n.accountDetailWalletNoDisposalsHint,
-                      icon: Icons.calculate_outlined,
+                      message: l10n.accountDetailWalletNoDisposalsHint,
+                      doodle: WiredDoodleKind.sun,
                     );
                   }
                   return Column(
@@ -2007,32 +1788,17 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
                   );
                 },
               ),
-              const SizedBox(height: SpacingTokens.md),
-              Row(
-                children: [
-                  Text(
-                    l10n.accountDetailWalletHoldings,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
+              ObSectionHeader(
+                title: l10n.accountDetailWalletHoldings,
+                subtitle: l10n.accountDetailWalletHoldingsHint,
+                trailing: Text(
+                  '(${snapshot.holdings})',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: palette.mutedInk,
                   ),
-                  const SizedBox(width: SpacingTokens.xs),
-                  Text(
-                    '(${snapshot.holdings})',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: SpacingTokens.xs),
-              Text(
-                l10n.accountDetailWalletHoldingsHint,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
                 ),
+                padding: const EdgeInsets.fromLTRB(0, 16, 0, 8),
               ),
-              const SizedBox(height: SpacingTokens.sm),
               Align(
                 alignment: Alignment.centerLeft,
                 child: FilterChip(
@@ -2043,22 +1809,20 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
               ),
               const SizedBox(height: SpacingTokens.sm),
               holdingsAsync.when(
-                loading: () => const Padding(
-                  padding: EdgeInsets.all(SpacingTokens.md),
-                  child: Center(child: CircularProgressIndicator()),
+                loading: () => ObLoadingPanel(
+                  label: l10n.accountDetailWalletHoldings,
                 ),
                 error: (error, _) => Text(
                   l10n.accountDetailWalletHoldingsLoadError,
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.error,
+                    color: palette.hue(ObTone.overspent),
                   ),
                 ),
                 data: (holdings) {
                   if (holdings.isEmpty) {
-                    return _EmptyStateCard(
+                    return ObStatePanel.empty(
                       title: l10n.accountDetailWalletNoHoldingsFound,
-                      subtitle: l10n.accountDetailWalletNoHoldingsHint,
-                      icon: Icons.inventory_2_outlined,
+                      message: l10n.accountDetailWalletNoHoldingsHint,
                     );
                   }
                   final sortedHoldings = [...holdings]
@@ -2077,10 +1841,10 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
                             .toList(growable: false)
                       : sortedHoldings;
                   if (visibleHoldings.isEmpty) {
-                    return _EmptyStateCard(
+                    return ObStatePanel.empty(
                       title: l10n.accountDetailWalletOnlyDustAssets,
-                      subtitle: l10n.accountDetailWalletOnlyDustAssetsHint,
-                      icon: Icons.tune_rounded,
+                      message: l10n.accountDetailWalletOnlyDustAssetsHint,
+                      doodle: WiredDoodleKind.leaf,
                     );
                   }
                   return Column(
@@ -2096,38 +1860,25 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
                   );
                 },
               ),
-              const SizedBox(height: SpacingTokens.lg),
-              Row(
-                children: [
-                  Text(
-                    l10n.accountDetailWalletTransactionHistory,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
+              ObSectionHeader(
+                title: l10n.accountDetailWalletTransactionHistory,
+                subtitle: l10n.accountDetailWalletTransactionHistoryHint,
+                trailing: Text(
+                  '(${snapshot.transactions})',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: palette.mutedInk,
                   ),
-                  const SizedBox(width: SpacingTokens.xs),
-                  Text(
-                    '(${snapshot.transactions})',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: SpacingTokens.xs),
-              Text(
-                l10n.accountDetailWalletTransactionHistoryHint,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
                 ),
+                padding: const EdgeInsets.fromLTRB(0, 16, 0, 8),
               ),
-              const SizedBox(height: SpacingTokens.sm),
               TextField(
                 controller: transactionSearchController,
                 textInputAction: TextInputAction.search,
                 decoration: InputDecoration(
                   hintText: l10n.accountDetailWalletTransactionSearchHint,
-                  prefixIcon: const Icon(Icons.search_rounded),
+                  prefixIcon: const SkribbleIcon(
+                    data: OpenBudgetIcons.search,
+                  ),
                 ),
               ),
               const SizedBox(height: SpacingTokens.sm),
@@ -2141,22 +1892,21 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
               ),
               const SizedBox(height: SpacingTokens.sm),
               transactionsAsync.when(
-                loading: () => const Padding(
-                  padding: EdgeInsets.all(SpacingTokens.md),
-                  child: Center(child: CircularProgressIndicator()),
+                loading: () => ObLoadingPanel(
+                  label: l10n.accountDetailWalletTransactionHistory,
                 ),
                 error: (error, _) => Text(
                   l10n.accountDetailWalletTransactionsLoadError,
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.error,
+                    color: palette.hue(ObTone.overspent),
                   ),
                 ),
                 data: (transactions) {
                   if (transactions.isEmpty) {
-                    return _EmptyStateCard(
+                    return ObStatePanel.empty(
                       title: l10n.accountDetailWalletNoTransactionsYet,
-                      subtitle: l10n.accountDetailWalletNoTransactionsHint,
-                      icon: Icons.receipt_long_outlined,
+                      message: l10n.accountDetailWalletNoTransactionsHint,
+                      doodle: WiredDoodleKind.balloon,
                     );
                   }
                   final sortedTransactions = [...transactions]
@@ -2185,7 +1935,8 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
                           tx.txType,
                           tx.source,
                           tx.category ?? '',
-                          _suggestedCategoryForWalletTransaction(tx) ?? '',
+                          _suggestedCategoryForWalletTransaction(tx, l10n) ??
+                              '',
                           tx.tagsCsv ?? '',
                           tx.memo ?? '',
                         ].join(' ').toLowerCase();
@@ -2193,10 +1944,10 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
                       })
                       .toList(growable: false);
                   if (visibleTransactions.isEmpty) {
-                    return _EmptyStateCard(
+                    return ObStatePanel.empty(
                       title: l10n.accountDetailWalletNoTransactionsMatch,
-                      subtitle: l10n.accountDetailWalletNoTransactionsMatchHint,
-                      icon: Icons.filter_alt_off_rounded,
+                      message: l10n.accountDetailWalletNoTransactionsMatchHint,
+                      doodle: WiredDoodleKind.cloud,
                     );
                   }
                   return Column(
@@ -2239,6 +1990,7 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
     if (transaction.id == null) return;
     final suggestedCategory = _suggestedCategoryForWalletTransaction(
       transaction,
+      l10n,
     );
     final existingCategory = transaction.category?.trim();
     final categoryController = TextEditingController(
@@ -2351,9 +2103,9 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
     return '${address.substring(0, 6)}...${address.substring(address.length - 6)}';
   }
 
-  static String _toLabel(String value) {
+  static String _toLabel(String value, AppLocalizations l10n) {
     final normalized = value.trim();
-    if (normalized.isEmpty) return 'Unknown';
+    if (normalized.isEmpty) return l10n.accountsUnknown;
     return normalized
         .split(RegExp(r'[_\s]+'))
         .where((segment) => segment.isNotEmpty)
@@ -2374,27 +2126,29 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
     ).format(amount);
   }
 
-  static String _formatCoverage(_SolanaWalletSnapshot snapshot) {
+  static String _formatCoverage(
+    _SolanaWalletSnapshot snapshot,
+    AppLocalizations l10n,
+  ) {
     final ratio = snapshot.valuationCoverageRatio;
     if (snapshot.holdings == 0 || ratio == null) {
-      return 'No holdings';
+      return l10n.accountsNoHoldings;
     }
     final covered = snapshot.pricedHoldings + snapshot.stalePricedHoldings;
     final percent = (ratio * 100).round();
     return '$percent% ($covered/${snapshot.holdings})';
   }
 
-  static Color _statusColor(String status, ThemeData theme) {
-    final colorScheme = theme.colorScheme;
+  static ObTone _statusTone(String status) {
     switch (status.toLowerCase()) {
       case 'success':
-        return OpenBudgetPalette.fgSuccessFor(theme);
+        return ObTone.funded;
       case 'error':
-        return colorScheme.error;
+        return ObTone.overspent;
       case 'pending':
-        return colorScheme.tertiary;
+        return ObTone.underfunded;
       default:
-        return colorScheme.onSurfaceVariant;
+        return ObTone.neutral;
     }
   }
 }
@@ -2492,52 +2246,55 @@ class _SolanaWalletSnapshot {
   final DateTime? lastActivity;
 }
 
-class _WalletMetricCard extends StatelessWidget {
-  const _WalletMetricCard({
+class _WalletMetricData {
+  const _WalletMetricData({
     required this.label,
     required this.value,
     required this.icon,
-    this.valueColor,
+    this.tone = ObTone.neutral,
   });
 
   final String label;
   final String value;
-  final IconData icon;
-  final Color? valueColor;
+  final WiredSvgIconData icon;
+  final ObTone tone;
+}
+
+class _WalletMetricCard extends HookWidget {
+  const _WalletMetricCard({required this.metric});
+
+  final _WalletMetricData metric;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final palette = theme.ob;
 
-    return Container(
+    return ObCard(
       padding: const EdgeInsets.all(SpacingTokens.md),
-      decoration: BoxDecoration(
-        color: OpenBudgetPalette.bgSecondaryFor(theme),
-        borderRadius: BorderRadius.circular(RadiusTokens.md),
-        border: Border.all(color: OpenBudgetPalette.borderSubtleFor(theme)),
-      ),
       child: Row(
         children: [
-          Icon(icon, size: 20, color: colorScheme.primary),
+          SkribbleIcon(
+            data: metric.icon,
+            size: 20,
+            color: palette.hue(ObTone.brand),
+          ),
           const SizedBox(width: SpacingTokens.sm),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  label,
+                  metric.label,
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
+                    color: palette.mutedInk,
                   ),
                 ),
                 const SizedBox(height: SpacingTokens.xs),
-                Text(
-                  value,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: valueColor,
-                  ),
+                ObAmount(
+                  metric.value,
+                  tone: metric.tone,
+                  style: theme.textTheme.titleMedium,
                 ),
               ],
             ),
@@ -2548,89 +2305,97 @@ class _WalletMetricCard extends StatelessWidget {
   }
 }
 
-class _TaxYearSummaryCard extends StatelessWidget {
+class _TaxYearSummaryCard extends HookWidget {
   const _TaxYearSummaryCard({required this.summary});
 
   final SolanaWalletTaxYearSummary summary;
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final pnlColor = _pnlColor(summary.estimatedRealizedPnl, colorScheme);
-    return Card(
-      margin: EdgeInsets.zero,
-      child: Padding(
-        padding: const EdgeInsets.all(SpacingTokens.md),
-        child: Row(
-          children: [
-            Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: colorScheme.primaryContainer,
-                borderRadius: BorderRadius.circular(RadiusTokens.sm),
-              ),
-              child: Icon(
-                Icons.calendar_today_rounded,
-                size: 18,
-                color: colorScheme.onPrimaryContainer,
-              ),
+    final palette = theme.ob;
+    final pnlTone = _pnlTone(summary.estimatedRealizedPnl);
+    return ObCard(
+      padding: const EdgeInsets.all(SpacingTokens.md),
+      child: Row(
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            alignment: Alignment.center,
+            decoration: ObRoughDecoration(
+              color: palette.wash(ObTone.brand),
+              outline: palette.quietPen,
+              radius: RadiusTokens.sm,
+              seed: 61,
             ),
-            const SizedBox(width: SpacingTokens.sm),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Tax ${summary.taxYear}',
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: SpacingTokens.xs),
-                  Text(
-                    '${summary.transactionCount} taxable tx',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
+            child: SkribbleIcon(
+              data: OpenBudgetIcons.calendar,
+              size: 18,
+              color: palette.hue(ObTone.brand),
             ),
-            const SizedBox(width: SpacingTokens.sm),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
+          ),
+          const SizedBox(width: SpacingTokens.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  _formatSignedUsd(summary.estimatedRealizedPnl),
+                  l10n.accountsTaxYear(summary.taxYear),
                   style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    color: pnlColor,
+                    fontWeight: FontWeight.w700,
+                    color: palette.ink,
                   ),
                 ),
+                const SizedBox(height: SpacingTokens.xs),
                 Text(
-                  'Proceeds ${NumberFormat.currency(symbol: r'$').format(summary.estimatedProceeds)}',
+                  l10n.accountsTaxableTransactions(summary.transactionCount),
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                Text(
-                  'Basis ${NumberFormat.currency(symbol: r'$').format(summary.estimatedCostBasis)}',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
+                    color: palette.mutedInk,
                   ),
                 ),
               ],
             ),
-          ],
-        ),
+          ),
+          const SizedBox(width: SpacingTokens.sm),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              ObAmount(
+                _formatSignedUsd(summary.estimatedRealizedPnl),
+                tone: pnlTone,
+                style: theme.textTheme.titleSmall,
+              ),
+              Text(
+                l10n.accountsProceeds(
+                  NumberFormat.currency(
+                    symbol: r'$',
+                  ).format(summary.estimatedProceeds),
+                ),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: palette.mutedInk,
+                ),
+              ),
+              Text(
+                l10n.accountsBasis(
+                  NumberFormat.currency(
+                    symbol: r'$',
+                  ).format(summary.estimatedCostBasis),
+                ),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: palette.mutedInk,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
 }
 
-class _HoldingCard extends StatelessWidget {
+class _HoldingCard extends HookWidget {
   const _HoldingCard({required this.holding});
 
   final SolanaWalletHolding holding;
@@ -2639,7 +2404,7 @@ class _HoldingCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final palette = theme.ob;
     final title = holding.symbol ?? holding.name ?? holding.assetId;
     final valueText = holding.totalValue == null
         ? '-'
@@ -2649,167 +2414,163 @@ class _HoldingCard extends StatelessWidget {
             decimalDigits: holding.totalValue!.abs() >= 1000 ? 0 : 2,
           ).format(holding.totalValue);
 
-    return Card(
-      margin: EdgeInsets.zero,
-      child: Padding(
-        padding: const EdgeInsets.all(SpacingTokens.md),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: colorScheme.primaryContainer,
-                borderRadius: BorderRadius.circular(RadiusTokens.sm),
-              ),
-              child: Icon(
-                holding.isNft ? Icons.image_outlined : Icons.token_rounded,
-                color: colorScheme.onPrimaryContainer,
-              ),
+    return ObCard(
+      padding: const EdgeInsets.all(SpacingTokens.md),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            alignment: Alignment.center,
+            decoration: ObRoughDecoration(
+              color: palette.highlight,
+              outline: palette.quietPen,
+              radius: RadiusTokens.sm,
+              seed: 71,
             ),
-            const SizedBox(width: SpacingTokens.sm),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: SpacingTokens.xs),
-                  Text(
-                    l10n.accountDetailWalletUnits(holding.balanceUi),
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(height: SpacingTokens.xs),
-                  Wrap(
-                    spacing: SpacingTokens.xs,
-                    runSpacing: SpacingTokens.xs,
-                    children: [
-                      if (holding.isNft)
-                        _MetadataChip(
-                          icon: Icons.image_outlined,
-                          label: l10n.accountDetailWalletNft,
-                        ),
-                      _MetadataChip(
-                        icon: Icons.account_tree_outlined,
-                        label: _programLabel(holding.tokenProgram),
-                      ),
-                      if (holding.priceSource != null &&
-                          holding.priceSource!.trim().isNotEmpty)
-                        _MetadataChip(
-                          icon: Icons.price_change_outlined,
-                          label: _SolanaWalletAccountBody._toLabel(
-                            holding.priceSource!,
-                          ),
-                        ),
-                      if (holding.priceQuality != null &&
-                          holding.priceQuality!.trim().isNotEmpty)
-                        _MetadataChip(
-                          icon: Icons.verified_outlined,
-                          label: _SolanaWalletAccountBody._toLabel(
-                            holding.priceQuality!,
-                          ),
-                        ),
-                      if (holding.priceConfidence != null &&
-                          holding.priceConfidence!.trim().isNotEmpty)
-                        _MetadataChip(
-                          icon: Icons.speed_rounded,
-                          label: l10n.accountDetailWalletConfidence(
-                            _SolanaWalletAccountBody._toLabel(
-                              holding.priceConfidence!,
-                            ),
-                          ),
-                        ),
-                      if (holding.isPriceStale ?? false)
-                        _MetadataChip(
-                          icon: Icons.schedule_rounded,
-                          label: l10n.accountDetailWalletStalePrice,
-                        ),
-                      if (holding.totalValue == null)
-                        _MetadataChip(
-                          icon: Icons.warning_amber_rounded,
-                          label: l10n.accountDetailWalletUnpriced,
-                          color: colorScheme.errorContainer.withAlpha(153),
-                          foregroundColor: colorScheme.onErrorContainer,
-                        ),
-                    ],
-                  ),
-                ],
-              ),
+            child: SkribbleIcon(
+              data: holding.isNft
+                  ? OpenBudgetIcons.image
+                  : OpenBudgetIcons.coins,
+              color: palette.hue(ObTone.brand),
             ),
-            const SizedBox(width: SpacingTokens.sm),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
+          ),
+          const SizedBox(width: SpacingTokens.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  valueText,
+                  title,
                   style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w700,
+                    color: palette.ink,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: SpacingTokens.xs),
+                Text(
+                  l10n.accountDetailWalletUnits(holding.balanceUi),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: palette.mutedInk,
                   ),
                 ),
-                if (holding.totalValue == null)
-                  Text(
-                    l10n.accountDetailWalletNoValuationSource,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: colorScheme.error,
-                    ),
-                  ),
-                if (holding.estimatedCostBasis != null)
-                  Text(
-                    l10n.accountDetailWalletBasis(
-                      NumberFormat.currency(
-                        symbol: r'$',
-                      ).format(holding.estimatedCostBasis),
-                    ),
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                if (holding.estimatedUnrealizedPnl != null)
-                  Text(
-                    l10n.accountDetailWalletPnl(
-                      _formatSignedUsd(holding.estimatedUnrealizedPnl!),
-                      holding.estimatedUnrealizedPnlPercent == null
-                          ? ''
-                          : ' (${holding.estimatedUnrealizedPnlPercent!.toStringAsFixed(1)}%)',
-                    ),
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: _pnlColor(
-                        holding.estimatedUnrealizedPnl!,
-                        colorScheme,
+                const SizedBox(height: SpacingTokens.xs),
+                Wrap(
+                  spacing: SpacingTokens.xs,
+                  runSpacing: SpacingTokens.xs,
+                  children: [
+                    if (holding.isNft)
+                      _MetadataChip(
+                        icon: OpenBudgetIcons.image,
+                        label: l10n.accountDetailWalletNft,
                       ),
-                      fontWeight: FontWeight.w700,
+                    _MetadataChip(
+                      icon: OpenBudgetIcons.tree,
+                      label: _programLabel(holding.tokenProgram, l10n),
                     ),
-                  ),
-                if (holding.pricePerToken != null)
-                  Text(
-                    l10n.accountDetailWalletPricePerToken(
-                      NumberFormat.currency(
-                        symbol: r'$',
-                      ).format(holding.pricePerToken),
-                    ),
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
+                    if (holding.priceSource != null &&
+                        holding.priceSource!.trim().isNotEmpty)
+                      _MetadataChip(
+                        icon: OpenBudgetIcons.priceChange,
+                        label: _SolanaWalletAccountBody._toLabel(
+                          holding.priceSource!,
+                          l10n,
+                        ),
+                      ),
+                    if (holding.priceQuality != null &&
+                        holding.priceQuality!.trim().isNotEmpty)
+                      _MetadataChip(
+                        icon: OpenBudgetIcons.verified,
+                        label: _SolanaWalletAccountBody._toLabel(
+                          holding.priceQuality!,
+                          l10n,
+                        ),
+                      ),
+                    if (holding.priceConfidence != null &&
+                        holding.priceConfidence!.trim().isNotEmpty)
+                      _MetadataChip(
+                        icon: OpenBudgetIcons.speed,
+                        label: l10n.accountDetailWalletConfidence(
+                          _SolanaWalletAccountBody._toLabel(
+                            holding.priceConfidence!,
+                            l10n,
+                          ),
+                        ),
+                      ),
+                    if (holding.isPriceStale ?? false)
+                      _MetadataChip(
+                        icon: OpenBudgetIcons.schedule,
+                        label: l10n.accountDetailWalletStalePrice,
+                        tone: ObTone.underfunded,
+                      ),
+                    if (holding.totalValue == null)
+                      _MetadataChip(
+                        icon: OpenBudgetIcons.warning,
+                        label: l10n.accountDetailWalletUnpriced,
+                        tone: ObTone.overspent,
+                      ),
+                  ],
+                ),
               ],
             ),
-          ],
-        ),
+          ),
+          const SizedBox(width: SpacingTokens.sm),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              ObAmount(valueText, style: theme.textTheme.titleSmall),
+              if (holding.totalValue == null)
+                Text(
+                  l10n.accountDetailWalletNoValuationSource,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: palette.hue(ObTone.overspent),
+                  ),
+                ),
+              if (holding.estimatedCostBasis != null)
+                Text(
+                  l10n.accountDetailWalletBasis(
+                    NumberFormat.currency(
+                      symbol: r'$',
+                    ).format(holding.estimatedCostBasis),
+                  ),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: palette.mutedInk,
+                  ),
+                ),
+              if (holding.estimatedUnrealizedPnl != null)
+                ObAmount(
+                  l10n.accountDetailWalletPnl(
+                    _formatSignedUsd(holding.estimatedUnrealizedPnl!),
+                    holding.estimatedUnrealizedPnlPercent == null
+                        ? ''
+                        : ' (${holding.estimatedUnrealizedPnlPercent!.toStringAsFixed(1)}%)',
+                  ),
+                  tone: _pnlTone(holding.estimatedUnrealizedPnl!),
+                  style: theme.textTheme.bodySmall,
+                ),
+              if (holding.pricePerToken != null)
+                Text(
+                  l10n.accountDetailWalletPricePerToken(
+                    NumberFormat.currency(
+                      symbol: r'$',
+                    ).format(holding.pricePerToken),
+                  ),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: palette.mutedInk,
+                  ),
+                ),
+            ],
+          ),
+        ],
       ),
     );
   }
 }
 
-class _TransactionCard extends StatelessWidget {
+class _TransactionCard extends HookWidget {
   const _TransactionCard({required this.transaction, required this.onEdit});
 
   final SolanaWalletTransaction transaction;
@@ -2819,13 +2580,14 @@ class _TransactionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final palette = theme.ob;
     final tags = _parseTags(transaction.tagsCsv);
     final programs = _parsePrograms(
       transaction.programsJson,
-    ).map(_programLabel).toSet().toList();
+    ).map((program) => _programLabel(program, l10n)).toSet().toList();
     final suggestedCategory = _suggestedCategoryForWalletTransaction(
       transaction,
+      l10n,
     );
     final hasCategory = transaction.category?.trim().isNotEmpty ?? false;
     final confidence = transaction.interpretationConfidence?.trim();
@@ -2833,239 +2595,171 @@ class _TransactionCard extends StatelessWidget {
         ? null
         : DateFormat.yMMMd().add_jm().format(transaction.occurredAt!);
 
-    return Card(
-      margin: EdgeInsets.zero,
-      child: Padding(
-        padding: const EdgeInsets.all(SpacingTokens.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 34,
-                  height: 34,
-                  decoration: BoxDecoration(
-                    color: colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(RadiusTokens.sm),
-                  ),
-                  child: Icon(
-                    _transactionIcon(transaction.txType),
-                    size: 18,
-                    color: colorScheme.primary,
-                  ),
+    return ObCard(
+      padding: const EdgeInsets.all(SpacingTokens.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                alignment: Alignment.center,
+                decoration: ObRoughDecoration(
+                  color: palette.highlight,
+                  outline: palette.quietPen,
+                  radius: RadiusTokens.sm,
+                  seed: 79,
                 ),
-                const SizedBox(width: SpacingTokens.sm),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        transaction.description,
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      if (occurredText != null)
-                        Padding(
-                          padding: const EdgeInsets.only(top: SpacingTokens.xs),
-                          child: Text(
-                            occurredText,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.edit_note_rounded),
-                  tooltip: l10n.accountDetailWalletEditMetadataTooltip,
-                  onPressed: onEdit,
-                ),
-              ],
-            ),
-            const SizedBox(height: SpacingTokens.sm),
-            Wrap(
-              spacing: SpacingTokens.xs,
-              runSpacing: SpacingTokens.xs,
-              children: [
-                _MetadataChip(
-                  icon: Icons.category_outlined,
-                  label: _SolanaWalletAccountBody._toLabel(transaction.txType),
-                ),
-                _MetadataChip(
-                  icon: Icons.hub_outlined,
-                  label: _SolanaWalletAccountBody._toLabel(transaction.source),
-                ),
-                if (confidence != null && confidence.isNotEmpty)
-                  _MetadataChip(
-                    icon: Icons.psychology_alt_outlined,
-                    label: l10n.accountDetailWalletConfidence(
-                      _SolanaWalletAccountBody._toLabel(confidence),
-                    ),
-                  ),
-                for (final program in programs.take(4))
-                  _MetadataChip(icon: Icons.extension_outlined, label: program),
-                if (hasCategory)
-                  _MetadataChip(
-                    icon: Icons.folder_open_rounded,
-                    label: transaction.category!.trim(),
-                  ),
-                if (!hasCategory && suggestedCategory != null)
-                  _MetadataChip(
-                    icon: Icons.auto_awesome_rounded,
-                    label: l10n.accountDetailWalletSuggestedCategory(
-                      suggestedCategory,
-                    ),
-                    color: colorScheme.primaryContainer,
-                    foregroundColor: colorScheme.onPrimaryContainer,
-                  ),
-                if (transaction.estimatedRealizedPnl != null)
-                  _MetadataChip(
-                    icon: Icons.query_stats_rounded,
-                    label: l10n.accountDetailWalletPnlValue(
-                      _formatSignedUsd(transaction.estimatedRealizedPnl!),
-                    ),
-                    color: transaction.estimatedRealizedPnl! >= 0
-                        ? colorScheme.secondary.withAlpha(40)
-                        : colorScheme.errorContainer,
-                    foregroundColor: transaction.estimatedRealizedPnl! >= 0
-                        ? colorScheme.secondary
-                        : colorScheme.onErrorContainer,
-                  ),
-                if (transaction.taxYear != null)
-                  _MetadataChip(
-                    icon: Icons.calendar_today_rounded,
-                    label: l10n.accountDetailWalletTaxYear(
-                      transaction.taxYear!,
-                    ),
-                  ),
-                for (final tag in tags.take(4))
-                  _MetadataChip(icon: Icons.tag_rounded, label: tag),
-              ],
-            ),
-            if (transaction.memo?.trim().isNotEmpty ?? false) ...[
-              const SizedBox(height: SpacingTokens.sm),
-              Text(
-                transaction.memo!.trim(),
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
+                child: SkribbleIcon(
+                  data: _transactionIcon(transaction.txType),
+                  size: 18,
+                  color: palette.hue(ObTone.brand),
                 ),
               ),
+              const SizedBox(width: SpacingTokens.sm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      transaction.description,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: palette.ink,
+                      ),
+                    ),
+                    if (occurredText != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: SpacingTokens.xs),
+                        child: Text(
+                          occurredText,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: palette.mutedInk,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              IconButton(
+                icon: const SkribbleIcon(data: OpenBudgetIcons.editNote),
+                tooltip: l10n.accountDetailWalletEditMetadataTooltip,
+                onPressed: onEdit,
+              ),
             ],
-          ],
-        ),
-      ),
-    );
-  }
-
-  static IconData _transactionIcon(String txType) {
-    final normalized = txType.toLowerCase();
-    if (normalized.contains('swap')) return Icons.swap_horiz_rounded;
-    if (normalized.contains('nft')) return Icons.image_outlined;
-    if (normalized.contains('stake')) return Icons.lock_clock_rounded;
-    if (normalized.contains('transfer')) return Icons.compare_arrows_rounded;
-    return Icons.receipt_long_outlined;
-  }
-}
-
-class _MetadataChip extends StatelessWidget {
-  const _MetadataChip({
-    required this.icon,
-    required this.label,
-    this.color,
-    this.foregroundColor,
-  });
-
-  final IconData icon;
-  final String label;
-  final Color? color;
-  final Color? foregroundColor;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final backgroundColor =
-        color ?? theme.colorScheme.surfaceContainerHighest.withAlpha(180);
-    final textColor = foregroundColor ?? theme.colorScheme.onSurfaceVariant;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: SpacingTokens.xs,
-        vertical: 4,
-      ),
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(RadiusTokens.xl),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 13, color: textColor),
-          const SizedBox(width: 4),
-          Text(
-            label,
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: textColor,
-              fontWeight: FontWeight.w600,
-            ),
           ),
+          const SizedBox(height: SpacingTokens.sm),
+          Wrap(
+            spacing: SpacingTokens.xs,
+            runSpacing: SpacingTokens.xs,
+            children: [
+              _MetadataChip(
+                icon: OpenBudgetIcons.category,
+                label: _SolanaWalletAccountBody._toLabel(
+                  transaction.txType,
+                  l10n,
+                ),
+              ),
+              _MetadataChip(
+                icon: OpenBudgetIcons.network,
+                label: _SolanaWalletAccountBody._toLabel(
+                  transaction.source,
+                  l10n,
+                ),
+              ),
+              if (confidence != null && confidence.isNotEmpty)
+                _MetadataChip(
+                  icon: OpenBudgetIcons.brain,
+                  label: l10n.accountDetailWalletConfidence(
+                    _SolanaWalletAccountBody._toLabel(confidence, l10n),
+                  ),
+                ),
+              for (final program in programs.take(4))
+                _MetadataChip(
+                  icon: OpenBudgetIcons.extension,
+                  label: program,
+                ),
+              if (hasCategory)
+                _MetadataChip(
+                  icon: OpenBudgetIcons.folder,
+                  label: transaction.category!.trim(),
+                ),
+              if (!hasCategory && suggestedCategory != null)
+                _MetadataChip(
+                  icon: OpenBudgetIcons.sparkle,
+                  label: l10n.accountDetailWalletSuggestedCategory(
+                    suggestedCategory,
+                  ),
+                  tone: ObTone.brand,
+                ),
+              if (transaction.estimatedRealizedPnl != null)
+                _MetadataChip(
+                  icon: OpenBudgetIcons.trendingUp,
+                  label: l10n.accountDetailWalletPnlValue(
+                    _formatSignedUsd(transaction.estimatedRealizedPnl!),
+                  ),
+                  tone: _pnlTone(transaction.estimatedRealizedPnl!),
+                ),
+              if (transaction.taxYear != null)
+                _MetadataChip(
+                  icon: OpenBudgetIcons.calendar,
+                  label: l10n.accountDetailWalletTaxYear(
+                    transaction.taxYear!,
+                  ),
+                ),
+              for (final tag in tags.take(4))
+                _MetadataChip(icon: OpenBudgetIcons.label, label: tag),
+            ],
+          ),
+          if (transaction.memo?.trim().isNotEmpty ?? false) ...[
+            const SizedBox(height: SpacingTokens.sm),
+            Text(
+              transaction.memo!.trim(),
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: palette.mutedInk,
+              ),
+            ),
+          ],
         ],
       ),
     );
   }
-}
 
-class _EmptyStateCard extends StatelessWidget {
-  const _EmptyStateCard({
-    required this.title,
-    required this.subtitle,
-    required this.icon,
-  });
-
-  final String title;
-  final String subtitle;
-  final IconData icon;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    return Card(
-      margin: EdgeInsets.zero,
-      child: Padding(
-        padding: const EdgeInsets.all(SpacingTokens.lg),
-        child: Column(
-          children: [
-            Icon(icon, size: 28, color: colorScheme.outline),
-            const SizedBox(height: SpacingTokens.sm),
-            Text(
-              title,
-              style: theme.textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: SpacingTokens.xs),
-            Text(
-              subtitle,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    );
+  static WiredSvgIconData _transactionIcon(String txType) {
+    final normalized = txType.toLowerCase();
+    if (normalized.contains('swap')) return OpenBudgetIcons.transfer;
+    if (normalized.contains('nft')) return OpenBudgetIcons.image;
+    if (normalized.contains('stake')) return OpenBudgetIcons.lockClock;
+    if (normalized.contains('transfer')) return OpenBudgetIcons.moveMoney;
+    return OpenBudgetIcons.receipt;
   }
 }
 
-String _programLabel(String? id) {
+class _MetadataChip extends HookWidget {
+  const _MetadataChip({
+    required this.icon,
+    required this.label,
+    this.tone = ObTone.neutral,
+  });
+
+  final WiredSvgIconData icon;
+  final String label;
+  final ObTone tone;
+
+  @override
+  Widget build(BuildContext context) => ObToneChip(
+    label: label,
+    tone: tone,
+    icon: SkribbleIcon(data: icon, size: 16),
+  );
+}
+
+String _programLabel(String? id, AppLocalizations l10n) {
   if (id == null || id.trim().isEmpty) {
-    return 'Unknown program';
+    return l10n.accountsUnknownProgram;
   }
   final value = id.trim();
   if (value.startsWith('TokenkegQfe')) return 'SPL Token';
@@ -3118,13 +2812,16 @@ String _formatSignedUsd(double amount) {
   return value;
 }
 
-Color _pnlColor(double amount, ColorScheme colorScheme) {
-  if (amount > 0) return colorScheme.secondary;
-  if (amount < 0) return colorScheme.error;
-  return colorScheme.onSurface;
+ObTone _pnlTone(double amount) {
+  if (amount > 0) return ObTone.funded;
+  if (amount < 0) return ObTone.overspent;
+  return ObTone.neutral;
 }
 
-String? _suggestedCategoryForWalletTransaction(SolanaWalletTransaction tx) {
+String? _suggestedCategoryForWalletTransaction(
+  SolanaWalletTransaction tx,
+  AppLocalizations l10n,
+) {
   final type = tx.txType.toLowerCase();
   final source = tx.source.toLowerCase();
   final programs = _parsePrograms(
@@ -3142,23 +2839,25 @@ String? _suggestedCategoryForWalletTransaction(SolanaWalletTransaction tx) {
       containsSignal('whirlpool') ||
       containsSignal('orca') ||
       containsSignal('pump')) {
-    return 'Swaps';
+    return l10n.accountsSuggestedSwaps;
   }
-  if (containsSignal('stake')) return 'Staking';
+  if (containsSignal('stake')) return l10n.accountsSuggestedStaking;
   if (containsSignal('nft') ||
       containsSignal('magiceden') ||
       containsSignal('tensor') ||
       containsSignal('metaplex')) {
-    return 'NFT';
+    return l10n.accountsSuggestedNft;
   }
   if (containsSignal('lend') ||
       containsSignal('borrow') ||
       containsSignal('margin')) {
-    return 'Lending';
+    return l10n.accountsSuggestedLending;
   }
-  if (containsSignal('airdrop') || containsSignal('claim')) return 'Income';
+  if (containsSignal('airdrop') || containsSignal('claim')) {
+    return l10n.accountsSuggestedIncome;
+  }
   if (containsSignal('transfer') || containsSignal('system_program')) {
-    return 'Transfers';
+    return l10n.accountsSuggestedTransfers;
   }
   return null;
 }
@@ -3194,7 +2893,6 @@ Future<int?> _showLoanTargetDialog(
         decoration: InputDecoration(
           labelText: l10n.accountDetailLoanMonthlyPayment,
           prefixText: '${currencyCode.symbol} ',
-          border: const OutlineInputBorder(),
         ),
       ),
       actions: [
@@ -3228,7 +2926,7 @@ class _ReconcileDialog extends HookWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final palette = theme.ob;
     final controller = useTextEditingController();
     final enteredCents = useState<int?>(null);
 
@@ -3249,11 +2947,9 @@ class _ReconcileDialog extends HookWidget {
                 l10n.reconcileClearedBalance,
                 style: theme.textTheme.bodyMedium,
               ),
-              Text(
+              ObAmount(
                 formatCents(clearedBalanceCents, currencyCode),
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+                style: theme.textTheme.bodyMedium,
               ),
             ],
           ),
@@ -3264,7 +2960,6 @@ class _ReconcileDialog extends HookWidget {
             decoration: InputDecoration(
               labelText: l10n.reconcileBalanceLabel,
               hintText: l10n.reconcileBalanceHint,
-              border: const OutlineInputBorder(),
             ),
             onChanged: (value) {
               final parsed = double.tryParse(value);
@@ -3282,14 +2977,10 @@ class _ReconcileDialog extends HookWidget {
                   l10n.reconcileDifference,
                   style: theme.textTheme.bodyMedium,
                 ),
-                Text(
+                ObAmount(
                   formatCents(differenceCents, currencyCode),
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: differenceCents != 0
-                        ? colorScheme.error
-                        : ColorTokens.secondary,
-                  ),
+                  tone: differenceCents != 0 ? ObTone.overspent : ObTone.funded,
+                  style: theme.textTheme.bodyMedium,
                 ),
               ],
             ),
@@ -3298,7 +2989,7 @@ class _ReconcileDialog extends HookWidget {
               Text(
                 l10n.reconcileAdjustmentNote,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
+                  color: palette.mutedInk,
                 ),
               ),
             ],

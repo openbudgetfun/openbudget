@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -10,7 +11,6 @@ import 'package:openbudget_app/src/features/budget/providers/budget_detail_provi
 import 'package:openbudget_app/src/features/settings/providers/budget_export_provider.dart';
 import 'package:openbudget_app/src/providers/theme_mode_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
-import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -24,17 +24,12 @@ class SettingsScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
     final budgetAsync = ref.watch(budgetDetailProvider(budgetId));
     final authState = ref.watch(authProvider);
     final themeMode = ref.watch(themeModeProvider);
 
     return Scaffold(
-      backgroundColor: OpenBudgetPalette.bgPrimaryFor(theme),
       appBar: AppBar(
-        backgroundColor: OpenBudgetPalette.bgPrimaryFor(theme),
-        surfaceTintColor: OpenBudgetPalette.transparentFor(theme),
-        automaticallyImplyLeading: false,
         title: Text(l10n.settingsTitle),
         actions: [
           TextButton(
@@ -42,23 +37,16 @@ class SettingsScreen extends HookConsumerWidget {
                 context.goNamed(moreRoute, pathParameters: {'id': budgetId}),
             child: Text(
               l10n.dialogDone,
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: theme.colorScheme.onSurface,
-                fontWeight: FontWeight.w600,
-              ),
+              style: theme.textTheme.titleMedium,
             ),
           ),
         ],
       ),
       body: budgetAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => Center(
-          child: Text(
-            l10n.settingsLoadError,
-            style: theme.textTheme.bodyLarge?.copyWith(
-              color: colorScheme.error,
-            ),
-          ),
+        loading: () => ObLoadingPanel(label: l10n.settingsLoading),
+        error: (_, _) => Padding(
+          padding: const EdgeInsets.all(SpacingTokens.md),
+          child: ObStatePanel.problem(title: l10n.settingsLoadError),
         ),
         data: (budget) {
           final accountIdentity = _resolveAccountIdentity(
@@ -72,7 +60,12 @@ class SettingsScreen extends HookConsumerWidget {
           final lastUpdatedLabel = _formatDateTime(budget.updatedAt);
 
           return ListView(
-            padding: const EdgeInsets.all(SpacingTokens.md),
+            padding: const EdgeInsets.fromLTRB(
+              SpacingTokens.md,
+              0,
+              SpacingTokens.md,
+              SpacingTokens.xl,
+            ),
             children: [
               _SettingsOverviewCard(
                 budgetName: budget.name,
@@ -81,13 +74,16 @@ class SettingsScreen extends HookConsumerWidget {
                 ownerLabel: accountIdentity,
                 lastUpdatedLabel: lastUpdatedLabel,
               ),
-              const SizedBox(height: SpacingTokens.lg),
-              _SectionTitle(title: l10n.settingsNavigationSection),
-              _SettingsCard(
+              ObSectionHeader(
+                title: l10n.settingsNavigationSection,
+                padding: _sectionHeaderPadding,
+              ),
+              Card(
+                clipBehavior: Clip.antiAlias,
                 child: Column(
                   children: [
                     _SettingsTile(
-                      icon: Icons.account_balance_wallet_rounded,
+                      icon: OpenBudgetIcons.wallet,
                       label: l10n.accountListTitle,
                       subtitle: l10n.settingsAccountsOverviewHint,
                       onTap: () => context.goNamed(
@@ -97,7 +93,7 @@ class SettingsScreen extends HookConsumerWidget {
                     ),
                     const Divider(height: 1),
                     _SettingsTile(
-                      icon: Icons.add_circle_outline_rounded,
+                      icon: OpenBudgetIcons.addCircle,
                       label: l10n.accountAddButton,
                       subtitle: l10n.settingsAddAccountHint,
                       onTap: () => context.goNamed(
@@ -107,7 +103,7 @@ class SettingsScreen extends HookConsumerWidget {
                     ),
                     const Divider(height: 1),
                     _SettingsTile(
-                      icon: Icons.repeat_rounded,
+                      icon: OpenBudgetIcons.recurring,
                       label: l10n.recurringListTitle,
                       onTap: () => context.goNamed(
                         recurringListRoute,
@@ -116,7 +112,7 @@ class SettingsScreen extends HookConsumerWidget {
                     ),
                     const Divider(height: 1),
                     _SettingsTile(
-                      icon: Icons.people_outline_rounded,
+                      icon: OpenBudgetIcons.people,
                       label: l10n.morePayees,
                       onTap: () => context.goNamed(
                         payeeListRoute,
@@ -125,7 +121,7 @@ class SettingsScreen extends HookConsumerWidget {
                     ),
                     const Divider(height: 1),
                     _SettingsTile(
-                      icon: Icons.rule_rounded,
+                      icon: OpenBudgetIcons.rule,
                       label: l10n.transactionRulesTitle,
                       onTap: () => context.goNamed(
                         transactionRulesRoute,
@@ -135,13 +131,16 @@ class SettingsScreen extends HookConsumerWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: SpacingTokens.lg),
-              _SectionTitle(title: l10n.settingsCurrentPlan),
-              _SettingsCard(
+              ObSectionHeader(
+                title: l10n.settingsCurrentPlan,
+                padding: _sectionHeaderPadding,
+              ),
+              Card(
+                clipBehavior: Clip.antiAlias,
                 child: Column(
                   children: [
                     _SettingsTile(
-                      icon: Icons.build_outlined,
+                      icon: OpenBudgetIcons.tool,
                       label: l10n.settingsPlanSettings,
                       onTap: () => context.goNamed(
                         planSettingsRoute,
@@ -150,32 +149,35 @@ class SettingsScreen extends HookConsumerWidget {
                     ),
                     const Divider(height: 1),
                     _SettingsTile(
-                      icon: Icons.add_circle_outline_rounded,
+                      icon: OpenBudgetIcons.addCircle,
                       label: l10n.settingsNewPlan,
                       onTap: () => context.goNamed(createBudgetRoute),
                     ),
                     const Divider(height: 1),
                     _SettingsTile(
-                      icon: Icons.folder_open_rounded,
+                      icon: OpenBudgetIcons.folder,
                       label: l10n.settingsOpenPlan,
                       onTap: () => context.go(homePath),
                     ),
                     const Divider(height: 1),
                     _SettingsTile(
-                      icon: Icons.eco_rounded,
+                      icon: OpenBudgetIcons.refresh,
                       label: l10n.settingsFreshStart,
                       onTap: () => _confirmFreshStart(context),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: SpacingTokens.lg),
-              _SectionTitle(title: l10n.settingsAppSection),
-              _SettingsCard(
+              ObSectionHeader(
+                title: l10n.settingsAppSection,
+                padding: _sectionHeaderPadding,
+              ),
+              Card(
+                clipBehavior: Clip.antiAlias,
                 child: Column(
                   children: [
                     _SettingsTile(
-                      icon: Icons.tune_rounded,
+                      icon: OpenBudgetIcons.tune,
                       label: l10n.settingsDisplayOptions,
                       onTap: () => context.goNamed(
                         displayOptionsRoute,
@@ -184,7 +186,7 @@ class SettingsScreen extends HookConsumerWidget {
                     ),
                     const Divider(height: 1),
                     _SettingsTile(
-                      icon: Icons.apps_rounded,
+                      icon: OpenBudgetIcons.apps,
                       label: l10n.settingsAppIcon,
                       onTap: () => context.goNamed(
                         appIconRoute,
@@ -193,7 +195,7 @@ class SettingsScreen extends HookConsumerWidget {
                     ),
                     const Divider(height: 1),
                     _SettingsTile(
-                      icon: Icons.palette_outlined,
+                      icon: OpenBudgetIcons.palette,
                       label: l10n.themeTitle,
                       subtitle: themeModeLabel,
                       onTap: () => _selectThemeMode(
@@ -204,7 +206,7 @@ class SettingsScreen extends HookConsumerWidget {
                     ),
                     const Divider(height: 1),
                     _SettingsTile(
-                      icon: Icons.account_balance_rounded,
+                      icon: OpenBudgetIcons.bank,
                       label: l10n.settingsManageBankConnections,
                       subtitle: l10n.settingsManageBankConnectionsHint,
                       onTap: () => context.goNamed(
@@ -215,20 +217,23 @@ class SettingsScreen extends HookConsumerWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: SpacingTokens.lg),
-              _SectionTitle(title: l10n.settingsDataSection),
-              _SettingsCard(
+              ObSectionHeader(
+                title: l10n.settingsDataSection,
+                padding: _sectionHeaderPadding,
+              ),
+              Card(
+                clipBehavior: Clip.antiAlias,
                 child: Column(
                   children: [
                     _SettingsTile(
-                      icon: Icons.download_rounded,
+                      icon: OpenBudgetIcons.download,
                       label: l10n.settingsExportData,
                       subtitle: l10n.settingsExportDataHint,
                       onTap: () => _exportBudgetData(context, ref),
                     ),
                     const Divider(height: 1),
                     _SettingsTile(
-                      icon: Icons.file_upload_outlined,
+                      icon: OpenBudgetIcons.upload,
                       label: l10n.moreImport,
                       onTap: () => context.goNamed(
                         importTransactionsRoute,
@@ -238,15 +243,18 @@ class SettingsScreen extends HookConsumerWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: SpacingTokens.lg),
-              _SectionTitle(title: l10n.settingsAccountSection),
-              _SettingsCard(
+              ObSectionHeader(
+                title: l10n.settingsAccountSection,
+                padding: _sectionHeaderPadding,
+              ),
+              Card(
+                clipBehavior: Clip.antiAlias,
                 child: Column(
                   children: [
                     _AccountIdentityTile(accountIdentity: accountIdentity),
                     const Divider(height: 1),
                     _SettingsTile(
-                      icon: Icons.person_rounded,
+                      icon: OpenBudgetIcons.person,
                       label: l10n.settingsAccountSettings,
                       subtitle: l10n.settingsAccountSettingsHint,
                       onTap: () => context.goNamed(
@@ -256,27 +264,30 @@ class SettingsScreen extends HookConsumerWidget {
                     ),
                     const Divider(height: 1),
                     _SettingsTile(
-                      icon: Icons.logout_rounded,
+                      icon: OpenBudgetIcons.logout,
                       label: l10n.settingsLogOut,
                       onTap: () => _confirmLogout(context, ref),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: SpacingTokens.lg),
-              _SectionTitle(title: l10n.settingsMiscSection),
-              _SettingsCard(
+              ObSectionHeader(
+                title: l10n.settingsMiscSection,
+                padding: _sectionHeaderPadding,
+              ),
+              Card(
+                clipBehavior: Clip.antiAlias,
                 child: Column(
                   children: [
                     _SettingsTile(
-                      icon: Icons.favorite_rounded,
+                      icon: OpenBudgetIcons.favorite,
                       label: l10n.settingsWriteAReview,
                       onTap: () =>
                           _showComingSoon(context, l10n.settingsWriteAReview),
                     ),
                     const Divider(height: 1),
                     _SettingsTile(
-                      icon: Icons.near_me_rounded,
+                      icon: OpenBudgetIcons.send,
                       label: l10n.settingsSendDiagnostics,
                       onTap: () => _showComingSoon(
                         context,
@@ -285,14 +296,14 @@ class SettingsScreen extends HookConsumerWidget {
                     ),
                     const Divider(height: 1),
                     _SettingsTile(
-                      icon: Icons.description_outlined,
+                      icon: OpenBudgetIcons.document,
                       label: l10n.settingsPrivacyPolicy,
                       onTap: () =>
                           _showComingSoon(context, l10n.settingsPrivacyPolicy),
                     ),
                     const Divider(height: 1),
                     _SettingsTile(
-                      icon: Icons.description_outlined,
+                      icon: OpenBudgetIcons.document,
                       label: l10n.settingsTermsOfService,
                       onTap: () =>
                           _showComingSoon(context, l10n.settingsTermsOfService),
@@ -301,21 +312,19 @@ class SettingsScreen extends HookConsumerWidget {
                 ),
               ),
               const SizedBox(height: SpacingTokens.xl),
-              Center(
-                child: Text(
-                  l10n.settingsVersion,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: OpenBudgetPalette.fgSecondaryFor(theme),
-                  ),
+              Text(
+                l10n.settingsVersion,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.ob.mutedInk,
                 ),
               ),
               const SizedBox(height: SpacingTokens.xs),
-              Center(
-                child: Text(
-                  'Last updated: $lastUpdatedLabel',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: OpenBudgetPalette.fgSecondaryFor(theme),
-                  ),
+              Text(
+                l10n.settingsLastUpdated(lastUpdatedLabel),
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.ob.mutedInk,
                 ),
               ),
             ],
@@ -324,6 +333,13 @@ class SettingsScreen extends HookConsumerWidget {
       ),
     );
   }
+
+  static const _sectionHeaderPadding = EdgeInsets.fromLTRB(
+    SpacingTokens.xs,
+    SpacingTokens.md,
+    SpacingTokens.xs,
+    SpacingTokens.xs,
+  );
 
   String _resolveAccountIdentity({
     required AuthState authState,
@@ -351,6 +367,7 @@ class SettingsScreen extends HookConsumerWidget {
     required ThemeMode currentThemeMode,
   }) async {
     final l10n = AppLocalizations.of(context);
+    final palette = Theme.of(context).ob;
     final options = [ThemeMode.system, ThemeMode.light, ThemeMode.dark];
 
     final selected = await showModalBottomSheet<ThemeMode>(
@@ -373,18 +390,20 @@ class SettingsScreen extends HookConsumerWidget {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     l10n.themeTitle,
-                    style: sheetTheme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
+                    style: sheetTheme.textTheme.titleMedium,
                   ),
                 ),
               ),
               for (final option in options)
                 ListTile(
-                  leading: Icon(
-                    option == currentThemeMode
-                        ? Icons.check_circle_rounded
-                        : Icons.circle_outlined,
+                  selected: option == currentThemeMode,
+                  leading: SkribbleIcon(
+                    data: option == currentThemeMode
+                        ? OpenBudgetIcons.checkCircle
+                        : OpenBudgetIcons.circle,
+                    color: option == currentThemeMode
+                        ? palette.brand
+                        : palette.mutedInk,
                   ),
                   title: Text(_themeModeLabel(l10n: l10n, themeMode: option)),
                   onTap: () => Navigator.of(sheetContext).pop(option),
@@ -428,7 +447,7 @@ class SettingsScreen extends HookConsumerWidget {
 
   Future<void> _confirmLogout(BuildContext context, WidgetRef ref) async {
     final l10n = AppLocalizations.of(context);
-    final colorScheme = Theme.of(context).colorScheme;
+    final palette = Theme.of(context).ob;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -442,8 +461,8 @@ class SettingsScreen extends HookConsumerWidget {
           FilledButton(
             onPressed: () => Navigator.of(ctx).pop(true),
             style: FilledButton.styleFrom(
-              backgroundColor: colorScheme.error,
-              foregroundColor: colorScheme.onError,
+              backgroundColor: palette.overspentWash,
+              foregroundColor: palette.overspent,
             ),
             child: Text(l10n.settingsLogOut),
           ),
@@ -485,7 +504,7 @@ class SettingsScreen extends HookConsumerWidget {
   }
 }
 
-class _SettingsOverviewCard extends StatelessWidget {
+class _SettingsOverviewCard extends HookWidget {
   const _SettingsOverviewCard({
     required this.budgetName,
     required this.currencyCode,
@@ -504,44 +523,92 @@ class _SettingsOverviewCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
+    final palette = theme.ob;
     final detailsStyle = theme.textTheme.bodyMedium?.copyWith(
-      color: OpenBudgetPalette.fgSecondaryFor(theme),
+      color: palette.mutedInk,
     );
 
-    return _SettingsCard(
-      child: Padding(
-        padding: const EdgeInsets.all(SpacingTokens.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              budgetName,
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w700,
+    return ObCard(
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: ObRoughDecoration(
+                  color: palette.wash(ObTone.brand),
+                  outline: palette.quietPen,
+                  seed: 11,
+                ),
+                child: SkribbleIcon(
+                  data: OpenBudgetIcons.envelope,
+                  size: 22,
+                  color: palette.hue(ObTone.brand),
+                ),
               ),
-            ),
-            const SizedBox(height: SpacingTokens.xs),
+              const SizedBox(width: SpacingTokens.md),
+              Expanded(
+                child: Text(
+                  budgetName,
+                  style: theme.textTheme.headlineSmall,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: SpacingTokens.sm),
+          Text(
+            l10n.settingsPlanCurrencyDetail(currencyCode),
+            style: detailsStyle,
+          ),
+          if (displayCurrencyCode != null &&
+              displayCurrencyCode != currencyCode)
             Text(
-              l10n.settingsPlanCurrencyDetail(currencyCode),
+              l10n.settingsDisplayCurrencyDetail(displayCurrencyCode!),
               style: detailsStyle,
             ),
-            if (displayCurrencyCode != null &&
-                displayCurrencyCode != currencyCode)
-              Text(
-                l10n.settingsDisplayCurrencyDetail(displayCurrencyCode!),
-                style: detailsStyle,
+          const SizedBox(height: SpacingTokens.xs),
+          Row(
+            children: [
+              SkribbleIcon(
+                data: OpenBudgetIcons.person,
+                size: 16,
+                color: palette.mutedInk,
               ),
-            const SizedBox(height: SpacingTokens.sm),
-            Text(l10n.settingsOwner(ownerLabel), style: detailsStyle),
-            Text(l10n.settingsUpdated(lastUpdatedLabel), style: detailsStyle),
-          ],
-        ),
+              const SizedBox(width: SpacingTokens.xs),
+              Expanded(
+                child: Text(
+                  l10n.settingsOwner(ownerLabel),
+                  style: detailsStyle,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          Row(
+            children: [
+              SkribbleIcon(
+                data: OpenBudgetIcons.schedule,
+                size: 16,
+                color: palette.mutedInk,
+              ),
+              const SizedBox(width: SpacingTokens.xs),
+              Expanded(
+                child: Text(
+                  l10n.settingsUpdated(lastUpdatedLabel),
+                  style: detailsStyle,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
 }
 
-class _AccountIdentityTile extends StatelessWidget {
+class _AccountIdentityTile extends HookWidget {
   const _AccountIdentityTile({required this.accountIdentity});
 
   final String accountIdentity;
@@ -550,6 +617,7 @@ class _AccountIdentityTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
+    final palette = theme.ob;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(
@@ -560,9 +628,19 @@ class _AccountIdentityTile extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const CircleAvatar(
-            radius: 18,
-            child: Icon(Icons.person_outline_rounded),
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: ObRoughDecoration(
+              color: palette.wash(ObTone.brand),
+              outline: palette.quietPen,
+              radius: RadiusTokens.lg,
+              seed: 13,
+            ),
+            child: SkribbleIcon(
+              data: OpenBudgetIcons.person,
+              size: 22,
+              color: palette.hue(ObTone.brand),
+            ),
           ),
           const SizedBox(width: SpacingTokens.sm),
           Expanded(
@@ -572,15 +650,13 @@ class _AccountIdentityTile extends StatelessWidget {
                 Text(
                   l10n.settingsLoggedInAs,
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: OpenBudgetPalette.fgSecondaryFor(theme),
+                    color: palette.mutedInk,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   accountIdentity,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: theme.textTheme.titleMedium,
                   overflow: TextOverflow.ellipsis,
                 ),
               ],
@@ -592,51 +668,7 @@ class _AccountIdentityTile extends StatelessWidget {
   }
 }
 
-class _SectionTitle extends StatelessWidget {
-  const _SectionTitle({required this.title});
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.only(
-        left: SpacingTokens.xs,
-        bottom: SpacingTokens.xs,
-      ),
-      child: Text(
-        title,
-        style: theme.textTheme.labelSmall?.copyWith(
-          color: OpenBudgetPalette.fgSecondaryFor(theme),
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-  }
-}
-
-class _SettingsCard extends StatelessWidget {
-  const _SettingsCard({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: OpenBudgetPalette.bgSecondaryFor(theme),
-        borderRadius: BorderRadius.circular(RadiusTokens.md),
-        border: Border.all(color: OpenBudgetPalette.borderSubtleFor(theme)),
-      ),
-      child: Material(type: MaterialType.transparency, child: child),
-    );
-  }
-}
-
-class _SettingsTile extends StatelessWidget {
+class _SettingsTile extends HookWidget {
   const _SettingsTile({
     required this.icon,
     required this.label,
@@ -644,7 +676,7 @@ class _SettingsTile extends StatelessWidget {
     this.subtitle,
   });
 
-  final IconData icon;
+  final WiredSvgIconData icon;
   final String label;
   final VoidCallback? onTap;
   final String? subtitle;
@@ -652,21 +684,23 @@ class _SettingsTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final palette = theme.ob;
 
     return ListTile(
-      leading: Icon(icon, color: OpenBudgetPalette.fgSecondaryFor(theme)),
+      leading: SkribbleIcon(data: icon, color: palette.ink),
       title: Text(label, style: theme.textTheme.bodyLarge),
       subtitle: subtitle == null
           ? null
           : Text(
               subtitle!,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: OpenBudgetPalette.fgSecondaryFor(theme),
+                color: palette.mutedInk,
               ),
             ),
-      trailing: Icon(
-        Icons.chevron_right_rounded,
-        color: OpenBudgetPalette.fgSecondaryFor(theme),
+      trailing: SkribbleIcon(
+        data: OpenBudgetIcons.chevronRight,
+        size: 20,
+        color: palette.mutedInk,
       ),
       onTap: onTap,
     );

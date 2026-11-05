@@ -1,15 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/settings/screens/delete_account_screen.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 void main() {
-  setUpAll(() {
-    GoogleFonts.config.allowRuntimeFetching = false;
-  });
-
   Widget buildSubject() => MaterialApp(
     theme: OpenBudgetTheme.light,
     localizationsDelegates: AppLocalizations.localizationsDelegates,

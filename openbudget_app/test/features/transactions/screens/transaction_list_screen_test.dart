@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
@@ -12,10 +11,6 @@ import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 void main() {
-  setUpAll(() {
-    GoogleFonts.config.allowRuntimeFetching = false;
-  });
-
   const budgetId = 'test-budget-1';
 
   final ownerId = UuidValue.fromString('00000000-0000-0000-0000-000000000099');
@@ -141,7 +136,7 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.byType(ObLoadingPanel), findsOneWidget);
     });
 
     testWidgets('shows Transactions title in app bar', (tester) async {
@@ -193,7 +188,12 @@ void main() {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
-      expect(find.byIcon(Icons.search), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.search,
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('shows filter chips (All, Income, Expense)', (tester) async {
@@ -216,7 +216,44 @@ void main() {
       await tester.pumpWidget(buildSubject(transactions: []));
       await tester.pumpAndSettle();
 
-      expect(find.byIcon(Icons.receipt_long_rounded), findsOneWidget);
+      expect(find.byKey(transactionListEmptyKey), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is WiredDoodle && w.kind == WiredDoodleKind.leaf,
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('renders problem panel with retry on load failure', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            transactionListProvider.overrideWith(
+              (ref, id) => throw Exception('Could not load transactions'),
+            ),
+          ],
+          child: MaterialApp(
+            theme: OpenBudgetTheme.light,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: const TransactionListScreen(budgetId: budgetId),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Could not load transactions'), findsOneWidget);
+      expect(find.byType(ObStatePanel), findsOneWidget);
+      expect(find.text('Retry'), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is WiredDoodle && w.kind == WiredDoodleKind.cloud,
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('shows app bar actions when transactions exist', (
@@ -226,11 +263,26 @@ void main() {
       await tester.pumpAndSettle();
 
       // Sort button
-      expect(find.byIcon(Icons.sort_rounded), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.sort,
+        ),
+        findsOneWidget,
+      );
       // Selection mode button
-      expect(find.byIcon(Icons.checklist_rounded), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.checkAll,
+        ),
+        findsOneWidget,
+      );
       // CSV export button
-      expect(find.byIcon(Icons.copy_rounded), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.copy,
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('shows add transaction FAB', (tester) async {
@@ -238,7 +290,12 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(FloatingActionButton), findsOneWidget);
-      expect(find.byIcon(Icons.add), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.add,
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('tapping add FAB opens add transaction sheet', (tester) async {
@@ -260,9 +317,24 @@ void main() {
       await tester.pumpWidget(buildSubject(transactions: []));
       await tester.pumpAndSettle();
 
-      expect(find.byIcon(Icons.sort_rounded), findsNothing);
-      expect(find.byIcon(Icons.checklist_rounded), findsNothing);
-      expect(find.byIcon(Icons.copy_rounded), findsNothing);
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.sort,
+        ),
+        findsNothing,
+      );
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.checkAll,
+        ),
+        findsNothing,
+      );
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.copy,
+        ),
+        findsNothing,
+      );
     });
 
     testWidgets('filtering by Income shows only income transactions', (
@@ -329,7 +401,7 @@ void main() {
       expect(find.text('Grocery Store'), findsNothing);
 
       // Tap the clear icon in the search field
-      await tester.tap(find.byIcon(Icons.clear).first);
+      await tester.tap(find.byKey(const Key('transaction-search-clear')));
       await tester.pumpAndSettle();
 
       // All transactions visible again
@@ -344,21 +416,60 @@ void main() {
       expect(find.text('Fill up for road trip'), findsOneWidget);
     });
 
+    testWidgets('shows status and flag chips on transaction rows', (
+      tester,
+    ) async {
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      // Coffee Shop is cleared, the other three are not; Gas Station is
+      // flagged red, and every expense is unassigned without a summary.
+      expect(find.text('Cleared'), findsOneWidget);
+      expect(find.text('Uncleared'), findsNWidgets(3));
+      expect(find.text('Red'), findsOneWidget);
+      expect(find.text('Unassigned'), findsNWidgets(3));
+      expect(find.byType(ObToneChip), findsWidgets);
+    });
+
     testWidgets('tapping selection mode button enters selection mode', (
       tester,
     ) async {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byIcon(Icons.checklist_rounded));
+      await tester.tap(
+        find.byWidgetPredicate(
+          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.checkAll,
+        ),
+      );
       await tester.pumpAndSettle();
 
       // Selection mode shows close button and select/deselect all
-      expect(find.byIcon(Icons.close), findsOneWidget);
-      expect(find.byIcon(Icons.select_all_rounded), findsOneWidget);
-      expect(find.byIcon(Icons.deselect_rounded), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.close,
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.selectAll,
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.deselect,
+        ),
+        findsOneWidget,
+      );
       // Normal app bar should be gone
-      expect(find.byIcon(Icons.sort_rounded), findsNothing);
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.sort,
+        ),
+        findsNothing,
+      );
     });
 
     testWidgets('close button exits selection mode', (tester) async {
@@ -366,28 +477,61 @@ void main() {
       await tester.pumpAndSettle();
 
       // Enter selection mode
-      await tester.tap(find.byIcon(Icons.checklist_rounded));
+      await tester.tap(
+        find.byWidgetPredicate(
+          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.checkAll,
+        ),
+      );
       await tester.pumpAndSettle();
 
       // Exit selection mode
-      await tester.tap(find.byIcon(Icons.close));
+      await tester.tap(
+        find.byWidgetPredicate(
+          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.close,
+        ),
+      );
       await tester.pumpAndSettle();
 
       // Back to normal app bar
-      expect(find.byIcon(Icons.sort_rounded), findsOneWidget);
-      expect(find.byIcon(Icons.close), findsNothing);
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.sort,
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.close,
+        ),
+        findsNothing,
+      );
     });
 
     testWidgets('select all selects all transactions', (tester) async {
+      // The ledger rows carry payee, envelope, and status detail, so use a
+      // taller surface to keep all four rows on screen with the bulk bar up.
+      tester.view.physicalSize = const Size(640, 1200);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
       // Enter selection mode
-      await tester.tap(find.byIcon(Icons.checklist_rounded));
+      await tester.tap(
+        find.byWidgetPredicate(
+          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.checkAll,
+        ),
+      );
       await tester.pumpAndSettle();
 
       // Select all
-      await tester.tap(find.byIcon(Icons.select_all_rounded));
+      await tester.tap(
+        find.byWidgetPredicate(
+          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.selectAll,
+        ),
+      );
       await tester.pumpAndSettle();
 
       // Shows count in app bar title — "4 selected"
@@ -401,17 +545,29 @@ void main() {
       await tester.pumpAndSettle();
 
       // Enter selection mode
-      await tester.tap(find.byIcon(Icons.checklist_rounded));
+      await tester.tap(
+        find.byWidgetPredicate(
+          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.checkAll,
+        ),
+      );
       await tester.pumpAndSettle();
 
       // Select all then deselect all
-      await tester.tap(find.byIcon(Icons.select_all_rounded));
+      await tester.tap(
+        find.byWidgetPredicate(
+          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.selectAll,
+        ),
+      );
       await tester.pumpAndSettle();
-      await tester.tap(find.byIcon(Icons.deselect_rounded));
+      await tester.tap(
+        find.byWidgetPredicate(
+          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.deselect,
+        ),
+      );
       await tester.pumpAndSettle();
 
       // Bottom bar should not be visible (no items selected)
-      expect(find.byIcon(Icons.delete_outline_rounded), findsNothing);
+      expect(find.byKey(const Key('bulk-delete-button')), findsNothing);
     });
 
     testWidgets('bottom action bar appears when transactions are selected', (
@@ -421,18 +577,36 @@ void main() {
       await tester.pumpAndSettle();
 
       // Enter selection mode
-      await tester.tap(find.byIcon(Icons.checklist_rounded));
+      await tester.tap(
+        find.byWidgetPredicate(
+          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.checkAll,
+        ),
+      );
       await tester.pumpAndSettle();
 
       // Select all
-      await tester.tap(find.byIcon(Icons.select_all_rounded));
+      await tester.tap(
+        find.byWidgetPredicate(
+          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.selectAll,
+        ),
+      );
       await tester.pumpAndSettle();
 
       // Bottom bar should show action buttons
       expect(find.text('Assign Envelope'), findsOneWidget);
-      expect(find.byIcon(Icons.flag_rounded), findsWidgets);
-      expect(find.byIcon(Icons.check_circle_outline), findsWidgets);
-      expect(find.byIcon(Icons.delete_outline_rounded), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.flag,
+        ),
+        findsWidgets,
+      );
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.checkCircle,
+        ),
+        findsWidgets,
+      );
+      expect(find.byKey(const Key('bulk-delete-button')), findsOneWidget);
     });
 
     testWidgets('tapping delete shows confirmation dialog', (tester) async {
@@ -440,13 +614,21 @@ void main() {
       await tester.pumpAndSettle();
 
       // Enter selection mode and select all
-      await tester.tap(find.byIcon(Icons.checklist_rounded));
+      await tester.tap(
+        find.byWidgetPredicate(
+          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.checkAll,
+        ),
+      );
       await tester.pumpAndSettle();
-      await tester.tap(find.byIcon(Icons.select_all_rounded));
+      await tester.tap(
+        find.byWidgetPredicate(
+          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.selectAll,
+        ),
+      );
       await tester.pumpAndSettle();
 
       // Tap delete button
-      await tester.tap(find.byIcon(Icons.delete_outline_rounded));
+      await tester.tap(find.byKey(const Key('bulk-delete-button')));
       await tester.pumpAndSettle();
 
       // Confirmation dialog should appear
@@ -460,13 +642,21 @@ void main() {
       await tester.pumpAndSettle();
 
       // Enter selection mode and select all
-      await tester.tap(find.byIcon(Icons.checklist_rounded));
+      await tester.tap(
+        find.byWidgetPredicate(
+          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.checkAll,
+        ),
+      );
       await tester.pumpAndSettle();
-      await tester.tap(find.byIcon(Icons.select_all_rounded));
+      await tester.tap(
+        find.byWidgetPredicate(
+          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.selectAll,
+        ),
+      );
       await tester.pumpAndSettle();
 
       // Tap delete button
-      await tester.tap(find.byIcon(Icons.delete_outline_rounded));
+      await tester.tap(find.byKey(const Key('bulk-delete-button')));
       await tester.pumpAndSettle();
 
       // Cancel
@@ -475,7 +665,12 @@ void main() {
 
       // Dialog dismissed, still in selection mode
       expect(find.text('Delete Transactions'), findsNothing);
-      expect(find.byIcon(Icons.close), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.close,
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('shows date group headers', (tester) async {
@@ -497,7 +692,11 @@ void main() {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byIcon(Icons.sort_rounded));
+      await tester.tap(
+        find.byWidgetPredicate(
+          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.sort,
+        ),
+      );
       await tester.pumpAndSettle();
 
       expect(find.text('Sort by'), findsOneWidget);
@@ -517,7 +716,7 @@ void main() {
       await tester.enterText(find.byType(TextField).first, 'nonexistentxyz');
       await tester.pumpAndSettle();
 
-      expect(find.byIcon(Icons.receipt_long_rounded), findsOneWidget);
+      expect(find.byKey(transactionListEmptyKey), findsOneWidget);
     });
 
     testWidgets('shows checkbox on each transaction in selection mode', (
@@ -527,7 +726,11 @@ void main() {
       await tester.pumpAndSettle();
 
       // Enter selection mode
-      await tester.tap(find.byIcon(Icons.checklist_rounded));
+      await tester.tap(
+        find.byWidgetPredicate(
+          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.checkAll,
+        ),
+      );
       await tester.pumpAndSettle();
 
       // Each of the 4 transactions should have a checkbox
@@ -539,7 +742,11 @@ void main() {
       await tester.pumpAndSettle();
 
       // Enter selection mode
-      await tester.tap(find.byIcon(Icons.checklist_rounded));
+      await tester.tap(
+        find.byWidgetPredicate(
+          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.checkAll,
+        ),
+      );
       await tester.pumpAndSettle();
 
       // Tap the first transaction card to toggle selection

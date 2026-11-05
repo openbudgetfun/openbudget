@@ -46,7 +46,7 @@ class EditCategoryDialog extends HookConsumerWidget {
         controller: nameController,
         decoration: InputDecoration(
           labelText: l10n.budgetCategoryNameLabel,
-          prefixIcon: const Icon(Icons.category_outlined),
+          prefixIcon: const SkribbleIcon(data: OpenBudgetIcons.category),
         ),
         autofocus: true,
         textInputAction: TextInputAction.done,
@@ -61,7 +61,7 @@ class EditCategoryDialog extends HookConsumerWidget {
               : () => _delete(context, ref, isSubmitting),
           child: Text(
             l10n.deleteConfirmButton,
-            style: TextStyle(color: Theme.of(context).colorScheme.error),
+            style: TextStyle(color: Theme.of(context).ob.overspent),
           ),
         ),
         TextButton(
@@ -90,10 +90,8 @@ class EditCategoryDialog extends HookConsumerWidget {
     ValueNotifier<bool> isSubmitting,
   ) async {
     final l10n = AppLocalizations.of(context);
-    final colorScheme = Theme.of(context).colorScheme;
-    final envelopeSummary = envelopeCount == 1
-        ? '1 envelope'
-        : '$envelopeCount envelopes';
+    final palette = Theme.of(context).ob;
+    final envelopeSummary = l10n.budgetEnvelopeCount(envelopeCount);
     final allocated = formatCents(totalAllocatedCents, currencyCode);
     final confirmed = await showDialog<bool>(
       context: context,
@@ -103,7 +101,7 @@ class EditCategoryDialog extends HookConsumerWidget {
           '${l10n.deleteConfirmMessage}\n\n'
           '"$currentName"\n\n'
           '$envelopeSummary\n'
-          '$allocated allocated',
+          '${l10n.budgetCategoryAllocated(allocated)}',
         ),
         actions: [
           TextButton(
@@ -113,8 +111,8 @@ class EditCategoryDialog extends HookConsumerWidget {
           FilledButton(
             onPressed: () => Navigator.of(ctx).pop(true),
             style: FilledButton.styleFrom(
-              backgroundColor: colorScheme.error,
-              foregroundColor: colorScheme.onError,
+              backgroundColor: palette.overspent,
+              foregroundColor: palette.onAction,
             ),
             child: Text(l10n.deleteConfirmButton),
           ),

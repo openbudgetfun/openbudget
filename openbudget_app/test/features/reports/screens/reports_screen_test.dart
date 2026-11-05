@@ -4,7 +4,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/age_of_money_provider.dart';
@@ -107,10 +106,6 @@ Widget _buildSubject({
 );
 
 void main() {
-  setUpAll(() {
-    GoogleFonts.config.allowRuntimeFetching = false;
-  });
-
   group('ReportsScreen', () {
     testWidgets('renders loading indicator while spending preview loads', (
       tester,
@@ -125,7 +120,7 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.byType(CircularProgressIndicator), findsWidgets);
+      expect(find.byType(ObLoadingPanel), findsWidgets);
     });
 
     testWidgets('renders reflect dashboard cards', (tester) async {
@@ -184,7 +179,11 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('Could not load report data'), findsOneWidget);
+      expect(find.textContaining('Could not load report data'), findsWidgets);
+      expect(
+        find.textContaining('Exception: Could not load report data'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('renders age of money preview with days', (tester) async {
@@ -196,6 +195,11 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      await tester.scrollUntilVisible(
+        find.text('7 days'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
       expect(find.text('7 days'), findsOneWidget);
     });
 

@@ -13,14 +13,12 @@ import 'package:openbudget_app/src/features/accounts/providers/plaid_account_lin
 import 'package:openbudget_app/src/features/accounts/providers/wallet_actions_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
-import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 import 'package:plaid_flutter/plaid_flutter.dart';
-import 'package:simple_icons/simple_icons.dart';
 
 enum _AddAccountStep {
   loading,
@@ -81,7 +79,7 @@ class AddAccountScreen extends HookConsumerWidget {
     final selectedTypeKey = useState<String?>(null);
     final selectedCurrency = useState(CurrencyCode.usd);
     final walletOnBudget = useState(false);
-    final successAccountLabel = useState<String>('Account');
+    final successAccountLabel = useState<String>(l10n.accountTypeOther);
     final didHydrateBudgetCurrency = useState(false);
     final showSearchingOverlay = useState(false);
     final selectedInstitution = useState<Institution?>(null);
@@ -263,9 +261,7 @@ class AddAccountScreen extends HookConsumerWidget {
         step.value = _AddAccountStep.unlinkedAccount;
         showAppToast(
           context,
-          message:
-              'Linked connections are only available on iOS/Android right now. '
-              'Add an unlinked account instead.',
+          message: l10n.accountsLinkedMobileOnly,
           variant: AppToastVariant.warning,
         );
         return;
@@ -283,9 +279,7 @@ class AddAccountScreen extends HookConsumerWidget {
           step.value = _AddAccountStep.unlinkedAccount;
           showAppToast(
             context,
-            message:
-                'Linked connections for "$institutionName" were not completed. '
-                'Add an unlinked account instead.',
+            message: l10n.accountsLinkedNotCompleted(institutionName),
             variant: AppToastVariant.warning,
           );
           return;
@@ -300,9 +294,7 @@ class AddAccountScreen extends HookConsumerWidget {
           step.value = _AddAccountStep.unlinkedAccount;
           showAppToast(
             context,
-            message:
-                'No accounts were imported from this connection. '
-                'Add an unlinked account instead.',
+            message: l10n.accountsLinkedNothingImported,
             variant: AppToastVariant.warning,
           );
           return;
@@ -314,9 +306,7 @@ class AddAccountScreen extends HookConsumerWidget {
         step.value = _AddAccountStep.unlinkedAccount;
         showAppToast(
           context,
-          message:
-              'Linked connections for "$institutionName" are currently unavailable. '
-              'Add an unlinked account instead.',
+          message: l10n.accountsLinkedUnavailable(institutionName),
           variant: AppToastVariant.error,
         );
       } finally {
@@ -340,7 +330,7 @@ class AddAccountScreen extends HookConsumerWidget {
               onBudget: walletOnBudget.value,
             );
         if (!context.mounted) return;
-        successAccountLabel.value = 'Solana Wallet';
+        successAccountLabel.value = l10n.accountTypeCryptoWallet;
         step.value = _AddAccountStep.success;
       } on Object catch (_) {
         final createdDespiteError = await wasAccountCreatedDespiteError(
@@ -348,7 +338,7 @@ class AddAccountScreen extends HookConsumerWidget {
         );
         if (!context.mounted) return;
         if (createdDespiteError) {
-          successAccountLabel.value = 'Solana Wallet';
+          successAccountLabel.value = l10n.accountTypeCryptoWallet;
           step.value = _AddAccountStep.success;
           return;
         }
@@ -425,11 +415,7 @@ class AddAccountScreen extends HookConsumerWidget {
     return RepaintBoundary(
       key: addAccountScreenCaptureBoundaryKey,
       child: Scaffold(
-        backgroundColor: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
         appBar: AppBar(
-          backgroundColor: OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
-          surfaceTintColor: OpenBudgetPalette.transparentFor(Theme.of(context)),
-          scrolledUnderElevation: 0,
           automaticallyImplyLeading: false,
           leading:
               step.value == _AddAccountStep.loading ||
@@ -437,7 +423,8 @@ class AddAccountScreen extends HookConsumerWidget {
                   step.value == _AddAccountStep.searchBank
               ? null
               : IconButton(
-                  icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                  icon: const SkribbleIcon(data: OpenBudgetIcons.back),
+                  tooltip: l10n.accountsBackAction,
                   onPressed: () {
                     if (step.value == _AddAccountStep.unlinkedAccount) {
                       step.value = _AddAccountStep.searchBank;
@@ -466,7 +453,8 @@ class AddAccountScreen extends HookConsumerWidget {
           ),
           actions: [
             IconButton(
-              icon: const Icon(Icons.close_rounded),
+              icon: const SkribbleIcon(data: OpenBudgetIcons.close),
+              tooltip: l10n.accountsCloseAction,
               onPressed: () => context.goNamed(
                 accountListRoute,
                 pathParameters: {'id': budgetId},
@@ -515,10 +503,8 @@ class AddAccountScreen extends HookConsumerWidget {
                     } on Exception catch (_) {
                       if (!context.mounted) return;
                       messenger.showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'Unable to add this account to the current budget.',
-                          ),
+                        SnackBar(
+                          content: Text(l10n.accountsAddExistingError),
                         ),
                       );
                     } finally {
@@ -590,9 +576,7 @@ class AddAccountScreen extends HookConsumerWidget {
             },
             if (showSearchingOverlay.value)
               ColoredBox(
-                color: OpenBudgetPalette.fgPrimaryFor(
-                  Theme.of(context),
-                ).withAlpha(120),
+                color: theme.ob.ink.withValues(alpha: 0.45),
                 child: Center(
                   child: Card(
                     child: Padding(
@@ -741,19 +725,15 @@ class _LoadingStep extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final logoAsset = theme.brightness == Brightness.dark
-        ? 'assets/branding/logos/ob_primary_dark_512.png'
-        : 'assets/branding/logos/ob_primary_light_512.png';
+    final palette = theme.ob;
     final title = switch (titleKey) {
       _LoadingStepKey.loading => l10n.loadingTitle,
       _LoadingStepKey.loadingInstitutions => l10n.addAccountLoadingInstitutions,
     };
-    final includeSpinner = titleKey == _LoadingStepKey.loadingInstitutions;
 
     return LayoutBuilder(
       builder: (context, constraints) {
         final compact = constraints.maxHeight < 300;
-        final logoSize = compact ? 56.0 : 84.0;
         final content = Padding(
           padding: EdgeInsets.symmetric(
             horizontal: compact ? SpacingTokens.lg : SpacingTokens.xl,
@@ -762,46 +742,32 @@ class _LoadingStep extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(RadiusTokens.lg),
-                child: Image.asset(
-                  logoAsset,
-                  width: logoSize,
-                  height: logoSize,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => Icon(
-                    Icons.account_balance_rounded,
-                    size: logoSize,
-                    color: theme.colorScheme.primary,
-                  ),
+              Container(
+                width: compact ? 56 : 76,
+                height: compact ? 56 : 76,
+                alignment: Alignment.center,
+                decoration: ObRoughDecoration(
+                  color: palette.wash(ObTone.brand),
+                  outline: palette.quietPen,
+                  radius: RadiusTokens.lg,
+                  seed: 23,
+                ),
+                child: SkribbleIcon(
+                  data: OpenBudgetIcons.bank,
+                  size: compact ? 28 : 38,
+                  color: palette.hue(ObTone.brand),
                 ),
               ),
-              SizedBox(height: compact ? SpacingTokens.sm : SpacingTokens.md),
-              Text(
-                title,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              if (!compact) ...[
-                const SizedBox(height: SpacingTokens.xs),
+              SizedBox(height: compact ? SpacingTokens.xs : SpacingTokens.sm),
+              ObLoadingPanel(label: title),
+              if (!compact)
                 Text(
                   l10n.loadingHint,
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
+                    color: palette.mutedInk,
                   ),
                   textAlign: TextAlign.center,
                 ),
-              ],
-              if (includeSpinner) ...[
-                SizedBox(height: compact ? SpacingTokens.md : SpacingTokens.lg),
-                const SizedBox(
-                  height: 28,
-                  width: 28,
-                  child: CircularProgressIndicator(strokeWidth: 3),
-                ),
-              ],
             ],
           ),
         );
@@ -898,45 +864,29 @@ class _BankSearchStep extends StatelessWidget {
           controller: searchController,
           onSubmitted: (_) => FocusScope.of(context).unfocus(),
           textInputAction: TextInputAction.search,
+          decoration: const InputDecoration(
+            prefixIcon: SkribbleIcon(data: OpenBudgetIcons.search),
+          ),
         ),
         const SizedBox(height: SpacingTokens.xs),
         Text(
           l10n.addAccountSearchHint,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
+            color: Theme.of(context).ob.mutedInk,
           ),
         ),
         const SizedBox(height: SpacingTokens.md),
-        Text(
-          sectionTitle,
-          style: Theme.of(
-            context,
-          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+        ObSectionHeader(
+          title: sectionTitle,
+          padding: EdgeInsets.zero,
         ),
         const SizedBox(height: SpacingTokens.sm),
         if (isLoadingInstitutions)
-          const Center(
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: SpacingTokens.md),
-              child: CircularProgressIndicator(strokeWidth: 2),
-            ),
-          )
+          ObLoadingPanel(label: l10n.addAccountLoadingInstitutions)
         else if (filteredInstitutions.isEmpty)
-          Container(
-            padding: const EdgeInsets.all(SpacingTokens.md),
-            decoration: BoxDecoration(
-              color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
-              border: Border.all(
-                color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
-              ),
-              borderRadius: BorderRadius.circular(RadiusTokens.md),
-            ),
-            child: Text(
-              l10n.addAccountNoInstitutionsFound,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
-              ),
-            ),
+          ObStatePanel.empty(
+            title: l10n.addAccountNoInstitutionsFound,
+            doodle: WiredDoodleKind.cloud,
           )
         else
           LayoutBuilder(
@@ -960,11 +910,9 @@ class _BankSearchStep extends StatelessWidget {
           ),
         if (filteredMyAccounts.isNotEmpty) ...[
           const SizedBox(height: SpacingTokens.md),
-          Text(
-            'My accounts',
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+          ObSectionHeader(
+            title: l10n.accountsMyAccounts,
+            padding: EdgeInsets.zero,
           ),
           const SizedBox(height: SpacingTokens.sm),
           ...filteredMyAccounts.map(
@@ -983,7 +931,7 @@ class _BankSearchStep extends StatelessWidget {
               child: Text(
                 l10n.orText,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
+                  color: Theme.of(context).ob.mutedInk,
                 ),
               ),
             ),
@@ -999,7 +947,7 @@ class _BankSearchStep extends StatelessWidget {
         const SizedBox(height: SpacingTokens.sm),
         FilledButton.icon(
           onPressed: onConnectSolana,
-          icon: const Icon(SimpleIcons.solana),
+          icon: const SkribbleIcon(data: OpenBudgetIcons.solana),
           label: Text(l10n.addAccountConnectWallet),
         ),
       ],
@@ -1007,38 +955,35 @@ class _BankSearchStep extends StatelessWidget {
   }
 }
 
-class _InstitutionTile extends StatelessWidget {
+class _InstitutionTile extends HookWidget {
   const _InstitutionTile({required this.option, required this.onTap});
 
   final Institution option;
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => InkWell(
+  Widget build(BuildContext context) => ObCard(
     onTap: onTap,
-    borderRadius: BorderRadius.circular(RadiusTokens.md),
-    child: Container(
+    child: SizedBox(
       height: 84,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
-        border: Border.all(
-          color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: SpacingTokens.sm),
+          child: Text(
+            option.name,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: Theme.of(context).ob.ink,
+            ),
+            textAlign: TextAlign.center,
+          ),
         ),
-        borderRadius: BorderRadius.circular(RadiusTokens.md),
-      ),
-      child: Text(
-        option.name,
-        style: Theme.of(
-          context,
-        ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
-        textAlign: TextAlign.center,
       ),
     ),
   );
 }
 
-class _MyAccountTile extends StatelessWidget {
+class _MyAccountTile extends HookWidget {
   const _MyAccountTile({required this.account, required this.onTap});
 
   final Account account;
@@ -1046,25 +991,31 @@ class _MyAccountTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    return Card(
+    final palette = theme.ob;
+    return ObCard(
       margin: const EdgeInsets.only(bottom: SpacingTokens.xs),
       child: ListTile(
         onTap: onTap,
-        leading: const Icon(Icons.bookmark_outline_rounded),
+        leading: SkribbleIcon(
+          data: OpenBudgetIcons.bookmark,
+          color: palette.hue(ObTone.brand),
+        ),
         title: Text(
           account.name,
           style: theme.textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w600,
+            color: palette.ink,
           ),
         ),
         subtitle: Text(
-          'Add this existing account to this budget',
+          l10n.accountsAddExistingAccountHint,
           style: theme.textTheme.bodySmall?.copyWith(
-            color: OpenBudgetPalette.fgSecondaryFor(theme),
+            color: palette.mutedInk,
           ),
         ),
-        trailing: const Icon(Icons.add_link_rounded),
+        trailing: const SkribbleIcon(data: OpenBudgetIcons.addLink, size: 20),
       ),
     );
   }
@@ -1100,7 +1051,7 @@ class _WalletConnectStep extends StatelessWidget {
           Text(
             l10n.addAccountWalletConnectionDescription,
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: OpenBudgetPalette.fgSecondaryFor(theme),
+              color: theme.ob.mutedInk,
             ),
           ),
           const SizedBox(height: SpacingTokens.md),
@@ -1175,29 +1126,17 @@ class _UnlinkedAccountStep extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final primaryTextColor = theme.brightness == Brightness.dark
-        ? theme.colorScheme.onSurface
-        : OpenBudgetPalette.fgIconStrongFor(Theme.of(context));
-    final secondaryTextColor = theme.brightness == Brightness.dark
-        ? theme.colorScheme.onSurfaceVariant
-        : OpenBudgetPalette.fgSecondaryFor(Theme.of(context));
-    final headingStyle =
-        (theme.textTheme.titleSmall ??
-                const TextStyle(fontSize: 21, fontWeight: FontWeight.w600))
-            .copyWith(fontWeight: FontWeight.w700, color: primaryTextColor);
-    final introStyle =
-        (theme.textTheme.bodyMedium ??
-                const TextStyle(fontSize: 17, fontWeight: FontWeight.w400))
-            .copyWith(color: secondaryTextColor);
-    final formValueStyle =
-        (theme.textTheme.bodyLarge ??
-                const TextStyle(fontSize: 20, fontWeight: FontWeight.w500))
-            .copyWith(color: primaryTextColor);
-    final formHintStyle =
-        (theme.textTheme.bodyLarge ??
-                const TextStyle(fontSize: 20, fontWeight: FontWeight.w500))
-            .copyWith(color: secondaryTextColor.withAlpha(220));
+    final palette = theme.ob;
+    final headingStyle = theme.textTheme.titleSmall?.copyWith(
+      fontWeight: FontWeight.w700,
+      color: palette.ink,
+    );
+    final introStyle = theme.textTheme.bodyMedium?.copyWith(
+      color: palette.mutedInk,
+    );
+    final formValueStyle = theme.textTheme.bodyLarge?.copyWith(
+      color: palette.ink,
+    );
     final introText = showWalletAddress
         ? l10n.addAccountWalletIntro
         : l10n.addAccountUnlinkedIntro;
@@ -1219,24 +1158,23 @@ class _UnlinkedAccountStep extends StatelessWidget {
           if (selectedInstitutionName != null &&
               selectedInstitutionName!.trim().isNotEmpty) ...[
             const SizedBox(height: SpacingTokens.sm),
-            Container(
+            ObCard(
+              tone: ObTone.brand,
               padding: const EdgeInsets.all(SpacingTokens.sm),
-              decoration: BoxDecoration(
-                color: OpenBudgetPalette.bgSecondaryFor(theme),
-                borderRadius: BorderRadius.circular(RadiusTokens.md),
-                border: Border.all(
-                  color: OpenBudgetPalette.borderSubtleFor(theme),
-                ),
-              ),
               child: Row(
                 children: [
-                  const Icon(Icons.account_balance_rounded, size: 18),
+                  SkribbleIcon(
+                    data: OpenBudgetIcons.bank,
+                    size: 18,
+                    color: palette.hue(ObTone.brand),
+                  ),
                   const SizedBox(width: SpacingTokens.xs),
                   Expanded(
                     child: Text(
-                      'Institution: $selectedInstitutionName',
+                      l10n.accountsInstitutionLabel(selectedInstitutionName!),
                       style: theme.textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w600,
+                        color: palette.ink,
                       ),
                     ),
                   ),
@@ -1254,52 +1192,51 @@ class _UnlinkedAccountStep extends StatelessWidget {
             style: formValueStyle,
             decoration: InputDecoration(
               hintText: l10n.addAccountNicknameHint,
-              hintStyle: formHintStyle,
             ),
           ),
           const SizedBox(height: SpacingTokens.md),
           Text(l10n.addAccountTypeQuestion, style: headingStyle),
           const SizedBox(height: SpacingTokens.xs),
-          ListTile(
-            key: _addAccountUnlinkedTypeTileKey,
-            onTap: onChooseType,
-            title: Text(
-              selectedTypeLabel,
-              style: formValueStyle.copyWith(
-                color: hasSelectedType ? primaryTextColor : secondaryTextColor,
-                fontWeight: hasSelectedType ? FontWeight.w600 : FontWeight.w500,
+          ObCard(
+            child: ListTile(
+              key: _addAccountUnlinkedTypeTileKey,
+              onTap: onChooseType,
+              title: Text(
+                selectedTypeLabel,
+                style: formValueStyle?.copyWith(
+                  color: hasSelectedType ? palette.ink : palette.mutedInk,
+                  fontWeight: hasSelectedType
+                      ? FontWeight.w600
+                      : FontWeight.w500,
+                ),
               ),
-            ),
-            trailing: const Icon(Icons.chevron_right_rounded),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: SpacingTokens.sm,
-            ),
-            shape: RoundedRectangleBorder(
-              side: BorderSide(
-                color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
+              trailing: const SkribbleIcon(
+                data: OpenBudgetIcons.chevronRight,
+                size: 20,
               ),
-              borderRadius: BorderRadius.circular(RadiusTokens.md),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: SpacingTokens.sm,
+              ),
             ),
           ),
           const SizedBox(height: SpacingTokens.md),
           if (showWalletAddress) ...[
-            Container(
+            ObCard(
+              tone: ObTone.brand,
               padding: const EdgeInsets.all(SpacingTokens.md),
-              decoration: BoxDecoration(
-                color: colorScheme.primaryContainer.withAlpha(120),
-                borderRadius: BorderRadius.circular(RadiusTokens.md),
-                border: Border.all(color: colorScheme.outlineVariant),
-              ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.wallet_outlined, color: colorScheme.primary),
+                  SkribbleIcon(
+                    data: OpenBudgetIcons.wallet,
+                    color: palette.hue(ObTone.brand),
+                  ),
                   const SizedBox(width: SpacingTokens.sm),
                   Expanded(
                     child: Text(
                       l10n.addAccountWalletAutoSyncHint,
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
+                        color: palette.ink,
                       ),
                     ),
                   ),
@@ -1314,17 +1251,16 @@ class _UnlinkedAccountStep extends StatelessWidget {
               controller: walletAddressController,
               keyboardType: TextInputType.text,
               textInputAction: TextInputAction.done,
-              style: formValueStyle.copyWith(fontFamily: 'monospace'),
+              style: formValueStyle?.copyWith(fontFamily: 'monospace'),
               decoration: InputDecoration(
                 hintText: l10n.addAccountWalletAddressExample,
-                hintStyle: formHintStyle,
               ),
             ),
             const SizedBox(height: SpacingTokens.xs),
             Text(
               l10n.addAccountWalletPublicAddressOnly,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: secondaryTextColor,
+                color: palette.mutedInk,
               ),
             ),
           ] else ...[
@@ -1341,7 +1277,6 @@ class _UnlinkedAccountStep extends StatelessWidget {
               style: formValueStyle,
               decoration: InputDecoration(
                 hintText: l10n.addAccountBalanceExample,
-                hintStyle: formHintStyle,
               ),
             ),
           ],
@@ -1365,58 +1300,66 @@ class _AccountTypeStep extends StatelessWidget {
   final ValueChanged<_AccountTypeOption> onSelected;
 
   @override
-  Widget build(BuildContext context) => ListView(
-    controller: scrollController,
-    primary: false,
-    padding: const EdgeInsets.fromLTRB(
-      SpacingTokens.md,
-      SpacingTokens.sm,
-      SpacingTokens.md,
-      SpacingTokens.xl,
-    ),
-    children: [
-      for (final section in sections) ...[
-        Text(
-          section.title,
-          style: Theme.of(
-            context,
-          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
-        ),
-        const SizedBox(height: SpacingTokens.xs),
-        Text(
-          section.subtitle,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final palette = theme.ob;
+    return ListView(
+      controller: scrollController,
+      primary: false,
+      padding: const EdgeInsets.fromLTRB(
+        SpacingTokens.md,
+        SpacingTokens.sm,
+        SpacingTokens.md,
+        SpacingTokens.xl,
+      ),
+      children: [
+        for (final section in sections) ...[
+          ObSectionHeader(
+            title: section.title,
+            subtitle: section.subtitle,
+            padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
           ),
-        ),
-        const SizedBox(height: SpacingTokens.sm),
-        for (final option in section.options) ...[
-          ListTile(
-            key: ValueKey('add-account-type-option-${option.key}'),
-            onTap: () => onSelected(option),
-            title: Text(option.label),
-            trailing: option.key == selectedTypeKey
-                ? Icon(
-                    Icons.check_rounded,
-                    color: OpenBudgetPalette.bgBrandFor(Theme.of(context)),
-                  )
-                : null,
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: SpacingTokens.sm,
-            ),
-            shape: RoundedRectangleBorder(
-              side: BorderSide(
-                color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
+          for (final option in section.options) ...[
+            ObCard(
+              margin: const EdgeInsets.only(bottom: SpacingTokens.xs),
+              child: ListTile(
+                key: ValueKey('add-account-type-option-${option.key}'),
+                onTap: () => onSelected(option),
+                leading: SkribbleIcon(
+                  data: _iconForType(option.key),
+                  size: 20,
+                  color: palette.hue(ObTone.brand),
+                ),
+                title: Text(option.label),
+                trailing: option.key == selectedTypeKey
+                    ? SkribbleIcon(
+                        data: OpenBudgetIcons.check,
+                        color: palette.hue(ObTone.brand),
+                      )
+                    : null,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: SpacingTokens.sm,
+                ),
               ),
-              borderRadius: BorderRadius.circular(RadiusTokens.md),
             ),
-          ),
-          const SizedBox(height: SpacingTokens.xs),
+          ],
+          const SizedBox(height: SpacingTokens.md),
         ],
-        const SizedBox(height: SpacingTokens.md),
       ],
-    ],
-  );
+    );
+  }
+
+  static WiredSvgIconData _iconForType(String type) => switch (type) {
+    'savings' => OpenBudgetIcons.savings,
+    'cash' => OpenBudgetIcons.cash,
+    'creditCard' || 'lineOfCredit' => OpenBudgetIcons.creditCard,
+    'mortgage' => OpenBudgetIcons.home,
+    'asset' => OpenBudgetIcons.trendingUp,
+    'liability' => OpenBudgetIcons.scale,
+    'cryptoWallet' => OpenBudgetIcons.solana,
+    'checking' => OpenBudgetIcons.bank,
+    _ => OpenBudgetIcons.receipt,
+  };
 }
 
 class _SuccessStep extends StatelessWidget {
@@ -1437,53 +1380,16 @@ class _SuccessStep extends StatelessWidget {
       child: _StepFrame(
         maxWidth: 720,
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(
-            SpacingTokens.md,
-            SpacingTokens.md,
-            SpacingTokens.md,
-            SpacingTokens.md,
-          ),
-          child: Column(
-            children: [
-              Icon(
-                Icons.check_circle_rounded,
-                size: 72,
-                color: OpenBudgetPalette.fgSuccessFor(Theme.of(context)),
-              ),
-              const SizedBox(height: SpacingTokens.md),
-              Text(
-                l10n.addAccountSuccessHeadline,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              const SizedBox(height: SpacingTokens.xs),
-              Text(
-                l10n.addAccountSuccessMessage(accountTypeLabel),
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
-                ),
-              ),
-              const SizedBox(height: SpacingTokens.xl),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: onAddAnother,
-                      child: Text(l10n.addAccountSuccessAddAnother),
-                    ),
-                  ),
-                  const SizedBox(width: SpacingTokens.sm),
-                  Expanded(
-                    child: FilledButton(
-                      onPressed: onDone,
-                      child: Text(l10n.dialogDone),
-                    ),
-                  ),
-                ],
-              ),
-            ],
+          padding: const EdgeInsets.all(SpacingTokens.md),
+          child: ObStatePanel.empty(
+            title: l10n.addAccountSuccessHeadline,
+            message: l10n.addAccountSuccessMessage(accountTypeLabel),
+            doodle: WiredDoodleKind.confetti,
+            action: ObStateAction(label: l10n.dialogDone, onPressed: onDone),
+            secondaryAction: ObStateAction(
+              label: l10n.addAccountSuccessAddAnother,
+              onPressed: onAddAnother,
+            ),
           ),
         ),
       ),

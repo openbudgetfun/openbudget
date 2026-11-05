@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
@@ -12,10 +11,6 @@ import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 void main() {
-  setUpAll(() {
-    GoogleFonts.config.allowRuntimeFetching = false;
-  });
-
   const budgetId = 'test-budget-1';
 
   Budget makeBudget({String currencyCode = 'USD'}) => Budget(
@@ -128,7 +123,12 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Description'), findsOneWidget);
-      expect(find.byIcon(Icons.description_outlined), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.document,
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('shows amount text field', (tester) async {
@@ -136,14 +136,24 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Amount'), findsOneWidget);
-      expect(find.byIcon(Icons.attach_money_rounded), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.money,
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('shows date picker with today date', (tester) async {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
-      expect(find.byIcon(Icons.calendar_today_rounded), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.calendar,
+        ),
+        findsOneWidget,
+      );
 
       // Verify a date string is shown (formatted as YYYY-MM-DD).
       final now = DateTime.now();
@@ -157,7 +167,12 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Payee'), findsOneWidget);
-      expect(find.byIcon(Icons.person_outlined), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.person,
+        ),
+        findsOneWidget,
+      );
       // The default selected item shows 'No Payee'.
       expect(find.text('No Payee'), findsOneWidget);
     });
@@ -167,7 +182,12 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Memo'), findsOneWidget);
-      expect(find.byIcon(Icons.note_outlined), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.note,
+        ),
+        findsOneWidget,
+      );
       expect(find.text('Add a note (optional)'), findsOneWidget);
     });
 
@@ -183,7 +203,12 @@ void main() {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
-      expect(find.byIcon(Icons.arrow_downward_rounded), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.inflow,
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('shows cancel button', (tester) async {
@@ -227,7 +252,11 @@ void main() {
       await tester.pumpAndSettle();
 
       // Tap the date ListTile.
-      await tester.tap(find.byIcon(Icons.calendar_today_rounded));
+      await tester.tap(
+        find.byWidgetPredicate(
+          (w) => w is SkribbleIcon && w.data == OpenBudgetIcons.calendar,
+        ),
+      );
       await tester.pumpAndSettle();
 
       // DatePicker dialog should appear.

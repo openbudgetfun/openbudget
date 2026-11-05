@@ -22,7 +22,6 @@ class AutoAssignDialog extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
     final proposalAsync = ref.watch(autoAssignProposalProvider(budgetId));
     final isAssigning = useState(false);
 
@@ -31,9 +30,9 @@ class AutoAssignDialog extends HookConsumerWidget {
       constraints: const BoxConstraints(maxWidth: 560),
       title: Row(
         children: [
-          const Icon(
-            Icons.auto_fix_high_rounded,
-            color: ColorTokens.primary,
+          SkribbleIcon(
+            data: OpenBudgetIcons.autoAssign,
+            color: Theme.of(context).ob.brand,
             size: 24,
           ),
           const SizedBox(width: SpacingTokens.sm),
@@ -41,9 +40,11 @@ class AutoAssignDialog extends HookConsumerWidget {
         ],
       ),
       content: proposalAsync.when(
-        loading: () => const SizedBox(
+        loading: () => SizedBox(
           height: 120,
-          child: Center(child: CircularProgressIndicator()),
+          child: Center(
+            child: ObLoadingPanel(label: l10n.loadingTitle),
+          ),
         ),
         error: (_, _) => Text(l10n.autoAssignError),
         data: (proposal) {
@@ -51,17 +52,17 @@ class AutoAssignDialog extends HookConsumerWidget {
             return Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(
-                  Icons.check_circle_outline_rounded,
+                SkribbleIcon(
+                  data: OpenBudgetIcons.checkCircle,
                   size: 48,
-                  color: ColorTokens.secondary,
+                  color: Theme.of(context).ob.funded,
                 ),
                 const SizedBox(height: SpacingTokens.md),
                 Text(
                   l10n.autoAssignNothingToAssign,
                   textAlign: TextAlign.center,
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
+                    color: Theme.of(context).ob.mutedInk,
                   ),
                 ),
               ],
@@ -76,24 +77,25 @@ class AutoAssignDialog extends HookConsumerWidget {
               children: [
                 Container(
                   padding: const EdgeInsets.all(SpacingTokens.sm),
-                  decoration: BoxDecoration(
-                    color: ColorTokens.secondary.withAlpha(20),
-                    borderRadius: BorderRadius.circular(RadiusTokens.sm),
+                  decoration: ObRoughDecoration(
+                    color: Theme.of(context).ob.fundedWash,
+                    radius: 10,
+                    seed: 89,
                   ),
                   child: Row(
                     children: [
                       Expanded(
                         child: Text(
                           l10n.autoAssignDistributing,
-                          style: theme.textTheme.bodySmall,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).ob.ink,
+                          ),
                         ),
                       ),
-                      Text(
+                      ObAmount(
                         formatCents(proposal.totalAssignedCents, currencyCode),
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: ColorTokens.secondary,
-                        ),
+                        tone: ObTone.funded,
+                        style: theme.textTheme.titleSmall,
                       ),
                     ],
                   ),
@@ -102,7 +104,7 @@ class AutoAssignDialog extends HookConsumerWidget {
                 Text(
                   l10n.autoAssignEnvelopeCount(proposal.items.length),
                   style: theme.textTheme.labelMedium?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
+                    color: Theme.of(context).ob.mutedInk,
                   ),
                 ),
                 const SizedBox(height: SpacingTokens.sm),
@@ -128,12 +130,10 @@ class AutoAssignDialog extends HookConsumerWidget {
                               ),
                             ),
                             const SizedBox(width: SpacingTokens.sm),
-                            Text(
+                            ObAmount(
                               '+${formatCents(item.addedCents, currencyCode)}',
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: ColorTokens.secondary,
-                              ),
+                              tone: ObTone.funded,
+                              style: theme.textTheme.bodyMedium,
                             ),
                           ],
                         ),
@@ -169,7 +169,10 @@ class AutoAssignDialog extends HookConsumerWidget {
                     height: 16,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Icon(Icons.auto_fix_high_rounded, size: 18),
+                : const SkribbleIcon(
+                    data: OpenBudgetIcons.autoAssign,
+                    size: 18,
+                  ),
             label: Text(
               isAssigning.value
                   ? l10n.autoAssignAssigning

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_goals_provider.dart';
@@ -85,10 +84,6 @@ BudgetSummary _makeSummary() {
 }
 
 void main() {
-  setUpAll(() {
-    GoogleFonts.config.allowRuntimeFetching = false;
-  });
-
   group('RecentMovesScreen', () {
     testWidgets('renders tabs and filters moved vs assigned events', (
       tester,
@@ -198,9 +193,21 @@ void main() {
       await _dismissCoachmarkIfVisible(tester);
 
       expect(find.text('Moves'), findsOneWidget);
-      expect(find.byIcon(Icons.arrow_back_rounded), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is SkribbleIcon && widget.data == OpenBudgetIcons.back,
+        ),
+        findsOneWidget,
+      );
       expect(find.textContaining('Groceries'), findsWidgets);
-      expect(find.byIcon(Icons.arrow_forward_rounded), findsWidgets);
+      expect(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is SkribbleIcon && widget.data == OpenBudgetIcons.forward,
+        ),
+        findsWidgets,
+      );
     });
   });
 }

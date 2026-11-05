@@ -54,7 +54,8 @@ class OpenBudgetApp extends HookConsumerWidget {
         themeMode: themeMode,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        builder: (context, child) => _DismissKeyboardOnTap(child: child),
+        builder: (context, child) =>
+            ObWiredScope(child: _DismissKeyboardOnTap(child: child)),
         home: const _AuthBootstrapScreen(),
       );
     }
@@ -68,7 +69,8 @@ class OpenBudgetApp extends HookConsumerWidget {
       themeMode: themeMode,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      builder: (context, child) => _DismissKeyboardOnTap(child: child),
+      builder: (context, child) =>
+          ObWiredScope(child: _DismissKeyboardOnTap(child: child)),
       routerConfig: router,
     );
   }

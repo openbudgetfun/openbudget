@@ -33,6 +33,7 @@ class LoginScreen extends HookConsumerWidget {
     final errorMessage = authState is AuthError ? authState.message : null;
     final obscurePassword = useState(true);
     final theme = Theme.of(context);
+    final palette = theme.ob;
     final canLogin =
         !isLoading &&
         emailController.text.trim().isNotEmpty &&
@@ -52,9 +53,6 @@ class LoginScreen extends HookConsumerWidget {
         const bool.hasEnvironment('APPLE_SERVICE_IDENTIFIER') &&
         const bool.hasEnvironment('APPLE_REDIRECT_URI');
     final showSocialSection = showGoogleSignIn || showAppleSignIn;
-    final backgroundColor = OpenBudgetPalette.bgAuthFor(theme);
-    final cardColor = OpenBudgetPalette.bgSecondaryFor(theme).withAlpha(240);
-    final dividerColor = OpenBudgetPalette.borderSubtleFor(theme);
     final statusBarStyle =
         (theme.brightness == Brightness.light
                 ? SystemUiOverlayStyle.dark
@@ -64,259 +62,226 @@ class LoginScreen extends HookConsumerWidget {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: statusBarStyle,
       child: Scaffold(
-        backgroundColor: backgroundColor,
-        body: Stack(
-          children: [
-            _LoginBackdrop(
-              backgroundColor: backgroundColor,
-              accentColor: theme.colorScheme.primary.withAlpha(35),
-              secondaryAccentColor: theme.colorScheme.tertiary.withAlpha(30),
-            ),
-            SafeArea(
-              child: Center(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(SpacingTokens.md),
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 420),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
+        body: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(SpacingTokens.md),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 420),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const SizedBox(height: SpacingTokens.xl),
+                    const Align(
+                      child: _OpenBudgetMark(
+                        key: Key('login-openbudget-mark'),
+                      ),
+                    ),
+                    const SizedBox(height: SpacingTokens.md),
+                    Wrap(
+                      alignment: WrapAlignment.center,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: SpacingTokens.sm,
                       children: [
-                        const SizedBox(height: SpacingTokens.xl),
-                        const _OpenBudgetMark(
-                          key: Key('login-openbudget-mark'),
-                        ),
-                        const SizedBox(height: SpacingTokens.md),
-                        Text(
-                          'Welcome Back',
-                          style: theme.textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.w800,
+                        ObHighlighter(
+                          child: Text(
+                            l10n.authLoginHeadline,
+                            style: theme.textTheme.displaySmall,
+                            textAlign: TextAlign.center,
                           ),
-                          textAlign: TextAlign.center,
                         ),
-                        const SizedBox(height: SpacingTokens.xs),
-                        Text(
-                          'Continue building better money habits.',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: OpenBudgetPalette.fgSecondaryFor(theme),
-                          ),
-                          textAlign: TextAlign.center,
+                        WiredDoodle(
+                          kind: WiredDoodleKind.sun,
+                          size: 56,
+                          seed: 4,
+                          color: palette.brand,
                         ),
-                        const SizedBox(height: SpacingTokens.lg),
-                        Container(
-                          padding: const EdgeInsets.all(SpacingTokens.md),
-                          decoration: BoxDecoration(
-                            color: cardColor,
-                            borderRadius: BorderRadius.circular(
-                              RadiusTokens.lg,
-                            ),
-                            border: Border.all(color: dividerColor),
-                            boxShadow: [
-                              BoxShadow(
-                                color: OpenBudgetPalette.overlayScrimFor(
-                                  theme,
-                                ).withAlpha(18),
-                                blurRadius: 18,
-                                offset: const Offset(0, 8),
+                      ],
+                    ),
+                    const SizedBox(height: SpacingTokens.xs),
+                    Text(
+                      l10n.authLoginSubtitle,
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        color: palette.mutedInk,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: SpacingTokens.lg),
+                    ObCard(
+                      padding: const EdgeInsets.all(SpacingTokens.md),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          if (showSocialSection) ...[
+                            if (showAppleSignIn)
+                              AppleSignInWidget(
+                                client: client,
+                                minimumWidth: 320,
+                                onAuthenticated: () {
+                                  unawaited(
+                                    ref
+                                        .read(authProvider.notifier)
+                                        .syncExternalAuthState(),
+                                  );
+                                },
+                                onError: (error) {
+                                  ref
+                                      .read(authProvider.notifier)
+                                      .setExternalAuthError(error);
+                                },
                               ),
-                            ],
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              if (showSocialSection) ...[
-                                if (showAppleSignIn)
-                                  AppleSignInWidget(
-                                    client: client,
-                                    minimumWidth: 320,
-                                    onAuthenticated: () {
-                                      unawaited(
-                                        ref
-                                            .read(authProvider.notifier)
-                                            .syncExternalAuthState(),
-                                      );
-                                    },
-                                    onError: (error) {
-                                      ref
-                                          .read(authProvider.notifier)
-                                          .setExternalAuthError(error);
-                                    },
+                            if (showAppleSignIn && showGoogleSignIn)
+                              const SizedBox(height: SpacingTokens.sm),
+                            if (showGoogleSignIn)
+                              GoogleSignInWidget(
+                                client: client,
+                                minimumWidth: 320,
+                                onAuthenticated: () {
+                                  unawaited(
+                                    ref
+                                        .read(authProvider.notifier)
+                                        .syncExternalAuthState(),
+                                  );
+                                },
+                                onError: (error) {
+                                  ref
+                                      .read(authProvider.notifier)
+                                      .setExternalAuthError(error);
+                                },
+                              ),
+                            const SizedBox(height: SpacingTokens.md),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Divider(
+                                    color: palette.line,
+                                    height: 1,
                                   ),
-                                if (showAppleSignIn && showGoogleSignIn)
-                                  const SizedBox(height: SpacingTokens.sm),
-                                if (showGoogleSignIn)
-                                  GoogleSignInWidget(
-                                    client: client,
-                                    minimumWidth: 320,
-                                    onAuthenticated: () {
-                                      unawaited(
-                                        ref
-                                            .read(authProvider.notifier)
-                                            .syncExternalAuthState(),
-                                      );
-                                    },
-                                    onError: (error) {
-                                      ref
-                                          .read(authProvider.notifier)
-                                          .setExternalAuthError(error);
-                                    },
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: SpacingTokens.md,
                                   ),
-                                const SizedBox(height: SpacingTokens.md),
-                                Row(
+                                  child: Text(
+                                    l10n.loginOrSeparator,
+                                    style: theme.textTheme.bodyMedium?.copyWith(
+                                      color: palette.mutedInk,
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Divider(
+                                    color: palette.line,
+                                    height: 1,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: SpacingTokens.md),
+                          ],
+                          if (errorMessage != null) ...[
+                            Semantics(
+                              liveRegion: true,
+                              child: Container(
+                                padding: const EdgeInsets.all(
+                                  SpacingTokens.sm,
+                                ),
+                                decoration: ObRoughDecoration(
+                                  color: palette.wash(ObTone.overspent),
+                                  outline: palette.quietPen,
+                                  radius: RadiusTokens.sm,
+                                  seed: 7,
+                                ),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Expanded(
-                                      child: Divider(
-                                        color: dividerColor,
-                                        height: 1,
-                                      ),
+                                    SkribbleIcon(
+                                      data: OpenBudgetIcons.error,
+                                      size: 18,
+                                      color: palette.overspent,
                                     ),
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: SpacingTokens.md,
-                                      ),
+                                    const SizedBox(width: SpacingTokens.sm),
+                                    Expanded(
                                       child: Text(
-                                        l10n.loginOrSeparator,
-                                        style: theme.textTheme.bodyMedium
-                                            ?.copyWith(
-                                              color:
-                                                  OpenBudgetPalette.fgSecondaryFor(
-                                                    theme,
-                                                  ),
-                                            ),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      child: Divider(
-                                        color: dividerColor,
-                                        height: 1,
+                                        errorMessage,
+                                        style: theme.textTheme.bodySmall
+                                            ?.copyWith(color: palette.ink),
                                       ),
                                     ),
                                   ],
                                 ),
-                                const SizedBox(height: SpacingTokens.md),
-                              ],
-                              if (errorMessage != null) ...[
-                                Container(
-                                  padding: const EdgeInsets.all(
-                                    SpacingTokens.sm,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: theme.colorScheme.errorContainer,
-                                    borderRadius: BorderRadius.circular(
-                                      RadiusTokens.sm,
-                                    ),
-                                  ),
-                                  child: Text(
-                                    errorMessage,
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: theme.colorScheme.onErrorContainer,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: SpacingTokens.md),
-                              ],
-                              _LoginTextField(
-                                controller: emailController,
-                                hintText: l10n.loginEmailLabel,
-                                keyboardType: TextInputType.emailAddress,
-                                textInputAction: TextInputAction.next,
                               ),
-                              const SizedBox(height: SpacingTokens.sm),
-                              _LoginTextField(
-                                controller: passwordController,
-                                hintText: l10n.loginPasswordLabel,
-                                obscureText: obscurePassword.value,
-                                textInputAction: TextInputAction.done,
-                                suffixIcon: IconButton(
-                                  onPressed: () => obscurePassword.value =
-                                      !obscurePassword.value,
-                                  icon: Icon(
-                                    obscurePassword.value
-                                        ? Icons.visibility_outlined
-                                        : Icons.visibility_off_outlined,
-                                    color: OpenBudgetPalette.fgSecondaryFor(
-                                      theme,
-                                    ),
-                                  ),
-                                ),
-                                onSubmitted: canLogin
-                                    ? (_) => _login(
-                                        ref,
-                                        emailController,
-                                        passwordController,
-                                      )
-                                    : null,
-                              ),
-                              const SizedBox(height: SpacingTokens.md),
-                              FilledButton(
-                                onPressed: canLogin
-                                    ? () => _login(
-                                        ref,
-                                        emailController,
-                                        passwordController,
-                                      )
-                                    : null,
-                                style: FilledButton.styleFrom(
-                                  elevation: 0,
-                                  minimumSize: const Size.fromHeight(48),
-                                  backgroundColor: OpenBudgetPalette.bgBrandFor(
-                                    theme,
-                                  ),
-                                  foregroundColor:
-                                      OpenBudgetPalette.fgOnBrandFor(theme),
-                                  disabledBackgroundColor: dividerColor,
-                                  disabledForegroundColor:
-                                      OpenBudgetPalette.fgSecondaryFor(theme),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(
-                                      RadiusTokens.sm,
-                                    ),
-                                  ),
-                                ),
-                                child: isLoading
-                                    ? const SizedBox(
-                                        height: 20,
-                                        width: 20,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                        ),
-                                      )
-                                    : Text(l10n.loginButton),
-                              ),
-                              const SizedBox(height: SpacingTokens.sm),
-                              TextButton(
-                                onPressed: () => _showUnavailable(
-                                  context,
-                                  l10n.loginForgotPassword,
-                                ),
-                                child: Text(
-                                  l10n.loginForgotPassword,
-                                  style: theme.textTheme.titleMedium?.copyWith(
-                                    color: OpenBudgetPalette.bgBrandFor(theme),
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ),
-                              TextButton(
-                                onPressed: () => context.go(registerPath),
-                                child: Text(
-                                  l10n.loginCreateAccount,
-                                  style: theme.textTheme.titleMedium?.copyWith(
-                                    color: OpenBudgetPalette.bgBrandFor(theme),
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ),
-                            ],
+                            ),
+                            const SizedBox(height: SpacingTokens.md),
+                          ],
+                          _LoginTextField(
+                            controller: emailController,
+                            labelText: l10n.loginEmailLabel,
+                            prefixIcon: OpenBudgetIcons.email,
+                            keyboardType: TextInputType.emailAddress,
+                            textInputAction: TextInputAction.next,
                           ),
-                        ),
-                        const SizedBox(height: SpacingTokens.md),
-                      ],
+                          const SizedBox(height: SpacingTokens.sm),
+                          _LoginTextField(
+                            controller: passwordController,
+                            labelText: l10n.loginPasswordLabel,
+                            prefixIcon: OpenBudgetIcons.lock,
+                            obscureText: obscurePassword.value,
+                            textInputAction: TextInputAction.done,
+                            suffixIcon: IconButton(
+                              tooltip: obscurePassword.value
+                                  ? l10n.authShowPassword
+                                  : l10n.authHidePassword,
+                              onPressed: () => obscurePassword.value =
+                                  !obscurePassword.value,
+                              icon: SkribbleIcon(
+                                data: obscurePassword.value
+                                    ? OpenBudgetIcons.visible
+                                    : OpenBudgetIcons.hidden,
+                              ),
+                            ),
+                            onSubmitted: canLogin
+                                ? (_) => _login(
+                                    ref,
+                                    emailController,
+                                    passwordController,
+                                  )
+                                : null,
+                          ),
+                          const SizedBox(height: SpacingTokens.md),
+                          ObFilledButton(
+                            onPressed: canLogin
+                                ? () => _login(
+                                    ref,
+                                    emailController,
+                                    passwordController,
+                                  )
+                                : null,
+                            isLoading: isLoading,
+                            loadingLabel: l10n.loginLoading,
+                            child: Text(l10n.loginButton),
+                          ),
+                          const SizedBox(height: SpacingTokens.sm),
+                          TextButton(
+                            onPressed: () => _showUnavailable(
+                              context,
+                              l10n.loginForgotPassword,
+                            ),
+                            child: Text(l10n.loginForgotPassword),
+                          ),
+                          TextButton(
+                            onPressed: () => context.go(registerPath),
+                            child: Text(l10n.loginCreateAccount),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
+                    const SizedBox(height: SpacingTokens.md),
+                  ],
                 ),
               ),
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -353,8 +318,8 @@ class _OpenBudgetMark extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final palette = theme.ob;
     final appIconStyle = ref.watch(appIconStyleProvider);
-    final fallbackColor = OpenBudgetPalette.bgBrandFor(theme);
     return SizedBox(
       height: 96,
       width: 96,
@@ -362,14 +327,17 @@ class _OpenBudgetMark extends HookConsumerWidget {
         appIconStyle.previewAssetPathFor(theme.brightness),
         fit: BoxFit.contain,
         errorBuilder: (context, error, stackTrace) => DecoratedBox(
-          decoration: BoxDecoration(
-            color: fallbackColor.withAlpha(22),
-            borderRadius: BorderRadius.circular(RadiusTokens.md),
+          decoration: ObRoughDecoration(
+            color: palette.wash(ObTone.brand),
+            outline: palette.quietPen,
+            seed: 9,
           ),
-          child: Icon(
-            Icons.account_balance_wallet_outlined,
-            color: fallbackColor,
-            size: 44,
+          child: Center(
+            child: SkribbleIcon(
+              data: OpenBudgetIcons.wallet,
+              color: palette.hue(ObTone.brand),
+              size: 44,
+            ),
           ),
         ),
       ),
@@ -377,52 +345,11 @@ class _OpenBudgetMark extends HookConsumerWidget {
   }
 }
 
-class _LoginBackdrop extends StatelessWidget {
-  const _LoginBackdrop({
-    required this.backgroundColor,
-    required this.accentColor,
-    required this.secondaryAccentColor,
-  });
-
-  final Color backgroundColor;
-  final Color accentColor;
-  final Color secondaryAccentColor;
-
-  @override
-  Widget build(BuildContext context) => Stack(
-    children: [
-      Positioned.fill(
-        child: DecoratedBox(decoration: BoxDecoration(color: backgroundColor)),
-      ),
-      Positioned(
-        top: -140,
-        left: -90,
-        child: Container(
-          width: 280,
-          height: 280,
-          decoration: BoxDecoration(color: accentColor, shape: BoxShape.circle),
-        ),
-      ),
-      Positioned(
-        bottom: -110,
-        right: -80,
-        child: Container(
-          width: 250,
-          height: 250,
-          decoration: BoxDecoration(
-            color: secondaryAccentColor,
-            shape: BoxShape.circle,
-          ),
-        ),
-      ),
-    ],
-  );
-}
-
 class _LoginTextField extends HookWidget {
   const _LoginTextField({
     required this.controller,
-    required this.hintText,
+    required this.labelText,
+    required this.prefixIcon,
     this.keyboardType,
     this.textInputAction,
     this.obscureText = false,
@@ -431,7 +358,8 @@ class _LoginTextField extends HookWidget {
   });
 
   final TextEditingController controller;
-  final String hintText;
+  final String labelText;
+  final WiredSvgIconData prefixIcon;
   final TextInputType? keyboardType;
   final TextInputAction? textInputAction;
   final bool obscureText;
@@ -440,7 +368,7 @@ class _LoginTextField extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final palette = Theme.of(context).ob;
     return TextField(
       controller: controller,
       keyboardType: keyboardType,
@@ -448,31 +376,13 @@ class _LoginTextField extends HookWidget {
       obscureText: obscureText,
       onSubmitted: onSubmitted,
       decoration: InputDecoration(
-        hintText: hintText,
-        hintStyle: theme.textTheme.bodyLarge?.copyWith(
-          color: OpenBudgetPalette.fgSecondaryFor(theme),
+        labelText: labelText,
+        prefixIcon: SkribbleIcon(
+          data: prefixIcon,
+          size: 20,
+          color: palette.mutedInk,
         ),
-        filled: true,
-        fillColor: OpenBudgetPalette.bgTertiaryFor(theme),
         suffixIcon: suffixIcon,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(RadiusTokens.sm),
-          borderSide: BorderSide.none,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(RadiusTokens.sm),
-          borderSide: BorderSide.none,
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(RadiusTokens.sm),
-          borderSide: BorderSide(
-            color: OpenBudgetPalette.borderSubtleFor(theme),
-          ),
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: SpacingTokens.md,
-          vertical: SpacingTokens.md,
-        ),
       ),
     );
   }

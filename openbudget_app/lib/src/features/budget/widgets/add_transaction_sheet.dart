@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
-import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 enum AddTransactionAction { income, expense, transfer }
@@ -15,6 +14,7 @@ class AddTransactionSheet extends HookWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
+    final palette = theme.ob;
 
     return SafeArea(
       child: SingleChildScrollView(
@@ -28,9 +28,10 @@ class AddTransactionSheet extends HookWidget {
             Container(
               width: 40,
               height: 4,
-              decoration: BoxDecoration(
-                color: OpenBudgetPalette.borderSubtleFor(theme),
-                borderRadius: BorderRadius.circular(2),
+              decoration: ObRoughDecoration(
+                color: palette.line,
+                radius: 4,
+                seed: 101,
               ),
             ),
             const SizedBox(height: SpacingTokens.lg),
@@ -38,31 +39,32 @@ class AddTransactionSheet extends HookWidget {
               l10n.addTransactionSheetTitle,
               style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.w800,
+                color: palette.ink,
               ),
             ),
             const SizedBox(height: SpacingTokens.lg),
             _ActionTile(
-              icon: Icons.arrow_downward_rounded,
+              icon: OpenBudgetIcons.inflow,
               label: l10n.addTransactionIncome,
-              color: OpenBudgetPalette.fgSuccessFor(theme),
+              tone: ObTone.funded,
               onTap: () {
                 Navigator.of(context).pop(AddTransactionAction.income);
               },
             ),
             const SizedBox(height: SpacingTokens.sm),
             _ActionTile(
-              icon: Icons.arrow_upward_rounded,
+              icon: OpenBudgetIcons.outflow,
               label: l10n.addTransactionExpense,
-              color: OpenBudgetPalette.fgErrorFor(theme),
+              tone: ObTone.overspent,
               onTap: () {
                 Navigator.of(context).pop(AddTransactionAction.expense);
               },
             ),
             const SizedBox(height: SpacingTokens.sm),
             _ActionTile(
-              icon: Icons.swap_horiz_rounded,
+              icon: OpenBudgetIcons.transfer,
               label: l10n.addTransactionTransfer,
-              color: OpenBudgetPalette.bgBrandFor(theme),
+              tone: ObTone.brand,
               onTap: () {
                 Navigator.of(context).pop(AddTransactionAction.transfer);
               },
@@ -79,41 +81,45 @@ class _ActionTile extends HookWidget {
   const _ActionTile({
     required this.icon,
     required this.label,
-    required this.color,
+    required this.tone,
     required this.onTap,
   });
 
-  final IconData icon;
+  final WiredSvgIconData icon;
   final String label;
-  final Color color;
+  final ObTone tone;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final palette = theme.ob;
 
-    return Card(
-      margin: EdgeInsets.zero,
-      color: OpenBudgetPalette.bgSecondaryFor(theme),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(RadiusTokens.md),
-        side: BorderSide(color: OpenBudgetPalette.borderSubtleFor(theme)),
-      ),
+    return ObCard(
+      onTap: onTap,
       child: ListTile(
-        onTap: onTap,
-        leading: CircleAvatar(
-          backgroundColor: color.withAlpha(18),
-          child: Icon(icon, color: color),
+        leading: Container(
+          width: 40,
+          height: 40,
+          alignment: Alignment.center,
+          decoration: ObRoughDecoration(
+            color: palette.wash(tone),
+            radius: 10,
+            strokeWidth: 1.4,
+            seed: 103,
+          ),
+          child: SkribbleIcon(data: icon, color: palette.hue(tone)),
         ),
         title: Text(
           label,
           style: theme.textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w700,
+            color: palette.ink,
           ),
         ),
-        trailing: Icon(
-          Icons.chevron_right_rounded,
-          color: OpenBudgetPalette.fgSecondaryFor(theme),
+        trailing: SkribbleIcon(
+          data: OpenBudgetIcons.chevronRight,
+          color: palette.mutedInk,
         ),
       ),
     );

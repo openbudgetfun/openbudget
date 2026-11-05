@@ -9,7 +9,6 @@ import 'package:openbudget_app/src/features/budget/providers/budget_detail_provi
 import 'package:openbudget_app/src/features/recurring/providers/recurring_actions_provider.dart';
 import 'package:openbudget_app/src/features/recurring/providers/recurring_list_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
-import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
@@ -19,8 +18,15 @@ import 'package:openbudget_ui/openbudget_ui.dart';
 
 enum RecurringViewFilter { all, expenses, income, due }
 
+/// Scheduled bills and income, written on a stack of paper slips.
 class RecurringListScreen extends HookConsumerWidget {
   const RecurringListScreen({required this.budgetId, super.key});
+
+  /// Opens the add-recurring dialog.
+  static const Key addButtonKey = ValueKey('recurring.add');
+
+  /// Opens the schedule calendar.
+  static const Key calendarButtonKey = ValueKey('recurring.calendar');
 
   final String budgetId;
 
@@ -29,8 +35,6 @@ class RecurringListScreen extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final recurringAsync = ref.watch(recurringListProvider(budgetId));
     final budgetAsync = ref.watch(budgetDetailProvider(budgetId));
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
     final viewFilter = useState(RecurringViewFilter.all);
     final budgetCurrency =
         budgetAsync.whenOrNull(
@@ -39,15 +43,12 @@ class RecurringListScreen extends HookConsumerWidget {
         CurrencyCode.usd;
 
     return Scaffold(
-      backgroundColor: OpenBudgetPalette.bgPrimaryFor(theme),
       appBar: AppBar(
-        backgroundColor: OpenBudgetPalette.bgPrimaryFor(theme),
-        surfaceTintColor: OpenBudgetPalette.transparentFor(theme),
-        scrolledUnderElevation: 0,
         title: Text(l10n.recurringListTitle),
         actions: [
           IconButton(
-            icon: const Icon(Icons.calendar_month_rounded),
+            key: calendarButtonKey,
+            icon: const SkribbleIcon(data: OpenBudgetIcons.calendarMonth),
             tooltip: l10n.scheduledCalendarTitle,
             onPressed: () => context.pushNamed(
               recurringCalendarRoute,
@@ -55,79 +56,40 @@ class RecurringListScreen extends HookConsumerWidget {
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.add),
+            key: addButtonKey,
+            icon: const SkribbleIcon(data: OpenBudgetIcons.add),
             tooltip: l10n.recurringAddButton,
             onPressed: () => _showAddDialog(context, budgetCurrency),
           ),
         ],
       ),
       body: recurringAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.error_outline_rounded,
-                size: 48,
-                color: colorScheme.error,
-              ),
-              const SizedBox(height: SpacingTokens.md),
-              Text(
-                l10n.recurringLoadError,
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: colorScheme.error,
-                ),
-              ),
-            ],
-          ),
+        loading: () =>
+            Center(child: ObLoadingPanel(label: l10n.recurringLoading)),
+        error: (error, _) => ListView(
+          padding: const EdgeInsets.all(SpacingTokens.md),
+          children: [
+            ObStatePanel.problem(
+              title: l10n.recurringLoadError,
+              message: error.toString(),
+            ),
+          ],
         ),
         data: (items) {
           if (items.isEmpty) {
-            return Center(
-              child: Card(
-                margin: const EdgeInsets.all(SpacingTokens.lg),
-                color: OpenBudgetPalette.bgSecondaryFor(theme),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(RadiusTokens.md),
-                  side: BorderSide(
-                    color: OpenBudgetPalette.borderSubtleFor(theme),
+            return ListView(
+              padding: const EdgeInsets.all(SpacingTokens.md),
+              children: [
+                ObStatePanel.empty(
+                  title: l10n.recurringEmptyTitle,
+                  message: l10n.recurringEmptySubtitle,
+                  doodle: WiredDoodleKind.sun,
+                  action: ObStateAction(
+                    label: l10n.recurringAddButton,
+                    onPressed: () => _showAddDialog(context, budgetCurrency),
                   ),
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.all(SpacingTokens.lg),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.repeat_rounded,
-                        size: 48,
-                        color: colorScheme.outlineVariant,
-                      ),
-                      const SizedBox(height: SpacingTokens.md),
-                      Text(
-                        l10n.recurringEmptyTitle,
-                        style: theme.textTheme.titleMedium,
-                      ),
-                      const SizedBox(height: SpacingTokens.sm),
-                      Text(
-                        l10n.recurringEmptySubtitle,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: SpacingTokens.lg),
-                      FilledButton.icon(
-                        onPressed: () =>
-                            _showAddDialog(context, budgetCurrency),
-                        icon: const Icon(Icons.add),
-                        label: Text(l10n.recurringAddButton),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              ],
             );
           }
 
@@ -165,11 +127,15 @@ class RecurringListScreen extends HookConsumerWidget {
               .toList();
 
           return RefreshIndicator(
-            onRefresh: () async {
-              ref.invalidate(recurringListProvider(budgetId));
-            },
+            onRefresh: () async =>
+                ref.invalidate(recurringListProvider(budgetId)),
             child: ListView(
-              padding: const EdgeInsets.all(SpacingTokens.md),
+              padding: const EdgeInsets.fromLTRB(
+                SpacingTokens.md,
+                SpacingTokens.sm,
+                SpacingTokens.md,
+                SpacingTokens.xl,
+              ),
               children: [
                 _RecurringSummaryCard(
                   totalItems: items.length,
@@ -188,73 +154,52 @@ class RecurringListScreen extends HookConsumerWidget {
                         ),
                 ),
                 const SizedBox(height: SpacingTokens.md),
-                SizedBox(
-                  height: 36,
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    children: [
-                      _RecurringFilterChip(
-                        label: l10n.transactionFilterAll,
-                        selected: viewFilter.value == RecurringViewFilter.all,
-                        onTap: () => viewFilter.value = RecurringViewFilter.all,
-                      ),
-                      const SizedBox(width: SpacingTokens.sm),
-                      _RecurringFilterChip(
-                        label: l10n.transactionFilterExpense,
-                        selected:
-                            viewFilter.value == RecurringViewFilter.expenses,
-                        onTap: () =>
-                            viewFilter.value = RecurringViewFilter.expenses,
-                        color: OpenBudgetPalette.fgErrorFor(theme),
-                      ),
-                      const SizedBox(width: SpacingTokens.sm),
-                      _RecurringFilterChip(
-                        label: l10n.transactionFilterIncome,
-                        selected:
-                            viewFilter.value == RecurringViewFilter.income,
-                        onTap: () =>
-                            viewFilter.value = RecurringViewFilter.income,
-                        color: OpenBudgetPalette.fgSuccessFor(theme),
-                      ),
-                      const SizedBox(width: SpacingTokens.sm),
-                      _RecurringFilterChip(
-                        label: l10n.recurringDueLabel,
-                        selected: viewFilter.value == RecurringViewFilter.due,
-                        onTap: () => viewFilter.value = RecurringViewFilter.due,
-                        color: OpenBudgetPalette.bgBrandFor(theme),
-                      ),
-                    ],
-                  ),
+                Wrap(
+                  spacing: SpacingTokens.sm,
+                  runSpacing: SpacingTokens.sm,
+                  children: [
+                    _RecurringFilterChip(
+                      label: l10n.transactionFilterAll,
+                      selected: viewFilter.value == RecurringViewFilter.all,
+                      onTap: () => viewFilter.value = RecurringViewFilter.all,
+                    ),
+                    _RecurringFilterChip(
+                      label: l10n.transactionFilterExpense,
+                      selected:
+                          viewFilter.value == RecurringViewFilter.expenses,
+                      onTap: () =>
+                          viewFilter.value = RecurringViewFilter.expenses,
+                    ),
+                    _RecurringFilterChip(
+                      label: l10n.transactionFilterIncome,
+                      selected: viewFilter.value == RecurringViewFilter.income,
+                      onTap: () =>
+                          viewFilter.value = RecurringViewFilter.income,
+                    ),
+                    _RecurringFilterChip(
+                      label: l10n.recurringDueLabel,
+                      selected: viewFilter.value == RecurringViewFilter.due,
+                      onTap: () => viewFilter.value = RecurringViewFilter.due,
+                    ),
+                  ],
                 ),
                 const SizedBox(height: SpacingTokens.md),
                 if (filteredItems.isEmpty)
-                  Card(
-                    margin: EdgeInsets.zero,
-                    color: OpenBudgetPalette.bgSecondaryFor(theme),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(RadiusTokens.md),
-                      side: BorderSide(
-                        color: OpenBudgetPalette.borderSubtleFor(theme),
-                      ),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(SpacingTokens.md),
-                      child: Text(
-                        l10n.transactionNoResults,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: OpenBudgetPalette.fgSecondaryFor(theme),
-                        ),
-                      ),
-                    ),
+                  ObStatePanel.empty(
+                    title: l10n.transactionNoResults,
+                    doodle: WiredDoodleKind.scribble,
+                    tone: ObTone.neutral,
                   ),
                 ...filteredItems.map(
-                  (item) => _RecurringTile(
-                    recurring: item,
-                    budgetId: budgetId,
-                    onEdit: () => _showEditDialog(context, item),
-                    onDelete: () => _confirmDelete(context, ref, item),
-                    onToggle: () => _toggleActive(ref, item),
-                    onSkip: () => _skipOccurrence(context, ref, item),
+                  (item) => Padding(
+                    padding: const EdgeInsets.only(bottom: SpacingTokens.sm),
+                    child: _RecurringTile(
+                      recurring: item,
+                      onEdit: () => _showEditDialog(context, item),
+                      onDelete: () => _confirmDelete(context, ref, item),
+                      onToggle: () => _toggleActive(ref, item),
+                      onSkip: () => _skipOccurrence(context, ref, item),
+                    ),
                   ),
                 ),
               ],
@@ -291,7 +236,6 @@ class RecurringListScreen extends HookConsumerWidget {
     RecurringTransaction recurring,
   ) async {
     final l10n = AppLocalizations.of(context);
-    final colorScheme = Theme.of(context).colorScheme;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -300,16 +244,12 @@ class RecurringListScreen extends HookConsumerWidget {
           '${l10n.deleteConfirmMessage}\n\n"${recurring.description}"',
         ),
         actions: [
-          TextButton(
+          ObTextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
             child: Text(l10n.dialogCancel),
           ),
-          FilledButton(
+          ObFilledButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            style: FilledButton.styleFrom(
-              backgroundColor: colorScheme.error,
-              foregroundColor: colorScheme.onError,
-            ),
             child: Text(l10n.deleteConfirmButton),
           ),
         ],
@@ -406,73 +346,92 @@ class _RecurringSummaryCard extends HookWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-
-    return Card(
-      margin: EdgeInsets.zero,
-      color: OpenBudgetPalette.bgSecondaryFor(theme),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(RadiusTokens.md),
-        side: BorderSide(color: OpenBudgetPalette.borderSubtleFor(theme)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(SpacingTokens.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(SpacingTokens.md),
-              decoration: BoxDecoration(
-                color: OpenBudgetPalette.bgAccentFor(theme),
-                borderRadius: BorderRadius.circular(RadiusTokens.md),
-              ),
-              child: Column(
-                children: [
-                  Text(
-                    l10n.recurringListTitle,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
+    final palette = theme.ob;
+    return ObCard(
+      padding: const EdgeInsets.all(SpacingTokens.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              SizedBox.square(
+                dimension: 40,
+                child: DecoratedBox(
+                  decoration: ObRoughDecoration(
+                    color: palette.brandWash,
+                    outline: palette.quietPen,
+                    radius: 10,
+                    strokeWidth: 1.6,
+                    seed: 5,
+                  ),
+                  child: Center(
+                    child: SkribbleIcon(
+                      data: OpenBudgetIcons.recurring,
+                      size: 20,
+                      color: palette.brand,
                     ),
                   ),
-                  const SizedBox(height: SpacingTokens.xs),
-                  Text(
-                    l10n.recurringTotalCount(totalItems),
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: OpenBudgetPalette.fgSecondaryFor(theme),
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
-            const SizedBox(height: SpacingTokens.md),
-            Row(
-              children: [
-                Expanded(
-                  child: _SummaryMetric(
-                    label: l10n.transactionFilterExpense,
-                    value: totalExpenses,
-                    color: OpenBudgetPalette.fgErrorFor(theme),
+              const SizedBox(width: SpacingTokens.sm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.recurringSummaryTitle,
+                      style: theme.textTheme.titleSmall,
+                    ),
+                    Text(
+                      l10n.recurringTotalCount(totalItems),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: palette.mutedInk,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (dueCount > 0)
+                ObToneChip(
+                  label: l10n.recurringDueLabel,
+                  tone: ObTone.overspent,
+                  icon: const SkribbleIcon(
+                    data: OpenBudgetIcons.schedule,
+                    size: 14,
                   ),
                 ),
-                const SizedBox(width: SpacingTokens.sm),
-                Expanded(
-                  child: _SummaryMetric(
-                    label: l10n.transactionFilterIncome,
-                    value: totalIncome,
-                    color: OpenBudgetPalette.fgSuccessFor(theme),
-                  ),
+            ],
+          ),
+          const SizedBox(height: SpacingTokens.md),
+          Row(
+            children: [
+              Expanded(
+                child: _SummaryMetric(
+                  label: l10n.transactionFilterExpense,
+                  value: totalExpenses,
+                  tone: ObTone.overspent,
                 ),
-                const SizedBox(width: SpacingTokens.sm),
-                Expanded(
-                  child: _SummaryMetric(
-                    label: l10n.recurringDueLabel,
-                    value: '$dueCount',
-                    color: OpenBudgetPalette.bgBrandFor(theme),
-                  ),
+              ),
+              const SizedBox(width: SpacingTokens.sm),
+              Expanded(
+                child: _SummaryMetric(
+                  label: l10n.transactionFilterIncome,
+                  value: totalIncome,
+                  tone: ObTone.funded,
                 ),
-              ],
-            ),
-          ],
-        ),
+              ),
+              const SizedBox(width: SpacingTokens.sm),
+              Expanded(
+                child: _SummaryMetric(
+                  label: l10n.recurringDueLabel,
+                  value: '$dueCount',
+                  tone: ObTone.underfunded,
+                  isMoney: false,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -482,48 +441,45 @@ class _SummaryMetric extends HookWidget {
   const _SummaryMetric({
     required this.label,
     required this.value,
-    required this.color,
+    required this.tone,
+    this.isMoney = true,
   });
 
   final String label;
   final String value;
-  final Color color;
+  final ObTone tone;
+  final bool isMoney;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: SpacingTokens.sm,
-        vertical: SpacingTokens.xs,
-      ),
-      decoration: BoxDecoration(
-        color: color.withAlpha(28),
-        borderRadius: BorderRadius.circular(RadiusTokens.sm),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: OpenBudgetPalette.fgSecondaryFor(theme),
-            ),
-          ),
-          const SizedBox(height: 2),
+    final palette = theme.ob;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: theme.textTheme.bodySmall?.copyWith(color: palette.mutedInk),
+        ),
+        const SizedBox(height: 2),
+        if (isMoney)
+          ObAmount(
+            value,
+            tone: tone,
+            style: theme.textTheme.titleSmall,
+          )
+        else
           Text(
             value,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: theme.textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: color,
+              color: palette.hue(tone),
             ),
           ),
-        ],
-      ),
+      ],
     );
   }
 }
@@ -533,46 +489,23 @@ class _RecurringFilterChip extends HookWidget {
     required this.label,
     required this.selected,
     required this.onTap,
-    this.color,
   });
 
   final String label;
   final bool selected;
   final VoidCallback onTap;
-  final Color? color;
 
   @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final chipColor = color ?? OpenBudgetPalette.bgBrandFor(theme);
-    return ChoiceChip(
-      label: Text(label),
-      selected: selected,
-      onSelected: (_) => onTap(),
-      backgroundColor: OpenBudgetPalette.bgSecondaryFor(theme),
-      selectedColor: chipColor.withAlpha(26),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(RadiusTokens.sm),
-        side: BorderSide(
-          color: selected
-              ? chipColor.withAlpha(130)
-              : OpenBudgetPalette.borderSubtleFor(theme),
-        ),
-      ),
-      labelStyle: theme.textTheme.labelMedium?.copyWith(
-        color: selected ? chipColor : OpenBudgetPalette.fgSecondaryFor(theme),
-        fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-      ),
-      visualDensity: VisualDensity.compact,
-      showCheckmark: false,
-    );
-  }
+  Widget build(BuildContext context) => ChoiceChip(
+    label: Text(label),
+    selected: selected,
+    onSelected: (_) => onTap(),
+  );
 }
 
 class _RecurringTile extends HookWidget {
   const _RecurringTile({
     required this.recurring,
-    required this.budgetId,
     required this.onEdit,
     required this.onDelete,
     required this.onToggle,
@@ -580,7 +513,6 @@ class _RecurringTile extends HookWidget {
   });
 
   final RecurringTransaction recurring;
-  final String budgetId;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
   final VoidCallback onToggle;
@@ -590,15 +522,12 @@ class _RecurringTile extends HookWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
+    final palette = theme.ob;
     final currency = CurrencyCode.values.firstWhere(
       (c) => c.code == recurring.currencyCode,
       orElse: () => CurrencyCode.usd,
     );
-    final amount = recurring.amountCents / _pow10(currency.decimals);
     final isIncome = recurring.amountCents > 0;
-    final formattedAmount =
-        '${currency.symbol}${amount.abs().toStringAsFixed(currency.decimals)}';
-
     final frequencyLabel = switch (recurring.frequency) {
       'daily' => l10n.recurringFreqDaily,
       'weekly' => l10n.recurringFreqWeekly,
@@ -616,132 +545,144 @@ class _RecurringTile extends HookWidget {
     return Dismissible(
       key: ValueKey(recurring.id),
       direction: DismissDirection.endToStart,
-      background: Container(
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: SpacingTokens.md),
-        decoration: BoxDecoration(
-          color: OpenBudgetPalette.fgErrorFor(theme),
-          borderRadius: BorderRadius.circular(RadiusTokens.md),
+      background: DecoratedBox(
+        decoration: ObRoughDecoration(
+          color: palette.overspentWash,
+          outline: palette.overspent,
+          seed: 17,
         ),
-        child: Icon(Icons.delete, color: OpenBudgetPalette.fgOnBrandFor(theme)),
+        child: Align(
+          alignment: Alignment.centerRight,
+          child: Padding(
+            padding: const EdgeInsets.only(right: SpacingTokens.md),
+            child: SkribbleIcon(
+              data: OpenBudgetIcons.delete,
+              color: palette.overspent,
+            ),
+          ),
+        ),
       ),
       confirmDismiss: (_) async {
         onDelete();
         return false;
       },
-      child: Card(
-        margin: const EdgeInsets.only(bottom: SpacingTokens.sm),
-        color: OpenBudgetPalette.bgSecondaryFor(theme),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(RadiusTokens.md),
-          side: BorderSide(color: OpenBudgetPalette.borderSubtleFor(theme)),
+      child: ObCard(
+        padding: const EdgeInsets.fromLTRB(
+          SpacingTokens.md,
+          SpacingTokens.sm,
+          SpacingTokens.md,
+          SpacingTokens.xs,
         ),
+        onTap: onEdit,
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            ListTile(
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: SpacingTokens.md,
-                vertical: SpacingTokens.xs,
-              ),
-              leading: CircleAvatar(
-                radius: 18,
-                backgroundColor: recurring.isActive
-                    ? OpenBudgetPalette.bgAccentFor(theme).withAlpha(90)
-                    : OpenBudgetPalette.bgTertiaryFor(theme),
-                child: Icon(
-                  Icons.repeat_rounded,
-                  color: recurring.isActive
-                      ? OpenBudgetPalette.bgBrandFor(theme)
-                      : OpenBudgetPalette.fgSecondaryFor(theme),
-                  size: 18,
-                ),
-              ),
-              title: Text(
-                recurring.description,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  decoration: recurring.isActive
-                      ? TextDecoration.none
-                      : TextDecoration.lineThrough,
-                ),
-              ),
-              subtitle: Text(
-                '$frequencyLabel \u2022 ${l10n.recurringNextDate}: $dateStr',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: OpenBudgetPalette.fgSecondaryFor(theme),
-                ),
-              ),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: SpacingTokens.sm,
-                      vertical: 3,
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox.square(
+                  dimension: 40,
+                  child: DecoratedBox(
+                    decoration: ObRoughDecoration(
+                      color: recurring.isActive
+                          ? palette.brandWash
+                          : palette.highlight,
+                      outline: palette.quietPen,
+                      radius: 10,
+                      strokeWidth: 1.6,
+                      seed: 19,
                     ),
-                    decoration: BoxDecoration(
-                      color: isIncome
-                          ? OpenBudgetPalette.fgSuccessFor(theme).withAlpha(26)
-                          : OpenBudgetPalette.fgErrorFor(theme).withAlpha(18),
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                    child: Text(
-                      isIncome ? '+$formattedAmount' : '-$formattedAmount',
-                      style: theme.textTheme.labelLarge?.copyWith(
-                        color: isIncome
-                            ? OpenBudgetPalette.fgSuccessFor(theme)
-                            : OpenBudgetPalette.fgErrorFor(theme),
-                        fontWeight: FontWeight.w700,
+                    child: Center(
+                      child: SkribbleIcon(
+                        data: OpenBudgetIcons.recurring,
+                        size: 20,
+                        color: recurring.isActive
+                            ? palette.brand
+                            : palette.mutedInk,
                       ),
                     ),
                   ),
-                  const SizedBox(width: SpacingTokens.xs),
-                  Switch.adaptive(
+                ),
+                const SizedBox(width: SpacingTokens.sm),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        recurring.description,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          color: palette.ink,
+                          decoration: recurring.isActive
+                              ? TextDecoration.none
+                              : TextDecoration.lineThrough,
+                        ),
+                      ),
+                      Text(
+                        '$frequencyLabel \u2022 ${l10n.recurringNextDate}: $dateStr',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: palette.mutedInk,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: SpacingTokens.sm),
+                ObAmount(
+                  isIncome
+                      ? '+${formatCents(recurring.amountCents, currency)}'
+                      : formatCents(recurring.amountCents, currency),
+                  tone: isIncome ? ObTone.funded : ObTone.overspent,
+                  style: theme.textTheme.titleSmall,
+                ),
+              ],
+            ),
+            const SizedBox(height: SpacingTokens.xs),
+            Wrap(
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: SpacingTokens.sm,
+              runSpacing: SpacingTokens.xs,
+              children: [
+                Semantics(
+                  label: l10n.recurringActiveLabel,
+                  child: Switch.adaptive(
                     value: recurring.isActive,
                     onChanged: (_) => onToggle(),
-                    activeTrackColor: OpenBudgetPalette.bgBrandFor(theme),
                   ),
-                ],
-              ),
-              onTap: onEdit,
+                ),
+                if (!recurring.isActive)
+                  ObToneChip(
+                    label: l10n.recurringPausedLabel,
+                    icon: const SkribbleIcon(
+                      data: OpenBudgetIcons.snooze,
+                      size: 14,
+                    ),
+                  ),
+                if (isDue)
+                  ObToneChip(
+                    label: l10n.recurringDueLabel,
+                    tone: ObTone.overspent,
+                    icon: const SkribbleIcon(
+                      data: OpenBudgetIcons.schedule,
+                      size: 14,
+                    ),
+                  ),
+                if (isDue)
+                  ObTextButton(
+                    onPressed: onSkip,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const SkribbleIcon(
+                          data: OpenBudgetIcons.skip,
+                          size: 18,
+                        ),
+                        const SizedBox(width: SpacingTokens.xs),
+                        Text(l10n.recurringSkipButton),
+                      ],
+                    ),
+                  ),
+              ],
             ),
-            if (isDue)
-              Padding(
-                padding: const EdgeInsets.only(
-                  left: SpacingTokens.md,
-                  right: SpacingTokens.md,
-                  bottom: SpacingTokens.sm,
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.schedule_rounded,
-                      size: 16,
-                      color: OpenBudgetPalette.bgBrandFor(theme),
-                    ),
-                    const SizedBox(width: SpacingTokens.xs),
-                    Expanded(
-                      child: Text(
-                        l10n.recurringDueLabel,
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: OpenBudgetPalette.bgBrandFor(theme),
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                    TextButton.icon(
-                      onPressed: onSkip,
-                      icon: const Icon(Icons.skip_next_rounded, size: 18),
-                      label: Text(l10n.recurringSkipButton),
-                      style: TextButton.styleFrom(
-                        foregroundColor: OpenBudgetPalette.fgSecondaryFor(
-                          theme,
-                        ),
-                        visualDensity: VisualDensity.compact,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
           ],
         ),
       ),
@@ -775,27 +716,37 @@ class _AddRecurringDialog extends HookConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            TextField(
+            ObTextField(
               controller: descController,
-              decoration: InputDecoration(
-                labelText: l10n.transactionDescriptionLabel,
-                prefixIcon: const Icon(Icons.description_outlined),
+              labelText: l10n.transactionDescriptionLabel,
+              prefixIcon: const SkribbleIcon(
+                data: OpenBudgetIcons.document,
+                size: 20,
               ),
               autofocus: true,
-              textInputAction: TextInputAction.next,
+              onSubmitted: (_) => unawaited(
+                _submit(
+                  context,
+                  ref,
+                  descController,
+                  amountController,
+                  frequency,
+                  nextDate,
+                  isExpense,
+                  currencyCode,
+                  isSubmitting,
+                ),
+              ),
             ),
             const SizedBox(height: SpacingTokens.md),
-            TextField(
+            ObTextField(
               controller: amountController,
-              decoration: InputDecoration(
-                labelText:
-                    '${l10n.transactionAmountLabel} (${currencyCode.code})',
-                prefixText: '${currencyCode.symbol} ',
-              ),
+              labelText:
+                  '${l10n.transactionAmountLabel} (${currencyCode.code})',
+              prefixText: '${currencyCode.symbol} ',
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
               ),
-              textInputAction: TextInputAction.done,
             ),
             const SizedBox(height: SpacingTokens.md),
             SegmentedButton<bool>(
@@ -813,11 +764,9 @@ class _AddRecurringDialog extends HookConsumerWidget {
               onSelectionChanged: (s) => isExpense.value = s.first,
             ),
             const SizedBox(height: SpacingTokens.md),
-            DropdownButtonFormField<String>(
-              initialValue: frequency.value,
-              decoration: InputDecoration(
-                labelText: l10n.recurringFrequencyLabel,
-              ),
+            ObDropdown<String>(
+              value: frequency.value,
+              labelText: l10n.recurringFrequencyLabel,
               items: [
                 DropdownMenuItem(
                   value: 'daily',
@@ -851,7 +800,7 @@ class _AddRecurringDialog extends HookConsumerWidget {
               subtitle: Text(
                 '${nextDate.value.year}-${nextDate.value.month.toString().padLeft(2, '0')}-${nextDate.value.day.toString().padLeft(2, '0')}',
               ),
-              trailing: const Icon(Icons.calendar_today),
+              trailing: const SkribbleIcon(data: OpenBudgetIcons.calendar),
               onTap: () async {
                 final picked = await showDatePicker(
                   context: context,
@@ -866,31 +815,25 @@ class _AddRecurringDialog extends HookConsumerWidget {
         ),
       ),
       actions: [
-        TextButton(
+        ObTextButton(
           onPressed: () => Navigator.of(context).pop(),
           child: Text(l10n.dialogCancel),
         ),
-        FilledButton(
-          onPressed: isSubmitting.value
-              ? null
-              : () => _submit(
-                  context,
-                  ref,
-                  descController,
-                  amountController,
-                  frequency,
-                  nextDate,
-                  isExpense,
-                  currencyCode,
-                  isSubmitting,
-                ),
-          child: isSubmitting.value
-              ? const SizedBox(
-                  height: 20,
-                  width: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : Text(l10n.dialogSave),
+        ObFilledButton(
+          isLoading: isSubmitting.value,
+          loadingLabel: l10n.recurringSavingLabel,
+          onPressed: () => _submit(
+            context,
+            ref,
+            descController,
+            amountController,
+            frequency,
+            nextDate,
+            isExpense,
+            currencyCode,
+            isSubmitting,
+          ),
+          child: Text(l10n.dialogSave),
         ),
       ],
     );
@@ -979,31 +922,27 @@ class _EditRecurringDialog extends HookConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            TextField(
+            ObTextField(
               controller: descController,
-              decoration: InputDecoration(
-                labelText: l10n.transactionDescriptionLabel,
-                prefixIcon: const Icon(Icons.description_outlined),
+              labelText: l10n.transactionDescriptionLabel,
+              prefixIcon: const SkribbleIcon(
+                data: OpenBudgetIcons.document,
+                size: 20,
               ),
-              textInputAction: TextInputAction.next,
             ),
             const SizedBox(height: SpacingTokens.md),
-            TextField(
+            ObTextField(
               controller: amountController,
-              decoration: InputDecoration(
-                labelText: '${l10n.transactionAmountLabel} (${currency.code})',
-                prefixText: '${currency.symbol} ',
-              ),
+              labelText: '${l10n.transactionAmountLabel} (${currency.code})',
+              prefixText: '${currency.symbol} ',
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
               ),
             ),
             const SizedBox(height: SpacingTokens.md),
-            DropdownButtonFormField<String>(
-              initialValue: frequency.value,
-              decoration: InputDecoration(
-                labelText: l10n.recurringFrequencyLabel,
-              ),
+            ObDropdown<String>(
+              value: frequency.value,
+              labelText: l10n.recurringFrequencyLabel,
               items: [
                 DropdownMenuItem(
                   value: 'daily',
@@ -1037,7 +976,7 @@ class _EditRecurringDialog extends HookConsumerWidget {
               subtitle: Text(
                 '${nextDate.value.year}-${nextDate.value.month.toString().padLeft(2, '0')}-${nextDate.value.day.toString().padLeft(2, '0')}',
               ),
-              trailing: const Icon(Icons.calendar_today),
+              trailing: const SkribbleIcon(data: OpenBudgetIcons.calendar),
               onTap: () async {
                 final picked = await showDatePicker(
                   context: context,
@@ -1052,30 +991,24 @@ class _EditRecurringDialog extends HookConsumerWidget {
         ),
       ),
       actions: [
-        TextButton(
+        ObTextButton(
           onPressed: () => Navigator.of(context).pop(),
           child: Text(l10n.dialogCancel),
         ),
-        FilledButton(
-          onPressed: isSubmitting.value
-              ? null
-              : () => _submit(
-                  context,
-                  ref,
-                  descController,
-                  amountController,
-                  frequency,
-                  nextDate,
-                  currency,
-                  isSubmitting,
-                ),
-          child: isSubmitting.value
-              ? const SizedBox(
-                  height: 20,
-                  width: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : Text(l10n.dialogSave),
+        ObFilledButton(
+          isLoading: isSubmitting.value,
+          loadingLabel: l10n.recurringSavingLabel,
+          onPressed: () => _submit(
+            context,
+            ref,
+            descController,
+            amountController,
+            frequency,
+            nextDate,
+            currency,
+            isSubmitting,
+          ),
+          child: Text(l10n.dialogSave),
         ),
       ],
     );

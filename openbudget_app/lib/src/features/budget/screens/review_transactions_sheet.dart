@@ -8,7 +8,6 @@ import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/monthly_allocation_provider.dart';
 import 'package:openbudget_app/src/features/transactions/providers/transaction_actions_provider.dart';
-import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
@@ -23,8 +22,8 @@ Future<void> showReviewTransactionsSheet(
 }) => showModalBottomSheet<void>(
   context: context,
   isScrollControlled: true,
-  backgroundColor: OpenBudgetPalette.transparentFor(Theme.of(context)),
-  barrierColor: OpenBudgetPalette.overlayScrimFor(Theme.of(context)),
+  backgroundColor: Theme.of(context).ob.canvas,
+  barrierColor: Theme.of(context).ob.firmPen.withAlpha(210),
   builder: (context) => FractionallySizedBox(
     heightFactor: 0.95,
     child: ReviewTransactionsSheet(
@@ -193,12 +192,18 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
           child: Wrap(
             children: [
               ListTile(
-                leading: const Icon(Icons.delete_outline_rounded),
+                leading: SkribbleIcon(
+                  data: OpenBudgetIcons.delete,
+                  color: Theme.of(context).ob.overspent,
+                ),
                 title: Text(l10n.reviewTransactionsDeleteSelected),
                 onTap: () => Navigator.of(context).pop(_MoreAction.delete),
               ),
               ListTile(
-                leading: const Icon(Icons.close_rounded),
+                leading: SkribbleIcon(
+                  data: OpenBudgetIcons.close,
+                  color: Theme.of(context).ob.ink,
+                ),
                 title: Text(l10n.dialogCancel),
                 onTap: () => Navigator.of(context).pop(),
               ),
@@ -223,38 +228,32 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
       summaryAsync.hasValue ? summaryAsync.value : null,
     );
 
+    final palette = theme.ob;
+
     return DecoratedBox(
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            OpenBudgetPalette.bgPrimaryFor(Theme.of(context)),
-            OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
-          ],
-        ),
-        borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(RadiusTokens.lg),
-        ),
+        color: palette.canvas,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
       ),
       child: SafeArea(
         top: false,
         child: Column(
           children: [
-            const SizedBox(height: SpacingTokens.xs),
+            const SizedBox(height: SpacingTokens.sm),
             Container(
               width: 36,
               height: 4,
-              decoration: BoxDecoration(
-                color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
-                borderRadius: BorderRadius.circular(RadiusTokens.md),
+              decoration: ObRoughDecoration(
+                color: palette.line,
+                radius: 4,
+                seed: 83,
               ),
             ),
             const SizedBox(height: SpacingTokens.sm),
             Text(
               l10n.reviewTransactionsSubtitle,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
+                color: palette.mutedInk,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -290,41 +289,16 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
             const Divider(height: 1),
             Expanded(
               child: !initialized.value && transactionsAsync.isLoading
-                  ? const Center(child: CircularProgressIndicator())
+                  ? Center(child: ObLoadingPanel(label: l10n.loadingTitle))
                   : queue.value.isEmpty
                   ? Center(
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: SpacingTokens.lg,
-                        ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.task_alt_rounded,
-                              size: 30,
-                              color: OpenBudgetPalette.fgSecondaryFor(
-                                Theme.of(context),
-                              ),
-                            ),
-                            const SizedBox(height: SpacingTokens.md),
-                            Text(
-                              l10n.reviewTransactionsAllDoneTitle,
-                              style: theme.textTheme.headlineSmall?.copyWith(
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                            const SizedBox(height: SpacingTokens.xs),
-                            Text(
-                              l10n.reviewTransactionsAllDoneSubtitle,
-                              style: theme.textTheme.bodyLarge?.copyWith(
-                                color: OpenBudgetPalette.fgSecondaryFor(
-                                  Theme.of(context),
-                                ),
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
+                        padding: const EdgeInsets.all(SpacingTokens.md),
+                        child: ObStatePanel.empty(
+                          title: l10n.reviewTransactionsAllDoneTitle,
+                          message: l10n.reviewTransactionsAllDoneSubtitle,
+                          doodle: WiredDoodleKind.flower,
+                          tone: ObTone.funded,
                         ),
                       ),
                     )
@@ -354,150 +328,98 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             if (showHeader)
-                              Container(
-                                margin: const EdgeInsets.fromLTRB(
-                                  SpacingTokens.md,
-                                  SpacingTokens.sm,
-                                  SpacingTokens.md,
-                                  SpacingTokens.xs,
-                                ),
+                              Padding(
                                 padding: const EdgeInsets.fromLTRB(
+                                  SpacingTokens.md,
                                   SpacingTokens.sm,
-                                  SpacingTokens.xs,
-                                  SpacingTokens.sm,
+                                  SpacingTokens.md,
                                   SpacingTokens.xs,
                                 ),
-                                decoration: BoxDecoration(
-                                  color: OpenBudgetPalette.bgTertiaryFor(
-                                    Theme.of(context),
-                                  ),
-                                  borderRadius: BorderRadius.circular(
-                                    RadiusTokens.sm,
-                                  ),
-                                  border: Border.all(
-                                    color: OpenBudgetPalette.borderSubtleFor(
-                                      Theme.of(context),
-                                    ),
-                                  ),
-                                ),
-
                                 child: Text(
                                   DateFormat.yMMMMd().format(
                                     transaction.transactionDate,
                                   ),
                                   style: theme.textTheme.titleSmall?.copyWith(
                                     fontWeight: FontWeight.w700,
+                                    color: palette.ink,
                                   ),
                                 ),
                               ),
-                            InkWell(
-                              onTap: transactionId == null
-                                  ? null
-                                  : () {
-                                      final next = Set<String>.from(
-                                        selectedIds.value,
-                                      );
-                                      if (next.contains(transactionId)) {
-                                        next.remove(transactionId);
-                                      } else {
-                                        next.add(transactionId);
-                                      }
-                                      selectedIds.value = next;
-                                    },
-                              child: Container(
-                                margin: const EdgeInsets.fromLTRB(
-                                  SpacingTokens.md,
-                                  0,
-                                  SpacingTokens.md,
-                                  SpacingTokens.xs,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: isSelected
-                                      ? OpenBudgetPalette.bgSelectedFor(theme)
-                                      : OpenBudgetPalette.bgSecondaryFor(
-                                          Theme.of(context),
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(
+                                SpacingTokens.md,
+                                0,
+                                SpacingTokens.md,
+                                SpacingTokens.xs,
+                              ),
+                              child: ObCard(
+                                tone: isSelected ? ObTone.brand : null,
+                                onTap: transactionId == null
+                                    ? null
+                                    : () {
+                                        final next = Set<String>.from(
+                                          selectedIds.value,
+                                        );
+                                        if (next.contains(transactionId)) {
+                                          next.remove(transactionId);
+                                        } else {
+                                          next.add(transactionId);
+                                        }
+                                        selectedIds.value = next;
+                                      },
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: SpacingTokens.sm,
+                                    vertical: SpacingTokens.sm,
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      SkribbleIcon(
+                                        data: isSelected
+                                            ? OpenBudgetIcons.checkCircle
+                                            : OpenBudgetIcons.circle,
+                                        color: isSelected
+                                            ? palette.brand
+                                            : palette.mutedInk,
+                                      ),
+                                      const SizedBox(width: SpacingTokens.sm),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              transaction.description,
+                                              style: theme.textTheme.titleMedium
+                                                  ?.copyWith(
+                                                    fontWeight: FontWeight.w700,
+                                                    color: palette.ink,
+                                                  ),
+                                            ),
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              envelopeName,
+                                              style: theme.textTheme.bodyMedium
+                                                  ?.copyWith(
+                                                    color: palette.mutedInk,
+                                                  ),
+                                            ),
+                                          ],
                                         ),
-                                  borderRadius: BorderRadius.circular(
-                                    RadiusTokens.md,
+                                      ),
+                                      const SizedBox(width: SpacingTokens.md),
+                                      ObAmount(
+                                        formatCents(
+                                          transaction.amountCents,
+                                          currencyCode,
+                                        ),
+                                        tone: transaction.amountCents >= 0
+                                            ? ObTone.funded
+                                            : ObTone.overspent,
+                                        style: theme.textTheme.titleMedium,
+                                      ),
+                                    ],
                                   ),
-                                  border: Border.all(
-                                    color: OpenBudgetPalette.borderSubtleFor(
-                                      Theme.of(context),
-                                    ),
-                                  ),
-                                ),
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      width: 4,
-                                      height: 68,
-                                      color: isSelected
-                                          ? OpenBudgetPalette.bgBrandFor(
-                                              Theme.of(context),
-                                            )
-                                          : OpenBudgetPalette.transparentFor(
-                                              theme,
-                                            ),
-                                    ),
-                                    const SizedBox(width: SpacingTokens.sm),
-                                    Icon(
-                                      isSelected
-                                          ? Icons.check_circle_rounded
-                                          : Icons.circle_outlined,
-                                      color: isSelected
-                                          ? OpenBudgetPalette.bgBrandFor(
-                                              Theme.of(context),
-                                            )
-                                          : OpenBudgetPalette.fgSecondaryFor(
-                                              Theme.of(context),
-                                            ),
-                                    ),
-                                    const SizedBox(width: SpacingTokens.sm),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            transaction.description,
-                                            style: theme.textTheme.titleMedium
-                                                ?.copyWith(
-                                                  fontWeight: FontWeight.w700,
-                                                ),
-                                          ),
-                                          const SizedBox(height: 2),
-                                          Text(
-                                            envelopeName,
-                                            style: theme.textTheme.bodyMedium
-                                                ?.copyWith(
-                                                  color:
-                                                      OpenBudgetPalette.fgSecondaryFor(
-                                                        theme,
-                                                      ),
-                                                ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    const SizedBox(width: SpacingTokens.md),
-                                    Text(
-                                      formatCents(
-                                        transaction.amountCents,
-                                        currencyCode,
-                                      ),
-                                      style: theme.textTheme.titleMedium?.copyWith(
-                                        fontWeight: FontWeight.w700,
-                                        color: transaction.amountCents >= 0
-                                            ? OpenBudgetPalette.fgSuccessFor(
-                                                theme,
-                                              )
-                                            : OpenBudgetPalette.fgPrimaryEmphasisFor(
-                                                theme,
-                                              ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: SpacingTokens.md),
-                                  ],
                                 ),
                               ),
                             ),
@@ -586,7 +508,7 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
   }
 }
 
-class _ReviewToolbar extends StatelessWidget {
+class _ReviewToolbar extends HookWidget {
   const _ReviewToolbar({
     required this.selectedCount,
     required this.selectedAmount,
@@ -608,121 +530,120 @@ class _ReviewToolbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return Container(
+    final theme = Theme.of(context);
+    final palette = theme.ob;
+    return DecoratedBox(
       decoration: BoxDecoration(
-        color: OpenBudgetPalette.bgSecondaryFor(Theme.of(context)),
-        border: Border(
-          top: BorderSide(
-            color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
-          ),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: OpenBudgetPalette.overlayScrimFor(Theme.of(context))
-                .withAlpha(
-                  Theme.of(context).brightness == Brightness.dark ? 84 : 24,
-                ),
-            blurRadius: 16,
-            offset: const Offset(0, -4),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.fromLTRB(
-        SpacingTokens.sm,
-        SpacingTokens.xs,
-        SpacingTokens.sm,
-        SpacingTokens.sm,
+        color: palette.surface,
+        border: Border(top: BorderSide(color: palette.line)),
       ),
       child: SafeArea(
         top: false,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              l10n.reviewTransactionsSelectedAmount(
-                selectedCount,
-                selectedAmount,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            SpacingTokens.sm,
+            SpacingTokens.xs,
+            SpacingTokens.sm,
+            SpacingTokens.sm,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                l10n.reviewTransactionsSelectedAmount(
+                  selectedCount,
+                  selectedAmount,
+                ),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: palette.mutedInk,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: OpenBudgetPalette.fgSecondaryFor(Theme.of(context)),
-                fontWeight: FontWeight.w600,
+              const SizedBox(height: SpacingTokens.xs),
+              Row(
+                children: [
+                  _ToolbarAction(
+                    icon: OpenBudgetIcons.close,
+                    label: l10n.dialogCancel,
+                    onTap: onCancel,
+                  ),
+                  _ToolbarAction(
+                    icon: OpenBudgetIcons.checkCircle,
+                    label: l10n.reviewTransactionsApprove,
+                    onTap: () => unawaited(onApprove()),
+                  ),
+                  _ToolbarAction(
+                    icon: OpenBudgetIcons.category,
+                    label: l10n.reviewTransactionsCategorize,
+                    onTap: () => unawaited(onCategorize()),
+                  ),
+                  _ToolbarAction(
+                    icon: OpenBudgetIcons.taskDone,
+                    label: l10n.reviewTransactionsClear,
+                    onTap: () => unawaited(onClear()),
+                  ),
+                  _ToolbarAction(
+                    icon: OpenBudgetIcons.more,
+                    label: l10n.moreTitle,
+                    onTap: () => unawaited(onMore()),
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(height: SpacingTokens.xs),
-            Row(
-              children: [
-                _ToolbarAction(
-                  icon: Icons.close_rounded,
-                  label: l10n.dialogCancel,
-                  onTap: onCancel,
-                ),
-                _ToolbarAction(
-                  icon: Icons.check_circle_outline_rounded,
-                  label: l10n.reviewTransactionsApprove,
-                  onTap: () => unawaited(onApprove()),
-                ),
-                _ToolbarAction(
-                  icon: Icons.category_outlined,
-                  label: l10n.reviewTransactionsCategorize,
-                  onTap: () => unawaited(onCategorize()),
-                ),
-                _ToolbarAction(
-                  icon: Icons.task_alt_outlined,
-                  label: l10n.reviewTransactionsClear,
-                  onTap: () => unawaited(onClear()),
-                ),
-                _ToolbarAction(
-                  icon: Icons.more_horiz_rounded,
-                  label: l10n.moreTitle,
-                  onTap: () => unawaited(onMore()),
-                ),
-              ],
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-class _ToolbarAction extends StatelessWidget {
+class _ToolbarAction extends HookWidget {
   const _ToolbarAction({
     required this.icon,
     required this.label,
     required this.onTap,
   });
 
-  final IconData icon;
+  final WiredSvgIconData icon;
   final String label;
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => Expanded(
-    child: InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(RadiusTokens.sm),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: SpacingTokens.xs),
-        child: Column(
-          children: [
-            Icon(
-              icon,
-              size: 20,
-              color: OpenBudgetPalette.bgBrandFor(Theme.of(context)),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              label,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: OpenBudgetPalette.bgBrandFor(Theme.of(context)),
-                fontWeight: FontWeight.w700,
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final palette = theme.ob;
+    return Expanded(
+      child: Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(8),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 56),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: SpacingTokens.xs),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SkribbleIcon(data: icon, size: 20, color: palette.brand),
+                  const SizedBox(height: 2),
+                  Text(
+                    label,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: palette.brand,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ),
             ),
-          ],
+          ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 enum _MoreAction { delete }

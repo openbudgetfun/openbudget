@@ -15,7 +15,7 @@ class BudgetTemplateDialog extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final palette = theme.ob;
     final templatesAsync = ref.watch(budgetTemplateListProvider(budgetId));
     final nameController = useTextEditingController();
     final isSaving = useState(false);
@@ -72,40 +72,22 @@ class BudgetTemplateDialog extends HookConsumerWidget {
               const SizedBox(height: SpacingTokens.sm),
               Flexible(
                 child: templatesAsync.when(
-                  loading: () =>
-                      const Center(child: CircularProgressIndicator()),
+                  loading: () => Center(
+                    child: ObLoadingPanel(label: l10n.loadingTitle),
+                  ),
                   error: (_, _) => Center(
                     child: Text(
                       l10n.templateSaveError,
-                      style: TextStyle(color: colorScheme.error),
+                      style: TextStyle(color: palette.overspent),
                     ),
                   ),
                   data: (templates) {
                     if (templates.isEmpty) {
-                      return Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.bookmark_border_rounded,
-                              size: 40,
-                              color: colorScheme.outlineVariant,
-                            ),
-                            const SizedBox(height: SpacingTokens.sm),
-                            Text(
-                              l10n.templateEmptyTitle,
-                              style: theme.textTheme.titleSmall,
-                            ),
-                            const SizedBox(height: SpacingTokens.xs),
-                            Text(
-                              l10n.templateEmptySubtitle,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: colorScheme.onSurfaceVariant,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
-                        ),
+                      return ObStatePanel.empty(
+                        title: l10n.templateEmptyTitle,
+                        message: l10n.templateEmptySubtitle,
+                        doodle: WiredDoodleKind.leaf,
+                        tone: ObTone.neutral,
                       );
                     }
 
@@ -253,7 +235,10 @@ class _TemplateTile extends HookWidget {
 
     return Card(
       child: ListTile(
-        leading: const Icon(Icons.bookmark_rounded),
+        leading: SkribbleIcon(
+          data: OpenBudgetIcons.bookmark,
+          color: Theme.of(context).ob.brand,
+        ),
         title: Text(
           name,
           style: theme.textTheme.bodyMedium?.copyWith(
@@ -269,12 +254,13 @@ class _TemplateTile extends HookWidget {
             ),
             const SizedBox(width: SpacingTokens.xs),
             IconButton(
-              icon: Icon(
-                Icons.delete_outline_rounded,
-                color: theme.colorScheme.error,
+              tooltip: l10n.deleteConfirmButton,
+              icon: SkribbleIcon(
+                data: OpenBudgetIcons.delete,
+                color: Theme.of(context).ob.overspent,
+                size: 20,
               ),
               onPressed: onDelete,
-              iconSize: 20,
             ),
           ],
         ),

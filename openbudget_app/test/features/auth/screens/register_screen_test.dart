@@ -1,16 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/auth/screens/register_screen.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 void main() {
-  setUpAll(() {
-    GoogleFonts.config.allowRuntimeFetching = false;
-  });
-
   Widget buildSubject() => ProviderScope(
     child: MaterialApp(
       theme: OpenBudgetTheme.light,
@@ -36,11 +31,11 @@ void main() {
         expect(find.text('Enter your email to get started'), findsOneWidget);
       });
 
-      testWidgets('shows person add icon', (tester) async {
+      testWidgets('shows person add doodle', (tester) async {
         await tester.pumpWidget(buildSubject());
         await tester.pump();
 
-        expect(find.byIcon(Icons.person_add_rounded), findsOneWidget);
+        expect(find.byType(WiredDoodle), findsOneWidget);
       });
 
       testWidgets('shows email text field', (tester) async {
@@ -48,7 +43,13 @@ void main() {
         await tester.pump();
 
         expect(find.text('Email'), findsOneWidget);
-        expect(find.byIcon(Icons.email_outlined), findsOneWidget);
+        expect(
+          find.byWidgetPredicate(
+            (widget) =>
+                widget is SkribbleIcon && widget.data == OpenBudgetIcons.email,
+          ),
+          findsOneWidget,
+        );
       });
 
       testWidgets('shows Send Verification Code button', (tester) async {
