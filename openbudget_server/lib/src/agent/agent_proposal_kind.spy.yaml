@@ -1,0 +1,7 @@
+### The kind of change the assistant proposes.
+enum: AgentProposalKind
+serialized: byName
+values:
+  - moveMoney
+  - setTransactionTaxCategory
+  - setEnvelopeTaxCategory

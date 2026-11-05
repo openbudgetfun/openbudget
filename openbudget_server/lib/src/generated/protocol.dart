@@ -13,6 +13,12 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:openbudget_server/src/generated/accounts/account.dart'
     as _i3fh9aci;
+import 'package:openbudget_server/src/generated/agent/agent_conversation.dart'
+    as _ihq3j0fx;
+import 'package:openbudget_server/src/generated/agent/agent_message.dart'
+    as _ixbh63dx;
+import 'package:openbudget_server/src/generated/agent/agent_proposal.dart'
+    as _iqa5uoc4;
 import 'package:openbudget_server/src/generated/budget_templates/budget_template.dart'
     as _ihbdj8p6;
 import 'package:openbudget_server/src/generated/budgets/budget.dart'
@@ -58,6 +64,19 @@ import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
     as _iais;
 
 import 'accounts/account.dart' as _iz2jf14v;
+import 'agent/agent_conversation.dart' as _isfmgqgu;
+import 'agent/agent_event.dart' as _i769eo9u;
+import 'agent/agent_event_kind.dart' as _iyhb15ax;
+import 'agent/agent_message.dart' as _inwxyid7;
+import 'agent/agent_message_role.dart' as _iy2njbiw;
+import 'agent/agent_proposal.dart' as _iqh65hzq;
+import 'agent/agent_proposal_kind.dart' as _idxyy01n;
+import 'agent/agent_proposal_status.dart' as _iksk16ej;
+import 'agent/agent_provider.dart' as _ic667156;
+import 'agent/agent_provider_settings.dart' as _ipqgbdtd;
+import 'agent/agent_provider_settings_view.dart' as _i0760q1h;
+import 'agent/agent_usage_record.dart' as _igo4k2bu;
+import 'agent/agent_usage_view.dart' as _ipqjijih;
 import 'billing/entitlement.dart' as _iq2w1sa5;
 import 'billing/entitlement_source.dart' as _ipnf4x0i;
 import 'billing/entitlement_status.dart' as _imqwzx9j;
@@ -100,6 +119,19 @@ import 'wallets/wallet_connect_result.dart' as _igiy3v19;
 import 'wallets/wallet_connection.dart' as _i9uqpb1b;
 import 'wallets/wallet_holding.dart' as _iqqppnaa;
 export 'accounts/account.dart';
+export 'agent/agent_conversation.dart';
+export 'agent/agent_event.dart';
+export 'agent/agent_event_kind.dart';
+export 'agent/agent_message.dart';
+export 'agent/agent_message_role.dart';
+export 'agent/agent_proposal.dart';
+export 'agent/agent_proposal_kind.dart';
+export 'agent/agent_proposal_status.dart';
+export 'agent/agent_provider.dart';
+export 'agent/agent_provider_settings.dart';
+export 'agent/agent_provider_settings_view.dart';
+export 'agent/agent_usage_record.dart';
+export 'agent/agent_usage_view.dart';
 export 'billing/entitlement.dart';
 export 'billing/entitlement_source.dart';
 export 'billing/entitlement_status.dart';
@@ -156,6 +188,19 @@ class Protocol extends _is.DatabaseSerializationManager
         this,
         types: const [
           _is.getType<_iz2jf14v.Account>,
+          _is.getType<_isfmgqgu.AgentConversation>,
+          _is.getType<_i769eo9u.AgentEvent>,
+          _is.getType<_iyhb15ax.AgentEventKind>,
+          _is.getType<_inwxyid7.AgentMessage>,
+          _is.getType<_iy2njbiw.AgentMessageRole>,
+          _is.getType<_iqh65hzq.AgentProposal>,
+          _is.getType<_idxyy01n.AgentProposalKind>,
+          _is.getType<_iksk16ej.AgentProposalStatus>,
+          _is.getType<_ic667156.AgentProvider>,
+          _is.getType<_ipqgbdtd.AgentProviderSettings>,
+          _is.getType<_i0760q1h.AgentProviderSettingsView>,
+          _is.getType<_igo4k2bu.AgentUsageRecord>,
+          _is.getType<_ipqjijih.AgentUsageView>,
           _is.getType<_iq2w1sa5.Entitlement>,
           _is.getType<_ipnf4x0i.EntitlementSource>,
           _is.getType<_imqwzx9j.EntitlementStatus>,
@@ -198,6 +243,19 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<_i9uqpb1b.WalletConnection>,
           _is.getType<_iqqppnaa.WalletHolding>,
           _is.getType<_iz2jf14v.Account?>,
+          _is.getType<_isfmgqgu.AgentConversation?>,
+          _is.getType<_i769eo9u.AgentEvent?>,
+          _is.getType<_iyhb15ax.AgentEventKind?>,
+          _is.getType<_inwxyid7.AgentMessage?>,
+          _is.getType<_iy2njbiw.AgentMessageRole?>,
+          _is.getType<_iqh65hzq.AgentProposal?>,
+          _is.getType<_idxyy01n.AgentProposalKind?>,
+          _is.getType<_iksk16ej.AgentProposalStatus?>,
+          _is.getType<_ic667156.AgentProvider?>,
+          _is.getType<_ipqgbdtd.AgentProviderSettings?>,
+          _is.getType<_i0760q1h.AgentProviderSettingsView?>,
+          _is.getType<_igo4k2bu.AgentUsageRecord?>,
+          _is.getType<_ipqjijih.AgentUsageView?>,
           _is.getType<_iq2w1sa5.Entitlement?>,
           _is.getType<_ipnf4x0i.EntitlementSource?>,
           _is.getType<_imqwzx9j.EntitlementStatus?>,
@@ -247,6 +305,9 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<List<_iuft4v7q.TaxOpportunityView>>,
           _is.getType<List<_iqqppnaa.WalletHolding>>,
           _is.getType<List<_i3fh9aci.Account>>,
+          _is.getType<List<_ihq3j0fx.AgentConversation>>,
+          _is.getType<List<_ixbh63dx.AgentMessage>>,
+          _is.getType<List<_iqa5uoc4.AgentProposal>>,
           _is.getType<List<_ihbdj8p6.BudgetTemplate>>,
           _is.getType<List<_i01zjgtu.MonthlyAllocation>>,
           _is.getType<List<_ihk6o4ea.Budget>>,
@@ -277,6 +338,19 @@ class Protocol extends _is.DatabaseSerializationManager
         ],
         classNames: const [
           'Account',
+          'AgentConversation',
+          'AgentEvent',
+          'AgentEventKind',
+          'AgentMessage',
+          'AgentMessageRole',
+          'AgentProposal',
+          'AgentProposalKind',
+          'AgentProposalStatus',
+          'AgentProvider',
+          'AgentProviderSettings',
+          'AgentProviderSettingsView',
+          'AgentUsageRecord',
+          'AgentUsageView',
           'Entitlement',
           'EntitlementSource',
           'EntitlementStatus',
@@ -480,6 +554,480 @@ class Protocol extends _is.DatabaseSerializationManager
             _isp.IndexElementDefinition(
               type: _isp.IndexElementDefinitionType.column,
               definition: 'externalAccountId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _isp.TableDefinition(
+      name: 'agent_conversation',
+      dartName: 'AgentConversation',
+      schema: 'public',
+      module: 'openbudget',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue?',
+          columnDefault: 'random_v7',
+        ),
+        _isp.ColumnDefinition(
+          name: 'userId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'budgetId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'title',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'now',
+        ),
+        _isp.ColumnDefinition(
+          name: 'updatedAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'now',
+        ),
+      ],
+      foreignKeys: [
+        _isp.ForeignKeyDefinition(
+          constraintName: 'agent_conversation_fk_0',
+          columns: ['budgetId'],
+          referenceTable: 'budget',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+      ],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'agent_conversation_budget_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'budgetId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'updatedAt',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+        _isp.IndexDefinition(
+          indexName: 'agent_conversation_user_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'userId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _isp.TableDefinition(
+      name: 'agent_message',
+      dartName: 'AgentMessage',
+      schema: 'public',
+      module: 'openbudget',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue?',
+          columnDefault: 'random_v7',
+        ),
+        _isp.ColumnDefinition(
+          name: 'conversationId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'role',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'protocol:AgentMessageRole',
+        ),
+        _isp.ColumnDefinition(
+          name: 'content',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'toolCallsJson',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'toolCallId',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'now',
+        ),
+      ],
+      foreignKeys: [
+        _isp.ForeignKeyDefinition(
+          constraintName: 'agent_message_fk_0',
+          columns: ['conversationId'],
+          referenceTable: 'agent_conversation',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+      ],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'agent_message_conversation_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'conversationId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'createdAt',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _isp.TableDefinition(
+      name: 'agent_proposal',
+      dartName: 'AgentProposal',
+      schema: 'public',
+      module: 'openbudget',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue?',
+          columnDefault: 'random_v7',
+        ),
+        _isp.ColumnDefinition(
+          name: 'userId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'budgetId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'conversationId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: true,
+          dartType: 'UuidValue?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'kind',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'protocol:AgentProposalKind',
+        ),
+        _isp.ColumnDefinition(
+          name: 'payloadJson',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'summary',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'status',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'protocol:AgentProposalStatus',
+        ),
+        _isp.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'now',
+        ),
+        _isp.ColumnDefinition(
+          name: 'resolvedAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: true,
+          dartType: 'DateTime?',
+        ),
+      ],
+      foreignKeys: [
+        _isp.ForeignKeyDefinition(
+          constraintName: 'agent_proposal_fk_0',
+          columns: ['budgetId'],
+          referenceTable: 'budget',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _isp.ForeignKeyAction.noAction,
+          onDelete: _isp.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+      ],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'agent_proposal_budget_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'budgetId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'status',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+        _isp.IndexDefinition(
+          indexName: 'agent_proposal_user_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'userId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'createdAt',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _isp.TableDefinition(
+      name: 'agent_provider_settings',
+      dartName: 'AgentProviderSettings',
+      schema: 'public',
+      module: 'openbudget',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue?',
+          columnDefault: 'random_v7',
+        ),
+        _isp.ColumnDefinition(
+          name: 'userId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'baseUrl',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'model',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'encryptedApiKey',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'nonce',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'keyHint',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'updatedAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'now',
+        ),
+      ],
+      foreignKeys: [],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'agent_provider_settings_user_unique_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'userId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _isp.TableDefinition(
+      name: 'agent_usage_record',
+      dartName: 'AgentUsageRecord',
+      schema: 'public',
+      module: 'openbudget',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue?',
+          columnDefault: 'random_v7',
+        ),
+        _isp.ColumnDefinition(
+          name: 'userId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'conversationId',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: true,
+          dartType: 'UuidValue?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'provider',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'protocol:AgentProvider',
+        ),
+        _isp.ColumnDefinition(
+          name: 'model',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _isp.ColumnDefinition(
+          name: 'promptTokens',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'cachedTokens',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'completionTokens',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'costMicroUsd',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _isp.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+          columnDefault: 'now',
+        ),
+      ],
+      foreignKeys: [],
+      indexes: [
+        _isp.IndexDefinition(
+          indexName: 'agent_usage_user_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'userId',
+            ),
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'createdAt',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+        _isp.IndexDefinition(
+          indexName: 'agent_usage_conversation_idx',
+          tableSpace: null,
+          elements: [
+            _isp.IndexElementDefinition(
+              type: _isp.IndexElementDefinitionType.column,
+              definition: 'conversationId',
             ),
           ],
           type: 'btree',
@@ -3500,6 +4048,45 @@ class Protocol extends _is.DatabaseSerializationManager
     if (t == _iz2jf14v.Account) {
       return _iz2jf14v.Account.fromJson(data) as T;
     }
+    if (t == _isfmgqgu.AgentConversation) {
+      return _isfmgqgu.AgentConversation.fromJson(data) as T;
+    }
+    if (t == _i769eo9u.AgentEvent) {
+      return _i769eo9u.AgentEvent.fromJson(data) as T;
+    }
+    if (t == _iyhb15ax.AgentEventKind) {
+      return _iyhb15ax.AgentEventKind.fromJson(data) as T;
+    }
+    if (t == _inwxyid7.AgentMessage) {
+      return _inwxyid7.AgentMessage.fromJson(data) as T;
+    }
+    if (t == _iy2njbiw.AgentMessageRole) {
+      return _iy2njbiw.AgentMessageRole.fromJson(data) as T;
+    }
+    if (t == _iqh65hzq.AgentProposal) {
+      return _iqh65hzq.AgentProposal.fromJson(data) as T;
+    }
+    if (t == _idxyy01n.AgentProposalKind) {
+      return _idxyy01n.AgentProposalKind.fromJson(data) as T;
+    }
+    if (t == _iksk16ej.AgentProposalStatus) {
+      return _iksk16ej.AgentProposalStatus.fromJson(data) as T;
+    }
+    if (t == _ic667156.AgentProvider) {
+      return _ic667156.AgentProvider.fromJson(data) as T;
+    }
+    if (t == _ipqgbdtd.AgentProviderSettings) {
+      return _ipqgbdtd.AgentProviderSettings.fromJson(data) as T;
+    }
+    if (t == _i0760q1h.AgentProviderSettingsView) {
+      return _i0760q1h.AgentProviderSettingsView.fromJson(data) as T;
+    }
+    if (t == _igo4k2bu.AgentUsageRecord) {
+      return _igo4k2bu.AgentUsageRecord.fromJson(data) as T;
+    }
+    if (t == _ipqjijih.AgentUsageView) {
+      return _ipqjijih.AgentUsageView.fromJson(data) as T;
+    }
     if (t == _iq2w1sa5.Entitlement) {
       return _iq2w1sa5.Entitlement.fromJson(data) as T;
     }
@@ -3625,6 +4212,62 @@ class Protocol extends _is.DatabaseSerializationManager
     }
     if (t == _is.getType<_iz2jf14v.Account?>()) {
       return (data != null ? _iz2jf14v.Account.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_isfmgqgu.AgentConversation?>()) {
+      return (data != null ? _isfmgqgu.AgentConversation.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_i769eo9u.AgentEvent?>()) {
+      return (data != null ? _i769eo9u.AgentEvent.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_iyhb15ax.AgentEventKind?>()) {
+      return (data != null ? _iyhb15ax.AgentEventKind.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_inwxyid7.AgentMessage?>()) {
+      return (data != null ? _inwxyid7.AgentMessage.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_iy2njbiw.AgentMessageRole?>()) {
+      return (data != null ? _iy2njbiw.AgentMessageRole.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_iqh65hzq.AgentProposal?>()) {
+      return (data != null ? _iqh65hzq.AgentProposal.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_idxyy01n.AgentProposalKind?>()) {
+      return (data != null ? _idxyy01n.AgentProposalKind.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_iksk16ej.AgentProposalStatus?>()) {
+      return (data != null
+              ? _iksk16ej.AgentProposalStatus.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _is.getType<_ic667156.AgentProvider?>()) {
+      return (data != null ? _ic667156.AgentProvider.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_ipqgbdtd.AgentProviderSettings?>()) {
+      return (data != null
+              ? _ipqgbdtd.AgentProviderSettings.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _is.getType<_i0760q1h.AgentProviderSettingsView?>()) {
+      return (data != null
+              ? _i0760q1h.AgentProviderSettingsView.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _is.getType<_igo4k2bu.AgentUsageRecord?>()) {
+      return (data != null ? _igo4k2bu.AgentUsageRecord.fromJson(data) : null)
+          as T;
+    }
+    if (t == _is.getType<_ipqjijih.AgentUsageView?>()) {
+      return (data != null ? _ipqjijih.AgentUsageView.fromJson(data) : null)
+          as T;
     }
     if (t == _is.getType<_iq2w1sa5.Entitlement?>()) {
       return (data != null ? _iq2w1sa5.Entitlement.fromJson(data) : null) as T;
@@ -3838,6 +4481,24 @@ class Protocol extends _is.DatabaseSerializationManager
               .toList()
           as T;
     }
+    if (t == List<_ihq3j0fx.AgentConversation>) {
+      return (data as List)
+              .map((e) => deserialize<_ihq3j0fx.AgentConversation>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_ixbh63dx.AgentMessage>) {
+      return (data as List)
+              .map((e) => deserialize<_ixbh63dx.AgentMessage>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_iqa5uoc4.AgentProposal>) {
+      return (data as List)
+              .map((e) => deserialize<_iqa5uoc4.AgentProposal>(e))
+              .toList()
+          as T;
+    }
     if (t == List<_ihbdj8p6.BudgetTemplate>) {
       return (data as List)
               .map((e) => deserialize<_ihbdj8p6.BudgetTemplate>(e))
@@ -3976,6 +4637,19 @@ class Protocol extends _is.DatabaseSerializationManager
   static String? getClassNameForType(Type type) {
     return switch (type) {
       _iz2jf14v.Account => 'Account',
+      _isfmgqgu.AgentConversation => 'AgentConversation',
+      _i769eo9u.AgentEvent => 'AgentEvent',
+      _iyhb15ax.AgentEventKind => 'AgentEventKind',
+      _inwxyid7.AgentMessage => 'AgentMessage',
+      _iy2njbiw.AgentMessageRole => 'AgentMessageRole',
+      _iqh65hzq.AgentProposal => 'AgentProposal',
+      _idxyy01n.AgentProposalKind => 'AgentProposalKind',
+      _iksk16ej.AgentProposalStatus => 'AgentProposalStatus',
+      _ic667156.AgentProvider => 'AgentProvider',
+      _ipqgbdtd.AgentProviderSettings => 'AgentProviderSettings',
+      _i0760q1h.AgentProviderSettingsView => 'AgentProviderSettingsView',
+      _igo4k2bu.AgentUsageRecord => 'AgentUsageRecord',
+      _ipqjijih.AgentUsageView => 'AgentUsageView',
       _iq2w1sa5.Entitlement => 'Entitlement',
       _ipnf4x0i.EntitlementSource => 'EntitlementSource',
       _imqwzx9j.EntitlementStatus => 'EntitlementStatus',
@@ -4033,6 +4707,32 @@ class Protocol extends _is.DatabaseSerializationManager
     switch (data) {
       case _iz2jf14v.Account():
         return 'Account';
+      case _isfmgqgu.AgentConversation():
+        return 'AgentConversation';
+      case _i769eo9u.AgentEvent():
+        return 'AgentEvent';
+      case _iyhb15ax.AgentEventKind():
+        return 'AgentEventKind';
+      case _inwxyid7.AgentMessage():
+        return 'AgentMessage';
+      case _iy2njbiw.AgentMessageRole():
+        return 'AgentMessageRole';
+      case _iqh65hzq.AgentProposal():
+        return 'AgentProposal';
+      case _idxyy01n.AgentProposalKind():
+        return 'AgentProposalKind';
+      case _iksk16ej.AgentProposalStatus():
+        return 'AgentProposalStatus';
+      case _ic667156.AgentProvider():
+        return 'AgentProvider';
+      case _ipqgbdtd.AgentProviderSettings():
+        return 'AgentProviderSettings';
+      case _i0760q1h.AgentProviderSettingsView():
+        return 'AgentProviderSettingsView';
+      case _igo4k2bu.AgentUsageRecord():
+        return 'AgentUsageRecord';
+      case _ipqjijih.AgentUsageView():
+        return 'AgentUsageView';
       case _iq2w1sa5.Entitlement():
         return 'Entitlement';
       case _ipnf4x0i.EntitlementSource():
@@ -4143,6 +4843,45 @@ class Protocol extends _is.DatabaseSerializationManager
     }
     if (dataClassName == 'Account') {
       return deserialize<_iz2jf14v.Account>(data['data']);
+    }
+    if (dataClassName == 'AgentConversation') {
+      return deserialize<_isfmgqgu.AgentConversation>(data['data']);
+    }
+    if (dataClassName == 'AgentEvent') {
+      return deserialize<_i769eo9u.AgentEvent>(data['data']);
+    }
+    if (dataClassName == 'AgentEventKind') {
+      return deserialize<_iyhb15ax.AgentEventKind>(data['data']);
+    }
+    if (dataClassName == 'AgentMessage') {
+      return deserialize<_inwxyid7.AgentMessage>(data['data']);
+    }
+    if (dataClassName == 'AgentMessageRole') {
+      return deserialize<_iy2njbiw.AgentMessageRole>(data['data']);
+    }
+    if (dataClassName == 'AgentProposal') {
+      return deserialize<_iqh65hzq.AgentProposal>(data['data']);
+    }
+    if (dataClassName == 'AgentProposalKind') {
+      return deserialize<_idxyy01n.AgentProposalKind>(data['data']);
+    }
+    if (dataClassName == 'AgentProposalStatus') {
+      return deserialize<_iksk16ej.AgentProposalStatus>(data['data']);
+    }
+    if (dataClassName == 'AgentProvider') {
+      return deserialize<_ic667156.AgentProvider>(data['data']);
+    }
+    if (dataClassName == 'AgentProviderSettings') {
+      return deserialize<_ipqgbdtd.AgentProviderSettings>(data['data']);
+    }
+    if (dataClassName == 'AgentProviderSettingsView') {
+      return deserialize<_i0760q1h.AgentProviderSettingsView>(data['data']);
+    }
+    if (dataClassName == 'AgentUsageRecord') {
+      return deserialize<_igo4k2bu.AgentUsageRecord>(data['data']);
+    }
+    if (dataClassName == 'AgentUsageView') {
+      return deserialize<_ipqjijih.AgentUsageView>(data['data']);
     }
     if (dataClassName == 'Entitlement') {
       return deserialize<_iq2w1sa5.Entitlement>(data['data']);
@@ -4316,6 +5055,16 @@ class Protocol extends _is.DatabaseSerializationManager
     switch (t) {
       case _iz2jf14v.Account:
         return _iz2jf14v.Account.t;
+      case _isfmgqgu.AgentConversation:
+        return _isfmgqgu.AgentConversation.t;
+      case _inwxyid7.AgentMessage:
+        return _inwxyid7.AgentMessage.t;
+      case _iqh65hzq.AgentProposal:
+        return _iqh65hzq.AgentProposal.t;
+      case _ipqgbdtd.AgentProviderSettings:
+        return _ipqgbdtd.AgentProviderSettings.t;
+      case _igo4k2bu.AgentUsageRecord:
+        return _igo4k2bu.AgentUsageRecord.t;
       case _iq2w1sa5.Entitlement:
         return _iq2w1sa5.Entitlement.t;
       case _iw7l0hzr.SolanaBillingChallenge:

@@ -1,0 +1,10 @@
+### How much of the built-in agent allowance is left this period.
+class: AgentUsageView
+fields:
+  provider: AgentProvider
+  ### Usage included in the plan this period, in micro-dollars. Zero for BYO.
+  allowanceMicroUsd: int
+  ### Metered usage this period, in micro-dollars. Zero for BYO.
+  usedMicroUsd: int
+  ### When the allowance next resets, when the user is subscribed.
+  periodEnd: DateTime?

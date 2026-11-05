@@ -1,0 +1,9 @@
+### The kind of event a streamed agent turn emits.
+enum: AgentEventKind
+serialized: byName
+values:
+  - textDelta
+  - toolCall
+  - proposal
+  - usage
+  - done

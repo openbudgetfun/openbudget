@@ -1,0 +1,22 @@
+### A change the assistant suggests but never makes itself.
+class: AgentProposal
+table: agent_proposal
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  userId: UuidValue
+  budgetId: UuidValue, relation(parent=budget, onDelete=cascade)
+  ### The conversation that produced it, when it came from chat.
+  conversationId: UuidValue?
+  kind: AgentProposalKind
+  ### Kind-specific arguments, as a JSON object.
+  payloadJson: String
+  ### One sentence the user can decide on.
+  summary: String
+  status: AgentProposalStatus
+  createdAt: DateTime, default=now
+  resolvedAt: DateTime?
+indexes:
+  agent_proposal_budget_idx:
+    fields: budgetId, status
+  agent_proposal_user_idx:
+    fields: userId, createdAt

@@ -1,0 +1,8 @@
+### Where a proposal is in its lifecycle.
+enum: AgentProposalStatus
+serialized: byName
+values:
+  ### Waiting for the user to apply or dismiss it.
+  - pending
+  - applied
+  - dismissed

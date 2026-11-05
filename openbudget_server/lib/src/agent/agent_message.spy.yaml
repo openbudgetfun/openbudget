@@ -1,0 +1,17 @@
+### One message in an agent conversation, including hidden tool traffic.
+class: AgentMessage
+table: agent_message
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  conversationId: UuidValue, relation(parent=agent_conversation, onDelete=cascade)
+  role: AgentMessageRole
+  ### The message text. Empty for an assistant turn that only calls tools.
+  content: String
+  ### JSON list of OpenAI tool calls the assistant requested, when any.
+  toolCallsJson: String?
+  ### The tool call this message answers, for role tool.
+  toolCallId: String?
+  createdAt: DateTime, default=now
+indexes:
+  agent_message_conversation_idx:
+    fields: conversationId, createdAt

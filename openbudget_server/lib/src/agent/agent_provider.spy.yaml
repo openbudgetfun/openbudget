@@ -1,0 +1,9 @@
+### Which provider answered an agent call.
+enum: AgentProvider
+serialized: byName
+values:
+  ### OpenBudget's built-in OpenCode Zen provider, metered against the
+  ### included allowance.
+  - zen
+  ### The user's own OpenAI-compatible provider, never metered.
+  - byo

@@ -13,6 +13,12 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:openbudget_client/src/protocol/accounts/account.dart'
     as _iqudaadl;
+import 'package:openbudget_client/src/protocol/agent/agent_conversation.dart'
+    as _in44ixo7;
+import 'package:openbudget_client/src/protocol/agent/agent_message.dart'
+    as _i8fbky0c;
+import 'package:openbudget_client/src/protocol/agent/agent_proposal.dart'
+    as _icv7zzda;
 import 'package:openbudget_client/src/protocol/budget_templates/budget_template.dart'
     as _itiojbb0;
 import 'package:openbudget_client/src/protocol/budgets/budget.dart'
@@ -57,6 +63,19 @@ import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart'
 import 'package:serverpod_client/serverpod_client.dart' as _isc;
 
 import 'accounts/account.dart' as _iz2jf14v;
+import 'agent/agent_conversation.dart' as _isfmgqgu;
+import 'agent/agent_event.dart' as _i769eo9u;
+import 'agent/agent_event_kind.dart' as _iyhb15ax;
+import 'agent/agent_message.dart' as _inwxyid7;
+import 'agent/agent_message_role.dart' as _iy2njbiw;
+import 'agent/agent_proposal.dart' as _iqh65hzq;
+import 'agent/agent_proposal_kind.dart' as _idxyy01n;
+import 'agent/agent_proposal_status.dart' as _iksk16ej;
+import 'agent/agent_provider.dart' as _ic667156;
+import 'agent/agent_provider_settings.dart' as _ipqgbdtd;
+import 'agent/agent_provider_settings_view.dart' as _i0760q1h;
+import 'agent/agent_usage_record.dart' as _igo4k2bu;
+import 'agent/agent_usage_view.dart' as _ipqjijih;
 import 'billing/entitlement.dart' as _iq2w1sa5;
 import 'billing/entitlement_source.dart' as _ipnf4x0i;
 import 'billing/entitlement_status.dart' as _imqwzx9j;
@@ -99,6 +118,19 @@ import 'wallets/wallet_connect_result.dart' as _igiy3v19;
 import 'wallets/wallet_connection.dart' as _i9uqpb1b;
 import 'wallets/wallet_holding.dart' as _iqqppnaa;
 export 'accounts/account.dart';
+export 'agent/agent_conversation.dart';
+export 'agent/agent_event.dart';
+export 'agent/agent_event_kind.dart';
+export 'agent/agent_message.dart';
+export 'agent/agent_message_role.dart';
+export 'agent/agent_proposal.dart';
+export 'agent/agent_proposal_kind.dart';
+export 'agent/agent_proposal_status.dart';
+export 'agent/agent_provider.dart';
+export 'agent/agent_provider_settings.dart';
+export 'agent/agent_provider_settings_view.dart';
+export 'agent/agent_usage_record.dart';
+export 'agent/agent_usage_view.dart';
 export 'billing/entitlement.dart';
 export 'billing/entitlement_source.dart';
 export 'billing/entitlement_status.dart';
@@ -156,6 +188,19 @@ class Protocol extends _isc.SerializationManager
         this,
         types: const [
           _isc.getType<_iz2jf14v.Account>,
+          _isc.getType<_isfmgqgu.AgentConversation>,
+          _isc.getType<_i769eo9u.AgentEvent>,
+          _isc.getType<_iyhb15ax.AgentEventKind>,
+          _isc.getType<_inwxyid7.AgentMessage>,
+          _isc.getType<_iy2njbiw.AgentMessageRole>,
+          _isc.getType<_iqh65hzq.AgentProposal>,
+          _isc.getType<_idxyy01n.AgentProposalKind>,
+          _isc.getType<_iksk16ej.AgentProposalStatus>,
+          _isc.getType<_ic667156.AgentProvider>,
+          _isc.getType<_ipqgbdtd.AgentProviderSettings>,
+          _isc.getType<_i0760q1h.AgentProviderSettingsView>,
+          _isc.getType<_igo4k2bu.AgentUsageRecord>,
+          _isc.getType<_ipqjijih.AgentUsageView>,
           _isc.getType<_iq2w1sa5.Entitlement>,
           _isc.getType<_ipnf4x0i.EntitlementSource>,
           _isc.getType<_imqwzx9j.EntitlementStatus>,
@@ -198,6 +243,19 @@ class Protocol extends _isc.SerializationManager
           _isc.getType<_i9uqpb1b.WalletConnection>,
           _isc.getType<_iqqppnaa.WalletHolding>,
           _isc.getType<_iz2jf14v.Account?>,
+          _isc.getType<_isfmgqgu.AgentConversation?>,
+          _isc.getType<_i769eo9u.AgentEvent?>,
+          _isc.getType<_iyhb15ax.AgentEventKind?>,
+          _isc.getType<_inwxyid7.AgentMessage?>,
+          _isc.getType<_iy2njbiw.AgentMessageRole?>,
+          _isc.getType<_iqh65hzq.AgentProposal?>,
+          _isc.getType<_idxyy01n.AgentProposalKind?>,
+          _isc.getType<_iksk16ej.AgentProposalStatus?>,
+          _isc.getType<_ic667156.AgentProvider?>,
+          _isc.getType<_ipqgbdtd.AgentProviderSettings?>,
+          _isc.getType<_i0760q1h.AgentProviderSettingsView?>,
+          _isc.getType<_igo4k2bu.AgentUsageRecord?>,
+          _isc.getType<_ipqjijih.AgentUsageView?>,
           _isc.getType<_iq2w1sa5.Entitlement?>,
           _isc.getType<_ipnf4x0i.EntitlementSource?>,
           _isc.getType<_imqwzx9j.EntitlementStatus?>,
@@ -247,6 +305,9 @@ class Protocol extends _isc.SerializationManager
           _isc.getType<List<_iuft4v7q.TaxOpportunityView>>,
           _isc.getType<List<_iqqppnaa.WalletHolding>>,
           _isc.getType<List<_iqudaadl.Account>>,
+          _isc.getType<List<_in44ixo7.AgentConversation>>,
+          _isc.getType<List<_i8fbky0c.AgentMessage>>,
+          _isc.getType<List<_icv7zzda.AgentProposal>>,
           _isc.getType<List<_itiojbb0.BudgetTemplate>>,
           _isc.getType<List<_iz3b7rge.MonthlyAllocation>>,
           _isc.getType<List<_iro9sz2e.Budget>>,
@@ -276,6 +337,19 @@ class Protocol extends _isc.SerializationManager
         ],
         classNames: const [
           'Account',
+          'AgentConversation',
+          'AgentEvent',
+          'AgentEventKind',
+          'AgentMessage',
+          'AgentMessageRole',
+          'AgentProposal',
+          'AgentProposalKind',
+          'AgentProposalStatus',
+          'AgentProvider',
+          'AgentProviderSettings',
+          'AgentProviderSettingsView',
+          'AgentUsageRecord',
+          'AgentUsageView',
           'Entitlement',
           'EntitlementSource',
           'EntitlementStatus',
@@ -346,6 +420,45 @@ class Protocol extends _isc.SerializationManager
 
     if (t == _iz2jf14v.Account) {
       return _iz2jf14v.Account.fromJson(data) as T;
+    }
+    if (t == _isfmgqgu.AgentConversation) {
+      return _isfmgqgu.AgentConversation.fromJson(data) as T;
+    }
+    if (t == _i769eo9u.AgentEvent) {
+      return _i769eo9u.AgentEvent.fromJson(data) as T;
+    }
+    if (t == _iyhb15ax.AgentEventKind) {
+      return _iyhb15ax.AgentEventKind.fromJson(data) as T;
+    }
+    if (t == _inwxyid7.AgentMessage) {
+      return _inwxyid7.AgentMessage.fromJson(data) as T;
+    }
+    if (t == _iy2njbiw.AgentMessageRole) {
+      return _iy2njbiw.AgentMessageRole.fromJson(data) as T;
+    }
+    if (t == _iqh65hzq.AgentProposal) {
+      return _iqh65hzq.AgentProposal.fromJson(data) as T;
+    }
+    if (t == _idxyy01n.AgentProposalKind) {
+      return _idxyy01n.AgentProposalKind.fromJson(data) as T;
+    }
+    if (t == _iksk16ej.AgentProposalStatus) {
+      return _iksk16ej.AgentProposalStatus.fromJson(data) as T;
+    }
+    if (t == _ic667156.AgentProvider) {
+      return _ic667156.AgentProvider.fromJson(data) as T;
+    }
+    if (t == _ipqgbdtd.AgentProviderSettings) {
+      return _ipqgbdtd.AgentProviderSettings.fromJson(data) as T;
+    }
+    if (t == _i0760q1h.AgentProviderSettingsView) {
+      return _i0760q1h.AgentProviderSettingsView.fromJson(data) as T;
+    }
+    if (t == _igo4k2bu.AgentUsageRecord) {
+      return _igo4k2bu.AgentUsageRecord.fromJson(data) as T;
+    }
+    if (t == _ipqjijih.AgentUsageView) {
+      return _ipqjijih.AgentUsageView.fromJson(data) as T;
     }
     if (t == _iq2w1sa5.Entitlement) {
       return _iq2w1sa5.Entitlement.fromJson(data) as T;
@@ -472,6 +585,62 @@ class Protocol extends _isc.SerializationManager
     }
     if (t == _isc.getType<_iz2jf14v.Account?>()) {
       return (data != null ? _iz2jf14v.Account.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_isfmgqgu.AgentConversation?>()) {
+      return (data != null ? _isfmgqgu.AgentConversation.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_i769eo9u.AgentEvent?>()) {
+      return (data != null ? _i769eo9u.AgentEvent.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_iyhb15ax.AgentEventKind?>()) {
+      return (data != null ? _iyhb15ax.AgentEventKind.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_inwxyid7.AgentMessage?>()) {
+      return (data != null ? _inwxyid7.AgentMessage.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_iy2njbiw.AgentMessageRole?>()) {
+      return (data != null ? _iy2njbiw.AgentMessageRole.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_iqh65hzq.AgentProposal?>()) {
+      return (data != null ? _iqh65hzq.AgentProposal.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_idxyy01n.AgentProposalKind?>()) {
+      return (data != null ? _idxyy01n.AgentProposalKind.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_iksk16ej.AgentProposalStatus?>()) {
+      return (data != null
+              ? _iksk16ej.AgentProposalStatus.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _isc.getType<_ic667156.AgentProvider?>()) {
+      return (data != null ? _ic667156.AgentProvider.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_ipqgbdtd.AgentProviderSettings?>()) {
+      return (data != null
+              ? _ipqgbdtd.AgentProviderSettings.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _isc.getType<_i0760q1h.AgentProviderSettingsView?>()) {
+      return (data != null
+              ? _i0760q1h.AgentProviderSettingsView.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _isc.getType<_igo4k2bu.AgentUsageRecord?>()) {
+      return (data != null ? _igo4k2bu.AgentUsageRecord.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_ipqjijih.AgentUsageView?>()) {
+      return (data != null ? _ipqjijih.AgentUsageView.fromJson(data) : null)
+          as T;
     }
     if (t == _isc.getType<_iq2w1sa5.Entitlement?>()) {
       return (data != null ? _iq2w1sa5.Entitlement.fromJson(data) : null) as T;
@@ -685,6 +854,24 @@ class Protocol extends _isc.SerializationManager
               .toList()
           as T;
     }
+    if (t == List<_in44ixo7.AgentConversation>) {
+      return (data as List)
+              .map((e) => deserialize<_in44ixo7.AgentConversation>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_i8fbky0c.AgentMessage>) {
+      return (data as List)
+              .map((e) => deserialize<_i8fbky0c.AgentMessage>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_icv7zzda.AgentProposal>) {
+      return (data as List)
+              .map((e) => deserialize<_icv7zzda.AgentProposal>(e))
+              .toList()
+          as T;
+    }
     if (t == List<_itiojbb0.BudgetTemplate>) {
       return (data as List)
               .map((e) => deserialize<_itiojbb0.BudgetTemplate>(e))
@@ -823,6 +1010,19 @@ class Protocol extends _isc.SerializationManager
   static String? getClassNameForType(Type type) {
     return switch (type) {
       _iz2jf14v.Account => 'Account',
+      _isfmgqgu.AgentConversation => 'AgentConversation',
+      _i769eo9u.AgentEvent => 'AgentEvent',
+      _iyhb15ax.AgentEventKind => 'AgentEventKind',
+      _inwxyid7.AgentMessage => 'AgentMessage',
+      _iy2njbiw.AgentMessageRole => 'AgentMessageRole',
+      _iqh65hzq.AgentProposal => 'AgentProposal',
+      _idxyy01n.AgentProposalKind => 'AgentProposalKind',
+      _iksk16ej.AgentProposalStatus => 'AgentProposalStatus',
+      _ic667156.AgentProvider => 'AgentProvider',
+      _ipqgbdtd.AgentProviderSettings => 'AgentProviderSettings',
+      _i0760q1h.AgentProviderSettingsView => 'AgentProviderSettingsView',
+      _igo4k2bu.AgentUsageRecord => 'AgentUsageRecord',
+      _ipqjijih.AgentUsageView => 'AgentUsageView',
       _iq2w1sa5.Entitlement => 'Entitlement',
       _ipnf4x0i.EntitlementSource => 'EntitlementSource',
       _imqwzx9j.EntitlementStatus => 'EntitlementStatus',
@@ -880,6 +1080,32 @@ class Protocol extends _isc.SerializationManager
     switch (data) {
       case _iz2jf14v.Account():
         return 'Account';
+      case _isfmgqgu.AgentConversation():
+        return 'AgentConversation';
+      case _i769eo9u.AgentEvent():
+        return 'AgentEvent';
+      case _iyhb15ax.AgentEventKind():
+        return 'AgentEventKind';
+      case _inwxyid7.AgentMessage():
+        return 'AgentMessage';
+      case _iy2njbiw.AgentMessageRole():
+        return 'AgentMessageRole';
+      case _iqh65hzq.AgentProposal():
+        return 'AgentProposal';
+      case _idxyy01n.AgentProposalKind():
+        return 'AgentProposalKind';
+      case _iksk16ej.AgentProposalStatus():
+        return 'AgentProposalStatus';
+      case _ic667156.AgentProvider():
+        return 'AgentProvider';
+      case _ipqgbdtd.AgentProviderSettings():
+        return 'AgentProviderSettings';
+      case _i0760q1h.AgentProviderSettingsView():
+        return 'AgentProviderSettingsView';
+      case _igo4k2bu.AgentUsageRecord():
+        return 'AgentUsageRecord';
+      case _ipqjijih.AgentUsageView():
+        return 'AgentUsageView';
       case _iq2w1sa5.Entitlement():
         return 'Entitlement';
       case _ipnf4x0i.EntitlementSource():
@@ -986,6 +1212,45 @@ class Protocol extends _isc.SerializationManager
     }
     if (dataClassName == 'Account') {
       return deserialize<_iz2jf14v.Account>(data['data']);
+    }
+    if (dataClassName == 'AgentConversation') {
+      return deserialize<_isfmgqgu.AgentConversation>(data['data']);
+    }
+    if (dataClassName == 'AgentEvent') {
+      return deserialize<_i769eo9u.AgentEvent>(data['data']);
+    }
+    if (dataClassName == 'AgentEventKind') {
+      return deserialize<_iyhb15ax.AgentEventKind>(data['data']);
+    }
+    if (dataClassName == 'AgentMessage') {
+      return deserialize<_inwxyid7.AgentMessage>(data['data']);
+    }
+    if (dataClassName == 'AgentMessageRole') {
+      return deserialize<_iy2njbiw.AgentMessageRole>(data['data']);
+    }
+    if (dataClassName == 'AgentProposal') {
+      return deserialize<_iqh65hzq.AgentProposal>(data['data']);
+    }
+    if (dataClassName == 'AgentProposalKind') {
+      return deserialize<_idxyy01n.AgentProposalKind>(data['data']);
+    }
+    if (dataClassName == 'AgentProposalStatus') {
+      return deserialize<_iksk16ej.AgentProposalStatus>(data['data']);
+    }
+    if (dataClassName == 'AgentProvider') {
+      return deserialize<_ic667156.AgentProvider>(data['data']);
+    }
+    if (dataClassName == 'AgentProviderSettings') {
+      return deserialize<_ipqgbdtd.AgentProviderSettings>(data['data']);
+    }
+    if (dataClassName == 'AgentProviderSettingsView') {
+      return deserialize<_i0760q1h.AgentProviderSettingsView>(data['data']);
+    }
+    if (dataClassName == 'AgentUsageRecord') {
+      return deserialize<_igo4k2bu.AgentUsageRecord>(data['data']);
+    }
+    if (dataClassName == 'AgentUsageView') {
+      return deserialize<_ipqjijih.AgentUsageView>(data['data']);
     }
     if (dataClassName == 'Entitlement') {
       return deserialize<_iq2w1sa5.Entitlement>(data['data']);
