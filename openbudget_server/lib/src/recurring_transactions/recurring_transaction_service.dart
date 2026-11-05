@@ -2,6 +2,7 @@ import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_server/src/accounts/account_service.dart';
 import 'package:openbudget_server/src/budgets/budget_service.dart';
 import 'package:openbudget_server/src/categories/category_service.dart';
+import 'package:openbudget_server/src/common/currency_validation.dart';
 import 'package:openbudget_server/src/envelopes/envelope_service.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:openbudget_server/src/payees/payee_service.dart';
@@ -38,11 +39,12 @@ class RecurringTransactionService {
       accountId: accountId,
       payeeId: payeeId,
     );
+    final normalizedCurrencyCode = requireSupportedCurrency(currencyCode);
 
     final recurring = RecurringTransaction(
       description: description,
       amountCents: amountCents,
-      currencyCode: currencyCode,
+      currencyCode: normalizedCurrencyCode,
       budgetId: budgetId,
       frequency: frequency,
       nextOccurrence: nextOccurrence,

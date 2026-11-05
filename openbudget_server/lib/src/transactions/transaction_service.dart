@@ -2,6 +2,7 @@ import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_server/src/accounts/account_service.dart';
 import 'package:openbudget_server/src/budgets/budget_service.dart';
 import 'package:openbudget_server/src/categories/category_service.dart';
+import 'package:openbudget_server/src/common/currency_validation.dart';
 import 'package:openbudget_server/src/envelopes/envelope_service.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:openbudget_server/src/payees/payee_service.dart';
@@ -33,11 +34,12 @@ class TransactionService {
       envelopeId: envelopeId,
       payeeId: payeeId,
     );
+    final normalizedCurrencyCode = requireSupportedCurrency(currencyCode);
 
     final transaction = Transaction(
       description: description,
       amountCents: amountCents,
-      currencyCode: currencyCode,
+      currencyCode: normalizedCurrencyCode,
       envelopeId: envelopeId,
       budgetId: budgetId,
       payeeId: payeeId,
@@ -160,6 +162,7 @@ class TransactionService {
       'Creating transfer from=$fromAccountId to=$toAccountId amount=$amountCents',
     );
     await BudgetService.getById(session, budgetId: budgetId);
+    final normalizedCurrencyCode = requireSupportedCurrency(currencyCode);
     await _assertAccountBelongsToBudget(
       session,
       accountId: fromAccountId,
@@ -181,7 +184,7 @@ class TransactionService {
       final outflow = Transaction(
         description: description,
         amountCents: -amountCents.abs(),
-        currencyCode: currencyCode,
+        currencyCode: normalizedCurrencyCode,
         budgetId: budgetId,
         accountId: fromAccountId,
         transactionDate: transactionDate,
@@ -196,7 +199,7 @@ class TransactionService {
       final inflow = Transaction(
         description: description,
         amountCents: amountCents.abs(),
-        currencyCode: currencyCode,
+        currencyCode: normalizedCurrencyCode,
         budgetId: budgetId,
         accountId: toAccountId,
         transferPairId: savedOutflow.id,
@@ -418,6 +421,7 @@ class TransactionService {
       budgetId: budgetId,
       payeeId: payeeId,
     );
+    final normalizedCurrencyCode = requireSupportedCurrency(currencyCode);
     if (accountId != null) {
       await _assertAccountBelongsToBudget(
         session,
@@ -450,7 +454,7 @@ class TransactionService {
       final parent = Transaction(
         description: description,
         amountCents: totalAmountCents,
-        currencyCode: currencyCode,
+        currencyCode: normalizedCurrencyCode,
         budgetId: budgetId,
         payeeId: payeeId,
         accountId: accountId,
@@ -472,7 +476,7 @@ class TransactionService {
           amountCents: totalAmountCents.isNegative
               ? -split.amountCents.abs()
               : split.amountCents.abs(),
-          currencyCode: currencyCode,
+          currencyCode: normalizedCurrencyCode,
           budgetId: budgetId,
           envelopeId: split.envelopeId,
           payeeId: payeeId,
@@ -519,13 +523,14 @@ class TransactionService {
   }) async {
     _log.info('Bulk creating ${rows.length} transactions for budget=$budgetId');
     await BudgetService.getById(session, budgetId: budgetId);
+    final normalizedCurrencyCode = requireSupportedCurrency(currencyCode);
 
     var count = 0;
     for (final row in rows) {
       final transaction = Transaction(
         description: row.description,
         amountCents: row.amountCents,
-        currencyCode: currencyCode,
+        currencyCode: normalizedCurrencyCode,
         budgetId: budgetId,
         accountId: accountId,
         transactionDate: row.transactionDate,

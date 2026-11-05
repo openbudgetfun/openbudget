@@ -26,9 +26,10 @@ void main() {
   });
 
   group('CurrencyCode.tryParse', () {
-    test('finds supported codes in any case', () {
+    test('finds supported codes in any case, trimming whitespace', () {
       expect(CurrencyCode.tryParse('NGN'), CurrencyCode.ngn);
       expect(CurrencyCode.tryParse('eur'), CurrencyCode.eur);
+      expect(CurrencyCode.tryParse('  gbp  '), CurrencyCode.gbp);
     });
 
     test('returns null for unsupported codes instead of guessing', () {
