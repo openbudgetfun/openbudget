@@ -163,7 +163,12 @@ void main() {
         expect(rates.class1EmployeeRateBasisPoints, 800);
         expect(rates.class1EmployeeUpperRateBasisPoints, 200);
         expect(rates.class1EmployerRateBasisPoints, 1500);
+        expect(rates.employmentAllowanceMinor, 1050000);
       }
+      // The lower earnings limit is the only Class 1 threshold that changed
+      // between the years.
+      expect(rates2025.class1LowerEarningsLimitMinor, 650000);
+      expect(rates2026.class1LowerEarningsLimitMinor, 670800);
     });
   });
 
@@ -226,6 +231,57 @@ void main() {
         );
       }
     });
+
+    test('repayments round down to whole pounds (SA110 boxes 3 and 3.1)', () {
+      // TC11: 9% x (£45,000 - £29,385) = £1,405.35, reported as £1,405.
+      expect(
+        rates2026.studentLoans[GbStudentLoanPlan.plan2]!.repaymentOn(
+          4500000,
+        ),
+        140500,
+      );
+      // 6% x (£40,000 - £21,000) = £1,140.00 exactly.
+      expect(
+        rates2026.studentLoans[GbStudentLoanPlan.postgraduate]!.repaymentOn(
+          4000000,
+        ),
+        114000,
+      );
+      // Odd pence always fall away, never up.
+      expect(
+        rates2026.studentLoans[GbStudentLoanPlan.plan5]!.repaymentOn(
+          2500100,
+        ),
+        0,
+      );
+      expect(
+        rates2026.studentLoans[GbStudentLoanPlan.plan5]!.repaymentOn(
+          2599999,
+        ),
+        8900,
+      );
+    });
+  });
+
+  group('payments on account, student loans and allowances', () {
+    for (final rates in [rates2025, rates2026]) {
+      test('${rates.label} rule data', () {
+        // GOV.UK payments on account; SA110 working sheet A356 to A358.
+        expect(rates.paymentsOnAccountMinimumMinor, 100000);
+        expect(rates.paymentsOnAccountCollectedSharePercent, 80);
+        expect(rates.paymentsOnAccountInstalmentSharePercent, 50);
+        // SA110 working sheet K31 and K32.
+        expect(rates.studentLoanUnearnedIncomeThresholdMinor, 200000);
+        // Basic-rate relief added at source.
+        expect(rates.pensionReliefAtSourceBasicRateBasisPoints, 2000);
+        // GOV.UK Annual Investment Allowance.
+        expect(rates.annualInvestmentAllowanceCapMinor, 100000000);
+        // GOV.UK full expensing and the 50% special-rate first-year
+        // allowance.
+        expect(rates.fullExpensingRateBasisPoints, 10000);
+        expect(rates.specialRateFirstYearAllowanceBasisPoints, 5000);
+      });
+    }
   });
 
   group('business taxes', () {
