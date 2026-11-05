@@ -88,3 +88,11 @@ const appIconRoute = 'appIcon';
 const appIconPath = '/budgets/:id/more/settings/app-icon';
 const displayOptionsRoute = 'displayOptions';
 const displayOptionsPath = '/budgets/:id/more/settings/display';
+
+// Assistant
+const assistantRoute = 'assistant';
+const assistantPath = '/budgets/:id/assistant';
+const assistantProposalsRoute = 'assistantProposals';
+const assistantProposalsPath = '/budgets/:id/assistant/proposals';
+const assistantProviderRoute = 'assistantProvider';
+const assistantProviderPath = '/budgets/:id/more/settings/assistant-provider';

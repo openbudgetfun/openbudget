@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/main.dart';
+import 'package:openbudget_app/src/features/assistant/screens/assistant_screen.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
@@ -371,6 +372,7 @@ class MoreTabPage {
   final WidgetTester tester;
 
   Finder get title => find.text('More').first;
+  Finder get assistantTile => find.text('Assistant');
   Finder get recurringTile => find.text('Recurring Transactions');
   Finder get payeesTile => find.text('Payees');
   Finder get rulesTile => find.text('Transaction Rules');
@@ -393,6 +395,46 @@ class CategoryDetailPage {
   /// so the action starts past the lazy list's cache extent.
   Future<void> scrollToRenameCategory() =>
       scrollIntoView(tester, renameCategoryButton);
+}
+
+/// Page object for the financial assistant.
+class AssistantPage {
+  AssistantPage(this.tester);
+
+  final WidgetTester tester;
+
+  Finder get title => find.text('Assistant').first;
+  Finder get emptyTitle => find.text('Ask about this plan');
+  Finder get suggestionTax => find.text('How much tax will I owe this year?');
+  Finder get suggestionCuts => find.text('Where can I cut spending?');
+  Finder get suggestionGoals => find.text('Am I on track for my goals?');
+  Finder get composerField => find.byKey(AssistantScreen.composerFieldKey);
+  Finder get sendButton => find.byKey(AssistantScreen.sendButtonKey);
+  Finder get typingIndicator => find.text('The assistant is thinking…');
+  Finder get applyButton => find.text('Apply').first;
+  Finder get dismissButton => find.text('Dismiss').first;
+  Finder get appliedChip => find.text('Applied');
+  Finder get dismissedChip => find.text('Dismissed');
+  Finder get disclaimer =>
+      find.text('Guidance only, not financial or tax advice.');
+
+  Finder toolChip(String label) => find.text(label);
+  Finder proposalSummary(String summary) => find.text(summary);
+
+  Future<void> sendSuggestion(String prompt) async {
+    await tester.tap(find.text(prompt));
+    await tester.pumpAndSettle();
+  }
+
+  Future<void> applyFirstProposal() async {
+    await tester.tap(applyButton);
+    await tester.pumpAndSettle();
+  }
+
+  Future<void> dismissFirstProposal() async {
+    await tester.tap(dismissButton);
+    await tester.pumpAndSettle();
+  }
 }
 
 /// Matches a hand-drawn [SkribbleIcon] by its catalog artwork.

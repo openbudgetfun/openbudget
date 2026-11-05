@@ -29,6 +29,15 @@ class MoreScreen extends HookWidget {
             child: Column(
               children: [
                 _MoreTile(
+                  icon: OpenBudgetIcons.sparkle,
+                  label: l10n.assistantTitle,
+                  onTap: () => context.pushNamed(
+                    assistantRoute,
+                    pathParameters: {'id': budgetId},
+                  ),
+                ),
+                const Divider(height: 1),
+                _MoreTile(
                   icon: OpenBudgetIcons.recurring,
                   label: l10n.moreRecurring,
                   onTap: () => context.goNamed(

@@ -70,6 +70,7 @@ void main() {
         scrollable: find.byType(Scrollable).first,
       );
       expect(find.text('Plan Settings'), findsOneWidget);
+      expect(find.text('Assistant provider'), findsOneWidget);
       expect(find.text('New Plan'), findsOneWidget);
       expect(find.text('Open Plan'), findsOneWidget);
       expect(find.text('Make a Fresh Start'), findsOneWidget);

@@ -6701,6 +6701,600 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Try again'**
   String get taxCategoryLoadRetry;
+
+  /// No description provided for @assistantApply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get assistantApply;
+
+  /// No description provided for @assistantComposerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask about this plan…'**
+  String get assistantComposerHint;
+
+  /// No description provided for @assistantConversationDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete conversation'**
+  String get assistantConversationDelete;
+
+  /// No description provided for @assistantConversationDeleteError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not delete the conversation.'**
+  String get assistantConversationDeleteError;
+
+  /// No description provided for @assistantConversationDeleteMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The chat and its messages are removed. Proposals it made stay in your plan.'**
+  String get assistantConversationDeleteMessage;
+
+  /// No description provided for @assistantConversationDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this conversation?'**
+  String get assistantConversationDeleteTitle;
+
+  /// No description provided for @assistantConversationDeletedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Conversation deleted'**
+  String get assistantConversationDeletedToast;
+
+  /// No description provided for @assistantConversationListEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No conversations yet. Your first question starts one.'**
+  String get assistantConversationListEmpty;
+
+  /// No description provided for @assistantConversations.
+  ///
+  /// In en, this message translates to:
+  /// **'Conversations'**
+  String get assistantConversations;
+
+  /// No description provided for @assistantConversationsLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load conversations.'**
+  String get assistantConversationsLoadError;
+
+  /// No description provided for @assistantDisclaimer.
+  ///
+  /// In en, this message translates to:
+  /// **'Guidance only, not financial or tax advice.'**
+  String get assistantDisclaimer;
+
+  /// No description provided for @assistantDismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get assistantDismiss;
+
+  /// No description provided for @assistantEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'I can read your budget, explain what changed, and suggest moves for you to approve. I never change anything on my own.'**
+  String get assistantEmptyMessage;
+
+  /// No description provided for @assistantEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask about this plan'**
+  String get assistantEmptyTitle;
+
+  /// No description provided for @assistantErrorAllowanceMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve used this month\'s included assistant usage. It resets with your next billing period, or you can connect your own provider and keep going now.'**
+  String get assistantErrorAllowanceMessage;
+
+  /// No description provided for @assistantErrorAllowanceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Included usage is spent'**
+  String get assistantErrorAllowanceTitle;
+
+  /// No description provided for @assistantErrorEntitlementMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The included assistant is part of OpenBudget Plus. Subscribe to keep chatting, or connect your own OpenAI-compatible provider.'**
+  String get assistantErrorEntitlementMessage;
+
+  /// No description provided for @assistantErrorEntitlementTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenBudget Plus is needed'**
+  String get assistantErrorEntitlementTitle;
+
+  /// No description provided for @assistantErrorGetPlus.
+  ///
+  /// In en, this message translates to:
+  /// **'Get OpenBudget Plus'**
+  String get assistantErrorGetPlus;
+
+  /// No description provided for @assistantErrorNetworkMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your connection and try again.'**
+  String get assistantErrorNetworkMessage;
+
+  /// No description provided for @assistantErrorNetworkTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t reach the assistant'**
+  String get assistantErrorNetworkTitle;
+
+  /// No description provided for @assistantErrorProviderMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The built-in provider isn\'t available. Try again, or connect your own OpenAI-compatible provider.'**
+  String get assistantErrorProviderMessage;
+
+  /// No description provided for @assistantErrorProviderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The assistant has no provider right now'**
+  String get assistantErrorProviderTitle;
+
+  /// No description provided for @assistantErrorTryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get assistantErrorTryAgain;
+
+  /// No description provided for @assistantErrorUnknownMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong while answering. Try again.'**
+  String get assistantErrorUnknownMessage;
+
+  /// No description provided for @assistantErrorUnknownTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The assistant couldn\'t finish'**
+  String get assistantErrorUnknownTitle;
+
+  /// No description provided for @assistantErrorUseOwnProvider.
+  ///
+  /// In en, this message translates to:
+  /// **'Use your own provider'**
+  String get assistantErrorUseOwnProvider;
+
+  /// No description provided for @assistantErrorValidationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'That request wasn\'t valid'**
+  String get assistantErrorValidationTitle;
+
+  /// No description provided for @assistantLoadingHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening the conversation…'**
+  String get assistantLoadingHistory;
+
+  /// No description provided for @assistantNewConversation.
+  ///
+  /// In en, this message translates to:
+  /// **'New conversation'**
+  String get assistantNewConversation;
+
+  /// No description provided for @assistantOpenProposals.
+  ///
+  /// In en, this message translates to:
+  /// **'Review proposals'**
+  String get assistantOpenProposals;
+
+  /// No description provided for @assistantOwnProviderUsage.
+  ///
+  /// In en, this message translates to:
+  /// **'Using your own provider'**
+  String get assistantOwnProviderUsage;
+
+  /// No description provided for @assistantOwnProviderUsageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Calls go to your provider and never count against the included usage.'**
+  String get assistantOwnProviderUsageHint;
+
+  /// No description provided for @assistantPendingProposals.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 proposal waiting} other{{count} proposals waiting}}'**
+  String assistantPendingProposals(int count);
+
+  /// No description provided for @assistantProposalActionError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not update that proposal. Try again.'**
+  String get assistantProposalActionError;
+
+  /// No description provided for @assistantProposalApplied.
+  ///
+  /// In en, this message translates to:
+  /// **'Applied'**
+  String get assistantProposalApplied;
+
+  /// No description provided for @assistantProposalAppliedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Proposal applied'**
+  String get assistantProposalAppliedToast;
+
+  /// No description provided for @assistantProposalDismissed.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismissed'**
+  String get assistantProposalDismissed;
+
+  /// No description provided for @assistantProposalDismissedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Proposal dismissed'**
+  String get assistantProposalDismissedToast;
+
+  /// No description provided for @assistantProposalEnvelopeTax.
+  ///
+  /// In en, this message translates to:
+  /// **'Envelope tax category'**
+  String get assistantProposalEnvelopeTax;
+
+  /// No description provided for @assistantProposalMoveMoney.
+  ///
+  /// In en, this message translates to:
+  /// **'Move money'**
+  String get assistantProposalMoveMoney;
+
+  /// No description provided for @assistantProposalPendingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for your call'**
+  String get assistantProposalPendingLabel;
+
+  /// No description provided for @assistantProposalTransactionTax.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction tax category'**
+  String get assistantProposalTransactionTax;
+
+  /// No description provided for @assistantProposalsEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'When the assistant suggests a move, it waits here for you to apply or dismiss it.'**
+  String get assistantProposalsEmptyMessage;
+
+  /// No description provided for @assistantProposalsEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing waiting'**
+  String get assistantProposalsEmptyTitle;
+
+  /// No description provided for @assistantProposalsHistorySection.
+  ///
+  /// In en, this message translates to:
+  /// **'Past proposals'**
+  String get assistantProposalsHistorySection;
+
+  /// No description provided for @assistantProposalsLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load proposals.'**
+  String get assistantProposalsLoadError;
+
+  /// No description provided for @assistantProposalsLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Gathering proposals…'**
+  String get assistantProposalsLoading;
+
+  /// No description provided for @assistantProposalsPendingSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for you'**
+  String get assistantProposalsPendingSection;
+
+  /// No description provided for @assistantProposalsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Assistant proposals'**
+  String get assistantProposalsTitle;
+
+  /// No description provided for @assistantProviderApiKey.
+  ///
+  /// In en, this message translates to:
+  /// **'API key'**
+  String get assistantProviderApiKey;
+
+  /// No description provided for @assistantProviderApiKeyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'sk-…'**
+  String get assistantProviderApiKeyHint;
+
+  /// No description provided for @assistantProviderBaseUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Base URL'**
+  String get assistantProviderBaseUrl;
+
+  /// No description provided for @assistantProviderBaseUrlHint.
+  ///
+  /// In en, this message translates to:
+  /// **'https://api.example.com/v1'**
+  String get assistantProviderBaseUrlHint;
+
+  /// No description provided for @assistantProviderEnterKeyAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved keys are never shown. Enter the key again to save changes.'**
+  String get assistantProviderEnterKeyAgain;
+
+  /// No description provided for @assistantProviderIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect an OpenAI-compatible provider to talk to the assistant with your own key.'**
+  String get assistantProviderIntro;
+
+  /// No description provided for @assistantProviderKeyRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the API key.'**
+  String get assistantProviderKeyRequired;
+
+  /// No description provided for @assistantProviderKeyStored.
+  ///
+  /// In en, this message translates to:
+  /// **'••••{hint}'**
+  String assistantProviderKeyStored(String hint);
+
+  /// No description provided for @assistantProviderLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load your provider settings.'**
+  String get assistantProviderLoadError;
+
+  /// No description provided for @assistantProviderLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading provider settings…'**
+  String get assistantProviderLoading;
+
+  /// No description provided for @assistantProviderModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Model'**
+  String get assistantProviderModel;
+
+  /// No description provided for @assistantProviderModelHint.
+  ///
+  /// In en, this message translates to:
+  /// **'model-name'**
+  String get assistantProviderModelHint;
+
+  /// No description provided for @assistantProviderModelRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the model name.'**
+  String get assistantProviderModelRequired;
+
+  /// No description provided for @assistantProviderPrivacy.
+  ///
+  /// In en, this message translates to:
+  /// **'The key is stored encrypted on our servers and is only used to call the provider you name here.'**
+  String get assistantProviderPrivacy;
+
+  /// No description provided for @assistantProviderRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove provider'**
+  String get assistantProviderRemove;
+
+  /// No description provided for @assistantProviderRemovedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Provider removed'**
+  String get assistantProviderRemovedToast;
+
+  /// No description provided for @assistantProviderRemoveError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not remove the provider.'**
+  String get assistantProviderRemoveError;
+
+  /// No description provided for @assistantProviderRemoveMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The assistant will go back to the included provider, which needs OpenBudget Plus.'**
+  String get assistantProviderRemoveMessage;
+
+  /// No description provided for @assistantProviderRemoveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove this provider?'**
+  String get assistantProviderRemoveTitle;
+
+  /// No description provided for @assistantProviderReplace.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a different provider'**
+  String get assistantProviderReplace;
+
+  /// No description provided for @assistantProviderSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save provider'**
+  String get assistantProviderSave;
+
+  /// No description provided for @assistantProviderSavedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your provider is connected'**
+  String get assistantProviderSavedTitle;
+
+  /// No description provided for @assistantProviderSavedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Provider saved'**
+  String get assistantProviderSavedToast;
+
+  /// No description provided for @assistantProviderSaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save the provider.'**
+  String get assistantProviderSaveError;
+
+  /// No description provided for @assistantProviderSettingsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Use your own OpenAI-compatible provider'**
+  String get assistantProviderSettingsHint;
+
+  /// No description provided for @assistantProviderSettingsRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Assistant provider'**
+  String get assistantProviderSettingsRow;
+
+  /// No description provided for @assistantProviderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Assistant provider'**
+  String get assistantProviderTitle;
+
+  /// No description provided for @assistantProviderUrlInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a full HTTPS URL that points at the provider.'**
+  String get assistantProviderUrlInvalid;
+
+  /// No description provided for @assistantProviderUrlRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the provider\'s HTTPS base URL.'**
+  String get assistantProviderUrlRequired;
+
+  /// No description provided for @assistantRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get assistantRetry;
+
+  /// No description provided for @assistantSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send message'**
+  String get assistantSend;
+
+  /// No description provided for @assistantSuggestionCuts.
+  ///
+  /// In en, this message translates to:
+  /// **'Where can I cut spending?'**
+  String get assistantSuggestionCuts;
+
+  /// No description provided for @assistantSuggestionGoals.
+  ///
+  /// In en, this message translates to:
+  /// **'Am I on track for my goals?'**
+  String get assistantSuggestionGoals;
+
+  /// No description provided for @assistantSuggestionTax.
+  ///
+  /// In en, this message translates to:
+  /// **'How much tax will I owe this year?'**
+  String get assistantSuggestionTax;
+
+  /// No description provided for @assistantTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Assistant'**
+  String get assistantTitle;
+
+  /// No description provided for @assistantToolGetTaxReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Looked at your tax report'**
+  String get assistantToolGetTaxReport;
+
+  /// No description provided for @assistantToolListBudgets.
+  ///
+  /// In en, this message translates to:
+  /// **'Looked at your plan'**
+  String get assistantToolListBudgets;
+
+  /// No description provided for @assistantToolListEnvelopes.
+  ///
+  /// In en, this message translates to:
+  /// **'Looked at your envelopes'**
+  String get assistantToolListEnvelopes;
+
+  /// No description provided for @assistantToolListTaxCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Looked at tax categories'**
+  String get assistantToolListTaxCategories;
+
+  /// No description provided for @assistantToolProposeEnvelopeTax.
+  ///
+  /// In en, this message translates to:
+  /// **'Drafted an envelope tax change'**
+  String get assistantToolProposeEnvelopeTax;
+
+  /// No description provided for @assistantToolProposeMoveMoney.
+  ///
+  /// In en, this message translates to:
+  /// **'Drafted a money move'**
+  String get assistantToolProposeMoveMoney;
+
+  /// No description provided for @assistantToolProposeTransactionTax.
+  ///
+  /// In en, this message translates to:
+  /// **'Drafted a tax category change'**
+  String get assistantToolProposeTransactionTax;
+
+  /// No description provided for @assistantToolSearchTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'Searched your transactions'**
+  String get assistantToolSearchTransactions;
+
+  /// No description provided for @assistantToolUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Looked something up'**
+  String get assistantToolUnknown;
+
+  /// No description provided for @assistantTyping.
+  ///
+  /// In en, this message translates to:
+  /// **'The assistant is thinking…'**
+  String get assistantTyping;
+
+  /// No description provided for @assistantUntitledConversation.
+  ///
+  /// In en, this message translates to:
+  /// **'Untitled conversation'**
+  String get assistantUntitledConversation;
+
+  /// No description provided for @assistantUsageLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking this month\'s usage…'**
+  String get assistantUsageLoading;
+
+  /// No description provided for @assistantUsageUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Usage isn\'t available right now.'**
+  String get assistantUsageUnavailable;
+
+  /// No description provided for @assistantUsageZen.
+  ///
+  /// In en, this message translates to:
+  /// **'{used} of {allowance} used this month'**
+  String assistantUsageZen(String used, String allowance);
 }
 
 class _AppLocalizationsDelegate
