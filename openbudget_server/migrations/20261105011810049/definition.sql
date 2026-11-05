@@ -409,6 +409,22 @@ CREATE INDEX "recurring_transaction_next_idx" ON "recurring_transaction" USING b
 CREATE INDEX "recurring_transaction_active_idx" ON "recurring_transaction" USING btree ("budgetId", "isActive");
 
 --
+-- Class SolanaBillingChallenge as table solana_billing_challenge
+--
+CREATE TABLE "solana_billing_challenge" (
+    "id" uuid PRIMARY KEY DEFAULT gen_random_uuid_v7(),
+    "userId" uuid NOT NULL,
+    "message" text NOT NULL,
+    "expiresAt" timestamp without time zone NOT NULL,
+    "usedAt" timestamp without time zone,
+    "createdAt" timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Indexes
+CREATE INDEX "solana_billing_challenge_user_idx" ON "solana_billing_challenge" USING btree ("userId");
+CREATE UNIQUE INDEX "solana_billing_challenge_message_idx" ON "solana_billing_challenge" USING btree ("message");
+
+--
 -- Class SolanaWallet as table solana_wallet
 --
 CREATE TABLE "solana_wallet" (
@@ -505,6 +521,20 @@ CREATE INDEX "solana_wallet_tx_wallet_idx" ON "solana_wallet_transaction" USING 
 CREATE INDEX "solana_wallet_tx_budget_idx" ON "solana_wallet_transaction" USING btree ("budgetId");
 CREATE INDEX "solana_wallet_tx_signature_idx" ON "solana_wallet_transaction" USING btree ("signature");
 CREATE UNIQUE INDEX "solana_wallet_tx_wallet_signature_unique" ON "solana_wallet_transaction" USING btree ("walletId", "signature");
+
+--
+-- Class StripeCustomer as table stripe_customer
+--
+CREATE TABLE "stripe_customer" (
+    "id" uuid PRIMARY KEY DEFAULT gen_random_uuid_v7(),
+    "userId" uuid NOT NULL,
+    "customerId" text NOT NULL,
+    "createdAt" timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Indexes
+CREATE UNIQUE INDEX "stripe_customer_user_idx" ON "stripe_customer" USING btree ("userId");
+CREATE UNIQUE INDEX "stripe_customer_customer_idx" ON "stripe_customer" USING btree ("customerId");
 
 --
 -- Class TaxProfileRecord as table tax_profile
@@ -1681,9 +1711,9 @@ ALTER TABLE ONLY "serverpod_auth_core_session"
 -- MIGRATION VERSION FOR openbudget
 --
 INSERT INTO "serverpod_migrations" ("module", "version", "timestamp")
-    VALUES ('openbudget', '20261104232301248', now())
+    VALUES ('openbudget', '20261105011810049', now())
     ON CONFLICT ("module")
-    DO UPDATE SET "version" = '20261104232301248', "timestamp" = now();
+    DO UPDATE SET "version" = '20261105011810049', "timestamp" = now();
 
 --
 -- MIGRATION VERSION FOR serverpod

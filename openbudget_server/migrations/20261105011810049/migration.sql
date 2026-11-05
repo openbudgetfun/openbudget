@@ -153,9 +153,9 @@ ALTER TABLE ONLY "agent_proposal"
 -- MIGRATION VERSION FOR openbudget
 --
 INSERT INTO "serverpod_migrations" ("module", "version", "timestamp")
-    VALUES ('openbudget', '20261104232301248', now())
+    VALUES ('openbudget', '20261105011810049', now())
     ON CONFLICT ("module")
-    DO UPDATE SET "version" = '20261104232301248', "timestamp" = now();
+    DO UPDATE SET "version" = '20261105011810049', "timestamp" = now();
 
 --
 -- MIGRATION VERSION FOR serverpod
