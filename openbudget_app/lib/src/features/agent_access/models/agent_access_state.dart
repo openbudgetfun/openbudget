@@ -28,8 +28,6 @@ AgentAccessFailure agentAccessFailureFrom(Object error) => switch (error) {
   ValidationException(:final message) => AgentAccessFailure.validation(
     message: message,
   ),
-  NotFoundException() ||
-  AuthenticationRequiredException() => const AgentAccessFailure.unknown(),
   _ => const AgentAccessFailure.unknown(),
 };
 
