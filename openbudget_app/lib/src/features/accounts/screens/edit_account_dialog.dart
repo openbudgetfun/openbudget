@@ -545,7 +545,7 @@ class EditAccountDialog extends HookConsumerWidget {
   }
 }
 
-class _SectionLabel extends StatelessWidget {
+class _SectionLabel extends HookWidget {
   const _SectionLabel({required this.text});
 
   final String text;

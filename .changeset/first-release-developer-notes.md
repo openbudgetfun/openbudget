@@ -17,6 +17,7 @@ The first release of the OpenBudget workspace: a Flutter app on Serverpod 4.1 wi
 - Flutter 3.47.7, Dart 3.13 and Serverpod 4.1.0, with the protocol and providers regenerated and the module schema migration applied.
 - `monochange` replaces knope for changeset-only releases, with a developer stream (`CHANGELOG.md`, GitHub release body) and a user stream (`WHATS_NEW.md` and `openbudget_app/assets/release_notes/<version>.json`).
 - The infrastructure-as-code and spec-driven tooling are gone; CI checks analyze, tests, formatting, Patrol flows, the widget ban, pinned dependencies, secrets and the generated icon catalog.
+- `avoid_stateful_widgets` in `openbudget_lints` now rejects `StatelessWidget` as well as the stateful widget types, so every widget is a `HookWidget` or `HookConsumerWidget`.
 
 ## Budgeting
 

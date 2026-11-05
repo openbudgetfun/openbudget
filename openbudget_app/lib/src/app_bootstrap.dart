@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/analytics/analytics_provider.dart';
@@ -76,7 +77,7 @@ class OpenBudgetApp extends HookConsumerWidget {
   }
 }
 
-class _DismissKeyboardOnTap extends StatelessWidget {
+class _DismissKeyboardOnTap extends HookWidget {
   const _DismissKeyboardOnTap({required this.child});
 
   final Widget? child;
@@ -113,7 +114,7 @@ class _DismissKeyboardOnTap extends StatelessWidget {
   );
 }
 
-class _AuthBootstrapScreen extends StatelessWidget {
+class _AuthBootstrapScreen extends HookWidget {
   const _AuthBootstrapScreen();
 
   @override

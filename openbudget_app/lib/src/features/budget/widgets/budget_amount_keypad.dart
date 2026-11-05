@@ -23,7 +23,7 @@ Future<String?> showBudgetAmountKeypadSheet({
   ),
 );
 
-class BudgetAmountField extends StatelessWidget {
+class BudgetAmountField extends HookWidget {
   const BudgetAmountField({
     required this.labelText,
     required this.currencyCode,
@@ -69,7 +69,7 @@ class BudgetAmountField extends StatelessWidget {
   }
 }
 
-class BudgetAmountKeypad extends StatelessWidget {
+class BudgetAmountKeypad extends HookWidget {
   const BudgetAmountKeypad({
     required this.inputValue,
     required this.onChanged,

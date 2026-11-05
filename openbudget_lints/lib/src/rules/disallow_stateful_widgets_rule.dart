@@ -12,15 +12,14 @@ final class DisallowStatefulWidgetsRule extends AnalysisRule {
   DisallowStatefulWidgetsRule()
     : super(
         name: 'avoid_stateful_widgets',
-        description: 'Disallow StatefulWidget-based classes in OpenBudget.',
+        description: 'Allow only hook-based widgets in OpenBudget.',
       );
 
   static const LintCode code = LintCode(
     'avoid_stateful_widgets',
-    'Stateful widgets are not allowed in OpenBudget. '
-        'Use HookWidget, HookConsumerWidget, or StatelessWidget instead.',
-    correctionMessage:
-        'Replace this widget with a hook-based or stateless implementation.',
+    'Only hook-based widgets are allowed in OpenBudget. '
+        'Use HookWidget or HookConsumerWidget instead.',
+    correctionMessage: 'Extend HookWidget, or HookConsumerWidget when the widget reads providers.',
     severity: DiagnosticSeverity.WARNING,
   );
 
@@ -121,6 +120,7 @@ final class _DisallowedClassNamesResolver {
 
   static const Set<String> _defaults = {
     'StatefulWidget',
+    'StatelessWidget',
     'ConsumerStatefulWidget',
     'StatefulHookConsumerWidget',
   };
