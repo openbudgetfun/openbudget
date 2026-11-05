@@ -3,13 +3,30 @@ FROM dart:3.13 AS build
 WORKDIR /workspace
 COPY . .
 
-# Install dependencies and compile the server executable
+# The root workspace also lists the Flutter packages, which this Dart-only
+# image cannot resolve. Narrow it to the server and its path dependencies;
+# the committed pubspec.lock keeps every remaining package at its locked
+# version.
+RUN printf '%s\n' \
+  'name: openbudget_workspace' \
+  'publish_to: none' \
+  'environment:' \
+  '  sdk: ^3.13.0' \
+  'workspace:' \
+  '  - openbudget_core' \
+  '  - openbudget_lints' \
+  '  - openbudget_server' \
+  > pubspec.yaml
+
+# Install dependencies and build the server. `dart build cli` (not
+# `dart compile exe`) runs the native build hooks of `serverpod_argon2` and
+# `sqlite3`, producing `bundle/bin/main` next to `bundle/lib/<libraries>`.
 WORKDIR /workspace/openbudget_server
 RUN dart pub get
-RUN dart compile exe bin/main.dart -o bin/server
+RUN dart build cli --target bin/main.dart --output build/cli
 
 # Final stage
-FROM alpine:latest
+FROM alpine:3.22
 
 # Environment variables
 ENV runmode=production
@@ -20,8 +37,10 @@ ENV role=monolith
 # Copy runtime dependencies
 COPY --from=build /runtime/ /
 
-# Copy compiled server executable
-COPY --from=build /workspace/openbudget_server/bin/server server
+# The bundle keeps its own bin/ and lib/ under /app, so the executable finds
+# its native libraries without touching the system directories.
+WORKDIR /app
+COPY --from=build /workspace/openbudget_server/build/cli/bundle/ ./
 
 # Copy configuration files and resources
 COPY --from=build /workspace/openbudget_server/config/ config/
@@ -36,5 +55,6 @@ EXPOSE 8080
 EXPOSE 8081
 EXPOSE 8082
 
-# Define the entrypoint command
-ENTRYPOINT ./server --mode=$runmode --server-id=$serverid --logging=$logging --role=$role
+# Define the entrypoint command. Pending migrations are applied on start, so
+# a new image never serves requests against an older schema.
+ENTRYPOINT ./bin/main --mode=$runmode --server-id=$serverid --logging=$logging --role=$role --apply-migrations
