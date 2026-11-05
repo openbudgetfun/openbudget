@@ -8,9 +8,15 @@ import 'package:openbudget_core/src/tax/tax_rule_pack.dart';
 /// Germany's tax rules for the Veranlagungszeiträume in [deTaxTables].
 ///
 /// The pack covers the calendar year, the § 32a EStG tariff with the splitting
-/// method, Solidaritätszuschlag, Kirchensteuer at an assumed 9 %, the
-/// Einnahmen-Überschuss-Rechnung of a sole trader with Gewerbesteuer and the
-/// § 35 credit, the corporate taxes of a GmbH or UG, and Umsatzsteuer.
+/// method, Solidaritätszuschlag and Kirchensteuer at the rate of the
+/// taxpayer's Bundesland, Kinderfreibeträge with the Günstigerprüfung against
+/// the Kindergeld, the Entfernungspauschale of § 9 Abs. 1 Satz 3 Nr. 4 EStG,
+/// the Homeoffice-Tagespauschale and the Arbeitszimmer of § 4 Abs. 5 EStG,
+/// the Einnahmen-Überschuss-Rechnung of a sole trader — Freiberufler without
+/// Gewerbesteuer, Gewerbetreibende with the § 35 credit —, the corporate
+/// taxes of a GmbH or UG, Umsatzsteuer with the § 19 Kleinunternehmer test of
+/// the previous and current year, and filing deadlines rolled forward by
+/// § 108 Abs. 3 AO.
 ///
 /// Every figure is a constant of one year's table, so the same input always
 /// produces the same report. The sources and the date they were checked are

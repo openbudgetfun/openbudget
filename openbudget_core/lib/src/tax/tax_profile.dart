@@ -69,7 +69,26 @@ sealed class TaxProfile {
         salesTaxRegistered: registered,
         jointAssessment: json['jointAssessment'] as bool? ?? false,
         churchTax: json['churchTax'] as bool? ?? false,
+        churchTaxState: switch (json['churchTaxState']) {
+          final String state => DeBundesland.values.byName(state),
+          // Old JSON stored only the flag; the flag alone keeps the 9 %
+          // assumption the old pack computed with.
+          _ => null,
+        },
         smallBusinessExemption: json['smallBusinessExemption'] as bool? ?? true,
+        einkunftsArt: switch (json['einkunftsArt']) {
+          // Old JSON had no Einkunftsart and the pack treated every sole
+          // trader as a Gewerbebetrieb.
+          final String art => DeEinkunftsArt.values.byName(art),
+          _ => DeEinkunftsArt.gewerblich,
+        },
+        children: json['children'] as int? ?? 0,
+        spouseEmployed: json['spouseEmployed'] as bool? ?? false,
+        statutoryPensionMinor: json['statutoryPensionMinor'] as int? ?? 0,
+        previousYearTurnoverMinor:
+            json['previousYearTurnoverMinor'] as int? ?? 0,
+        commuteKmOneWay: json['commuteKmOneWay'] as int? ?? 0,
+        commuteDays: json['commuteDays'] as int? ?? 0,
       ),
       null => throw FormatException(
         'Unknown jurisdiction',
@@ -356,13 +375,66 @@ final class NgTaxProfile extends TaxProfile {
   };
 }
 
+/// Whether a self-employed person's profit is gewerblich (§ 15 EStG,
+/// Anlage G, trade tax with the § 35 credit) or freiberuflich (§ 18 EStG,
+/// Anlage S, no trade tax).
+enum DeEinkunftsArt {
+  /// Freie Berufe: no Gewerbesteuer, filed on Anlage S.
+  freiberuflich,
+
+  /// Gewerbebetrieb: Gewerbesteuer and the § 35 EStG credit, Anlage G.
+  gewerblich,
+}
+
+/// The sixteen Länder. Church tax is state and church law, so the rate
+/// follows the Land: 8 % in Bayern and Baden-Württemberg, 9 % everywhere
+/// else.
+enum DeBundesland {
+  badenWuerttemberg('Baden-Württemberg'),
+  bayern('Bayern'),
+  berlin('Berlin'),
+  brandenburg('Brandenburg'),
+  bremen('Bremen'),
+  hamburg('Hamburg'),
+  hessen('Hessen'),
+  mecklenburgVorpommern('Mecklenburg-Vorpommern'),
+  niedersachsen('Niedersachsen'),
+  nordrheinWestfalen('Nordrhein-Westfalen'),
+  rheinlandPfalz('Rheinland-Pfalz'),
+  saarland('Saarland'),
+  sachsen('Sachsen'),
+  sachsenAnhalt('Sachsen-Anhalt'),
+  schleswigHolstein('Schleswig-Holstein'),
+  thueringen('Thüringen');
+
+  const DeBundesland(this.label);
+
+  /// The name the Land uses for itself.
+  final String label;
+
+  /// Kirchensteuer-Hebesatz of the Land (§ 51a Abs. 1 EStG naming the
+  /// Grundsteuer of the Kirchen as 8 % or 9 % of the income tax).
+  int get churchTaxRateBasisPoints =>
+      this == DeBundesland.bayern || this == DeBundesland.badenWuerttemberg
+      ? 800
+      : 900;
+}
+
 final class DeTaxProfile extends TaxProfile {
   const DeTaxProfile({
     required super.entityKind,
     this.salesTaxRegistered = false,
     this.jointAssessment = false,
     this.churchTax = false,
+    this.churchTaxState,
     this.smallBusinessExemption = true,
+    this.einkunftsArt = DeEinkunftsArt.gewerblich,
+    this.children = 0,
+    this.spouseEmployed = false,
+    this.statutoryPensionMinor = 0,
+    this.previousYearTurnoverMinor = 0,
+    this.commuteKmOneWay = 0,
+    this.commuteDays = 0,
   });
 
   @override
@@ -375,17 +447,71 @@ final class DeTaxProfile extends TaxProfile {
   /// method.
   final bool jointAssessment;
 
-  /// Kirchensteuer is due on top of income tax.
+  /// Whether the taxpayer belongs to a church that levies Kirchensteuer.
+  ///
+  /// The rate itself comes from [churchTaxState]. A profile parsed from old
+  /// JSON carries only this flag; the pack then assumes the 9 % the old
+  /// behaviour assumed.
   final bool churchTax;
 
-  /// Kleinunternehmerregelung (§19 UStG): no VAT charged or reclaimed.
+  /// The Land whose Kirchensteuer rate applies. Null when the taxpayer has
+  /// not named it, in which case [churchTax] alone triggers the 9 %
+  /// assumption.
+  final DeBundesland? churchTaxState;
+
+  /// The Kirchensteuer rate this profile triggers, in basis points: the
+  /// Land's rate when named, the old 9 % assumption for the bare flag, zero
+  /// otherwise.
+  int get churchTaxRateBasisPoints => switch (churchTaxState) {
+    final state? => state.churchTaxRateBasisPoints,
+    null => churchTax ? 900 : 0,
+  };
+
+  /// Kleinunternehmerregelung (§ 19 UStG): no VAT charged or reclaimed.
   final bool smallBusinessExemption;
+
+  /// For a sole trader: whether the profit is gewerblich or freiberuflich.
+  /// Defaults to gewerblich, what the pack assumed before the field existed.
+  final DeEinkunftsArt einkunftsArt;
+
+  /// Children the taxpayer receives Kindergeld for. The pack assumes a full
+  /// twelve months per child.
+  final int children;
+
+  /// Zusammenveranlagung only: the second spouse also earns wages, so they
+  /// claim their own Arbeitnehmer-Pauschbetrag and file their own Anlage N.
+  final bool spouseEmployed;
+
+  /// Contributions to the gesetzliche Rentenversicherung, employee and
+  /// employer share combined. They reduce the Basisrente headroom of
+  /// § 10 Abs. 3 EStG.
+  final int statutoryPensionMinor;
+
+  /// Gesamtumsatz of the previous calendar year, for the Kleinunternehmer
+  /// test of § 19 Abs. 1 Satz 1 UStG. Zero when the business did not exist.
+  final int previousYearTurnoverMinor;
+
+  /// Anlage N: one-way distance in full kilometres to the first workplace,
+  /// shortest road connection.
+  final int commuteKmOneWay;
+
+  /// Anlage N: days the workplace was visited. Days of illness, holiday,
+  /// Dienstreise or Heimarbeit do not count.
+  final int commuteDays;
 
   @override
   Map<String, Object?> toJson() => {
     ..._baseJson(),
     'jointAssessment': jointAssessment,
     'churchTax': churchTax,
+    'churchTaxState': ?churchTaxState?.name,
     'smallBusinessExemption': smallBusinessExemption,
+    'einkunftsArt': einkunftsArt.name,
+    'children': children,
+    'spouseEmployed': spouseEmployed,
+    'statutoryPensionMinor': statutoryPensionMinor,
+    'previousYearTurnoverMinor': previousYearTurnoverMinor,
+    'commuteKmOneWay': commuteKmOneWay,
+    'commuteDays': commuteDays,
   };
 }

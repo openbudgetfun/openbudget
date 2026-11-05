@@ -16,12 +16,24 @@ TaxInput individualInput(
   int year = 2026,
   bool joint = false,
   bool church = false,
+  DeBundesland? churchState,
+  int children = 0,
+  bool spouseEmployed = false,
+  int statutoryPensionMinor = 0,
+  int commuteKmOneWay = 0,
+  int commuteDays = 0,
   List<TaxInput> linked = const [],
 }) => TaxInput(
   profile: DeTaxProfile(
     entityKind: TaxEntityKind.individual,
     jointAssessment: joint,
     churchTax: church,
+    churchTaxState: churchState,
+    children: children,
+    spouseEmployed: spouseEmployed,
+    statutoryPensionMinor: statutoryPensionMinor,
+    commuteKmOneWay: commuteKmOneWay,
+    commuteDays: commuteDays,
   ),
   year: rules.taxYear(year),
   entries: entries,
@@ -32,12 +44,16 @@ TaxInput soleTraderInput(
   List<TaxEntry> entries, {
   bool vatRegistered = true,
   bool smallBusinessExemption = false,
+  DeEinkunftsArt einkunftsArt = DeEinkunftsArt.gewerblich,
+  int previousYearTurnoverMinor = 0,
   int year = 2026,
 }) => TaxInput(
   profile: DeTaxProfile(
     entityKind: TaxEntityKind.soleTrader,
     salesTaxRegistered: vatRegistered,
     smallBusinessExemption: smallBusinessExemption,
+    einkunftsArt: einkunftsArt,
+    previousYearTurnoverMinor: previousYearTurnoverMinor,
   ),
   year: rules.taxYear(year),
   entries: entries,
@@ -168,6 +184,217 @@ void main() {
       );
     });
 
+    test('joint assessment applies one Pauschbetrag per employed spouse', () {
+      final report = rules.report(
+        individualInput(
+          [entry('de.ind.arbeitslohn', 200000)],
+          joint: true,
+          spouseEmployed: true,
+        ),
+      );
+      // Two Pauschbeträge: 200 000 - 2 460 - 72 = 197 468 Euro; half 98 734
+      // taxed twice = 2 * 30 332 = 60 664 Euro.
+      expect(liability(report, 'Einkommensteuer'), 6066400);
+      expect(
+        report.lines
+            .firstWhere(
+              (line) => line.label == 'Arbeitnehmer-Pauschbetrag (je Ehegatte)',
+            )
+            .amountMinor,
+        -246000,
+      );
+      expect(
+        report.assumptions.join(' '),
+        contains('je erwerbstätigem Ehegatten'),
+      );
+    });
+
+    test('Kinderfreibeträge beat the Kindergeld under joint assessment', () {
+      final report = rules.report(
+        individualInput(
+          [entry('de.ind.arbeitslohn', 200000)],
+          joint: true,
+          children: 2,
+        ),
+      );
+      // 198 698 - 2 * 9 756 = 179 186 Euro; half 89 593 taxed twice:
+      // 2 * 26 493 = 52 986 Euro, more than the 6 216 Euro Kindergeld saves.
+      expect(
+        report.lines
+            .firstWhere((line) => line.label == 'Zu versteuerndes Einkommen')
+            .amountMinor,
+        17918600,
+      );
+      expect(liability(report, 'Einkommensteuer'), 5298600);
+      // Soli on the KFB tax: 11.9 % of (52 986 - 40 700) = 1 462.03.
+      expect(liability(report, 'Solidaritätszuschlag'), 146203);
+    });
+
+    test(
+      'the Kindergeld wins but Soli and Kirchensteuer use the KFB tax',
+      () {
+        final report = rules.report(
+          individualInput(
+            [entry('de.ind.arbeitslohn', 60000)],
+            children: 2,
+            churchState: DeBundesland.hessen,
+          ),
+        );
+        // 60 000 - 1 230 - 36 = 58 734 Euro; with 2 halved KFB 9 756 Euro the
+        // tax is 10 191 Euro, so the 6 216 Euro Kindergeld wins and the
+        // assessed tax stays 13 747 Euro.
+        expect(
+          report.lines
+              .firstWhere((line) => line.label == 'Zu versteuerndes Einkommen')
+              .amountMinor,
+          5873400,
+        );
+        expect(liability(report, 'Einkommensteuer'), 1374700);
+        // Soli and Kirchensteuer are computed on the 10 191 Euro KFB tax
+        // (§ 3 Abs. 2 SolzG, § 51a Abs. 1 EStG); 9 % of 10 191 = 917.19.
+        expect(liability(report, 'Kirchensteuer'), 91719);
+        // 10 191 Euro is below the Soli Freigrenze, so no surcharge is due.
+        expect(
+          report.liabilities.where(
+            (item) => item.label == 'Solidaritätszuschlag',
+          ),
+          isEmpty,
+        );
+        expect(
+          report.assumptions.join(' '),
+          contains('das Kindergeld gewählt'),
+        );
+      },
+    );
+
+    test('the Basisrente cap doubles jointly and shrinks by pension dues', () {
+      final single = rules.report(
+        individualInput(
+          [
+            entry('de.ind.arbeitslohn', 50000),
+            entry('de.ind.basisrente', 35000),
+          ],
+          statutoryPensionMinor: 1000000,
+        ),
+      );
+      // Cap 30 826 - 10 000 = 20 826 Euro of the 35 000 Euro paid.
+      expect(
+        single.lines
+            .firstWhere((line) => line.label == 'Basisrente (Sonderausgaben)')
+            .amountMinor,
+        -2082600,
+      );
+      final joint = rules.report(
+        individualInput(
+          [
+            entry('de.ind.arbeitslohn', 100000),
+            entry('de.ind.basisrente', 45000),
+          ],
+          joint: true,
+          statutoryPensionMinor: 2000000,
+        ),
+      );
+      // Cap 2 * 30 826 - 20 000 = 41 652 Euro of the 45 000 Euro paid.
+      expect(
+        joint.lines
+            .firstWhere((line) => line.label == 'Basisrente (Sonderausgaben)')
+            .amountMinor,
+        -4165200,
+      );
+    });
+
+    test('the Homeoffice-Pauschale caps at 1 260 Euro in whole days', () {
+      // A 2 000 Euro claim is cut to the annual cap: 100 000 - 1 260 - 36 =
+      // 98 704 Euro.
+      final report = rules.report(
+        individualInput([
+          entry('de.ind.arbeitslohn', 100000),
+          entry('de.ind.homeoffice', 2000),
+        ]),
+      );
+      expect(
+        report.lines
+            .firstWhere((line) => line.label == 'Zu versteuerndes Einkommen')
+            .amountMinor,
+        9870400,
+      );
+      // 1 263 Euro is 210.5 days; only whole days count, so the claim floors
+      // to 1 260 Euro and the same zvE results.
+      final floored = rules.report(
+        individualInput([
+          entry('de.ind.arbeitslohn', 100000),
+          entry('de.ind.homeoffice', 1263),
+        ]),
+      );
+      expect(
+        floored.lines
+            .firstWhere((line) => line.label == 'Zu versteuerndes Einkommen')
+            .amountMinor,
+        9870400,
+      );
+      expect(
+        floored.assumptions.join(' '),
+        contains('210 Tage'),
+      );
+    });
+
+    test('an Arbeitszimmer excludes the Homeoffice-Tagespauschale', () {
+      final report = rules.report(
+        individualInput([
+          entry('de.ind.arbeitslohn', 100000),
+          entry('de.ind.arbeitszimmer', 1260),
+          entry('de.ind.homeoffice', 1260),
+        ]),
+      );
+      // Only the Arbeitszimmer counts: 100 000 - 1 260 - 36 = 98 704 Euro.
+      expect(
+        report.lines
+            .firstWhere((line) => line.label == 'Zu versteuerndes Einkommen')
+            .amountMinor,
+        9870400,
+      );
+      expect(
+        report.assumptions.join(' '),
+        contains('bleibt außen vor'),
+      );
+      final opportunityIds = rules
+          .opportunities(
+            individualInput([
+              entry('de.ind.arbeitslohn', 100000),
+              entry('de.ind.arbeitszimmer', 1260),
+            ]),
+            report,
+          )
+          .map((item) => item.id)
+          .toSet();
+      expect(opportunityIds, isNot(contains('de.homeoffice_pauschale')));
+    });
+
+    test('the Entfernungspauschale is a Werbungskosten input', () {
+      final report = rules.report(
+        individualInput(
+          [
+            entry('de.ind.arbeitslohn', 60000),
+            entry('de.ind.werbungskosten', 1000),
+          ],
+          commuteKmOneWay: 25,
+          commuteDays: 100,
+        ),
+      );
+      // 2026: 25 km * 0.38 * 100 days = 950 Euro; 1 000 + 950 > 1 230, so the
+      // actual costs apply: 60 000 - 1 950 - 36 = 58 014 Euro.
+      expect(
+        report.lines
+            .firstWhere((line) => line.label == 'Zu versteuerndes Einkommen')
+            .amountMinor,
+        5801400,
+      );
+      expect(
+        report.assumptions.join(' '),
+        contains('Entfernungspauschale'),
+      );
+    });
+
     test('capital income is taxed at 25 % after the Sparer-Pauschbetrag', () {
       final report = rules.report(
         individualInput([
@@ -215,6 +442,29 @@ void main() {
       expect(report.assumptions, contains(contains('§ 35 EStG')));
     });
 
+    test('a linked Freiberufler feeds the profit but earns no § 35 credit', () {
+      final business = soleTraderInput(
+        [
+          entry('de.euer.betriebseinnahmen', 100000),
+          entry('de.euer.wareneinkauf', 40000),
+        ],
+        einkunftsArt: DeEinkunftsArt.freiberuflich,
+      );
+      final report = rules.report(
+        individualInput(
+          [entry('de.ind.arbeitslohn', 100000)],
+          linked: [business],
+        ),
+      );
+      // Same profit, but no Gewerbesteuer and therefore no § 35 credit:
+      // 98 770 + 60 000 - 36 = 158 734 Euro taxed fully.
+      expect(liability(report, 'Einkommensteuer'), 5553200);
+      expect(
+        report.lines.any((line) => line.label == 'Anrechnung nach § 35 EStG'),
+        isFalse,
+      );
+    });
+
     test('the bands add up to the income tax', () {
       for (final joint in [false, true]) {
         final report = rules.report(
@@ -251,7 +501,7 @@ void main() {
       );
       expect(report.assumptions, isNotEmpty);
       expect(report.sources, isNotEmpty);
-      expect(report.rulesVerifiedOn, DateTime.utc(2026, 11, 4));
+      expect(report.rulesVerifiedOn, DateTime.utc(2026, 11, 5));
       expect(report.currencyCode, 'EUR');
       expect(
         report.assumptions.join(' '),
@@ -271,10 +521,7 @@ void main() {
         ]),
       );
       // (60 000 - 24 500) * 3.5 % = 1 242.50 Euro Messbetrag; * 400 %.
-      expect(
-        liability(report, 'Gewerbesteuer (Annahme Gewerbebetrieb)'),
-        497000,
-      );
+      expect(liability(report, 'Gewerbesteuer'), 497000);
       expect(liability(report, 'Umsatzsteuer-Zahllast'), 1500000);
       expect(
         report.lines
@@ -347,6 +594,55 @@ void main() {
         1500000,
       );
     });
+
+    test('a Freiberufler owes no Gewerbesteuer and files Anlage S', () {
+      final report = rules.report(
+        soleTraderInput([
+          entry('de.euer.betriebseinnahmen', 100000),
+          entry('de.euer.wareneinkauf', 40000),
+        ], einkunftsArt: DeEinkunftsArt.freiberuflich),
+      );
+      expect(report.liabilities, isEmpty);
+      expect(
+        report.lines
+            .firstWhere(
+              (line) =>
+                  line.label ==
+                  'Gewinn (Betriebseinnahmen ./. Betriebsausgaben)',
+            )
+            .reportReference,
+        contains('Anlage S'),
+      );
+      expect(
+        report.assumptions.join(' '),
+        contains('freiberuflich'),
+      );
+      expect(
+        report.assumptions.join(' '),
+        isNot(contains('Hebesatz')),
+      );
+    });
+
+    test('an Arbeitszimmer excludes the Tagespauschale in the EÜR', () {
+      final report = rules.report(
+        soleTraderInput([
+          entry('de.euer.betriebseinnahmen', 30000),
+          entry('de.euer.arbeitszimmer', 1260),
+          entry('de.euer.homeoffice', 1260),
+        ]),
+      );
+      // 30 000 - 1 260 Arbeitszimmer (Tagespauschale dropped) = 28 740 Euro.
+      expect(
+        report.lines
+            .firstWhere(
+              (line) =>
+                  line.label ==
+                  'Gewinn (Betriebseinnahmen ./. Betriebsausgaben)',
+            )
+            .amountMinor,
+        2874000,
+      );
+    });
   });
 
   group('company 2026', () {
@@ -378,6 +674,26 @@ void main() {
         allOf(contains('Körperschaftsteuer 15 %'), contains('Hebesatz 400 %')),
       );
     });
+
+    test('company lines reference Anlage GK and ZVE, not KSt 1', () {
+      final report = rules.report(
+        companyInput([entry('de.co.umsatzerloese', 100000)]),
+      );
+      final profit = report.lines.firstWhere(
+        (line) =>
+            line.label == 'Jahresüberschuss/-fehlbetrag (Gewinn vor Steuern)',
+      );
+      expect(profit.reportReference, contains('Anlage GK'));
+      expect(profit.amountMinor, 10000000);
+      final taxable = report.lines.firstWhere(
+        (line) => line.label.startsWith('Einkommen'),
+      );
+      expect(taxable.reportReference, contains('Anlage ZVE'));
+      expect(taxable.amountMinor, 10000000);
+      for (final line in report.lines) {
+        expect(line.reportReference, isNot(contains('KSt 1')));
+      }
+    });
   });
 
   group('opportunities', () {
@@ -391,6 +707,27 @@ void main() {
       expect(ids, contains('de.homeoffice_pauschale'));
       expect(ids, contains('de.basisrente_hoechstbetrag'));
       expect(ids, isNot(contains('de.sparer_pauschbetrag')));
+    });
+
+    test('filing deadlines roll off weekends (§ 108 Abs. 3 AO)', () {
+      // VZ 2026: 31 Jul 2027 is a Saturday, so Monday 2 Aug 2027.
+      final input2026 = individualInput([
+        entry('de.ind.arbeitslohn', 100000),
+      ]);
+      final opportunity2026 = rules
+          .opportunities(input2026, rules.report(input2026))
+          .firstWhere((item) => item.id == 'de.frist_steuererklaerung');
+      expect(opportunity2026.deadline, DateTime.utc(2027, 8, 2));
+      // VZ 2025: 28 Feb 2027 (advised) is a Sunday, so Monday 1 Mar 2027.
+      final input2025 = individualInput(
+        [entry('de.ind.arbeitslohn', 100000)],
+        year: 2025,
+      );
+      final report2025 = rules.report(input2025);
+      expect(
+        report2025.assumptions.join(' '),
+        contains('01.03.2027'),
+      );
     });
 
     test('an unused Sparer-Pauschbetrag estimates the refund', () {
@@ -428,6 +765,48 @@ void main() {
           .toSet();
       expect(ids, contains('de.kleinunternehmerregelung'));
       expect(ids, contains('de.investitionsabzugsbetrag'));
+    });
+
+    test('the Kleinunternehmer test uses both years and both limits', () {
+      List<TaxOpportunity> opportunities({
+        required int previousYearMinor,
+        required int currentYearEuros,
+      }) => rules
+          .opportunities(
+            soleTraderInput(
+              [entry('de.euer.betriebseinnahmen', currentYearEuros)],
+              previousYearTurnoverMinor: previousYearMinor,
+            ),
+            rules.report(
+              soleTraderInput(
+                [entry('de.euer.betriebseinnahmen', currentYearEuros)],
+                previousYearTurnoverMinor: previousYearMinor,
+              ),
+            ),
+          )
+          .where((item) => item.id == 'de.kleinunternehmerregelung')
+          .toList();
+
+      // 24 999 prior and current under 100 000: exempt.
+      expect(
+        opportunities(previousYearMinor: 2499900, currentYearEuros: 20000),
+        hasLength(1),
+      );
+      // 25 000 prior is still "at most".
+      expect(
+        opportunities(previousYearMinor: 2500000, currentYearEuros: 100000),
+        hasLength(1),
+      );
+      // 25 001 prior: regular taxation, no opportunity.
+      expect(
+        opportunities(previousYearMinor: 2500100, currentYearEuros: 20000),
+        isEmpty,
+      );
+      // Current year crossing 100 000: the 100 001st euro carries VAT.
+      expect(
+        opportunities(previousYearMinor: 2400000, currentYearEuros: 100001),
+        isEmpty,
+      );
     });
 
     test('a shareholder sees the salary-or-dividend comparison', () {

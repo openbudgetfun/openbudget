@@ -39,12 +39,28 @@ const List<TaxCategory> deIndividualCategories = [
     description: 'Tatsächliche Werbungskosten. Ist der Betrag niedriger als der Arbeitnehmer-Pauschbetrag, wird dieser abgezogen.',
   ),
   TaxCategory(
+    code: 'de.ind.arbeitszimmer',
+    label: 'Häusliches Arbeitszimmer',
+    kind: TaxCategoryKind.expense,
+    entityKinds: {TaxEntityKind.individual},
+    reportReference: 'Anlage N Z57 (Kz 325) – Häusliches Arbeitszimmer',
+    description:
+        'Jahrespauschale von 1 260 Euro, wenn das Arbeitszimmer den Mittelpunkt '
+        'der Tätigkeit bildet, sonst die tatsächlichen Kosten '
+        '(§ 4 Abs. 5 Satz 1 Nr. 6b EStG). Nicht zusammen mit der '
+        'Homeoffice-Tagespauschale für dieselben Tage.',
+  ),
+  TaxCategory(
     code: 'de.ind.homeoffice',
     label: 'Homeoffice-Pauschale',
     kind: TaxCategoryKind.expense,
     entityKinds: {TaxEntityKind.individual},
-    reportReference: 'Anlage N – Häusliches Arbeitszimmer',
-    description: '6 Euro je Kalendertag, höchstens 1 260 Euro im Jahr (§ 4 Abs. 5 Satz 1 Nr. 6c EStG).',
+    reportReference:
+        'Anlage N Z58/Z59 (Kz 335/336) – Homeoffice-Tagespauschale',
+    description:
+        '6 Euro je Kalendertag, höchstens 1 260 Euro im Jahr '
+        '(§ 4 Abs. 5 Satz 1 Nr. 6c EStG). Der Finanzbetrag wird je Tag '
+        'erfasst; Z57 und Z58/Z59 dürfen sich zeitlich nicht überlappen.',
   ),
   TaxCategory(
     code: 'de.ind.sonstige_einkuenfte',
@@ -152,16 +168,16 @@ const List<TaxCategory> deSoleTraderCategories = [
     label: 'Häusliches Arbeitszimmer (Jahrespauschale)',
     kind: TaxCategoryKind.expense,
     entityKinds: {TaxEntityKind.soleTrader},
-    reportReference: 'Anlage EÜR – Häusliches Arbeitszimmer',
-    description: '1 260 Euro im Jahr, wenn das Arbeitszimmer den Mittelpunkt der Tätigkeit bildet (§ 4 Abs. 5 Satz 1 Nr. 6b EStG).',
+    reportReference: 'Anlage EÜR Z65 (Kz 162/172) – Häusliches Arbeitszimmer',
+    description: '1 260 Euro im Jahr, wenn das Arbeitszimmer den Mittelpunkt der Tätigkeit bildet (§ 4 Abs. 5 Satz 1 Nr. 6b EStG). Nicht zusammen mit der Tagespauschale für dieselben Tage.',
   ),
   TaxCategory(
     code: 'de.euer.homeoffice',
     label: 'Homeoffice-Pauschale (Tagespauschale)',
     kind: TaxCategoryKind.expense,
     entityKinds: {TaxEntityKind.soleTrader},
-    reportReference: 'Anlage EÜR – Homeoffice-Pauschale',
-    description: '6 Euro je Kalendertag, höchstens 1 260 Euro im Jahr (§ 4 Abs. 5 Satz 1 Nr. 6c EStG).',
+    reportReference: 'Anlage EÜR Z66 (Kz 163) – Homeoffice-Pauschale',
+    description: '6 Euro je Kalendertag, höchstens 1 260 Euro im Jahr (§ 4 Abs. 5 Satz 1 Nr. 6c EStG). Der Finanzbetrag wird je Tag erfasst.',
   ),
   TaxCategory(
     code: 'de.euer.fahrtkosten',
@@ -232,35 +248,38 @@ const List<TaxCategory> deSoleTraderCategories = [
   ),
 ];
 
-/// The categories of a GmbH or UG.
+/// The categories of a GmbH or UG. The income statement lands on Anlage GK
+/// (the KSt 1 Hauptvordruck carries no Besteuerungsgrundlagen) and the
+/// taxable income on Anlage ZVE; the Kennzahlen of both forms were not
+/// retrieved when the pack was researched.
 const List<TaxCategory> deCompanyCategories = [
   TaxCategory(
     code: 'de.co.umsatzerloese',
     label: 'Umsatzerlöse',
     kind: TaxCategoryKind.income,
     entityKinds: {TaxEntityKind.company},
-    reportReference: 'KSt 1 – Umsatzerlöse',
+    reportReference: 'Anlage GK – Umsatzerlöse',
   ),
   TaxCategory(
     code: 'de.co.sonstige_ertraege',
     label: 'Sonstige betriebliche Erträge',
     kind: TaxCategoryKind.income,
     entityKinds: {TaxEntityKind.company},
-    reportReference: 'KSt 1 – Sonstige betriebliche Erträge',
+    reportReference: 'Anlage GK – Sonstige betriebliche Erträge',
   ),
   TaxCategory(
     code: 'de.co.materialaufwand',
     label: 'Material- und Wareneinsatz',
     kind: TaxCategoryKind.expense,
     entityKinds: {TaxEntityKind.company},
-    reportReference: 'KSt 1 – Materialaufwand',
+    reportReference: 'Anlage GK – Materialaufwand',
   ),
   TaxCategory(
     code: 'de.co.personal',
     label: 'Personalaufwand',
     kind: TaxCategoryKind.expense,
     entityKinds: {TaxEntityKind.company},
-    reportReference: 'KSt 1 – Personalaufwand',
+    reportReference: 'Anlage GK – Personalaufwand',
     description: 'Auch das Gehalt eines Gesellschafter-Geschäftsführers mindert den Gewinn.',
   ),
   TaxCategory(
@@ -268,14 +287,14 @@ const List<TaxCategory> deCompanyCategories = [
     label: 'Abschreibungen (AfA)',
     kind: TaxCategoryKind.expense,
     entityKinds: {TaxEntityKind.company},
-    reportReference: 'KSt 1 – Absetzungen für Abnutzung',
+    reportReference: 'Anlage GK – Absetzungen für Abnutzung',
   ),
   TaxCategory(
     code: 'de.co.gwg',
     label: 'Geringwertige Wirtschaftsgüter (GWG)',
     kind: TaxCategoryKind.expense,
     entityKinds: {TaxEntityKind.company},
-    reportReference: 'KSt 1 – Geringwertige Wirtschaftsgüter',
+    reportReference: 'Anlage GK – Geringwertige Wirtschaftsgüter',
     description: 'Sofort abziehbar bis 800 Euro netto je Wirtschaftsgut (§ 6 Abs. 2 EStG).',
   ),
   TaxCategory(
@@ -283,21 +302,21 @@ const List<TaxCategory> deCompanyCategories = [
     label: 'Raumkosten',
     kind: TaxCategoryKind.expense,
     entityKinds: {TaxEntityKind.company},
-    reportReference: 'KSt 1 – Raumkosten',
+    reportReference: 'Anlage GK – Raumkosten',
   ),
   TaxCategory(
     code: 'de.co.fahrtkosten',
     label: 'Fahrtkosten',
     kind: TaxCategoryKind.expense,
     entityKinds: {TaxEntityKind.company},
-    reportReference: 'KSt 1 – Fahrtkosten',
+    reportReference: 'Anlage GK – Fahrtkosten',
   ),
   TaxCategory(
     code: 'de.co.bewirtung',
     label: 'Bewirtungskosten (70 % abzugsfähig)',
     kind: TaxCategoryKind.expense,
     entityKinds: {TaxEntityKind.company},
-    reportReference: 'KSt 1 – Bewirtungskosten',
+    reportReference: 'Anlage GK – Bewirtungskosten',
     description: 'Die Rechnung in voller Höhe erfassen; abgezogen werden 70 % (§ 4 Abs. 5 Satz 1 Nr. 2 EStG).',
   ),
   TaxCategory(
@@ -305,14 +324,14 @@ const List<TaxCategory> deCompanyCategories = [
     label: 'Versicherungen',
     kind: TaxCategoryKind.expense,
     entityKinds: {TaxEntityKind.company},
-    reportReference: 'KSt 1 – Versicherungen',
+    reportReference: 'Anlage GK – Versicherungen',
   ),
   TaxCategory(
     code: 'de.co.sonstige',
     label: 'Sonstige betriebliche Aufwendungen',
     kind: TaxCategoryKind.expense,
     entityKinds: {TaxEntityKind.company},
-    reportReference: 'KSt 1 – Sonstige betriebliche Aufwendungen',
+    reportReference: 'Anlage GK – Sonstige betriebliche Aufwendungen',
   ),
   deVatOutput,
   deVatInput,
@@ -321,14 +340,15 @@ const List<TaxCategory> deCompanyCategories = [
     label: 'Körperschaftsteuer-Vorauszahlungen',
     kind: TaxCategoryKind.taxPaid,
     entityKinds: {TaxEntityKind.company},
-    reportReference: 'KSt 1 – Vorauszahlungen',
+    reportReference: 'KSt 1 – Vorauszahlungen (Formlinie nicht verifiziert)',
   ),
   TaxCategory(
     code: 'de.co.gewst_vorauszahlungen',
     label: 'Gewerbesteuer-Vorauszahlungen',
     kind: TaxCategoryKind.taxPaid,
     entityKinds: {TaxEntityKind.company},
-    reportReference: 'GewSt 1 – Vorauszahlungen',
+    reportReference:
+        'GewSt 1 A – Vorauszahlungen (Formlinie nicht verifiziert)',
   ),
 ];
 
