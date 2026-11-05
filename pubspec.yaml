@@ -37,10 +37,19 @@ melos:
       exec: dart analyze --fatal-infos .
 
     test:
-      description: Run tests in all packages.
+      description: Run the Flutter and pure Dart tests that CI runs without services.
+      steps:
+        - test:flutter
+        - test:dart
+
+    test:dart:
+      description: Run Dart tests in pure Dart packages (server tests need Postgres and Redis, so run them in `openbudget_server`).
       exec: dart test
       packageFilters:
         dirExists: test
+        flutter: false
+        ignore:
+          - openbudget_server
 
     test:flutter:
       description: Run Flutter tests in Flutter packages.

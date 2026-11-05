@@ -40,7 +40,7 @@ melos run analyze             # Alias: melos analyze
 
 # Code quality
 melos run analyze             # Run dart analyze across all packages
-melos run test               # Run tests in all packages
+melos run test               # Flutter and pure Dart tests (server tests need Postgres; run them in openbudget_server)
 melos run format             # Format all Dart code
 dprint check                 # Check non-Dart formatting (JSON, YAML, MD, TOML)
 dprint fmt                   # Fix non-Dart formatting
