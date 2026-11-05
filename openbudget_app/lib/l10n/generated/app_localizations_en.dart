@@ -3790,6 +3790,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String get taxGbStudentLoanPostgraduate => 'Postgraduate loan';
 
   @override
+  String get taxGbPostgraduateLoanHint =>
+      'Repay 6% of income above £21,000 on top of any undergraduate plan.';
+
+  @override
+  String get taxGbAccountingPeriodEnd => 'Accounting period end';
+
+  @override
+  String get taxGbAccountingPeriodEndHint =>
+      'The company\'s year end. Corporation Tax runs on these periods, not the tax year.';
+
+  @override
+  String get taxGbAccountingPeriodMonth => 'Month';
+
+  @override
+  String get taxGbAccountingPeriodDay => 'Day';
+
+  @override
+  String get taxGbAssociatedCompanies => 'Associated companies';
+
+  @override
+  String get taxGbAssociatedCompaniesHint =>
+      'Other companies under common control. Each one divides the £50,000 and £250,000 limits.';
+
+  @override
+  String get taxGbAssociatedCompaniesError =>
+      'Enter the number of associated companies as a whole number, such as 0.';
+
+  @override
   String get taxUsFilingStatus => 'Filing status';
 
   @override
