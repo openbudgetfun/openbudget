@@ -1,3 +1,4 @@
+import 'package:openbudget_server/src/agent/agent_egress_guard.dart';
 import 'package:openbudget_server/src/agent/agent_provider_settings_service.dart';
 import 'package:openbudget_server/src/agent/agent_usage_service.dart';
 import 'package:openbudget_server/src/billing/billing_plan.dart';
@@ -53,6 +54,7 @@ abstract final class AgentProviderResolver {
       userId,
     );
     if (byo != null) {
+      await AgentEgressGuard.checkResolved(byo.endpoint);
       return AgentProviderSelection(
         provider: AgentProvider.byo,
         endpoint: byo.endpoint,

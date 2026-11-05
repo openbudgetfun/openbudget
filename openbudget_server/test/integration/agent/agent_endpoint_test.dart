@@ -1,8 +1,10 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:openbudget_core/openbudget_core.dart';
+import 'package:openbudget_server/src/agent/agent_egress_guard.dart';
 import 'package:openbudget_server/src/agent/agent_provider_resolver.dart';
 import 'package:openbudget_server/src/agent/agent_secret_box.dart';
 import 'package:openbudget_server/src/agent/agent_service.dart';
@@ -115,10 +117,12 @@ void main() {
       rawSession.passwords['opencodeZenApiKey'] = _zenKey;
       rawSession.passwords['agentKeyEncryptionKey'] = _encryptionKey;
       requests = [];
+      AgentEgressGuard.lookup = (_) async => [InternetAddress('203.0.113.10')];
     });
 
     tearDown(() {
       AgentService.chatClientOverride = null;
+      AgentEgressGuard.lookup = InternetAddress.lookup;
       rawSession.passwords.remove('opencodeZenApiKey');
       rawSession.passwords.remove('agentKeyEncryptionKey');
     });

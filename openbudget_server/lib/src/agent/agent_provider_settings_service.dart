@@ -1,3 +1,4 @@
+import 'package:openbudget_server/src/agent/agent_egress_guard.dart';
 import 'package:openbudget_server/src/agent/agent_secret_box.dart';
 import 'package:openbudget_server/src/exceptions/exceptions.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
@@ -35,6 +36,7 @@ abstract final class AgentProviderSettingsService {
         'baseUrl must be an HTTPS URL without credentials.',
       );
     }
+    AgentEgressGuard.checkHostName(uri.host);
 
     final path = uri.path.endsWith('/')
         ? uri.path.substring(0, uri.path.length - 1)
