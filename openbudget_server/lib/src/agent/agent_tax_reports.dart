@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:openbudget_core/openbudget_core.dart';
-import 'package:openbudget_server/src/exceptions/exceptions.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:openbudget_server/src/tax/tax_entry_builder.dart';
 import 'package:openbudget_server/src/tax/tax_fx_rates.dart';
@@ -26,14 +25,14 @@ abstract final class AgentTaxReports {
     int? startYear,
   }) async {
     final budget = await Budget.db.findById(session, budgetId);
-    if (budget == null) throw NotFoundException('Budget not found');
+    if (budget == null) throw NotFoundException(message: 'Budget not found');
 
     final record = await TaxProfileRecord.db.findFirstRow(
       session,
       where: (t) => t.budgetId.equals(budgetId),
     );
     if (record == null) {
-      throw NotFoundException('Tax profile not found for this budget');
+      throw NotFoundException(message: 'Tax profile not found for this budget');
     }
 
     final jurisdiction = _jurisdiction(record.jurisdiction);
@@ -44,7 +43,7 @@ abstract final class AgentTaxReports {
           ? pack.taxYearFor(DateTime.now().toUtc())
           : pack.taxYear(startYear);
     } on UnsupportedTaxYearException catch (error) {
-      throw TaxRulesUnavailableException(error.toString());
+      throw TaxRulesUnavailableException(message: error.toString());
     }
 
     final profile = _profileForRecord(record);
@@ -62,7 +61,7 @@ abstract final class AgentTaxReports {
     try {
       report = pack.report(built.input);
     } on UnsupportedTaxYearException catch (error) {
-      throw TaxRulesUnavailableException(error.toString());
+      throw TaxRulesUnavailableException(message: error.toString());
     }
     final opportunities = pack.opportunities(built.input, report);
 
@@ -135,7 +134,7 @@ abstract final class AgentTaxReports {
       where: (t) => t.budgetId.equals(budgetId),
     );
     if (record == null) {
-      throw NotFoundException('Tax profile not found for this budget');
+      throw NotFoundException(message: 'Tax profile not found for this budget');
     }
     final kind = _entityKind(record.entityKind);
     final pack = TaxRules.forJurisdiction(
@@ -157,7 +156,9 @@ abstract final class AgentTaxReports {
   static TaxJurisdiction _jurisdiction(String value) {
     final jurisdiction = TaxJurisdiction.fromCountryCode(value);
     if (jurisdiction == null) {
-      throw ValidationException('Unsupported tax jurisdiction "$value".');
+      throw ValidationException(
+        message: 'Unsupported tax jurisdiction "$value".',
+      );
     }
     return jurisdiction;
   }
@@ -166,7 +167,7 @@ abstract final class AgentTaxReports {
     for (final kind in TaxEntityKind.values) {
       if (kind.name == value) return kind;
     }
-    throw ValidationException('Unsupported tax entity kind "$value".');
+    throw ValidationException(message: 'Unsupported tax entity kind "$value".');
   }
 
   static TaxProfile _profileForRecord(TaxProfileRecord record) {
@@ -174,17 +175,22 @@ abstract final class AgentTaxReports {
     try {
       decoded = jsonDecode(record.profileJson);
     } on FormatException {
-      throw ValidationException('The stored tax profile is not valid JSON.');
+      throw ValidationException(
+        message: 'The stored tax profile is not valid JSON.',
+      );
     }
     if (decoded is! Map<String, Object?>) {
-      throw ValidationException('The stored tax profile is not an object.');
+      throw ValidationException(
+        message: 'The stored tax profile is not an object.',
+      );
     }
     final profile = TaxProfile.fromJson(decoded);
     if (profile.jurisdiction.countryCode != record.jurisdiction ||
         profile.entityKind.name != record.entityKind) {
       throw ValidationException(
-        'The stored tax profile does not match its jurisdiction and entity '
-        'kind.',
+        message:
+            'The stored tax profile does not match its jurisdiction and entity '
+            'kind.',
       );
     }
     return profile;

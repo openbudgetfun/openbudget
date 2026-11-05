@@ -5,7 +5,6 @@ import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_server/src/budgets/budget_service.dart';
 import 'package:openbudget_server/src/categories/category_service.dart';
 import 'package:openbudget_server/src/envelopes/envelope_service.dart';
-import 'package:openbudget_server/src/exceptions/exceptions.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:openbudget_server/src/tax/tax_entry_builder.dart';
 import 'package:openbudget_server/src/tax/tax_fx_rates.dart';
@@ -80,27 +79,29 @@ class TaxService {
 
     if (profile.jurisdiction != parsedJurisdiction) {
       throw ValidationException(
-        'profileJson is a ${profile.jurisdiction.countryCode} profile but '
-        'the budget jurisdiction is ${parsedJurisdiction.countryCode}.',
+        message:
+            'profileJson is a ${profile.jurisdiction.countryCode} profile but '
+            'the budget jurisdiction is ${parsedJurisdiction.countryCode}.',
       );
     }
     if (profile.entityKind != parsedKind) {
       throw ValidationException(
-        'profileJson is for ${profile.entityKind.name} but the budget is '
-        '${parsedKind.name}.',
+        message:
+            'profileJson is for ${profile.entityKind.name} but the budget is '
+            '${parsedKind.name}.',
       );
     }
 
     if (parsedKind == TaxEntityKind.individual) {
       if (linkedBudgetId != null) {
         throw ValidationException(
-          'An individual tax profile cannot link another budget.',
+          message: 'An individual tax profile cannot link another budget.',
         );
       }
     } else if (linkedBudgetId != null) {
       if (linkedBudgetId == budgetId) {
         throw ValidationException(
-          'The linked budget must be different from this budget.',
+          message: 'The linked budget must be different from this budget.',
         );
       }
       await BudgetService.getById(session, budgetId: linkedBudgetId);
@@ -112,8 +113,9 @@ class TaxService {
           (linkedProfile.entityKind != TaxEntityKind.individual.name ||
               linkedProfile.jurisdiction != parsedJurisdiction.countryCode)) {
         throw ValidationException(
-          'The linked budget must be an individual budget in the same '
-          'jurisdiction.',
+          message:
+              'The linked budget must be an individual budget in the same '
+              'jurisdiction.',
         );
       }
     }
@@ -225,15 +227,16 @@ class TaxService {
     if (businessUsePercent != null &&
         (businessUsePercent < 0 || businessUsePercent > 100)) {
       throw ValidationException(
-        'businessUsePercent must be between 0 and 100.',
+        message: 'businessUsePercent must be between 0 and 100.',
       );
     }
 
     final limit = transaction.amountCents.abs();
     if (salesTaxCents != null && (salesTaxCents < 0 || salesTaxCents > limit)) {
       throw ValidationException(
-        'salesTaxCents must be between 0 and the transaction amount '
-        '($limit).',
+        message:
+            'salesTaxCents must be between 0 and the transaction amount '
+            '($limit).',
       );
     }
 
@@ -269,7 +272,7 @@ class TaxService {
           ? pack.taxYearFor(DateTime.now().toUtc())
           : pack.taxYear(startYear);
     } on UnsupportedTaxYearException catch (error) {
-      throw TaxRulesUnavailableException(error.toString());
+      throw TaxRulesUnavailableException(message: error.toString());
     }
 
     final profile = _profileForRecord(record);
@@ -287,7 +290,7 @@ class TaxService {
     try {
       report = pack.report(built.input);
     } on UnsupportedTaxYearException catch (error) {
-      throw TaxRulesUnavailableException(error.toString());
+      throw TaxRulesUnavailableException(message: error.toString());
     }
     final opportunities = pack.opportunities(built.input, report);
 
@@ -308,7 +311,7 @@ class TaxService {
       where: (t) => t.budgetId.equals(budgetId),
     );
     if (record == null) {
-      throw NotFoundException('Tax profile not found for this budget');
+      throw NotFoundException(message: 'Tax profile not found for this budget');
     }
     return record;
   }
@@ -319,7 +322,9 @@ class TaxService {
   static TaxJurisdiction _parseJurisdiction(String value) {
     final jurisdiction = TaxJurisdiction.fromCountryCode(value);
     if (jurisdiction == null) {
-      throw ValidationException('Unsupported tax jurisdiction "$value".');
+      throw ValidationException(
+        message: 'Unsupported tax jurisdiction "$value".',
+      );
     }
     return jurisdiction;
   }
@@ -328,7 +333,7 @@ class TaxService {
     for (final kind in TaxEntityKind.values) {
       if (kind.name == value) return kind;
     }
-    throw ValidationException('Unsupported tax entity kind "$value".');
+    throw ValidationException(message: 'Unsupported tax entity kind "$value".');
   }
 
   static TaxProfile _profileForRecord(TaxProfileRecord record) {
@@ -337,8 +342,9 @@ class TaxService {
     final kind = _parseEntityKind(record.entityKind);
     if (profile.jurisdiction != jurisdiction || profile.entityKind != kind) {
       throw ValidationException(
-        'The stored tax profile does not match its jurisdiction and entity '
-        'kind.',
+        message:
+            'The stored tax profile does not match its jurisdiction and entity '
+            'kind.',
       );
     }
     return profile;
@@ -354,12 +360,13 @@ class TaxService {
     final category = pack.category(code);
     if (category == null) {
       throw ValidationException(
-        'Unknown ${pack.jurisdiction.countryCode} tax category "$code".',
+        message:
+            'Unknown ${pack.jurisdiction.countryCode} tax category "$code".',
       );
     }
     if (!category.entityKinds.contains(kind)) {
       throw ValidationException(
-        'Tax category "$code" does not apply to ${kind.name} books.',
+        message: 'Tax category "$code" does not apply to ${kind.name} books.',
       );
     }
   }
@@ -372,11 +379,11 @@ class TaxService {
       decoded = jsonDecode(profileJson);
     } on FormatException catch (error) {
       throw ValidationException(
-        'profileJson is not valid JSON: ${error.message}',
+        message: 'profileJson is not valid JSON: ${error.message}',
       );
     }
     if (decoded is! Map<String, Object?>) {
-      throw ValidationException('profileJson must be a JSON object.');
+      throw ValidationException(message: 'profileJson must be a JSON object.');
     }
 
     final sanitized = _sanitizeProfileJson(decoded);
@@ -384,7 +391,7 @@ class TaxService {
       return TaxProfile.fromJson(sanitized);
     } on FormatException catch (error) {
       throw ValidationException(
-        'profileJson is not a valid tax profile: ${error.message}',
+        message: 'profileJson is not a valid tax profile: ${error.message}',
       );
     }
   }
@@ -409,8 +416,9 @@ class TaxService {
               (plan) => plan.name == studentLoanPlan,
             )) {
           throw ValidationException(
-            'profileJson has an unknown student loan plan '
-            '"$studentLoanPlan".',
+            message:
+                'profileJson has an unknown student loan plan '
+                '"$studentLoanPlan".',
           );
         }
         sanitized.addAll({
@@ -424,7 +432,8 @@ class TaxService {
               (status) => status.name == filingStatus,
             )) {
           throw ValidationException(
-            'profileJson has an unknown filing status "$filingStatus".',
+            message:
+                'profileJson has an unknown filing status "$filingStatus".',
           );
         }
         sanitized['filingStatus'] = filingStatus;
@@ -441,7 +450,7 @@ class TaxService {
         });
       case null:
         throw ValidationException(
-          'Unsupported tax jurisdiction "$jurisdictionCode".',
+          message: 'Unsupported tax jurisdiction "$jurisdictionCode".',
         );
     }
 
@@ -451,7 +460,9 @@ class TaxService {
   static String _requiredString(Map<String, Object?> json, String key) {
     final value = json[key];
     if (value is! String) {
-      throw ValidationException('profileJson field "$key" must be a string.');
+      throw ValidationException(
+        message: 'profileJson field "$key" must be a string.',
+      );
     }
     return value;
   }
@@ -460,7 +471,9 @@ class TaxService {
     final value = json[key];
     if (value == null) return null;
     if (value is T) return value as T;
-    throw ValidationException('profileJson field "$key" has the wrong type.');
+    throw ValidationException(
+      message: 'profileJson field "$key" has the wrong type.',
+    );
   }
 
   static Future<TaxFxRates> _loadRates(Session session) async {

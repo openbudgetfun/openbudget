@@ -1,0 +1,69 @@
+/* AUTOMATICALLY GENERATED CODE DO NOT MODIFY */
+/*   To generate run: "serverpod generate"    */
+
+// ignore_for_file: implementation_imports
+// ignore_for_file: library_private_types_in_public_api
+// ignore_for_file: non_constant_identifier_names
+// ignore_for_file: public_member_api_docs
+// ignore_for_file: type_literal_in_constant_pattern
+// ignore_for_file: use_super_parameters
+// ignore_for_file: invalid_use_of_internal_member
+
+// ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'package:serverpod/serverpod.dart' as _is;
+
+/// Thrown when a requested resource does not exist or the user does not have
+/// access to it.
+abstract class NotFoundException
+    implements
+        _is.SerializableException,
+        _is.SerializableModel,
+        _is.ProtocolSerialization {
+  NotFoundException._({String? message})
+    : message = message ?? 'Resource not found';
+
+  factory NotFoundException({String? message}) = _NotFoundExceptionImpl;
+
+  factory NotFoundException.fromJson(Map<String, dynamic> jsonSerialization) {
+    return NotFoundException(message: jsonSerialization['message'] as String?);
+  }
+
+  String message;
+
+  /// Returns a shallow copy of this [NotFoundException]
+  /// with some or all fields replaced by the given arguments.
+  @_is.useResult
+  NotFoundException copyWith({String? message});
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      '__className__': 'NotFoundException',
+      'message': message,
+    };
+  }
+
+  @override
+  Map<String, dynamic> toJsonForProtocol() {
+    return {
+      '__className__': 'NotFoundException',
+      'message': message,
+    };
+  }
+
+  @override
+  String toString() {
+    return 'NotFoundException(message: $message)';
+  }
+}
+
+class _NotFoundExceptionImpl extends NotFoundException {
+  _NotFoundExceptionImpl({String? message}) : super._(message: message);
+
+  /// Returns a shallow copy of this [NotFoundException]
+  /// with some or all fields replaced by the given arguments.
+  @_is.useResult
+  @override
+  NotFoundException copyWith({String? message}) {
+    return NotFoundException(message: message ?? this.message);
+  }
+}

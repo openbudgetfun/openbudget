@@ -1,4 +1,3 @@
-import 'package:openbudget_server/src/exceptions/exceptions.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
 
@@ -21,7 +20,7 @@ Future<Budget> requireOwnedBudget(
 }) async {
   final budget = await Budget.db.findById(session, budgetId);
   if (budget == null || budget.ownerId != userId) {
-    throw NotFoundException('Budget not found');
+    throw NotFoundException(message: 'Budget not found');
   }
   return budget;
 }

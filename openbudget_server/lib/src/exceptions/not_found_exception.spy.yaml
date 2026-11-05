@@ -1,0 +1,5 @@
+### Thrown when a requested resource does not exist or the user does not have
+### access to it.
+exception: NotFoundException
+fields:
+  message: String, default='Resource not found'

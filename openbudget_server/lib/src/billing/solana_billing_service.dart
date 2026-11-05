@@ -7,7 +7,6 @@ import 'package:openbudget_server/src/billing/entitlement_service.dart';
 import 'package:openbudget_server/src/billing/solana_billing_chain.dart';
 import 'package:openbudget_server/src/billing/solana_billing_plan.dart';
 import 'package:openbudget_server/src/billing/solana_rpc_billing_chain.dart';
-import 'package:openbudget_server/src/exceptions/exceptions.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
 import 'package:solana_kit/solana_kit.dart';
@@ -111,16 +110,18 @@ class SolanaBillingService {
       where: (t) => t.userId.equals(userId) & t.message.equals(message),
     );
     if (challenge == null) {
-      throw NotFoundException('Subscription challenge not found');
+      throw NotFoundException(message: 'Subscription challenge not found');
     }
     if (challenge.usedAt != null) {
-      throw ValidationException('Subscription challenge was already used');
+      throw ValidationException(
+        message: 'Subscription challenge was already used',
+      );
     }
     if (!challenge.expiresAt.isAfter(now)) {
-      throw ValidationException('Subscription challenge expired');
+      throw ValidationException(message: 'Subscription challenge expired');
     }
     if (!_verifyOwnership(subscriber, message, signatureBase58)) {
-      throw ValidationException('Invalid wallet signature');
+      throw ValidationException(message: 'Invalid wallet signature');
     }
 
     final (subscriptionPda, _) = await findSubscriptionDelegationPda(
@@ -161,8 +162,8 @@ class SolanaBillingService {
       );
     } on Exception catch (error) {
       throw BillingProviderException(
-        'solana',
-        'first payment: ${error.runtimeType}',
+        provider: 'solana',
+        details: 'first payment: ${error.runtimeType}',
       );
     }
 
@@ -196,7 +197,9 @@ class SolanaBillingService {
     required String subscriberAddress,
   }) {
     if (snapshot == null) {
-      throw ValidationException('Subscription account not found on chain');
+      throw ValidationException(
+        message: 'Subscription account not found on chain',
+      );
     }
     final matches =
         snapshot.subscriptionAddress == subscriptionAddress &&
@@ -207,7 +210,9 @@ class SolanaBillingService {
         snapshot.amountBaseUnits == SolanaBillingPlan.amountBaseUnits &&
         snapshot.periodSeconds == SolanaBillingPlan.periodSeconds;
     if (!matches) {
-      throw ValidationException('Subscription does not match the plan terms');
+      throw ValidationException(
+        message: 'Subscription does not match the plan terms',
+      );
     }
   }
 
@@ -234,7 +239,9 @@ class SolanaBillingService {
     try {
       return address(value);
     } on Object {
-      throw BillingRailUnavailableException('Invalid Solana $label address');
+      throw BillingRailUnavailableException(
+        message: 'Invalid Solana $label address',
+      );
     }
   }
 

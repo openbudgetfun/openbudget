@@ -1,0 +1,4 @@
+### Thrown when no tax rule pack is available for a jurisdiction or year.
+exception: TaxRulesUnavailableException
+fields:
+  message: String, default='Tax rules are not available'

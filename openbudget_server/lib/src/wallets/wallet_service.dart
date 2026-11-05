@@ -4,7 +4,6 @@ import 'dart:math';
 
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_server/src/budgets/budget_service.dart';
-import 'package:openbudget_server/src/exceptions/exceptions.dart';
 import 'package:openbudget_server/src/fx_rates/fx_rate_service.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
@@ -58,7 +57,7 @@ class WalletService {
       connectionId,
     );
     if (connection == null || connection.budgetId != budgetId) {
-      throw NotFoundException('Wallet connection not found.');
+      throw NotFoundException(message: 'Wallet connection not found.');
     }
 
     final now = DateTime.now().toUtc();
@@ -87,7 +86,7 @@ class WalletService {
       connectionId,
     );
     if (connection == null || connection.budgetId != budgetId) {
-      throw NotFoundException('Wallet connection not found.');
+      throw NotFoundException(message: 'Wallet connection not found.');
     }
     await BudgetService.getById(session, budgetId: budgetId);
 
@@ -217,7 +216,7 @@ class WalletService {
   }) async {
     final budgetId = budget.id;
     if (budgetId == null) {
-      throw ValidationException('Budget id is required.');
+      throw ValidationException(message: 'Budget id is required.');
     }
 
     final shortAddress = _shortAddress(connection.address);
@@ -573,7 +572,7 @@ class WalletService {
   static void _validateSolanaAddress(String address) {
     final regex = RegExp(r'^[1-9A-HJ-NP-Za-km-z]{32,44}$');
     if (!regex.hasMatch(address)) {
-      throw ValidationException('Invalid Solana wallet address.');
+      throw ValidationException(message: 'Invalid Solana wallet address.');
     }
   }
 
@@ -591,13 +590,13 @@ class WalletService {
       final body = await response.transform(utf8.decoder).join();
       if (response.statusCode < 200 || response.statusCode >= 300) {
         throw ValidationException(
-          'Request failed (${response.statusCode}) for $uri',
+          message: 'Request failed (${response.statusCode}) for $uri',
         );
       }
       final decoded = jsonDecode(body);
       if (decoded is! Map<String, dynamic>) {
         throw ValidationException(
-          'Unexpected response payload for ${uri.path}.',
+          message: 'Unexpected response payload for ${uri.path}.',
         );
       }
       return decoded;
@@ -628,15 +627,21 @@ class WalletService {
       final response = await request.close();
       final body = await response.transform(utf8.decoder).join();
       if (response.statusCode < 200 || response.statusCode >= 300) {
-        throw ValidationException('Solana RPC request failed: $method');
+        throw ValidationException(
+          message: 'Solana RPC request failed: $method',
+        );
       }
       final decoded = jsonDecode(body);
       if (decoded is! Map<String, dynamic>) {
-        throw ValidationException('Invalid Solana RPC response for $method');
+        throw ValidationException(
+          message: 'Invalid Solana RPC response for $method',
+        );
       }
       final error = decoded['error'];
       if (error != null) {
-        throw ValidationException('Solana RPC error for $method: $error');
+        throw ValidationException(
+          message: 'Solana RPC error for $method: $error',
+        );
       }
       final result = decoded['result'];
       if (result is! Map<String, dynamic>) return null;

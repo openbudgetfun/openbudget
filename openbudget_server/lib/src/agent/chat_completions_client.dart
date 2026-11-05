@@ -3,7 +3,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:openbudget_server/src/agent/agent_pricing.dart';
-import 'package:openbudget_server/src/exceptions/exceptions.dart';
+import 'package:openbudget_server/src/generated/protocol.dart';
 
 /// Token counts a provider reports for one completion.
 class ChatCompletionUsage {
@@ -69,7 +69,7 @@ class ChatCompletionToolCall {
     final name = function is Map<String, Object?> ? function['name'] : null;
     if (name is! String || name.isEmpty) {
       throw AgentProviderException(
-        'The provider returned a tool call without a function name.',
+        message: 'The provider returned a tool call without a function name.',
       );
     }
     final rawArguments = function is Map<String, Object?>
@@ -162,16 +162,18 @@ class ChatCompletionsClient {
           )
           .timeout(requestTimeout);
     } on TimeoutException {
-      throw AgentProviderException('The provider did not answer in time.');
+      throw AgentProviderException(
+        message: 'The provider did not answer in time.',
+      );
     } on http.ClientException catch (error) {
       throw AgentProviderException(
-        'The provider request failed: ${error.message}',
+        message: 'The provider request failed: ${error.message}',
       );
     }
 
     if (response.statusCode < 200 || response.statusCode >= 300) {
       throw AgentProviderException(
-        'The provider returned HTTP ${response.statusCode}.',
+        message: 'The provider returned HTTP ${response.statusCode}.',
       );
     }
 
@@ -179,11 +181,13 @@ class ChatCompletionsClient {
     try {
       decoded = jsonDecode(response.body);
     } on FormatException {
-      throw AgentProviderException('The provider did not return JSON.');
+      throw AgentProviderException(
+        message: 'The provider did not return JSON.',
+      );
     }
     if (decoded is! Map<String, Object?>) {
       throw AgentProviderException(
-        'The provider returned an unexpected response shape.',
+        message: 'The provider returned an unexpected response shape.',
       );
     }
     return _parse(decoded);
@@ -192,12 +196,16 @@ class ChatCompletionsClient {
   ChatCompletionResult _parse(Map<String, Object?> json) {
     final choices = json['choices'];
     if (choices is! List || choices.isEmpty) {
-      throw AgentProviderException('The provider returned no choices.');
+      throw AgentProviderException(
+        message: 'The provider returned no choices.',
+      );
     }
     final choice = choices.first;
     final message = choice is Map<String, Object?> ? choice['message'] : null;
     if (message is! Map<String, Object?>) {
-      throw AgentProviderException('The provider returned no message.');
+      throw AgentProviderException(
+        message: 'The provider returned no message.',
+      );
     }
 
     final rawToolCalls = message['tool_calls'];

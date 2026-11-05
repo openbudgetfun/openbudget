@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:openbudget_core/openbudget_core.dart';
-import 'package:openbudget_server/src/exceptions/exceptions.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
 
@@ -56,18 +55,22 @@ class CurrencyApiProviderClient implements FxRateProviderClient {
 
       if (response.statusCode < 200 || response.statusCode >= 300) {
         throw ValidationException(
-          'FX provider request failed (status=${response.statusCode})',
+          message: 'FX provider request failed (status=${response.statusCode})',
         );
       }
 
       final decoded = jsonDecode(body);
       if (decoded is! Map<String, dynamic>) {
-        throw ValidationException('FX provider returned invalid payload');
+        throw ValidationException(
+          message: 'FX provider returned invalid payload',
+        );
       }
 
       final data = decoded['data'];
       if (data is! Map<String, dynamic>) {
-        throw ValidationException('FX provider payload missing data map');
+        throw ValidationException(
+          message: 'FX provider payload missing data map',
+        );
       }
 
       final meta = decoded['meta'];
@@ -90,7 +93,9 @@ class CurrencyApiProviderClient implements FxRateProviderClient {
       }
 
       if (rates.length <= 1) {
-        throw ValidationException('FX provider returned no usable rates');
+        throw ValidationException(
+          message: 'FX provider returned no usable rates',
+        );
       }
 
       return FxProviderResult(fetchedAt: fetchedAt, rates: rates);
@@ -240,7 +245,8 @@ class FxRateService {
 
     if (!_hasProviderCredentials(session)) {
       throw ValidationException(
-        'Missing currency provider credentials ($_currencyApiKeyName).',
+        message:
+            'Missing currency provider credentials ($_currencyApiKeyName).',
       );
     }
 
@@ -276,7 +282,7 @@ class FxRateService {
 
       final snapshotId = snapshot.id;
       if (snapshotId == null) {
-        throw ValidationException('Failed to persist FX snapshot id');
+        throw ValidationException(message: 'Failed to persist FX snapshot id');
       }
 
       final entries = providerResult.rates.entries
@@ -330,7 +336,7 @@ class FxRateService {
   }) async {
     final snapshotId = snapshot.id;
     if (snapshotId == null) {
-      throw ValidationException('FX snapshot missing id');
+      throw ValidationException(message: 'FX snapshot missing id');
     }
 
     final entries = await FxRateEntry.db.find(

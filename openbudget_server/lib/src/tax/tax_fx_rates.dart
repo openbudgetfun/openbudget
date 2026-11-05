@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:openbudget_core/openbudget_core.dart';
-import 'package:openbudget_server/src/exceptions/exceptions.dart';
+import 'package:openbudget_server/src/generated/protocol.dart';
 
 /// The rates from one FX snapshot, relative to [baseCurrencyCode].
 ///
@@ -52,8 +52,9 @@ class TaxFxRates {
     final snapshot = _snapshotFor(date);
     if (snapshot == null) {
       throw TaxRateUnavailableException(
-        'No exchange rate is available to convert $fromCurrencyCode to '
-        '$toCurrencyCode on ${date.toIso8601String()}.',
+        message:
+            'No exchange rate is available to convert $fromCurrencyCode to '
+            '$toCurrencyCode on ${date.toIso8601String()}.',
       );
     }
 
@@ -72,8 +73,9 @@ class TaxFxRates {
     final currency = CurrencyCode.tryParse(currencyCode);
     if (currency == null) {
       throw TaxRateUnavailableException(
-        'OpenBudget does not know the minor unit of $currencyCode, so it '
-        'cannot convert amounts in it.',
+        message:
+            'OpenBudget does not know the minor unit of $currencyCode, so it '
+            'cannot convert amounts in it.',
       );
     }
     return currency.decimals;
@@ -100,9 +102,10 @@ class TaxFxRates {
     final rate = snapshot.rates[currencyCode];
     if (rate == null || rate <= 0) {
       throw TaxRateUnavailableException(
-        'The ${snapshot.baseCurrencyCode} snapshot from '
-        '${snapshot.fetchedAt.toIso8601String()} has no $currencyCode rate to '
-        'convert an amount dated ${date.toIso8601String()}.',
+        message:
+            'The ${snapshot.baseCurrencyCode} snapshot from '
+            '${snapshot.fetchedAt.toIso8601String()} has no $currencyCode rate to '
+            'convert an amount dated ${date.toIso8601String()}.',
       );
     }
     return rate;

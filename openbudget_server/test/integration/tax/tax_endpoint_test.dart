@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:openbudget_core/openbudget_core.dart';
-import 'package:openbudget_server/src/exceptions/exceptions.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:openbudget_server/src/tax/tax_service.dart';
 import 'package:serverpod/serverpod.dart' show UuidValue;

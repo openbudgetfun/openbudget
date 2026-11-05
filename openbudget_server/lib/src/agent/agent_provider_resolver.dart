@@ -3,7 +3,6 @@ import 'package:openbudget_server/src/agent/agent_provider_settings_service.dart
 import 'package:openbudget_server/src/agent/agent_usage_service.dart';
 import 'package:openbudget_server/src/billing/billing_plan.dart';
 import 'package:openbudget_server/src/billing/entitlement_service.dart';
-import 'package:openbudget_server/src/exceptions/exceptions.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
 
@@ -79,7 +78,7 @@ abstract final class AgentProviderResolver {
     final apiKey = session.passwords[_zenKeyPassword]?.trim();
     if (apiKey == null || apiKey.isEmpty) {
       throw AgentProviderUnavailableException(
-        'The built-in agent provider is not configured.',
+        message: 'The built-in agent provider is not configured.',
       );
     }
 

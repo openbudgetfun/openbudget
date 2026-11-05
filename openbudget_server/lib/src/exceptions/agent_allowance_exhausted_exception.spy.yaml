@@ -1,0 +1,4 @@
+### Thrown when the built-in agent allowance for the current period is spent.
+exception: AgentAllowanceExhaustedException
+fields:
+  message: String, default='The included OpenBudget Plus agent usage is used up'

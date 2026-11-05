@@ -3,7 +3,6 @@ import 'package:openbudget_server/src/accounts/account_service.dart';
 import 'package:openbudget_server/src/budgets/budget_service.dart';
 import 'package:openbudget_server/src/categories/category_service.dart';
 import 'package:openbudget_server/src/envelopes/envelope_service.dart';
-import 'package:openbudget_server/src/exceptions/exceptions.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:openbudget_server/src/payees/payee_service.dart';
 import 'package:serverpod/serverpod.dart' hide Transaction;
@@ -92,7 +91,7 @@ class TransactionService {
   }) async {
     final transaction = await Transaction.db.findById(session, transactionId);
     if (transaction == null) {
-      throw NotFoundException('Transaction not found');
+      throw NotFoundException(message: 'Transaction not found');
     }
 
     // Verify the user owns the parent budget.
@@ -174,7 +173,7 @@ class TransactionService {
 
     if (fromAccountId == toAccountId) {
       throw ValidationException(
-        'Source and destination accounts must be different',
+        message: 'Source and destination accounts must be different',
       );
     }
 
@@ -441,7 +440,8 @@ class TransactionService {
     final splitSum = splits.fold<int>(0, (sum, s) => sum + s.amountCents.abs());
     if (splitSum != totalAmountCents.abs()) {
       throw ValidationException(
-        'Split amounts must equal total: $splitSum != ${totalAmountCents.abs()}',
+        message:
+            'Split amounts must equal total: $splitSum != ${totalAmountCents.abs()}',
       );
     }
 
@@ -582,7 +582,7 @@ class TransactionService {
   }) async {
     final account = await AccountService.getById(session, accountId: accountId);
     if (account.budgetId != budgetId) {
-      throw NotFoundException('Account not found in this budget');
+      throw NotFoundException(message: 'Account not found in this budget');
     }
   }
 
@@ -600,7 +600,7 @@ class TransactionService {
       categoryId: envelope.categoryId,
     );
     if (category.budgetId != budgetId) {
-      throw NotFoundException('Envelope not found in this budget');
+      throw NotFoundException(message: 'Envelope not found in this budget');
     }
   }
 
@@ -611,7 +611,7 @@ class TransactionService {
   }) async {
     final payee = await PayeeService.getById(session, payeeId: payeeId);
     if (payee.budgetId != budgetId) {
-      throw NotFoundException('Payee not found in this budget');
+      throw NotFoundException(message: 'Payee not found in this budget');
     }
   }
 

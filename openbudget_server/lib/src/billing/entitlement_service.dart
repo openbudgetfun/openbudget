@@ -1,4 +1,3 @@
-import 'package:openbudget_server/src/exceptions/exceptions.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
 
@@ -71,10 +70,12 @@ abstract final class EntitlementService {
     required DateTime currentPeriodEnd,
   }) async {
     if (externalId.isEmpty) {
-      throw ValidationException('externalId must not be empty');
+      throw ValidationException(message: 'externalId must not be empty');
     }
     if (!currentPeriodEnd.isAfter(currentPeriodStart)) {
-      throw ValidationException('currentPeriodEnd must follow the start');
+      throw ValidationException(
+        message: 'currentPeriodEnd must follow the start',
+      );
     }
     return session.db.transaction((transaction) async {
       final existing = await Entitlement.db.findFirstRow(
@@ -101,7 +102,7 @@ abstract final class EntitlementService {
       }
       if (existing.userId != userId) {
         throw ForbiddenException(
-          'This subscription belongs to a different user',
+          message: 'This subscription belongs to a different user',
         );
       }
       return Entitlement.db.updateRow(

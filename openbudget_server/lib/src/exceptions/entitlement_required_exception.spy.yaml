@@ -1,0 +1,5 @@
+### Thrown when a feature needs OpenBudget Plus and the user has no active
+### subscription.
+exception: EntitlementRequiredException
+fields:
+  message: String, default='OpenBudget Plus is required'

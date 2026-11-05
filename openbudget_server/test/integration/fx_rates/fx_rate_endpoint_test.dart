@@ -1,5 +1,5 @@
-import 'package:openbudget_server/src/exceptions/exceptions.dart';
 import 'package:openbudget_server/src/fx_rates/fx_rate_service.dart';
+import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:test/test.dart';
 
 import '../helpers/auth_helper.dart';
@@ -29,7 +29,7 @@ class _FakeFxProviderClient implements FxRateProviderClient {
     _callCount += 1;
 
     if (throwOnCall.contains(_callCount)) {
-      throw ValidationException('Simulated provider failure');
+      throw ValidationException(message: 'Simulated provider failure');
     }
 
     final index = _callCount - 1;

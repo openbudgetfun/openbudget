@@ -1,0 +1,5 @@
+### Thrown when a billing rail is not configured or its provider rejects a
+### request.
+exception: BillingRailUnavailableException
+fields:
+  message: String, default='This payment rail is not available'

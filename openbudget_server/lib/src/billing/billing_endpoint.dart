@@ -2,7 +2,6 @@ import 'package:openbudget_server/src/billing/billing_secrets.dart';
 import 'package:openbudget_server/src/billing/entitlement_service.dart';
 import 'package:openbudget_server/src/billing/solana_billing_service.dart';
 import 'package:openbudget_server/src/billing/stripe_client.dart';
-import 'package:openbudget_server/src/exceptions/exceptions.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
 
@@ -62,7 +61,7 @@ class BillingEndpoint extends Endpoint {
       where: (t) => t.userId.equals(userId),
     );
     if (customer == null) {
-      throw NotFoundException('No Stripe customer for this user');
+      throw NotFoundException(message: 'No Stripe customer for this user');
     }
     return _stripeClient.createPortalSession(
       secretKey: secretKey,

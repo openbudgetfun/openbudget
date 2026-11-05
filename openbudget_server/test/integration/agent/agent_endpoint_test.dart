@@ -12,7 +12,6 @@ import 'package:openbudget_server/src/agent/agent_tool_registry.dart';
 import 'package:openbudget_server/src/agent/chat_completions_client.dart';
 import 'package:openbudget_server/src/billing/billing_plan.dart';
 import 'package:openbudget_server/src/billing/entitlement_service.dart';
-import 'package:openbudget_server/src/exceptions/exceptions.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart' hide Transaction;
 import 'package:test/test.dart';

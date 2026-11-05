@@ -2,7 +2,6 @@ import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_server/src/budgets/budget_service.dart';
 import 'package:openbudget_server/src/categories/category_service.dart';
 import 'package:openbudget_server/src/envelopes/envelope_service.dart';
-import 'package:openbudget_server/src/exceptions/exceptions.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:openbudget_server/src/payees/payee_service.dart';
 import 'package:serverpod/serverpod.dart';
@@ -61,7 +60,7 @@ class TransactionRuleService {
   }) async {
     final rule = await TransactionRule.db.findById(session, ruleId);
     if (rule == null) {
-      throw NotFoundException('Transaction rule not found');
+      throw NotFoundException(message: 'Transaction rule not found');
     }
 
     await BudgetService.getById(session, budgetId: rule.budgetId);
@@ -143,7 +142,7 @@ class TransactionRuleService {
       categoryId: envelope.categoryId,
     );
     if (category.budgetId != budgetId) {
-      throw NotFoundException('Envelope not found in this budget');
+      throw NotFoundException(message: 'Envelope not found in this budget');
     }
   }
 
@@ -154,7 +153,7 @@ class TransactionRuleService {
   }) async {
     final payee = await PayeeService.getById(session, payeeId: payeeId);
     if (payee.budgetId != budgetId) {
-      throw NotFoundException('Payee not found in this budget');
+      throw NotFoundException(message: 'Payee not found in this budget');
     }
   }
 

@@ -1,5 +1,4 @@
 import 'package:openbudget_core/openbudget_core.dart';
-import 'package:openbudget_server/src/exceptions/exceptions.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:openbudget_server/src/tax/tax_entry_builder.dart';
 import 'package:openbudget_server/src/tax/tax_fx_rates.dart';

@@ -2,7 +2,6 @@ import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_server/src/budgets/budget_service.dart';
 import 'package:openbudget_server/src/categories/category_service.dart';
 import 'package:openbudget_server/src/envelopes/envelope_service.dart';
-import 'package:openbudget_server/src/exceptions/exceptions.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
 
@@ -206,7 +205,7 @@ class MonthlyAllocationService {
       allocationId,
     );
     if (allocation == null) {
-      throw NotFoundException('Monthly allocation not found');
+      throw NotFoundException(message: 'Monthly allocation not found');
     }
 
     await BudgetService.getById(session, budgetId: allocation.budgetId);
@@ -228,7 +227,7 @@ class MonthlyAllocationService {
     );
 
     if (category.budgetId != budgetId) {
-      throw NotFoundException('Envelope not found in this budget');
+      throw NotFoundException(message: 'Envelope not found in this budget');
     }
   }
 }
