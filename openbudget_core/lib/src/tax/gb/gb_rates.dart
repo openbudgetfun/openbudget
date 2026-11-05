@@ -1,0 +1,501 @@
+import 'package:meta/meta.dart';
+import 'package:openbudget_core/src/tax/tax_model.dart';
+import 'package:openbudget_core/src/tax/tax_profile.dart';
+import 'package:openbudget_core/src/tax/tax_rule_pack.dart';
+
+/// One pound in minor units, so the tables read in pounds.
+const int _pound = 100;
+
+/// A student loan plan's terms for one tax year.
+@immutable
+final class GbStudentLoanTerms {
+  const GbStudentLoanTerms({
+    required this.rateBasisPoints,
+    this.thresholdMinor,
+  });
+
+  /// Income above which repayments start, or null when the plan has not
+  /// begun collecting repayments in this year.
+  final int? thresholdMinor;
+
+  /// 900 is 9%.
+  final int rateBasisPoints;
+
+  /// The share of income above [thresholdMinor] repaid, in minor units.
+  int repaymentOn(int incomeMinor) {
+    final threshold = thresholdMinor;
+    if (threshold == null || incomeMinor <= threshold) {
+      return 0;
+    }
+    return (incomeMinor - threshold) * rateBasisPoints ~/ 10000;
+  }
+}
+
+/// The rates, thresholds and allowances of one United Kingdom tax year.
+///
+/// Every band ceiling is stated in the "income after allowances" space that
+/// [applyTaxBands] uses, so the personal allowance is never counted twice.
+@immutable
+final class GbTaxYearRates {
+  const GbTaxYearRates({
+    required this.startYear,
+    required this.label,
+    required this.personalAllowanceMinor,
+    required this.personalAllowanceIncomeLimitMinor,
+    required this.rukBands,
+    required this.scottishBands,
+    required this.savingsBands,
+    required this.dividendBands,
+    required this.basicRateLimitMinor,
+    required this.higherRateLimitMinor,
+    required this.startingRateForSavingsMinor,
+    required this.personalSavingsAllowanceBasicMinor,
+    required this.personalSavingsAllowanceHigherMinor,
+    required this.dividendAllowanceMinor,
+    required this.capitalGainsAnnualExemptAmountMinor,
+    required this.capitalGainsBasicRateBasisPoints,
+    required this.capitalGainsHigherRateBasisPoints,
+    required this.class2SmallProfitsThresholdMinor,
+    required this.class2WeeklyRateMinor,
+    required this.class4LowerProfitsLimitMinor,
+    required this.class4UpperProfitsLimitMinor,
+    required this.class4LowerRateBasisPoints,
+    required this.class4UpperRateBasisPoints,
+    required this.class1PrimaryThresholdMinor,
+    required this.class1SecondaryThresholdMinor,
+    required this.class1UpperEarningsLimitMinor,
+    required this.class1EmployeeRateBasisPoints,
+    required this.class1EmployeeUpperRateBasisPoints,
+    required this.class1EmployerRateBasisPoints,
+    required this.studentLoans,
+    required this.tradingAllowanceMinor,
+    required this.corporationTaxSmallProfitsRateBasisPoints,
+    required this.corporationTaxMainRateBasisPoints,
+    required this.corporationTaxLowerLimitMinor,
+    required this.corporationTaxUpperLimitMinor,
+    required this.corporationTaxMarginalReliefBasisPoints,
+    required this.vatRegistrationThresholdMinor,
+    required this.vatStandardRateBasisPoints,
+    required this.isaAllowanceMinor,
+    required this.pensionAnnualAllowanceMinor,
+  });
+
+  /// The calendar year the tax year starts in.
+  final int startYear;
+
+  /// HMRC's label, such as `2026/27`.
+  final String label;
+
+  final int personalAllowanceMinor;
+
+  /// Adjusted net income above which the personal allowance tapers.
+  final int personalAllowanceIncomeLimitMinor;
+
+  /// England, Wales and Northern Ireland income tax on non-savings income.
+  final List<TaxBand> rukBands;
+
+  /// Scottish income tax on non-savings income.
+  final List<TaxBand> scottishBands;
+
+  /// UK rates for savings income, applied on top of non-savings income.
+  final List<TaxBand> savingsBands;
+
+  /// UK dividend rates, applied on top of savings income.
+  final List<TaxBand> dividendBands;
+
+  /// The UK basic rate limit in after-allowance terms.
+  final int basicRateLimitMinor;
+
+  /// The UK higher rate limit in after-allowance terms.
+  final int higherRateLimitMinor;
+
+  /// The 0% starting rate for savings, before it is reduced by other income.
+  final int startingRateForSavingsMinor;
+
+  final int personalSavingsAllowanceBasicMinor;
+  final int personalSavingsAllowanceHigherMinor;
+  final int dividendAllowanceMinor;
+
+  final int capitalGainsAnnualExemptAmountMinor;
+  final int capitalGainsBasicRateBasisPoints;
+  final int capitalGainsHigherRateBasisPoints;
+
+  final int class2SmallProfitsThresholdMinor;
+  final int class2WeeklyRateMinor;
+  final int class4LowerProfitsLimitMinor;
+  final int class4UpperProfitsLimitMinor;
+  final int class4LowerRateBasisPoints;
+  final int class4UpperRateBasisPoints;
+
+  /// Class 1 thresholds are annual, as a company director is assessed.
+  final int class1PrimaryThresholdMinor;
+  final int class1SecondaryThresholdMinor;
+  final int class1UpperEarningsLimitMinor;
+  final int class1EmployeeRateBasisPoints;
+  final int class1EmployeeUpperRateBasisPoints;
+  final int class1EmployerRateBasisPoints;
+
+  final Map<GbStudentLoanPlan, GbStudentLoanTerms> studentLoans;
+
+  /// The trading allowance, an alternative to deducting expenses.
+  final int tradingAllowanceMinor;
+
+  final int corporationTaxSmallProfitsRateBasisPoints;
+  final int corporationTaxMainRateBasisPoints;
+  final int corporationTaxLowerLimitMinor;
+  final int corporationTaxUpperLimitMinor;
+
+  /// The marginal relief standard fraction, 3/200, as basis points.
+  final int corporationTaxMarginalReliefBasisPoints;
+
+  final int vatRegistrationThresholdMinor;
+  final int vatStandardRateBasisPoints;
+
+  final int isaAllowanceMinor;
+  final int pensionAnnualAllowanceMinor;
+
+  /// The personal allowance after the £100,000 taper.
+  int personalAllowanceFor(int adjustedNetIncomeMinor) {
+    if (adjustedNetIncomeMinor <= personalAllowanceIncomeLimitMinor) {
+      return personalAllowanceMinor;
+    }
+    final excess = adjustedNetIncomeMinor - personalAllowanceIncomeLimitMinor;
+    // One pound of allowance is lost for each full two pounds of income.
+    final reduction = (excess ~/ (2 * _pound)) * _pound;
+    final reduced = personalAllowanceMinor - reduction;
+    return reduced > 0 ? reduced : 0;
+  }
+}
+
+const _rates2025 = GbTaxYearRates(
+  startYear: 2025,
+  label: '2025/26',
+  personalAllowanceMinor: 12570 * _pound,
+  personalAllowanceIncomeLimitMinor: 100000 * _pound,
+  rukBands: [
+    TaxBand(
+      label: 'Basic rate',
+      rateBasisPoints: 2000,
+      ceilingMinor: 37700 * _pound,
+    ),
+    TaxBand(
+      label: 'Higher rate',
+      rateBasisPoints: 4000,
+      ceilingMinor: 125140 * _pound,
+    ),
+    TaxBand(label: 'Additional rate', rateBasisPoints: 4500),
+  ],
+  scottishBands: [
+    TaxBand(
+      label: 'Starter rate',
+      rateBasisPoints: 1900,
+      ceilingMinor: 2827 * _pound,
+    ),
+    TaxBand(
+      label: 'Basic rate',
+      rateBasisPoints: 2000,
+      ceilingMinor: 14921 * _pound,
+    ),
+    TaxBand(
+      label: 'Intermediate rate',
+      rateBasisPoints: 2100,
+      ceilingMinor: 31092 * _pound,
+    ),
+    TaxBand(
+      label: 'Higher rate',
+      rateBasisPoints: 4200,
+      ceilingMinor: 62430 * _pound,
+    ),
+    TaxBand(
+      label: 'Advanced rate',
+      rateBasisPoints: 4500,
+      ceilingMinor: 125140 * _pound,
+    ),
+    TaxBand(label: 'Top rate', rateBasisPoints: 4800),
+  ],
+  savingsBands: [
+    TaxBand(
+      label: 'Basic rate',
+      rateBasisPoints: 2000,
+      ceilingMinor: 37700 * _pound,
+    ),
+    TaxBand(
+      label: 'Higher rate',
+      rateBasisPoints: 4000,
+      ceilingMinor: 125140 * _pound,
+    ),
+    TaxBand(label: 'Additional rate', rateBasisPoints: 4500),
+  ],
+  dividendBands: [
+    TaxBand(
+      label: 'Dividend basic rate',
+      rateBasisPoints: 875,
+      ceilingMinor: 37700 * _pound,
+    ),
+    TaxBand(
+      label: 'Dividend higher rate',
+      rateBasisPoints: 3375,
+      ceilingMinor: 125140 * _pound,
+    ),
+    TaxBand(label: 'Dividend additional rate', rateBasisPoints: 3935),
+  ],
+  basicRateLimitMinor: 37700 * _pound,
+  higherRateLimitMinor: 125140 * _pound,
+  startingRateForSavingsMinor: 5000 * _pound,
+  personalSavingsAllowanceBasicMinor: 1000 * _pound,
+  personalSavingsAllowanceHigherMinor: 500 * _pound,
+  dividendAllowanceMinor: 500 * _pound,
+  capitalGainsAnnualExemptAmountMinor: 3000 * _pound,
+  capitalGainsBasicRateBasisPoints: 1800,
+  capitalGainsHigherRateBasisPoints: 2400,
+  class2SmallProfitsThresholdMinor: 6845 * _pound,
+  class2WeeklyRateMinor: 350,
+  class4LowerProfitsLimitMinor: 12570 * _pound,
+  class4UpperProfitsLimitMinor: 50270 * _pound,
+  class4LowerRateBasisPoints: 600,
+  class4UpperRateBasisPoints: 200,
+  class1PrimaryThresholdMinor: 12570 * _pound,
+  class1SecondaryThresholdMinor: 5000 * _pound,
+  class1UpperEarningsLimitMinor: 50270 * _pound,
+  class1EmployeeRateBasisPoints: 800,
+  class1EmployeeUpperRateBasisPoints: 200,
+  class1EmployerRateBasisPoints: 1500,
+  studentLoans: {
+    GbStudentLoanPlan.plan1: GbStudentLoanTerms(
+      thresholdMinor: 26065 * _pound,
+      rateBasisPoints: 900,
+    ),
+    GbStudentLoanPlan.plan2: GbStudentLoanTerms(
+      thresholdMinor: 28470 * _pound,
+      rateBasisPoints: 900,
+    ),
+    GbStudentLoanPlan.plan4: GbStudentLoanTerms(
+      thresholdMinor: 32745 * _pound,
+      rateBasisPoints: 900,
+    ),
+    // Plan 5 loans first fell due for repayment in April 2026.
+    GbStudentLoanPlan.plan5: GbStudentLoanTerms(rateBasisPoints: 900),
+    GbStudentLoanPlan.postgraduate: GbStudentLoanTerms(
+      thresholdMinor: 21000 * _pound,
+      rateBasisPoints: 600,
+    ),
+  },
+  tradingAllowanceMinor: 1000 * _pound,
+  corporationTaxSmallProfitsRateBasisPoints: 1900,
+  corporationTaxMainRateBasisPoints: 2500,
+  corporationTaxLowerLimitMinor: 50000 * _pound,
+  corporationTaxUpperLimitMinor: 250000 * _pound,
+  corporationTaxMarginalReliefBasisPoints: 150,
+  vatRegistrationThresholdMinor: 90000 * _pound,
+  vatStandardRateBasisPoints: 2000,
+  isaAllowanceMinor: 20000 * _pound,
+  pensionAnnualAllowanceMinor: 60000 * _pound,
+);
+
+const _rates2026 = GbTaxYearRates(
+  startYear: 2026,
+  label: '2026/27',
+  personalAllowanceMinor: 12570 * _pound,
+  personalAllowanceIncomeLimitMinor: 100000 * _pound,
+  rukBands: [
+    TaxBand(
+      label: 'Basic rate',
+      rateBasisPoints: 2000,
+      ceilingMinor: 37700 * _pound,
+    ),
+    TaxBand(
+      label: 'Higher rate',
+      rateBasisPoints: 4000,
+      ceilingMinor: 125140 * _pound,
+    ),
+    TaxBand(label: 'Additional rate', rateBasisPoints: 4500),
+  ],
+  scottishBands: [
+    TaxBand(
+      label: 'Starter rate',
+      rateBasisPoints: 1900,
+      ceilingMinor: 3967 * _pound,
+    ),
+    TaxBand(
+      label: 'Basic rate',
+      rateBasisPoints: 2000,
+      ceilingMinor: 16956 * _pound,
+    ),
+    TaxBand(
+      label: 'Intermediate rate',
+      rateBasisPoints: 2100,
+      ceilingMinor: 31092 * _pound,
+    ),
+    TaxBand(
+      label: 'Higher rate',
+      rateBasisPoints: 4200,
+      ceilingMinor: 62430 * _pound,
+    ),
+    TaxBand(
+      label: 'Advanced rate',
+      rateBasisPoints: 4500,
+      ceilingMinor: 125140 * _pound,
+    ),
+    TaxBand(label: 'Top rate', rateBasisPoints: 4800),
+  ],
+  savingsBands: [
+    TaxBand(
+      label: 'Basic rate',
+      rateBasisPoints: 2000,
+      ceilingMinor: 37700 * _pound,
+    ),
+    TaxBand(
+      label: 'Higher rate',
+      rateBasisPoints: 4000,
+      ceilingMinor: 125140 * _pound,
+    ),
+    TaxBand(label: 'Additional rate', rateBasisPoints: 4500),
+  ],
+  dividendBands: [
+    TaxBand(
+      label: 'Dividend basic rate',
+      rateBasisPoints: 1075,
+      ceilingMinor: 37700 * _pound,
+    ),
+    TaxBand(
+      label: 'Dividend higher rate',
+      rateBasisPoints: 3575,
+      ceilingMinor: 125140 * _pound,
+    ),
+    TaxBand(label: 'Dividend additional rate', rateBasisPoints: 3935),
+  ],
+  basicRateLimitMinor: 37700 * _pound,
+  higherRateLimitMinor: 125140 * _pound,
+  startingRateForSavingsMinor: 5000 * _pound,
+  personalSavingsAllowanceBasicMinor: 1000 * _pound,
+  personalSavingsAllowanceHigherMinor: 500 * _pound,
+  dividendAllowanceMinor: 500 * _pound,
+  capitalGainsAnnualExemptAmountMinor: 3000 * _pound,
+  capitalGainsBasicRateBasisPoints: 1800,
+  capitalGainsHigherRateBasisPoints: 2400,
+  class2SmallProfitsThresholdMinor: 7105 * _pound,
+  class2WeeklyRateMinor: 365,
+  class4LowerProfitsLimitMinor: 12570 * _pound,
+  class4UpperProfitsLimitMinor: 50270 * _pound,
+  class4LowerRateBasisPoints: 600,
+  class4UpperRateBasisPoints: 200,
+  class1PrimaryThresholdMinor: 12570 * _pound,
+  class1SecondaryThresholdMinor: 5000 * _pound,
+  class1UpperEarningsLimitMinor: 50270 * _pound,
+  class1EmployeeRateBasisPoints: 800,
+  class1EmployeeUpperRateBasisPoints: 200,
+  class1EmployerRateBasisPoints: 1500,
+  studentLoans: {
+    GbStudentLoanPlan.plan1: GbStudentLoanTerms(
+      thresholdMinor: 26900 * _pound,
+      rateBasisPoints: 900,
+    ),
+    GbStudentLoanPlan.plan2: GbStudentLoanTerms(
+      thresholdMinor: 29385 * _pound,
+      rateBasisPoints: 900,
+    ),
+    GbStudentLoanPlan.plan4: GbStudentLoanTerms(
+      thresholdMinor: 33795 * _pound,
+      rateBasisPoints: 900,
+    ),
+    GbStudentLoanPlan.plan5: GbStudentLoanTerms(
+      thresholdMinor: 25000 * _pound,
+      rateBasisPoints: 900,
+    ),
+    GbStudentLoanPlan.postgraduate: GbStudentLoanTerms(
+      thresholdMinor: 21000 * _pound,
+      rateBasisPoints: 600,
+    ),
+  },
+  tradingAllowanceMinor: 1000 * _pound,
+  corporationTaxSmallProfitsRateBasisPoints: 1900,
+  corporationTaxMainRateBasisPoints: 2500,
+  corporationTaxLowerLimitMinor: 50000 * _pound,
+  corporationTaxUpperLimitMinor: 250000 * _pound,
+  corporationTaxMarginalReliefBasisPoints: 150,
+  vatRegistrationThresholdMinor: 90000 * _pound,
+  vatStandardRateBasisPoints: 2000,
+  isaAllowanceMinor: 20000 * _pound,
+  pensionAnnualAllowanceMinor: 60000 * _pound,
+);
+
+/// The UK rates this pack knows, by [TaxYear.startYear].
+const Map<int, GbTaxYearRates> gbRatesByStartYear = {
+  2025: _rates2025,
+  2026: _rates2026,
+};
+
+/// The pages every figure in [gbRatesByStartYear] was checked against.
+///
+/// Fetched on [gbRulesVerifiedOn].
+final List<Uri> gbRateSources = List.unmodifiable(<Uri>[
+  Uri.parse('https://www.gov.uk/income-tax-rates'),
+  Uri.parse(
+    'https://www.gov.uk/government/publications/rates-and-allowances-income-tax/'
+    'income-tax-rates-and-allowances-current-and-past',
+  ),
+  Uri.parse('https://www.gov.uk/scottish-income-tax'),
+  Uri.parse('https://www.gov.uk/scottish-income-tax/2025-to-2026-tax-year'),
+  Uri.parse('https://www.gov.uk/tax-on-dividends'),
+  Uri.parse(
+    'https://www.gov.uk/apply-tax-free-interest-on-savings/how-much-is-tax-free',
+  ),
+  Uri.parse(
+    'https://www.gov.uk/guidance/capital-gains-tax-rates-and-allowances',
+  ),
+  Uri.parse(
+    'https://www.gov.uk/government/publications/rates-and-allowances-national-'
+    'insurance-contributions/rates-and-allowances-national-insurance-contributions',
+  ),
+  Uri.parse('https://www.gov.uk/self-employed-national-insurance-rates'),
+  Uri.parse(
+    'https://www.gov.uk/guidance/rates-and-thresholds-for-employers-2025-to-2026',
+  ),
+  Uri.parse(
+    'https://www.gov.uk/guidance/rates-and-thresholds-for-employers-2026-to-2027',
+  ),
+  Uri.parse('https://www.gov.uk/repaying-your-student-loan/what-you-pay'),
+  Uri.parse('https://www.gov.uk/guidance/previous-annual-repayment-thresholds'),
+  Uri.parse(
+    'https://www.gov.uk/government/publications/student-loans-a-guide-to-terms-and-'
+    'conditions/student-loans-a-guide-to-terms-and-conditions-2025-to-2026',
+  ),
+  Uri.parse(
+    'https://www.gov.uk/guidance/tax-free-allowances-on-property-and-trading-income',
+  ),
+  Uri.parse('https://www.gov.uk/corporation-tax-rates'),
+  Uri.parse('https://www.gov.uk/guidance/corporation-tax-marginal-relief'),
+  Uri.parse(
+    'https://www.gov.uk/government/publications/rates-and-allowances-corporation-tax/'
+    'rates-and-allowances-corporation-tax',
+  ),
+  Uri.parse('https://www.gov.uk/guidance/the-company-tax-return-guide'),
+  Uri.parse('https://www.gov.uk/vat-registration/when-to-register'),
+  Uri.parse('https://www.gov.uk/vat-rates'),
+  Uri.parse('https://www.gov.uk/tax-on-your-private-pension/annual-allowance'),
+  Uri.parse(
+    'https://www.gov.uk/tax-on-your-private-pension/pension-tax-relief',
+  ),
+  Uri.parse(
+    'https://www.gov.uk/government/publications/rates-and-allowances-pension-schemes/'
+    'pension-schemes-rates',
+  ),
+  Uri.parse('https://www.gov.uk/individual-savings-accounts'),
+  Uri.parse(
+    'https://www.gov.uk/guidance/manage-isa-subscriptions-for-your-investors',
+  ),
+  Uri.parse(
+    'https://www.gov.uk/government/publications/changes-to-tax-rates-for-property-'
+    'savings-dividend-income/changes-to-tax-rates-for-property-savings-dividend-income',
+  ),
+  Uri.parse(
+    'https://www.gov.uk/understand-self-assessment-bill/payments-on-account',
+  ),
+  Uri.parse('https://www.gov.uk/self-assessment-tax-returns/deadlines'),
+  Uri.parse(
+    'https://www.gov.uk/government/publications/self-assessment-self-employment-full-sa103f',
+  ),
+]);
+
+/// The day the figures in [gbRatesByStartYear] were last checked.
+final DateTime gbRulesVerifiedOn = DateTime.utc(2026, 11, 4);
