@@ -37,7 +37,9 @@ runs:
       run: |
         nix profile add --accept-flake-config nixpkgs#cachix
         cachix use devenv
-        nix profile add nixpkgs#devenv
+        # Keep this tag equal to the `devenv` input in devenv.yaml. A CLI from
+        # nixpkgs drifts from the locked modules and fails to evaluate them.
+        nix profile add --accept-flake-config github:cachix/devenv/v2.4.0
       shell: bash
 
     - name: install flutter sdk via fvm
