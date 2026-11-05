@@ -102,6 +102,36 @@ class _TaxProfileForm extends HookConsumerWidget {
     final filingStatus = useState(
       us?.filingStatus ?? UsFilingStatus.single,
     );
+    final homeOfficeMethod = useState(
+      us?.homeOfficeMethod ?? UsHomeOfficeMethod.simplified,
+    );
+    final specifiedServiceTrade = useState(
+      us?.specifiedServiceTrade ?? false,
+    );
+    final foreignExclusionController = useTextEditingController(
+      text: us == null
+          ? ''
+          : minorToPlainText(us.foreignEarnedIncomeExclusionMinor, 2),
+    );
+    final dependentsUnder17Controller = useTextEditingController(
+      text: us == null
+          ? ''
+          : '${us.dependents.where((dependent) => dependent.underSeventeen).length}',
+    );
+    final dependents17OrOlderController = useTextEditingController(
+      text: us == null
+          ? ''
+          : '${us.dependents.where((dependent) => !dependent.underSeventeen).length}',
+    );
+    final dependentsHaveSsn = useState(
+      us != null &&
+          us.dependents.isNotEmpty &&
+          us.dependents.every((dependent) => dependent.hasValidSsn),
+    );
+    final taxpayer65OrOlder = useState(us?.taxpayer65OrOlder ?? false);
+    final spouse65OrOlder = useState(us?.spouse65OrOlder ?? false);
+    final taxpayerHasSsn = useState(us?.taxpayerHasSsn ?? true);
+    final spouseHasSsn = useState(us?.spouseHasSsn ?? true);
     final annualRentController = useTextEditingController(
       text: ng == null
           ? ''
@@ -141,6 +171,26 @@ class _TaxProfileForm extends HookConsumerWidget {
         entityKind: entityKind.value,
         salesTaxRegistered: salesTaxRegistered.value,
         filingStatus: filingStatus.value,
+        homeOfficeMethod: homeOfficeMethod.value,
+        specifiedServiceTrade: specifiedServiceTrade.value,
+        foreignEarnedIncomeExclusionMinor:
+            parsePlainMinor(foreignExclusionController.text, 2) ?? 0,
+        taxpayer65OrOlder: taxpayer65OrOlder.value,
+        spouse65OrOlder: spouse65OrOlder.value,
+        taxpayerHasSsn: taxpayerHasSsn.value,
+        spouseHasSsn: spouseHasSsn.value,
+        dependents: [
+          for (var i = 0; i < _countOf(dependentsUnder17Controller); i++)
+            UsDependent(
+              underSeventeen: true,
+              hasValidSsn: dependentsHaveSsn.value,
+            ),
+          for (var i = 0; i < _countOf(dependents17OrOlderController); i++)
+            UsDependent(
+              underSeventeen: false,
+              hasValidSsn: dependentsHaveSsn.value,
+            ),
+        ],
       ),
       TaxJurisdiction.ng => NgTaxProfile(
         entityKind: entityKind.value,
@@ -399,6 +449,134 @@ class _TaxProfileForm extends HookConsumerWidget {
                     },
                   ),
                 ),
+                if (entity == TaxEntityKind.individual) ...[
+                  const Divider(height: 1),
+                  SwitchListTile(
+                    value: taxpayerHasSsn.value,
+                    onChanged: (value) => taxpayerHasSsn.value = value,
+                    title: Text(l10n.taxUsTaxpayerHasSsn),
+                    subtitle: Text(l10n.taxUsSsnHint),
+                    secondary: SkribbleIcon(
+                      data: OpenBudgetIcons.document,
+                      color: palette.ink,
+                    ),
+                  ),
+                  if (filingStatus.value ==
+                      UsFilingStatus.marriedFilingJointly) ...[
+                    const Divider(height: 1),
+                    SwitchListTile(
+                      value: spouseHasSsn.value,
+                      onChanged: (value) => spouseHasSsn.value = value,
+                      title: Text(l10n.taxUsSpouseHasSsn),
+                      subtitle: Text(l10n.taxUsSsnHint),
+                      secondary: SkribbleIcon(
+                        data: OpenBudgetIcons.people,
+                        color: palette.ink,
+                      ),
+                    ),
+                  ],
+                  const Divider(height: 1),
+                  SwitchListTile(
+                    value: taxpayer65OrOlder.value,
+                    onChanged: (value) => taxpayer65OrOlder.value = value,
+                    title: Text(l10n.taxUsTaxpayer65OrOlder),
+                    secondary: SkribbleIcon(
+                      data: OpenBudgetIcons.nature,
+                      color: palette.ink,
+                    ),
+                  ),
+                  if (filingStatus.value ==
+                      UsFilingStatus.marriedFilingJointly) ...[
+                    const Divider(height: 1),
+                    SwitchListTile(
+                      value: spouse65OrOlder.value,
+                      onChanged: (value) => spouse65OrOlder.value = value,
+                      title: Text(l10n.taxUsSpouse65OrOlder),
+                      secondary: SkribbleIcon(
+                        data: OpenBudgetIcons.nature,
+                        color: palette.ink,
+                      ),
+                    ),
+                  ],
+                  const Divider(height: 1),
+                  Padding(
+                    padding: const EdgeInsets.all(SpacingTokens.md),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ObTextField(
+                          controller: dependentsUnder17Controller,
+                          labelText: l10n.taxUsDependentsUnder17,
+                          hintText: l10n.taxUsDependentsCountHint,
+                          keyboardType: TextInputType.number,
+                        ),
+                        const SizedBox(height: SpacingTokens.md),
+                        ObTextField(
+                          controller: dependents17OrOlderController,
+                          labelText: l10n.taxUsDependents17OrOlder,
+                          hintText: l10n.taxUsDependentsCountHint,
+                          keyboardType: TextInputType.number,
+                        ),
+                      ],
+                    ),
+                  ),
+                  SwitchListTile(
+                    value: dependentsHaveSsn.value,
+                    onChanged: (value) => dependentsHaveSsn.value = value,
+                    title: Text(l10n.taxUsDependentsSsn),
+                    subtitle: Text(l10n.taxUsDependentsSsnHint),
+                    secondary: SkribbleIcon(
+                      data: OpenBudgetIcons.document,
+                      color: palette.ink,
+                    ),
+                  ),
+                  const Divider(height: 1),
+                  Padding(
+                    padding: const EdgeInsets.all(SpacingTokens.md),
+                    child: ObTextField(
+                      controller: foreignExclusionController,
+                      labelText: l10n.taxUsForeignEarnedIncomeExclusion,
+                      hintText: l10n.taxUsForeignEarnedIncomeExclusionHint,
+                      prefixText: CurrencyCode.usd.symbol,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                    ),
+                  ),
+                ],
+                if (entity == TaxEntityKind.soleTrader) ...[
+                  const Divider(height: 1),
+                  SwitchListTile(
+                    value: specifiedServiceTrade.value,
+                    onChanged: (value) => specifiedServiceTrade.value = value,
+                    title: Text(l10n.taxUsSpecifiedServiceTrade),
+                    subtitle: Text(l10n.taxUsSpecifiedServiceTradeHint),
+                    secondary: SkribbleIcon(
+                      data: OpenBudgetIcons.store,
+                      color: palette.ink,
+                    ),
+                  ),
+                  const Divider(height: 1),
+                  Padding(
+                    padding: const EdgeInsets.all(SpacingTokens.md),
+                    child: ObDropdown<UsHomeOfficeMethod>(
+                      value: homeOfficeMethod.value,
+                      labelText: l10n.taxUsHomeOfficeMethod,
+                      items: [
+                        for (final method in UsHomeOfficeMethod.values)
+                          DropdownMenuItem(
+                            value: method,
+                            child: Text(
+                              taxHomeOfficeMethodLabel(l10n, method),
+                            ),
+                          ),
+                      ],
+                      onChanged: (method) {
+                        if (method != null) homeOfficeMethod.value = method;
+                      },
+                    ),
+                  ),
+                ],
               ],
               if (country.value == TaxJurisdiction.ng) ...[
                 const Divider(height: 1),
@@ -568,3 +746,7 @@ GbStudentLoanPlan _studentLoanPlan(String name) {
   }
   return GbStudentLoanPlan.plan2;
 }
+
+/// A dependent count field value, or zero when it is not a whole number.
+int _countOf(TextEditingController controller) =>
+    int.tryParse(controller.text.trim()) ?? 0;

@@ -23,8 +23,9 @@ const List<TaxCategory> usIndividualCategories = [
     entityKinds: _individualOnly,
     reportReference: 'Form 1040, line 2a',
     description:
-        'Not included in taxable income, but it is added to modified adjusted '
-        'gross income for the net investment income tax.',
+        'Not included in taxable income and not added back to modified '
+        'adjusted gross income; the net investment income tax adds back '
+        'only the foreign earned income exclusion.',
   ),
   TaxCategory(
     code: 'us.ind.taxable_interest',
@@ -120,14 +121,63 @@ const List<TaxCategory> usIndividualCategories = [
         'annual addition or compensation limits.',
   ),
   TaxCategory(
+    code: 'us.ind.state_local_taxes',
+    label: 'State and local taxes',
+    kind: TaxCategoryKind.relief,
+    entityKinds: _individualOnly,
+    reportReference: 'Schedule A (Form 1040), line 5d',
+    description:
+        'State and local income, sales, real estate, and personal property '
+        'taxes paid, included in the itemized deductions total. Capped by '
+        'the SALT cap and its income phase-down (IRC 164(b)(6)).',
+  ),
+  TaxCategory(
     code: 'us.ind.itemized_deductions',
     label: 'Itemized deductions',
     kind: TaxCategoryKind.relief,
     entityKinds: _individualOnly,
     reportReference: 'Schedule A (Form 1040), line 17',
     description:
-        'A single user-entered total. The pack compares it with the standard '
-        'deduction and does not recompute the individual Schedule A lines.',
+        'A single user-entered total, including the state and local taxes '
+        'entered in their own category. The pack compares it with the '
+        'standard deduction, applies the SALT cap, and does not recompute '
+        'the other Schedule A lines.',
+  ),
+  TaxCategory(
+    code: 'us.ind.qualified_tips',
+    label: 'Qualified tips (Schedule 1-A)',
+    kind: TaxCategoryKind.relief,
+    entityKinds: _individualOnly,
+    reportReference: 'Schedule 1-A (Form 1040)',
+    description:
+        'Tips from an occupation on the IRS tipped-occupation list, '
+        'reported on a W-2, 1099, payee statement, or Form 4137. Capped at '
+        r'$25,000 and phased out at higher incomes; requires an SSN and, '
+        'if married, a joint return. Tax years 2025 to 2028 only.',
+  ),
+  TaxCategory(
+    code: 'us.ind.qualified_overtime_premium',
+    label: 'Qualified overtime premium (Schedule 1-A)',
+    kind: TaxCategoryKind.relief,
+    entityKinds: _individualOnly,
+    reportReference: 'Schedule 1-A (Form 1040)',
+    description:
+        'Only the premium part of overtime pay above the regular rate '
+        r'(FLSA section 7), capped at $12,500 ($25,000 joint) and phased '
+        'out at higher incomes. Tax years 2025 to 2028 only.',
+  ),
+  TaxCategory(
+    code: 'us.ind.vehicle_loan_interest',
+    label: 'Passenger vehicle loan interest (Schedule 1-A)',
+    kind: TaxCategoryKind.relief,
+    entityKinds: _individualOnly,
+    reportReference: 'Schedule 1-A (Form 1040)',
+    description:
+        'Interest on a loan taken after December 31, 2024 for a new '
+        'passenger vehicle assembled in the United States, first lien, '
+        r'personal use. Capped at $10,000 and phased out at higher '
+        'incomes; the VIN is listed on the return. Tax years 2025 to 2028 '
+        'only.',
   ),
   TaxCategory(
     code: 'us.ind.federal_withholding',
@@ -350,11 +400,27 @@ const List<TaxCategory> usScheduleCCategories = [
   ),
   TaxCategory(
     code: 'us.sch_c.home_office',
-    label: 'Expenses for business use of your home (simplified method)',
+    label: 'Expenses for business use of your home',
     kind: TaxCategoryKind.expense,
     entityKinds: _soleTraderOnly,
     reportReference: 'Schedule C (Form 1040), line 30',
-    description: r'Simplified method only. Capped at $1,500: $5 per square foot for up to 300 square feet.',
+    description:
+        r'The profile chooses the simplified method (capped at $1,500: '
+        r'$5 per square foot for up to 300 square feet) or the regular '
+        'Form 8829 method, which has no additional cap. Neither is limited '
+        'to gross income from the business use here.',
+  ),
+  TaxCategory(
+    code: 'us.sch_c.ubia_of_qualified_property',
+    label: 'Unadjusted basis of qualified property (UBIA)',
+    kind: TaxCategoryKind.outOfScope,
+    entityKinds: _soleTraderOnly,
+    reportReference: 'Form 8995-A',
+    description:
+        'The unadjusted basis of qualified property immediately after '
+        'acquisition. Not deducted; it feeds the alternative QBI wage '
+        'limitation (25% of W-2 wages plus 2.5% of UBIA) above the '
+        'section 199A threshold.',
   ),
 ];
 
