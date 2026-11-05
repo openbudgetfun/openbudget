@@ -74,6 +74,15 @@ class SettingsScreen extends HookConsumerWidget {
                 ownerLabel: accountIdentity,
                 lastUpdatedLabel: lastUpdatedLabel,
               ),
+              Card(
+                clipBehavior: Clip.antiAlias,
+                child: _SettingsTile(
+                  icon: OpenBudgetIcons.sparkle,
+                  label: l10n.plusTitle,
+                  subtitle: l10n.plusNavSubtitle,
+                  onTap: () => context.pushNamed(plusRoute),
+                ),
+              ),
               ObSectionHeader(
                 title: l10n.settingsNavigationSection,
                 padding: _sectionHeaderPadding,

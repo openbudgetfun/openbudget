@@ -62,8 +62,13 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Current Plan'), findsOneWidget);
       expect(find.text('Family Plan'), findsOneWidget);
+      await tester.scrollUntilVisible(
+        find.text('Current Plan'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(find.text('Current Plan'), findsOneWidget);
       await tester.scrollUntilVisible(
         find.text('Plan Settings'),
         300,

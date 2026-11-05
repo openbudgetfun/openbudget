@@ -20,6 +20,7 @@ import 'package:openbudget_app/src/features/budget/screens/recent_moves_screen.d
 import 'package:openbudget_app/src/features/home/screens/home_screen.dart';
 import 'package:openbudget_app/src/features/more/screens/more_screen.dart';
 import 'package:openbudget_app/src/features/payees/screens/payee_list_screen.dart';
+import 'package:openbudget_app/src/features/plus/screens/plus_screen.dart';
 import 'package:openbudget_app/src/features/recurring/screens/recurring_calendar_screen.dart';
 import 'package:openbudget_app/src/features/recurring/screens/recurring_list_screen.dart';
 import 'package:openbudget_app/src/features/reports/screens/category_trends_screen.dart';
@@ -88,6 +89,12 @@ GoRouter appRouter(Ref ref) {
         name: homeRoute,
         path: homePath,
         builder: (context, state) => const HomeScreen(),
+      ),
+      GoRoute(
+        name: plusRoute,
+        path: plusPath,
+        builder: (context, state) =>
+            PlusScreen(status: state.uri.queryParameters['status']),
       ),
       GoRoute(
         name: createBudgetRoute,

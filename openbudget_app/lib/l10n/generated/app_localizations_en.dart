@@ -4274,4 +4274,189 @@ class AppLocalizationsEn extends AppLocalizations {
   String assistantUsageZen(String used, String allowance) {
     return '$used of $allowance used this month';
   }
+
+  @override
+  String get plusTitle => 'OpenBudget Plus';
+
+  @override
+  String get plusNavSubtitle => 'Tax reports, the assistant and more';
+
+  @override
+  String get plusHeroHeadline => 'Get more from every envelope';
+
+  @override
+  String get plusHeroBody =>
+      'Tax reports, a built-in assistant that knows your budget, and room to bring your own agent.';
+
+  @override
+  String get plusPriceAmount => '\$10';
+
+  @override
+  String get plusPricePeriod => 'a month';
+
+  @override
+  String get plusPriceNote => 'Cancel whenever you like.';
+
+  @override
+  String get plusIncludedUsage => '\$1 of assistant usage included every month';
+
+  @override
+  String get plusBenefitsTitle => 'What you get';
+
+  @override
+  String get plusBenefitTaxTitle => 'Tax reports';
+
+  @override
+  String get plusBenefitTaxBody =>
+      'UK, US, Nigeria and Germany, built from your own transactions.';
+
+  @override
+  String get plusBenefitAssistantTitle => 'The assistant';
+
+  @override
+  String get plusBenefitAssistantBody =>
+      'Ask questions about your money, with \$1 of usage included each month.';
+
+  @override
+  String get plusBenefitAgentTitle => 'Bring your own agent';
+
+  @override
+  String get plusBenefitAgentBody =>
+      'Connect an OpenAI-compatible provider and use your own key.';
+
+  @override
+  String get plusChooseRail => 'Choose how to pay';
+
+  @override
+  String get plusStripeButton => 'Pay with card';
+
+  @override
+  String get plusStripeNote => 'Secure checkout opens in your browser.';
+
+  @override
+  String get plusSolanaButton => 'Pay with USDC';
+
+  @override
+  String get plusSolanaNote => 'Subscribe from a Solana wallet on this device.';
+
+  @override
+  String get plusStoreAppleButton => 'Subscribe in the App Store';
+
+  @override
+  String get plusStoreGoogleButton => 'Subscribe on Google Play';
+
+  @override
+  String get plusStoreUnavailable =>
+      'Store purchases are unavailable in this build.';
+
+  @override
+  String get plusStoreHint =>
+      'Billed through your store account. Cancel any time in your store settings.';
+
+  @override
+  String get plusRestorePurchases => 'Restore purchases';
+
+  @override
+  String get plusRestoreSuccess => 'Purchases restored.';
+
+  @override
+  String get plusPurchaseSuccess =>
+      'Purchase complete. Your plan will update in a moment.';
+
+  @override
+  String get plusRefreshButton => 'I\'ve paid, refresh';
+
+  @override
+  String get plusRefreshNote =>
+      'After checkout, come back and check your plan.';
+
+  @override
+  String get plusPlanTitle => 'Your OpenBudget Plus plan';
+
+  @override
+  String plusSource(String source) {
+    return 'Paid with $source';
+  }
+
+  @override
+  String get plusSourceStripe => 'Card';
+
+  @override
+  String get plusSourceAppStore => 'App Store';
+
+  @override
+  String get plusSourcePlayStore => 'Google Play';
+
+  @override
+  String get plusSourceSolana => 'Solana';
+
+  @override
+  String get plusStatusActive => 'Active';
+
+  @override
+  String get plusStatusPastDue => 'Past due';
+
+  @override
+  String get plusStatusCanceled => 'Cancelled';
+
+  @override
+  String get plusStatusExpired => 'Expired';
+
+  @override
+  String plusRenewsOn(String date) {
+    return 'Renews on $date';
+  }
+
+  @override
+  String plusEndsOn(String date) {
+    return 'Ends on $date';
+  }
+
+  @override
+  String plusEndedOn(String date) {
+    return 'Ended on $date';
+  }
+
+  @override
+  String get plusManage => 'Manage';
+
+  @override
+  String get plusManageSolanaBody =>
+      'Cancel from the wallet that approved this subscription. OpenBudget stops charging when the on-chain subscription ends.';
+
+  @override
+  String get plusLoading => 'Loading your plan…';
+
+  @override
+  String get plusLoadError => 'Could not load your plan';
+
+  @override
+  String get plusLoadErrorBody => 'Check your connection, then try again.';
+
+  @override
+  String get plusRetry => 'Try again';
+
+  @override
+  String get plusCheckoutSuccess => 'Payment received. Checking your plan…';
+
+  @override
+  String get plusCheckoutCancelled =>
+      'Checkout cancelled. Nothing was charged.';
+
+  @override
+  String get plusFailureCancelled => 'Nothing was charged.';
+
+  @override
+  String get plusFailureRejected => 'The wallet request was cancelled.';
+
+  @override
+  String get plusFailureUnavailable =>
+      'That payment method is not available right now.';
+
+  @override
+  String get plusFailureFailed => 'That did not work. Try again.';
+
+  @override
+  String get plusPriceCurrencyNote =>
+      'OpenBudget Plus is billed in US dollars.';
 }

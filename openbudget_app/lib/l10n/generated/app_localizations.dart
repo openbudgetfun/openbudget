@@ -7295,6 +7295,336 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{used} of {allowance} used this month'**
   String assistantUsageZen(String used, String allowance);
+
+  /// No description provided for @plusTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenBudget Plus'**
+  String get plusTitle;
+
+  /// No description provided for @plusNavSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax reports, the assistant and more'**
+  String get plusNavSubtitle;
+
+  /// No description provided for @plusHeroHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Get more from every envelope'**
+  String get plusHeroHeadline;
+
+  /// No description provided for @plusHeroBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax reports, a built-in assistant that knows your budget, and room to bring your own agent.'**
+  String get plusHeroBody;
+
+  /// No description provided for @plusPriceAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'\$10'**
+  String get plusPriceAmount;
+
+  /// No description provided for @plusPricePeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'a month'**
+  String get plusPricePeriod;
+
+  /// No description provided for @plusPriceNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel whenever you like.'**
+  String get plusPriceNote;
+
+  /// No description provided for @plusIncludedUsage.
+  ///
+  /// In en, this message translates to:
+  /// **'\$1 of assistant usage included every month'**
+  String get plusIncludedUsage;
+
+  /// No description provided for @plusBenefitsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What you get'**
+  String get plusBenefitsTitle;
+
+  /// No description provided for @plusBenefitTaxTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax reports'**
+  String get plusBenefitTaxTitle;
+
+  /// No description provided for @plusBenefitTaxBody.
+  ///
+  /// In en, this message translates to:
+  /// **'UK, US, Nigeria and Germany, built from your own transactions.'**
+  String get plusBenefitTaxBody;
+
+  /// No description provided for @plusBenefitAssistantTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The assistant'**
+  String get plusBenefitAssistantTitle;
+
+  /// No description provided for @plusBenefitAssistantBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask questions about your money, with \$1 of usage included each month.'**
+  String get plusBenefitAssistantBody;
+
+  /// No description provided for @plusBenefitAgentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Bring your own agent'**
+  String get plusBenefitAgentTitle;
+
+  /// No description provided for @plusBenefitAgentBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect an OpenAI-compatible provider and use your own key.'**
+  String get plusBenefitAgentBody;
+
+  /// No description provided for @plusChooseRail.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose how to pay'**
+  String get plusChooseRail;
+
+  /// No description provided for @plusStripeButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay with card'**
+  String get plusStripeButton;
+
+  /// No description provided for @plusStripeNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Secure checkout opens in your browser.'**
+  String get plusStripeNote;
+
+  /// No description provided for @plusSolanaButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay with USDC'**
+  String get plusSolanaButton;
+
+  /// No description provided for @plusSolanaNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscribe from a Solana wallet on this device.'**
+  String get plusSolanaNote;
+
+  /// No description provided for @plusStoreAppleButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscribe in the App Store'**
+  String get plusStoreAppleButton;
+
+  /// No description provided for @plusStoreGoogleButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscribe on Google Play'**
+  String get plusStoreGoogleButton;
+
+  /// No description provided for @plusStoreUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Store purchases are unavailable in this build.'**
+  String get plusStoreUnavailable;
+
+  /// No description provided for @plusStoreHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Billed through your store account. Cancel any time in your store settings.'**
+  String get plusStoreHint;
+
+  /// No description provided for @plusRestorePurchases.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore purchases'**
+  String get plusRestorePurchases;
+
+  /// No description provided for @plusRestoreSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchases restored.'**
+  String get plusRestoreSuccess;
+
+  /// No description provided for @plusPurchaseSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchase complete. Your plan will update in a moment.'**
+  String get plusPurchaseSuccess;
+
+  /// No description provided for @plusRefreshButton.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'ve paid, refresh'**
+  String get plusRefreshButton;
+
+  /// No description provided for @plusRefreshNote.
+  ///
+  /// In en, this message translates to:
+  /// **'After checkout, come back and check your plan.'**
+  String get plusRefreshNote;
+
+  /// No description provided for @plusPlanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your OpenBudget Plus plan'**
+  String get plusPlanTitle;
+
+  /// No description provided for @plusSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid with {source}'**
+  String plusSource(String source);
+
+  /// No description provided for @plusSourceStripe.
+  ///
+  /// In en, this message translates to:
+  /// **'Card'**
+  String get plusSourceStripe;
+
+  /// No description provided for @plusSourceAppStore.
+  ///
+  /// In en, this message translates to:
+  /// **'App Store'**
+  String get plusSourceAppStore;
+
+  /// No description provided for @plusSourcePlayStore.
+  ///
+  /// In en, this message translates to:
+  /// **'Google Play'**
+  String get plusSourcePlayStore;
+
+  /// No description provided for @plusSourceSolana.
+  ///
+  /// In en, this message translates to:
+  /// **'Solana'**
+  String get plusSourceSolana;
+
+  /// No description provided for @plusStatusActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get plusStatusActive;
+
+  /// No description provided for @plusStatusPastDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Past due'**
+  String get plusStatusPastDue;
+
+  /// No description provided for @plusStatusCanceled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get plusStatusCanceled;
+
+  /// No description provided for @plusStatusExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Expired'**
+  String get plusStatusExpired;
+
+  /// No description provided for @plusRenewsOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Renews on {date}'**
+  String plusRenewsOn(String date);
+
+  /// No description provided for @plusEndsOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Ends on {date}'**
+  String plusEndsOn(String date);
+
+  /// No description provided for @plusEndedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Ended on {date}'**
+  String plusEndedOn(String date);
+
+  /// No description provided for @plusManage.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage'**
+  String get plusManage;
+
+  /// No description provided for @plusManageSolanaBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel from the wallet that approved this subscription. OpenBudget stops charging when the on-chain subscription ends.'**
+  String get plusManageSolanaBody;
+
+  /// No description provided for @plusLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading your plan…'**
+  String get plusLoading;
+
+  /// No description provided for @plusLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load your plan'**
+  String get plusLoadError;
+
+  /// No description provided for @plusLoadErrorBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your connection, then try again.'**
+  String get plusLoadErrorBody;
+
+  /// No description provided for @plusRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get plusRetry;
+
+  /// No description provided for @plusCheckoutSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment received. Checking your plan…'**
+  String get plusCheckoutSuccess;
+
+  /// No description provided for @plusCheckoutCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Checkout cancelled. Nothing was charged.'**
+  String get plusCheckoutCancelled;
+
+  /// No description provided for @plusFailureCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing was charged.'**
+  String get plusFailureCancelled;
+
+  /// No description provided for @plusFailureRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'The wallet request was cancelled.'**
+  String get plusFailureRejected;
+
+  /// No description provided for @plusFailureUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'That payment method is not available right now.'**
+  String get plusFailureUnavailable;
+
+  /// No description provided for @plusFailureFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'That did not work. Try again.'**
+  String get plusFailureFailed;
+
+  /// No description provided for @plusPriceCurrencyNote.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenBudget Plus is billed in US dollars.'**
+  String get plusPriceCurrencyNote;
 }
 
 class _AppLocalizationsDelegate
