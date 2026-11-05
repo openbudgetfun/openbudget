@@ -21,6 +21,7 @@ import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 import 'package:patrol/patrol.dart';
 
+import 'common/patrol_helpers.dart';
 import 'helpers/screenshot_capture.dart';
 
 const _budgetId = '00000000-0000-0000-0000-000000000901';
@@ -396,7 +397,8 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.text('Finish Onboarding'), findsOneWidget);
+    final planPage = PlanTabPage(tester);
+    expect(planPage.finishOnboardingButton, findsOneWidget);
     container
         .read(recentMovesProvider.notifier)
         .recordAssigned(
@@ -415,11 +417,10 @@ void main() {
     await tester.pumpAndSettle();
     await captureIntegrationScreenshot(tester, 'plan-screen');
     await tester.pump(const Duration(seconds: 1));
-    await tester.tap(find.text('Finish Onboarding'));
-    await tester.pumpAndSettle();
-    expect(find.text('Finish Onboarding'), findsNothing);
-    expect(find.text('Review 1 transaction'), findsOneWidget);
-    await tester.tap(find.text('Review 1 transaction'));
+    await planPage.finishOnboarding();
+    expect(planPage.finishOnboardingButton, findsNothing);
+    expect(planPage.reviewTransactionsBanner, findsOneWidget);
+    await planPage.openReviewTransactions();
     await tester.pumpAndSettle();
     expect(find.text('1 New Transaction'), findsOneWidget);
     await captureIntegrationScreenshot(tester, 'review-transactions-screen');
@@ -448,11 +449,10 @@ void main() {
       'plan-screen-onboarding-dismissed',
     );
     await tester.pump(const Duration(seconds: 1));
-    await tester.tap(find.text('Spotlight'));
-    await tester.pumpAndSettle();
+    await planPage.showSpotlight();
     await captureIntegrationScreenshot(tester, 'spotlight-screen');
     await tester.pump(const Duration(seconds: 1));
-    await tester.tap(find.text('Categories'));
+    await planPage.showCategories();
     await tester.pumpAndSettle();
     expect(find.byType(ObEnvelopeGauge), findsWidgets);
 
@@ -576,7 +576,9 @@ void main() {
 
     await tester.tap(find.text('Cancel'));
     await tester.pumpAndSettle();
-    expect(find.text('Rename Category'), findsOneWidget);
+    final categoryDetailPage = CategoryDetailPage(tester);
+    await categoryDetailPage.scrollToRenameCategory();
+    expect(categoryDetailPage.renameCategoryButton, findsOneWidget);
   });
 
   patrolWidgetTest('opens overspending coverage sheet from plan banner', (

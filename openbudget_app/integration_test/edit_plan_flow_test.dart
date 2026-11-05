@@ -11,6 +11,8 @@ import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:patrol/patrol.dart';
 
+import 'common/patrol_helpers.dart';
+
 const _budgetId = '00000000-0000-0000-0000-000000000A01';
 const _categoryId = '00000000-0000-0000-0000-000000000A02';
 
@@ -96,6 +98,7 @@ void main() {
     'edit plan screen supports target entry, group details, and next navigation',
     ($) async {
       final tester = $.tester;
+      final editPlanPage = EditPlanPage(tester);
       final container = ProviderContainer(
         overrides: [
           budgetMonthlySummaryProvider.overrideWith(
@@ -146,9 +149,8 @@ void main() {
       expect(find.text('Needs'), findsOneWidget);
       expect(find.text('Add Target'), findsWidgets);
 
-      await tester.tap(find.text('Add Target').first);
-      await tester.pumpAndSettle();
-      expect(find.text('Save Target'), findsOneWidget);
+      await editPlanPage.openFirstAddTarget();
+      expect(editPlanPage.saveTargetButton, findsOneWidget);
       await tester.tap(find.widgetWithText(BudgetAmountField, 'I need'));
       await tester.pumpAndSettle();
       for (final digit in ['2', '8', '0', '0']) {
@@ -160,10 +162,7 @@ void main() {
       await tester.tap(find.text('Cancel'));
       await tester.pumpAndSettle();
 
-      await tester.tap(
-        find.byKey(Key('edit-plan-group-menu-${_categoryId.toLowerCase()}')),
-      );
-      await tester.pumpAndSettle();
+      await editPlanPage.openGroupDetails(_categoryId);
       expect(find.text('Details'), findsOneWidget);
       expect(find.text('Category Group Name'), findsOneWidget);
       await tester.tap(find.text('Hide'));

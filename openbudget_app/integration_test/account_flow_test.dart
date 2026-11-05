@@ -22,6 +22,7 @@ import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 import 'package:patrol/patrol.dart';
 
+import 'common/patrol_helpers.dart';
 import 'helpers/screenshot_capture.dart';
 
 const _budgetId = 'test-budget-id';
@@ -242,8 +243,10 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Daily USD'), findsOneWidget);
-    expect(find.text('Savings EUR'), findsOneWidget);
+    final accountsPage = AccountsTabPage(tester);
+    expect(accountsPage.accountTile('Daily USD'), findsOneWidget);
+    await accountsPage.scrollToAccount('Savings EUR');
+    expect(accountsPage.accountTile('Savings EUR'), findsOneWidget);
     expect(find.textContaining('USD'), findsWidgets);
     expect(find.textContaining('EUR'), findsWidgets);
   });
@@ -890,15 +893,13 @@ void main() {
     await tester.tap(find.text('Daily USD'));
     await tester.pumpAndSettle();
 
-    await tester.tap(_skribbleIcon(OpenBudgetIcons.more));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Edit Account'));
-    await tester.pumpAndSettle();
+    await AccountDetailPage(tester).openEditAccount();
 
     expect(find.text('Account Nickname'), findsOneWidget);
     expect(find.text('Account Notes'), findsOneWidget);
     expect(find.text('Working Balance'), findsWidgets);
     expect(find.text('Link an Account (Unavailable)'), findsOneWidget);
+    await EditAccountFormPage(tester).scrollToCloseAccount();
     expect(find.text('Close Account'), findsOneWidget);
   });
 
