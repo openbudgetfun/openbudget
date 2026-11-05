@@ -1,0 +1,16 @@
+### A one-time wallet ownership challenge for a Solana subscription.
+class: SolanaBillingChallenge
+table: solana_billing_challenge
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  userId: UuidValue
+  message: String
+  expiresAt: DateTime
+  usedAt: DateTime?
+  createdAt: DateTime, default=now
+indexes:
+  solana_billing_challenge_user_idx:
+    fields: userId
+  solana_billing_challenge_message_idx:
+    fields: message
+    unique: true

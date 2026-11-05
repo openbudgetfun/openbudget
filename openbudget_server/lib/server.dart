@@ -7,6 +7,7 @@ import 'package:openbudget_server/src/generated/serverpod.dart';
 import 'package:openbudget_server/src/institutions/institution_service.dart';
 import 'package:openbudget_server/src/logging/server_logging.dart';
 import 'package:openbudget_server/src/web/routes/app_config_route.dart';
+import 'package:openbudget_server/src/web/routes/billing_webhook_routes.dart';
 import 'package:openbudget_server/src/web/routes/root.dart';
 import 'package:serverpod_auth_idp_server/core.dart';
 import 'package:serverpod_auth_idp_server/providers/apple.dart';
@@ -114,6 +115,10 @@ Future<void> run(List<String> args) async {
     '/app/assets/assets/config.json',
   );
 
+  // Payment provider webhooks.
+  pod.webServer.addRoute(StripeWebhookRoute(), '/webhooks/stripe');
+  pod.webServer.addRoute(RevenueCatWebhookRoute(), '/webhooks/revenuecat');
+
   if (appleIdpEnabled) {
     pod.webServer.addRoute(
       AppleOauthCallbackRoute(
@@ -159,6 +164,15 @@ Future<void> run(List<String> args) async {
 
   // Keep persisted FX rates fresh for display-currency conversion.
   FxRateService.startBackgroundRefresh(pod);
+
+  // Charge due Solana subscriptions once an hour.
+  const collectorIdentifier = 'solana-billing-collector';
+  await pod.futureCalls.cancel(collectorIdentifier);
+  await pod.futureCalls
+      .callRecurring(identifier: collectorIdentifier)
+      .every(const Duration(hours: 1))
+      .solanaBillingCollector
+      .collect();
 }
 
 String? _readPassword(Serverpod pod, String key) {

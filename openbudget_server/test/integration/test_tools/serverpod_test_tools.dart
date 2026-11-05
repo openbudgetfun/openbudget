@@ -18,6 +18,8 @@ import 'package:openbudget_server/src/generated/accounts/account.dart'
     as _i3fh9aci;
 import 'package:openbudget_server/src/generated/billing/entitlement.dart'
     as _iiht0r85;
+import 'package:openbudget_server/src/generated/billing/solana_plan_view.dart'
+    as _i7ligxlm;
 import 'package:openbudget_server/src/generated/budget_templates/budget_template.dart'
     as _ihbdj8p6;
 import 'package:openbudget_server/src/generated/budgets/budget.dart'
@@ -28,6 +30,7 @@ import 'package:openbudget_server/src/generated/envelope_goals/envelope_goal.dar
     as _iuyjld9f;
 import 'package:openbudget_server/src/generated/envelopes/envelope.dart'
     as _igwnqatb;
+import 'package:openbudget_server/src/generated/future_calls.dart' as _iwv90kfd;
 import 'package:openbudget_server/src/generated/fx_rates/fx_latest_snapshot.dart'
     as _ictw4lhv;
 import 'package:openbudget_server/src/generated/institutions/institution.dart'
@@ -202,6 +205,8 @@ void withServerpod(
 }
 
 class TestEndpoints {
+  late final futureCalls = _FutureCalls();
+
   late final _AccountEndpoint account;
 
   late final _AppleIdpEndpoint appleIdp;
@@ -349,6 +354,10 @@ class _InternalTestEndpoints extends TestEndpoints
       serializationManager,
     );
   }
+}
+
+class _FutureCalls {
+  late final solanaBillingCollector = _SolanaBillingCollectorFutureCall();
 }
 
 class _AccountEndpoint {
@@ -1113,6 +1122,159 @@ class _BillingEndpoint {
           _localUniqueSession,
           _localCallContext.arguments,
         ) as _ida.Future<_iiht0r85.Entitlement?>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<String> createStripeCheckout(
+    _ist.TestSessionBuilder sessionBuilder,
+    String successUrl,
+    String cancelUrl,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'billing',
+            method: 'createStripeCheckout',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'billing',
+          methodName: 'createStripeCheckout',
+          parameters: _ist.testObjectToJson({
+            'successUrl': successUrl,
+            'cancelUrl': cancelUrl,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _ida.Future<String>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<String> createStripePortal(
+    _ist.TestSessionBuilder sessionBuilder,
+    String returnUrl,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'billing',
+            method: 'createStripePortal',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'billing',
+          methodName: 'createStripePortal',
+          parameters: _ist.testObjectToJson({'returnUrl': returnUrl}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _ida.Future<String>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_i7ligxlm.SolanaPlanView> getSolanaPlan(
+    _ist.TestSessionBuilder sessionBuilder,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'billing',
+            method: 'getSolanaPlan',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'billing',
+          methodName: 'getSolanaPlan',
+          parameters: _ist.testObjectToJson({}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _ida.Future<_i7ligxlm.SolanaPlanView>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<String> solanaSubscriptionChallenge(
+    _ist.TestSessionBuilder sessionBuilder,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'billing',
+            method: 'solanaSubscriptionChallenge',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'billing',
+          methodName: 'solanaSubscriptionChallenge',
+          parameters: _ist.testObjectToJson({}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _ida.Future<String>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_iiht0r85.Entitlement> confirmSolanaSubscription(
+    _ist.TestSessionBuilder sessionBuilder,
+    String subscriberAddress,
+    String message,
+    String signatureBase58,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'billing',
+            method: 'confirmSolanaSubscription',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'billing',
+          methodName: 'confirmSolanaSubscription',
+          parameters: _ist.testObjectToJson({
+            'subscriberAddress': subscriberAddress,
+            'message': message,
+            'signatureBase58': signatureBase58,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _ida.Future<_iiht0r85.Entitlement>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -4435,5 +4597,20 @@ class _WalletEndpoint {
         await _localUniqueSession.close();
       }
     });
+  }
+}
+
+class _SolanaBillingCollectorFutureCall {
+  Future<void> collect(_ist.TestSessionBuilder sessionBuilder) async {
+    var _localUniqueSession =
+        (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild();
+    try {
+      await _iwv90kfd.SolanaBillingCollectorCollectFutureCall().invoke(
+        _localUniqueSession,
+        null,
+      );
+    } finally {
+      await _localUniqueSession.close();
+    }
   }
 }

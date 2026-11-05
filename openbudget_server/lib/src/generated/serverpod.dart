@@ -19,6 +19,8 @@ import 'protocol.dart' as _il2as5qe;
 
 export 'package:serverpod/serverpod.dart' hide Serverpod;
 
+export 'future_calls.dart' show ServerpodFutureCallsGetter;
+
 /// The Serverpod server for this project.
 ///
 /// Pre-configured with the generated Protocol serialization manager and

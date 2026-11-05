@@ -72,3 +72,31 @@ class EntitlementRequiredException implements Exception {
   @override
   String toString() => 'EntitlementRequiredException: $message';
 }
+
+/// Thrown when a billing rail is not configured or its provider rejects a
+/// request.
+class BillingRailUnavailableException implements Exception {
+  BillingRailUnavailableException([
+    this.message = 'This payment rail is not available',
+  ]);
+
+  final String message;
+
+  @override
+  String toString() => 'BillingRailUnavailableException: $message';
+}
+
+/// Thrown when a billing provider accepts a request but fails to complete it.
+///
+/// The message never contains response bodies or credentials.
+class BillingProviderException implements Exception {
+  BillingProviderException(this.provider, [this.details]);
+
+  final String provider;
+  final String? details;
+
+  @override
+  String toString() => details == null
+      ? 'BillingProviderException: $provider request failed'
+      : 'BillingProviderException: $provider request failed ($details)';
+}

@@ -60,6 +60,9 @@ import 'accounts/account.dart' as _iz2jf14v;
 import 'billing/entitlement.dart' as _iq2w1sa5;
 import 'billing/entitlement_source.dart' as _ipnf4x0i;
 import 'billing/entitlement_status.dart' as _imqwzx9j;
+import 'billing/solana_billing_challenge.dart' as _iw7l0hzr;
+import 'billing/solana_plan_view.dart' as _iwxkomal;
+import 'billing/stripe_customer.dart' as _in1nt6tx;
 import 'budget_templates/budget_template.dart' as _i01fne9j;
 import 'budgets/budget.dart' as _idtyoogy;
 import 'categories/category.dart' as _iwxpkdmg;
@@ -99,6 +102,9 @@ export 'accounts/account.dart';
 export 'billing/entitlement.dart';
 export 'billing/entitlement_source.dart';
 export 'billing/entitlement_status.dart';
+export 'billing/solana_billing_challenge.dart';
+export 'billing/solana_plan_view.dart';
+export 'billing/stripe_customer.dart';
 export 'budget_templates/budget_template.dart';
 export 'budgets/budget.dart';
 export 'categories/category.dart';
@@ -153,6 +159,9 @@ class Protocol extends _isc.SerializationManager
           _isc.getType<_iq2w1sa5.Entitlement>,
           _isc.getType<_ipnf4x0i.EntitlementSource>,
           _isc.getType<_imqwzx9j.EntitlementStatus>,
+          _isc.getType<_iw7l0hzr.SolanaBillingChallenge>,
+          _isc.getType<_iwxkomal.SolanaPlanView>,
+          _isc.getType<_in1nt6tx.StripeCustomer>,
           _isc.getType<_i01fne9j.BudgetTemplate>,
           _isc.getType<_idtyoogy.Budget>,
           _isc.getType<_iwxpkdmg.Category>,
@@ -192,6 +201,9 @@ class Protocol extends _isc.SerializationManager
           _isc.getType<_iq2w1sa5.Entitlement?>,
           _isc.getType<_ipnf4x0i.EntitlementSource?>,
           _isc.getType<_imqwzx9j.EntitlementStatus?>,
+          _isc.getType<_iw7l0hzr.SolanaBillingChallenge?>,
+          _isc.getType<_iwxkomal.SolanaPlanView?>,
+          _isc.getType<_in1nt6tx.StripeCustomer?>,
           _isc.getType<_i01fne9j.BudgetTemplate?>,
           _isc.getType<_idtyoogy.Budget?>,
           _isc.getType<_iwxpkdmg.Category?>,
@@ -267,6 +279,9 @@ class Protocol extends _isc.SerializationManager
           'Entitlement',
           'EntitlementSource',
           'EntitlementStatus',
+          'SolanaBillingChallenge',
+          'SolanaPlanView',
+          'StripeCustomer',
           'BudgetTemplate',
           'Budget',
           'Category',
@@ -340,6 +355,15 @@ class Protocol extends _isc.SerializationManager
     }
     if (t == _imqwzx9j.EntitlementStatus) {
       return _imqwzx9j.EntitlementStatus.fromJson(data) as T;
+    }
+    if (t == _iw7l0hzr.SolanaBillingChallenge) {
+      return _iw7l0hzr.SolanaBillingChallenge.fromJson(data) as T;
+    }
+    if (t == _iwxkomal.SolanaPlanView) {
+      return _iwxkomal.SolanaPlanView.fromJson(data) as T;
+    }
+    if (t == _in1nt6tx.StripeCustomer) {
+      return _in1nt6tx.StripeCustomer.fromJson(data) as T;
     }
     if (t == _i01fne9j.BudgetTemplate) {
       return _i01fne9j.BudgetTemplate.fromJson(data) as T;
@@ -458,6 +482,20 @@ class Protocol extends _isc.SerializationManager
     }
     if (t == _isc.getType<_imqwzx9j.EntitlementStatus?>()) {
       return (data != null ? _imqwzx9j.EntitlementStatus.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_iw7l0hzr.SolanaBillingChallenge?>()) {
+      return (data != null
+              ? _iw7l0hzr.SolanaBillingChallenge.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _isc.getType<_iwxkomal.SolanaPlanView?>()) {
+      return (data != null ? _iwxkomal.SolanaPlanView.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_in1nt6tx.StripeCustomer?>()) {
+      return (data != null ? _in1nt6tx.StripeCustomer.fromJson(data) : null)
           as T;
     }
     if (t == _isc.getType<_i01fne9j.BudgetTemplate?>()) {
@@ -788,6 +826,9 @@ class Protocol extends _isc.SerializationManager
       _iq2w1sa5.Entitlement => 'Entitlement',
       _ipnf4x0i.EntitlementSource => 'EntitlementSource',
       _imqwzx9j.EntitlementStatus => 'EntitlementStatus',
+      _iw7l0hzr.SolanaBillingChallenge => 'SolanaBillingChallenge',
+      _iwxkomal.SolanaPlanView => 'SolanaPlanView',
+      _in1nt6tx.StripeCustomer => 'StripeCustomer',
       _i01fne9j.BudgetTemplate => 'BudgetTemplate',
       _idtyoogy.Budget => 'Budget',
       _iwxpkdmg.Category => 'Category',
@@ -845,6 +886,12 @@ class Protocol extends _isc.SerializationManager
         return 'EntitlementSource';
       case _imqwzx9j.EntitlementStatus():
         return 'EntitlementStatus';
+      case _iw7l0hzr.SolanaBillingChallenge():
+        return 'SolanaBillingChallenge';
+      case _iwxkomal.SolanaPlanView():
+        return 'SolanaPlanView';
+      case _in1nt6tx.StripeCustomer():
+        return 'StripeCustomer';
       case _i01fne9j.BudgetTemplate():
         return 'BudgetTemplate';
       case _idtyoogy.Budget():
@@ -948,6 +995,15 @@ class Protocol extends _isc.SerializationManager
     }
     if (dataClassName == 'EntitlementStatus') {
       return deserialize<_imqwzx9j.EntitlementStatus>(data['data']);
+    }
+    if (dataClassName == 'SolanaBillingChallenge') {
+      return deserialize<_iw7l0hzr.SolanaBillingChallenge>(data['data']);
+    }
+    if (dataClassName == 'SolanaPlanView') {
+      return deserialize<_iwxkomal.SolanaPlanView>(data['data']);
+    }
+    if (dataClassName == 'StripeCustomer') {
+      return deserialize<_in1nt6tx.StripeCustomer>(data['data']);
     }
     if (dataClassName == 'BudgetTemplate') {
       return deserialize<_i01fne9j.BudgetTemplate>(data['data']);

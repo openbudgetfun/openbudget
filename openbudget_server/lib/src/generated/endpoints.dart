@@ -10,6 +10,7 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'package:openbudget_server/src/generated/future_calls.dart' as _iwv90kfd;
 import 'package:openbudget_server/src/generated/transactions/import_row.dart'
     as _iyod81ld;
 import 'package:openbudget_server/src/generated/transactions/split_item.dart'
@@ -44,6 +45,7 @@ import '../tax/tax_endpoint.dart' as _i34kr7gr;
 import '../transaction_rules/transaction_rule_endpoint.dart' as _i70s5v1k;
 import '../transactions/transaction_endpoint.dart' as _if8xv4dr;
 import '../wallets/wallet_endpoint.dart' as _i1ub0otr;
+export 'future_calls.dart' show ServerpodFutureCallsGetter;
 
 class Endpoints extends _is.EndpointDispatch {
   @override
@@ -762,6 +764,101 @@ class Endpoints extends _is.EndpointDispatch {
                 Map<String, dynamic> params,
               ) async => (endpoints['billing'] as _irc9lmoc.BillingEndpoint)
                   .getEntitlement(session),
+        ),
+        'createStripeCheckout': _is.MethodConnector(
+          name: 'createStripeCheckout',
+          params: {
+            'successUrl': _is.ParameterDescription(
+              name: 'successUrl',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'cancelUrl': _is.ParameterDescription(
+              name: 'cancelUrl',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['billing'] as _irc9lmoc.BillingEndpoint)
+                  .createStripeCheckout(
+                    session,
+                    params['successUrl'],
+                    params['cancelUrl'],
+                  ),
+        ),
+        'createStripePortal': _is.MethodConnector(
+          name: 'createStripePortal',
+          params: {
+            'returnUrl': _is.ParameterDescription(
+              name: 'returnUrl',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['billing'] as _irc9lmoc.BillingEndpoint)
+                  .createStripePortal(
+                    session,
+                    params['returnUrl'],
+                  ),
+        ),
+        'getSolanaPlan': _is.MethodConnector(
+          name: 'getSolanaPlan',
+          params: {},
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['billing'] as _irc9lmoc.BillingEndpoint)
+                  .getSolanaPlan(session),
+        ),
+        'solanaSubscriptionChallenge': _is.MethodConnector(
+          name: 'solanaSubscriptionChallenge',
+          params: {},
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['billing'] as _irc9lmoc.BillingEndpoint)
+                  .solanaSubscriptionChallenge(session),
+        ),
+        'confirmSolanaSubscription': _is.MethodConnector(
+          name: 'confirmSolanaSubscription',
+          params: {
+            'subscriberAddress': _is.ParameterDescription(
+              name: 'subscriberAddress',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'message': _is.ParameterDescription(
+              name: 'message',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'signatureBase58': _is.ParameterDescription(
+              name: 'signatureBase58',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['billing'] as _irc9lmoc.BillingEndpoint)
+                  .confirmSolanaSubscription(
+                    session,
+                    params['subscriberAddress'],
+                    params['message'],
+                    params['signatureBase58'],
+                  ),
         ),
       },
     );
@@ -3571,5 +3668,10 @@ class Endpoints extends _is.EndpointDispatch {
       ..initializeEndpoints(server);
     modules['serverpod_auth_core'] = _iacs.Endpoints()
       ..initializeEndpoints(server);
+  }
+
+  @override
+  _is.FutureCallDispatch? get futureCalls {
+    return _iwv90kfd.FutureCalls();
   }
 }

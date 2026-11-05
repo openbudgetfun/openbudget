@@ -1,0 +1,8 @@
+### The terms and addresses the app needs to build a subscribe transaction.
+class: SolanaPlanView
+fields:
+  planAddress: String
+  programAddress: String
+  usdcMint: String
+  amountBaseUnits: int
+  periodSeconds: int
