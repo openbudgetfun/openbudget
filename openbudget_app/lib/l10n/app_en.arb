@@ -2118,5 +2118,62 @@
   "plusFailureRejected": "The wallet request was cancelled.",
   "plusFailureUnavailable": "That payment method is not available right now.",
   "plusFailureFailed": "That did not work. Try again.",
-  "plusPriceCurrencyNote": "OpenBudget Plus is billed in US dollars."
+  "plusPriceCurrencyNote": "OpenBudget Plus is billed in US dollars.",
+  "agentAccessTitle": "Agent access",
+  "agentAccessSettingsSubtitle": "Connect Claude Code or another MCP client",
+  "agentAccessIntro": "Personal access tokens let external agents such as Claude Code and Codex read your budgets and tax reports over MCP.",
+  "agentAccessTokenName": "Token name",
+  "agentAccessTokenNameHint": "Claude Code",
+  "agentAccessNameRequired": "Enter a name for this token.",
+  "agentAccessCanPropose": "Can propose changes",
+  "agentAccessCanProposeHint": "The agent can suggest budget and tax changes. You still apply or dismiss them in OpenBudget.",
+  "agentAccessCreate": "Create token",
+  "agentAccessCreating": "Creating token…",
+  "agentAccessTokensSection": "Your tokens",
+  "agentAccessEmptyTitle": "No agent tokens yet",
+  "agentAccessEmptyBody": "Create a token above, then point your MCP client at the server.",
+  "agentAccessTokenPrefix": "{prefix}…",
+  "@agentAccessTokenPrefix": {
+    "placeholders": {
+      "prefix": {
+        "type": "String"
+      }
+    }
+  },
+  "agentAccessCreated": "Created {date}",
+  "@agentAccessCreated": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "agentAccessLastUsed": "Last used {date}",
+  "@agentAccessLastUsed": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "agentAccessNeverUsed": "Never used",
+  "agentAccessRevoked": "Revoked",
+  "agentAccessRevoke": "Revoke",
+  "agentAccessRevoking": "Revoking…",
+  "agentAccessRevokeTitle": "Revoke this token?",
+  "agentAccessRevokeMessage": "Any agent using this token stops working immediately. This cannot be undone.",
+  "agentAccessRevokeConfirm": "Revoke token",
+  "agentAccessRevokedToast": "Token revoked.",
+  "agentAccessTokenDialogTitle": "Your new token",
+  "agentAccessTokenDialogWarning": "Copy this token now. It is shown once and cannot be recovered; the server stores only its hash.",
+  "agentAccessCopyToken": "Copy token",
+  "agentAccessCopiedToast": "Token copied to clipboard.",
+  "agentAccessFailure": "That did not work. Try again.",
+  "agentAccessLoading": "Loading your agent tokens…",
+  "agentAccessLoadError": "Could not load your agent tokens",
+  "agentAccessLoadErrorBody": "Check your connection, then try again.",
+  "agentAccessRetry": "Try again",
+  "agentAccessSetupTitle": "Connect a client",
+  "agentAccessSetupBody": "Point your MCP client at the server's /mcp route and send the token as a Bearer token. Agents never change your money directly: they propose changes, and you apply or dismiss them in OpenBudget.",
+  "agentAccessSetupExample": "Authorization: Bearer obk_…"
 }

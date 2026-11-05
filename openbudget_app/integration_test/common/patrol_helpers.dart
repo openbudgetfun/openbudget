@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/main.dart';
+import 'package:openbudget_app/src/features/agent_access/screens/agent_access_screen.dart';
 import 'package:openbudget_app/src/features/assistant/screens/assistant_screen.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -456,6 +457,67 @@ class PlusPage {
 
   Future<void> openFromSettings() async {
     await tester.tap(settingsRow);
+    await tester.pumpAndSettle();
+  }
+}
+
+/// Page object for Agent access personal access tokens.
+class AgentAccessPage {
+  AgentAccessPage(this.tester);
+
+  final WidgetTester tester;
+
+  Finder get settingsRow => find.text('Agent access');
+  Finder get title => find.text('Agent access').first;
+  Finder get emptyTitle => find.text('No agent tokens yet');
+  Finder get nameField => find.byKey(AgentAccessScreen.nameFieldKey);
+  Finder get canProposeSwitch =>
+      find.byKey(AgentAccessScreen.canProposeSwitchKey);
+  Finder get createButton => find.byKey(AgentAccessScreen.createButtonKey);
+  Finder get tokenDialog => find.byKey(AgentAccessScreen.tokenDialogKey);
+  Finder get copyButton => find.byKey(AgentAccessScreen.copyButtonKey);
+  Finder get revokeButton => find.text('Revoke').first;
+  Finder get revokeConfirmButton => find.text('Revoke token');
+  Finder get revokedChip => find.text('Revoked');
+
+  Future<void> openFromSettings() async {
+    await tester.tap(settingsRow);
+    await tester.pumpAndSettle();
+  }
+
+  Future<void> createToken(String name) async {
+    await tester.scrollUntilVisible(
+      nameField,
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.enterText(nameField, name);
+    await tester.scrollUntilVisible(
+      createButton,
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(createButton);
+    await tester.pumpAndSettle();
+  }
+
+  Future<void> copyToken() async {
+    await tester.tap(copyButton);
+    await tester.pumpAndSettle();
+    // Let the confirmation toast clear before the next action.
+    await tester.pump(const Duration(seconds: 5));
+    await tester.pumpAndSettle();
+  }
+
+  Future<void> revokeFirstToken() async {
+    await tester.scrollUntilVisible(
+      revokeButton,
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(revokeButton);
+    await tester.pumpAndSettle();
+    await tester.tap(revokeConfirmButton);
     await tester.pumpAndSettle();
   }
 }
