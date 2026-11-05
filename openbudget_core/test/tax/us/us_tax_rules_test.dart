@@ -505,6 +505,30 @@ void main() {
       expect(lineNamed(report, 'Federal income tax').amountMinor, 571700);
     });
 
+    test(
+      r'ordinary income under $100,000 uses the Table inside a larger total',
+      () {
+        final report = rules.report(
+          individualInput(
+            year: 2025,
+            entries: [
+              entryMinor(2025, 'us.ind.wages', 10575000),
+              entryMinor(2025, 'us.ind.long_term_capital_gains', 2000000),
+            ],
+          ),
+        );
+        expect(lineNamed(report, 'Taxable income').amountMinor, 11000000);
+        // $110,000 of taxable income, $90,000 of it ordinary. The worksheet
+        // taxes the ordinary part by the Table (midpoint 90,025: $14,720,
+        // where the formula would give $14,714) and adds 15% of the $20,000
+        // gain.
+        expect(
+          lineNamed(report, 'Federal income tax').amountMinor,
+          1772000,
+        );
+      },
+    );
+
     test(r'2025 married filing jointly starts the 15% band at $96,700', () {
       final report = rules.report(
         individualInput(

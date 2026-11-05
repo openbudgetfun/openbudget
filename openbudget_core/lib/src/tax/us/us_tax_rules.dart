@@ -761,19 +761,15 @@ final class UsTaxRules implements TaxRulePack {
     final wholePreferential = _max(0, whole - wholeOrdinary);
     final brackets = table.ordinaryBracketsFor(status);
     final preferentialBands = table.longTermCapitalGainsBandsFor(status);
-    if (whole ~/ 100 >= usTaxTableThresholdDollars) {
-      // Tax Computation Worksheet: the formula on the whole-dollar
-      // amounts, the preferential part stacked on the ordinary part.
-      return sumBandTax(applyTaxBands(wholeOrdinary, brackets)) +
-          sumBandTax(
-            applyTaxBands(
-              wholePreferential,
-              preferentialBands,
-              startMinor: wholeOrdinary,
-            ),
-          );
+    // Each amount the worksheet taxes picks its own method: the Tax Table
+    // below $100,000, the Tax Computation Worksheet at and above.
+    int ordinaryTaxOn(int amountMinor) =>
+        amountMinor ~/ 100 >= usTaxTableThresholdDollars
+        ? sumBandTax(applyTaxBands(amountMinor, brackets))
+        : usIncomeTaxFromTable(amountMinor, status, year);
+    if (wholePreferential == 0) {
+      return ordinaryTaxOn(whole);
     }
-    final ordinaryByTable = usIncomeTaxFromTable(wholeOrdinary, status, year);
     final preferentialPart = usRoundToDollars(
       sumBandTax(
         applyTaxBands(
@@ -783,8 +779,10 @@ final class UsTaxRules implements TaxRulePack {
         ),
       ),
     );
-    final wholeByTable = usIncomeTaxFromTable(whole, status, year);
-    return _min(ordinaryByTable + preferentialPart, wholeByTable);
+    return _min(
+      ordinaryTaxOn(wholeOrdinary) + preferentialPart,
+      ordinaryTaxOn(whole),
+    );
   }
 
   _SeTax _selfEmploymentTax({
