@@ -1,0 +1,59 @@
+{
+  "title": "[2.4.0](https://github.com/openbudgetfun/openbudget/releases/tag/v2.4.0) (2026-11-05)",
+  "summary": ["A small release with two things worth opening."],
+  "sections": [
+    {
+      "title": "New",
+      "collapsed": false,
+      "entries": [
+        {
+          "summary": "See what changed after each update",
+          "details_markdown": "OpenBudget now opens its release notes once after an update.\n\n- **Every update.** Read what changed without leaving the app.\n- **On your terms.** Open the notes again from Settings whenever you like.\n\nNothing to learn, nothing to configure.",
+          "packages": [
+            {
+              "name": "openbudget_app",
+              "bump": "minor"
+            }
+          ],
+          "change_type": "user_feat",
+          "bump": "minor",
+          "stream": "user",
+          "style": "expanded",
+          "provenance": {
+            "source_path": ".changeset/whats-new-user.md",
+            "change_owner": {
+              "label": "Ifiok Jr."
+            },
+            "future_field": "ignored"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Improved",
+      "collapsed": false,
+      "entries": [
+        {
+          "summary": "Envelope notes read better",
+          "details_markdown": "Notes keep their paragraphs and lists, so a long note is still easy to scan.",
+          "packages": [
+            {
+              "name": "openbudget_app",
+              "bump": "patch"
+            }
+          ],
+          "change_type": "user_improve",
+          "bump": "patch",
+          "stream": "user",
+          "style": "compact",
+          "provenance": {
+            "source_path": ".changeset/envelope-notes-user.md"
+          }
+        }
+      ]
+    }
+  ],
+  "unknown_root_field": {
+    "nested": true
+  }
+}

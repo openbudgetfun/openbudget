@@ -9,6 +9,8 @@ import 'package:openbudget_app/src/features/auth/providers/auth_provider.dart';
 import 'package:openbudget_app/src/features/auth/providers/auth_state.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
 import 'package:openbudget_app/src/features/settings/providers/budget_export_provider.dart';
+import 'package:openbudget_app/src/features/whats_new/providers/whats_new_providers.dart';
+import 'package:openbudget_app/src/features/whats_new/screens/whats_new_sheet.dart';
 import 'package:openbudget_app/src/providers/theme_mode_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
@@ -207,6 +209,13 @@ class SettingsScreen extends HookConsumerWidget {
                 child: Column(
                   children: [
                     _SettingsTile(
+                      icon: OpenBudgetIcons.sparkle,
+                      label: l10n.whatsNewTitle,
+                      subtitle: l10n.whatsNewSettingHint,
+                      onTap: () => _showWhatsNew(context, ref),
+                    ),
+                    const Divider(height: 1),
+                    _SettingsTile(
                       icon: OpenBudgetIcons.tune,
                       label: l10n.settingsDisplayOptions,
                       onTap: () => context.goNamed(
@@ -390,6 +399,14 @@ class SettingsScreen extends HookConsumerWidget {
 
   String _formatDateTime(DateTime timestamp) =>
       DateFormat.yMMMd().add_jm().format(timestamp.toLocal());
+
+  Future<void> _showWhatsNew(BuildContext context, WidgetRef ref) async {
+    final result = await ref.read(whatsNewCurrentNotesProvider.future);
+    if (!context.mounted) {
+      return;
+    }
+    await showWhatsNewSheet(context, result: result);
+  }
 
   Future<void> _selectThemeMode({
     required BuildContext context,
