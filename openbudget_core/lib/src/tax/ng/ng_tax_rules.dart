@@ -12,26 +12,36 @@ part 'ng_reports.dart';
 part 'ng_tax_categories.dart';
 part 'ng_tax_rates.dart';
 
-/// Nigeria's tax rules under the Nigeria Tax Act 2025.
+/// Nigeria's tax rules, under the regime the year of assessment selects.
 ///
-/// The pack supports the 2026 calendar year of assessment. Amounts are in
-/// kobo, the minor unit of the naira: N1 is 100 kobo.
+/// The pack supports the 2025 and 2026 calendar years of assessment. Amounts
+/// are in kobo, the minor unit of the naira: N1 is 100 kobo.
 ///
-/// It computes personal income tax on the Fourth Schedule bands after the
-/// eligible deductions in section 30, business profits for sole traders and
-/// companies with one year of capital allowance at the First Schedule Table I
-/// rates, companies income tax at 0% for small companies and 30% otherwise,
-/// the 4% development levy, and VAT at 7.5% for registered persons.
+/// Income earned in calendar 2025 stays under the repealed Personal Income
+/// Tax Act, Companies Income Tax Act and Value Added Tax Act (secondary
+/// sources; the Act texts were not read): the PITA progressive bands after
+/// the consolidated relief allowance, the 1% minimum tax, CITA tiers of 0%,
+/// 20% and 30% by turnover with the 3% tertiary education tax, and VAT at
+/// 7.5% with the old N25,000,000 registration threshold.
 ///
-/// It does not model the minimum effective tax rate for large groups
-/// (section 57), state and local government levies, or the minimum-wage
-/// exemption in section 58.
+/// Income from 1 January 2026 follows the Nigeria Tax Act 2025 and the
+/// Nigeria Tax Administration Act 2025: personal income tax on the Fourth
+/// Schedule bands after the eligible deductions in section 30, business
+/// profits for sole traders and companies with one year of capital allowance
+/// at the First Schedule Table I rates, companies income tax at 0% for small
+/// companies and 30% otherwise, the 4% development levy, and VAT at 7.5% for
+/// registered persons.
+///
+/// It does not compute the minimum effective tax rate for large groups and
+/// multinational members (NTA section 57), state and local government
+/// levies, or the minimum-wage exemption in NTA section 58.
 ///
 /// Every amount is in kobo, and every computed slice is rounded down to a
-/// whole kobo: band tax through [applyTaxBands], rent relief, capital
-/// allowances, companies income tax, the development levy and VAT. Rounding
-/// down keeps a claim within the receipt and matches the contract's band
-/// helper.
+/// whole kobo: band tax through [applyTaxBands], the consolidated relief
+/// allowance, the minimum tax, rent relief, capital allowances, companies
+/// income tax, the tertiary education tax, the development levy and VAT.
+/// Rounding down keeps a claim within the receipt and matches the contract's
+/// band helper.
 ///
 /// [report] throws [ArgumentError] when the input is not Nigerian and
 /// [UnsupportedTaxYearException] when the year's rates are missing.
@@ -39,7 +49,7 @@ final class NgTaxRules implements TaxRulePack {
   /// Creates the Nigeria rule pack.
   const NgTaxRules();
 
-  static const Set<int> _supportedStartYears = {2026};
+  static const Set<int> _supportedStartYears = {2025, 2026};
 
   @override
   TaxJurisdiction get jurisdiction => TaxJurisdiction.ng;

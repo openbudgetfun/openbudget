@@ -23,8 +23,8 @@ void main() {
       expect(ngRules.taxYearFor(DateTime(2026)).startYear, 2026);
     });
 
-    test('supports 2026 only', () {
-      expect(ngRules.supportedStartYears, {2026});
+    test('supports the 2025 and 2026 years of assessment', () {
+      expect(ngRules.supportedStartYears, {2025, 2026});
     });
   });
 
@@ -79,19 +79,31 @@ void main() {
       final input = ngInput(
         profile: ngIndividual(),
         entries: const [],
-        startYear: 2025,
+        startYear: 2024,
       );
       expect(
         () => ngRules.report(input),
         throwsA(
           isA<UnsupportedTaxYearException>()
-              .having((error) => error.startYear, 'startYear', 2025)
+              .having((error) => error.startYear, 'startYear', 2024)
               .having(
                 (error) => error.jurisdiction,
                 'jurisdiction',
                 TaxJurisdiction.ng,
               ),
         ),
+      );
+    });
+
+    test('2027 is unsupported until its rules are loaded', () {
+      final input = ngInput(
+        profile: ngIndividual(),
+        entries: const [],
+        startYear: 2027,
+      );
+      expect(
+        () => ngRules.report(input),
+        throwsA(isA<UnsupportedTaxYearException>()),
       );
     });
 
@@ -137,10 +149,35 @@ void main() {
       expect(report.year.label, '2026');
       expect(report.sources, isNotEmpty);
       expect(report.sources.every((uri) => uri.scheme == 'https'), isTrue);
-      expect(report.rulesVerifiedOn, DateTime.utc(2026, 11, 4));
+      expect(report.rulesVerifiedOn, DateTime.utc(2026, 11, 5));
       expect(report.assumptions, isNotEmpty);
       expect(
         report.assumptions.any((assumption) => assumption.contains('Resident')),
+        isTrue,
+      );
+    });
+
+    test('the 2025 report is secondary-sourced and cites its sources', () {
+      final report = ngRules.report(
+        ngInput(
+          startYear: 2025,
+          profile: ngIndividual(),
+          entries: [ngEntry('ng.ind.employment.salary', 1_000_000)],
+        ),
+      );
+      expect(report.year.label, '2025');
+      expect(report.sources, isNotEmpty);
+      expect(report.sources.every((uri) => uri.scheme == 'https'), isTrue);
+      expect(
+        report.assumptions.any(
+          (assumption) => assumption.contains('secondary-sourced'),
+        ),
+        isTrue,
+      );
+      expect(
+        report.assumptions.any(
+          (assumption) => assumption.contains('Personal Income Tax Act'),
+        ),
         isTrue,
       );
     });

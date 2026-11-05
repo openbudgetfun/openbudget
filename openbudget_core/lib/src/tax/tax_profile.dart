@@ -46,6 +46,11 @@ sealed class TaxProfile {
         entityKind: entityKind,
         salesTaxRegistered: registered,
         annualRentMinor: json['annualRentMinor'] as int? ?? 0,
+        smallCompanyCeiling: switch (json['smallCompanyCeiling']) {
+          final String ceiling => NgSmallCompanyCeiling.values.byName(ceiling),
+          _ => NgSmallCompanyCeiling.ntaGazette,
+        },
+        mneGroupMember: json['mneGroupMember'] as bool? ?? false,
       ),
       TaxJurisdiction.de => DeTaxProfile(
         entityKind: entityKind,
@@ -128,11 +133,30 @@ final class UsTaxProfile extends TaxProfile {
   };
 }
 
+/// Which gross-turnover figure decides small-company status in Nigeria.
+///
+/// The two 2025 Acts disagree: the Nigeria Tax Act gazette defines a small
+/// company at N50,000,000 or less, while the Nigeria Tax Administration Act
+/// defines a "small business" at N100,000,000 or less. Officials describe the
+/// N50,000,000 figure as a gazetting error, but no enacted correction was
+/// found as of 5 November 2026, so the default stays on the Act that charges
+/// the tax and the user can switch.
+enum NgSmallCompanyCeiling {
+  /// The Nigeria Tax Act gazette: gross turnover of N50,000,000 or less.
+  ntaGazette,
+
+  /// The Nigeria Tax Administration Act: gross turnover of N100,000,000 or
+  /// less.
+  ntaaIntended,
+}
+
 final class NgTaxProfile extends TaxProfile {
   const NgTaxProfile({
     required super.entityKind,
     this.salesTaxRegistered = false,
     this.annualRentMinor = 0,
+    this.smallCompanyCeiling = NgSmallCompanyCeiling.ntaGazette,
+    this.mneGroupMember = false,
   });
 
   @override
@@ -142,12 +166,25 @@ final class NgTaxProfile extends TaxProfile {
   final bool salesTaxRegistered;
 
   /// Annual rent paid on a home, for rent relief under the Nigeria Tax Act.
+  ///
+  /// The 2025 regime has no rent relief; the pack ignores this for a 2025
+  /// year of assessment.
   final int annualRentMinor;
+
+  /// Which turnover figure decides small-company status for 2026.
+  final NgSmallCompanyCeiling smallCompanyCeiling;
+
+  /// Whether the books belong to a constituent entity of a multinational
+  /// group, which brings the 15% minimum effective tax rate (NTA s.57) into
+  /// scope regardless of turnover.
+  final bool mneGroupMember;
 
   @override
   Map<String, Object?> toJson() => {
     ..._baseJson(),
     'annualRentMinor': annualRentMinor,
+    'smallCompanyCeiling': smallCompanyCeiling.name,
+    'mneGroupMember': mneGroupMember,
   };
 }
 

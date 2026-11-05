@@ -135,6 +135,30 @@ void main() {
       expect(report.liabilities.single.amountMinor, 27_000_000);
     });
 
+    test('rent of N1,200,000 gives relief of N240,000', () {
+      final report = individualReport(
+        employmentNaira: 2_800_000,
+        annualRentNaira: 1_200_000,
+      );
+      expect(ngLine(report, 'Rent relief').amountMinor, 24_000_000);
+    });
+
+    test('rent of N2,500,000 is exactly the cap', () {
+      final report = individualReport(
+        employmentNaira: 10_000_000,
+        annualRentNaira: 2_500_000,
+      );
+      expect(ngLine(report, 'Rent relief').amountMinor, 50_000_000);
+    });
+
+    test('no rent gives no relief', () {
+      final report = individualReport(employmentNaira: 2_800_000);
+      expect(
+        report.lines.any((line) => line.label.startsWith('Rent relief')),
+        isFalse,
+      );
+    });
+
     test(
       'pension, NHF, NHIS, life insurance and housing loan interest add up',
       () {
@@ -167,6 +191,48 @@ void main() {
       expect(report.liabilities.single.amountMinor, 27_000_000);
       expect(report.alreadyPaidMinor, 7_000_000);
       expect(report.balanceDueMinor, 20_000_000);
+    });
+  });
+
+  group('foreign income exemption (NTA s.163(1)(s))', () {
+    test('approved-channel foreign dividend, interest, rent and royalty are '
+        'out of scope', () {
+      final report = individualReport(
+        employmentNaira: 1_000_000,
+        extra: [
+          ngEntry('ng.ind.investment.dividend_foreign', 3_000_000),
+          ngEntry('ng.ind.investment.interest_foreign', 100_000),
+          ngEntry('ng.ind.investment.rent_foreign', 200_000),
+          ngEntry('ng.ind.investment.royalty_foreign', 50_000),
+        ],
+      );
+      expect(ngLine(report, 'Total income').amountMinor, 100_000_000);
+      expect(ngLine(report, 'Foreign dividend').amountMinor, 300_000_000);
+      expect(ngLine(report, 'Foreign interest').amountMinor, 10_000_000);
+      expect(ngLine(report, 'Foreign rent').amountMinor, 20_000_000);
+      expect(ngLine(report, 'Foreign royalty').amountMinor, 5_000_000);
+      expect(report.liabilities.single.amountMinor, 3_000_000);
+      expect(
+        report.assumptions.any(
+          (assumption) => assumption.contains('163(1)(s)'),
+        ),
+        isTrue,
+      );
+    });
+
+    test('a foreign dividend stays out of scope with a linked trade', () {
+      final business = ngInput(
+        profile: ngSoleTrader(),
+        entries: [ngEntry('ng.biz.revenue.sales', 1_000_000)],
+      );
+      final report = individualReport(
+        extra: [ngEntry('ng.ind.investment.dividend_foreign', 5_000_000)],
+        linked: [business],
+      );
+      // Only the linked business profit of N1,000,000 is chargeable; the
+      // exempt foreign dividend never reaches total income (vector T2).
+      expect(ngLine(report, 'Total income').amountMinor, 100_000_000);
+      expect(report.liabilities.single.amountMinor, 3_000_000);
     });
   });
 

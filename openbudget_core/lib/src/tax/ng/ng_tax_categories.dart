@@ -76,11 +76,47 @@ abstract final class _NgTaxCategories {
     ),
     TaxCategory(
       code: 'ng.ind.investment.dividend_foreign',
-      label: 'Dividend from a foreign company',
-      kind: TaxCategoryKind.income,
+      label: 'Foreign dividend brought in through approved channels',
+      kind: TaxCategoryKind.outOfScope,
       entityKinds: _individualKinds,
-      reportReference: 'NTA 2025 s.4(1)(c)',
-      description: 'A dividend that is not franked investment income.',
+      reportReference: 'NTA 2025 s.163(1)(s)',
+      description:
+          'Exempt when brought into Nigeria through approved channels '
+          '(NTA s.163(1)(s)). Record a foreign dividend that is not brought '
+          'in through approved channels as other income instead.',
+    ),
+    TaxCategory(
+      code: 'ng.ind.investment.interest_foreign',
+      label: 'Foreign interest brought in through approved channels',
+      kind: TaxCategoryKind.outOfScope,
+      entityKinds: _individualKinds,
+      reportReference: 'NTA 2025 s.163(1)(s)',
+      description:
+          'Exempt when brought into Nigeria through approved channels '
+          '(NTA s.163(1)(s)). Record foreign interest taxed at source as a '
+          'final tax under the interest categories instead.',
+    ),
+    TaxCategory(
+      code: 'ng.ind.investment.rent_foreign',
+      label: 'Foreign rent brought in through approved channels',
+      kind: TaxCategoryKind.outOfScope,
+      entityKinds: _individualKinds,
+      reportReference: 'NTA 2025 s.163(1)(s)',
+      description:
+          'Exempt when brought into Nigeria through approved channels '
+          '(NTA s.163(1)(s)). Record foreign rent that is not brought in '
+          'through approved channels under rent instead.',
+    ),
+    TaxCategory(
+      code: 'ng.ind.investment.royalty_foreign',
+      label: 'Foreign royalty brought in through approved channels',
+      kind: TaxCategoryKind.outOfScope,
+      entityKinds: _individualKinds,
+      reportReference: 'NTA 2025 s.163(1)(s)',
+      description:
+          'Exempt when brought into Nigeria through approved channels '
+          '(NTA s.163(1)(s)). Record a foreign royalty that is not brought '
+          'in through approved channels under royalties instead.',
     ),
     TaxCategory(
       code: 'ng.ind.investment.dividend_ng',
@@ -223,7 +259,9 @@ abstract final class _NgTaxCategories {
       label: 'Professional services',
       kind: TaxCategoryKind.income,
       entityKinds: _soleTraderKinds,
-      reportReference: 'NTAA 2025 s.147',
+      reportReference:
+          'NTAA 2025 small business definition (section '
+          'unverified)',
       description:
           'A business providing professional services is not a small business '
           'for VAT.',
@@ -242,8 +280,10 @@ abstract final class _NgTaxCategories {
       entityKinds: _soleTraderKinds,
       reportReference: 'NTA 2025 s.187',
       description:
-          'Supplies charged to VAT at 0%, such as exported goods and services. '
-          'They remain taxable income.',
+          'Supplies charged to VAT at 0%, such as exported goods and '
+          'services, basic food, medicines, medical services and equipment, '
+          'and tuition. Input VAT stays recoverable and they remain taxable '
+          'income.',
     ),
     TaxCategory(
       code: 'ng.biz.revenue.exempt',
@@ -252,8 +292,10 @@ abstract final class _NgTaxCategories {
       entityKinds: _soleTraderKinds,
       reportReference: 'NTA 2025 s.186',
       description:
-          'Supplies exempt from VAT, such as land and medical services. They '
-          'remain taxable income.',
+          'Supplies exempt from VAT, such as land and buildings: no output '
+          'VAT is charged and input VAT on them is not recoverable. They '
+          'remain taxable income. Medical services are not exempt; they are '
+          'zero-rated under section 187.',
     ),
     TaxCategory(
       code: 'ng.biz.expense.cost_of_sales',
@@ -496,7 +538,9 @@ abstract final class _NgTaxCategories {
       label: 'Professional services',
       kind: TaxCategoryKind.income,
       entityKinds: _companyKinds,
-      reportReference: 'NTA 2025 s.202',
+      reportReference:
+          'NTA 2025 small company definition (section '
+          'unverified)',
       description:
           'A company providing professional services cannot be a small '
           'company.',
@@ -515,8 +559,10 @@ abstract final class _NgTaxCategories {
       entityKinds: _companyKinds,
       reportReference: 'NTA 2025 s.187',
       description:
-          'Supplies charged to VAT at 0%, such as exported goods and services. '
-          'They remain taxable income.',
+          'Supplies charged to VAT at 0%, such as exported goods and '
+          'services, basic food, medicines, medical services and equipment, '
+          'and tuition. Input VAT stays recoverable and they remain taxable '
+          'income.',
     ),
     TaxCategory(
       code: 'ng.co.revenue.exempt',
@@ -525,8 +571,10 @@ abstract final class _NgTaxCategories {
       entityKinds: _companyKinds,
       reportReference: 'NTA 2025 s.186',
       description:
-          'Supplies exempt from VAT, such as land and medical services. They '
-          'remain taxable income.',
+          'Supplies exempt from VAT, such as land and buildings: no output '
+          'VAT is charged and input VAT on them is not recoverable. They '
+          'remain taxable income. Medical services are not exempt; they are '
+          'zero-rated under section 187.',
     ),
     TaxCategory(
       code: 'ng.co.revenue.dividend_ng',
