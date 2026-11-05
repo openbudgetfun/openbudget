@@ -34,6 +34,7 @@ void main() {
       expect(find.text('Payees'), findsOneWidget);
       expect(find.text('Transaction Rules'), findsOneWidget);
       expect(find.text('Import Transactions'), findsOneWidget);
+      expect(find.text('Taxes'), findsOneWidget);
       expect(find.text('Settings'), findsOneWidget);
     });
 
@@ -45,6 +46,7 @@ void main() {
       expect(skribbleIcon(OpenBudgetIcons.people), findsOneWidget);
       expect(skribbleIcon(OpenBudgetIcons.rule), findsOneWidget);
       expect(skribbleIcon(OpenBudgetIcons.upload), findsOneWidget);
+      expect(skribbleIcon(OpenBudgetIcons.scale), findsOneWidget);
       expect(skribbleIcon(OpenBudgetIcons.settings), findsOneWidget);
     });
 
@@ -52,7 +54,7 @@ void main() {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
-      expect(skribbleIcon(OpenBudgetIcons.chevronRight), findsNWidgets(5));
+      expect(skribbleIcon(OpenBudgetIcons.chevronRight), findsNWidgets(6));
     });
 
     testWidgets('renders items inside a Card', (tester) async {
