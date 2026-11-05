@@ -10,7 +10,6 @@ openbudget_app/
 openbudget_ui/
 openbudget_test_utils/
 openbudget_scripts/
-openbudget_lints/
 openbudget_wired/
 
 # Server test directory
@@ -39,6 +38,10 @@ devenv.yaml
 # Documentation
 *.md
 !openbudget_server/README.md
+
+# Local build output; the image resolves and compiles from scratch
+**/.dart_tool/
+**/build/
 
 # Misc
 *.log
