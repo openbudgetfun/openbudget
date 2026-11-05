@@ -85,3 +85,7 @@ local.properties
 
 # monochange local caches (release records under .monochange/releases stay tracked)
 .monochange/local/
+
+# Deep-research notes behind the .claude/skills domain skills (kept local)
+research_notes/
+reports/
