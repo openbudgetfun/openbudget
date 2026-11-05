@@ -6414,6 +6414,54 @@ abstract class AppLocalizations {
   /// **'Postgraduate loan'**
   String get taxGbStudentLoanPostgraduate;
 
+  /// No description provided for @taxGbPostgraduateLoanHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Repay 6% of income above £21,000 on top of any undergraduate plan.'**
+  String get taxGbPostgraduateLoanHint;
+
+  /// No description provided for @taxGbAccountingPeriodEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'Accounting period end'**
+  String get taxGbAccountingPeriodEnd;
+
+  /// No description provided for @taxGbAccountingPeriodEndHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The company\'s year end. Corporation Tax runs on these periods, not the tax year.'**
+  String get taxGbAccountingPeriodEndHint;
+
+  /// No description provided for @taxGbAccountingPeriodMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get taxGbAccountingPeriodMonth;
+
+  /// No description provided for @taxGbAccountingPeriodDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Day'**
+  String get taxGbAccountingPeriodDay;
+
+  /// No description provided for @taxGbAssociatedCompanies.
+  ///
+  /// In en, this message translates to:
+  /// **'Associated companies'**
+  String get taxGbAssociatedCompanies;
+
+  /// No description provided for @taxGbAssociatedCompaniesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Other companies under common control. Each one divides the £50,000 and £250,000 limits.'**
+  String get taxGbAssociatedCompaniesHint;
+
+  /// No description provided for @taxGbAssociatedCompaniesError.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the number of associated companies as a whole number, such as 0.'**
+  String get taxGbAssociatedCompaniesError;
+
   /// No description provided for @taxUsFilingStatus.
   ///
   /// In en, this message translates to:

@@ -1,8 +1,11 @@
 import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
+import 'package:openbudget_core/src/tax/gb/gb_capital_allowances.dart';
 import 'package:openbudget_core/src/tax/gb/gb_categories.dart';
+import 'package:openbudget_core/src/tax/gb/gb_corporation_tax.dart';
 import 'package:openbudget_core/src/tax/gb/gb_income_tax.dart';
+import 'package:openbudget_core/src/tax/gb/gb_payments_on_account.dart';
 import 'package:openbudget_core/src/tax/gb/gb_rates.dart';
 import 'package:openbudget_core/src/tax/tax_model.dart';
 import 'package:openbudget_core/src/tax/tax_profile.dart';
@@ -130,7 +133,12 @@ final class GbTaxRules implements TaxRulePack {
               : 'Profit from ${figures.linkedBusinesses} linked sole-trade '
                     'businesses',
           amountMinor: figures.linkedProfitMinor,
-          reportReference: 'SA103F box 64',
+          // The trading allowance is deducted at box 73 and the taxable
+          // profit it produces is box 76, which is the figure that flows to
+          // the SA100 tax calculation. Without it the profit is box 64.
+          reportReference: figures.linkedTradingAllowanceUsed
+              ? 'SA103F box 76'
+              : 'SA103F box 64',
         ),
       if (totals['gb.ind.savings'] != 0)
         _categoryLine(totals, 'gb.ind.savings'),
@@ -193,18 +201,37 @@ final class GbTaxRules implements TaxRulePack {
           label: 'Class 4 National Insurance',
           amountMinor: figures.class4TaxMinor,
         ),
-      if (figures.studentLoanMinor > 0)
+      if (figures.undergraduateLoanMinor > 0)
         TaxReportLine(
           label:
               'Student loan repayments '
               '(${_studentLoanLabel(profile.studentLoanPlan!)})',
-          amountMinor: figures.studentLoanMinor,
+          amountMinor: figures.undergraduateLoanMinor,
+        ),
+      if (figures.postgraduateLoanMinor > 0)
+        TaxReportLine(
+          label: 'Student loan repayments (Postgraduate Loan)',
+          amountMinor: figures.postgraduateLoanMinor,
         ),
       if (totals['gb.ind.pension_contributions'] != 0)
         _categoryLine(totals, 'gb.ind.pension_contributions'),
       if (totals['gb.ind.gift_aid'] != 0)
         _categoryLine(totals, 'gb.ind.gift_aid'),
       if (taxPaid != 0) _categoryLine(totals, 'gb.ind.tax_paid'),
+      if (figures.paymentsOnAccount.required) ...[
+        TaxReportLine(
+          label:
+              'First payment on account towards next year, due '
+              '${_date(figures.paymentsOnAccount.firstDue)}',
+          amountMinor: figures.paymentsOnAccount.instalmentMinor,
+        ),
+        TaxReportLine(
+          label:
+              'Second payment on account towards next year, due '
+              '${_date(figures.paymentsOnAccount.secondDue)}',
+          amountMinor: figures.paymentsOnAccount.instalmentMinor,
+        ),
+      ],
       TaxReportLine(
         label: balance >= 0 ? 'Balance due' : 'Refund due',
         amountMinor: balance.abs(),
@@ -265,10 +292,12 @@ final class GbTaxRules implements TaxRulePack {
           label: 'Allowable expenses recorded (not deducted)',
           amountMinor: figures.totalExpensesMinor,
         ),
+        // The trading allowance is deducted at box 73, adjusted profit, and
+        // the taxable profit it produces is box 76, which flows to the SA100.
         TaxReportLine(
           label: 'Trading income allowance',
           amountMinor: figures.tradingAllowanceMinor,
-          reportReference: 'SA103F box 16.1',
+          reportReference: 'SA103F box 73',
         ),
       ] else
         TaxReportLine(
@@ -296,11 +325,20 @@ final class GbTaxRules implements TaxRulePack {
           reportReference: 'SA103F box 49',
           entryCount: totals.counts['gb.se.capital_allowances'] ?? 0,
         ),
+      if (figures.capitalAllowancesUnrelievedMinor > 0)
+        TaxReportLine(
+          label:
+              'Capital expenditure above the Annual Investment Allowance cap '
+              '(no writing-down allowance modelled yet)',
+          amountMinor: figures.capitalAllowancesUnrelievedMinor,
+        ),
       if (figures.taxableProfitMinor >= 0)
         TaxReportLine(
           label: 'Net business profit for tax purposes',
           amountMinor: figures.taxableProfitMinor,
-          reportReference: 'SA103F box 64',
+          reportReference: figures.tradingAllowanceUsed
+              ? 'SA103F box 76'
+              : 'SA103F box 64',
         )
       else
         TaxReportLine(
@@ -336,7 +374,7 @@ final class GbTaxRules implements TaxRulePack {
       lines: lines,
       liabilities: liabilities,
       alreadyPaidMinor: taxPaid,
-      assumptions: _soleTraderAssumptions(profile),
+      assumptions: _soleTraderAssumptions(profile, rates),
       sources: gbRateSources,
       rulesVerifiedOn: gbRulesVerifiedOn,
       uncategorizedCount: figures.uncategorizedCount,
@@ -348,7 +386,7 @@ final class GbTaxRules implements TaxRulePack {
     TaxInput input,
     GbTaxYearRates rates,
   ) {
-    final figures = _companyFigures(input.entries, rates);
+    final figures = _companyFigures(input, rates);
     final totals = figures.totals;
     final taxPaid = totals['gb.co.tax_paid'];
     final vat = _vatSummary(input.entries);
@@ -377,12 +415,20 @@ final class GbTaxRules implements TaxRulePack {
           code: 'gb.co.depreciation',
           entryCount: totals.counts['gb.co.depreciation'] ?? 0,
         ),
-      if (figures.capitalAllowancesMinor != 0)
+      if (figures.allowances.annualInvestmentAllowanceMinor != 0)
         TaxReportLine(
           label: 'Annual Investment Allowance',
-          amountMinor: figures.capitalAllowancesMinor,
+          amountMinor: figures.allowances.annualInvestmentAllowanceMinor,
           code: 'gb.co.capital_allowances',
+          reportReference: 'CT600 box 690',
           entryCount: totals.counts['gb.co.capital_allowances'] ?? 0,
+        ),
+      if (figures.allowances.unrelievedMinor > 0)
+        TaxReportLine(
+          label:
+              'Capital expenditure with no allowance yet (pools and '
+              'writing-down allowances are not modelled)',
+          amountMinor: figures.allowances.unrelievedMinor,
         ),
       TaxReportLine(
         label: 'Trading profit',
@@ -451,7 +497,12 @@ final class GbTaxRules implements TaxRulePack {
       lines: lines,
       liabilities: liabilities,
       alreadyPaidMinor: taxPaid,
-      assumptions: _companyAssumptions(profile),
+      assumptions: _companyAssumptions(
+        profile: profile,
+        ap: figures.accountingPeriod,
+        assessment: figures.assessment,
+        allowances: figures.allowances,
+      ),
       sources: gbRateSources,
       rulesVerifiedOn: gbRulesVerifiedOn,
       uncategorizedCount: figures.uncategorizedCount,
@@ -469,15 +520,15 @@ final class GbTaxRules implements TaxRulePack {
 
     var linkedProfit = 0;
     var linkedBusinesses = 0;
+    var linkedTradingAllowanceUsed = false;
     for (final linked in input.linked) {
       if (linked.profile.entityKind != TaxEntityKind.soleTrader) {
         continue;
       }
-      linkedProfit += _soleTraderFigures(
-        linked.entries,
-        rates,
-      ).taxableProfitMinor;
+      final linkedFigures = _soleTraderFigures(linked.entries, rates);
+      linkedProfit += linkedFigures.taxableProfitMinor;
       linkedBusinesses++;
+      linkedTradingAllowanceUsed |= linkedFigures.tradingAllowanceUsed;
     }
 
     final nonSavings =
@@ -495,6 +546,10 @@ final class GbTaxRules implements TaxRulePack {
       nonSavingsMinor: nonSavings,
       savingsMinor: savings,
       dividendsMinor: dividends,
+      // Gross amounts: the categories record the figure with basic-rate
+      // relief included, which is what adjusted net income subtracts.
+      pensionContributionsMinor: totals['gb.ind.pension_contributions'],
+      giftAidMinor: totals['gb.ind.gift_aid'],
     );
 
     final proceeds = totals['gb.ind.capital_gains_proceeds'];
@@ -528,12 +583,33 @@ final class GbTaxRules implements TaxRulePack {
     final class4Slices = _class4Slices(rates, tradeProfit);
     final class4Tax = sumBandTax(class4Slices);
 
-    final plan = profile.studentLoanPlan;
-    final studentLoan = plan == null
+    // Student loans: an undergraduate plan and a postgraduate loan can both
+    // run at once, each on the SA110 working sheet's income base.
+    final repaymentBase = _studentLoanRepaymentBase(
+      rates,
+      totals,
+      linkedProfit,
+    );
+    final undergraduatePlan = profile.studentLoanPlan;
+    final undergraduateLoan = undergraduatePlan == null
         ? 0
-        : rates.studentLoans[plan]!.repaymentOn(
-            (tax.totalIncomeMinor ~/ 100) * 100,
-          );
+        : rates.studentLoans[undergraduatePlan]!.repaymentOn(repaymentBase);
+    final postgraduateLoan = profile.postgraduateLoan
+        ? rates.studentLoans[GbStudentLoanPlan.postgraduate]!.repaymentOn(
+            repaymentBase,
+          )
+        : 0;
+
+    final paymentsOnAccount = computeGbPaymentsOnAccount(
+      rates: rates,
+      startYear: input.year.startYear,
+      // Payments on account cover Income Tax and Class 4 only; CGT,
+      // student loan repayments and HICBC are settled with the balancing
+      // payment. Tax recorded as paid stands in for tax collected at
+      // source (PAYE and withholding).
+      incomeTaxAndClass4Minor: tax.totalTaxMinor + class4Tax,
+      taxCollectedAtSourceMinor: totals['gb.ind.tax_paid'],
+    );
 
     final liabilities = <TaxLiability>[
       if (tax.taxableNonSavingsMinor > 0)
@@ -568,12 +644,17 @@ final class GbTaxRules implements TaxRulePack {
           amountMinor: class4Tax,
           bands: class4Slices,
         ),
-      if (studentLoan > 0)
+      if (undergraduateLoan > 0)
         TaxLiability(
           label:
               'Student loan repayments '
-              '(${_studentLoanLabel(plan!)})',
-          amountMinor: studentLoan,
+              '(${_studentLoanLabel(undergraduatePlan!)})',
+          amountMinor: undergraduateLoan,
+        ),
+      if (postgraduateLoan > 0)
+        TaxLiability(
+          label: 'Student loan repayments (Postgraduate Loan)',
+          amountMinor: postgraduateLoan,
         ),
     ];
 
@@ -581,6 +662,7 @@ final class GbTaxRules implements TaxRulePack {
       totals: totals,
       linkedProfitMinor: linkedProfit,
       linkedBusinesses: linkedBusinesses,
+      linkedTradingAllowanceUsed: linkedTradingAllowanceUsed,
       nonSavingsMinor: nonSavings,
       savingsMinor: savings,
       dividendsMinor: dividends,
@@ -589,7 +671,9 @@ final class GbTaxRules implements TaxRulePack {
       taxableGainsMinor: taxableGains,
       cgtTaxMinor: cgtTax,
       class4TaxMinor: class4Tax,
-      studentLoanMinor: studentLoan,
+      undergraduateLoanMinor: undergraduateLoan,
+      postgraduateLoanMinor: postgraduateLoan,
+      paymentsOnAccount: paymentsOnAccount,
       tradeProfitMinor: tradeProfit,
       liabilities: liabilities,
       totalTaxMinor: liabilities.fold(
@@ -628,6 +712,36 @@ final class GbTaxRules implements TaxRulePack {
     ];
   }
 
+  /// The SA110 working sheet's student-loan repayment base: earned income
+  /// (employment, self-employment including linked trades, property and
+  /// other taxable income) plus savings and dividends only above the
+  /// rule-data unearned threshold, less gross pension contributions. The
+  /// unearned threshold follows the SA110 notes (K31 and K32, 2026); the
+  /// uk-personal-tax skill flags its exact mechanics as needing
+  /// confirmation.
+  int _studentLoanRepaymentBase(
+    GbTaxYearRates rates,
+    _EntryTotals totals,
+    int linkedProfitMinor,
+  ) {
+    final earned =
+        totals['gb.ind.employment'] +
+        totals['gb.ind.self_employment'] +
+        totals['gb.ind.property'] +
+        totals['gb.ind.other_income'] +
+        linkedProfitMinor;
+    final unearned = totals['gb.ind.savings'] + totals['gb.ind.dividends'];
+    return math.max<int>(
+      0,
+      earned +
+          math.max<int>(
+            0,
+            unearned - rates.studentLoanUnearnedIncomeThresholdMinor,
+          ) -
+          totals['gb.ind.pension_contributions'],
+    );
+  }
+
   // ── Sole trader computation ───────────────────────────────────────────
 
   _SoleTraderFigures _soleTraderFigures(
@@ -638,7 +752,15 @@ final class GbTaxRules implements TaxRulePack {
     final turnover = totals['gb.se.turnover'];
     final otherIncome = totals['gb.se.other_income'];
     final depreciation = totals['gb.se.depreciation'];
-    final capitalAllowances = totals['gb.se.capital_allowances'];
+    // The Annual Investment Allowance is capped at the rule-data maximum,
+    // which the tax year is assumed to cover in full. Cars never qualify,
+    // and writing-down allowances for the excess are not modelled yet.
+    final capitalAllowances = math.min(
+      totals['gb.se.capital_allowances'],
+      rates.annualInvestmentAllowanceCapMinor,
+    );
+    final capitalAllowancesUnrelieved =
+        totals['gb.se.capital_allowances'] - capitalAllowances;
     final expenses = <String, int>{
       for (final code in _soleTraderExpenseCodes)
         if (totals[code] != 0) code: totals[code],
@@ -671,6 +793,7 @@ final class GbTaxRules implements TaxRulePack {
       totalExpensesMinor: totalExpenses,
       depreciationMinor: depreciation,
       capitalAllowancesMinor: capitalAllowances,
+      capitalAllowancesUnrelievedMinor: capitalAllowancesUnrelieved,
       tradingAllowanceUsed: tradingAllowanceUsed,
       tradingAllowanceMinor: tradingAllowanceUsed
           ? deduction
@@ -683,16 +806,35 @@ final class GbTaxRules implements TaxRulePack {
 
   // ── Company computation ───────────────────────────────────────────────
 
-  _CompanyFigures _companyFigures(
-    List<TaxEntry> entries,
-    GbTaxYearRates rates,
-  ) {
-    final totals = _EntryTotals.of(entries, TaxEntityKind.company);
+  _CompanyFigures _companyFigures(TaxInput input, GbTaxYearRates rates) {
+    final profile = input.profile as GbTaxProfile;
+    final totals = _EntryTotals.of(input.entries, TaxEntityKind.company);
     final turnover = totals['gb.co.turnover'];
     final otherIncome = totals['gb.co.other_income'];
     final interest = totals['gb.co.interest_received'];
     final depreciation = totals['gb.co.depreciation'];
-    final capitalAllowances = totals['gb.co.capital_allowances'];
+    final accountingPeriod = gbAccountingPeriodFor(
+      taxYear: input.year,
+      endMonth: profile.accountingPeriodEndMonth,
+      endDay: profile.accountingPeriodEndDay,
+    );
+    // The recorded figure is qualifying plant and machinery expenditure
+    // claimed at 100%. It takes the AIA route, capped and pro-rated for the
+    // accounting period; companies could fully expense new plant or take
+    // the 50% special-rate first-year allowance instead, but the books do
+    // not record the asset types. Cars never reach the AIA, and pools and
+    // writing-down allowances are not modelled yet.
+    final allowances = computeGbCapitalAllowances(
+      rates: rates,
+      aiaCapMinor:
+          rates.annualInvestmentAllowanceCapMinor *
+          gbAccountingPeriodMonths(accountingPeriod) ~/
+          12,
+      additions: GbCapitalAllowanceAdditions(
+        otherQualifyingMinor: totals['gb.co.capital_allowances'],
+      ),
+      company: true,
+    );
     final expenses = <String, int>{
       for (final code in _companyExpenseCodes)
         if (totals[code] != 0) code: totals[code],
@@ -702,47 +844,29 @@ final class GbTaxRules implements TaxRulePack {
       (sum, amount) => sum + amount,
     );
 
-    final tradingProfit = turnover - totalExpenses - capitalAllowances;
+    final tradingProfit = turnover - totalExpenses - allowances.totalMinor;
     final totalProfits = tradingProfit + otherIncome + interest;
     final chargeable = math.max(0, totalProfits);
-    final tax = _corporationTax(rates, chargeable);
+    final assessment = computeGbCorporationTax(
+      ap: accountingPeriod,
+      chargeableProfitsMinor: chargeable,
+      associatedCompanies: profile.associatedCompanies,
+    );
 
     return _CompanyFigures(
       totals: totals,
       depreciationMinor: depreciation,
-      capitalAllowancesMinor: capitalAllowances,
+      allowances: allowances,
+      accountingPeriod: accountingPeriod,
+      assessment: assessment,
       tradingProfitMinor: tradingProfit,
       totalProfitsMinor: totalProfits,
       chargeableMinor: chargeable,
-      grossCorporationTaxMinor: tax.gross,
-      marginalReliefMinor: tax.relief,
-      corporationTaxMinor: tax.tax,
+      grossCorporationTaxMinor: assessment.grossTaxMinor,
+      marginalReliefMinor: assessment.marginalReliefMinor,
+      corporationTaxMinor: assessment.taxMinor,
       uncategorizedCount: totals.uncategorizedCount,
     );
-  }
-
-  ({int gross, int relief, int tax}) _corporationTax(
-    GbTaxYearRates rates,
-    int profitMinor,
-  ) {
-    final profit = (profitMinor ~/ 100) * 100;
-    if (profit <= 0) {
-      return (gross: 0, relief: 0, tax: 0);
-    }
-    if (profit <= rates.corporationTaxLowerLimitMinor) {
-      final tax =
-          profit * rates.corporationTaxSmallProfitsRateBasisPoints ~/ 10000;
-      return (gross: tax, relief: 0, tax: tax);
-    }
-    final gross = profit * rates.corporationTaxMainRateBasisPoints ~/ 10000;
-    if (profit >= rates.corporationTaxUpperLimitMinor) {
-      return (gross: gross, relief: 0, tax: gross);
-    }
-    final relief =
-        (rates.corporationTaxUpperLimitMinor - profit) *
-        rates.corporationTaxMarginalReliefBasisPoints ~/
-        10000;
-    return (gross: gross, relief: relief, tax: math.max(0, gross - relief));
   }
 
   // ── VAT ───────────────────────────────────────────────────────────────
@@ -759,12 +883,18 @@ final class GbTaxRules implements TaxRulePack {
       switch (category.kind) {
         case TaxCategoryKind.income:
         case TaxCategoryKind.expense:
-          final vat = entry.salesTaxMinor * entry.businessUsePercent ~/ 100;
-          if (vat != 0) {
-            hasEntries = true;
-            if (category.kind == TaxCategoryKind.income) {
-              output += vat;
-            } else {
+          // Business-use apportionment is an input-tax rule: VAT is owed on
+          // the whole sale, but only the business share of input VAT is
+          // reclaimable.
+          if (category.kind == TaxCategoryKind.income) {
+            if (entry.salesTaxMinor != 0) {
+              hasEntries = true;
+              output += entry.salesTaxMinor;
+            }
+          } else {
+            final vat = entry.salesTaxMinor * entry.businessUsePercent ~/ 100;
+            if (vat != 0) {
+              hasEntries = true;
               input += vat;
             }
           }
@@ -775,9 +905,12 @@ final class GbTaxRules implements TaxRulePack {
               : entry.amountMinor;
         case TaxCategoryKind.salesTaxPaid:
           hasEntries = true;
-          input += entry.salesTaxMinor > 0
-              ? entry.salesTaxMinor
-              : entry.amountMinor;
+          input +=
+              (entry.salesTaxMinor > 0
+                  ? entry.salesTaxMinor
+                  : entry.amountMinor) *
+              entry.businessUsePercent ~/
+              100;
         case TaxCategoryKind.disposalProceeds:
         case TaxCategoryKind.disposalCost:
         case TaxCategoryKind.relief:
@@ -821,27 +954,38 @@ final class GbTaxRules implements TaxRulePack {
       ),
     ];
 
-    final totalIncome = figures.tax.totalIncomeMinor;
+    final adjustedNetIncome = figures.tax.adjustedNetIncomeMinor;
     final taperEnd =
         rates.personalAllowanceIncomeLimitMinor +
         2 * rates.personalAllowanceMinor;
-    if (totalIncome > rates.personalAllowanceIncomeLimitMinor &&
-        totalIncome <= taperEnd) {
-      final needed = totalIncome - rates.personalAllowanceIncomeLimitMinor;
+    if (adjustedNetIncome > rates.personalAllowanceIncomeLimitMinor &&
+        adjustedNetIncome <= taperEnd) {
+      final needed =
+          adjustedNetIncome - rates.personalAllowanceIncomeLimitMinor;
       final marginal = _marginalRate(profile, rates, figures, _IncomeKind.top);
-      final saving = math.max(0, marginal - 2000) * needed ~/ 10000;
+      // The provider has already added basic-rate relief at source, so a
+      // gross contribution cuts the Self Assessment bill by the marginal
+      // rate less that relief.
+      final saving =
+          math.max(
+            0,
+            marginal - rates.pensionReliefAtSourceBasicRateBasisPoints,
+          ) *
+          needed ~/
+          10000;
       opportunities.add(
         TaxOpportunity(
           id: 'gb.pension_taper',
           title: 'Restore your personal allowance',
           explanation:
-              'Your income of ${_money(totalIncome)} has reduced your personal '
-              'allowance to ${_money(figures.tax.personalAllowanceMinor)}. A '
-              'gross pension contribution of ${_money(needed)} would bring it '
-              'back to ${_money(rates.personalAllowanceMinor)}. Your marginal '
-              'rate is about ${_percent(marginal)}; after the 20% relief already '
-              'added at source this is estimated to cut your Self Assessment '
-              'bill by ${_money(saving)}.',
+              'Your adjusted net income of ${_money(adjustedNetIncome)} has '
+              'reduced your personal allowance to '
+              '${_money(figures.tax.personalAllowanceMinor)}. A gross pension '
+              'contribution of ${_money(needed)} would bring it back to '
+              '${_money(rates.personalAllowanceMinor)}. Your marginal rate is '
+              'about ${_percent(marginal)}; after the 20% relief already added '
+              'at source this is estimated to cut your Self Assessment bill by '
+              '${_money(saving)}.',
           estimatedSavingMinor: saving,
           source: Uri.parse('https://www.gov.uk/income-tax-rates'),
           deadline: yearEnd,
@@ -962,24 +1106,29 @@ final class GbTaxRules implements TaxRulePack {
     }
 
     final balance = report.balanceDueMinor;
-    final paidShare = report.totalLiabilityMinor == 0
-        ? 100
-        : report.alreadyPaidMinor * 100 ~/ report.totalLiabilityMinor;
-    final needsPaymentsOnAccount = balance > 100000 && paidShare < 80;
+    final paymentsOnAccount = figures.paymentsOnAccount;
+    final instalmentText = paymentsOnAccount.required
+        ? 'HMRC also expects two payments on account towards next year: '
+              '${_money(paymentsOnAccount.instalmentMinor)} by '
+              '${_date(paymentsOnAccount.firstDue)} and the same again by '
+              '${_date(paymentsOnAccount.secondDue)}. They are '
+              '${rates.paymentsOnAccountInstalmentSharePercent}% of this '
+              'year’s Income Tax and Class 4 National Insurance of '
+              '${_money(paymentsOnAccount.baseMinor)} less tax collected at '
+              'source, and do not cover Capital Gains Tax, student loan '
+              'repayments or the High Income Child Benefit Charge.'
+        : 'No payments on account are due towards next year: the statutory '
+              'rule skips them when the year’s Income Tax and Class 4, less '
+              'tax collected at source, is under '
+              '${_money(rates.paymentsOnAccountMinimumMinor)} or more than '
+              '${rates.paymentsOnAccountCollectedSharePercent}% of it was '
+              'collected at source.';
     final deadlineMessage = balance < 0
         ? 'Your entries show a refund of ${_money(balance.abs())} before any '
               'payments on account. The return and any payment must reach HMRC '
               'by 31 January following the tax year.'
-        : needsPaymentsOnAccount
-        ? 'Your balance due is ${_money(balance)}. HMRC will normally ask for '
-              'it by 31 January, plus a first payment on account of '
-              '${_money(balance ~/ 2)} towards next year, with a second payment '
-              'of the same amount on 31 July. Payments on account are not '
-              'required when the bill is under £1,000 or 80% was collected at '
-              'source.'
-        : 'Your Self Assessment return and any tax due must reach HMRC by '
-              '31 January following the tax year. Your balance due is '
-              '${_money(balance)}.';
+        : 'Your balance due is ${_money(balance)}. HMRC will normally ask for '
+              'it by 31 January. $instalmentText';
     opportunities.add(
       TaxOpportunity(
         id: 'gb.self_assessment_deadline',
@@ -1039,11 +1188,31 @@ final class GbTaxRules implements TaxRulePack {
       if (company.profile.entityKind != TaxEntityKind.company) {
         continue;
       }
-      final companyFigures = _companyFigures(company.entries, rates);
+      final companyProfile = company.profile as GbTaxProfile;
+      final companyFigures = _companyFigures(company, rates);
       final profit = companyFigures.totalProfitsMinor;
       if (profit <= 0) {
         continue;
       }
+      final accountingPeriod = companyFigures.accountingPeriod;
+      final associates = companyProfile.associatedCompanies;
+      final wages = companyFigures.totals['gb.co.wages'];
+
+      // s2(4A) NICA 2014: the Employment Allowance is not available to a
+      // company whose only employee paid above the secondary threshold is a
+      // sole director. The books record one wages total and the profit is
+      // assumed to be before any pay, so wages at or above the threshold
+      // are read as another employee paid above it; stated in the text
+      // either way.
+      final employmentAllowanceAvailable =
+          wages >= rates.class1SecondaryThresholdMinor;
+
+      GbCorporationTaxAssessment assess(int profitMinor) =>
+          computeGbCorporationTax(
+            ap: accountingPeriod,
+            chargeableProfitsMinor: profitMinor,
+            associatedCompanies: associates,
+          );
 
       int costWith(int salaryMinor) => _directorCost(
         profile: profile,
@@ -1051,20 +1220,23 @@ final class GbTaxRules implements TaxRulePack {
         figures: figures,
         profitMinor: profit,
         salaryMinor: salaryMinor,
+        employmentAllowanceAvailable: employmentAllowanceAvailable,
+        assess: assess,
       );
 
       final dividendOnly = costWith(0);
+      // Candidate salaries are the year's Class 1 thresholds from rule
+      // data, never hard-coded "optimal" figures.
+      final candidates = <int>{
+        rates.class1LowerEarningsLimitMinor,
+        rates.class1SecondaryThresholdMinor,
+        rates.class1PrimaryThresholdMinor,
+        rates.class1UpperEarningsLimitMinor,
+        profit,
+      }.where((salary) => salary <= profit).toList()..sort();
       var bestCost = dividendOnly;
       var bestSalary = 0;
-      for (final salary in <int>[
-        5000 * 100,
-        12570 * 100,
-        50270 * 100,
-        profit,
-      ]) {
-        if (salary > profit) {
-          continue;
-        }
+      for (final salary in candidates) {
         final cost = costWith(salary);
         if (cost < bestCost) {
           bestCost = cost;
@@ -1080,15 +1252,18 @@ final class GbTaxRules implements TaxRulePack {
         title: 'Compare a director’s salary with dividends',
         explanation:
             'Your company’s profit before directors’ pay and Corporation Tax '
-            'is ${_money(profit)}. Taking ${_money(bestSalary)} as salary and '
-            'the rest as dividends is estimated to cost ${_money(bestCost)} in '
-            'Corporation Tax, employer and employee National Insurance and '
-            'income tax, against ${_money(dividendOnly)} for dividends only: a '
-            'saving of ${_money(saving)}. Assumes the profit is before any pay '
-            'or dividend to the director, no Employment Allowance, no '
-            'associated companies and that all profit is distributed; if the '
-            'books already include the director’s pay, treat this as '
-            'illustrative.',
+            'is ${_money(profit)}. As guidance only, taking '
+            '${_money(bestSalary)} as salary and the rest as dividends is '
+            'estimated to cost ${_money(bestCost)} in Corporation Tax, '
+            'employer and employee National Insurance and income tax, against '
+            '${_money(dividendOnly)} for dividends only: a saving of '
+            '${_money(saving)}. The salaries compared are the year’s '
+            'National Insurance thresholds. Employment Allowance is treated '
+            'as ${employmentAllowanceAvailable ? 'available, because the books show wages above the secondary threshold beyond the director’s pay' : 'unavailable, because a company whose sole director is the only employee paid above the secondary threshold cannot claim it'}. '
+            'Assumes the profit is before any pay or dividend to the director '
+            'and that all profit is distributed; if the books already include '
+            'the director’s pay, treat this as illustrative. This is a '
+            'comparison to check, not a recommendation.',
         estimatedSavingMinor: saving,
         source: Uri.parse('https://www.gov.uk/tax-on-dividends'),
         deadline: DateTime.utc(input.year.startYear + 1, 4, 5),
@@ -1103,16 +1278,24 @@ final class GbTaxRules implements TaxRulePack {
     required _IndividualFigures figures,
     required int profitMinor,
     required int salaryMinor,
+    required bool employmentAllowanceAvailable,
+    required GbCorporationTaxAssessment Function(int profitMinor) assess,
   }) {
-    final employerNic =
-        math.max(0, salaryMinor - rates.class1SecondaryThresholdMinor) *
+    var employerNic =
+        math.max<int>(
+          0,
+          salaryMinor - rates.class1SecondaryThresholdMinor,
+        ) *
         rates.class1EmployerRateBasisPoints ~/
         10000;
+    if (employmentAllowanceAvailable) {
+      employerNic = math.max<int>(
+        0,
+        employerNic - rates.employmentAllowanceMinor,
+      );
+    }
     final companyProfit = profitMinor - salaryMinor - employerNic;
-    final corporationTax = _corporationTax(
-      rates,
-      math.max(0, companyProfit),
-    ).tax;
+    final corporationTax = assess(math.max<int>(0, companyProfit)).taxMinor;
     final dividend = math.max(0, companyProfit - corporationTax);
     final tax = computeGbIncomeTax(
       rates: rates,
@@ -1221,33 +1404,39 @@ final class GbTaxRules implements TaxRulePack {
     'Income is limited to the entries recorded in OpenBudget; income held elsewhere is not included.',
     'The personal allowance is set against non-savings income first, then savings, then dividends.',
     'Taxable income is rounded down to whole pounds and each tax slice down to the penny, in your favour.',
-    'The personal allowance tapers by £1 for each full £2 of income above £100,000 and is nil from £125,140.',
+    'The personal allowance tapers by £1 for each full £2 of adjusted net income above £100,000 and is nil from £125,140. Gross pension contributions and Gift Aid donations reduce adjusted net income.',
     'Property income is treated as non-savings income; the £1,000 property allowance and finance cost relief are not modelled.',
     if (profile.scottishTaxpayer)
       'Scottish rates apply to non-savings income. Savings and dividends are taxed at UK rates, as the Scottish rates do not apply to them.'
     else
       'England, Wales and Northern Ireland rates apply to non-savings income.',
     'The personal savings allowance and the starting rate for savings are decided using the UK basic rate limit.',
-    'Only the standard personal allowance is claimed. Marriage Allowance, Blind Person’s Allowance, Gift Aid and other reliefs are not modelled.',
-    if (_hasReliefs(figures)) 'Pension contributions and Gift Aid donations are reported but not deducted; their relief depends on the scheme and is not modelled.',
+    'Only the standard personal allowance is claimed. Marriage Allowance, Blind Person’s Allowance and pension band extension are not modelled.',
+    if (_hasReliefs(figures)) 'Pension contributions and Gift Aid donations are shown as recorded and reduce adjusted net income for the allowance taper; their band extension and scheme-specific relief are not modelled.',
     'Trading losses reduce other income but are not carried forward or set against capital gains.',
     'Class 2 National Insurance is not charged: profits above ${_money(rates.class2SmallProfitsThresholdMinor)} are treated as paid, and voluntary contributions are not modelled.',
     'Class 4 National Insurance is charged on the combined profit of all self-employments, rounded down to whole pounds.',
-    'Student loan repayments are based on total income before allowances.',
+    'Student loan repayments follow the SA110 working sheet: earned income plus savings and dividends only above ${_money(rates.studentLoanUnearnedIncomeThresholdMinor)}, less gross pension contributions, each plan rounded down to whole pounds. An undergraduate plan and a postgraduate loan can run at the same time.',
     if (figures.netGainsMinor > 0) 'Capital Gains Tax covers only the disposals entered. Losses, reliefs and the 60-day property return are not modelled; the annual exempt amount is set against the gains.',
-    'No payments on account are included; tax already paid is what was recorded.',
+    if (figures.paymentsOnAccount.required)
+      'Two payments on account towards next year are estimated at ${rates.paymentsOnAccountInstalmentSharePercent}% of this year’s Income Tax and Class 4 National Insurance (${_money(figures.paymentsOnAccount.baseMinor)} less tax recorded as paid): ${_money(figures.paymentsOnAccount.instalmentMinor)} each, due ${_date(figures.paymentsOnAccount.firstDue)} and ${_date(figures.paymentsOnAccount.secondDue)}. Tax recorded as paid is treated as collected at source; payments on account already made for this year cannot be separated from it.'
+    else
+      'No payments on account are due towards next year: the year’s Income Tax and Class 4, less tax recorded as paid, is under ${_money(rates.paymentsOnAccountMinimumMinor)} or more than ${rates.paymentsOnAccountCollectedSharePercent}% was collected at source.',
   ];
 
   bool _hasReliefs(_IndividualFigures figures) =>
       figures.totals['gb.ind.pension_contributions'] != 0 ||
       figures.totals['gb.ind.gift_aid'] != 0;
 
-  List<String> _soleTraderAssumptions(GbTaxProfile profile) => <String>[
+  List<String> _soleTraderAssumptions(
+    GbTaxProfile profile,
+    GbTaxYearRates rates,
+  ) => <String>[
     'The figures are the taxable profit of the trade before the personal allowance; the owner’s individual report taxes them.',
     'Entries are treated as the business accounts. Cash basis and traditional accounting are not distinguished.',
     'Profits are computed in pence; the owner’s individual report rounds taxable income down to whole pounds.',
     'The £1,000 trading allowance is used automatically when it is larger than actual allowable expenses, unless capital allowances are claimed. It cannot be used with capital allowances.',
-    'Only the Annual Investment Allowance is modelled, at 100% of the expenditure recorded. Writing-down allowances, balancing charges and cars are not modelled.',
+    'Only the Annual Investment Allowance is modelled, at 100% of the expenditure recorded and capped at ${_money(rates.annualInvestmentAllowanceCapMinor)}. Writing-down allowances, balancing charges and cars are not modelled.',
     'Depreciation is not deducted; it is shown as a disallowable expense and added back.',
     'Business use is applied through each entry’s business use percentage. Stock valuation, private use adjustments, losses carried forward and basis period reform are not modelled.',
     if (profile.salesTaxRegistered)
@@ -1256,14 +1445,27 @@ final class GbTaxRules implements TaxRulePack {
       'The books are not VAT registered, so no VAT summary is shown.',
   ];
 
-  List<String> _companyAssumptions(GbTaxProfile profile) => <String>[
-    'No associated companies: the £50,000 and £250,000 limits are not reduced.',
+  List<String> _companyAssumptions({
+    required GbTaxProfile profile,
+    required GbAccountingPeriod ap,
+    required GbCorporationTaxAssessment assessment,
+    required GbCapitalAllowances allowances,
+  }) => <String>[
+    'The accounting period runs ${_date(ap.start)} to ${_date(ap.end)}: Corporation Tax follows the company’s year end, not the 6 April tax year. The entries recorded in the tax year are assumed to be this period’s accounts.',
+    if (profile.associatedCompanies > 0)
+      '${profile.associatedCompanies} associated ${profile.associatedCompanies == 1 ? 'company divides' : 'companies divide'} the £50,000 and £250,000 limits by ${profile.associatedCompanies + 1}.'
+    else
+      'No associated companies: the £50,000 and £250,000 limits are not reduced.',
     'No exempt distributions from other companies, so augmented profits equal taxable total profits.',
-    'The accounting period is taken to match the tax year supplied. The rates for the financial years starting 1 April 2025 and 1 April 2026 are identical, so no apportionment between financial years is needed. The five days of April 2027 fall in a financial year whose rates were not set when these figures were checked; the 2026 rates are applied.',
-    'Corporation Tax is 19% up to £50,000, 25% from £250,000, and the main rate less marginal relief in between, using the 3/200 standard fraction.',
+    if (assessment.parts.length > 1)
+      'The accounting period straddles 1 April, so profits are apportioned by day across the financial years it covers and each part is charged for its own financial year.'
+    else if (assessment.parts.isNotEmpty)
+      'The accounting period sits inside the financial year starting 1 April ${assessment.parts.single.financialYearStartYear}.',
+    'Corporation Tax is 19% up to £50,000, 25% from £250,000, and the main rate less marginal relief in between, using the 3/200 standard fraction. The rates are held at 19% and 25% for the financial years starting 1 April 2025, 1 April 2026 and 1 April 2027, so parts falling in FY2027 use the same row; the FY2027 hold was confirmed when these figures were checked.',
     'Profits are rounded down to whole pounds and Corporation Tax down to the penny.',
     'No losses, group relief, qualifying donations, research and development relief or ring-fence profits are modelled.',
-    'Depreciation is not deducted; it is shown as a disallowable expense and added back. Only the Annual Investment Allowance is modelled.',
+    'Depreciation is not deducted; it is shown as a disallowable expense and added back.',
+    'The Annual Investment Allowance is capped at ${_money(allowances.aiaCapMinor)} for this period and never covers cars. Companies can fully expense new and unused main-rate plant and take a 50% first-year allowance on new and unused special-rate plant, but the recorded figure is claimed through the Annual Investment Allowance because the asset types are not recorded. Pools, writing-down allowances and balancing charges are not modelled yet, so any expenditure left unrelieved is shown as such.',
     'Employment Allowance is not modelled.',
     if (profile.salesTaxRegistered)
       'VAT is reported separately and excluded from turnover and expenses.'
@@ -1344,6 +1546,7 @@ final class _IndividualFigures {
     required this.totals,
     required this.linkedProfitMinor,
     required this.linkedBusinesses,
+    required this.linkedTradingAllowanceUsed,
     required this.nonSavingsMinor,
     required this.savingsMinor,
     required this.dividendsMinor,
@@ -1352,7 +1555,9 @@ final class _IndividualFigures {
     required this.taxableGainsMinor,
     required this.cgtTaxMinor,
     required this.class4TaxMinor,
-    required this.studentLoanMinor,
+    required this.undergraduateLoanMinor,
+    required this.postgraduateLoanMinor,
+    required this.paymentsOnAccount,
     required this.tradeProfitMinor,
     required this.liabilities,
     required this.totalTaxMinor,
@@ -1361,6 +1566,10 @@ final class _IndividualFigures {
   final _EntryTotals totals;
   final int linkedProfitMinor;
   final int linkedBusinesses;
+
+  /// Whether any linked sole trade claimed the trading allowance, which
+  /// moves its SA103F reference from box 64 to box 76.
+  final bool linkedTradingAllowanceUsed;
   final int nonSavingsMinor;
   final int savingsMinor;
   final int dividendsMinor;
@@ -1369,7 +1578,9 @@ final class _IndividualFigures {
   final int taxableGainsMinor;
   final int cgtTaxMinor;
   final int class4TaxMinor;
-  final int studentLoanMinor;
+  final int undergraduateLoanMinor;
+  final int postgraduateLoanMinor;
+  final GbPaymentsOnAccount paymentsOnAccount;
   final int tradeProfitMinor;
   final List<TaxLiability> liabilities;
   final int totalTaxMinor;
@@ -1384,6 +1595,7 @@ final class _SoleTraderFigures {
     required this.totalExpensesMinor,
     required this.depreciationMinor,
     required this.capitalAllowancesMinor,
+    required this.capitalAllowancesUnrelievedMinor,
     required this.tradingAllowanceUsed,
     required this.tradingAllowanceMinor,
     required this.netProfitMinor,
@@ -1395,6 +1607,7 @@ final class _SoleTraderFigures {
   final int totalExpensesMinor;
   final int depreciationMinor;
   final int capitalAllowancesMinor;
+  final int capitalAllowancesUnrelievedMinor;
   final bool tradingAllowanceUsed;
   final int tradingAllowanceMinor;
   final int netProfitMinor;
@@ -1407,7 +1620,9 @@ final class _CompanyFigures {
   const _CompanyFigures({
     required this.totals,
     required this.depreciationMinor,
-    required this.capitalAllowancesMinor,
+    required this.allowances,
+    required this.accountingPeriod,
+    required this.assessment,
     required this.tradingProfitMinor,
     required this.totalProfitsMinor,
     required this.chargeableMinor,
@@ -1419,7 +1634,9 @@ final class _CompanyFigures {
 
   final _EntryTotals totals;
   final int depreciationMinor;
-  final int capitalAllowancesMinor;
+  final GbCapitalAllowances allowances;
+  final GbAccountingPeriod accountingPeriod;
+  final GbCorporationTaxAssessment assessment;
   final int tradingProfitMinor;
   final int totalProfitsMinor;
   final int chargeableMinor;
@@ -1445,6 +1662,25 @@ final class _VatSummary {
 }
 
 // ── Formatting for opportunity text ─────────────────────────────────────
+
+const List<String> _months = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+];
+
+/// A date-only value as `31 March 2027`.
+String _date(DateTime date) =>
+    '${date.day} ${_months[date.month - 1]} ${date.year}';
 
 String _money(int amountMinor) {
   final negative = amountMinor < 0;

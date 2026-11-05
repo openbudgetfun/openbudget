@@ -26,14 +26,10 @@ sealed class TaxProfile {
     return switch (TaxJurisdiction.fromCountryCode(
       json['jurisdiction']! as String,
     )) {
-      TaxJurisdiction.gb => GbTaxProfile(
-        entityKind: entityKind,
+      TaxJurisdiction.gb => gbProfileFromJson(
+        json,
+        entityKind,
         salesTaxRegistered: registered,
-        scottishTaxpayer: json['scottishTaxpayer'] as bool? ?? false,
-        studentLoanPlan: switch (json['studentLoanPlan']) {
-          final String plan => GbStudentLoanPlan.values.byName(plan),
-          _ => null,
-        },
       ),
       TaxJurisdiction.us => UsTaxProfile(
         entityKind: entityKind,
@@ -90,6 +86,11 @@ sealed class TaxProfile {
 }
 
 /// Student loan repayment plans HMRC collects through Self Assessment.
+///
+/// [postgraduate] never appears in [GbTaxProfile.studentLoanPlan]: a
+/// postgraduate loan is held alongside an undergraduate plan, so it is a
+/// separate flag. The value stays in the enum so old profiles that stored
+/// the postgraduate loan in `studentLoanPlan` still parse.
 enum GbStudentLoanPlan { plan1, plan2, plan4, plan5, postgraduate }
 
 final class GbTaxProfile extends TaxProfile {
@@ -98,6 +99,10 @@ final class GbTaxProfile extends TaxProfile {
     this.salesTaxRegistered = false,
     this.scottishTaxpayer = false,
     this.studentLoanPlan,
+    this.postgraduateLoan = false,
+    this.accountingPeriodEndMonth = 3,
+    this.accountingPeriodEndDay = 31,
+    this.associatedCompanies = 0,
   });
 
   @override
@@ -110,14 +115,74 @@ final class GbTaxProfile extends TaxProfile {
   /// rates.
   final bool scottishTaxpayer;
 
+  /// The undergraduate repayment plan, when there is one. A person can hold
+  /// an undergraduate plan and a postgraduate loan at the same time, so the
+  /// two are separate facts.
   final GbStudentLoanPlan? studentLoanPlan;
+
+  /// Whether a postgraduate loan is repaid through Self Assessment as well.
+  final bool postgraduateLoan;
+
+  /// The company accounting period's end day, as month (1 to 12) and day
+  /// (1 to 31). Corporation Tax is assessed on accounting periods, not on
+  /// the 6 April tax year. Defaults to 31 March, the most common
+  /// small-company year end.
+  final int accountingPeriodEndMonth;
+  final int accountingPeriodEndDay;
+
+  /// Other companies under common control, excluding this one. Each one
+  /// divides the £50,000 and £250,000 Corporation Tax limits.
+  final int associatedCompanies;
 
   @override
   Map<String, Object?> toJson() => {
     ..._baseJson(),
     'scottishTaxpayer': scottishTaxpayer,
     'studentLoanPlan': ?studentLoanPlan?.name,
+    // Omitted when default, so profiles saved before these fields existed
+    // keep their exact stored shape.
+    'postgraduateLoan': ?(postgraduateLoan ? true : null),
+    'accountingPeriodEndMonth': ?(accountingPeriodEndMonth == 3
+        ? null
+        : accountingPeriodEndMonth),
+    'accountingPeriodEndDay': ?(accountingPeriodEndDay == 31
+        ? null
+        : accountingPeriodEndDay),
+    'associatedCompanies': ?(associatedCompanies > 0
+        ? associatedCompanies
+        : null),
   };
+}
+
+/// Decodes a GB profile, reading the pre-2027 JSON shape too: profiles
+/// written before the postgraduate loan got its own flag stored it in
+/// `studentLoanPlan`.
+GbTaxProfile gbProfileFromJson(
+  Map<String, Object?> json,
+  TaxEntityKind entityKind, {
+  required bool salesTaxRegistered,
+}) {
+  final legacyPlan = switch (json['studentLoanPlan']) {
+    final String plan => GbStudentLoanPlan.values.byName(plan),
+    _ => null,
+  };
+  final undergradPlan =
+      legacyPlan == null || legacyPlan == GbStudentLoanPlan.postgraduate
+      ? null
+      : legacyPlan;
+  final postgraduate =
+      json['postgraduateLoan'] as bool? ??
+      legacyPlan == GbStudentLoanPlan.postgraduate;
+  return GbTaxProfile(
+    entityKind: entityKind,
+    salesTaxRegistered: salesTaxRegistered,
+    scottishTaxpayer: json['scottishTaxpayer'] as bool? ?? false,
+    studentLoanPlan: undergradPlan,
+    postgraduateLoan: postgraduate,
+    accountingPeriodEndMonth: json['accountingPeriodEndMonth'] as int? ?? 3,
+    accountingPeriodEndDay: json['accountingPeriodEndDay'] as int? ?? 31,
+    associatedCompanies: json['associatedCompanies'] as int? ?? 0,
+  );
 }
 
 enum UsFilingStatus {

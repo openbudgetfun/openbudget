@@ -13,6 +13,7 @@ import 'package:openbudget_core/src/tax/tax_rule_pack.dart';
 final class GbIncomeTaxComputation {
   const GbIncomeTaxComputation({
     required this.totalIncomeMinor,
+    required this.adjustedNetIncomeMinor,
     required this.personalAllowanceMinor,
     required this.taxableIncomeMinor,
     required this.taxableNonSavingsMinor,
@@ -26,6 +27,12 @@ final class GbIncomeTaxComputation {
   /// All income before the personal allowance, after a loss has been set
   /// against the other kinds.
   final int totalIncomeMinor;
+
+  /// Total income less gross relief-at-source pension contributions and
+  /// gross Gift Aid donations. The personal allowance taper is measured on
+  /// this, not on total income. The statutory definition was not quoted
+  /// from legislation; see the uk-personal-tax skill's flagged gap.
+  final int adjustedNetIncomeMinor;
 
   final int personalAllowanceMinor;
 
@@ -52,13 +59,17 @@ final class GbIncomeTaxComputation {
 /// Non-savings income is taxed first (at Scottish rates when
 /// [scottishTaxpayer]), then savings, then dividends, as ITA 2007 requires.
 /// Taxable income is rounded down to whole pounds and each band slice's tax
-/// down to the penny, both in the taxpayer's favour.
+/// down to the penny, both in the taxpayer's favour. Gross relief-at-source
+/// [pensionContributionsMinor] and gross [giftAidMinor] donations reduce
+/// adjusted net income, which decides the personal allowance taper.
 GbIncomeTaxComputation computeGbIncomeTax({
   required GbTaxYearRates rates,
   required bool scottishTaxpayer,
   required int nonSavingsMinor,
   required int savingsMinor,
   required int dividendsMinor,
+  int pensionContributionsMinor = 0,
+  int giftAidMinor = 0,
 }) {
   var nonSavings = nonSavingsMinor;
   var savings = savingsMinor;
@@ -76,7 +87,13 @@ GbIncomeTaxComputation computeGbIncomeTax({
   }
 
   final totalIncome = nonSavings + savings + dividends;
-  final allowance = rates.personalAllowanceFor(totalIncome);
+  // Pension and Gift Aid gross payments reduce adjusted net income, which
+  // is the base the personal allowance taper works on.
+  final adjustedNetIncome = math.max(
+    0,
+    totalIncome - pensionContributionsMinor - giftAidMinor,
+  );
+  final allowance = rates.personalAllowanceFor(adjustedNetIncome);
 
   var allowanceLeft = allowance;
   final nonSavingsAfterAllowance = math.max(0, nonSavings - allowanceLeft);
@@ -155,6 +172,7 @@ GbIncomeTaxComputation computeGbIncomeTax({
 
   return GbIncomeTaxComputation(
     totalIncomeMinor: totalIncome,
+    adjustedNetIncomeMinor: adjustedNetIncome,
     personalAllowanceMinor: allowance,
     taxableIncomeMinor: totalTaxable,
     taxableNonSavingsMinor: taxableNonSavings,

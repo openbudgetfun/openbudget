@@ -125,6 +125,9 @@ void main() {
       expect(find.text('Individual'), findsOneWidget);
       expect(find.text('Scottish taxpayer'), findsOneWidget);
       expect(find.text('Student loan plan'), findsOneWidget);
+      expect(find.text('Postgraduate loan'), findsOneWidget);
+      expect(find.text('Accounting period end'), findsNothing);
+      expect(find.text('Associated companies'), findsNothing);
       expect(find.text('Linked personal budget'), findsNothing);
 
       await _save(tester);
@@ -140,6 +143,125 @@ void main() {
         'salesTaxRegistered': false,
         'scottishTaxpayer': false,
       });
+    });
+
+    testWidgets('saves an undergraduate plan with a postgraduate loan', (
+      tester,
+    ) async {
+      final fake = FakeTaxRepository();
+      await tester.pumpWidget(_buildApp(fake));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byType(DropdownButtonFormField<String>).first);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Plan 2').last);
+      await tester.pumpAndSettle();
+
+      await tester.scrollUntilVisible(
+        find.text('Postgraduate loan'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Postgraduate loan'));
+      await tester.pumpAndSettle();
+
+      await _save(tester);
+
+      final saved = _lastProfileJson(fake);
+      expect(saved['studentLoanPlan'], 'plan2');
+      expect(saved['postgraduateLoan'], isTrue);
+    });
+
+    testWidgets('saves a UK company accounting period and associates', (
+      tester,
+    ) async {
+      final fake = FakeTaxRepository();
+      await tester.pumpWidget(_buildApp(fake));
+      await tester.pumpAndSettle();
+
+      await _selectEntity(tester, 'Company');
+      expect(find.text('Accounting period end'), findsOneWidget);
+      expect(find.text('Associated companies'), findsOneWidget);
+
+      await tester.scrollUntilVisible(
+        find.text('Associated companies').last,
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), '2');
+      await _save(tester);
+
+      final saved = _lastProfileJson(fake);
+      // The default 31 March end is not stored; the count is.
+      expect(saved['accountingPeriodEndMonth'], isNull);
+      expect(saved['accountingPeriodEndDay'], isNull);
+      expect(saved['associatedCompanies'], 2);
+    });
+
+    testWidgets('a UK company keeps a non-default accounting period', (
+      tester,
+    ) async {
+      final fake = FakeTaxRepository();
+      await tester.pumpWidget(_buildApp(fake));
+      await tester.pumpAndSettle();
+
+      await _selectEntity(tester, 'Company');
+      await tester.scrollUntilVisible(
+        find.text('Accounting period end'),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+
+      // Month dropdown first, then the day dropdown. The menu builds its
+      // items lazily, so pick months near the default that are visible.
+      await tester.tap(find.byType(DropdownButtonFormField<int>).first);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('May').last);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(DropdownButtonFormField<int>).last);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('31').last);
+      await tester.pumpAndSettle();
+
+      await _save(tester);
+
+      final saved = _lastProfileJson(fake);
+      expect(saved['accountingPeriodEndMonth'], 5);
+      // 31 is the default day, so it is not stored.
+      expect(saved['accountingPeriodEndDay'], isNull);
+    });
+
+    testWidgets('rejects a non-numeric associated companies count', (
+      tester,
+    ) async {
+      const error =
+          'Enter the number of associated companies as a whole number, '
+          'such as 0.';
+      final fake = FakeTaxRepository();
+      await tester.pumpWidget(_buildApp(fake));
+      await tester.pumpAndSettle();
+
+      await _selectEntity(tester, 'Company');
+      await tester.scrollUntilVisible(
+        find.text('Associated companies').last,
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), 'two');
+      await _save(tester);
+
+      await tester.scrollUntilVisible(
+        find.text(error),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+      expect(find.text(error), findsOneWidget);
+      expect(fake.savedProfiles, isEmpty);
     });
 
     testWidgets('saves a US profile with the chosen filing status', (
