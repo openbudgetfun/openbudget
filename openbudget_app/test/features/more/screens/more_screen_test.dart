@@ -36,12 +36,14 @@ void main() {
       expect(find.text('Import Transactions'), findsOneWidget);
       expect(find.text('Taxes'), findsOneWidget);
       expect(find.text('Settings'), findsOneWidget);
+      expect(find.text('Assistant'), findsOneWidget);
     });
 
     testWidgets('shows correct icons for each item', (tester) async {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
+      expect(skribbleIcon(OpenBudgetIcons.sparkle), findsOneWidget);
       expect(skribbleIcon(OpenBudgetIcons.recurring), findsOneWidget);
       expect(skribbleIcon(OpenBudgetIcons.people), findsOneWidget);
       expect(skribbleIcon(OpenBudgetIcons.rule), findsOneWidget);
@@ -54,7 +56,7 @@ void main() {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
-      expect(skribbleIcon(OpenBudgetIcons.chevronRight), findsNWidgets(6));
+      expect(skribbleIcon(OpenBudgetIcons.chevronRight), findsNWidgets(7));
     });
 
     testWidgets('renders items inside a Card', (tester) async {

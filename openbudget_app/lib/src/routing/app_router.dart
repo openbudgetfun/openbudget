@@ -4,6 +4,9 @@ import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/accounts/screens/account_detail_screen.dart';
 import 'package:openbudget_app/src/features/accounts/screens/account_list_screen.dart';
 import 'package:openbudget_app/src/features/accounts/screens/add_account_screen.dart';
+import 'package:openbudget_app/src/features/assistant/screens/assistant_proposals_screen.dart';
+import 'package:openbudget_app/src/features/assistant/screens/assistant_provider_screen.dart';
+import 'package:openbudget_app/src/features/assistant/screens/assistant_screen.dart';
 import 'package:openbudget_app/src/features/auth/providers/auth_provider.dart';
 import 'package:openbudget_app/src/features/auth/providers/auth_state.dart';
 import 'package:openbudget_app/src/features/auth/screens/login_screen.dart';
@@ -421,6 +424,12 @@ GoRouter appRouter(Ref ref) {
                               return DisplayOptionsScreen(budgetId: id);
                             },
                           ),
+                          GoRoute(
+                            name: assistantProviderRoute,
+                            path: 'assistant-provider',
+                            builder: (context, state) =>
+                                const AssistantProviderScreen(),
+                          ),
                         ],
                       ),
                     ],
@@ -430,6 +439,24 @@ GoRouter appRouter(Ref ref) {
             ],
           ),
           // Routes outside the shell (full-screen overlays).
+          GoRoute(
+            name: assistantRoute,
+            path: 'assistant',
+            builder: (context, state) {
+              final id = state.pathParameters['id']!;
+              return AssistantScreen(budgetId: id);
+            },
+            routes: [
+              GoRoute(
+                name: assistantProposalsRoute,
+                path: 'proposals',
+                builder: (context, state) {
+                  final id = state.pathParameters['id']!;
+                  return AssistantProposalsScreen(budgetId: id);
+                },
+              ),
+            ],
+          ),
           GoRoute(
             name: addIncomeRoute,
             path: 'income/add',

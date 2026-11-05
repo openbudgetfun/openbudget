@@ -3941,4 +3941,337 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get taxCategoryLoadRetry => 'Try again';
+
+  @override
+  String get assistantApply => 'Apply';
+
+  @override
+  String get assistantComposerHint => 'Ask about this plan…';
+
+  @override
+  String get assistantConversationDelete => 'Delete conversation';
+
+  @override
+  String get assistantConversationDeleteError =>
+      'Could not delete the conversation.';
+
+  @override
+  String get assistantConversationDeleteMessage =>
+      'The chat and its messages are removed. Proposals it made stay in your plan.';
+
+  @override
+  String get assistantConversationDeleteTitle => 'Delete this conversation?';
+
+  @override
+  String get assistantConversationDeletedToast => 'Conversation deleted';
+
+  @override
+  String get assistantConversationListEmpty =>
+      'No conversations yet. Your first question starts one.';
+
+  @override
+  String get assistantConversations => 'Conversations';
+
+  @override
+  String get assistantConversationsLoadError => 'Could not load conversations.';
+
+  @override
+  String get assistantDisclaimer =>
+      'Guidance only, not financial or tax advice.';
+
+  @override
+  String get assistantDismiss => 'Dismiss';
+
+  @override
+  String get assistantEmptyMessage =>
+      'I can read your budget, explain what changed, and suggest moves for you to approve. I never change anything on my own.';
+
+  @override
+  String get assistantEmptyTitle => 'Ask about this plan';
+
+  @override
+  String get assistantErrorAllowanceMessage =>
+      'You\'ve used this month\'s included assistant usage. It resets with your next billing period, or you can connect your own provider and keep going now.';
+
+  @override
+  String get assistantErrorAllowanceTitle => 'Included usage is spent';
+
+  @override
+  String get assistantErrorEntitlementMessage =>
+      'The included assistant is part of OpenBudget Plus. Subscribe to keep chatting, or connect your own OpenAI-compatible provider.';
+
+  @override
+  String get assistantErrorEntitlementTitle => 'OpenBudget Plus is needed';
+
+  @override
+  String get assistantErrorGetPlus => 'Get OpenBudget Plus';
+
+  @override
+  String get assistantErrorNetworkMessage =>
+      'Check your connection and try again.';
+
+  @override
+  String get assistantErrorNetworkTitle => 'Couldn\'t reach the assistant';
+
+  @override
+  String get assistantErrorProviderMessage =>
+      'The built-in provider isn\'t available. Try again, or connect your own OpenAI-compatible provider.';
+
+  @override
+  String get assistantErrorProviderTitle =>
+      'The assistant has no provider right now';
+
+  @override
+  String get assistantErrorTryAgain => 'Try again';
+
+  @override
+  String get assistantErrorUnknownMessage =>
+      'Something went wrong while answering. Try again.';
+
+  @override
+  String get assistantErrorUnknownTitle => 'The assistant couldn\'t finish';
+
+  @override
+  String get assistantErrorUseOwnProvider => 'Use your own provider';
+
+  @override
+  String get assistantErrorValidationTitle => 'That request wasn\'t valid';
+
+  @override
+  String get assistantLoadingHistory => 'Opening the conversation…';
+
+  @override
+  String get assistantNewConversation => 'New conversation';
+
+  @override
+  String get assistantOpenProposals => 'Review proposals';
+
+  @override
+  String get assistantOwnProviderUsage => 'Using your own provider';
+
+  @override
+  String get assistantOwnProviderUsageHint =>
+      'Calls go to your provider and never count against the included usage.';
+
+  @override
+  String assistantPendingProposals(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count proposals waiting',
+      one: '1 proposal waiting',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get assistantProposalActionError =>
+      'Could not update that proposal. Try again.';
+
+  @override
+  String get assistantProposalApplied => 'Applied';
+
+  @override
+  String get assistantProposalAppliedToast => 'Proposal applied';
+
+  @override
+  String get assistantProposalDismissed => 'Dismissed';
+
+  @override
+  String get assistantProposalDismissedToast => 'Proposal dismissed';
+
+  @override
+  String get assistantProposalEnvelopeTax => 'Envelope tax category';
+
+  @override
+  String get assistantProposalMoveMoney => 'Move money';
+
+  @override
+  String get assistantProposalPendingLabel => 'Waiting for your call';
+
+  @override
+  String get assistantProposalTransactionTax => 'Transaction tax category';
+
+  @override
+  String get assistantProposalsEmptyMessage =>
+      'When the assistant suggests a move, it waits here for you to apply or dismiss it.';
+
+  @override
+  String get assistantProposalsEmptyTitle => 'Nothing waiting';
+
+  @override
+  String get assistantProposalsHistorySection => 'Past proposals';
+
+  @override
+  String get assistantProposalsLoadError => 'Could not load proposals.';
+
+  @override
+  String get assistantProposalsLoading => 'Gathering proposals…';
+
+  @override
+  String get assistantProposalsPendingSection => 'Waiting for you';
+
+  @override
+  String get assistantProposalsTitle => 'Assistant proposals';
+
+  @override
+  String get assistantProviderApiKey => 'API key';
+
+  @override
+  String get assistantProviderApiKeyHint => 'sk-…';
+
+  @override
+  String get assistantProviderBaseUrl => 'Base URL';
+
+  @override
+  String get assistantProviderBaseUrlHint => 'https://api.example.com/v1';
+
+  @override
+  String get assistantProviderEnterKeyAgain =>
+      'Saved keys are never shown. Enter the key again to save changes.';
+
+  @override
+  String get assistantProviderIntro =>
+      'Connect an OpenAI-compatible provider to talk to the assistant with your own key.';
+
+  @override
+  String get assistantProviderKeyRequired => 'Enter the API key.';
+
+  @override
+  String assistantProviderKeyStored(String hint) {
+    return '••••$hint';
+  }
+
+  @override
+  String get assistantProviderLoadError =>
+      'Could not load your provider settings.';
+
+  @override
+  String get assistantProviderLoading => 'Loading provider settings…';
+
+  @override
+  String get assistantProviderModel => 'Model';
+
+  @override
+  String get assistantProviderModelHint => 'model-name';
+
+  @override
+  String get assistantProviderModelRequired => 'Enter the model name.';
+
+  @override
+  String get assistantProviderPrivacy =>
+      'The key is stored encrypted on our servers and is only used to call the provider you name here.';
+
+  @override
+  String get assistantProviderRemove => 'Remove provider';
+
+  @override
+  String get assistantProviderRemovedToast => 'Provider removed';
+
+  @override
+  String get assistantProviderRemoveError => 'Could not remove the provider.';
+
+  @override
+  String get assistantProviderRemoveMessage =>
+      'The assistant will go back to the included provider, which needs OpenBudget Plus.';
+
+  @override
+  String get assistantProviderRemoveTitle => 'Remove this provider?';
+
+  @override
+  String get assistantProviderReplace => 'Use a different provider';
+
+  @override
+  String get assistantProviderSave => 'Save provider';
+
+  @override
+  String get assistantProviderSavedTitle => 'Your provider is connected';
+
+  @override
+  String get assistantProviderSavedToast => 'Provider saved';
+
+  @override
+  String get assistantProviderSaveError => 'Could not save the provider.';
+
+  @override
+  String get assistantProviderSettingsHint =>
+      'Use your own OpenAI-compatible provider';
+
+  @override
+  String get assistantProviderSettingsRow => 'Assistant provider';
+
+  @override
+  String get assistantProviderTitle => 'Assistant provider';
+
+  @override
+  String get assistantProviderUrlInvalid =>
+      'Use a full HTTPS URL that points at the provider.';
+
+  @override
+  String get assistantProviderUrlRequired =>
+      'Enter the provider\'s HTTPS base URL.';
+
+  @override
+  String get assistantRetry => 'Try again';
+
+  @override
+  String get assistantSend => 'Send message';
+
+  @override
+  String get assistantSuggestionCuts => 'Where can I cut spending?';
+
+  @override
+  String get assistantSuggestionGoals => 'Am I on track for my goals?';
+
+  @override
+  String get assistantSuggestionTax => 'How much tax will I owe this year?';
+
+  @override
+  String get assistantTitle => 'Assistant';
+
+  @override
+  String get assistantToolGetTaxReport => 'Looked at your tax report';
+
+  @override
+  String get assistantToolListBudgets => 'Looked at your plan';
+
+  @override
+  String get assistantToolListEnvelopes => 'Looked at your envelopes';
+
+  @override
+  String get assistantToolListTaxCategories => 'Looked at tax categories';
+
+  @override
+  String get assistantToolProposeEnvelopeTax =>
+      'Drafted an envelope tax change';
+
+  @override
+  String get assistantToolProposeMoveMoney => 'Drafted a money move';
+
+  @override
+  String get assistantToolProposeTransactionTax =>
+      'Drafted a tax category change';
+
+  @override
+  String get assistantToolSearchTransactions => 'Searched your transactions';
+
+  @override
+  String get assistantToolUnknown => 'Looked something up';
+
+  @override
+  String get assistantTyping => 'The assistant is thinking…';
+
+  @override
+  String get assistantUntitledConversation => 'Untitled conversation';
+
+  @override
+  String get assistantUsageLoading => 'Checking this month\'s usage…';
+
+  @override
+  String get assistantUsageUnavailable => 'Usage isn\'t available right now.';
+
+  @override
+  String assistantUsageZen(String used, String allowance) {
+    return '$used of $allowance used this month';
+  }
 }

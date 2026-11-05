@@ -149,6 +149,16 @@ class SettingsScreen extends HookConsumerWidget {
                     ),
                     const Divider(height: 1),
                     _SettingsTile(
+                      icon: OpenBudgetIcons.sparkle,
+                      label: l10n.assistantProviderSettingsRow,
+                      subtitle: l10n.assistantProviderSettingsHint,
+                      onTap: () => context.pushNamed(
+                        assistantProviderRoute,
+                        pathParameters: {'id': budgetId},
+                      ),
+                    ),
+                    const Divider(height: 1),
+                    _SettingsTile(
                       icon: OpenBudgetIcons.addCircle,
                       label: l10n.settingsNewPlan,
                       onTap: () => context.goNamed(createBudgetRoute),
