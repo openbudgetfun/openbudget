@@ -18,7 +18,7 @@ build/
 .packages
 .pub/
 
-# Generated — do NOT ignore *.g.dart or *.freezed.dart (constitution: committed)
+# Generated — do NOT ignore *.g.dart or *.freezed.dart (generated code is committed)
 
 # IDE
 *.iml

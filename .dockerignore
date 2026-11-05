@@ -2,7 +2,6 @@
 .git/
 .github/
 .claude/
-.specify/
 .changeset/
 .fvm/
 
@@ -18,7 +17,6 @@ openbudget_wired/
 openbudget_server/test/
 
 # Infrastructure and docs
-infra/
 docs/
 tools/
 
@@ -34,8 +32,6 @@ dprint.json
 knope.toml
 mdt.toml
 package.json
-pnpm-lock.yaml
-pnpm-workspace.yaml
 devenv.lock
 devenv.nix
 devenv.yaml

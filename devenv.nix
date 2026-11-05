@@ -18,13 +18,10 @@ in
       extra.agave
       extra.knope
       extra.mdt
-      extra.pnpm-standalone
       fvm
       gitleaks
       ktlint
       nixfmt
-      pulumi-bin
-      pulumi-esc
       shfmt
     ]
     ++ lib.optionals stdenv.isDarwin [
@@ -391,36 +388,9 @@ in
     "install:all" = {
       exec = ''
         set -e
-        install:pulumi
-        install:pnpm
         install:dart
-        install:infra || echo "Skipping infra install (pnpm not available)"
       '';
       description = "Run all install scripts.";
-      binary = "bash";
-    };
-    "install:pnpm" = {
-      exec = ''
-        set -euo pipefail
-        mkdir -p "$DEVENV_ROOT/.eget/bin"
-
-        # Create a wrapper script that uses npx as a reliable fallback.
-        # The nix-provided pnpm-standalone SEA binary can be incompatible
-        # across node versions or architectures (e.g. CI Linux runners).
-        # Always remove first — previous runs may leave a symlink to the
-        # read-only nix store.
-        rm -f "$DEVENV_ROOT/.eget/bin/pnpm"
-
-        if command -v pnpm >/dev/null 2>&1 && pnpm --version >/dev/null 2>&1; then
-          ln -sf "$(command -v pnpm)" "$DEVENV_ROOT/.eget/bin/pnpm"
-        else
-          echo "Creating pnpm wrapper using npx..."
-          printf '#!/usr/bin/env bash\nexec npx --yes pnpm@latest-10 "$@"\n' \
-            > "$DEVENV_ROOT/.eget/bin/pnpm"
-          chmod +x "$DEVENV_ROOT/.eget/bin/pnpm"
-        fi
-      '';
-      description = "Ensure pnpm is available for install scripts.";
       binary = "bash";
     };
     "install:dart" = {
@@ -429,57 +399,6 @@ in
         flutter pub get
       '';
       description = "Install dart dependencies";
-      binary = "bash";
-    };
-    "install:pulumi" = {
-      exec = ''
-        PULUMI_DIR="$DEVENV_ROOT/.eget/bin"
-        PULUMI_VERSION="v3.223.0"
-        if [ -f "$PULUMI_DIR/pulumi" ]; then
-          CURRENT=$("$PULUMI_DIR/pulumi" version 2>/dev/null || echo "")
-          if [ "$CURRENT" = "$PULUMI_VERSION" ]; then
-            echo "Pulumi $PULUMI_VERSION already installed"
-            exit 0
-          fi
-        fi
-        echo "Installing Pulumi $PULUMI_VERSION..."
-        OS=$(uname -s | tr '[:upper:]' '[:lower:]')
-        ARCH=$(uname -m | sed 's/x86_64/x64/' | sed 's/aarch64/arm64/')
-        curl -fsSL "https://get.pulumi.com/releases/sdk/pulumi-$PULUMI_VERSION-$OS-$ARCH.tar.gz" \
-          | tar xz --strip-components=1 -C "$PULUMI_DIR"
-        echo "Pulumi $PULUMI_VERSION installed"
-      '';
-      description = "Install Pulumi CLI from official releases.";
-      binary = "bash";
-    };
-    "install:infra" = {
-      exec = ''
-        set -e
-        cd "$DEVENV_ROOT/infra"
-        $DEVENV_ROOT/.eget/bin/pnpm install
-      '';
-      description = "Install infrastructure dependencies.";
-      binary = "bash";
-    };
-    "pulumi" = {
-      exec = ''
-        set -e
-        export PATH="$DEVENV_ROOT/.eget/bin:$PATH"
-        source "$HOME/.env.dotfiles" 2>/dev/null || true
-        export PULUMI_ACCESS_TOKEN="''${PULUMI_ACCESS_TOKEN:-$PULUMI_TOKEN}"
-        $DEVENV_ROOT/.eget/bin/pulumi $@
-      '';
-      description = "Run Pulumi infrastructure CLI.";
-      binary = "bash";
-    };
-    "esc" = {
-      exec = ''
-        set -e
-        source "$HOME/.env.dotfiles" 2>/dev/null || true
-        export PULUMI_ACCESS_TOKEN="''${PULUMI_ACCESS_TOKEN:-$PULUMI_TOKEN}"
-        $DEVENV_ROOT/.eget/bin/esc $@
-      '';
-      description = "Run Pulumi ESC CLI.";
       binary = "bash";
     };
     "docs:workflows:update" = {
@@ -496,51 +415,6 @@ in
         mdt check
       '';
       description = "Verify workflow markdown files are in sync with templates.";
-      binary = "bash";
-    };
-    "infra:preview" = {
-      exec = ''
-        set -e
-        cd "$DEVENV_ROOT/infra"
-        pulumi preview $@
-      '';
-      description = "Preview infrastructure changes.";
-      binary = "bash";
-    };
-    "infra:up" = {
-      exec = ''
-        set -e
-        cd "$DEVENV_ROOT/infra"
-        pulumi up $@
-      '';
-      description = "Deploy infrastructure changes.";
-      binary = "bash";
-    };
-    "infra:destroy" = {
-      exec = ''
-        set -e
-        cd "$DEVENV_ROOT/infra"
-        pulumi destroy $@
-      '';
-      description = "Tear down all infrastructure resources.";
-      binary = "bash";
-    };
-    "infra:build" = {
-      exec = ''
-        set -e
-        cd "$DEVENV_ROOT/infra"
-        pnpm build
-      '';
-      description = "Type-check the infrastructure code.";
-      binary = "bash";
-    };
-    "infra:stack" = {
-      exec = ''
-        set -e
-        cd "$DEVENV_ROOT/infra"
-        pulumi stack $@
-      '';
-      description = "Manage Pulumi stacks (select, ls, output, etc.).";
       binary = "bash";
     };
     "server:start" = {

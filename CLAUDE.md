@@ -196,9 +196,13 @@ All PRs must pass: analyze, test, format, integration-test, widget-ban, secrets-
 - Never create incremental migrations for iterative tweaks within the same branch — squash into a single migration before opening the PR.
 - Migration files (`openbudget_server/migrations/`) are committed alongside the code they support.
 
-## Constitution
+## Product Principles
 
-See `.specify/memory/constitution.md` for the full project constitution (v1.0.0). All code must comply with its 10 core principles.
+- **Envelope budgeting is zero-sum.** Every unit of income is assigned to a category, and money can move between categories at any time.
+- **Multi-currency is native.** Every model, calculation, and screen carries a currency. Conversions show their rate source and staleness and never silently round away value.
+- **Cloud-first.** All persistent data lives on the Serverpod backend; the API contract is the single source of truth.
+- **AI advice is guidance, not regulated advice.** Surface actionable insights in context and include an appropriate disclaimer.
+- **Packages form a DAG.** Shared code lives in workspace packages that never depend on app code.
 
 ## Tech Stack
 

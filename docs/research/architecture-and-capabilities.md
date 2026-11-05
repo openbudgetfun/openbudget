@@ -14,7 +14,7 @@ It is **not yet** a live multi-currency valuation platform, a digital-asset port
 
 ## 2) Method and Scope
 
-This research was performed by reading app/server/core/infra code and project docs directly in the repository.
+This research was performed by reading app/server/core code and project docs directly in the repository.
 
 Primary focus areas:
 
@@ -32,7 +32,7 @@ Primary focus areas:
 - `openbudget_server`: Serverpod backend with PostgreSQL.
 - `openbudget_client`: generated Serverpod client.
 - `openbudget_core`: shared constants/logging utilities (includes currency enum).
-- `infra`: Pulumi TypeScript for AWS (ECS) and GCP (Cloud Run).
+- Deployment infrastructure is not part of this repository.
 
 ### 3.2 Backend Domain Surface (Implemented)
 
@@ -211,7 +211,6 @@ Evidence:
 - Clear bounded services in backend.
 - Ownership checks are consistent.
 - Good baseline test volume (app unit + integration, server integration).
-- Infra supports AWS and GCP with Pulumi ESC secret management.
 
 ### 8.2 Scaling Friction
 
@@ -248,7 +247,6 @@ Current docs and recent changes indicate heavy effort on:
 Evidence:
 
 - `docs/openbudget-screenflows.md`
-- `docs/openbudget-migration-progress.md`
 
 Strategic planning artifacts for multi-currency valuation, crypto assets, tax engine, and AI workflows are currently missing.
 
