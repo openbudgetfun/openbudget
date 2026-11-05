@@ -12,6 +12,7 @@ import 'package:openbudget_app/src/features/budget/screens/edit_envelope_dialog.
 import 'package:openbudget_app/src/features/budget/screens/quick_budget_dialog.dart';
 import 'package:openbudget_app/src/features/budget/screens/set_goal_dialog.dart';
 import 'package:openbudget_app/src/features/settings/providers/display_options_provider.dart';
+import 'package:openbudget_app/src/features/tax/widgets/tax_category_row.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
@@ -259,6 +260,13 @@ class CategoryDetailScreen extends HookConsumerWidget {
                       summary.month,
                     ),
                   ),
+                ),
+              ),
+              const SizedBox(height: SpacingTokens.md),
+              _Card(
+                child: EnvelopeTaxCategoryRow(
+                  budgetId: budgetId,
+                  envelope: selectedEnvelope,
                 ),
               ),
               const SizedBox(height: SpacingTokens.lg),

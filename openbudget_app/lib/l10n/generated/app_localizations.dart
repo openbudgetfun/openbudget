@@ -6017,6 +6017,690 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{title}. {entries}'**
   String reportsChartSummary(String title, String entries);
+
+  /// No description provided for @moreTaxes.
+  ///
+  /// In en, this message translates to:
+  /// **'Taxes'**
+  String get moreTaxes;
+
+  /// No description provided for @taxOverviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Taxes'**
+  String get taxOverviewTitle;
+
+  /// No description provided for @taxOverviewLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading your tax report'**
+  String get taxOverviewLoading;
+
+  /// No description provided for @taxOverviewLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t load your tax report.'**
+  String get taxOverviewLoadError;
+
+  /// No description provided for @taxProfileLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t load your tax profile.'**
+  String get taxProfileLoadError;
+
+  /// No description provided for @taxSetupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up taxes'**
+  String get taxSetupTitle;
+
+  /// No description provided for @taxSetupMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your country and how you file, then tag envelopes and transactions so OpenBudget can work out your tax position.'**
+  String get taxSetupMessage;
+
+  /// No description provided for @taxSetupAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up taxes'**
+  String get taxSetupAction;
+
+  /// No description provided for @taxRulesUnavailableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No rates for this year'**
+  String get taxRulesUnavailableTitle;
+
+  /// No description provided for @taxRulesUnavailableMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenBudget doesn\'t have the tax rates for this year yet. Try another year.'**
+  String get taxRulesUnavailableMessage;
+
+  /// No description provided for @taxYearLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax year {year}'**
+  String taxYearLabel(String year);
+
+  /// No description provided for @taxPreviousYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous tax year'**
+  String get taxPreviousYear;
+
+  /// No description provided for @taxNextYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Next tax year'**
+  String get taxNextYear;
+
+  /// No description provided for @taxBalanceDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance due'**
+  String get taxBalanceDue;
+
+  /// No description provided for @taxRefundDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Refund due'**
+  String get taxRefundDue;
+
+  /// No description provided for @taxNothingToPay.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to pay'**
+  String get taxNothingToPay;
+
+  /// No description provided for @taxTotalLiability.
+  ///
+  /// In en, this message translates to:
+  /// **'Total tax'**
+  String get taxTotalLiability;
+
+  /// No description provided for @taxAlreadyPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Already paid'**
+  String get taxAlreadyPaid;
+
+  /// No description provided for @taxUncategorizedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Uncategorized: {count}'**
+  String taxUncategorizedCount(int count);
+
+  /// No description provided for @taxUncategorizedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tag these transactions to include them in your report.'**
+  String get taxUncategorizedHint;
+
+  /// No description provided for @taxConvertedEntries.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 entry converted at its transaction date rate} other{{count} entries converted at their transaction date rates}}'**
+  String taxConvertedEntries(int count);
+
+  /// No description provided for @taxLiabilitiesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax due'**
+  String get taxLiabilitiesTitle;
+
+  /// No description provided for @taxLiabilitiesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No tax is due for this year.'**
+  String get taxLiabilitiesEmpty;
+
+  /// No description provided for @taxBandsShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Show how this was worked out'**
+  String get taxBandsShow;
+
+  /// No description provided for @taxBandsHide.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide how this was worked out'**
+  String get taxBandsHide;
+
+  /// No description provided for @taxBandRate.
+  ///
+  /// In en, this message translates to:
+  /// **'{rate}%'**
+  String taxBandRate(String rate);
+
+  /// No description provided for @taxBandBaseColumn.
+  ///
+  /// In en, this message translates to:
+  /// **'Taxable'**
+  String get taxBandBaseColumn;
+
+  /// No description provided for @taxBandTaxColumn.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax'**
+  String get taxBandTaxColumn;
+
+  /// No description provided for @taxReportLinesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Report lines'**
+  String get taxReportLinesTitle;
+
+  /// No description provided for @taxReportLinesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No categorised lines yet. Tag envelopes or transactions to fill this in.'**
+  String get taxReportLinesEmpty;
+
+  /// No description provided for @taxEntryCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No entries} =1{1 entry} other{{count} entries}}'**
+  String taxEntryCount(int count);
+
+  /// No description provided for @taxOpportunitiesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ways to pay less'**
+  String get taxOpportunitiesTitle;
+
+  /// No description provided for @taxOpportunitySaving.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated saving {amount}'**
+  String taxOpportunitySaving(String amount);
+
+  /// No description provided for @taxOpportunityDeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Act by {date}'**
+  String taxOpportunityDeadline(String date);
+
+  /// No description provided for @taxOpportunitySource.
+  ///
+  /// In en, this message translates to:
+  /// **'Guidance'**
+  String get taxOpportunitySource;
+
+  /// No description provided for @taxHowWorkedOutTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How this was worked out'**
+  String get taxHowWorkedOutTitle;
+
+  /// No description provided for @taxRulesVerifiedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Rates checked on {date}'**
+  String taxRulesVerifiedOn(String date);
+
+  /// No description provided for @taxAssumptionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Assumptions'**
+  String get taxAssumptionsTitle;
+
+  /// No description provided for @taxSourcesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sources'**
+  String get taxSourcesTitle;
+
+  /// No description provided for @taxDisclaimer.
+  ///
+  /// In en, this message translates to:
+  /// **'Guidance only, not tax advice. Check figures with a qualified adviser before filing.'**
+  String get taxDisclaimer;
+
+  /// No description provided for @taxProfileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax profile'**
+  String get taxProfileTitle;
+
+  /// No description provided for @taxProfileLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading your tax profile'**
+  String get taxProfileLoading;
+
+  /// No description provided for @taxProfileSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save profile'**
+  String get taxProfileSave;
+
+  /// No description provided for @taxProfileSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax profile saved'**
+  String get taxProfileSaved;
+
+  /// No description provided for @taxProfileSaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t save your tax profile.'**
+  String get taxProfileSaveError;
+
+  /// No description provided for @taxProfileSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{jurisdiction} · {entity}'**
+  String taxProfileSummary(String jurisdiction, String entity);
+
+  /// No description provided for @taxCountryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Country'**
+  String get taxCountryLabel;
+
+  /// No description provided for @taxEntityKindLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Entity kind'**
+  String get taxEntityKindLabel;
+
+  /// No description provided for @taxEntityIndividual.
+  ///
+  /// In en, this message translates to:
+  /// **'Individual'**
+  String get taxEntityIndividual;
+
+  /// No description provided for @taxEntitySoleTrader.
+  ///
+  /// In en, this message translates to:
+  /// **'Sole trader'**
+  String get taxEntitySoleTrader;
+
+  /// No description provided for @taxEntityCompany.
+  ///
+  /// In en, this message translates to:
+  /// **'Company'**
+  String get taxEntityCompany;
+
+  /// No description provided for @taxJurisdictionGb.
+  ///
+  /// In en, this message translates to:
+  /// **'United Kingdom'**
+  String get taxJurisdictionGb;
+
+  /// No description provided for @taxJurisdictionUs.
+  ///
+  /// In en, this message translates to:
+  /// **'United States'**
+  String get taxJurisdictionUs;
+
+  /// No description provided for @taxJurisdictionNg.
+  ///
+  /// In en, this message translates to:
+  /// **'Nigeria'**
+  String get taxJurisdictionNg;
+
+  /// No description provided for @taxJurisdictionDe.
+  ///
+  /// In en, this message translates to:
+  /// **'Germany'**
+  String get taxJurisdictionDe;
+
+  /// No description provided for @taxSalesTaxRegistered.
+  ///
+  /// In en, this message translates to:
+  /// **'Registered for sales tax or VAT'**
+  String get taxSalesTaxRegistered;
+
+  /// No description provided for @taxSalesTaxRegisteredHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn this on if you charge and reclaim sales tax on these books.'**
+  String get taxSalesTaxRegisteredHint;
+
+  /// No description provided for @taxGbScottishTaxpayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Scottish taxpayer'**
+  String get taxGbScottishTaxpayer;
+
+  /// No description provided for @taxGbScottishTaxpayerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Use Scottish income tax rates.'**
+  String get taxGbScottishTaxpayerHint;
+
+  /// No description provided for @taxGbStudentLoanPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Student loan plan'**
+  String get taxGbStudentLoanPlan;
+
+  /// No description provided for @taxGbStudentLoanNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No student loan'**
+  String get taxGbStudentLoanNone;
+
+  /// No description provided for @taxGbStudentLoanPlan1.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan 1'**
+  String get taxGbStudentLoanPlan1;
+
+  /// No description provided for @taxGbStudentLoanPlan2.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan 2'**
+  String get taxGbStudentLoanPlan2;
+
+  /// No description provided for @taxGbStudentLoanPlan4.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan 4'**
+  String get taxGbStudentLoanPlan4;
+
+  /// No description provided for @taxGbStudentLoanPlan5.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan 5'**
+  String get taxGbStudentLoanPlan5;
+
+  /// No description provided for @taxGbStudentLoanPostgraduate.
+  ///
+  /// In en, this message translates to:
+  /// **'Postgraduate loan'**
+  String get taxGbStudentLoanPostgraduate;
+
+  /// No description provided for @taxUsFilingStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Filing status'**
+  String get taxUsFilingStatus;
+
+  /// No description provided for @taxUsFilingSingle.
+  ///
+  /// In en, this message translates to:
+  /// **'Single'**
+  String get taxUsFilingSingle;
+
+  /// No description provided for @taxUsFilingMarriedJointly.
+  ///
+  /// In en, this message translates to:
+  /// **'Married filing jointly'**
+  String get taxUsFilingMarriedJointly;
+
+  /// No description provided for @taxUsFilingMarriedSeparately.
+  ///
+  /// In en, this message translates to:
+  /// **'Married filing separately'**
+  String get taxUsFilingMarriedSeparately;
+
+  /// No description provided for @taxUsFilingHeadOfHousehold.
+  ///
+  /// In en, this message translates to:
+  /// **'Head of household'**
+  String get taxUsFilingHeadOfHousehold;
+
+  /// No description provided for @taxNgAnnualRent.
+  ///
+  /// In en, this message translates to:
+  /// **'Annual rent paid'**
+  String get taxNgAnnualRent;
+
+  /// No description provided for @taxNgAnnualRentHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Used for rent relief under the Nigeria Tax Act.'**
+  String get taxNgAnnualRentHint;
+
+  /// No description provided for @taxNgAnnualRentError.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the annual rent as a number, such as 1200000.'**
+  String get taxNgAnnualRentError;
+
+  /// No description provided for @taxDeJointAssessment.
+  ///
+  /// In en, this message translates to:
+  /// **'Joint assessment'**
+  String get taxDeJointAssessment;
+
+  /// No description provided for @taxDeJointAssessmentHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Spouses assessed together with income splitting.'**
+  String get taxDeJointAssessmentHint;
+
+  /// No description provided for @taxDeChurchTax.
+  ///
+  /// In en, this message translates to:
+  /// **'Church tax'**
+  String get taxDeChurchTax;
+
+  /// No description provided for @taxDeChurchTaxHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Kirchensteuer on top of income tax.'**
+  String get taxDeChurchTaxHint;
+
+  /// No description provided for @taxDeSmallBusinessExemption.
+  ///
+  /// In en, this message translates to:
+  /// **'Small business VAT exemption'**
+  String get taxDeSmallBusinessExemption;
+
+  /// No description provided for @taxDeSmallBusinessExemptionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Kleinunternehmerregelung: no VAT charged or reclaimed.'**
+  String get taxDeSmallBusinessExemptionHint;
+
+  /// No description provided for @taxLinkedBudget.
+  ///
+  /// In en, this message translates to:
+  /// **'Linked personal budget'**
+  String get taxLinkedBudget;
+
+  /// No description provided for @taxLinkedBudgetHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The personal budget this business feeds.'**
+  String get taxLinkedBudgetHint;
+
+  /// No description provided for @taxLinkedBudgetNone.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get taxLinkedBudgetNone;
+
+  /// No description provided for @taxLinkedBudgetError.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a different budget to link.'**
+  String get taxLinkedBudgetError;
+
+  /// No description provided for @taxCategorySheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax category'**
+  String get taxCategorySheetTitle;
+
+  /// No description provided for @taxCategorySheetSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search categories'**
+  String get taxCategorySheetSearch;
+
+  /// No description provided for @taxCategoryNone.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get taxCategoryNone;
+
+  /// No description provided for @taxCategoryNoneHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave this out of the tax report.'**
+  String get taxCategoryNoneHint;
+
+  /// No description provided for @taxCategoryKindIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get taxCategoryKindIncome;
+
+  /// No description provided for @taxCategoryKindExpense.
+  ///
+  /// In en, this message translates to:
+  /// **'Expenses'**
+  String get taxCategoryKindExpense;
+
+  /// No description provided for @taxCategoryKindDisposalProceeds.
+  ///
+  /// In en, this message translates to:
+  /// **'Disposal proceeds'**
+  String get taxCategoryKindDisposalProceeds;
+
+  /// No description provided for @taxCategoryKindDisposalCost.
+  ///
+  /// In en, this message translates to:
+  /// **'Acquisition costs'**
+  String get taxCategoryKindDisposalCost;
+
+  /// No description provided for @taxCategoryKindRelief.
+  ///
+  /// In en, this message translates to:
+  /// **'Reliefs'**
+  String get taxCategoryKindRelief;
+
+  /// No description provided for @taxCategoryKindTaxPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax already paid'**
+  String get taxCategoryKindTaxPaid;
+
+  /// No description provided for @taxCategoryKindSalesTaxCollected.
+  ///
+  /// In en, this message translates to:
+  /// **'Sales tax collected'**
+  String get taxCategoryKindSalesTaxCollected;
+
+  /// No description provided for @taxCategoryKindSalesTaxPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Sales tax paid'**
+  String get taxCategoryKindSalesTaxPaid;
+
+  /// No description provided for @taxCategoryKindOutOfScope.
+  ///
+  /// In en, this message translates to:
+  /// **'Outside tax'**
+  String get taxCategoryKindOutOfScope;
+
+  /// No description provided for @taxCategorySearchEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No categories match \"{query}\".'**
+  String taxCategorySearchEmpty(String query);
+
+  /// No description provided for @taxCategorySheetSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save category'**
+  String get taxCategorySheetSave;
+
+  /// No description provided for @taxCategorySheetSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax category updated.'**
+  String get taxCategorySheetSaved;
+
+  /// No description provided for @taxCategorySheetError.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t update the tax category.'**
+  String get taxCategorySheetError;
+
+  /// No description provided for @taxCategorySheetEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up a tax profile first to choose a category.'**
+  String get taxCategorySheetEmpty;
+
+  /// No description provided for @taxCategorySheetSetupAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up taxes'**
+  String get taxCategorySheetSetupAction;
+
+  /// No description provided for @taxCategorySheetLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading tax categories'**
+  String get taxCategorySheetLoading;
+
+  /// No description provided for @taxCategorySheetLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t load tax categories.'**
+  String get taxCategorySheetLoadError;
+
+  /// No description provided for @taxCategoryRowLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax category'**
+  String get taxCategoryRowLabel;
+
+  /// No description provided for @taxCategoryNotSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set'**
+  String get taxCategoryNotSet;
+
+  /// No description provided for @taxCategoryTagged.
+  ///
+  /// In en, this message translates to:
+  /// **'Tagged'**
+  String get taxCategoryTagged;
+
+  /// No description provided for @taxTransactionBusinessUse.
+  ///
+  /// In en, this message translates to:
+  /// **'Business use'**
+  String get taxTransactionBusinessUse;
+
+  /// No description provided for @taxTransactionBusinessUseValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}%'**
+  String taxTransactionBusinessUseValue(int percent);
+
+  /// No description provided for @taxTransactionSalesTax.
+  ///
+  /// In en, this message translates to:
+  /// **'Sales tax included'**
+  String get taxTransactionSalesTax;
+
+  /// No description provided for @taxTransactionSalesTaxHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The tax already inside the transaction amount.'**
+  String get taxTransactionSalesTaxHint;
+
+  /// No description provided for @taxTransactionSalesTaxError.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter an amount no larger than the transaction.'**
+  String get taxTransactionSalesTaxError;
+
+  /// No description provided for @taxCategoryLoadRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get taxCategoryLoadRetry;
 }
 
 class _AppLocalizationsDelegate

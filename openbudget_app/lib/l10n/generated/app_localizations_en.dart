@@ -3551,4 +3551,394 @@ class AppLocalizationsEn extends AppLocalizations {
   String reportsChartSummary(String title, String entries) {
     return '$title. $entries';
   }
+
+  @override
+  String get moreTaxes => 'Taxes';
+
+  @override
+  String get taxOverviewTitle => 'Taxes';
+
+  @override
+  String get taxOverviewLoading => 'Loading your tax report';
+
+  @override
+  String get taxOverviewLoadError => 'We couldn\'t load your tax report.';
+
+  @override
+  String get taxProfileLoadError => 'We couldn\'t load your tax profile.';
+
+  @override
+  String get taxSetupTitle => 'Set up taxes';
+
+  @override
+  String get taxSetupMessage =>
+      'Choose your country and how you file, then tag envelopes and transactions so OpenBudget can work out your tax position.';
+
+  @override
+  String get taxSetupAction => 'Set up taxes';
+
+  @override
+  String get taxRulesUnavailableTitle => 'No rates for this year';
+
+  @override
+  String get taxRulesUnavailableMessage =>
+      'OpenBudget doesn\'t have the tax rates for this year yet. Try another year.';
+
+  @override
+  String taxYearLabel(String year) {
+    return 'Tax year $year';
+  }
+
+  @override
+  String get taxPreviousYear => 'Previous tax year';
+
+  @override
+  String get taxNextYear => 'Next tax year';
+
+  @override
+  String get taxBalanceDue => 'Balance due';
+
+  @override
+  String get taxRefundDue => 'Refund due';
+
+  @override
+  String get taxNothingToPay => 'Nothing to pay';
+
+  @override
+  String get taxTotalLiability => 'Total tax';
+
+  @override
+  String get taxAlreadyPaid => 'Already paid';
+
+  @override
+  String taxUncategorizedCount(int count) {
+    return 'Uncategorized: $count';
+  }
+
+  @override
+  String get taxUncategorizedHint =>
+      'Tag these transactions to include them in your report.';
+
+  @override
+  String taxConvertedEntries(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count entries converted at their transaction date rates',
+      one: '1 entry converted at its transaction date rate',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get taxLiabilitiesTitle => 'Tax due';
+
+  @override
+  String get taxLiabilitiesEmpty => 'No tax is due for this year.';
+
+  @override
+  String get taxBandsShow => 'Show how this was worked out';
+
+  @override
+  String get taxBandsHide => 'Hide how this was worked out';
+
+  @override
+  String taxBandRate(String rate) {
+    return '$rate%';
+  }
+
+  @override
+  String get taxBandBaseColumn => 'Taxable';
+
+  @override
+  String get taxBandTaxColumn => 'Tax';
+
+  @override
+  String get taxReportLinesTitle => 'Report lines';
+
+  @override
+  String get taxReportLinesEmpty =>
+      'No categorised lines yet. Tag envelopes or transactions to fill this in.';
+
+  @override
+  String taxEntryCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count entries',
+      one: '1 entry',
+      zero: 'No entries',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get taxOpportunitiesTitle => 'Ways to pay less';
+
+  @override
+  String taxOpportunitySaving(String amount) {
+    return 'Estimated saving $amount';
+  }
+
+  @override
+  String taxOpportunityDeadline(String date) {
+    return 'Act by $date';
+  }
+
+  @override
+  String get taxOpportunitySource => 'Guidance';
+
+  @override
+  String get taxHowWorkedOutTitle => 'How this was worked out';
+
+  @override
+  String taxRulesVerifiedOn(String date) {
+    return 'Rates checked on $date';
+  }
+
+  @override
+  String get taxAssumptionsTitle => 'Assumptions';
+
+  @override
+  String get taxSourcesTitle => 'Sources';
+
+  @override
+  String get taxDisclaimer =>
+      'Guidance only, not tax advice. Check figures with a qualified adviser before filing.';
+
+  @override
+  String get taxProfileTitle => 'Tax profile';
+
+  @override
+  String get taxProfileLoading => 'Loading your tax profile';
+
+  @override
+  String get taxProfileSave => 'Save profile';
+
+  @override
+  String get taxProfileSaved => 'Tax profile saved';
+
+  @override
+  String get taxProfileSaveError => 'We couldn\'t save your tax profile.';
+
+  @override
+  String taxProfileSummary(String jurisdiction, String entity) {
+    return '$jurisdiction · $entity';
+  }
+
+  @override
+  String get taxCountryLabel => 'Country';
+
+  @override
+  String get taxEntityKindLabel => 'Entity kind';
+
+  @override
+  String get taxEntityIndividual => 'Individual';
+
+  @override
+  String get taxEntitySoleTrader => 'Sole trader';
+
+  @override
+  String get taxEntityCompany => 'Company';
+
+  @override
+  String get taxJurisdictionGb => 'United Kingdom';
+
+  @override
+  String get taxJurisdictionUs => 'United States';
+
+  @override
+  String get taxJurisdictionNg => 'Nigeria';
+
+  @override
+  String get taxJurisdictionDe => 'Germany';
+
+  @override
+  String get taxSalesTaxRegistered => 'Registered for sales tax or VAT';
+
+  @override
+  String get taxSalesTaxRegisteredHint =>
+      'Turn this on if you charge and reclaim sales tax on these books.';
+
+  @override
+  String get taxGbScottishTaxpayer => 'Scottish taxpayer';
+
+  @override
+  String get taxGbScottishTaxpayerHint => 'Use Scottish income tax rates.';
+
+  @override
+  String get taxGbStudentLoanPlan => 'Student loan plan';
+
+  @override
+  String get taxGbStudentLoanNone => 'No student loan';
+
+  @override
+  String get taxGbStudentLoanPlan1 => 'Plan 1';
+
+  @override
+  String get taxGbStudentLoanPlan2 => 'Plan 2';
+
+  @override
+  String get taxGbStudentLoanPlan4 => 'Plan 4';
+
+  @override
+  String get taxGbStudentLoanPlan5 => 'Plan 5';
+
+  @override
+  String get taxGbStudentLoanPostgraduate => 'Postgraduate loan';
+
+  @override
+  String get taxUsFilingStatus => 'Filing status';
+
+  @override
+  String get taxUsFilingSingle => 'Single';
+
+  @override
+  String get taxUsFilingMarriedJointly => 'Married filing jointly';
+
+  @override
+  String get taxUsFilingMarriedSeparately => 'Married filing separately';
+
+  @override
+  String get taxUsFilingHeadOfHousehold => 'Head of household';
+
+  @override
+  String get taxNgAnnualRent => 'Annual rent paid';
+
+  @override
+  String get taxNgAnnualRentHint =>
+      'Used for rent relief under the Nigeria Tax Act.';
+
+  @override
+  String get taxNgAnnualRentError =>
+      'Enter the annual rent as a number, such as 1200000.';
+
+  @override
+  String get taxDeJointAssessment => 'Joint assessment';
+
+  @override
+  String get taxDeJointAssessmentHint =>
+      'Spouses assessed together with income splitting.';
+
+  @override
+  String get taxDeChurchTax => 'Church tax';
+
+  @override
+  String get taxDeChurchTaxHint => 'Kirchensteuer on top of income tax.';
+
+  @override
+  String get taxDeSmallBusinessExemption => 'Small business VAT exemption';
+
+  @override
+  String get taxDeSmallBusinessExemptionHint =>
+      'Kleinunternehmerregelung: no VAT charged or reclaimed.';
+
+  @override
+  String get taxLinkedBudget => 'Linked personal budget';
+
+  @override
+  String get taxLinkedBudgetHint => 'The personal budget this business feeds.';
+
+  @override
+  String get taxLinkedBudgetNone => 'None';
+
+  @override
+  String get taxLinkedBudgetError => 'Choose a different budget to link.';
+
+  @override
+  String get taxCategorySheetTitle => 'Tax category';
+
+  @override
+  String get taxCategorySheetSearch => 'Search categories';
+
+  @override
+  String get taxCategoryNone => 'None';
+
+  @override
+  String get taxCategoryNoneHint => 'Leave this out of the tax report.';
+
+  @override
+  String get taxCategoryKindIncome => 'Income';
+
+  @override
+  String get taxCategoryKindExpense => 'Expenses';
+
+  @override
+  String get taxCategoryKindDisposalProceeds => 'Disposal proceeds';
+
+  @override
+  String get taxCategoryKindDisposalCost => 'Acquisition costs';
+
+  @override
+  String get taxCategoryKindRelief => 'Reliefs';
+
+  @override
+  String get taxCategoryKindTaxPaid => 'Tax already paid';
+
+  @override
+  String get taxCategoryKindSalesTaxCollected => 'Sales tax collected';
+
+  @override
+  String get taxCategoryKindSalesTaxPaid => 'Sales tax paid';
+
+  @override
+  String get taxCategoryKindOutOfScope => 'Outside tax';
+
+  @override
+  String taxCategorySearchEmpty(String query) {
+    return 'No categories match \"$query\".';
+  }
+
+  @override
+  String get taxCategorySheetSave => 'Save category';
+
+  @override
+  String get taxCategorySheetSaved => 'Tax category updated.';
+
+  @override
+  String get taxCategorySheetError => 'We couldn\'t update the tax category.';
+
+  @override
+  String get taxCategorySheetEmpty =>
+      'Set up a tax profile first to choose a category.';
+
+  @override
+  String get taxCategorySheetSetupAction => 'Set up taxes';
+
+  @override
+  String get taxCategorySheetLoading => 'Loading tax categories';
+
+  @override
+  String get taxCategorySheetLoadError => 'We couldn\'t load tax categories.';
+
+  @override
+  String get taxCategoryRowLabel => 'Tax category';
+
+  @override
+  String get taxCategoryNotSet => 'Not set';
+
+  @override
+  String get taxCategoryTagged => 'Tagged';
+
+  @override
+  String get taxTransactionBusinessUse => 'Business use';
+
+  @override
+  String taxTransactionBusinessUseValue(int percent) {
+    return '$percent%';
+  }
+
+  @override
+  String get taxTransactionSalesTax => 'Sales tax included';
+
+  @override
+  String get taxTransactionSalesTaxHint =>
+      'The tax already inside the transaction amount.';
+
+  @override
+  String get taxTransactionSalesTaxError =>
+      'Enter an amount no larger than the transaction.';
+
+  @override
+  String get taxCategoryLoadRetry => 'Try again';
 }

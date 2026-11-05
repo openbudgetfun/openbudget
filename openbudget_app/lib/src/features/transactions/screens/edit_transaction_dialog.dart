@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
 import 'package:openbudget_app/src/features/payees/providers/payee_list_provider.dart';
+import 'package:openbudget_app/src/features/tax/widgets/tax_category_row.dart';
 import 'package:openbudget_app/src/features/transactions/providers/transaction_actions_provider.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
@@ -181,6 +182,12 @@ class EditTransactionDialog extends HookConsumerWidget {
               ),
               maxLines: 2,
               textInputAction: TextInputAction.done,
+            ),
+            const SizedBox(height: SpacingTokens.sm),
+            TransactionTaxCategoryRow(
+              budgetId: budgetId,
+              transaction: transaction,
+              currencyCode: currencyCode.code,
             ),
           ],
         ),

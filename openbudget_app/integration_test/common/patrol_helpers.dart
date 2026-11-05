@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/main.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 Finder _skribbleIcon(WiredSvgIconData data) => find.byWidgetPredicate(
@@ -374,6 +375,7 @@ class MoreTabPage {
   Finder get payeesTile => find.text('Payees');
   Finder get rulesTile => find.text('Transaction Rules');
   Finder get importTile => find.text('Import Transactions');
+  Finder get taxesTile => find.text('Taxes');
   Finder get settingsTile => find.text('Settings');
 }
 
@@ -397,3 +399,48 @@ class CategoryDetailPage {
 Finder _iconFinder(WiredSvgIconData data) => find.byWidgetPredicate(
   (widget) => widget is SkribbleIcon && widget.data == data,
 );
+
+/// Page object for the tax overview.
+class TaxOverviewPage {
+  TaxOverviewPage(this.tester);
+
+  final WidgetTester tester;
+
+  Finder get title => find.text('Taxes').first;
+  Finder get emptyTitle => find.text('Set up taxes').first;
+  Finder get setupButton => find.text('Set up taxes').last;
+  Finder get yearLabel => find.byKey(const Key('tax-year-label'));
+  Finder get balanceDue => find.text('Balance due');
+  Finder get refundDue => find.text('Refund due');
+  Finder get disclaimer => find.text(
+    'Guidance only, not tax advice. Check figures with a qualified adviser '
+    'before filing.',
+  );
+}
+
+/// Page object for the tax profile form.
+class TaxProfilePage {
+  TaxProfilePage(this.tester);
+
+  final WidgetTester tester;
+
+  Finder get title => find.text('Tax profile').first;
+  Finder get countryField =>
+      find.byType(DropdownButtonFormField<TaxJurisdiction>);
+  Finder get entityField => find.byType(DropdownButtonFormField<TaxEntityKind>);
+  Finder get scottishTaxpayerToggle => find.text('Scottish taxpayer');
+  Finder get studentLoanField => find.byType(DropdownButtonFormField<String>);
+  Finder get annualRentField => find.byType(TextField).first;
+  Finder get saveButton => find.text('Save profile');
+
+  Future<void> save() async {
+    await tester.scrollUntilVisible(
+      saveButton,
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(saveButton);
+    await tester.pumpAndSettle();
+  }
+}

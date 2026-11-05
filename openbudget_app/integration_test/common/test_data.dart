@@ -21,4 +21,13 @@ abstract final class TestData {
   static const transferDescription = 'To Savings';
   static const expenseAmountCents = 5499;
   static const incomeAmountCents = 350000;
+
+  // Tax
+  static const taxProfileTitle = 'Tax profile';
+  static const taxSetupTitle = 'Set up taxes';
+  static const taxBalanceDue = 'Balance due';
+  static const taxDisclaimer =
+      'Guidance only, not tax advice. Check figures with a qualified adviser '
+      'before filing.';
+  static const taxYearLabel = 'Tax year 2026/27';
 }

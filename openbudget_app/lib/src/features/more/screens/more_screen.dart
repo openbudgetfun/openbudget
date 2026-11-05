@@ -65,6 +65,15 @@ class MoreScreen extends HookWidget {
                 ),
                 const Divider(height: 1),
                 _MoreTile(
+                  icon: OpenBudgetIcons.scale,
+                  label: l10n.moreTaxes,
+                  onTap: () => context.pushNamed(
+                    taxOverviewRoute,
+                    pathParameters: {'id': budgetId},
+                  ),
+                ),
+                const Divider(height: 1),
+                _MoreTile(
                   icon: OpenBudgetIcons.settings,
                   label: l10n.moreSettings,
                   onTap: () => context.goNamed(

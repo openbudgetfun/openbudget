@@ -32,6 +32,8 @@ import 'package:openbudget_app/src/features/settings/screens/delete_account_scre
 import 'package:openbudget_app/src/features/settings/screens/display_options_screen.dart';
 import 'package:openbudget_app/src/features/settings/screens/plan_settings_screen.dart';
 import 'package:openbudget_app/src/features/settings/screens/settings_screen.dart';
+import 'package:openbudget_app/src/features/tax/screens/tax_overview_screen.dart';
+import 'package:openbudget_app/src/features/tax/screens/tax_profile_screen.dart';
 import 'package:openbudget_app/src/features/transaction_rules/screens/rule_list_screen.dart';
 import 'package:openbudget_app/src/features/transactions/screens/add_expense_screen.dart';
 import 'package:openbudget_app/src/features/transactions/screens/add_income_screen.dart';
@@ -122,6 +124,24 @@ GoRouter appRouter(Ref ref) {
           return null;
         },
         routes: [
+          GoRoute(
+            name: taxOverviewRoute,
+            path: 'tax',
+            builder: (context, state) {
+              final id = state.pathParameters['id']!;
+              return TaxOverviewScreen(budgetId: id);
+            },
+            routes: [
+              GoRoute(
+                name: taxProfileRoute,
+                path: 'profile',
+                builder: (context, state) {
+                  final id = state.pathParameters['id']!;
+                  return TaxProfileScreen(budgetId: id);
+                },
+              ),
+            ],
+          ),
           GoRoute(
             name: editPlanRoute,
             path: 'plan/edit',

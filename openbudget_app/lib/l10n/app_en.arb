@@ -1718,5 +1718,199 @@
         "type": "String"
       }
     }
-  }
+  },
+  "moreTaxes": "Taxes",
+  "taxOverviewTitle": "Taxes",
+  "taxOverviewLoading": "Loading your tax report",
+  "taxOverviewLoadError": "We couldn't load your tax report.",
+  "taxProfileLoadError": "We couldn't load your tax profile.",
+  "taxSetupTitle": "Set up taxes",
+  "taxSetupMessage": "Choose your country and how you file, then tag envelopes and transactions so OpenBudget can work out your tax position.",
+  "taxSetupAction": "Set up taxes",
+  "taxRulesUnavailableTitle": "No rates for this year",
+  "taxRulesUnavailableMessage": "OpenBudget doesn't have the tax rates for this year yet. Try another year.",
+  "taxYearLabel": "Tax year {year}",
+  "@taxYearLabel": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "taxPreviousYear": "Previous tax year",
+  "taxNextYear": "Next tax year",
+  "taxBalanceDue": "Balance due",
+  "taxRefundDue": "Refund due",
+  "taxNothingToPay": "Nothing to pay",
+  "taxTotalLiability": "Total tax",
+  "taxAlreadyPaid": "Already paid",
+  "taxUncategorizedCount": "Uncategorized: {count}",
+  "@taxUncategorizedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "taxUncategorizedHint": "Tag these transactions to include them in your report.",
+  "taxConvertedEntries": "{count, plural, =1{1 entry converted at its transaction date rate} other{{count} entries converted at their transaction date rates}}",
+  "@taxConvertedEntries": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "taxLiabilitiesTitle": "Tax due",
+  "taxLiabilitiesEmpty": "No tax is due for this year.",
+  "taxBandsShow": "Show how this was worked out",
+  "taxBandsHide": "Hide how this was worked out",
+  "taxBandRate": "{rate}%",
+  "@taxBandRate": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "taxBandBaseColumn": "Taxable",
+  "taxBandTaxColumn": "Tax",
+  "taxReportLinesTitle": "Report lines",
+  "taxReportLinesEmpty": "No categorised lines yet. Tag envelopes or transactions to fill this in.",
+  "taxEntryCount": "{count, plural, =0{No entries} =1{1 entry} other{{count} entries}}",
+  "@taxEntryCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "taxOpportunitiesTitle": "Ways to pay less",
+  "taxOpportunitySaving": "Estimated saving {amount}",
+  "@taxOpportunitySaving": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "taxOpportunityDeadline": "Act by {date}",
+  "@taxOpportunityDeadline": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "taxOpportunitySource": "Guidance",
+  "taxHowWorkedOutTitle": "How this was worked out",
+  "taxRulesVerifiedOn": "Rates checked on {date}",
+  "@taxRulesVerifiedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "taxAssumptionsTitle": "Assumptions",
+  "taxSourcesTitle": "Sources",
+  "taxDisclaimer": "Guidance only, not tax advice. Check figures with a qualified adviser before filing.",
+  "taxProfileTitle": "Tax profile",
+  "taxProfileLoading": "Loading your tax profile",
+  "taxProfileSave": "Save profile",
+  "taxProfileSaved": "Tax profile saved",
+  "taxProfileSaveError": "We couldn't save your tax profile.",
+  "taxProfileSummary": "{jurisdiction} · {entity}",
+  "@taxProfileSummary": {
+    "placeholders": {
+      "jurisdiction": {
+        "type": "String"
+      },
+      "entity": {
+        "type": "String"
+      }
+    }
+  },
+  "taxCountryLabel": "Country",
+  "taxEntityKindLabel": "Entity kind",
+  "taxEntityIndividual": "Individual",
+  "taxEntitySoleTrader": "Sole trader",
+  "taxEntityCompany": "Company",
+  "taxJurisdictionGb": "United Kingdom",
+  "taxJurisdictionUs": "United States",
+  "taxJurisdictionNg": "Nigeria",
+  "taxJurisdictionDe": "Germany",
+  "taxSalesTaxRegistered": "Registered for sales tax or VAT",
+  "taxSalesTaxRegisteredHint": "Turn this on if you charge and reclaim sales tax on these books.",
+  "taxGbScottishTaxpayer": "Scottish taxpayer",
+  "taxGbScottishTaxpayerHint": "Use Scottish income tax rates.",
+  "taxGbStudentLoanPlan": "Student loan plan",
+  "taxGbStudentLoanNone": "No student loan",
+  "taxGbStudentLoanPlan1": "Plan 1",
+  "taxGbStudentLoanPlan2": "Plan 2",
+  "taxGbStudentLoanPlan4": "Plan 4",
+  "taxGbStudentLoanPlan5": "Plan 5",
+  "taxGbStudentLoanPostgraduate": "Postgraduate loan",
+  "taxUsFilingStatus": "Filing status",
+  "taxUsFilingSingle": "Single",
+  "taxUsFilingMarriedJointly": "Married filing jointly",
+  "taxUsFilingMarriedSeparately": "Married filing separately",
+  "taxUsFilingHeadOfHousehold": "Head of household",
+  "taxNgAnnualRent": "Annual rent paid",
+  "taxNgAnnualRentHint": "Used for rent relief under the Nigeria Tax Act.",
+  "taxNgAnnualRentError": "Enter the annual rent as a number, such as 1200000.",
+  "taxDeJointAssessment": "Joint assessment",
+  "taxDeJointAssessmentHint": "Spouses assessed together with income splitting.",
+  "taxDeChurchTax": "Church tax",
+  "taxDeChurchTaxHint": "Kirchensteuer on top of income tax.",
+  "taxDeSmallBusinessExemption": "Small business VAT exemption",
+  "taxDeSmallBusinessExemptionHint": "Kleinunternehmerregelung: no VAT charged or reclaimed.",
+  "taxLinkedBudget": "Linked personal budget",
+  "taxLinkedBudgetHint": "The personal budget this business feeds.",
+  "taxLinkedBudgetNone": "None",
+  "taxLinkedBudgetError": "Choose a different budget to link.",
+  "taxCategorySheetTitle": "Tax category",
+  "taxCategorySheetSearch": "Search categories",
+  "taxCategoryNone": "None",
+  "taxCategoryNoneHint": "Leave this out of the tax report.",
+  "taxCategoryKindIncome": "Income",
+  "taxCategoryKindExpense": "Expenses",
+  "taxCategoryKindDisposalProceeds": "Disposal proceeds",
+  "taxCategoryKindDisposalCost": "Acquisition costs",
+  "taxCategoryKindRelief": "Reliefs",
+  "taxCategoryKindTaxPaid": "Tax already paid",
+  "taxCategoryKindSalesTaxCollected": "Sales tax collected",
+  "taxCategoryKindSalesTaxPaid": "Sales tax paid",
+  "taxCategoryKindOutOfScope": "Outside tax",
+  "taxCategorySearchEmpty": "No categories match \"{query}\".",
+  "@taxCategorySearchEmpty": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "taxCategorySheetSave": "Save category",
+  "taxCategorySheetSaved": "Tax category updated.",
+  "taxCategorySheetError": "We couldn't update the tax category.",
+  "taxCategorySheetEmpty": "Set up a tax profile first to choose a category.",
+  "taxCategorySheetSetupAction": "Set up taxes",
+  "taxCategorySheetLoading": "Loading tax categories",
+  "taxCategorySheetLoadError": "We couldn't load tax categories.",
+  "taxCategoryRowLabel": "Tax category",
+  "taxCategoryNotSet": "Not set",
+  "taxCategoryTagged": "Tagged",
+  "taxTransactionBusinessUse": "Business use",
+  "taxTransactionBusinessUseValue": "{percent}%",
+  "@taxTransactionBusinessUseValue": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "taxTransactionSalesTax": "Sales tax included",
+  "taxTransactionSalesTaxHint": "The tax already inside the transaction amount.",
+  "taxTransactionSalesTaxError": "Enter an amount no larger than the transaction.",
+  "taxCategoryLoadRetry": "Try again"
 }

@@ -109,11 +109,16 @@ void main() {
     expect(find.text('Assigned So Far'), findsOneWidget);
     expect(find.text('To Go'), findsOneWidget);
 
-    await tester.drag(find.byType(ListView), const Offset(0, -500));
+    await tester.scrollUntilVisible(
+      find.text('Delete Category'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.pumpAndSettle();
 
     expect(find.text('Snooze for this month'), findsOneWidget);
     expect(find.text('Notes'), findsOneWidget);
+    expect(find.text('Tax category'), findsOneWidget);
     expect(find.text('Rename Category'), findsOneWidget);
     expect(find.text('Hide Category'), findsOneWidget);
     expect(find.text('Delete Category'), findsOneWidget);
