@@ -8,7 +8,6 @@ import 'package:openbudget_app/src/features/budget/providers/monthly_allocation_
 import 'package:openbudget_app/src/features/budget/widgets/budget_amount_keypad.dart';
 import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
-import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 class MoveMoneyDialog extends HookConsumerWidget {
@@ -35,9 +34,9 @@ class MoveMoneyDialog extends HookConsumerWidget {
     final budgetAsync = ref.watch(budgetDetailProvider(budgetId));
     final currency =
         budgetAsync.whenOrNull(
-          data: (budget) => parseCurrencyCode(budget.currencyCode),
+          data: (budget) => normalizeCurrencyCode(budget.currencyCode),
         ) ??
-        CurrencyCode.usd;
+        '';
 
     // Build a flat list of envelopes with category labels.
     final envelopeItems = <DropdownMenuItem<String>>[];
@@ -82,7 +81,7 @@ class MoveMoneyDialog extends HookConsumerWidget {
             ),
             const SizedBox(height: SpacingTokens.md),
             BudgetAmountField(
-              labelText: '${l10n.transactionAmountLabel} (${currency.code})',
+              labelText: '${l10n.transactionAmountLabel} ($currency)',
               currencyCode: currency,
               inputValue: amountInput.value,
               hintText: formatBudgetAmountInputForField(
@@ -142,7 +141,7 @@ class MoveMoneyDialog extends HookConsumerWidget {
     String amountInput,
     ValueNotifier<String?> fromEnvelopeId,
     ValueNotifier<String?> toEnvelopeId,
-    CurrencyCode currency,
+    String currency,
     ValueNotifier<bool> isSubmitting,
   ) async {
     final l10n = AppLocalizations.of(context);

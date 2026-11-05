@@ -3,7 +3,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
 import 'package:openbudget_app/src/features/reports/providers/net_worth_provider.dart';
 import 'package:openbudget_client/openbudget_client.dart';
-import 'package:openbudget_core/openbudget_core.dart';
 
 void main() {
   const budgetId = 'test-budget-1';
@@ -64,10 +63,10 @@ void main() {
     expect(data.netWorth, 0);
 
     final usd = data.currencyBreakdown.firstWhere(
-      (entry) => entry.currency == CurrencyCode.usd,
+      (entry) => entry.currency == 'USD',
     );
     final eur = data.currencyBreakdown.firstWhere(
-      (entry) => entry.currency == CurrencyCode.eur,
+      (entry) => entry.currency == 'EUR',
     );
 
     expect(usd.totalAssets, 150000);

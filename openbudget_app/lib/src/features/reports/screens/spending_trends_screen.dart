@@ -7,9 +7,7 @@ import 'package:openbudget_app/src/features/reports/utils/report_month_label.dar
 import 'package:openbudget_app/src/features/reports/widgets/report_charts.dart';
 import 'package:openbudget_app/src/features/reports/widgets/report_figures.dart';
 import 'package:openbudget_app/src/features/settings/providers/display_currency_provider.dart';
-import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
-import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 /// Income and spending month by month, as a drawn ledger.
@@ -42,7 +40,7 @@ class SpendingTrendsScreen extends HookConsumerWidget {
           ],
         ),
         data: (data) {
-          final sourceCurrency = parseCurrencyCode(data.currencyCode);
+          final sourceCurrency = data.currencyCode;
 
           if (data.months.every((m) => m.transactionCount == 0)) {
             return ListView(
@@ -75,9 +73,12 @@ class SpendingTrendsScreen extends HookConsumerWidget {
                         amount:
                             converter?.formatAmount(
                               amountCents: data.averageIncome,
-                              sourceCurrency: sourceCurrency,
+                              currencyCode: sourceCurrency,
                             ) ??
-                            formatCents(data.averageIncome, sourceCurrency),
+                            formatCentsForCode(
+                              data.averageIncome,
+                              sourceCurrency,
+                            ),
                         tone: ObTone.funded,
                       ),
                     ),
@@ -87,9 +88,12 @@ class SpendingTrendsScreen extends HookConsumerWidget {
                         amount:
                             converter?.formatAmount(
                               amountCents: data.averageExpenses,
-                              sourceCurrency: sourceCurrency,
+                              currencyCode: sourceCurrency,
                             ) ??
-                            formatCents(data.averageExpenses, sourceCurrency),
+                            formatCentsForCode(
+                              data.averageExpenses,
+                              sourceCurrency,
+                            ),
                         tone: ObTone.overspent,
                         alignEnd: true,
                       ),
@@ -145,7 +149,7 @@ class _MonthlyChart extends HookWidget {
   });
 
   final List<MonthlyTrend> months;
-  final CurrencyCode sourceCurrency;
+  final String sourceCurrency;
   final DisplayCurrencyConverter? converter;
 
   @override
@@ -156,9 +160,9 @@ class _MonthlyChart extends HookWidget {
     String format(int cents) =>
         converter?.formatAmount(
           amountCents: cents,
-          sourceCurrency: sourceCurrency,
+          currencyCode: sourceCurrency,
         ) ??
-        formatCents(cents, sourceCurrency);
+        formatCentsForCode(cents, sourceCurrency);
     final columns = [
       for (final month in months)
         ReportChartColumn(
@@ -231,7 +235,7 @@ class _MonthSummaryTile extends HookWidget {
   });
 
   final MonthlyTrend month;
-  final CurrencyCode sourceCurrency;
+  final String sourceCurrency;
   final DisplayCurrencyConverter? converter;
 
   @override
@@ -243,9 +247,9 @@ class _MonthSummaryTile extends HookWidget {
     String format(int cents) =>
         converter?.formatAmount(
           amountCents: cents,
-          sourceCurrency: sourceCurrency,
+          currencyCode: sourceCurrency,
         ) ??
-        formatCents(cents, sourceCurrency);
+        formatCentsForCode(cents, sourceCurrency);
 
     return ObCard(
       padding: const EdgeInsets.all(SpacingTokens.md),

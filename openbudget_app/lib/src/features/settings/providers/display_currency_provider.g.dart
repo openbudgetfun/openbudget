@@ -8,18 +8,34 @@ part of 'display_currency_provider.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
+/// The currency the budget displays amounts in, or null when either the
+/// display override or the budget's own currency is unsupported.
+///
+/// A null display currency means conversion is unavailable; call sites format
+/// each amount with its raw code instead of assuming dollars.
 
 @ProviderFor(displayCurrency)
 final displayCurrencyProvider = DisplayCurrencyFamily._();
 
+/// The currency the budget displays amounts in, or null when either the
+/// display override or the budget's own currency is unsupported.
+///
+/// A null display currency means conversion is unavailable; call sites format
+/// each amount with its raw code instead of assuming dollars.
+
 final class DisplayCurrencyProvider
     extends
         $FunctionalProvider<
-          AsyncValue<CurrencyCode>,
-          CurrencyCode,
-          FutureOr<CurrencyCode>
+          AsyncValue<CurrencyCode?>,
+          CurrencyCode?,
+          FutureOr<CurrencyCode?>
         >
-    with $FutureModifier<CurrencyCode>, $FutureProvider<CurrencyCode> {
+    with $FutureModifier<CurrencyCode?>, $FutureProvider<CurrencyCode?> {
+  /// The currency the budget displays amounts in, or null when either the
+  /// display override or the budget's own currency is unsupported.
+  ///
+  /// A null display currency means conversion is unavailable; call sites format
+  /// each amount with its raw code instead of assuming dollars.
   DisplayCurrencyProvider._({
     required DisplayCurrencyFamily super.from,
     required String super.argument,
@@ -43,12 +59,12 @@ final class DisplayCurrencyProvider
 
   @$internal
   @override
-  $FutureProviderElement<CurrencyCode> $createElement(
+  $FutureProviderElement<CurrencyCode?> $createElement(
     $ProviderPointer pointer,
   ) => $FutureProviderElement(pointer);
 
   @override
-  FutureOr<CurrencyCode> create(Ref ref) {
+  FutureOr<CurrencyCode?> create(Ref ref) {
     final argument = this.argument as String;
     return displayCurrency(ref, argument);
   }
@@ -64,10 +80,16 @@ final class DisplayCurrencyProvider
   }
 }
 
-String _$displayCurrencyHash() => r'e3b14a2fc31a00e5d60d4e03478f88092244f1a9';
+String _$displayCurrencyHash() => r'db6280aab2417d673f184bae1969bdbe77cba398';
+
+/// The currency the budget displays amounts in, or null when either the
+/// display override or the budget's own currency is unsupported.
+///
+/// A null display currency means conversion is unavailable; call sites format
+/// each amount with its raw code instead of assuming dollars.
 
 final class DisplayCurrencyFamily extends $Family
-    with $FunctionalFamilyOverride<FutureOr<CurrencyCode>, String> {
+    with $FunctionalFamilyOverride<FutureOr<CurrencyCode?>, String> {
   DisplayCurrencyFamily._()
     : super(
         retry: null,
@@ -76,6 +98,12 @@ final class DisplayCurrencyFamily extends $Family
         $allTransitiveDependencies: null,
         isAutoDispose: true,
       );
+
+  /// The currency the budget displays amounts in, or null when either the
+  /// display override or the budget's own currency is unsupported.
+  ///
+  /// A null display currency means conversion is unavailable; call sites format
+  /// each amount with its raw code instead of assuming dollars.
 
   DisplayCurrencyProvider call(String budgetId) =>
       DisplayCurrencyProvider._(argument: budgetId, from: this);
@@ -184,7 +212,7 @@ final class DisplayCurrencyConverterProvider
 }
 
 String _$displayCurrencyConverterHash() =>
-    r'c48b83d3c5c620e5cace05a11fa305109c1b011c';
+    r'69fe46fb4156646e4159493f217a25d6b8801d48';
 
 final class DisplayCurrencyConverterFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<DisplayCurrencyConverter>, String> {

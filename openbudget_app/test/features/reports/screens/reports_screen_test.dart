@@ -70,7 +70,7 @@ NetWorthData _makeNetWorthData() {
     currencyCode: 'USD',
     currencyBreakdown: [
       CurrencyNetWorthData(
-        currency: CurrencyCode.usd,
+        currency: 'USD',
         totalAssets: 5222000,
         totalLiabilities: -125,
         assetAccounts: [checking],

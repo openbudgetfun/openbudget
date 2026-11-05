@@ -1,7 +1,6 @@
 import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
 import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_client/openbudget_client.dart';
-import 'package:openbudget_core/openbudget_core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'net_worth_provider.g.dart';
@@ -12,10 +11,10 @@ Future<NetWorthData> netWorth(Ref ref, String budgetId) async {
   final accounts = await ref.watch(accountListProvider(budgetId).future);
   final activeAccounts = accounts.where((account) => !account.isClosed);
 
-  final byCurrency = <CurrencyCode, _CurrencyAccumulator>{};
+  final byCurrency = <String, _CurrencyAccumulator>{};
 
   for (final account in activeAccounts) {
-    final currency = parseCurrencyCode(account.currencyCode);
+    final currency = normalizeCurrencyCode(account.currencyCode);
     final bucket = byCurrency.putIfAbsent(currency, _CurrencyAccumulator.new);
 
     if (account.accountType == 'creditCard') {
@@ -43,7 +42,7 @@ Future<NetWorthData> netWorth(Ref ref, String budgetId) async {
             ),
           )
           .toList()
-        ..sort((a, b) => a.currency.code.compareTo(b.currency.code));
+        ..sort((a, b) => a.currency.compareTo(b.currency));
 
   final primaryTotals = breakdown.length == 1 ? breakdown.first : null;
 
@@ -60,9 +59,7 @@ Future<NetWorthData> netWorth(Ref ref, String budgetId) async {
     liabilityAccounts: List<Account>.unmodifiable(
       breakdown.expand((entry) => entry.liabilityAccounts),
     ),
-    currencyCode: breakdown.isNotEmpty
-        ? breakdown.first.currency.code
-        : CurrencyCode.usd.code,
+    currencyCode: breakdown.isNotEmpty ? breakdown.first.currency : '',
     currencyBreakdown: List<CurrencyNetWorthData>.unmodifiable(breakdown),
   );
 }
@@ -76,7 +73,7 @@ class CurrencyNetWorthData {
     required this.liabilityAccounts,
   });
 
-  final CurrencyCode currency;
+  final String currency;
   final int totalAssets;
   final int totalLiabilities;
   final List<Account> assetAccounts;

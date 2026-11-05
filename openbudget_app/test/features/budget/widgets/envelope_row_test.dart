@@ -8,7 +8,6 @@ import 'package:openbudget_app/src/features/budget/providers/budget_summary_prov
 import 'package:openbudget_app/src/features/budget/widgets/envelope_row.dart';
 import 'package:openbudget_app/src/features/settings/providers/display_options_provider.dart';
 import 'package:openbudget_client/openbudget_client.dart';
-import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 void main() {
@@ -52,7 +51,7 @@ void main() {
 
   Widget buildSubject({
     required Envelope envelope,
-    CurrencyCode currencyCode = CurrencyCode.usd,
+    String currencyCode = 'USD',
     MonthlyEnvelopeData? monthlyData,
     EnvelopeGoal? goal,
     VoidCallback? onQuickBudget,

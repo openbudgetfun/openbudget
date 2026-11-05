@@ -3,12 +3,11 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
-import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 Future<String?> showBudgetAmountKeypadSheet({
   required BuildContext context,
-  required CurrencyCode currencyCode,
+  required String currencyCode,
   required String initialInput,
   String? title,
   bool allowNegative = true,
@@ -37,7 +36,7 @@ class BudgetAmountField extends StatelessWidget {
   });
 
   final String labelText;
-  final CurrencyCode currencyCode;
+  final String currencyCode;
   final String inputValue;
   final VoidCallback onTap;
   final Widget? prefixIcon;
@@ -60,7 +59,7 @@ class BudgetAmountField extends StatelessWidget {
           labelText: labelText,
           hintText: hintText,
           prefixIcon: prefixIcon,
-          prefixText: '${currencyCode.symbol} ',
+          prefixText: '${currencySymbolForCode(currencyCode)} ',
           suffixIcon: const SkribbleIcon(data: OpenBudgetIcons.keypad),
           enabled: enabled,
         ),
@@ -254,7 +253,7 @@ class _BudgetAmountSheet extends HookWidget {
     this.title,
   });
 
-  final CurrencyCode currencyCode;
+  final String currencyCode;
   final String initialInput;
   final bool allowNegative;
   final String? title;
@@ -306,7 +305,7 @@ class _BudgetAmountSheet extends HookWidget {
               ),
               const SizedBox(height: SpacingTokens.xs),
               ObAmount(
-                formatCents(cents ?? 0, currencyCode),
+                formatCentsForCode(cents ?? 0, currencyCode),
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
               const SizedBox(height: SpacingTokens.xs),
@@ -327,20 +326,20 @@ class _BudgetAmountSheet extends HookWidget {
 
 int? parseBudgetAmountInputToCents({
   required String input,
-  required CurrencyCode currencyCode,
+  required String currencyCode,
 }) {
   if (input.isEmpty || input == '-') return null;
   final isNegative = input.startsWith('-');
   final digits = input.replaceAll('-', '');
   final units = int.tryParse(digits);
   if (units == null) return null;
-  final cents = units * _pow10(currencyCode.decimals);
+  final cents = units * _pow10(currencyDecimalsForCode(currencyCode));
   return isNegative ? -cents : cents;
 }
 
 String formatBudgetAmountInputForField({
   required String input,
-  required CurrencyCode currencyCode,
+  required String currencyCode,
 }) {
   if (input.isEmpty) return '';
   final cents = parseBudgetAmountInputToCents(
@@ -348,16 +347,16 @@ String formatBudgetAmountInputForField({
     currencyCode: currencyCode,
   );
   if (cents == null) return '';
-  final divisor = _pow10(currencyCode.decimals);
+  final divisor = _pow10(currencyDecimalsForCode(currencyCode));
   final value = cents / divisor;
-  return value.toStringAsFixed(currencyCode.decimals);
+  return value.toStringAsFixed(currencyDecimalsForCode(currencyCode));
 }
 
 String budgetAmountInputFromCents({
   required int cents,
-  required CurrencyCode currencyCode,
+  required String currencyCode,
 }) {
-  final divisor = _pow10(currencyCode.decimals);
+  final divisor = _pow10(currencyDecimalsForCode(currencyCode));
   final units = (cents / divisor).round();
   return units.toString();
 }

@@ -6,9 +6,7 @@ import 'package:openbudget_app/src/features/reports/providers/category_trends_pr
 import 'package:openbudget_app/src/features/reports/utils/report_month_label.dart';
 import 'package:openbudget_app/src/features/reports/widgets/report_charts.dart';
 import 'package:openbudget_app/src/features/settings/providers/display_currency_provider.dart';
-import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
-import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 /// One line per category, one drawn bar per month.
@@ -55,7 +53,7 @@ class CategoryTrendsScreen extends HookConsumerWidget {
             );
           }
 
-          final sourceCurrency = parseCurrencyCode(data.currencyCode);
+          final sourceCurrency = data.currencyCode;
 
           return ListView(
             padding: const EdgeInsets.fromLTRB(
@@ -103,7 +101,7 @@ class _CategoryTrendCard extends HookWidget {
 
   final CategoryTrendLine category;
   final List<MonthLabel> months;
-  final CurrencyCode sourceCurrency;
+  final String sourceCurrency;
   final DisplayCurrencyConverter? converter;
 
   @override
@@ -117,9 +115,9 @@ class _CategoryTrendCard extends HookWidget {
     String format(int cents) =>
         converter?.formatAmount(
           amountCents: cents,
-          sourceCurrency: sourceCurrency,
+          currencyCode: sourceCurrency,
         ) ??
-        formatCents(cents, sourceCurrency);
+        formatCentsForCode(cents, sourceCurrency);
 
     return Semantics(
       container: true,

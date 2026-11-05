@@ -14,7 +14,6 @@ import 'package:openbudget_app/src/features/payees/providers/payee_list_provider
 import 'package:openbudget_app/src/features/transactions/providers/transaction_actions_provider.dart';
 import 'package:openbudget_app/src/features/transactions/screens/edit_transaction_dialog.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
-import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
@@ -894,8 +893,7 @@ class TransactionListScreen extends HookConsumerWidget {
     for (final tx in topLevel) {
       final date = _formatDateIso(tx.transactionDate);
       final desc = _escapeCsv(tx.description);
-      final currency = parseCurrencyCode(tx.currencyCode);
-      final amount = formatCents(tx.amountCents, currency);
+      final amount = formatCentsForCode(tx.amountCents, tx.currencyCode);
       final memo = _escapeCsv(tx.memo ?? '');
       final status = tx.reconciled
           ? 'Reconciled'
@@ -1288,7 +1286,6 @@ class _TransactionTile extends HookConsumerWidget {
     final palette = theme.ob;
     final isIncome = transaction.amountCents > 0;
     final tone = isIncome ? ObTone.funded : ObTone.neutral;
-    final transactionCurrency = parseCurrencyCode(transaction.currencyCode);
 
     final statusIcon = transaction.reconciled
         ? OpenBudgetIcons.lock
@@ -1464,7 +1461,10 @@ class _TransactionTile extends HookConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     ObAmount(
-                      formatCents(transaction.amountCents, transactionCurrency),
+                      formatCentsForCode(
+                        transaction.amountCents,
+                        transaction.currencyCode,
+                      ),
                       tone: tone,
                       style: theme.textTheme.titleMedium,
                     ),
@@ -1761,7 +1761,7 @@ class _TransactionTile extends HookConsumerWidget {
         builder: (_) => EditTransactionDialog(
           transaction: transaction,
           budgetId: budgetId,
-          currencyCode: parseCurrencyCode(transaction.currencyCode),
+          currencyCode: transaction.currencyCode,
         ),
       ),
     );

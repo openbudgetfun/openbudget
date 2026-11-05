@@ -96,14 +96,14 @@ NetWorthData _makeNetWorthData(List<Account> accounts) {
     currencyCode: 'USD',
     currencyBreakdown: [
       CurrencyNetWorthData(
-        currency: CurrencyCode.usd,
+        currency: 'USD',
         totalAssets: 10000,
         totalLiabilities: 0,
         assetAccounts: [usd],
         liabilityAccounts: const [],
       ),
       CurrencyNetWorthData(
-        currency: CurrencyCode.eur,
+        currency: 'EUR',
         totalAssets: 10000,
         totalLiabilities: 0,
         assetAccounts: [eur],

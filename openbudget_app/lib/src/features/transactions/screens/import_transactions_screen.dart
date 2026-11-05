@@ -6,9 +6,10 @@ import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
 import 'package:openbudget_app/src/features/transactions/providers/import_transactions_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
+import 'package:openbudget_app/src/utils/currency_code_utils.dart';
+import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
-import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 class ImportTransactionsScreen extends HookConsumerWidget {
@@ -27,11 +28,8 @@ class ImportTransactionsScreen extends HookConsumerWidget {
     final budgetAsync = ref.watch(budgetDetailProvider(budgetId));
 
     final currencyCode = budgetAsync.hasValue
-        ? CurrencyCode.values.firstWhere(
-            (c) => c.code == budgetAsync.value!.currencyCode,
-            orElse: () => CurrencyCode.usd,
-          )
-        : CurrencyCode.usd;
+        ? normalizeCurrencyCode(budgetAsync.value!.currencyCode)
+        : '';
 
     return Scaffold(
       appBar: AppBar(
@@ -243,7 +241,7 @@ class ImportTransactionsScreen extends HookConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     List<ImportRow> rows,
-    CurrencyCode currencyCode,
+    String currencyCode,
     ValueNotifier<bool> isSubmitting,
   ) async {
     final l10n = AppLocalizations.of(context);
@@ -254,7 +252,7 @@ class ImportTransactionsScreen extends HookConsumerWidget {
           .read(importTransactionsProvider.notifier)
           .importRows(
             budgetId: budgetId,
-            currencyCode: currencyCode.code,
+            currencyCode: normalizeCurrencyCode(currencyCode),
             rows: rows,
           );
       if (!context.mounted) return;
@@ -278,21 +276,6 @@ class ImportTransactionsScreen extends HookConsumerWidget {
   static String _formatDate(DateTime date) =>
       '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
 
-  static String _formatAmount(int cents, CurrencyCode currency) {
-    final sign = cents < 0 ? '-' : '';
-    final absCents = cents.abs();
-    final decimals = currency.decimals;
-    final divisor = _pow10(decimals);
-    final whole = absCents ~/ divisor;
-    final frac = (absCents % divisor).toString().padLeft(decimals, '0');
-    return '$sign${currency.symbol}$whole.$frac';
-  }
-
-  static int _pow10(int exponent) {
-    var result = 1;
-    for (var i = 0; i < exponent; i++) {
-      result *= 10;
-    }
-    return result;
-  }
+  static String _formatAmount(int cents, String currencyCode) =>
+      formatCentsForCode(cents, currencyCode);
 }

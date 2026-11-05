@@ -11,7 +11,6 @@ import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
-import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 class SplitExpenseScreen extends HookConsumerWidget {
@@ -31,9 +30,9 @@ class SplitExpenseScreen extends HookConsumerWidget {
     final palette = theme.ob;
     final budgetCurrency =
         budgetAsync.whenOrNull(
-          data: (budget) => parseCurrencyCode(budget.currencyCode),
+          data: (budget) => normalizeCurrencyCode(budget.currencyCode),
         ) ??
-        CurrencyCode.usd;
+        '';
 
     // Dynamic list of splits
     final splitControllers = useState<List<_SplitData>>([
@@ -63,8 +62,8 @@ class SplitExpenseScreen extends HookConsumerWidget {
           sum + (double.tryParse(split.amountController.text.trim()) ?? 0),
     );
     final remaining = totalAmount - splitTotal;
-    final remainingCents = (remaining * _pow10(budgetCurrency.decimals))
-        .round();
+    final remainingCents =
+        (remaining * _pow10(currencyDecimalsForCode(budgetCurrency))).round();
     final isBalanced = remaining.abs() < 0.005;
     final remainingTone = isBalanced ? ObTone.funded : ObTone.underfunded;
 
@@ -158,7 +157,7 @@ class SplitExpenseScreen extends HookConsumerWidget {
                           ),
                         ),
                         ObAmount(
-                          formatCents(remainingCents, budgetCurrency),
+                          formatCentsForCode(remainingCents, budgetCurrency),
                           tone: remainingTone,
                           style: theme.textTheme.bodyMedium,
                         ),
@@ -233,12 +232,15 @@ class SplitExpenseScreen extends HookConsumerWidget {
                             final budget = budgetAsync.value;
                             if (budget == null) return;
 
-                            final currency = CurrencyCode.values.firstWhere(
-                              (c) => c.code == budget.currencyCode,
-                              orElse: () => CurrencyCode.usd,
+                            final currency = normalizeCurrencyCode(
+                              budget.currencyCode,
                             );
                             final totalCents =
-                                (total * _pow10(currency.decimals)).round();
+                                (total *
+                                        _pow10(
+                                          currencyDecimalsForCode(currency),
+                                        ))
+                                    .round();
 
                             final splitItems = <SplitItem>[];
                             for (final split in splits) {
@@ -250,7 +252,10 @@ class SplitExpenseScreen extends HookConsumerWidget {
                               if (splitAmount <= 0) return;
 
                               final splitCents =
-                                  (splitAmount * _pow10(currency.decimals))
+                                  (splitAmount *
+                                          _pow10(
+                                            currencyDecimalsForCode(currency),
+                                          ))
                                       .round();
                               final envId = split.selectedEnvelopeId;
                               final memo = split.memoController.text.trim();
@@ -292,7 +297,7 @@ class SplitExpenseScreen extends HookConsumerWidget {
                                   .createSplit(
                                     description: description,
                                     totalAmountCents: -totalCents.abs(),
-                                    currencyCode: budget.currencyCode,
+                                    currencyCode: currency,
                                     budgetId: budgetId,
                                     date: DateTime.now(),
                                     splits: splitItems,

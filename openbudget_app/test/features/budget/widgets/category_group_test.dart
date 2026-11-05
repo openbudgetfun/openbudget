@@ -7,7 +7,6 @@ import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
 import 'package:openbudget_app/src/features/budget/widgets/category_group.dart';
 import 'package:openbudget_client/openbudget_client.dart';
-import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 void main() {
@@ -80,7 +79,7 @@ void main() {
       home: Scaffold(
         body: CategoryGroup(
           categoryWithEnvelopes: makeCategoryWithEnvelopes(),
-          currencyCode: CurrencyCode.usd,
+          currencyCode: 'USD',
           onAddEnvelope: () {},
           onDeleteCategory: () {},
           onEditCategory: () {},

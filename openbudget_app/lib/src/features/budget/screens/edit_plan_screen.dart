@@ -17,7 +17,6 @@ import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
-import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 class EditPlanScreen extends HookConsumerWidget {
@@ -52,10 +51,7 @@ class EditPlanScreen extends HookConsumerWidget {
       ),
       data: (summary) {
         final goalsMap = goalsAsync.asData?.value ?? <String, EnvelopeGoal>{};
-        final currencyCode = CurrencyCode.values.firstWhere(
-          (currency) => currency.code == summary.budget.currencyCode,
-          orElse: () => CurrencyCode.usd,
-        );
+        final currencyCode = summary.budget.currencyCode;
 
         return _EditPlanContent(
           budgetId: budgetId,
@@ -79,7 +75,7 @@ class _EditPlanContent extends HookConsumerWidget {
   final String budgetId;
   final BudgetSummary summary;
   final Map<String, EnvelopeGoal> goalsMap;
-  final CurrencyCode currencyCode;
+  final String currencyCode;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -144,7 +140,7 @@ class _EditPlanContent extends HookConsumerWidget {
             child: Column(
               children: [
                 ObAmount(
-                  formatCents(monthlyTargetsCents, currencyCode),
+                  formatCentsForCode(monthlyTargetsCents, currencyCode),
                   style: theme.textTheme.displaySmall,
                 ),
                 const SizedBox(height: SpacingTokens.xs),
@@ -165,14 +161,14 @@ class _EditPlanContent extends HookConsumerWidget {
               children: [
                 _TargetRow(
                   label: l10n.editPlanMonthlyTargets,
-                  amount: formatCents(monthlyTargetsCents, currencyCode),
+                  amount: formatCentsForCode(monthlyTargetsCents, currencyCode),
                   fraction: monthlyTargetsProgress,
                   tone: ObTone.funded,
                 ),
                 const Divider(height: SpacingTokens.lg),
                 _TargetRow(
                   label: l10n.editPlanMonthlyIncome,
-                  amount: formatCents(monthlyIncomeCents, currencyCode),
+                  amount: formatCentsForCode(monthlyIncomeCents, currencyCode),
                   fraction: 1,
                   tone: ObTone.neutral,
                   trailing: SkribbleIcon(
@@ -393,7 +389,7 @@ class _EditPlanContent extends HookConsumerWidget {
   void _showAddEnvelopeDialog(
     BuildContext context,
     String categoryId,
-    CurrencyCode currencyCode, {
+    String currencyCode, {
     required int year,
     required int month,
   }) {
@@ -614,7 +610,7 @@ class _EditPlanContent extends HookConsumerWidget {
     final envelopeSummary = envelopeCount == 1
         ? l10n.editPlanEnvelopeCount(1)
         : l10n.editPlanEnvelopeCount(envelopeCount);
-    final allocated = formatCents(
+    final allocated = formatCentsForCode(
       categoryWithEnvelopes.totalBudgetedCents,
       currencyCode,
     );
@@ -693,7 +689,7 @@ class _EditPlanCategoryCard extends HookWidget {
 
   final CategoryWithEnvelopes categoryWithEnvelopes;
   final Map<String, EnvelopeGoal> goalsMap;
-  final CurrencyCode currencyCode;
+  final String currencyCode;
   final bool reordering;
   final VoidCallback onMoveUp;
   final VoidCallback onMoveDown;
@@ -823,7 +819,7 @@ class _EditPlanCategoryCard extends HookWidget {
                       ),
                     if (!reordering && targetCents != null)
                       ObAmount(
-                        formatCents(targetCents, currencyCode),
+                        formatCentsForCode(targetCents, currencyCode),
                         style: theme.textTheme.titleMedium,
                       ),
                   ],

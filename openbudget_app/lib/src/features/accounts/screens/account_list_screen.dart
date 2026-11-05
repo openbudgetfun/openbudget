@@ -12,7 +12,6 @@ import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_client/openbudget_client.dart';
-import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 class AccountListScreen extends HookConsumerWidget {
@@ -332,7 +331,7 @@ class _SectionTotal extends HookWidget {
     required this.converter,
   });
 
-  final Map<CurrencyCode, int> totalsByCurrency;
+  final Map<String, int> totalsByCurrency;
   final DisplayCurrencyConverter? converter;
 
   @override
@@ -358,8 +357,8 @@ class _SectionTotal extends HookWidget {
         (totalsByCurrency.isEmpty ? 0 : totalsByCurrency.values.first);
     return ObAmount(
       convertedTotal != null
-          ? formatCents(convertedTotal, converter!.displayCurrency)
-          : formatCents(singleTotal, totalsByCurrency.keys.first),
+          ? formatCents(convertedTotal, converter!.displayCurrency!)
+          : formatCentsForCode(singleTotal, totalsByCurrency.keys.first),
       tone: singleTotal >= 0 ? ObTone.funded : ObTone.overspent,
       style: theme.textTheme.titleSmall,
     );
@@ -378,7 +377,6 @@ class _AccountTile extends HookWidget {
     final theme = Theme.of(context);
     final palette = theme.ob;
     final icon = _iconForType(account.accountType);
-    final currency = parseCurrencyCode(account.currencyCode);
     final accountId = account.id?.toString();
     final balanceTone = account.balanceCents > 0
         ? ObTone.funded
@@ -443,7 +441,7 @@ class _AccountTile extends HookWidget {
           ),
         ),
         trailing: ObAmount(
-          formatCents(account.balanceCents, currency),
+          formatCentsForCode(account.balanceCents, account.currencyCode),
           tone: balanceTone,
           style: theme.textTheme.titleMedium,
         ),
@@ -544,9 +542,9 @@ class _NetWorthCard extends HookWidget {
 
     final isSingleCurrency = totalsByCurrency.length == 1 || showConverted;
     final overallLabel = showConverted
-        ? formatCents(convertedNetWorth, converter!.displayCurrency)
+        ? formatCents(convertedNetWorth, converter!.displayCurrency!)
         : totalsByCurrency.length == 1
-        ? formatCents(
+        ? formatCentsForCode(
             totalsByCurrency.first.netWorth,
             totalsByCurrency.first.currency,
           )
@@ -590,7 +588,7 @@ class _NetWorthCard extends HookWidget {
                   child: _NetWorthMetric(
                     label: l10n.accountTotalAssets,
                     amount: convertedAssets,
-                    currencyCode: converter!.displayCurrency,
+                    currencyCode: converter!.displayCurrency!.code,
                     tone: ObTone.funded,
                   ),
                 ),
@@ -602,7 +600,7 @@ class _NetWorthCard extends HookWidget {
                   child: _NetWorthMetric(
                     label: l10n.accountTotalLiabilities,
                     amount: convertedLiabilities,
-                    currencyCode: converter!.displayCurrency,
+                    currencyCode: converter!.displayCurrency!.code,
                     tone: ObTone.overspent,
                   ),
                 ),
@@ -677,7 +675,7 @@ class _NetWorthCurrencyRow extends HookWidget {
           Row(
             children: [
               Text(
-                totals.currency.code,
+                normalizeCurrencyCode(totals.currency),
                 style: theme.textTheme.labelMedium?.copyWith(
                   fontWeight: FontWeight.w700,
                   color: palette.ink,
@@ -685,7 +683,7 @@ class _NetWorthCurrencyRow extends HookWidget {
               ),
               const Spacer(),
               ObAmount(
-                formatCents(totals.netWorth, totals.currency),
+                formatCentsForCode(totals.netWorth, totals.currency),
                 tone: netTone,
                 style: theme.textTheme.labelLarge,
               ),
@@ -697,7 +695,7 @@ class _NetWorthCurrencyRow extends HookWidget {
               Expanded(
                 child: Text(
                   '${l10n.accountTotalAssets}: '
-                  '${formatCents(totals.assets, totals.currency)}',
+                  '${formatCentsForCode(totals.assets, totals.currency)}',
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: palette.ink,
                   ),
@@ -706,7 +704,7 @@ class _NetWorthCurrencyRow extends HookWidget {
               Expanded(
                 child: Text(
                   '${l10n.accountTotalLiabilities}: '
-                  '${formatCents(totals.liabilities, totals.currency)}',
+                  '${formatCentsForCode(totals.liabilities, totals.currency)}',
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: palette.ink,
                   ),
@@ -731,7 +729,7 @@ class _NetWorthMetric extends HookWidget {
 
   final String label;
   final int amount;
-  final CurrencyCode currencyCode;
+  final String currencyCode;
   final ObTone tone;
 
   @override
@@ -748,7 +746,7 @@ class _NetWorthMetric extends HookWidget {
         ),
         const SizedBox(height: 2),
         ObAmount(
-          formatCents(amount, currencyCode),
+          formatCentsForCode(amount, currencyCode),
           tone: tone,
           style: theme.textTheme.titleSmall,
         ),
@@ -764,7 +762,7 @@ class _NetWorthTotals {
     required this.liabilities,
   });
 
-  final CurrencyCode currency;
+  final String currency;
   final int assets;
   final int liabilities;
 
@@ -772,11 +770,11 @@ class _NetWorthTotals {
 }
 
 List<_NetWorthTotals> _computeNetWorthByCurrency(Iterable<Account> accounts) {
-  final assets = <CurrencyCode, int>{};
-  final liabilities = <CurrencyCode, int>{};
+  final assets = <String, int>{};
+  final liabilities = <String, int>{};
 
   for (final account in accounts) {
-    final currency = parseCurrencyCode(account.currencyCode);
+    final currency = normalizeCurrencyCode(account.currencyCode);
     if (account.balanceCents >= 0) {
       assets[currency] = (assets[currency] ?? 0) + account.balanceCents;
       continue;
@@ -784,12 +782,11 @@ List<_NetWorthTotals> _computeNetWorthByCurrency(Iterable<Account> accounts) {
     liabilities[currency] = (liabilities[currency] ?? 0) + account.balanceCents;
   }
 
-  final allCurrencies = {...assets.keys, ...liabilities.keys}.toList()
-    ..sort((a, b) => a.code.compareTo(b.code));
+  final allCurrencies = {...assets.keys, ...liabilities.keys}.toList()..sort();
 
   if (allCurrencies.isEmpty) {
     return const [
-      _NetWorthTotals(currency: CurrencyCode.usd, assets: 0, liabilities: 0),
+      _NetWorthTotals(currency: '', assets: 0, liabilities: 0),
     ];
   }
 
@@ -804,13 +801,13 @@ List<_NetWorthTotals> _computeNetWorthByCurrency(Iterable<Account> accounts) {
       .toList();
 }
 
-Map<CurrencyCode, int> _sumBalancesByCurrency(Iterable<Account> accounts) {
+Map<String, int> _sumBalancesByCurrency(Iterable<Account> accounts) {
   final totals = aggregateCentsByCurrency(
     accounts,
     currencyCodeOf: (account) => account.currencyCode,
     amountCentsOf: (account) => account.balanceCents,
   );
   final sorted = totals.entries.toList()
-    ..sort((a, b) => a.key.code.compareTo(b.key.code));
+    ..sort((a, b) => a.key.compareTo(b.key));
   return {for (final entry in sorted) entry.key: entry.value};
 }

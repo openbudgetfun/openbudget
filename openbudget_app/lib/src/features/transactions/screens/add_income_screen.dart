@@ -13,7 +13,6 @@ import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
-import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 class AddIncomeScreen extends HookConsumerWidget {
@@ -37,9 +36,9 @@ class AddIncomeScreen extends HookConsumerWidget {
     final palette = theme.ob;
     final budgetCurrency =
         budgetAsync.whenOrNull(
-          data: (budget) => parseCurrencyCode(budget.currencyCode),
+          data: (budget) => normalizeCurrencyCode(budget.currencyCode),
         ) ??
-        CurrencyCode.usd;
+        '';
 
     useValueListenable(amountController);
 
@@ -52,7 +51,8 @@ class AddIncomeScreen extends HookConsumerWidget {
         duplicateCount.value = 0;
         return;
       }
-      final amountCents = (amount * _pow10(budgetCurrency.decimals)).round();
+      final amountCents =
+          (amount * _pow10(currencyDecimalsForCode(budgetCurrency))).round();
       try {
         final duplicates = await ref.read(
           duplicateCheckProvider(
@@ -83,11 +83,11 @@ class AddIncomeScreen extends HookConsumerWidget {
 
     final amountText = amountController.text.trim();
     final amountValue = double.tryParse(amountText) ?? 0;
-    final amountCentsPreview = (amountValue * _pow10(budgetCurrency.decimals))
-        .round();
+    final amountCentsPreview =
+        (amountValue * _pow10(currencyDecimalsForCode(budgetCurrency))).round();
     final formattedAmount = amountValue == 0
-        ? formatCents(0, budgetCurrency)
-        : formatCents(amountCentsPreview, budgetCurrency);
+        ? formatCentsForCode(0, budgetCurrency)
+        : formatCentsForCode(amountCentsPreview, budgetCurrency);
 
     return Scaffold(
       appBar: AppBar(
@@ -176,7 +176,7 @@ class AddIncomeScreen extends HookConsumerWidget {
                             filled: false,
                             isDense: true,
                             contentPadding: EdgeInsets.zero,
-                            hintText: formatCents(0, budgetCurrency),
+                            hintText: formatCentsForCode(0, budgetCurrency),
                             hintStyle:
                                 ObTextStyles.amount(
                                   theme.textTheme.displaySmall,
@@ -342,7 +342,10 @@ class AddIncomeScreen extends HookConsumerWidget {
                           if (budget == null) return;
 
                           final amountCents =
-                              (amount * _pow10(budgetCurrency.decimals))
+                              (amount *
+                                      _pow10(
+                                        currencyDecimalsForCode(budgetCurrency),
+                                      ))
                                   .round();
 
                           isSubmitting.value = true;
@@ -354,7 +357,7 @@ class AddIncomeScreen extends HookConsumerWidget {
                                 .addIncome(
                                   description: description,
                                   amountCents: amountCents,
-                                  currencyCode: budgetCurrency.code,
+                                  currencyCode: budgetCurrency,
                                   budgetId: budgetId,
                                   date: selectedDate.value,
                                   memo: memoText.isEmpty ? null : memoText,

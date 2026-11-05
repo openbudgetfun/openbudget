@@ -8,7 +8,6 @@ import 'package:openbudget_app/src/features/settings/providers/display_currency_
 import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_client/openbudget_client.dart';
-import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 /// Every active account, written down as one net worth statement.
@@ -82,8 +81,8 @@ class _NetWorthStatement extends HookWidget {
         convertedLiabilities != null;
     final primaryBreakdown = data.currencyBreakdown.firstOrNull;
     final primaryCurrency = useConverted
-        ? converter!.displayCurrency
-        : (primaryBreakdown?.currency ?? CurrencyCode.usd);
+        ? converter!.displayCurrency!.code
+        : (primaryBreakdown?.currency ?? '');
     final primaryNetWorth = useConverted
         ? convertedNetWorth
         : (primaryBreakdown?.netWorth ?? 0);
@@ -105,7 +104,7 @@ class _NetWorthStatement extends HookWidget {
             for (final breakdown in data.currencyBreakdown)
               breakdown.currency: breakdown.netWorth,
           })
-        : formatCents(primaryNetWorth, primaryCurrency);
+        : formatCentsForCode(primaryNetWorth, primaryCurrency);
     final hasAccounts =
         data.assetAccounts.isNotEmpty || data.liabilityAccounts.isNotEmpty;
 
@@ -150,14 +149,20 @@ class _NetWorthStatement extends HookWidget {
                   Expanded(
                     child: ReportFigure(
                       label: l10n.netWorthAssets,
-                      amount: formatCents(primaryAssets, primaryCurrency),
+                      amount: formatCentsForCode(
+                        primaryAssets,
+                        primaryCurrency,
+                      ),
                       tone: ObTone.funded,
                     ),
                   ),
                   Expanded(
                     child: ReportFigure(
                       label: l10n.netWorthLiabilities,
-                      amount: formatCents(primaryLiabilities, primaryCurrency),
+                      amount: formatCentsForCode(
+                        primaryLiabilities,
+                        primaryCurrency,
+                      ),
                       tone: ObTone.overspent,
                       alignEnd: true,
                     ),
@@ -293,14 +298,14 @@ class _CurrencySummaryRow extends HookWidget {
           Row(
             children: [
               Text(
-                currency.currency.code,
+                normalizeCurrencyCode(currency.currency),
                 style: theme.textTheme.labelLarge?.copyWith(
                   color: palette.ink,
                 ),
               ),
               const Spacer(),
               ObAmount(
-                formatCents(total, currency.currency),
+                formatCentsForCode(total, currency.currency),
                 tone: tone,
                 style: theme.textTheme.titleSmall,
               ),
@@ -312,7 +317,7 @@ class _CurrencySummaryRow extends HookWidget {
               Expanded(
                 child: ReportFigure(
                   label: l10n.netWorthAssets,
-                  amount: formatCents(
+                  amount: formatCentsForCode(
                     currency.totalAssets,
                     currency.currency,
                   ),
@@ -322,7 +327,7 @@ class _CurrencySummaryRow extends HookWidget {
               Expanded(
                 child: ReportFigure(
                   label: l10n.netWorthLiabilities,
-                  amount: formatCents(
+                  amount: formatCentsForCode(
                     currency.totalLiabilities,
                     currency.currency,
                   ),
@@ -348,7 +353,6 @@ class _AccountTile extends HookWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final palette = theme.ob;
-    final currency = parseCurrencyCode(account.currencyCode);
     final tone = account.balanceCents >= 0 ? ObTone.funded : ObTone.overspent;
 
     return ListTile(
@@ -381,7 +385,7 @@ class _AccountTile extends HookWidget {
         style: theme.textTheme.bodySmall?.copyWith(color: palette.mutedInk),
       ),
       trailing: ObAmount(
-        formatCents(account.balanceCents, currency),
+        formatCentsForCode(account.balanceCents, account.currencyCode),
         tone: tone,
         style: theme.textTheme.bodyLarge,
       ),

@@ -6,9 +6,7 @@ import 'package:openbudget_app/src/features/reports/providers/spending_report_pr
 import 'package:openbudget_app/src/features/reports/utils/report_month_label.dart';
 import 'package:openbudget_app/src/features/reports/widgets/report_charts.dart';
 import 'package:openbudget_app/src/features/settings/providers/display_currency_provider.dart';
-import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
-import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 /// A month or a range of months, split across the envelopes it was spent in.
@@ -83,7 +81,7 @@ class SpendingByPayeeScreen extends HookConsumerWidget {
           ],
         ),
         data: (report) {
-          final sourceCurrency = parseCurrencyCode(report.currencyCode);
+          final sourceCurrency = report.currencyCode;
           final sortedEntries = report.categorySpending.entries.toList()
             ..sort((a, b) => b.value.compareTo(a.value));
           final totalSpent = report.totalExpenses;
@@ -91,9 +89,9 @@ class SpendingByPayeeScreen extends HookConsumerWidget {
           String format(int cents) =>
               converter?.formatAmount(
                 amountCents: cents,
-                sourceCurrency: sourceCurrency,
+                currencyCode: sourceCurrency,
               ) ??
-              formatCents(cents, sourceCurrency);
+              formatCentsForCode(cents, sourceCurrency);
           final topEntries = sortedEntries.take(series.length).toList();
           final listedTotal = topEntries.fold<int>(
             0,
@@ -301,9 +299,12 @@ class SpendingByPayeeScreen extends HookConsumerWidget {
                     ObAmount(
                       converter?.formatAmount(
                             amountCents: report.totalIncome,
-                            sourceCurrency: sourceCurrency,
+                            currencyCode: sourceCurrency,
                           ) ??
-                          formatCents(report.totalIncome, sourceCurrency),
+                          formatCentsForCode(
+                            report.totalIncome,
+                            sourceCurrency,
+                          ),
                       tone: ObTone.funded,
                       style: theme.textTheme.titleSmall,
                     ),
@@ -396,7 +397,7 @@ class _CategoryRow extends HookWidget {
   final String categoryName;
   final int amountCents;
   final int totalCents;
-  final CurrencyCode sourceCurrency;
+  final String sourceCurrency;
   final DisplayCurrencyConverter? converter;
   final Color color;
   final int seed;
@@ -432,9 +433,9 @@ class _CategoryRow extends HookWidget {
       trailing: ObAmount(
         converter?.formatAmount(
               amountCents: amountCents,
-              sourceCurrency: sourceCurrency,
+              currencyCode: sourceCurrency,
             ) ??
-            formatCents(amountCents, sourceCurrency),
+            formatCentsForCode(amountCents, sourceCurrency),
         style: theme.textTheme.titleSmall,
       ),
     );

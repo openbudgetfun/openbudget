@@ -5,9 +5,9 @@ import 'package:intl/intl.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/envelope_goal_provider.dart';
 import 'package:openbudget_app/src/features/budget/widgets/budget_amount_keypad.dart';
+import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
-import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 enum _GoalCadence { weekly, monthly, yearly, custom }
@@ -26,7 +26,7 @@ class SetGoalDialog extends HookConsumerWidget {
 
   final String envelopeId;
   final String budgetId;
-  final CurrencyCode currencyCode;
+  final String currencyCode;
   final EnvelopeGoal? existingGoal;
   final String envelopeName;
 
@@ -551,10 +551,11 @@ class SetGoalDialog extends HookConsumerWidget {
     }
   }
 
-  String _formatCents(int cents, CurrencyCode currency) {
-    final divisor = _pow10(currency.decimals);
+  String _formatCents(int cents, String currencyCode) {
+    final decimals = currencyDecimalsForCode(currencyCode);
+    final divisor = _pow10(decimals);
     final value = cents / divisor;
-    return value.toStringAsFixed(currency.decimals);
+    return value.toStringAsFixed(decimals);
   }
 
   _GoalCadence _initialCadence(EnvelopeGoal? goal) {

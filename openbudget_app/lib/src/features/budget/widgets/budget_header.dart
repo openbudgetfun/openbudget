@@ -9,7 +9,6 @@ import 'package:openbudget_app/src/features/budget/providers/selected_month_prov
 import 'package:openbudget_app/src/features/budget/screens/auto_assign_dialog.dart';
 import 'package:openbudget_app/src/features/settings/providers/display_options_provider.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
-import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 class BudgetHeader extends HookConsumerWidget {
@@ -28,7 +27,7 @@ class BudgetHeader extends HookConsumerWidget {
   });
 
   final int readyToAssignCents;
-  final CurrencyCode currencyCode;
+  final String currencyCode;
   final String budgetId;
   final int year;
   final int month;
@@ -165,7 +164,7 @@ class BudgetHeader extends HookConsumerWidget {
                 ObAmount(
                   hideAmounts
                       ? hiddenAmountPlaceholder
-                      : formatCents(readyToAssignCents, currencyCode),
+                      : formatCentsForCode(readyToAssignCents, currencyCode),
                   highlighted: !isOverspent,
                   tone: isOverspent ? ObTone.overspent : ObTone.neutral,
                   style: theme.textTheme.headlineMedium,
@@ -188,7 +187,7 @@ class BudgetHeader extends HookConsumerWidget {
                       label: l10n.budgetTotalIncome,
                       value: hideAmounts
                           ? hiddenAmountPlaceholder
-                          : formatCents(totalIncomeCents, currencyCode),
+                          : formatCentsForCode(totalIncomeCents, currencyCode),
                       tone: ObTone.funded,
                     ),
                   ),
@@ -197,7 +196,10 @@ class BudgetHeader extends HookConsumerWidget {
                       label: l10n.budgetTotalBudgeted,
                       value: hideAmounts
                           ? hiddenAmountPlaceholder
-                          : formatCents(totalBudgetedCents, currencyCode),
+                          : formatCentsForCode(
+                              totalBudgetedCents,
+                              currencyCode,
+                            ),
                     ),
                   ),
                   Expanded(
@@ -205,7 +207,10 @@ class BudgetHeader extends HookConsumerWidget {
                       label: l10n.budgetTotalActivity,
                       value: hideAmounts
                           ? hiddenAmountPlaceholder
-                          : formatCents(-totalActivityCents, currencyCode),
+                          : formatCentsForCode(
+                              -totalActivityCents,
+                              currencyCode,
+                            ),
                       tone: totalActivityCents > 0
                           ? ObTone.overspent
                           : ObTone.funded,
@@ -246,7 +251,10 @@ class BudgetHeader extends HookConsumerWidget {
                         l10n.budgetOverspentWarning(
                           hideAmounts
                               ? hiddenAmountPlaceholder
-                              : formatCents(totalOverspentCents, currencyCode),
+                              : formatCentsForCode(
+                                  totalOverspentCents,
+                                  currencyCode,
+                                ),
                         ),
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: palette.ink,

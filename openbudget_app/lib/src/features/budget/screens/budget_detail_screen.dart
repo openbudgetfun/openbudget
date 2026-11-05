@@ -34,7 +34,6 @@ import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
-import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 enum _PlanMenuAction {
@@ -143,10 +142,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
 
         final summary = summaryAsync.value!;
         final selection = selectedEditor.value!;
-        final currencyCode = CurrencyCode.values.firstWhere(
-          (code) => code.code == summary.budget.currencyCode,
-          orElse: () => CurrencyCode.usd,
-        );
+        final currencyCode = summary.budget.currencyCode;
         inlineEditorSheetOpen.value = true;
 
         unawaited(
@@ -175,7 +171,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
                     inputValue: sheetInput,
                     amountLabel: hideAmounts
                         ? hiddenAmountPlaceholder
-                        : formatCents(
+                        : formatCentsForCode(
                             _parseEditorCents(sheetInput) ??
                                 (selection.monthlyData?.allocatedCents ??
                                     selection.envelope.budgetedAmountCents),
@@ -321,10 +317,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
         ),
       ),
       data: (summary) {
-        final currencyCode = CurrencyCode.values.firstWhere(
-          (c) => c.code == summary.budget.currencyCode,
-          orElse: () => CurrencyCode.usd,
-        );
+        final currencyCode = summary.budget.currencyCode;
         final goalsMap = goalsAsync.hasValue
             ? goalsAsync.value!
             : <String, EnvelopeGoal>{};
@@ -518,7 +511,10 @@ class BudgetDetailScreen extends HookConsumerWidget {
                     type: onboardingType,
                     readyToAssign: hideAmounts
                         ? hiddenAmountPlaceholder
-                        : formatCents(summary.readyToAssignCents, currencyCode),
+                        : formatCentsForCode(
+                            summary.readyToAssignCents,
+                            currencyCode,
+                          ),
                     onPrimaryAction: () => switch (onboardingType) {
                       _PlanOnboardingType.addAccounts => context.goNamed(
                         addAccountRoute,
@@ -964,7 +960,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
   Color _dialogBarrierColor(BuildContext context) =>
       OpenBudgetPalette.overlayScrimFor(Theme.of(context)).withAlpha(210);
 
-  void _showAutoAssignDialog(BuildContext context, CurrencyCode currencyCode) {
+  void _showAutoAssignDialog(BuildContext context, String currencyCode) {
     unawaited(
       showDialog<void>(
         context: context,
@@ -977,7 +973,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
 
   void _showCoverOverspendingSheet(
     BuildContext context,
-    CurrencyCode currencyCode, {
+    String currencyCode, {
     required int year,
     required int month,
     required List<_OverspentEnvelopeEntry> overspentEnvelopes,
@@ -1004,7 +1000,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
   void _showQuickBudgetDialog(
     BuildContext context,
     Envelope envelope,
-    CurrencyCode currencyCode, {
+    String currencyCode, {
     required int year,
     required int month,
   }) {
@@ -1030,7 +1026,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
     String currentName,
     int envelopeCount,
     int totalAllocatedCents,
-    CurrencyCode currencyCode,
+    String currencyCode,
   ) {
     unawaited(
       showDialog<void>(
@@ -1062,7 +1058,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
   void _showAddEnvelopeDialog(
     BuildContext context,
     String categoryId,
-    CurrencyCode currencyCode, {
+    String currencyCode, {
     required int year,
     required int month,
   }) {
@@ -1085,7 +1081,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
     BuildContext context,
     Envelope envelope,
     String categoryId,
-    CurrencyCode currencyCode, {
+    String currencyCode, {
     required int year,
     required int month,
   }) {
@@ -1109,7 +1105,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     CategoryWithEnvelopes categoryWithEnvelopes,
-    CurrencyCode currencyCode,
+    String currencyCode,
   ) async {
     final l10n = AppLocalizations.of(context);
     final palette = Theme.of(context).ob;
@@ -1118,7 +1114,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
 
     final categoryName = categoryWithEnvelopes.category.name;
     final envelopeCount = categoryWithEnvelopes.envelopes.length;
-    final totalAllocated = formatCents(
+    final totalAllocated = formatCentsForCode(
       categoryWithEnvelopes.totalBudgetedCents,
       currencyCode,
     );
@@ -1594,7 +1590,7 @@ class _CreditCardSectionLoader extends HookConsumerWidget {
   });
 
   final String budgetId;
-  final CurrencyCode currencyCode;
+  final String currencyCode;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -1912,7 +1908,7 @@ class _SpotlightOverview extends HookWidget {
   final BudgetSummary summary;
   final Map<String, EnvelopeGoal> goalsMap;
   final int totalActivityCents;
-  final CurrencyCode currencyCode;
+  final String currencyCode;
   final bool hideAmounts;
   final VoidCallback onEditTargets;
   final VoidCallback onAssign;
@@ -2039,7 +2035,10 @@ class _SpotlightOverview extends HookWidget {
                         tone: ObTone.brand,
                         value: hideAmounts
                             ? hiddenAmountPlaceholder
-                            : formatCents(totalTargetsCents, currencyCode),
+                            : formatCentsForCode(
+                                totalTargetsCents,
+                                currencyCode,
+                              ),
                         actionLabel: l10n.budgetSpotlightEdit,
                         onActionTap: onEditTargets,
                       ),
@@ -2055,7 +2054,10 @@ class _SpotlightOverview extends HookWidget {
                         tone: ObTone.underfunded,
                         value: hideAmounts
                             ? hiddenAmountPlaceholder
-                            : formatCents(totalUnderfundedCents, currencyCode),
+                            : formatCentsForCode(
+                                totalUnderfundedCents,
+                                currencyCode,
+                              ),
                       ),
                     ),
                   ),
@@ -2073,7 +2075,7 @@ class _SpotlightOverview extends HookWidget {
                         tone: ObTone.funded,
                         value: hideAmounts
                             ? hiddenAmountPlaceholder
-                            : formatCents(
+                            : formatCentsForCode(
                                 summary.totalBudgetedCents,
                                 currencyCode,
                               ),
@@ -2092,7 +2094,10 @@ class _SpotlightOverview extends HookWidget {
                         tone: ObTone.overspent,
                         value: hideAmounts
                             ? hiddenAmountPlaceholder
-                            : formatCents(totalActivityCents, currencyCode),
+                            : formatCentsForCode(
+                                totalActivityCents,
+                                currencyCode,
+                              ),
                         actionLabel: l10n.budgetSpotlightReflect,
                         onActionTap: onReflect,
                       ),
@@ -2612,7 +2617,7 @@ class _CoverOverspendingSheet extends HookConsumerWidget {
   final String budgetId;
   final int year;
   final int month;
-  final CurrencyCode currencyCode;
+  final String currencyCode;
   final List<_OverspentEnvelopeEntry> overspentEnvelopes;
 
   @override
@@ -2749,7 +2754,10 @@ class _CoverOverspendingSheet extends HookConsumerWidget {
                             ),
                             subtitle: Text(
                               l10n.budgetDetailNeedsToCover(
-                                formatCents(item.overspentCents, currencyCode),
+                                formatCentsForCode(
+                                  item.overspentCents,
+                                  currencyCode,
+                                ),
                               ),
                               style: theme.textTheme.bodySmall?.copyWith(
                                 color: palette.mutedInk,

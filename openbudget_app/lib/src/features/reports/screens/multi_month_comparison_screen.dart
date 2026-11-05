@@ -5,9 +5,7 @@ import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/reports/providers/multi_month_comparison_provider.dart';
 import 'package:openbudget_app/src/features/reports/utils/report_month_label.dart';
 import 'package:openbudget_app/src/features/settings/providers/display_currency_provider.dart';
-import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
-import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 /// Months side by side, written as one wide hand-ruled table.
@@ -60,9 +58,7 @@ class MultiMonthComparisonScreen extends HookConsumerWidget {
           ],
         ),
         data: (comparison) {
-          final sourceCurrency = parseCurrencyCode(
-            comparison.budget.currencyCode,
-          );
+          final sourceCurrency = comparison.budget.currencyCode;
 
           if (comparison.categories.isEmpty) {
             return ListView(
@@ -99,7 +95,7 @@ class _ComparisonTable extends HookWidget {
   });
 
   final MultiMonthComparison comparison;
-  final CurrencyCode sourceCurrency;
+  final String sourceCurrency;
   final DisplayCurrencyConverter? converter;
 
   @override
@@ -113,9 +109,9 @@ class _ComparisonTable extends HookWidget {
     String format(int cents) =>
         converter?.formatAmount(
           amountCents: cents,
-          sourceCurrency: sourceCurrency,
+          currencyCode: sourceCurrency,
         ) ??
-        formatCents(cents, sourceCurrency);
+        formatCentsForCode(cents, sourceCurrency);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(SpacingTokens.md),

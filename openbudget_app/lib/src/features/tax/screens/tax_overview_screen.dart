@@ -8,7 +8,6 @@ import 'package:openbudget_app/src/features/tax/providers/tax_providers.dart';
 import 'package:openbudget_app/src/features/tax/tax_formatting.dart';
 import 'package:openbudget_app/src/features/tax/tax_labels.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
-import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
@@ -273,7 +272,7 @@ class _TaxReportBody extends HookConsumerWidget {
                     for (final liability in report.liabilities)
                       _LiabilityCard(
                         liability: liability,
-                        currency: parseCurrencyCode(report.currencyCode),
+                        currency: report.currencyCode,
                       ),
                   ObSectionHeader(
                     title: l10n.taxReportLinesTitle,
@@ -298,7 +297,7 @@ class _TaxReportBody extends HookConsumerWidget {
                     for (final opportunity in report.opportunities)
                       _OpportunityCard(
                         opportunity: opportunity,
-                        currency: parseCurrencyCode(report.currencyCode),
+                        currency: report.currencyCode,
                       ),
                   ],
                   const SizedBox(height: SpacingTokens.md),
@@ -368,7 +367,7 @@ class _BalanceHero extends HookWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final palette = theme.ob;
-    final currency = parseCurrencyCode(report.currencyCode);
+    final currency = report.currencyCode;
     final balance = report.balanceDueMinor;
     final isRefund = balance < 0;
     final label = balance > 0
@@ -376,7 +375,7 @@ class _BalanceHero extends HookWidget {
         : isRefund
         ? l10n.taxRefundDue
         : l10n.taxNothingToPay;
-    final amount = formatCents(balance.abs(), currency);
+    final amount = formatCentsForCode(balance.abs(), currency);
 
     return ObCard(
       tone: isRefund
@@ -407,7 +406,10 @@ class _BalanceHero extends HookWidget {
               Expanded(
                 child: _Metric(
                   label: l10n.taxTotalLiability,
-                  amount: formatCents(report.totalLiabilityMinor, currency),
+                  amount: formatCentsForCode(
+                    report.totalLiabilityMinor,
+                    currency,
+                  ),
                 ),
               ),
               const SizedBox(
@@ -417,7 +419,7 @@ class _BalanceHero extends HookWidget {
               Expanded(
                 child: _Metric(
                   label: l10n.taxAlreadyPaid,
-                  amount: formatCents(report.alreadyPaidMinor, currency),
+                  amount: formatCentsForCode(report.alreadyPaidMinor, currency),
                 ),
               ),
             ],
@@ -457,7 +459,7 @@ class _LiabilityCard extends HookWidget {
   const _LiabilityCard({required this.liability, required this.currency});
 
   final TaxLiabilityView liability;
-  final CurrencyCode currency;
+  final String currency;
 
   @override
   Widget build(BuildContext context) {
@@ -500,7 +502,7 @@ class _LiabilityCard extends HookWidget {
                       ),
                     ),
                     ObAmount(
-                      formatCents(liability.amountMinor, currency),
+                      formatCentsForCode(liability.amountMinor, currency),
                       style: theme.textTheme.titleSmall,
                     ),
                     if (hasBands) ...[
@@ -573,7 +575,7 @@ class _LiabilityCard extends HookWidget {
                                   ),
                                 ),
                                 ObAmount(
-                                  formatCents(band.baseMinor, currency),
+                                  formatCentsForCode(band.baseMinor, currency),
                                   style: theme.textTheme.bodySmall,
                                 ),
                               ],
@@ -591,7 +593,7 @@ class _LiabilityCard extends HookWidget {
                                   ),
                                 ),
                                 ObAmount(
-                                  formatCents(band.taxMinor, currency),
+                                  formatCentsForCode(band.taxMinor, currency),
                                   style: theme.textTheme.bodySmall,
                                 ),
                               ],
@@ -620,7 +622,7 @@ class _ReportLinesCard extends HookWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final palette = theme.ob;
-    final currency = parseCurrencyCode(report.currencyCode);
+    final currency = report.currencyCode;
 
     return ObCard(
       padding: const EdgeInsets.symmetric(
@@ -677,7 +679,7 @@ class _ReportLinesCard extends HookWidget {
                         ),
                         const SizedBox(width: SpacingTokens.sm),
                         ObAmount(
-                          formatCents(line.amountMinor, currency),
+                          formatCentsForCode(line.amountMinor, currency),
                           style: theme.textTheme.bodyMedium,
                         ),
                       ],
@@ -694,7 +696,7 @@ class _OpportunityCard extends HookWidget {
   const _OpportunityCard({required this.opportunity, required this.currency});
 
   final TaxOpportunityView opportunity;
-  final CurrencyCode currency;
+  final String currency;
 
   @override
   Widget build(BuildContext context) {
@@ -727,7 +729,7 @@ class _OpportunityCard extends HookWidget {
               if (saving != null)
                 ObToneChip(
                   label: l10n.taxOpportunitySaving(
-                    formatCents(saving, currency),
+                    formatCentsForCode(saving, currency),
                   ),
                   tone: ObTone.funded,
                   icon: const SkribbleIcon(
