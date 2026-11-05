@@ -128,7 +128,8 @@ final class DeIndividualAssessment {
   final int taxableIncome;
 
   /// The income tax the Zuschlagsteuern are computed on: the tariff with
-  /// Kinderfreibeträge, before the § 35 credit.
+  /// Kinderfreibeträge less the § 35 credit on that tariff, without the
+  /// Kindergeld add-back (§ 3 Abs. 2 SolzG, § 51a Abs. 1 EStG).
   final int surchargeBase;
   final int marginalRateBasisPoints;
   final int tariffTax;
@@ -358,9 +359,12 @@ DeIndividualAssessment deIndividual(TaxInput input, DeTaxTable table) {
     incomeAfterDeductions - (usesKinderfreibetrag ? kinderfreibetrag : 0),
   );
   // § 3 Abs. 2 SolzG and § 51a Abs. 1 EStG: the base of Solidaritätszuschlag
-  // and Kirchensteuer is always the tax recalculated with Kinderfreibeträge,
-  // before the § 35 credit.
-  final surchargeBase = tariffOn(incomeAfterDeductions - kinderfreibetrag);
+  // and Kirchensteuer is the tax that would be fixed with Kinderfreibeträge
+  // in every case, so it is recalculated with them and still reduced by the
+  // § 35 credit below.
+  final surchargeTariffTax = tariffOn(
+    incomeAfterDeductions - kinderfreibetrag,
+  );
   final tariffTax = tariffOn(taxableIncome);
 
   var positiveIncome = 0;
@@ -380,7 +384,20 @@ DeIndividualAssessment deIndividual(TaxInput input, DeTaxTable table) {
     tradeTaxMinor: tradeTaxPaidByBusinesses,
     messbetragMinor: tradeTaxMessbetrag,
   );
-  final incomeTax = tariffTax - credit;
+  // § 31 Satz 4 and § 2 Abs. 6 Satz 3 EStG: when the Kinderfreibeträge win
+  // the Günstigerprüfung, the Kindergeld already received is added back to
+  // the income tax.
+  final incomeTax =
+      tariffTax - credit + (usesKinderfreibetrag ? kindergeld : 0);
+  final surchargeBase =
+      surchargeTariffTax -
+      deSection35CreditMinor(
+        incomeTaxMinor: surchargeTariffTax,
+        businessProfitMinor: businessProfit,
+        positiveIncomeMinor: positiveIncome,
+        tradeTaxMinor: tradeTaxPaidByBusinesses,
+        messbetragMinor: tradeTaxMessbetrag,
+      );
 
   final freigrenze = profile.jointAssessment
       ? table.solidarity.freigrenzeJoint
@@ -541,6 +558,12 @@ TaxReport _individualReport(
         label: 'Anrechnung nach § 35 EStG',
         amountMinor: -assessment.section35Credit,
         reportReference: 'Anlage G Z51/Z52 (Kz 64-67) – § 35 EStG',
+      ),
+    if (assessment.usesKinderfreibetrag && assessment.kindergeld > 0)
+      TaxReportLine(
+        label: 'Hinzurechnung Kindergeld',
+        amountMinor: assessment.kindergeld,
+        reportReference: '§ 31 Satz 4 EStG',
       ),
     if (assessment.lohnsteuer > 0) _line('de.ind.lohnsteuer', totals, counts),
     if (assessment.kapitalertragsteuer > 0)

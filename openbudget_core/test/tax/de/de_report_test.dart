@@ -225,7 +225,14 @@ void main() {
             .amountMinor,
         17918600,
       );
-      expect(liability(report, 'Einkommensteuer'), 5298600);
+      // § 31 Satz 4 EStG adds the Kindergeld back: 52 986 + 6 216 Euro.
+      expect(
+        report.lines
+            .firstWhere((line) => line.label == 'Hinzurechnung Kindergeld')
+            .amountMinor,
+        621600,
+      );
+      expect(liability(report, 'Einkommensteuer'), 5920200);
       // Soli on the KFB tax: 11.9 % of (52 986 - 40 700) = 1 462.03.
       expect(liability(report, 'Solidaritätszuschlag'), 146203);
     });
@@ -433,6 +440,9 @@ void main() {
       );
       // 98 770 + 60 000 - 36 = 158 734 Euro; 55 532 - 4 970 = 50 562 Euro.
       expect(liability(report, 'Einkommensteuer'), 5056200);
+      // The § 35 credit also reduces the Soli base (§ 3 Abs. 2 SolzG):
+      // 5.5 % of 50 562 Euro, not of the 55 532 Euro tariff tax.
+      expect(liability(report, 'Solidaritätszuschlag'), 278091);
       expect(
         report.lines
             .firstWhere((line) => line.label == 'Anrechnung nach § 35 EStG')

@@ -430,8 +430,9 @@ final Map<int, DateTime> _advisedTransitionDeadlines = {
 ///
 /// The holiday check covers the nationwide Feiertage only. Länder-specific
 /// holidays (Fronleichnam, Allerheiligen, Reformationstag, Buß- und Bettag
-/// and the like) are not modelled, so a deadline can only move later than
-/// the strict law demands, never earlier.
+/// and the like) are not modelled, so in a Land with such a holiday the
+/// shown deadline can be a day earlier than the law allows, never later.
+/// That errs towards filing on time.
 DateTime deRollForward(DateTime deadline) {
   var day = DateTime.utc(deadline.year, deadline.month, deadline.day);
   while (_isRestDay(day)) {
