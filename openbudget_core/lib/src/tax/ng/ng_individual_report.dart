@@ -12,7 +12,7 @@ final class _IndividualPosition {
     required this.linkedLines,
     required this.skippedLinkedInputs,
     required this.reliefs,
-    required this.rentRelief,
+    required this.statutoryRelief,
     required this.totalIncome,
     required this.chargeableIncome,
     required this.alreadyPaid,
@@ -30,7 +30,12 @@ final class _IndividualPosition {
   final int skippedLinkedInputs;
 
   final int reliefs;
-  final int rentRelief;
+
+  /// The statutory allowance that reduces total income before the reliefs
+  /// the user records: rent relief under the NTA, the consolidated relief
+  /// allowance under the old regime.
+  final int statutoryRelief;
+
   final int totalIncome;
   final int chargeableIncome;
   final int alreadyPaid;
@@ -56,56 +61,28 @@ _IndividualPosition _individualPosition(TaxInput input, _NgTaxTable table) {
     }
   }
 
-  final annualRent = switch (input.profile) {
-    NgTaxProfile(:final annualRentMinor) => math.max(0, annualRentMinor),
-    _ => 0,
+  final totalIncome = income + gains + _linkedProfit(input);
+
+  final statutoryRelief = switch (table.regime) {
+    // NTA s.30(2)(a)(vi): 20% of annual rent paid, capped at N500,000.
+    _NgRegime.nta => switch (input.profile) {
+      NgTaxProfile(:final annualRentMinor) => _rentRelief(
+        math.max(0, annualRentMinor),
+        table,
+      ),
+      _ => 0,
+    },
+    // PITA consolidated relief allowance (secondary): the higher of
+    // N200,000 or 1% of gross income, plus 20% of gross income.
+    _NgRegime.pitaCita => _consolidatedReliefAllowance(totalIncome, table),
   };
-  final rentRelief = _rentRelief(annualRent, table);
 
-  final soleTraderLinks = input.linked
-      .where((link) => link.profile.entityKind == TaxEntityKind.soleTrader)
-      .length;
-  var linkedProfit = 0;
-  var linkedTaxPaid = 0;
-  var linkedNumber = 0;
-  var skippedLinkedInputs = 0;
-  final linkedLines = <TaxReportLine>[];
-  for (final link in input.linked) {
-    if (link.profile.entityKind != TaxEntityKind.soleTrader) {
-      skippedLinkedInputs += 1;
-      continue;
-    }
-    linkedNumber += 1;
-    final business = _businessPosition(
-      entries: link.entries,
-      kind: TaxEntityKind.soleTrader,
-      reclaimVat: link.profile.salesTaxRegistered,
-    );
-    linkedTaxPaid += business.taxPaid;
-    final suffix = soleTraderLinks == 1 ? '' : ' $linkedNumber';
-    if (business.totalProfit > 0) {
-      linkedProfit += business.totalProfit;
-      linkedLines.add(
-        TaxReportLine(
-          label: 'Profit from linked business$suffix',
-          amountMinor: business.totalProfit,
-        ),
-      );
-    }
-    if (business.lossMinor > 0) {
-      linkedLines.add(
-        TaxReportLine(
-          label: 'Loss from linked business$suffix (carried forward)',
-          amountMinor: business.lossMinor,
-        ),
-      );
-    }
-  }
-
-  final totalIncome = income + gains + linkedProfit;
-  final chargeableIncome = math.max(0, totalIncome - reliefs - rentRelief);
-  final alreadyPaid =
-      _sumKind(amounts, TaxCategoryKind.taxPaid) + linkedTaxPaid;
+  final chargeableIncome = math.max(
+    0,
+    totalIncome - reliefs - statutoryRelief,
+  );
+  final recordedTaxPaid = _sumKind(amounts, TaxCategoryKind.taxPaid);
+  final linkedPaid = _linkedTaxPaid(input);
 
   return _IndividualPosition(
     amounts: amounts,
@@ -113,23 +90,122 @@ _IndividualPosition _individualPosition(TaxInput input, _NgTaxTable table) {
     uncategorized: totals.uncategorized,
     gains: gains,
     capitalLoss: capitalLoss,
-    linkedTaxPaid: linkedTaxPaid,
-    linkedLines: linkedLines,
-    skippedLinkedInputs: skippedLinkedInputs,
+    linkedTaxPaid: linkedPaid,
+    linkedLines: _linkedLines(input),
+    skippedLinkedInputs: _skippedLinkedInputs(input),
     reliefs: reliefs,
-    rentRelief: rentRelief,
+    statutoryRelief: statutoryRelief,
     totalIncome: totalIncome,
     chargeableIncome: chargeableIncome,
-    alreadyPaid: alreadyPaid,
+    alreadyPaid: recordedTaxPaid + linkedPaid,
   );
 }
+
+/// The profit of the sole trades linked to an individual.
+int _linkedProfit(TaxInput input) {
+  var profit = 0;
+  for (final business in _linkedSoleTrades(input)) {
+    if (business.totalProfit > 0) {
+      profit += business.totalProfit;
+    }
+  }
+  return profit;
+}
+
+/// The tax the linked sole trades already paid, credited on the personal
+/// return.
+int _linkedTaxPaid(TaxInput input) {
+  var paid = 0;
+  for (final business in _linkedSoleTrades(input)) {
+    paid += business.taxPaid;
+  }
+  return paid;
+}
+
+/// Report lines for the linked sole trades.
+List<TaxReportLine> _linkedLines(TaxInput input) {
+  final links = _linkedSoleTrades(input);
+  final lines = <TaxReportLine>[];
+  for (final (index, business) in links.indexed) {
+    final suffix = links.length == 1 ? '' : ' ${index + 1}';
+    if (business.totalProfit > 0) {
+      lines.add(
+        TaxReportLine(
+          label: 'Profit from linked business$suffix',
+          amountMinor: business.totalProfit,
+        ),
+      );
+    }
+    if (business.lossMinor > 0) {
+      lines.add(
+        TaxReportLine(
+          label: 'Loss from linked business$suffix (carried forward)',
+          amountMinor: business.lossMinor,
+        ),
+      );
+    }
+  }
+  return lines;
+}
+
+/// The sole trades linked to [input], ignoring every other kind of book.
+List<_BusinessPosition> _linkedSoleTrades(TaxInput input) => [
+  for (final link in input.linked)
+    if (link.profile.entityKind == TaxEntityKind.soleTrader)
+      _businessPosition(
+        entries: link.entries,
+        kind: TaxEntityKind.soleTrader,
+        reclaimVat: link.profile.salesTaxRegistered,
+      ),
+];
+
+/// How many linked inputs were not sole trades and were left out.
+int _skippedLinkedInputs(TaxInput input) => input.linked
+    .where((link) => link.profile.entityKind != TaxEntityKind.soleTrader)
+    .length;
 
 /// Builds an individual's report.
 TaxReport _individualReport(TaxInput input, _NgTaxTable table) {
   final position = _individualPosition(input, table);
   final slices = applyTaxBands(position.chargeableIncome, table.bands);
-  final tax = sumBandTax(slices);
+  final progressiveTax = sumBandTax(slices);
+  // Old regime (PITA, secondary): minimum tax of 1% of gross income is
+  // payable where it exceeds the progressive tax. It does not exist under
+  // the NTA.
+  final minimumTax = switch (table.regime) {
+    _NgRegime.nta => 0,
+    _NgRegime.pitaCita =>
+      position.totalIncome * table.minimumTaxBasisPoints ~/ 10000,
+  };
+  final payable = math.max(progressiveTax, minimumTax);
+  final chargedSlices = payable > progressiveTax
+      ? [
+          TaxBandSlice(
+            label: 'Minimum tax at 1% of gross income',
+            baseMinor: position.totalIncome,
+            rateBasisPoints: table.minimumTaxBasisPoints,
+            taxMinor: minimumTax,
+          ),
+        ]
+      : slices;
   const catalog = _NgTaxCategories.individual;
+
+  final statutoryReliefLine = switch (table.regime) {
+    // NTA s.30(2)(a)(vi).
+    _NgRegime.nta when position.statutoryRelief > 0 => TaxReportLine(
+      label: 'Rent relief (20% of annual rent, capped at N500,000)',
+      amountMinor: position.statutoryRelief,
+      reportReference: 'NTA 2025 s.30(2)(a)(vi)',
+    ),
+    // PITA consolidated relief allowance (secondary source; the section
+    // number is unverified).
+    _NgRegime.pitaCita when position.statutoryRelief > 0 => TaxReportLine(
+      label: 'Consolidated relief allowance',
+      amountMinor: position.statutoryRelief,
+      reportReference: 'PITA (secondary source; section unverified)',
+    ),
+    _ => null,
+  };
 
   final lines = <TaxReportLine>[
     ..._categoryLines(
@@ -182,16 +258,22 @@ TaxReport _individualReport(TaxInput input, _NgTaxTable table) {
       position.counts,
       kind: TaxCategoryKind.relief,
     ),
-    if (position.rentRelief > 0)
+    ?statutoryReliefLine,
+    if (payable > progressiveTax)
       TaxReportLine(
-        label: 'Rent relief (20% of annual rent, capped at N500,000)',
-        amountMinor: position.rentRelief,
-        reportReference: 'NTA 2025 s.30(2)(a)(vi)',
+        label:
+            'Minimum tax at 1% of gross income (replaces the lower '
+            'progressive tax)',
+        amountMinor: minimumTax,
+        reportReference: 'PITA (secondary source; section unverified)',
       ),
     TaxReportLine(
       label: 'Chargeable income',
       amountMinor: position.chargeableIncome,
-      reportReference: 'NTA 2025 s.30',
+      reportReference: switch (table.regime) {
+        _NgRegime.nta => 'NTA 2025 s.30',
+        _NgRegime.pitaCita => 'PITA (secondary source; section unverified)',
+      },
     ),
     ..._categoryLines(
       catalog,
@@ -208,14 +290,26 @@ TaxReport _individualReport(TaxInput input, _NgTaxTable table) {
 
   final assumptions = <String>[
     ..._baseAssumptions(),
-    'Rent relief uses the annual rent recorded in the profile; keep the tenancy agreement and rent receipts as evidence.',
+    ...switch (table.regime) {
+      _NgRegime.nta => [
+        'Rent relief uses the annual rent recorded in the profile; keep the tenancy agreement and rent receipts as evidence.',
+      ],
+      _NgRegime.pitaCita => [
+        'The 2025 figures are secondary-sourced (PwC and other summaries); the Personal Income Tax Act text was not read.',
+        'The consolidated relief allowance (the higher of N200,000 or 1% of gross income, plus 20% of gross income) applies instead of the Nigeria Tax Act rent relief; the annual rent recorded in the profile is not used for 2025.',
+        'The 1% minimum tax is payable where it exceeds the progressive tax; exemptions from minimum tax are not modelled.',
+        'Approved-channel foreign dividend, interest, rent and royalty are recorded out of scope; the old PITA foreign income rules were not researched.',
+      ],
+    },
+    if (table.regime == _NgRegime.nta) 'Foreign dividend, interest, rent and royalty brought into Nigeria through approved channels are exempt (NTA 2025 s.163(1)(s)) and recorded out of scope; foreign employment and business income are not exempt.',
     'Worldwide income is included for a resident individual; foreign tax credits are not modelled.',
     'Franked dividends and final-tax interest are excluded from total income.',
     'Capital gains exemptions and reliefs in Part VIII (private residence, personal chattels, motor vehicles, gifts, certain share disposals) are not modelled; record exempt disposals out of scope.',
     'Employment exemptions and benefits-in-kind valuation rules are not modelled; record the taxable value only.',
     'Pension, NHF and NHIS deductions use the amounts recorded; statutory caps and approved-scheme conditions are not checked.',
     'Business losses and unused capital allowances are carried forward, not offset against other income.',
-    'The minimum-wage exemption in section 58 is not modelled.',
+    if (table.regime == _NgRegime.nta)
+      'The minimum-wage exemption in section 58 is not modelled.',
     'Tax deducted at source is credited only when recorded as a tax-paid category.',
   ];
   if (position.skippedLinkedInputs > 0) {
@@ -231,8 +325,8 @@ TaxReport _individualReport(TaxInput input, _NgTaxTable table) {
     liabilities: [
       TaxLiability(
         label: 'Personal income tax',
-        amountMinor: tax,
-        bands: slices,
+        amountMinor: payable,
+        bands: chargedSlices,
       ),
     ],
     alreadyPaidMinor: position.alreadyPaid,

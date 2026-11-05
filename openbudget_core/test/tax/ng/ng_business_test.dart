@@ -115,7 +115,7 @@ void main() {
       expect(ngLine(report, 'Profit chargeable').amountMinor, 785_000_000);
     });
 
-    test('an input VAT credit is carried forward, not refunded', () {
+    test('excess input VAT is carried forward and refundable on request', () {
       final report = soleTraderReport(
         vat: true,
         entries: [
@@ -124,7 +124,10 @@ void main() {
         ],
       );
       expect(ngLiability(report, 'Value added tax').amountMinor, 0);
-      expect(ngLine(report, 'VAT credit').amountMinor, 75_000_000);
+      final credit = ngLine(report, 'Excess input VAT');
+      expect(credit.amountMinor, 75_000_000);
+      expect(credit.label, contains('refundable on request'));
+      expect(credit.reportReference, 'NTA 2025 s.156(1)-(2)');
     });
 
     test('capital allowance rates are 10%, 20% and 25% by class', () {
@@ -172,6 +175,22 @@ void main() {
       expect(ngLiability(report, 'Companies income tax').amountMinor, 0);
     });
 
+    test('one kobo above the ceiling pays 30%', () {
+      final report = ngRules.report(
+        TaxInput(
+          profile: ngCompany(),
+          year: ngRules.taxYear(2026),
+          entries: [
+            ngEntry('ng.co.revenue.sales', 0, amountMinor: 5_000_000_001),
+          ],
+        ),
+      );
+      expect(
+        ngLiability(report, 'Companies income tax').amountMinor,
+        1_500_000_000,
+      );
+    });
+
     test('one naira above the ceiling pays 30%', () {
       final report = companyReport(
         entries: [
@@ -186,14 +205,76 @@ void main() {
     });
 
     test('turnover between the two statutory ceilings flags the conflict', () {
-      bool flagsConflict(int turnoverNaira) => companyReport(
-        entries: [ngEntry('ng.co.revenue.sales', turnoverNaira)],
-      ).assumptions.any((text) => text.contains('section 147'));
+      bool flagsConflict(int turnoverNaira) =>
+          companyReport(
+            entries: [ngEntry('ng.co.revenue.sales', turnoverNaira)],
+          ).assumptions.any(
+            (text) =>
+                text.contains('N50,000,000') &&
+                text.contains('N100,000,000') &&
+                text.contains('disagree'),
+          );
 
       expect(flagsConflict(50_000_000), isFalse);
+      expect(flagsConflict(50_000_001), isTrue);
       expect(flagsConflict(80_000_000), isTrue);
       expect(flagsConflict(100_000_000), isTrue);
       expect(flagsConflict(100_000_001), isFalse);
+    });
+
+    test('the ceiling switch follows the profile (C2 and C2b)', () {
+      TaxReport reportWith(NgSmallCompanyCeiling ceiling) => ngRules.report(
+        TaxInput(
+          profile: NgTaxProfile(
+            entityKind: TaxEntityKind.company,
+            smallCompanyCeiling: ceiling,
+          ),
+          year: ngRules.taxYear(2026),
+          entries: [
+            ngEntry('ng.co.revenue.sales', 80_000_000),
+            ngEntry('ng.co.expense.other', 70_000_000),
+          ],
+        ),
+      );
+
+      // C2: gazetted N50m ceiling — turnover N80m is not small.
+      final gazette = reportWith(NgSmallCompanyCeiling.ntaGazette);
+      expect(
+        ngLiability(gazette, 'Companies income tax').amountMinor,
+        300_000_000,
+      );
+      expect(ngLiability(gazette, 'Development levy').amountMinor, 40_000_000);
+
+      // C2b: the N100m Administration Act figure — the same company is small.
+      final intended = reportWith(NgSmallCompanyCeiling.ntaaIntended);
+      expect(
+        ngLiability(intended, 'Companies income tax').amountMinor,
+        0,
+      );
+      expect(intended.totalLiabilityMinor, 0);
+      // The conflict is still explained: the switch never silences it.
+      expect(
+        intended.assumptions.any((text) => text.contains('disagree')),
+        isTrue,
+      );
+    });
+
+    test('the profile ceiling round-trips through JSON', () {
+      const profile = NgTaxProfile(
+        entityKind: TaxEntityKind.company,
+        smallCompanyCeiling: NgSmallCompanyCeiling.ntaaIntended,
+        mneGroupMember: true,
+      );
+      final restored = TaxProfile.fromJson(profile.toJson()) as NgTaxProfile;
+      expect(restored.smallCompanyCeiling, NgSmallCompanyCeiling.ntaaIntended);
+      expect(restored.mneGroupMember, isTrue);
+
+      // Defaults keep older stored profiles valid.
+      const legacy = NgTaxProfile(entityKind: TaxEntityKind.company);
+      final json = legacy.toJson()..remove('smallCompanyCeiling');
+      final parsed = TaxProfile.fromJson(json) as NgTaxProfile;
+      expect(parsed.smallCompanyCeiling, NgSmallCompanyCeiling.ntaGazette);
+      expect(parsed.mneGroupMember, isFalse);
     });
 
     test('professional services are never a small company', () {
@@ -313,6 +394,46 @@ void main() {
       );
       expect(report.uncategorizedCount, 1);
       expect(ngLine(report, 'Total profits').amountMinor, 100_000_000);
+    });
+  });
+
+  group('minimum effective tax rate (NTA s.57)', () {
+    bool mentionsEtr(TaxReport report) => report.assumptions.any(
+      (text) => text.contains('minimum effective tax rate'),
+    );
+
+    test('aggregate turnover of N20bn or more brings it in', () {
+      final report = companyReport(
+        entries: [ngEntry('ng.co.revenue.sales', 20_000_000_000)],
+      );
+      expect(mentionsEtr(report), isTrue);
+      expect(
+        report.assumptions.singleWhere(
+          (text) => text.contains('minimum effective tax rate'),
+        ),
+        contains('N20,000,000,000'),
+      );
+    });
+
+    test('below N20bn without a multinational group skips it', () {
+      final report = companyReport(
+        entries: [ngEntry('ng.co.revenue.sales', 5_000_000_000)],
+      );
+      expect(mentionsEtr(report), isFalse);
+    });
+
+    test('a multinational group member is in scope at any turnover', () {
+      final report = ngRules.report(
+        TaxInput(
+          profile: const NgTaxProfile(
+            entityKind: TaxEntityKind.company,
+            mneGroupMember: true,
+          ),
+          year: ngRules.taxYear(2026),
+          entries: [ngEntry('ng.co.revenue.sales', 1_000_000)],
+        ),
+      );
+      expect(mentionsEtr(report), isTrue);
     });
   });
 }

@@ -269,7 +269,11 @@ Iterable<TaxReportLine> _capitalAllowanceLines(
 }
 
 /// Output and input VAT lines for a registered business.
-List<TaxReportLine> _vatLines(_BusinessPosition position, bool registered) {
+List<TaxReportLine> _vatLines(
+  _BusinessPosition position,
+  bool registered,
+  _NgTaxTable table,
+) {
   if (!registered || (position.outputVat == 0 && position.inputVat == 0)) {
     return const [];
   }
@@ -286,9 +290,16 @@ List<TaxReportLine> _vatLines(_BusinessPosition position, bool registered) {
     ),
     if (position.inputVat > position.outputVat)
       TaxReportLine(
-        label: 'VAT credit carried forward',
+        label:
+            'Excess input VAT (credit carried forward or refundable on '
+            'request)',
         amountMinor: position.inputVat - position.outputVat,
-        reportReference: 'NTA 2025 s.156(1)(b)',
+        reportReference: switch (table.regime) {
+          // NTA s.156(1)-(2): the excess is a carried-forward credit or a
+          // refund on request.
+          _NgRegime.nta => 'NTA 2025 s.156(1)-(2)',
+          _NgRegime.pitaCita => 'VATA (secondary source; section unverified)',
+        },
       ),
   ];
 }
@@ -313,17 +324,25 @@ TaxReport _soleTraderReport(TaxInput input, _NgTaxTable table) {
       profitLabel: 'Profit chargeable on the owner personal return',
       reclaimVat: registered,
     ),
-    ..._vatLines(position, registered),
+    ..._vatLines(position, registered, table),
   ];
 
   final assumptions = <String>[
     ..._baseAssumptions(),
     'The business profit is taxed on the owner personal return; this report shows the profit that feeds it.',
     'Tax deducted at source is credited on the owner personal return, not against this business report.',
-    'Capital allowance is one year at the First Schedule Table I rates on current-year additions; prior-year assets, disposals and balancing charges are not tracked.',
+    ...switch (table.regime) {
+      _NgRegime.nta => [
+        'Capital allowance is one year at the First Schedule Table I rates on current-year additions; prior-year assets, disposals and balancing charges are not tracked.',
+      ],
+      _NgRegime.pitaCita => [
+        'The 2025 figures are secondary-sourced (PwC and other summaries); the Personal Income Tax Act text was not read.',
+        'Capital allowance is one year at the First Schedule Table I rates on current-year additions; prior-year assets, disposals and balancing charges are not tracked.',
+      ],
+    },
     'Business expenses are assumed to be wholly and exclusively incurred in producing the income; no expense is reclassified.',
     'VAT is charged only when the business is registered; otherwise input VAT is part of the cost.',
-    if (registered) 'Input VAT is treated as fully recoverable; the Act requires apportionment where supplies are partly exempt, and a credit is carried forward rather than refunded unless the supplies are zero-rated.',
+    if (registered) ..._vatAssumptions(table, registered),
   ];
 
   return TaxReport(

@@ -108,6 +108,21 @@ int _rentRelief(int annualRentMinor, _NgTaxTable table) {
   return math.min(relief, table.rentReliefCapMinor);
 }
 
+/// Old regime (PITA, secondary): the consolidated relief allowance on
+/// [grossMinor] of gross income, the higher of the N200,000 floor or 1% of
+/// gross income, plus 20% of gross income. Each part is rounded down to a
+/// whole kobo.
+int _consolidatedReliefAllowance(int grossMinor, _NgTaxTable table) {
+  if (grossMinor <= 0) {
+    return 0;
+  }
+  final percentPart = math.max(
+    grossMinor * table.craPercentBasisPoints ~/ 10000,
+    table.craFloorMinor,
+  );
+  return percentPart + grossMinor * table.craShareBasisPoints ~/ 10000;
+}
+
 /// A plain naira amount for explanations, without a thousands separator.
 String _naira(int minor) {
   final whole = minor ~/ 100;
