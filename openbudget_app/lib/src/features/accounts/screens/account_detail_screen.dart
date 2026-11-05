@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -132,11 +133,13 @@ class AccountDetailScreen extends HookConsumerWidget {
                     switch (action) {
                       case _AccountMenuAction.reconcile:
                         if (txnAsync.hasValue) {
-                          _reconcile(
-                            context,
-                            ref,
-                            txnAsync.value!,
-                            currencyCode,
+                          unawaited(
+                            _reconcile(
+                              context,
+                              ref,
+                              txnAsync.value!,
+                              currencyCode,
+                            ),
                           );
                         }
                       case _AccountMenuAction.hideReconciled:
@@ -454,13 +457,17 @@ class AccountDetailScreen extends HookConsumerWidget {
   }
 
   void _openEditAccount(BuildContext context, Account account) {
-    showDialog<void>(
-      context: context,
-      builder: (_) => EditAccountDialog(
-        account: account,
-        budgetId: budgetId,
-        onDeleted: () =>
-            context.goNamed(accountListRoute, pathParameters: {'id': budgetId}),
+    unawaited(
+      showDialog<void>(
+        context: context,
+        builder: (_) => EditAccountDialog(
+          account: account,
+          budgetId: budgetId,
+          onDeleted: () => context.goNamed(
+            accountListRoute,
+            pathParameters: {'id': budgetId},
+          ),
+        ),
       ),
     );
   }

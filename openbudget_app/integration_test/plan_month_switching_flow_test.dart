@@ -4,9 +4,11 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
+import 'package:openbudget_app/src/features/budget/providers/age_of_money_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_goals_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/credit_card_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/monthly_allocation_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/selected_month_provider.dart';
 import 'package:openbudget_app/src/features/budget/screens/budget_detail_screen.dart';
 import 'package:openbudget_app/src/features/recurring/providers/recurring_auto_post_provider.dart';
@@ -14,9 +16,6 @@ import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:patrol/patrol.dart';
-
-// Serverpod's UuidValue.fromString is marked experimental.
-// ignore_for_file: experimental_member_use
 
 const _budgetId = '00000000-0000-0000-0000-000000000971';
 const _categoryId = '00000000-0000-0000-0000-000000000972';
@@ -88,6 +87,8 @@ void main() {
     final tester = $.tester;
     final container = ProviderContainer(
       overrides: [
+        ageOfMoneyProvider.overrideWith((ref, budgetId) async => null),
+        monthlyTransactionsProvider.overrideWith((ref, _) async => const []),
         budgetMonthlySummaryProvider.overrideWith((ref, budgetId) async {
           final month = ref.watch(selectedMonthProvider(budgetId));
           return _makeSummaryForMonth(month);

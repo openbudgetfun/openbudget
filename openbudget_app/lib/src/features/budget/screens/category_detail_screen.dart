@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
@@ -59,7 +61,7 @@ class CategoryDetailScreen extends HookConsumerWidget {
       ),
       body: summaryAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, __) => Center(
+        error: (_, _) => Center(
           child: Text(
             l10n.budgetLoadError,
             style: theme.textTheme.bodyLarge?.copyWith(
@@ -308,15 +310,17 @@ class CategoryDetailScreen extends HookConsumerWidget {
     int year,
     int month,
   ) {
-    showDialog<void>(
-      context: context,
-      builder: (_) => QuickBudgetDialog(
-        budgetId: budgetId,
-        envelopeId: envelope.id?.toString() ?? '',
-        envelopeName: envelope.name,
-        currencyCode: currencyCode,
-        year: year,
-        month: month,
+    unawaited(
+      showDialog<void>(
+        context: context,
+        builder: (_) => QuickBudgetDialog(
+          budgetId: budgetId,
+          envelopeId: envelope.id?.toString() ?? '',
+          envelopeName: envelope.name,
+          currencyCode: currencyCode,
+          year: year,
+          month: month,
+        ),
       ),
     );
   }
@@ -327,14 +331,16 @@ class CategoryDetailScreen extends HookConsumerWidget {
     CurrencyCode currencyCode, [
     EnvelopeGoal? existingGoal,
   ]) {
-    showDialog<void>(
-      context: context,
-      builder: (_) => SetGoalDialog(
-        envelopeId: envelope.id?.toString() ?? '',
-        budgetId: budgetId,
-        currencyCode: currencyCode,
-        existingGoal: existingGoal,
-        envelopeName: envelope.name,
+    unawaited(
+      showDialog<void>(
+        context: context,
+        builder: (_) => SetGoalDialog(
+          envelopeId: envelope.id?.toString() ?? '',
+          budgetId: budgetId,
+          currencyCode: currencyCode,
+          existingGoal: existingGoal,
+          envelopeName: envelope.name,
+        ),
       ),
     );
   }
@@ -346,51 +352,57 @@ class CategoryDetailScreen extends HookConsumerWidget {
     int year,
     int month,
   ) {
-    showDialog<void>(
-      context: context,
-      builder: (_) => EditEnvelopeDialog(
-        envelope: envelope,
-        categoryId: categoryId,
-        budgetId: budgetId,
-        currencyCode: currencyCode,
-        year: year,
-        month: month,
+    unawaited(
+      showDialog<void>(
+        context: context,
+        builder: (_) => EditEnvelopeDialog(
+          envelope: envelope,
+          categoryId: categoryId,
+          budgetId: budgetId,
+          currencyCode: currencyCode,
+          year: year,
+          month: month,
+        ),
       ),
     );
   }
 
   void _confirmDeleteEnvelope(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    showDialog<void>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(l10n.deleteConfirmTitle),
-        content: Text(l10n.categoryDetailDeleteConfirm),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: Text(l10n.dialogCancel),
-          ),
-          FilledButton(
-            onPressed: () async {
-              Navigator.of(dialogContext).pop();
-              await ref
-                  .read(envelopeActionsProvider.notifier)
-                  .deleteEnvelope(
-                    envelopeId: envelopeId,
-                    categoryId: categoryId,
-                    budgetId: budgetId,
-                  );
-              if (context.mounted) {
-                context.pop();
-              }
-            },
-            style: FilledButton.styleFrom(
-              backgroundColor: OpenBudgetPalette.fgErrorFor(Theme.of(context)),
+    unawaited(
+      showDialog<void>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: Text(l10n.deleteConfirmTitle),
+          content: Text(l10n.categoryDetailDeleteConfirm),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: Text(l10n.dialogCancel),
             ),
-            child: Text(l10n.deleteConfirmButton),
-          ),
-        ],
+            FilledButton(
+              onPressed: () async {
+                Navigator.of(dialogContext).pop();
+                await ref
+                    .read(envelopeActionsProvider.notifier)
+                    .deleteEnvelope(
+                      envelopeId: envelopeId,
+                      categoryId: categoryId,
+                      budgetId: budgetId,
+                    );
+                if (context.mounted) {
+                  context.pop();
+                }
+              },
+              style: FilledButton.styleFrom(
+                backgroundColor: OpenBudgetPalette.fgErrorFor(
+                  Theme.of(context),
+                ),
+              ),
+              child: Text(l10n.deleteConfirmButton),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -589,7 +601,7 @@ class _Card extends HookWidget {
         color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
       ),
     ),
-    child: child,
+    child: Material(type: MaterialType.transparency, child: child),
   );
 }
 

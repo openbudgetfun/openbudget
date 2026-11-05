@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:openbudget_app/src/features/auth/providers/auth_state.dart';
 import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
 import 'package:openbudget_core/openbudget_core.dart';
@@ -12,7 +14,7 @@ class AuthNotifier extends _$AuthNotifier {
 
   @override
   AuthState build() {
-    _tryRestore();
+    unawaited(_tryRestore());
     return const AuthRestoring();
   }
 
@@ -98,8 +100,6 @@ class AuthNotifier extends _$AuthNotifier {
     final client = ref.read(serverpodClientProvider);
     try {
       final registrationToken = await client.emailIdp.verifyRegistrationCode(
-        // Serverpod API requires UuidValue which is experimental in uuid package.
-        // ignore: experimental_member_use
         accountRequestId: UuidValue.fromString(accountRequestId),
         verificationCode: verificationCode,
       );

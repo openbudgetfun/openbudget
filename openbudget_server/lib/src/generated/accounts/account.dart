@@ -10,11 +10,13 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:serverpod/serverpod.dart' as _i1;
+import 'dart:async' as _ida;
+
+import 'package:serverpod/serverpod.dart' as _is;
 
 /// A financial account within a budget (checking, savings, credit card, cash, etc.).
 abstract class Account
-    implements _i1.TableRow<_i1.UuidValue?>, _i1.ProtocolSerialization {
+    implements _is.TableRow<_is.UuidValue?>, _is.ProtocolSerialization {
   Account._({
     this.id,
     required this.name,
@@ -36,20 +38,20 @@ abstract class Account
   }) : createdAt = createdAt ?? DateTime.now();
 
   factory Account({
-    _i1.UuidValue? id,
+    _is.UuidValue? id,
     required String name,
     required String accountType,
     required int balanceCents,
     required String currencyCode,
-    required _i1.UuidValue budgetId,
-    _i1.UuidValue? creatorId,
-    _i1.UuidValue? institutionId,
+    required _is.UuidValue budgetId,
+    _is.UuidValue? creatorId,
+    _is.UuidValue? institutionId,
     required bool onBudget,
     required int sortOrder,
     required bool isClosed,
     String? sourceType,
     String? externalAccountId,
-    _i1.UuidValue? connectionId,
+    _is.UuidValue? connectionId,
     DateTime? lastSyncedAt,
     String? syncStatus,
     DateTime? createdAt,
@@ -59,41 +61,41 @@ abstract class Account
     return Account(
       id: jsonSerialization['id'] == null
           ? null
-          : _i1.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
+          : _is.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
       name: jsonSerialization['name'] as String,
       accountType: jsonSerialization['accountType'] as String,
       balanceCents: jsonSerialization['balanceCents'] as int,
       currencyCode: jsonSerialization['currencyCode'] as String,
-      budgetId: _i1.UuidValueJsonExtension.fromJson(
+      budgetId: _is.UuidValueJsonExtension.fromJson(
         jsonSerialization['budgetId'],
       ),
       creatorId: jsonSerialization['creatorId'] == null
           ? null
-          : _i1.UuidValueJsonExtension.fromJson(jsonSerialization['creatorId']),
+          : _is.UuidValueJsonExtension.fromJson(jsonSerialization['creatorId']),
       institutionId: jsonSerialization['institutionId'] == null
           ? null
-          : _i1.UuidValueJsonExtension.fromJson(
+          : _is.UuidValueJsonExtension.fromJson(
               jsonSerialization['institutionId'],
             ),
-      onBudget: _i1.BoolJsonExtension.fromJson(jsonSerialization['onBudget']),
+      onBudget: _is.BoolJsonExtension.fromJson(jsonSerialization['onBudget']),
       sortOrder: jsonSerialization['sortOrder'] as int,
-      isClosed: _i1.BoolJsonExtension.fromJson(jsonSerialization['isClosed']),
+      isClosed: _is.BoolJsonExtension.fromJson(jsonSerialization['isClosed']),
       sourceType: jsonSerialization['sourceType'] as String?,
       externalAccountId: jsonSerialization['externalAccountId'] as String?,
       connectionId: jsonSerialization['connectionId'] == null
           ? null
-          : _i1.UuidValueJsonExtension.fromJson(
+          : _is.UuidValueJsonExtension.fromJson(
               jsonSerialization['connectionId'],
             ),
       lastSyncedAt: jsonSerialization['lastSyncedAt'] == null
           ? null
-          : _i1.DateTimeJsonExtension.fromJson(
+          : _is.DateTimeJsonExtension.fromJson(
               jsonSerialization['lastSyncedAt'],
             ),
       syncStatus: jsonSerialization['syncStatus'] as String?,
       createdAt: jsonSerialization['createdAt'] == null
           ? null
-          : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
+          : _is.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
     );
   }
 
@@ -102,7 +104,7 @@ abstract class Account
   static const db = AccountRepository._();
 
   @override
-  _i1.UuidValue? id;
+  _is.UuidValue? id;
 
   String name;
 
@@ -115,13 +117,13 @@ abstract class Account
   /// ISO 4217 currency code.
   String currencyCode;
 
-  _i1.UuidValue budgetId;
+  _is.UuidValue budgetId;
 
   /// The authenticated user that created this account record.
-  _i1.UuidValue? creatorId;
+  _is.UuidValue? creatorId;
 
   /// Optional linked financial institution for this account.
-  _i1.UuidValue? institutionId;
+  _is.UuidValue? institutionId;
 
   /// Whether this account is included in the budget's "on budget" calculations.
   bool onBudget;
@@ -139,7 +141,7 @@ abstract class Account
   String? externalAccountId;
 
   /// Connection identifier used by external account sync providers.
-  _i1.UuidValue? connectionId;
+  _is.UuidValue? connectionId;
 
   /// Last time the account was synchronized from an external provider.
   DateTime? lastSyncedAt;
@@ -150,27 +152,27 @@ abstract class Account
   DateTime createdAt;
 
   @override
-  _i1.Table<_i1.UuidValue?> get table => t;
+  _is.Table<_is.UuidValue?> get table => t;
 
   /// Returns a shallow copy of this [Account]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_is.useResult
   Account copyWith({
-    _i1.UuidValue? id,
+    _is.UuidValue? id = const _is.$UndefinedUuidValue(),
     String? name,
     String? accountType,
     int? balanceCents,
     String? currencyCode,
-    _i1.UuidValue? budgetId,
-    _i1.UuidValue? creatorId,
-    _i1.UuidValue? institutionId,
+    _is.UuidValue? budgetId,
+    _is.UuidValue? creatorId = const _is.$UndefinedUuidValue(),
+    _is.UuidValue? institutionId = const _is.$UndefinedUuidValue(),
     bool? onBudget,
     int? sortOrder,
     bool? isClosed,
     String? sourceType,
     String? externalAccountId,
-    _i1.UuidValue? connectionId,
-    DateTime? lastSyncedAt,
+    _is.UuidValue? connectionId = const _is.$UndefinedUuidValue(),
+    DateTime? lastSyncedAt = const _is.$UndefinedDateTime(),
     String? syncStatus,
     DateTime? createdAt,
   });
@@ -227,12 +229,11 @@ abstract class Account
   }
 
   static AccountIncludeList includeList({
-    _i1.WhereExpressionBuilder<AccountTable>? where,
+    _is.WhereExpressionBuilder<AccountTable>? where,
     int? limit,
     int? offset,
-    _i1.OrderByBuilder<AccountTable>? orderBy,
-    bool orderDescending = false,
-    _i1.OrderByListBuilder<AccountTable>? orderByList,
+    _is.OrderByBuilder<AccountTable>? orderBy,
+    _is.OrderByListBuilder<AccountTable>? orderByList,
     AccountInclude? include,
   }) {
     return AccountIncludeList._(
@@ -240,7 +241,6 @@ abstract class Account
       limit: limit,
       offset: offset,
       orderBy: orderBy?.call(Account.t),
-      orderDescending: orderDescending,
       orderByList: orderByList?.call(Account.t),
       include: include,
     );
@@ -248,7 +248,7 @@ abstract class Account
 
   @override
   String toString() {
-    return _i1.SerializationManager.encode(this);
+    return _is.SerializationManager.encode(this);
   }
 }
 
@@ -256,20 +256,20 @@ class _Undefined {}
 
 class _AccountImpl extends Account {
   _AccountImpl({
-    _i1.UuidValue? id,
+    _is.UuidValue? id,
     required String name,
     required String accountType,
     required int balanceCents,
     required String currencyCode,
-    required _i1.UuidValue budgetId,
-    _i1.UuidValue? creatorId,
-    _i1.UuidValue? institutionId,
+    required _is.UuidValue budgetId,
+    _is.UuidValue? creatorId,
+    _is.UuidValue? institutionId,
     required bool onBudget,
     required int sortOrder,
     required bool isClosed,
     String? sourceType,
     String? externalAccountId,
-    _i1.UuidValue? connectionId,
+    _is.UuidValue? connectionId,
     DateTime? lastSyncedAt,
     String? syncStatus,
     DateTime? createdAt,
@@ -295,38 +295,40 @@ class _AccountImpl extends Account {
 
   /// Returns a shallow copy of this [Account]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_is.useResult
   @override
   Account copyWith({
-    Object? id = _Undefined,
+    _is.UuidValue? id = const _is.$UndefinedUuidValue(),
     String? name,
     String? accountType,
     int? balanceCents,
     String? currencyCode,
-    _i1.UuidValue? budgetId,
-    Object? creatorId = _Undefined,
-    Object? institutionId = _Undefined,
+    _is.UuidValue? budgetId,
+    _is.UuidValue? creatorId = const _is.$UndefinedUuidValue(),
+    _is.UuidValue? institutionId = const _is.$UndefinedUuidValue(),
     bool? onBudget,
     int? sortOrder,
     bool? isClosed,
     Object? sourceType = _Undefined,
     Object? externalAccountId = _Undefined,
-    Object? connectionId = _Undefined,
-    Object? lastSyncedAt = _Undefined,
+    _is.UuidValue? connectionId = const _is.$UndefinedUuidValue(),
+    DateTime? lastSyncedAt = const _is.$UndefinedDateTime(),
     Object? syncStatus = _Undefined,
     DateTime? createdAt,
   }) {
     return Account(
-      id: id is _i1.UuidValue? ? id : this.id,
+      id: id is _is.UndefinedSentinel ? this.id : id,
       name: name ?? this.name,
       accountType: accountType ?? this.accountType,
       balanceCents: balanceCents ?? this.balanceCents,
       currencyCode: currencyCode ?? this.currencyCode,
       budgetId: budgetId ?? this.budgetId,
-      creatorId: creatorId is _i1.UuidValue? ? creatorId : this.creatorId,
-      institutionId: institutionId is _i1.UuidValue?
-          ? institutionId
-          : this.institutionId,
+      creatorId: creatorId is _is.UndefinedSentinel
+          ? this.creatorId
+          : creatorId,
+      institutionId: institutionId is _is.UndefinedSentinel
+          ? this.institutionId
+          : institutionId,
       onBudget: onBudget ?? this.onBudget,
       sortOrder: sortOrder ?? this.sortOrder,
       isClosed: isClosed ?? this.isClosed,
@@ -334,143 +336,231 @@ class _AccountImpl extends Account {
       externalAccountId: externalAccountId is String?
           ? externalAccountId
           : this.externalAccountId,
-      connectionId: connectionId is _i1.UuidValue?
-          ? connectionId
-          : this.connectionId,
-      lastSyncedAt: lastSyncedAt is DateTime?
-          ? lastSyncedAt
-          : this.lastSyncedAt,
+      connectionId: connectionId is _is.UndefinedSentinel
+          ? this.connectionId
+          : connectionId,
+      lastSyncedAt: lastSyncedAt is _is.UndefinedSentinel
+          ? this.lastSyncedAt
+          : lastSyncedAt,
       syncStatus: syncStatus is String? ? syncStatus : this.syncStatus,
       createdAt: createdAt ?? this.createdAt,
     );
   }
 }
 
-class AccountUpdateTable extends _i1.UpdateTable<AccountTable> {
+class AccountUpdateTable extends _is.UpdateTable<AccountTable> {
   AccountUpdateTable(super.table);
 
-  _i1.ColumnValue<String, String> name(String value) =>
-      _i1.ColumnValue(table.name, value);
+  _is.ColumnValue<String, String> name(String value) => _is.ColumnValue(
+    table.name,
+    value,
+  );
 
-  _i1.ColumnValue<String, String> accountType(String value) =>
-      _i1.ColumnValue(table.accountType, value);
+  _is.ColumnValue<String, String> accountType(String value) => _is.ColumnValue(
+    table.accountType,
+    value,
+  );
 
-  _i1.ColumnValue<int, int> balanceCents(int value) =>
-      _i1.ColumnValue(table.balanceCents, value);
+  _is.ColumnValue<int, int> balanceCents(int value) => _is.ColumnValue(
+    table.balanceCents,
+    value,
+  );
 
-  _i1.ColumnValue<String, String> currencyCode(String value) =>
-      _i1.ColumnValue(table.currencyCode, value);
+  _is.ColumnValue<String, String> currencyCode(String value) => _is.ColumnValue(
+    table.currencyCode,
+    value,
+  );
 
-  _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> budgetId(_i1.UuidValue value) =>
-      _i1.ColumnValue(table.budgetId, value);
+  _is.ColumnValue<_is.UuidValue, _is.UuidValue> budgetId(_is.UuidValue value) =>
+      _is.ColumnValue(
+        table.budgetId,
+        value,
+      );
 
-  _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> creatorId(
-    _i1.UuidValue? value,
-  ) => _i1.ColumnValue(table.creatorId, value);
+  _is.ColumnValue<_is.UuidValue, _is.UuidValue> creatorId(
+    _is.UuidValue? value,
+  ) => _is.ColumnValue(
+    table.creatorId,
+    value,
+  );
 
-  _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> institutionId(
-    _i1.UuidValue? value,
-  ) => _i1.ColumnValue(table.institutionId, value);
+  _is.ColumnValue<_is.UuidValue, _is.UuidValue> institutionId(
+    _is.UuidValue? value,
+  ) => _is.ColumnValue(
+    table.institutionId,
+    value,
+  );
 
-  _i1.ColumnValue<bool, bool> onBudget(bool value) =>
-      _i1.ColumnValue(table.onBudget, value);
+  _is.ColumnValue<bool, bool> onBudget(bool value) => _is.ColumnValue(
+    table.onBudget,
+    value,
+  );
 
-  _i1.ColumnValue<int, int> sortOrder(int value) =>
-      _i1.ColumnValue(table.sortOrder, value);
+  _is.ColumnValue<int, int> sortOrder(int value) => _is.ColumnValue(
+    table.sortOrder,
+    value,
+  );
 
-  _i1.ColumnValue<bool, bool> isClosed(bool value) =>
-      _i1.ColumnValue(table.isClosed, value);
+  _is.ColumnValue<bool, bool> isClosed(bool value) => _is.ColumnValue(
+    table.isClosed,
+    value,
+  );
 
-  _i1.ColumnValue<String, String> sourceType(String? value) =>
-      _i1.ColumnValue(table.sourceType, value);
+  _is.ColumnValue<String, String> sourceType(String? value) => _is.ColumnValue(
+    table.sourceType,
+    value,
+  );
 
-  _i1.ColumnValue<String, String> externalAccountId(String? value) =>
-      _i1.ColumnValue(table.externalAccountId, value);
+  _is.ColumnValue<String, String> externalAccountId(String? value) =>
+      _is.ColumnValue(
+        table.externalAccountId,
+        value,
+      );
 
-  _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> connectionId(
-    _i1.UuidValue? value,
-  ) => _i1.ColumnValue(table.connectionId, value);
+  _is.ColumnValue<_is.UuidValue, _is.UuidValue> connectionId(
+    _is.UuidValue? value,
+  ) => _is.ColumnValue(
+    table.connectionId,
+    value,
+  );
 
-  _i1.ColumnValue<DateTime, DateTime> lastSyncedAt(DateTime? value) =>
-      _i1.ColumnValue(table.lastSyncedAt, value);
+  _is.ColumnValue<DateTime, DateTime> lastSyncedAt(DateTime? value) =>
+      _is.ColumnValue(
+        table.lastSyncedAt,
+        value,
+      );
 
-  _i1.ColumnValue<String, String> syncStatus(String? value) =>
-      _i1.ColumnValue(table.syncStatus, value);
+  _is.ColumnValue<String, String> syncStatus(String? value) => _is.ColumnValue(
+    table.syncStatus,
+    value,
+  );
 
-  _i1.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
-      _i1.ColumnValue(table.createdAt, value);
+  _is.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
+      _is.ColumnValue(
+        table.createdAt,
+        value,
+      );
 }
 
-class AccountTable extends _i1.Table<_i1.UuidValue?> {
+class AccountTable extends _is.Table<_is.UuidValue?> {
   AccountTable({super.tableRelation}) : super(tableName: 'account') {
     updateTable = AccountUpdateTable(this);
-    name = _i1.ColumnString('name', this);
-    accountType = _i1.ColumnString('accountType', this);
-    balanceCents = _i1.ColumnInt('balanceCents', this);
-    currencyCode = _i1.ColumnString('currencyCode', this);
-    budgetId = _i1.ColumnUuid('budgetId', this);
-    creatorId = _i1.ColumnUuid('creatorId', this);
-    institutionId = _i1.ColumnUuid('institutionId', this);
-    onBudget = _i1.ColumnBool('onBudget', this);
-    sortOrder = _i1.ColumnInt('sortOrder', this);
-    isClosed = _i1.ColumnBool('isClosed', this);
-    sourceType = _i1.ColumnString('sourceType', this);
-    externalAccountId = _i1.ColumnString('externalAccountId', this);
-    connectionId = _i1.ColumnUuid('connectionId', this);
-    lastSyncedAt = _i1.ColumnDateTime('lastSyncedAt', this);
-    syncStatus = _i1.ColumnString('syncStatus', this);
-    createdAt = _i1.ColumnDateTime('createdAt', this, hasDefault: true);
+    name = _is.ColumnString(
+      'name',
+      this,
+    );
+    accountType = _is.ColumnString(
+      'accountType',
+      this,
+    );
+    balanceCents = _is.ColumnInt(
+      'balanceCents',
+      this,
+    );
+    currencyCode = _is.ColumnString(
+      'currencyCode',
+      this,
+    );
+    budgetId = _is.ColumnUuid(
+      'budgetId',
+      this,
+    );
+    creatorId = _is.ColumnUuid(
+      'creatorId',
+      this,
+    );
+    institutionId = _is.ColumnUuid(
+      'institutionId',
+      this,
+    );
+    onBudget = _is.ColumnBool(
+      'onBudget',
+      this,
+    );
+    sortOrder = _is.ColumnInt(
+      'sortOrder',
+      this,
+    );
+    isClosed = _is.ColumnBool(
+      'isClosed',
+      this,
+    );
+    sourceType = _is.ColumnString(
+      'sourceType',
+      this,
+    );
+    externalAccountId = _is.ColumnString(
+      'externalAccountId',
+      this,
+    );
+    connectionId = _is.ColumnUuid(
+      'connectionId',
+      this,
+    );
+    lastSyncedAt = _is.ColumnDateTime(
+      'lastSyncedAt',
+      this,
+    );
+    syncStatus = _is.ColumnString(
+      'syncStatus',
+      this,
+    );
+    createdAt = _is.ColumnDateTime(
+      'createdAt',
+      this,
+      hasDefault: true,
+    );
   }
 
   late final AccountUpdateTable updateTable;
 
-  late final _i1.ColumnString name;
+  late final _is.ColumnString name;
 
   /// Account type: checking, savings, creditCard, cash, investment, other.
-  late final _i1.ColumnString accountType;
+  late final _is.ColumnString accountType;
 
   /// Current balance in integer cents.
-  late final _i1.ColumnInt balanceCents;
+  late final _is.ColumnInt balanceCents;
 
   /// ISO 4217 currency code.
-  late final _i1.ColumnString currencyCode;
+  late final _is.ColumnString currencyCode;
 
-  late final _i1.ColumnUuid budgetId;
+  late final _is.ColumnUuid budgetId;
 
   /// The authenticated user that created this account record.
-  late final _i1.ColumnUuid creatorId;
+  late final _is.ColumnUuid creatorId;
 
   /// Optional linked financial institution for this account.
-  late final _i1.ColumnUuid institutionId;
+  late final _is.ColumnUuid institutionId;
 
   /// Whether this account is included in the budget's "on budget" calculations.
-  late final _i1.ColumnBool onBudget;
+  late final _is.ColumnBool onBudget;
 
   /// Sort order for display.
-  late final _i1.ColumnInt sortOrder;
+  late final _is.ColumnInt sortOrder;
 
   /// Whether this account has been closed/archived.
-  late final _i1.ColumnBool isClosed;
+  late final _is.ColumnBool isClosed;
 
   /// Source of account data: manual, plaid, solana.
-  late final _i1.ColumnString sourceType;
+  late final _is.ColumnString sourceType;
 
   /// External source account identifier (e.g. Plaid account_id or wallet address).
-  late final _i1.ColumnString externalAccountId;
+  late final _is.ColumnString externalAccountId;
 
   /// Connection identifier used by external account sync providers.
-  late final _i1.ColumnUuid connectionId;
+  late final _is.ColumnUuid connectionId;
 
   /// Last time the account was synchronized from an external provider.
-  late final _i1.ColumnDateTime lastSyncedAt;
+  late final _is.ColumnDateTime lastSyncedAt;
 
   /// Latest sync status for the account (e.g. synced, stale, error).
-  late final _i1.ColumnString syncStatus;
+  late final _is.ColumnString syncStatus;
 
-  late final _i1.ColumnDateTime createdAt;
+  late final _is.ColumnDateTime createdAt;
 
   @override
-  List<_i1.Column> get columns => [
+  List<_is.Column> get columns => [
     id,
     name,
     accountType,
@@ -491,23 +581,22 @@ class AccountTable extends _i1.Table<_i1.UuidValue?> {
   ];
 }
 
-class AccountInclude extends _i1.IncludeObject {
+class AccountInclude extends _is.IncludeObject {
   AccountInclude._();
 
   @override
-  Map<String, _i1.Include?> get includes => {};
+  Map<String, _is.Include?> get includes => {};
 
   @override
-  _i1.Table<_i1.UuidValue?> get table => Account.t;
+  _is.Table<_is.UuidValue?> get table => Account.t;
 }
 
-class AccountIncludeList extends _i1.IncludeList {
+class AccountIncludeList extends _is.IncludeList {
   AccountIncludeList._({
-    _i1.WhereExpressionBuilder<AccountTable>? where,
+    _is.WhereExpressionBuilder<AccountTable>? where,
     super.limit,
     super.offset,
     super.orderBy,
-    super.orderDescending,
     super.orderByList,
     super.include,
   }) {
@@ -515,10 +604,10 @@ class AccountIncludeList extends _i1.IncludeList {
   }
 
   @override
-  Map<String, _i1.Include?> get includes => include?.includes ?? {};
+  Map<String, _is.Include?> get includes => include?.includes ?? {};
 
   @override
-  _i1.Table<_i1.UuidValue?> get table => Account.t;
+  _is.Table<_is.UuidValue?> get table => Account.t;
 }
 
 class AccountRepository {
@@ -547,27 +636,88 @@ class AccountRepository {
   /// );
   /// ```
   Future<List<Account>> find(
-    _i1.DatabaseSession session, {
-    _i1.WhereExpressionBuilder<AccountTable>? where,
+    _is.DatabaseSession session, {
+    _is.WhereExpressionBuilder<AccountTable>? where,
     int? limit,
     int? offset,
-    _i1.OrderByBuilder<AccountTable>? orderBy,
-    bool orderDescending = false,
-    _i1.OrderByListBuilder<AccountTable>? orderByList,
-    _i1.Transaction? transaction,
-    _i1.LockMode? lockMode,
-    _i1.LockBehavior? lockBehavior,
+    _is.OrderByBuilder<AccountTable>? orderBy,
+    _is.OrderByListBuilder<AccountTable>? orderByList,
+    _is.Transaction? transaction,
+    _is.LockMode? lockMode,
+    _is.LockBehavior? lockBehavior,
   }) async {
     return session.db.find<Account>(
       where: where?.call(Account.t),
       orderBy: orderBy?.call(Account.t),
       orderByList: orderByList?.call(Account.t),
-      orderDescending: orderDescending,
       limit: limit,
       offset: offset,
       transaction: transaction,
       lockMode: lockMode,
       lockBehavior: lockBehavior,
+    );
+  }
+
+  /// Emits [Account]s matching the given query parameters every time the
+  /// source tables are modified.
+  ///
+  /// Use [where] to specify which items to include in the return value.
+  /// If none is specified, all items will be returned.
+  ///
+  /// To specify the order of the items use [orderBy] or [orderByList]
+  /// when sorting by multiple columns.
+  ///
+  /// The maximum number of items can be set by [limit]. If no limit is set,
+  /// all items matching the query will be returned.
+  ///
+  /// [offset] defines how many items to skip, after which [limit] (or all)
+  /// items are read from the database.
+  ///
+  /// Use [throttle] to specify the minimum interval between queries. It can
+  /// also be set to `null`, in which case the stream will only be throttled
+  /// when its subscription is paused.
+  ///
+  /// Source tables are collected from the queried table, [where], [orderBy],
+  /// [orderByList], and the [include] graph. [alsoTriggerOnTables] is added
+  /// to that set. Pass [Table] instances such as `Account.t`.
+  ///
+  /// Raw [Expression] SQL is not inspected. Tables referenced only in raw
+  /// SQL must be passed via [alsoTriggerOnTables].
+  ///
+  /// The stream always reads committed state and never joins an ambient
+  /// [Transaction]. Emissions for a write fire after that write commits.
+  ///
+  /// Currently only supported on SQLite. Calling this method on PostgreSQL
+  /// throws an [UnsupportedError].
+  ///
+  /// ```dart
+  /// var subscription = Persons.db.watch(
+  ///   session,
+  ///   where: (t) => t.lastName.equals('Jones'),
+  ///   orderBy: (t) => t.firstName,
+  ///   limit: 100,
+  /// ).listen((persons) {
+  ///   // Handle the latest matching rows.
+  /// });
+  /// ```
+  _ida.Stream<List<Account>> watch(
+    _is.DatabaseSession session, {
+    _is.WhereExpressionBuilder<AccountTable>? where,
+    int? limit,
+    int? offset,
+    _is.OrderByBuilder<AccountTable>? orderBy,
+    _is.OrderByListBuilder<AccountTable>? orderByList,
+    Duration? throttle = const Duration(milliseconds: 30),
+    Iterable<_is.Table>? alsoTriggerOnTables,
+  }) {
+    return session.db.watch<Account>(
+      where: where?.call(Account.t),
+      orderBy: orderBy?.call(Account.t),
+      orderByList: orderByList?.call(Account.t),
+      limit: limit,
+      offset: offset,
+      throttle: throttle,
+      alsoTriggerOnTables: alsoTriggerOnTables,
     );
   }
 
@@ -589,21 +739,19 @@ class AccountRepository {
   /// );
   /// ```
   Future<Account?> findFirstRow(
-    _i1.DatabaseSession session, {
-    _i1.WhereExpressionBuilder<AccountTable>? where,
+    _is.DatabaseSession session, {
+    _is.WhereExpressionBuilder<AccountTable>? where,
     int? offset,
-    _i1.OrderByBuilder<AccountTable>? orderBy,
-    bool orderDescending = false,
-    _i1.OrderByListBuilder<AccountTable>? orderByList,
-    _i1.Transaction? transaction,
-    _i1.LockMode? lockMode,
-    _i1.LockBehavior? lockBehavior,
+    _is.OrderByBuilder<AccountTable>? orderBy,
+    _is.OrderByListBuilder<AccountTable>? orderByList,
+    _is.Transaction? transaction,
+    _is.LockMode? lockMode,
+    _is.LockBehavior? lockBehavior,
   }) async {
     return session.db.findFirstRow<Account>(
       where: where?.call(Account.t),
       orderBy: orderBy?.call(Account.t),
       orderByList: orderByList?.call(Account.t),
-      orderDescending: orderDescending,
       offset: offset,
       transaction: transaction,
       lockMode: lockMode,
@@ -613,11 +761,11 @@ class AccountRepository {
 
   /// Finds a single [Account] by its [id] or null if no such row exists.
   Future<Account?> findById(
-    _i1.DatabaseSession session,
-    _i1.UuidValue id, {
-    _i1.Transaction? transaction,
-    _i1.LockMode? lockMode,
-    _i1.LockBehavior? lockBehavior,
+    _is.DatabaseSession session,
+    _is.UuidValue id, {
+    _is.Transaction? transaction,
+    _is.LockMode? lockMode,
+    _is.LockBehavior? lockBehavior,
   }) async {
     return session.db.findById<Account>(
       id,
@@ -637,16 +785,22 @@ class AccountRepository {
   /// If [ignoreConflicts] is set to `true`, rows that conflict with existing
   /// rows are silently skipped, and only the successfully inserted rows are
   /// returned.
+  ///
+  /// If [noReturn] is set to `true`, the inserted rows are not read back from
+  /// the database and an empty list is returned. This avoids the overhead of
+  /// transferring and deserializing the rows when the result is not needed.
   Future<List<Account>> insert(
-    _i1.DatabaseSession session,
+    _is.DatabaseSession session,
     List<Account> rows, {
-    _i1.Transaction? transaction,
+    _is.Transaction? transaction,
     bool ignoreConflicts = false,
+    bool noReturn = false,
   }) async {
     return session.db.insert<Account>(
       rows,
       transaction: transaction,
       ignoreConflicts: ignoreConflicts,
+      noReturn: noReturn,
     );
   }
 
@@ -654,11 +808,83 @@ class AccountRepository {
   ///
   /// The returned [Account] will have its `id` field set.
   Future<Account> insertRow(
-    _i1.DatabaseSession session,
+    _is.DatabaseSession session,
     Account row, {
-    _i1.Transaction? transaction,
+    _is.Transaction? transaction,
   }) async {
-    return session.db.insertRow<Account>(row, transaction: transaction);
+    return session.db.insertRow<Account>(
+      row,
+      transaction: transaction,
+    );
+  }
+
+  /// Upserts all [Account]s in the list and returns the resulting rows.
+  ///
+  /// If a row conflicts on the given [conflictColumns], the existing row is
+  /// updated with the new values. Otherwise, a new row is inserted.
+  ///
+  /// If [updateColumns] is provided, only those columns will be updated on
+  /// conflict. If null, all non-conflict, non-id columns are updated.
+  ///
+  /// If [updateWhere] is provided, the update only applies to rows matching the
+  /// given expression. Conflicting rows that don't match are skipped and not
+  /// returned, so the resulting list may be shorter than [rows].
+  ///
+  /// The returned [Account]s will have their `id` fields set.
+  ///
+  /// This is an atomic operation, meaning that if one of the rows fails,
+  /// none of the rows will be affected.
+  ///
+  /// If [noReturn] is set to `true`, the resulting rows are not read back from
+  /// the database and an empty list is returned. This avoids the overhead of
+  /// transferring and deserializing the rows when the result is not needed.
+  Future<List<Account>> upsert(
+    _is.DatabaseSession session,
+    List<Account> rows, {
+    required _is.ColumnSelections<AccountTable> conflictColumns,
+    _is.ColumnSelections<AccountTable>? updateColumns,
+    _is.WhereExpressionBuilder<AccountTable>? updateWhere,
+    _is.Transaction? transaction,
+    bool noReturn = false,
+  }) async {
+    return session.db.upsert<Account>(
+      rows,
+      conflictColumns: conflictColumns(Account.t),
+      updateColumns: updateColumns?.call(Account.t),
+      updateWhere: updateWhere?.call(Account.t),
+      transaction: transaction,
+      noReturn: noReturn,
+    );
+  }
+
+  /// Upserts a single [Account] and returns the resulting row.
+  ///
+  /// If the row conflicts on the given [conflictColumns], the existing row is
+  /// updated. Otherwise, a new row is inserted.
+  ///
+  /// If [updateColumns] is provided, only those columns will be updated on
+  /// conflict. If null, all non-conflict, non-id columns are updated.
+  ///
+  /// If [updateWhere] is provided, the update only applies when the existing
+  /// row matches the expression. Returns `null` if no row was affected — for
+  /// example when [updateWhere] does not match the conflicting row.
+  ///
+  /// The returned [Account] will have its `id` field set.
+  Future<Account?> upsertRow(
+    _is.DatabaseSession session,
+    Account row, {
+    required _is.ColumnSelections<AccountTable> conflictColumns,
+    _is.ColumnSelections<AccountTable>? updateColumns,
+    _is.WhereExpressionBuilder<AccountTable>? updateWhere,
+    _is.Transaction? transaction,
+  }) async {
+    return session.db.upsertRow<Account>(
+      row,
+      conflictColumns: conflictColumns(Account.t),
+      updateColumns: updateColumns?.call(Account.t),
+      updateWhere: updateWhere?.call(Account.t),
+      transaction: transaction,
+    );
   }
 
   /// Updates all [Account]s in the list and returns the updated rows. If
@@ -666,16 +892,22 @@ class AccountRepository {
   /// all columns.
   /// This is an atomic operation, meaning that if one of the rows fails to
   /// update, none of the rows will be updated.
+  ///
+  /// If [noReturn] is set to `true`, the updated rows are not read back from
+  /// the database and an empty list is returned. This avoids the overhead of
+  /// transferring and deserializing the rows when the result is not needed.
   Future<List<Account>> update(
-    _i1.DatabaseSession session,
+    _is.DatabaseSession session,
     List<Account> rows, {
-    _i1.ColumnSelections<AccountTable>? columns,
-    _i1.Transaction? transaction,
+    _is.ColumnSelections<AccountTable>? columns,
+    _is.Transaction? transaction,
+    bool noReturn = false,
   }) async {
     return session.db.update<Account>(
       rows,
       columns: columns?.call(Account.t),
       transaction: transaction,
+      noReturn: noReturn,
     );
   }
 
@@ -683,10 +915,10 @@ class AccountRepository {
   /// Optionally, a list of [columns] can be provided to only update those
   /// columns. Defaults to all columns.
   Future<Account> updateRow(
-    _i1.DatabaseSession session,
+    _is.DatabaseSession session,
     Account row, {
-    _i1.ColumnSelections<AccountTable>? columns,
-    _i1.Transaction? transaction,
+    _is.ColumnSelections<AccountTable>? columns,
+    _is.Transaction? transaction,
   }) async {
     return session.db.updateRow<Account>(
       row,
@@ -698,10 +930,10 @@ class AccountRepository {
   /// Updates a single [Account] by its [id] with the specified [columnValues].
   /// Returns the updated row or null if no row with the given id exists.
   Future<Account?> updateById(
-    _i1.DatabaseSession session,
-    _i1.UuidValue id, {
-    required _i1.ColumnValueListBuilder<AccountUpdateTable> columnValues,
-    _i1.Transaction? transaction,
+    _is.DatabaseSession session,
+    _is.UuidValue id, {
+    required _is.ColumnValueListBuilder<AccountUpdateTable> columnValues,
+    _is.Transaction? transaction,
   }) async {
     return session.db.updateById<Account>(
       id,
@@ -712,16 +944,20 @@ class AccountRepository {
 
   /// Updates all [Account]s matching the [where] expression with the specified [columnValues].
   /// Returns the list of updated rows.
+  ///
+  /// If [noReturn] is set to `true`, the updated rows are not read back from
+  /// the database and an empty list is returned. This avoids the overhead of
+  /// transferring and deserializing the rows when the result is not needed.
   Future<List<Account>> updateWhere(
-    _i1.DatabaseSession session, {
-    required _i1.ColumnValueListBuilder<AccountUpdateTable> columnValues,
-    required _i1.WhereExpressionBuilder<AccountTable> where,
+    _is.DatabaseSession session, {
+    required _is.ColumnValueListBuilder<AccountUpdateTable> columnValues,
+    required _is.WhereExpressionBuilder<AccountTable> where,
     int? limit,
     int? offset,
-    _i1.OrderByBuilder<AccountTable>? orderBy,
-    _i1.OrderByListBuilder<AccountTable>? orderByList,
-    bool orderDescending = false,
-    _i1.Transaction? transaction,
+    _is.OrderByBuilder<AccountTable>? orderBy,
+    _is.OrderByListBuilder<AccountTable>? orderByList,
+    _is.Transaction? transaction,
+    bool noReturn = false,
   }) async {
     return session.db.updateWhere<Account>(
       columnValues: columnValues(Account.t.updateTable),
@@ -730,50 +966,83 @@ class AccountRepository {
       offset: offset,
       orderBy: orderBy?.call(Account.t),
       orderByList: orderByList?.call(Account.t),
-      orderDescending: orderDescending,
       transaction: transaction,
+      noReturn: noReturn,
     );
   }
 
   /// Deletes all [Account]s in the list and returns the deleted rows.
+  ///
+  /// To specify the order of the returned rows use [orderBy] or [orderByList]
+  /// when sorting by multiple columns.
+  ///
   /// This is an atomic operation, meaning that if one of the rows fail to
   /// be deleted, none of the rows will be deleted.
+  ///
+  /// If [noReturn] is set to `true`, the deleted rows are not read back from
+  /// the database and an empty list is returned. This avoids the overhead of
+  /// transferring and deserializing the rows when the result is not needed.
   Future<List<Account>> delete(
-    _i1.DatabaseSession session,
+    _is.DatabaseSession session,
     List<Account> rows, {
-    _i1.Transaction? transaction,
+    _is.OrderByBuilder<AccountTable>? orderBy,
+    _is.OrderByListBuilder<AccountTable>? orderByList,
+    _is.Transaction? transaction,
+    bool noReturn = false,
   }) async {
-    return session.db.delete<Account>(rows, transaction: transaction);
+    return session.db.delete<Account>(
+      rows,
+      orderBy: orderBy?.call(Account.t),
+      orderByList: orderByList?.call(Account.t),
+      transaction: transaction,
+      noReturn: noReturn,
+    );
   }
 
   /// Deletes a single [Account].
   Future<Account> deleteRow(
-    _i1.DatabaseSession session,
+    _is.DatabaseSession session,
     Account row, {
-    _i1.Transaction? transaction,
+    _is.Transaction? transaction,
   }) async {
-    return session.db.deleteRow<Account>(row, transaction: transaction);
+    return session.db.deleteRow<Account>(
+      row,
+      transaction: transaction,
+    );
   }
 
   /// Deletes all rows matching the [where] expression.
+  ///
+  /// To specify the order of the returned rows use [orderBy] or [orderByList]
+  /// when sorting by multiple columns.
+  ///
+  /// If [noReturn] is set to `true`, the deleted rows are not read back from
+  /// the database and an empty list is returned. This avoids the overhead of
+  /// transferring and deserializing the rows when the result is not needed.
   Future<List<Account>> deleteWhere(
-    _i1.DatabaseSession session, {
-    required _i1.WhereExpressionBuilder<AccountTable> where,
-    _i1.Transaction? transaction,
+    _is.DatabaseSession session, {
+    required _is.WhereExpressionBuilder<AccountTable> where,
+    _is.OrderByBuilder<AccountTable>? orderBy,
+    _is.OrderByListBuilder<AccountTable>? orderByList,
+    _is.Transaction? transaction,
+    bool noReturn = false,
   }) async {
     return session.db.deleteWhere<Account>(
       where: where(Account.t),
+      orderBy: orderBy?.call(Account.t),
+      orderByList: orderByList?.call(Account.t),
       transaction: transaction,
+      noReturn: noReturn,
     );
   }
 
   /// Counts the number of rows matching the [where] expression. If omitted,
   /// will return the count of all rows in the table.
   Future<int> count(
-    _i1.DatabaseSession session, {
-    _i1.WhereExpressionBuilder<AccountTable>? where,
+    _is.DatabaseSession session, {
+    _is.WhereExpressionBuilder<AccountTable>? where,
     int? limit,
-    _i1.Transaction? transaction,
+    _is.Transaction? transaction,
   }) async {
     return session.db.count<Account>(
       where: where?.call(Account.t),
@@ -784,11 +1053,11 @@ class AccountRepository {
 
   /// Acquires row-level locks on [Account] rows matching the [where] expression.
   Future<void> lockRows(
-    _i1.DatabaseSession session, {
-    required _i1.WhereExpressionBuilder<AccountTable> where,
-    required _i1.LockMode lockMode,
-    required _i1.Transaction transaction,
-    _i1.LockBehavior lockBehavior = _i1.LockBehavior.wait,
+    _is.DatabaseSession session, {
+    required _is.WhereExpressionBuilder<AccountTable> where,
+    required _is.LockMode lockMode,
+    required _is.Transaction transaction,
+    _is.LockBehavior lockBehavior = _is.LockBehavior.wait,
   }) async {
     return session.db.lockRows<Account>(
       where: where(Account.t),

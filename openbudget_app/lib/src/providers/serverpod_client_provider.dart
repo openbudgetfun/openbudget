@@ -23,6 +23,7 @@ Client serverpodClient(Ref ref) {
 
   final client = Client(apiUrl)
     ..authSessionManager = FlutterAuthSessionManager();
+  ref.onDispose(client.close);
 
   if (!_isWidgetTestRuntime()) {
     client.connectivityMonitor = FlutterConnectivityMonitor();

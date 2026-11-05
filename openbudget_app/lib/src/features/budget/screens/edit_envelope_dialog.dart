@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -272,14 +274,16 @@ class EditEnvelopeDialog extends HookConsumerWidget {
     );
     final existingGoal = goalAsync.whenOrNull(data: (g) => g);
 
-    showDialog<void>(
-      context: context,
-      builder: (_) => SetGoalDialog(
-        envelopeId: envelope.id?.toString() ?? '',
-        budgetId: budgetId,
-        currencyCode: currencyCode,
-        existingGoal: existingGoal,
-        envelopeName: envelope.name,
+    unawaited(
+      showDialog<void>(
+        context: context,
+        builder: (_) => SetGoalDialog(
+          envelopeId: envelope.id?.toString() ?? '',
+          budgetId: budgetId,
+          currencyCode: currencyCode,
+          existingGoal: existingGoal,
+          envelopeName: envelope.name,
+        ),
       ),
     );
   }

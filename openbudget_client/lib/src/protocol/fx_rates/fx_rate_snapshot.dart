@@ -10,10 +10,11 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:serverpod_client/serverpod_client.dart' as _i1;
+import 'package:serverpod_client/serverpod_client.dart' as _isc;
 
 /// Snapshot of exchange rates fetched from an upstream FX provider.
-abstract class FxRateSnapshot implements _i1.SerializableModel {
+abstract class FxRateSnapshot
+    implements _isc.SerializableModel, _isc.ProtocolSerialization {
   FxRateSnapshot._({
     this.id,
     required this.provider,
@@ -25,7 +26,7 @@ abstract class FxRateSnapshot implements _i1.SerializableModel {
        createdAt = createdAt ?? DateTime.now();
 
   factory FxRateSnapshot({
-    _i1.UuidValue? id,
+    _isc.UuidValue? id,
     required String provider,
     required String baseCurrencyCode,
     required DateTime fetchedAt,
@@ -37,25 +38,25 @@ abstract class FxRateSnapshot implements _i1.SerializableModel {
     return FxRateSnapshot(
       id: jsonSerialization['id'] == null
           ? null
-          : _i1.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
+          : _isc.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
       provider: jsonSerialization['provider'] as String,
       baseCurrencyCode: jsonSerialization['baseCurrencyCode'] as String,
-      fetchedAt: _i1.DateTimeJsonExtension.fromJson(
+      fetchedAt: _isc.DateTimeJsonExtension.fromJson(
         jsonSerialization['fetchedAt'],
       ),
       isLatest: jsonSerialization['isLatest'] == null
           ? null
-          : _i1.BoolJsonExtension.fromJson(jsonSerialization['isLatest']),
+          : _isc.BoolJsonExtension.fromJson(jsonSerialization['isLatest']),
       createdAt: jsonSerialization['createdAt'] == null
           ? null
-          : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
+          : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
     );
   }
 
   /// The database id, set if the object has been inserted into the
   /// database or if it has been fetched from the database. Otherwise,
   /// the id will be null.
-  _i1.UuidValue? id;
+  _isc.UuidValue? id;
 
   String provider;
 
@@ -69,9 +70,9 @@ abstract class FxRateSnapshot implements _i1.SerializableModel {
 
   /// Returns a shallow copy of this [FxRateSnapshot]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_isc.useResult
   FxRateSnapshot copyWith({
-    _i1.UuidValue? id,
+    _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
     String? provider,
     String? baseCurrencyCode,
     DateTime? fetchedAt,
@@ -92,16 +93,27 @@ abstract class FxRateSnapshot implements _i1.SerializableModel {
   }
 
   @override
+  Map<String, dynamic> toJsonForProtocol() {
+    return {
+      '__className__': 'FxRateSnapshot',
+      if (id != null) 'id': id?.toJson(),
+      'provider': provider,
+      'baseCurrencyCode': baseCurrencyCode,
+      'fetchedAt': fetchedAt.toJson(),
+      'isLatest': isLatest,
+      'createdAt': createdAt.toJson(),
+    };
+  }
+
+  @override
   String toString() {
-    return _i1.SerializationManager.encode(this);
+    return _isc.SerializationManager.encode(this);
   }
 }
 
-class _Undefined {}
-
 class _FxRateSnapshotImpl extends FxRateSnapshot {
   _FxRateSnapshotImpl({
-    _i1.UuidValue? id,
+    _isc.UuidValue? id,
     required String provider,
     required String baseCurrencyCode,
     required DateTime fetchedAt,
@@ -118,10 +130,10 @@ class _FxRateSnapshotImpl extends FxRateSnapshot {
 
   /// Returns a shallow copy of this [FxRateSnapshot]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_isc.useResult
   @override
   FxRateSnapshot copyWith({
-    Object? id = _Undefined,
+    _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
     String? provider,
     String? baseCurrencyCode,
     DateTime? fetchedAt,
@@ -129,7 +141,7 @@ class _FxRateSnapshotImpl extends FxRateSnapshot {
     DateTime? createdAt,
   }) {
     return FxRateSnapshot(
-      id: id is _i1.UuidValue? ? id : this.id,
+      id: id is _isc.UndefinedSentinel ? this.id : id,
       provider: provider ?? this.provider,
       baseCurrencyCode: baseCurrencyCode ?? this.baseCurrencyCode,
       fetchedAt: fetchedAt ?? this.fetchedAt,

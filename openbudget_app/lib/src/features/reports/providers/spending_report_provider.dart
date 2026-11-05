@@ -14,11 +14,7 @@ Future<SpendingReport> spendingReport(
   int month,
 ) async {
   final client = ref.read(serverpodClientProvider);
-  // Serverpod API requires UuidValue which is experimental in uuid package.
-  // ignore: experimental_member_use
   final transactions = await client.transaction.listByMonth(
-    // Serverpod API requires UuidValue which is experimental in uuid package.
-    // ignore: experimental_member_use
     UuidValue.fromString(budgetId),
     year,
     month,

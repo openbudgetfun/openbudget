@@ -14,8 +14,6 @@ class BudgetExport extends _$BudgetExport {
     final client = ref.read(serverpodClientProvider);
     try {
       final json = await client.budget.exportData(
-        // Serverpod API requires UuidValue which is experimental in uuid package.
-        // ignore: experimental_member_use
         UuidValue.fromString(budgetId),
       );
       if (ref.mounted) {

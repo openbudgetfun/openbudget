@@ -31,7 +31,7 @@ class CategoryTrendsScreen extends HookConsumerWidget {
       appBar: AppBar(title: Text(l10n.categoryTrendsTitle)),
       body: trendsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, __) => Center(
+        error: (_, _) => Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [

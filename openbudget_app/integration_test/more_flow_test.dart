@@ -1,6 +1,3 @@
-// Serverpod's UuidValue.fromString is marked experimental.
-// ignore_for_file: experimental_member_use
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -96,7 +93,7 @@ Widget _buildApp() {
       GoRoute(
         name: recurringCalendarRoute,
         path: recurringCalendarPath,
-        builder: (_, __) => const Scaffold(body: Text('Recurring Calendar')),
+        builder: (_, _) => const Scaffold(body: Text('Recurring Calendar')),
       ),
       GoRoute(
         name: transactionRulesRoute,
@@ -107,17 +104,17 @@ Widget _buildApp() {
       GoRoute(
         name: payeeListRoute,
         path: payeeListPath,
-        builder: (_, __) => const Scaffold(body: Text('Payees')),
+        builder: (_, _) => const Scaffold(body: Text('Payees')),
       ),
       GoRoute(
         name: importTransactionsRoute,
         path: importTransactionsPath,
-        builder: (_, __) => const Scaffold(body: Text('Import')),
+        builder: (_, _) => const Scaffold(body: Text('Import')),
       ),
       GoRoute(
         name: settingsRoute,
         path: settingsPath,
-        builder: (_, __) => const Scaffold(body: Text('Settings')),
+        builder: (_, _) => const Scaffold(body: Text('Settings')),
       ),
     ],
   );

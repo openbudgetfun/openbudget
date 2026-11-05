@@ -83,7 +83,7 @@ final class _PinnedDependenciesCache {
   static final Map<String, _CacheEntry> _cache = {};
 
   static List<String> readViolations(Folder packageRoot) {
-    final pubspecFile = packageRoot.getChildAssumingFile(
+    final pubspecFile = packageRoot.getFile(
       _PinnedDependenciesVisitor._pubspecPath,
     );
     if (!pubspecFile.exists) {

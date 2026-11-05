@@ -10,10 +10,11 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:serverpod_client/serverpod_client.dart' as _i1;
+import 'package:serverpod_client/serverpod_client.dart' as _isc;
 
 /// A grouping of envelopes within a budget.
-abstract class Category implements _i1.SerializableModel {
+abstract class Category
+    implements _isc.SerializableModel, _isc.ProtocolSerialization {
   Category._({
     this.id,
     required this.name,
@@ -25,9 +26,9 @@ abstract class Category implements _i1.SerializableModel {
        createdAt = createdAt ?? DateTime.now();
 
   factory Category({
-    _i1.UuidValue? id,
+    _isc.UuidValue? id,
     required String name,
-    required _i1.UuidValue budgetId,
+    required _isc.UuidValue budgetId,
     required int sortOrder,
     bool? isHidden,
     DateTime? createdAt,
@@ -37,29 +38,29 @@ abstract class Category implements _i1.SerializableModel {
     return Category(
       id: jsonSerialization['id'] == null
           ? null
-          : _i1.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
+          : _isc.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
       name: jsonSerialization['name'] as String,
-      budgetId: _i1.UuidValueJsonExtension.fromJson(
+      budgetId: _isc.UuidValueJsonExtension.fromJson(
         jsonSerialization['budgetId'],
       ),
       sortOrder: jsonSerialization['sortOrder'] as int,
       isHidden: jsonSerialization['isHidden'] == null
           ? null
-          : _i1.BoolJsonExtension.fromJson(jsonSerialization['isHidden']),
+          : _isc.BoolJsonExtension.fromJson(jsonSerialization['isHidden']),
       createdAt: jsonSerialization['createdAt'] == null
           ? null
-          : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
+          : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
     );
   }
 
   /// The database id, set if the object has been inserted into the
   /// database or if it has been fetched from the database. Otherwise,
   /// the id will be null.
-  _i1.UuidValue? id;
+  _isc.UuidValue? id;
 
   String name;
 
-  _i1.UuidValue budgetId;
+  _isc.UuidValue budgetId;
 
   int sortOrder;
 
@@ -70,11 +71,11 @@ abstract class Category implements _i1.SerializableModel {
 
   /// Returns a shallow copy of this [Category]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_isc.useResult
   Category copyWith({
-    _i1.UuidValue? id,
+    _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
     String? name,
-    _i1.UuidValue? budgetId,
+    _isc.UuidValue? budgetId,
     int? sortOrder,
     bool? isHidden,
     DateTime? createdAt,
@@ -93,8 +94,21 @@ abstract class Category implements _i1.SerializableModel {
   }
 
   @override
+  Map<String, dynamic> toJsonForProtocol() {
+    return {
+      '__className__': 'Category',
+      if (id != null) 'id': id?.toJson(),
+      'name': name,
+      'budgetId': budgetId.toJson(),
+      'sortOrder': sortOrder,
+      if (isHidden != null) 'isHidden': isHidden,
+      'createdAt': createdAt.toJson(),
+    };
+  }
+
+  @override
   String toString() {
-    return _i1.SerializationManager.encode(this);
+    return _isc.SerializationManager.encode(this);
   }
 }
 
@@ -102,9 +116,9 @@ class _Undefined {}
 
 class _CategoryImpl extends Category {
   _CategoryImpl({
-    _i1.UuidValue? id,
+    _isc.UuidValue? id,
     required String name,
-    required _i1.UuidValue budgetId,
+    required _isc.UuidValue budgetId,
     required int sortOrder,
     bool? isHidden,
     DateTime? createdAt,
@@ -119,18 +133,18 @@ class _CategoryImpl extends Category {
 
   /// Returns a shallow copy of this [Category]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_isc.useResult
   @override
   Category copyWith({
-    Object? id = _Undefined,
+    _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
     String? name,
-    _i1.UuidValue? budgetId,
+    _isc.UuidValue? budgetId,
     int? sortOrder,
     Object? isHidden = _Undefined,
     DateTime? createdAt,
   }) {
     return Category(
-      id: id is _i1.UuidValue? ? id : this.id,
+      id: id is _isc.UndefinedSentinel ? this.id : id,
       name: name ?? this.name,
       budgetId: budgetId ?? this.budgetId,
       sortOrder: sortOrder ?? this.sortOrder,

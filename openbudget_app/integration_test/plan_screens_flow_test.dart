@@ -1,21 +1,22 @@
-// Serverpod's UuidValue.fromString is marked experimental.
-// ignore_for_file: experimental_member_use
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
+import 'package:openbudget_app/src/features/budget/providers/age_of_money_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_goals_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/category_actions_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/credit_card_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/monthly_allocation_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/recent_moves_provider.dart';
 import 'package:openbudget_app/src/features/budget/screens/budget_detail_screen.dart';
 import 'package:openbudget_app/src/features/budget/screens/category_detail_screen.dart';
 import 'package:openbudget_app/src/features/budget/screens/recent_moves_screen.dart';
+import 'package:openbudget_app/src/features/budget/widgets/budget_amount_keypad.dart';
 import 'package:openbudget_app/src/features/recurring/providers/recurring_auto_post_provider.dart';
+import 'package:openbudget_app/src/features/transactions/providers/transaction_actions_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:patrol/patrol.dart';
@@ -281,6 +282,41 @@ List<Transaction> _makeMonthlyTransactions() => [
   ),
 ];
 
+class _FakeCategoryActions extends CategoryActions {
+  List<String> reorderedCategoryIds = [];
+  String? reorderedBudgetId;
+
+  @override
+  AsyncValue<void> build() => const AsyncValue.data(null);
+
+  @override
+  Future<void> reorderCategories({
+    required String budgetId,
+    required List<String> categoryIds,
+  }) async {
+    reorderedCategoryIds = List.of(categoryIds);
+    reorderedBudgetId = budgetId;
+  }
+}
+
+class _FakeTransactionActions extends TransactionActions {
+  List<String> clearedTransactionIds = [];
+  String? clearedBudgetId;
+
+  @override
+  AsyncValue<void> build() => const AsyncValue.data(null);
+
+  @override
+  Future<int> bulkToggleCleared({
+    required List<String> transactionIds,
+    required String budgetId,
+  }) async {
+    clearedTransactionIds = List.of(transactionIds);
+    clearedBudgetId = budgetId;
+    return transactionIds.length;
+  }
+}
+
 void main() {
   GoogleFonts.config.allowRuntimeFetching = false;
 
@@ -288,8 +324,11 @@ void main() {
     $,
   ) async {
     final tester = $.tester;
+    final transactionActions = _FakeTransactionActions();
     final container = ProviderContainer(
       overrides: [
+        ageOfMoneyProvider.overrideWith((ref, budgetId) async => null),
+        transactionActionsProvider.overrideWith(() => transactionActions),
         budgetMonthlySummaryProvider.overrideWith(
           (ref, _) async => _makeSummary(),
         ),
@@ -309,7 +348,7 @@ void main() {
         GoRoute(
           name: homeRoute,
           path: homePath,
-          builder: (_, __) => const Scaffold(body: Text('Home')),
+          builder: (_, _) => const Scaffold(body: Text('Home')),
         ),
         GoRoute(
           name: planRoute,
@@ -393,6 +432,10 @@ void main() {
     expect(find.text('1 Selected'), findsOneWidget);
     await tester.tap(find.text('Approve'));
     await tester.pumpAndSettle();
+    expect(transactionActions.clearedBudgetId, _budgetId);
+    expect(transactionActions.clearedTransactionIds, [
+      _makeMonthlyTransactions().single.id.toString(),
+    ]);
     expect(find.text('No Transactions'), findsOneWidget);
     expect(find.text("You're All Done!"), findsOneWidget);
     await captureIntegrationScreenshot(
@@ -519,7 +562,7 @@ void main() {
     );
     expect(saveTargetButton.onPressed, isNull);
 
-    await tester.tap(find.text('I need'));
+    await tester.tap(find.widgetWithText(BudgetAmountField, 'I need'));
     await tester.pumpAndSettle();
     for (final digit in ['2', '8', '0', '0']) {
       await tester.tap(find.byKey(Key('budget-keypad-digit-$digit')));
@@ -544,6 +587,7 @@ void main() {
     final tester = $.tester;
     final container = ProviderContainer(
       overrides: [
+        ageOfMoneyProvider.overrideWith((ref, budgetId) async => null),
         budgetMonthlySummaryProvider.overrideWith(
           (ref, _) async => _makeOverspentSummary(),
         ),
@@ -602,6 +646,7 @@ void main() {
 
     final container = ProviderContainer(
       overrides: [
+        ageOfMoneyProvider.overrideWith((ref, budgetId) async => null),
         budgetMonthlySummaryProvider.overrideWith(
           (ref, _) async => _makeSummary(),
         ),
@@ -694,8 +739,11 @@ void main() {
     $,
   ) async {
     final tester = $.tester;
+    final categoryActions = _FakeCategoryActions();
     final container = ProviderContainer(
       overrides: [
+        categoryActionsProvider.overrideWith(() => categoryActions),
+        ageOfMoneyProvider.overrideWith((ref, budgetId) async => null),
         budgetMonthlySummaryProvider.overrideWith(
           (ref, _) async => _makeReorderSummary(),
         ),
@@ -757,6 +805,13 @@ void main() {
     await tester.tap(find.widgetWithText(TextButton, 'Done'));
     await tester.pumpAndSettle();
 
+    expect(categoryActions.reorderedBudgetId, _budgetId);
+    expect(
+      categoryActions.reorderedCategoryIds,
+      _makeReorderSummary().categories.reversed
+          .map((category) => category.category.id.toString())
+          .toList(),
+    );
     expect(find.byIcon(Icons.more_horiz_rounded), findsOneWidget);
   });
 }

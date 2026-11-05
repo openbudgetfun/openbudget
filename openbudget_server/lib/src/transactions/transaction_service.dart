@@ -59,8 +59,7 @@ class TransactionService {
     return Transaction.db.find(
       session,
       where: (t) => t.budgetId.equals(budgetId),
-      orderBy: (t) => t.transactionDate,
-      orderDescending: true,
+      orderBy: (t) => t.transactionDate.desc(),
     );
   }
 
@@ -82,8 +81,7 @@ class TransactionService {
           t.budgetId.equals(budgetId) &
           (t.transactionDate >= start) &
           (t.transactionDate < end),
-      orderBy: (t) => t.transactionDate,
-      orderDescending: true,
+      orderBy: (t) => t.transactionDate.desc(),
     );
   }
 
@@ -236,8 +234,7 @@ class TransactionService {
     return Transaction.db.find(
       session,
       where: (t) => t.budgetId.equals(budgetId) & t.accountId.equals(accountId),
-      orderBy: (t) => t.transactionDate,
-      orderDescending: true,
+      orderBy: (t) => t.transactionDate.desc(),
     );
   }
 
@@ -563,8 +560,7 @@ class TransactionService {
           t.amountCents.equals(amountCents) &
           (t.transactionDate >= dayBefore) &
           (t.transactionDate <= dayAfter),
-      orderBy: (t) => t.transactionDate,
-      orderDescending: true,
+      orderBy: (t) => t.transactionDate.desc(),
       limit: 5,
     );
   }

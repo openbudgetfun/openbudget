@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
@@ -264,18 +266,22 @@ class RecurringListScreen extends HookConsumerWidget {
   }
 
   void _showAddDialog(BuildContext context, CurrencyCode currencyCode) {
-    showDialog<void>(
-      context: context,
-      builder: (_) =>
-          _AddRecurringDialog(budgetId: budgetId, currencyCode: currencyCode),
+    unawaited(
+      showDialog<void>(
+        context: context,
+        builder: (_) =>
+            _AddRecurringDialog(budgetId: budgetId, currencyCode: currencyCode),
+      ),
     );
   }
 
   void _showEditDialog(BuildContext context, RecurringTransaction recurring) {
-    showDialog<void>(
-      context: context,
-      builder: (_) =>
-          _EditRecurringDialog(recurring: recurring, budgetId: budgetId),
+    unawaited(
+      showDialog<void>(
+        context: context,
+        builder: (_) =>
+            _EditRecurringDialog(recurring: recurring, budgetId: budgetId),
+      ),
     );
   }
 

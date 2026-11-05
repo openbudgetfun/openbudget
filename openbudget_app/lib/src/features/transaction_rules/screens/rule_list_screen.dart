@@ -64,7 +64,7 @@ class RuleListScreen extends HookConsumerWidget {
       ),
       body: rulesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, __) => Center(
+        error: (_, _) => Center(
           child: Text(
             l10n.transactionRulesLoadError,
             style: theme.textTheme.bodyLarge?.copyWith(

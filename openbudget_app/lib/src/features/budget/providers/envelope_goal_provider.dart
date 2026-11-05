@@ -8,8 +8,6 @@ part 'envelope_goal_provider.g.dart';
 @riverpod
 Future<EnvelopeGoal?> envelopeGoal(Ref ref, String envelopeId) async {
   final client = ref.read(serverpodClientProvider);
-  // Serverpod API requires UuidValue which is experimental in uuid package.
-  // ignore: experimental_member_use
   return client.envelopeGoal.getForEnvelope(UuidValue.fromString(envelopeId));
 }
 
@@ -22,8 +20,6 @@ Future<List<EnvelopeGoal>> envelopeGoals(
   final client = ref.read(serverpodClientProvider);
   final uuids = envelopeIds
       .map(
-        // Serverpod API requires UuidValue which is experimental in uuid package.
-        // ignore: experimental_member_use
         UuidValue.fromString,
       )
       .toList();
@@ -47,8 +43,6 @@ class EnvelopeGoalActions extends _$EnvelopeGoalActions {
     final client = ref.read(serverpodClientProvider);
     try {
       final goal = await client.envelopeGoal.upsert(
-        // Serverpod API requires UuidValue which is experimental in uuid package.
-        // ignore: experimental_member_use
         UuidValue.fromString(envelopeId),
         goalType,
         targetAmountCents,
@@ -78,8 +72,6 @@ class EnvelopeGoalActions extends _$EnvelopeGoalActions {
     state = const AsyncValue.loading();
     final client = ref.read(serverpodClientProvider);
     try {
-      // Serverpod API requires UuidValue which is experimental in uuid package.
-      // ignore: experimental_member_use
       await client.envelopeGoal.delete(UuidValue.fromString(goalId));
       if (ref.mounted) {
         ref

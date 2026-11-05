@@ -14,8 +14,6 @@ class BudgetActions extends _$BudgetActions {
     state = const AsyncValue.loading();
     final client = ref.read(serverpodClientProvider);
     try {
-      // Serverpod API requires UuidValue which is experimental in uuid package.
-      // ignore: experimental_member_use
       await client.budget.delete(UuidValue.fromString(budgetId));
       if (ref.mounted) {
         ref.invalidate(budgetListProvider);

@@ -74,7 +74,7 @@ class BalanceStyleNotifier extends Notifier<BalanceStyle> {
     return enumFromName(BalanceStyle.values, rawValue, BalanceStyle.standard);
   }
 
-  // ignore: use_setters_to_change_properties, Keep explicit command-style API for consistency with other notifiers.
+  // Keep explicit command-style API for consistency with other notifiers.
   void setBalanceStyle(BalanceStyle style) {
     state = style;
     persistString(ref, key: UiPreferenceKeys.balanceStyle, value: style.name);
@@ -90,7 +90,7 @@ class AppIconStyleNotifier extends Notifier<AppIconStyle> {
     return enumFromName(AppIconStyle.values, rawValue, AppIconStyle.primary);
   }
 
-  // ignore: use_setters_to_change_properties, Keep explicit command-style API for consistency with other notifiers.
+  // Keep explicit command-style API for consistency with other notifiers.
   void setAppIconStyle(AppIconStyle style) {
     state = style;
     persistString(ref, key: UiPreferenceKeys.appIconStyle, value: style.name);
@@ -105,7 +105,7 @@ class HideAmountsNotifier extends Notifier<bool> {
           .readBool(UiPreferenceKeys.hideAmounts) ??
       false;
 
-  // ignore: use_setters_to_change_properties, Keep explicit command-style API for consistency with other notifiers.
+  // Keep explicit command-style API for consistency with other notifiers.
   void setHideAmounts({required bool value}) {
     state = value;
     persistBool(ref, key: UiPreferenceKeys.hideAmounts, value: value);
@@ -120,7 +120,7 @@ class HideProgressBarsNotifier extends Notifier<bool> {
           .readBool(UiPreferenceKeys.hideProgressBars) ??
       false;
 
-  // ignore: use_setters_to_change_properties, Keep explicit command-style API for consistency with other notifiers.
+  // Keep explicit command-style API for consistency with other notifiers.
   void setHideProgressBars({required bool value}) {
     state = value;
     persistBool(ref, key: UiPreferenceKeys.hideProgressBars, value: value);
@@ -145,7 +145,7 @@ class NumberFormatStyleNotifier extends Notifier<NumberFormatStyle> {
     );
   }
 
-  // ignore: use_setters_to_change_properties, Keep explicit command-style API for consistency with other notifiers.
+  // Keep explicit command-style API for consistency with other notifiers.
   void setNumberFormat(NumberFormatStyle style) {
     state = style;
     persistString(
@@ -174,7 +174,7 @@ class CurrencyPlacementStyleNotifier extends Notifier<CurrencyPlacementStyle> {
     );
   }
 
-  // ignore: use_setters_to_change_properties, Keep explicit command-style API for consistency with other notifiers.
+  // Keep explicit command-style API for consistency with other notifiers.
   void setCurrencyPlacement(CurrencyPlacementStyle style) {
     state = style;
     persistString(
@@ -203,7 +203,7 @@ class DateFormatStyleNotifier extends Notifier<DateFormatStyle> {
     );
   }
 
-  // ignore: use_setters_to_change_properties, Keep explicit command-style API for consistency with other notifiers.
+  // Keep explicit command-style API for consistency with other notifiers.
   void setDateFormat(DateFormatStyle style) {
     state = style;
     persistString(

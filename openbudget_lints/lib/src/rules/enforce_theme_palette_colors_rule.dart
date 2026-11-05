@@ -9,15 +9,13 @@ final class EnforceThemePaletteColorsRule extends AnalysisRule {
   EnforceThemePaletteColorsRule()
     : super(
         name: 'enforce_theme_palette_colors',
-        description:
-            'Require OpenBudgetPalette theme-aware color access in openbudget_app.',
+        description: 'Require OpenBudgetPalette theme-aware color access in openbudget_app.',
       );
 
   static const LintCode code = LintCode(
     'enforce_theme_palette_colors',
     'Avoid hardcoded colors. Use OpenBudgetPalette.*For(theme) instead.',
-    correctionMessage:
-        'Replace hardcoded or direct palette constants with OpenBudgetPalette.*For(theme).',
+    correctionMessage: 'Replace hardcoded or direct palette constants with OpenBudgetPalette.*For(theme).',
     severity: DiagnosticSeverity.WARNING,
   );
 

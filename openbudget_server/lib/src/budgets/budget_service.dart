@@ -45,8 +45,7 @@ class BudgetService {
     final budgets = await Budget.db.find(
       session,
       where: (t) => t.ownerId.equals(userId),
-      orderBy: (t) => t.createdAt,
-      orderDescending: true,
+      orderBy: (t) => t.createdAt.desc(),
     );
     _log.info('Found ${budgets.length} budgets');
     return budgets;
@@ -138,8 +137,7 @@ class BudgetService {
     final transactions = await Transaction.db.find(
       session,
       where: (t) => t.budgetId.equals(budgetId),
-      orderBy: (t) => t.transactionDate,
-      orderDescending: true,
+      orderBy: (t) => t.transactionDate.desc(),
     );
 
     final payees = await Payee.db.find(

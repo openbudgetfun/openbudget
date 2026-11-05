@@ -1,6 +1,3 @@
-// Serverpod's UuidValue.fromString is marked experimental.
-// ignore_for_file: experimental_member_use
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -12,6 +9,7 @@ import 'package:openbudget_app/src/features/reports/providers/spending_report_pr
 import 'package:openbudget_app/src/features/reports/screens/net_worth_screen.dart';
 import 'package:openbudget_app/src/features/reports/screens/reports_screen.dart';
 import 'package:openbudget_app/src/features/reports/screens/spending_by_payee_screen.dart';
+import 'package:openbudget_app/src/features/settings/providers/display_currency_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_client/openbudget_client.dart';
@@ -144,6 +142,13 @@ Widget _buildApp({ThemeMode themeMode = ThemeMode.light}) {
 
   return ProviderScope(
     overrides: [
+      displayCurrencyConverterProvider.overrideWith(
+        (ref, budgetId) async => const DisplayCurrencyConverter(
+          displayCurrency: CurrencyCode.usd,
+          baseCurrencyCode: null,
+          ratesByCode: {},
+        ),
+      ),
       spendingReportProvider.overrideWith(
         (ref, args) async => _makeReportForMonth(args.$2, args.$3),
       ),

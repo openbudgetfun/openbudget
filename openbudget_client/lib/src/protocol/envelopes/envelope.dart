@@ -10,10 +10,11 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:serverpod_client/serverpod_client.dart' as _i1;
+import 'package:serverpod_client/serverpod_client.dart' as _isc;
 
 /// An envelope within a category, tracking budgeted and spent amounts.
-abstract class Envelope implements _i1.SerializableModel {
+abstract class Envelope
+    implements _isc.SerializableModel, _isc.ProtocolSerialization {
   Envelope._({
     this.id,
     required this.name,
@@ -29,9 +30,9 @@ abstract class Envelope implements _i1.SerializableModel {
        createdAt = createdAt ?? DateTime.now();
 
   factory Envelope({
-    _i1.UuidValue? id,
+    _isc.UuidValue? id,
     required String name,
-    required _i1.UuidValue categoryId,
+    required _isc.UuidValue categoryId,
     required int budgetedAmountCents,
     required int spentAmountCents,
     required String currencyCode,
@@ -45,9 +46,9 @@ abstract class Envelope implements _i1.SerializableModel {
     return Envelope(
       id: jsonSerialization['id'] == null
           ? null
-          : _i1.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
+          : _isc.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
       name: jsonSerialization['name'] as String,
-      categoryId: _i1.UuidValueJsonExtension.fromJson(
+      categoryId: _isc.UuidValueJsonExtension.fromJson(
         jsonSerialization['categoryId'],
       ),
       budgetedAmountCents: jsonSerialization['budgetedAmountCents'] as int,
@@ -57,21 +58,21 @@ abstract class Envelope implements _i1.SerializableModel {
       note: jsonSerialization['note'] as String?,
       isHidden: jsonSerialization['isHidden'] == null
           ? null
-          : _i1.BoolJsonExtension.fromJson(jsonSerialization['isHidden']),
+          : _isc.BoolJsonExtension.fromJson(jsonSerialization['isHidden']),
       createdAt: jsonSerialization['createdAt'] == null
           ? null
-          : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
+          : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
     );
   }
 
   /// The database id, set if the object has been inserted into the
   /// database or if it has been fetched from the database. Otherwise,
   /// the id will be null.
-  _i1.UuidValue? id;
+  _isc.UuidValue? id;
 
   String name;
 
-  _i1.UuidValue categoryId;
+  _isc.UuidValue categoryId;
 
   /// Budgeted amount stored as integer cents to avoid floating-point issues.
   int budgetedAmountCents;
@@ -95,11 +96,11 @@ abstract class Envelope implements _i1.SerializableModel {
 
   /// Returns a shallow copy of this [Envelope]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_isc.useResult
   Envelope copyWith({
-    _i1.UuidValue? id,
+    _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
     String? name,
-    _i1.UuidValue? categoryId,
+    _isc.UuidValue? categoryId,
     int? budgetedAmountCents,
     int? spentAmountCents,
     String? currencyCode,
@@ -126,8 +127,25 @@ abstract class Envelope implements _i1.SerializableModel {
   }
 
   @override
+  Map<String, dynamic> toJsonForProtocol() {
+    return {
+      '__className__': 'Envelope',
+      if (id != null) 'id': id?.toJson(),
+      'name': name,
+      'categoryId': categoryId.toJson(),
+      'budgetedAmountCents': budgetedAmountCents,
+      'spentAmountCents': spentAmountCents,
+      'currencyCode': currencyCode,
+      'sortOrder': sortOrder,
+      if (note != null) 'note': note,
+      if (isHidden != null) 'isHidden': isHidden,
+      'createdAt': createdAt.toJson(),
+    };
+  }
+
+  @override
   String toString() {
-    return _i1.SerializationManager.encode(this);
+    return _isc.SerializationManager.encode(this);
   }
 }
 
@@ -135,9 +153,9 @@ class _Undefined {}
 
 class _EnvelopeImpl extends Envelope {
   _EnvelopeImpl({
-    _i1.UuidValue? id,
+    _isc.UuidValue? id,
     required String name,
-    required _i1.UuidValue categoryId,
+    required _isc.UuidValue categoryId,
     required int budgetedAmountCents,
     required int spentAmountCents,
     required String currencyCode,
@@ -160,12 +178,12 @@ class _EnvelopeImpl extends Envelope {
 
   /// Returns a shallow copy of this [Envelope]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_isc.useResult
   @override
   Envelope copyWith({
-    Object? id = _Undefined,
+    _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
     String? name,
-    _i1.UuidValue? categoryId,
+    _isc.UuidValue? categoryId,
     int? budgetedAmountCents,
     int? spentAmountCents,
     String? currencyCode,
@@ -175,7 +193,7 @@ class _EnvelopeImpl extends Envelope {
     DateTime? createdAt,
   }) {
     return Envelope(
-      id: id is _i1.UuidValue? ? id : this.id,
+      id: id is _isc.UndefinedSentinel ? this.id : id,
       name: name ?? this.name,
       categoryId: categoryId ?? this.categoryId,
       budgetedAmountCents: budgetedAmountCents ?? this.budgetedAmountCents,

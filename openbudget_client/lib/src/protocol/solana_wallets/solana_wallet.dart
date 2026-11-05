@@ -10,10 +10,11 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:serverpod_client/serverpod_client.dart' as _i1;
+import 'package:serverpod_client/serverpod_client.dart' as _isc;
 
 /// A Solana wallet linked to an OpenBudget account.
-abstract class SolanaWallet implements _i1.SerializableModel {
+abstract class SolanaWallet
+    implements _isc.SerializableModel, _isc.ProtocolSerialization {
   SolanaWallet._({
     this.id,
     required this.accountId,
@@ -31,9 +32,9 @@ abstract class SolanaWallet implements _i1.SerializableModel {
        updatedAt = updatedAt ?? DateTime.now();
 
   factory SolanaWallet({
-    _i1.UuidValue? id,
-    required _i1.UuidValue accountId,
-    required _i1.UuidValue budgetId,
+    _isc.UuidValue? id,
+    required _isc.UuidValue accountId,
+    required _isc.UuidValue budgetId,
     required String address,
     String? label,
     required String cluster,
@@ -49,11 +50,11 @@ abstract class SolanaWallet implements _i1.SerializableModel {
     return SolanaWallet(
       id: jsonSerialization['id'] == null
           ? null
-          : _i1.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
-      accountId: _i1.UuidValueJsonExtension.fromJson(
+          : _isc.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
+      accountId: _isc.UuidValueJsonExtension.fromJson(
         jsonSerialization['accountId'],
       ),
-      budgetId: _i1.UuidValueJsonExtension.fromJson(
+      budgetId: _isc.UuidValueJsonExtension.fromJson(
         jsonSerialization['budgetId'],
       ),
       address: jsonSerialization['address'] as String,
@@ -62,28 +63,28 @@ abstract class SolanaWallet implements _i1.SerializableModel {
       lastSignature: jsonSerialization['lastSignature'] as String?,
       lastSyncedAt: jsonSerialization['lastSyncedAt'] == null
           ? null
-          : _i1.DateTimeJsonExtension.fromJson(
+          : _isc.DateTimeJsonExtension.fromJson(
               jsonSerialization['lastSyncedAt'],
             ),
       syncStatus: jsonSerialization['syncStatus'] as String,
       lastSyncError: jsonSerialization['lastSyncError'] as String?,
       createdAt: jsonSerialization['createdAt'] == null
           ? null
-          : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
+          : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
       updatedAt: jsonSerialization['updatedAt'] == null
           ? null
-          : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['updatedAt']),
+          : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['updatedAt']),
     );
   }
 
   /// The database id, set if the object has been inserted into the
   /// database or if it has been fetched from the database. Otherwise,
   /// the id will be null.
-  _i1.UuidValue? id;
+  _isc.UuidValue? id;
 
-  _i1.UuidValue accountId;
+  _isc.UuidValue accountId;
 
-  _i1.UuidValue budgetId;
+  _isc.UuidValue budgetId;
 
   /// Solana wallet address (base58).
   String address;
@@ -112,16 +113,16 @@ abstract class SolanaWallet implements _i1.SerializableModel {
 
   /// Returns a shallow copy of this [SolanaWallet]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_isc.useResult
   SolanaWallet copyWith({
-    _i1.UuidValue? id,
-    _i1.UuidValue? accountId,
-    _i1.UuidValue? budgetId,
+    _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
+    _isc.UuidValue? accountId,
+    _isc.UuidValue? budgetId,
     String? address,
     String? label,
     String? cluster,
     String? lastSignature,
-    DateTime? lastSyncedAt,
+    DateTime? lastSyncedAt = const _isc.$UndefinedDateTime(),
     String? syncStatus,
     String? lastSyncError,
     DateTime? createdAt,
@@ -147,8 +148,27 @@ abstract class SolanaWallet implements _i1.SerializableModel {
   }
 
   @override
+  Map<String, dynamic> toJsonForProtocol() {
+    return {
+      '__className__': 'SolanaWallet',
+      if (id != null) 'id': id?.toJson(),
+      'accountId': accountId.toJson(),
+      'budgetId': budgetId.toJson(),
+      'address': address,
+      if (label != null) 'label': label,
+      'cluster': cluster,
+      if (lastSignature != null) 'lastSignature': lastSignature,
+      if (lastSyncedAt != null) 'lastSyncedAt': lastSyncedAt?.toJson(),
+      'syncStatus': syncStatus,
+      if (lastSyncError != null) 'lastSyncError': lastSyncError,
+      'createdAt': createdAt.toJson(),
+      'updatedAt': updatedAt.toJson(),
+    };
+  }
+
+  @override
   String toString() {
-    return _i1.SerializationManager.encode(this);
+    return _isc.SerializationManager.encode(this);
   }
 }
 
@@ -156,9 +176,9 @@ class _Undefined {}
 
 class _SolanaWalletImpl extends SolanaWallet {
   _SolanaWalletImpl({
-    _i1.UuidValue? id,
-    required _i1.UuidValue accountId,
-    required _i1.UuidValue budgetId,
+    _isc.UuidValue? id,
+    required _isc.UuidValue accountId,
+    required _isc.UuidValue budgetId,
     required String address,
     String? label,
     required String cluster,
@@ -185,24 +205,24 @@ class _SolanaWalletImpl extends SolanaWallet {
 
   /// Returns a shallow copy of this [SolanaWallet]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_isc.useResult
   @override
   SolanaWallet copyWith({
-    Object? id = _Undefined,
-    _i1.UuidValue? accountId,
-    _i1.UuidValue? budgetId,
+    _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
+    _isc.UuidValue? accountId,
+    _isc.UuidValue? budgetId,
     String? address,
     Object? label = _Undefined,
     String? cluster,
     Object? lastSignature = _Undefined,
-    Object? lastSyncedAt = _Undefined,
+    DateTime? lastSyncedAt = const _isc.$UndefinedDateTime(),
     String? syncStatus,
     Object? lastSyncError = _Undefined,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
     return SolanaWallet(
-      id: id is _i1.UuidValue? ? id : this.id,
+      id: id is _isc.UndefinedSentinel ? this.id : id,
       accountId: accountId ?? this.accountId,
       budgetId: budgetId ?? this.budgetId,
       address: address ?? this.address,
@@ -211,9 +231,9 @@ class _SolanaWalletImpl extends SolanaWallet {
       lastSignature: lastSignature is String?
           ? lastSignature
           : this.lastSignature,
-      lastSyncedAt: lastSyncedAt is DateTime?
-          ? lastSyncedAt
-          : this.lastSyncedAt,
+      lastSyncedAt: lastSyncedAt is _isc.UndefinedSentinel
+          ? this.lastSyncedAt
+          : lastSyncedAt,
       syncStatus: syncStatus ?? this.syncStatus,
       lastSyncError: lastSyncError is String?
           ? lastSyncError

@@ -41,13 +41,13 @@ final class BudgetExportProvider
   }
 }
 
-String _$budgetExportHash() => r'fc62a5c571fc648a7e765d06759022f9eedda940';
+String _$budgetExportHash() => r'e2c085808c5ef8b016d7bfee489043bb0eb93383';
 
 abstract class _$BudgetExport extends $Notifier<AsyncValue<void>> {
   AsyncValue<void> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<void>, AsyncValue<void>>;
     final element =
         ref.element
@@ -57,6 +57,6 @@ abstract class _$BudgetExport extends $Notifier<AsyncValue<void>> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

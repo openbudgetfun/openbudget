@@ -92,7 +92,7 @@ abstract class _$SelectedMonth extends $Notifier<BudgetMonth> {
   BudgetMonth build(String budgetId);
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<BudgetMonth, BudgetMonth>;
     final element =
         ref.element
@@ -102,6 +102,6 @@ abstract class _$SelectedMonth extends $Notifier<BudgetMonth> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, () => build(_$args));
+    return element.handleCreate(ref, () => build(_$args));
   }
 }

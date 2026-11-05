@@ -10,11 +10,13 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:serverpod/serverpod.dart' as _i1;
+import 'dart:async' as _ida;
+
+import 'package:serverpod/serverpod.dart' as _is;
 
 /// A parsed Solana transaction associated with a wallet.
 abstract class SolanaWalletTransaction
-    implements _i1.TableRow<_i1.UuidValue?>, _i1.ProtocolSerialization {
+    implements _is.TableRow<_is.UuidValue?>, _is.ProtocolSerialization {
   SolanaWalletTransaction._({
     this.id,
     required this.walletId,
@@ -44,9 +46,9 @@ abstract class SolanaWalletTransaction
        updatedAt = updatedAt ?? DateTime.now();
 
   factory SolanaWalletTransaction({
-    _i1.UuidValue? id,
-    required _i1.UuidValue walletId,
-    required _i1.UuidValue budgetId,
+    _is.UuidValue? id,
+    required _is.UuidValue walletId,
+    required _is.UuidValue budgetId,
     required String signature,
     required int slot,
     DateTime? occurredAt,
@@ -76,18 +78,18 @@ abstract class SolanaWalletTransaction
     return SolanaWalletTransaction(
       id: jsonSerialization['id'] == null
           ? null
-          : _i1.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
-      walletId: _i1.UuidValueJsonExtension.fromJson(
+          : _is.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
+      walletId: _is.UuidValueJsonExtension.fromJson(
         jsonSerialization['walletId'],
       ),
-      budgetId: _i1.UuidValueJsonExtension.fromJson(
+      budgetId: _is.UuidValueJsonExtension.fromJson(
         jsonSerialization['budgetId'],
       ),
       signature: jsonSerialization['signature'] as String,
       slot: jsonSerialization['slot'] as int,
       occurredAt: jsonSerialization['occurredAt'] == null
           ? null
-          : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['occurredAt']),
+          : _is.DateTimeJsonExtension.fromJson(jsonSerialization['occurredAt']),
       description: jsonSerialization['description'] as String,
       txType: jsonSerialization['txType'] as String,
       source: jsonSerialization['source'] as String,
@@ -110,10 +112,10 @@ abstract class SolanaWalletTransaction
       rawJson: jsonSerialization['rawJson'] as String,
       createdAt: jsonSerialization['createdAt'] == null
           ? null
-          : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
+          : _is.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
       updatedAt: jsonSerialization['updatedAt'] == null
           ? null
-          : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['updatedAt']),
+          : _is.DateTimeJsonExtension.fromJson(jsonSerialization['updatedAt']),
     );
   }
 
@@ -122,11 +124,11 @@ abstract class SolanaWalletTransaction
   static const db = SolanaWalletTransactionRepository._();
 
   @override
-  _i1.UuidValue? id;
+  _is.UuidValue? id;
 
-  _i1.UuidValue walletId;
+  _is.UuidValue walletId;
 
-  _i1.UuidValue budgetId;
+  _is.UuidValue budgetId;
 
   /// Transaction signature.
   String signature;
@@ -190,18 +192,18 @@ abstract class SolanaWalletTransaction
   DateTime updatedAt;
 
   @override
-  _i1.Table<_i1.UuidValue?> get table => t;
+  _is.Table<_is.UuidValue?> get table => t;
 
   /// Returns a shallow copy of this [SolanaWalletTransaction]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_is.useResult
   SolanaWalletTransaction copyWith({
-    _i1.UuidValue? id,
-    _i1.UuidValue? walletId,
-    _i1.UuidValue? budgetId,
+    _is.UuidValue? id = const _is.$UndefinedUuidValue(),
+    _is.UuidValue? walletId,
+    _is.UuidValue? budgetId,
     String? signature,
     int? slot,
-    DateTime? occurredAt,
+    DateTime? occurredAt = const _is.$UndefinedDateTime(),
     String? description,
     String? txType,
     String? source,
@@ -294,12 +296,11 @@ abstract class SolanaWalletTransaction
   }
 
   static SolanaWalletTransactionIncludeList includeList({
-    _i1.WhereExpressionBuilder<SolanaWalletTransactionTable>? where,
+    _is.WhereExpressionBuilder<SolanaWalletTransactionTable>? where,
     int? limit,
     int? offset,
-    _i1.OrderByBuilder<SolanaWalletTransactionTable>? orderBy,
-    bool orderDescending = false,
-    _i1.OrderByListBuilder<SolanaWalletTransactionTable>? orderByList,
+    _is.OrderByBuilder<SolanaWalletTransactionTable>? orderBy,
+    _is.OrderByListBuilder<SolanaWalletTransactionTable>? orderByList,
     SolanaWalletTransactionInclude? include,
   }) {
     return SolanaWalletTransactionIncludeList._(
@@ -307,7 +308,6 @@ abstract class SolanaWalletTransaction
       limit: limit,
       offset: offset,
       orderBy: orderBy?.call(SolanaWalletTransaction.t),
-      orderDescending: orderDescending,
       orderByList: orderByList?.call(SolanaWalletTransaction.t),
       include: include,
     );
@@ -315,7 +315,7 @@ abstract class SolanaWalletTransaction
 
   @override
   String toString() {
-    return _i1.SerializationManager.encode(this);
+    return _is.SerializationManager.encode(this);
   }
 }
 
@@ -323,9 +323,9 @@ class _Undefined {}
 
 class _SolanaWalletTransactionImpl extends SolanaWalletTransaction {
   _SolanaWalletTransactionImpl({
-    _i1.UuidValue? id,
-    required _i1.UuidValue walletId,
-    required _i1.UuidValue budgetId,
+    _is.UuidValue? id,
+    required _is.UuidValue walletId,
+    required _is.UuidValue budgetId,
     required String signature,
     required int slot,
     DateTime? occurredAt,
@@ -376,15 +376,15 @@ class _SolanaWalletTransactionImpl extends SolanaWalletTransaction {
 
   /// Returns a shallow copy of this [SolanaWalletTransaction]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_is.useResult
   @override
   SolanaWalletTransaction copyWith({
-    Object? id = _Undefined,
-    _i1.UuidValue? walletId,
-    _i1.UuidValue? budgetId,
+    _is.UuidValue? id = const _is.$UndefinedUuidValue(),
+    _is.UuidValue? walletId,
+    _is.UuidValue? budgetId,
     String? signature,
     int? slot,
-    Object? occurredAt = _Undefined,
+    DateTime? occurredAt = const _is.$UndefinedDateTime(),
     String? description,
     String? txType,
     String? source,
@@ -405,12 +405,14 @@ class _SolanaWalletTransactionImpl extends SolanaWalletTransaction {
     DateTime? updatedAt,
   }) {
     return SolanaWalletTransaction(
-      id: id is _i1.UuidValue? ? id : this.id,
+      id: id is _is.UndefinedSentinel ? this.id : id,
       walletId: walletId ?? this.walletId,
       budgetId: budgetId ?? this.budgetId,
       signature: signature ?? this.signature,
       slot: slot ?? this.slot,
-      occurredAt: occurredAt is DateTime? ? occurredAt : this.occurredAt,
+      occurredAt: occurredAt is _is.UndefinedSentinel
+          ? this.occurredAt
+          : occurredAt,
       description: description ?? this.description,
       txType: txType ?? this.txType,
       source: source ?? this.source,
@@ -446,180 +448,306 @@ class _SolanaWalletTransactionImpl extends SolanaWalletTransaction {
 }
 
 class SolanaWalletTransactionUpdateTable
-    extends _i1.UpdateTable<SolanaWalletTransactionTable> {
+    extends _is.UpdateTable<SolanaWalletTransactionTable> {
   SolanaWalletTransactionUpdateTable(super.table);
 
-  _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> walletId(_i1.UuidValue value) =>
-      _i1.ColumnValue(table.walletId, value);
+  _is.ColumnValue<_is.UuidValue, _is.UuidValue> walletId(_is.UuidValue value) =>
+      _is.ColumnValue(
+        table.walletId,
+        value,
+      );
 
-  _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> budgetId(_i1.UuidValue value) =>
-      _i1.ColumnValue(table.budgetId, value);
+  _is.ColumnValue<_is.UuidValue, _is.UuidValue> budgetId(_is.UuidValue value) =>
+      _is.ColumnValue(
+        table.budgetId,
+        value,
+      );
 
-  _i1.ColumnValue<String, String> signature(String value) =>
-      _i1.ColumnValue(table.signature, value);
+  _is.ColumnValue<String, String> signature(String value) => _is.ColumnValue(
+    table.signature,
+    value,
+  );
 
-  _i1.ColumnValue<int, int> slot(int value) =>
-      _i1.ColumnValue(table.slot, value);
+  _is.ColumnValue<int, int> slot(int value) => _is.ColumnValue(
+    table.slot,
+    value,
+  );
 
-  _i1.ColumnValue<DateTime, DateTime> occurredAt(DateTime? value) =>
-      _i1.ColumnValue(table.occurredAt, value);
+  _is.ColumnValue<DateTime, DateTime> occurredAt(DateTime? value) =>
+      _is.ColumnValue(
+        table.occurredAt,
+        value,
+      );
 
-  _i1.ColumnValue<String, String> description(String value) =>
-      _i1.ColumnValue(table.description, value);
+  _is.ColumnValue<String, String> description(String value) => _is.ColumnValue(
+    table.description,
+    value,
+  );
 
-  _i1.ColumnValue<String, String> txType(String value) =>
-      _i1.ColumnValue(table.txType, value);
+  _is.ColumnValue<String, String> txType(String value) => _is.ColumnValue(
+    table.txType,
+    value,
+  );
 
-  _i1.ColumnValue<String, String> source(String value) =>
-      _i1.ColumnValue(table.source, value);
+  _is.ColumnValue<String, String> source(String value) => _is.ColumnValue(
+    table.source,
+    value,
+  );
 
-  _i1.ColumnValue<String, String> interpretationConfidence(String? value) =>
-      _i1.ColumnValue(table.interpretationConfidence, value);
+  _is.ColumnValue<String, String> interpretationConfidence(String? value) =>
+      _is.ColumnValue(
+        table.interpretationConfidence,
+        value,
+      );
 
-  _i1.ColumnValue<String, String> programsJson(String? value) =>
-      _i1.ColumnValue(table.programsJson, value);
+  _is.ColumnValue<String, String> programsJson(String? value) =>
+      _is.ColumnValue(
+        table.programsJson,
+        value,
+      );
 
-  _i1.ColumnValue<String, String> nativeTransfersJson(String? value) =>
-      _i1.ColumnValue(table.nativeTransfersJson, value);
+  _is.ColumnValue<String, String> nativeTransfersJson(String? value) =>
+      _is.ColumnValue(
+        table.nativeTransfersJson,
+        value,
+      );
 
-  _i1.ColumnValue<String, String> tokenTransfersJson(String? value) =>
-      _i1.ColumnValue(table.tokenTransfersJson, value);
+  _is.ColumnValue<String, String> tokenTransfersJson(String? value) =>
+      _is.ColumnValue(
+        table.tokenTransfersJson,
+        value,
+      );
 
-  _i1.ColumnValue<double, double> estimatedCostBasis(double? value) =>
-      _i1.ColumnValue(table.estimatedCostBasis, value);
+  _is.ColumnValue<double, double> estimatedCostBasis(double? value) =>
+      _is.ColumnValue(
+        table.estimatedCostBasis,
+        value,
+      );
 
-  _i1.ColumnValue<double, double> estimatedProceeds(double? value) =>
-      _i1.ColumnValue(table.estimatedProceeds, value);
+  _is.ColumnValue<double, double> estimatedProceeds(double? value) =>
+      _is.ColumnValue(
+        table.estimatedProceeds,
+        value,
+      );
 
-  _i1.ColumnValue<double, double> estimatedRealizedPnl(double? value) =>
-      _i1.ColumnValue(table.estimatedRealizedPnl, value);
+  _is.ColumnValue<double, double> estimatedRealizedPnl(double? value) =>
+      _is.ColumnValue(
+        table.estimatedRealizedPnl,
+        value,
+      );
 
-  _i1.ColumnValue<String, String> pnlCurrency(String? value) =>
-      _i1.ColumnValue(table.pnlCurrency, value);
+  _is.ColumnValue<String, String> pnlCurrency(String? value) => _is.ColumnValue(
+    table.pnlCurrency,
+    value,
+  );
 
-  _i1.ColumnValue<int, int> taxYear(int? value) =>
-      _i1.ColumnValue(table.taxYear, value);
+  _is.ColumnValue<int, int> taxYear(int? value) => _is.ColumnValue(
+    table.taxYear,
+    value,
+  );
 
-  _i1.ColumnValue<String, String> category(String? value) =>
-      _i1.ColumnValue(table.category, value);
+  _is.ColumnValue<String, String> category(String? value) => _is.ColumnValue(
+    table.category,
+    value,
+  );
 
-  _i1.ColumnValue<String, String> tagsCsv(String? value) =>
-      _i1.ColumnValue(table.tagsCsv, value);
+  _is.ColumnValue<String, String> tagsCsv(String? value) => _is.ColumnValue(
+    table.tagsCsv,
+    value,
+  );
 
-  _i1.ColumnValue<String, String> memo(String? value) =>
-      _i1.ColumnValue(table.memo, value);
+  _is.ColumnValue<String, String> memo(String? value) => _is.ColumnValue(
+    table.memo,
+    value,
+  );
 
-  _i1.ColumnValue<String, String> rawJson(String value) =>
-      _i1.ColumnValue(table.rawJson, value);
+  _is.ColumnValue<String, String> rawJson(String value) => _is.ColumnValue(
+    table.rawJson,
+    value,
+  );
 
-  _i1.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
-      _i1.ColumnValue(table.createdAt, value);
+  _is.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
+      _is.ColumnValue(
+        table.createdAt,
+        value,
+      );
 
-  _i1.ColumnValue<DateTime, DateTime> updatedAt(DateTime value) =>
-      _i1.ColumnValue(table.updatedAt, value);
+  _is.ColumnValue<DateTime, DateTime> updatedAt(DateTime value) =>
+      _is.ColumnValue(
+        table.updatedAt,
+        value,
+      );
 }
 
-class SolanaWalletTransactionTable extends _i1.Table<_i1.UuidValue?> {
+class SolanaWalletTransactionTable extends _is.Table<_is.UuidValue?> {
   SolanaWalletTransactionTable({super.tableRelation})
     : super(tableName: 'solana_wallet_transaction') {
     updateTable = SolanaWalletTransactionUpdateTable(this);
-    walletId = _i1.ColumnUuid('walletId', this);
-    budgetId = _i1.ColumnUuid('budgetId', this);
-    signature = _i1.ColumnString('signature', this);
-    slot = _i1.ColumnInt('slot', this);
-    occurredAt = _i1.ColumnDateTime('occurredAt', this);
-    description = _i1.ColumnString('description', this);
-    txType = _i1.ColumnString('txType', this);
-    source = _i1.ColumnString('source', this);
-    interpretationConfidence = _i1.ColumnString(
+    walletId = _is.ColumnUuid(
+      'walletId',
+      this,
+    );
+    budgetId = _is.ColumnUuid(
+      'budgetId',
+      this,
+    );
+    signature = _is.ColumnString(
+      'signature',
+      this,
+    );
+    slot = _is.ColumnInt(
+      'slot',
+      this,
+    );
+    occurredAt = _is.ColumnDateTime(
+      'occurredAt',
+      this,
+    );
+    description = _is.ColumnString(
+      'description',
+      this,
+    );
+    txType = _is.ColumnString(
+      'txType',
+      this,
+    );
+    source = _is.ColumnString(
+      'source',
+      this,
+    );
+    interpretationConfidence = _is.ColumnString(
       'interpretationConfidence',
       this,
     );
-    programsJson = _i1.ColumnString('programsJson', this);
-    nativeTransfersJson = _i1.ColumnString('nativeTransfersJson', this);
-    tokenTransfersJson = _i1.ColumnString('tokenTransfersJson', this);
-    estimatedCostBasis = _i1.ColumnDouble('estimatedCostBasis', this);
-    estimatedProceeds = _i1.ColumnDouble('estimatedProceeds', this);
-    estimatedRealizedPnl = _i1.ColumnDouble('estimatedRealizedPnl', this);
-    pnlCurrency = _i1.ColumnString('pnlCurrency', this);
-    taxYear = _i1.ColumnInt('taxYear', this);
-    category = _i1.ColumnString('category', this);
-    tagsCsv = _i1.ColumnString('tagsCsv', this);
-    memo = _i1.ColumnString('memo', this);
-    rawJson = _i1.ColumnString('rawJson', this);
-    createdAt = _i1.ColumnDateTime('createdAt', this, hasDefault: true);
-    updatedAt = _i1.ColumnDateTime('updatedAt', this, hasDefault: true);
+    programsJson = _is.ColumnString(
+      'programsJson',
+      this,
+    );
+    nativeTransfersJson = _is.ColumnString(
+      'nativeTransfersJson',
+      this,
+    );
+    tokenTransfersJson = _is.ColumnString(
+      'tokenTransfersJson',
+      this,
+    );
+    estimatedCostBasis = _is.ColumnDouble(
+      'estimatedCostBasis',
+      this,
+    );
+    estimatedProceeds = _is.ColumnDouble(
+      'estimatedProceeds',
+      this,
+    );
+    estimatedRealizedPnl = _is.ColumnDouble(
+      'estimatedRealizedPnl',
+      this,
+    );
+    pnlCurrency = _is.ColumnString(
+      'pnlCurrency',
+      this,
+    );
+    taxYear = _is.ColumnInt(
+      'taxYear',
+      this,
+    );
+    category = _is.ColumnString(
+      'category',
+      this,
+    );
+    tagsCsv = _is.ColumnString(
+      'tagsCsv',
+      this,
+    );
+    memo = _is.ColumnString(
+      'memo',
+      this,
+    );
+    rawJson = _is.ColumnString(
+      'rawJson',
+      this,
+    );
+    createdAt = _is.ColumnDateTime(
+      'createdAt',
+      this,
+      hasDefault: true,
+    );
+    updatedAt = _is.ColumnDateTime(
+      'updatedAt',
+      this,
+      hasDefault: true,
+    );
   }
 
   late final SolanaWalletTransactionUpdateTable updateTable;
 
-  late final _i1.ColumnUuid walletId;
+  late final _is.ColumnUuid walletId;
 
-  late final _i1.ColumnUuid budgetId;
+  late final _is.ColumnUuid budgetId;
 
   /// Transaction signature.
-  late final _i1.ColumnString signature;
+  late final _is.ColumnString signature;
 
   /// Ledger slot number.
-  late final _i1.ColumnInt slot;
+  late final _is.ColumnInt slot;
 
   /// Transaction timestamp from chain data.
-  late final _i1.ColumnDateTime occurredAt;
+  late final _is.ColumnDateTime occurredAt;
 
   /// Human-readable transaction description.
-  late final _i1.ColumnString description;
+  late final _is.ColumnString description;
 
   /// Parsed transaction type from Helius.
-  late final _i1.ColumnString txType;
+  late final _is.ColumnString txType;
 
   /// Parsed transaction source from Helius.
-  late final _i1.ColumnString source;
+  late final _is.ColumnString source;
 
   /// Confidence level for synthesized fallback interpretation.
-  late final _i1.ColumnString interpretationConfidence;
+  late final _is.ColumnString interpretationConfidence;
 
   /// JSON-encoded list of detected program IDs.
-  late final _i1.ColumnString programsJson;
+  late final _is.ColumnString programsJson;
 
   /// JSON-encoded native transfer details.
-  late final _i1.ColumnString nativeTransfersJson;
+  late final _is.ColumnString nativeTransfersJson;
 
   /// JSON-encoded token transfer details.
-  late final _i1.ColumnString tokenTransfersJson;
+  late final _is.ColumnString tokenTransfersJson;
 
   /// Estimated disposal cost basis in quote currency.
-  late final _i1.ColumnDouble estimatedCostBasis;
+  late final _is.ColumnDouble estimatedCostBasis;
 
   /// Estimated disposal proceeds in quote currency.
-  late final _i1.ColumnDouble estimatedProceeds;
+  late final _is.ColumnDouble estimatedProceeds;
 
   /// Estimated realized gain/loss in quote currency.
-  late final _i1.ColumnDouble estimatedRealizedPnl;
+  late final _is.ColumnDouble estimatedRealizedPnl;
 
   /// Quote currency used for estimated P&L values.
-  late final _i1.ColumnString pnlCurrency;
+  late final _is.ColumnString pnlCurrency;
 
   /// Tax year inferred from occurredAt.
-  late final _i1.ColumnInt taxYear;
+  late final _is.ColumnInt taxYear;
 
   /// User-managed category value.
-  late final _i1.ColumnString category;
+  late final _is.ColumnString category;
 
   /// User-managed comma-separated tags.
-  late final _i1.ColumnString tagsCsv;
+  late final _is.ColumnString tagsCsv;
 
   /// User-managed memo.
-  late final _i1.ColumnString memo;
+  late final _is.ColumnString memo;
 
   /// Raw enhanced transaction payload JSON.
-  late final _i1.ColumnString rawJson;
+  late final _is.ColumnString rawJson;
 
-  late final _i1.ColumnDateTime createdAt;
+  late final _is.ColumnDateTime createdAt;
 
-  late final _i1.ColumnDateTime updatedAt;
+  late final _is.ColumnDateTime updatedAt;
 
   @override
-  List<_i1.Column> get columns => [
+  List<_is.Column> get columns => [
     id,
     walletId,
     budgetId,
@@ -647,23 +775,22 @@ class SolanaWalletTransactionTable extends _i1.Table<_i1.UuidValue?> {
   ];
 }
 
-class SolanaWalletTransactionInclude extends _i1.IncludeObject {
+class SolanaWalletTransactionInclude extends _is.IncludeObject {
   SolanaWalletTransactionInclude._();
 
   @override
-  Map<String, _i1.Include?> get includes => {};
+  Map<String, _is.Include?> get includes => {};
 
   @override
-  _i1.Table<_i1.UuidValue?> get table => SolanaWalletTransaction.t;
+  _is.Table<_is.UuidValue?> get table => SolanaWalletTransaction.t;
 }
 
-class SolanaWalletTransactionIncludeList extends _i1.IncludeList {
+class SolanaWalletTransactionIncludeList extends _is.IncludeList {
   SolanaWalletTransactionIncludeList._({
-    _i1.WhereExpressionBuilder<SolanaWalletTransactionTable>? where,
+    _is.WhereExpressionBuilder<SolanaWalletTransactionTable>? where,
     super.limit,
     super.offset,
     super.orderBy,
-    super.orderDescending,
     super.orderByList,
     super.include,
   }) {
@@ -671,10 +798,10 @@ class SolanaWalletTransactionIncludeList extends _i1.IncludeList {
   }
 
   @override
-  Map<String, _i1.Include?> get includes => include?.includes ?? {};
+  Map<String, _is.Include?> get includes => include?.includes ?? {};
 
   @override
-  _i1.Table<_i1.UuidValue?> get table => SolanaWalletTransaction.t;
+  _is.Table<_is.UuidValue?> get table => SolanaWalletTransaction.t;
 }
 
 class SolanaWalletTransactionRepository {
@@ -703,27 +830,88 @@ class SolanaWalletTransactionRepository {
   /// );
   /// ```
   Future<List<SolanaWalletTransaction>> find(
-    _i1.DatabaseSession session, {
-    _i1.WhereExpressionBuilder<SolanaWalletTransactionTable>? where,
+    _is.DatabaseSession session, {
+    _is.WhereExpressionBuilder<SolanaWalletTransactionTable>? where,
     int? limit,
     int? offset,
-    _i1.OrderByBuilder<SolanaWalletTransactionTable>? orderBy,
-    bool orderDescending = false,
-    _i1.OrderByListBuilder<SolanaWalletTransactionTable>? orderByList,
-    _i1.Transaction? transaction,
-    _i1.LockMode? lockMode,
-    _i1.LockBehavior? lockBehavior,
+    _is.OrderByBuilder<SolanaWalletTransactionTable>? orderBy,
+    _is.OrderByListBuilder<SolanaWalletTransactionTable>? orderByList,
+    _is.Transaction? transaction,
+    _is.LockMode? lockMode,
+    _is.LockBehavior? lockBehavior,
   }) async {
     return session.db.find<SolanaWalletTransaction>(
       where: where?.call(SolanaWalletTransaction.t),
       orderBy: orderBy?.call(SolanaWalletTransaction.t),
       orderByList: orderByList?.call(SolanaWalletTransaction.t),
-      orderDescending: orderDescending,
       limit: limit,
       offset: offset,
       transaction: transaction,
       lockMode: lockMode,
       lockBehavior: lockBehavior,
+    );
+  }
+
+  /// Emits [SolanaWalletTransaction]s matching the given query parameters every time the
+  /// source tables are modified.
+  ///
+  /// Use [where] to specify which items to include in the return value.
+  /// If none is specified, all items will be returned.
+  ///
+  /// To specify the order of the items use [orderBy] or [orderByList]
+  /// when sorting by multiple columns.
+  ///
+  /// The maximum number of items can be set by [limit]. If no limit is set,
+  /// all items matching the query will be returned.
+  ///
+  /// [offset] defines how many items to skip, after which [limit] (or all)
+  /// items are read from the database.
+  ///
+  /// Use [throttle] to specify the minimum interval between queries. It can
+  /// also be set to `null`, in which case the stream will only be throttled
+  /// when its subscription is paused.
+  ///
+  /// Source tables are collected from the queried table, [where], [orderBy],
+  /// [orderByList], and the [include] graph. [alsoTriggerOnTables] is added
+  /// to that set. Pass [Table] instances such as `SolanaWalletTransaction.t`.
+  ///
+  /// Raw [Expression] SQL is not inspected. Tables referenced only in raw
+  /// SQL must be passed via [alsoTriggerOnTables].
+  ///
+  /// The stream always reads committed state and never joins an ambient
+  /// [Transaction]. Emissions for a write fire after that write commits.
+  ///
+  /// Currently only supported on SQLite. Calling this method on PostgreSQL
+  /// throws an [UnsupportedError].
+  ///
+  /// ```dart
+  /// var subscription = Persons.db.watch(
+  ///   session,
+  ///   where: (t) => t.lastName.equals('Jones'),
+  ///   orderBy: (t) => t.firstName,
+  ///   limit: 100,
+  /// ).listen((persons) {
+  ///   // Handle the latest matching rows.
+  /// });
+  /// ```
+  _ida.Stream<List<SolanaWalletTransaction>> watch(
+    _is.DatabaseSession session, {
+    _is.WhereExpressionBuilder<SolanaWalletTransactionTable>? where,
+    int? limit,
+    int? offset,
+    _is.OrderByBuilder<SolanaWalletTransactionTable>? orderBy,
+    _is.OrderByListBuilder<SolanaWalletTransactionTable>? orderByList,
+    Duration? throttle = const Duration(milliseconds: 30),
+    Iterable<_is.Table>? alsoTriggerOnTables,
+  }) {
+    return session.db.watch<SolanaWalletTransaction>(
+      where: where?.call(SolanaWalletTransaction.t),
+      orderBy: orderBy?.call(SolanaWalletTransaction.t),
+      orderByList: orderByList?.call(SolanaWalletTransaction.t),
+      limit: limit,
+      offset: offset,
+      throttle: throttle,
+      alsoTriggerOnTables: alsoTriggerOnTables,
     );
   }
 
@@ -745,21 +933,19 @@ class SolanaWalletTransactionRepository {
   /// );
   /// ```
   Future<SolanaWalletTransaction?> findFirstRow(
-    _i1.DatabaseSession session, {
-    _i1.WhereExpressionBuilder<SolanaWalletTransactionTable>? where,
+    _is.DatabaseSession session, {
+    _is.WhereExpressionBuilder<SolanaWalletTransactionTable>? where,
     int? offset,
-    _i1.OrderByBuilder<SolanaWalletTransactionTable>? orderBy,
-    bool orderDescending = false,
-    _i1.OrderByListBuilder<SolanaWalletTransactionTable>? orderByList,
-    _i1.Transaction? transaction,
-    _i1.LockMode? lockMode,
-    _i1.LockBehavior? lockBehavior,
+    _is.OrderByBuilder<SolanaWalletTransactionTable>? orderBy,
+    _is.OrderByListBuilder<SolanaWalletTransactionTable>? orderByList,
+    _is.Transaction? transaction,
+    _is.LockMode? lockMode,
+    _is.LockBehavior? lockBehavior,
   }) async {
     return session.db.findFirstRow<SolanaWalletTransaction>(
       where: where?.call(SolanaWalletTransaction.t),
       orderBy: orderBy?.call(SolanaWalletTransaction.t),
       orderByList: orderByList?.call(SolanaWalletTransaction.t),
-      orderDescending: orderDescending,
       offset: offset,
       transaction: transaction,
       lockMode: lockMode,
@@ -769,11 +955,11 @@ class SolanaWalletTransactionRepository {
 
   /// Finds a single [SolanaWalletTransaction] by its [id] or null if no such row exists.
   Future<SolanaWalletTransaction?> findById(
-    _i1.DatabaseSession session,
-    _i1.UuidValue id, {
-    _i1.Transaction? transaction,
-    _i1.LockMode? lockMode,
-    _i1.LockBehavior? lockBehavior,
+    _is.DatabaseSession session,
+    _is.UuidValue id, {
+    _is.Transaction? transaction,
+    _is.LockMode? lockMode,
+    _is.LockBehavior? lockBehavior,
   }) async {
     return session.db.findById<SolanaWalletTransaction>(
       id,
@@ -793,16 +979,22 @@ class SolanaWalletTransactionRepository {
   /// If [ignoreConflicts] is set to `true`, rows that conflict with existing
   /// rows are silently skipped, and only the successfully inserted rows are
   /// returned.
+  ///
+  /// If [noReturn] is set to `true`, the inserted rows are not read back from
+  /// the database and an empty list is returned. This avoids the overhead of
+  /// transferring and deserializing the rows when the result is not needed.
   Future<List<SolanaWalletTransaction>> insert(
-    _i1.DatabaseSession session,
+    _is.DatabaseSession session,
     List<SolanaWalletTransaction> rows, {
-    _i1.Transaction? transaction,
+    _is.Transaction? transaction,
     bool ignoreConflicts = false,
+    bool noReturn = false,
   }) async {
     return session.db.insert<SolanaWalletTransaction>(
       rows,
       transaction: transaction,
       ignoreConflicts: ignoreConflicts,
+      noReturn: noReturn,
     );
   }
 
@@ -810,12 +1002,81 @@ class SolanaWalletTransactionRepository {
   ///
   /// The returned [SolanaWalletTransaction] will have its `id` field set.
   Future<SolanaWalletTransaction> insertRow(
-    _i1.DatabaseSession session,
+    _is.DatabaseSession session,
     SolanaWalletTransaction row, {
-    _i1.Transaction? transaction,
+    _is.Transaction? transaction,
   }) async {
     return session.db.insertRow<SolanaWalletTransaction>(
       row,
+      transaction: transaction,
+    );
+  }
+
+  /// Upserts all [SolanaWalletTransaction]s in the list and returns the resulting rows.
+  ///
+  /// If a row conflicts on the given [conflictColumns], the existing row is
+  /// updated with the new values. Otherwise, a new row is inserted.
+  ///
+  /// If [updateColumns] is provided, only those columns will be updated on
+  /// conflict. If null, all non-conflict, non-id columns are updated.
+  ///
+  /// If [updateWhere] is provided, the update only applies to rows matching the
+  /// given expression. Conflicting rows that don't match are skipped and not
+  /// returned, so the resulting list may be shorter than [rows].
+  ///
+  /// The returned [SolanaWalletTransaction]s will have their `id` fields set.
+  ///
+  /// This is an atomic operation, meaning that if one of the rows fails,
+  /// none of the rows will be affected.
+  ///
+  /// If [noReturn] is set to `true`, the resulting rows are not read back from
+  /// the database and an empty list is returned. This avoids the overhead of
+  /// transferring and deserializing the rows when the result is not needed.
+  Future<List<SolanaWalletTransaction>> upsert(
+    _is.DatabaseSession session,
+    List<SolanaWalletTransaction> rows, {
+    required _is.ColumnSelections<SolanaWalletTransactionTable> conflictColumns,
+    _is.ColumnSelections<SolanaWalletTransactionTable>? updateColumns,
+    _is.WhereExpressionBuilder<SolanaWalletTransactionTable>? updateWhere,
+    _is.Transaction? transaction,
+    bool noReturn = false,
+  }) async {
+    return session.db.upsert<SolanaWalletTransaction>(
+      rows,
+      conflictColumns: conflictColumns(SolanaWalletTransaction.t),
+      updateColumns: updateColumns?.call(SolanaWalletTransaction.t),
+      updateWhere: updateWhere?.call(SolanaWalletTransaction.t),
+      transaction: transaction,
+      noReturn: noReturn,
+    );
+  }
+
+  /// Upserts a single [SolanaWalletTransaction] and returns the resulting row.
+  ///
+  /// If the row conflicts on the given [conflictColumns], the existing row is
+  /// updated. Otherwise, a new row is inserted.
+  ///
+  /// If [updateColumns] is provided, only those columns will be updated on
+  /// conflict. If null, all non-conflict, non-id columns are updated.
+  ///
+  /// If [updateWhere] is provided, the update only applies when the existing
+  /// row matches the expression. Returns `null` if no row was affected — for
+  /// example when [updateWhere] does not match the conflicting row.
+  ///
+  /// The returned [SolanaWalletTransaction] will have its `id` field set.
+  Future<SolanaWalletTransaction?> upsertRow(
+    _is.DatabaseSession session,
+    SolanaWalletTransaction row, {
+    required _is.ColumnSelections<SolanaWalletTransactionTable> conflictColumns,
+    _is.ColumnSelections<SolanaWalletTransactionTable>? updateColumns,
+    _is.WhereExpressionBuilder<SolanaWalletTransactionTable>? updateWhere,
+    _is.Transaction? transaction,
+  }) async {
+    return session.db.upsertRow<SolanaWalletTransaction>(
+      row,
+      conflictColumns: conflictColumns(SolanaWalletTransaction.t),
+      updateColumns: updateColumns?.call(SolanaWalletTransaction.t),
+      updateWhere: updateWhere?.call(SolanaWalletTransaction.t),
       transaction: transaction,
     );
   }
@@ -825,16 +1086,22 @@ class SolanaWalletTransactionRepository {
   /// all columns.
   /// This is an atomic operation, meaning that if one of the rows fails to
   /// update, none of the rows will be updated.
+  ///
+  /// If [noReturn] is set to `true`, the updated rows are not read back from
+  /// the database and an empty list is returned. This avoids the overhead of
+  /// transferring and deserializing the rows when the result is not needed.
   Future<List<SolanaWalletTransaction>> update(
-    _i1.DatabaseSession session,
+    _is.DatabaseSession session,
     List<SolanaWalletTransaction> rows, {
-    _i1.ColumnSelections<SolanaWalletTransactionTable>? columns,
-    _i1.Transaction? transaction,
+    _is.ColumnSelections<SolanaWalletTransactionTable>? columns,
+    _is.Transaction? transaction,
+    bool noReturn = false,
   }) async {
     return session.db.update<SolanaWalletTransaction>(
       rows,
       columns: columns?.call(SolanaWalletTransaction.t),
       transaction: transaction,
+      noReturn: noReturn,
     );
   }
 
@@ -842,10 +1109,10 @@ class SolanaWalletTransactionRepository {
   /// Optionally, a list of [columns] can be provided to only update those
   /// columns. Defaults to all columns.
   Future<SolanaWalletTransaction> updateRow(
-    _i1.DatabaseSession session,
+    _is.DatabaseSession session,
     SolanaWalletTransaction row, {
-    _i1.ColumnSelections<SolanaWalletTransactionTable>? columns,
-    _i1.Transaction? transaction,
+    _is.ColumnSelections<SolanaWalletTransactionTable>? columns,
+    _is.Transaction? transaction,
   }) async {
     return session.db.updateRow<SolanaWalletTransaction>(
       row,
@@ -857,11 +1124,11 @@ class SolanaWalletTransactionRepository {
   /// Updates a single [SolanaWalletTransaction] by its [id] with the specified [columnValues].
   /// Returns the updated row or null if no row with the given id exists.
   Future<SolanaWalletTransaction?> updateById(
-    _i1.DatabaseSession session,
-    _i1.UuidValue id, {
-    required _i1.ColumnValueListBuilder<SolanaWalletTransactionUpdateTable>
+    _is.DatabaseSession session,
+    _is.UuidValue id, {
+    required _is.ColumnValueListBuilder<SolanaWalletTransactionUpdateTable>
     columnValues,
-    _i1.Transaction? transaction,
+    _is.Transaction? transaction,
   }) async {
     return session.db.updateById<SolanaWalletTransaction>(
       id,
@@ -872,17 +1139,21 @@ class SolanaWalletTransactionRepository {
 
   /// Updates all [SolanaWalletTransaction]s matching the [where] expression with the specified [columnValues].
   /// Returns the list of updated rows.
+  ///
+  /// If [noReturn] is set to `true`, the updated rows are not read back from
+  /// the database and an empty list is returned. This avoids the overhead of
+  /// transferring and deserializing the rows when the result is not needed.
   Future<List<SolanaWalletTransaction>> updateWhere(
-    _i1.DatabaseSession session, {
-    required _i1.ColumnValueListBuilder<SolanaWalletTransactionUpdateTable>
+    _is.DatabaseSession session, {
+    required _is.ColumnValueListBuilder<SolanaWalletTransactionUpdateTable>
     columnValues,
-    required _i1.WhereExpressionBuilder<SolanaWalletTransactionTable> where,
+    required _is.WhereExpressionBuilder<SolanaWalletTransactionTable> where,
     int? limit,
     int? offset,
-    _i1.OrderByBuilder<SolanaWalletTransactionTable>? orderBy,
-    _i1.OrderByListBuilder<SolanaWalletTransactionTable>? orderByList,
-    bool orderDescending = false,
-    _i1.Transaction? transaction,
+    _is.OrderByBuilder<SolanaWalletTransactionTable>? orderBy,
+    _is.OrderByListBuilder<SolanaWalletTransactionTable>? orderByList,
+    _is.Transaction? transaction,
+    bool noReturn = false,
   }) async {
     return session.db.updateWhere<SolanaWalletTransaction>(
       columnValues: columnValues(SolanaWalletTransaction.t.updateTable),
@@ -891,30 +1162,44 @@ class SolanaWalletTransactionRepository {
       offset: offset,
       orderBy: orderBy?.call(SolanaWalletTransaction.t),
       orderByList: orderByList?.call(SolanaWalletTransaction.t),
-      orderDescending: orderDescending,
       transaction: transaction,
+      noReturn: noReturn,
     );
   }
 
   /// Deletes all [SolanaWalletTransaction]s in the list and returns the deleted rows.
+  ///
+  /// To specify the order of the returned rows use [orderBy] or [orderByList]
+  /// when sorting by multiple columns.
+  ///
   /// This is an atomic operation, meaning that if one of the rows fail to
   /// be deleted, none of the rows will be deleted.
+  ///
+  /// If [noReturn] is set to `true`, the deleted rows are not read back from
+  /// the database and an empty list is returned. This avoids the overhead of
+  /// transferring and deserializing the rows when the result is not needed.
   Future<List<SolanaWalletTransaction>> delete(
-    _i1.DatabaseSession session,
+    _is.DatabaseSession session,
     List<SolanaWalletTransaction> rows, {
-    _i1.Transaction? transaction,
+    _is.OrderByBuilder<SolanaWalletTransactionTable>? orderBy,
+    _is.OrderByListBuilder<SolanaWalletTransactionTable>? orderByList,
+    _is.Transaction? transaction,
+    bool noReturn = false,
   }) async {
     return session.db.delete<SolanaWalletTransaction>(
       rows,
+      orderBy: orderBy?.call(SolanaWalletTransaction.t),
+      orderByList: orderByList?.call(SolanaWalletTransaction.t),
       transaction: transaction,
+      noReturn: noReturn,
     );
   }
 
   /// Deletes a single [SolanaWalletTransaction].
   Future<SolanaWalletTransaction> deleteRow(
-    _i1.DatabaseSession session,
+    _is.DatabaseSession session,
     SolanaWalletTransaction row, {
-    _i1.Transaction? transaction,
+    _is.Transaction? transaction,
   }) async {
     return session.db.deleteRow<SolanaWalletTransaction>(
       row,
@@ -923,24 +1208,37 @@ class SolanaWalletTransactionRepository {
   }
 
   /// Deletes all rows matching the [where] expression.
+  ///
+  /// To specify the order of the returned rows use [orderBy] or [orderByList]
+  /// when sorting by multiple columns.
+  ///
+  /// If [noReturn] is set to `true`, the deleted rows are not read back from
+  /// the database and an empty list is returned. This avoids the overhead of
+  /// transferring and deserializing the rows when the result is not needed.
   Future<List<SolanaWalletTransaction>> deleteWhere(
-    _i1.DatabaseSession session, {
-    required _i1.WhereExpressionBuilder<SolanaWalletTransactionTable> where,
-    _i1.Transaction? transaction,
+    _is.DatabaseSession session, {
+    required _is.WhereExpressionBuilder<SolanaWalletTransactionTable> where,
+    _is.OrderByBuilder<SolanaWalletTransactionTable>? orderBy,
+    _is.OrderByListBuilder<SolanaWalletTransactionTable>? orderByList,
+    _is.Transaction? transaction,
+    bool noReturn = false,
   }) async {
     return session.db.deleteWhere<SolanaWalletTransaction>(
       where: where(SolanaWalletTransaction.t),
+      orderBy: orderBy?.call(SolanaWalletTransaction.t),
+      orderByList: orderByList?.call(SolanaWalletTransaction.t),
       transaction: transaction,
+      noReturn: noReturn,
     );
   }
 
   /// Counts the number of rows matching the [where] expression. If omitted,
   /// will return the count of all rows in the table.
   Future<int> count(
-    _i1.DatabaseSession session, {
-    _i1.WhereExpressionBuilder<SolanaWalletTransactionTable>? where,
+    _is.DatabaseSession session, {
+    _is.WhereExpressionBuilder<SolanaWalletTransactionTable>? where,
     int? limit,
-    _i1.Transaction? transaction,
+    _is.Transaction? transaction,
   }) async {
     return session.db.count<SolanaWalletTransaction>(
       where: where?.call(SolanaWalletTransaction.t),
@@ -951,11 +1249,11 @@ class SolanaWalletTransactionRepository {
 
   /// Acquires row-level locks on [SolanaWalletTransaction] rows matching the [where] expression.
   Future<void> lockRows(
-    _i1.DatabaseSession session, {
-    required _i1.WhereExpressionBuilder<SolanaWalletTransactionTable> where,
-    required _i1.LockMode lockMode,
-    required _i1.Transaction transaction,
-    _i1.LockBehavior lockBehavior = _i1.LockBehavior.wait,
+    _is.DatabaseSession session, {
+    required _is.WhereExpressionBuilder<SolanaWalletTransactionTable> where,
+    required _is.LockMode lockMode,
+    required _is.Transaction transaction,
+    _is.LockBehavior lockBehavior = _is.LockBehavior.wait,
   }) async {
     return session.db.lockRows<SolanaWalletTransaction>(
       where: where(SolanaWalletTransaction.t),

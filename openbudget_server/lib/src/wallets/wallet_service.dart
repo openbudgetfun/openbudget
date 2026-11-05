@@ -253,8 +253,7 @@ class WalletService {
     final last = await Account.db.findFirstRow(
       session,
       where: (t) => t.budgetId.equals(budgetId),
-      orderBy: (t) => t.sortOrder,
-      orderDescending: true,
+      orderBy: (t) => t.sortOrder.desc(),
     );
     final sortOrder = (last?.sortOrder ?? -1) + 1;
 

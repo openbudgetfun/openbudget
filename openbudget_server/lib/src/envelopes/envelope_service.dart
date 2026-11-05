@@ -153,8 +153,7 @@ class EnvelopeService {
     final existing = await Envelope.db.find(
       session,
       where: (t) => t.categoryId.equals(categoryId),
-      orderBy: (t) => t.sortOrder,
-      orderDescending: true,
+      orderBy: (t) => t.sortOrder.desc(),
       limit: 1,
     );
     return existing.isEmpty ? 0 : existing.first.sortOrder + 1;

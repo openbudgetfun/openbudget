@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
@@ -32,14 +34,16 @@ class RecentMovesScreen extends HookConsumerWidget {
     useEffect(() {
       if (introSeen || allEvents.isEmpty) return null;
 
-      Future.microtask(() async {
-        if (!context.mounted) return;
-        ref.read(recentMovesIntroSeenSetProvider.notifier).markSeen(budgetId);
-        await showDialog<void>(
-          context: context,
-          builder: (_) => const _RecentMovesIntroDialog(),
-        );
-      });
+      unawaited(
+        Future.microtask(() async {
+          if (!context.mounted) return;
+          ref.read(recentMovesIntroSeenSetProvider.notifier).markSeen(budgetId);
+          await showDialog<void>(
+            context: context,
+            builder: (_) => const _RecentMovesIntroDialog(),
+          );
+        }),
+      );
 
       return null;
     }, [introSeen, allEvents.isEmpty]);
@@ -71,7 +75,7 @@ class RecentMovesScreen extends HookConsumerWidget {
       ),
       body: summaryAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, __) => Center(
+        error: (_, _) => Center(
           child: Text(
             l10n.reportsLoadError,
             style: theme.textTheme.bodyLarge?.copyWith(
@@ -282,7 +286,7 @@ class EnvelopeMovesScreen extends HookConsumerWidget {
       ),
       body: summaryAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, __) => Center(
+        error: (_, _) => Center(
           child: Text(
             l10n.reportsLoadError,
             style: theme.textTheme.bodyLarge?.copyWith(

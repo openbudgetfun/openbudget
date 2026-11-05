@@ -10,10 +10,11 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:serverpod_client/serverpod_client.dart' as _i1;
+import 'package:serverpod_client/serverpod_client.dart' as _isc;
 
 /// Native-asset holding for a wallet connection.
-abstract class WalletHolding implements _i1.SerializableModel {
+abstract class WalletHolding
+    implements _isc.SerializableModel, _isc.ProtocolSerialization {
   WalletHolding._({
     this.id,
     required this.walletConnectionId,
@@ -29,8 +30,8 @@ abstract class WalletHolding implements _i1.SerializableModel {
   }) : lastSyncedAt = lastSyncedAt ?? DateTime.now();
 
   factory WalletHolding({
-    _i1.UuidValue? id,
-    required _i1.UuidValue walletConnectionId,
+    _isc.UuidValue? id,
+    required _isc.UuidValue walletConnectionId,
     required String chain,
     required String assetId,
     required String symbol,
@@ -46,8 +47,8 @@ abstract class WalletHolding implements _i1.SerializableModel {
     return WalletHolding(
       id: jsonSerialization['id'] == null
           ? null
-          : _i1.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
-      walletConnectionId: _i1.UuidValueJsonExtension.fromJson(
+          : _isc.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
+      walletConnectionId: _isc.UuidValueJsonExtension.fromJson(
         jsonSerialization['walletConnectionId'],
       ),
       chain: jsonSerialization['chain'] as String,
@@ -60,7 +61,7 @@ abstract class WalletHolding implements _i1.SerializableModel {
       usdValue: (jsonSerialization['usdValue'] as num?)?.toDouble(),
       lastSyncedAt: jsonSerialization['lastSyncedAt'] == null
           ? null
-          : _i1.DateTimeJsonExtension.fromJson(
+          : _isc.DateTimeJsonExtension.fromJson(
               jsonSerialization['lastSyncedAt'],
             ),
     );
@@ -69,9 +70,9 @@ abstract class WalletHolding implements _i1.SerializableModel {
   /// The database id, set if the object has been inserted into the
   /// database or if it has been fetched from the database. Otherwise,
   /// the id will be null.
-  _i1.UuidValue? id;
+  _isc.UuidValue? id;
 
-  _i1.UuidValue walletConnectionId;
+  _isc.UuidValue walletConnectionId;
 
   String chain;
 
@@ -93,10 +94,10 @@ abstract class WalletHolding implements _i1.SerializableModel {
 
   /// Returns a shallow copy of this [WalletHolding]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_isc.useResult
   WalletHolding copyWith({
-    _i1.UuidValue? id,
-    _i1.UuidValue? walletConnectionId,
+    _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
+    _isc.UuidValue? walletConnectionId,
     String? chain,
     String? assetId,
     String? symbol,
@@ -126,8 +127,26 @@ abstract class WalletHolding implements _i1.SerializableModel {
   }
 
   @override
+  Map<String, dynamic> toJsonForProtocol() {
+    return {
+      '__className__': 'WalletHolding',
+      if (id != null) 'id': id?.toJson(),
+      'walletConnectionId': walletConnectionId.toJson(),
+      'chain': chain,
+      'assetId': assetId,
+      'symbol': symbol,
+      'decimals': decimals,
+      'quantityBaseUnits': quantityBaseUnits,
+      'quantityDisplay': quantityDisplay,
+      if (usdPrice != null) 'usdPrice': usdPrice,
+      if (usdValue != null) 'usdValue': usdValue,
+      'lastSyncedAt': lastSyncedAt.toJson(),
+    };
+  }
+
+  @override
   String toString() {
-    return _i1.SerializationManager.encode(this);
+    return _isc.SerializationManager.encode(this);
   }
 }
 
@@ -135,8 +154,8 @@ class _Undefined {}
 
 class _WalletHoldingImpl extends WalletHolding {
   _WalletHoldingImpl({
-    _i1.UuidValue? id,
-    required _i1.UuidValue walletConnectionId,
+    _isc.UuidValue? id,
+    required _isc.UuidValue walletConnectionId,
     required String chain,
     required String assetId,
     required String symbol,
@@ -162,11 +181,11 @@ class _WalletHoldingImpl extends WalletHolding {
 
   /// Returns a shallow copy of this [WalletHolding]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_isc.useResult
   @override
   WalletHolding copyWith({
-    Object? id = _Undefined,
-    _i1.UuidValue? walletConnectionId,
+    _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
+    _isc.UuidValue? walletConnectionId,
     String? chain,
     String? assetId,
     String? symbol,
@@ -178,7 +197,7 @@ class _WalletHoldingImpl extends WalletHolding {
     DateTime? lastSyncedAt,
   }) {
     return WalletHolding(
-      id: id is _i1.UuidValue? ? id : this.id,
+      id: id is _isc.UndefinedSentinel ? this.id : id,
       walletConnectionId: walletConnectionId ?? this.walletConnectionId,
       chain: chain ?? this.chain,
       assetId: assetId ?? this.assetId,

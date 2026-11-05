@@ -10,11 +10,13 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:serverpod/serverpod.dart' as _i1;
+import 'dart:async' as _ida;
+
+import 'package:serverpod/serverpod.dart' as _is;
 
 /// Current holding state for an asset in a Solana wallet.
 abstract class SolanaWalletHolding
-    implements _i1.TableRow<_i1.UuidValue?>, _i1.ProtocolSerialization {
+    implements _is.TableRow<_is.UuidValue?>, _is.ProtocolSerialization {
   SolanaWalletHolding._({
     this.id,
     required this.walletId,
@@ -46,9 +48,9 @@ abstract class SolanaWalletHolding
   }) : updatedAt = updatedAt ?? DateTime.now();
 
   factory SolanaWalletHolding({
-    _i1.UuidValue? id,
-    required _i1.UuidValue walletId,
-    required _i1.UuidValue budgetId,
+    _is.UuidValue? id,
+    required _is.UuidValue walletId,
+    required _is.UuidValue budgetId,
     required String assetId,
     String? symbol,
     String? name,
@@ -79,11 +81,11 @@ abstract class SolanaWalletHolding
     return SolanaWalletHolding(
       id: jsonSerialization['id'] == null
           ? null
-          : _i1.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
-      walletId: _i1.UuidValueJsonExtension.fromJson(
+          : _is.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
+      walletId: _is.UuidValueJsonExtension.fromJson(
         jsonSerialization['walletId'],
       ),
-      budgetId: _i1.UuidValueJsonExtension.fromJson(
+      budgetId: _is.UuidValueJsonExtension.fromJson(
         jsonSerialization['budgetId'],
       ),
       assetId: jsonSerialization['assetId'] as String,
@@ -93,7 +95,7 @@ abstract class SolanaWalletHolding
       decimals: jsonSerialization['decimals'] as int,
       balanceRaw: jsonSerialization['balanceRaw'] as String,
       balanceUi: jsonSerialization['balanceUi'] as String,
-      isNft: _i1.BoolJsonExtension.fromJson(jsonSerialization['isNft']),
+      isNft: _is.BoolJsonExtension.fromJson(jsonSerialization['isNft']),
       priceCurrency: jsonSerialization['priceCurrency'] as String?,
       pricePerToken: (jsonSerialization['pricePerToken'] as num?)?.toDouble(),
       totalValue: (jsonSerialization['totalValue'] as num?)?.toDouble(),
@@ -109,20 +111,20 @@ abstract class SolanaWalletHolding
       pnlCurrency: jsonSerialization['pnlCurrency'] as String?,
       pnlAsOf: jsonSerialization['pnlAsOf'] == null
           ? null
-          : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['pnlAsOf']),
+          : _is.DateTimeJsonExtension.fromJson(jsonSerialization['pnlAsOf']),
       priceSource: jsonSerialization['priceSource'] as String?,
       priceQuality: jsonSerialization['priceQuality'] as String?,
       priceConfidence: jsonSerialization['priceConfidence'] as String?,
       isPriceStale: jsonSerialization['isPriceStale'] == null
           ? null
-          : _i1.BoolJsonExtension.fromJson(jsonSerialization['isPriceStale']),
+          : _is.BoolJsonExtension.fromJson(jsonSerialization['isPriceStale']),
       priceAsOf: jsonSerialization['priceAsOf'] == null
           ? null
-          : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['priceAsOf']),
+          : _is.DateTimeJsonExtension.fromJson(jsonSerialization['priceAsOf']),
       metadataJson: jsonSerialization['metadataJson'] as String?,
       updatedAt: jsonSerialization['updatedAt'] == null
           ? null
-          : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['updatedAt']),
+          : _is.DateTimeJsonExtension.fromJson(jsonSerialization['updatedAt']),
     );
   }
 
@@ -131,11 +133,11 @@ abstract class SolanaWalletHolding
   static const db = SolanaWalletHoldingRepository._();
 
   @override
-  _i1.UuidValue? id;
+  _is.UuidValue? id;
 
-  _i1.UuidValue walletId;
+  _is.UuidValue walletId;
 
-  _i1.UuidValue budgetId;
+  _is.UuidValue budgetId;
 
   /// Asset identifier (mint address for fungible tokens / NFT ID).
   String assetId;
@@ -201,15 +203,15 @@ abstract class SolanaWalletHolding
   DateTime updatedAt;
 
   @override
-  _i1.Table<_i1.UuidValue?> get table => t;
+  _is.Table<_is.UuidValue?> get table => t;
 
   /// Returns a shallow copy of this [SolanaWalletHolding]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_is.useResult
   SolanaWalletHolding copyWith({
-    _i1.UuidValue? id,
-    _i1.UuidValue? walletId,
-    _i1.UuidValue? budgetId,
+    _is.UuidValue? id = const _is.$UndefinedUuidValue(),
+    _is.UuidValue? walletId,
+    _is.UuidValue? budgetId,
     String? assetId,
     String? symbol,
     String? name,
@@ -226,12 +228,12 @@ abstract class SolanaWalletHolding
     double? estimatedUnrealizedPnlPercent,
     double? estimatedRealizedPnl,
     String? pnlCurrency,
-    DateTime? pnlAsOf,
+    DateTime? pnlAsOf = const _is.$UndefinedDateTime(),
     String? priceSource,
     String? priceQuality,
     String? priceConfidence,
     bool? isPriceStale,
-    DateTime? priceAsOf,
+    DateTime? priceAsOf = const _is.$UndefinedDateTime(),
     String? metadataJson,
     DateTime? updatedAt,
   });
@@ -314,12 +316,11 @@ abstract class SolanaWalletHolding
   }
 
   static SolanaWalletHoldingIncludeList includeList({
-    _i1.WhereExpressionBuilder<SolanaWalletHoldingTable>? where,
+    _is.WhereExpressionBuilder<SolanaWalletHoldingTable>? where,
     int? limit,
     int? offset,
-    _i1.OrderByBuilder<SolanaWalletHoldingTable>? orderBy,
-    bool orderDescending = false,
-    _i1.OrderByListBuilder<SolanaWalletHoldingTable>? orderByList,
+    _is.OrderByBuilder<SolanaWalletHoldingTable>? orderBy,
+    _is.OrderByListBuilder<SolanaWalletHoldingTable>? orderByList,
     SolanaWalletHoldingInclude? include,
   }) {
     return SolanaWalletHoldingIncludeList._(
@@ -327,7 +328,6 @@ abstract class SolanaWalletHolding
       limit: limit,
       offset: offset,
       orderBy: orderBy?.call(SolanaWalletHolding.t),
-      orderDescending: orderDescending,
       orderByList: orderByList?.call(SolanaWalletHolding.t),
       include: include,
     );
@@ -335,7 +335,7 @@ abstract class SolanaWalletHolding
 
   @override
   String toString() {
-    return _i1.SerializationManager.encode(this);
+    return _is.SerializationManager.encode(this);
   }
 }
 
@@ -343,9 +343,9 @@ class _Undefined {}
 
 class _SolanaWalletHoldingImpl extends SolanaWalletHolding {
   _SolanaWalletHoldingImpl({
-    _i1.UuidValue? id,
-    required _i1.UuidValue walletId,
-    required _i1.UuidValue budgetId,
+    _is.UuidValue? id,
+    required _is.UuidValue walletId,
+    required _is.UuidValue budgetId,
     required String assetId,
     String? symbol,
     String? name,
@@ -402,12 +402,12 @@ class _SolanaWalletHoldingImpl extends SolanaWalletHolding {
 
   /// Returns a shallow copy of this [SolanaWalletHolding]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_is.useResult
   @override
   SolanaWalletHolding copyWith({
-    Object? id = _Undefined,
-    _i1.UuidValue? walletId,
-    _i1.UuidValue? budgetId,
+    _is.UuidValue? id = const _is.$UndefinedUuidValue(),
+    _is.UuidValue? walletId,
+    _is.UuidValue? budgetId,
     String? assetId,
     Object? symbol = _Undefined,
     Object? name = _Undefined,
@@ -424,17 +424,17 @@ class _SolanaWalletHoldingImpl extends SolanaWalletHolding {
     Object? estimatedUnrealizedPnlPercent = _Undefined,
     Object? estimatedRealizedPnl = _Undefined,
     Object? pnlCurrency = _Undefined,
-    Object? pnlAsOf = _Undefined,
+    DateTime? pnlAsOf = const _is.$UndefinedDateTime(),
     Object? priceSource = _Undefined,
     Object? priceQuality = _Undefined,
     Object? priceConfidence = _Undefined,
     Object? isPriceStale = _Undefined,
-    Object? priceAsOf = _Undefined,
+    DateTime? priceAsOf = const _is.$UndefinedDateTime(),
     Object? metadataJson = _Undefined,
     DateTime? updatedAt,
   }) {
     return SolanaWalletHolding(
-      id: id is _i1.UuidValue? ? id : this.id,
+      id: id is _is.UndefinedSentinel ? this.id : id,
       walletId: walletId ?? this.walletId,
       budgetId: budgetId ?? this.budgetId,
       assetId: assetId ?? this.assetId,
@@ -465,14 +465,16 @@ class _SolanaWalletHoldingImpl extends SolanaWalletHolding {
           ? estimatedRealizedPnl
           : this.estimatedRealizedPnl,
       pnlCurrency: pnlCurrency is String? ? pnlCurrency : this.pnlCurrency,
-      pnlAsOf: pnlAsOf is DateTime? ? pnlAsOf : this.pnlAsOf,
+      pnlAsOf: pnlAsOf is _is.UndefinedSentinel ? this.pnlAsOf : pnlAsOf,
       priceSource: priceSource is String? ? priceSource : this.priceSource,
       priceQuality: priceQuality is String? ? priceQuality : this.priceQuality,
       priceConfidence: priceConfidence is String?
           ? priceConfidence
           : this.priceConfidence,
       isPriceStale: isPriceStale is bool? ? isPriceStale : this.isPriceStale,
-      priceAsOf: priceAsOf is DateTime? ? priceAsOf : this.priceAsOf,
+      priceAsOf: priceAsOf is _is.UndefinedSentinel
+          ? this.priceAsOf
+          : priceAsOf,
       metadataJson: metadataJson is String? ? metadataJson : this.metadataJson,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -480,195 +482,338 @@ class _SolanaWalletHoldingImpl extends SolanaWalletHolding {
 }
 
 class SolanaWalletHoldingUpdateTable
-    extends _i1.UpdateTable<SolanaWalletHoldingTable> {
+    extends _is.UpdateTable<SolanaWalletHoldingTable> {
   SolanaWalletHoldingUpdateTable(super.table);
 
-  _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> walletId(_i1.UuidValue value) =>
-      _i1.ColumnValue(table.walletId, value);
+  _is.ColumnValue<_is.UuidValue, _is.UuidValue> walletId(_is.UuidValue value) =>
+      _is.ColumnValue(
+        table.walletId,
+        value,
+      );
 
-  _i1.ColumnValue<_i1.UuidValue, _i1.UuidValue> budgetId(_i1.UuidValue value) =>
-      _i1.ColumnValue(table.budgetId, value);
+  _is.ColumnValue<_is.UuidValue, _is.UuidValue> budgetId(_is.UuidValue value) =>
+      _is.ColumnValue(
+        table.budgetId,
+        value,
+      );
 
-  _i1.ColumnValue<String, String> assetId(String value) =>
-      _i1.ColumnValue(table.assetId, value);
+  _is.ColumnValue<String, String> assetId(String value) => _is.ColumnValue(
+    table.assetId,
+    value,
+  );
 
-  _i1.ColumnValue<String, String> symbol(String? value) =>
-      _i1.ColumnValue(table.symbol, value);
+  _is.ColumnValue<String, String> symbol(String? value) => _is.ColumnValue(
+    table.symbol,
+    value,
+  );
 
-  _i1.ColumnValue<String, String> name(String? value) =>
-      _i1.ColumnValue(table.name, value);
+  _is.ColumnValue<String, String> name(String? value) => _is.ColumnValue(
+    table.name,
+    value,
+  );
 
-  _i1.ColumnValue<String, String> tokenProgram(String? value) =>
-      _i1.ColumnValue(table.tokenProgram, value);
+  _is.ColumnValue<String, String> tokenProgram(String? value) =>
+      _is.ColumnValue(
+        table.tokenProgram,
+        value,
+      );
 
-  _i1.ColumnValue<int, int> decimals(int value) =>
-      _i1.ColumnValue(table.decimals, value);
+  _is.ColumnValue<int, int> decimals(int value) => _is.ColumnValue(
+    table.decimals,
+    value,
+  );
 
-  _i1.ColumnValue<String, String> balanceRaw(String value) =>
-      _i1.ColumnValue(table.balanceRaw, value);
+  _is.ColumnValue<String, String> balanceRaw(String value) => _is.ColumnValue(
+    table.balanceRaw,
+    value,
+  );
 
-  _i1.ColumnValue<String, String> balanceUi(String value) =>
-      _i1.ColumnValue(table.balanceUi, value);
+  _is.ColumnValue<String, String> balanceUi(String value) => _is.ColumnValue(
+    table.balanceUi,
+    value,
+  );
 
-  _i1.ColumnValue<bool, bool> isNft(bool value) =>
-      _i1.ColumnValue(table.isNft, value);
+  _is.ColumnValue<bool, bool> isNft(bool value) => _is.ColumnValue(
+    table.isNft,
+    value,
+  );
 
-  _i1.ColumnValue<String, String> priceCurrency(String? value) =>
-      _i1.ColumnValue(table.priceCurrency, value);
+  _is.ColumnValue<String, String> priceCurrency(String? value) =>
+      _is.ColumnValue(
+        table.priceCurrency,
+        value,
+      );
 
-  _i1.ColumnValue<double, double> pricePerToken(double? value) =>
-      _i1.ColumnValue(table.pricePerToken, value);
+  _is.ColumnValue<double, double> pricePerToken(double? value) =>
+      _is.ColumnValue(
+        table.pricePerToken,
+        value,
+      );
 
-  _i1.ColumnValue<double, double> totalValue(double? value) =>
-      _i1.ColumnValue(table.totalValue, value);
+  _is.ColumnValue<double, double> totalValue(double? value) => _is.ColumnValue(
+    table.totalValue,
+    value,
+  );
 
-  _i1.ColumnValue<double, double> estimatedCostBasis(double? value) =>
-      _i1.ColumnValue(table.estimatedCostBasis, value);
+  _is.ColumnValue<double, double> estimatedCostBasis(double? value) =>
+      _is.ColumnValue(
+        table.estimatedCostBasis,
+        value,
+      );
 
-  _i1.ColumnValue<double, double> estimatedUnrealizedPnl(double? value) =>
-      _i1.ColumnValue(table.estimatedUnrealizedPnl, value);
+  _is.ColumnValue<double, double> estimatedUnrealizedPnl(double? value) =>
+      _is.ColumnValue(
+        table.estimatedUnrealizedPnl,
+        value,
+      );
 
-  _i1.ColumnValue<double, double> estimatedUnrealizedPnlPercent(
+  _is.ColumnValue<double, double> estimatedUnrealizedPnlPercent(
     double? value,
-  ) => _i1.ColumnValue(table.estimatedUnrealizedPnlPercent, value);
+  ) => _is.ColumnValue(
+    table.estimatedUnrealizedPnlPercent,
+    value,
+  );
 
-  _i1.ColumnValue<double, double> estimatedRealizedPnl(double? value) =>
-      _i1.ColumnValue(table.estimatedRealizedPnl, value);
+  _is.ColumnValue<double, double> estimatedRealizedPnl(double? value) =>
+      _is.ColumnValue(
+        table.estimatedRealizedPnl,
+        value,
+      );
 
-  _i1.ColumnValue<String, String> pnlCurrency(String? value) =>
-      _i1.ColumnValue(table.pnlCurrency, value);
+  _is.ColumnValue<String, String> pnlCurrency(String? value) => _is.ColumnValue(
+    table.pnlCurrency,
+    value,
+  );
 
-  _i1.ColumnValue<DateTime, DateTime> pnlAsOf(DateTime? value) =>
-      _i1.ColumnValue(table.pnlAsOf, value);
+  _is.ColumnValue<DateTime, DateTime> pnlAsOf(DateTime? value) =>
+      _is.ColumnValue(
+        table.pnlAsOf,
+        value,
+      );
 
-  _i1.ColumnValue<String, String> priceSource(String? value) =>
-      _i1.ColumnValue(table.priceSource, value);
+  _is.ColumnValue<String, String> priceSource(String? value) => _is.ColumnValue(
+    table.priceSource,
+    value,
+  );
 
-  _i1.ColumnValue<String, String> priceQuality(String? value) =>
-      _i1.ColumnValue(table.priceQuality, value);
+  _is.ColumnValue<String, String> priceQuality(String? value) =>
+      _is.ColumnValue(
+        table.priceQuality,
+        value,
+      );
 
-  _i1.ColumnValue<String, String> priceConfidence(String? value) =>
-      _i1.ColumnValue(table.priceConfidence, value);
+  _is.ColumnValue<String, String> priceConfidence(String? value) =>
+      _is.ColumnValue(
+        table.priceConfidence,
+        value,
+      );
 
-  _i1.ColumnValue<bool, bool> isPriceStale(bool? value) =>
-      _i1.ColumnValue(table.isPriceStale, value);
+  _is.ColumnValue<bool, bool> isPriceStale(bool? value) => _is.ColumnValue(
+    table.isPriceStale,
+    value,
+  );
 
-  _i1.ColumnValue<DateTime, DateTime> priceAsOf(DateTime? value) =>
-      _i1.ColumnValue(table.priceAsOf, value);
+  _is.ColumnValue<DateTime, DateTime> priceAsOf(DateTime? value) =>
+      _is.ColumnValue(
+        table.priceAsOf,
+        value,
+      );
 
-  _i1.ColumnValue<String, String> metadataJson(String? value) =>
-      _i1.ColumnValue(table.metadataJson, value);
+  _is.ColumnValue<String, String> metadataJson(String? value) =>
+      _is.ColumnValue(
+        table.metadataJson,
+        value,
+      );
 
-  _i1.ColumnValue<DateTime, DateTime> updatedAt(DateTime value) =>
-      _i1.ColumnValue(table.updatedAt, value);
+  _is.ColumnValue<DateTime, DateTime> updatedAt(DateTime value) =>
+      _is.ColumnValue(
+        table.updatedAt,
+        value,
+      );
 }
 
-class SolanaWalletHoldingTable extends _i1.Table<_i1.UuidValue?> {
+class SolanaWalletHoldingTable extends _is.Table<_is.UuidValue?> {
   SolanaWalletHoldingTable({super.tableRelation})
     : super(tableName: 'solana_wallet_holding') {
     updateTable = SolanaWalletHoldingUpdateTable(this);
-    walletId = _i1.ColumnUuid('walletId', this);
-    budgetId = _i1.ColumnUuid('budgetId', this);
-    assetId = _i1.ColumnString('assetId', this);
-    symbol = _i1.ColumnString('symbol', this);
-    name = _i1.ColumnString('name', this);
-    tokenProgram = _i1.ColumnString('tokenProgram', this);
-    decimals = _i1.ColumnInt('decimals', this);
-    balanceRaw = _i1.ColumnString('balanceRaw', this);
-    balanceUi = _i1.ColumnString('balanceUi', this);
-    isNft = _i1.ColumnBool('isNft', this);
-    priceCurrency = _i1.ColumnString('priceCurrency', this);
-    pricePerToken = _i1.ColumnDouble('pricePerToken', this);
-    totalValue = _i1.ColumnDouble('totalValue', this);
-    estimatedCostBasis = _i1.ColumnDouble('estimatedCostBasis', this);
-    estimatedUnrealizedPnl = _i1.ColumnDouble('estimatedUnrealizedPnl', this);
-    estimatedUnrealizedPnlPercent = _i1.ColumnDouble(
+    walletId = _is.ColumnUuid(
+      'walletId',
+      this,
+    );
+    budgetId = _is.ColumnUuid(
+      'budgetId',
+      this,
+    );
+    assetId = _is.ColumnString(
+      'assetId',
+      this,
+    );
+    symbol = _is.ColumnString(
+      'symbol',
+      this,
+    );
+    name = _is.ColumnString(
+      'name',
+      this,
+    );
+    tokenProgram = _is.ColumnString(
+      'tokenProgram',
+      this,
+    );
+    decimals = _is.ColumnInt(
+      'decimals',
+      this,
+    );
+    balanceRaw = _is.ColumnString(
+      'balanceRaw',
+      this,
+    );
+    balanceUi = _is.ColumnString(
+      'balanceUi',
+      this,
+    );
+    isNft = _is.ColumnBool(
+      'isNft',
+      this,
+    );
+    priceCurrency = _is.ColumnString(
+      'priceCurrency',
+      this,
+    );
+    pricePerToken = _is.ColumnDouble(
+      'pricePerToken',
+      this,
+    );
+    totalValue = _is.ColumnDouble(
+      'totalValue',
+      this,
+    );
+    estimatedCostBasis = _is.ColumnDouble(
+      'estimatedCostBasis',
+      this,
+    );
+    estimatedUnrealizedPnl = _is.ColumnDouble(
+      'estimatedUnrealizedPnl',
+      this,
+    );
+    estimatedUnrealizedPnlPercent = _is.ColumnDouble(
       'estimatedUnrealizedPnlPercent',
       this,
     );
-    estimatedRealizedPnl = _i1.ColumnDouble('estimatedRealizedPnl', this);
-    pnlCurrency = _i1.ColumnString('pnlCurrency', this);
-    pnlAsOf = _i1.ColumnDateTime('pnlAsOf', this);
-    priceSource = _i1.ColumnString('priceSource', this);
-    priceQuality = _i1.ColumnString('priceQuality', this);
-    priceConfidence = _i1.ColumnString('priceConfidence', this);
-    isPriceStale = _i1.ColumnBool('isPriceStale', this);
-    priceAsOf = _i1.ColumnDateTime('priceAsOf', this);
-    metadataJson = _i1.ColumnString('metadataJson', this);
-    updatedAt = _i1.ColumnDateTime('updatedAt', this, hasDefault: true);
+    estimatedRealizedPnl = _is.ColumnDouble(
+      'estimatedRealizedPnl',
+      this,
+    );
+    pnlCurrency = _is.ColumnString(
+      'pnlCurrency',
+      this,
+    );
+    pnlAsOf = _is.ColumnDateTime(
+      'pnlAsOf',
+      this,
+    );
+    priceSource = _is.ColumnString(
+      'priceSource',
+      this,
+    );
+    priceQuality = _is.ColumnString(
+      'priceQuality',
+      this,
+    );
+    priceConfidence = _is.ColumnString(
+      'priceConfidence',
+      this,
+    );
+    isPriceStale = _is.ColumnBool(
+      'isPriceStale',
+      this,
+    );
+    priceAsOf = _is.ColumnDateTime(
+      'priceAsOf',
+      this,
+    );
+    metadataJson = _is.ColumnString(
+      'metadataJson',
+      this,
+    );
+    updatedAt = _is.ColumnDateTime(
+      'updatedAt',
+      this,
+      hasDefault: true,
+    );
   }
 
   late final SolanaWalletHoldingUpdateTable updateTable;
 
-  late final _i1.ColumnUuid walletId;
+  late final _is.ColumnUuid walletId;
 
-  late final _i1.ColumnUuid budgetId;
+  late final _is.ColumnUuid budgetId;
 
   /// Asset identifier (mint address for fungible tokens / NFT ID).
-  late final _i1.ColumnString assetId;
+  late final _is.ColumnString assetId;
 
-  late final _i1.ColumnString symbol;
+  late final _is.ColumnString symbol;
 
-  late final _i1.ColumnString name;
+  late final _is.ColumnString name;
 
   /// Token program identifier (e.g. Tokenkeg..., TokenzQd...).
-  late final _i1.ColumnString tokenProgram;
+  late final _is.ColumnString tokenProgram;
 
-  late final _i1.ColumnInt decimals;
+  late final _is.ColumnInt decimals;
 
   /// Raw integer amount in base units.
-  late final _i1.ColumnString balanceRaw;
+  late final _is.ColumnString balanceRaw;
 
   /// Decimal amount as a string for display.
-  late final _i1.ColumnString balanceUi;
+  late final _is.ColumnString balanceUi;
 
-  late final _i1.ColumnBool isNft;
+  late final _is.ColumnBool isNft;
 
   /// Quote currency for valuation (for now typically USD).
-  late final _i1.ColumnString priceCurrency;
+  late final _is.ColumnString priceCurrency;
 
-  late final _i1.ColumnDouble pricePerToken;
+  late final _is.ColumnDouble pricePerToken;
 
-  late final _i1.ColumnDouble totalValue;
+  late final _is.ColumnDouble totalValue;
 
   /// Estimated aggregate acquisition basis in quote currency.
-  late final _i1.ColumnDouble estimatedCostBasis;
+  late final _is.ColumnDouble estimatedCostBasis;
 
   /// Estimated unrealized gain/loss in quote currency.
-  late final _i1.ColumnDouble estimatedUnrealizedPnl;
+  late final _is.ColumnDouble estimatedUnrealizedPnl;
 
   /// Estimated unrealized gain/loss percentage.
-  late final _i1.ColumnDouble estimatedUnrealizedPnlPercent;
+  late final _is.ColumnDouble estimatedUnrealizedPnlPercent;
 
   /// Estimated realized gain/loss accumulated for this asset.
-  late final _i1.ColumnDouble estimatedRealizedPnl;
+  late final _is.ColumnDouble estimatedRealizedPnl;
 
   /// Quote currency used for estimated P&L values.
-  late final _i1.ColumnString pnlCurrency;
+  late final _is.ColumnString pnlCurrency;
 
   /// Timestamp for the last P&L estimate update.
-  late final _i1.ColumnDateTime pnlAsOf;
+  late final _is.ColumnDateTime pnlAsOf;
 
-  late final _i1.ColumnString priceSource;
+  late final _is.ColumnString priceSource;
 
   /// Qualitative pricing classification: provider, derived, stale_cache, unpriced.
-  late final _i1.ColumnString priceQuality;
+  late final _is.ColumnString priceQuality;
 
   /// Confidence tier for the valuation source: high, medium, low.
-  late final _i1.ColumnString priceConfidence;
+  late final _is.ColumnString priceConfidence;
 
   /// True when valuation is using a cached fallback price.
-  late final _i1.ColumnBool isPriceStale;
+  late final _is.ColumnBool isPriceStale;
 
-  late final _i1.ColumnDateTime priceAsOf;
+  late final _is.ColumnDateTime priceAsOf;
 
   /// JSON-encoded asset metadata subset.
-  late final _i1.ColumnString metadataJson;
+  late final _is.ColumnString metadataJson;
 
-  late final _i1.ColumnDateTime updatedAt;
+  late final _is.ColumnDateTime updatedAt;
 
   @override
-  List<_i1.Column> get columns => [
+  List<_is.Column> get columns => [
     id,
     walletId,
     budgetId,
@@ -699,23 +844,22 @@ class SolanaWalletHoldingTable extends _i1.Table<_i1.UuidValue?> {
   ];
 }
 
-class SolanaWalletHoldingInclude extends _i1.IncludeObject {
+class SolanaWalletHoldingInclude extends _is.IncludeObject {
   SolanaWalletHoldingInclude._();
 
   @override
-  Map<String, _i1.Include?> get includes => {};
+  Map<String, _is.Include?> get includes => {};
 
   @override
-  _i1.Table<_i1.UuidValue?> get table => SolanaWalletHolding.t;
+  _is.Table<_is.UuidValue?> get table => SolanaWalletHolding.t;
 }
 
-class SolanaWalletHoldingIncludeList extends _i1.IncludeList {
+class SolanaWalletHoldingIncludeList extends _is.IncludeList {
   SolanaWalletHoldingIncludeList._({
-    _i1.WhereExpressionBuilder<SolanaWalletHoldingTable>? where,
+    _is.WhereExpressionBuilder<SolanaWalletHoldingTable>? where,
     super.limit,
     super.offset,
     super.orderBy,
-    super.orderDescending,
     super.orderByList,
     super.include,
   }) {
@@ -723,10 +867,10 @@ class SolanaWalletHoldingIncludeList extends _i1.IncludeList {
   }
 
   @override
-  Map<String, _i1.Include?> get includes => include?.includes ?? {};
+  Map<String, _is.Include?> get includes => include?.includes ?? {};
 
   @override
-  _i1.Table<_i1.UuidValue?> get table => SolanaWalletHolding.t;
+  _is.Table<_is.UuidValue?> get table => SolanaWalletHolding.t;
 }
 
 class SolanaWalletHoldingRepository {
@@ -755,27 +899,88 @@ class SolanaWalletHoldingRepository {
   /// );
   /// ```
   Future<List<SolanaWalletHolding>> find(
-    _i1.DatabaseSession session, {
-    _i1.WhereExpressionBuilder<SolanaWalletHoldingTable>? where,
+    _is.DatabaseSession session, {
+    _is.WhereExpressionBuilder<SolanaWalletHoldingTable>? where,
     int? limit,
     int? offset,
-    _i1.OrderByBuilder<SolanaWalletHoldingTable>? orderBy,
-    bool orderDescending = false,
-    _i1.OrderByListBuilder<SolanaWalletHoldingTable>? orderByList,
-    _i1.Transaction? transaction,
-    _i1.LockMode? lockMode,
-    _i1.LockBehavior? lockBehavior,
+    _is.OrderByBuilder<SolanaWalletHoldingTable>? orderBy,
+    _is.OrderByListBuilder<SolanaWalletHoldingTable>? orderByList,
+    _is.Transaction? transaction,
+    _is.LockMode? lockMode,
+    _is.LockBehavior? lockBehavior,
   }) async {
     return session.db.find<SolanaWalletHolding>(
       where: where?.call(SolanaWalletHolding.t),
       orderBy: orderBy?.call(SolanaWalletHolding.t),
       orderByList: orderByList?.call(SolanaWalletHolding.t),
-      orderDescending: orderDescending,
       limit: limit,
       offset: offset,
       transaction: transaction,
       lockMode: lockMode,
       lockBehavior: lockBehavior,
+    );
+  }
+
+  /// Emits [SolanaWalletHolding]s matching the given query parameters every time the
+  /// source tables are modified.
+  ///
+  /// Use [where] to specify which items to include in the return value.
+  /// If none is specified, all items will be returned.
+  ///
+  /// To specify the order of the items use [orderBy] or [orderByList]
+  /// when sorting by multiple columns.
+  ///
+  /// The maximum number of items can be set by [limit]. If no limit is set,
+  /// all items matching the query will be returned.
+  ///
+  /// [offset] defines how many items to skip, after which [limit] (or all)
+  /// items are read from the database.
+  ///
+  /// Use [throttle] to specify the minimum interval between queries. It can
+  /// also be set to `null`, in which case the stream will only be throttled
+  /// when its subscription is paused.
+  ///
+  /// Source tables are collected from the queried table, [where], [orderBy],
+  /// [orderByList], and the [include] graph. [alsoTriggerOnTables] is added
+  /// to that set. Pass [Table] instances such as `SolanaWalletHolding.t`.
+  ///
+  /// Raw [Expression] SQL is not inspected. Tables referenced only in raw
+  /// SQL must be passed via [alsoTriggerOnTables].
+  ///
+  /// The stream always reads committed state and never joins an ambient
+  /// [Transaction]. Emissions for a write fire after that write commits.
+  ///
+  /// Currently only supported on SQLite. Calling this method on PostgreSQL
+  /// throws an [UnsupportedError].
+  ///
+  /// ```dart
+  /// var subscription = Persons.db.watch(
+  ///   session,
+  ///   where: (t) => t.lastName.equals('Jones'),
+  ///   orderBy: (t) => t.firstName,
+  ///   limit: 100,
+  /// ).listen((persons) {
+  ///   // Handle the latest matching rows.
+  /// });
+  /// ```
+  _ida.Stream<List<SolanaWalletHolding>> watch(
+    _is.DatabaseSession session, {
+    _is.WhereExpressionBuilder<SolanaWalletHoldingTable>? where,
+    int? limit,
+    int? offset,
+    _is.OrderByBuilder<SolanaWalletHoldingTable>? orderBy,
+    _is.OrderByListBuilder<SolanaWalletHoldingTable>? orderByList,
+    Duration? throttle = const Duration(milliseconds: 30),
+    Iterable<_is.Table>? alsoTriggerOnTables,
+  }) {
+    return session.db.watch<SolanaWalletHolding>(
+      where: where?.call(SolanaWalletHolding.t),
+      orderBy: orderBy?.call(SolanaWalletHolding.t),
+      orderByList: orderByList?.call(SolanaWalletHolding.t),
+      limit: limit,
+      offset: offset,
+      throttle: throttle,
+      alsoTriggerOnTables: alsoTriggerOnTables,
     );
   }
 
@@ -797,21 +1002,19 @@ class SolanaWalletHoldingRepository {
   /// );
   /// ```
   Future<SolanaWalletHolding?> findFirstRow(
-    _i1.DatabaseSession session, {
-    _i1.WhereExpressionBuilder<SolanaWalletHoldingTable>? where,
+    _is.DatabaseSession session, {
+    _is.WhereExpressionBuilder<SolanaWalletHoldingTable>? where,
     int? offset,
-    _i1.OrderByBuilder<SolanaWalletHoldingTable>? orderBy,
-    bool orderDescending = false,
-    _i1.OrderByListBuilder<SolanaWalletHoldingTable>? orderByList,
-    _i1.Transaction? transaction,
-    _i1.LockMode? lockMode,
-    _i1.LockBehavior? lockBehavior,
+    _is.OrderByBuilder<SolanaWalletHoldingTable>? orderBy,
+    _is.OrderByListBuilder<SolanaWalletHoldingTable>? orderByList,
+    _is.Transaction? transaction,
+    _is.LockMode? lockMode,
+    _is.LockBehavior? lockBehavior,
   }) async {
     return session.db.findFirstRow<SolanaWalletHolding>(
       where: where?.call(SolanaWalletHolding.t),
       orderBy: orderBy?.call(SolanaWalletHolding.t),
       orderByList: orderByList?.call(SolanaWalletHolding.t),
-      orderDescending: orderDescending,
       offset: offset,
       transaction: transaction,
       lockMode: lockMode,
@@ -821,11 +1024,11 @@ class SolanaWalletHoldingRepository {
 
   /// Finds a single [SolanaWalletHolding] by its [id] or null if no such row exists.
   Future<SolanaWalletHolding?> findById(
-    _i1.DatabaseSession session,
-    _i1.UuidValue id, {
-    _i1.Transaction? transaction,
-    _i1.LockMode? lockMode,
-    _i1.LockBehavior? lockBehavior,
+    _is.DatabaseSession session,
+    _is.UuidValue id, {
+    _is.Transaction? transaction,
+    _is.LockMode? lockMode,
+    _is.LockBehavior? lockBehavior,
   }) async {
     return session.db.findById<SolanaWalletHolding>(
       id,
@@ -845,16 +1048,22 @@ class SolanaWalletHoldingRepository {
   /// If [ignoreConflicts] is set to `true`, rows that conflict with existing
   /// rows are silently skipped, and only the successfully inserted rows are
   /// returned.
+  ///
+  /// If [noReturn] is set to `true`, the inserted rows are not read back from
+  /// the database and an empty list is returned. This avoids the overhead of
+  /// transferring and deserializing the rows when the result is not needed.
   Future<List<SolanaWalletHolding>> insert(
-    _i1.DatabaseSession session,
+    _is.DatabaseSession session,
     List<SolanaWalletHolding> rows, {
-    _i1.Transaction? transaction,
+    _is.Transaction? transaction,
     bool ignoreConflicts = false,
+    bool noReturn = false,
   }) async {
     return session.db.insert<SolanaWalletHolding>(
       rows,
       transaction: transaction,
       ignoreConflicts: ignoreConflicts,
+      noReturn: noReturn,
     );
   }
 
@@ -862,12 +1071,81 @@ class SolanaWalletHoldingRepository {
   ///
   /// The returned [SolanaWalletHolding] will have its `id` field set.
   Future<SolanaWalletHolding> insertRow(
-    _i1.DatabaseSession session,
+    _is.DatabaseSession session,
     SolanaWalletHolding row, {
-    _i1.Transaction? transaction,
+    _is.Transaction? transaction,
   }) async {
     return session.db.insertRow<SolanaWalletHolding>(
       row,
+      transaction: transaction,
+    );
+  }
+
+  /// Upserts all [SolanaWalletHolding]s in the list and returns the resulting rows.
+  ///
+  /// If a row conflicts on the given [conflictColumns], the existing row is
+  /// updated with the new values. Otherwise, a new row is inserted.
+  ///
+  /// If [updateColumns] is provided, only those columns will be updated on
+  /// conflict. If null, all non-conflict, non-id columns are updated.
+  ///
+  /// If [updateWhere] is provided, the update only applies to rows matching the
+  /// given expression. Conflicting rows that don't match are skipped and not
+  /// returned, so the resulting list may be shorter than [rows].
+  ///
+  /// The returned [SolanaWalletHolding]s will have their `id` fields set.
+  ///
+  /// This is an atomic operation, meaning that if one of the rows fails,
+  /// none of the rows will be affected.
+  ///
+  /// If [noReturn] is set to `true`, the resulting rows are not read back from
+  /// the database and an empty list is returned. This avoids the overhead of
+  /// transferring and deserializing the rows when the result is not needed.
+  Future<List<SolanaWalletHolding>> upsert(
+    _is.DatabaseSession session,
+    List<SolanaWalletHolding> rows, {
+    required _is.ColumnSelections<SolanaWalletHoldingTable> conflictColumns,
+    _is.ColumnSelections<SolanaWalletHoldingTable>? updateColumns,
+    _is.WhereExpressionBuilder<SolanaWalletHoldingTable>? updateWhere,
+    _is.Transaction? transaction,
+    bool noReturn = false,
+  }) async {
+    return session.db.upsert<SolanaWalletHolding>(
+      rows,
+      conflictColumns: conflictColumns(SolanaWalletHolding.t),
+      updateColumns: updateColumns?.call(SolanaWalletHolding.t),
+      updateWhere: updateWhere?.call(SolanaWalletHolding.t),
+      transaction: transaction,
+      noReturn: noReturn,
+    );
+  }
+
+  /// Upserts a single [SolanaWalletHolding] and returns the resulting row.
+  ///
+  /// If the row conflicts on the given [conflictColumns], the existing row is
+  /// updated. Otherwise, a new row is inserted.
+  ///
+  /// If [updateColumns] is provided, only those columns will be updated on
+  /// conflict. If null, all non-conflict, non-id columns are updated.
+  ///
+  /// If [updateWhere] is provided, the update only applies when the existing
+  /// row matches the expression. Returns `null` if no row was affected — for
+  /// example when [updateWhere] does not match the conflicting row.
+  ///
+  /// The returned [SolanaWalletHolding] will have its `id` field set.
+  Future<SolanaWalletHolding?> upsertRow(
+    _is.DatabaseSession session,
+    SolanaWalletHolding row, {
+    required _is.ColumnSelections<SolanaWalletHoldingTable> conflictColumns,
+    _is.ColumnSelections<SolanaWalletHoldingTable>? updateColumns,
+    _is.WhereExpressionBuilder<SolanaWalletHoldingTable>? updateWhere,
+    _is.Transaction? transaction,
+  }) async {
+    return session.db.upsertRow<SolanaWalletHolding>(
+      row,
+      conflictColumns: conflictColumns(SolanaWalletHolding.t),
+      updateColumns: updateColumns?.call(SolanaWalletHolding.t),
+      updateWhere: updateWhere?.call(SolanaWalletHolding.t),
       transaction: transaction,
     );
   }
@@ -877,16 +1155,22 @@ class SolanaWalletHoldingRepository {
   /// all columns.
   /// This is an atomic operation, meaning that if one of the rows fails to
   /// update, none of the rows will be updated.
+  ///
+  /// If [noReturn] is set to `true`, the updated rows are not read back from
+  /// the database and an empty list is returned. This avoids the overhead of
+  /// transferring and deserializing the rows when the result is not needed.
   Future<List<SolanaWalletHolding>> update(
-    _i1.DatabaseSession session,
+    _is.DatabaseSession session,
     List<SolanaWalletHolding> rows, {
-    _i1.ColumnSelections<SolanaWalletHoldingTable>? columns,
-    _i1.Transaction? transaction,
+    _is.ColumnSelections<SolanaWalletHoldingTable>? columns,
+    _is.Transaction? transaction,
+    bool noReturn = false,
   }) async {
     return session.db.update<SolanaWalletHolding>(
       rows,
       columns: columns?.call(SolanaWalletHolding.t),
       transaction: transaction,
+      noReturn: noReturn,
     );
   }
 
@@ -894,10 +1178,10 @@ class SolanaWalletHoldingRepository {
   /// Optionally, a list of [columns] can be provided to only update those
   /// columns. Defaults to all columns.
   Future<SolanaWalletHolding> updateRow(
-    _i1.DatabaseSession session,
+    _is.DatabaseSession session,
     SolanaWalletHolding row, {
-    _i1.ColumnSelections<SolanaWalletHoldingTable>? columns,
-    _i1.Transaction? transaction,
+    _is.ColumnSelections<SolanaWalletHoldingTable>? columns,
+    _is.Transaction? transaction,
   }) async {
     return session.db.updateRow<SolanaWalletHolding>(
       row,
@@ -909,11 +1193,11 @@ class SolanaWalletHoldingRepository {
   /// Updates a single [SolanaWalletHolding] by its [id] with the specified [columnValues].
   /// Returns the updated row or null if no row with the given id exists.
   Future<SolanaWalletHolding?> updateById(
-    _i1.DatabaseSession session,
-    _i1.UuidValue id, {
-    required _i1.ColumnValueListBuilder<SolanaWalletHoldingUpdateTable>
+    _is.DatabaseSession session,
+    _is.UuidValue id, {
+    required _is.ColumnValueListBuilder<SolanaWalletHoldingUpdateTable>
     columnValues,
-    _i1.Transaction? transaction,
+    _is.Transaction? transaction,
   }) async {
     return session.db.updateById<SolanaWalletHolding>(
       id,
@@ -924,17 +1208,21 @@ class SolanaWalletHoldingRepository {
 
   /// Updates all [SolanaWalletHolding]s matching the [where] expression with the specified [columnValues].
   /// Returns the list of updated rows.
+  ///
+  /// If [noReturn] is set to `true`, the updated rows are not read back from
+  /// the database and an empty list is returned. This avoids the overhead of
+  /// transferring and deserializing the rows when the result is not needed.
   Future<List<SolanaWalletHolding>> updateWhere(
-    _i1.DatabaseSession session, {
-    required _i1.ColumnValueListBuilder<SolanaWalletHoldingUpdateTable>
+    _is.DatabaseSession session, {
+    required _is.ColumnValueListBuilder<SolanaWalletHoldingUpdateTable>
     columnValues,
-    required _i1.WhereExpressionBuilder<SolanaWalletHoldingTable> where,
+    required _is.WhereExpressionBuilder<SolanaWalletHoldingTable> where,
     int? limit,
     int? offset,
-    _i1.OrderByBuilder<SolanaWalletHoldingTable>? orderBy,
-    _i1.OrderByListBuilder<SolanaWalletHoldingTable>? orderByList,
-    bool orderDescending = false,
-    _i1.Transaction? transaction,
+    _is.OrderByBuilder<SolanaWalletHoldingTable>? orderBy,
+    _is.OrderByListBuilder<SolanaWalletHoldingTable>? orderByList,
+    _is.Transaction? transaction,
+    bool noReturn = false,
   }) async {
     return session.db.updateWhere<SolanaWalletHolding>(
       columnValues: columnValues(SolanaWalletHolding.t.updateTable),
@@ -943,30 +1231,44 @@ class SolanaWalletHoldingRepository {
       offset: offset,
       orderBy: orderBy?.call(SolanaWalletHolding.t),
       orderByList: orderByList?.call(SolanaWalletHolding.t),
-      orderDescending: orderDescending,
       transaction: transaction,
+      noReturn: noReturn,
     );
   }
 
   /// Deletes all [SolanaWalletHolding]s in the list and returns the deleted rows.
+  ///
+  /// To specify the order of the returned rows use [orderBy] or [orderByList]
+  /// when sorting by multiple columns.
+  ///
   /// This is an atomic operation, meaning that if one of the rows fail to
   /// be deleted, none of the rows will be deleted.
+  ///
+  /// If [noReturn] is set to `true`, the deleted rows are not read back from
+  /// the database and an empty list is returned. This avoids the overhead of
+  /// transferring and deserializing the rows when the result is not needed.
   Future<List<SolanaWalletHolding>> delete(
-    _i1.DatabaseSession session,
+    _is.DatabaseSession session,
     List<SolanaWalletHolding> rows, {
-    _i1.Transaction? transaction,
+    _is.OrderByBuilder<SolanaWalletHoldingTable>? orderBy,
+    _is.OrderByListBuilder<SolanaWalletHoldingTable>? orderByList,
+    _is.Transaction? transaction,
+    bool noReturn = false,
   }) async {
     return session.db.delete<SolanaWalletHolding>(
       rows,
+      orderBy: orderBy?.call(SolanaWalletHolding.t),
+      orderByList: orderByList?.call(SolanaWalletHolding.t),
       transaction: transaction,
+      noReturn: noReturn,
     );
   }
 
   /// Deletes a single [SolanaWalletHolding].
   Future<SolanaWalletHolding> deleteRow(
-    _i1.DatabaseSession session,
+    _is.DatabaseSession session,
     SolanaWalletHolding row, {
-    _i1.Transaction? transaction,
+    _is.Transaction? transaction,
   }) async {
     return session.db.deleteRow<SolanaWalletHolding>(
       row,
@@ -975,24 +1277,37 @@ class SolanaWalletHoldingRepository {
   }
 
   /// Deletes all rows matching the [where] expression.
+  ///
+  /// To specify the order of the returned rows use [orderBy] or [orderByList]
+  /// when sorting by multiple columns.
+  ///
+  /// If [noReturn] is set to `true`, the deleted rows are not read back from
+  /// the database and an empty list is returned. This avoids the overhead of
+  /// transferring and deserializing the rows when the result is not needed.
   Future<List<SolanaWalletHolding>> deleteWhere(
-    _i1.DatabaseSession session, {
-    required _i1.WhereExpressionBuilder<SolanaWalletHoldingTable> where,
-    _i1.Transaction? transaction,
+    _is.DatabaseSession session, {
+    required _is.WhereExpressionBuilder<SolanaWalletHoldingTable> where,
+    _is.OrderByBuilder<SolanaWalletHoldingTable>? orderBy,
+    _is.OrderByListBuilder<SolanaWalletHoldingTable>? orderByList,
+    _is.Transaction? transaction,
+    bool noReturn = false,
   }) async {
     return session.db.deleteWhere<SolanaWalletHolding>(
       where: where(SolanaWalletHolding.t),
+      orderBy: orderBy?.call(SolanaWalletHolding.t),
+      orderByList: orderByList?.call(SolanaWalletHolding.t),
       transaction: transaction,
+      noReturn: noReturn,
     );
   }
 
   /// Counts the number of rows matching the [where] expression. If omitted,
   /// will return the count of all rows in the table.
   Future<int> count(
-    _i1.DatabaseSession session, {
-    _i1.WhereExpressionBuilder<SolanaWalletHoldingTable>? where,
+    _is.DatabaseSession session, {
+    _is.WhereExpressionBuilder<SolanaWalletHoldingTable>? where,
     int? limit,
-    _i1.Transaction? transaction,
+    _is.Transaction? transaction,
   }) async {
     return session.db.count<SolanaWalletHolding>(
       where: where?.call(SolanaWalletHolding.t),
@@ -1003,11 +1318,11 @@ class SolanaWalletHoldingRepository {
 
   /// Acquires row-level locks on [SolanaWalletHolding] rows matching the [where] expression.
   Future<void> lockRows(
-    _i1.DatabaseSession session, {
-    required _i1.WhereExpressionBuilder<SolanaWalletHoldingTable> where,
-    required _i1.LockMode lockMode,
-    required _i1.Transaction transaction,
-    _i1.LockBehavior lockBehavior = _i1.LockBehavior.wait,
+    _is.DatabaseSession session, {
+    required _is.WhereExpressionBuilder<SolanaWalletHoldingTable> where,
+    required _is.LockMode lockMode,
+    required _is.Transaction transaction,
+    _is.LockBehavior lockBehavior = _is.LockBehavior.wait,
   }) async {
     return session.db.lockRows<SolanaWalletHolding>(
       where: where(SolanaWalletHolding.t),

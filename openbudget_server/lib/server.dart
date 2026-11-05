@@ -3,13 +3,11 @@ import 'dart:io';
 import 'package:openbudget_server/src/auth/apple_oauth_callback_route.dart';
 import 'package:openbudget_server/src/auth/email_sender.dart';
 import 'package:openbudget_server/src/fx_rates/fx_rate_service.dart';
-import 'package:openbudget_server/src/generated/endpoints.dart';
-import 'package:openbudget_server/src/generated/protocol.dart' hide Transaction;
+import 'package:openbudget_server/src/generated/serverpod.dart';
 import 'package:openbudget_server/src/institutions/institution_service.dart';
 import 'package:openbudget_server/src/logging/server_logging.dart';
 import 'package:openbudget_server/src/web/routes/app_config_route.dart';
 import 'package:openbudget_server/src/web/routes/root.dart';
-import 'package:serverpod/serverpod.dart';
 import 'package:serverpod_auth_idp_server/core.dart';
 import 'package:serverpod_auth_idp_server/providers/apple.dart';
 import 'package:serverpod_auth_idp_server/providers/email.dart';
@@ -28,7 +26,7 @@ Future<void> run(List<String> args) async {
   // Initialize logging before anything else.
   initServerLogging();
 
-  final pod = Serverpod(args, Protocol(), Endpoints());
+  final pod = Serverpod(args);
   final emailSender = createEmailSender(
     runMode: pod.runMode,
     smtpHost: _readPassword(pod, 'smtpHost'),

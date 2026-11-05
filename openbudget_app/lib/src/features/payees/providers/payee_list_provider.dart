@@ -7,7 +7,5 @@ part 'payee_list_provider.g.dart';
 @riverpod
 Future<List<Payee>> payeeList(Ref ref, String budgetId) async {
   final client = ref.read(serverpodClientProvider);
-  // Serverpod API requires UuidValue which is experimental in uuid package.
-  // ignore: experimental_member_use
   return client.payee.list(UuidValue.fromString(budgetId));
 }

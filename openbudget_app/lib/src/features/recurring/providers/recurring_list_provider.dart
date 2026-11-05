@@ -10,7 +10,5 @@ Future<List<RecurringTransaction>> recurringList(
   String budgetId,
 ) async {
   final client = ref.read(serverpodClientProvider);
-  // Serverpod API requires UuidValue which is experimental in uuid package.
-  // ignore: experimental_member_use
   return client.recurringTransaction.list(UuidValue.fromString(budgetId));
 }

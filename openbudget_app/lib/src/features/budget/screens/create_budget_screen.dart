@@ -197,7 +197,7 @@ class CreateBudgetScreen extends HookConsumerWidget {
       child: ListView.separated(
         shrinkWrap: true,
         itemCount: CurrencyCode.values.length,
-        separatorBuilder: (_, __) => const Divider(height: 1),
+        separatorBuilder: (_, _) => const Divider(height: 1),
         itemBuilder: (context, index) {
           final currency = CurrencyCode.values[index];
           return ListTile(

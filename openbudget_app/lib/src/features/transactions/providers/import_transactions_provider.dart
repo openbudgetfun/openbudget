@@ -21,16 +21,10 @@ class ImportTransactions extends _$ImportTransactions {
     final client = ref.read(serverpodClientProvider);
     try {
       final count = await client.transaction.bulkImport(
-        // Serverpod API requires UuidValue which is experimental in uuid package.
-        // ignore: experimental_member_use
         UuidValue.fromString(budgetId),
         currencyCode,
         rows,
-        accountId: accountId != null
-            // Serverpod API requires UuidValue which is experimental in uuid package.
-            // ignore: experimental_member_use
-            ? UuidValue.fromString(accountId)
-            : null,
+        accountId: accountId != null ? UuidValue.fromString(accountId) : null,
       );
       if (ref.mounted) {
         ref.invalidate(budgetSummaryProvider(budgetId));

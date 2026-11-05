@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:hooks_riverpod/misc.dart';
 
 enum RecentMoveType { moved, assigned }
 
@@ -99,11 +100,14 @@ final recentMovesProvider =
       RecentMovesNotifier.new,
     );
 
-final recentMovesForBudgetProvider =
-    Provider.family<List<RecentMoveEvent>, String>((ref, budgetId) {
-      final allEvents = ref.watch(recentMovesProvider);
-      return allEvents[budgetId] ?? const <RecentMoveEvent>[];
-    });
+final ProviderFamily<List<RecentMoveEvent>, String>
+recentMovesForBudgetProvider = Provider.family<List<RecentMoveEvent>, String>((
+  ref,
+  budgetId,
+) {
+  final allEvents = ref.watch(recentMovesProvider);
+  return allEvents[budgetId] ?? const <RecentMoveEvent>[];
+});
 
 class RecentMovesIntroNotifier extends Notifier<Set<String>> {
   @override
@@ -119,10 +123,11 @@ final recentMovesIntroSeenSetProvider =
       RecentMovesIntroNotifier.new,
     );
 
-final recentMovesIntroSeenProvider = Provider.family<bool, String>((
-  ref,
-  budgetId,
-) {
-  final seen = ref.watch(recentMovesIntroSeenSetProvider);
-  return seen.contains(budgetId);
-});
+final ProviderFamily<bool, String> recentMovesIntroSeenProvider =
+    Provider.family<bool, String>((
+      ref,
+      budgetId,
+    ) {
+      final seen = ref.watch(recentMovesIntroSeenSetProvider);
+      return seen.contains(budgetId);
+    });

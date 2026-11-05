@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -189,7 +191,7 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
           Expanded(
             child: transactionsAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (_, __) => Center(child: Text(l10n.transactionLoadError)),
+              error: (_, _) => Center(child: Text(l10n.transactionLoadError)),
               data: (allTransactions) {
                 final envelopeId = envelope.id?.toString();
                 final transactions =
@@ -298,40 +300,46 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
   }
 
   void _showMoveMoney(BuildContext context) {
-    showDialog<void>(
-      context: context,
-      builder: (_) => MoveMoneyDialog(
-        budgetId: budgetId,
-        year: year,
-        month: month,
-        categories: categories,
+    unawaited(
+      showDialog<void>(
+        context: context,
+        builder: (_) => MoveMoneyDialog(
+          budgetId: budgetId,
+          year: year,
+          month: month,
+          categories: categories,
+        ),
       ),
     );
   }
 
   void _showSetGoal(BuildContext context) {
-    showDialog<void>(
-      context: context,
-      builder: (_) => SetGoalDialog(
-        envelopeId: envelope.id?.toString() ?? '',
-        budgetId: budgetId,
-        currencyCode: currencyCode,
-        existingGoal: goal,
-        envelopeName: envelope.name,
+    unawaited(
+      showDialog<void>(
+        context: context,
+        builder: (_) => SetGoalDialog(
+          envelopeId: envelope.id?.toString() ?? '',
+          budgetId: budgetId,
+          currencyCode: currencyCode,
+          existingGoal: goal,
+          envelopeName: envelope.name,
+        ),
       ),
     );
   }
 
   void _showEditEnvelope(BuildContext context) {
-    showDialog<void>(
-      context: context,
-      builder: (_) => EditEnvelopeDialog(
-        envelope: envelope,
-        categoryId: categoryId,
-        budgetId: budgetId,
-        currencyCode: currencyCode,
-        year: year,
-        month: month,
+    unawaited(
+      showDialog<void>(
+        context: context,
+        builder: (_) => EditEnvelopeDialog(
+          envelope: envelope,
+          categoryId: categoryId,
+          budgetId: budgetId,
+          currencyCode: currencyCode,
+          year: year,
+          month: month,
+        ),
       ),
     );
   }

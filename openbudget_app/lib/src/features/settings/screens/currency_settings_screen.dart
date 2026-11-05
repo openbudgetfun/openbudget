@@ -1,6 +1,3 @@
-// Serverpod's UuidValue.fromString is marked experimental.
-// ignore_for_file: experimental_member_use
-
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
@@ -76,7 +73,7 @@ class CurrencySettingsScreen extends HookConsumerWidget {
       ),
       body: budgetAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, __) => Center(
+        error: (_, _) => Center(
           child: Text(
             l10n.settingsLoadError,
             style: theme.textTheme.bodyLarge?.copyWith(
@@ -136,7 +133,7 @@ class CurrencySettingsScreen extends HookConsumerWidget {
         child: ListView.separated(
           shrinkWrap: true,
           itemCount: CurrencyCode.values.length,
-          separatorBuilder: (_, __) => const Divider(height: 1),
+          separatorBuilder: (_, _) => const Divider(height: 1),
           itemBuilder: (context, index) {
             final currency = CurrencyCode.values[index];
             return ListTile(
@@ -220,7 +217,7 @@ class CurrencySettingsScreen extends HookConsumerWidget {
       child: ListView.separated(
         shrinkWrap: true,
         itemCount: options.length,
-        separatorBuilder: (_, __) => const Divider(height: 1),
+        separatorBuilder: (_, _) => const Divider(height: 1),
         itemBuilder: (context, index) {
           final option = options[index];
           final selected = option == current;
@@ -263,7 +260,7 @@ class _SettingsCard extends HookWidget {
         color: OpenBudgetPalette.borderSubtleFor(Theme.of(context)),
       ),
     ),
-    child: child,
+    child: Material(type: MaterialType.transparency, child: child),
   );
 }
 

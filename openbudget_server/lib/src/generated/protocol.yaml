@@ -20,6 +20,7 @@ emailIdp:
   - hasAccount:
 googleIdp:
   - login:
+  - loginWithCode:
   - hasAccount:
 jwtRefresh:
   - refreshAccessToken:

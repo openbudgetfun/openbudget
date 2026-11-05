@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -508,25 +510,27 @@ class EditAccountDialog extends HookConsumerWidget {
     Account deleted,
     AppLocalizations l10n,
   ) {
-    ref
-        .read(accountActionsProvider.notifier)
-        .undoDeleteAccount(deletedAccount: deleted, budgetId: budgetId)
-        .then((_) {
-          if (!context.mounted) return;
-          showAppToast(
-            context,
-            message: l10n.undoDeleteSuccess,
-            variant: AppToastVariant.success,
-          );
-        })
-        .catchError((_) {
-          if (!context.mounted) return;
-          showAppToast(
-            context,
-            message: l10n.undoDeleteError,
-            variant: AppToastVariant.error,
-          );
-        });
+    unawaited(
+      ref
+          .read(accountActionsProvider.notifier)
+          .undoDeleteAccount(deletedAccount: deleted, budgetId: budgetId)
+          .then((_) {
+            if (!context.mounted) return;
+            showAppToast(
+              context,
+              message: l10n.undoDeleteSuccess,
+              variant: AppToastVariant.success,
+            );
+          })
+          .catchError((_) {
+            if (!context.mounted) return;
+            showAppToast(
+              context,
+              message: l10n.undoDeleteError,
+              variant: AppToastVariant.error,
+            );
+          }),
+    );
   }
 }
 

@@ -41,13 +41,13 @@ final class EnvelopeActionsProvider
   }
 }
 
-String _$envelopeActionsHash() => r'cbbabed2d04f2e2dd6b671630a8b714421763c75';
+String _$envelopeActionsHash() => r'c1bd3b4f3c4657ae75a03a152bc0c0a3ac2c020f';
 
 abstract class _$EnvelopeActions extends $Notifier<AsyncValue<void>> {
   AsyncValue<void> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<void>, AsyncValue<void>>;
     final element =
         ref.element
@@ -57,6 +57,6 @@ abstract class _$EnvelopeActions extends $Notifier<AsyncValue<void>> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

@@ -147,8 +147,10 @@ If you did not request this code, you can safely ignore this email.
   }
 }
 
-typedef SmtpMessageSender =
-    Future<void> Function(Message message, SmtpServer smtpServer);
+typedef SmtpMessageSender = Future<void> Function(
+  Message message,
+  SmtpServer smtpServer,
+);
 
 Future<void> _defaultSmtpMessageSender(
   Message message,

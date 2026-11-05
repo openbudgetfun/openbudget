@@ -1,6 +1,3 @@
-// Serverpod's UuidValue.fromString is marked experimental.
-// ignore_for_file: experimental_member_use
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -97,7 +94,7 @@ void main() {
         GoRoute(
           name: planRoute,
           path: '/budgets/:id/plan',
-          builder: (_, __) =>
+          builder: (_, _) =>
               const Scaffold(body: Center(child: Text('Plan route'))),
         ),
         GoRoute(

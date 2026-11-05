@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:openbudget_core/openbudget_core.dart';
@@ -60,7 +61,7 @@ class DevFileLogHandler {
       final length = _file.lengthSync();
       if (length > maxSizeBytes) {
         // Schedule truncation asynchronously to avoid blocking writes.
-        truncate();
+        unawaited(truncate());
       }
     } on FileSystemException {
       // Ignore — file may be in flux.

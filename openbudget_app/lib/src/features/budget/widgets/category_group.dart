@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -383,62 +385,64 @@ class CategoryGroup extends HookConsumerWidget {
     final category = categoryWithEnvelopes.category;
     final isHidden = category.isHidden ?? false;
 
-    showModalBottomSheet<void>(
-      context: context,
-      builder: (ctx) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.edit_rounded),
-              title: Text(l10n.budgetEditCategoryTitle),
-              onTap: () {
-                Navigator.of(ctx).pop();
-                onEditCategory();
-              },
-            ),
-            if (onReorderEnvelopes != null &&
-                categoryWithEnvelopes.envelopes.length > 1)
+    unawaited(
+      showModalBottomSheet<void>(
+        context: context,
+        builder: (ctx) => SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
               ListTile(
-                leading: const Icon(Icons.swap_vert_rounded),
-                title: Text(l10n.envelopeReorderHint),
+                leading: const Icon(Icons.edit_rounded),
+                title: Text(l10n.budgetEditCategoryTitle),
                 onTap: () {
                   Navigator.of(ctx).pop();
-                  isReorderingEnvelopes.value = true;
+                  onEditCategory();
                 },
               ),
-            if (onToggleHideCategory != null)
+              if (onReorderEnvelopes != null &&
+                  categoryWithEnvelopes.envelopes.length > 1)
+                ListTile(
+                  leading: const Icon(Icons.swap_vert_rounded),
+                  title: Text(l10n.envelopeReorderHint),
+                  onTap: () {
+                    Navigator.of(ctx).pop();
+                    isReorderingEnvelopes.value = true;
+                  },
+                ),
+              if (onToggleHideCategory != null)
+                ListTile(
+                  leading: Icon(
+                    isHidden
+                        ? Icons.visibility_rounded
+                        : Icons.visibility_off_rounded,
+                  ),
+                  title: Text(
+                    isHidden
+                        ? l10n.budgetUnhideCategory
+                        : l10n.budgetHideCategory,
+                  ),
+                  onTap: () {
+                    Navigator.of(ctx).pop();
+                    onToggleHideCategory!(isHidden: !isHidden);
+                  },
+                ),
               ListTile(
-                leading: Icon(
-                  isHidden
-                      ? Icons.visibility_rounded
-                      : Icons.visibility_off_rounded,
+                leading: const Icon(
+                  Icons.delete_rounded,
+                  color: ColorTokens.error,
                 ),
                 title: Text(
-                  isHidden
-                      ? l10n.budgetUnhideCategory
-                      : l10n.budgetHideCategory,
+                  l10n.deleteConfirmButton,
+                  style: const TextStyle(color: ColorTokens.error),
                 ),
                 onTap: () {
                   Navigator.of(ctx).pop();
-                  onToggleHideCategory!(isHidden: !isHidden);
+                  onDeleteCategory();
                 },
               ),
-            ListTile(
-              leading: const Icon(
-                Icons.delete_rounded,
-                color: ColorTokens.error,
-              ),
-              title: Text(
-                l10n.deleteConfirmButton,
-                style: const TextStyle(color: ColorTokens.error),
-              ),
-              onTap: () {
-                Navigator.of(ctx).pop();
-                onDeleteCategory();
-              },
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -452,71 +456,73 @@ class CategoryGroup extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final isHidden = envelope.isHidden ?? false;
 
-    showModalBottomSheet<void>(
-      context: context,
-      builder: (ctx) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.edit_rounded),
-              title: Text(l10n.editEnvelopeTitle),
-              onTap: () {
-                Navigator.of(ctx).pop();
-                onEditEnvelope(envelope);
-              },
-            ),
-            if (onQuickBudget != null)
+    unawaited(
+      showModalBottomSheet<void>(
+        context: context,
+        builder: (ctx) => SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
               ListTile(
-                leading: const Icon(Icons.flash_on_rounded),
-                title: Text(l10n.quickBudgetTitle),
+                leading: const Icon(Icons.edit_rounded),
+                title: Text(l10n.editEnvelopeTitle),
                 onTap: () {
                   Navigator.of(ctx).pop();
-                  onQuickBudget!(envelope);
+                  onEditEnvelope(envelope);
                 },
               ),
-            if (onReorderEnvelopes != null &&
-                categoryWithEnvelopes.envelopes.length > 1)
+              if (onQuickBudget != null)
+                ListTile(
+                  leading: const Icon(Icons.flash_on_rounded),
+                  title: Text(l10n.quickBudgetTitle),
+                  onTap: () {
+                    Navigator.of(ctx).pop();
+                    onQuickBudget!(envelope);
+                  },
+                ),
+              if (onReorderEnvelopes != null &&
+                  categoryWithEnvelopes.envelopes.length > 1)
+                ListTile(
+                  leading: const Icon(Icons.swap_vert_rounded),
+                  title: Text(l10n.envelopeReorderHint),
+                  onTap: () {
+                    Navigator.of(ctx).pop();
+                    isReorderingEnvelopes.value = true;
+                  },
+                ),
+              if (onToggleHideEnvelope != null)
+                ListTile(
+                  leading: Icon(
+                    isHidden
+                        ? Icons.visibility_rounded
+                        : Icons.visibility_off_rounded,
+                  ),
+                  title: Text(
+                    isHidden
+                        ? l10n.budgetUnhideEnvelope
+                        : l10n.budgetHideEnvelope,
+                  ),
+                  onTap: () {
+                    Navigator.of(ctx).pop();
+                    onToggleHideEnvelope!(envelope, isHidden: !isHidden);
+                  },
+                ),
               ListTile(
-                leading: const Icon(Icons.swap_vert_rounded),
-                title: Text(l10n.envelopeReorderHint),
-                onTap: () {
-                  Navigator.of(ctx).pop();
-                  isReorderingEnvelopes.value = true;
-                },
-              ),
-            if (onToggleHideEnvelope != null)
-              ListTile(
-                leading: Icon(
-                  isHidden
-                      ? Icons.visibility_rounded
-                      : Icons.visibility_off_rounded,
+                leading: const Icon(
+                  Icons.delete_rounded,
+                  color: ColorTokens.error,
                 ),
                 title: Text(
-                  isHidden
-                      ? l10n.budgetUnhideEnvelope
-                      : l10n.budgetHideEnvelope,
+                  l10n.deleteConfirmButton,
+                  style: const TextStyle(color: ColorTokens.error),
                 ),
                 onTap: () {
                   Navigator.of(ctx).pop();
-                  onToggleHideEnvelope!(envelope, isHidden: !isHidden);
+                  onDeleteEnvelope(envelope);
                 },
               ),
-            ListTile(
-              leading: const Icon(
-                Icons.delete_rounded,
-                color: ColorTokens.error,
-              ),
-              title: Text(
-                l10n.deleteConfirmButton,
-                style: const TextStyle(color: ColorTokens.error),
-              ),
-              onTap: () {
-                Navigator.of(ctx).pop();
-                onDeleteEnvelope(envelope);
-              },
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -1,1 +1,4 @@
+analyzer:
+  exclude:
+    - build/**
 include: package:openbudget_lints/analysis_options.yaml

@@ -10,10 +10,11 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:serverpod_client/serverpod_client.dart' as _i1;
+import 'package:serverpod_client/serverpod_client.dart' as _isc;
 
 /// Geographic availability and popularity metadata for an institution.
-abstract class InstitutionLocation implements _i1.SerializableModel {
+abstract class InstitutionLocation
+    implements _isc.SerializableModel, _isc.ProtocolSerialization {
   InstitutionLocation._({
     this.id,
     required this.institutionId,
@@ -25,8 +26,8 @@ abstract class InstitutionLocation implements _i1.SerializableModel {
        createdAt = createdAt ?? DateTime.now();
 
   factory InstitutionLocation({
-    _i1.UuidValue? id,
-    required _i1.UuidValue institutionId,
+    _isc.UuidValue? id,
+    required _isc.UuidValue institutionId,
     required String locationCode,
     bool? isPopular,
     int? popularityRank,
@@ -37,27 +38,27 @@ abstract class InstitutionLocation implements _i1.SerializableModel {
     return InstitutionLocation(
       id: jsonSerialization['id'] == null
           ? null
-          : _i1.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
-      institutionId: _i1.UuidValueJsonExtension.fromJson(
+          : _isc.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
+      institutionId: _isc.UuidValueJsonExtension.fromJson(
         jsonSerialization['institutionId'],
       ),
       locationCode: jsonSerialization['locationCode'] as String,
       isPopular: jsonSerialization['isPopular'] == null
           ? null
-          : _i1.BoolJsonExtension.fromJson(jsonSerialization['isPopular']),
+          : _isc.BoolJsonExtension.fromJson(jsonSerialization['isPopular']),
       popularityRank: jsonSerialization['popularityRank'] as int?,
       createdAt: jsonSerialization['createdAt'] == null
           ? null
-          : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
+          : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
     );
   }
 
   /// The database id, set if the object has been inserted into the
   /// database or if it has been fetched from the database. Otherwise,
   /// the id will be null.
-  _i1.UuidValue? id;
+  _isc.UuidValue? id;
 
-  _i1.UuidValue institutionId;
+  _isc.UuidValue institutionId;
 
   /// ISO 3166 country code (e.g. US, GB) or regional marker (e.g. EU).
   String locationCode;
@@ -72,10 +73,10 @@ abstract class InstitutionLocation implements _i1.SerializableModel {
 
   /// Returns a shallow copy of this [InstitutionLocation]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_isc.useResult
   InstitutionLocation copyWith({
-    _i1.UuidValue? id,
-    _i1.UuidValue? institutionId,
+    _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
+    _isc.UuidValue? institutionId,
     String? locationCode,
     bool? isPopular,
     int? popularityRank,
@@ -95,8 +96,21 @@ abstract class InstitutionLocation implements _i1.SerializableModel {
   }
 
   @override
+  Map<String, dynamic> toJsonForProtocol() {
+    return {
+      '__className__': 'InstitutionLocation',
+      if (id != null) 'id': id?.toJson(),
+      'institutionId': institutionId.toJson(),
+      'locationCode': locationCode,
+      'isPopular': isPopular,
+      if (popularityRank != null) 'popularityRank': popularityRank,
+      'createdAt': createdAt.toJson(),
+    };
+  }
+
+  @override
   String toString() {
-    return _i1.SerializationManager.encode(this);
+    return _isc.SerializationManager.encode(this);
   }
 }
 
@@ -104,8 +118,8 @@ class _Undefined {}
 
 class _InstitutionLocationImpl extends InstitutionLocation {
   _InstitutionLocationImpl({
-    _i1.UuidValue? id,
-    required _i1.UuidValue institutionId,
+    _isc.UuidValue? id,
+    required _isc.UuidValue institutionId,
     required String locationCode,
     bool? isPopular,
     int? popularityRank,
@@ -121,18 +135,18 @@ class _InstitutionLocationImpl extends InstitutionLocation {
 
   /// Returns a shallow copy of this [InstitutionLocation]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_isc.useResult
   @override
   InstitutionLocation copyWith({
-    Object? id = _Undefined,
-    _i1.UuidValue? institutionId,
+    _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
+    _isc.UuidValue? institutionId,
     String? locationCode,
     bool? isPopular,
     Object? popularityRank = _Undefined,
     DateTime? createdAt,
   }) {
     return InstitutionLocation(
-      id: id is _i1.UuidValue? ? id : this.id,
+      id: id is _isc.UndefinedSentinel ? this.id : id,
       institutionId: institutionId ?? this.institutionId,
       locationCode: locationCode ?? this.locationCode,
       isPopular: isPopular ?? this.isPopular,

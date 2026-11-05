@@ -2,7 +2,7 @@ name: openbudget_workspace
 publish_to: none
 
 environment:
-  sdk: ^3.11.0
+  sdk: ^3.13.0
 
 workspace:
   - openbudget_app
@@ -15,8 +15,12 @@ workspace:
   - openbudget_test_utils
 
 dev_dependencies:
-  melos: ^7.4.0
-  serverpod_cli: 3.4.6
+  melos: ^8.6.0
+  serverpod_cli: 4.1.0
+
+dependency_overrides:
+  # Serverpod and coverage need newer APIs; launcher_icons still caps its compatible logger at 0.4.
+  cli_util: 0.6.0
 
 melos:
   name: openbudget
@@ -35,23 +39,23 @@ melos:
 
     test:flutter:
       description: Run Flutter tests in Flutter packages.
-      run: melos exec --concurrency=1 --depends-on=flutter --dir-exists=test -- flutter test
+      run: dart run melos exec --concurrency=1 --depends-on=flutter --dir-exists=test -- flutter test
 
     generate:
       description: Run build_runner in all packages that use it.
-      exec: dart run build_runner build --delete-conflicting-outputs
+      exec: dart run build_runner build
       packageFilters:
         dependsOn: build_runner
 
     generate:watch:
       description: Run build_runner in watch mode.
-      exec: dart run build_runner watch --delete-conflicting-outputs
+      exec: dart run build_runner watch
       packageFilters:
         dependsOn: build_runner
 
     serverpod:generate:
       description: Run Serverpod code generation.
-      run: cd openbudget_server && dart run serverpod generate
+      run: cd openbudget_server && dart run serverpod_cli --no-analytics generate
 
     clean:
       description: Clean all packages.

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -127,9 +129,11 @@ class LoginScreen extends HookConsumerWidget {
                                     client: client,
                                     minimumWidth: 320,
                                     onAuthenticated: () {
-                                      ref
-                                          .read(authProvider.notifier)
-                                          .syncExternalAuthState();
+                                      unawaited(
+                                        ref
+                                            .read(authProvider.notifier)
+                                            .syncExternalAuthState(),
+                                      );
                                     },
                                     onError: (error) {
                                       ref
@@ -144,9 +148,11 @@ class LoginScreen extends HookConsumerWidget {
                                     client: client,
                                     minimumWidth: 320,
                                     onAuthenticated: () {
-                                      ref
-                                          .read(authProvider.notifier)
-                                          .syncExternalAuthState();
+                                      unawaited(
+                                        ref
+                                            .read(authProvider.notifier)
+                                            .syncExternalAuthState(),
+                                      );
                                     },
                                     onError: (error) {
                                       ref
@@ -321,12 +327,14 @@ class LoginScreen extends HookConsumerWidget {
     TextEditingController emailController,
     TextEditingController passwordController,
   ) {
-    ref
-        .read(authProvider.notifier)
-        .login(
-          email: emailController.text.trim(),
-          password: passwordController.text,
-        );
+    unawaited(
+      ref
+          .read(authProvider.notifier)
+          .login(
+            email: emailController.text.trim(),
+            password: passwordController.text,
+          ),
+    );
   }
 
   void _showUnavailable(BuildContext context, String provider) {

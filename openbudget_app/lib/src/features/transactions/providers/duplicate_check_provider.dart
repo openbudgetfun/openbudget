@@ -15,8 +15,6 @@ Future<List<Transaction>> duplicateCheck(
 
   final client = ref.read(serverpodClientProvider);
   return client.transaction.findDuplicates(
-    // Serverpod API requires UuidValue which is experimental in uuid package.
-    // ignore: experimental_member_use
     UuidValue.fromString(budgetId),
     amountCents,
     transactionDate,

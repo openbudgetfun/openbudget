@@ -10,10 +10,11 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:serverpod_client/serverpod_client.dart' as _i1;
+import 'package:serverpod_client/serverpod_client.dart' as _isc;
 
 /// Cached USD quote for a blockchain asset.
-abstract class AssetQuoteCache implements _i1.SerializableModel {
+abstract class AssetQuoteCache
+    implements _isc.SerializableModel, _isc.ProtocolSerialization {
   AssetQuoteCache._({
     this.id,
     required this.chain,
@@ -25,7 +26,7 @@ abstract class AssetQuoteCache implements _i1.SerializableModel {
   }) : fetchedAt = fetchedAt ?? DateTime.now();
 
   factory AssetQuoteCache({
-    _i1.UuidValue? id,
+    _isc.UuidValue? id,
     required String chain,
     required String assetId,
     required String symbol,
@@ -38,15 +39,15 @@ abstract class AssetQuoteCache implements _i1.SerializableModel {
     return AssetQuoteCache(
       id: jsonSerialization['id'] == null
           ? null
-          : _i1.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
+          : _isc.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
       chain: jsonSerialization['chain'] as String,
       assetId: jsonSerialization['assetId'] as String,
       symbol: jsonSerialization['symbol'] as String,
       usdPrice: (jsonSerialization['usdPrice'] as num).toDouble(),
       fetchedAt: jsonSerialization['fetchedAt'] == null
           ? null
-          : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['fetchedAt']),
-      expiresAt: _i1.DateTimeJsonExtension.fromJson(
+          : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['fetchedAt']),
+      expiresAt: _isc.DateTimeJsonExtension.fromJson(
         jsonSerialization['expiresAt'],
       ),
     );
@@ -55,7 +56,7 @@ abstract class AssetQuoteCache implements _i1.SerializableModel {
   /// The database id, set if the object has been inserted into the
   /// database or if it has been fetched from the database. Otherwise,
   /// the id will be null.
-  _i1.UuidValue? id;
+  _isc.UuidValue? id;
 
   String chain;
 
@@ -71,9 +72,9 @@ abstract class AssetQuoteCache implements _i1.SerializableModel {
 
   /// Returns a shallow copy of this [AssetQuoteCache]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_isc.useResult
   AssetQuoteCache copyWith({
-    _i1.UuidValue? id,
+    _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
     String? chain,
     String? assetId,
     String? symbol,
@@ -96,16 +97,28 @@ abstract class AssetQuoteCache implements _i1.SerializableModel {
   }
 
   @override
+  Map<String, dynamic> toJsonForProtocol() {
+    return {
+      '__className__': 'AssetQuoteCache',
+      if (id != null) 'id': id?.toJson(),
+      'chain': chain,
+      'assetId': assetId,
+      'symbol': symbol,
+      'usdPrice': usdPrice,
+      'fetchedAt': fetchedAt.toJson(),
+      'expiresAt': expiresAt.toJson(),
+    };
+  }
+
+  @override
   String toString() {
-    return _i1.SerializationManager.encode(this);
+    return _isc.SerializationManager.encode(this);
   }
 }
 
-class _Undefined {}
-
 class _AssetQuoteCacheImpl extends AssetQuoteCache {
   _AssetQuoteCacheImpl({
-    _i1.UuidValue? id,
+    _isc.UuidValue? id,
     required String chain,
     required String assetId,
     required String symbol,
@@ -124,10 +137,10 @@ class _AssetQuoteCacheImpl extends AssetQuoteCache {
 
   /// Returns a shallow copy of this [AssetQuoteCache]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_isc.useResult
   @override
   AssetQuoteCache copyWith({
-    Object? id = _Undefined,
+    _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
     String? chain,
     String? assetId,
     String? symbol,
@@ -136,7 +149,7 @@ class _AssetQuoteCacheImpl extends AssetQuoteCache {
     DateTime? expiresAt,
   }) {
     return AssetQuoteCache(
-      id: id is _i1.UuidValue? ? id : this.id,
+      id: id is _isc.UndefinedSentinel ? this.id : id,
       chain: chain ?? this.chain,
       assetId: assetId ?? this.assetId,
       symbol: symbol ?? this.symbol,

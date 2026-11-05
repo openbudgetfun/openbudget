@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
@@ -100,25 +102,27 @@ class BudgetDetailScreen extends HookConsumerWidget {
 
       hasAutoPosted.value = true;
 
-      Future.microtask(() async {
-        isPosting.value = true;
-        try {
-          final count = await ref
-              .read(recurringAutoPostActionsProvider.notifier)
-              .postDue(budgetId: budgetId);
-          if (context.mounted && count > 0) {
-            showAppToast(
-              context,
-              message: l10n.recurringAutoPosted(count),
-              variant: AppToastVariant.success,
-            );
+      unawaited(
+        Future.microtask(() async {
+          isPosting.value = true;
+          try {
+            final count = await ref
+                .read(recurringAutoPostActionsProvider.notifier)
+                .postDue(budgetId: budgetId);
+            if (context.mounted && count > 0) {
+              showAppToast(
+                context,
+                message: l10n.recurringAutoPosted(count),
+                variant: AppToastVariant.success,
+              );
+            }
+          } on Exception catch (_) {
+            hasAutoPosted.value = false;
+          } finally {
+            isPosting.value = false;
           }
-        } on Exception catch (_) {
-          hasAutoPosted.value = false;
-        } finally {
-          isPosting.value = false;
-        }
-      });
+        }),
+      );
 
       return null;
     }, [dueCountAsync, summaryAsync]);
@@ -146,134 +150,143 @@ class BudgetDetailScreen extends HookConsumerWidget {
         );
         inlineEditorSheetOpen.value = true;
 
-        Future.microtask(() async {
-          if (!context.mounted) return;
-          var sheetInput = editorInput.value;
+        unawaited(
+          Future.microtask(() async {
+            if (!context.mounted) return;
+            var sheetInput = editorInput.value;
 
-          await showModalBottomSheet<void>(
-            context: context,
-            isScrollControlled: true,
-            showDragHandle: true,
-            backgroundColor: OpenBudgetPalette.transparentFor(
-              Theme.of(context),
-            ),
-            barrierColor: OpenBudgetPalette.overlayScrimFor(
-              Theme.of(context),
-            ).withAlpha(210),
-            builder: (sheetContext) => StatefulBuilder(
-              builder: (sheetContext, setSheetState) {
-                void setInputValue(String value) {
-                  setSheetState(() => sheetInput = value);
-                  editorInput.value = value;
-                }
+            await showModalBottomSheet<void>(
+              context: context,
+              isScrollControlled: true,
+              showDragHandle: true,
+              backgroundColor: OpenBudgetPalette.transparentFor(
+                Theme.of(context),
+              ),
+              barrierColor: OpenBudgetPalette.overlayScrimFor(
+                Theme.of(context),
+              ).withAlpha(210),
+              builder: (sheetContext) => StatefulBuilder(
+                builder: (sheetContext, setSheetState) {
+                  void setInputValue(String value) {
+                    setSheetState(() => sheetInput = value);
+                    editorInput.value = value;
+                  }
 
-                return _InlineAmountEditor(
-                  inputValue: sheetInput,
-                  amountLabel: hideAmounts
-                      ? hiddenAmountPlaceholder
-                      : formatCents(
-                          _parseEditorCents(sheetInput) ??
-                              (selection.monthlyData?.allocatedCents ??
-                                  selection.envelope.budgetedAmountCents),
-                          currencyCode,
-                        ),
-                  onAutoAssign: () {
-                    Navigator.of(sheetContext).pop();
-                    _showQuickBudgetDialog(
-                      context,
-                      selection.envelope,
-                      currencyCode,
-                      year: summary.year,
-                      month: summary.month,
-                    );
-                  },
-                  onMoveMoney: () {
-                    Navigator.of(sheetContext).pop();
-                    showDialog<void>(
-                      context: context,
-                      barrierColor: OpenBudgetPalette.overlayScrimFor(
-                        Theme.of(context),
-                      ).withAlpha(210),
-                      builder: (_) => MoveMoneyDialog(
-                        budgetId: budgetId,
+                  return _InlineAmountEditor(
+                    inputValue: sheetInput,
+                    amountLabel: hideAmounts
+                        ? hiddenAmountPlaceholder
+                        : formatCents(
+                            _parseEditorCents(sheetInput) ??
+                                (selection.monthlyData?.allocatedCents ??
+                                    selection.envelope.budgetedAmountCents),
+                            currencyCode,
+                          ),
+                    onAutoAssign: () {
+                      Navigator.of(sheetContext).pop();
+                      _showQuickBudgetDialog(
+                        context,
+                        selection.envelope,
+                        currencyCode,
                         year: summary.year,
                         month: summary.month,
-                        categories: summary.categories,
-                      ),
-                    );
-                  },
-                  onDetails: () {
-                    final envelopeId = selection.envelope.id?.toString() ?? '';
-                    final categoryId = selection.categoryId;
-                    if (envelopeId.isEmpty || categoryId.isEmpty) return;
-                    Navigator.of(sheetContext).pop();
-                    context.pushNamed(
-                      categoryDetailRoute,
-                      pathParameters: {
-                        'id': budgetId,
-                        'categoryId': categoryId,
-                        'envelopeId': envelopeId,
-                      },
-                    );
-                  },
-                  onDigit: (digit) {
-                    if (sheetInput.length >= 9) return;
-                    setInputValue('$sheetInput$digit');
-                  },
-                  onBackspace: () {
-                    if (sheetInput.isEmpty) return;
-                    setInputValue(
-                      sheetInput.substring(0, sheetInput.length - 1),
-                    );
-                  },
-                  onNegative: () {
-                    final delta = _parseEditorCents(sheetInput);
-                    if (delta == null || delta == 0) return;
-                    final currentCents =
-                        selection.monthlyData?.allocatedCents ??
-                        selection.envelope.budgetedAmountCents;
-                    final nextDollars = ((currentCents - delta) / 100).round();
-                    setInputValue('$nextDollars');
-                  },
-                  onPositive: () {
-                    final delta = _parseEditorCents(sheetInput);
-                    if (delta == null || delta == 0) return;
-                    final currentCents =
-                        selection.monthlyData?.allocatedCents ??
-                        selection.envelope.budgetedAmountCents;
-                    final nextDollars = ((currentCents + delta) / 100).round();
-                    setInputValue('$nextDollars');
-                  },
-                  onCancel: () => Navigator.of(sheetContext).pop(),
-                  onApply: () => _applyInlineAllocation(
-                    context: context,
-                    ref: ref,
-                    selection: selection,
-                    year: summary.year,
-                    month: summary.month,
-                    input: sheetInput,
-                    closeEditor: false,
-                  ),
-                  onDone: () => _applyInlineAllocation(
-                    context: context,
-                    ref: ref,
-                    selection: selection,
-                    year: summary.year,
-                    month: summary.month,
-                    input: sheetInput,
-                    closeEditor: true,
-                    onCloseEditor: () => Navigator.of(sheetContext).pop(),
-                  ),
-                );
-              },
-            ),
-          );
+                      );
+                    },
+                    onMoveMoney: () {
+                      Navigator.of(sheetContext).pop();
+                      unawaited(
+                        showDialog<void>(
+                          context: context,
+                          barrierColor: OpenBudgetPalette.overlayScrimFor(
+                            Theme.of(context),
+                          ).withAlpha(210),
+                          builder: (_) => MoveMoneyDialog(
+                            budgetId: budgetId,
+                            year: summary.year,
+                            month: summary.month,
+                            categories: summary.categories,
+                          ),
+                        ),
+                      );
+                    },
+                    onDetails: () {
+                      final envelopeId =
+                          selection.envelope.id?.toString() ?? '';
+                      final categoryId = selection.categoryId;
+                      if (envelopeId.isEmpty || categoryId.isEmpty) return;
+                      Navigator.of(sheetContext).pop();
+                      unawaited(
+                        context.pushNamed(
+                          categoryDetailRoute,
+                          pathParameters: {
+                            'id': budgetId,
+                            'categoryId': categoryId,
+                            'envelopeId': envelopeId,
+                          },
+                        ),
+                      );
+                    },
+                    onDigit: (digit) {
+                      if (sheetInput.length >= 9) return;
+                      setInputValue('$sheetInput$digit');
+                    },
+                    onBackspace: () {
+                      if (sheetInput.isEmpty) return;
+                      setInputValue(
+                        sheetInput.substring(0, sheetInput.length - 1),
+                      );
+                    },
+                    onNegative: () {
+                      final delta = _parseEditorCents(sheetInput);
+                      if (delta == null || delta == 0) return;
+                      final currentCents =
+                          selection.monthlyData?.allocatedCents ??
+                          selection.envelope.budgetedAmountCents;
+                      final nextDollars = ((currentCents - delta) / 100)
+                          .round();
+                      setInputValue('$nextDollars');
+                    },
+                    onPositive: () {
+                      final delta = _parseEditorCents(sheetInput);
+                      if (delta == null || delta == 0) return;
+                      final currentCents =
+                          selection.monthlyData?.allocatedCents ??
+                          selection.envelope.budgetedAmountCents;
+                      final nextDollars = ((currentCents + delta) / 100)
+                          .round();
+                      setInputValue('$nextDollars');
+                    },
+                    onCancel: () => Navigator.of(sheetContext).pop(),
+                    onApply: () => _applyInlineAllocation(
+                      context: context,
+                      ref: ref,
+                      selection: selection,
+                      year: summary.year,
+                      month: summary.month,
+                      input: sheetInput,
+                      closeEditor: false,
+                    ),
+                    onDone: () => _applyInlineAllocation(
+                      context: context,
+                      ref: ref,
+                      selection: selection,
+                      year: summary.year,
+                      month: summary.month,
+                      input: sheetInput,
+                      closeEditor: true,
+                      onCloseEditor: () => Navigator.of(sheetContext).pop(),
+                    ),
+                  );
+                },
+              ),
+            );
 
-          if (!context.mounted) return;
-          inlineEditorSheetOpen.value = false;
-          selectedEditor.value = null;
-          editorInput.value = '';
-        });
+            if (!context.mounted) return;
+            inlineEditorSheetOpen.value = false;
+            selectedEditor.value = null;
+            editorInput.value = '';
+          }),
+        );
 
         return null;
       },
@@ -433,16 +446,20 @@ class BudgetDetailScreen extends HookConsumerWidget {
                   );
                 },
                 onSaveTemplate: () {
-                  showDialog<void>(
-                    context: context,
-                    barrierColor: _dialogBarrierColor(context),
-                    builder: (_) => BudgetTemplateDialog(budgetId: budgetId),
+                  unawaited(
+                    showDialog<void>(
+                      context: context,
+                      barrierColor: _dialogBarrierColor(context),
+                      builder: (_) => BudgetTemplateDialog(budgetId: budgetId),
+                    ),
                   );
                 },
                 onRecentMoves: () {
-                  context.pushNamed(
-                    recentMovesRoute,
-                    pathParameters: {'id': budgetId},
+                  unawaited(
+                    context.pushNamed(
+                      recentMovesRoute,
+                      pathParameters: {'id': budgetId},
+                    ),
                   );
                 },
               ),
@@ -1002,11 +1019,13 @@ class BudgetDetailScreen extends HookConsumerWidget {
       OpenBudgetPalette.overlayScrimFor(Theme.of(context)).withAlpha(210);
 
   void _showAutoAssignDialog(BuildContext context, CurrencyCode currencyCode) {
-    showDialog<void>(
-      context: context,
-      barrierColor: _dialogBarrierColor(context),
-      builder: (_) =>
-          AutoAssignDialog(budgetId: budgetId, currencyCode: currencyCode),
+    unawaited(
+      showDialog<void>(
+        context: context,
+        barrierColor: _dialogBarrierColor(context),
+        builder: (_) =>
+            AutoAssignDialog(budgetId: budgetId, currencyCode: currencyCode),
+      ),
     );
   }
 
@@ -1017,18 +1036,20 @@ class BudgetDetailScreen extends HookConsumerWidget {
     required int month,
     required List<_OverspentEnvelopeEntry> overspentEnvelopes,
   }) {
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: OpenBudgetPalette.transparentFor(Theme.of(context)),
-      builder: (context) => FractionallySizedBox(
-        heightFactor: 0.9,
-        child: _CoverOverspendingSheet(
-          budgetId: budgetId,
-          year: year,
-          month: month,
-          currencyCode: currencyCode,
-          overspentEnvelopes: overspentEnvelopes,
+    unawaited(
+      showModalBottomSheet<void>(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: OpenBudgetPalette.transparentFor(Theme.of(context)),
+        builder: (context) => FractionallySizedBox(
+          heightFactor: 0.9,
+          child: _CoverOverspendingSheet(
+            budgetId: budgetId,
+            year: year,
+            month: month,
+            currencyCode: currencyCode,
+            overspentEnvelopes: overspentEnvelopes,
+          ),
         ),
       ),
     );
@@ -1041,16 +1062,18 @@ class BudgetDetailScreen extends HookConsumerWidget {
     required int year,
     required int month,
   }) {
-    showDialog<void>(
-      context: context,
-      barrierColor: _dialogBarrierColor(context),
-      builder: (_) => QuickBudgetDialog(
-        budgetId: budgetId,
-        envelopeId: envelope.id?.toString() ?? '',
-        envelopeName: envelope.name,
-        currencyCode: currencyCode,
-        year: year,
-        month: month,
+    unawaited(
+      showDialog<void>(
+        context: context,
+        barrierColor: _dialogBarrierColor(context),
+        builder: (_) => QuickBudgetDialog(
+          budgetId: budgetId,
+          envelopeId: envelope.id?.toString() ?? '',
+          envelopeName: envelope.name,
+          currencyCode: currencyCode,
+          year: year,
+          month: month,
+        ),
       ),
     );
   }
@@ -1063,26 +1086,30 @@ class BudgetDetailScreen extends HookConsumerWidget {
     int totalAllocatedCents,
     CurrencyCode currencyCode,
   ) {
-    showDialog<void>(
-      context: context,
-      barrierColor: _dialogBarrierColor(context),
-      builder: (_) => EditCategoryDialog(
-        categoryId: categoryId,
-        budgetId: budgetId,
-        currentName: currentName,
-        envelopeCount: envelopeCount,
-        totalAllocatedCents: totalAllocatedCents,
-        currencyCode: currencyCode,
+    unawaited(
+      showDialog<void>(
+        context: context,
+        barrierColor: _dialogBarrierColor(context),
+        builder: (_) => EditCategoryDialog(
+          categoryId: categoryId,
+          budgetId: budgetId,
+          currentName: currentName,
+          envelopeCount: envelopeCount,
+          totalAllocatedCents: totalAllocatedCents,
+          currencyCode: currencyCode,
+        ),
       ),
     );
   }
 
   void _showAddCategoryDialog(BuildContext context, int nextSortOrder) {
-    showDialog<void>(
-      context: context,
-      barrierColor: _dialogBarrierColor(context),
-      builder: (_) =>
-          AddCategoryDialog(budgetId: budgetId, nextSortOrder: nextSortOrder),
+    unawaited(
+      showDialog<void>(
+        context: context,
+        barrierColor: _dialogBarrierColor(context),
+        builder: (_) =>
+            AddCategoryDialog(budgetId: budgetId, nextSortOrder: nextSortOrder),
+      ),
     );
   }
 
@@ -1093,15 +1120,17 @@ class BudgetDetailScreen extends HookConsumerWidget {
     required int year,
     required int month,
   }) {
-    showDialog<void>(
-      context: context,
-      barrierColor: _dialogBarrierColor(context),
-      builder: (_) => AddEnvelopeDialog(
-        categoryId: categoryId,
-        budgetId: budgetId,
-        currencyCode: currencyCode,
-        year: year,
-        month: month,
+    unawaited(
+      showDialog<void>(
+        context: context,
+        barrierColor: _dialogBarrierColor(context),
+        builder: (_) => AddEnvelopeDialog(
+          categoryId: categoryId,
+          budgetId: budgetId,
+          currencyCode: currencyCode,
+          year: year,
+          month: month,
+        ),
       ),
     );
   }
@@ -1114,16 +1143,18 @@ class BudgetDetailScreen extends HookConsumerWidget {
     required int year,
     required int month,
   }) {
-    showDialog<void>(
-      context: context,
-      barrierColor: _dialogBarrierColor(context),
-      builder: (_) => EditEnvelopeDialog(
-        envelope: envelope,
-        categoryId: categoryId,
-        budgetId: budgetId,
-        currencyCode: currencyCode,
-        year: year,
-        month: month,
+    unawaited(
+      showDialog<void>(
+        context: context,
+        barrierColor: _dialogBarrierColor(context),
+        builder: (_) => EditEnvelopeDialog(
+          envelope: envelope,
+          categoryId: categoryId,
+          budgetId: budgetId,
+          currencyCode: currencyCode,
+          year: year,
+          month: month,
+        ),
       ),
     );
   }
@@ -1724,7 +1755,7 @@ class _ReviewTransactionsBannerLoader extends HookConsumerWidget {
           data: (transactions) =>
               transactions.where((t) => !t.cleared && !t.reconciled).length,
           loading: () => 0,
-          error: (_, __) => 0,
+          error: (_, _) => 0,
         ),
       ),
     );

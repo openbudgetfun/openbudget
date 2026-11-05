@@ -10,458 +10,614 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:serverpod/serverpod.dart' as _i1;
-import '../accounts/account_endpoint.dart' as _i2;
-import '../auth/apple_idp_endpoint.dart' as _i3;
-import '../auth/email_idp_endpoint.dart' as _i4;
-import '../auth/google_idp_endpoint.dart' as _i5;
-import '../auth/jwt_refresh_endpoint.dart' as _i6;
-import '../budget_templates/budget_template_endpoint.dart' as _i7;
-import '../budgets/budget_endpoint.dart' as _i8;
-import '../budgets/budget_stream.dart' as _i9;
-import '../categories/category_endpoint.dart' as _i10;
-import '../envelope_goals/envelope_goal_endpoint.dart' as _i11;
-import '../envelopes/envelope_endpoint.dart' as _i12;
-import '../fx_rates/fx_rate_endpoint.dart' as _i13;
-import '../institutions/institution_endpoint.dart' as _i14;
-import '../monthly_allocations/monthly_allocation_endpoint.dart' as _i15;
-import '../payees/payee_endpoint.dart' as _i16;
-import '../plaid/plaid_endpoint.dart' as _i17;
-import '../recurring_transactions/recurring_transaction_endpoint.dart' as _i18;
-import '../solana_wallets/solana_wallet_endpoint.dart' as _i19;
-import '../transaction_rules/transaction_rule_endpoint.dart' as _i20;
-import '../transactions/transaction_endpoint.dart' as _i21;
-import '../wallets/wallet_endpoint.dart' as _i22;
-import 'package:openbudget_server/src/generated/transactions/split_item.dart'
-    as _i23;
 import 'package:openbudget_server/src/generated/transactions/import_row.dart'
-    as _i24;
-import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
-    as _i25;
+    as _iyod81ld;
+import 'package:openbudget_server/src/generated/transactions/split_item.dart'
+    as _ii8zyh2l;
+import 'package:serverpod/serverpod.dart' as _is;
 import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
-    as _i26;
+    as _iacs;
+import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
+    as _iais;
 
-class Endpoints extends _i1.EndpointDispatch {
+import '../accounts/account_endpoint.dart' as _izzfgwyn;
+import '../auth/apple_idp_endpoint.dart' as _ilq63su8;
+import '../auth/email_idp_endpoint.dart' as _iuc1hd5t;
+import '../auth/google_idp_endpoint.dart' as _i71axiz0;
+import '../auth/jwt_refresh_endpoint.dart' as _inwq3ztq;
+import '../budget_templates/budget_template_endpoint.dart' as _i3p5ie4r;
+import '../budgets/budget_endpoint.dart' as _in8w6wxx;
+import '../budgets/budget_stream.dart' as _i5nzdilh;
+import '../categories/category_endpoint.dart' as _irthghnb;
+import '../envelope_goals/envelope_goal_endpoint.dart' as _i76paldx;
+import '../envelopes/envelope_endpoint.dart' as _in6dn9dl;
+import '../fx_rates/fx_rate_endpoint.dart' as _i7xoygut;
+import '../institutions/institution_endpoint.dart' as _i9rhv37i;
+import '../monthly_allocations/monthly_allocation_endpoint.dart' as _ilfvovcz;
+import '../payees/payee_endpoint.dart' as _i5rb0bcw;
+import '../plaid/plaid_endpoint.dart' as _i9pkxqxw;
+import '../recurring_transactions/recurring_transaction_endpoint.dart'
+    as _ipwgw1dv;
+import '../solana_wallets/solana_wallet_endpoint.dart' as _in77fwrc;
+import '../transaction_rules/transaction_rule_endpoint.dart' as _i70s5v1k;
+import '../transactions/transaction_endpoint.dart' as _if8xv4dr;
+import '../wallets/wallet_endpoint.dart' as _i1ub0otr;
+
+class Endpoints extends _is.EndpointDispatch {
   @override
-  void initializeEndpoints(_i1.Server server) {
-    var endpoints = <String, _i1.Endpoint>{
-      'account': _i2.AccountEndpoint()..initialize(server, 'account', null),
-      'appleIdp': _i3.AppleIdpEndpoint()..initialize(server, 'appleIdp', null),
-      'emailIdp': _i4.EmailIdpEndpoint()..initialize(server, 'emailIdp', null),
-      'googleIdp': _i5.GoogleIdpEndpoint()
-        ..initialize(server, 'googleIdp', null),
-      'jwtRefresh': _i6.JwtRefreshEndpoint()
-        ..initialize(server, 'jwtRefresh', null),
-      'budgetTemplate': _i7.BudgetTemplateEndpoint()
-        ..initialize(server, 'budgetTemplate', null),
-      'budget': _i8.BudgetEndpoint()..initialize(server, 'budget', null),
-      'budgetStream': _i9.BudgetStreamEndpoint()
-        ..initialize(server, 'budgetStream', null),
-      'category': _i10.CategoryEndpoint()..initialize(server, 'category', null),
-      'envelopeGoal': _i11.EnvelopeGoalEndpoint()
-        ..initialize(server, 'envelopeGoal', null),
-      'envelope': _i12.EnvelopeEndpoint()..initialize(server, 'envelope', null),
-      'fxRate': _i13.FxRateEndpoint()..initialize(server, 'fxRate', null),
-      'institution': _i14.InstitutionEndpoint()
-        ..initialize(server, 'institution', null),
-      'monthlyAllocation': _i15.MonthlyAllocationEndpoint()
-        ..initialize(server, 'monthlyAllocation', null),
-      'payee': _i16.PayeeEndpoint()..initialize(server, 'payee', null),
-      'plaid': _i17.PlaidEndpoint()..initialize(server, 'plaid', null),
-      'recurringTransaction': _i18.RecurringTransactionEndpoint()
-        ..initialize(server, 'recurringTransaction', null),
-      'solanaWallet': _i19.SolanaWalletEndpoint()
-        ..initialize(server, 'solanaWallet', null),
-      'transactionRule': _i20.TransactionRuleEndpoint()
-        ..initialize(server, 'transactionRule', null),
-      'transaction': _i21.TransactionEndpoint()
-        ..initialize(server, 'transaction', null),
-      'wallet': _i22.WalletEndpoint()..initialize(server, 'wallet', null),
+  void initializeEndpoints(_is.Server server) {
+    var endpoints = <String, _is.Endpoint>{
+      'account': _izzfgwyn.AccountEndpoint()
+        ..initialize(
+          server,
+          'account',
+          null,
+        ),
+      'appleIdp': _ilq63su8.AppleIdpEndpoint()
+        ..initialize(
+          server,
+          'appleIdp',
+          null,
+        ),
+      'emailIdp': _iuc1hd5t.EmailIdpEndpoint()
+        ..initialize(
+          server,
+          'emailIdp',
+          null,
+        ),
+      'googleIdp': _i71axiz0.GoogleIdpEndpoint()
+        ..initialize(
+          server,
+          'googleIdp',
+          null,
+        ),
+      'jwtRefresh': _inwq3ztq.JwtRefreshEndpoint()
+        ..initialize(
+          server,
+          'jwtRefresh',
+          null,
+        ),
+      'budgetTemplate': _i3p5ie4r.BudgetTemplateEndpoint()
+        ..initialize(
+          server,
+          'budgetTemplate',
+          null,
+        ),
+      'budget': _in8w6wxx.BudgetEndpoint()
+        ..initialize(
+          server,
+          'budget',
+          null,
+        ),
+      'budgetStream': _i5nzdilh.BudgetStreamEndpoint()
+        ..initialize(
+          server,
+          'budgetStream',
+          null,
+        ),
+      'category': _irthghnb.CategoryEndpoint()
+        ..initialize(
+          server,
+          'category',
+          null,
+        ),
+      'envelopeGoal': _i76paldx.EnvelopeGoalEndpoint()
+        ..initialize(
+          server,
+          'envelopeGoal',
+          null,
+        ),
+      'envelope': _in6dn9dl.EnvelopeEndpoint()
+        ..initialize(
+          server,
+          'envelope',
+          null,
+        ),
+      'fxRate': _i7xoygut.FxRateEndpoint()
+        ..initialize(
+          server,
+          'fxRate',
+          null,
+        ),
+      'institution': _i9rhv37i.InstitutionEndpoint()
+        ..initialize(
+          server,
+          'institution',
+          null,
+        ),
+      'monthlyAllocation': _ilfvovcz.MonthlyAllocationEndpoint()
+        ..initialize(
+          server,
+          'monthlyAllocation',
+          null,
+        ),
+      'payee': _i5rb0bcw.PayeeEndpoint()
+        ..initialize(
+          server,
+          'payee',
+          null,
+        ),
+      'plaid': _i9pkxqxw.PlaidEndpoint()
+        ..initialize(
+          server,
+          'plaid',
+          null,
+        ),
+      'recurringTransaction': _ipwgw1dv.RecurringTransactionEndpoint()
+        ..initialize(
+          server,
+          'recurringTransaction',
+          null,
+        ),
+      'solanaWallet': _in77fwrc.SolanaWalletEndpoint()
+        ..initialize(
+          server,
+          'solanaWallet',
+          null,
+        ),
+      'transactionRule': _i70s5v1k.TransactionRuleEndpoint()
+        ..initialize(
+          server,
+          'transactionRule',
+          null,
+        ),
+      'transaction': _if8xv4dr.TransactionEndpoint()
+        ..initialize(
+          server,
+          'transaction',
+          null,
+        ),
+      'wallet': _i1ub0otr.WalletEndpoint()
+        ..initialize(
+          server,
+          'wallet',
+          null,
+        ),
     };
-    connectors['account'] = _i1.EndpointConnector(
+    connectors['account'] = _is.EndpointConnector(
       name: 'account',
       endpoint: endpoints['account']!,
       methodConnectors: {
-        'create': _i1.MethodConnector(
+        'create': _is.MethodConnector(
           name: 'create',
           params: {
-            'name': _i1.ParameterDescription(
+            'name': _is.ParameterDescription(
               name: 'name',
-              type: _i1.getType<String>(),
+              type: _is.getType<String>(),
               nullable: false,
             ),
-            'accountType': _i1.ParameterDescription(
+            'accountType': _is.ParameterDescription(
               name: 'accountType',
-              type: _i1.getType<String>(),
+              type: _is.getType<String>(),
               nullable: false,
             ),
-            'balanceCents': _i1.ParameterDescription(
+            'balanceCents': _is.ParameterDescription(
               name: 'balanceCents',
-              type: _i1.getType<int>(),
+              type: _is.getType<int>(),
               nullable: false,
             ),
-            'currencyCode': _i1.ParameterDescription(
+            'currencyCode': _is.ParameterDescription(
               name: 'currencyCode',
-              type: _i1.getType<String>(),
+              type: _is.getType<String>(),
               nullable: false,
             ),
-            'budgetId': _i1.ParameterDescription(
+            'budgetId': _is.ParameterDescription(
               name: 'budgetId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'onBudget': _i1.ParameterDescription(
+            'onBudget': _is.ParameterDescription(
               name: 'onBudget',
-              type: _i1.getType<bool>(),
+              type: _is.getType<bool>(),
               nullable: false,
             ),
-            'sortOrder': _i1.ParameterDescription(
+            'sortOrder': _is.ParameterDescription(
               name: 'sortOrder',
-              type: _i1.getType<int>(),
+              type: _is.getType<int>(),
               nullable: false,
             ),
-            'institutionId': _i1.ParameterDescription(
+            'institutionId': _is.ParameterDescription(
               name: 'institutionId',
-              type: _i1.getType<_i1.UuidValue?>(),
+              type: _is.getType<_is.UuidValue?>(),
               nullable: true,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['account'] as _i2.AccountEndpoint).create(
-                session,
-                params['name'],
-                params['accountType'],
-                params['balanceCents'],
-                params['currencyCode'],
-                params['budgetId'],
-                onBudget: params['onBudget'],
-                sortOrder: params['sortOrder'],
-                institutionId: params['institutionId'],
-              ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['account'] as _izzfgwyn.AccountEndpoint).create(
+                    session,
+                    params['name'],
+                    params['accountType'],
+                    params['balanceCents'],
+                    params['currencyCode'],
+                    params['budgetId'],
+                    onBudget: params['onBudget'],
+                    sortOrder: params['sortOrder'],
+                    institutionId: params['institutionId'],
+                  ),
         ),
-        'list': _i1.MethodConnector(
+        'list': _is.MethodConnector(
           name: 'list',
           params: {
-            'budgetId': _i1.ParameterDescription(
+            'budgetId': _is.ParameterDescription(
               name: 'budgetId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['account'] as _i2.AccountEndpoint).list(
-                session,
-                params['budgetId'],
-              ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['account'] as _izzfgwyn.AccountEndpoint).list(
+                    session,
+                    params['budgetId'],
+                  ),
         ),
-        'listMine': _i1.MethodConnector(
+        'listMine': _is.MethodConnector(
           name: 'listMine',
           params: {
-            'excludeBudgetId': _i1.ParameterDescription(
+            'excludeBudgetId': _is.ParameterDescription(
               name: 'excludeBudgetId',
-              type: _i1.getType<_i1.UuidValue?>(),
+              type: _is.getType<_is.UuidValue?>(),
               nullable: true,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['account'] as _i2.AccountEndpoint).listMine(
-                session,
-                excludeBudgetId: params['excludeBudgetId'],
-              ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['account'] as _izzfgwyn.AccountEndpoint).listMine(
+                    session,
+                    excludeBudgetId: params['excludeBudgetId'],
+                  ),
         ),
-        'addMineToBudget': _i1.MethodConnector(
+        'addMineToBudget': _is.MethodConnector(
           name: 'addMineToBudget',
           params: {
-            'sourceAccountId': _i1.ParameterDescription(
+            'sourceAccountId': _is.ParameterDescription(
               name: 'sourceAccountId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'budgetId': _i1.ParameterDescription(
+            'budgetId': _is.ParameterDescription(
               name: 'budgetId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['account'] as _i2.AccountEndpoint).addMineToBudget(
-                session,
-                params['sourceAccountId'],
-                params['budgetId'],
-              ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['account'] as _izzfgwyn.AccountEndpoint)
+                  .addMineToBudget(
+                    session,
+                    params['sourceAccountId'],
+                    params['budgetId'],
+                  ),
         ),
-        'get': _i1.MethodConnector(
+        'get': _is.MethodConnector(
           name: 'get',
           params: {
-            'accountId': _i1.ParameterDescription(
+            'accountId': _is.ParameterDescription(
               name: 'accountId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['account'] as _i2.AccountEndpoint).get(
-                session,
-                params['accountId'],
-              ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['account'] as _izzfgwyn.AccountEndpoint).get(
+                    session,
+                    params['accountId'],
+                  ),
         ),
-        'update': _i1.MethodConnector(
+        'update': _is.MethodConnector(
           name: 'update',
           params: {
-            'accountId': _i1.ParameterDescription(
+            'accountId': _is.ParameterDescription(
               name: 'accountId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'name': _i1.ParameterDescription(
+            'name': _is.ParameterDescription(
               name: 'name',
-              type: _i1.getType<String?>(),
+              type: _is.getType<String?>(),
               nullable: true,
             ),
-            'accountType': _i1.ParameterDescription(
+            'accountType': _is.ParameterDescription(
               name: 'accountType',
-              type: _i1.getType<String?>(),
+              type: _is.getType<String?>(),
               nullable: true,
             ),
-            'balanceCents': _i1.ParameterDescription(
+            'balanceCents': _is.ParameterDescription(
               name: 'balanceCents',
-              type: _i1.getType<int?>(),
+              type: _is.getType<int?>(),
               nullable: true,
             ),
-            'onBudget': _i1.ParameterDescription(
+            'onBudget': _is.ParameterDescription(
               name: 'onBudget',
-              type: _i1.getType<bool?>(),
+              type: _is.getType<bool?>(),
               nullable: true,
             ),
-            'sortOrder': _i1.ParameterDescription(
+            'sortOrder': _is.ParameterDescription(
               name: 'sortOrder',
-              type: _i1.getType<int?>(),
+              type: _is.getType<int?>(),
               nullable: true,
             ),
-            'isClosed': _i1.ParameterDescription(
+            'isClosed': _is.ParameterDescription(
               name: 'isClosed',
-              type: _i1.getType<bool?>(),
+              type: _is.getType<bool?>(),
               nullable: true,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['account'] as _i2.AccountEndpoint).update(
-                session,
-                params['accountId'],
-                name: params['name'],
-                accountType: params['accountType'],
-                balanceCents: params['balanceCents'],
-                onBudget: params['onBudget'],
-                sortOrder: params['sortOrder'],
-                isClosed: params['isClosed'],
-              ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['account'] as _izzfgwyn.AccountEndpoint).update(
+                    session,
+                    params['accountId'],
+                    name: params['name'],
+                    accountType: params['accountType'],
+                    balanceCents: params['balanceCents'],
+                    onBudget: params['onBudget'],
+                    sortOrder: params['sortOrder'],
+                    isClosed: params['isClosed'],
+                  ),
         ),
-        'delete': _i1.MethodConnector(
+        'delete': _is.MethodConnector(
           name: 'delete',
           params: {
-            'accountId': _i1.ParameterDescription(
+            'accountId': _is.ParameterDescription(
               name: 'accountId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['account'] as _i2.AccountEndpoint).delete(
-                session,
-                params['accountId'],
-              ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['account'] as _izzfgwyn.AccountEndpoint).delete(
+                    session,
+                    params['accountId'],
+                  ),
         ),
       },
     );
-    connectors['appleIdp'] = _i1.EndpointConnector(
+    connectors['appleIdp'] = _is.EndpointConnector(
       name: 'appleIdp',
       endpoint: endpoints['appleIdp']!,
       methodConnectors: {
-        'login': _i1.MethodConnector(
+        'login': _is.MethodConnector(
           name: 'login',
           params: {
-            'identityToken': _i1.ParameterDescription(
+            'identityToken': _is.ParameterDescription(
               name: 'identityToken',
-              type: _i1.getType<String>(),
+              type: _is.getType<String>(),
               nullable: false,
             ),
-            'authorizationCode': _i1.ParameterDescription(
+            'authorizationCode': _is.ParameterDescription(
               name: 'authorizationCode',
-              type: _i1.getType<String>(),
+              type: _is.getType<String>(),
               nullable: false,
             ),
-            'isNativeApplePlatformSignIn': _i1.ParameterDescription(
+            'isNativeApplePlatformSignIn': _is.ParameterDescription(
               name: 'isNativeApplePlatformSignIn',
-              type: _i1.getType<bool>(),
+              type: _is.getType<bool>(),
               nullable: false,
             ),
-            'firstName': _i1.ParameterDescription(
+            'firstName': _is.ParameterDescription(
               name: 'firstName',
-              type: _i1.getType<String?>(),
+              type: _is.getType<String?>(),
               nullable: true,
             ),
-            'lastName': _i1.ParameterDescription(
+            'lastName': _is.ParameterDescription(
               name: 'lastName',
-              type: _i1.getType<String?>(),
+              type: _is.getType<String?>(),
               nullable: true,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['appleIdp'] as _i3.AppleIdpEndpoint).login(
-                session,
-                identityToken: params['identityToken'],
-                authorizationCode: params['authorizationCode'],
-                isNativeApplePlatformSignIn:
-                    params['isNativeApplePlatformSignIn'],
-                firstName: params['firstName'],
-                lastName: params['lastName'],
-              ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['appleIdp'] as _ilq63su8.AppleIdpEndpoint).login(
+                    session,
+                    identityToken: params['identityToken'],
+                    authorizationCode: params['authorizationCode'],
+                    isNativeApplePlatformSignIn:
+                        params['isNativeApplePlatformSignIn'],
+                    firstName: params['firstName'],
+                    lastName: params['lastName'],
+                  ),
         ),
-        'hasAccount': _i1.MethodConnector(
+        'hasAccount': _is.MethodConnector(
           name: 'hasAccount',
           params: {},
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['appleIdp'] as _i3.AppleIdpEndpoint).hasAccount(
-                session,
-              ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['appleIdp'] as _ilq63su8.AppleIdpEndpoint)
+                  .hasAccount(session),
         ),
       },
     );
-    connectors['emailIdp'] = _i1.EndpointConnector(
+    connectors['emailIdp'] = _is.EndpointConnector(
       name: 'emailIdp',
       endpoint: endpoints['emailIdp']!,
       methodConnectors: {
-        'login': _i1.MethodConnector(
+        'login': _is.MethodConnector(
           name: 'login',
           params: {
-            'email': _i1.ParameterDescription(
+            'email': _is.ParameterDescription(
               name: 'email',
-              type: _i1.getType<String>(),
+              type: _is.getType<String>(),
               nullable: false,
             ),
-            'password': _i1.ParameterDescription(
+            'password': _is.ParameterDescription(
               name: 'password',
-              type: _i1.getType<String>(),
+              type: _is.getType<String>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['emailIdp'] as _i4.EmailIdpEndpoint).login(
-                session,
-                email: params['email'],
-                password: params['password'],
-              ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['emailIdp'] as _iuc1hd5t.EmailIdpEndpoint).login(
+                    session,
+                    email: params['email'],
+                    password: params['password'],
+                  ),
         ),
-        'startRegistration': _i1.MethodConnector(
+        'startRegistration': _is.MethodConnector(
           name: 'startRegistration',
           params: {
-            'email': _i1.ParameterDescription(
+            'email': _is.ParameterDescription(
               name: 'email',
-              type: _i1.getType<String>(),
+              type: _is.getType<String>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['emailIdp'] as _i4.EmailIdpEndpoint).startRegistration(
-                session,
-                email: params['email'],
-              ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['emailIdp'] as _iuc1hd5t.EmailIdpEndpoint)
+                  .startRegistration(
+                    session,
+                    email: params['email'],
+                  ),
         ),
-        'verifyRegistrationCode': _i1.MethodConnector(
+        'verifyRegistrationCode': _is.MethodConnector(
           name: 'verifyRegistrationCode',
           params: {
-            'accountRequestId': _i1.ParameterDescription(
+            'accountRequestId': _is.ParameterDescription(
               name: 'accountRequestId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'verificationCode': _i1.ParameterDescription(
+            'verificationCode': _is.ParameterDescription(
               name: 'verificationCode',
-              type: _i1.getType<String>(),
+              type: _is.getType<String>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['emailIdp'] as _i4.EmailIdpEndpoint)
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['emailIdp'] as _iuc1hd5t.EmailIdpEndpoint)
                   .verifyRegistrationCode(
                     session,
                     accountRequestId: params['accountRequestId'],
                     verificationCode: params['verificationCode'],
                   ),
         ),
-        'finishRegistration': _i1.MethodConnector(
+        'finishRegistration': _is.MethodConnector(
           name: 'finishRegistration',
           params: {
-            'registrationToken': _i1.ParameterDescription(
+            'registrationToken': _is.ParameterDescription(
               name: 'registrationToken',
-              type: _i1.getType<String>(),
+              type: _is.getType<String>(),
               nullable: false,
             ),
-            'password': _i1.ParameterDescription(
+            'password': _is.ParameterDescription(
               name: 'password',
-              type: _i1.getType<String>(),
+              type: _is.getType<String>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['emailIdp'] as _i4.EmailIdpEndpoint)
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['emailIdp'] as _iuc1hd5t.EmailIdpEndpoint)
                   .finishRegistration(
                     session,
                     registrationToken: params['registrationToken'],
                     password: params['password'],
                   ),
         ),
-        'startPasswordReset': _i1.MethodConnector(
+        'startPasswordReset': _is.MethodConnector(
           name: 'startPasswordReset',
           params: {
-            'email': _i1.ParameterDescription(
+            'email': _is.ParameterDescription(
               name: 'email',
-              type: _i1.getType<String>(),
+              type: _is.getType<String>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['emailIdp'] as _i4.EmailIdpEndpoint)
-                  .startPasswordReset(session, email: params['email']),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['emailIdp'] as _iuc1hd5t.EmailIdpEndpoint)
+                  .startPasswordReset(
+                    session,
+                    email: params['email'],
+                  ),
         ),
-        'verifyPasswordResetCode': _i1.MethodConnector(
+        'verifyPasswordResetCode': _is.MethodConnector(
           name: 'verifyPasswordResetCode',
           params: {
-            'passwordResetRequestId': _i1.ParameterDescription(
+            'passwordResetRequestId': _is.ParameterDescription(
               name: 'passwordResetRequestId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'verificationCode': _i1.ParameterDescription(
+            'verificationCode': _is.ParameterDescription(
               name: 'verificationCode',
-              type: _i1.getType<String>(),
+              type: _is.getType<String>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['emailIdp'] as _i4.EmailIdpEndpoint)
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['emailIdp'] as _iuc1hd5t.EmailIdpEndpoint)
                   .verifyPasswordResetCode(
                     session,
                     passwordResetRequestId: params['passwordResetRequestId'],
                     verificationCode: params['verificationCode'],
                   ),
         ),
-        'finishPasswordReset': _i1.MethodConnector(
+        'finishPasswordReset': _is.MethodConnector(
           name: 'finishPasswordReset',
           params: {
-            'finishPasswordResetToken': _i1.ParameterDescription(
+            'finishPasswordResetToken': _is.ParameterDescription(
               name: 'finishPasswordResetToken',
-              type: _i1.getType<String>(),
+              type: _is.getType<String>(),
               nullable: false,
             ),
-            'newPassword': _i1.ParameterDescription(
+            'newPassword': _is.ParameterDescription(
               name: 'newPassword',
-              type: _i1.getType<String>(),
+              type: _is.getType<String>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['emailIdp'] as _i4.EmailIdpEndpoint)
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['emailIdp'] as _iuc1hd5t.EmailIdpEndpoint)
                   .finishPasswordReset(
                     session,
                     finishPasswordResetToken:
@@ -469,2292 +625,2749 @@ class Endpoints extends _i1.EndpointDispatch {
                     newPassword: params['newPassword'],
                   ),
         ),
-        'hasAccount': _i1.MethodConnector(
+        'hasAccount': _is.MethodConnector(
           name: 'hasAccount',
           params: {},
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['emailIdp'] as _i4.EmailIdpEndpoint).hasAccount(
-                session,
-              ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['emailIdp'] as _iuc1hd5t.EmailIdpEndpoint)
+                  .hasAccount(session),
         ),
       },
     );
-    connectors['googleIdp'] = _i1.EndpointConnector(
+    connectors['googleIdp'] = _is.EndpointConnector(
       name: 'googleIdp',
       endpoint: endpoints['googleIdp']!,
       methodConnectors: {
-        'login': _i1.MethodConnector(
+        'login': _is.MethodConnector(
           name: 'login',
           params: {
-            'idToken': _i1.ParameterDescription(
+            'idToken': _is.ParameterDescription(
               name: 'idToken',
-              type: _i1.getType<String>(),
+              type: _is.getType<String>(),
               nullable: false,
             ),
-            'accessToken': _i1.ParameterDescription(
+            'accessToken': _is.ParameterDescription(
               name: 'accessToken',
-              type: _i1.getType<String?>(),
+              type: _is.getType<String?>(),
               nullable: true,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['googleIdp'] as _i5.GoogleIdpEndpoint).login(
-                session,
-                idToken: params['idToken'],
-                accessToken: params['accessToken'],
-              ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['googleIdp'] as _i71axiz0.GoogleIdpEndpoint).login(
+                    session,
+                    idToken: params['idToken'],
+                    accessToken: params['accessToken'],
+                  ),
         ),
-        'hasAccount': _i1.MethodConnector(
+        'loginWithCode': _is.MethodConnector(
+          name: 'loginWithCode',
+          params: {
+            'code': _is.ParameterDescription(
+              name: 'code',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'codeVerifier': _is.ParameterDescription(
+              name: 'codeVerifier',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'redirectUri': _is.ParameterDescription(
+              name: 'redirectUri',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['googleIdp'] as _i71axiz0.GoogleIdpEndpoint)
+                  .loginWithCode(
+                    session,
+                    code: params['code'],
+                    codeVerifier: params['codeVerifier'],
+                    redirectUri: params['redirectUri'],
+                  ),
+        ),
+        'hasAccount': _is.MethodConnector(
           name: 'hasAccount',
           params: {},
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['googleIdp'] as _i5.GoogleIdpEndpoint).hasAccount(
-                session,
-              ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['googleIdp'] as _i71axiz0.GoogleIdpEndpoint)
+                  .hasAccount(session),
         ),
       },
     );
-    connectors['jwtRefresh'] = _i1.EndpointConnector(
+    connectors['jwtRefresh'] = _is.EndpointConnector(
       name: 'jwtRefresh',
       endpoint: endpoints['jwtRefresh']!,
       methodConnectors: {
-        'refreshAccessToken': _i1.MethodConnector(
+        'refreshAccessToken': _is.MethodConnector(
           name: 'refreshAccessToken',
           params: {
-            'refreshToken': _i1.ParameterDescription(
+            'refreshToken': _is.ParameterDescription(
               name: 'refreshToken',
-              type: _i1.getType<String>(),
-              nullable: false,
+              type: _is.getType<String?>(),
+              nullable: true,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['jwtRefresh'] as _i6.JwtRefreshEndpoint)
-                  .refreshAccessToken(
-                    session,
-                    refreshToken: params['refreshToken'],
-                  ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['jwtRefresh'] as _inwq3ztq.JwtRefreshEndpoint)
+                      .refreshAccessToken(
+                        session,
+                        refreshToken: params['refreshToken'],
+                      ),
         ),
       },
     );
-    connectors['budgetTemplate'] = _i1.EndpointConnector(
+    connectors['budgetTemplate'] = _is.EndpointConnector(
       name: 'budgetTemplate',
       endpoint: endpoints['budgetTemplate']!,
       methodConnectors: {
-        'saveFromMonth': _i1.MethodConnector(
+        'saveFromMonth': _is.MethodConnector(
           name: 'saveFromMonth',
           params: {
-            'budgetId': _i1.ParameterDescription(
+            'budgetId': _is.ParameterDescription(
               name: 'budgetId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'name': _i1.ParameterDescription(
+            'name': _is.ParameterDescription(
               name: 'name',
-              type: _i1.getType<String>(),
+              type: _is.getType<String>(),
               nullable: false,
             ),
-            'year': _i1.ParameterDescription(
+            'year': _is.ParameterDescription(
               name: 'year',
-              type: _i1.getType<int>(),
+              type: _is.getType<int>(),
               nullable: false,
             ),
-            'month': _i1.ParameterDescription(
+            'month': _is.ParameterDescription(
               name: 'month',
-              type: _i1.getType<int>(),
+              type: _is.getType<int>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['budgetTemplate'] as _i7.BudgetTemplateEndpoint)
-                  .saveFromMonth(
-                    session,
-                    params['budgetId'],
-                    params['name'],
-                    params['year'],
-                    params['month'],
-                  ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['budgetTemplate']
+                          as _i3p5ie4r.BudgetTemplateEndpoint)
+                      .saveFromMonth(
+                        session,
+                        params['budgetId'],
+                        params['name'],
+                        params['year'],
+                        params['month'],
+                      ),
         ),
-        'list': _i1.MethodConnector(
+        'list': _is.MethodConnector(
           name: 'list',
           params: {
-            'budgetId': _i1.ParameterDescription(
+            'budgetId': _is.ParameterDescription(
               name: 'budgetId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['budgetTemplate'] as _i7.BudgetTemplateEndpoint).list(
-                session,
-                params['budgetId'],
-              ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['budgetTemplate']
+                          as _i3p5ie4r.BudgetTemplateEndpoint)
+                      .list(
+                        session,
+                        params['budgetId'],
+                      ),
         ),
-        'applyToMonth': _i1.MethodConnector(
+        'applyToMonth': _is.MethodConnector(
           name: 'applyToMonth',
           params: {
-            'templateId': _i1.ParameterDescription(
+            'templateId': _is.ParameterDescription(
               name: 'templateId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'budgetId': _i1.ParameterDescription(
+            'budgetId': _is.ParameterDescription(
               name: 'budgetId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'year': _i1.ParameterDescription(
+            'year': _is.ParameterDescription(
               name: 'year',
-              type: _i1.getType<int>(),
+              type: _is.getType<int>(),
               nullable: false,
             ),
-            'month': _i1.ParameterDescription(
+            'month': _is.ParameterDescription(
               name: 'month',
-              type: _i1.getType<int>(),
+              type: _is.getType<int>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['budgetTemplate'] as _i7.BudgetTemplateEndpoint)
-                  .applyToMonth(
-                    session,
-                    params['templateId'],
-                    params['budgetId'],
-                    params['year'],
-                    params['month'],
-                  ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['budgetTemplate']
+                          as _i3p5ie4r.BudgetTemplateEndpoint)
+                      .applyToMonth(
+                        session,
+                        params['templateId'],
+                        params['budgetId'],
+                        params['year'],
+                        params['month'],
+                      ),
         ),
-        'delete': _i1.MethodConnector(
+        'delete': _is.MethodConnector(
           name: 'delete',
           params: {
-            'templateId': _i1.ParameterDescription(
+            'templateId': _is.ParameterDescription(
               name: 'templateId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['budgetTemplate'] as _i7.BudgetTemplateEndpoint)
-                  .delete(session, params['templateId']),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['budgetTemplate']
+                          as _i3p5ie4r.BudgetTemplateEndpoint)
+                      .delete(
+                        session,
+                        params['templateId'],
+                      ),
         ),
       },
     );
-    connectors['budget'] = _i1.EndpointConnector(
+    connectors['budget'] = _is.EndpointConnector(
       name: 'budget',
       endpoint: endpoints['budget']!,
       methodConnectors: {
-        'create': _i1.MethodConnector(
+        'create': _is.MethodConnector(
           name: 'create',
           params: {
-            'name': _i1.ParameterDescription(
+            'name': _is.ParameterDescription(
               name: 'name',
-              type: _i1.getType<String>(),
+              type: _is.getType<String>(),
               nullable: false,
             ),
-            'currencyCode': _i1.ParameterDescription(
+            'currencyCode': _is.ParameterDescription(
               name: 'currencyCode',
-              type: _i1.getType<String>(),
+              type: _is.getType<String>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['budget'] as _i8.BudgetEndpoint).create(
-                session,
-                params['name'],
-                params['currencyCode'],
-              ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['budget'] as _in8w6wxx.BudgetEndpoint).create(
+                    session,
+                    params['name'],
+                    params['currencyCode'],
+                  ),
         ),
-        'list': _i1.MethodConnector(
+        'list': _is.MethodConnector(
           name: 'list',
           params: {},
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['budget'] as _i8.BudgetEndpoint).list(session),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['budget'] as _in8w6wxx.BudgetEndpoint).list(
+                session,
+              ),
         ),
-        'get': _i1.MethodConnector(
+        'get': _is.MethodConnector(
           name: 'get',
           params: {
-            'budgetId': _i1.ParameterDescription(
+            'budgetId': _is.ParameterDescription(
               name: 'budgetId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['budget'] as _i8.BudgetEndpoint).get(
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['budget'] as _in8w6wxx.BudgetEndpoint).get(
                 session,
                 params['budgetId'],
               ),
         ),
-        'update': _i1.MethodConnector(
+        'update': _is.MethodConnector(
           name: 'update',
           params: {
-            'budgetId': _i1.ParameterDescription(
+            'budgetId': _is.ParameterDescription(
               name: 'budgetId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'name': _i1.ParameterDescription(
+            'name': _is.ParameterDescription(
               name: 'name',
-              type: _i1.getType<String?>(),
+              type: _is.getType<String?>(),
               nullable: true,
             ),
-            'currencyCode': _i1.ParameterDescription(
+            'currencyCode': _is.ParameterDescription(
               name: 'currencyCode',
-              type: _i1.getType<String?>(),
+              type: _is.getType<String?>(),
               nullable: true,
             ),
-            'displayCurrencyCode': _i1.ParameterDescription(
+            'displayCurrencyCode': _is.ParameterDescription(
               name: 'displayCurrencyCode',
-              type: _i1.getType<String?>(),
+              type: _is.getType<String?>(),
               nullable: true,
             ),
-            'clearDisplayCurrencyCode': _i1.ParameterDescription(
+            'clearDisplayCurrencyCode': _is.ParameterDescription(
               name: 'clearDisplayCurrencyCode',
-              type: _i1.getType<bool?>(),
+              type: _is.getType<bool?>(),
               nullable: true,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['budget'] as _i8.BudgetEndpoint).update(
-                session,
-                params['budgetId'],
-                name: params['name'],
-                currencyCode: params['currencyCode'],
-                displayCurrencyCode: params['displayCurrencyCode'],
-                clearDisplayCurrencyCode: params['clearDisplayCurrencyCode'],
-              ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['budget'] as _in8w6wxx.BudgetEndpoint).update(
+                    session,
+                    params['budgetId'],
+                    name: params['name'],
+                    currencyCode: params['currencyCode'],
+                    displayCurrencyCode: params['displayCurrencyCode'],
+                    clearDisplayCurrencyCode:
+                        params['clearDisplayCurrencyCode'],
+                  ),
         ),
-        'delete': _i1.MethodConnector(
+        'delete': _is.MethodConnector(
           name: 'delete',
           params: {
-            'budgetId': _i1.ParameterDescription(
+            'budgetId': _is.ParameterDescription(
               name: 'budgetId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['budget'] as _i8.BudgetEndpoint).delete(
-                session,
-                params['budgetId'],
-              ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['budget'] as _in8w6wxx.BudgetEndpoint).delete(
+                    session,
+                    params['budgetId'],
+                  ),
         ),
-        'exportData': _i1.MethodConnector(
+        'exportData': _is.MethodConnector(
           name: 'exportData',
           params: {
-            'budgetId': _i1.ParameterDescription(
+            'budgetId': _is.ParameterDescription(
               name: 'budgetId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['budget'] as _i8.BudgetEndpoint).exportData(
-                session,
-                params['budgetId'],
-              ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['budget'] as _in8w6wxx.BudgetEndpoint).exportData(
+                    session,
+                    params['budgetId'],
+                  ),
         ),
       },
     );
-    connectors['budgetStream'] = _i1.EndpointConnector(
+    connectors['budgetStream'] = _is.EndpointConnector(
       name: 'budgetStream',
       endpoint: endpoints['budgetStream']!,
       methodConnectors: {
-        'budgetUpdates': _i1.MethodStreamConnector(
+        'budgetUpdates': _is.MethodStreamConnector(
           name: 'budgetUpdates',
           params: {},
           streamParams: {
-            'budgetIdStream': _i1.StreamParameterDescription<_i1.UuidValue>(
+            'budgetIdStream': _is.StreamParameterDescription<_is.UuidValue>(
               name: 'budgetIdStream',
               nullable: false,
             ),
           },
-          returnType: _i1.MethodStreamReturnType.streamType,
+          returnType: _is.MethodStreamReturnType.streamType,
           call:
               (
-                _i1.Session session,
+                _is.Session session,
                 Map<String, dynamic> params,
                 Map<String, Stream> streamParams,
-              ) => (endpoints['budgetStream'] as _i9.BudgetStreamEndpoint)
+              ) => (endpoints['budgetStream'] as _i5nzdilh.BudgetStreamEndpoint)
                   .budgetUpdates(
                     session,
-                    streamParams['budgetIdStream']!.cast<_i1.UuidValue>(),
+                    streamParams['budgetIdStream']!.cast<_is.UuidValue>(),
                   ),
         ),
       },
     );
-    connectors['category'] = _i1.EndpointConnector(
+    connectors['category'] = _is.EndpointConnector(
       name: 'category',
       endpoint: endpoints['category']!,
       methodConnectors: {
-        'create': _i1.MethodConnector(
+        'create': _is.MethodConnector(
           name: 'create',
           params: {
-            'name': _i1.ParameterDescription(
+            'name': _is.ParameterDescription(
               name: 'name',
-              type: _i1.getType<String>(),
+              type: _is.getType<String>(),
               nullable: false,
             ),
-            'budgetId': _i1.ParameterDescription(
+            'budgetId': _is.ParameterDescription(
               name: 'budgetId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'sortOrder': _i1.ParameterDescription(
+            'sortOrder': _is.ParameterDescription(
               name: 'sortOrder',
-              type: _i1.getType<int>(),
+              type: _is.getType<int>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['category'] as _i10.CategoryEndpoint).create(
-                session,
-                params['name'],
-                params['budgetId'],
-                params['sortOrder'],
-              ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['category'] as _irthghnb.CategoryEndpoint).create(
+                    session,
+                    params['name'],
+                    params['budgetId'],
+                    params['sortOrder'],
+                  ),
         ),
-        'list': _i1.MethodConnector(
+        'list': _is.MethodConnector(
           name: 'list',
           params: {
-            'budgetId': _i1.ParameterDescription(
+            'budgetId': _is.ParameterDescription(
               name: 'budgetId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['category'] as _i10.CategoryEndpoint).list(
-                session,
-                params['budgetId'],
-              ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['category'] as _irthghnb.CategoryEndpoint).list(
+                    session,
+                    params['budgetId'],
+                  ),
         ),
-        'get': _i1.MethodConnector(
+        'get': _is.MethodConnector(
           name: 'get',
           params: {
-            'categoryId': _i1.ParameterDescription(
+            'categoryId': _is.ParameterDescription(
               name: 'categoryId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['category'] as _i10.CategoryEndpoint).get(
-                session,
-                params['categoryId'],
-              ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['category'] as _irthghnb.CategoryEndpoint).get(
+                    session,
+                    params['categoryId'],
+                  ),
         ),
-        'update': _i1.MethodConnector(
+        'update': _is.MethodConnector(
           name: 'update',
           params: {
-            'categoryId': _i1.ParameterDescription(
+            'categoryId': _is.ParameterDescription(
               name: 'categoryId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'name': _i1.ParameterDescription(
+            'name': _is.ParameterDescription(
               name: 'name',
-              type: _i1.getType<String?>(),
+              type: _is.getType<String?>(),
               nullable: true,
             ),
-            'sortOrder': _i1.ParameterDescription(
+            'sortOrder': _is.ParameterDescription(
               name: 'sortOrder',
-              type: _i1.getType<int?>(),
+              type: _is.getType<int?>(),
               nullable: true,
             ),
-            'isHidden': _i1.ParameterDescription(
+            'isHidden': _is.ParameterDescription(
               name: 'isHidden',
-              type: _i1.getType<bool?>(),
+              type: _is.getType<bool?>(),
               nullable: true,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['category'] as _i10.CategoryEndpoint).update(
-                session,
-                params['categoryId'],
-                name: params['name'],
-                sortOrder: params['sortOrder'],
-                isHidden: params['isHidden'],
-              ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['category'] as _irthghnb.CategoryEndpoint).update(
+                    session,
+                    params['categoryId'],
+                    name: params['name'],
+                    sortOrder: params['sortOrder'],
+                    isHidden: params['isHidden'],
+                  ),
         ),
-        'reorder': _i1.MethodConnector(
+        'reorder': _is.MethodConnector(
           name: 'reorder',
           params: {
-            'budgetId': _i1.ParameterDescription(
+            'budgetId': _is.ParameterDescription(
               name: 'budgetId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'categoryIds': _i1.ParameterDescription(
+            'categoryIds': _is.ParameterDescription(
               name: 'categoryIds',
-              type: _i1.getType<List<_i1.UuidValue>>(),
+              type: _is.getType<List<_is.UuidValue>>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['category'] as _i10.CategoryEndpoint).reorder(
-                session,
-                params['budgetId'],
-                params['categoryIds'],
-              ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['category'] as _irthghnb.CategoryEndpoint).reorder(
+                    session,
+                    params['budgetId'],
+                    params['categoryIds'],
+                  ),
         ),
-        'delete': _i1.MethodConnector(
+        'delete': _is.MethodConnector(
           name: 'delete',
           params: {
-            'categoryId': _i1.ParameterDescription(
+            'categoryId': _is.ParameterDescription(
               name: 'categoryId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['category'] as _i10.CategoryEndpoint).delete(
-                session,
-                params['categoryId'],
-              ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['category'] as _irthghnb.CategoryEndpoint).delete(
+                    session,
+                    params['categoryId'],
+                  ),
         ),
       },
     );
-    connectors['envelopeGoal'] = _i1.EndpointConnector(
+    connectors['envelopeGoal'] = _is.EndpointConnector(
       name: 'envelopeGoal',
       endpoint: endpoints['envelopeGoal']!,
       methodConnectors: {
-        'upsert': _i1.MethodConnector(
+        'upsert': _is.MethodConnector(
           name: 'upsert',
           params: {
-            'envelopeId': _i1.ParameterDescription(
+            'envelopeId': _is.ParameterDescription(
               name: 'envelopeId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'goalType': _i1.ParameterDescription(
+            'goalType': _is.ParameterDescription(
               name: 'goalType',
-              type: _i1.getType<String>(),
+              type: _is.getType<String>(),
               nullable: false,
             ),
-            'targetAmountCents': _i1.ParameterDescription(
+            'targetAmountCents': _is.ParameterDescription(
               name: 'targetAmountCents',
-              type: _i1.getType<int>(),
+              type: _is.getType<int>(),
               nullable: false,
             ),
-            'targetDate': _i1.ParameterDescription(
+            'targetDate': _is.ParameterDescription(
               name: 'targetDate',
-              type: _i1.getType<DateTime?>(),
+              type: _is.getType<DateTime?>(),
               nullable: true,
             ),
-            'monthlyFundingCents': _i1.ParameterDescription(
+            'monthlyFundingCents': _is.ParameterDescription(
               name: 'monthlyFundingCents',
-              type: _i1.getType<int?>(),
+              type: _is.getType<int?>(),
               nullable: true,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['envelopeGoal'] as _i11.EnvelopeGoalEndpoint).upsert(
-                session,
-                params['envelopeId'],
-                params['goalType'],
-                params['targetAmountCents'],
-                targetDate: params['targetDate'],
-                monthlyFundingCents: params['monthlyFundingCents'],
-              ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['envelopeGoal'] as _i76paldx.EnvelopeGoalEndpoint)
+                      .upsert(
+                        session,
+                        params['envelopeId'],
+                        params['goalType'],
+                        params['targetAmountCents'],
+                        targetDate: params['targetDate'],
+                        monthlyFundingCents: params['monthlyFundingCents'],
+                      ),
         ),
-        'getForEnvelope': _i1.MethodConnector(
+        'getForEnvelope': _is.MethodConnector(
           name: 'getForEnvelope',
           params: {
-            'envelopeId': _i1.ParameterDescription(
+            'envelopeId': _is.ParameterDescription(
               name: 'envelopeId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['envelopeGoal'] as _i11.EnvelopeGoalEndpoint)
-                  .getForEnvelope(session, params['envelopeId']),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['envelopeGoal'] as _i76paldx.EnvelopeGoalEndpoint)
+                      .getForEnvelope(
+                        session,
+                        params['envelopeId'],
+                      ),
         ),
-        'listForEnvelopes': _i1.MethodConnector(
+        'listForEnvelopes': _is.MethodConnector(
           name: 'listForEnvelopes',
           params: {
-            'envelopeIds': _i1.ParameterDescription(
+            'envelopeIds': _is.ParameterDescription(
               name: 'envelopeIds',
-              type: _i1.getType<List<_i1.UuidValue>>(),
+              type: _is.getType<List<_is.UuidValue>>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['envelopeGoal'] as _i11.EnvelopeGoalEndpoint)
-                  .listForEnvelopes(session, params['envelopeIds']),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['envelopeGoal'] as _i76paldx.EnvelopeGoalEndpoint)
+                      .listForEnvelopes(
+                        session,
+                        params['envelopeIds'],
+                      ),
         ),
-        'delete': _i1.MethodConnector(
+        'delete': _is.MethodConnector(
           name: 'delete',
           params: {
-            'goalId': _i1.ParameterDescription(
+            'goalId': _is.ParameterDescription(
               name: 'goalId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['envelopeGoal'] as _i11.EnvelopeGoalEndpoint).delete(
-                session,
-                params['goalId'],
-              ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['envelopeGoal'] as _i76paldx.EnvelopeGoalEndpoint)
+                      .delete(
+                        session,
+                        params['goalId'],
+                      ),
         ),
       },
     );
-    connectors['envelope'] = _i1.EndpointConnector(
+    connectors['envelope'] = _is.EndpointConnector(
       name: 'envelope',
       endpoint: endpoints['envelope']!,
       methodConnectors: {
-        'create': _i1.MethodConnector(
+        'create': _is.MethodConnector(
           name: 'create',
           params: {
-            'name': _i1.ParameterDescription(
+            'name': _is.ParameterDescription(
               name: 'name',
-              type: _i1.getType<String>(),
+              type: _is.getType<String>(),
               nullable: false,
             ),
-            'categoryId': _i1.ParameterDescription(
+            'categoryId': _is.ParameterDescription(
               name: 'categoryId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'budgetedAmountCents': _i1.ParameterDescription(
+            'budgetedAmountCents': _is.ParameterDescription(
               name: 'budgetedAmountCents',
-              type: _i1.getType<int>(),
+              type: _is.getType<int>(),
               nullable: false,
             ),
-            'currencyCode': _i1.ParameterDescription(
+            'currencyCode': _is.ParameterDescription(
               name: 'currencyCode',
-              type: _i1.getType<String>(),
+              type: _is.getType<String>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['envelope'] as _i12.EnvelopeEndpoint).create(
-                session,
-                params['name'],
-                params['categoryId'],
-                params['budgetedAmountCents'],
-                params['currencyCode'],
-              ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['envelope'] as _in6dn9dl.EnvelopeEndpoint).create(
+                    session,
+                    params['name'],
+                    params['categoryId'],
+                    params['budgetedAmountCents'],
+                    params['currencyCode'],
+                  ),
         ),
-        'list': _i1.MethodConnector(
+        'list': _is.MethodConnector(
           name: 'list',
           params: {
-            'categoryId': _i1.ParameterDescription(
+            'categoryId': _is.ParameterDescription(
               name: 'categoryId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['envelope'] as _i12.EnvelopeEndpoint).list(
-                session,
-                params['categoryId'],
-              ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['envelope'] as _in6dn9dl.EnvelopeEndpoint).list(
+                    session,
+                    params['categoryId'],
+                  ),
         ),
-        'get': _i1.MethodConnector(
+        'get': _is.MethodConnector(
           name: 'get',
           params: {
-            'envelopeId': _i1.ParameterDescription(
+            'envelopeId': _is.ParameterDescription(
               name: 'envelopeId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['envelope'] as _i12.EnvelopeEndpoint).get(
-                session,
-                params['envelopeId'],
-              ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['envelope'] as _in6dn9dl.EnvelopeEndpoint).get(
+                    session,
+                    params['envelopeId'],
+                  ),
         ),
-        'update': _i1.MethodConnector(
+        'update': _is.MethodConnector(
           name: 'update',
           params: {
-            'envelopeId': _i1.ParameterDescription(
+            'envelopeId': _is.ParameterDescription(
               name: 'envelopeId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'name': _i1.ParameterDescription(
+            'name': _is.ParameterDescription(
               name: 'name',
-              type: _i1.getType<String?>(),
+              type: _is.getType<String?>(),
               nullable: true,
             ),
-            'budgetedAmountCents': _i1.ParameterDescription(
+            'budgetedAmountCents': _is.ParameterDescription(
               name: 'budgetedAmountCents',
-              type: _i1.getType<int?>(),
+              type: _is.getType<int?>(),
               nullable: true,
             ),
-            'spentAmountCents': _i1.ParameterDescription(
+            'spentAmountCents': _is.ParameterDescription(
               name: 'spentAmountCents',
-              type: _i1.getType<int?>(),
+              type: _is.getType<int?>(),
               nullable: true,
             ),
-            'note': _i1.ParameterDescription(
+            'note': _is.ParameterDescription(
               name: 'note',
-              type: _i1.getType<String?>(),
+              type: _is.getType<String?>(),
               nullable: true,
             ),
-            'isHidden': _i1.ParameterDescription(
+            'isHidden': _is.ParameterDescription(
               name: 'isHidden',
-              type: _i1.getType<bool?>(),
+              type: _is.getType<bool?>(),
               nullable: true,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['envelope'] as _i12.EnvelopeEndpoint).update(
-                session,
-                params['envelopeId'],
-                name: params['name'],
-                budgetedAmountCents: params['budgetedAmountCents'],
-                spentAmountCents: params['spentAmountCents'],
-                note: params['note'],
-                isHidden: params['isHidden'],
-              ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['envelope'] as _in6dn9dl.EnvelopeEndpoint).update(
+                    session,
+                    params['envelopeId'],
+                    name: params['name'],
+                    budgetedAmountCents: params['budgetedAmountCents'],
+                    spentAmountCents: params['spentAmountCents'],
+                    note: params['note'],
+                    isHidden: params['isHidden'],
+                  ),
         ),
-        'reorder': _i1.MethodConnector(
+        'reorder': _is.MethodConnector(
           name: 'reorder',
           params: {
-            'categoryId': _i1.ParameterDescription(
+            'categoryId': _is.ParameterDescription(
               name: 'categoryId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'envelopeIds': _i1.ParameterDescription(
+            'envelopeIds': _is.ParameterDescription(
               name: 'envelopeIds',
-              type: _i1.getType<List<String>>(),
+              type: _is.getType<List<String>>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['envelope'] as _i12.EnvelopeEndpoint).reorder(
-                session,
-                params['categoryId'],
-                params['envelopeIds'],
-              ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['envelope'] as _in6dn9dl.EnvelopeEndpoint).reorder(
+                    session,
+                    params['categoryId'],
+                    params['envelopeIds'],
+                  ),
         ),
-        'delete': _i1.MethodConnector(
+        'delete': _is.MethodConnector(
           name: 'delete',
           params: {
-            'envelopeId': _i1.ParameterDescription(
+            'envelopeId': _is.ParameterDescription(
               name: 'envelopeId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['envelope'] as _i12.EnvelopeEndpoint).delete(
-                session,
-                params['envelopeId'],
-              ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['envelope'] as _in6dn9dl.EnvelopeEndpoint).delete(
+                    session,
+                    params['envelopeId'],
+                  ),
         ),
       },
     );
-    connectors['fxRate'] = _i1.EndpointConnector(
+    connectors['fxRate'] = _is.EndpointConnector(
       name: 'fxRate',
       endpoint: endpoints['fxRate']!,
       methodConnectors: {
-        'latest': _i1.MethodConnector(
+        'latest': _is.MethodConnector(
           name: 'latest',
           params: {},
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['fxRate'] as _i13.FxRateEndpoint).latest(session),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['fxRate'] as _i7xoygut.FxRateEndpoint)
+                  .latest(session),
         ),
-        'refresh': _i1.MethodConnector(
+        'refresh': _is.MethodConnector(
           name: 'refresh',
           params: {},
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['fxRate'] as _i13.FxRateEndpoint).refresh(session),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['fxRate'] as _i7xoygut.FxRateEndpoint)
+                  .refresh(session),
         ),
       },
     );
-    connectors['institution'] = _i1.EndpointConnector(
+    connectors['institution'] = _is.EndpointConnector(
       name: 'institution',
       endpoint: endpoints['institution']!,
       methodConnectors: {
-        'list': _i1.MethodConnector(
+        'list': _is.MethodConnector(
           name: 'list',
           params: {
-            'locationCode': _i1.ParameterDescription(
+            'locationCode': _is.ParameterDescription(
               name: 'locationCode',
-              type: _i1.getType<String?>(),
+              type: _is.getType<String?>(),
               nullable: true,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['institution'] as _i14.InstitutionEndpoint).list(
-                session,
-                locationCode: params['locationCode'],
-              ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['institution'] as _i9rhv37i.InstitutionEndpoint)
+                      .list(
+                        session,
+                        locationCode: params['locationCode'],
+                      ),
         ),
       },
     );
-    connectors['monthlyAllocation'] = _i1.EndpointConnector(
+    connectors['monthlyAllocation'] = _is.EndpointConnector(
       name: 'monthlyAllocation',
       endpoint: endpoints['monthlyAllocation']!,
       methodConnectors: {
-        'upsert': _i1.MethodConnector(
+        'upsert': _is.MethodConnector(
           name: 'upsert',
           params: {
-            'envelopeId': _i1.ParameterDescription(
+            'envelopeId': _is.ParameterDescription(
               name: 'envelopeId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'budgetId': _i1.ParameterDescription(
+            'budgetId': _is.ParameterDescription(
               name: 'budgetId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'year': _i1.ParameterDescription(
+            'year': _is.ParameterDescription(
               name: 'year',
-              type: _i1.getType<int>(),
+              type: _is.getType<int>(),
               nullable: false,
             ),
-            'month': _i1.ParameterDescription(
+            'month': _is.ParameterDescription(
               name: 'month',
-              type: _i1.getType<int>(),
+              type: _is.getType<int>(),
               nullable: false,
             ),
-            'allocatedCents': _i1.ParameterDescription(
+            'allocatedCents': _is.ParameterDescription(
               name: 'allocatedCents',
-              type: _i1.getType<int>(),
+              type: _is.getType<int>(),
               nullable: false,
             ),
-            'carryoverCents': _i1.ParameterDescription(
+            'carryoverCents': _is.ParameterDescription(
               name: 'carryoverCents',
-              type: _i1.getType<int>(),
+              type: _is.getType<int>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['monthlyAllocation'] as _i15.MonthlyAllocationEndpoint)
-                  .upsert(
-                    session,
-                    params['envelopeId'],
-                    params['budgetId'],
-                    params['year'],
-                    params['month'],
-                    params['allocatedCents'],
-                    carryoverCents: params['carryoverCents'],
-                  ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['monthlyAllocation']
+                          as _ilfvovcz.MonthlyAllocationEndpoint)
+                      .upsert(
+                        session,
+                        params['envelopeId'],
+                        params['budgetId'],
+                        params['year'],
+                        params['month'],
+                        params['allocatedCents'],
+                        carryoverCents: params['carryoverCents'],
+                      ),
         ),
-        'list': _i1.MethodConnector(
+        'list': _is.MethodConnector(
           name: 'list',
           params: {
-            'budgetId': _i1.ParameterDescription(
+            'budgetId': _is.ParameterDescription(
               name: 'budgetId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'year': _i1.ParameterDescription(
+            'year': _is.ParameterDescription(
               name: 'year',
-              type: _i1.getType<int>(),
+              type: _is.getType<int>(),
               nullable: false,
             ),
-            'month': _i1.ParameterDescription(
+            'month': _is.ParameterDescription(
               name: 'month',
-              type: _i1.getType<int>(),
+              type: _is.getType<int>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['monthlyAllocation'] as _i15.MonthlyAllocationEndpoint)
-                  .list(
-                    session,
-                    params['budgetId'],
-                    params['year'],
-                    params['month'],
-                  ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['monthlyAllocation']
+                          as _ilfvovcz.MonthlyAllocationEndpoint)
+                      .list(
+                        session,
+                        params['budgetId'],
+                        params['year'],
+                        params['month'],
+                      ),
         ),
-        'copyMonth': _i1.MethodConnector(
+        'copyMonth': _is.MethodConnector(
           name: 'copyMonth',
           params: {
-            'budgetId': _i1.ParameterDescription(
+            'budgetId': _is.ParameterDescription(
               name: 'budgetId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'sourceYear': _i1.ParameterDescription(
+            'sourceYear': _is.ParameterDescription(
               name: 'sourceYear',
-              type: _i1.getType<int>(),
+              type: _is.getType<int>(),
               nullable: false,
             ),
-            'sourceMonth': _i1.ParameterDescription(
+            'sourceMonth': _is.ParameterDescription(
               name: 'sourceMonth',
-              type: _i1.getType<int>(),
+              type: _is.getType<int>(),
               nullable: false,
             ),
-            'targetYear': _i1.ParameterDescription(
+            'targetYear': _is.ParameterDescription(
               name: 'targetYear',
-              type: _i1.getType<int>(),
+              type: _is.getType<int>(),
               nullable: false,
             ),
-            'targetMonth': _i1.ParameterDescription(
+            'targetMonth': _is.ParameterDescription(
               name: 'targetMonth',
-              type: _i1.getType<int>(),
+              type: _is.getType<int>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['monthlyAllocation'] as _i15.MonthlyAllocationEndpoint)
-                  .copyMonth(
-                    session,
-                    params['budgetId'],
-                    params['sourceYear'],
-                    params['sourceMonth'],
-                    params['targetYear'],
-                    params['targetMonth'],
-                  ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['monthlyAllocation']
+                          as _ilfvovcz.MonthlyAllocationEndpoint)
+                      .copyMonth(
+                        session,
+                        params['budgetId'],
+                        params['sourceYear'],
+                        params['sourceMonth'],
+                        params['targetYear'],
+                        params['targetMonth'],
+                      ),
         ),
-        'moveMoney': _i1.MethodConnector(
+        'moveMoney': _is.MethodConnector(
           name: 'moveMoney',
           params: {
-            'fromEnvelopeId': _i1.ParameterDescription(
+            'fromEnvelopeId': _is.ParameterDescription(
               name: 'fromEnvelopeId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'toEnvelopeId': _i1.ParameterDescription(
+            'toEnvelopeId': _is.ParameterDescription(
               name: 'toEnvelopeId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'budgetId': _i1.ParameterDescription(
+            'budgetId': _is.ParameterDescription(
               name: 'budgetId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'year': _i1.ParameterDescription(
+            'year': _is.ParameterDescription(
               name: 'year',
-              type: _i1.getType<int>(),
+              type: _is.getType<int>(),
               nullable: false,
             ),
-            'month': _i1.ParameterDescription(
+            'month': _is.ParameterDescription(
               name: 'month',
-              type: _i1.getType<int>(),
+              type: _is.getType<int>(),
               nullable: false,
             ),
-            'amountCents': _i1.ParameterDescription(
+            'amountCents': _is.ParameterDescription(
               name: 'amountCents',
-              type: _i1.getType<int>(),
+              type: _is.getType<int>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['monthlyAllocation'] as _i15.MonthlyAllocationEndpoint)
-                  .moveMoney(
-                    session,
-                    params['fromEnvelopeId'],
-                    params['toEnvelopeId'],
-                    params['budgetId'],
-                    params['year'],
-                    params['month'],
-                    params['amountCents'],
-                  ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['monthlyAllocation']
+                          as _ilfvovcz.MonthlyAllocationEndpoint)
+                      .moveMoney(
+                        session,
+                        params['fromEnvelopeId'],
+                        params['toEnvelopeId'],
+                        params['budgetId'],
+                        params['year'],
+                        params['month'],
+                        params['amountCents'],
+                      ),
         ),
-        'delete': _i1.MethodConnector(
+        'delete': _is.MethodConnector(
           name: 'delete',
           params: {
-            'allocationId': _i1.ParameterDescription(
+            'allocationId': _is.ParameterDescription(
               name: 'allocationId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['monthlyAllocation'] as _i15.MonthlyAllocationEndpoint)
-                  .delete(session, params['allocationId']),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['monthlyAllocation']
+                          as _ilfvovcz.MonthlyAllocationEndpoint)
+                      .delete(
+                        session,
+                        params['allocationId'],
+                      ),
         ),
       },
     );
-    connectors['payee'] = _i1.EndpointConnector(
+    connectors['payee'] = _is.EndpointConnector(
       name: 'payee',
       endpoint: endpoints['payee']!,
       methodConnectors: {
-        'create': _i1.MethodConnector(
+        'create': _is.MethodConnector(
           name: 'create',
           params: {
-            'name': _i1.ParameterDescription(
+            'name': _is.ParameterDescription(
               name: 'name',
-              type: _i1.getType<String>(),
+              type: _is.getType<String>(),
               nullable: false,
             ),
-            'budgetId': _i1.ParameterDescription(
+            'budgetId': _is.ParameterDescription(
               name: 'budgetId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['payee'] as _i16.PayeeEndpoint).create(
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['payee'] as _i5rb0bcw.PayeeEndpoint).create(
                 session,
                 params['name'],
                 params['budgetId'],
               ),
         ),
-        'list': _i1.MethodConnector(
+        'list': _is.MethodConnector(
           name: 'list',
           params: {
-            'budgetId': _i1.ParameterDescription(
+            'budgetId': _is.ParameterDescription(
               name: 'budgetId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['payee'] as _i16.PayeeEndpoint).list(
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['payee'] as _i5rb0bcw.PayeeEndpoint).list(
                 session,
                 params['budgetId'],
               ),
         ),
-        'get': _i1.MethodConnector(
+        'get': _is.MethodConnector(
           name: 'get',
           params: {
-            'payeeId': _i1.ParameterDescription(
+            'payeeId': _is.ParameterDescription(
               name: 'payeeId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['payee'] as _i16.PayeeEndpoint).get(
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['payee'] as _i5rb0bcw.PayeeEndpoint).get(
                 session,
                 params['payeeId'],
               ),
         ),
-        'update': _i1.MethodConnector(
+        'update': _is.MethodConnector(
           name: 'update',
           params: {
-            'payeeId': _i1.ParameterDescription(
+            'payeeId': _is.ParameterDescription(
               name: 'payeeId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'name': _i1.ParameterDescription(
+            'name': _is.ParameterDescription(
               name: 'name',
-              type: _i1.getType<String?>(),
+              type: _is.getType<String?>(),
               nullable: true,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['payee'] as _i16.PayeeEndpoint).update(
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['payee'] as _i5rb0bcw.PayeeEndpoint).update(
                 session,
                 params['payeeId'],
                 name: params['name'],
               ),
         ),
-        'lastUsedEnvelopeId': _i1.MethodConnector(
+        'lastUsedEnvelopeId': _is.MethodConnector(
           name: 'lastUsedEnvelopeId',
           params: {
-            'payeeId': _i1.ParameterDescription(
+            'payeeId': _is.ParameterDescription(
               name: 'payeeId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'budgetId': _i1.ParameterDescription(
+            'budgetId': _is.ParameterDescription(
               name: 'budgetId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['payee'] as _i16.PayeeEndpoint).lastUsedEnvelopeId(
-                session,
-                params['payeeId'],
-                params['budgetId'],
-              ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['payee'] as _i5rb0bcw.PayeeEndpoint)
+                  .lastUsedEnvelopeId(
+                    session,
+                    params['payeeId'],
+                    params['budgetId'],
+                  ),
         ),
-        'merge': _i1.MethodConnector(
+        'merge': _is.MethodConnector(
           name: 'merge',
           params: {
-            'sourcePayeeId': _i1.ParameterDescription(
+            'sourcePayeeId': _is.ParameterDescription(
               name: 'sourcePayeeId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'targetPayeeId': _i1.ParameterDescription(
+            'targetPayeeId': _is.ParameterDescription(
               name: 'targetPayeeId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['payee'] as _i16.PayeeEndpoint).merge(
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['payee'] as _i5rb0bcw.PayeeEndpoint).merge(
                 session,
                 params['sourcePayeeId'],
                 params['targetPayeeId'],
               ),
         ),
-        'delete': _i1.MethodConnector(
+        'delete': _is.MethodConnector(
           name: 'delete',
           params: {
-            'payeeId': _i1.ParameterDescription(
+            'payeeId': _is.ParameterDescription(
               name: 'payeeId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['payee'] as _i16.PayeeEndpoint).delete(
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['payee'] as _i5rb0bcw.PayeeEndpoint).delete(
                 session,
                 params['payeeId'],
               ),
         ),
       },
     );
-    connectors['plaid'] = _i1.EndpointConnector(
+    connectors['plaid'] = _is.EndpointConnector(
       name: 'plaid',
       endpoint: endpoints['plaid']!,
       methodConnectors: {
-        'createLinkToken': _i1.MethodConnector(
+        'createLinkToken': _is.MethodConnector(
           name: 'createLinkToken',
           params: {
-            'budgetId': _i1.ParameterDescription(
+            'budgetId': _is.ParameterDescription(
               name: 'budgetId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['plaid'] as _i17.PlaidEndpoint).createLinkToken(
-                session,
-                params['budgetId'],
-              ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['plaid'] as _i9pkxqxw.PlaidEndpoint)
+                  .createLinkToken(
+                    session,
+                    params['budgetId'],
+                  ),
         ),
-        'exchangePublicToken': _i1.MethodConnector(
+        'exchangePublicToken': _is.MethodConnector(
           name: 'exchangePublicToken',
           params: {
-            'budgetId': _i1.ParameterDescription(
+            'budgetId': _is.ParameterDescription(
               name: 'budgetId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'publicToken': _i1.ParameterDescription(
+            'publicToken': _is.ParameterDescription(
               name: 'publicToken',
-              type: _i1.getType<String>(),
+              type: _is.getType<String>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['plaid'] as _i17.PlaidEndpoint).exchangePublicToken(
-                session,
-                params['budgetId'],
-                params['publicToken'],
-              ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['plaid'] as _i9pkxqxw.PlaidEndpoint)
+                  .exchangePublicToken(
+                    session,
+                    params['budgetId'],
+                    params['publicToken'],
+                  ),
         ),
-        'syncConnection': _i1.MethodConnector(
+        'syncConnection': _is.MethodConnector(
           name: 'syncConnection',
           params: {
-            'budgetId': _i1.ParameterDescription(
+            'budgetId': _is.ParameterDescription(
               name: 'budgetId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'connectionId': _i1.ParameterDescription(
+            'connectionId': _is.ParameterDescription(
               name: 'connectionId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['plaid'] as _i17.PlaidEndpoint).syncConnection(
-                session,
-                params['budgetId'],
-                params['connectionId'],
-              ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['plaid'] as _i9pkxqxw.PlaidEndpoint)
+                  .syncConnection(
+                    session,
+                    params['budgetId'],
+                    params['connectionId'],
+                  ),
         ),
-        'importSandboxAccounts': _i1.MethodConnector(
+        'importSandboxAccounts': _is.MethodConnector(
           name: 'importSandboxAccounts',
           params: {
-            'budgetId': _i1.ParameterDescription(
+            'budgetId': _is.ParameterDescription(
               name: 'budgetId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'plaidInstitutionId': _i1.ParameterDescription(
+            'plaidInstitutionId': _is.ParameterDescription(
               name: 'plaidInstitutionId',
-              type: _i1.getType<String?>(),
+              type: _is.getType<String?>(),
               nullable: true,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['plaid'] as _i17.PlaidEndpoint).importSandboxAccounts(
-                session,
-                params['budgetId'],
-                plaidInstitutionId: params['plaidInstitutionId'],
-              ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['plaid'] as _i9pkxqxw.PlaidEndpoint)
+                  .importSandboxAccounts(
+                    session,
+                    params['budgetId'],
+                    plaidInstitutionId: params['plaidInstitutionId'],
+                  ),
         ),
       },
     );
-    connectors['recurringTransaction'] = _i1.EndpointConnector(
+    connectors['recurringTransaction'] = _is.EndpointConnector(
       name: 'recurringTransaction',
       endpoint: endpoints['recurringTransaction']!,
       methodConnectors: {
-        'create': _i1.MethodConnector(
+        'create': _is.MethodConnector(
           name: 'create',
           params: {
-            'description': _i1.ParameterDescription(
+            'description': _is.ParameterDescription(
               name: 'description',
-              type: _i1.getType<String>(),
+              type: _is.getType<String>(),
               nullable: false,
             ),
-            'amountCents': _i1.ParameterDescription(
+            'amountCents': _is.ParameterDescription(
               name: 'amountCents',
-              type: _i1.getType<int>(),
+              type: _is.getType<int>(),
               nullable: false,
             ),
-            'currencyCode': _i1.ParameterDescription(
+            'currencyCode': _is.ParameterDescription(
               name: 'currencyCode',
-              type: _i1.getType<String>(),
+              type: _is.getType<String>(),
               nullable: false,
             ),
-            'budgetId': _i1.ParameterDescription(
+            'budgetId': _is.ParameterDescription(
               name: 'budgetId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'frequency': _i1.ParameterDescription(
+            'frequency': _is.ParameterDescription(
               name: 'frequency',
-              type: _i1.getType<String>(),
+              type: _is.getType<String>(),
               nullable: false,
             ),
-            'nextOccurrence': _i1.ParameterDescription(
+            'nextOccurrence': _is.ParameterDescription(
               name: 'nextOccurrence',
-              type: _i1.getType<DateTime>(),
+              type: _is.getType<DateTime>(),
               nullable: false,
             ),
-            'envelopeId': _i1.ParameterDescription(
+            'envelopeId': _is.ParameterDescription(
               name: 'envelopeId',
-              type: _i1.getType<_i1.UuidValue?>(),
+              type: _is.getType<_is.UuidValue?>(),
               nullable: true,
             ),
-            'accountId': _i1.ParameterDescription(
+            'accountId': _is.ParameterDescription(
               name: 'accountId',
-              type: _i1.getType<_i1.UuidValue?>(),
+              type: _is.getType<_is.UuidValue?>(),
               nullable: true,
             ),
-            'payeeId': _i1.ParameterDescription(
+            'payeeId': _is.ParameterDescription(
               name: 'payeeId',
-              type: _i1.getType<_i1.UuidValue?>(),
+              type: _is.getType<_is.UuidValue?>(),
               nullable: true,
             ),
-            'endDate': _i1.ParameterDescription(
+            'endDate': _is.ParameterDescription(
               name: 'endDate',
-              type: _i1.getType<DateTime?>(),
+              type: _is.getType<DateTime?>(),
               nullable: true,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['recurringTransaction']
-                      as _i18.RecurringTransactionEndpoint)
-                  .create(
-                    session,
-                    params['description'],
-                    params['amountCents'],
-                    params['currencyCode'],
-                    params['budgetId'],
-                    params['frequency'],
-                    params['nextOccurrence'],
-                    envelopeId: params['envelopeId'],
-                    accountId: params['accountId'],
-                    payeeId: params['payeeId'],
-                    endDate: params['endDate'],
-                  ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['recurringTransaction']
+                          as _ipwgw1dv.RecurringTransactionEndpoint)
+                      .create(
+                        session,
+                        params['description'],
+                        params['amountCents'],
+                        params['currencyCode'],
+                        params['budgetId'],
+                        params['frequency'],
+                        params['nextOccurrence'],
+                        envelopeId: params['envelopeId'],
+                        accountId: params['accountId'],
+                        payeeId: params['payeeId'],
+                        endDate: params['endDate'],
+                      ),
         ),
-        'list': _i1.MethodConnector(
+        'list': _is.MethodConnector(
           name: 'list',
           params: {
-            'budgetId': _i1.ParameterDescription(
+            'budgetId': _is.ParameterDescription(
               name: 'budgetId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'activeOnly': _i1.ParameterDescription(
+            'activeOnly': _is.ParameterDescription(
               name: 'activeOnly',
-              type: _i1.getType<bool?>(),
+              type: _is.getType<bool?>(),
               nullable: true,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['recurringTransaction']
-                      as _i18.RecurringTransactionEndpoint)
-                  .list(
-                    session,
-                    params['budgetId'],
-                    activeOnly: params['activeOnly'],
-                  ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['recurringTransaction']
+                          as _ipwgw1dv.RecurringTransactionEndpoint)
+                      .list(
+                        session,
+                        params['budgetId'],
+                        activeOnly: params['activeOnly'],
+                      ),
         ),
-        'get': _i1.MethodConnector(
+        'get': _is.MethodConnector(
           name: 'get',
           params: {
-            'recurringTransactionId': _i1.ParameterDescription(
+            'recurringTransactionId': _is.ParameterDescription(
               name: 'recurringTransactionId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['recurringTransaction']
-                      as _i18.RecurringTransactionEndpoint)
-                  .get(session, params['recurringTransactionId']),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['recurringTransaction']
+                          as _ipwgw1dv.RecurringTransactionEndpoint)
+                      .get(
+                        session,
+                        params['recurringTransactionId'],
+                      ),
         ),
-        'update': _i1.MethodConnector(
+        'update': _is.MethodConnector(
           name: 'update',
           params: {
-            'recurringTransactionId': _i1.ParameterDescription(
+            'recurringTransactionId': _is.ParameterDescription(
               name: 'recurringTransactionId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'description': _i1.ParameterDescription(
+            'description': _is.ParameterDescription(
               name: 'description',
-              type: _i1.getType<String?>(),
+              type: _is.getType<String?>(),
               nullable: true,
             ),
-            'amountCents': _i1.ParameterDescription(
+            'amountCents': _is.ParameterDescription(
               name: 'amountCents',
-              type: _i1.getType<int?>(),
+              type: _is.getType<int?>(),
               nullable: true,
             ),
-            'envelopeId': _i1.ParameterDescription(
+            'envelopeId': _is.ParameterDescription(
               name: 'envelopeId',
-              type: _i1.getType<_i1.UuidValue?>(),
+              type: _is.getType<_is.UuidValue?>(),
               nullable: true,
             ),
-            'accountId': _i1.ParameterDescription(
+            'accountId': _is.ParameterDescription(
               name: 'accountId',
-              type: _i1.getType<_i1.UuidValue?>(),
+              type: _is.getType<_is.UuidValue?>(),
               nullable: true,
             ),
-            'payeeId': _i1.ParameterDescription(
+            'payeeId': _is.ParameterDescription(
               name: 'payeeId',
-              type: _i1.getType<_i1.UuidValue?>(),
+              type: _is.getType<_is.UuidValue?>(),
               nullable: true,
             ),
-            'frequency': _i1.ParameterDescription(
+            'frequency': _is.ParameterDescription(
               name: 'frequency',
-              type: _i1.getType<String?>(),
+              type: _is.getType<String?>(),
               nullable: true,
             ),
-            'nextOccurrence': _i1.ParameterDescription(
+            'nextOccurrence': _is.ParameterDescription(
               name: 'nextOccurrence',
-              type: _i1.getType<DateTime?>(),
+              type: _is.getType<DateTime?>(),
               nullable: true,
             ),
-            'endDate': _i1.ParameterDescription(
+            'endDate': _is.ParameterDescription(
               name: 'endDate',
-              type: _i1.getType<DateTime?>(),
+              type: _is.getType<DateTime?>(),
               nullable: true,
             ),
-            'isActive': _i1.ParameterDescription(
+            'isActive': _is.ParameterDescription(
               name: 'isActive',
-              type: _i1.getType<bool?>(),
+              type: _is.getType<bool?>(),
               nullable: true,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['recurringTransaction']
-                      as _i18.RecurringTransactionEndpoint)
-                  .update(
-                    session,
-                    params['recurringTransactionId'],
-                    description: params['description'],
-                    amountCents: params['amountCents'],
-                    envelopeId: params['envelopeId'],
-                    accountId: params['accountId'],
-                    payeeId: params['payeeId'],
-                    frequency: params['frequency'],
-                    nextOccurrence: params['nextOccurrence'],
-                    endDate: params['endDate'],
-                    isActive: params['isActive'],
-                  ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['recurringTransaction']
+                          as _ipwgw1dv.RecurringTransactionEndpoint)
+                      .update(
+                        session,
+                        params['recurringTransactionId'],
+                        description: params['description'],
+                        amountCents: params['amountCents'],
+                        envelopeId: params['envelopeId'],
+                        accountId: params['accountId'],
+                        payeeId: params['payeeId'],
+                        frequency: params['frequency'],
+                        nextOccurrence: params['nextOccurrence'],
+                        endDate: params['endDate'],
+                        isActive: params['isActive'],
+                      ),
         ),
-        'delete': _i1.MethodConnector(
+        'delete': _is.MethodConnector(
           name: 'delete',
           params: {
-            'recurringTransactionId': _i1.ParameterDescription(
+            'recurringTransactionId': _is.ParameterDescription(
               name: 'recurringTransactionId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['recurringTransaction']
-                      as _i18.RecurringTransactionEndpoint)
-                  .delete(session, params['recurringTransactionId']),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['recurringTransaction']
+                          as _ipwgw1dv.RecurringTransactionEndpoint)
+                      .delete(
+                        session,
+                        params['recurringTransactionId'],
+                      ),
         ),
-        'skipOccurrence': _i1.MethodConnector(
+        'skipOccurrence': _is.MethodConnector(
           name: 'skipOccurrence',
           params: {
-            'recurringTransactionId': _i1.ParameterDescription(
+            'recurringTransactionId': _is.ParameterDescription(
               name: 'recurringTransactionId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['recurringTransaction']
-                      as _i18.RecurringTransactionEndpoint)
-                  .skipOccurrence(session, params['recurringTransactionId']),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['recurringTransaction']
+                          as _ipwgw1dv.RecurringTransactionEndpoint)
+                      .skipOccurrence(
+                        session,
+                        params['recurringTransactionId'],
+                      ),
         ),
-        'postDue': _i1.MethodConnector(
+        'postDue': _is.MethodConnector(
           name: 'postDue',
           params: {
-            'budgetId': _i1.ParameterDescription(
+            'budgetId': _is.ParameterDescription(
               name: 'budgetId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['recurringTransaction']
-                      as _i18.RecurringTransactionEndpoint)
-                  .postDue(session, params['budgetId']),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['recurringTransaction']
+                          as _ipwgw1dv.RecurringTransactionEndpoint)
+                      .postDue(
+                        session,
+                        params['budgetId'],
+                      ),
         ),
-        'countDue': _i1.MethodConnector(
+        'countDue': _is.MethodConnector(
           name: 'countDue',
           params: {
-            'budgetId': _i1.ParameterDescription(
+            'budgetId': _is.ParameterDescription(
               name: 'budgetId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['recurringTransaction']
-                      as _i18.RecurringTransactionEndpoint)
-                  .countDue(session, params['budgetId']),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['recurringTransaction']
+                          as _ipwgw1dv.RecurringTransactionEndpoint)
+                      .countDue(
+                        session,
+                        params['budgetId'],
+                      ),
         ),
       },
     );
-    connectors['solanaWallet'] = _i1.EndpointConnector(
+    connectors['solanaWallet'] = _is.EndpointConnector(
       name: 'solanaWallet',
       endpoint: endpoints['solanaWallet']!,
       methodConnectors: {
-        'attach': _i1.MethodConnector(
+        'attach': _is.MethodConnector(
           name: 'attach',
           params: {
-            'budgetId': _i1.ParameterDescription(
+            'budgetId': _is.ParameterDescription(
               name: 'budgetId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'accountId': _i1.ParameterDescription(
+            'accountId': _is.ParameterDescription(
               name: 'accountId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'address': _i1.ParameterDescription(
+            'address': _is.ParameterDescription(
               name: 'address',
-              type: _i1.getType<String>(),
+              type: _is.getType<String>(),
               nullable: false,
             ),
-            'label': _i1.ParameterDescription(
+            'label': _is.ParameterDescription(
               name: 'label',
-              type: _i1.getType<String?>(),
+              type: _is.getType<String?>(),
               nullable: true,
             ),
-            'cluster': _i1.ParameterDescription(
+            'cluster': _is.ParameterDescription(
               name: 'cluster',
-              type: _i1.getType<String>(),
+              type: _is.getType<String>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['solanaWallet'] as _i19.SolanaWalletEndpoint).attach(
-                session,
-                params['budgetId'],
-                params['accountId'],
-                params['address'],
-                label: params['label'],
-                cluster: params['cluster'],
-              ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['solanaWallet'] as _in77fwrc.SolanaWalletEndpoint)
+                      .attach(
+                        session,
+                        params['budgetId'],
+                        params['accountId'],
+                        params['address'],
+                        label: params['label'],
+                        cluster: params['cluster'],
+                      ),
         ),
-        'list': _i1.MethodConnector(
+        'list': _is.MethodConnector(
           name: 'list',
           params: {
-            'budgetId': _i1.ParameterDescription(
+            'budgetId': _is.ParameterDescription(
               name: 'budgetId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['solanaWallet'] as _i19.SolanaWalletEndpoint).list(
-                session,
-                params['budgetId'],
-              ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['solanaWallet'] as _in77fwrc.SolanaWalletEndpoint)
+                      .list(
+                        session,
+                        params['budgetId'],
+                      ),
         ),
-        'getForAccount': _i1.MethodConnector(
+        'getForAccount': _is.MethodConnector(
           name: 'getForAccount',
           params: {
-            'budgetId': _i1.ParameterDescription(
+            'budgetId': _is.ParameterDescription(
               name: 'budgetId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'accountId': _i1.ParameterDescription(
+            'accountId': _is.ParameterDescription(
               name: 'accountId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['solanaWallet'] as _i19.SolanaWalletEndpoint)
-                  .getForAccount(
-                    session,
-                    params['budgetId'],
-                    params['accountId'],
-                  ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['solanaWallet'] as _in77fwrc.SolanaWalletEndpoint)
+                      .getForAccount(
+                        session,
+                        params['budgetId'],
+                        params['accountId'],
+                      ),
         ),
-        'sync': _i1.MethodConnector(
+        'sync': _is.MethodConnector(
           name: 'sync',
           params: {
-            'budgetId': _i1.ParameterDescription(
+            'budgetId': _is.ParameterDescription(
               name: 'budgetId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'walletId': _i1.ParameterDescription(
+            'walletId': _is.ParameterDescription(
               name: 'walletId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'limit': _i1.ParameterDescription(
+            'limit': _is.ParameterDescription(
               name: 'limit',
-              type: _i1.getType<int>(),
+              type: _is.getType<int>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['solanaWallet'] as _i19.SolanaWalletEndpoint).sync(
-                session,
-                params['budgetId'],
-                params['walletId'],
-                limit: params['limit'],
-              ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['solanaWallet'] as _in77fwrc.SolanaWalletEndpoint)
+                      .sync(
+                        session,
+                        params['budgetId'],
+                        params['walletId'],
+                        limit: params['limit'],
+                      ),
         ),
-        'listTransactions': _i1.MethodConnector(
+        'listTransactions': _is.MethodConnector(
           name: 'listTransactions',
           params: {
-            'budgetId': _i1.ParameterDescription(
+            'budgetId': _is.ParameterDescription(
               name: 'budgetId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'walletId': _i1.ParameterDescription(
+            'walletId': _is.ParameterDescription(
               name: 'walletId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'limit': _i1.ParameterDescription(
+            'limit': _is.ParameterDescription(
               name: 'limit',
-              type: _i1.getType<int>(),
+              type: _is.getType<int>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['solanaWallet'] as _i19.SolanaWalletEndpoint)
-                  .listTransactions(
-                    session,
-                    params['budgetId'],
-                    params['walletId'],
-                    limit: params['limit'],
-                  ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['solanaWallet'] as _in77fwrc.SolanaWalletEndpoint)
+                      .listTransactions(
+                        session,
+                        params['budgetId'],
+                        params['walletId'],
+                        limit: params['limit'],
+                      ),
         ),
-        'listHoldings': _i1.MethodConnector(
+        'listHoldings': _is.MethodConnector(
           name: 'listHoldings',
           params: {
-            'budgetId': _i1.ParameterDescription(
+            'budgetId': _is.ParameterDescription(
               name: 'budgetId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'walletId': _i1.ParameterDescription(
+            'walletId': _is.ParameterDescription(
               name: 'walletId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['solanaWallet'] as _i19.SolanaWalletEndpoint)
-                  .listHoldings(
-                    session,
-                    params['budgetId'],
-                    params['walletId'],
-                  ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['solanaWallet'] as _in77fwrc.SolanaWalletEndpoint)
+                      .listHoldings(
+                        session,
+                        params['budgetId'],
+                        params['walletId'],
+                      ),
         ),
-        'listTaxYearSummaries': _i1.MethodConnector(
+        'listTaxYearSummaries': _is.MethodConnector(
           name: 'listTaxYearSummaries',
           params: {
-            'budgetId': _i1.ParameterDescription(
+            'budgetId': _is.ParameterDescription(
               name: 'budgetId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'walletId': _i1.ParameterDescription(
+            'walletId': _is.ParameterDescription(
               name: 'walletId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['solanaWallet'] as _i19.SolanaWalletEndpoint)
-                  .listTaxYearSummaries(
-                    session,
-                    params['budgetId'],
-                    params['walletId'],
-                  ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['solanaWallet'] as _in77fwrc.SolanaWalletEndpoint)
+                      .listTaxYearSummaries(
+                        session,
+                        params['budgetId'],
+                        params['walletId'],
+                      ),
         ),
-        'updateTransactionMetadata': _i1.MethodConnector(
+        'updateTransactionMetadata': _is.MethodConnector(
           name: 'updateTransactionMetadata',
           params: {
-            'budgetId': _i1.ParameterDescription(
+            'budgetId': _is.ParameterDescription(
               name: 'budgetId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'transactionId': _i1.ParameterDescription(
+            'transactionId': _is.ParameterDescription(
               name: 'transactionId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'category': _i1.ParameterDescription(
+            'category': _is.ParameterDescription(
               name: 'category',
-              type: _i1.getType<String?>(),
+              type: _is.getType<String?>(),
               nullable: true,
             ),
-            'tagsCsv': _i1.ParameterDescription(
+            'tagsCsv': _is.ParameterDescription(
               name: 'tagsCsv',
-              type: _i1.getType<String?>(),
+              type: _is.getType<String?>(),
               nullable: true,
             ),
-            'memo': _i1.ParameterDescription(
+            'memo': _is.ParameterDescription(
               name: 'memo',
-              type: _i1.getType<String?>(),
+              type: _is.getType<String?>(),
               nullable: true,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['solanaWallet'] as _i19.SolanaWalletEndpoint)
-                  .updateTransactionMetadata(
-                    session,
-                    params['budgetId'],
-                    params['transactionId'],
-                    category: params['category'],
-                    tagsCsv: params['tagsCsv'],
-                    memo: params['memo'],
-                  ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['solanaWallet'] as _in77fwrc.SolanaWalletEndpoint)
+                      .updateTransactionMetadata(
+                        session,
+                        params['budgetId'],
+                        params['transactionId'],
+                        category: params['category'],
+                        tagsCsv: params['tagsCsv'],
+                        memo: params['memo'],
+                      ),
         ),
       },
     );
-    connectors['transactionRule'] = _i1.EndpointConnector(
+    connectors['transactionRule'] = _is.EndpointConnector(
       name: 'transactionRule',
       endpoint: endpoints['transactionRule']!,
       methodConnectors: {
-        'create': _i1.MethodConnector(
+        'create': _is.MethodConnector(
           name: 'create',
           params: {
-            'budgetId': _i1.ParameterDescription(
+            'budgetId': _is.ParameterDescription(
               name: 'budgetId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'payeeId': _i1.ParameterDescription(
+            'payeeId': _is.ParameterDescription(
               name: 'payeeId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'targetEnvelopeId': _i1.ParameterDescription(
+            'targetEnvelopeId': _is.ParameterDescription(
               name: 'targetEnvelopeId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['transactionRule'] as _i20.TransactionRuleEndpoint)
-                  .create(
-                    session,
-                    params['budgetId'],
-                    params['payeeId'],
-                    params['targetEnvelopeId'],
-                  ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['transactionRule']
+                          as _i70s5v1k.TransactionRuleEndpoint)
+                      .create(
+                        session,
+                        params['budgetId'],
+                        params['payeeId'],
+                        params['targetEnvelopeId'],
+                      ),
         ),
-        'list': _i1.MethodConnector(
+        'list': _is.MethodConnector(
           name: 'list',
           params: {
-            'budgetId': _i1.ParameterDescription(
+            'budgetId': _is.ParameterDescription(
               name: 'budgetId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['transactionRule'] as _i20.TransactionRuleEndpoint)
-                  .list(session, params['budgetId']),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['transactionRule']
+                          as _i70s5v1k.TransactionRuleEndpoint)
+                      .list(
+                        session,
+                        params['budgetId'],
+                      ),
         ),
-        'get': _i1.MethodConnector(
+        'get': _is.MethodConnector(
           name: 'get',
           params: {
-            'ruleId': _i1.ParameterDescription(
+            'ruleId': _is.ParameterDescription(
               name: 'ruleId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['transactionRule'] as _i20.TransactionRuleEndpoint)
-                  .get(session, params['ruleId']),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['transactionRule']
+                          as _i70s5v1k.TransactionRuleEndpoint)
+                      .get(
+                        session,
+                        params['ruleId'],
+                      ),
         ),
-        'update': _i1.MethodConnector(
+        'update': _is.MethodConnector(
           name: 'update',
           params: {
-            'ruleId': _i1.ParameterDescription(
+            'ruleId': _is.ParameterDescription(
               name: 'ruleId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'targetEnvelopeId': _i1.ParameterDescription(
+            'targetEnvelopeId': _is.ParameterDescription(
               name: 'targetEnvelopeId',
-              type: _i1.getType<_i1.UuidValue?>(),
+              type: _is.getType<_is.UuidValue?>(),
               nullable: true,
             ),
-            'enabled': _i1.ParameterDescription(
+            'enabled': _is.ParameterDescription(
               name: 'enabled',
-              type: _i1.getType<bool?>(),
+              type: _is.getType<bool?>(),
               nullable: true,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['transactionRule'] as _i20.TransactionRuleEndpoint)
-                  .update(
-                    session,
-                    params['ruleId'],
-                    targetEnvelopeId: params['targetEnvelopeId'],
-                    enabled: params['enabled'],
-                  ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['transactionRule']
+                          as _i70s5v1k.TransactionRuleEndpoint)
+                      .update(
+                        session,
+                        params['ruleId'],
+                        targetEnvelopeId: params['targetEnvelopeId'],
+                        enabled: params['enabled'],
+                      ),
         ),
-        'findMatchingEnvelope': _i1.MethodConnector(
+        'findMatchingEnvelope': _is.MethodConnector(
           name: 'findMatchingEnvelope',
           params: {
-            'budgetId': _i1.ParameterDescription(
+            'budgetId': _is.ParameterDescription(
               name: 'budgetId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'payeeId': _i1.ParameterDescription(
+            'payeeId': _is.ParameterDescription(
               name: 'payeeId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['transactionRule'] as _i20.TransactionRuleEndpoint)
-                  .findMatchingEnvelope(
-                    session,
-                    params['budgetId'],
-                    params['payeeId'],
-                  ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['transactionRule']
+                          as _i70s5v1k.TransactionRuleEndpoint)
+                      .findMatchingEnvelope(
+                        session,
+                        params['budgetId'],
+                        params['payeeId'],
+                      ),
         ),
-        'delete': _i1.MethodConnector(
+        'delete': _is.MethodConnector(
           name: 'delete',
           params: {
-            'ruleId': _i1.ParameterDescription(
+            'ruleId': _is.ParameterDescription(
               name: 'ruleId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['transactionRule'] as _i20.TransactionRuleEndpoint)
-                  .delete(session, params['ruleId']),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['transactionRule']
+                          as _i70s5v1k.TransactionRuleEndpoint)
+                      .delete(
+                        session,
+                        params['ruleId'],
+                      ),
         ),
       },
     );
-    connectors['transaction'] = _i1.EndpointConnector(
+    connectors['transaction'] = _is.EndpointConnector(
       name: 'transaction',
       endpoint: endpoints['transaction']!,
       methodConnectors: {
-        'create': _i1.MethodConnector(
+        'create': _is.MethodConnector(
           name: 'create',
           params: {
-            'description': _i1.ParameterDescription(
+            'description': _is.ParameterDescription(
               name: 'description',
-              type: _i1.getType<String>(),
+              type: _is.getType<String>(),
               nullable: false,
             ),
-            'amountCents': _i1.ParameterDescription(
+            'amountCents': _is.ParameterDescription(
               name: 'amountCents',
-              type: _i1.getType<int>(),
+              type: _is.getType<int>(),
               nullable: false,
             ),
-            'currencyCode': _i1.ParameterDescription(
+            'currencyCode': _is.ParameterDescription(
               name: 'currencyCode',
-              type: _i1.getType<String>(),
+              type: _is.getType<String>(),
               nullable: false,
             ),
-            'budgetId': _i1.ParameterDescription(
+            'budgetId': _is.ParameterDescription(
               name: 'budgetId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'transactionDate': _i1.ParameterDescription(
+            'transactionDate': _is.ParameterDescription(
               name: 'transactionDate',
-              type: _i1.getType<DateTime>(),
+              type: _is.getType<DateTime>(),
               nullable: false,
             ),
-            'envelopeId': _i1.ParameterDescription(
+            'envelopeId': _is.ParameterDescription(
               name: 'envelopeId',
-              type: _i1.getType<_i1.UuidValue?>(),
+              type: _is.getType<_is.UuidValue?>(),
               nullable: true,
             ),
-            'payeeId': _i1.ParameterDescription(
+            'payeeId': _is.ParameterDescription(
               name: 'payeeId',
-              type: _i1.getType<_i1.UuidValue?>(),
+              type: _is.getType<_is.UuidValue?>(),
               nullable: true,
             ),
-            'memo': _i1.ParameterDescription(
+            'memo': _is.ParameterDescription(
               name: 'memo',
-              type: _i1.getType<String?>(),
+              type: _is.getType<String?>(),
               nullable: true,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['transaction'] as _i21.TransactionEndpoint).create(
-                session,
-                params['description'],
-                params['amountCents'],
-                params['currencyCode'],
-                params['budgetId'],
-                params['transactionDate'],
-                envelopeId: params['envelopeId'],
-                payeeId: params['payeeId'],
-                memo: params['memo'],
-              ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['transaction'] as _if8xv4dr.TransactionEndpoint)
+                      .create(
+                        session,
+                        params['description'],
+                        params['amountCents'],
+                        params['currencyCode'],
+                        params['budgetId'],
+                        params['transactionDate'],
+                        envelopeId: params['envelopeId'],
+                        payeeId: params['payeeId'],
+                        memo: params['memo'],
+                      ),
         ),
-        'list': _i1.MethodConnector(
+        'list': _is.MethodConnector(
           name: 'list',
           params: {
-            'budgetId': _i1.ParameterDescription(
+            'budgetId': _is.ParameterDescription(
               name: 'budgetId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['transaction'] as _i21.TransactionEndpoint).list(
-                session,
-                params['budgetId'],
-              ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['transaction'] as _if8xv4dr.TransactionEndpoint)
+                      .list(
+                        session,
+                        params['budgetId'],
+                      ),
         ),
-        'listByMonth': _i1.MethodConnector(
+        'listByMonth': _is.MethodConnector(
           name: 'listByMonth',
           params: {
-            'budgetId': _i1.ParameterDescription(
+            'budgetId': _is.ParameterDescription(
               name: 'budgetId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'year': _i1.ParameterDescription(
+            'year': _is.ParameterDescription(
               name: 'year',
-              type: _i1.getType<int>(),
+              type: _is.getType<int>(),
               nullable: false,
             ),
-            'month': _i1.ParameterDescription(
+            'month': _is.ParameterDescription(
               name: 'month',
-              type: _i1.getType<int>(),
+              type: _is.getType<int>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['transaction'] as _i21.TransactionEndpoint)
-                  .listByMonth(
-                    session,
-                    params['budgetId'],
-                    params['year'],
-                    params['month'],
-                  ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['transaction'] as _if8xv4dr.TransactionEndpoint)
+                      .listByMonth(
+                        session,
+                        params['budgetId'],
+                        params['year'],
+                        params['month'],
+                      ),
         ),
-        'get': _i1.MethodConnector(
+        'get': _is.MethodConnector(
           name: 'get',
           params: {
-            'transactionId': _i1.ParameterDescription(
+            'transactionId': _is.ParameterDescription(
               name: 'transactionId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['transaction'] as _i21.TransactionEndpoint).get(
-                session,
-                params['transactionId'],
-              ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['transaction'] as _if8xv4dr.TransactionEndpoint)
+                      .get(
+                        session,
+                        params['transactionId'],
+                      ),
         ),
-        'update': _i1.MethodConnector(
+        'update': _is.MethodConnector(
           name: 'update',
           params: {
-            'transactionId': _i1.ParameterDescription(
+            'transactionId': _is.ParameterDescription(
               name: 'transactionId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'description': _i1.ParameterDescription(
+            'description': _is.ParameterDescription(
               name: 'description',
-              type: _i1.getType<String?>(),
+              type: _is.getType<String?>(),
               nullable: true,
             ),
-            'amountCents': _i1.ParameterDescription(
+            'amountCents': _is.ParameterDescription(
               name: 'amountCents',
-              type: _i1.getType<int?>(),
+              type: _is.getType<int?>(),
               nullable: true,
             ),
-            'envelopeId': _i1.ParameterDescription(
+            'envelopeId': _is.ParameterDescription(
               name: 'envelopeId',
-              type: _i1.getType<_i1.UuidValue?>(),
+              type: _is.getType<_is.UuidValue?>(),
               nullable: true,
             ),
-            'payeeId': _i1.ParameterDescription(
+            'payeeId': _is.ParameterDescription(
               name: 'payeeId',
-              type: _i1.getType<_i1.UuidValue?>(),
+              type: _is.getType<_is.UuidValue?>(),
               nullable: true,
             ),
-            'transactionDate': _i1.ParameterDescription(
+            'transactionDate': _is.ParameterDescription(
               name: 'transactionDate',
-              type: _i1.getType<DateTime?>(),
+              type: _is.getType<DateTime?>(),
               nullable: true,
             ),
-            'memo': _i1.ParameterDescription(
+            'memo': _is.ParameterDescription(
               name: 'memo',
-              type: _i1.getType<String?>(),
+              type: _is.getType<String?>(),
               nullable: true,
             ),
-            'flagColor': _i1.ParameterDescription(
+            'flagColor': _is.ParameterDescription(
               name: 'flagColor',
-              type: _i1.getType<String?>(),
+              type: _is.getType<String?>(),
               nullable: true,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['transaction'] as _i21.TransactionEndpoint).update(
-                session,
-                params['transactionId'],
-                description: params['description'],
-                amountCents: params['amountCents'],
-                envelopeId: params['envelopeId'],
-                payeeId: params['payeeId'],
-                transactionDate: params['transactionDate'],
-                memo: params['memo'],
-                flagColor: params['flagColor'],
-              ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['transaction'] as _if8xv4dr.TransactionEndpoint)
+                      .update(
+                        session,
+                        params['transactionId'],
+                        description: params['description'],
+                        amountCents: params['amountCents'],
+                        envelopeId: params['envelopeId'],
+                        payeeId: params['payeeId'],
+                        transactionDate: params['transactionDate'],
+                        memo: params['memo'],
+                        flagColor: params['flagColor'],
+                      ),
         ),
-        'setFlag': _i1.MethodConnector(
+        'setFlag': _is.MethodConnector(
           name: 'setFlag',
           params: {
-            'transactionId': _i1.ParameterDescription(
+            'transactionId': _is.ParameterDescription(
               name: 'transactionId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'flagColor': _i1.ParameterDescription(
+            'flagColor': _is.ParameterDescription(
               name: 'flagColor',
-              type: _i1.getType<String?>(),
+              type: _is.getType<String?>(),
               nullable: true,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['transaction'] as _i21.TransactionEndpoint).setFlag(
-                session,
-                params['transactionId'],
-                flagColor: params['flagColor'],
-              ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['transaction'] as _if8xv4dr.TransactionEndpoint)
+                      .setFlag(
+                        session,
+                        params['transactionId'],
+                        flagColor: params['flagColor'],
+                      ),
         ),
-        'transfer': _i1.MethodConnector(
+        'transfer': _is.MethodConnector(
           name: 'transfer',
           params: {
-            'description': _i1.ParameterDescription(
+            'description': _is.ParameterDescription(
               name: 'description',
-              type: _i1.getType<String>(),
+              type: _is.getType<String>(),
               nullable: false,
             ),
-            'amountCents': _i1.ParameterDescription(
+            'amountCents': _is.ParameterDescription(
               name: 'amountCents',
-              type: _i1.getType<int>(),
+              type: _is.getType<int>(),
               nullable: false,
             ),
-            'currencyCode': _i1.ParameterDescription(
+            'currencyCode': _is.ParameterDescription(
               name: 'currencyCode',
-              type: _i1.getType<String>(),
+              type: _is.getType<String>(),
               nullable: false,
             ),
-            'budgetId': _i1.ParameterDescription(
+            'budgetId': _is.ParameterDescription(
               name: 'budgetId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'fromAccountId': _i1.ParameterDescription(
+            'fromAccountId': _is.ParameterDescription(
               name: 'fromAccountId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'toAccountId': _i1.ParameterDescription(
+            'toAccountId': _is.ParameterDescription(
               name: 'toAccountId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'transactionDate': _i1.ParameterDescription(
+            'transactionDate': _is.ParameterDescription(
               name: 'transactionDate',
-              type: _i1.getType<DateTime>(),
+              type: _is.getType<DateTime>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['transaction'] as _i21.TransactionEndpoint).transfer(
-                session,
-                params['description'],
-                params['amountCents'],
-                params['currencyCode'],
-                params['budgetId'],
-                params['fromAccountId'],
-                params['toAccountId'],
-                params['transactionDate'],
-              ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['transaction'] as _if8xv4dr.TransactionEndpoint)
+                      .transfer(
+                        session,
+                        params['description'],
+                        params['amountCents'],
+                        params['currencyCode'],
+                        params['budgetId'],
+                        params['fromAccountId'],
+                        params['toAccountId'],
+                        params['transactionDate'],
+                      ),
         ),
-        'listByAccount': _i1.MethodConnector(
+        'listByAccount': _is.MethodConnector(
           name: 'listByAccount',
           params: {
-            'accountId': _i1.ParameterDescription(
+            'accountId': _is.ParameterDescription(
               name: 'accountId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'budgetId': _i1.ParameterDescription(
+            'budgetId': _is.ParameterDescription(
               name: 'budgetId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['transaction'] as _i21.TransactionEndpoint)
-                  .listByAccount(
-                    session,
-                    params['accountId'],
-                    params['budgetId'],
-                  ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['transaction'] as _if8xv4dr.TransactionEndpoint)
+                      .listByAccount(
+                        session,
+                        params['accountId'],
+                        params['budgetId'],
+                      ),
         ),
-        'toggleCleared': _i1.MethodConnector(
+        'toggleCleared': _is.MethodConnector(
           name: 'toggleCleared',
           params: {
-            'transactionId': _i1.ParameterDescription(
+            'transactionId': _is.ParameterDescription(
               name: 'transactionId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['transaction'] as _i21.TransactionEndpoint)
-                  .toggleCleared(session, params['transactionId']),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['transaction'] as _if8xv4dr.TransactionEndpoint)
+                      .toggleCleared(
+                        session,
+                        params['transactionId'],
+                      ),
         ),
-        'reconcileAccount': _i1.MethodConnector(
+        'reconcileAccount': _is.MethodConnector(
           name: 'reconcileAccount',
           params: {
-            'accountId': _i1.ParameterDescription(
+            'accountId': _is.ParameterDescription(
               name: 'accountId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'budgetId': _i1.ParameterDescription(
+            'budgetId': _is.ParameterDescription(
               name: 'budgetId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['transaction'] as _i21.TransactionEndpoint)
-                  .reconcileAccount(
-                    session,
-                    params['accountId'],
-                    params['budgetId'],
-                  ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['transaction'] as _if8xv4dr.TransactionEndpoint)
+                      .reconcileAccount(
+                        session,
+                        params['accountId'],
+                        params['budgetId'],
+                      ),
         ),
-        'reconcileWithBalance': _i1.MethodConnector(
+        'reconcileWithBalance': _is.MethodConnector(
           name: 'reconcileWithBalance',
           params: {
-            'accountId': _i1.ParameterDescription(
+            'accountId': _is.ParameterDescription(
               name: 'accountId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'budgetId': _i1.ParameterDescription(
+            'budgetId': _is.ParameterDescription(
               name: 'budgetId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'statementBalanceCents': _i1.ParameterDescription(
+            'statementBalanceCents': _is.ParameterDescription(
               name: 'statementBalanceCents',
-              type: _i1.getType<int>(),
+              type: _is.getType<int>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['transaction'] as _i21.TransactionEndpoint)
-                  .reconcileWithBalance(
-                    session,
-                    params['accountId'],
-                    params['budgetId'],
-                    params['statementBalanceCents'],
-                  ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['transaction'] as _if8xv4dr.TransactionEndpoint)
+                      .reconcileWithBalance(
+                        session,
+                        params['accountId'],
+                        params['budgetId'],
+                        params['statementBalanceCents'],
+                      ),
         ),
-        'ageOfMoney': _i1.MethodConnector(
+        'ageOfMoney': _is.MethodConnector(
           name: 'ageOfMoney',
           params: {
-            'budgetId': _i1.ParameterDescription(
+            'budgetId': _is.ParameterDescription(
               name: 'budgetId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['transaction'] as _i21.TransactionEndpoint).ageOfMoney(
-                session,
-                params['budgetId'],
-              ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['transaction'] as _if8xv4dr.TransactionEndpoint)
+                      .ageOfMoney(
+                        session,
+                        params['budgetId'],
+                      ),
         ),
-        'createSplit': _i1.MethodConnector(
+        'createSplit': _is.MethodConnector(
           name: 'createSplit',
           params: {
-            'description': _i1.ParameterDescription(
+            'description': _is.ParameterDescription(
               name: 'description',
-              type: _i1.getType<String>(),
+              type: _is.getType<String>(),
               nullable: false,
             ),
-            'totalAmountCents': _i1.ParameterDescription(
+            'totalAmountCents': _is.ParameterDescription(
               name: 'totalAmountCents',
-              type: _i1.getType<int>(),
+              type: _is.getType<int>(),
               nullable: false,
             ),
-            'currencyCode': _i1.ParameterDescription(
+            'currencyCode': _is.ParameterDescription(
               name: 'currencyCode',
-              type: _i1.getType<String>(),
+              type: _is.getType<String>(),
               nullable: false,
             ),
-            'budgetId': _i1.ParameterDescription(
+            'budgetId': _is.ParameterDescription(
               name: 'budgetId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'transactionDate': _i1.ParameterDescription(
+            'transactionDate': _is.ParameterDescription(
               name: 'transactionDate',
-              type: _i1.getType<DateTime>(),
+              type: _is.getType<DateTime>(),
               nullable: false,
             ),
-            'splits': _i1.ParameterDescription(
+            'splits': _is.ParameterDescription(
               name: 'splits',
-              type: _i1.getType<List<_i23.SplitItem>>(),
+              type: _is.getType<List<_ii8zyh2l.SplitItem>>(),
               nullable: false,
             ),
-            'payeeId': _i1.ParameterDescription(
+            'payeeId': _is.ParameterDescription(
               name: 'payeeId',
-              type: _i1.getType<_i1.UuidValue?>(),
+              type: _is.getType<_is.UuidValue?>(),
               nullable: true,
             ),
-            'accountId': _i1.ParameterDescription(
+            'accountId': _is.ParameterDescription(
               name: 'accountId',
-              type: _i1.getType<_i1.UuidValue?>(),
+              type: _is.getType<_is.UuidValue?>(),
               nullable: true,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['transaction'] as _i21.TransactionEndpoint)
-                  .createSplit(
-                    session,
-                    params['description'],
-                    params['totalAmountCents'],
-                    params['currencyCode'],
-                    params['budgetId'],
-                    params['transactionDate'],
-                    params['splits'],
-                    payeeId: params['payeeId'],
-                    accountId: params['accountId'],
-                  ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['transaction'] as _if8xv4dr.TransactionEndpoint)
+                      .createSplit(
+                        session,
+                        params['description'],
+                        params['totalAmountCents'],
+                        params['currencyCode'],
+                        params['budgetId'],
+                        params['transactionDate'],
+                        params['splits'],
+                        payeeId: params['payeeId'],
+                        accountId: params['accountId'],
+                      ),
         ),
-        'listSplits': _i1.MethodConnector(
+        'listSplits': _is.MethodConnector(
           name: 'listSplits',
           params: {
-            'parentTransactionId': _i1.ParameterDescription(
+            'parentTransactionId': _is.ParameterDescription(
               name: 'parentTransactionId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['transaction'] as _i21.TransactionEndpoint).listSplits(
-                session,
-                params['parentTransactionId'],
-              ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['transaction'] as _if8xv4dr.TransactionEndpoint)
+                      .listSplits(
+                        session,
+                        params['parentTransactionId'],
+                      ),
         ),
-        'bulkImport': _i1.MethodConnector(
+        'bulkImport': _is.MethodConnector(
           name: 'bulkImport',
           params: {
-            'budgetId': _i1.ParameterDescription(
+            'budgetId': _is.ParameterDescription(
               name: 'budgetId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'currencyCode': _i1.ParameterDescription(
+            'currencyCode': _is.ParameterDescription(
               name: 'currencyCode',
-              type: _i1.getType<String>(),
+              type: _is.getType<String>(),
               nullable: false,
             ),
-            'rows': _i1.ParameterDescription(
+            'rows': _is.ParameterDescription(
               name: 'rows',
-              type: _i1.getType<List<_i24.ImportRow>>(),
+              type: _is.getType<List<_iyod81ld.ImportRow>>(),
               nullable: false,
             ),
-            'accountId': _i1.ParameterDescription(
+            'accountId': _is.ParameterDescription(
               name: 'accountId',
-              type: _i1.getType<_i1.UuidValue?>(),
+              type: _is.getType<_is.UuidValue?>(),
               nullable: true,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['transaction'] as _i21.TransactionEndpoint).bulkImport(
-                session,
-                params['budgetId'],
-                params['currencyCode'],
-                params['rows'],
-                accountId: params['accountId'],
-              ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['transaction'] as _if8xv4dr.TransactionEndpoint)
+                      .bulkImport(
+                        session,
+                        params['budgetId'],
+                        params['currencyCode'],
+                        params['rows'],
+                        accountId: params['accountId'],
+                      ),
         ),
-        'findDuplicates': _i1.MethodConnector(
+        'findDuplicates': _is.MethodConnector(
           name: 'findDuplicates',
           params: {
-            'budgetId': _i1.ParameterDescription(
+            'budgetId': _is.ParameterDescription(
               name: 'budgetId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'amountCents': _i1.ParameterDescription(
+            'amountCents': _is.ParameterDescription(
               name: 'amountCents',
-              type: _i1.getType<int>(),
+              type: _is.getType<int>(),
               nullable: false,
             ),
-            'transactionDate': _i1.ParameterDescription(
+            'transactionDate': _is.ParameterDescription(
               name: 'transactionDate',
-              type: _i1.getType<DateTime>(),
+              type: _is.getType<DateTime>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['transaction'] as _i21.TransactionEndpoint)
-                  .findDuplicates(
-                    session,
-                    params['budgetId'],
-                    params['amountCents'],
-                    params['transactionDate'],
-                  ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['transaction'] as _if8xv4dr.TransactionEndpoint)
+                      .findDuplicates(
+                        session,
+                        params['budgetId'],
+                        params['amountCents'],
+                        params['transactionDate'],
+                      ),
         ),
-        'delete': _i1.MethodConnector(
+        'delete': _is.MethodConnector(
           name: 'delete',
           params: {
-            'transactionId': _i1.ParameterDescription(
+            'transactionId': _is.ParameterDescription(
               name: 'transactionId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['transaction'] as _i21.TransactionEndpoint).delete(
-                session,
-                params['transactionId'],
-              ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['transaction'] as _if8xv4dr.TransactionEndpoint)
+                      .delete(
+                        session,
+                        params['transactionId'],
+                      ),
         ),
       },
     );
-    connectors['wallet'] = _i1.EndpointConnector(
+    connectors['wallet'] = _is.EndpointConnector(
       name: 'wallet',
       endpoint: endpoints['wallet']!,
       methodConnectors: {
-        'connectSolanaWallet': _i1.MethodConnector(
+        'connectSolanaWallet': _is.MethodConnector(
           name: 'connectSolanaWallet',
           params: {
-            'budgetId': _i1.ParameterDescription(
+            'budgetId': _is.ParameterDescription(
               name: 'budgetId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'address': _i1.ParameterDescription(
+            'address': _is.ParameterDescription(
               name: 'address',
-              type: _i1.getType<String>(),
+              type: _is.getType<String>(),
               nullable: false,
             ),
-            'label': _i1.ParameterDescription(
+            'label': _is.ParameterDescription(
               name: 'label',
-              type: _i1.getType<String?>(),
+              type: _is.getType<String?>(),
               nullable: true,
             ),
-            'onBudget': _i1.ParameterDescription(
+            'onBudget': _is.ParameterDescription(
               name: 'onBudget',
-              type: _i1.getType<bool>(),
+              type: _is.getType<bool>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['wallet'] as _i22.WalletEndpoint).connectSolanaWallet(
-                session,
-                params['budgetId'],
-                params['address'],
-                label: params['label'],
-                onBudget: params['onBudget'],
-              ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['wallet'] as _i1ub0otr.WalletEndpoint)
+                  .connectSolanaWallet(
+                    session,
+                    params['budgetId'],
+                    params['address'],
+                    label: params['label'],
+                    onBudget: params['onBudget'],
+                  ),
         ),
-        'refreshSolanaWallet': _i1.MethodConnector(
+        'refreshSolanaWallet': _is.MethodConnector(
           name: 'refreshSolanaWallet',
           params: {
-            'budgetId': _i1.ParameterDescription(
+            'budgetId': _is.ParameterDescription(
               name: 'budgetId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'connectionId': _i1.ParameterDescription(
+            'connectionId': _is.ParameterDescription(
               name: 'connectionId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['wallet'] as _i22.WalletEndpoint).refreshSolanaWallet(
-                session,
-                params['budgetId'],
-                params['connectionId'],
-              ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['wallet'] as _i1ub0otr.WalletEndpoint)
+                  .refreshSolanaWallet(
+                    session,
+                    params['budgetId'],
+                    params['connectionId'],
+                  ),
         ),
-        'listWalletHoldings': _i1.MethodConnector(
+        'listWalletHoldings': _is.MethodConnector(
           name: 'listWalletHoldings',
           params: {
-            'budgetId': _i1.ParameterDescription(
+            'budgetId': _is.ParameterDescription(
               name: 'budgetId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'connectionId': _i1.ParameterDescription(
+            'connectionId': _is.ParameterDescription(
               name: 'connectionId',
-              type: _i1.getType<_i1.UuidValue>(),
+              type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
           },
-          call: (_i1.Session session, Map<String, dynamic> params) async =>
-              (endpoints['wallet'] as _i22.WalletEndpoint).listWalletHoldings(
-                session,
-                params['budgetId'],
-                params['connectionId'],
-              ),
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['wallet'] as _i1ub0otr.WalletEndpoint)
+                  .listWalletHoldings(
+                    session,
+                    params['budgetId'],
+                    params['connectionId'],
+                  ),
         ),
       },
     );
-    modules['serverpod_auth_idp'] = _i25.Endpoints()
+    modules['serverpod_auth_idp'] = _iais.Endpoints()
       ..initializeEndpoints(server);
-    modules['serverpod_auth_core'] = _i26.Endpoints()
+    modules['serverpod_auth_core'] = _iacs.Endpoints()
       ..initializeEndpoints(server);
   }
 }

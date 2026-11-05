@@ -74,7 +74,7 @@ class BudgetTemplateDialog extends HookConsumerWidget {
                 child: templatesAsync.when(
                   loading: () =>
                       const Center(child: CircularProgressIndicator()),
-                  error: (_, __) => Center(
+                  error: (_, _) => Center(
                     child: Text(
                       l10n.templateSaveError,
                       style: TextStyle(color: colorScheme.error),
@@ -112,7 +112,7 @@ class BudgetTemplateDialog extends HookConsumerWidget {
                     return ListView.separated(
                       shrinkWrap: true,
                       itemCount: templates.length,
-                      separatorBuilder: (_, __) =>
+                      separatorBuilder: (_, _) =>
                           const SizedBox(height: SpacingTokens.xs),
                       itemBuilder: (context, index) {
                         final template = templates[index];

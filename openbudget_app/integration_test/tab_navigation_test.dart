@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
+import 'package:openbudget_app/src/features/budget/providers/budget_realtime_provider.dart';
 import 'package:openbudget_app/src/features/budget/screens/budget_shell_screen.dart';
 import 'package:patrol/patrol.dart';
 
@@ -22,7 +23,7 @@ Widget _buildApp() {
             routes: [
               GoRoute(
                 path: '/plan',
-                builder: (_, __) =>
+                builder: (_, _) =>
                     const Scaffold(body: Center(child: Text('Plan Tab'))),
               ),
             ],
@@ -31,7 +32,7 @@ Widget _buildApp() {
             routes: [
               GoRoute(
                 path: '/accounts',
-                builder: (_, __) =>
+                builder: (_, _) =>
                     const Scaffold(body: Center(child: Text('Accounts Tab'))),
               ),
             ],
@@ -40,7 +41,7 @@ Widget _buildApp() {
             routes: [
               GoRoute(
                 path: '/reflect',
-                builder: (_, __) =>
+                builder: (_, _) =>
                     const Scaffold(body: Center(child: Text('Reflect Tab'))),
               ),
             ],
@@ -49,7 +50,7 @@ Widget _buildApp() {
             routes: [
               GoRoute(
                 path: '/more',
-                builder: (_, __) =>
+                builder: (_, _) =>
                     const Scaffold(body: Center(child: Text('More Tab'))),
               ),
             ],
@@ -60,6 +61,7 @@ Widget _buildApp() {
   );
 
   return ProviderScope(
+    overrides: [budgetRealtimeProvider.overrideWith((ref, budgetId) {})],
     child: MaterialApp.router(
       theme: ThemeData.light(useMaterial3: true),
       localizationsDelegates: AppLocalizations.localizationsDelegates,

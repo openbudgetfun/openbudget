@@ -10,10 +10,11 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:serverpod_client/serverpod_client.dart' as _i1;
+import 'package:serverpod_client/serverpod_client.dart' as _isc;
 
 /// A saved allocation template that can be applied to any month.
-abstract class BudgetTemplate implements _i1.SerializableModel {
+abstract class BudgetTemplate
+    implements _isc.SerializableModel, _isc.ProtocolSerialization {
   BudgetTemplate._({
     this.id,
     required this.budgetId,
@@ -25,8 +26,8 @@ abstract class BudgetTemplate implements _i1.SerializableModel {
        updatedAt = updatedAt ?? DateTime.now();
 
   factory BudgetTemplate({
-    _i1.UuidValue? id,
-    required _i1.UuidValue budgetId,
+    _isc.UuidValue? id,
+    required _isc.UuidValue budgetId,
     required String name,
     required String allocationData,
     DateTime? createdAt,
@@ -37,27 +38,27 @@ abstract class BudgetTemplate implements _i1.SerializableModel {
     return BudgetTemplate(
       id: jsonSerialization['id'] == null
           ? null
-          : _i1.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
-      budgetId: _i1.UuidValueJsonExtension.fromJson(
+          : _isc.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
+      budgetId: _isc.UuidValueJsonExtension.fromJson(
         jsonSerialization['budgetId'],
       ),
       name: jsonSerialization['name'] as String,
       allocationData: jsonSerialization['allocationData'] as String,
       createdAt: jsonSerialization['createdAt'] == null
           ? null
-          : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
+          : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
       updatedAt: jsonSerialization['updatedAt'] == null
           ? null
-          : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['updatedAt']),
+          : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['updatedAt']),
     );
   }
 
   /// The database id, set if the object has been inserted into the
   /// database or if it has been fetched from the database. Otherwise,
   /// the id will be null.
-  _i1.UuidValue? id;
+  _isc.UuidValue? id;
 
-  _i1.UuidValue budgetId;
+  _isc.UuidValue budgetId;
 
   /// User-chosen name for the template (e.g. "Standard Month").
   String name;
@@ -71,10 +72,10 @@ abstract class BudgetTemplate implements _i1.SerializableModel {
 
   /// Returns a shallow copy of this [BudgetTemplate]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_isc.useResult
   BudgetTemplate copyWith({
-    _i1.UuidValue? id,
-    _i1.UuidValue? budgetId,
+    _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
+    _isc.UuidValue? budgetId,
     String? name,
     String? allocationData,
     DateTime? createdAt,
@@ -94,17 +95,28 @@ abstract class BudgetTemplate implements _i1.SerializableModel {
   }
 
   @override
+  Map<String, dynamic> toJsonForProtocol() {
+    return {
+      '__className__': 'BudgetTemplate',
+      if (id != null) 'id': id?.toJson(),
+      'budgetId': budgetId.toJson(),
+      'name': name,
+      'allocationData': allocationData,
+      'createdAt': createdAt.toJson(),
+      'updatedAt': updatedAt.toJson(),
+    };
+  }
+
+  @override
   String toString() {
-    return _i1.SerializationManager.encode(this);
+    return _isc.SerializationManager.encode(this);
   }
 }
 
-class _Undefined {}
-
 class _BudgetTemplateImpl extends BudgetTemplate {
   _BudgetTemplateImpl({
-    _i1.UuidValue? id,
-    required _i1.UuidValue budgetId,
+    _isc.UuidValue? id,
+    required _isc.UuidValue budgetId,
     required String name,
     required String allocationData,
     DateTime? createdAt,
@@ -120,18 +132,18 @@ class _BudgetTemplateImpl extends BudgetTemplate {
 
   /// Returns a shallow copy of this [BudgetTemplate]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_isc.useResult
   @override
   BudgetTemplate copyWith({
-    Object? id = _Undefined,
-    _i1.UuidValue? budgetId,
+    _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
+    _isc.UuidValue? budgetId,
     String? name,
     String? allocationData,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
     return BudgetTemplate(
-      id: id is _i1.UuidValue? ? id : this.id,
+      id: id is _isc.UndefinedSentinel ? this.id : id,
       budgetId: budgetId ?? this.budgetId,
       name: name ?? this.name,
       allocationData: allocationData ?? this.allocationData,

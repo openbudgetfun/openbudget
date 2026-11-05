@@ -20,14 +20,8 @@ class RuleActions extends _$RuleActions {
     final client = ref.read(serverpodClientProvider);
     try {
       final rule = await client.transactionRule.create(
-        // Serverpod API requires UuidValue which is experimental in uuid package.
-        // ignore: experimental_member_use
         UuidValue.fromString(budgetId),
-        // Serverpod API requires UuidValue which is experimental in uuid package.
-        // ignore: experimental_member_use
         UuidValue.fromString(payeeId),
-        // Serverpod API requires UuidValue which is experimental in uuid package.
-        // ignore: experimental_member_use
         UuidValue.fromString(targetEnvelopeId),
       );
       if (ref.mounted) {
@@ -51,8 +45,6 @@ class RuleActions extends _$RuleActions {
     final client = ref.read(serverpodClientProvider);
     try {
       final rule = await client.transactionRule.update(
-        // Serverpod API requires UuidValue which is experimental in uuid package.
-        // ignore: experimental_member_use
         UuidValue.fromString(ruleId),
         enabled: enabled,
       );
@@ -76,8 +68,6 @@ class RuleActions extends _$RuleActions {
     final client = ref.read(serverpodClientProvider);
     try {
       await client.transactionRule.delete(
-        // Serverpod API requires UuidValue which is experimental in uuid package.
-        // ignore: experimental_member_use
         UuidValue.fromString(ruleId),
       );
       if (ref.mounted) {

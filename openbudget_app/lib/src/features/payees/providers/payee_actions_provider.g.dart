@@ -41,13 +41,13 @@ final class PayeeActionsProvider
   }
 }
 
-String _$payeeActionsHash() => r'5221d707ad04c3c291dbac12605c468fedf66650';
+String _$payeeActionsHash() => r'5514e984fea52c3eb5faaab77cf7cefde4d81e23';
 
 abstract class _$PayeeActions extends $Notifier<AsyncValue<void>> {
   AsyncValue<void> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<void>, AsyncValue<void>>;
     final element =
         ref.element
@@ -57,6 +57,6 @@ abstract class _$PayeeActions extends $Notifier<AsyncValue<void>> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

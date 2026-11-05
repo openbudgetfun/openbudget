@@ -10,10 +10,11 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:serverpod_client/serverpod_client.dart' as _i1;
+import 'package:serverpod_client/serverpod_client.dart' as _isc;
 
 /// Per-month allocation for an envelope, enabling monthly budget cycles.
-abstract class MonthlyAllocation implements _i1.SerializableModel {
+abstract class MonthlyAllocation
+    implements _isc.SerializableModel, _isc.ProtocolSerialization {
   MonthlyAllocation._({
     this.id,
     required this.envelopeId,
@@ -28,9 +29,9 @@ abstract class MonthlyAllocation implements _i1.SerializableModel {
        updatedAt = updatedAt ?? DateTime.now();
 
   factory MonthlyAllocation({
-    _i1.UuidValue? id,
-    required _i1.UuidValue envelopeId,
-    required _i1.UuidValue budgetId,
+    _isc.UuidValue? id,
+    required _isc.UuidValue envelopeId,
+    required _isc.UuidValue budgetId,
     required int year,
     required int month,
     required int allocatedCents,
@@ -43,11 +44,11 @@ abstract class MonthlyAllocation implements _i1.SerializableModel {
     return MonthlyAllocation(
       id: jsonSerialization['id'] == null
           ? null
-          : _i1.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
-      envelopeId: _i1.UuidValueJsonExtension.fromJson(
+          : _isc.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
+      envelopeId: _isc.UuidValueJsonExtension.fromJson(
         jsonSerialization['envelopeId'],
       ),
-      budgetId: _i1.UuidValueJsonExtension.fromJson(
+      budgetId: _isc.UuidValueJsonExtension.fromJson(
         jsonSerialization['budgetId'],
       ),
       year: jsonSerialization['year'] as int,
@@ -56,21 +57,21 @@ abstract class MonthlyAllocation implements _i1.SerializableModel {
       carryoverCents: jsonSerialization['carryoverCents'] as int,
       createdAt: jsonSerialization['createdAt'] == null
           ? null
-          : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
+          : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
       updatedAt: jsonSerialization['updatedAt'] == null
           ? null
-          : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['updatedAt']),
+          : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['updatedAt']),
     );
   }
 
   /// The database id, set if the object has been inserted into the
   /// database or if it has been fetched from the database. Otherwise,
   /// the id will be null.
-  _i1.UuidValue? id;
+  _isc.UuidValue? id;
 
-  _i1.UuidValue envelopeId;
+  _isc.UuidValue envelopeId;
 
-  _i1.UuidValue budgetId;
+  _isc.UuidValue budgetId;
 
   /// The year of the budget month (e.g. 2026).
   int year;
@@ -90,11 +91,11 @@ abstract class MonthlyAllocation implements _i1.SerializableModel {
 
   /// Returns a shallow copy of this [MonthlyAllocation]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_isc.useResult
   MonthlyAllocation copyWith({
-    _i1.UuidValue? id,
-    _i1.UuidValue? envelopeId,
-    _i1.UuidValue? budgetId,
+    _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
+    _isc.UuidValue? envelopeId,
+    _isc.UuidValue? budgetId,
     int? year,
     int? month,
     int? allocatedCents,
@@ -119,18 +120,32 @@ abstract class MonthlyAllocation implements _i1.SerializableModel {
   }
 
   @override
+  Map<String, dynamic> toJsonForProtocol() {
+    return {
+      '__className__': 'MonthlyAllocation',
+      if (id != null) 'id': id?.toJson(),
+      'envelopeId': envelopeId.toJson(),
+      'budgetId': budgetId.toJson(),
+      'year': year,
+      'month': month,
+      'allocatedCents': allocatedCents,
+      'carryoverCents': carryoverCents,
+      'createdAt': createdAt.toJson(),
+      'updatedAt': updatedAt.toJson(),
+    };
+  }
+
+  @override
   String toString() {
-    return _i1.SerializationManager.encode(this);
+    return _isc.SerializationManager.encode(this);
   }
 }
 
-class _Undefined {}
-
 class _MonthlyAllocationImpl extends MonthlyAllocation {
   _MonthlyAllocationImpl({
-    _i1.UuidValue? id,
-    required _i1.UuidValue envelopeId,
-    required _i1.UuidValue budgetId,
+    _isc.UuidValue? id,
+    required _isc.UuidValue envelopeId,
+    required _isc.UuidValue budgetId,
     required int year,
     required int month,
     required int allocatedCents,
@@ -151,12 +166,12 @@ class _MonthlyAllocationImpl extends MonthlyAllocation {
 
   /// Returns a shallow copy of this [MonthlyAllocation]
   /// with some or all fields replaced by the given arguments.
-  @_i1.useResult
+  @_isc.useResult
   @override
   MonthlyAllocation copyWith({
-    Object? id = _Undefined,
-    _i1.UuidValue? envelopeId,
-    _i1.UuidValue? budgetId,
+    _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
+    _isc.UuidValue? envelopeId,
+    _isc.UuidValue? budgetId,
     int? year,
     int? month,
     int? allocatedCents,
@@ -165,7 +180,7 @@ class _MonthlyAllocationImpl extends MonthlyAllocation {
     DateTime? updatedAt,
   }) {
     return MonthlyAllocation(
-      id: id is _i1.UuidValue? ? id : this.id,
+      id: id is _isc.UndefinedSentinel ? this.id : id,
       envelopeId: envelopeId ?? this.envelopeId,
       budgetId: budgetId ?? this.budgetId,
       year: year ?? this.year,

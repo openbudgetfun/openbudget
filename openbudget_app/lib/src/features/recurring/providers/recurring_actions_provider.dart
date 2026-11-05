@@ -29,26 +29,14 @@ class RecurringActions extends _$RecurringActions {
         description,
         amountCents,
         currencyCode,
-        // Serverpod API requires UuidValue which is experimental in uuid package.
-        // ignore: experimental_member_use
         UuidValue.fromString(budgetId),
         frequency,
         nextOccurrence,
         envelopeId: envelopeId != null
-            // Serverpod API requires UuidValue which is experimental in uuid package.
-            // ignore: experimental_member_use
             ? UuidValue.fromString(envelopeId)
             : null,
-        accountId: accountId != null
-            // Serverpod API requires UuidValue which is experimental in uuid package.
-            // ignore: experimental_member_use
-            ? UuidValue.fromString(accountId)
-            : null,
-        payeeId: payeeId != null
-            // Serverpod API requires UuidValue which is experimental in uuid package.
-            // ignore: experimental_member_use
-            ? UuidValue.fromString(payeeId)
-            : null,
+        accountId: accountId != null ? UuidValue.fromString(accountId) : null,
+        payeeId: payeeId != null ? UuidValue.fromString(payeeId) : null,
         endDate: endDate,
       );
       if (ref.mounted) {
@@ -78,8 +66,6 @@ class RecurringActions extends _$RecurringActions {
     final client = ref.read(serverpodClientProvider);
     try {
       final recurring = await client.recurringTransaction.update(
-        // Serverpod API requires UuidValue which is experimental in uuid package.
-        // ignore: experimental_member_use
         UuidValue.fromString(recurringId),
         description: description,
         amountCents: amountCents,
@@ -109,8 +95,6 @@ class RecurringActions extends _$RecurringActions {
     final client = ref.read(serverpodClientProvider);
     try {
       final recurring = await client.recurringTransaction.skipOccurrence(
-        // Serverpod API requires UuidValue which is experimental in uuid package.
-        // ignore: experimental_member_use
         UuidValue.fromString(recurringId),
       );
       if (ref.mounted) {
@@ -134,8 +118,6 @@ class RecurringActions extends _$RecurringActions {
     final client = ref.read(serverpodClientProvider);
     try {
       await client.recurringTransaction.delete(
-        // Serverpod API requires UuidValue which is experimental in uuid package.
-        // ignore: experimental_member_use
         UuidValue.fromString(recurringId),
       );
       if (ref.mounted) {

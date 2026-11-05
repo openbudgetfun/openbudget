@@ -99,8 +99,7 @@ class AccountService {
                 t.creatorId.equals(userId) &
                 t.isClosed.equals(false) &
                 t.budgetId.notEquals(excludeBudgetId),
-      orderBy: (t) => t.createdAt,
-      orderDescending: true,
+      orderBy: (t) => t.createdAt.desc(),
     );
 
     final seenKeys = <String>{};
@@ -215,8 +214,7 @@ class AccountService {
     final last = await Account.db.findFirstRow(
       session,
       where: (t) => t.budgetId.equals(budgetId),
-      orderBy: (t) => t.sortOrder,
-      orderDescending: true,
+      orderBy: (t) => t.sortOrder.desc(),
     );
     return (last?.sortOrder ?? -1) + 1;
   }

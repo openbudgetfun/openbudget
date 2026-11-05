@@ -8,8 +8,6 @@ part 'rule_list_provider.g.dart';
 @riverpod
 Future<List<TransactionRule>> ruleList(Ref ref, String budgetId) async {
   final client = ref.read(serverpodClientProvider);
-  // Serverpod API requires UuidValue which is experimental in uuid package.
-  // ignore: experimental_member_use
   final budgetUuid = UuidValue.fromString(budgetId);
   return client.transactionRule.list(budgetUuid);
 }

@@ -12,8 +12,6 @@ Future<List<Transaction>> splitTransactions(
   String parentTransactionId,
 ) async {
   final client = ref.read(serverpodClientProvider);
-  // Serverpod API requires UuidValue which is experimental in uuid package.
-  // ignore: experimental_member_use
   final parentUuid = UuidValue.fromString(parentTransactionId);
   return client.transaction.listSplits(parentUuid);
 }
@@ -38,8 +36,6 @@ class SplitTransactionActions extends _$SplitTransactionActions {
         description,
         totalAmountCents,
         currencyCode,
-        // Serverpod API requires UuidValue which is experimental in uuid package.
-        // ignore: experimental_member_use
         UuidValue.fromString(budgetId),
         date,
         splits,
