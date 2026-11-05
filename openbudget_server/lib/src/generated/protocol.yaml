@@ -85,6 +85,18 @@ fxRate:
   - refresh:
 institution:
   - list:
+ledger:
+  - enableLedger:
+  - listAccounts:
+  - createAccount:
+  - archiveAccount:
+  - saveDraftJournal:
+  - deleteDraftJournal:
+  - postJournal:
+  - reverseJournal:
+  - listJournals:
+  - setLockDate:
+  - trialBalance:
 monthlyAllocation:
   - upsert:
   - list:

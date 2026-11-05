@@ -23,9 +23,11 @@ abstract class Budget
     required this.currencyCode,
     this.displayCurrencyCode,
     required this.ownerId,
+    String? accountingMode,
     DateTime? createdAt,
     DateTime? updatedAt,
-  }) : createdAt = createdAt ?? DateTime.now(),
+  }) : accountingMode = accountingMode ?? 'envelope',
+       createdAt = createdAt ?? DateTime.now(),
        updatedAt = updatedAt ?? DateTime.now();
 
   factory Budget({
@@ -34,6 +36,7 @@ abstract class Budget
     required String currencyCode,
     String? displayCurrencyCode,
     required _is.UuidValue ownerId,
+    String? accountingMode,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) = _BudgetImpl;
@@ -49,6 +52,7 @@ abstract class Budget
       ownerId: _is.UuidValueJsonExtension.fromJson(
         jsonSerialization['ownerId'],
       ),
+      accountingMode: jsonSerialization['accountingMode'] as String?,
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _is.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
@@ -77,6 +81,11 @@ abstract class Budget
   /// The user who owns this budget.
   _is.UuidValue ownerId;
 
+  /// AccountingMode name: `envelope` (default) or `ledger`. Only sole-trader
+  /// and company budgets may switch to `ledger`, and switching back is not
+  /// supported.
+  String accountingMode;
+
   DateTime createdAt;
 
   DateTime updatedAt;
@@ -93,6 +102,7 @@ abstract class Budget
     String? currencyCode,
     String? displayCurrencyCode,
     _is.UuidValue? ownerId,
+    String? accountingMode,
     DateTime? createdAt,
     DateTime? updatedAt,
   });
@@ -106,6 +116,7 @@ abstract class Budget
       if (displayCurrencyCode != null)
         'displayCurrencyCode': displayCurrencyCode,
       'ownerId': ownerId.toJson(),
+      'accountingMode': accountingMode,
       'createdAt': createdAt.toJson(),
       'updatedAt': updatedAt.toJson(),
     };
@@ -121,6 +132,7 @@ abstract class Budget
       if (displayCurrencyCode != null)
         'displayCurrencyCode': displayCurrencyCode,
       'ownerId': ownerId.toJson(),
+      'accountingMode': accountingMode,
       'createdAt': createdAt.toJson(),
       'updatedAt': updatedAt.toJson(),
     };
@@ -163,6 +175,7 @@ class _BudgetImpl extends Budget {
     required String currencyCode,
     String? displayCurrencyCode,
     required _is.UuidValue ownerId,
+    String? accountingMode,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) : super._(
@@ -171,6 +184,7 @@ class _BudgetImpl extends Budget {
          currencyCode: currencyCode,
          displayCurrencyCode: displayCurrencyCode,
          ownerId: ownerId,
+         accountingMode: accountingMode,
          createdAt: createdAt,
          updatedAt: updatedAt,
        );
@@ -185,6 +199,7 @@ class _BudgetImpl extends Budget {
     String? currencyCode,
     Object? displayCurrencyCode = _Undefined,
     _is.UuidValue? ownerId,
+    String? accountingMode,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -196,6 +211,7 @@ class _BudgetImpl extends Budget {
           ? displayCurrencyCode
           : this.displayCurrencyCode,
       ownerId: ownerId ?? this.ownerId,
+      accountingMode: accountingMode ?? this.accountingMode,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -224,6 +240,12 @@ class BudgetUpdateTable extends _is.UpdateTable<BudgetTable> {
   _is.ColumnValue<_is.UuidValue, _is.UuidValue> ownerId(_is.UuidValue value) =>
       _is.ColumnValue(
         table.ownerId,
+        value,
+      );
+
+  _is.ColumnValue<String, String> accountingMode(String value) =>
+      _is.ColumnValue(
+        table.accountingMode,
         value,
       );
 
@@ -259,6 +281,11 @@ class BudgetTable extends _is.Table<_is.UuidValue?> {
       'ownerId',
       this,
     );
+    accountingMode = _is.ColumnString(
+      'accountingMode',
+      this,
+      hasDefault: true,
+    );
     createdAt = _is.ColumnDateTime(
       'createdAt',
       this,
@@ -285,6 +312,11 @@ class BudgetTable extends _is.Table<_is.UuidValue?> {
   /// The user who owns this budget.
   late final _is.ColumnUuid ownerId;
 
+  /// AccountingMode name: `envelope` (default) or `ledger`. Only sole-trader
+  /// and company budgets may switch to `ledger`, and switching back is not
+  /// supported.
+  late final _is.ColumnString accountingMode;
+
   late final _is.ColumnDateTime createdAt;
 
   late final _is.ColumnDateTime updatedAt;
@@ -296,6 +328,7 @@ class BudgetTable extends _is.Table<_is.UuidValue?> {
     currencyCode,
     displayCurrencyCode,
     ownerId,
+    accountingMode,
     createdAt,
     updatedAt,
   ];
