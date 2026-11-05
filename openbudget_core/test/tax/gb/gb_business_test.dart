@@ -90,6 +90,10 @@ void main() {
       expect(_line(report, 'Trading income allowance'), 100000);
       expect(_line(report, 'Net profit'), 400000);
       expect(_line(report, 'Net business profit for tax purposes'), 400000);
+      // The trading allowance is deducted at box 73 and the taxable profit
+      // it produces is box 76, the figure that flows to the SA100.
+      expect(_referenced(report, 'SA103F box 73').amountMinor, 100000);
+      expect(_referenced(report, 'SA103F box 76').amountMinor, 400000);
       expect(
         report.lines.any((line) => line.reportReference == 'SA103F box 31'),
         isFalse,
@@ -106,10 +110,15 @@ void main() {
         ),
       );
       expect(
-        report.lines.any((line) => line.reportReference == 'SA103F box 16.1'),
+        report.lines.any((line) => line.reportReference == 'SA103F box 73'),
+        isFalse,
+      );
+      expect(
+        report.lines.any((line) => line.reportReference == 'SA103F box 76'),
         isFalse,
       );
       expect(_referenced(report, 'SA103F box 47').amountMinor, 2800000);
+      expect(_referenced(report, 'SA103F box 64').amountMinor, 2800000);
     });
 
     test('reports a loss without a tax liability', () {
@@ -159,6 +168,33 @@ void main() {
       expect(_line(report, 'VAT charged on sales (output VAT)'), 200000);
       expect(_line(report, 'VAT paid on purchases (input VAT)'), 40000);
       expect(report.balanceDueMinor, 160000);
+    });
+
+    test('business use is apportioned on input VAT only', () {
+      final report = _gb.report(
+        _soleTraderInput(
+          vat: true,
+          entries: [
+            // A half-business sale still charges VAT on the whole amount.
+            _entry(
+              'gb.se.turnover',
+              1200000,
+              businessUsePercent: 50,
+              salesTaxMinor: 200000,
+            ),
+            // Only the business share of input VAT is reclaimable.
+            _entry(
+              'gb.se.cost_of_goods',
+              240000,
+              businessUsePercent: 50,
+              salesTaxMinor: 40000,
+            ),
+          ],
+        ),
+      );
+      expect(_line(report, 'VAT charged on sales (output VAT)'), 200000);
+      expect(_line(report, 'VAT paid on purchases (input VAT)'), 20000);
+      expect(report.liabilities.single.amountMinor, 180000);
     });
 
     test('explicit VAT categories record the VAT itself', () {
@@ -288,6 +324,70 @@ void main() {
       );
     });
 
+    test(
+      'the accounting period follows the profile, defaulting to 31 March',
+      () {
+        final report = _gb.report(
+          _companyInput(entries: [_pounds('gb.co.turnover', 100000)]),
+        );
+        expect(
+          report.assumptions,
+          contains(
+            'The accounting period runs 1 April 2026 to 31 March 2027: '
+            'Corporation Tax follows the company’s year end, not the 6 April '
+            'tax year. The entries recorded in the tax year are assumed to be '
+            'this period’s accounts.',
+          ),
+        );
+      },
+    );
+
+    test('associated companies divide the limits (CTM03935, vector 8)', () {
+      final input = TaxInput(
+        profile: const GbTaxProfile(
+          entityKind: TaxEntityKind.company,
+          associatedCompanies: 1,
+        ),
+        year: _gb.taxYear(2026),
+        entries: [_pounds('gb.co.turnover', 60000)],
+      );
+      final report = _gb.report(input);
+      // Limits become £25,000 and £125,000: £15,000 gross less
+      // £975 marginal relief.
+      expect(report.liabilities.first.amountMinor, 1402500);
+      expect(
+        report.assumptions,
+        contains(
+          '1 associated company divides the £50,000 and £250,000 limits by 2.',
+        ),
+      );
+    });
+
+    test('the Annual Investment Allowance is capped at £1,000,000', () {
+      final report = _gb.report(
+        _companyInput(
+          entries: [
+            _pounds('gb.co.turnover', 1200000),
+            _pounds('gb.co.capital_allowances', 1200000),
+          ],
+        ),
+      );
+      expect(_line(report, 'Annual Investment Allowance'), 100000000);
+      expect(
+        _line(
+          report,
+          'Capital expenditure with no allowance yet (pools and '
+          'writing-down allowances are not modelled)',
+        ),
+        20000000,
+      );
+      // £200,000 trading profit after the capped allowance, in the marginal
+      // relief band: £50,000 gross less £750 relief.
+      expect(_referenced(report, 'CT600 box 155').amountMinor, 20000000);
+      expect(_referenced(report, 'CT600 box 440').amountMinor, 4925000);
+      expect(_referenced(report, 'CT600 box 690').amountMinor, 100000000);
+    });
+
     test('wrong-kind categories are counted', () {
       final report = _gb.report(
         _companyInput(
@@ -375,7 +475,31 @@ void main() {
       );
     });
 
-    test('director salary versus dividends', () {
+    test('director salary versus dividends matches the skill vector D', () {
+      // uk-company-tax test vector D: profit £60,000, no other income, no
+      // Employment Allowance, 2026/27. The cheapest of the threshold
+      // salaries is £12,570, saving £1,980.14 unrounded against dividends
+      // only; the pack truncates each slice to the penny, inside the
+      // vector's £1 tolerance.
+      final company = _companyInput(
+        entries: [_pounds('gb.co.turnover', 60000)],
+      );
+      final input = TaxInput(
+        profile: const GbTaxProfile(entityKind: TaxEntityKind.individual),
+        year: _gb.taxYear(2026),
+        entries: const [],
+        linked: [company],
+      );
+      final opportunity = _gb
+          .opportunities(input, _gb.report(input))
+          .firstWhere((item) => item.id == 'gb.director_salary_vs_dividend');
+      expect(opportunity.estimatedSavingMinor, 198021);
+      expect(opportunity.explanation, contains('£12,570'));
+      expect(opportunity.explanation, contains('guidance'));
+      expect(opportunity.explanation, isNot(contains('optimal')));
+    });
+
+    test('director comparison at £100,000 of profit', () {
       final company = _companyInput(
         entries: [_pounds('gb.co.turnover', 100000)],
       );
@@ -388,9 +512,13 @@ void main() {
       final opportunity = _gb
           .opportunities(input, _gb.report(input))
           .firstWhere((item) => item.id == 'gb.director_salary_vs_dividend');
-      expect(opportunity.estimatedSavingMinor, greaterThan(0));
+      // The £12,570 salary still wins at the 26.5% marginal CT rate: the
+      // lower earnings limit and upper earnings limit candidates are
+      // compared and rejected.
+      expect(opportunity.estimatedSavingMinor, 160427);
       expect(opportunity.explanation, contains('£12,570'));
       expect(opportunity.explanation, contains('Employment Allowance'));
+      expect(opportunity.explanation, contains('illustrative'));
     });
 
     test('a company that already pays wages still gets the comparison', () {
@@ -410,6 +538,52 @@ void main() {
           .opportunities(input, _gb.report(input))
           .firstWhere((item) => item.id == 'gb.director_salary_vs_dividend');
       expect(opportunity.explanation, contains('illustrative'));
+    });
+
+    test('the Employment Allowance is credited when other wages allow it', () {
+      // Wages of £20,000 sit above every candidate salary, so another
+      // employee above the secondary threshold is inferred and the £10,500
+      // allowance covers the director's employer NIC.
+      final company = _companyInput(
+        entries: [
+          _pounds('gb.co.turnover', 100000),
+          _pounds('gb.co.wages', 20000),
+        ],
+      );
+      final input = TaxInput(
+        profile: const GbTaxProfile(entityKind: TaxEntityKind.individual),
+        year: _gb.taxYear(2026),
+        entries: const [],
+        linked: [company],
+      );
+      final opportunity = _gb
+          .opportunities(input, _gb.report(input))
+          .firstWhere((item) => item.id == 'gb.director_salary_vs_dividend');
+      expect(
+        opportunity.explanation,
+        contains('Employment Allowance is treated as available'),
+      );
+      expect(opportunity.estimatedSavingMinor, greaterThan(0));
+    });
+
+    test('a sole director on their own gets no Employment Allowance', () {
+      final company = _companyInput(
+        entries: [_pounds('gb.co.turnover', 100000)],
+      );
+      final input = TaxInput(
+        profile: const GbTaxProfile(entityKind: TaxEntityKind.individual),
+        year: _gb.taxYear(2026),
+        entries: const [],
+        linked: [company],
+      );
+      final opportunity = _gb
+          .opportunities(input, _gb.report(input))
+          .firstWhere((item) => item.id == 'gb.director_salary_vs_dividend');
+      expect(
+        opportunity.explanation,
+        contains('Employment Allowance is treated as unavailable'),
+      );
+      expect(opportunity.explanation, contains('sole director'));
     });
   });
 }

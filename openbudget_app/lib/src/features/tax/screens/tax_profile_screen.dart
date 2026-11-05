@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/home/providers/budget_list_provider.dart';
 import 'package:openbudget_app/src/features/tax/providers/tax_actions_provider.dart';
@@ -99,6 +100,16 @@ class _TaxProfileForm extends HookConsumerWidget {
     );
     final scottishTaxpayer = useState(gb?.scottishTaxpayer ?? false);
     final studentLoanPlan = useState<GbStudentLoanPlan?>(gb?.studentLoanPlan);
+    final postgraduateLoan = useState(gb?.postgraduateLoan ?? false);
+    final accountingPeriodEndMonth = useState(
+      gb?.accountingPeriodEndMonth ?? 3,
+    );
+    final accountingPeriodEndDay = useState(gb?.accountingPeriodEndDay ?? 31);
+    final associatedCompaniesController = useTextEditingController(
+      text: gb == null || gb.associatedCompanies == 0
+          ? ''
+          : gb.associatedCompanies.toString(),
+    );
     final filingStatus = useState(
       us?.filingStatus ?? UsFilingStatus.single,
     );
@@ -130,12 +141,25 @@ class _TaxProfileForm extends HookConsumerWidget {
         )
         .toList();
 
+    // The associated companies field as a whole number of zero or more, or
+    // null when it does not parse. Empty means none.
+    int? associatedCompaniesValue() {
+      final text = associatedCompaniesController.text.trim();
+      if (text.isEmpty) return 0;
+      final value = int.tryParse(text);
+      return value != null && value >= 0 ? value : null;
+    }
+
     TaxProfile buildProfile() => switch (country.value) {
       TaxJurisdiction.gb => GbTaxProfile(
         entityKind: entityKind.value,
         salesTaxRegistered: salesTaxRegistered.value,
         scottishTaxpayer: scottishTaxpayer.value,
         studentLoanPlan: studentLoanPlan.value,
+        postgraduateLoan: postgraduateLoan.value,
+        accountingPeriodEndMonth: accountingPeriodEndMonth.value,
+        accountingPeriodEndDay: accountingPeriodEndDay.value,
+        associatedCompanies: associatedCompaniesValue() ?? 0,
       ),
       TaxJurisdiction.us => UsTaxProfile(
         entityKind: entityKind.value,
@@ -174,6 +198,12 @@ class _TaxProfileForm extends HookConsumerWidget {
           rentError.value = l10n.taxNgAnnualRentError;
           return;
         }
+      }
+      if (country.value == TaxJurisdiction.gb &&
+          entityKind.value == TaxEntityKind.company &&
+          associatedCompaniesValue() == null) {
+        formError.value = l10n.taxGbAssociatedCompaniesError;
+        return;
       }
       if (entityKind.value != TaxEntityKind.individual &&
           linkedBudgetId.value == budgetId) {
@@ -366,7 +396,11 @@ class _TaxProfileForm extends HookConsumerWidget {
                         value: 'none',
                         child: Text(l10n.taxGbStudentLoanNone),
                       ),
-                      for (final plan in GbStudentLoanPlan.values)
+                      // The undergraduate plans. A postgraduate loan runs
+                      // alongside any of them and has its own switch.
+                      for (final plan in GbStudentLoanPlan.values.where(
+                        (plan) => plan != GbStudentLoanPlan.postgraduate,
+                      ))
                         DropdownMenuItem(
                           value: plan.name,
                           child: Text(taxStudentLoanPlanLabel(l10n, plan)),
@@ -379,6 +413,112 @@ class _TaxProfileForm extends HookConsumerWidget {
                     },
                   ),
                 ),
+                const Divider(height: 1),
+                SwitchListTile(
+                  value: postgraduateLoan.value,
+                  onChanged: (value) => postgraduateLoan.value = value,
+                  title: Text(l10n.taxGbStudentLoanPostgraduate),
+                  subtitle: Text(l10n.taxGbPostgraduateLoanHint),
+                  secondary: SkribbleIcon(
+                    data: OpenBudgetIcons.insight,
+                    color: palette.ink,
+                  ),
+                ),
+                if (entityKind.value == TaxEntityKind.company) ...[
+                  const Divider(height: 1),
+                  Padding(
+                    padding: const EdgeInsets.all(SpacingTokens.md),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.taxGbAccountingPeriodEnd,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: palette.mutedInk,
+                          ),
+                        ),
+                        const SizedBox(height: SpacingTokens.xs),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: ObDropdown<int>(
+                                value: accountingPeriodEndMonth.value,
+                                labelText: l10n.taxGbAccountingPeriodMonth,
+                                items: [
+                                  for (var month = 1; month <= 12; month++)
+                                    DropdownMenuItem(
+                                      value: month,
+                                      child: Text(
+                                        DateFormat.MMMM().format(
+                                          DateTime(2024, month),
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                                onChanged: (month) {
+                                  if (month == null) return;
+                                  accountingPeriodEndMonth.value = month;
+                                  // Keep the day inside the chosen month.
+                                  final lastDay = _daysInMonth(
+                                    month: month,
+                                    leap: true,
+                                  );
+                                  if (accountingPeriodEndDay.value > lastDay) {
+                                    accountingPeriodEndDay.value = lastDay;
+                                  }
+                                },
+                              ),
+                            ),
+                            const SizedBox(width: SpacingTokens.md),
+                            Expanded(
+                              child: ObDropdown<int>(
+                                value: accountingPeriodEndDay.value,
+                                labelText: l10n.taxGbAccountingPeriodDay,
+                                items: [
+                                  for (
+                                    var day = 1;
+                                    day <=
+                                        _daysInMonth(
+                                          month: accountingPeriodEndMonth.value,
+                                          leap: true,
+                                        );
+                                    day++
+                                  )
+                                    DropdownMenuItem(
+                                      value: day,
+                                      child: Text('$day'),
+                                    ),
+                                ],
+                                onChanged: (day) {
+                                  if (day != null) {
+                                    accountingPeriodEndDay.value = day;
+                                  }
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: SpacingTokens.xs),
+                        Text(
+                          l10n.taxGbAccountingPeriodEndHint,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: palette.mutedInk,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Divider(height: 1),
+                  Padding(
+                    padding: const EdgeInsets.all(SpacingTokens.md),
+                    child: ObTextField(
+                      controller: associatedCompaniesController,
+                      labelText: l10n.taxGbAssociatedCompanies,
+                      hintText: l10n.taxGbAssociatedCompaniesHint,
+                      keyboardType: TextInputType.number,
+                    ),
+                  ),
+                ],
               ],
               if (country.value == TaxJurisdiction.us) ...[
                 const Divider(height: 1),
@@ -554,6 +694,15 @@ TaxJurisdiction _jurisdictionForCurrency(String? currencyCode) =>
       'EUR' => TaxJurisdiction.de,
       _ => TaxJurisdiction.gb,
     };
+
+/// The days an accounting period may end on for [month], allowing 29
+/// February: a year end that has no leap day is treated as 28 February by
+/// the rule pack.
+int _daysInMonth({required int month, required bool leap}) => switch (month) {
+  2 => leap ? 29 : 28,
+  4 || 6 || 9 || 11 => 30,
+  _ => 31,
+};
 
 Budget? _budgetWithId(Iterable<Budget> budgets, String id) {
   for (final budget in budgets) {

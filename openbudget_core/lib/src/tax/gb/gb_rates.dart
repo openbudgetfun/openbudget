@@ -21,13 +21,17 @@ final class GbStudentLoanTerms {
   /// 900 is 9%.
   final int rateBasisPoints;
 
-  /// The share of income above [thresholdMinor] repaid, in minor units.
+  /// The share of income above [thresholdMinor] repaid, rounded down to a
+  /// whole pound. The SA110 summary reports the Student Loan and
+  /// Postgraduate Loan due as whole pounds, rounded down (SA110 notes,
+  /// 2026, page TCSN 49; see the uk-personal-tax skill).
   int repaymentOn(int incomeMinor) {
     final threshold = thresholdMinor;
     if (threshold == null || incomeMinor <= threshold) {
       return 0;
     }
-    return (incomeMinor - threshold) * rateBasisPoints ~/ 10000;
+    final repayment = (incomeMinor - threshold) * rateBasisPoints ~/ 10000;
+    return repayment - repayment % _pound;
   }
 }
 
@@ -61,14 +65,24 @@ final class GbTaxYearRates {
     required this.class4UpperProfitsLimitMinor,
     required this.class4LowerRateBasisPoints,
     required this.class4UpperRateBasisPoints,
+    required this.class1LowerEarningsLimitMinor,
     required this.class1PrimaryThresholdMinor,
     required this.class1SecondaryThresholdMinor,
     required this.class1UpperEarningsLimitMinor,
     required this.class1EmployeeRateBasisPoints,
     required this.class1EmployeeUpperRateBasisPoints,
     required this.class1EmployerRateBasisPoints,
+    required this.employmentAllowanceMinor,
     required this.studentLoans,
     required this.tradingAllowanceMinor,
+    required this.paymentsOnAccountMinimumMinor,
+    required this.paymentsOnAccountCollectedSharePercent,
+    required this.paymentsOnAccountInstalmentSharePercent,
+    required this.studentLoanUnearnedIncomeThresholdMinor,
+    required this.pensionReliefAtSourceBasicRateBasisPoints,
+    required this.annualInvestmentAllowanceCapMinor,
+    required this.fullExpensingRateBasisPoints,
+    required this.specialRateFirstYearAllowanceBasisPoints,
     required this.corporationTaxSmallProfitsRateBasisPoints,
     required this.corporationTaxMainRateBasisPoints,
     required this.corporationTaxLowerLimitMinor,
@@ -128,6 +142,7 @@ final class GbTaxYearRates {
   final int class4UpperRateBasisPoints;
 
   /// Class 1 thresholds are annual, as a company director is assessed.
+  final int class1LowerEarningsLimitMinor;
   final int class1PrimaryThresholdMinor;
   final int class1SecondaryThresholdMinor;
   final int class1UpperEarningsLimitMinor;
@@ -135,10 +150,49 @@ final class GbTaxYearRates {
   final int class1EmployeeUpperRateBasisPoints;
   final int class1EmployerRateBasisPoints;
 
+  /// The annual Employment Allowance against employer Class 1 NIC. A company
+  /// cannot claim it when all its secondary Class 1 earnings in the year go
+  /// to one director who is the only employee paid above the secondary
+  /// threshold (s2(4A) NICA 2014).
+  final int employmentAllowanceMinor;
+
   final Map<GbStudentLoanPlan, GbStudentLoanTerms> studentLoans;
 
   /// The trading allowance, an alternative to deducting expenses.
   final int tradingAllowanceMinor;
+
+  /// Payments on account are two instalments of
+  /// [paymentsOnAccountInstalmentSharePercent] of the year's Income Tax plus
+  /// Class 4 NIC, less tax collected at source. They are not needed when
+  /// that amount is under [paymentsOnAccountMinimumMinor], or when more than
+  /// [paymentsOnAccountCollectedSharePercent] percent of it was collected at
+  /// source (SA110 working sheet A356 to A358).
+  final int paymentsOnAccountMinimumMinor;
+  final int paymentsOnAccountCollectedSharePercent;
+  final int paymentsOnAccountInstalmentSharePercent;
+
+  /// The SA110 student-loan working sheet counts unearned income only above
+  /// this threshold (lines K31 and K32, SA110 notes 2026). The exact
+  /// mechanics are flagged as needing confirmation in the uk-personal-tax
+  /// skill.
+  final int studentLoanUnearnedIncomeThresholdMinor;
+
+  /// The basic-rate relief a pension provider adds at source. Used to state
+  /// the net cost of a gross pension contribution in the taper opportunity.
+  final int pensionReliefAtSourceBasicRateBasisPoints;
+
+  /// The Annual Investment Allowance cap for one 12-month accounting or tax
+  /// year, pro-rated for a shorter period.
+  final int annualInvestmentAllowanceCapMinor;
+
+  /// Companies may fully expense new and unused main-rate plant and
+  /// machinery bought from 1 April 2023 (not cars). 10000 is 100%.
+  final int fullExpensingRateBasisPoints;
+
+  /// The first-year allowance for companies on new and unused special-rate
+  /// plant, same conditions. 5000 is 50%; the remaining cost waits for the
+  /// special-rate pool, which is not modelled yet.
+  final int specialRateFirstYearAllowanceBasisPoints;
 
   final int corporationTaxSmallProfitsRateBasisPoints;
   final int corporationTaxMainRateBasisPoints;
@@ -254,12 +308,14 @@ const _rates2025 = GbTaxYearRates(
   class4UpperProfitsLimitMinor: 50270 * _pound,
   class4LowerRateBasisPoints: 600,
   class4UpperRateBasisPoints: 200,
+  class1LowerEarningsLimitMinor: 6500 * _pound,
   class1PrimaryThresholdMinor: 12570 * _pound,
   class1SecondaryThresholdMinor: 5000 * _pound,
   class1UpperEarningsLimitMinor: 50270 * _pound,
   class1EmployeeRateBasisPoints: 800,
   class1EmployeeUpperRateBasisPoints: 200,
   class1EmployerRateBasisPoints: 1500,
+  employmentAllowanceMinor: 10500 * _pound,
   studentLoans: {
     GbStudentLoanPlan.plan1: GbStudentLoanTerms(
       thresholdMinor: 26065 * _pound,
@@ -281,6 +337,14 @@ const _rates2025 = GbTaxYearRates(
     ),
   },
   tradingAllowanceMinor: 1000 * _pound,
+  paymentsOnAccountMinimumMinor: 1000 * _pound,
+  paymentsOnAccountCollectedSharePercent: 80,
+  paymentsOnAccountInstalmentSharePercent: 50,
+  studentLoanUnearnedIncomeThresholdMinor: 2000 * _pound,
+  pensionReliefAtSourceBasicRateBasisPoints: 2000,
+  annualInvestmentAllowanceCapMinor: 1000000 * _pound,
+  fullExpensingRateBasisPoints: 10000,
+  specialRateFirstYearAllowanceBasisPoints: 5000,
   corporationTaxSmallProfitsRateBasisPoints: 1900,
   corporationTaxMainRateBasisPoints: 2500,
   corporationTaxLowerLimitMinor: 50000 * _pound,
@@ -379,12 +443,14 @@ const _rates2026 = GbTaxYearRates(
   class4UpperProfitsLimitMinor: 50270 * _pound,
   class4LowerRateBasisPoints: 600,
   class4UpperRateBasisPoints: 200,
+  class1LowerEarningsLimitMinor: 6708 * _pound,
   class1PrimaryThresholdMinor: 12570 * _pound,
   class1SecondaryThresholdMinor: 5000 * _pound,
   class1UpperEarningsLimitMinor: 50270 * _pound,
   class1EmployeeRateBasisPoints: 800,
   class1EmployeeUpperRateBasisPoints: 200,
   class1EmployerRateBasisPoints: 1500,
+  employmentAllowanceMinor: 10500 * _pound,
   studentLoans: {
     GbStudentLoanPlan.plan1: GbStudentLoanTerms(
       thresholdMinor: 26900 * _pound,
@@ -408,6 +474,14 @@ const _rates2026 = GbTaxYearRates(
     ),
   },
   tradingAllowanceMinor: 1000 * _pound,
+  paymentsOnAccountMinimumMinor: 1000 * _pound,
+  paymentsOnAccountCollectedSharePercent: 80,
+  paymentsOnAccountInstalmentSharePercent: 50,
+  studentLoanUnearnedIncomeThresholdMinor: 2000 * _pound,
+  pensionReliefAtSourceBasicRateBasisPoints: 2000,
+  annualInvestmentAllowanceCapMinor: 1000000 * _pound,
+  fullExpensingRateBasisPoints: 10000,
+  specialRateFirstYearAllowanceBasisPoints: 5000,
   corporationTaxSmallProfitsRateBasisPoints: 1900,
   corporationTaxMainRateBasisPoints: 2500,
   corporationTaxLowerLimitMinor: 50000 * _pound,
@@ -472,6 +546,16 @@ final List<Uri> gbRateSources = List.unmodifiable(<Uri>[
   Uri.parse('https://www.gov.uk/guidance/the-company-tax-return-guide'),
   Uri.parse('https://www.gov.uk/vat-registration/when-to-register'),
   Uri.parse('https://www.gov.uk/vat-rates'),
+  Uri.parse(
+    'https://www.gov.uk/capital-allowances/annual-investment-allowance',
+  ),
+  Uri.parse('https://www.gov.uk/capital-allowances/full-expensing'),
+  Uri.parse('https://www.gov.uk/capital-allowances/first-year-allowances'),
+  Uri.parse(
+    'https://www.gov.uk/government/publications/employment-allowance-more-'
+    'detailed-guidance/single-director-companies-and-employment-allowance-'
+    'further-employer-guidance',
+  ),
   Uri.parse('https://www.gov.uk/tax-on-your-private-pension/annual-allowance'),
   Uri.parse(
     'https://www.gov.uk/tax-on-your-private-pension/pension-tax-relief',
