@@ -29,6 +29,7 @@ class SettingsScreen extends HookConsumerWidget {
     final budgetAsync = ref.watch(budgetDetailProvider(budgetId));
     final authState = ref.watch(authProvider);
     final themeMode = ref.watch(themeModeProvider);
+    final appVersion = ref.watch(appVersionProvider).value;
 
     return Scaffold(
       appBar: AppBar(
@@ -351,13 +352,14 @@ class SettingsScreen extends HookConsumerWidget {
                 ),
               ),
               const SizedBox(height: SpacingTokens.xl),
-              Text(
-                l10n.settingsVersion,
-                textAlign: TextAlign.center,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.ob.mutedInk,
+              if (appVersion != null)
+                Text(
+                  l10n.settingsVersion(appVersion),
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.ob.mutedInk,
+                  ),
                 ),
-              ),
               const SizedBox(height: SpacingTokens.xs),
               Text(
                 l10n.settingsLastUpdated(lastUpdatedLabel),

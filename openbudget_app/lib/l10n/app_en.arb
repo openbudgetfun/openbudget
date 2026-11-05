@@ -813,7 +813,14 @@
   "settingsTermsOfService": "Terms of Service",
   "settingsTogether": "OpenBudget Together",
   "settingsTitle": "Settings",
-  "settingsVersion": "App Version 1.0.0 (1)",
+  "settingsVersion": "App Version {version}",
+  "@settingsVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
   "settingsWriteAReview": "Write a Review",
   "settingsYourPrivacyChoices": "Your Privacy Choices",
   "spendingByPayeeBreakdown": "Spending Breakdown",

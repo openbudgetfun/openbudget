@@ -1805,7 +1805,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsTitle => 'Settings';
 
   @override
-  String get settingsVersion => 'App Version 1.0.0 (1)';
+  String settingsVersion(String version) {
+    return 'App Version $version';
+  }
 
   @override
   String get settingsWriteAReview => 'Write a Review';

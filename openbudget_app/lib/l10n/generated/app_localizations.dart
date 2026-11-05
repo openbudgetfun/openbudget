@@ -3067,8 +3067,8 @@ abstract class AppLocalizations {
   /// No description provided for @settingsVersion.
   ///
   /// In en, this message translates to:
-  /// **'App Version 1.0.0 (1)'**
-  String get settingsVersion;
+  /// **'App Version {version}'**
+  String settingsVersion(String version);
 
   /// No description provided for @settingsWriteAReview.
   ///
