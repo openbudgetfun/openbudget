@@ -3816,6 +3816,28 @@ class AppLocalizationsEn extends AppLocalizations {
       'Enter the annual rent as a number, such as 1200000.';
 
   @override
+  String get taxNgSmallCompanyCeiling => 'Small company turnover ceiling';
+
+  @override
+  String get taxNgSmallCompanyCeilingHint =>
+      'The two Nigerian Acts disagree: the Nigeria Tax Act gazette says N50,000,000 and the Administration Act says N100,000,000. Pick the figure that should decide your company\'s small company status.';
+
+  @override
+  String get taxNgSmallCompanyCeilingGazette =>
+      'N50,000,000 (Nigeria Tax Act gazette)';
+
+  @override
+  String get taxNgSmallCompanyCeilingIntended =>
+      'N100,000,000 (Administration Act)';
+
+  @override
+  String get taxNgMneGroupMember => 'Member of a multinational group';
+
+  @override
+  String get taxNgMneGroupMemberHint =>
+      'Multinational group members may owe the 15% minimum effective tax rate whatever their turnover.';
+
+  @override
   String get taxDeJointAssessment => 'Joint assessment';
 
   @override

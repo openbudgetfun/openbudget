@@ -6462,6 +6462,42 @@ abstract class AppLocalizations {
   /// **'Enter the annual rent as a number, such as 1200000.'**
   String get taxNgAnnualRentError;
 
+  /// No description provided for @taxNgSmallCompanyCeiling.
+  ///
+  /// In en, this message translates to:
+  /// **'Small company turnover ceiling'**
+  String get taxNgSmallCompanyCeiling;
+
+  /// No description provided for @taxNgSmallCompanyCeilingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The two Nigerian Acts disagree: the Nigeria Tax Act gazette says N50,000,000 and the Administration Act says N100,000,000. Pick the figure that should decide your company\'s small company status.'**
+  String get taxNgSmallCompanyCeilingHint;
+
+  /// No description provided for @taxNgSmallCompanyCeilingGazette.
+  ///
+  /// In en, this message translates to:
+  /// **'N50,000,000 (Nigeria Tax Act gazette)'**
+  String get taxNgSmallCompanyCeilingGazette;
+
+  /// No description provided for @taxNgSmallCompanyCeilingIntended.
+  ///
+  /// In en, this message translates to:
+  /// **'N100,000,000 (Administration Act)'**
+  String get taxNgSmallCompanyCeilingIntended;
+
+  /// No description provided for @taxNgMneGroupMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Member of a multinational group'**
+  String get taxNgMneGroupMember;
+
+  /// No description provided for @taxNgMneGroupMemberHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Multinational group members may owe the 15% minimum effective tax rate whatever their turnover.'**
+  String get taxNgMneGroupMemberHint;
+
   /// No description provided for @taxDeJointAssessment.
   ///
   /// In en, this message translates to:

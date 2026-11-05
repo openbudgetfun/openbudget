@@ -107,6 +107,10 @@ class _TaxProfileForm extends HookConsumerWidget {
           ? ''
           : minorToPlainText(ng.annualRentMinor, CurrencyCode.ngn.decimals),
     );
+    final smallCompanyCeiling = useState(
+      ng?.smallCompanyCeiling ?? NgSmallCompanyCeiling.ntaGazette,
+    );
+    final mneGroupMember = useState(ng?.mneGroupMember ?? false);
     final jointAssessment = useState(de?.jointAssessment ?? false);
     final churchTax = useState(de?.churchTax ?? false);
     final smallBusinessExemption = useState(
@@ -147,6 +151,8 @@ class _TaxProfileForm extends HookConsumerWidget {
               CurrencyCode.ngn.decimals,
             ) ??
             0,
+        smallCompanyCeiling: smallCompanyCeiling.value,
+        mneGroupMember: mneGroupMember.value,
       ),
       TaxJurisdiction.de => DeTaxProfile(
         entityKind: entityKind.value,
@@ -424,6 +430,54 @@ class _TaxProfileForm extends HookConsumerWidget {
                           ),
                         ),
                     ],
+                  ),
+                ),
+                const Divider(height: 1),
+                Padding(
+                  padding: const EdgeInsets.all(SpacingTokens.md),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ObDropdown<NgSmallCompanyCeiling>(
+                        value: smallCompanyCeiling.value,
+                        labelText: l10n.taxNgSmallCompanyCeiling,
+                        items: [
+                          DropdownMenuItem(
+                            value: NgSmallCompanyCeiling.ntaGazette,
+                            child: Text(l10n.taxNgSmallCompanyCeilingGazette),
+                          ),
+                          DropdownMenuItem(
+                            value: NgSmallCompanyCeiling.ntaaIntended,
+                            child: Text(
+                              l10n.taxNgSmallCompanyCeilingIntended,
+                            ),
+                          ),
+                        ],
+                        onChanged: (ceiling) {
+                          if (ceiling != null) {
+                            smallCompanyCeiling.value = ceiling;
+                          }
+                        },
+                      ),
+                      const SizedBox(height: SpacingTokens.xs),
+                      Text(
+                        l10n.taxNgSmallCompanyCeilingHint,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: palette.mutedInk,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Divider(height: 1),
+                SwitchListTile(
+                  value: mneGroupMember.value,
+                  onChanged: (value) => mneGroupMember.value = value,
+                  title: Text(l10n.taxNgMneGroupMember),
+                  subtitle: Text(l10n.taxNgMneGroupMemberHint),
+                  secondary: SkribbleIcon(
+                    data: OpenBudgetIcons.network,
+                    color: palette.ink,
                   ),
                 ),
               ],

@@ -214,6 +214,52 @@ void main() {
       expect(_lastProfileJson(fake)['jurisdiction'], 'NG');
     });
 
+    testWidgets('saves Nigerian ceiling and multinational defaults', (
+      tester,
+    ) async {
+      final fake = FakeTaxRepository();
+      await tester.pumpWidget(_buildApp(fake));
+      await tester.pumpAndSettle();
+
+      await _selectCountry(tester, 'Nigeria');
+      expect(find.text('Small company turnover ceiling'), findsOneWidget);
+      expect(find.text('Member of a multinational group'), findsOneWidget);
+
+      await _save(tester);
+
+      final saved = _lastProfileJson(fake);
+      expect(saved['smallCompanyCeiling'], 'ntaGazette');
+      expect(saved['mneGroupMember'], isFalse);
+    });
+
+    testWidgets('saves the chosen Nigerian ceiling and multinational flag', (
+      tester,
+    ) async {
+      final fake = FakeTaxRepository();
+      await tester.pumpWidget(_buildApp(fake));
+      await tester.pumpAndSettle();
+
+      await _selectCountry(tester, 'Nigeria');
+
+      await tester.tap(
+        find.byType(DropdownButtonFormField<NgSmallCompanyCeiling>),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('N100,000,000 (Administration Act)').last);
+      await tester.pumpAndSettle();
+
+      await tester.ensureVisible(find.text('Member of a multinational group'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Member of a multinational group'));
+      await tester.pumpAndSettle();
+
+      await _save(tester);
+
+      final saved = _lastProfileJson(fake);
+      expect(saved['smallCompanyCeiling'], 'ntaaIntended');
+      expect(saved['mneGroupMember'], isTrue);
+    });
+
     testWidgets('shows German options and saves their defaults', (
       tester,
     ) async {
