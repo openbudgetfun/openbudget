@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/accounts/screens/account_detail_screen.dart';
@@ -551,7 +552,7 @@ String? authRedirectForLocation({
   return null;
 }
 
-class _StartupScreen extends StatelessWidget {
+class _StartupScreen extends HookWidget {
   const _StartupScreen();
 
   @override

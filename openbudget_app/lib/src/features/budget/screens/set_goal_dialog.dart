@@ -634,7 +634,7 @@ class _GoalPayload {
   final int? monthlyFundingCents;
 }
 
-class _GoalCard extends StatelessWidget {
+class _GoalCard extends HookWidget {
   const _GoalCard({required this.child});
 
   final Widget child;

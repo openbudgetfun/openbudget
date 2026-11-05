@@ -80,7 +80,7 @@ monochange run notes         # Render the developer and user release notes
 - Widgets that don't need Riverpod: use `HookWidget`
 - All reusable stateful logic MUST be extracted into custom hooks (`use*` functions)
 - Use `useTextEditingController`, `useState`, `useEffect`, `useAnimationController`, `useMemoized`, etc.
-- CI enforces this via a grep check that fails on any `extends StatefulWidget` or `extends StatelessWidget`
+- CI enforces this through the `avoid_stateful_widgets` rule in `openbudget_lints`: `dart analyze --fatal-infos` fails on any widget that extends `StatelessWidget`, `StatefulWidget`, or their Riverpod stateful variants
 
 ### Provider Pattern
 
@@ -172,7 +172,7 @@ All work MUST go through feature branches and pull requests. No direct commits t
 
 ### CI Requirements
 
-All PRs must pass: analyze, test, format, integration-test, widget-ban, secrets-scan, server-test, pinned-deps.
+All PRs must pass the CI jobs: `analyze` (`dart analyze --fatal-infos` with the widget, palette and pinned-dependency rules), `format` (dprint), `Ban StatefulWidget and StatelessWidget`, `Secrets Detection` (Gitleaks), `lint` (Swift, workflow docs, localization and the generated icon catalog), `test`, `changesets`, `server-test`, `integration-test`, `Release config guard`, and `Detect native dependency changes`. The `main` ruleset requires `analyze`, `test`, `format`, `integration-test`, the widget ban and `Secrets Detection` by name.
 
 ### Database Migrations (Minimize)
 

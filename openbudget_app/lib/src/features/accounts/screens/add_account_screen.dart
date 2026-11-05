@@ -678,7 +678,7 @@ class AddAccountScreen extends HookConsumerWidget {
   }
 }
 
-class _StepFrame extends StatelessWidget {
+class _StepFrame extends HookWidget {
   const _StepFrame({required this.child, this.maxWidth = 980});
 
   final Widget child;
@@ -703,7 +703,7 @@ class _StepFrame extends StatelessWidget {
 
 enum _LoadingStepKey { loading, loadingInstitutions }
 
-class _LoadingStep extends StatelessWidget {
+class _LoadingStep extends HookWidget {
   const _LoadingStep({required this.titleKey});
 
   final _LoadingStepKey titleKey;
@@ -769,7 +769,7 @@ class _LoadingStep extends StatelessWidget {
   }
 }
 
-class _BankSearchStep extends StatelessWidget {
+class _BankSearchStep extends HookWidget {
   const _BankSearchStep({
     required this.scrollController,
     required this.searchController,
@@ -1008,7 +1008,7 @@ class _MyAccountTile extends HookWidget {
   }
 }
 
-class _WalletConnectStep extends StatelessWidget {
+class _WalletConnectStep extends HookWidget {
   const _WalletConnectStep({
     required this.walletAddressController,
     required this.walletLabelController,
@@ -1086,7 +1086,7 @@ class _WalletConnectStep extends StatelessWidget {
   }
 }
 
-class _UnlinkedAccountStep extends StatelessWidget {
+class _UnlinkedAccountStep extends HookWidget {
   const _UnlinkedAccountStep({
     required this.scrollController,
     required this.nameController,
@@ -1273,7 +1273,7 @@ class _UnlinkedAccountStep extends StatelessWidget {
   }
 }
 
-class _AccountTypeStep extends StatelessWidget {
+class _AccountTypeStep extends HookWidget {
   const _AccountTypeStep({
     required this.scrollController,
     required this.sections,
@@ -1349,7 +1349,7 @@ class _AccountTypeStep extends StatelessWidget {
   };
 }
 
-class _SuccessStep extends StatelessWidget {
+class _SuccessStep extends HookWidget {
   const _SuccessStep({
     required this.accountTypeLabel,
     required this.onAddAnother,
