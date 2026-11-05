@@ -40,4 +40,10 @@ abstract final class TestData {
   static const assistantProposalSummary =
       r'Move $50 from Dining Out to Groceries.';
   static const assistantToolLabel = 'Looked at your tax report';
+
+  // Agent access
+  static const agentAccessBudgetId = '00000000-0000-0000-0000-000000000f05';
+  static const agentAccessTokenId = '00000000-0000-0000-0000-000000000f06';
+  static const agentAccessTokenName = 'Claude Code';
+  static const agentAccessToken = 'obk_patrol_secret_token';
 }

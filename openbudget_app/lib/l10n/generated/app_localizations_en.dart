@@ -4459,4 +4459,126 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get plusPriceCurrencyNote =>
       'OpenBudget Plus is billed in US dollars.';
+
+  @override
+  String get agentAccessTitle => 'Agent access';
+
+  @override
+  String get agentAccessSettingsSubtitle =>
+      'Connect Claude Code or another MCP client';
+
+  @override
+  String get agentAccessIntro =>
+      'Personal access tokens let external agents such as Claude Code and Codex read your budgets and tax reports over MCP.';
+
+  @override
+  String get agentAccessTokenName => 'Token name';
+
+  @override
+  String get agentAccessTokenNameHint => 'Claude Code';
+
+  @override
+  String get agentAccessNameRequired => 'Enter a name for this token.';
+
+  @override
+  String get agentAccessCanPropose => 'Can propose changes';
+
+  @override
+  String get agentAccessCanProposeHint =>
+      'The agent can suggest budget and tax changes. You still apply or dismiss them in OpenBudget.';
+
+  @override
+  String get agentAccessCreate => 'Create token';
+
+  @override
+  String get agentAccessCreating => 'Creating token…';
+
+  @override
+  String get agentAccessTokensSection => 'Your tokens';
+
+  @override
+  String get agentAccessEmptyTitle => 'No agent tokens yet';
+
+  @override
+  String get agentAccessEmptyBody =>
+      'Create a token above, then point your MCP client at the server.';
+
+  @override
+  String agentAccessTokenPrefix(String prefix) {
+    return '$prefix…';
+  }
+
+  @override
+  String agentAccessCreated(String date) {
+    return 'Created $date';
+  }
+
+  @override
+  String agentAccessLastUsed(String date) {
+    return 'Last used $date';
+  }
+
+  @override
+  String get agentAccessNeverUsed => 'Never used';
+
+  @override
+  String get agentAccessRevoked => 'Revoked';
+
+  @override
+  String get agentAccessRevoke => 'Revoke';
+
+  @override
+  String get agentAccessRevoking => 'Revoking…';
+
+  @override
+  String get agentAccessRevokeTitle => 'Revoke this token?';
+
+  @override
+  String get agentAccessRevokeMessage =>
+      'Any agent using this token stops working immediately. This cannot be undone.';
+
+  @override
+  String get agentAccessRevokeConfirm => 'Revoke token';
+
+  @override
+  String get agentAccessRevokedToast => 'Token revoked.';
+
+  @override
+  String get agentAccessTokenDialogTitle => 'Your new token';
+
+  @override
+  String get agentAccessTokenDialogWarning =>
+      'Copy this token now. It is shown once and cannot be recovered; the server stores only its hash.';
+
+  @override
+  String get agentAccessCopyToken => 'Copy token';
+
+  @override
+  String get agentAccessCopiedToast => 'Token copied to clipboard.';
+
+  @override
+  String get agentAccessFailure => 'That did not work. Try again.';
+
+  @override
+  String get agentAccessLoading => 'Loading your agent tokens…';
+
+  @override
+  String get agentAccessLoadError => 'Could not load your agent tokens';
+
+  @override
+  String get agentAccessLoadErrorBody =>
+      'Check your connection, then try again.';
+
+  @override
+  String get agentAccessRetry => 'Try again';
+
+  @override
+  String get agentAccessSetupTitle => 'Connect a client';
+
+  @override
+  String get agentAccessSetupBody =>
+      'Point your MCP client at the server\'s /mcp route and send the token as a Bearer token. Agents never change your money directly: they propose changes, and you apply or dismiss them in OpenBudget.';
+
+  @override
+  String get agentAccessSetupExample => 'Authorization: Bearer obk_…';
 }

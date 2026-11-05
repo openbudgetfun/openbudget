@@ -4,6 +4,7 @@ import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/accounts/screens/account_detail_screen.dart';
 import 'package:openbudget_app/src/features/accounts/screens/account_list_screen.dart';
 import 'package:openbudget_app/src/features/accounts/screens/add_account_screen.dart';
+import 'package:openbudget_app/src/features/agent_access/screens/agent_access_screen.dart';
 import 'package:openbudget_app/src/features/assistant/screens/assistant_proposals_screen.dart';
 import 'package:openbudget_app/src/features/assistant/screens/assistant_provider_screen.dart';
 import 'package:openbudget_app/src/features/assistant/screens/assistant_screen.dart';
@@ -95,6 +96,11 @@ GoRouter appRouter(Ref ref) {
         path: plusPath,
         builder: (context, state) =>
             PlusScreen(status: state.uri.queryParameters['status']),
+      ),
+      GoRoute(
+        name: agentAccessRoute,
+        path: agentAccessPath,
+        builder: (context, state) => const AgentAccessScreen(),
       ),
       GoRoute(
         name: createBudgetRoute,

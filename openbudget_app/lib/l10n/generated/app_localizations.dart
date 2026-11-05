@@ -7625,6 +7625,222 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'OpenBudget Plus is billed in US dollars.'**
   String get plusPriceCurrencyNote;
+
+  /// No description provided for @agentAccessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent access'**
+  String get agentAccessTitle;
+
+  /// No description provided for @agentAccessSettingsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect Claude Code or another MCP client'**
+  String get agentAccessSettingsSubtitle;
+
+  /// No description provided for @agentAccessIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal access tokens let external agents such as Claude Code and Codex read your budgets and tax reports over MCP.'**
+  String get agentAccessIntro;
+
+  /// No description provided for @agentAccessTokenName.
+  ///
+  /// In en, this message translates to:
+  /// **'Token name'**
+  String get agentAccessTokenName;
+
+  /// No description provided for @agentAccessTokenNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Claude Code'**
+  String get agentAccessTokenNameHint;
+
+  /// No description provided for @agentAccessNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a name for this token.'**
+  String get agentAccessNameRequired;
+
+  /// No description provided for @agentAccessCanPropose.
+  ///
+  /// In en, this message translates to:
+  /// **'Can propose changes'**
+  String get agentAccessCanPropose;
+
+  /// No description provided for @agentAccessCanProposeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The agent can suggest budget and tax changes. You still apply or dismiss them in OpenBudget.'**
+  String get agentAccessCanProposeHint;
+
+  /// No description provided for @agentAccessCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create token'**
+  String get agentAccessCreate;
+
+  /// No description provided for @agentAccessCreating.
+  ///
+  /// In en, this message translates to:
+  /// **'Creating token…'**
+  String get agentAccessCreating;
+
+  /// No description provided for @agentAccessTokensSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Your tokens'**
+  String get agentAccessTokensSection;
+
+  /// No description provided for @agentAccessEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No agent tokens yet'**
+  String get agentAccessEmptyTitle;
+
+  /// No description provided for @agentAccessEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a token above, then point your MCP client at the server.'**
+  String get agentAccessEmptyBody;
+
+  /// No description provided for @agentAccessTokenPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'{prefix}…'**
+  String agentAccessTokenPrefix(String prefix);
+
+  /// No description provided for @agentAccessCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Created {date}'**
+  String agentAccessCreated(String date);
+
+  /// No description provided for @agentAccessLastUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Last used {date}'**
+  String agentAccessLastUsed(String date);
+
+  /// No description provided for @agentAccessNeverUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Never used'**
+  String get agentAccessNeverUsed;
+
+  /// No description provided for @agentAccessRevoked.
+  ///
+  /// In en, this message translates to:
+  /// **'Revoked'**
+  String get agentAccessRevoked;
+
+  /// No description provided for @agentAccessRevoke.
+  ///
+  /// In en, this message translates to:
+  /// **'Revoke'**
+  String get agentAccessRevoke;
+
+  /// No description provided for @agentAccessRevoking.
+  ///
+  /// In en, this message translates to:
+  /// **'Revoking…'**
+  String get agentAccessRevoking;
+
+  /// No description provided for @agentAccessRevokeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Revoke this token?'**
+  String get agentAccessRevokeTitle;
+
+  /// No description provided for @agentAccessRevokeMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Any agent using this token stops working immediately. This cannot be undone.'**
+  String get agentAccessRevokeMessage;
+
+  /// No description provided for @agentAccessRevokeConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Revoke token'**
+  String get agentAccessRevokeConfirm;
+
+  /// No description provided for @agentAccessRevokedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Token revoked.'**
+  String get agentAccessRevokedToast;
+
+  /// No description provided for @agentAccessTokenDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your new token'**
+  String get agentAccessTokenDialogTitle;
+
+  /// No description provided for @agentAccessTokenDialogWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy this token now. It is shown once and cannot be recovered; the server stores only its hash.'**
+  String get agentAccessTokenDialogWarning;
+
+  /// No description provided for @agentAccessCopyToken.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy token'**
+  String get agentAccessCopyToken;
+
+  /// No description provided for @agentAccessCopiedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Token copied to clipboard.'**
+  String get agentAccessCopiedToast;
+
+  /// No description provided for @agentAccessFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'That did not work. Try again.'**
+  String get agentAccessFailure;
+
+  /// No description provided for @agentAccessLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading your agent tokens…'**
+  String get agentAccessLoading;
+
+  /// No description provided for @agentAccessLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load your agent tokens'**
+  String get agentAccessLoadError;
+
+  /// No description provided for @agentAccessLoadErrorBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your connection, then try again.'**
+  String get agentAccessLoadErrorBody;
+
+  /// No description provided for @agentAccessRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get agentAccessRetry;
+
+  /// No description provided for @agentAccessSetupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect a client'**
+  String get agentAccessSetupTitle;
+
+  /// No description provided for @agentAccessSetupBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Point your MCP client at the server\'s /mcp route and send the token as a Bearer token. Agents never change your money directly: they propose changes, and you apply or dismiss them in OpenBudget.'**
+  String get agentAccessSetupBody;
+
+  /// No description provided for @agentAccessSetupExample.
+  ///
+  /// In en, this message translates to:
+  /// **'Authorization: Bearer obk_…'**
+  String get agentAccessSetupExample;
 }
 
 class _AppLocalizationsDelegate

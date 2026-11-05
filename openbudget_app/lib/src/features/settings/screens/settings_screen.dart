@@ -76,11 +76,22 @@ class SettingsScreen extends HookConsumerWidget {
               ),
               Card(
                 clipBehavior: Clip.antiAlias,
-                child: _SettingsTile(
-                  icon: OpenBudgetIcons.sparkle,
-                  label: l10n.plusTitle,
-                  subtitle: l10n.plusNavSubtitle,
-                  onTap: () => context.pushNamed(plusRoute),
+                child: Column(
+                  children: [
+                    _SettingsTile(
+                      icon: OpenBudgetIcons.sparkle,
+                      label: l10n.plusTitle,
+                      subtitle: l10n.plusNavSubtitle,
+                      onTap: () => context.pushNamed(plusRoute),
+                    ),
+                    const Divider(height: 1),
+                    _SettingsTile(
+                      icon: OpenBudgetIcons.lock,
+                      label: l10n.agentAccessTitle,
+                      subtitle: l10n.agentAccessSettingsSubtitle,
+                      onTap: () => context.pushNamed(agentAccessRoute),
+                    ),
+                  ],
                 ),
               ),
               ObSectionHeader(
