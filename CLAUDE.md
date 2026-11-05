@@ -127,10 +127,10 @@ The project uses [monochange](https://github.com/monochange/monochange) for **ch
 
 Each changeset targets exactly one audience, chosen by its type:
 
-| Stream              | Types                                                                                   | Lands in                                                           |
-| ------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
-| `default` (developers) | `breaking`, `native`, `feat`, `fix`, `perf`, `refactor`, `security`, `chore`, `ci`, `docs`, `test` | `CHANGELOG.md` and the GitHub release body                         |
-| `user` (people using the app) | `user_feat`, `user_improve`, `user_fix`                                       | `WHATS_NEW.md` and `openbudget_app/assets/release_notes/<version>.json` (the in-app "What's new" sheet) |
+| Stream                        | Types                                                                                              | Lands in                                                                                                |
+| ----------------------------- | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `default` (developers)        | `breaking`, `native`, `feat`, `fix`, `perf`, `refactor`, `security`, `chore`, `ci`, `docs`, `test` | `CHANGELOG.md` and the GitHub release body                                                              |
+| `user` (people using the app) | `user_feat`, `user_improve`, `user_fix`                                                            | `WHATS_NEW.md` and `openbudget_app/assets/release_notes/<version>.json` (the in-app "What's new" sheet) |
 
 - Every PR that changes a package **must** include a changeset; CI enforces it with `monochange check` and `monochange preview`.
 - Write user changesets in product language: the outcome someone notices, never the implementation. Keep developer detail in a developer changeset.
