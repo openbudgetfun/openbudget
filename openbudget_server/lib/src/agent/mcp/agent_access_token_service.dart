@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:crypto/crypto.dart';
-import 'package:openbudget_server/src/exceptions/exceptions.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
 
@@ -37,7 +36,7 @@ class AgentAccessTokenService {
     final trimmed = name.trim();
     if (trimmed.isEmpty || trimmed.length > _maxNameLength) {
       throw ValidationException(
-        'name must be between 1 and $_maxNameLength characters.',
+        message: 'name must be between 1 and $_maxNameLength characters.',
       );
     }
 
@@ -47,7 +46,8 @@ class AgentAccessTokenService {
     );
     if (active >= maxActiveTokens) {
       throw ValidationException(
-        'A user can have at most $maxActiveTokens unrevoked access tokens.',
+        message:
+            'A user can have at most $maxActiveTokens unrevoked access tokens.',
       );
     }
 
@@ -87,7 +87,7 @@ class AgentAccessTokenService {
   }) async {
     final token = await AgentAccessToken.db.findById(session, id);
     if (token == null || token.userId != userId) {
-      throw NotFoundException('Access token not found');
+      throw NotFoundException(message: 'Access token not found');
     }
     if (token.revokedAt != null) return view(token);
 
