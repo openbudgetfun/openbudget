@@ -5,7 +5,6 @@ import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/category_actions_provider.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
-import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 class EditCategoryDialog extends HookConsumerWidget {
@@ -24,7 +23,7 @@ class EditCategoryDialog extends HookConsumerWidget {
   final String currentName;
   final int envelopeCount;
   final int totalAllocatedCents;
-  final CurrencyCode currencyCode;
+  final String currencyCode;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -92,7 +91,7 @@ class EditCategoryDialog extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final palette = Theme.of(context).ob;
     final envelopeSummary = l10n.budgetEnvelopeCount(envelopeCount);
-    final allocated = formatCents(totalAllocatedCents, currencyCode);
+    final allocated = formatCentsForCode(totalAllocatedCents, currencyCode);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(

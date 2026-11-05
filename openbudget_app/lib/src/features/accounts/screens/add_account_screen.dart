@@ -14,9 +14,9 @@ import 'package:openbudget_app/src/features/accounts/providers/wallet_actions_pr
 import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/utils/currency_code_utils.dart';
+import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
-import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 import 'package:plaid_flutter/plaid_flutter.dart';
 
@@ -77,10 +77,8 @@ class AddAccountScreen extends HookConsumerWidget {
     final walletLabelController = useTextEditingController();
     final isSubmitting = useState(false);
     final selectedTypeKey = useState<String?>(null);
-    final selectedCurrency = useState(CurrencyCode.usd);
     final walletOnBudget = useState(false);
     final successAccountLabel = useState<String>(l10n.accountTypeOther);
-    final didHydrateBudgetCurrency = useState(false);
     final showSearchingOverlay = useState(false);
     final selectedInstitution = useState<Institution?>(null);
     final locationCode = useMemoized(_resolveLocationCode);
@@ -98,9 +96,6 @@ class AddAccountScreen extends HookConsumerWidget {
       institutionCatalogProvider(locationCode),
     );
     final myAccountsAsync = ref.watch(myReusableAccountsProvider(budgetId));
-    final budgetCurrencyCode = budgetAsync.whenOrNull(
-      data: (budget) => budget.currencyCode,
-    );
 
     final typeSections = _accountTypeSections(l10n);
     final accountTypes = [
@@ -112,15 +107,6 @@ class AddAccountScreen extends HookConsumerWidget {
             (type) => type.key == selectedTypeKey.value,
             orElse: () => accountTypes.first,
           );
-
-    useEffect(() {
-      if (didHydrateBudgetCurrency.value || budgetCurrencyCode == null) {
-        return null;
-      }
-      selectedCurrency.value = parseCurrencyCode(budgetCurrencyCode);
-      didHydrateBudgetCurrency.value = true;
-      return null;
-    }, [budgetCurrencyCode]);
 
     useListenable(nameController);
     useListenable(balanceController);
@@ -367,7 +353,8 @@ class AddAccountScreen extends HookConsumerWidget {
       }
 
       var balanceCents =
-          (parsedBalance * _pow10(selectedCurrency.value.decimals)).round();
+          (parsedBalance * _pow10(currencyDecimalsForCode(budget.currencyCode)))
+              .round();
       if (chosenType.isDebt && balanceCents > 0) {
         balanceCents = -balanceCents;
       }
@@ -380,7 +367,7 @@ class AddAccountScreen extends HookConsumerWidget {
               name: nameController.text.trim(),
               accountType: chosenType.serverType,
               balanceCents: balanceCents,
-              currencyCode: selectedCurrency.value.code,
+              currencyCode: normalizeCurrencyCode(budget.currencyCode),
               budgetId: budgetId,
               onBudget: chosenType.onBudgetDefault,
               sortOrder: 0,

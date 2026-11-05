@@ -6,7 +6,6 @@ import 'package:openbudget_app/src/features/budget/providers/budget_summary_prov
 import 'package:openbudget_app/src/features/settings/providers/display_options_provider.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_client/openbudget_client.dart';
-import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 class EnvelopeRow extends HookConsumerWidget {
@@ -25,7 +24,7 @@ class EnvelopeRow extends HookConsumerWidget {
   });
 
   final Envelope envelope;
-  final CurrencyCode currencyCode;
+  final String currencyCode;
   final VoidCallback onTap;
   final VoidCallback onLongPress;
   final MonthlyEnvelopeData? monthlyData;
@@ -132,7 +131,10 @@ class EnvelopeRow extends HookConsumerWidget {
                               message: l10n.envelopeCarryover(
                                 hideAmounts
                                     ? hiddenAmountPlaceholder
-                                    : formatCents(carryover, currencyCode),
+                                    : formatCentsForCode(
+                                        carryover,
+                                        currencyCode,
+                                      ),
                               ),
                               child: SkribbleIcon(
                                 data: carryover > 0
@@ -188,7 +190,7 @@ class EnvelopeRow extends HookConsumerWidget {
                                   l10n.envelopeUnderfunded(
                                     hideAmounts
                                         ? hiddenAmountPlaceholder
-                                        : formatCents(
+                                        : formatCentsForCode(
                                             underfunded,
                                             currencyCode,
                                           ),
@@ -235,7 +237,7 @@ class EnvelopeRow extends HookConsumerWidget {
                         ObAmount(
                           hideAmounts
                               ? hiddenAmountPlaceholder
-                              : formatCents(available, currencyCode),
+                              : formatCentsForCode(available, currencyCode),
                           tone: amountTone,
                           style: theme.textTheme.titleSmall,
                         ),

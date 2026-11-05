@@ -55,7 +55,7 @@ class CurrencySettingsScreen extends HookConsumerWidget {
           child: ObStatePanel.problem(title: l10n.settingsLoadError),
         ),
         data: (budget) {
-          final selectedCurrency = parseCurrencyCode(budget.currencyCode);
+          final selectedCurrency = CurrencyCode.tryParse(budget.currencyCode);
 
           return ListView(
             padding: const EdgeInsets.fromLTRB(
@@ -71,8 +71,9 @@ class CurrencySettingsScreen extends HookConsumerWidget {
                   children: [
                     _SettingsTile(
                       title: l10n.settingsCurrency,
-                      value:
-                          '${selectedCurrency.displayName} - ${selectedCurrency.code}',
+                      value: selectedCurrency == null
+                          ? normalizeCurrencyCode(budget.currencyCode)
+                          : '${selectedCurrency.displayName} - ${selectedCurrency.code}',
                       isNavigation: true,
                       onTap: () =>
                           _selectCurrency(context, ref, selectedCurrency),
@@ -102,7 +103,7 @@ class CurrencySettingsScreen extends HookConsumerWidget {
   Future<void> _selectCurrency(
     BuildContext context,
     WidgetRef ref,
-    CurrencyCode current,
+    CurrencyCode? current,
   ) async {
     final l10n = AppLocalizations.of(context);
     final selected = await showModalBottomSheet<CurrencyCode>(

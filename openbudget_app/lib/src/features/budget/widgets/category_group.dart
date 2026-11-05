@@ -9,7 +9,6 @@ import 'package:openbudget_app/src/features/budget/widgets/envelope_row.dart';
 import 'package:openbudget_app/src/features/settings/providers/display_options_provider.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_client/openbudget_client.dart';
-import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 class CategoryGroup extends HookConsumerWidget {
@@ -35,7 +34,7 @@ class CategoryGroup extends HookConsumerWidget {
   });
 
   final CategoryWithEnvelopes categoryWithEnvelopes;
-  final CurrencyCode currencyCode;
+  final String currencyCode;
   final VoidCallback onAddEnvelope;
   final VoidCallback onDeleteCategory;
   final VoidCallback onEditCategory;
@@ -147,7 +146,10 @@ class CategoryGroup extends HookConsumerWidget {
                           ObAmount(
                             hideAmounts
                                 ? hiddenAmountPlaceholder
-                                : formatCents(totalAvailable, currencyCode),
+                                : formatCentsForCode(
+                                    totalAvailable,
+                                    currencyCode,
+                                  ),
                             tone: availableTone,
                             style: theme.textTheme.titleSmall,
                           ),

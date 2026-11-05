@@ -201,8 +201,11 @@ class DisplayOptionsScreen extends HookConsumerWidget {
       return l10n.settingsDisplayCurrencyMatchDefault;
     }
 
-    final currency = parseCurrencyCode(overrideCode);
-    return '${currency.displayName} (${currency.code})';
+    final currency = CurrencyCode.tryParse(overrideCode);
+    // A legacy override with an unsupported code is shown as written.
+    return currency == null
+        ? normalizeCurrencyCode(overrideCode)
+        : '${currency.displayName} (${currency.code})';
   }
 
   Future<void> _selectDisplayCurrency(

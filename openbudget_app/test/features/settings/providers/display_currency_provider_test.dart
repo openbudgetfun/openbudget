@@ -80,10 +80,28 @@ void main() {
       expect(
         missingRateConverter.formatAmount(
           amountCents: 10000,
-          sourceCurrency: CurrencyCode.gbp,
+          currencyCode: 'GBP',
         ),
         '\u00A3100.00',
       );
+    });
+
+    test(
+      'formats unsupported codes with their raw code instead of dollars',
+      () {
+        expect(
+          converter.formatAmount(amountCents: 1250, currencyCode: 'XYZ'),
+          'XYZ 12.50',
+        );
+      },
+    );
+
+    test('cannot convert totals containing an unsupported code', () {
+      expect(
+        converter.convertTotalsToDisplay({'USD': 10000, 'XYZ': 1250}),
+        isNull,
+      );
+      expect(converter.convertTotalsToDisplay({'USD': 10000}), 8000);
     });
   });
 }

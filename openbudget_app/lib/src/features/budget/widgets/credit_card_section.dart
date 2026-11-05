@@ -3,7 +3,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/credit_card_provider.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
-import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 class CreditCardSection extends HookWidget {
@@ -14,7 +13,7 @@ class CreditCardSection extends HookWidget {
   });
 
   final List<CreditCardPaymentInfo> payments;
-  final CurrencyCode currencyCode;
+  final String currencyCode;
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +51,7 @@ class CreditCardSection extends HookWidget {
                 ),
               ),
               ObAmount(
-                formatCents(totalPayment, currencyCode),
+                formatCentsForCode(totalPayment, currencyCode),
                 tone: ObTone.review,
                 style: theme.textTheme.titleSmall,
               ),
@@ -82,13 +81,13 @@ class CreditCardSection extends HookWidget {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       ObAmount(
-                        formatCents(payment.paymentCents, currencyCode),
+                        formatCentsForCode(payment.paymentCents, currencyCode),
                         tone: ObTone.review,
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(
                         '${l10n.creditCardSpentThisMonth}: '
-                        '${formatCents(payment.spentCents, currencyCode)}',
+                        '${formatCentsForCode(payment.spentCents, currencyCode)}',
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: palette.mutedInk,
                         ),

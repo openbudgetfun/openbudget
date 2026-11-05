@@ -15,7 +15,6 @@ import 'package:openbudget_app/src/features/settings/providers/display_options_p
 import 'package:openbudget_app/src/features/tax/widgets/tax_category_row.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_client/openbudget_client.dart';
-import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 class CategoryDetailScreen extends HookConsumerWidget {
@@ -70,10 +69,7 @@ class CategoryDetailScreen extends HookConsumerWidget {
           ),
         ),
         data: (summary) {
-          final currencyCode = CurrencyCode.values.firstWhere(
-            (code) => code.code == summary.budget.currencyCode,
-            orElse: () => CurrencyCode.usd,
-          );
+          final currencyCode = summary.budget.currencyCode;
 
           Envelope? envelope;
           MonthlyEnvelopeData? monthlyData;
@@ -142,28 +138,28 @@ class CategoryDetailScreen extends HookConsumerWidget {
                       label: l10n.envelopeFromLastMonth,
                       value: hideAmounts
                           ? hiddenAmountPlaceholder
-                          : formatCents(carryover, currencyCode),
+                          : formatCentsForCode(carryover, currencyCode),
                     ),
                     const Divider(height: 1),
                     _DetailRow(
                       label: l10n.envelopeAssigned,
                       value: hideAmounts
                           ? hiddenAmountPlaceholder
-                          : formatCents(assigned, currencyCode),
+                          : formatCentsForCode(assigned, currencyCode),
                     ),
                     const Divider(height: 1),
                     _DetailRow(
                       label: l10n.envelopeActivityTitle,
                       value: hideAmounts
                           ? hiddenAmountPlaceholder
-                          : formatCents(-spent, currencyCode),
+                          : formatCentsForCode(-spent, currencyCode),
                     ),
                     const Divider(height: 1),
                     _DetailRow(
                       label: l10n.envelopeAvailable,
                       value: hideAmounts
                           ? hiddenAmountPlaceholder
-                          : formatCents(available, currencyCode),
+                          : formatCentsForCode(available, currencyCode),
                       tone: availableTone,
                       emphasize: true,
                     ),
@@ -317,7 +313,7 @@ class CategoryDetailScreen extends HookConsumerWidget {
   void _showQuickBudgetDialog(
     BuildContext context,
     Envelope envelope,
-    CurrencyCode currencyCode,
+    String currencyCode,
     int year,
     int month,
   ) {
@@ -339,7 +335,7 @@ class CategoryDetailScreen extends HookConsumerWidget {
   void _showSetGoalDialog(
     BuildContext context,
     Envelope envelope,
-    CurrencyCode currencyCode, [
+    String currencyCode, [
     EnvelopeGoal? existingGoal,
   ]) {
     unawaited(
@@ -359,7 +355,7 @@ class CategoryDetailScreen extends HookConsumerWidget {
   void _showEditEnvelopeDialog(
     BuildContext context,
     Envelope envelope,
-    CurrencyCode currencyCode,
+    String currencyCode,
     int year,
     int month,
   ) {
@@ -434,7 +430,7 @@ class _GoalCard extends HookWidget {
   final EnvelopeGoal goal;
   final int budgetedCents;
   final int availableCents;
-  final CurrencyCode currencyCode;
+  final String currencyCode;
   final bool hideAmounts;
   final bool hideProgressBars;
   final VoidCallback onAssign;
@@ -496,7 +492,7 @@ class _GoalCard extends HookWidget {
                     : l10n.categoryDetailAssignMore(
                         hideAmounts
                             ? hiddenAmountPlaceholder
-                            : formatCents(underfunded, currencyCode),
+                            : formatCentsForCode(underfunded, currencyCode),
                       ),
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodyLarge?.copyWith(
@@ -522,19 +518,19 @@ class _GoalCard extends HookWidget {
               label: l10n.categoryDetailAmountToAssignThisMonth,
               value: hideAmounts
                   ? hiddenAmountPlaceholder
-                  : formatCents(amountToAssignThisMonth, currencyCode),
+                  : formatCentsForCode(amountToAssignThisMonth, currencyCode),
             ),
             _DetailRow(
               label: l10n.categoryDetailAssignedSoFar,
               value: hideAmounts
                   ? hiddenAmountPlaceholder
-                  : formatCents(budgetedCents, currencyCode),
+                  : formatCentsForCode(budgetedCents, currencyCode),
             ),
             _DetailRow(
               label: l10n.categoryDetailToGo,
               value: hideAmounts
                   ? hiddenAmountPlaceholder
-                  : formatCents(underfunded, currencyCode),
+                  : formatCentsForCode(underfunded, currencyCode),
               tone: isComplete ? ObTone.funded : ObTone.underfunded,
             ),
             const SizedBox(height: SpacingTokens.md),

@@ -5,7 +5,6 @@ import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
 import 'package:openbudget_app/src/features/transfers/screens/create_transfer_screen.dart';
 import 'package:openbudget_client/openbudget_client.dart';
-import 'package:openbudget_core/openbudget_core.dart';
 
 void main() {
   const screenBudgetId = '00000000-0000-0000-0000-000000000001';
@@ -89,23 +88,23 @@ void main() {
     },
   );
 
-  test('transferCurrency falls back to USD without a selected source', () {
+  test('transferCurrency is empty without a selected source', () {
     final currency = transferCurrency(accounts, fromAccountId: null);
 
-    expect(currency, CurrencyCode.usd);
+    expect(currency, '');
   });
 
   test('transferCurrency matches selected source account currency', () {
     final fromId = accounts.last.id!.toString();
     final currency = transferCurrency(accounts, fromAccountId: fromId);
 
-    expect(currency, CurrencyCode.eur);
+    expect(currency, 'EUR');
   });
 
   test('parseTransferAmountCents respects decimal precision by currency', () {
-    expect(parseTransferAmountCents('12.34', CurrencyCode.usd), 1234);
-    expect(parseTransferAmountCents('12.34', CurrencyCode.jpy), 12);
-    expect(parseTransferAmountCents('0.00000042', CurrencyCode.btc), 42);
+    expect(parseTransferAmountCents('12.34', 'USD'), 1234);
+    expect(parseTransferAmountCents('12.34', 'JPY'), 12);
+    expect(parseTransferAmountCents('0.00000042', 'BTC'), 42);
   });
 
   testWidgets(

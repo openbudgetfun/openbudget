@@ -14,7 +14,6 @@ import 'package:openbudget_app/src/features/budget/screens/set_goal_dialog.dart'
 import 'package:openbudget_app/src/features/settings/providers/display_options_provider.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_client/openbudget_client.dart';
-import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 class EnvelopeActivitySheet extends HookConsumerWidget {
@@ -33,7 +32,7 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
 
   final Envelope envelope;
   final String budgetId;
-  final CurrencyCode currencyCode;
+  final String currencyCode;
   final List<CategoryWithEnvelopes> categories;
   final String categoryId;
   final int year;
@@ -144,7 +143,7 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
                             ObAmount(
                               hideAmounts
                                   ? hiddenAmountPlaceholder
-                                  : formatCents(available, currencyCode),
+                                  : formatCentsForCode(available, currencyCode),
                               tone: availableTone,
                               style: theme.textTheme.titleLarge,
                             ),
@@ -313,7 +312,10 @@ class EnvelopeActivitySheet extends HookConsumerWidget {
                           ObAmount(
                             hideAmounts
                                 ? hiddenAmountPlaceholder
-                                : formatCents(tx.amountCents, currencyCode),
+                                : formatCentsForCode(
+                                    tx.amountCents,
+                                    currencyCode,
+                                  ),
                             tone: tone,
                             style: theme.textTheme.bodyMedium,
                           ),
@@ -411,7 +413,7 @@ class _BalanceGrid extends HookWidget {
   final int assigned;
   final int activity;
   final int available;
-  final CurrencyCode currencyCode;
+  final String currencyCode;
   final ObTone availableTone;
   final bool hideAmounts;
 
@@ -421,7 +423,7 @@ class _BalanceGrid extends HookWidget {
 
     String amount(int cents) => hideAmounts
         ? hiddenAmountPlaceholder
-        : formatCents(cents, currencyCode);
+        : formatCentsForCode(cents, currencyCode);
 
     return ObCard(
       tone: ObTone.neutral,
@@ -512,7 +514,7 @@ class _GoalSummary extends HookWidget {
   final EnvelopeGoal goal;
   final int budgetedCents;
   final int availableCents;
-  final CurrencyCode currencyCode;
+  final String currencyCode;
   final bool hideAmounts;
   final bool hideProgressBars;
 
@@ -540,12 +542,12 @@ class _GoalSummary extends HookWidget {
 
     final formattedAmount = hideAmounts
         ? hiddenAmountPlaceholder
-        : formatCents(goal.targetAmountCents, currencyCode);
+        : formatCentsForCode(goal.targetAmountCents, currencyCode);
     final goalLabel = switch (goal.goalType) {
       'monthly_funding' => l10n.budgetGoalMonthly(
         hideAmounts
             ? hiddenAmountPlaceholder
-            : formatCents(
+            : formatCentsForCode(
                 goal.monthlyFundingCents ?? goal.targetAmountCents,
                 currencyCode,
               ),
@@ -586,7 +588,7 @@ class _GoalSummary extends HookWidget {
                 l10n.envelopeUnderfunded(
                   hideAmounts
                       ? hiddenAmountPlaceholder
-                      : formatCents(underfunded, currencyCode),
+                      : formatCentsForCode(underfunded, currencyCode),
                 ),
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: palette.overspent,

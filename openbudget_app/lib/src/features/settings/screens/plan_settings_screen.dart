@@ -11,6 +11,7 @@ import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 class PlanSettingsScreen extends HookConsumerWidget {
@@ -55,7 +56,7 @@ class PlanSettingsScreen extends HookConsumerWidget {
           child: ObStatePanel.problem(title: l10n.settingsLoadError),
         ),
         data: (budget) {
-          final currency = parseCurrencyCode(budget.currencyCode);
+          final currency = CurrencyCode.tryParse(budget.currencyCode);
 
           return ListView(
             padding: const EdgeInsets.fromLTRB(
@@ -86,7 +87,9 @@ class PlanSettingsScreen extends HookConsumerWidget {
                   children: [
                     _SettingChoiceTile(
                       title: l10n.settingsCurrency,
-                      value: '${currency.displayName} - ${currency.code}',
+                      value: currency == null
+                          ? normalizeCurrencyCode(budget.currencyCode)
+                          : '${currency.displayName} - ${currency.code}',
                       isNavigation: true,
                       onTap: () => context.goNamed(
                         currencySettingsRoute,

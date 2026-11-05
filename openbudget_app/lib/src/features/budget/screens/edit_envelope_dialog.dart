@@ -11,7 +11,6 @@ import 'package:openbudget_app/src/features/budget/screens/set_goal_dialog.dart'
 import 'package:openbudget_app/src/features/budget/widgets/budget_amount_keypad.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
-import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 class EditEnvelopeDialog extends HookConsumerWidget {
@@ -28,7 +27,7 @@ class EditEnvelopeDialog extends HookConsumerWidget {
   final Envelope envelope;
   final String categoryId;
   final String budgetId;
-  final CurrencyCode currencyCode;
+  final String currencyCode;
   final int year;
   final int month;
 

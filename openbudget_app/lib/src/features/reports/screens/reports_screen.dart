@@ -11,9 +11,7 @@ import 'package:openbudget_app/src/features/reports/widgets/report_charts.dart';
 import 'package:openbudget_app/src/features/reports/widgets/report_figures.dart';
 import 'package:openbudget_app/src/features/settings/providers/display_currency_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
-import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
-import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 /// The Reflect tab: three hand-drawn statements about the month.
@@ -212,7 +210,7 @@ class _SpendingBreakdownPreview extends HookWidget {
     final sortedEntries = report.categorySpending.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
     final categories = sortedEntries.take(6).toList();
-    final sourceCurrency = parseCurrencyCode(report.currencyCode);
+    final sourceCurrency = report.currencyCode;
     final listedTotal = categories.fold<int>(
       0,
       (sum, item) => sum + item.value,
@@ -222,9 +220,9 @@ class _SpendingBreakdownPreview extends HookWidget {
     String format(int cents) =>
         converter?.formatAmount(
           amountCents: cents,
-          sourceCurrency: sourceCurrency,
+          currencyCode: sourceCurrency,
         ) ??
-        formatCents(cents, sourceCurrency);
+        formatCentsForCode(cents, sourceCurrency);
 
     final segments = [
       for (final (index, entry) in categories.indexed)
@@ -328,8 +326,8 @@ class _NetWorthPreview extends HookWidget {
         convertedLiabilities != null;
     final primary = data.currencyBreakdown.firstOrNull;
     final currency = useConverted
-        ? converter!.displayCurrency
-        : (primary?.currency ?? CurrencyCode.usd);
+        ? converter!.displayCurrency!.code
+        : (primary?.currency ?? '');
     final assets = useConverted ? convertedAssets : (primary?.totalAssets ?? 0);
     final liabilities = useConverted
         ? convertedLiabilities
@@ -338,14 +336,14 @@ class _NetWorthPreview extends HookWidget {
         ? convertedNetWorth
         : (primary?.netWorth ?? 0);
     final series = reportSeriesColors(theme);
-    final assetsLabel = formatCents(assets, currency);
-    final liabilitiesLabel = formatCents(liabilities, currency);
+    final assetsLabel = formatCentsForCode(assets, currency);
+    final liabilitiesLabel = formatCentsForCode(liabilities, currency);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ObAmount(
-          formatCents(netWorth, currency),
+          formatCentsForCode(netWorth, currency),
           tone: netWorth >= 0 ? ObTone.funded : ObTone.overspent,
           style: theme.textTheme.headlineMedium,
         ),

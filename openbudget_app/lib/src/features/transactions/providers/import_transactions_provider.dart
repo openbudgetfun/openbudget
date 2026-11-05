@@ -1,7 +1,7 @@
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
 import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
+import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_client/openbudget_client.dart';
-import 'package:openbudget_core/openbudget_core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'import_transactions_provider.g.dart';
@@ -44,7 +44,7 @@ class ImportTransactions extends _$ImportTransactions {
 ///
 /// Expects CSV with columns: date, description, amount (or inflow/outflow).
 /// Supports common bank export formats with header detection.
-List<ImportRow> parseCsvText(String csv, CurrencyCode currency) {
+List<ImportRow> parseCsvText(String csv, String currencyCode) {
   final lines = csv
       .split('\n')
       .map((l) => l.trim())
@@ -86,7 +86,8 @@ List<ImportRow> parseCsvText(String csv, CurrencyCode currency) {
     final amount = double.tryParse(amountText);
     if (amount == null) continue;
 
-    final amountCents = (amount * _pow10(currency.decimals)).round();
+    final amountCents = (amount * _pow10(currencyDecimalsForCode(currencyCode)))
+        .round();
 
     rows.add(
       ImportRow(

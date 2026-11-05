@@ -5,7 +5,6 @@ import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/auto_assign_provider.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
-import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 class AutoAssignDialog extends HookConsumerWidget {
@@ -16,7 +15,7 @@ class AutoAssignDialog extends HookConsumerWidget {
   });
 
   final String budgetId;
-  final CurrencyCode currencyCode;
+  final String currencyCode;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -93,7 +92,10 @@ class AutoAssignDialog extends HookConsumerWidget {
                         ),
                       ),
                       ObAmount(
-                        formatCents(proposal.totalAssignedCents, currencyCode),
+                        formatCentsForCode(
+                          proposal.totalAssignedCents,
+                          currencyCode,
+                        ),
                         tone: ObTone.funded,
                         style: theme.textTheme.titleSmall,
                       ),
@@ -131,7 +133,7 @@ class AutoAssignDialog extends HookConsumerWidget {
                             ),
                             const SizedBox(width: SpacingTokens.sm),
                             ObAmount(
-                              '+${formatCents(item.addedCents, currencyCode)}',
+                              '+${formatCentsForCode(item.addedCents, currencyCode)}',
                               tone: ObTone.funded,
                               style: theme.textTheme.bodyMedium,
                             ),

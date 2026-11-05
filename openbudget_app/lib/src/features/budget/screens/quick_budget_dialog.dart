@@ -6,7 +6,6 @@ import 'package:openbudget_app/src/features/budget/providers/monthly_allocation_
 import 'package:openbudget_app/src/features/budget/providers/quick_budget_provider.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
-import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 class QuickBudgetDialog extends HookConsumerWidget {
@@ -23,7 +22,7 @@ class QuickBudgetDialog extends HookConsumerWidget {
   final String budgetId;
   final String envelopeId;
   final String envelopeName;
-  final CurrencyCode currencyCode;
+  final String currencyCode;
   final int year;
   final int month;
 
@@ -57,22 +56,22 @@ class QuickBudgetDialog extends HookConsumerWidget {
             const SizedBox(height: SpacingTokens.md),
             _QuickBudgetOption(
               label: l10n.quickBudgetLastMonth,
-              amount: formatCents(data.budgetedLastMonth, currencyCode),
+              amount: formatCentsForCode(data.budgetedLastMonth, currencyCode),
               onTap: () => _apply(context, ref, data.budgetedLastMonth),
             ),
             _QuickBudgetOption(
               label: l10n.quickBudgetSpentLastMonth,
-              amount: formatCents(data.spentLastMonth, currencyCode),
+              amount: formatCentsForCode(data.spentLastMonth, currencyCode),
               onTap: () => _apply(context, ref, data.spentLastMonth),
             ),
             _QuickBudgetOption(
               label: l10n.quickBudgetAverageBudgeted,
-              amount: formatCents(data.averageBudgeted, currencyCode),
+              amount: formatCentsForCode(data.averageBudgeted, currencyCode),
               onTap: () => _apply(context, ref, data.averageBudgeted),
             ),
             _QuickBudgetOption(
               label: l10n.quickBudgetAverageSpent,
-              amount: formatCents(data.averageSpent, currencyCode),
+              amount: formatCentsForCode(data.averageSpent, currencyCode),
               onTap: () => _apply(context, ref, data.averageSpent),
             ),
           ],

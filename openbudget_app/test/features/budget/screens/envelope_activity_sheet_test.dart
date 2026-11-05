@@ -8,7 +8,6 @@ import 'package:openbudget_app/src/features/budget/providers/budget_summary_prov
 import 'package:openbudget_app/src/features/budget/providers/monthly_allocation_provider.dart';
 import 'package:openbudget_app/src/features/budget/screens/envelope_activity_sheet.dart';
 import 'package:openbudget_client/openbudget_client.dart';
-import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 const _budgetId = 'test-budget-id';
@@ -116,7 +115,7 @@ void main() {
           body: EnvelopeActivitySheet(
             envelope: env,
             budgetId: _budgetId,
-            currencyCode: CurrencyCode.usd,
+            currencyCode: 'USD',
             categories: _makeCategories(),
             categoryId: _categoryUuid.toString(),
             year: 2026,

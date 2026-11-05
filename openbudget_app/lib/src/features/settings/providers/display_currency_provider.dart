@@ -4,7 +4,6 @@ import 'package:openbudget_app/src/features/budget/providers/budget_detail_provi
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
 import 'package:openbudget_app/src/features/home/providers/budget_list_provider.dart';
 import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
-import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart' as formatter;
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
@@ -12,10 +11,17 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'display_currency_provider.g.dart';
 
+/// The currency the budget displays amounts in, or null when either the
+/// display override or the budget's own currency is unsupported.
+///
+/// A null display currency means conversion is unavailable; call sites format
+/// each amount with its raw code instead of assuming dollars.
 @riverpod
-Future<CurrencyCode> displayCurrency(Ref ref, String budgetId) async {
+Future<CurrencyCode?> displayCurrency(Ref ref, String budgetId) async {
   final budget = await ref.watch(budgetDetailProvider(budgetId).future);
-  return parseCurrencyCode(budget.displayCurrencyCode ?? budget.currencyCode);
+  return CurrencyCode.tryParse(
+    budget.displayCurrencyCode ?? budget.currencyCode,
+  );
 }
 
 @riverpod
@@ -34,7 +40,7 @@ Future<DisplayCurrencyConverter> displayCurrencyConverter(
   String budgetId,
 ) async {
   final budget = await ref.watch(budgetDetailProvider(budgetId).future);
-  final selectedCurrency = parseCurrencyCode(
+  final selectedCurrency = CurrencyCode.tryParse(
     budget.displayCurrencyCode ?? budget.currencyCode,
   );
 
@@ -92,41 +98,48 @@ class DisplayCurrencyConverter {
     required this._ratesByCode,
   });
 
-  final CurrencyCode displayCurrency;
+  /// Null when the budget's display currency is not supported by OpenBudget.
+  final CurrencyCode? displayCurrency;
   final String? baseCurrencyCode;
   final Map<String, double> _ratesByCode;
 
   bool get hasRates => _ratesByCode.isNotEmpty;
 
+  /// Formats an amount in [currencyCode], converting to the display currency
+  /// only when both currencies are supported and a rate is available.
+  ///
+  /// Unsupported source or display codes fall back to the raw code and a
+  /// plain two-decimal amount, never to another currency's symbol.
   String formatAmount({
     required int amountCents,
-    required CurrencyCode sourceCurrency,
+    required String currencyCode,
   }) {
-    final convertedCents = convertCents(
-      amountCents: amountCents,
-      sourceCurrency: sourceCurrency,
-    );
-
-    if (convertedCents == null) {
-      return formatter.formatCents(amountCents, sourceCurrency);
+    final source = CurrencyCode.tryParse(currencyCode);
+    final converted = source == null
+        ? null
+        : convertCents(amountCents: amountCents, sourceCurrency: source);
+    if (converted == null) {
+      return formatter.formatCentsForCode(amountCents, currencyCode);
     }
 
-    return formatter.formatCents(convertedCents, displayCurrency);
+    return formatter.formatCents(converted, displayCurrency!);
   }
 
   int? convertCents({
     required int amountCents,
     required CurrencyCode sourceCurrency,
   }) {
-    if (sourceCurrency == displayCurrency) return amountCents;
+    final targetCurrency = displayCurrency;
+    if (targetCurrency == null) return null;
+    if (sourceCurrency == targetCurrency) return amountCents;
 
     final sourceRate = _lookupRate(sourceCurrency);
-    final targetRate = _lookupRate(displayCurrency);
+    final targetRate = _lookupRate(targetCurrency);
     if (sourceRate == null || targetRate == null) return null;
     if (sourceRate <= 0 || targetRate <= 0) return null;
 
     final sourceFactor = _pow10(sourceCurrency.decimals);
-    final targetFactor = _pow10(displayCurrency.decimals);
+    final targetFactor = _pow10(targetCurrency.decimals);
 
     final amountInSourceUnits = amountCents / sourceFactor;
     final amountInTargetUnits = amountInSourceUnits / sourceRate * targetRate;
@@ -134,12 +147,18 @@ class DisplayCurrencyConverter {
     return amountInTargetCents;
   }
 
-  int? convertTotalsToDisplay(Map<CurrencyCode, int> totalsByCurrency) {
+  /// Converts every bucket to the display currency, keyed by raw code.
+  ///
+  /// Returns null when any code is unsupported or lacks a rate, so the caller
+  /// keeps the per-currency breakdown instead of dropping money.
+  int? convertTotalsToDisplay(Map<String, int> totalsByCurrency) {
     var total = 0;
     for (final entry in totalsByCurrency.entries) {
+      final source = CurrencyCode.tryParse(entry.key);
+      if (source == null) return null;
       final converted = convertCents(
         amountCents: entry.value,
-        sourceCurrency: entry.key,
+        sourceCurrency: source,
       );
       if (converted == null) return null;
       total += converted;

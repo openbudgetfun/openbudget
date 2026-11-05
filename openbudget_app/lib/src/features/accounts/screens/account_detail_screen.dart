@@ -18,7 +18,6 @@ import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
-import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 enum _StatusFilter { all, uncleared }
@@ -60,12 +59,7 @@ class AccountDetailScreen extends HookConsumerWidget {
               accounts.where((a) => a.id?.toString() == accountId).firstOrNull,
         )
         .value;
-    final currencyCode = accountData != null
-        ? CurrencyCode.values.firstWhere(
-            (c) => c.code == accountData.currencyCode,
-            orElse: () => CurrencyCode.usd,
-          )
-        : CurrencyCode.usd;
+    final currencyCode = accountData?.currencyCode ?? '';
     final isLoanAccount =
         accountData != null && _isLoanStyleAccount(accountData);
     final isSolanaWalletAccount = accountData?.accountType == 'cryptoWallet';
@@ -492,7 +486,7 @@ class AccountDetailScreen extends HookConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     List<Transaction> transactions,
-    CurrencyCode currencyCode,
+    String currencyCode,
   ) async {
     final l10n = AppLocalizations.of(context);
 
@@ -564,7 +558,7 @@ class AccountDetailScreen extends HookConsumerWidget {
             context,
             message: l10n.reconcileSuccessWithAdjustment(
               count,
-              formatCents(adjustment, currencyCode),
+              formatCentsForCode(adjustment, currencyCode),
             ),
             variant: AppToastVariant.success,
           );
@@ -596,7 +590,7 @@ class _BalanceHeader extends HookWidget {
   });
 
   final Account accountData;
-  final CurrencyCode currencyCode;
+  final String currencyCode;
   final List<Transaction>? transactions;
 
   @override
@@ -636,7 +630,7 @@ class _BalanceHeader extends HookWidget {
           ),
           const SizedBox(height: SpacingTokens.xs),
           ObAmount(
-            formatCents(accountData.balanceCents, currencyCode),
+            formatCentsForCode(accountData.balanceCents, currencyCode),
             tone: accountData.balanceCents >= 0
                 ? ObTone.funded
                 : ObTone.overspent,
@@ -652,13 +646,13 @@ class _BalanceHeader extends HookWidget {
                 _BalanceStat(
                   icon: OpenBudgetIcons.checkCircle,
                   label: l10n.accountBalanceCleared,
-                  amount: formatCents(clearedCents, currencyCode),
+                  amount: formatCentsForCode(clearedCents, currencyCode),
                   tone: ObTone.funded,
                 ),
                 _BalanceStat(
                   icon: OpenBudgetIcons.circle,
                   label: l10n.accountBalanceUncleared,
-                  amount: formatCents(unclearedCents, currencyCode),
+                  amount: formatCentsForCode(unclearedCents, currencyCode),
                   tone: ObTone.neutral,
                 ),
               ],
@@ -738,7 +732,7 @@ class _TransactionRow extends HookWidget {
   });
 
   final Transaction transaction;
-  final CurrencyCode currencyCode;
+  final String currencyCode;
   final int runningBalanceCents;
   final String? payeeName;
   final String? envelopeName;
@@ -839,12 +833,12 @@ class _TransactionRow extends HookWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               ObAmount(
-                formatCents(transaction.amountCents, currencyCode),
+                formatCentsForCode(transaction.amountCents, currencyCode),
                 tone: isInflow ? ObTone.funded : ObTone.overspent,
                 style: theme.textTheme.titleMedium,
               ),
               ObAmount(
-                formatCents(runningBalanceCents, currencyCode),
+                formatCentsForCode(runningBalanceCents, currencyCode),
                 tone: runningBalanceCents >= 0
                     ? ObTone.neutral
                     : ObTone.overspent,
@@ -871,7 +865,7 @@ class _LoanAccountDetailBody extends HookWidget {
 
   final Account accountData;
   final List<Transaction> transactions;
-  final CurrencyCode currencyCode;
+  final String currencyCode;
   final int? monthlyTargetCents;
   final ValueChanged<int> onMonthlyTargetChanged;
   final _LoanDetailTab selectedTab;
@@ -962,7 +956,7 @@ class _LoanAccountDetailBody extends HookWidget {
                       entries: [
                         _LoanSummaryEntry(
                           label: l10n.accountDetailLoanBalance,
-                          value: formatCents(
+                          value: formatCentsForCode(
                             accountData.balanceCents,
                             currencyCode,
                           ),
@@ -973,13 +967,16 @@ class _LoanAccountDetailBody extends HookWidget {
                         ),
                         _LoanSummaryEntry(
                           label: l10n.accountDetailLoanPaid,
-                          value: formatCents(paidThisMonthCents, currencyCode),
+                          value: formatCentsForCode(
+                            paidThisMonthCents,
+                            currencyCode,
+                          ),
                           emphasized: true,
                           tone: ObTone.funded,
                         ),
                         _LoanSummaryEntry(
                           label: DateFormat.MMMM().format(now),
-                          value: formatCents(
+                          value: formatCentsForCode(
                             chargedThisMonthCents,
                             currencyCode,
                           ),
@@ -990,7 +987,10 @@ class _LoanAccountDetailBody extends HookWidget {
                         ),
                         _LoanSummaryEntry(
                           label: l10n.accountDetailLoanTotalBorrowed,
-                          value: formatCents(-totalBorrowedCents, currencyCode),
+                          value: formatCentsForCode(
+                            -totalBorrowedCents,
+                            currencyCode,
+                          ),
                           emphasized: false,
                           tone: ObTone.overspent,
                         ),
@@ -1064,7 +1064,7 @@ class _LoanAccountDetailBody extends HookWidget {
                           const SizedBox(height: SpacingTokens.md),
                           _LoanDetailRow(
                             label: l10n.accountDetailLoanMonthlyTarget,
-                            value: formatCents(
+                            value: formatCentsForCode(
                               monthlyPaymentBaseline,
                               currencyCode,
                             ),
@@ -1115,7 +1115,7 @@ class _LoanAccountDetailBody extends HookWidget {
                           const Divider(height: 1),
                           _LoanDetailRow(
                             label: l10n.accountDetailLoanMonthlyMinimum,
-                            value: formatCents(
+                            value: formatCentsForCode(
                               monthlyPaymentBaseline,
                               currencyCode,
                             ),
@@ -1129,7 +1129,7 @@ class _LoanAccountDetailBody extends HookWidget {
                       entries: [
                         _LoanSummaryEntry(
                           label: l10n.accountDetailLoanBalance,
-                          value: formatCents(
+                          value: formatCentsForCode(
                             accountData.balanceCents,
                             currencyCode,
                           ),
@@ -1140,7 +1140,10 @@ class _LoanAccountDetailBody extends HookWidget {
                         ),
                         _LoanSummaryEntry(
                           label: l10n.accountDetailLoanPaid,
-                          value: formatCents(paidThisMonthCents, currencyCode),
+                          value: formatCentsForCode(
+                            paidThisMonthCents,
+                            currencyCode,
+                          ),
                           emphasized: true,
                           tone: ObTone.funded,
                         ),
@@ -1148,7 +1151,7 @@ class _LoanAccountDetailBody extends HookWidget {
                           label: l10n.accountDetailLoanInMonth(
                             DateFormat.MMMM().format(now),
                           ),
-                          value: formatCents(
+                          value: formatCentsForCode(
                             chargedThisMonthCents,
                             currencyCode,
                           ),
@@ -1289,7 +1292,7 @@ class _LoanActivityList extends HookWidget {
   });
 
   final List<Transaction> transactions;
-  final CurrencyCode currencyCode;
+  final String currencyCode;
 
   @override
   Widget build(BuildContext context) {
@@ -1354,7 +1357,7 @@ class _LoanActivityRow extends HookWidget {
   });
 
   final Transaction transaction;
-  final CurrencyCode currencyCode;
+  final String currencyCode;
 
   @override
   Widget build(BuildContext context) {
@@ -1390,7 +1393,7 @@ class _LoanActivityRow extends HookWidget {
           ),
           const SizedBox(width: SpacingTokens.sm),
           ObAmount(
-            formatCents(transaction.amountCents, currencyCode),
+            formatCentsForCode(transaction.amountCents, currencyCode),
             tone: isPayment ? ObTone.funded : ObTone.overspent,
             style: theme.textTheme.titleMedium,
           ),
@@ -2872,15 +2875,17 @@ int _pow10Int(int exponent) {
 
 Future<int?> _showLoanTargetDialog(
   BuildContext context, {
-  required CurrencyCode currencyCode,
+  required String currencyCode,
   required int? monthlyTargetCents,
 }) async {
   final l10n = AppLocalizations.of(context);
-  final factor = _pow10Int(currencyCode.decimals);
+  final factor = _pow10Int(currencyDecimalsForCode(currencyCode));
   final controller = TextEditingController(
     text: monthlyTargetCents == null
         ? ''
-        : (monthlyTargetCents / factor).toStringAsFixed(currencyCode.decimals),
+        : (monthlyTargetCents / factor).toStringAsFixed(
+            currencyDecimalsForCode(currencyCode),
+          ),
   );
 
   return showDialog<int>(
@@ -2892,7 +2897,7 @@ Future<int?> _showLoanTargetDialog(
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
         decoration: InputDecoration(
           labelText: l10n.accountDetailLoanMonthlyPayment,
-          prefixText: '${currencyCode.symbol} ',
+          prefixText: '${currencySymbolForCode(currencyCode)} ',
         ),
       ),
       actions: [
@@ -2920,7 +2925,7 @@ class _ReconcileDialog extends HookWidget {
   });
 
   final int clearedBalanceCents;
-  final CurrencyCode currencyCode;
+  final String currencyCode;
 
   @override
   Widget build(BuildContext context) {
@@ -2948,7 +2953,7 @@ class _ReconcileDialog extends HookWidget {
                 style: theme.textTheme.bodyMedium,
               ),
               ObAmount(
-                formatCents(clearedBalanceCents, currencyCode),
+                formatCentsForCode(clearedBalanceCents, currencyCode),
                 style: theme.textTheme.bodyMedium,
               ),
             ],
@@ -2964,7 +2969,8 @@ class _ReconcileDialog extends HookWidget {
             onChanged: (value) {
               final parsed = double.tryParse(value);
               enteredCents.value = parsed != null
-                  ? (parsed * _pow10(currencyCode.decimals)).round()
+                  ? (parsed * _pow10(currencyDecimalsForCode(currencyCode)))
+                        .round()
                   : null;
             },
           ),
@@ -2978,7 +2984,7 @@ class _ReconcileDialog extends HookWidget {
                   style: theme.textTheme.bodyMedium,
                 ),
                 ObAmount(
-                  formatCents(differenceCents, currencyCode),
+                  formatCentsForCode(differenceCents, currencyCode),
                   tone: differenceCents != 0 ? ObTone.overspent : ObTone.funded,
                   style: theme.textTheme.bodyMedium,
                 ),
@@ -3027,7 +3033,7 @@ class _ReconcileMatchDialog extends HookWidget {
   });
 
   final int clearedBalanceCents;
-  final CurrencyCode currencyCode;
+  final String currencyCode;
 
   @override
   Widget build(BuildContext context) {
@@ -3037,7 +3043,7 @@ class _ReconcileMatchDialog extends HookWidget {
     return AlertDialog(
       title: Text(
         l10n.accountDetailReconcileMatchTitle(
-          formatCents(clearedBalanceCents, currencyCode),
+          formatCentsForCode(clearedBalanceCents, currencyCode),
         ),
         textAlign: TextAlign.center,
       ),

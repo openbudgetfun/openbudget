@@ -10,7 +10,6 @@ import 'package:openbudget_app/src/features/budget/providers/recent_moves_provid
 import 'package:openbudget_app/src/features/settings/providers/display_options_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
-import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 enum _RecentMovesTab { all, moved, assigned }
@@ -85,10 +84,7 @@ class RecentMovesScreen extends HookConsumerWidget {
           ),
         ),
         data: (summary) {
-          final currencyCode = CurrencyCode.values.firstWhere(
-            (code) => code.code == summary.budget.currencyCode,
-            orElse: () => CurrencyCode.usd,
-          );
+          final currencyCode = summary.budget.currencyCode;
 
           final envelopeNames = _buildEnvelopeNameMap(summary.categories);
           final events = _filteredEvents(selectedTab.value, allEvents);
@@ -292,10 +288,7 @@ class EnvelopeMovesScreen extends HookConsumerWidget {
           ),
         ),
         data: (summary) {
-          final currencyCode = CurrencyCode.values.firstWhere(
-            (code) => code.code == summary.budget.currencyCode,
-            orElse: () => CurrencyCode.usd,
-          );
+          final currencyCode = summary.budget.currencyCode;
           final envelopeNames = <String, String>{};
           for (final group in summary.categories) {
             for (final envelope in group.envelopes) {
@@ -492,7 +485,7 @@ class _RecentMovesList extends HookWidget {
 
   final List<RecentMoveEvent> events;
   final Map<String, String> envelopeNames;
-  final CurrencyCode currencyCode;
+  final String currencyCode;
   final bool hideAmounts;
   final ValueChanged<String> onEnvelopeTap;
 
@@ -633,7 +626,7 @@ class _RecentMoveRow extends HookWidget {
 
   final RecentMoveEvent event;
   final Map<String, String> envelopeNames;
-  final CurrencyCode currencyCode;
+  final String currencyCode;
   final bool hideAmounts;
   final ValueChanged<String> onEnvelopeTap;
   final bool showDivider;
@@ -645,7 +638,7 @@ class _RecentMoveRow extends HookWidget {
     final palette = theme.ob;
     final amountText = hideAmounts
         ? hiddenAmountPlaceholder
-        : formatCents(event.amountCents, currencyCode);
+        : formatCentsForCode(event.amountCents, currencyCode);
 
     final toName =
         envelopeNames[event.toEnvelopeId] ?? l10n.recentMovesUnnamedEnvelope;
@@ -721,7 +714,7 @@ class _EnvelopeMoveRow extends HookWidget {
   final RecentMoveEvent event;
   final String envelopeId;
   final Map<String, String> envelopeNames;
-  final CurrencyCode currencyCode;
+  final String currencyCode;
   final bool hideAmounts;
 
   @override
@@ -746,7 +739,7 @@ class _EnvelopeMoveRow extends HookWidget {
     };
     final amountText = hideAmounts
         ? hiddenAmountPlaceholder
-        : formatCents(signedAmount, currencyCode);
+        : formatCentsForCode(signedAmount, currencyCode);
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(

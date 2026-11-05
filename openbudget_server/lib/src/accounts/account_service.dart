@@ -1,5 +1,6 @@
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_server/src/budgets/budget_service.dart';
+import 'package:openbudget_server/src/common/currency_validation.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:openbudget_server/src/institutions/institution_service.dart';
 import 'package:serverpod/serverpod.dart';
@@ -36,6 +37,7 @@ class AccountService {
 
     final userId = _requireUserId(session);
     await BudgetService.getById(session, budgetId: budgetId);
+    final normalizedCurrencyCode = requireSupportedCurrency(currencyCode);
 
     if (institutionId != null) {
       await InstitutionService.ensureCatalogSeeded(session);
@@ -53,7 +55,7 @@ class AccountService {
       name: name,
       accountType: accountType,
       balanceCents: balanceCents,
-      currencyCode: currencyCode,
+      currencyCode: normalizedCurrencyCode,
       budgetId: budgetId,
       creatorId: userId,
       institutionId: institutionId,

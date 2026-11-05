@@ -4,7 +4,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/recurring/providers/recurring_calendar_provider.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
-import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 /// A month of scheduled money, pressed into a hand-ruled grid.
@@ -410,10 +409,6 @@ class _DayDetail extends HookWidget {
         final recurring = occurrence.recurring;
         final isIncome = recurring.amountCents > 0;
         final tone = isIncome ? ObTone.funded : ObTone.overspent;
-        final currency = CurrencyCode.values.firstWhere(
-          (c) => c.code == recurring.currencyCode,
-          orElse: () => CurrencyCode.usd,
-        );
         final frequencyLabel = switch (recurring.frequency) {
           'daily' => l10n.recurringFreqDaily,
           'weekly' => l10n.recurringFreqWeekly,
@@ -497,8 +492,11 @@ class _DayDetail extends HookWidget {
               ),
               trailing: ObAmount(
                 isIncome
-                    ? '+${formatCents(recurring.amountCents, currency)}'
-                    : formatCents(recurring.amountCents, currency),
+                    ? '+${formatCentsForCode(recurring.amountCents, recurring.currencyCode)}'
+                    : formatCentsForCode(
+                        recurring.amountCents,
+                        recurring.currencyCode,
+                      ),
                 tone: tone,
                 style: theme.textTheme.titleSmall,
               ),

@@ -92,9 +92,10 @@ enum CurrencyCode {
   final int decimals;
 
   /// The currency with ISO 4217 [code], or null when OpenBudget does not
-  /// support it. Callers decide what an unknown code means; nothing guesses.
+  /// support it. [code] is trimmed and upper-cased before matching. Callers
+  /// decide what an unknown code means; nothing guesses.
   static CurrencyCode? tryParse(String code) {
-    final upper = code.toUpperCase();
+    final upper = code.trim().toUpperCase();
     for (final currency in values) {
       if (currency.code == upper) {
         return currency;

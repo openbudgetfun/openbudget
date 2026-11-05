@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:openbudget_core/openbudget_core.dart';
+import 'package:openbudget_server/src/common/currency_validation.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart' hide Transaction;
 
@@ -25,10 +26,11 @@ class BudgetService {
   }) async {
     _log.info('Creating budget name=$name currency=$currencyCode');
     final userId = _requireUserId(session);
+    final normalizedCurrencyCode = requireSupportedCurrency(currencyCode);
 
     final budget = Budget(
       name: name,
-      currencyCode: currencyCode,
+      currencyCode: normalizedCurrencyCode,
       ownerId: userId,
     );
     final created = await Budget.db.insertRow(session, budget);
@@ -75,13 +77,19 @@ class BudgetService {
   }) async {
     _log.info('Updating budget id=$budgetId');
     final budget = await getById(session, budgetId: budgetId);
+    final normalizedCurrencyCode = currencyCode == null
+        ? null
+        : requireSupportedCurrency(currencyCode);
+    final normalizedDisplayCurrencyCode = displayCurrencyCode == null
+        ? null
+        : requireSupportedCurrency(displayCurrencyCode);
 
     final updated = budget.copyWith(
       name: name ?? budget.name,
-      currencyCode: currencyCode ?? budget.currencyCode,
+      currencyCode: normalizedCurrencyCode ?? budget.currencyCode,
       displayCurrencyCode: clearDisplayCurrencyCode
           ? null
-          : (displayCurrencyCode ?? budget.displayCurrencyCode),
+          : (normalizedDisplayCurrencyCode ?? budget.displayCurrencyCode),
       updatedAt: DateTime.now(),
     );
     return Budget.db.updateRow(session, updated);

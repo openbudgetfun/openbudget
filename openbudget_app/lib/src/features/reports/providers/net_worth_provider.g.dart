@@ -68,7 +68,7 @@ final class NetWorthProvider
   }
 }
 
-String _$netWorthHash() => r'6db8fdc18b4132bdc096db573a2a190037dbb626';
+String _$netWorthHash() => r'ac5525bfd9e72bdff9669c0b2d5c2459e670924f';
 
 /// Computes net worth from all active accounts in a budget.
 

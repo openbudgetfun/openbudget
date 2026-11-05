@@ -8,10 +8,10 @@ import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/monthly_allocation_provider.dart';
 import 'package:openbudget_app/src/features/transactions/providers/transaction_actions_provider.dart';
+import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
-import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 Future<void> showReviewTransactionsSheet(
@@ -409,7 +409,7 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
                                       ),
                                       const SizedBox(width: SpacingTokens.md),
                                       ObAmount(
-                                        formatCents(
+                                        formatCentsForCode(
                                           transaction.amountCents,
                                           currencyCode,
                                         ),
@@ -431,7 +431,10 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
             if (selectedCount > 0)
               _ReviewToolbar(
                 selectedCount: selectedCount,
-                selectedAmount: formatCents(selectedAmountCents, currencyCode),
+                selectedAmount: formatCentsForCode(
+                  selectedAmountCents,
+                  currencyCode,
+                ),
                 onCancel: () => selectedIds.value = <String>{},
                 onApprove: approveSelected,
                 onCategorize: categorizeSelected,
@@ -444,14 +447,8 @@ class ReviewTransactionsSheet extends HookConsumerWidget {
     );
   }
 
-  static CurrencyCode _currencyFromSummary(BudgetSummary? summary) {
-    final code = summary?.budget.currencyCode;
-    if (code == null) return CurrencyCode.usd;
-    return CurrencyCode.values.firstWhere(
-      (currency) => currency.code == code,
-      orElse: () => CurrencyCode.usd,
-    );
-  }
+  static String _currencyFromSummary(BudgetSummary? summary) =>
+      normalizeCurrencyCode(summary?.budget.currencyCode ?? '');
 
   static List<Transaction> _toReviewQueue(List<Transaction> transactions) {
     final queue =

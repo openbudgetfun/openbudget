@@ -5,7 +5,6 @@ import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/reports/providers/net_worth_provider.dart';
 import 'package:openbudget_app/src/features/reports/screens/net_worth_screen.dart';
 import 'package:openbudget_client/openbudget_client.dart';
-import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 void main() {
@@ -60,7 +59,7 @@ void main() {
       currencyCode: 'USD',
       currencyBreakdown: [
         CurrencyNetWorthData(
-          currency: CurrencyCode.usd,
+          currency: 'USD',
           totalAssets: 120000,
           totalLiabilities: 0,
           assetAccounts: [usdAccount],
@@ -99,14 +98,14 @@ void main() {
       currencyCode: 'USD',
       currencyBreakdown: [
         CurrencyNetWorthData(
-          currency: CurrencyCode.usd,
+          currency: 'USD',
           totalAssets: 100000,
           totalLiabilities: 0,
           assetAccounts: [usdAccount],
           liabilityAccounts: const [],
         ),
         CurrencyNetWorthData(
-          currency: CurrencyCode.eur,
+          currency: 'EUR',
           totalAssets: 200000,
           totalLiabilities: 0,
           assetAccounts: [eurAccount],

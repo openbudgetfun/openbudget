@@ -1,5 +1,6 @@
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_server/src/categories/category_service.dart';
+import 'package:openbudget_server/src/common/currency_validation.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
 
@@ -20,6 +21,7 @@ class EnvelopeService {
   }) async {
     _log.info('Creating envelope name=$name category=$categoryId');
     await CategoryService.getById(session, categoryId: categoryId);
+    final normalizedCurrencyCode = requireSupportedCurrency(currencyCode);
 
     // Auto-assign sort order if not provided.
     final order =
@@ -30,7 +32,7 @@ class EnvelopeService {
       categoryId: categoryId,
       budgetedAmountCents: budgetedAmountCents,
       spentAmountCents: 0,
-      currencyCode: currencyCode,
+      currencyCode: normalizedCurrencyCode,
       sortOrder: order,
       createdAt: DateTime.now(),
     );

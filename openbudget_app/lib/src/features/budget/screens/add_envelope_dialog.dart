@@ -5,8 +5,8 @@ import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/envelope_actions_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/monthly_allocation_provider.dart';
 import 'package:openbudget_app/src/features/budget/widgets/budget_amount_keypad.dart';
+import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
-import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 class AddEnvelopeDialog extends HookConsumerWidget {
@@ -21,7 +21,7 @@ class AddEnvelopeDialog extends HookConsumerWidget {
 
   final String categoryId;
   final String budgetId;
-  final CurrencyCode currencyCode;
+  final String currencyCode;
   final int year;
   final int month;
 
@@ -133,7 +133,7 @@ class AddEnvelopeDialog extends HookConsumerWidget {
             name: name,
             categoryId: categoryId,
             budgetedAmountCents: amountCents,
-            currencyCode: currencyCode.code,
+            currencyCode: normalizeCurrencyCode(currencyCode),
             budgetId: budgetId,
           );
       await ref

@@ -9,7 +9,6 @@ import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
-import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 @visibleForTesting
@@ -36,20 +35,18 @@ List<Account> transferDestinationAccounts(
 }
 
 @visibleForTesting
-CurrencyCode transferCurrency(
+String transferCurrency(
   List<Account> accounts, {
   required String? fromAccountId,
 }) {
   final fromAccount = findTransferAccountById(accounts, fromAccountId);
-  return fromAccount == null
-      ? CurrencyCode.usd
-      : parseCurrencyCode(fromAccount.currencyCode);
+  return normalizeCurrencyCode(fromAccount?.currencyCode ?? '');
 }
 
 @visibleForTesting
-int parseTransferAmountCents(String amountText, CurrencyCode currency) {
+int parseTransferAmountCents(String amountText, String currencyCode) {
   final amount = double.tryParse(amountText.trim()) ?? 0;
-  return (amount * _pow10(currency.decimals)).round();
+  return (amount * _pow10(currencyDecimalsForCode(currencyCode))).round();
 }
 
 class CreateTransferScreen extends HookConsumerWidget {
@@ -88,7 +85,7 @@ class CreateTransferScreen extends HookConsumerWidget {
             accounts,
             fromAccountId: fromAccountId.value,
           );
-          final zeroAmountHint = formatCents(0, selectedCurrency);
+          final zeroAmountHint = formatCentsForCode(0, selectedCurrency);
 
           final toAccountOptions = transferDestinationAccounts(
             accounts,
@@ -163,8 +160,8 @@ class CreateTransferScreen extends HookConsumerWidget {
                 controller: amountController,
                 decoration: InputDecoration(
                   labelText:
-                      '${l10n.transactionAmountLabel} (${selectedCurrency.code})',
-                  prefixText: '${selectedCurrency.symbol} ',
+                      '${l10n.transactionAmountLabel} (${normalizeCurrencyCode(selectedCurrency)})',
+                  prefixText: '${currencySymbolForCode(selectedCurrency)} ',
                   hintText: zeroAmountHint,
                   prefixIcon: const SkribbleIcon(
                     data: OpenBudgetIcons.coins,
@@ -274,10 +271,10 @@ class CreateTransferScreen extends HookConsumerWidget {
       return;
     }
 
-    final currency = parseCurrencyCode(fromAccount.currencyCode);
+    final currencyCode = normalizeCurrencyCode(fromAccount.currencyCode);
     final amountCents = parseTransferAmountCents(
       amountController.text,
-      currency,
+      currencyCode,
     );
     if (amountCents <= 0) return;
     isSubmitting.value = true;
@@ -287,7 +284,7 @@ class CreateTransferScreen extends HookConsumerWidget {
       await client.transaction.transfer(
         descController.text.trim(),
         amountCents,
-        currency.code,
+        currencyCode,
         UuidValue.fromString(budgetId),
         UuidValue.fromString(fromAccountId.value!),
         UuidValue.fromString(toAccountId.value!),

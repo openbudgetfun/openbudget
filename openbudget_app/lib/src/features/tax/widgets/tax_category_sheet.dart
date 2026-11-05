@@ -10,7 +10,7 @@ import 'package:openbudget_app/src/features/tax/providers/tax_providers.dart';
 import 'package:openbudget_app/src/features/tax/tax_formatting.dart';
 import 'package:openbudget_app/src/features/tax/tax_labels.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
-import 'package:openbudget_app/src/utils/currency_code_utils.dart';
+import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -107,11 +107,12 @@ class _TaxCategorySheet extends HookConsumerWidget {
           ? 100
           : initialBusinessUse,
     );
-    final currency = parseCurrencyCode(currencyCode ?? 'USD');
+    final currency = currencyCode ?? '';
+    final currencyDecimals = currencyDecimalsForCode(currency);
     final salesTaxController = useTextEditingController(
       text: salesTaxCents == null
           ? ''
-          : minorToPlainText(salesTaxCents!, currency.decimals),
+          : minorToPlainText(salesTaxCents!, currencyDecimals),
     );
     final salesTaxError = useState<String?>(null);
     final saveError = useState<String?>(null);
@@ -128,7 +129,7 @@ class _TaxCategorySheet extends HookConsumerWidget {
       int? parsedSalesTax;
       salesTaxError.value = null;
       if (_isTransaction && salesTaxText.isNotEmpty) {
-        final parsed = parsePlainMinor(salesTaxText, currency.decimals);
+        final parsed = parsePlainMinor(salesTaxText, currencyDecimals);
         if (parsed == null) {
           salesTaxError.value = l10n.taxTransactionSalesTaxError;
           return;
@@ -366,7 +367,7 @@ class _TaxCategorySheet extends HookConsumerWidget {
                                   controller: salesTaxController,
                                   labelText: l10n.taxTransactionSalesTax,
                                   hintText: l10n.taxTransactionSalesTaxHint,
-                                  prefixText: currency.symbol,
+                                  prefixText: currencySymbolForCode(currency),
                                   keyboardType:
                                       const TextInputType.numberWithOptions(
                                         decimal: true,

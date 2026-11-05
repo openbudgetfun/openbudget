@@ -6,7 +6,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_actions_provider.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
-import 'package:openbudget_app/src/utils/currency_code_utils.dart';
+import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -33,8 +33,9 @@ class EditAccountDialog extends HookConsumerWidget {
     final notesController = useTextEditingController();
     final onBudget = useState(account.onBudget);
     final isSubmitting = useState(false);
-    final currencyCode = parseCurrencyCode(account.currencyCode);
-    final factor = _pow10(currencyCode.decimals);
+    final currencyCode = account.currencyCode;
+    final currencyDecimals = currencyDecimalsForCode(currencyCode);
+    final factor = _pow10(currencyDecimals);
 
     final accountTypes = [
       'checking',
@@ -50,7 +51,7 @@ class EditAccountDialog extends HookConsumerWidget {
     final balanceController = useTextEditingController(
       text: _formatInitialAmount(
         cents: account.balanceCents.abs(),
-        decimals: currencyCode.decimals,
+        decimals: currencyDecimals,
       ),
     );
 
@@ -232,7 +233,7 @@ class EditAccountDialog extends HookConsumerWidget {
                   ),
                   const SizedBox(width: SpacingTokens.sm),
                   Text(
-                    currencyCode.symbol,
+                    currencySymbolForCode(currencyCode),
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w700,
                       color: palette.ink,

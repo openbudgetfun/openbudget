@@ -15,7 +15,6 @@ import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
-import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 class HomeScreen extends HookConsumerWidget {
@@ -204,11 +203,6 @@ class _BudgetCard extends HookConsumerWidget {
         .asData
         ?.value;
 
-    final currency = CurrencyCode.values.firstWhere(
-      (c) => c.code == currencyCode,
-      orElse: () => CurrencyCode.usd,
-    );
-
     return Card(
       margin: const EdgeInsets.only(bottom: SpacingTokens.md),
       clipBehavior: Clip.antiAlias,
@@ -267,8 +261,8 @@ class _BudgetCard extends HookConsumerWidget {
                       );
                       final hasSingleCurrency = totalsByCurrency.length <= 1;
                       final singleCurrency = hasSingleCurrency
-                          ? (totalsByCurrency.keys.firstOrNull ?? currency)
-                          : currency;
+                          ? (totalsByCurrency.keys.firstOrNull ?? currencyCode)
+                          : currencyCode;
                       final singleTotal = hasSingleCurrency
                           ? (totalsByCurrency.values.firstOrNull ?? 0)
                           : 0;
@@ -278,10 +272,10 @@ class _BudgetCard extends HookConsumerWidget {
                       final totalLabel = convertedTotal != null
                           ? formatCents(
                               convertedTotal,
-                              converter!.displayCurrency,
+                              converter!.displayCurrency!,
                             )
                           : hasSingleCurrency
-                          ? formatCents(singleTotal, singleCurrency)
+                          ? formatCentsForCode(singleTotal, singleCurrency)
                           : formatCurrencyBreakdown(totalsByCurrency);
                       final totalForColor = convertedTotal ?? singleTotal;
                       final totalTone =
@@ -342,9 +336,9 @@ class _BudgetCard extends HookConsumerWidget {
                         l10n.homeBudgetReadyToAssign(
                           converter?.formatAmount(
                                 amountCents: readyToAssign,
-                                sourceCurrency: currency,
+                                currencyCode: currencyCode,
                               ) ??
-                              formatCents(readyToAssign, currency),
+                              formatCentsForCode(readyToAssign, currencyCode),
                         ),
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: palette.hue(readyTone),
@@ -422,7 +416,7 @@ class _NetWorthSummary extends HookConsumerWidget {
     final theme = Theme.of(context);
     final palette = theme.ob;
 
-    final totalsByCurrency = <CurrencyCode, int>{};
+    final totalsByCurrency = <String, int>{};
     var totalAccounts = 0;
     var loaded = false;
 
@@ -432,7 +426,7 @@ class _NetWorthSummary extends HookConsumerWidget {
         loaded = true;
         final active = accountsAsync.value!.where((a) => !a.isClosed);
         for (final account in active) {
-          final currency = parseCurrencyCode(account.currencyCode);
+          final currency = normalizeCurrencyCode(account.currencyCode);
           totalsByCurrency[currency] =
               (totalsByCurrency[currency] ?? 0) + account.balanceCents;
           totalAccounts++;
@@ -449,9 +443,9 @@ class _NetWorthSummary extends HookConsumerWidget {
     final isPositive = !isSingleCurrency || singleTotal >= 0;
     final tone = isPositive ? ObTone.funded : ObTone.overspent;
     final totalLabel = isSingleCurrency
-        ? formatCents(
+        ? formatCentsForCode(
             singleTotal,
-            totalsByCurrency.keys.firstOrNull ?? CurrencyCode.usd,
+            totalsByCurrency.keys.firstOrNull ?? '',
           )
         : formatCurrencyBreakdown(totalsByCurrency);
 
