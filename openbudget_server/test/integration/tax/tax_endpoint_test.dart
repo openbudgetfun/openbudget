@@ -157,6 +157,146 @@ void main() {
         expect(roundTripped.dependents.last.hasValidSsn, isFalse);
       });
 
+      test('then a UK company profile keeps its new fields', () async {
+        final budget = await createBudget(authedSession, 'Company');
+        const profile = GbTaxProfile(
+          entityKind: TaxEntityKind.company,
+          postgraduateLoan: true,
+          accountingPeriodEndMonth: 6,
+          accountingPeriodEndDay: 30,
+          associatedCompanies: 2,
+        );
+
+        final saved = await endpoints.tax.saveProfile(
+          authedSession,
+          budget.id!,
+          'GB',
+          TaxEntityKind.company.name,
+          jsonEncode(profile.toJson()),
+        );
+
+        final roundTripped = TaxProfile.fromJson(
+          jsonDecode(saved.profileJson) as Map<String, Object?>,
+        ) as GbTaxProfile;
+        expect(roundTripped.postgraduateLoan, isTrue);
+        expect(roundTripped.accountingPeriodEndMonth, 6);
+        expect(roundTripped.accountingPeriodEndDay, 30);
+        expect(roundTripped.associatedCompanies, 2);
+      });
+
+      test('then a Nigerian company profile keeps its new fields', () async {
+        final budget = await endpoints.budget.create(
+          authedSession,
+          'Lagos Ltd',
+          'NGN',
+        );
+        const profile = NgTaxProfile(
+          entityKind: TaxEntityKind.company,
+          smallCompanyCeiling: NgSmallCompanyCeiling.ntaaIntended,
+          mneGroupMember: true,
+        );
+
+        final saved = await endpoints.tax.saveProfile(
+          authedSession,
+          budget.id!,
+          'NG',
+          TaxEntityKind.company.name,
+          jsonEncode(profile.toJson()),
+        );
+
+        final roundTripped = TaxProfile.fromJson(
+          jsonDecode(saved.profileJson) as Map<String, Object?>,
+        ) as NgTaxProfile;
+        expect(
+          roundTripped.smallCompanyCeiling,
+          NgSmallCompanyCeiling.ntaaIntended,
+        );
+        expect(roundTripped.mneGroupMember, isTrue);
+      });
+
+      test('then a German profile keeps its new fields', () async {
+        final budget = await endpoints.budget.create(
+          authedSession,
+          'Freelance',
+          'EUR',
+        );
+        const profile = DeTaxProfile(
+          entityKind: TaxEntityKind.soleTrader,
+          churchTax: true,
+          churchTaxState: DeBundesland.bayern,
+          einkunftsArt: DeEinkunftsArt.freiberuflich,
+          children: 2,
+          statutoryPensionMinor: 600000,
+          previousYearTurnoverMinor: 2000000,
+          commuteKmOneWay: 18,
+          commuteDays: 210,
+        );
+
+        final saved = await endpoints.tax.saveProfile(
+          authedSession,
+          budget.id!,
+          'DE',
+          TaxEntityKind.soleTrader.name,
+          jsonEncode(profile.toJson()),
+        );
+
+        final roundTripped = TaxProfile.fromJson(
+          jsonDecode(saved.profileJson) as Map<String, Object?>,
+        );
+        expect(roundTripped.toJson(), profile.toJson());
+      });
+
+      test('then unknown keys are dropped from the stored profile', () async {
+        final budget = await createBudget(authedSession, 'Personal');
+
+        final saved = await endpoints.tax.saveProfile(
+          authedSession,
+          budget.id!,
+          'GB',
+          TaxEntityKind.individual.name,
+          jsonEncode({
+            'jurisdiction': 'GB',
+            'entityKind': 'individual',
+            'scottishTaxpayer': true,
+            'notAField': 'kept nowhere',
+          }),
+        );
+
+        final stored = jsonDecode(saved.profileJson) as Map<String, Object?>;
+        expect(stored, isNot(contains('notAField')));
+        expect(stored['scottishTaxpayer'], isTrue);
+      });
+
+      for (final (field, value) in [
+        ('scottishTaxpayer', 'yes'),
+        ('associatedCompanies', -1),
+        ('accountingPeriodEndMonth', 13),
+        ('accountingPeriodEndDay', 31),
+        ('studentLoanPlan', 'plan9'),
+      ]) {
+        test('then $field set to $value rejects', () async {
+          final budget = await createBudget(authedSession, 'Company');
+
+          await expectLater(
+            endpoints.tax.saveProfile(
+              authedSession,
+              budget.id!,
+              'GB',
+              TaxEntityKind.company.name,
+              jsonEncode({
+                'jurisdiction': 'GB',
+                'entityKind': 'company',
+                // Day 31 is only invalid against a 30-day month.
+                if (field == 'accountingPeriodEndDay')
+                  'accountingPeriodEndMonth': 9,
+                field: value,
+              }),
+            ),
+            throwsA(isA<ValidationException>()),
+          );
+        });
+      }
+
       test('then an unknown US filing status rejects', () async {
         final budget = await createBudget(authedSession, 'Personal');
 

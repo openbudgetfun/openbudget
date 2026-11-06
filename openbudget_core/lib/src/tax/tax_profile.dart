@@ -19,13 +19,10 @@ sealed class TaxProfile {
   Map<String, Object?> toJson();
 
   static TaxProfile fromJson(Map<String, Object?> json) {
-    final entityKind = TaxEntityKind.values.byName(
-      json['entityKind']! as String,
-    );
-    final registered = json['salesTaxRegistered'] as bool? ?? false;
-    return switch (TaxJurisdiction.fromCountryCode(
-      json['jurisdiction']! as String,
-    )) {
+    final entityKind = _requiredEnum(json, 'entityKind', TaxEntityKind.values);
+    final registered = _field<bool>(json, 'salesTaxRegistered') ?? false;
+    final jurisdictionCode = _required<String>(json, 'jurisdiction');
+    return switch (TaxJurisdiction.fromCountryCode(jurisdictionCode)) {
       TaxJurisdiction.gb => gbProfileFromJson(
         json,
         entityKind,
@@ -34,66 +31,74 @@ sealed class TaxProfile {
       TaxJurisdiction.us => UsTaxProfile(
         entityKind: entityKind,
         salesTaxRegistered: registered,
-        filingStatus: UsFilingStatus.values.byName(
-          json['filingStatus'] as String? ?? UsFilingStatus.single.name,
-        ),
-        homeOfficeMethod: switch (json['homeOfficeMethod']) {
-          final String method => UsHomeOfficeMethod.values.byName(method),
-          _ => UsHomeOfficeMethod.simplified,
-        },
-        specifiedServiceTrade: json['specifiedServiceTrade'] as bool? ?? false,
+        filingStatus:
+            _enumField(json, 'filingStatus', UsFilingStatus.values) ??
+            UsFilingStatus.single,
+        homeOfficeMethod:
+            _enumField(json, 'homeOfficeMethod', UsHomeOfficeMethod.values) ??
+            UsHomeOfficeMethod.simplified,
+        specifiedServiceTrade:
+            _field<bool>(json, 'specifiedServiceTrade') ?? false,
         foreignEarnedIncomeExclusionMinor:
-            json['foreignEarnedIncomeExclusionMinor'] as int? ?? 0,
-        taxpayer65OrOlder: json['taxpayer65OrOlder'] as bool? ?? false,
-        spouse65OrOlder: json['spouse65OrOlder'] as bool? ?? false,
-        taxpayerHasSsn: json['taxpayerHasSsn'] as bool? ?? true,
-        spouseHasSsn: json['spouseHasSsn'] as bool? ?? true,
+            _nonNegativeInt(json, 'foreignEarnedIncomeExclusionMinor') ?? 0,
+        taxpayer65OrOlder: _field<bool>(json, 'taxpayer65OrOlder') ?? false,
+        spouse65OrOlder: _field<bool>(json, 'spouse65OrOlder') ?? false,
+        taxpayerHasSsn: _field<bool>(json, 'taxpayerHasSsn') ?? true,
+        spouseHasSsn: _field<bool>(json, 'spouseHasSsn') ?? true,
         dependents: [
           for (final dependent
-              in json['dependents'] as List<Object?>? ?? const [])
-            UsDependent.fromJson(dependent! as Map<String, Object?>),
+              in _field<List<Object?>>(json, 'dependents') ?? const [])
+            switch (dependent) {
+              final Map<String, Object?> fields => UsDependent.fromJson(fields),
+              _ => throw FormatException(
+                'Tax profile field "dependents" must hold objects',
+                dependent,
+              ),
+            },
         ],
       ),
       TaxJurisdiction.ng => NgTaxProfile(
         entityKind: entityKind,
         salesTaxRegistered: registered,
-        annualRentMinor: json['annualRentMinor'] as int? ?? 0,
-        smallCompanyCeiling: switch (json['smallCompanyCeiling']) {
-          final String ceiling => NgSmallCompanyCeiling.values.byName(ceiling),
-          _ => NgSmallCompanyCeiling.ntaGazette,
-        },
-        mneGroupMember: json['mneGroupMember'] as bool? ?? false,
+        annualRentMinor: _nonNegativeInt(json, 'annualRentMinor') ?? 0,
+        smallCompanyCeiling:
+            _enumField(
+              json,
+              'smallCompanyCeiling',
+              NgSmallCompanyCeiling.values,
+            ) ??
+            NgSmallCompanyCeiling.ntaGazette,
+        mneGroupMember: _field<bool>(json, 'mneGroupMember') ?? false,
       ),
       TaxJurisdiction.de => DeTaxProfile(
         entityKind: entityKind,
         salesTaxRegistered: registered,
-        jointAssessment: json['jointAssessment'] as bool? ?? false,
-        churchTax: json['churchTax'] as bool? ?? false,
-        churchTaxState: switch (json['churchTaxState']) {
-          final String state => DeBundesland.values.byName(state),
-          // Old JSON stored only the flag; the flag alone keeps the 9 %
-          // assumption the old pack computed with.
-          _ => null,
-        },
-        smallBusinessExemption: json['smallBusinessExemption'] as bool? ?? true,
-        einkunftsArt: switch (json['einkunftsArt']) {
-          // Old JSON had no Einkunftsart and the pack treated every sole
-          // trader as a Gewerbebetrieb.
-          final String art => DeEinkunftsArt.values.byName(art),
-          _ => DeEinkunftsArt.gewerblich,
-        },
-        children: json['children'] as int? ?? 0,
-        spouseEmployed: json['spouseEmployed'] as bool? ?? false,
-        statutoryPensionMinor: json['statutoryPensionMinor'] as int? ?? 0,
+        jointAssessment: _field<bool>(json, 'jointAssessment') ?? false,
+        churchTax: _field<bool>(json, 'churchTax') ?? false,
+        // Old JSON stored only the flag; the flag alone keeps the 9 %
+        // assumption the old pack computed with.
+        churchTaxState: _enumField(
+          json,
+          'churchTaxState',
+          DeBundesland.values,
+        ),
+        smallBusinessExemption:
+            _field<bool>(json, 'smallBusinessExemption') ?? true,
+        // Old JSON had no Einkunftsart and the pack treated every sole
+        // trader as a Gewerbebetrieb.
+        einkunftsArt:
+            _enumField(json, 'einkunftsArt', DeEinkunftsArt.values) ??
+            DeEinkunftsArt.gewerblich,
+        children: _nonNegativeInt(json, 'children') ?? 0,
+        spouseEmployed: _field<bool>(json, 'spouseEmployed') ?? false,
+        statutoryPensionMinor:
+            _nonNegativeInt(json, 'statutoryPensionMinor') ?? 0,
         previousYearTurnoverMinor:
-            json['previousYearTurnoverMinor'] as int? ?? 0,
-        commuteKmOneWay: json['commuteKmOneWay'] as int? ?? 0,
-        commuteDays: json['commuteDays'] as int? ?? 0,
+            _nonNegativeInt(json, 'previousYearTurnoverMinor') ?? 0,
+        commuteKmOneWay: _nonNegativeInt(json, 'commuteKmOneWay') ?? 0,
+        commuteDays: _nonNegativeInt(json, 'commuteDays') ?? 0,
       ),
-      null => throw FormatException(
-        'Unknown jurisdiction',
-        json['jurisdiction'],
-      ),
+      null => throw FormatException('Unknown jurisdiction', jurisdictionCode),
     };
   }
 
@@ -181,26 +186,46 @@ GbTaxProfile gbProfileFromJson(
   TaxEntityKind entityKind, {
   required bool salesTaxRegistered,
 }) {
-  final legacyPlan = switch (json['studentLoanPlan']) {
-    final String plan => GbStudentLoanPlan.values.byName(plan),
-    _ => null,
-  };
+  final legacyPlan = _enumField(
+    json,
+    'studentLoanPlan',
+    GbStudentLoanPlan.values,
+  );
   final undergradPlan =
       legacyPlan == null || legacyPlan == GbStudentLoanPlan.postgraduate
       ? null
       : legacyPlan;
   final postgraduate =
-      json['postgraduateLoan'] as bool? ??
+      _field<bool>(json, 'postgraduateLoan') ??
       legacyPlan == GbStudentLoanPlan.postgraduate;
+  final endMonth = _field<int>(json, 'accountingPeriodEndMonth') ?? 3;
+  if (endMonth < 1 || endMonth > 12) {
+    throw FormatException(
+      'Tax profile field "accountingPeriodEndMonth" must be 1 to 12',
+      endMonth,
+    );
+  }
+  final endDay = _field<int>(json, 'accountingPeriodEndDay') ?? 31;
+  final lastDay = switch (endMonth) {
+    2 => 29,
+    4 || 6 || 9 || 11 => 30,
+    _ => 31,
+  };
+  if (endDay < 1 || endDay > lastDay) {
+    throw FormatException(
+      'Tax profile field "accountingPeriodEndDay" must be 1 to $lastDay',
+      endDay,
+    );
+  }
   return GbTaxProfile(
     entityKind: entityKind,
     salesTaxRegistered: salesTaxRegistered,
-    scottishTaxpayer: json['scottishTaxpayer'] as bool? ?? false,
+    scottishTaxpayer: _field<bool>(json, 'scottishTaxpayer') ?? false,
     studentLoanPlan: undergradPlan,
     postgraduateLoan: postgraduate,
-    accountingPeriodEndMonth: json['accountingPeriodEndMonth'] as int? ?? 3,
-    accountingPeriodEndDay: json['accountingPeriodEndDay'] as int? ?? 31,
-    associatedCompanies: json['associatedCompanies'] as int? ?? 0,
+    accountingPeriodEndMonth: endMonth,
+    accountingPeriodEndDay: endDay,
+    associatedCompanies: _nonNegativeInt(json, 'associatedCompanies') ?? 0,
   );
 }
 
@@ -236,8 +261,8 @@ final class UsDependent {
   });
 
   UsDependent.fromJson(Map<String, Object?> json)
-    : underSeventeen = json['underSeventeen'] as bool? ?? false,
-      hasValidSsn = json['hasValidSsn'] as bool? ?? false;
+    : underSeventeen = _field<bool>(json, 'underSeventeen') ?? false,
+      hasValidSsn = _field<bool>(json, 'hasValidSsn') ?? false;
 
   /// Under 17 on December 31 of the tax year.
   final bool underSeventeen;
@@ -515,3 +540,50 @@ final class DeTaxProfile extends TaxProfile {
     'commuteDays': commuteDays,
   };
 }
+
+// Strict readers for stored and client-supplied profile maps. Each one fails
+// with a [FormatException] naming the field, so a malformed profile is
+// reported as invalid input rather than crashing with a cast error.
+
+T? _field<T extends Object>(Map<String, Object?> json, String key) {
+  final value = json[key];
+  if (value == null) return null;
+  if (value is T) return value;
+  throw FormatException('Tax profile field "$key" must be a $T', value);
+}
+
+T _required<T extends Object>(Map<String, Object?> json, String key) =>
+    _field<T>(json, key) ??
+    (throw FormatException('Tax profile field "$key" is required'));
+
+int? _nonNegativeInt(Map<String, Object?> json, String key) {
+  final value = _field<int>(json, key);
+  if (value != null && value < 0) {
+    throw FormatException(
+      'Tax profile field "$key" must not be negative',
+      value,
+    );
+  }
+  return value;
+}
+
+T? _enumField<T extends Enum>(
+  Map<String, Object?> json,
+  String key,
+  List<T> values,
+) {
+  final name = _field<String>(json, key);
+  if (name == null) return null;
+  for (final value in values) {
+    if (value.name == name) return value;
+  }
+  throw FormatException('Tax profile field "$key" has an unknown value', name);
+}
+
+T _requiredEnum<T extends Enum>(
+  Map<String, Object?> json,
+  String key,
+  List<T> values,
+) =>
+    _enumField(json, key, values) ??
+    (throw FormatException('Tax profile field "$key" is required'));

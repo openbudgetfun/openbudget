@@ -111,6 +111,82 @@ void main() {
         throwsFormatException,
       );
     });
+
+    for (final (description, fields) in <(String, Map<String, Object?>)>[
+      ('a missing entity kind', {'entityKind': null}),
+      ('an unknown entity kind', {'entityKind': 'partnership'}),
+      ('a string where a flag belongs', {'salesTaxRegistered': 'true'}),
+      ('an unknown student loan plan', {'studentLoanPlan': 'plan9'}),
+      ('a negative count', {'associatedCompanies': -1}),
+      ('a month past December', {'accountingPeriodEndMonth': 13}),
+      (
+        'a day past the month end',
+        {
+          'accountingPeriodEndMonth': 4,
+          'accountingPeriodEndDay': 31,
+        },
+      ),
+    ]) {
+      test('rejects $description with a FormatException', () {
+        expect(
+          () => TaxProfile.fromJson({
+            'jurisdiction': 'GB',
+            'entityKind': 'company',
+            ...fields,
+          }),
+          throwsFormatException,
+        );
+      });
+    }
+
+    for (final (description, fields) in <(String, Map<String, Object?>)>[
+      ('a negative German child count', {'children': -1}),
+      ('an unknown Land', {'churchTaxState': 'atlantis'}),
+      ('an unknown Einkunftsart', {'einkunftsArt': 'landwirtschaft'}),
+    ]) {
+      test('rejects $description with a FormatException', () {
+        expect(
+          () => TaxProfile.fromJson({
+            'jurisdiction': 'DE',
+            'entityKind': 'soleTrader',
+            ...fields,
+          }),
+          throwsFormatException,
+        );
+      });
+    }
+
+    test('accepts 29 February as a company year end', () {
+      final profile = TaxProfile.fromJson({
+        'jurisdiction': 'GB',
+        'entityKind': 'company',
+        'accountingPeriodEndMonth': 2,
+        'accountingPeriodEndDay': 29,
+      }) as GbTaxProfile;
+      expect(profile.accountingPeriodEndDay, 29);
+    });
+
+    test('rejects a US dependent that is not an object', () {
+      expect(
+        () => TaxProfile.fromJson({
+          'jurisdiction': 'US',
+          'entityKind': 'individual',
+          'dependents': [true],
+        }),
+        throwsFormatException,
+      );
+    });
+
+    test('rejects an unknown Nigerian small-company ceiling', () {
+      expect(
+        () => TaxProfile.fromJson({
+          'jurisdiction': 'NG',
+          'entityKind': 'company',
+          'smallCompanyCeiling': 'n75m',
+        }),
+        throwsFormatException,
+      );
+    });
   });
 
   test('every jurisdiction reports in its own currency', () {
