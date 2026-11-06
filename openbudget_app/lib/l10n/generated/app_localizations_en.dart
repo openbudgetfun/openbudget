@@ -3833,6 +3833,67 @@ class AppLocalizationsEn extends AppLocalizations {
   String get taxUsFilingHeadOfHousehold => 'Head of household';
 
   @override
+  String get taxUsFilingQualifyingSurvivingSpouse =>
+      'Qualifying surviving spouse';
+
+  @override
+  String get taxUsForeignEarnedIncomeExclusion =>
+      'Foreign earned income exclusion';
+
+  @override
+  String get taxUsForeignEarnedIncomeExclusionHint =>
+      'The amount you excluded on Form 2555 this year. It is added back when the investment income and deduction phase-outs check your income.';
+
+  @override
+  String get taxUsDependentsUnder17 => 'Dependents under 17';
+
+  @override
+  String get taxUsDependents17OrOlder => 'Dependents 17 or older';
+
+  @override
+  String get taxUsDependentsCountHint =>
+      'The number of people you claim as dependents.';
+
+  @override
+  String get taxUsDependentsSsn => 'All dependents have an SSN';
+
+  @override
+  String get taxUsDependentsSsnHint =>
+      'Only dependents with an SSN valid for employment earn a credit.';
+
+  @override
+  String get taxUsTaxpayer65OrOlder => 'You are 65 or older';
+
+  @override
+  String get taxUsSpouse65OrOlder => 'Your spouse is 65 or older';
+
+  @override
+  String get taxUsTaxpayerHasSsn => 'You have an SSN';
+
+  @override
+  String get taxUsSpouseHasSsn => 'Your spouse has an SSN';
+
+  @override
+  String get taxUsSsnHint =>
+      'Required for the tips, overtime, and senior deductions.';
+
+  @override
+  String get taxUsHomeOfficeMethod => 'Home office method';
+
+  @override
+  String get taxUsHomeOfficeSimplified => 'Simplified (\$5 per square foot)';
+
+  @override
+  String get taxUsHomeOfficeRegular => 'Regular (Form 8829)';
+
+  @override
+  String get taxUsSpecifiedServiceTrade => 'Specified service business';
+
+  @override
+  String get taxUsSpecifiedServiceTradeHint =>
+      'Consulting, law, health and similar businesses phase out of the qualified business income deduction.';
+
+  @override
   String get taxNgAnnualRent => 'Annual rent paid';
 
   @override

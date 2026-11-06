@@ -293,6 +293,100 @@ void main() {
       expect(saved['salesTaxRegistered'], isTrue);
     });
 
+    testWidgets('offers qualifying surviving spouse as a filing status', (
+      tester,
+    ) async {
+      final fake = FakeTaxRepository();
+      await tester.pumpWidget(_buildApp(fake));
+      await tester.pumpAndSettle();
+
+      await _selectCountry(tester, 'United States');
+      await tester.tap(find.byType(DropdownButtonFormField<UsFilingStatus>));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Qualifying surviving spouse').last);
+      await tester.pumpAndSettle();
+
+      await _save(tester);
+
+      expect(
+        _lastProfileJson(fake)['filingStatus'],
+        'qualifyingSurvivingSpouse',
+      );
+    });
+
+    testWidgets('saves US dependents, age, SSN, and exclusion', (
+      tester,
+    ) async {
+      final fake = FakeTaxRepository();
+      await tester.pumpWidget(_buildApp(fake));
+      await tester.pumpAndSettle();
+
+      await _selectCountry(tester, 'United States');
+      await tester.ensureVisible(find.text('Dependents under 17'));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Dependents under 17'),
+        '2',
+      );
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Dependents 17 or older'),
+        '1',
+      );
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Foreign earned income exclusion'),
+        '5000',
+      );
+      await tester.ensureVisible(find.text('You are 65 or older'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('You are 65 or older'));
+      await tester.pumpAndSettle();
+
+      await _save(tester);
+
+      final saved = _lastProfileJson(fake);
+      expect(saved['jurisdiction'], 'US');
+      expect(saved['taxpayer65OrOlder'], isTrue);
+      expect(saved['spouse65OrOlder'], isFalse);
+      expect(saved['taxpayerHasSsn'], isTrue);
+      expect(saved['foreignEarnedIncomeExclusionMinor'], 500000);
+      // The SSN switch starts off, so no dependent carries an SSN yet.
+      expect(saved['dependents'], [
+        {'underSeventeen': true, 'hasValidSsn': false},
+        {'underSeventeen': true, 'hasValidSsn': false},
+        {'underSeventeen': false, 'hasValidSsn': false},
+      ]);
+    });
+
+    testWidgets('saves the US home office method for a sole trader', (
+      tester,
+    ) async {
+      final fake = FakeTaxRepository();
+      await tester.pumpWidget(_buildApp(fake));
+      await tester.pumpAndSettle();
+
+      await _selectEntity(tester, 'Sole trader');
+      await _selectCountry(tester, 'United States');
+      expect(find.text('Home office method'), findsOneWidget);
+      expect(find.text('Specified service business'), findsOneWidget);
+
+      await tester.ensureVisible(
+        find.byType(DropdownButtonFormField<UsHomeOfficeMethod>),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.byType(DropdownButtonFormField<UsHomeOfficeMethod>),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Regular (Form 8829)').last);
+      await tester.pumpAndSettle();
+
+      await _save(tester);
+
+      final saved = _lastProfileJson(fake);
+      expect(saved['homeOfficeMethod'], 'regular');
+      expect(saved['specifiedServiceTrade'], isFalse);
+    });
+
     testWidgets('validates a Nigerian annual rent before saving', (
       tester,
     ) async {

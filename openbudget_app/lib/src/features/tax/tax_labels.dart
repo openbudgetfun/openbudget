@@ -55,4 +55,15 @@ String taxFilingStatusLabel(AppLocalizations l10n, UsFilingStatus status) =>
       UsFilingStatus.marriedFilingSeparately =>
         l10n.taxUsFilingMarriedSeparately,
       UsFilingStatus.headOfHousehold => l10n.taxUsFilingHeadOfHousehold,
+      UsFilingStatus.qualifyingSurvivingSpouse =>
+        l10n.taxUsFilingQualifyingSurvivingSpouse,
     };
+
+/// The label for the Schedule C home office method.
+String taxHomeOfficeMethodLabel(
+  AppLocalizations l10n,
+  UsHomeOfficeMethod method,
+) => switch (method) {
+  UsHomeOfficeMethod.simplified => l10n.taxUsHomeOfficeSimplified,
+  UsHomeOfficeMethod.regular => l10n.taxUsHomeOfficeRegular,
+};

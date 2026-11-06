@@ -6492,6 +6492,114 @@ abstract class AppLocalizations {
   /// **'Head of household'**
   String get taxUsFilingHeadOfHousehold;
 
+  /// No description provided for @taxUsFilingQualifyingSurvivingSpouse.
+  ///
+  /// In en, this message translates to:
+  /// **'Qualifying surviving spouse'**
+  String get taxUsFilingQualifyingSurvivingSpouse;
+
+  /// No description provided for @taxUsForeignEarnedIncomeExclusion.
+  ///
+  /// In en, this message translates to:
+  /// **'Foreign earned income exclusion'**
+  String get taxUsForeignEarnedIncomeExclusion;
+
+  /// No description provided for @taxUsForeignEarnedIncomeExclusionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The amount you excluded on Form 2555 this year. It is added back when the investment income and deduction phase-outs check your income.'**
+  String get taxUsForeignEarnedIncomeExclusionHint;
+
+  /// No description provided for @taxUsDependentsUnder17.
+  ///
+  /// In en, this message translates to:
+  /// **'Dependents under 17'**
+  String get taxUsDependentsUnder17;
+
+  /// No description provided for @taxUsDependents17OrOlder.
+  ///
+  /// In en, this message translates to:
+  /// **'Dependents 17 or older'**
+  String get taxUsDependents17OrOlder;
+
+  /// No description provided for @taxUsDependentsCountHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The number of people you claim as dependents.'**
+  String get taxUsDependentsCountHint;
+
+  /// No description provided for @taxUsDependentsSsn.
+  ///
+  /// In en, this message translates to:
+  /// **'All dependents have an SSN'**
+  String get taxUsDependentsSsn;
+
+  /// No description provided for @taxUsDependentsSsnHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Only dependents with an SSN valid for employment earn a credit.'**
+  String get taxUsDependentsSsnHint;
+
+  /// No description provided for @taxUsTaxpayer65OrOlder.
+  ///
+  /// In en, this message translates to:
+  /// **'You are 65 or older'**
+  String get taxUsTaxpayer65OrOlder;
+
+  /// No description provided for @taxUsSpouse65OrOlder.
+  ///
+  /// In en, this message translates to:
+  /// **'Your spouse is 65 or older'**
+  String get taxUsSpouse65OrOlder;
+
+  /// No description provided for @taxUsTaxpayerHasSsn.
+  ///
+  /// In en, this message translates to:
+  /// **'You have an SSN'**
+  String get taxUsTaxpayerHasSsn;
+
+  /// No description provided for @taxUsSpouseHasSsn.
+  ///
+  /// In en, this message translates to:
+  /// **'Your spouse has an SSN'**
+  String get taxUsSpouseHasSsn;
+
+  /// No description provided for @taxUsSsnHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Required for the tips, overtime, and senior deductions.'**
+  String get taxUsSsnHint;
+
+  /// No description provided for @taxUsHomeOfficeMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Home office method'**
+  String get taxUsHomeOfficeMethod;
+
+  /// No description provided for @taxUsHomeOfficeSimplified.
+  ///
+  /// In en, this message translates to:
+  /// **'Simplified (\$5 per square foot)'**
+  String get taxUsHomeOfficeSimplified;
+
+  /// No description provided for @taxUsHomeOfficeRegular.
+  ///
+  /// In en, this message translates to:
+  /// **'Regular (Form 8829)'**
+  String get taxUsHomeOfficeRegular;
+
+  /// No description provided for @taxUsSpecifiedServiceTrade.
+  ///
+  /// In en, this message translates to:
+  /// **'Specified service business'**
+  String get taxUsSpecifiedServiceTrade;
+
+  /// No description provided for @taxUsSpecifiedServiceTradeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Consulting, law, health and similar businesses phase out of the qualified business income deduction.'**
+  String get taxUsSpecifiedServiceTradeHint;
+
   /// No description provided for @taxNgAnnualRent.
   ///
   /// In en, this message translates to:

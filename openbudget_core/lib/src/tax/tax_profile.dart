@@ -37,6 +37,22 @@ sealed class TaxProfile {
         filingStatus: UsFilingStatus.values.byName(
           json['filingStatus'] as String? ?? UsFilingStatus.single.name,
         ),
+        homeOfficeMethod: switch (json['homeOfficeMethod']) {
+          final String method => UsHomeOfficeMethod.values.byName(method),
+          _ => UsHomeOfficeMethod.simplified,
+        },
+        specifiedServiceTrade: json['specifiedServiceTrade'] as bool? ?? false,
+        foreignEarnedIncomeExclusionMinor:
+            json['foreignEarnedIncomeExclusionMinor'] as int? ?? 0,
+        taxpayer65OrOlder: json['taxpayer65OrOlder'] as bool? ?? false,
+        spouse65OrOlder: json['spouse65OrOlder'] as bool? ?? false,
+        taxpayerHasSsn: json['taxpayerHasSsn'] as bool? ?? true,
+        spouseHasSsn: json['spouseHasSsn'] as bool? ?? true,
+        dependents: [
+          for (final dependent
+              in json['dependents'] as List<Object?>? ?? const [])
+            UsDependent.fromJson(dependent! as Map<String, Object?>),
+        ],
       ),
       TaxJurisdiction.ng => NgTaxProfile(
         entityKind: entityKind,
@@ -174,6 +190,46 @@ enum UsFilingStatus {
   marriedFilingJointly,
   marriedFilingSeparately,
   headOfHousehold,
+
+  /// A taxpayer whose spouse died within the two tax years before the year
+  /// of the return and who has a dependent child at home. It uses the
+  /// married-filing-jointly brackets, standard deduction and thresholds.
+  qualifyingSurvivingSpouse,
+}
+
+/// How business-use-of-home expenses are claimed on Schedule C.
+enum UsHomeOfficeMethod {
+  /// $5 per square foot up to 300 square feet, capped at $1,500.
+  simplified,
+
+  /// Actual expenses on Form 8829; not subject to the $1,500 cap.
+  regular,
+}
+
+/// One person claimed as a dependent on a US return.
+///
+/// Age matters only through the under-17 line that separates the child tax
+/// credit from the credit for other dependents.
+final class UsDependent {
+  const UsDependent({
+    required this.underSeventeen,
+    required this.hasValidSsn,
+  });
+
+  UsDependent.fromJson(Map<String, Object?> json)
+    : underSeventeen = json['underSeventeen'] as bool? ?? false,
+      hasValidSsn = json['hasValidSsn'] as bool? ?? false;
+
+  /// Under 17 on December 31 of the tax year.
+  final bool underSeventeen;
+
+  /// Has an SSN valid for employment issued by the return due date.
+  final bool hasValidSsn;
+
+  Map<String, Object?> toJson() => {
+    'underSeventeen': underSeventeen,
+    'hasValidSsn': hasValidSsn,
+  };
 }
 
 final class UsTaxProfile extends TaxProfile {
@@ -181,6 +237,14 @@ final class UsTaxProfile extends TaxProfile {
     required super.entityKind,
     this.salesTaxRegistered = false,
     this.filingStatus = UsFilingStatus.single,
+    this.homeOfficeMethod = UsHomeOfficeMethod.simplified,
+    this.specifiedServiceTrade = false,
+    this.foreignEarnedIncomeExclusionMinor = 0,
+    this.taxpayer65OrOlder = false,
+    this.spouse65OrOlder = false,
+    this.taxpayerHasSsn = true,
+    this.spouseHasSsn = true,
+    this.dependents = const [],
   });
 
   @override
@@ -191,10 +255,49 @@ final class UsTaxProfile extends TaxProfile {
 
   final UsFilingStatus filingStatus;
 
+  /// The Schedule C method used for business use of home; the $1,500 cap
+  /// applies to [UsHomeOfficeMethod.simplified] only.
+  final UsHomeOfficeMethod homeOfficeMethod;
+
+  /// The trade is a specified service trade or business (SSTB) for the
+  /// qualified business income phase-out.
+  final bool specifiedServiceTrade;
+
+  /// The foreign earned income exclusion claimed on Form 2555. It is added
+  /// back to modified adjusted gross income for the net investment income
+  /// tax, the SALT phase-down, and the Schedule 1-A phase-outs.
+  final int foreignEarnedIncomeExclusionMinor;
+
+  /// The taxpayer is 65 or older on December 31 (Schedule 1-A senior
+  /// deduction).
+  final bool taxpayer65OrOlder;
+
+  /// The spouse is 65 or older on December 31 (Schedule 1-A senior
+  /// deduction on a joint return).
+  final bool spouse65OrOlder;
+
+  /// The taxpayer has an SSN valid for employment (Schedule 1-A and the
+  /// child tax credit require one).
+  final bool taxpayerHasSsn;
+
+  /// The spouse has an SSN valid for employment.
+  final bool spouseHasSsn;
+
+  /// The people claimed as dependents this year.
+  final List<UsDependent> dependents;
+
   @override
   Map<String, Object?> toJson() => {
     ..._baseJson(),
     'filingStatus': filingStatus.name,
+    'homeOfficeMethod': homeOfficeMethod.name,
+    'specifiedServiceTrade': specifiedServiceTrade,
+    'foreignEarnedIncomeExclusionMinor': foreignEarnedIncomeExclusionMinor,
+    'taxpayer65OrOlder': taxpayer65OrOlder,
+    'spouse65OrOlder': spouse65OrOlder,
+    'taxpayerHasSsn': taxpayerHasSsn,
+    'spouseHasSsn': spouseHasSsn,
+    'dependents': [for (final dependent in dependents) dependent.toJson()],
   };
 }
 
