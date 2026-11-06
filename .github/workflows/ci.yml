@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   lint:
-    runs-on: blacksmith-2vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -44,7 +44,7 @@ jobs:
         shell: devenv shell -- bash -e {0}
 
   analyze:
-    runs-on: blacksmith-2vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -57,7 +57,7 @@ jobs:
         shell: devenv shell -- bash -e {0}
 
   format:
-    runs-on: blacksmith-2vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -71,7 +71,7 @@ jobs:
 
   widget-ban:
     name: Ban StatefulWidget and StatelessWidget
-    runs-on: blacksmith-2vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
@@ -86,7 +86,7 @@ jobs:
 
   secrets-scan:
     name: Secrets Detection
-    runs-on: blacksmith-2vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
@@ -103,7 +103,7 @@ jobs:
         run: gitleaks detect --source . --redact --config .gitleaks.toml
 
   test:
-    runs-on: blacksmith-2vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -120,7 +120,7 @@ jobs:
         shell: devenv shell -- bash -e {0}
 
   changesets:
-    runs-on: blacksmith-2vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
@@ -150,7 +150,7 @@ jobs:
         shell: devenv shell -- bash -e {0}
 
   server-test:
-    runs-on: blacksmith-2vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     services:
       postgres:
@@ -203,7 +203,7 @@ jobs:
         shell: devenv shell -- bash -e {0}
 
   integration-test:
-    runs-on: blacksmith-2vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -220,7 +220,7 @@ jobs:
 
   release-config-guard:
     name: Release config guard
-    runs-on: blacksmith-2vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
@@ -244,7 +244,7 @@ jobs:
 
   native-change-check:
     name: Detect native dependency changes
-    runs-on: blacksmith-2vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     if: github.event_name == 'pull_request'
     steps:
       - uses: actions/checkout@v4
