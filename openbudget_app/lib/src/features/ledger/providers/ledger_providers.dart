@@ -7,10 +7,9 @@ part 'ledger_providers.g.dart';
 /// The budget's chart of accounts, archived accounts included so the
 /// Accounts tab can mark them.
 @riverpod
-Future<List<LedgerAccount>> ledgerAccounts(Ref ref, String budgetId) =>
-    ref
-        .watch(ledgerRepositoryProvider)
-        .listAccounts(budgetId, includeArchived: true);
+Future<List<LedgerAccount>> ledgerAccounts(Ref ref, String budgetId) => ref
+    .watch(ledgerRepositoryProvider)
+    .listAccounts(budgetId, includeArchived: true);
 
 /// The budget's journals, newest first.
 @riverpod

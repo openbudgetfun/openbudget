@@ -171,8 +171,8 @@ class JournalDetailScreen extends HookConsumerWidget {
           );
         },
       ),
-      bottomNavigationBar: status == JournalStatus.draft ||
-              status == JournalStatus.posted
+      bottomNavigationBar:
+          status == JournalStatus.draft || status == JournalStatus.posted
           ? DecoratedBox(
               decoration: BoxDecoration(
                 color: palette.surface,

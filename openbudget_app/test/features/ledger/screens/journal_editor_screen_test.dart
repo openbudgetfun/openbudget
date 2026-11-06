@@ -68,17 +68,15 @@ Future<void> _pumpEditor(
 
 /// The totals card sits below the fold on the 800x600 test surface because
 /// the two line cards fill the screen first.
-Future<void> _scrollToTotals(WidgetTester tester) {
-  return tester.scrollUntilVisible(
-    find.byKey(const Key('journal-totals')),
-    200,
-    scrollable: find
-        .byWidgetPredicate(
-          (widget) => widget is Scrollable && widget.axis == Axis.vertical,
-        )
-        .first,
-  );
-}
+Future<void> _scrollToTotals(WidgetTester tester) => tester.scrollUntilVisible(
+  find.byKey(const Key('journal-totals')),
+  200,
+  scrollable: find
+      .byWidgetPredicate(
+        (widget) => widget is Scrollable && widget.axis == Axis.vertical,
+      )
+      .first,
+);
 
 /// Selects [accountLabel] in the account dropdown of line [lineIndex].
 ///

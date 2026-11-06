@@ -193,8 +193,7 @@ class _JournalsTab extends HookConsumerWidget {
             message: ledgerErrorMessage(error, l10n.booksJournalsLoadError),
             action: ObStateAction(
               label: l10n.ledgerRetry,
-              onPressed: () =>
-                  ref.invalidate(ledgerJournalsProvider(budgetId)),
+              onPressed: () => ref.invalidate(ledgerJournalsProvider(budgetId)),
             ),
           ),
         ),
@@ -231,7 +230,10 @@ class _JournalsTab extends HookConsumerWidget {
                     journal: journal,
                     onTap: () => context.pushNamed(
                       journalDetailRoute,
-                      pathParameters: {'id': budgetId, 'journalId': journal.id!.toString()},
+                      pathParameters: {
+                        'id': budgetId,
+                        'journalId': journal.id!.toString(),
+                      },
                     ),
                   );
                 },
@@ -279,9 +281,7 @@ class _JournalCard extends HookWidget {
                   color: palette.mutedInk,
                 ),
               ),
-        trailing: status == null
-            ? null
-            : JournalStatusChip(status: status),
+        trailing: status == null ? null : JournalStatusChip(status: status),
       ),
     );
   }
@@ -310,8 +310,7 @@ class _AccountsTab extends HookConsumerWidget {
             message: ledgerErrorMessage(error, l10n.booksAccountsLoadError),
             action: ObStateAction(
               label: l10n.ledgerRetry,
-              onPressed: () =>
-                  ref.invalidate(ledgerAccountsProvider(budgetId)),
+              onPressed: () => ref.invalidate(ledgerAccountsProvider(budgetId)),
             ),
           ),
         ),

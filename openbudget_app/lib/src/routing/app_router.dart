@@ -184,7 +184,10 @@ GoRouter appRouter(Ref ref) {
                 builder: (context, state) {
                   final id = state.pathParameters['id']!;
                   final journalId = state.pathParameters['journalId']!;
-                  return JournalDetailScreen(budgetId: id, journalId: journalId);
+                  return JournalDetailScreen(
+                    budgetId: id,
+                    journalId: journalId,
+                  );
                 },
               ),
             ],

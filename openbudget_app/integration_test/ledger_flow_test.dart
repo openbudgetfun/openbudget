@@ -71,8 +71,7 @@ class FakeBooksRepository implements LedgerRepository {
   Future<List<LedgerAccount>> listAccounts(
     String budgetId, {
     required bool includeArchived,
-  }) async =>
-      accounts;
+  }) async => accounts;
 
   @override
   Future<LedgerAccount> createAccount({
@@ -171,8 +170,7 @@ class FakeBooksRepository implements LedgerRepository {
     String budgetId, {
     DateTime? fromDate,
     DateTime? toDate,
-  }) async =>
-      journals;
+  }) async => journals;
 
   @override
   Future<LedgerPeriodLock> setLockDate(
@@ -214,9 +212,7 @@ class FakeBooksRepository implements LedgerRepository {
       for (final code in debitByAccount.keys.toList()..sort())
         TrialBalanceRowView(
           accountCode: code,
-          accountName: accounts
-              .firstWhere((a) => a.code == code)
-              .name,
+          accountName: accounts.firstWhere((a) => a.code == code).name,
           accountType: accounts.firstWhere((a) => a.code == code).type,
           debitMinor: debitByAccount[code] ?? 0,
           creditMinor: creditByAccount[code] ?? 0,

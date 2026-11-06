@@ -46,8 +46,7 @@ class BooksEntryTile extends HookConsumerWidget {
     }
 
     final isLedger =
-        AccountingMode.tryParse(budget.accountingMode) ==
-        AccountingMode.ledger;
+        AccountingMode.tryParse(budget.accountingMode) == AccountingMode.ledger;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -123,9 +122,11 @@ class BooksEntryTile extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     isEnabling.value = true;
     try {
-      await ref.read(ledgerActionsProvider.notifier).enableLedger(
-        budgetId: budgetId,
-      );
+      await ref
+          .read(ledgerActionsProvider.notifier)
+          .enableLedger(
+            budgetId: budgetId,
+          );
       if (!context.mounted) return;
       showAppToast(
         context,

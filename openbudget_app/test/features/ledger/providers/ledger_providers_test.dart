@@ -4,6 +4,7 @@ import 'package:openbudget_app/src/features/budget/providers/budget_detail_provi
 import 'package:openbudget_app/src/features/ledger/providers/ledger_actions_provider.dart';
 import 'package:openbudget_app/src/features/ledger/providers/ledger_providers.dart';
 import 'package:openbudget_app/src/features/ledger/providers/ledger_repository.dart';
+
 import '../ledger_test_data.dart';
 
 ProviderContainer _containerWith(LedgerRepository repository) {
@@ -84,8 +85,7 @@ void main() {
         ledgerTrialBalanceProvider(testBudgetId, DateTime(2026)).future,
       );
       await container.read(
-        ledgerTrialBalanceProvider(testBudgetId, DateTime(2026, 10, 31))
-            .future,
+        ledgerTrialBalanceProvider(testBudgetId, DateTime(2026, 10, 31)).future,
       );
 
       expect(
@@ -106,7 +106,10 @@ void main() {
 
       expect(budget.accountingMode, 'ledger');
       expect(fake.enabledBudgets, [testBudgetId]);
-      expect(container.read(ledgerActionsProvider), const AsyncValue<void>.data(null));
+      expect(
+        container.read(ledgerActionsProvider),
+        const AsyncValue<void>.data(null),
+      );
     });
 
     test('enableLedger records failures and rethrows', () async {
@@ -249,23 +252,26 @@ void main() {
   });
 
   group('fake store integrity', () {
-    test('posting a reversal on a fresh fake keeps the store consistent', () async {
-      final fake = FakeLedgerRepository();
-      final container = _containerWith(fake);
+    test(
+      'posting a reversal on a fresh fake keeps the store consistent',
+      () async {
+        final fake = FakeLedgerRepository();
+        final container = _containerWith(fake);
 
-      await container.read(ledgerJournalsProvider(testBudgetId).future);
-      await container
-          .read(ledgerActionsProvider.notifier)
-          .reverseJournal(
-            budgetId: testBudgetId,
-            journalId: postedJournalId,
-            date: DateTime(2026, 11, 2),
-          );
+        await container.read(ledgerJournalsProvider(testBudgetId).future);
+        await container
+            .read(ledgerActionsProvider.notifier)
+            .reverseJournal(
+              budgetId: testBudgetId,
+              journalId: postedJournalId,
+              date: DateTime(2026, 11, 2),
+            );
 
-      final journals = await container.read(
-        ledgerJournalsProvider(testBudgetId).future,
-      );
-      expect(journals, hasLength(5));
-    });
+        final journals = await container.read(
+          ledgerJournalsProvider(testBudgetId).future,
+        );
+        expect(journals, hasLength(5));
+      },
+    );
   });
 }

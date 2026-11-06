@@ -170,7 +170,8 @@ TrialBalanceView trialBalanceView({
   budgetId: UuidValue.fromString(testBudgetId),
   currencyCode: currencyCode,
   asOf: asOf ?? DateTime.utc(2026, 11, 5),
-  rows: rows ??
+  rows:
+      rows ??
       [
         trialRow(),
         trialRow(
@@ -320,8 +321,7 @@ class FakeLedgerRepository implements LedgerRepository {
       source: source,
     ));
     final resolvedId =
-        journalId ??
-        '00000000-0000-0000-0000-0000000000d$_nextJournalNumber';
+        journalId ?? '00000000-0000-0000-0000-0000000000d$_nextJournalNumber';
     _nextJournalNumber++;
     return _recordDraft(
       journalId: resolvedId,
@@ -335,7 +335,7 @@ class FakeLedgerRepository implements LedgerRepository {
     if (deleteError != null) throw deleteError!;
     deletedJournals.add(journalId);
     journals = [
-      ...?(journals ?? testJournals()).where(
+      ...(journals ?? testJournals()).where(
         (j) => j.id?.toString() != journalId,
       ),
     ];
@@ -364,7 +364,8 @@ class FakeLedgerRepository implements LedgerRepository {
     reversedJournals.add((journalId: journalId, date: date));
     journals = [
       for (final j in journals ?? testJournals())
-        if (j.id?.toString() == journalId) j.copyWith(status: 'reversed')
+        if (j.id?.toString() == journalId)
+          j.copyWith(status: 'reversed')
         else
           j,
     ];

@@ -80,9 +80,7 @@ class LedgerActions extends _$LedgerActions {
   }) async {
     state = const AsyncValue.loading();
     try {
-      await ref
-          .read(ledgerRepositoryProvider)
-          .deleteDraftJournal(journalId);
+      await ref.read(ledgerRepositoryProvider).deleteDraftJournal(journalId);
       if (ref.mounted) {
         ref.invalidate(ledgerJournalsProvider(budgetId));
         state = const AsyncValue.data(null);

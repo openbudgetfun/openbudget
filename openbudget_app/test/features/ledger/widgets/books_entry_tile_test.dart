@@ -22,8 +22,9 @@ Future<void> _pumpTile(
     overrides: [
       ledgerRepositoryProvider.overrideWithValue(repository),
       taxProfileProvider.overrideWith(
-        (ref, id) async =>
-            entityKind.isEmpty ? null : businessTaxProfile(entityKind: entityKind),
+        (ref, id) async => entityKind.isEmpty
+            ? null
+            : businessTaxProfile(entityKind: entityKind),
       ),
       budgetDetailProvider.overrideWith(
         (ref, id) async => testBudget(accountingMode: accountingMode),
@@ -36,9 +37,11 @@ Future<void> _pumpTile(
     routes: [
       GoRoute(
         path: '/more',
-        builder: (_, _) => const Scaffold(body: BooksEntryTile(
-          budgetId: testBudgetId,
-        )),
+        builder: (_, _) => const Scaffold(
+          body: BooksEntryTile(
+            budgetId: testBudgetId,
+          ),
+        ),
       ),
       GoRoute(
         name: booksRoute,

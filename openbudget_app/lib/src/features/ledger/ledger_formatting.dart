@@ -36,6 +36,9 @@ String minorToPlainString(int minor, int decimals) {
   final isNegative = minor < 0;
   final abs = minor.abs();
   final whole = abs ~/ _pow10(decimals);
+  if (decimals == 0) {
+    return '${isNegative ? '-' : ''}$whole';
+  }
   final fraction = (abs % _pow10(decimals)).toString().padLeft(decimals, '0');
   return '${isNegative ? '-' : ''}$whole.$fraction';
 }

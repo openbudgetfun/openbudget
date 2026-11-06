@@ -230,7 +230,8 @@ class JournalEditorScreen extends HookConsumerWidget {
               decimals: decimals,
               currency: currency,
               issues: [
-                for (final issue in draftIssues) ledgerIssueMessage(l10n, issue),
+                for (final issue in draftIssues)
+                  ledgerIssueMessage(l10n, issue),
               ],
               missingAccountLines: missingAccounts,
             ),
@@ -570,7 +571,10 @@ class _TotalsCard extends HookWidget {
                   formatCentsForCode(difference.abs(), currency),
                 ),
                 tone: ObTone.overspent,
-                icon: const SkribbleIcon(data: OpenBudgetIcons.warning, size: 16),
+                icon: const SkribbleIcon(
+                  data: OpenBudgetIcons.warning,
+                  size: 16,
+                ),
               ),
             for (final line in missingAccountLines)
               Padding(

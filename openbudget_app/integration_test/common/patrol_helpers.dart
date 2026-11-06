@@ -419,18 +419,15 @@ class JournalEditorPage {
   final WidgetTester tester;
 
   Finder get title => find.text('New journal').first;
-  Finder get referenceField =>
-      find.byKey(const Key('journal-reference-field'));
-  Finder get narrationField =>
-      find.byKey(const Key('journal-narration-field'));
+  Finder get referenceField => find.byKey(const Key('journal-reference-field'));
+  Finder get narrationField => find.byKey(const Key('journal-narration-field'));
   Finder get addLineButton => find.byKey(const Key('journal-add-line'));
   Finder get balancedChip => find.byKey(const Key('journal-balanced-chip'));
   Finder get totalsCard => find.byKey(const Key('journal-totals'));
   Finder get saveDraftButton => find.byKey(const Key('journal-save-draft'));
   Finder get postButton => find.byKey(const Key('journal-post-button'));
   Finder get postDialog => find.byKey(const Key('journal-post-dialog'));
-  Finder get postConfirmButton =>
-      find.byKey(const Key('journal-post-confirm'));
+  Finder get postConfirmButton => find.byKey(const Key('journal-post-confirm'));
 
   Finder lineAccount(int index) =>
       find.byKey(Key('journal-line-account-$index'));
