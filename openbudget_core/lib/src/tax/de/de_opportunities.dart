@@ -50,7 +50,7 @@ List<TaxOpportunity> _individualOpportunities(
   DeTaxTable table,
 ) {
   final assessment = deIndividual(input, table);
-  final churchRate = profile.churchTax ? deKirchensteuerRateBasisPoints : 0;
+  final churchRate = profile.churchTaxRateBasisPoints;
   final opportunities = <TaxOpportunity>[];
 
   final unusedAllowance =
@@ -77,17 +77,23 @@ List<TaxOpportunity> _individualOpportunities(
     );
   }
 
-  final homeOfficeClaimed = assessment.totals['de.ind.homeoffice'] ?? 0;
+  // § 4 Abs. 5 Satz 1 Nr. 6c EStG: 6 Euro per day, capped at the annual
+  // maximum. The opportunity stays silent when an Arbeitszimmer is claimed,
+  // because the two claims must not overlap in time.
+  final homeOfficeClaimed = assessment.homeoffice;
   final homeOfficeMax = table.allowances.homeOfficeAnnualMax;
-  if (homeOfficeClaimed < homeOfficeMax &&
+  if (assessment.arbeitszimmer == 0 &&
+      homeOfficeClaimed < homeOfficeMax &&
       assessment.marginalRateBasisPoints > 0) {
+    final daily = table.allowances.homeOfficeDailyAllowance;
+    final remainingDays = (homeOfficeMax - homeOfficeClaimed) ~/ daily;
     final shortfall = homeOfficeMax - homeOfficeClaimed;
     opportunities.add(
       TaxOpportunity(
         id: 'de.homeoffice_pauschale',
         title: 'Homeoffice-Pauschale ausschöpfen',
         explanation:
-            'Für jeden Kalendertag mit überwiegend häuslicher Tätigkeit sind 6 Euro abziehbar, höchstens ${deEuro(homeOfficeMax)} im Jahr (§ 4 Abs. 5 Satz 1 Nr. 6c EStG). Erfasst sind bisher ${deEuro(homeOfficeClaimed)}; es fehlen ${deEuro(shortfall)} bis zur Höchstgrenze.',
+            'Für jeden Kalendertag mit überwiegend häuslicher Tätigkeit sind ${deEuro(daily)} abziehbar, höchstens ${deEuro(homeOfficeMax)} im Jahr (§ 4 Abs. 5 Satz 1 Nr. 6c EStG). Erfasst sind bisher ${deEuro(homeOfficeClaimed)}; es fehlen $remainingDays Tage (${deEuro(shortfall)}) bis zur Höchstgrenze.',
         source: Uri.parse('https://www.gesetze-im-internet.de/estg/__4.html'),
         estimatedSavingMinor:
             math.min(shortfall, assessment.taxableIncome) *
@@ -98,7 +104,8 @@ List<TaxOpportunity> _individualOpportunities(
     );
   }
 
-  final basisrenteShortfall = table.basisrenteMax - assessment.basisrentePaid;
+  final basisrenteCap = assessment.basisrenteCap;
+  final basisrenteShortfall = basisrenteCap - assessment.basisrentePaid;
   final usableBasisrente = math.min(
     basisrenteShortfall,
     assessment.taxableIncome,
@@ -109,7 +116,7 @@ List<TaxOpportunity> _individualOpportunities(
         id: 'de.basisrente_hoechstbetrag',
         title: 'Basisrente bis zum Höchstbetrag einzahlen',
         explanation:
-            'Beiträge zu einer Basisrente sind bis ${deEuro(table.basisrenteMax)} im Jahr als Sonderausgaben abziehbar (§ 10 Abs. 3 EStG). Erfasst sind bisher ${deEuro(assessment.basisrentePaid)}. Die Ersparnis gilt für zusätzliche Beiträge bis zur Höhe des zu versteuernden Einkommens; die Auszahlung der Rente ist später steuerpflichtig.',
+            'Beiträge zu einer Basisrente sind bis ${deEuro(basisrenteCap)} im Jahr als Sonderausgaben abziehbar (§ 10 Abs. 3 EStG${profile.jointAssessment ? '; bei Zusammenveranlagung verdoppelter Höchstbetrag' : ''}${assessment.statutoryPension > 0 ? ', gemindert um ${deEuro(assessment.statutoryPension)} Beiträge zur gesetzlichen Rentenversicherung' : ''}). Erfasst sind bisher ${deEuro(assessment.basisrentePaid)}. Die Ersparnis gilt für zusätzliche Beiträge bis zur Höhe des zu versteuernden Einkommens; die Auszahlung der Rente ist später steuerpflichtig.',
         source: Uri.parse('https://www.gesetze-im-internet.de/estg/__10.html'),
         estimatedSavingMinor:
             usableBasisrente * assessment.marginalRateBasisPoints ~/ 10000,
@@ -254,7 +261,12 @@ List<TaxOpportunity> _smallBusinessOpportunity(
       turnover += entry.value;
     }
   }
-  if (turnover > table.vat.smallBusinessPreviousYearTurnover) {
+  // § 19 Abs. 1 Satz 1 UStG from 2025: the previous year's Gesamtumsatz must
+  // stay at or below 25 000 Euro and the current year's at or below
+  // 100 000 Euro. Both limits are "at most".
+  if (profile.previousYearTurnoverMinor >
+          table.vat.smallBusinessPreviousYearTurnover ||
+      turnover > table.vat.smallBusinessCurrentYearTurnover) {
     return const [];
   }
   final vatDue =
@@ -264,7 +276,7 @@ List<TaxOpportunity> _smallBusinessOpportunity(
       id: 'de.kleinunternehmerregelung',
       title: 'Kleinunternehmerregelung nach § 19 UStG prüfen',
       explanation:
-          'Der Umsatz von ${deEuro(turnover)} liegt unter ${deEuro(table.vat.smallBusinessPreviousYearTurnover)}. Lag auch der Gesamtumsatz des Vorjahres unter dieser Grenze und bleibt der laufende Umsatz unter ${deEuro(table.vat.smallBusinessCurrentYearTurnover)}, entfällt die Umsatzsteuer; dafür entfällt auch der Vorsteuerabzug. Die Ersparnis ist die bisherige Zahllast.',
+          'Der Vorjahresumsatz von ${deEuro(profile.previousYearTurnoverMinor)} und der diesjährige Umsatz von ${deEuro(turnover)} liegen unter den Grenzen von ${deEuro(table.vat.smallBusinessPreviousYearTurnover)} (Vorjahr) und ${deEuro(table.vat.smallBusinessCurrentYearTurnover)} (laufendes Jahr). Bleibt der laufende Umsatz unter der Grenze, entfällt die Umsatzsteuer; dafür entfällt auch der Vorsteuerabzug. Die Ersparnis ist die bisherige Zahllast.',
       source: Uri.parse(
         'https://www.gesetze-im-internet.de/ustg_1980/__19.html',
       ),
@@ -274,11 +286,15 @@ List<TaxOpportunity> _smallBusinessOpportunity(
   ];
 }
 
-TaxOpportunity _filingDeadline(DeTaxTable table) => TaxOpportunity(
-  id: 'de.frist_steuererklaerung',
-  title: 'Abgabefrist der Steuererklärung',
-  explanation:
-      'Die Steuererklärung für ${table.startYear} ist bis ${deDate(deFilingDeadline(table.startYear))} abzugeben (§ 149 Abs. 2 AO). Mit Steuerberater oder Lohnsteuerhilfeverein verlängert sich die Frist bis ${deDate(deAdvisorFilingDeadline(table.startYear))} (§ 149 Abs. 3 AO).',
-  source: Uri.parse('https://www.gesetze-im-internet.de/ao_1977/__149.html'),
-  deadline: deFilingDeadline(table.startYear),
-);
+TaxOpportunity _filingDeadline(DeTaxTable table) {
+  final selfFiled = deFilingDeadline(table.startYear);
+  final advised = deAdvisorFilingDeadline(table.startYear);
+  return TaxOpportunity(
+    id: 'de.frist_steuererklaerung',
+    title: 'Abgabefrist der Steuererklärung',
+    explanation:
+        'Die Steuererklärung für ${table.startYear} ist bis ${deDate(selfFiled)} abzugeben (§ 149 Abs. 2 AO). Mit Steuerberater oder Lohnsteuerhilfeverein verlängert sich die Frist bis ${deDate(advised)} (§ 149 Abs. 3 AO). Fällt eine Frist auf einen Samstag, Sonntag oder Feiertag, verschiebt sie sich auf den nächsten Werktag (§ 108 Abs. 3 AO).',
+    source: Uri.parse('https://www.gesetze-im-internet.de/ao_1977/__149.html'),
+    deadline: selfFiled,
+  );
+}

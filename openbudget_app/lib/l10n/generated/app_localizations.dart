@@ -6666,6 +6666,18 @@ abstract class AppLocalizations {
   /// **'Spouses assessed together with income splitting.'**
   String get taxDeJointAssessmentHint;
 
+  /// No description provided for @taxDeSpouseEmployed.
+  ///
+  /// In en, this message translates to:
+  /// **'Spouse also earns wages'**
+  String get taxDeSpouseEmployed;
+
+  /// No description provided for @taxDeSpouseEmployedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Each employed spouse claims their own worker\'s flat-rate allowance and files their own Anlage N.'**
+  String get taxDeSpouseEmployedHint;
+
   /// No description provided for @taxDeChurchTax.
   ///
   /// In en, this message translates to:
@@ -6677,6 +6689,216 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Kirchensteuer on top of income tax.'**
   String get taxDeChurchTaxHint;
+
+  /// No description provided for @taxDeChurchState.
+  ///
+  /// In en, this message translates to:
+  /// **'State (Land) of the church tax'**
+  String get taxDeChurchState;
+
+  /// No description provided for @taxDeChurchStateHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Sets the rate: 8% in Bavaria and Baden-Württemberg, 9% elsewhere. Leave it out to assume 9%.'**
+  String get taxDeChurchStateHint;
+
+  /// No description provided for @taxDeChurchStateNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Not specified (assume 9%)'**
+  String get taxDeChurchStateNone;
+
+  /// No description provided for @taxDeChildren.
+  ///
+  /// In en, this message translates to:
+  /// **'Children (Kindergeld)'**
+  String get taxDeChildren;
+
+  /// No description provided for @taxDeChildrenHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Children you receive Kindergeld for; a full twelve months per child is assumed.'**
+  String get taxDeChildrenHint;
+
+  /// No description provided for @taxDeEinkunftsArt.
+  ///
+  /// In en, this message translates to:
+  /// **'Type of self-employment'**
+  String get taxDeEinkunftsArt;
+
+  /// No description provided for @taxDeEinkunftsArtHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Freiberufler owe no trade tax and file Anlage S; Gewerbetreibende owe Gewerbesteuer and file Anlage G.'**
+  String get taxDeEinkunftsArtHint;
+
+  /// No description provided for @taxDeEinkunftsArtFreiberuflich.
+  ///
+  /// In en, this message translates to:
+  /// **'Freiberufler (liberal profession)'**
+  String get taxDeEinkunftsArtFreiberuflich;
+
+  /// No description provided for @taxDeEinkunftsArtGewerblich.
+  ///
+  /// In en, this message translates to:
+  /// **'Gewerbetreibender (trade)'**
+  String get taxDeEinkunftsArtGewerblich;
+
+  /// No description provided for @taxDeStatutoryPension.
+  ///
+  /// In en, this message translates to:
+  /// **'Statutory pension contributions'**
+  String get taxDeStatutoryPension;
+
+  /// No description provided for @taxDeStatutoryPensionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Employee and employer share per year; they reduce the Rürup (Basisrente) deduction.'**
+  String get taxDeStatutoryPensionHint;
+
+  /// No description provided for @taxDePriorTurnover.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous year\'s turnover'**
+  String get taxDePriorTurnover;
+
+  /// No description provided for @taxDePriorTurnoverHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Total turnover of last year; it decides the Kleinunternehmer test (at most €25,000 prior year, €100,000 this year).'**
+  String get taxDePriorTurnoverHint;
+
+  /// No description provided for @taxDeCommuteKm.
+  ///
+  /// In en, this message translates to:
+  /// **'Commute: one-way distance (km)'**
+  String get taxDeCommuteKm;
+
+  /// No description provided for @taxDeCommuteKmHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Full kilometres to your first workplace, shortest route (Anlage N).'**
+  String get taxDeCommuteKmHint;
+
+  /// No description provided for @taxDeCommuteDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Commute: days travelled'**
+  String get taxDeCommuteDays;
+
+  /// No description provided for @taxDeCommuteDaysHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Days you actually visited the workplace; illness, holiday and home-office days do not count.'**
+  String get taxDeCommuteDaysHint;
+
+  /// No description provided for @taxDeNumberError.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a whole number of 0 or more.'**
+  String get taxDeNumberError;
+
+  /// No description provided for @taxDeAmountError.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the amount as a number, such as 4800.'**
+  String get taxDeAmountError;
+
+  /// No description provided for @taxDeBundeslandBw.
+  ///
+  /// In en, this message translates to:
+  /// **'Baden-Württemberg'**
+  String get taxDeBundeslandBw;
+
+  /// No description provided for @taxDeBundeslandBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Bavaria'**
+  String get taxDeBundeslandBy;
+
+  /// No description provided for @taxDeBundeslandBe.
+  ///
+  /// In en, this message translates to:
+  /// **'Berlin'**
+  String get taxDeBundeslandBe;
+
+  /// No description provided for @taxDeBundeslandBb.
+  ///
+  /// In en, this message translates to:
+  /// **'Brandenburg'**
+  String get taxDeBundeslandBb;
+
+  /// No description provided for @taxDeBundeslandHb.
+  ///
+  /// In en, this message translates to:
+  /// **'Bremen'**
+  String get taxDeBundeslandHb;
+
+  /// No description provided for @taxDeBundeslandHh.
+  ///
+  /// In en, this message translates to:
+  /// **'Hamburg'**
+  String get taxDeBundeslandHh;
+
+  /// No description provided for @taxDeBundeslandHe.
+  ///
+  /// In en, this message translates to:
+  /// **'Hesse'**
+  String get taxDeBundeslandHe;
+
+  /// No description provided for @taxDeBundeslandMv.
+  ///
+  /// In en, this message translates to:
+  /// **'Mecklenburg-Vorpommern'**
+  String get taxDeBundeslandMv;
+
+  /// No description provided for @taxDeBundeslandNi.
+  ///
+  /// In en, this message translates to:
+  /// **'Lower Saxony'**
+  String get taxDeBundeslandNi;
+
+  /// No description provided for @taxDeBundeslandNw.
+  ///
+  /// In en, this message translates to:
+  /// **'North Rhine-Westphalia'**
+  String get taxDeBundeslandNw;
+
+  /// No description provided for @taxDeBundeslandRp.
+  ///
+  /// In en, this message translates to:
+  /// **'Rhineland-Palatinate'**
+  String get taxDeBundeslandRp;
+
+  /// No description provided for @taxDeBundeslandSl.
+  ///
+  /// In en, this message translates to:
+  /// **'Saarland'**
+  String get taxDeBundeslandSl;
+
+  /// No description provided for @taxDeBundeslandSn.
+  ///
+  /// In en, this message translates to:
+  /// **'Saxony'**
+  String get taxDeBundeslandSn;
+
+  /// No description provided for @taxDeBundeslandSt.
+  ///
+  /// In en, this message translates to:
+  /// **'Saxony-Anhalt'**
+  String get taxDeBundeslandSt;
+
+  /// No description provided for @taxDeBundeslandSh.
+  ///
+  /// In en, this message translates to:
+  /// **'Schleswig-Holstein'**
+  String get taxDeBundeslandSh;
+
+  /// No description provided for @taxDeBundeslandTh.
+  ///
+  /// In en, this message translates to:
+  /// **'Thuringia'**
+  String get taxDeBundeslandTh;
 
   /// No description provided for @taxDeSmallBusinessExemption.
   ///

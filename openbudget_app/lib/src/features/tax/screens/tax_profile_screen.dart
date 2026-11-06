@@ -153,9 +153,41 @@ class _TaxProfileForm extends HookConsumerWidget {
     );
     final mneGroupMember = useState(ng?.mneGroupMember ?? false);
     final jointAssessment = useState(de?.jointAssessment ?? false);
+    final spouseEmployed = useState(de?.spouseEmployed ?? false);
     final churchTax = useState(de?.churchTax ?? false);
+    final churchState = useState<DeBundesland?>(de?.churchTaxState);
     final smallBusinessExemption = useState(
       de?.smallBusinessExemption ?? true,
+    );
+    final einkunftsArt = useState(
+      de?.einkunftsArt ?? DeEinkunftsArt.gewerblich,
+    );
+    final childrenController = useTextEditingController(
+      text: de == null || de.children == 0 ? '' : '${de.children}',
+    );
+    final pensionController = useTextEditingController(
+      text: de == null
+          ? ''
+          : minorToPlainText(
+              de.statutoryPensionMinor,
+              CurrencyCode.eur.decimals,
+            ),
+    );
+    final priorTurnoverController = useTextEditingController(
+      text: de == null || de.previousYearTurnoverMinor == 0
+          ? ''
+          : minorToPlainText(
+              de.previousYearTurnoverMinor,
+              CurrencyCode.eur.decimals,
+            ),
+    );
+    final commuteKmController = useTextEditingController(
+      text: de == null || de.commuteKmOneWay == 0
+          ? ''
+          : '${de.commuteKmOneWay}',
+    );
+    final commuteDaysController = useTextEditingController(
+      text: de == null || de.commuteDays == 0 ? '' : '${de.commuteDays}',
     );
     final linkedBudgetId = useState<String?>(existingLinkedBudgetId);
     final rentError = useState<String?>(null);
@@ -233,7 +265,25 @@ class _TaxProfileForm extends HookConsumerWidget {
         salesTaxRegistered: salesTaxRegistered.value,
         jointAssessment: jointAssessment.value,
         churchTax: churchTax.value,
+        churchTaxState: churchState.value,
         smallBusinessExemption: smallBusinessExemption.value,
+        einkunftsArt: einkunftsArt.value,
+        children: _wholeCount(childrenController.text) ?? 0,
+        spouseEmployed: spouseEmployed.value,
+        statutoryPensionMinor:
+            parsePlainMinor(
+              pensionController.text,
+              CurrencyCode.eur.decimals,
+            ) ??
+            0,
+        previousYearTurnoverMinor:
+            parsePlainMinor(
+              priorTurnoverController.text,
+              CurrencyCode.eur.decimals,
+            ) ??
+            0,
+        commuteKmOneWay: _wholeCount(commuteKmController.text) ?? 0,
+        commuteDays: _wholeCount(commuteDaysController.text) ?? 0,
       ),
     };
 
@@ -254,6 +304,31 @@ class _TaxProfileForm extends HookConsumerWidget {
           associatedCompaniesValue() == null) {
         formError.value = l10n.taxGbAssociatedCompaniesError;
         return;
+      }
+      if (country.value == TaxJurisdiction.de) {
+        final countTexts = [
+          childrenController.text,
+          commuteKmController.text,
+          commuteDaysController.text,
+        ];
+        if (countTexts.any(
+          (text) => text.trim().isNotEmpty && _wholeCount(text) == null,
+        )) {
+          formError.value = l10n.taxDeNumberError;
+          return;
+        }
+        final euroTexts = [
+          pensionController.text,
+          priorTurnoverController.text,
+        ];
+        if (euroTexts.any(
+          (text) =>
+              text.trim().isNotEmpty &&
+              parsePlainMinor(text, CurrencyCode.eur.decimals) == null,
+        )) {
+          formError.value = l10n.taxDeAmountError;
+          return;
+        }
       }
       if (entityKind.value != TaxEntityKind.individual &&
           linkedBudgetId.value == budgetId) {
@@ -811,6 +886,20 @@ class _TaxProfileForm extends HookConsumerWidget {
                     color: palette.ink,
                   ),
                 ),
+                if (jointAssessment.value &&
+                    entity == TaxEntityKind.individual) ...[
+                  const Divider(height: 1),
+                  SwitchListTile(
+                    value: spouseEmployed.value,
+                    onChanged: (value) => spouseEmployed.value = value,
+                    title: Text(l10n.taxDeSpouseEmployed),
+                    subtitle: Text(l10n.taxDeSpouseEmployedHint),
+                    secondary: SkribbleIcon(
+                      data: OpenBudgetIcons.people,
+                      color: palette.ink,
+                    ),
+                  ),
+                ],
                 const Divider(height: 1),
                 SwitchListTile(
                   value: churchTax.value,
@@ -822,6 +911,108 @@ class _TaxProfileForm extends HookConsumerWidget {
                     color: palette.ink,
                   ),
                 ),
+                if (churchTax.value)
+                  Padding(
+                    padding: const EdgeInsets.all(SpacingTokens.md),
+                    child: ObDropdown<String>(
+                      value: churchState.value?.name ?? 'none',
+                      labelText: l10n.taxDeChurchState,
+                      hintText: l10n.taxDeChurchStateHint,
+                      items: [
+                        DropdownMenuItem(
+                          value: 'none',
+                          child: Text(l10n.taxDeChurchStateNone),
+                        ),
+                        for (final state in DeBundesland.values)
+                          DropdownMenuItem(
+                            value: state.name,
+                            child: Text(taxDeBundeslandLabel(l10n, state)),
+                          ),
+                      ],
+                      onChanged: (value) {
+                        churchState.value = value == null || value == 'none'
+                            ? null
+                            : _bundesland(value);
+                      },
+                    ),
+                  ),
+                if (entity == TaxEntityKind.soleTrader) ...[
+                  const Divider(height: 1),
+                  Padding(
+                    padding: const EdgeInsets.all(SpacingTokens.md),
+                    child: ObDropdown<DeEinkunftsArt>(
+                      value: einkunftsArt.value,
+                      labelText: l10n.taxDeEinkunftsArt,
+                      hintText: l10n.taxDeEinkunftsArtHint,
+                      items: [
+                        for (final art in DeEinkunftsArt.values)
+                          DropdownMenuItem(
+                            value: art,
+                            child: Text(taxDeEinkunftsArtLabel(l10n, art)),
+                          ),
+                      ],
+                      onChanged: (value) {
+                        if (value != null) einkunftsArt.value = value;
+                      },
+                    ),
+                  ),
+                ],
+                if (entity == TaxEntityKind.individual) ...[
+                  const Divider(height: 1),
+                  Padding(
+                    padding: const EdgeInsets.all(SpacingTokens.md),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ObTextField(
+                          controller: childrenController,
+                          labelText: l10n.taxDeChildren,
+                          hintText: l10n.taxDeChildrenHint,
+                          keyboardType: TextInputType.number,
+                        ),
+                        const SizedBox(height: SpacingTokens.md),
+                        ObTextField(
+                          controller: pensionController,
+                          labelText: l10n.taxDeStatutoryPension,
+                          hintText: l10n.taxDeStatutoryPensionHint,
+                          prefixText: CurrencyCode.eur.symbol,
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                        ),
+                        const SizedBox(height: SpacingTokens.md),
+                        ObTextField(
+                          controller: commuteKmController,
+                          labelText: l10n.taxDeCommuteKm,
+                          hintText: l10n.taxDeCommuteKmHint,
+                          keyboardType: TextInputType.number,
+                        ),
+                        const SizedBox(height: SpacingTokens.md),
+                        ObTextField(
+                          controller: commuteDaysController,
+                          labelText: l10n.taxDeCommuteDays,
+                          hintText: l10n.taxDeCommuteDaysHint,
+                          keyboardType: TextInputType.number,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+                if (entity != TaxEntityKind.individual) ...[
+                  const Divider(height: 1),
+                  Padding(
+                    padding: const EdgeInsets.all(SpacingTokens.md),
+                    child: ObTextField(
+                      controller: priorTurnoverController,
+                      labelText: l10n.taxDePriorTurnover,
+                      hintText: l10n.taxDePriorTurnoverHint,
+                      prefixText: CurrencyCode.eur.symbol,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                    ),
+                  ),
+                ],
                 const Divider(height: 1),
                 SwitchListTile(
                   value: smallBusinessExemption.value,
@@ -882,6 +1073,14 @@ int _daysInMonth({required int month, required bool leap}) => switch (month) {
   _ => 31,
 };
 
+/// Parses a whole count such as children, kilometres or days, or null when
+/// the text is not a non-negative whole number.
+int? _wholeCount(String text) {
+  final normalized = text.trim();
+  if (normalized.isEmpty) return 0;
+  return int.tryParse(normalized);
+}
+
 Budget? _budgetWithId(Iterable<Budget> budgets, String id) {
   for (final budget in budgets) {
     if (budget.id?.toString() == id) return budget;
@@ -899,3 +1098,6 @@ GbStudentLoanPlan _studentLoanPlan(String name) {
 /// A dependent count field value, or zero when it is not a whole number.
 int _countOf(TextEditingController controller) =>
     int.tryParse(controller.text.trim()) ?? 0;
+
+/// Resolves the dropdown value, which is always a known Bundesland name.
+DeBundesland _bundesland(String name) => DeBundesland.values.byName(name);
