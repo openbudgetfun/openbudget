@@ -95,6 +95,8 @@ ledger:
   - postJournal:
   - reverseJournal:
   - listJournals:
+  - listJournalLines:
+  - getLockDate:
   - setLockDate:
   - trialBalance:
 monthlyAllocation:

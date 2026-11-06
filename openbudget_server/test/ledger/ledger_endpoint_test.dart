@@ -283,6 +283,30 @@ void main() {
           throwsA(isA<NotFoundException>()),
         );
       });
+
+      test('then a stranger cannot read lines or the lock date', () async {
+        final budget = await createBudget(owner, TaxEntityKind.company);
+        final accounts = await enableLedger(owner, budget);
+        final journal = await post(
+          owner,
+          budget,
+          date: openingDate,
+          lines: [
+            line(accounts['1000']!, isDebit: true, amountMinor: 1000),
+            line(accounts['3200']!, isDebit: false, amountMinor: 1000),
+          ],
+          source: 'opening',
+        );
+
+        await expectLater(
+          endpoints.ledger.listJournalLines(stranger, journal.id!),
+          throwsA(isA<NotFoundException>()),
+        );
+        await expectLater(
+          endpoints.ledger.getLockDate(stranger, budget.id!),
+          throwsA(isA<NotFoundException>()),
+        );
+      });
     });
 
     group('when saving drafts', () {
@@ -406,6 +430,37 @@ void main() {
             source: 'manual',
           ),
           throwsA(isA<ValidationException>()),
+        );
+      });
+
+      test('then a draft lists its lines for editing', () async {
+        final draft = await endpoints.ledger.saveDraftJournal(
+          owner,
+          budget.id!,
+          openingDate,
+          [
+            line(accounts['1000']!, isDebit: true, amountMinor: 2500),
+            line(accounts['3200']!, isDebit: false, amountMinor: 2500),
+          ],
+          reference: 'JB-lines',
+          source: 'manual',
+        );
+
+        final lines = await endpoints.ledger.listJournalLines(
+          owner,
+          draft.id!,
+        );
+
+        expect(lines, hasLength(2));
+        expect(
+          {
+            for (final l in lines)
+              l.ledgerAccountId: (l.debitMinor, l.creditMinor),
+          },
+          {
+            accounts['1000']!.id: (2500, 0),
+            accounts['3200']!.id: (0, 2500),
+          },
         );
       });
 
@@ -808,6 +863,15 @@ void main() {
           laterDate,
         );
         expect(reversal.status, 'posted');
+      });
+
+      test('then the lock date reads back once set', () async {
+        expect(await endpoints.ledger.getLockDate(owner, budget.id!), isNull);
+
+        await endpoints.ledger.setLockDate(owner, budget.id!, feeDate);
+
+        final lock = await endpoints.ledger.getLockDate(owner, budget.id!);
+        expect(lock?.lockDate, DateTime.utc(2026, 11, 3));
       });
 
       test('then setting the lock is audited', () async {

@@ -145,6 +145,18 @@ class LedgerEndpoint extends Endpoint {
     toDate: toDate,
   );
 
+  /// Lists one journal's lines, oldest first.
+  Future<List<JournalLine>> listJournalLines(
+    Session session,
+    UuidValue journalId,
+  ) => LedgerService.listJournalLines(session, journalId: journalId);
+
+  /// The budget's period lock, or null when no lock date has been set.
+  Future<LedgerPeriodLock?> getLockDate(
+    Session session,
+    UuidValue budgetId,
+  ) => LedgerService.getLockDate(session, budgetId: budgetId);
+
   /// Sets or moves the budget's period lock date.
   Future<LedgerPeriodLock> setLockDate(
     Session session,
