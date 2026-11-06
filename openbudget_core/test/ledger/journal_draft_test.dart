@@ -118,6 +118,28 @@ void main() {
       expect(codes(draft), contains('lineOneSideRequired'));
     });
 
+    test('names the offending line on per-line issues', () {
+      final draft = JournalDraft(
+        functionalCurrency: 'GBP',
+        lines: [
+          _gbpLine(accountCode: '1000', isDebit: true, amountMinor: 100),
+          _gbpLine(accountCode: '4000', isDebit: false, amountMinor: 0),
+        ],
+      );
+
+      final issues = draft.validate();
+      final lineIssue = issues.firstWhere(
+        (issue) => issue.code == 'lineOneSideRequired',
+      );
+      expect(lineIssue.lineIndex, 1);
+      expect(
+        issues
+            .where((issue) => issue.code == 'unbalancedFunctional')
+            .map((issue) => issue.lineIndex),
+        everyElement(isNull),
+      );
+    });
+
     test('rejects negative amounts', () {
       final draft = JournalDraft(
         functionalCurrency: 'GBP',

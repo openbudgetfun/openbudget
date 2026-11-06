@@ -20,6 +20,9 @@ import 'package:openbudget_app/src/features/budget/screens/create_budget_screen.
 import 'package:openbudget_app/src/features/budget/screens/edit_plan_screen.dart';
 import 'package:openbudget_app/src/features/budget/screens/recent_moves_screen.dart';
 import 'package:openbudget_app/src/features/home/screens/home_screen.dart';
+import 'package:openbudget_app/src/features/ledger/screens/books_screen.dart';
+import 'package:openbudget_app/src/features/ledger/screens/journal_detail_screen.dart';
+import 'package:openbudget_app/src/features/ledger/screens/journal_editor_screen.dart';
 import 'package:openbudget_app/src/features/more/screens/more_screen.dart';
 import 'package:openbudget_app/src/features/payees/screens/payee_list_screen.dart';
 import 'package:openbudget_app/src/features/plus/screens/plus_screen.dart';
@@ -155,6 +158,48 @@ GoRouter appRouter(Ref ref) {
                 builder: (context, state) {
                   final id = state.pathParameters['id']!;
                   return TaxProfileScreen(budgetId: id);
+                },
+              ),
+            ],
+          ),
+          GoRoute(
+            name: booksRoute,
+            path: 'books',
+            builder: (context, state) {
+              final id = state.pathParameters['id']!;
+              return BooksScreen(budgetId: id);
+            },
+            routes: [
+              GoRoute(
+                name: journalNewRoute,
+                path: 'journals/new',
+                builder: (context, state) {
+                  final id = state.pathParameters['id']!;
+                  return JournalEditorScreen(budgetId: id);
+                },
+              ),
+              GoRoute(
+                name: journalEditRoute,
+                path: 'journals/:journalId/edit',
+                builder: (context, state) {
+                  final id = state.pathParameters['id']!;
+                  final journalId = state.pathParameters['journalId']!;
+                  return JournalEditorScreen(
+                    budgetId: id,
+                    journalId: journalId,
+                  );
+                },
+              ),
+              GoRoute(
+                name: journalDetailRoute,
+                path: 'journals/:journalId',
+                builder: (context, state) {
+                  final id = state.pathParameters['id']!;
+                  final journalId = state.pathParameters['journalId']!;
+                  return JournalDetailScreen(
+                    budgetId: id,
+                    journalId: journalId,
+                  );
                 },
               ),
             ],

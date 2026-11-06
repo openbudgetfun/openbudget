@@ -2226,6 +2226,44 @@ class Endpoints extends _is.EndpointDispatch {
                     toDate: params['toDate'],
                   ),
         ),
+        'listJournalLines': _is.MethodConnector(
+          name: 'listJournalLines',
+          params: {
+            'journalId': _is.ParameterDescription(
+              name: 'journalId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['ledger'] as _ia4une1r.LedgerEndpoint)
+                  .listJournalLines(
+                    session,
+                    params['journalId'],
+                  ),
+        ),
+        'getLockDate': _is.MethodConnector(
+          name: 'getLockDate',
+          params: {
+            'budgetId': _is.ParameterDescription(
+              name: 'budgetId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['ledger'] as _ia4une1r.LedgerEndpoint).getLockDate(
+                    session,
+                    params['budgetId'],
+                  ),
+        ),
         'setLockDate': _is.MethodConnector(
           name: 'setLockDate',
           params: {

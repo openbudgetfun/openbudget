@@ -1,21 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
+import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
 import 'package:openbudget_app/src/features/more/screens/more_screen.dart';
+import 'package:openbudget_app/src/features/tax/providers/tax_providers.dart';
+import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
-void main() {
-  const budgetId = 'test-budget-1';
+import '../../ledger/ledger_test_data.dart';
 
+Widget buildSubject({
+  TaxProfileRecord? profile,
+  String accountingMode = 'envelope',
+}) {
+  final container = ProviderContainer(
+    overrides: [
+      taxProfileProvider.overrideWith((ref, id) async => profile),
+      budgetDetailProvider.overrideWith(
+        (ref, id) async => testBudget(accountingMode: accountingMode),
+      ),
+    ],
+  );
+  addTearDown(container.dispose);
+  return UncontrolledProviderScope(
+    container: container,
+    child: MaterialApp(
+      theme: OpenBudgetTheme.light,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: const MoreScreen(budgetId: 'test-budget-1'),
+    ),
+  );
+}
+
+void main() {
   Finder skribbleIcon(WiredSvgIconData data) => find.byWidgetPredicate(
     (widget) => widget is SkribbleIcon && widget.data == data,
-  );
-
-  Widget buildSubject() => MaterialApp(
-    theme: OpenBudgetTheme.light,
-    localizationsDelegates: AppLocalizations.localizationsDelegates,
-    supportedLocales: AppLocalizations.supportedLocales,
-    home: const MoreScreen(budgetId: budgetId),
   );
 
   group('MoreScreen', () {
@@ -64,6 +85,44 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(Card), findsOneWidget);
+    });
+
+    group('books entry', () {
+      testWidgets('hides for a personal budget', (tester) async {
+        await tester.pumpWidget(buildSubject());
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('books-entry-tile')), findsNothing);
+        expect(find.text('Enable double-entry books'), findsNothing);
+      });
+
+      testWidgets('offers to enable books for a sole trader in envelope mode', (
+        tester,
+      ) async {
+        await tester.pumpWidget(
+          buildSubject(profile: businessTaxProfile()),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('books-entry-tile')), findsOneWidget);
+        expect(find.text('Enable double-entry books'), findsOneWidget);
+        expect(skribbleIcon(OpenBudgetIcons.document), findsOneWidget);
+      });
+
+      testWidgets('shows the books entry for a company already on ledger', (
+        tester,
+      ) async {
+        await tester.pumpWidget(
+          buildSubject(
+            profile: businessTaxProfile(entityKind: 'company'),
+            accountingMode: 'ledger',
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('books-entry-tile')), findsOneWidget);
+        expect(find.text('Books'), findsOneWidget);
+      });
     });
   });
 }

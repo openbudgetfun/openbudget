@@ -2,13 +2,17 @@ import 'package:openbudget_core/src/ledger/exchange_rate.dart';
 
 /// One validation failure found in a journal draft.
 class LedgerValidationIssue {
-  const LedgerValidationIssue(this.code, this.message);
+  const LedgerValidationIssue(this.code, this.message, {this.lineIndex});
 
   /// Stable machine-readable identifier, such as `unbalancedFunctional`.
   final String code;
 
   /// Human-readable explanation, safe to surface to the user.
   final String message;
+
+  /// The zero-based index of the offending line, or null when the issue is
+  /// about the journal as a whole.
+  final int? lineIndex;
 
   @override
   String toString() => '$code: $message';
@@ -192,6 +196,7 @@ class JournalDraft {
             'lineOneSideRequired',
             '$label must carry a positive debit or a positive credit, '
                 'not both and not neither.',
+            lineIndex: index,
           ),
         );
         continue;
@@ -202,6 +207,7 @@ class JournalDraft {
             'lineOneSideRequired',
             '$label must carry a positive functional debit or credit, '
                 'not both and not neither.',
+            lineIndex: index,
           ),
         );
         continue;
@@ -213,6 +219,7 @@ class JournalDraft {
             '$label is a ${_direction(side.$1)} in ${line.currencyCode} '
                 'but a ${_direction(functionalSide.$1)} in the functional '
                 'currency.',
+            lineIndex: index,
           ),
         );
         continue;
@@ -225,6 +232,7 @@ class JournalDraft {
             'invalidExchangeRate',
             '$label has exchange rate "${line.exchangeRate}", which is not '
                 'a positive decimal string such as "1.234567".',
+            lineIndex: index,
           ),
         );
         continue;
@@ -236,6 +244,7 @@ class JournalDraft {
           LedgerValidationIssue(
             'unsupportedCurrency',
             '$label uses unsupported currency "${line.currencyCode}".',
+            lineIndex: index,
           ),
         );
         continue;
@@ -254,6 +263,7 @@ class JournalDraft {
             '$label converts ${side.$2} ${line.currencyCode} at '
                 '${line.exchangeRate} to $expectedFunctional minor, not '
                 '${functionalSide.$2} minor.',
+            lineIndex: index,
           ),
         );
         continue;

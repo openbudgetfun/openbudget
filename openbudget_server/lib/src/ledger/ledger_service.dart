@@ -710,6 +710,36 @@ class LedgerService {
     });
   }
 
+  /// Lists one journal's lines, oldest first.
+  ///
+  /// Line ids are UUIDv7, so ordering by id follows insertion time. Line
+  /// order carries no accounting meaning; it only lets an editor show the
+  /// lines roughly as they were entered.
+  static Future<List<JournalLine>> listJournalLines(
+    Session session, {
+    required UuidValue journalId,
+  }) async {
+    final journal = await _getOwnedJournal(session, journalId: journalId);
+    await _requireLedgerBudget(session, budgetId: journal.budgetId);
+    return JournalLine.db.find(
+      session,
+      where: (l) => l.journalId.equals(journalId),
+      orderBy: (l) => l.id,
+    );
+  }
+
+  /// The budget's period lock, or null when no lock date has been set.
+  static Future<LedgerPeriodLock?> getLockDate(
+    Session session, {
+    required UuidValue budgetId,
+  }) async {
+    await _requireLedgerBudget(session, budgetId: budgetId);
+    return LedgerPeriodLock.db.findFirstRow(
+      session,
+      where: (l) => l.budgetId.equals(budgetId),
+    );
+  }
+
   /// Lists the budget's journals between the optional dates, newest first.
   ///
   /// Both bounds are inclusive calendar dates.

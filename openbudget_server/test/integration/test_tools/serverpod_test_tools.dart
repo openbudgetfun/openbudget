@@ -53,6 +53,8 @@ import 'package:openbudget_server/src/generated/institutions/institution.dart'
     as _izagyfe8;
 import 'package:openbudget_server/src/generated/ledger/journal.dart'
     as _ixvlhhyv;
+import 'package:openbudget_server/src/generated/ledger/journal_line.dart'
+    as _icjh3b69;
 import 'package:openbudget_server/src/generated/ledger/journal_line_input.dart'
     as _in0sxdux;
 import 'package:openbudget_server/src/generated/ledger/ledger_account.dart'
@@ -3121,6 +3123,64 @@ class _LedgerEndpoint {
           _localUniqueSession,
           _localCallContext.arguments,
         ) as _ida.Future<List<_ixvlhhyv.Journal>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<List<_icjh3b69.JournalLine>> listJournalLines(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue journalId,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'ledger',
+            method: 'listJournalLines',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'ledger',
+          methodName: 'listJournalLines',
+          parameters: _ist.testObjectToJson({'journalId': journalId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _ida.Future<List<_icjh3b69.JournalLine>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_i1ns2ewu.LedgerPeriodLock?> getLockDate(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue budgetId,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'ledger',
+            method: 'getLockDate',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'ledger',
+          methodName: 'getLockDate',
+          parameters: _ist.testObjectToJson({'budgetId': budgetId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _ida.Future<_i1ns2ewu.LedgerPeriodLock?>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();

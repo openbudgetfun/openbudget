@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
+import 'package:openbudget_app/src/features/ledger/widgets/books_entry_tile.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
@@ -81,6 +82,7 @@ class MoreScreen extends HookWidget {
                     pathParameters: {'id': budgetId},
                   ),
                 ),
+                BooksEntryTile(budgetId: budgetId),
                 const Divider(height: 1),
                 _MoreTile(
                   icon: OpenBudgetIcons.settings,

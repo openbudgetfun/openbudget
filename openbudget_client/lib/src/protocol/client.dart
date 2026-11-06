@@ -51,6 +51,8 @@ import 'package:openbudget_client/src/protocol/institutions/institution.dart'
     as _i6ysl1a4;
 import 'package:openbudget_client/src/protocol/ledger/journal.dart'
     as _izuizaeu;
+import 'package:openbudget_client/src/protocol/ledger/journal_line.dart'
+    as _iwruw2s3;
 import 'package:openbudget_client/src/protocol/ledger/journal_line_input.dart'
     as _i3j8x5or;
 import 'package:openbudget_client/src/protocol/ledger/ledger_account.dart'
@@ -1173,7 +1175,7 @@ class EndpointInstitution extends _isc.EndpointRef {
 ///
 /// All methods require authentication and check budget ownership. Posted
 /// journals have no update or delete path anywhere in this API: corrections
-/// go through [reverse].
+/// go through `reverseJournal`.
 /// {@category Endpoint}
 class EndpointLedger extends _isc.EndpointRef {
   EndpointLedger(_isc.EndpointCaller caller) : super(caller);
@@ -1302,6 +1304,24 @@ class EndpointLedger extends _isc.EndpointRef {
       'fromDate': fromDate,
       'toDate': toDate,
     },
+  );
+
+  /// Lists one journal's lines, oldest first.
+  _ida.Future<List<_iwruw2s3.JournalLine>> listJournalLines(
+    _isc.UuidValue journalId,
+  ) => caller.callServerEndpoint<List<_iwruw2s3.JournalLine>>(
+    'ledger',
+    'listJournalLines',
+    {'journalId': journalId},
+  );
+
+  /// The budget's period lock, or null when no lock date has been set.
+  _ida.Future<_i10h3ni6.LedgerPeriodLock?> getLockDate(
+    _isc.UuidValue budgetId,
+  ) => caller.callServerEndpoint<_i10h3ni6.LedgerPeriodLock?>(
+    'ledger',
+    'getLockDate',
+    {'budgetId': budgetId},
   );
 
   /// Sets or moves the budget's period lock date.

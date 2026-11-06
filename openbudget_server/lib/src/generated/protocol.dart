@@ -35,6 +35,8 @@ import 'package:openbudget_server/src/generated/institutions/institution.dart'
     as _izagyfe8;
 import 'package:openbudget_server/src/generated/ledger/journal.dart'
     as _ixvlhhyv;
+import 'package:openbudget_server/src/generated/ledger/journal_line.dart'
+    as _icjh3b69;
 import 'package:openbudget_server/src/generated/ledger/journal_line_input.dart'
     as _in0sxdux;
 import 'package:openbudget_server/src/generated/ledger/ledger_account.dart'
@@ -422,6 +424,7 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<List<_iab1c098.LedgerAccount>>,
           _is.getType<List<_in0sxdux.JournalLineInput>>,
           _is.getType<List<_ixvlhhyv.Journal>>,
+          _is.getType<List<_icjh3b69.JournalLine>>,
           _is.getType<List<_i2xhh3nq.Payee>>,
           _is.getType<List<_i6lbncsb.RecurringTransaction>>,
           _is.getType<List<_ieq0zunc.SolanaWallet>>,
@@ -5526,6 +5529,12 @@ class Protocol extends _is.DatabaseSerializationManager
     if (t == List<_ixvlhhyv.Journal>) {
       return (data as List)
               .map((e) => deserialize<_ixvlhhyv.Journal>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_icjh3b69.JournalLine>) {
+      return (data as List)
+              .map((e) => deserialize<_icjh3b69.JournalLine>(e))
               .toList()
           as T;
     }

@@ -35,6 +35,8 @@ import 'package:openbudget_client/src/protocol/institutions/institution.dart'
     as _i6ysl1a4;
 import 'package:openbudget_client/src/protocol/ledger/journal.dart'
     as _izuizaeu;
+import 'package:openbudget_client/src/protocol/ledger/journal_line.dart'
+    as _iwruw2s3;
 import 'package:openbudget_client/src/protocol/ledger/journal_line_input.dart'
     as _i3j8x5or;
 import 'package:openbudget_client/src/protocol/ledger/ledger_account.dart'
@@ -422,6 +424,7 @@ class Protocol extends _isc.SerializationManager
           _isc.getType<List<_ixq9t892.LedgerAccount>>,
           _isc.getType<List<_i3j8x5or.JournalLineInput>>,
           _isc.getType<List<_izuizaeu.Journal>>,
+          _isc.getType<List<_iwruw2s3.JournalLine>>,
           _isc.getType<List<_iaf6ifsb.Payee>>,
           _isc.getType<List<_i41tn6nr.RecurringTransaction>>,
           _isc.getType<List<_i1b8tal0.SolanaWallet>>,
@@ -1261,6 +1264,12 @@ class Protocol extends _isc.SerializationManager
     if (t == List<_izuizaeu.Journal>) {
       return (data as List)
               .map((e) => deserialize<_izuizaeu.Journal>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_iwruw2s3.JournalLine>) {
+      return (data as List)
+              .map((e) => deserialize<_iwruw2s3.JournalLine>(e))
               .toList()
           as T;
     }
