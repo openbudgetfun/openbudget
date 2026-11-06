@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
 import 'package:openbudget_app/src/features/ledger/providers/ledger_repository.dart';
@@ -12,7 +15,7 @@ import 'package:openbudget_test_utils/openbudget_test_utils.dart';
 
 import '../ledger_test_data.dart';
 
-GoRouter _router() => GoRouter(
+GoRouter _router({String? journalId}) => GoRouter(
   initialLocation: '/books-entry',
   routes: [
     GoRoute(
@@ -21,8 +24,11 @@ GoRouter _router() => GoRouter(
         body: Center(
           child: FilledButton(
             onPressed: () => context.pushNamed(
-              journalNewRoute,
-              pathParameters: {'id': testBudgetId},
+              journalId == null ? journalNewRoute : journalEditRoute,
+              pathParameters: {
+                'id': testBudgetId,
+                'journalId': ?journalId,
+              },
             ),
             child: const Text('Open editor'),
           ),
@@ -40,13 +46,23 @@ GoRouter _router() => GoRouter(
       builder: (context, state) =>
           JournalEditorScreen(budgetId: state.pathParameters['id']!),
     ),
+    GoRoute(
+      name: journalEditRoute,
+      path: journalEditPath,
+      builder: (context, state) => JournalEditorScreen(
+        budgetId: state.pathParameters['id']!,
+        journalId: state.pathParameters['journalId'],
+      ),
+    ),
   ],
 );
 
 Future<void> _pumpEditor(
   WidgetTester tester,
-  FakeLedgerRepository repository,
-) async {
+  FakeLedgerRepository repository, {
+  String? journalId,
+  bool settle = true,
+}) async {
   final container = ProviderContainer(
     overrides: [
       ledgerRepositoryProvider.overrideWithValue(repository),
@@ -57,13 +73,20 @@ Future<void> _pumpEditor(
   await tester.pumpApp(
     const SizedBox.shrink(),
     container: container,
-    router: _router(),
+    router: _router(journalId: journalId),
     localizationsDelegates: AppLocalizations.localizationsDelegates,
     supportedLocales: AppLocalizations.supportedLocales,
   );
   await tester.pumpAndSettle();
   await tester.tap(find.text('Open editor'));
-  await tester.pumpAndSettle();
+  if (settle) {
+    await tester.pumpAndSettle();
+  } else {
+    // The loading panel animates forever, so the caller pumps frames
+    // instead of waiting for the tree to settle.
+    await tester.pump();
+    await tester.pump();
+  }
 }
 
 /// The totals card sits below the fold on the 800x600 test surface because
@@ -356,6 +379,120 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Books are locked.'), findsOneWidget);
+    });
+
+    testWidgets('reopening a draft fills the rows and re-save replaces it', (
+      tester,
+    ) async {
+      final repository = FakeLedgerRepository();
+      await _pumpEditor(
+        tester,
+        repository,
+        journalId: draftJournalId,
+      );
+
+      expect(find.text('Edit draft'), findsOneWidget);
+      expect(find.byKey(const Key('journal-lines-loading')), findsNothing);
+      expect(find.text('JB-2026-0002'), findsOneWidget);
+      expect(find.text('Not finished'), findsOneWidget);
+      expect(
+        find.text(DateFormat.yMMMd().format(DateTime.utc(2026, 5, 14))),
+        findsOneWidget,
+      );
+      expect(
+        tester
+            .widget<DropdownButtonFormField<String>>(
+              find.byKey(const Key('journal-line-account-0')),
+            )
+            .initialValue,
+        bankAccountId,
+      );
+      expect(
+        tester
+            .widget<SegmentedButton<bool>>(
+              find.byKey(const Key('journal-line-side-0')),
+            )
+            .selected,
+        {true},
+      );
+      expect(
+        tester
+            .widget<SegmentedButton<bool>>(
+              find.byKey(const Key('journal-line-side-1')),
+            )
+            .selected,
+        {false},
+      );
+      await _scrollToTotals(tester);
+      expect(find.text('50.00'), findsNWidgets(4));
+      expect(find.byKey(const Key('journal-balanced-chip')), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('journal-save-draft')));
+      await tester.pumpAndSettle();
+
+      expect(repository.savedDrafts, hasLength(1));
+      final saved = repository.savedDrafts.single;
+      expect(saved.journalId, draftJournalId);
+      expect(saved.reference, 'JB-2026-0002');
+      expect(saved.narration, 'Not finished');
+      expect(saved.lines, hasLength(2));
+      expect(saved.lines.first.debitMinor, 5000);
+      expect(saved.lines.last.creditMinor, 5000);
+    });
+
+    testWidgets('shows a loading state while the draft lines load', (
+      tester,
+    ) async {
+      final repository = FakeLedgerRepository()
+        ..linesCompleter = Completer<List<JournalLine>>();
+      await _pumpEditor(
+        tester,
+        repository,
+        journalId: draftJournalId,
+        settle: false,
+      );
+
+      expect(find.byKey(const Key('journal-lines-loading')), findsOneWidget);
+      expect(find.byKey(const Key('journal-line-account-0')), findsNothing);
+
+      repository.linesCompleter!.complete(
+        testJournalLines(journalId: draftJournalId),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('journal-lines-loading')), findsNothing);
+      expect(
+        find.byKey(const Key('journal-line-account-0')),
+        findsOneWidget,
+      );
+      await _scrollToTotals(tester);
+      expect(find.text('50.00'), findsNWidgets(4));
+    });
+
+    testWidgets('shows a retryable problem panel when lines fail to load', (
+      tester,
+    ) async {
+      final repository = FakeLedgerRepository(
+        linesError: Exception('offline'),
+      );
+      await _pumpEditor(tester, repository, journalId: draftJournalId);
+
+      expect(find.byKey(const Key('journal-lines-error')), findsOneWidget);
+      expect(
+        find.text("We couldn't load this journal's lines. Try again."),
+        findsOneWidget,
+      );
+      expect(find.byKey(const Key('journal-line-account-0')), findsNothing);
+
+      repository.linesError = null;
+      await tester.tap(find.text('Try again'));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('journal-lines-error')), findsNothing);
+      expect(
+        find.byKey(const Key('journal-line-account-0')),
+        findsOneWidget,
+      );
     });
   });
 }

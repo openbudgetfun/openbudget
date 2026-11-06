@@ -4882,7 +4882,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get booksLockDateLabel => 'Lock date';
 
   @override
-  String get booksLockDateNone => 'No lock date';
+  String get booksLockDateNone => 'No lock date set';
 
   @override
   String get booksLockDateAction => 'Set lock date';
@@ -5138,6 +5138,15 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get journalDraftLinesUnavailable =>
-      'This draft\'s lines can\'t be shown here yet. Delete the draft and record it again to change them.';
+  String get journalEditTitle => 'Edit draft';
+
+  @override
+  String get journalEditAction => 'Edit draft';
+
+  @override
+  String get journalLinesHeader => 'Lines';
+
+  @override
+  String get journalLinesLoadError =>
+      'We couldn\'t load this journal\'s lines. Try again.';
 }

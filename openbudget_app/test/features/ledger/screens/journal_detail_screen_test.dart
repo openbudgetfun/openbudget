@@ -50,6 +50,11 @@ Future<void> _pumpDetail(
           journalId: state.pathParameters['journalId']!,
         ),
       ),
+      GoRoute(
+        name: journalEditRoute,
+        path: journalEditPath,
+        builder: (_, _) => const Scaffold(body: Text('Editor stub')),
+      ),
     ],
   );
   await tester.pumpApp(
@@ -80,15 +85,77 @@ void main() {
       expect(find.byKey(const Key('journal-reverse-button')), findsOneWidget);
     });
 
-    testWidgets('a draft shows the delete action and the lines note', (
+    testWidgets('shows the stored lines with per-currency totals', (
+      tester,
+    ) async {
+      await _pumpDetail(tester, FakeLedgerRepository(), postedJournalId);
+
+      expect(find.byKey(const Key('journal-detail-lines')), findsOneWidget);
+      expect(find.text('Debit'), findsOneWidget);
+      expect(find.text('Credit'), findsOneWidget);
+      expect(find.byKey(const Key('journal-detail-line-0')), findsOneWidget);
+      expect(find.text('1000'), findsOneWidget);
+      expect(find.text('Bank'), findsOneWidget);
+      expect(find.byKey(const Key('journal-detail-line-1')), findsOneWidget);
+      expect(find.text('4000'), findsOneWidget);
+      expect(find.text('Sales'), findsOneWidget);
+      // Each line prints only its own side; totals repeat both.
+      expect(find.text('£50.00'), findsNWidgets(4));
+      expect(find.byKey(const Key('journal-detail-totals-0')), findsOneWidget);
+      expect(find.text('Totals'), findsOneWidget);
+    });
+
+    testWidgets('a draft shows its lines with edit and delete actions', (
       tester,
     ) async {
       await _pumpDetail(tester, FakeLedgerRepository(), draftJournalId);
 
       expect(find.text('Draft'), findsOneWidget);
-      expect(find.byKey(const Key('journal-draft-lines-note')), findsOneWidget);
+      expect(find.byKey(const Key('journal-draft-lines-note')), findsNothing);
+      expect(find.byKey(const Key('journal-detail-lines')), findsOneWidget);
+      expect(find.byKey(const Key('journal-edit-button')), findsOneWidget);
       expect(find.byKey(const Key('journal-delete-button')), findsOneWidget);
       expect(find.byKey(const Key('journal-reverse-button')), findsNothing);
+    });
+
+    testWidgets('the edit action opens the draft in the editor', (
+      tester,
+    ) async {
+      await _pumpDetail(tester, FakeLedgerRepository(), draftJournalId);
+
+      await tester.tap(find.byKey(const Key('journal-edit-button')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Editor stub'), findsOneWidget);
+    });
+
+    testWidgets('shows a retryable problem panel when lines fail', (
+      tester,
+    ) async {
+      final repository = FakeLedgerRepository(
+        linesError: Exception('offline'),
+      );
+      await _pumpDetail(tester, repository, postedJournalId);
+
+      expect(
+        find.byKey(const Key('journal-detail-lines-error')),
+        findsOneWidget,
+      );
+      expect(
+        find.text("We couldn't load this journal's lines. Try again."),
+        findsOneWidget,
+      );
+
+      repository.linesError = null;
+      await tester.tap(find.text('Try again'));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.byKey(const Key('journal-detail-lines-error')),
+        findsNothing,
+      );
+      expect(find.byKey(const Key('journal-detail-lines')), findsOneWidget);
+      expect(find.text('Bank'), findsOneWidget);
     });
 
     testWidgets('deletes a draft after confirmation and goes back', (
@@ -165,6 +232,7 @@ void main() {
         find.text('Reversal of JB-2026-0004'),
         findsOneWidget,
       );
+      expect(find.byKey(const Key('journal-detail-lines')), findsOneWidget);
       expect(find.byKey(const Key('journal-delete-button')), findsNothing);
       expect(find.byKey(const Key('journal-reverse-button')), findsNothing);
     });

@@ -16,6 +16,16 @@ Future<List<LedgerAccount>> ledgerAccounts(Ref ref, String budgetId) => ref
 Future<List<Journal>> ledgerJournals(Ref ref, String budgetId) =>
     ref.watch(ledgerRepositoryProvider).listJournals(budgetId);
 
+/// One journal's lines, oldest first.
+@riverpod
+Future<List<JournalLine>> ledgerJournalLines(Ref ref, String journalId) =>
+    ref.watch(ledgerRepositoryProvider).listJournalLines(journalId);
+
+/// The budget's stored period lock date, or null when none is set.
+@riverpod
+Future<LedgerPeriodLock?> ledgerLockDate(Ref ref, String budgetId) =>
+    ref.watch(ledgerRepositoryProvider).getLockDate(budgetId);
+
 /// The trial balance through the inclusive calendar date [asOf].
 @riverpod
 Future<TrialBalanceView> ledgerTrialBalance(

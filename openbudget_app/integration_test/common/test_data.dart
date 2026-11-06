@@ -37,6 +37,7 @@ abstract final class TestData {
   static const booksEnableConfirm = 'Enable books';
   static const booksEnabledToast = 'Double-entry books are on';
   static const journalReference = 'JB-2026-0099';
+  static const draftJournalReference = 'JB-2026-0100';
   static const journalNarration = 'Client invoice';
   static const journalAmount = '50.00';
   static const bankAccountLabel = '1000 Bank';
@@ -46,6 +47,7 @@ abstract final class TestData {
   static const reversedLabel = 'Reversed';
   static const trialBalanceTab = 'Trial balance';
   static const bankAccountRow = 'Bank';
+  static const salesAccountRow = 'Sales';
   // Assistant
   static const assistantBudgetId = '00000000-0000-0000-0000-000000000f01';
   static const assistantUserId = '00000000-0000-0000-0000-000000000f02';

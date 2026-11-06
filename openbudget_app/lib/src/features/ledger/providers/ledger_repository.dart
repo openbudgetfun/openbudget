@@ -55,7 +55,13 @@ abstract interface class LedgerRepository {
     DateTime? toDate,
   });
 
+  /// One journal's lines, oldest first.
+  Future<List<JournalLine>> listJournalLines(String journalId);
+
   Future<LedgerPeriodLock> setLockDate(String budgetId, DateTime lockDate);
+
+  /// The budget's stored period lock date, or null when none is set.
+  Future<LedgerPeriodLock?> getLockDate(String budgetId);
 
   Future<TrialBalanceView> trialBalance(String budgetId, DateTime asOf);
 }
@@ -150,11 +156,19 @@ class ServerpodLedgerRepository implements LedgerRepository {
   );
 
   @override
+  Future<List<JournalLine>> listJournalLines(String journalId) =>
+      _client.ledger.listJournalLines(UuidValue.fromString(journalId));
+
+  @override
   Future<LedgerPeriodLock> setLockDate(String budgetId, DateTime lockDate) =>
       _client.ledger.setLockDate(
         UuidValue.fromString(budgetId),
         lockDate,
       );
+
+  @override
+  Future<LedgerPeriodLock?> getLockDate(String budgetId) =>
+      _client.ledger.getLockDate(UuidValue.fromString(budgetId));
 
   @override
   Future<TrialBalanceView> trialBalance(String budgetId, DateTime asOf) =>

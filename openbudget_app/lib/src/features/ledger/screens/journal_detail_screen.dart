@@ -9,16 +9,19 @@ import 'package:openbudget_app/src/features/ledger/ledger_labels.dart';
 import 'package:openbudget_app/src/features/ledger/providers/ledger_actions_provider.dart';
 import 'package:openbudget_app/src/features/ledger/providers/ledger_providers.dart';
 import 'package:openbudget_app/src/features/ledger/widgets/journal_status_chip.dart';
+import 'package:openbudget_app/src/features/ledger/widgets/ledger_amount_row.dart';
+import 'package:openbudget_app/src/routing/route_names.dart';
+import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
-/// One journal, read-only: a draft can be deleted, a posted journal can be
-/// reversed, and a reversed journal shows what undid it.
+/// One journal, read-only: a draft can be edited and deleted, a posted
+/// journal can be reversed, and a reversed journal shows what undid it.
 ///
-/// The ledger API does not return journal lines yet, so this screen shows
-/// the journal's own fields; lines are not rendered anywhere.
+/// Every journal shows its stored lines under the header fields, formatted
+/// in each line's own currency.
 class JournalDetailScreen extends HookConsumerWidget {
   const JournalDetailScreen({
     required this.budgetId,
@@ -35,6 +38,9 @@ class JournalDetailScreen extends HookConsumerWidget {
     final theme = Theme.of(context);
     final palette = theme.ob;
     final journalsAsync = ref.watch(ledgerJournalsProvider(budgetId));
+    final linesAsync = ref.watch(ledgerJournalLinesProvider(journalId));
+    final accountsAsync = ref.watch(ledgerAccountsProvider(budgetId));
+    final accounts = accountsAsync.value ?? const <LedgerAccount>[];
     final isWorking = useState(false);
 
     final journals = journalsAsync.value ?? const <Journal>[];
@@ -137,21 +143,35 @@ class JournalDetailScreen extends HookConsumerWidget {
                   ],
                 ),
               ),
-              if (status == JournalStatus.draft) ...[
-                const SizedBox(height: SpacingTokens.sm),
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: SpacingTokens.xs,
+              const SizedBox(height: SpacingTokens.sm),
+              linesAsync.when(
+                loading: () => const KeyedSubtree(
+                  key: Key('journal-detail-lines-loading'),
+                  child: Padding(
+                    padding: EdgeInsets.all(SpacingTokens.md),
+                    child: Center(child: WiredLoadingIndicator()),
                   ),
-                  child: Text(
-                    key: const Key('journal-draft-lines-note'),
-                    l10n.journalDraftLinesUnavailable,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: palette.mutedInk,
+                ),
+                error: (error, _) => KeyedSubtree(
+                  key: const Key('journal-detail-lines-error'),
+                  child: ObStatePanel.problem(
+                    title: l10n.journalLinesHeader,
+                    message: ledgerErrorMessage(
+                      error,
+                      l10n.journalLinesLoadError,
+                    ),
+                    action: ObStateAction(
+                      label: l10n.ledgerRetry,
+                      onPressed: () =>
+                          ref.invalidate(ledgerJournalLinesProvider(journalId)),
                     ),
                   ),
                 ),
-              ],
+                data: (lines) => _LinesCard(
+                  lines: lines,
+                  accounts: accounts,
+                ),
+              ),
               if (status == JournalStatus.posted) ...[
                 const SizedBox(height: SpacingTokens.sm),
                 Padding(
@@ -189,7 +209,21 @@ class JournalDetailScreen extends HookConsumerWidget {
                   ),
                   child: Row(
                     children: [
-                      if (status == JournalStatus.draft)
+                      if (status == JournalStatus.draft) ...[
+                        Expanded(
+                          child: FilledButton(
+                            key: const Key('journal-edit-button'),
+                            onPressed: () => context.pushNamed(
+                              journalEditRoute,
+                              pathParameters: {
+                                'id': budgetId,
+                                'journalId': journalId,
+                              },
+                            ),
+                            child: Text(l10n.journalEditAction),
+                          ),
+                        ),
+                        const SizedBox(width: SpacingTokens.sm),
                         Expanded(
                           child: OutlinedButton(
                             key: const Key('journal-delete-button'),
@@ -199,6 +233,7 @@ class JournalDetailScreen extends HookConsumerWidget {
                             child: Text(l10n.journalDeleteAction),
                           ),
                         ),
+                      ],
                       if (status == JournalStatus.posted)
                         Expanded(
                           child: FilledButton(
@@ -409,6 +444,83 @@ class _Note extends HookWidget {
     return Padding(
       padding: const EdgeInsets.only(top: SpacingTokens.xs),
       child: Text(text, style: theme.textTheme.bodySmall),
+    );
+  }
+}
+
+/// The journal's stored lines: one row per line with the account, the
+/// transaction-currency debit and credit, then totals per currency.
+class _LinesCard extends HookWidget {
+  const _LinesCard({required this.lines, required this.accounts});
+
+  final List<JournalLine> lines;
+  final List<LedgerAccount> accounts;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
+    final labelsByAccountId = <String, (String, String)>{
+      for (final account in accounts)
+        if (account.id != null)
+          account.id!.toString(): (account.code, account.name),
+    };
+    (String, String) accountParts(UuidValue accountId) =>
+        labelsByAccountId[accountId.toString()] ?? ('', accountId.toString());
+
+    final totalsByCurrency = <String, ({int debit, int credit})>{};
+    for (final line in lines) {
+      final current =
+          totalsByCurrency[line.currencyCode] ?? (debit: 0, credit: 0);
+      totalsByCurrency[line.currencyCode] = (
+        debit: current.debit + line.debitMinor,
+        credit: current.credit + line.creditMinor,
+      );
+    }
+    final currencyCodes = totalsByCurrency.keys.toList()..sort();
+
+    return ObCard(
+      key: const Key('journal-detail-lines'),
+      padding: const EdgeInsets.symmetric(
+        horizontal: SpacingTokens.md,
+        vertical: SpacingTokens.xs,
+      ),
+      child: Column(
+        children: [
+          LedgerAmountRow(
+            code: '',
+            name: '',
+            debit: l10n.ledgerColumnDebit,
+            credit: l10n.ledgerColumnCredit,
+            isHeader: true,
+          ),
+          const Divider(height: 1),
+          for (final (index, line) in lines.indexed) ...[
+            if (index > 0) const Divider(height: 1),
+            LedgerAmountRow(
+              key: Key('journal-detail-line-$index'),
+              code: accountParts(line.ledgerAccountId).$1,
+              name: accountParts(line.ledgerAccountId).$2,
+              debit: line.debitMinor == 0
+                  ? ''
+                  : formatCentsForCode(line.debitMinor, line.currencyCode),
+              credit: line.creditMinor == 0
+                  ? ''
+                  : formatCentsForCode(line.creditMinor, line.currencyCode),
+            ),
+          ],
+          const Divider(height: 1),
+          for (final (index, code) in currencyCodes.indexed)
+            LedgerAmountRow(
+              key: Key('journal-detail-totals-$index'),
+              code: '',
+              name: l10n.ledgerTotalsLabel,
+              debit: formatCentsForCode(totalsByCurrency[code]!.debit, code),
+              credit: formatCentsForCode(totalsByCurrency[code]!.credit, code),
+              isTotals: true,
+            ),
+        ],
+      ),
     );
   }
 }

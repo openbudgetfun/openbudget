@@ -62,6 +62,10 @@ class LedgerActions extends _$LedgerActions {
         ref
           ..invalidate(ledgerJournalsProvider(budgetId))
           ..invalidate(ledgerTrialBalanceProvider);
+        final savedId = journal.id?.toString();
+        if (savedId != null) {
+          ref.invalidate(ledgerJournalLinesProvider(savedId));
+        }
         state = const AsyncValue.data(null);
       }
       return journal;
@@ -106,7 +110,8 @@ class LedgerActions extends _$LedgerActions {
       if (ref.mounted) {
         ref
           ..invalidate(ledgerJournalsProvider(budgetId))
-          ..invalidate(ledgerTrialBalanceProvider);
+          ..invalidate(ledgerTrialBalanceProvider)
+          ..invalidate(ledgerJournalLinesProvider(journalId));
         state = const AsyncValue.data(null);
       }
       return journal;
@@ -132,7 +137,8 @@ class LedgerActions extends _$LedgerActions {
       if (ref.mounted) {
         ref
           ..invalidate(ledgerJournalsProvider(budgetId))
-          ..invalidate(ledgerTrialBalanceProvider);
+          ..invalidate(ledgerTrialBalanceProvider)
+          ..invalidate(ledgerJournalLinesProvider(journalId));
         state = const AsyncValue.data(null);
       }
       return reversal;
@@ -157,7 +163,8 @@ class LedgerActions extends _$LedgerActions {
       if (ref.mounted) {
         ref
           ..invalidate(ledgerJournalsProvider(budgetId))
-          ..invalidate(ledgerTrialBalanceProvider);
+          ..invalidate(ledgerTrialBalanceProvider)
+          ..invalidate(ledgerLockDateProvider(budgetId));
         state = const AsyncValue.data(null);
       }
       return lock;

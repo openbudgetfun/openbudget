@@ -59,6 +59,11 @@ class FakeBooksRepository implements LedgerRepository {
   final journals = <Journal>[];
   final linesByJournal = <String, List<JournalLineInput>>{};
 
+  /// Every journal id passed to [saveDraftJournal], in call order.
+  final savedJournalIds = <String?>[];
+
+  LedgerPeriodLock? lock;
+
   int nextJournalNumber = 1;
 
   @override
@@ -98,6 +103,19 @@ class FakeBooksRepository implements LedgerRepository {
     String? journalId,
     String? narration,
   }) async {
+    savedJournalIds.add(journalId);
+    if (journalId != null) {
+      // Replacing a draft keeps its id and rewrites its lines.
+      final index = journals.indexWhere((j) => j.id?.toString() == journalId);
+      if (index != -1) {
+        journals[index] = journals[index]
+          ..date = date
+          ..reference = reference
+          ..narration = narration;
+        linesByJournal[journalId] = lines;
+        return journals[index];
+      }
+    }
     final stored = Journal(
       id: UuidValue.fromString(
         '00000000-0000-0000-0000-0000000009${nextJournalNumber.toString().padLeft(2, '0')}',
@@ -172,11 +190,42 @@ class FakeBooksRepository implements LedgerRepository {
     DateTime? toDate,
   }) async => journals;
 
+  /// Returns the stored inputs as the [JournalLine] rows the server would
+  /// persist, so the editor and detail screens read back what was saved.
+  @override
+  Future<List<JournalLine>> listJournalLines(String journalId) async => [
+    for (final (index, line)
+        in (linesByJournal[journalId] ?? const <JournalLineInput>[]).indexed)
+      JournalLine(
+        id: UuidValue.fromString(
+          '00000000-0000-0000-0000-0000000009${(index + 1).toString().padLeft(2, '0')}',
+        ),
+        journalId: UuidValue.fromString(journalId),
+        ledgerAccountId: line.ledgerAccountId,
+        debitMinor: line.debitMinor,
+        creditMinor: line.creditMinor,
+        currencyCode: line.currencyCode,
+        functionalDebitMinor: line.functionalDebitMinor,
+        functionalCreditMinor: line.functionalCreditMinor,
+        exchangeRate: line.exchangeRate,
+        rateDate: line.rateDate,
+        rateSource: line.rateSource,
+      ),
+  ];
+
   @override
   Future<LedgerPeriodLock> setLockDate(
     String budgetId,
     DateTime lockDate,
-  ) => throw UnimplementedError();
+  ) async => lock = LedgerPeriodLock(
+    id: UuidValue.fromString('00000000-0000-0000-0000-000000000904'),
+    budgetId: _budgetUuid,
+    lockDate: lockDate,
+    setBy: _ownerUuid,
+  );
+
+  @override
+  Future<LedgerPeriodLock?> getLockDate(String budgetId) async => lock;
 
   @override
   Future<TrialBalanceView> trialBalance(String budgetId, DateTime asOf) async {
@@ -299,6 +348,14 @@ Widget _buildApp(FakeBooksRepository books) {
                 JournalEditorScreen(budgetId: state.pathParameters['id']!),
           ),
           GoRoute(
+            name: journalEditRoute,
+            path: 'journals/:journalId/edit',
+            builder: (context, state) => JournalEditorScreen(
+              budgetId: state.pathParameters['id']!,
+              journalId: state.pathParameters['journalId'],
+            ),
+          ),
+          GoRoute(
             name: journalDetailRoute,
             path: 'journals/:journalId',
             builder: (context, state) => JournalDetailScreen(
@@ -383,7 +440,7 @@ void main() {
       expect(find.text(TestData.bankAccountRow), findsOneWidget);
       expect(find.textContaining(TestData.journalAmount), findsWidgets);
 
-      // Reverse it from the read-only journal.
+      // Reverse it from the read-only journal, whose lines are shown.
       await booksTab.openJournals(tester);
       await tester.pumpAndSettle();
       await tester.tap(booksTab.journalTile(TestData.journalReference));
@@ -392,6 +449,15 @@ void main() {
       final detail = JournalDetailPage(tester);
       expect(detail.postedChip, findsOneWidget);
       expect(detail.readOnlyNote, findsOneWidget);
+
+      await detail.scrollToLines();
+      expect(detail.linesCard, findsOneWidget);
+      expect(find.text('1000'), findsOneWidget);
+      expect(find.text(TestData.bankAccountRow), findsOneWidget);
+      expect(find.text('4000'), findsOneWidget);
+      expect(find.text(TestData.salesAccountRow), findsOneWidget);
+      expect(find.textContaining(TestData.journalAmount), findsWidgets);
+      expect(detail.totalsRow(0), findsOneWidget);
 
       await tester.tap(detail.reverseButton);
       await tester.pumpAndSettle();
@@ -408,6 +474,54 @@ void main() {
         books.journals.first.reversalOfJournalId?.toString(),
         books.journals.last.id?.toString(),
       );
+
+      // A saved draft reopens with its stored lines and re-save replaces
+      // the same draft instead of creating a second one.
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+
+      await tester.tap(booksTab.newJournalButton);
+      await tester.pumpAndSettle();
+
+      await editor.setReference(TestData.draftJournalReference);
+      await editor.fillBalanced();
+      await editor.scrollToTotals();
+      expect(editor.balancedChip, findsOneWidget);
+      await tester.tap(editor.saveDraftButton);
+      await tester.pumpAndSettle();
+
+      expect(books.savedJournalIds.last, isNull);
+      final draftId = books.journals.first.id!.toString();
+      await tester.tap(booksTab.journalTile(TestData.draftJournalReference));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Draft'), findsOneWidget);
+      await detail.scrollToLines();
+      expect(detail.linesCard, findsOneWidget);
+      expect(find.textContaining(TestData.journalAmount), findsWidgets);
+      expect(detail.editButton, findsOneWidget);
+      expect(detail.deleteButton, findsOneWidget);
+
+      await tester.tap(detail.editButton);
+      await tester.pumpAndSettle();
+
+      expect(editor.editTitle, findsOneWidget);
+      expect(editor.referenceValue(), TestData.draftJournalReference);
+      expect(editor.lineAmountValue(0), TestData.journalAmount);
+      expect(editor.lineAmountValue(1), TestData.journalAmount);
+
+      await editor.scrollToTotals();
+      expect(editor.balancedChip, findsOneWidget);
+      await tester.tap(editor.saveDraftButton);
+      await tester.pumpAndSettle();
+
+      expect(books.savedJournalIds.last, draftId);
+      expect(books.journals, hasLength(3));
+      expect(
+        books.journals.where((j) => j.id?.toString() == draftId),
+        hasLength(1),
+      );
+      expect(find.text('Draft'), findsOneWidget);
     },
   );
 }

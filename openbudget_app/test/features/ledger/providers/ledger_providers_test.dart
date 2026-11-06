@@ -63,6 +63,78 @@ void main() {
     });
   });
 
+  group('ledgerJournalLinesProvider', () {
+    test('returns the lines for the requested journal', () async {
+      final fake = FakeLedgerRepository();
+      final container = _containerWith(fake);
+
+      final lines = await container.read(
+        ledgerJournalLinesProvider(draftJournalId).future,
+      );
+
+      expect(lines, hasLength(2));
+      expect(lines.first.debitMinor, 5000);
+      expect(lines.last.creditMinor, 5000);
+      expect(fake.lineCalls, [draftJournalId]);
+    });
+
+    test('returns the stored lines when the fake has overrides', () async {
+      final stored = [
+        journalLine(journalId: draftJournalId, debitMinor: 700),
+      ];
+      final container = _containerWith(
+        FakeLedgerRepository(
+          journalLines: {draftJournalId: stored},
+        ),
+      );
+
+      final lines = await container.read(
+        ledgerJournalLinesProvider(draftJournalId).future,
+      );
+
+      expect(lines, same(stored));
+    });
+
+    test('surfaces repository errors', () async {
+      final container = _containerWith(
+        FakeLedgerRepository(linesError: Exception('offline')),
+      );
+      final provider = ledgerJournalLinesProvider(draftJournalId);
+      final subscription = container.listen(provider, (_, _) {});
+      addTearDown(subscription.close);
+
+      await Future<void>.delayed(Duration.zero);
+
+      expect(container.read(provider).hasError, isTrue);
+    });
+  });
+
+  group('ledgerLockDateProvider', () {
+    test('returns null when no lock date is set', () async {
+      final fake = FakeLedgerRepository();
+      final container = _containerWith(fake);
+
+      final lock = await container.read(
+        ledgerLockDateProvider(testBudgetId).future,
+      );
+
+      expect(lock, isNull);
+      expect(fake.lockLookups, [testBudgetId]);
+    });
+
+    test('returns the stored lock', () async {
+      final container = _containerWith(
+        FakeLedgerRepository(lock: testLock()),
+      );
+
+      final lock = await container.read(
+        ledgerLockDateProvider(testBudgetId).future,
+      );
+
+      expect(lock?.lockDate, DateTime.utc(2026, 10, 31));
+    });
+  });
+
   group('ledgerTrialBalanceProvider', () {
     test('passes the as-of date through', () async {
       final fake = FakeLedgerRepository();
@@ -248,6 +320,106 @@ void main() {
         throwsA(isA<Exception>()),
       );
       expect(container.read(ledgerActionsProvider).hasError, isTrue);
+    });
+  });
+
+  group('write invalidation', () {
+    test('saveDraftJournal invalidates the saved journal lines', () async {
+      final fake = FakeLedgerRepository();
+      final container = _containerWith(fake);
+      final actions = container.read(ledgerActionsProvider.notifier);
+      final date = DateTime(2026, 5, 14);
+      final lines = [
+        testLineInput(),
+        testLineInput(accountId: salesAccountId, debit: false),
+      ];
+
+      final draft = await actions.saveDraftJournal(
+        budgetId: testBudgetId,
+        date: date,
+        lines: lines,
+        reference: 'JB-2026-0011',
+      );
+      final draftId = draft.id!.toString();
+      final linesProvider = ledgerJournalLinesProvider(draftId);
+      final subscription = container.listen(linesProvider, (_, _) {});
+      addTearDown(subscription.close);
+
+      await container.read(linesProvider.future);
+      expect(fake.lineCalls, [draftId]);
+
+      await actions.saveDraftJournal(
+        budgetId: testBudgetId,
+        date: date,
+        lines: lines,
+        reference: 'JB-2026-0011',
+        journalId: draftId,
+      );
+
+      await container.read(linesProvider.future);
+      expect(fake.lineCalls, [draftId, draftId]);
+    });
+
+    test('postJournal invalidates the journal lines', () async {
+      final fake = FakeLedgerRepository();
+      final container = _containerWith(fake);
+      final linesProvider = ledgerJournalLinesProvider(draftJournalId);
+      final subscription = container.listen(linesProvider, (_, _) {});
+      addTearDown(subscription.close);
+
+      await container.read(linesProvider.future);
+      expect(fake.lineCalls, [draftJournalId]);
+
+      await container
+          .read(ledgerActionsProvider.notifier)
+          .postJournal(budgetId: testBudgetId, journalId: draftJournalId);
+
+      await container.read(linesProvider.future);
+      expect(fake.lineCalls, [draftJournalId, draftJournalId]);
+    });
+
+    test('reverseJournal invalidates the journal lines', () async {
+      final fake = FakeLedgerRepository();
+      final container = _containerWith(fake);
+      final linesProvider = ledgerJournalLinesProvider(postedJournalId);
+      final subscription = container.listen(linesProvider, (_, _) {});
+      addTearDown(subscription.close);
+
+      await container.read(linesProvider.future);
+      expect(fake.lineCalls, [postedJournalId]);
+
+      await container
+          .read(ledgerActionsProvider.notifier)
+          .reverseJournal(
+            budgetId: testBudgetId,
+            journalId: postedJournalId,
+            date: DateTime(2026, 11, 2),
+          );
+
+      await container.read(linesProvider.future);
+      expect(fake.lineCalls, [postedJournalId, postedJournalId]);
+    });
+
+    test('setLockDate invalidates the lock date', () async {
+      final fake = FakeLedgerRepository();
+      final container = _containerWith(fake);
+      final lockProvider = ledgerLockDateProvider(testBudgetId);
+      final subscription = container.listen(lockProvider, (_, _) {});
+      addTearDown(subscription.close);
+
+      await container.read(lockProvider.future);
+      expect(fake.lockLookups, [testBudgetId]);
+
+      await container
+          .read(ledgerActionsProvider.notifier)
+          .setLockDate(
+            budgetId: testBudgetId,
+            lockDate: DateTime(2026, 10, 31),
+          );
+
+      final lock = await container.read(lockProvider.future);
+      expect(fake.lockLookups, [testBudgetId, testBudgetId]);
+      expect(lock?.lockDate, DateTime(2026, 10, 31));
     });
   });
 

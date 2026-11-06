@@ -2279,7 +2279,7 @@
   "booksTabAccounts": "Accounts",
   "booksTabTrialBalance": "Trial balance",
   "booksLockDateLabel": "Lock date",
-  "booksLockDateNone": "No lock date",
+  "booksLockDateNone": "No lock date set",
   "booksLockDateAction": "Set lock date",
   "booksLockDateHint": "Posting and reversing on or before this date is blocked.",
   "booksLockDateSavedToast": "Books locked through {date}",
@@ -2356,7 +2356,10 @@
   "journalReverseError": "We couldn't reverse this journal. Try again.",
   "journalReversalOfLabel": "Reversal of {reference}",
   "journalPostedAtLabel": "Posted {date}",
-  "journalDraftLinesUnavailable": "This draft's lines can't be shown here yet. Delete the draft and record it again to change them.",
+  "journalEditTitle": "Edit draft",
+  "journalEditAction": "Edit draft",
+  "journalLinesHeader": "Lines",
+  "journalLinesLoadError": "We couldn't load this journal's lines. Try again.",
   "@booksEnableDialogBody": {
     "placeholders": {
       "budget": {

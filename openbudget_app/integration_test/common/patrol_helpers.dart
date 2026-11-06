@@ -402,6 +402,12 @@ class BooksTabPage {
 
   Finder journalTile(String reference) => find.text(reference);
 
+  Finder get lockBanner => find.byKey(const Key('books-lock-banner'));
+  Finder get lockValue => find.byKey(const Key('books-lock-value'));
+  Finder get lockDialog => find.byKey(const Key('books-lock-dialog'));
+  Finder get lockSetButton => find.byKey(const Key('books-lock-set'));
+  Finder get draftChip => find.text('Draft').first;
+
   /// Scrolls the tab strip into view first: at 800x600 the tabs sit just
   /// above the fold when the sheet opens.
   Future<void> openTrialBalance() => scrollAndTap(tester, trialBalanceTab);
@@ -419,6 +425,7 @@ class JournalEditorPage {
   final WidgetTester tester;
 
   Finder get title => find.text('New journal').first;
+  Finder get editTitle => find.text('Edit draft').first;
   Finder get referenceField => find.byKey(const Key('journal-reference-field'));
   Finder get narrationField => find.byKey(const Key('journal-narration-field'));
   Finder get addLineButton => find.byKey(const Key('journal-add-line'));
@@ -428,6 +435,7 @@ class JournalEditorPage {
   Finder get postButton => find.byKey(const Key('journal-post-button'));
   Finder get postDialog => find.byKey(const Key('journal-post-dialog'));
   Finder get postConfirmButton => find.byKey(const Key('journal-post-confirm'));
+  Finder get linesLoading => find.byKey(const Key('journal-lines-loading'));
 
   Finder lineAccount(int index) =>
       find.byKey(Key('journal-line-account-$index'));
@@ -436,6 +444,28 @@ class JournalEditorPage {
     of: find.byKey(Key('journal-line-side-$index')),
     matching: find.text('Credit'),
   );
+
+  /// The amount currently typed into line [index]'s field.
+  String lineAmountValue(int index) => tester
+      .widget<EditableText>(
+        find.descendant(
+          of: lineAmount(index),
+          matching: find.byType(EditableText),
+        ),
+      )
+      .controller
+      .text;
+
+  /// The reference currently typed into the reference field.
+  String referenceValue() => tester
+      .widget<EditableText>(
+        find.descendant(
+          of: referenceField,
+          matching: find.byType(EditableText),
+        ),
+      )
+      .controller
+      .text;
 
   Future<void> setReference(String text) async {
     await tester.enterText(referenceField, text);
@@ -491,6 +521,8 @@ class JournalDetailPage {
   Finder get postedChip => find.text('Posted').first;
   Finder get reversedChip => find.text('Reversed').first;
   Finder get readOnlyNote => find.byKey(const Key('journal-readonly-note'));
+  Finder get linesCard => find.byKey(const Key('journal-detail-lines'));
+  Finder get editButton => find.byKey(const Key('journal-edit-button'));
   Finder get reverseButton => find.byKey(const Key('journal-reverse-button'));
   Finder get reverseDialog => find.byKey(const Key('journal-reverse-dialog'));
   Finder get reverseConfirmButton =>
@@ -498,6 +530,13 @@ class JournalDetailPage {
   Finder get deleteButton => find.byKey(const Key('journal-delete-button'));
 
   Finder reference(String value) => find.text(value);
+  Finder lineRow(int index) => find.byKey(Key('journal-detail-line-$index'));
+  Finder totalsRow(int index) =>
+      find.byKey(Key('journal-detail-totals-$index'));
+
+  /// Scrolls the stored lines card into view; it sits below the fold on the
+  /// 800x600 surface CI runs on.
+  Future<void> scrollToLines() => scrollIntoView(tester, linesCard);
 }
 
 /// Page object for the category detail screen.

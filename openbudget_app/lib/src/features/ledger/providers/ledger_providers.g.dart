@@ -183,6 +183,179 @@ final class LedgerJournalsFamily extends $Family
   String toString() => r'ledgerJournalsProvider';
 }
 
+/// One journal's lines, oldest first.
+
+@ProviderFor(ledgerJournalLines)
+final ledgerJournalLinesProvider = LedgerJournalLinesFamily._();
+
+/// One journal's lines, oldest first.
+
+final class LedgerJournalLinesProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<JournalLine>>,
+          List<JournalLine>,
+          FutureOr<List<JournalLine>>
+        >
+    with
+        $FutureModifier<List<JournalLine>>,
+        $FutureProvider<List<JournalLine>> {
+  /// One journal's lines, oldest first.
+  LedgerJournalLinesProvider._({
+    required LedgerJournalLinesFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'ledgerJournalLinesProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$ledgerJournalLinesHash();
+
+  @override
+  String toString() {
+    return r'ledgerJournalLinesProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<List<JournalLine>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<JournalLine>> create(Ref ref) {
+    final argument = this.argument as String;
+    return ledgerJournalLines(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is LedgerJournalLinesProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$ledgerJournalLinesHash() =>
+    r'9264e5b35027c5f94d16f870819938e52aa75c98';
+
+/// One journal's lines, oldest first.
+
+final class LedgerJournalLinesFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<List<JournalLine>>, String> {
+  LedgerJournalLinesFamily._()
+    : super(
+        retry: null,
+        name: r'ledgerJournalLinesProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// One journal's lines, oldest first.
+
+  LedgerJournalLinesProvider call(String journalId) =>
+      LedgerJournalLinesProvider._(argument: journalId, from: this);
+
+  @override
+  String toString() => r'ledgerJournalLinesProvider';
+}
+
+/// The budget's stored period lock date, or null when none is set.
+
+@ProviderFor(ledgerLockDate)
+final ledgerLockDateProvider = LedgerLockDateFamily._();
+
+/// The budget's stored period lock date, or null when none is set.
+
+final class LedgerLockDateProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<LedgerPeriodLock?>,
+          LedgerPeriodLock?,
+          FutureOr<LedgerPeriodLock?>
+        >
+    with
+        $FutureModifier<LedgerPeriodLock?>,
+        $FutureProvider<LedgerPeriodLock?> {
+  /// The budget's stored period lock date, or null when none is set.
+  LedgerLockDateProvider._({
+    required LedgerLockDateFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'ledgerLockDateProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$ledgerLockDateHash();
+
+  @override
+  String toString() {
+    return r'ledgerLockDateProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<LedgerPeriodLock?> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<LedgerPeriodLock?> create(Ref ref) {
+    final argument = this.argument as String;
+    return ledgerLockDate(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is LedgerLockDateProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$ledgerLockDateHash() => r'2edd1e70c17e2ab616b8735bd7379555d8f180b7';
+
+/// The budget's stored period lock date, or null when none is set.
+
+final class LedgerLockDateFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<LedgerPeriodLock?>, String> {
+  LedgerLockDateFamily._()
+    : super(
+        retry: null,
+        name: r'ledgerLockDateProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// The budget's stored period lock date, or null when none is set.
+
+  LedgerLockDateProvider call(String budgetId) =>
+      LedgerLockDateProvider._(argument: budgetId, from: this);
+
+  @override
+  String toString() => r'ledgerLockDateProvider';
+}
+
 /// The trial balance through the inclusive calendar date [asOf].
 
 @ProviderFor(ledgerTrialBalance)

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/ledger/providers/ledger_repository.dart';
 import 'package:openbudget_app/src/features/ledger/screens/books_screen.dart';
@@ -238,6 +239,68 @@ void main() {
         expect(
           find.text("We couldn't load the trial balance."),
           findsWidgets,
+        );
+      });
+    });
+
+    group('lock date', () {
+      testWidgets('shows the stored lock date from the server', (tester) async {
+        await _pumpBooks(
+          tester,
+          FakeLedgerRepository(lock: testLock()),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('books-lock-banner')), findsOneWidget);
+        expect(find.text('Lock date'), findsOneWidget);
+        expect(
+          find.text(
+            DateFormat.yMMMd().format(DateTime.utc(2026, 10, 31)),
+          ),
+          findsOneWidget,
+        );
+        expect(find.text('No lock date set'), findsNothing);
+      });
+
+      testWidgets('shows that no lock date is set yet', (tester) async {
+        await _pumpBooks(tester, FakeLedgerRepository());
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('books-lock-banner')), findsOneWidget);
+        expect(find.text('No lock date set'), findsOneWidget);
+      });
+
+      testWidgets('the dialog reads the stored date and saving refreshes it', (
+        tester,
+      ) async {
+        final repository = FakeLedgerRepository(lock: testLock());
+        await _pumpBooks(tester, repository);
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byKey(const Key('books-lock-button')));
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('books-lock-dialog')), findsOneWidget);
+        expect(
+          tester.widget<Text>(find.byKey(const Key('books-lock-current'))).data,
+          DateFormat.yMMMd().format(DateTime.utc(2026, 10, 31)),
+        );
+
+        await tester.tap(find.byKey(const Key('books-lock-set')));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('20').first);
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('OK').last);
+        await tester.pumpAndSettle();
+
+        expect(repository.lockDates.single.lockDate.day, 20);
+        expect(
+          tester.widget<Text>(find.byKey(const Key('books-lock-value'))).data,
+          DateFormat.yMMMd().format(DateTime.utc(2026, 10, 20)),
+        );
+        expect(
+          find.text(DateFormat.yMMMd().format(DateTime.utc(2026, 10, 31))),
+          findsNothing,
         );
       });
     });

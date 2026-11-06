@@ -179,6 +179,18 @@ GoRouter appRouter(Ref ref) {
                 },
               ),
               GoRoute(
+                name: journalEditRoute,
+                path: 'journals/:journalId/edit',
+                builder: (context, state) {
+                  final id = state.pathParameters['id']!;
+                  final journalId = state.pathParameters['journalId']!;
+                  return JournalEditorScreen(
+                    budgetId: id,
+                    journalId: journalId,
+                  );
+                },
+              ),
+              GoRoute(
                 name: journalDetailRoute,
                 path: 'journals/:journalId',
                 builder: (context, state) {

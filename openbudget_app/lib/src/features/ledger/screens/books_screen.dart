@@ -9,6 +9,7 @@ import 'package:openbudget_app/src/features/ledger/ledger_labels.dart';
 import 'package:openbudget_app/src/features/ledger/providers/ledger_actions_provider.dart';
 import 'package:openbudget_app/src/features/ledger/providers/ledger_providers.dart';
 import 'package:openbudget_app/src/features/ledger/widgets/journal_status_chip.dart';
+import 'package:openbudget_app/src/features/ledger/widgets/ledger_amount_row.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
@@ -26,8 +27,11 @@ class BooksScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final palette = theme.ob;
     final tabController = useTabController(initialLength: 3);
-    final lockDate = useState<DateTime?>(null);
+    final lockAsync = ref.watch(ledgerLockDateProvider(budgetId));
+    final storedLockDate = lockAsync.value?.lockDate;
 
     return Scaffold(
       appBar: AppBar(
@@ -37,7 +41,7 @@ class BooksScreen extends HookConsumerWidget {
             key: const Key('books-lock-button'),
             tooltip: l10n.booksLockDateLabel,
             icon: const SkribbleIcon(data: OpenBudgetIcons.lockClock),
-            onPressed: () => _showLockDialog(context, ref, lockDate),
+            onPressed: () => _showLockDialog(context, ref, storedLockDate),
           ),
         ],
       ),
@@ -60,6 +64,48 @@ class BooksScreen extends HookConsumerWidget {
               Tab(text: l10n.booksTabTrialBalance),
             ],
           ),
+          Padding(
+            key: const Key('books-lock-banner'),
+            padding: const EdgeInsets.fromLTRB(
+              SpacingTokens.md,
+              SpacingTokens.xs,
+              SpacingTokens.md,
+              0,
+            ),
+            child: Row(
+              children: [
+                SkribbleIcon(
+                  data: OpenBudgetIcons.lockClock,
+                  size: 16,
+                  color: palette.mutedInk,
+                ),
+                const SizedBox(width: SpacingTokens.xs),
+                Text(
+                  l10n.booksLockDateLabel,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: palette.mutedInk,
+                  ),
+                ),
+                const Spacer(),
+                if (lockAsync.isLoading)
+                  const SizedBox(
+                    width: 14,
+                    height: 14,
+                    child: WiredLoadingIndicator(),
+                  )
+                else
+                  Text(
+                    key: const Key('books-lock-value'),
+                    lockAsync.hasError
+                        ? '—'
+                        : storedLockDate == null
+                        ? l10n.booksLockDateNone
+                        : DateFormat.yMMMd().format(storedLockDate),
+                    style: theme.textTheme.titleSmall,
+                  ),
+              ],
+            ),
+          ),
           Expanded(
             child: TabBarView(
               controller: tabController,
@@ -78,7 +124,7 @@ class BooksScreen extends HookConsumerWidget {
   Future<void> _showLockDialog(
     BuildContext context,
     WidgetRef ref,
-    ValueNotifier<DateTime?> lockDate,
+    DateTime? storedLockDate,
   ) async {
     final l10n = AppLocalizations.of(context);
     await showDialog<void>(
@@ -92,9 +138,9 @@ class BooksScreen extends HookConsumerWidget {
           children: [
             Text(
               key: const Key('books-lock-current'),
-              lockDate.value == null
+              storedLockDate == null
                   ? l10n.booksLockDateNone
-                  : DateFormat.yMMMd().format(lockDate.value!),
+                  : DateFormat.yMMMd().format(storedLockDate),
             ),
             const SizedBox(height: SpacingTokens.xs),
             Text(
@@ -113,11 +159,11 @@ class BooksScreen extends HookConsumerWidget {
           FilledButton(
             key: const Key('books-lock-set'),
             onPressed: () async {
-              final picked = await _pickLockDate(dialogContext, lockDate);
+              final picked = await _pickLockDate(dialogContext, storedLockDate);
               if (picked == null) return;
               if (dialogContext.mounted) dialogContext.pop();
               if (!context.mounted) return;
-              await _setLockDate(context, ref, picked, lockDate);
+              await _setLockDate(context, ref, picked);
             },
             child: Text(l10n.booksLockDateAction),
           ),
@@ -128,12 +174,12 @@ class BooksScreen extends HookConsumerWidget {
 
   Future<DateTime?> _pickLockDate(
     BuildContext context,
-    ValueNotifier<DateTime?> lockDate,
+    DateTime? storedLockDate,
   ) async {
     final today = ledgerCalendarDate(DateTime.now());
     return showDatePicker(
       context: context,
-      initialDate: lockDate.value ?? today,
+      initialDate: storedLockDate ?? today,
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
     );
@@ -143,14 +189,12 @@ class BooksScreen extends HookConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     DateTime date,
-    ValueNotifier<DateTime?> lockDate,
   ) async {
     final l10n = AppLocalizations.of(context);
     try {
       final lock = await ref
           .read(ledgerActionsProvider.notifier)
           .setLockDate(budgetId: budgetId, lockDate: ledgerCalendarDate(date));
-      lockDate.value = ledgerCalendarDate(lock.lockDate);
       if (!context.mounted) return;
       showAppToast(
         context,
@@ -548,8 +592,8 @@ class _TrialBalanceTab extends HookConsumerWidget {
                   ),
                   child: Column(
                     children: [
-                      _TrialRow(
-                        leading: '',
+                      LedgerAmountRow(
+                        code: '',
                         name: '',
                         debit: l10n.ledgerColumnDebit,
                         credit: l10n.ledgerColumnCredit,
@@ -558,8 +602,8 @@ class _TrialBalanceTab extends HookConsumerWidget {
                       const Divider(height: 1),
                       for (final (index, row) in report.rows.indexed) ...[
                         if (index > 0) const Divider(height: 1),
-                        _TrialRow(
-                          leading: row.accountCode,
+                        LedgerAmountRow(
+                          code: row.accountCode,
                           name: row.accountName,
                           debit: row.debitMinor == 0
                               ? ''
@@ -576,8 +620,8 @@ class _TrialBalanceTab extends HookConsumerWidget {
                         ),
                       ],
                       const Divider(height: 1),
-                      _TrialRow(
-                        leading: '',
+                      LedgerAmountRow(
+                        code: '',
                         name: l10n.ledgerTotalsLabel,
                         debit: formatCentsForCode(
                           report.totalDebitMinor,
@@ -596,79 +640,6 @@ class _TrialBalanceTab extends HookConsumerWidget {
           ),
         );
       },
-    );
-  }
-}
-
-class _TrialRow extends HookWidget {
-  const _TrialRow({
-    required this.leading,
-    required this.name,
-    required this.debit,
-    required this.credit,
-    this.isHeader = false,
-    this.isTotals = false,
-  });
-
-  final String leading;
-  final String name;
-  final String debit;
-  final String credit;
-  final bool isHeader;
-  final bool isTotals;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final palette = theme.ob;
-    final style = isHeader || isTotals
-        ? theme.textTheme.labelMedium
-        : theme.textTheme.bodyMedium;
-    final headerStyle = isHeader
-        ? style?.copyWith(color: palette.mutedInk)
-        : isTotals
-        ? style?.copyWith(fontWeight: FontWeight.w700)
-        : style;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: SpacingTokens.sm),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 44,
-            child: Text(
-              leading,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: palette.mutedInk,
-              ),
-            ),
-          ),
-          Expanded(
-            child: Text(name, style: headerStyle),
-          ),
-          const SizedBox(width: SpacingTokens.sm),
-          SizedBox(
-            width: 96,
-            child: Text(
-              debit,
-              textAlign: TextAlign.right,
-              style: headerStyle?.copyWith(
-                fontFeatures: const [FontFeature.tabularFigures()],
-              ),
-            ),
-          ),
-          SizedBox(
-            width: 96,
-            child: Text(
-              credit,
-              textAlign: TextAlign.right,
-              style: headerStyle?.copyWith(
-                fontFeatures: const [FontFeature.tabularFigures()],
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

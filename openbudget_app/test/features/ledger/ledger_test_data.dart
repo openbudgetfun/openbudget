@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:openbudget_app/src/features/ledger/providers/ledger_repository.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 
@@ -145,6 +147,40 @@ JournalLineInput testLineInput({
   rateSource: 'manual',
 );
 
+JournalLine journalLine({
+  String id = '00000000-0000-0000-0000-0000000000c101',
+  String journalId = postedJournalId,
+  String accountId = bankAccountId,
+  int debitMinor = 5000,
+  int creditMinor = 0,
+  String currencyCode = 'GBP',
+}) => JournalLine(
+  id: UuidValue.fromString(id),
+  journalId: UuidValue.fromString(journalId),
+  ledgerAccountId: UuidValue.fromString(accountId),
+  description: creditMinor == 0 ? null : 'Sales',
+  debitMinor: debitMinor,
+  creditMinor: creditMinor,
+  currencyCode: currencyCode,
+  functionalDebitMinor: debitMinor,
+  functionalCreditMinor: creditMinor,
+  exchangeRate: '1',
+  rateDate: DateTime.utc(2026, 5, 14),
+  rateSource: 'manual',
+);
+
+/// The balanced £50.00 pair the test journals were posted with.
+List<JournalLine> testJournalLines({String journalId = postedJournalId}) => [
+  journalLine(journalId: journalId),
+  journalLine(
+    id: '00000000-0000-0000-0000-0000000000c111',
+    journalId: journalId,
+    accountId: salesAccountId,
+    debitMinor: 0,
+    creditMinor: 5000,
+  ),
+];
+
 TrialBalanceRowView trialRow({
   String code = '1000',
   String name = 'Bank',
@@ -198,11 +234,13 @@ class FakeLedgerRepository implements LedgerRepository {
   FakeLedgerRepository({
     this.accounts,
     this.journals,
+    this.journalLines,
     this.trialBalanceResult,
     this.lock,
     this.enableError,
     this.accountsError,
     this.journalsError,
+    this.linesError,
     this.trialBalanceError,
     this.saveError,
     this.deleteError,
@@ -213,17 +251,23 @@ class FakeLedgerRepository implements LedgerRepository {
 
   List<LedgerAccount>? accounts;
   List<Journal>? journals;
+  Map<String, List<JournalLine>>? journalLines;
   TrialBalanceView? trialBalanceResult;
   LedgerPeriodLock? lock;
   Exception? enableError;
   Exception? accountsError;
   Exception? journalsError;
+  Exception? linesError;
   Exception? trialBalanceError;
   Exception? saveError;
   Exception? deleteError;
   Exception? postError;
   Exception? reverseError;
   Exception? lockError;
+
+  /// When set, every [listJournalLines] call waits on it, so tests control
+  /// exactly when the lines arrive.
+  Completer<List<JournalLine>>? linesCompleter;
 
   final List<String> enabledBudgets = [];
   final List<String> archivedAccounts = [];
@@ -245,6 +289,8 @@ class FakeLedgerRepository implements LedgerRepository {
   final List<({String budgetId, DateTime lockDate})> lockDates = [];
   final List<({String budgetId, DateTime asOf})> trialBalanceCalls = [];
   final List<({String budgetId, bool includeArchived})> accountCalls = [];
+  final List<String> lineCalls = [];
+  final List<String> lockLookups = [];
 
   int _nextJournalNumber = 10;
 
@@ -396,13 +442,35 @@ class FakeLedgerRepository implements LedgerRepository {
   }
 
   @override
+  Future<List<JournalLine>> listJournalLines(String journalId) async {
+    if (linesError != null) throw linesError!;
+    lineCalls.add(journalId);
+    if (linesCompleter != null) return linesCompleter!.future;
+    final stored = journalLines?[journalId];
+    if (stored != null) return stored;
+    return testJournalLines(journalId: journalId);
+  }
+
+  @override
   Future<LedgerPeriodLock> setLockDate(
     String budgetId,
     DateTime lockDate,
   ) async {
     if (lockError != null) throw lockError!;
     lockDates.add((budgetId: budgetId, lockDate: lockDate));
-    return lock ?? testLock(lockDate: lockDate);
+    lock = LedgerPeriodLock(
+      id: UuidValue.fromString('00000000-0000-0000-0000-0000000000c010'),
+      budgetId: UuidValue.fromString(budgetId),
+      lockDate: lockDate,
+      setBy: UuidValue.fromString(testOwnerId),
+    );
+    return lock!;
+  }
+
+  @override
+  Future<LedgerPeriodLock?> getLockDate(String budgetId) async {
+    lockLookups.add(budgetId);
+    return lock;
   }
 
   @override

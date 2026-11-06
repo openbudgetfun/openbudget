@@ -8379,7 +8379,7 @@ abstract class AppLocalizations {
   /// No description provided for @booksLockDateNone.
   ///
   /// In en, this message translates to:
-  /// **'No lock date'**
+  /// **'No lock date set'**
   String get booksLockDateNone;
 
   /// No description provided for @booksLockDateAction.
@@ -8838,11 +8838,29 @@ abstract class AppLocalizations {
   /// **'Posted {date}'**
   String journalPostedAtLabel(String date);
 
-  /// No description provided for @journalDraftLinesUnavailable.
+  /// No description provided for @journalEditTitle.
   ///
   /// In en, this message translates to:
-  /// **'This draft\'s lines can\'t be shown here yet. Delete the draft and record it again to change them.'**
-  String get journalDraftLinesUnavailable;
+  /// **'Edit draft'**
+  String get journalEditTitle;
+
+  /// No description provided for @journalEditAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit draft'**
+  String get journalEditAction;
+
+  /// No description provided for @journalLinesHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Lines'**
+  String get journalLinesHeader;
+
+  /// No description provided for @journalLinesLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t load this journal\'s lines. Try again.'**
+  String get journalLinesLoadError;
 }
 
 class _AppLocalizationsDelegate
