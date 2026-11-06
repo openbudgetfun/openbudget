@@ -11,6 +11,10 @@ fields:
   displayCurrencyCode: String?
   ### The user who owns this budget.
   ownerId: UuidValue
+  ### AccountingMode name: `envelope` (default) or `ledger`. Only sole-trader
+  ### and company budgets may switch to `ledger`, and switching back is not
+  ### supported.
+  accountingMode: String, default='envelope'
   createdAt: DateTime, default=now
   updatedAt: DateTime, default=now
 indexes:

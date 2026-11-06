@@ -1,0 +1,28 @@
+### One account in a budget's double-entry chart of accounts.
+###
+### Codes are user-visible labels; nothing keys on them. Accounts with a
+### [LedgerSystemRole]-style `systemRole` are structural: one active account
+### per role, and they cannot be deleted.
+class: LedgerAccount
+table: ledger_account
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  budgetId: UuidValue, relation(parent=budget)
+  ### Illustrative code from the template chart, unique per budget.
+  code: String
+  name: String
+  ### LedgerAccountType name: asset, liability, equity, income or expense.
+  type: String
+  ### LedgerSystemRole name, when this is a structural account.
+  systemRole: String?
+  ### ISO 4217 code for foreign-currency bank or control accounts.
+  currencyCode: String?
+  ### Optional tax category feeding the tax engine.
+  taxCategoryCode: String?
+  ### Archived accounts keep their lines but accept no new postings.
+  archived: bool, default=false
+  createdAt: DateTime, default=now
+indexes:
+  ledger_account_budget_code_unique_idx:
+    fields: budgetId, code
+    unique: true

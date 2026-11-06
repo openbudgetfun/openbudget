@@ -1,0 +1,39 @@
+### One line of a [Journal]: a one-sided amount on one ledger account.
+###
+### Every line carries the transaction-currency amount and the functional
+### amount (the budget's currencyCode) with the exact exchange rate that
+### produced it. `functionalDebitMinor`/`functionalCreditMinor` follow the
+### same direction as the transaction side; exactly one of each pair is
+### positive. A zero functional amount is legitimate only where the stated
+### rate rounds a small amount to zero.
+class: JournalLine
+table: journal_line
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  journalId: UuidValue, relation(parent=journal, onDelete=Cascade)
+  ledgerAccountId: UuidValue, relation(parent=ledger_account)
+  description: String?
+  ### Debit in transaction-currency minor units, or 0.
+  debitMinor: int, default=0
+  ### Credit in transaction-currency minor units, or 0.
+  creditMinor: int, default=0
+  ### ISO 4217 code of the transaction currency.
+  currencyCode: String
+  ### Debit in functional-currency minor units, or 0.
+  functionalDebitMinor: int, default=0
+  ### Credit in functional-currency minor units, or 0.
+  functionalCreditMinor: int, default=0
+  ### Functional per 1 transaction currency, exact decimal string such as
+  ### `1.234567`. Never a double.
+  exchangeRate: String, default='1'
+  ### The calendar date the rate was struck on.
+  rateDate: DateTime?
+  ### Where the rate came from, such as `manual` or a provider name.
+  rateSource: String?
+  ### Optional sales-tax code applied to this line.
+  taxCode: String?
+indexes:
+  journal_line_journal_idx:
+    fields: journalId
+  journal_line_account_idx:
+    fields: ledgerAccountId

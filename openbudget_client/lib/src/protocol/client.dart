@@ -49,6 +49,16 @@ import 'package:openbudget_client/src/protocol/fx_rates/fx_latest_snapshot.dart'
     as _it7vndki;
 import 'package:openbudget_client/src/protocol/institutions/institution.dart'
     as _i6ysl1a4;
+import 'package:openbudget_client/src/protocol/ledger/journal.dart'
+    as _izuizaeu;
+import 'package:openbudget_client/src/protocol/ledger/journal_line_input.dart'
+    as _i3j8x5or;
+import 'package:openbudget_client/src/protocol/ledger/ledger_account.dart'
+    as _ixq9t892;
+import 'package:openbudget_client/src/protocol/ledger/ledger_period_lock.dart'
+    as _i10h3ni6;
+import 'package:openbudget_client/src/protocol/ledger/trial_balance_view.dart'
+    as _i0gvlz5s;
 import 'package:openbudget_client/src/protocol/monthly_allocations/monthly_allocation.dart'
     as _iz3b7rge;
 import 'package:openbudget_client/src/protocol/payees/payee.dart' as _iaf6ifsb;
@@ -1159,6 +1169,168 @@ class EndpointInstitution extends _isc.EndpointRef {
       );
 }
 
+/// API surface for a budget's double-entry books.
+///
+/// All methods require authentication and check budget ownership. Posted
+/// journals have no update or delete path anywhere in this API: corrections
+/// go through [reverse].
+/// {@category Endpoint}
+class EndpointLedger extends _isc.EndpointRef {
+  EndpointLedger(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'ledger';
+
+  /// Enables ledger accounting on a sole-trader or company budget and seeds
+  /// its chart of accounts from the jurisdiction template.
+  _ida.Future<_iro9sz2e.Budget> enableLedger(_isc.UuidValue budgetId) =>
+      caller.callServerEndpoint<_iro9sz2e.Budget>(
+        'ledger',
+        'enableLedger',
+        {'budgetId': budgetId},
+      );
+
+  /// Lists the budget's ledger accounts.
+  _ida.Future<List<_ixq9t892.LedgerAccount>> listAccounts(
+    _isc.UuidValue budgetId, {
+    required bool includeArchived,
+  }) => caller.callServerEndpoint<List<_ixq9t892.LedgerAccount>>(
+    'ledger',
+    'listAccounts',
+    {
+      'budgetId': budgetId,
+      'includeArchived': includeArchived,
+    },
+  );
+
+  /// Adds an account to the budget's chart of accounts.
+  _ida.Future<_ixq9t892.LedgerAccount> createAccount(
+    _isc.UuidValue budgetId,
+    String code,
+    String name,
+    String type, {
+    String? systemRole,
+    String? currencyCode,
+    String? taxCategoryCode,
+  }) => caller.callServerEndpoint<_ixq9t892.LedgerAccount>(
+    'ledger',
+    'createAccount',
+    {
+      'budgetId': budgetId,
+      'code': code,
+      'name': name,
+      'type': type,
+      'systemRole': systemRole,
+      'currencyCode': currencyCode,
+      'taxCategoryCode': taxCategoryCode,
+    },
+  );
+
+  /// Archives an account so it stops accepting postings.
+  _ida.Future<_ixq9t892.LedgerAccount> archiveAccount(
+    _isc.UuidValue accountId,
+  ) => caller.callServerEndpoint<_ixq9t892.LedgerAccount>(
+    'ledger',
+    'archiveAccount',
+    {'accountId': accountId},
+  );
+
+  /// Saves a draft journal: creates one, or replaces the lines of an
+  /// existing draft when [journalId] is given.
+  _ida.Future<_izuizaeu.Journal> saveDraftJournal(
+    _isc.UuidValue budgetId,
+    DateTime date,
+    List<_i3j8x5or.JournalLineInput> lines, {
+    _isc.UuidValue? journalId,
+    required String reference,
+    String? narration,
+    required String source,
+  }) => caller.callServerEndpoint<_izuizaeu.Journal>(
+    'ledger',
+    'saveDraftJournal',
+    {
+      'budgetId': budgetId,
+      'date': date,
+      'lines': lines,
+      'journalId': journalId,
+      'reference': reference,
+      'narration': narration,
+      'source': source,
+    },
+  );
+
+  /// Deletes a draft journal. Posted journals cannot be deleted.
+  _ida.Future<void> deleteDraftJournal(_isc.UuidValue journalId) =>
+      caller.callServerEndpoint<void>(
+        'ledger',
+        'deleteDraftJournal',
+        {'journalId': journalId},
+      );
+
+  /// Posts a draft journal, making it immutable.
+  _ida.Future<_izuizaeu.Journal> postJournal(_isc.UuidValue journalId) =>
+      caller.callServerEndpoint<_izuizaeu.Journal>(
+        'ledger',
+        'postJournal',
+        {'journalId': journalId},
+      );
+
+  /// Reverses a posted journal on [date] with a mirror journal.
+  _ida.Future<_izuizaeu.Journal> reverseJournal(
+    _isc.UuidValue journalId,
+    DateTime date,
+  ) => caller.callServerEndpoint<_izuizaeu.Journal>(
+    'ledger',
+    'reverseJournal',
+    {
+      'journalId': journalId,
+      'date': date,
+    },
+  );
+
+  /// Lists the budget's journals between the optional inclusive dates,
+  /// newest first.
+  _ida.Future<List<_izuizaeu.Journal>> listJournals(
+    _isc.UuidValue budgetId, {
+    DateTime? fromDate,
+    DateTime? toDate,
+  }) => caller.callServerEndpoint<List<_izuizaeu.Journal>>(
+    'ledger',
+    'listJournals',
+    {
+      'budgetId': budgetId,
+      'fromDate': fromDate,
+      'toDate': toDate,
+    },
+  );
+
+  /// Sets or moves the budget's period lock date.
+  _ida.Future<_i10h3ni6.LedgerPeriodLock> setLockDate(
+    _isc.UuidValue budgetId,
+    DateTime lockDate,
+  ) => caller.callServerEndpoint<_i10h3ni6.LedgerPeriodLock>(
+    'ledger',
+    'setLockDate',
+    {
+      'budgetId': budgetId,
+      'lockDate': lockDate,
+    },
+  );
+
+  /// Computes the trial balance through [asOf] over posted journals.
+  _ida.Future<_i0gvlz5s.TrialBalanceView> trialBalance(
+    _isc.UuidValue budgetId,
+    DateTime asOf,
+  ) => caller.callServerEndpoint<_i0gvlz5s.TrialBalanceView>(
+    'ledger',
+    'trialBalance',
+    {
+      'budgetId': budgetId,
+      'asOf': asOf,
+    },
+  );
+}
+
 /// API surface for monthly allocation operations.
 ///
 /// All methods require authentication.
@@ -2199,6 +2371,7 @@ class Client extends _isc.ServerpodClientShared {
     envelope = EndpointEnvelope(this);
     fxRate = EndpointFxRate(this);
     institution = EndpointInstitution(this);
+    ledger = EndpointLedger(this);
     monthlyAllocation = EndpointMonthlyAllocation(this);
     payee = EndpointPayee(this);
     plaid = EndpointPlaid(this);
@@ -2243,6 +2416,8 @@ class Client extends _isc.ServerpodClientShared {
 
   late final EndpointInstitution institution;
 
+  late final EndpointLedger ledger;
+
   late final EndpointMonthlyAllocation monthlyAllocation;
 
   late final EndpointPayee payee;
@@ -2281,6 +2456,7 @@ class Client extends _isc.ServerpodClientShared {
     'envelope': envelope,
     'fxRate': fxRate,
     'institution': institution,
+    'ledger': ledger,
     'monthlyAllocation': monthlyAllocation,
     'payee': payee,
     'plaid': plaid,
