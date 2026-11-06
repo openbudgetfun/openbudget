@@ -8303,6 +8303,546 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The release notes for this version aren\'t in a format OpenBudget can show.'**
   String get whatsNewErrorMessage;
+
+  /// No description provided for @booksEntryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Books'**
+  String get booksEntryTitle;
+
+  /// No description provided for @booksEntryEnableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable double-entry books'**
+  String get booksEntryEnableTitle;
+
+  /// No description provided for @booksEnableDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable double-entry books?'**
+  String get booksEnableDialogTitle;
+
+  /// No description provided for @booksEnableDialogBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Books add double-entry accounting to {budget}: a chart of accounts, journals and a trial balance. Envelopes keep working as they do today. The switch is one-way — once books are on for this budget, they cannot be turned back off.'**
+  String booksEnableDialogBody(String budget);
+
+  /// No description provided for @booksEnableDialogConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable books'**
+  String get booksEnableDialogConfirm;
+
+  /// No description provided for @booksEnabledToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Double-entry books are on'**
+  String get booksEnabledToast;
+
+  /// No description provided for @booksEnableError.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t enable books. Try again.'**
+  String get booksEnableError;
+
+  /// No description provided for @booksTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Books'**
+  String get booksTitle;
+
+  /// No description provided for @booksTabJournals.
+  ///
+  /// In en, this message translates to:
+  /// **'Journals'**
+  String get booksTabJournals;
+
+  /// No description provided for @booksTabAccounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Accounts'**
+  String get booksTabAccounts;
+
+  /// No description provided for @booksTabTrialBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Trial balance'**
+  String get booksTabTrialBalance;
+
+  /// No description provided for @booksLockDateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock date'**
+  String get booksLockDateLabel;
+
+  /// No description provided for @booksLockDateNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No lock date'**
+  String get booksLockDateNone;
+
+  /// No description provided for @booksLockDateAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Set lock date'**
+  String get booksLockDateAction;
+
+  /// No description provided for @booksLockDateHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Posting and reversing on or before this date is blocked.'**
+  String get booksLockDateHint;
+
+  /// No description provided for @booksLockDateSavedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Books locked through {date}'**
+  String booksLockDateSavedToast(String date);
+
+  /// No description provided for @booksLockDateError.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t set the lock date. Try again.'**
+  String get booksLockDateError;
+
+  /// No description provided for @booksJournalsLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t load your journals.'**
+  String get booksJournalsLoadError;
+
+  /// No description provided for @booksAccountsLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t load your chart of accounts.'**
+  String get booksAccountsLoadError;
+
+  /// No description provided for @booksTrialBalanceLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t load the trial balance.'**
+  String get booksTrialBalanceLoadError;
+
+  /// No description provided for @booksNewJournalTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'New journal'**
+  String get booksNewJournalTooltip;
+
+  /// No description provided for @booksJournalEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No journals yet'**
+  String get booksJournalEmptyTitle;
+
+  /// No description provided for @booksJournalEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Post your first journal to start the books.'**
+  String get booksJournalEmptyMessage;
+
+  /// No description provided for @booksJournalEmptyAction.
+  ///
+  /// In en, this message translates to:
+  /// **'New journal'**
+  String get booksJournalEmptyAction;
+
+  /// No description provided for @booksAccountsEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No accounts yet'**
+  String get booksAccountsEmptyTitle;
+
+  /// No description provided for @booksAccountsEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your chart of accounts is seeded when books are enabled.'**
+  String get booksAccountsEmptyMessage;
+
+  /// No description provided for @ledgerStatusDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft'**
+  String get ledgerStatusDraft;
+
+  /// No description provided for @ledgerStatusPosted.
+  ///
+  /// In en, this message translates to:
+  /// **'Posted'**
+  String get ledgerStatusPosted;
+
+  /// No description provided for @ledgerStatusReversed.
+  ///
+  /// In en, this message translates to:
+  /// **'Reversed'**
+  String get ledgerStatusReversed;
+
+  /// No description provided for @ledgerAccountTypeAsset.
+  ///
+  /// In en, this message translates to:
+  /// **'Assets'**
+  String get ledgerAccountTypeAsset;
+
+  /// No description provided for @ledgerAccountTypeLiability.
+  ///
+  /// In en, this message translates to:
+  /// **'Liabilities'**
+  String get ledgerAccountTypeLiability;
+
+  /// No description provided for @ledgerAccountTypeEquity.
+  ///
+  /// In en, this message translates to:
+  /// **'Equity'**
+  String get ledgerAccountTypeEquity;
+
+  /// No description provided for @ledgerAccountTypeIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get ledgerAccountTypeIncome;
+
+  /// No description provided for @ledgerAccountTypeExpense.
+  ///
+  /// In en, this message translates to:
+  /// **'Expenses'**
+  String get ledgerAccountTypeExpense;
+
+  /// No description provided for @ledgerAccountArchived.
+  ///
+  /// In en, this message translates to:
+  /// **'Archived'**
+  String get ledgerAccountArchived;
+
+  /// No description provided for @ledgerTrialBalanceBalanced.
+  ///
+  /// In en, this message translates to:
+  /// **'Balanced'**
+  String get ledgerTrialBalanceBalanced;
+
+  /// No description provided for @ledgerTrialBalanceUnbalanced.
+  ///
+  /// In en, this message translates to:
+  /// **'Out of balance by {difference}'**
+  String ledgerTrialBalanceUnbalanced(String difference);
+
+  /// No description provided for @ledgerTrialBalanceEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No posted movement through this date yet.'**
+  String get ledgerTrialBalanceEmpty;
+
+  /// No description provided for @ledgerColumnDebit.
+  ///
+  /// In en, this message translates to:
+  /// **'Debit'**
+  String get ledgerColumnDebit;
+
+  /// No description provided for @ledgerColumnCredit.
+  ///
+  /// In en, this message translates to:
+  /// **'Credit'**
+  String get ledgerColumnCredit;
+
+  /// No description provided for @ledgerTotalsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Totals'**
+  String get ledgerTotalsLabel;
+
+  /// No description provided for @ledgerTrialBalanceAsOfLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'As of'**
+  String get ledgerTrialBalanceAsOfLabel;
+
+  /// No description provided for @ledgerRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get ledgerRetry;
+
+  /// No description provided for @journalNewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New journal'**
+  String get journalNewTitle;
+
+  /// No description provided for @journalDetailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Journal'**
+  String get journalDetailTitle;
+
+  /// No description provided for @journalDateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get journalDateLabel;
+
+  /// No description provided for @journalReferenceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reference'**
+  String get journalReferenceLabel;
+
+  /// No description provided for @journalNarrationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Narration'**
+  String get journalNarrationLabel;
+
+  /// No description provided for @journalLineAccountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get journalLineAccountLabel;
+
+  /// No description provided for @journalLinePickAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose an account'**
+  String get journalLinePickAccount;
+
+  /// No description provided for @journalLineSideDebit.
+  ///
+  /// In en, this message translates to:
+  /// **'Debit'**
+  String get journalLineSideDebit;
+
+  /// No description provided for @journalLineSideCredit.
+  ///
+  /// In en, this message translates to:
+  /// **'Credit'**
+  String get journalLineSideCredit;
+
+  /// No description provided for @journalLineAmountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get journalLineAmountLabel;
+
+  /// No description provided for @journalAddLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Add line'**
+  String get journalAddLine;
+
+  /// No description provided for @journalRemoveLineTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove line'**
+  String get journalRemoveLineTooltip;
+
+  /// No description provided for @journalDebitsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Debits'**
+  String get journalDebitsLabel;
+
+  /// No description provided for @journalCreditsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Credits'**
+  String get journalCreditsLabel;
+
+  /// No description provided for @journalDifferenceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Difference'**
+  String get journalDifferenceLabel;
+
+  /// No description provided for @journalBalancedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Balanced'**
+  String get journalBalancedLabel;
+
+  /// No description provided for @journalUnbalancedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Out of balance by {difference}'**
+  String journalUnbalancedLabel(String difference);
+
+  /// No description provided for @journalIssueAtLeastTwoLines.
+  ///
+  /// In en, this message translates to:
+  /// **'A journal needs at least two lines.'**
+  String get journalIssueAtLeastTwoLines;
+
+  /// No description provided for @journalIssueLineOneSideRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Line {index} needs a positive amount on one side.'**
+  String journalIssueLineOneSideRequired(int index);
+
+  /// No description provided for @journalIssueUnbalancedFunctional.
+  ///
+  /// In en, this message translates to:
+  /// **'Debits and credits do not match yet.'**
+  String get journalIssueUnbalancedFunctional;
+
+  /// No description provided for @journalIssueFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'This journal is not ready to save.'**
+  String get journalIssueFallback;
+
+  /// No description provided for @journalAmountInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid amount'**
+  String get journalAmountInvalid;
+
+  /// No description provided for @journalSaveDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Save draft'**
+  String get journalSaveDraft;
+
+  /// No description provided for @journalDraftSavedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft saved'**
+  String get journalDraftSavedToast;
+
+  /// No description provided for @journalPost.
+  ///
+  /// In en, this message translates to:
+  /// **'Post'**
+  String get journalPost;
+
+  /// No description provided for @journalPostConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Post this journal?'**
+  String get journalPostConfirmTitle;
+
+  /// No description provided for @journalPostConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Posting makes the journal permanent: posted journals cannot be edited or deleted. Mistakes are fixed by posting a reversal.'**
+  String get journalPostConfirmBody;
+
+  /// No description provided for @journalPostConfirmAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Post journal'**
+  String get journalPostConfirmAction;
+
+  /// No description provided for @journalPostedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Journal posted'**
+  String get journalPostedToast;
+
+  /// No description provided for @journalPostError.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t post this journal. Try again.'**
+  String get journalPostError;
+
+  /// No description provided for @journalSaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t save this draft. Try again.'**
+  String get journalSaveError;
+
+  /// No description provided for @journalDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this draft?'**
+  String get journalDeleteTitle;
+
+  /// No description provided for @journalDeleteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The draft and its lines will be removed. This cannot be undone.'**
+  String get journalDeleteBody;
+
+  /// No description provided for @journalDeleteAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete draft'**
+  String get journalDeleteAction;
+
+  /// No description provided for @journalDeletedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft deleted'**
+  String get journalDeletedToast;
+
+  /// No description provided for @journalDeleteError.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t delete this draft. Try again.'**
+  String get journalDeleteError;
+
+  /// No description provided for @journalReadOnlyBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Posted journals cannot be edited. Fix mistakes with a reversal.'**
+  String get journalReadOnlyBanner;
+
+  /// No description provided for @journalReverse.
+  ///
+  /// In en, this message translates to:
+  /// **'Reverse'**
+  String get journalReverse;
+
+  /// No description provided for @journalReverseConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reverse this journal?'**
+  String get journalReverseConfirmTitle;
+
+  /// No description provided for @journalReverseConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A mirror journal will undo this one on the date you choose. The original stays in the books, marked reversed.'**
+  String get journalReverseConfirmBody;
+
+  /// No description provided for @journalReverseDateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reversal date'**
+  String get journalReverseDateLabel;
+
+  /// No description provided for @journalReverseAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Reverse journal'**
+  String get journalReverseAction;
+
+  /// No description provided for @journalReversedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Journal reversed'**
+  String get journalReversedToast;
+
+  /// No description provided for @journalReverseError.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t reverse this journal. Try again.'**
+  String get journalReverseError;
+
+  /// No description provided for @journalReversalOfLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reversal of {reference}'**
+  String journalReversalOfLabel(String reference);
+
+  /// No description provided for @journalPostedAtLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Posted {date}'**
+  String journalPostedAtLabel(String date);
+
+  /// No description provided for @journalDraftLinesUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'This draft\'s lines can\'t be shown here yet. Delete the draft and record it again to change them.'**
+  String get journalDraftLinesUnavailable;
 }
 
 class _AppLocalizationsDelegate

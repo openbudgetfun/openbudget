@@ -4842,4 +4842,302 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get whatsNewErrorMessage =>
       'The release notes for this version aren\'t in a format OpenBudget can show.';
+
+  @override
+  String get booksEntryTitle => 'Books';
+
+  @override
+  String get booksEntryEnableTitle => 'Enable double-entry books';
+
+  @override
+  String get booksEnableDialogTitle => 'Enable double-entry books?';
+
+  @override
+  String booksEnableDialogBody(String budget) {
+    return 'Books add double-entry accounting to $budget: a chart of accounts, journals and a trial balance. Envelopes keep working as they do today. The switch is one-way — once books are on for this budget, they cannot be turned back off.';
+  }
+
+  @override
+  String get booksEnableDialogConfirm => 'Enable books';
+
+  @override
+  String get booksEnabledToast => 'Double-entry books are on';
+
+  @override
+  String get booksEnableError => 'We couldn\'t enable books. Try again.';
+
+  @override
+  String get booksTitle => 'Books';
+
+  @override
+  String get booksTabJournals => 'Journals';
+
+  @override
+  String get booksTabAccounts => 'Accounts';
+
+  @override
+  String get booksTabTrialBalance => 'Trial balance';
+
+  @override
+  String get booksLockDateLabel => 'Lock date';
+
+  @override
+  String get booksLockDateNone => 'No lock date';
+
+  @override
+  String get booksLockDateAction => 'Set lock date';
+
+  @override
+  String get booksLockDateHint =>
+      'Posting and reversing on or before this date is blocked.';
+
+  @override
+  String booksLockDateSavedToast(String date) {
+    return 'Books locked through $date';
+  }
+
+  @override
+  String get booksLockDateError => 'We couldn\'t set the lock date. Try again.';
+
+  @override
+  String get booksJournalsLoadError => 'We couldn\'t load your journals.';
+
+  @override
+  String get booksAccountsLoadError =>
+      'We couldn\'t load your chart of accounts.';
+
+  @override
+  String get booksTrialBalanceLoadError =>
+      'We couldn\'t load the trial balance.';
+
+  @override
+  String get booksNewJournalTooltip => 'New journal';
+
+  @override
+  String get booksJournalEmptyTitle => 'No journals yet';
+
+  @override
+  String get booksJournalEmptyMessage =>
+      'Post your first journal to start the books.';
+
+  @override
+  String get booksJournalEmptyAction => 'New journal';
+
+  @override
+  String get booksAccountsEmptyTitle => 'No accounts yet';
+
+  @override
+  String get booksAccountsEmptyMessage =>
+      'Your chart of accounts is seeded when books are enabled.';
+
+  @override
+  String get ledgerStatusDraft => 'Draft';
+
+  @override
+  String get ledgerStatusPosted => 'Posted';
+
+  @override
+  String get ledgerStatusReversed => 'Reversed';
+
+  @override
+  String get ledgerAccountTypeAsset => 'Assets';
+
+  @override
+  String get ledgerAccountTypeLiability => 'Liabilities';
+
+  @override
+  String get ledgerAccountTypeEquity => 'Equity';
+
+  @override
+  String get ledgerAccountTypeIncome => 'Income';
+
+  @override
+  String get ledgerAccountTypeExpense => 'Expenses';
+
+  @override
+  String get ledgerAccountArchived => 'Archived';
+
+  @override
+  String get ledgerTrialBalanceBalanced => 'Balanced';
+
+  @override
+  String ledgerTrialBalanceUnbalanced(String difference) {
+    return 'Out of balance by $difference';
+  }
+
+  @override
+  String get ledgerTrialBalanceEmpty =>
+      'No posted movement through this date yet.';
+
+  @override
+  String get ledgerColumnDebit => 'Debit';
+
+  @override
+  String get ledgerColumnCredit => 'Credit';
+
+  @override
+  String get ledgerTotalsLabel => 'Totals';
+
+  @override
+  String get ledgerTrialBalanceAsOfLabel => 'As of';
+
+  @override
+  String get ledgerRetry => 'Try again';
+
+  @override
+  String get journalNewTitle => 'New journal';
+
+  @override
+  String get journalDetailTitle => 'Journal';
+
+  @override
+  String get journalDateLabel => 'Date';
+
+  @override
+  String get journalReferenceLabel => 'Reference';
+
+  @override
+  String get journalNarrationLabel => 'Narration';
+
+  @override
+  String get journalLineAccountLabel => 'Account';
+
+  @override
+  String get journalLinePickAccount => 'Choose an account';
+
+  @override
+  String get journalLineSideDebit => 'Debit';
+
+  @override
+  String get journalLineSideCredit => 'Credit';
+
+  @override
+  String get journalLineAmountLabel => 'Amount';
+
+  @override
+  String get journalAddLine => 'Add line';
+
+  @override
+  String get journalRemoveLineTooltip => 'Remove line';
+
+  @override
+  String get journalDebitsLabel => 'Debits';
+
+  @override
+  String get journalCreditsLabel => 'Credits';
+
+  @override
+  String get journalDifferenceLabel => 'Difference';
+
+  @override
+  String get journalBalancedLabel => 'Balanced';
+
+  @override
+  String journalUnbalancedLabel(String difference) {
+    return 'Out of balance by $difference';
+  }
+
+  @override
+  String get journalIssueAtLeastTwoLines =>
+      'A journal needs at least two lines.';
+
+  @override
+  String journalIssueLineOneSideRequired(int index) {
+    return 'Line $index needs a positive amount on one side.';
+  }
+
+  @override
+  String get journalIssueUnbalancedFunctional =>
+      'Debits and credits do not match yet.';
+
+  @override
+  String get journalIssueFallback => 'This journal is not ready to save.';
+
+  @override
+  String get journalAmountInvalid => 'Enter a valid amount';
+
+  @override
+  String get journalSaveDraft => 'Save draft';
+
+  @override
+  String get journalDraftSavedToast => 'Draft saved';
+
+  @override
+  String get journalPost => 'Post';
+
+  @override
+  String get journalPostConfirmTitle => 'Post this journal?';
+
+  @override
+  String get journalPostConfirmBody =>
+      'Posting makes the journal permanent: posted journals cannot be edited or deleted. Mistakes are fixed by posting a reversal.';
+
+  @override
+  String get journalPostConfirmAction => 'Post journal';
+
+  @override
+  String get journalPostedToast => 'Journal posted';
+
+  @override
+  String get journalPostError => 'We couldn\'t post this journal. Try again.';
+
+  @override
+  String get journalSaveError => 'We couldn\'t save this draft. Try again.';
+
+  @override
+  String get journalDeleteTitle => 'Delete this draft?';
+
+  @override
+  String get journalDeleteBody =>
+      'The draft and its lines will be removed. This cannot be undone.';
+
+  @override
+  String get journalDeleteAction => 'Delete draft';
+
+  @override
+  String get journalDeletedToast => 'Draft deleted';
+
+  @override
+  String get journalDeleteError => 'We couldn\'t delete this draft. Try again.';
+
+  @override
+  String get journalReadOnlyBanner =>
+      'Posted journals cannot be edited. Fix mistakes with a reversal.';
+
+  @override
+  String get journalReverse => 'Reverse';
+
+  @override
+  String get journalReverseConfirmTitle => 'Reverse this journal?';
+
+  @override
+  String get journalReverseConfirmBody =>
+      'A mirror journal will undo this one on the date you choose. The original stays in the books, marked reversed.';
+
+  @override
+  String get journalReverseDateLabel => 'Reversal date';
+
+  @override
+  String get journalReverseAction => 'Reverse journal';
+
+  @override
+  String get journalReversedToast => 'Journal reversed';
+
+  @override
+  String get journalReverseError =>
+      'We couldn\'t reverse this journal. Try again.';
+
+  @override
+  String journalReversalOfLabel(String reference) {
+    return 'Reversal of $reference';
+  }
+
+  @override
+  String journalPostedAtLabel(String date) {
+    return 'Posted $date';
+  }
+
+  @override
+  String get journalDraftLinesUnavailable =>
+      'This draft\'s lines can\'t be shown here yet. Delete the draft and record it again to change them.';
 }
