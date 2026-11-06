@@ -22,6 +22,77 @@ int deSolidaritySurchargeMinor({
   return math.min(proportional, mild);
 }
 
+/// § 32 EStG with § 26b: the Kinderfreibeträge a claim may use.
+///
+/// Joint assessment claims both parents' halves, so the full
+/// [DeChildRules.kinderfreibetragPerChildMinor] counts per child. A single
+/// parent claims their own half; a transferred half (§ 32 Abs. 6 Satz 2 EStG)
+/// is not modelled.
+int deChildAllowanceMinor({
+  required int children,
+  required bool jointAssessment,
+  required DeChildRules rules,
+}) {
+  if (children <= 0) {
+    return 0;
+  }
+  final perChild = jointAssessment
+      ? rules.kinderfreibetragPerChildMinor
+      : rules.kinderfreibetragPerChildMinor ~/ 2;
+  return children * perChild;
+}
+
+/// § 66 EStG: the Kindergeld of a full year. The pack assumes all twelve
+/// months, which is what a year without a month of birth or death shows.
+int deKindergeldMinor({required int children, required DeChildRules rules}) =>
+    children <= 0 ? 0 : children * 12 * rules.kindergeldMonthlyMinor;
+
+/// § 10 Abs. 3 EStG: the Basisrente Höchstbetrag of one assessment.
+///
+/// The statute doubles the Höchstbetrag for joint assessment and reduces it
+/// by the contributions to the gesetzliche Rentenversicherung (employee and
+/// employer share). Both steps are statute knowledge the research flagged as
+/// inferred; they never push the cap below zero.
+int deBasisrenteCapMinor({
+  required int basisrenteMaxMinor,
+  required bool jointAssessment,
+  required int statutoryPensionMinor,
+}) => math.max(
+  0,
+  basisrenteMaxMinor * (jointAssessment ? 2 : 1) - statutoryPensionMinor,
+);
+
+/// § 9 Abs. 1 Satz 3 Nr. 4 EStG: the Entfernungspauschale for one year.
+///
+/// [days] counts the days the workplace was visited, [kmOneWay] the one-way
+/// distance in full kilometres by the shortest road connection. Only one
+/// trip per working day counts. The result is capped at the year's annual
+/// cap; journeys in an own or provided car could exceed it, which the pack
+/// cannot tell apart.
+int deEntfernungspauschaleMinor({
+  required int days,
+  required int kmOneWay,
+  required DeCommuterRules rules,
+}) {
+  if (days <= 0 || kmOneWay <= 0) {
+    return 0;
+  }
+  var perDay = 0;
+  for (final tier in rules.tiers) {
+    if (kmOneWay < tier.fromKm) {
+      continue;
+    }
+    final toKm = tier.toKm;
+    final tierKm = toKm == null
+        ? kmOneWay - tier.fromKm + 1
+        : math.min(kmOneWay, toKm) - tier.fromKm + 1;
+    if (tierKm > 0) {
+      perDay += tierKm * tier.minorPerKm;
+    }
+  }
+  return math.min(perDay * days, rules.annualCapMinor);
+}
+
 /// § 32d Abs. 1 EStG: the tax on capital income.
 ///
 /// With church tax the rate is `e / (4 + k)`, which is the statute's

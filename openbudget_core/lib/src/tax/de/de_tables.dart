@@ -137,6 +137,59 @@ final class DeInvestmentDeduction {
   final int profitLimit;
 }
 
+/// § 32 EStG and § 31 EStG: the Kinderfreibeträge and the Kindergeld of one
+/// year.
+@immutable
+final class DeChildRules {
+  const DeChildRules({
+    required this.kinderfreibetragPerChildMinor,
+    required this.kindergeldMonthlyMinor,
+  });
+
+  /// Kinderfreibetrag plus BEA-Freibetrag for one child, both parents
+  /// combined, for a full year. Each parent claims half.
+  final int kinderfreibetragPerChildMinor;
+
+  /// Kindergeld per month and child.
+  final int kindergeldMonthlyMinor;
+}
+
+/// One tier of the Entfernungspauschale: from [fromKm] up to and including
+/// [toKm], [minorPerKm] per full kilometre. A null [toKm] is the open top
+/// tier.
+@immutable
+final class DeCommuterTier {
+  const DeCommuterTier({
+    required this.fromKm,
+    required this.minorPerKm,
+    this.toKm,
+  });
+
+  /// First full kilometre the rate applies to, 1-based.
+  final int fromKm;
+
+  /// Last full kilometre, inclusive; null for the open top tier.
+  final int? toKm;
+
+  /// Cents per full kilometre, in minor units: `30` is 0.30 Euro.
+  final int minorPerKm;
+}
+
+/// § 9 Abs. 1 Satz 3 Nr. 4 EStG: the Entfernungspauschale schedule of one
+/// year and its annual cap.
+@immutable
+final class DeCommuterRules {
+  const DeCommuterRules({required this.tiers, required this.annualCapMinor});
+
+  /// Ascending by [DeCommuterTier.fromKm], the first tier starts at km 1.
+  final List<DeCommuterTier> tiers;
+
+  /// § 9 Abs. 1 Satz 3 Nr. 4 EStG caps the deduction at 4 500 Euro per year,
+  /// except for journeys in an own or provided car, which the pack cannot
+  /// tell apart.
+  final int annualCapMinor;
+}
+
 /// Every figure one German tax year needs, in one place.
 @immutable
 final class DeTaxTable {
@@ -149,6 +202,8 @@ final class DeTaxTable {
     required this.vat,
     required this.investmentDeduction,
     required this.basisrenteMax,
+    required this.children,
+    required this.commuter,
   });
 
   final int startYear;
@@ -163,6 +218,12 @@ final class DeTaxTable {
   /// knappschaftlichen Rentenversicherung, rounded up to whole euros. That is
   /// 24.7 % of the knappschaftliche Beitragsbemessungsgrenze.
   final int basisrenteMax;
+
+  /// Kinderfreibeträge and Kindergeld of the year.
+  final DeChildRules children;
+
+  /// Entfernungspauschale schedule of the year.
+  final DeCommuterRules commuter;
 }
 
 /// The Veranlagungszeiträume this pack knows, keyed by calendar year.
@@ -215,6 +276,22 @@ const Map<int, DeTaxTable> deTaxTables = {
       maxPerBusiness: 20000000,
       profitLimit: 20000000,
     ),
+    // Kinderfreibetrag plus BEA 9 600 per child (secondary; the itemisation
+    // 6 672 + 2 928 is inferred, only the total is sourced), Kindergeld 255
+    // per month.
+    children: DeChildRules(
+      kinderfreibetragPerChildMinor: 960000,
+      kindergeldMonthlyMinor: 25500,
+    ),
+    // § 9 Abs. 1 Satz 3 Nr. 4 EStG 2025: 0.30 Euro for km 1 to 20, 0.38 Euro
+    // from km 21 (Anleitung Anlage N 2025).
+    commuter: DeCommuterRules(
+      tiers: [
+        DeCommuterTier(fromKm: 1, toKm: 20, minorPerKm: 30),
+        DeCommuterTier(fromKm: 21, minorPerKm: 38),
+      ],
+      annualCapMinor: 450000,
+    ),
     basisrenteMax: 2934400,
   ),
   2026: DeTaxTable(
@@ -265,19 +342,24 @@ const Map<int, DeTaxTable> deTaxTables = {
       maxPerBusiness: 20000000,
       profitLimit: 20000000,
     ),
+    // Kinderfreibetrag 6 828 plus BEA 2 928 = 9 756 per child, Kindergeld 259
+    // per month (secondary, familienservice.de and steuerberater-tabak.com).
+    children: DeChildRules(
+      kinderfreibetragPerChildMinor: 975600,
+      kindergeldMonthlyMinor: 25900,
+    ),
+    // § 9 Abs. 1 Satz 3 Nr. 4 EStG from 1 Jan 2026 (Steueränderungsgesetz
+    // 2025, BGBl. 2025 I Nr. 363): 0.38 Euro for every full kilometre.
+    commuter: DeCommuterRules(
+      tiers: [DeCommuterTier(fromKm: 1, minorPerKm: 38)],
+      annualCapMinor: 450000,
+    ),
     basisrenteMax: 3082600,
   ),
 };
 
-/// The Kirchensteuer this pack assumes: 9 % of the income tax.
-///
-/// Kirchensteuer is state and church law, not federal law. Bayern and
-/// Baden-Württemberg levy 8 %, which this pack does not model; it states the
-/// 9 % assumption in every report that charges it.
-const int deKirchensteuerRateBasisPoints = 900;
-
 /// The day the figures in [deTaxTables] were last checked.
-final DateTime deRulesVerifiedOn = DateTime.utc(2026, 11, 4);
+final DateTime deRulesVerifiedOn = DateTime.utc(2026, 11, 5);
 
 /// The pages every figure came from.
 final List<Uri> deSources = List.unmodifiable([
@@ -292,17 +374,21 @@ final List<Uri> deSources = List.unmodifiable([
   Uri.parse('https://www.gesetze-im-internet.de/estg/__4.html'),
   Uri.parse('https://www.gesetze-im-internet.de/estg/__6.html'),
   Uri.parse('https://www.gesetze-im-internet.de/estg/__7g.html'),
+  Uri.parse('https://www.gesetze-im-internet.de/estg/__9.html'),
   Uri.parse('https://www.gesetze-im-internet.de/estg/__9a.html'),
   Uri.parse('https://www.gesetze-im-internet.de/estg/__10.html'),
   Uri.parse('https://www.gesetze-im-internet.de/estg/__10c.html'),
   Uri.parse('https://www.gesetze-im-internet.de/estg/__20.html'),
+  Uri.parse('https://www.gesetze-im-internet.de/estg/__31.html'),
   Uri.parse('https://www.gesetze-im-internet.de/estg/__32d.html'),
   Uri.parse('https://www.gesetze-im-internet.de/estg/__35.html'),
+  Uri.parse('https://www.gesetze-im-internet.de/estg/__51a.html'),
   Uri.parse('https://www.gesetze-im-internet.de/gewstg/__11.html'),
   Uri.parse('https://www.gesetze-im-internet.de/gewstg/__16.html'),
   Uri.parse('https://www.gesetze-im-internet.de/kstg_1977/__23.html'),
   Uri.parse('https://www.gesetze-im-internet.de/ustg_1980/__12.html'),
   Uri.parse('https://www.gesetze-im-internet.de/ustg_1980/__19.html'),
+  Uri.parse('https://www.gesetze-im-internet.de/ao_1977/__108.html'),
   Uri.parse('https://www.gesetze-im-internet.de/ao_1977/__149.html'),
   Uri.parse('https://www.gesetze-im-internet.de/svbezgrv_2025/__4.html'),
   Uri.parse('https://www.gesetze-im-internet.de/svbezgrv_2026/__4.html'),
@@ -310,9 +396,97 @@ final List<Uri> deSources = List.unmodifiable([
   Uri.parse('https://www.gesetze-im-internet.de/rvbeitrsbek_2026/----.html'),
 ]);
 
-/// § 149 Abs. 2 AO: seven months after the end of the calendar year.
-DateTime deFilingDeadline(int startYear) => DateTime.utc(startYear + 1, 7, 31);
+/// § 149 Abs. 2 AO: seven months after the end of the calendar year, moved
+/// forward by [deRollForward] when it falls on a weekend or holiday.
+DateTime deFilingDeadline(int startYear) =>
+    deRollForward(DateTime.utc(startYear + 1, 7, 31));
 
-/// § 149 Abs. 3 AO: the last day of February in the second following year.
-DateTime deAdvisorFilingDeadline(int startYear) =>
-    DateTime.utc(startYear + 2, 3, 0);
+/// § 149 Abs. 3 AO: the last day of February in the second following year,
+/// moved forward by [deRollForward].
+///
+/// For the Veranlagungszeiträume before 2025 the Übergangsfristen of
+/// Art. 97 § 36 Abs. 3 EGAO replace that rule: 30 Apr 2026 for VZ 2024,
+/// 31 May 2025 for VZ 2023, 31 Jul 2024 for VZ 2022, 31 Aug 2023 for VZ
+/// 2021 and 31 Aug 2022 for VZ 2020. From VZ 2025 on the general rule
+/// applies again.
+DateTime deAdvisorFilingDeadline(int startYear) {
+  final transition = _advisedTransitionDeadlines[startYear];
+  return deRollForward(
+    transition ?? DateTime.utc(startYear + 2, 3, 0),
+  );
+}
+
+/// The Art. 97 § 36 Abs. 3 EGAO advised deadlines, keyed by Veranlagungszeitraum.
+final Map<int, DateTime> _advisedTransitionDeadlines = {
+  2024: DateTime.utc(2026, 4, 30),
+  2023: DateTime.utc(2025, 5, 31),
+  2022: DateTime.utc(2024, 7, 31),
+  2021: DateTime.utc(2023, 8, 31),
+  2020: DateTime.utc(2022, 8, 31),
+};
+
+/// § 108 Abs. 3 AO: a deadline that falls on a Saturday, Sunday or public
+/// holiday moves to the next working day.
+///
+/// The holiday check covers the nationwide Feiertage only. Länder-specific
+/// holidays (Fronleichnam, Allerheiligen, Reformationstag, Buß- und Bettag
+/// and the like) are not modelled, so in a Land with such a holiday the
+/// shown deadline can be a day earlier than the law allows, never later.
+/// That errs towards filing on time.
+DateTime deRollForward(DateTime deadline) {
+  var day = DateTime.utc(deadline.year, deadline.month, deadline.day);
+  while (_isRestDay(day)) {
+    day = DateTime.utc(day.year, day.month, day.day + 1);
+  }
+  return day;
+}
+
+bool _isRestDay(DateTime day) =>
+    day.weekday == DateTime.saturday ||
+    day.weekday == DateTime.sunday ||
+    _nationwideHolidays(day.year).contains(day);
+
+/// The Feiertage every Land observes (§ 2 Abs. 1 Feiertagsgesetz der Länder
+/// in derselben Fassung): Neujahr, Karfreitag, Ostermontag, Tag der Arbeit,
+/// Christi Himmelfahrt, Pfingstmontag, Tag der Deutschen Einheit and the
+/// two Weihnachtstage.
+Set<DateTime> _nationwideHolidays(int year) {
+  final easterSunday = _easterSunday(year);
+  DateTime dayOf(int month, int day) => DateTime.utc(year, month, day);
+  DateTime fromEaster(int days) => DateTime.utc(
+    easterSunday.year,
+    easterSunday.month,
+    easterSunday.day + days,
+  );
+  return {
+    dayOf(1, 1),
+    fromEaster(-2), // Karfreitag
+    fromEaster(1), // Ostermontag
+    dayOf(5, 1),
+    fromEaster(39), // Christi Himmelfahrt
+    fromEaster(50), // Pfingstmontag
+    dayOf(10, 3),
+    dayOf(12, 25),
+    dayOf(12, 26),
+  };
+}
+
+/// Anonymous Gregorian algorithm (Meeus/Jones/Butcher): Easter Sunday of
+/// [year], the anchor of the movable Feiertage.
+DateTime _easterSunday(int year) {
+  final a = year % 19;
+  final b = year ~/ 100;
+  final c = year % 100;
+  final d = b ~/ 4;
+  final e = b % 4;
+  final f = (b + 8) ~/ 25;
+  final g = (b - f + 1) ~/ 3;
+  final h = (19 * a + b - d - g + 15) % 30;
+  final i = c ~/ 4;
+  final k = c % 4;
+  final l = (32 + 2 * e + 2 * i - h - k) % 7;
+  final m = (a + 11 * h + 22 * l) ~/ 451;
+  final month = (h + l - 7 * m + 114) ~/ 31;
+  final day = (h + l - 7 * m + 114) % 31 + 1;
+  return DateTime.utc(year, month, day);
+}

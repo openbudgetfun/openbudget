@@ -23,12 +23,14 @@ TaxInput _individualInput({
   List<TaxEntry> entries = const [],
   bool scottish = false,
   GbStudentLoanPlan? loan,
+  bool postgraduateLoan = false,
   List<TaxInput> linked = const [],
 }) => TaxInput(
   profile: GbTaxProfile(
     entityKind: TaxEntityKind.individual,
     scottishTaxpayer: scottish,
     studentLoanPlan: loan,
+    postgraduateLoan: postgraduateLoan,
   ),
   year: _gb.taxYear(startYear),
   entries: entries,
@@ -40,6 +42,7 @@ TaxReport _report({
   List<TaxEntry> entries = const [],
   bool scottish = false,
   GbStudentLoanPlan? loan,
+  bool postgraduateLoan = false,
   List<TaxInput> linked = const [],
 }) => _gb.report(
   _individualInput(
@@ -47,6 +50,7 @@ TaxReport _report({
     entries: entries,
     scottish: scottish,
     loan: loan,
+    postgraduateLoan: postgraduateLoan,
     linked: linked,
   ),
 );
@@ -370,6 +374,18 @@ void main() {
       expect(report.totalLiabilityMinor, 724500);
     });
 
+    test('plan 2 rounds down to whole pounds (SA110 box 3)', () {
+      // TC11: 9% x (£45,000 - £29,385) = £1,405.35, reported as £1,405.
+      final report = _report(
+        entries: [_pounds('gb.ind.employment', 45000)],
+        loan: GbStudentLoanPlan.plan2,
+      );
+      final loan = report.liabilities.firstWhere(
+        (liability) => liability.label.startsWith('Student loan'),
+      );
+      expect(loan.amountMinor, 140500);
+    });
+
     test('plan 5 has no repayments in 2025/26', () {
       final report = _report(
         startYear: 2025,
@@ -404,6 +420,223 @@ void main() {
         (liability) => liability.label.startsWith('Student loan'),
       );
       expect(loan.amountMinor, 60000);
+    });
+
+    test('an undergraduate plan and a postgraduate loan run together', () {
+      final report = _report(
+        entries: [_pounds('gb.ind.employment', 45000)],
+        loan: GbStudentLoanPlan.plan2,
+        postgraduateLoan: true,
+      );
+      final loans = report.liabilities.where(
+        (liability) => liability.label.startsWith('Student loan'),
+      );
+      // Plan 2 £1,405.35 -> £1,405, postgraduate 6% x £24,000 = £1,440.
+      expect(loans.map((loan) => loan.amountMinor), [140500, 144000]);
+      expect(loans, hasLength(2));
+    });
+
+    test('the base counts savings and dividends only above £2,000', () {
+      // £2,000 of savings is inside the unearned threshold, so the base is
+      // the £30,000 salary: 9% x £615 = £55.35 -> £55.
+      final withinThreshold = _report(
+        entries: [
+          _pounds('gb.ind.employment', 30000),
+          _pounds('gb.ind.savings', 2000),
+        ],
+        loan: GbStudentLoanPlan.plan2,
+      );
+      expect(
+        withinThreshold.liabilities
+            .firstWhere((liability) => liability.label.startsWith('Student'))
+            .amountMinor,
+        5500,
+      );
+      // £2,500 of savings adds £500 to the base: 9% x £1,115 = £100.35 -> £100.
+      final aboveThreshold = _report(
+        entries: [
+          _pounds('gb.ind.employment', 30000),
+          _pounds('gb.ind.savings', 2500),
+        ],
+        loan: GbStudentLoanPlan.plan2,
+      );
+      expect(
+        aboveThreshold.liabilities
+            .firstWhere((liability) => liability.label.startsWith('Student'))
+            .amountMinor,
+        10000,
+      );
+    });
+
+    test('gross pension contributions reduce the repayment base', () {
+      final report = _report(
+        entries: [
+          _pounds('gb.ind.employment', 40000),
+          _pounds('gb.ind.pension_contributions', 5000),
+        ],
+        loan: GbStudentLoanPlan.plan2,
+      );
+      // Base £35,000: 9% x £5,615 = £505.35 -> £505.
+      final loan = report.liabilities.firstWhere(
+        (liability) => liability.label.startsWith('Student loan'),
+      );
+      expect(loan.amountMinor, 50500);
+    });
+  });
+
+  group('profile JSON', () {
+    test('an old profile with the postgraduate plan still parses', () {
+      final restored = TaxProfile.fromJson({
+        'jurisdiction': 'GB',
+        'entityKind': 'individual',
+        'salesTaxRegistered': false,
+        'scottishTaxpayer': false,
+        'studentLoanPlan': 'postgraduate',
+      });
+      expect(restored, isA<GbTaxProfile>());
+      final gb = restored as GbTaxProfile;
+      expect(gb.studentLoanPlan, isNull);
+      expect(gb.postgraduateLoan, isTrue);
+    });
+
+    test('accounting period and associates round-trip for a company', () {
+      const profile = GbTaxProfile(
+        entityKind: TaxEntityKind.company,
+        accountingPeriodEndMonth: 12,
+        associatedCompanies: 2,
+      );
+      final restored = TaxProfile.fromJson(profile.toJson());
+      expect(restored, isA<GbTaxProfile>());
+      final gb = restored as GbTaxProfile;
+      expect(gb.accountingPeriodEndMonth, 12);
+      expect(gb.accountingPeriodEndDay, 31);
+      expect(gb.associatedCompanies, 2);
+      expect(gb.toJson(), profile.toJson());
+    });
+
+    test('defaults keep the stored JSON shape', () {
+      const profile = GbTaxProfile(
+        entityKind: TaxEntityKind.individual,
+        scottishTaxpayer: true,
+        studentLoanPlan: GbStudentLoanPlan.plan2,
+      );
+      expect(profile.toJson(), {
+        'jurisdiction': 'GB',
+        'entityKind': 'individual',
+        'salesTaxRegistered': false,
+        'scottishTaxpayer': true,
+        'studentLoanPlan': 'plan2',
+      });
+    });
+  });
+
+  group('payments on account', () {
+    test('the statutory schedule appears when the base reaches £1,000', () {
+      // TC1: sole-trade profit £60,000 in 2025/26 gives £11,432.00 Income
+      // Tax plus £2,456.60 Class 4; each instalment is half of £13,888.60.
+      final report = _report(
+        startYear: 2025,
+        linked: [
+          TaxInput(
+            profile: const GbTaxProfile(entityKind: TaxEntityKind.soleTrader),
+            year: _gb.taxYear(2025),
+            entries: [
+              _pounds('gb.se.turnover', 61000),
+              _pounds('gb.se.cost_of_goods', 1000),
+            ],
+          ),
+        ],
+      );
+      expect(report.totalLiabilityMinor, 1143200 + 245660);
+      expect(
+        _line(
+          report,
+          'First payment on account towards next year, due 31 '
+          'January 2027',
+        ),
+        694430,
+      );
+      expect(
+        _line(
+          report,
+          'Second payment on account towards next year, due 31 '
+          'July 2027',
+        ),
+        694430,
+      );
+    });
+
+    test('no payments on account below the £1,000 minimum', () {
+      // Income Tax £3,486.00 less £2,800 tax at source leaves £686, under
+      // the £1,000 minimum.
+      final report = _report(
+        entries: [
+          _pounds('gb.ind.employment', 30000),
+          _pounds('gb.ind.tax_paid', 2800),
+        ],
+      );
+      expect(
+        report.lines.where(
+          (line) => line.label.contains('payment on account'),
+        ),
+        isEmpty,
+      );
+      expect(
+        report.assumptions.join(' '),
+        contains('No payments on account are due'),
+      );
+    });
+
+    test('no payments on account when more than 80% was collected', () {
+      // £3,486.00 Income Tax with £2,789.00 collected: the base £697 is
+      // under 20% of the year's tax, so nothing is due.
+      final report = _report(
+        entries: [
+          _pounds('gb.ind.employment', 30000),
+          _pounds('gb.ind.tax_paid', 2789),
+        ],
+      );
+      expect(
+        report.lines.where(
+          (line) => line.label.contains('payment on account'),
+        ),
+        isEmpty,
+      );
+    });
+
+    test('payments on account exclude capital gains and student loans', () {
+      // The year's Income Tax is £3,668.75; the £2,448.00 CGT, the £106
+      // plan 2 loan and the £50 collected at source do not join the base,
+      // so each instalment is half of £3,618.75.
+      final report = _report(
+        entries: [
+          _pounds('gb.ind.employment', 29570),
+          _pounds('gb.ind.dividends', 3000),
+          _entry('gb.ind.capital_gains_proceeds', 2400000),
+          _entry('gb.ind.capital_gains_cost', 740000),
+          _pounds('gb.ind.tax_paid', 50),
+        ],
+        loan: GbStudentLoanPlan.plan2,
+      );
+      expect(
+        _line(
+          report,
+          'First payment on account towards next year, due 31 January 2028',
+        ),
+        180937,
+      );
+    });
+
+    test('the deadline opportunity states the instalments', () {
+      final input = _individualInput(
+        entries: [_pounds('gb.ind.employment', 30000)],
+      );
+      final opportunity = _gb
+          .opportunities(input, _gb.report(input))
+          .firstWhere((item) => item.id == 'gb.self_assessment_deadline');
+      expect(opportunity.explanation, contains('£1,743'));
+      expect(opportunity.explanation, contains('31 July 2028'));
+      expect(opportunity.explanation, contains('High Income Child Benefit'));
     });
   });
 
@@ -445,22 +678,50 @@ void main() {
       expect(_line(report, 'Employment income'), 100000);
     });
 
-    test('relief entries are reported but not deducted', () {
+    test('relief entries reduce adjusted net income but are not deducted', () {
       final report = _report(
         entries: [
           _pounds('gb.ind.employment', 30000),
           _pounds('gb.ind.pension_contributions', 5000),
         ],
       );
+      // The contribution is not deducted from taxable income...
       expect(report.totalLiabilityMinor, 348600);
       expect(_line(report, 'Pension contributions'), 500000);
       expect(
         report.assumptions,
         contains(
-          'Pension contributions and Gift Aid donations are reported but not '
-          'deducted; their relief depends on the scheme and is not modelled.',
+          'Pension contributions and Gift Aid donations are shown as recorded '
+          'and reduce adjusted net income for the allowance taper; their band '
+          'extension and scheme-specific relief are not modelled.',
         ),
       );
+    });
+
+    test('a gross pension contribution restores the tapered allowance', () {
+      // £110,000 employment less £10,000 gross pension: adjusted net income
+      // of £100,000 keeps the full allowance.
+      final report = _report(
+        entries: [
+          _pounds('gb.ind.employment', 110000),
+          _pounds('gb.ind.pension_contributions', 10000),
+        ],
+      );
+      expect(_line(report, 'Personal allowance'), 1257000);
+      // £97,430 taxable: £37,700 at 20% and £59,730 at 40%.
+      expect(report.totalLiabilityMinor, 754000 + 2389200);
+    });
+
+    test('a gross Gift Aid donation reduces adjusted net income', () {
+      final report = _report(
+        entries: [
+          _pounds('gb.ind.employment', 105000),
+          _pounds('gb.ind.gift_aid', 10000),
+        ],
+      );
+      expect(_line(report, 'Personal allowance'), 1257000);
+      // £92,430 taxable: £37,700 at 20% and £54,730 at 40%.
+      expect(report.totalLiabilityMinor, 754000 + 2189200);
     });
 
     test('assumptions and sources are stated', () {

@@ -106,8 +106,15 @@ void main() {
       expect(soli(20351), 11);
     });
 
-    test('stays in the Milderungszone at 30 000 Euro', () {
-      // 11.9 % of 9 650 Euro = 1 148.35 Euro, below 5.5 % of the tax.
+    test('keeps the exact cent at 21 000 Euro (the float bug case)', () {
+      // min(1 155.00, 11.9 % of 650 = 77.35); a float implementation
+      // returns 77.34.
+      expect(soli(21000), 7735);
+    });
+
+    test('stays in the Milderungszone at 25 000 and 30 000 Euro', () {
+      // 11.9 % of 4 650 = 553.35 and of 9 650 = 1 148.35.
+      expect(soli(25000), 55335);
       expect(soli(30000), 114835);
     });
 
@@ -122,6 +129,160 @@ void main() {
         rules: rules,
       );
       expect(joint, 0);
+    });
+  });
+
+  group('Solidaritätszuschlag 2025', () {
+    final rules = deTaxTables[2025]!.solidarity;
+    int soli(int taxEuros) => deSolidaritySurchargeMinor(
+      incomeTaxMinor: taxEuros * 100,
+      freigrenzeMinor: rules.freigrenze,
+      rules: rules,
+    );
+
+    test('is not levied at the Freigrenze of 19 950 Euro', () {
+      expect(soli(19950), 0);
+    });
+
+    test('stays in the Milderungszone at 25 000 Euro', () {
+      // min(1 375.00, 11.9 % of 5 050 = 600.95).
+      expect(soli(25000), 60095);
+    });
+  });
+
+  group('Entfernungspauschale', () {
+    test('2025 pays 0.30 to km 20 and 0.38 from km 21', () {
+      final rules = deTaxTables[2025]!.commuter;
+      expect(
+        deEntfernungspauschaleMinor(days: 1, kmOneWay: 20, rules: rules),
+        600,
+      );
+      expect(
+        deEntfernungspauschaleMinor(days: 1, kmOneWay: 21, rules: rules),
+        638,
+      );
+      expect(
+        deEntfernungspauschaleMinor(days: 1, kmOneWay: 22, rules: rules),
+        676,
+      );
+    });
+
+    test('2026 pays 0.38 from km 1', () {
+      final rules = deTaxTables[2026]!.commuter;
+      expect(
+        deEntfernungspauschaleMinor(days: 1, kmOneWay: 1, rules: rules),
+        38,
+      );
+      expect(
+        deEntfernungspauschaleMinor(days: 1, kmOneWay: 20, rules: rules),
+        760,
+      );
+      expect(
+        deEntfernungspauschaleMinor(days: 1, kmOneWay: 21, rules: rules),
+        798,
+      );
+    });
+
+    test('counts only visited days and caps at 4 500 Euro', () {
+      final rules = deTaxTables[2026]!.commuter;
+      expect(
+        deEntfernungspauschaleMinor(days: 100, kmOneWay: 25, rules: rules),
+        95000,
+      );
+      expect(
+        deEntfernungspauschaleMinor(days: 0, kmOneWay: 25, rules: rules),
+        0,
+      );
+      expect(
+        deEntfernungspauschaleMinor(days: 365, kmOneWay: 50, rules: rules),
+        rules.annualCapMinor,
+      );
+      expect(rules.annualCapMinor, 450000);
+    });
+  });
+
+  group('Kinderfreibetrag and Kindergeld', () {
+    test('2026 counts 9 756 per child, halved without joint assessment', () {
+      final rules = deTaxTables[2026]!.children;
+      expect(
+        deChildAllowanceMinor(children: 2, jointAssessment: true, rules: rules),
+        1951200,
+      );
+      expect(
+        deChildAllowanceMinor(
+          children: 2,
+          jointAssessment: false,
+          rules: rules,
+        ),
+        975600,
+      );
+    });
+
+    test('2025 counts 9 600 per child, halved without joint assessment', () {
+      final rules = deTaxTables[2025]!.children;
+      expect(
+        deChildAllowanceMinor(children: 1, jointAssessment: true, rules: rules),
+        960000,
+      );
+      expect(
+        deChildAllowanceMinor(
+          children: 1,
+          jointAssessment: false,
+          rules: rules,
+        ),
+        480000,
+      );
+    });
+
+    test('the Kindergeld covers twelve months', () {
+      expect(
+        deKindergeldMinor(children: 2, rules: deTaxTables[2026]!.children),
+        621600,
+      );
+      expect(
+        deKindergeldMinor(children: 2, rules: deTaxTables[2025]!.children),
+        612000,
+      );
+    });
+  });
+
+  group('Basisrente Höchstbetrag', () {
+    test('2026 is 30 826 Euro, 2025 is 29 344 Euro', () {
+      expect(
+        deBasisrenteCapMinor(
+          basisrenteMaxMinor: deTaxTables[2026]!.basisrenteMax,
+          jointAssessment: false,
+          statutoryPensionMinor: 0,
+        ),
+        3082600,
+      );
+      expect(
+        deBasisrenteCapMinor(
+          basisrenteMaxMinor: deTaxTables[2025]!.basisrenteMax,
+          jointAssessment: false,
+          statutoryPensionMinor: 0,
+        ),
+        2934400,
+      );
+    });
+
+    test('doubles jointly and shrinks by the statutory pension', () {
+      expect(
+        deBasisrenteCapMinor(
+          basisrenteMaxMinor: deTaxTables[2026]!.basisrenteMax,
+          jointAssessment: true,
+          statutoryPensionMinor: 2000000,
+        ),
+        4165200,
+      );
+      expect(
+        deBasisrenteCapMinor(
+          basisrenteMaxMinor: deTaxTables[2026]!.basisrenteMax,
+          jointAssessment: false,
+          statutoryPensionMinor: 50000000,
+        ),
+        0,
+      );
     });
   });
 

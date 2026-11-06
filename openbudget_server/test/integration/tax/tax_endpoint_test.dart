@@ -111,6 +111,72 @@ void main() {
         expect(loaded?.profileJson, saved.profileJson);
       });
 
+      test('then a US profile keeps its new fields', () async {
+        final budget = await endpoints.budget.create(
+          authedSession,
+          'Family',
+          'USD',
+        );
+        const profile = UsTaxProfile(
+          entityKind: TaxEntityKind.individual,
+          filingStatus: UsFilingStatus.qualifyingSurvivingSpouse,
+          homeOfficeMethod: UsHomeOfficeMethod.regular,
+          specifiedServiceTrade: true,
+          foreignEarnedIncomeExclusionMinor: 500000,
+          taxpayer65OrOlder: true,
+          spouse65OrOlder: true,
+          dependents: [
+            UsDependent(underSeventeen: true, hasValidSsn: true),
+            UsDependent(underSeventeen: false, hasValidSsn: false),
+          ],
+        );
+
+        final saved = await endpoints.tax.saveProfile(
+          authedSession,
+          budget.id!,
+          'US',
+          TaxEntityKind.individual.name,
+          jsonEncode(profile.toJson()),
+        );
+
+        expect(saved.jurisdiction, 'US');
+        final roundTripped = TaxProfile.fromJson(
+          jsonDecode(saved.profileJson) as Map<String, Object?>,
+        ) as UsTaxProfile;
+        expect(
+          roundTripped.filingStatus,
+          UsFilingStatus.qualifyingSurvivingSpouse,
+        );
+        expect(roundTripped.homeOfficeMethod, UsHomeOfficeMethod.regular);
+        expect(roundTripped.specifiedServiceTrade, isTrue);
+        expect(roundTripped.foreignEarnedIncomeExclusionMinor, 500000);
+        expect(roundTripped.taxpayer65OrOlder, isTrue);
+        expect(roundTripped.spouse65OrOlder, isTrue);
+        expect(roundTripped.dependents, hasLength(2));
+        expect(roundTripped.dependents.first.hasValidSsn, isTrue);
+        expect(roundTripped.dependents.last.hasValidSsn, isFalse);
+      });
+
+      test('then an unknown US filing status rejects', () async {
+        final budget = await createBudget(authedSession, 'Personal');
+
+        await expectLater(
+          endpoints.tax.saveProfile(
+            authedSession,
+            budget.id!,
+            'US',
+            TaxEntityKind.individual.name,
+            jsonEncode({
+              'jurisdiction': 'US',
+              'entityKind': 'individual',
+              'salesTaxRegistered': false,
+              'filingStatus': 'headOfFamily',
+            }),
+          ),
+          throwsA(isA<ValidationException>()),
+        );
+      });
+
       test('with an unknown jurisdiction then rejects', () async {
         final budget = await createBudget(authedSession, 'Personal');
 

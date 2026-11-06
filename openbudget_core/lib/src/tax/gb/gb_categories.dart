@@ -359,8 +359,9 @@ const List<TaxCategory> gbCategories = <TaxCategory>[
     kind: TaxCategoryKind.expense,
     entityKinds: {TaxEntityKind.company},
     description:
-        'Plant and machinery relieved at 100% under the Annual Investment '
-        'Allowance. Writing-down allowances are not modelled.',
+        'Qualifying plant and machinery claimed at 100%, capped at the '
+        'Annual Investment Allowance maximum (cars never qualify). '
+        'Writing-down allowances are not modelled.',
   ),
   TaxCategory(
     code: 'gb.co.tax_paid',

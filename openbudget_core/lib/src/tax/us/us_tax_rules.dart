@@ -4,12 +4,16 @@ import 'package:openbudget_core/src/tax/tax_rule_pack.dart';
 import 'package:openbudget_core/src/tax/us/us_tax_categories.dart';
 import 'package:openbudget_core/src/tax/us/us_tax_tables.dart';
 
+export 'package:openbudget_core/src/tax/us/us_tax_categories.dart';
+export 'package:openbudget_core/src/tax/us/us_tax_tables.dart';
+
 /// The United States federal tax rules.
 ///
 /// The pack covers calendar years 2025 and 2026, using the figures in
 /// Revenue Procedure 2024-40, Revenue Procedure 2025-32, and the One Big
-/// Beautiful Bill Act amendments those procedures reflect. State and local
-/// taxes, credits, and alternative minimum tax are outside its scope.
+/// Beautiful Bill Act amendments those procedures reflect. State income
+/// tax returns and alternative minimum tax are outside its scope; the
+/// credits it computes are listed in the individual report assumptions.
 final class UsTaxRules implements TaxRulePack {
   const UsTaxRules();
 
@@ -143,11 +147,21 @@ final class UsTaxRules implements TaxRulePack {
     };
   }
 
+  UsHomeOfficeMethod _homeOfficeMethod(TaxInput input) =>
+      switch (input.profile) {
+        UsTaxProfile(:final homeOfficeMethod) => homeOfficeMethod,
+        _ => UsHomeOfficeMethod.simplified,
+      };
+
   _ScheduleCComputation _scheduleCComputation(TaxInput input) {
     final totals = _totalsFor(input, TaxEntityKind.soleTrader);
     final amounts = Map<String, int>.of(totals.amounts);
     final rawHomeOffice = amounts['us.sch_c.home_office'] ?? 0;
-    final homeOffice = _min(rawHomeOffice, _homeOfficeCapMinor);
+    // The $1,500 cap applies to the simplified method only; the regular
+    // Form 8829 method is uncapped (Publication 587).
+    final homeOffice = _homeOfficeMethod(input) == UsHomeOfficeMethod.simplified
+        ? _min(rawHomeOffice, _homeOfficeCapMinor)
+        : rawHomeOffice;
     if (homeOffice != rawHomeOffice) {
       amounts['us.sch_c.home_office'] = homeOffice;
     }
@@ -226,9 +240,21 @@ final class UsTaxRules implements TaxRulePack {
     TaxInput input,
     UsTaxYearTable table,
   ) {
-    final status = _filingStatus(input.profile);
+    final profile = switch (input.profile) {
+      final UsTaxProfile p => p,
+      _ => throw ArgumentError.value(
+        input.profile,
+        'input.profile',
+        'US individual rules need a UsTaxProfile',
+      ),
+    };
+    final status = profile.filingStatus;
+    final year = input.year.startYear;
     final totals = _totalsFor(input, TaxEntityKind.individual);
     var linkedBusinessProfit = 0;
+    var linkedBusinessWages = 0;
+    var linkedBusinessUbia = 0;
+    var linkedSstbCount = 0;
     var linkedBusinessCount = 0;
     var linkedUncategorized = 0;
     for (final linked in input.linked) {
@@ -239,9 +265,19 @@ final class UsTaxRules implements TaxRulePack {
       }
       final business = _scheduleCComputation(linked);
       linkedBusinessProfit += business.netProfit;
+      linkedBusinessWages += business.totals['us.sch_c.wages'];
+      linkedBusinessUbia +=
+          business.totals['us.sch_c.ubia_of_qualified_property'];
+      if (switch (linked.profile) {
+        UsTaxProfile(:final specifiedServiceTrade) => specifiedServiceTrade,
+        _ => false,
+      }) {
+        linkedSstbCount++;
+      }
       linkedBusinessCount++;
       linkedUncategorized += business.totals.uncategorizedCount;
     }
+    final linkedIsSstb = linkedBusinessCount > 0 && linkedSstbCount > 0;
 
     final wages = totals['us.ind.wages'];
     final shortTermGains = totals['us.ind.short_term_capital_gains'];
@@ -284,37 +320,88 @@ final class UsTaxRules implements TaxRulePack {
     final selfEmployedRetirement = totals['us.ind.self_employed_retirement'];
     final adjustments =
         seTax.half + hsaContribution + iraContribution + selfEmployedRetirement;
-    final adjustedGrossIncome = _max(0, totalIncome - adjustments);
+    // AGI may be negative; deductions carry forward to taxable income,
+    // which floors at zero (Form 1040 lines 11 and 15).
+    final adjustedGrossIncome = totalIncome - adjustments;
 
-    final standardDeduction = table.standardDeductionFor(status);
-    final itemizedDeductions = totals['us.ind.itemized_deductions'];
-    final usingItemized = itemizedDeductions > standardDeduction;
-    final deduction = usingItemized ? itemizedDeductions : standardDeduction;
-    final preQbiTaxable = _max(0, adjustedGrossIncome - deduction);
+    // Modified AGI adds back the foreign earned income exclusion (and the
+    // section 931/933 possessions exclusions, not modeled) for the net
+    // investment income tax, the SALT phase-down, and Schedule 1-A.
+    final modifiedAdjustedGrossIncome =
+        adjustedGrossIncome + profile.foreignEarnedIncomeExclusionMinor;
 
-    final qbiBase = _max(
-      0,
-      linkedBusinessProfit - seTax.half - selfEmployedRetirement,
+    // Itemized deductions with the SALT cap (IRC 164(b)(6)).
+    final itemizedClaimed = totals['us.ind.itemized_deductions'];
+    final saltClaimed = totals['us.ind.state_local_taxes'];
+    final saltAllowed = _saltAllowedAmount(
+      saltClaimed: saltClaimed,
+      itemizedClaimed: itemizedClaimed,
+      modifiedAdjustedGrossIncome: modifiedAdjustedGrossIncome,
+      status: status,
+      table: table,
     );
-    final qbiThreshold = table.qualifiedBusinessIncomeThresholdFor(status);
-    var qbiDeduction = 0;
-    if (qbiBase > 0 && preQbiTaxable <= qbiThreshold) {
-      final incomeLimitBase = _max(0, preQbiTaxable - preferentialIncome);
-      qbiDeduction = _min(
-        qbiBase * _qbiRateBasisPoints ~/ 10000,
-        incomeLimitBase * _qbiRateBasisPoints ~/ 10000,
-      );
-      final minimumDeduction = table.qbiMinimumDeductionMinor;
-      final minimumIncome = table.qbiMinimumIncomeMinor;
-      if (minimumDeduction != null &&
-          minimumIncome != null &&
-          qbiBase >= minimumIncome) {
-        qbiDeduction = _max(
-          qbiDeduction,
-          _min(minimumDeduction, preQbiTaxable),
-        );
-      }
-    }
+    final allowedItemized = itemizedClaimed - saltClaimed + saltAllowed;
+    final standardDeduction = table.standardDeductionFor(status);
+    final usingItemized = allowedItemized > standardDeduction;
+    final deduction = usingItemized ? allowedItemized : standardDeduction;
+
+    // Schedule 1-A deductions, tax years 2025 to 2028 only (supported
+    // years are 2025 and 2026). Allowed with the standard deduction or
+    // itemizing (IRC 224 to 225, 163(h)(4), 151(d)(5)).
+    final seniorPersons = switch (status) {
+      UsFilingStatus.marriedFilingJointly =>
+        (profile.taxpayer65OrOlder ? 1 : 0) + (profile.spouse65OrOlder ? 1 : 0),
+      UsFilingStatus.qualifyingSurvivingSpouse =>
+        profile.taxpayer65OrOlder ? 1 : 0,
+      _ => profile.taxpayer65OrOlder ? 1 : 0,
+    };
+    final schedule1aTips = _schedule1aTips(
+      tipsClaimed: totals['us.ind.qualified_tips'],
+      modifiedAdjustedGrossIncome: modifiedAdjustedGrossIncome,
+      status: status,
+      table: table,
+    );
+    final schedule1aOvertime = _schedule1aOvertime(
+      overtimeClaimed: totals['us.ind.qualified_overtime_premium'],
+      modifiedAdjustedGrossIncome: modifiedAdjustedGrossIncome,
+      status: status,
+      table: table,
+    );
+    final schedule1aVehicleInterest = _schedule1aVehicleInterest(
+      interestClaimed: totals['us.ind.vehicle_loan_interest'],
+      modifiedAdjustedGrossIncome: modifiedAdjustedGrossIncome,
+      status: status,
+      table: table,
+    );
+    final schedule1aSenior = _schedule1aSenior(
+      seniorPersons: seniorPersons,
+      modifiedAdjustedGrossIncome: modifiedAdjustedGrossIncome,
+      status: status,
+      table: table,
+    );
+    final schedule1aTotal =
+        schedule1aTips +
+        schedule1aOvertime +
+        schedule1aVehicleInterest +
+        schedule1aSenior;
+
+    final preQbiTaxable = _max(
+      0,
+      adjustedGrossIncome - deduction - schedule1aTotal,
+    );
+    final qbiDeduction = _qbiDeduction(
+      qbiBase: _max(
+        0,
+        linkedBusinessProfit - seTax.half - selfEmployedRetirement,
+      ),
+      preQbiTaxable: preQbiTaxable,
+      preferentialIncome: preferentialIncome,
+      w2Wages: linkedBusinessWages,
+      ubia: linkedBusinessUbia,
+      isSstb: linkedIsSstb,
+      status: status,
+      table: table,
+    );
     final taxableIncome = _max(0, preQbiTaxable - qbiDeduction);
     final preferentialTaxable = _min(preferentialIncome, taxableIncome);
     final ordinaryTaxable = taxableIncome - preferentialTaxable;
@@ -323,13 +410,20 @@ final class UsTaxRules implements TaxRulePack {
       ordinaryTaxable,
       table.ordinaryBracketsFor(status),
     );
-    final ordinaryTax = sumBandTax(ordinarySlices);
     final capitalGainsSlices = applyTaxBands(
       preferentialTaxable,
       table.longTermCapitalGainsBandsFor(status),
       startMinor: ordinaryTaxable,
     );
-    final capitalGainsTax = sumBandTax(capitalGainsSlices);
+    // The filed tax: Tax Table below $100,000 of taxable income, Tax
+    // Computation Worksheet (the bracket formula) at and above.
+    final incomeTax = _incomeTax(
+      taxableIncome: taxableIncome,
+      ordinaryTaxable: ordinaryTaxable,
+      status: status,
+      year: year,
+      table: table,
+    );
 
     final investmentIncome =
         totals['us.ind.taxable_interest'] +
@@ -339,8 +433,6 @@ final class UsTaxRules implements TaxRulePack {
         longTermNet -
         allowedCapitalLoss;
     final netInvestmentIncome = _max(0, investmentIncome);
-    final modifiedAdjustedGrossIncome =
-        adjustedGrossIncome + totals['us.ind.tax_exempt_interest'];
     final excessMagi = _max(
       0,
       modifiedAdjustedGrossIncome -
@@ -349,11 +441,55 @@ final class UsTaxRules implements TaxRulePack {
     final netInvestmentIncomeTax =
         _min(netInvestmentIncome, excessMagi) * _niitRateBasisPoints ~/ 10000;
 
+    // Additional Medicare tax on wages plus self-employment income
+    // together, per Form 8959 (IRC 3101(b)(2)).
+    final medicareThreshold = table.additionalMedicareThresholdFor(status);
+    final wageAdditionalMedicareBase = _max(0, wages - medicareThreshold);
+    final additionalMedicareBase =
+        wageAdditionalMedicareBase + seTax.additionalMedicareBase;
+    final additionalMedicareTax =
+        additionalMedicareBase * _additionalMedicareRateBasisPoints ~/ 10000;
+
+    // Child tax credit and credit for other dependents (IRC 24).
+    var qualifyingChildren = 0;
+    var otherDependents = 0;
+    var dependentsWithoutSsn = 0;
+    for (final dependent in profile.dependents) {
+      if (!dependent.hasValidSsn) {
+        dependentsWithoutSsn++;
+        continue;
+      }
+      dependent.underSeventeen ? qualifyingChildren++ : otherDependents++;
+    }
+    final grossCredit =
+        qualifyingChildren * table.childTaxCreditPerChildMinor +
+        otherDependents * table.otherDependentCreditMinor;
+    final creditExcessMagi = _max(
+      0,
+      modifiedAdjustedGrossIncome -
+          table.childTaxCreditPhaseOutThresholdFor(status),
+    );
+    // $50 per $1,000 over the threshold, rounded up to the next $1,000
+    // (K: rate and rounding not read from the IRS sources).
+    final creditPhaseOut =
+        ((creditExcessMagi + 99999) ~/ 100000) * _ctcPhaseOutPerThousandMinor;
+    final childTaxCredit = _max(
+      0,
+      grossCredit - _min(grossCredit, creditPhaseOut),
+    );
+
+    final claimantsHaveSsn = switch (status) {
+      UsFilingStatus.marriedFilingJointly =>
+        profile.taxpayerHasSsn && profile.spouseHasSsn,
+      _ => profile.taxpayerHasSsn,
+    };
     final alreadyPaid =
         totals['us.ind.federal_withholding'] +
         totals['us.ind.estimated_tax_payments'];
-    final totalTax =
-        ordinaryTax + capitalGainsTax + netInvestmentIncomeTax + seTax.tax;
+    final totalTaxBeforeCredits =
+        incomeTax + netInvestmentIncomeTax + additionalMedicareTax + seTax.tax;
+    final creditsApplied = _min(childTaxCredit, totalTaxBeforeCredits);
+    final totalTax = totalTaxBeforeCredits - creditsApplied;
     return _IndividualComputation(
       totals: totals,
       filingStatus: status,
@@ -364,18 +500,31 @@ final class UsTaxRules implements TaxRulePack {
       ordinaryTaxable: ordinaryTaxable,
       preferentialTaxable: preferentialTaxable,
       ordinarySlices: ordinarySlices,
-      ordinaryTax: ordinaryTax,
       capitalGainsSlices: capitalGainsSlices,
-      capitalGainsTax: capitalGainsTax,
+      incomeTax: incomeTax,
       netInvestmentIncomeTax: netInvestmentIncomeTax,
+      additionalMedicareBase: additionalMedicareBase,
+      additionalMedicareTax: additionalMedicareTax,
       totalIncome: totalIncome,
       adjustments: adjustments,
       adjustedGrossIncome: adjustedGrossIncome,
+      modifiedAdjustedGrossIncome: modifiedAdjustedGrossIncome,
       standardDeduction: standardDeduction,
-      itemizedDeductions: itemizedDeductions,
+      itemizedClaimed: itemizedClaimed,
+      saltClaimed: saltClaimed,
+      saltAllowed: saltAllowed,
       usingItemized: usingItemized,
+      schedule1aTips: schedule1aTips,
+      schedule1aOvertime: schedule1aOvertime,
+      schedule1aVehicleInterest: schedule1aVehicleInterest,
+      schedule1aSenior: schedule1aSenior,
+      schedule1aTotal: schedule1aTotal,
       qbiDeduction: qbiDeduction,
       taxableIncome: taxableIncome,
+      childTaxCredit: childTaxCredit,
+      creditsApplied: creditsApplied,
+      dependentsWithoutSsn: dependentsWithoutSsn,
+      claimantsHaveSsn: claimantsHaveSsn,
       totalTax: totalTax,
       alreadyPaid: alreadyPaid,
       shortTermNet: shortTermNet,
@@ -385,6 +534,254 @@ final class UsTaxRules implements TaxRulePack {
       hsaContribution: hsaContribution,
       iraContribution: iraContribution,
       selfEmployedRetirement: selfEmployedRetirement,
+    );
+  }
+
+  /// The SALT cap and its 30% phase-down to the floor (IRC 164(b)(6)).
+  /// Married filing separately halves the cap, threshold, and floor; the
+  /// qualifying surviving spouse uses the joint figures. MAGI adds back
+  /// the foreign earned income exclusion.
+  int _saltAllowedAmount({
+    required int saltClaimed,
+    required int itemizedClaimed,
+    required int modifiedAdjustedGrossIncome,
+    required UsFilingStatus status,
+    required UsTaxYearTable table,
+  }) {
+    if (saltClaimed <= 0) {
+      return 0;
+    }
+    final mfs = status == UsFilingStatus.marriedFilingSeparately;
+    var cap = mfs ? table.saltCapMinor ~/ 2 : table.saltCapMinor;
+    final threshold = mfs
+        ? table.saltPhaseDownThreshold ~/ 2
+        : table.saltPhaseDownThreshold;
+    final floor = mfs ? table.saltFloorMinor ~/ 2 : table.saltFloorMinor;
+    if (modifiedAdjustedGrossIncome > threshold) {
+      final reduction =
+          (modifiedAdjustedGrossIncome - threshold) *
+          _saltPhaseDownRateBasisPoints ~/
+          10000;
+      cap = _max(floor, cap - reduction);
+    }
+    return _min(_min(saltClaimed, itemizedClaimed), cap);
+  }
+
+  /// The Schedule 1-A phase-out removes [perThousandMinor] for each $1,000
+  /// (or portion thereof) of MAGI over [thresholdMinor]. The "or portion
+  /// thereof" treatment for tips, overtime, and senior is I (statute text
+  /// read only for vehicle interest; verify against the instructions).
+  int _schedule1aPhaseOut({
+    required int modifiedAdjustedGrossIncome,
+    required int thresholdMinor,
+    required int perThousandMinor,
+  }) {
+    final over = modifiedAdjustedGrossIncome - thresholdMinor;
+    if (over <= 0) {
+      return 0;
+    }
+    return ((over + 99999) ~/ 100000) * perThousandMinor;
+  }
+
+  int _schedule1aTips({
+    required int tipsClaimed,
+    required int modifiedAdjustedGrossIncome,
+    required UsFilingStatus status,
+    required UsTaxYearTable table,
+  }) {
+    if (tipsClaimed <= 0 || status == UsFilingStatus.marriedFilingSeparately) {
+      return 0;
+    }
+    // The phase-out reduces the cap; the deduction is the lesser of the
+    // tips and the reduced cap.
+    final cap = _max(
+      0,
+      table.qualifiedTipsCapMinor -
+          _schedule1aPhaseOut(
+            modifiedAdjustedGrossIncome: modifiedAdjustedGrossIncome,
+            thresholdMinor: table.tipsOvertimePhaseOutThresholdFor(status),
+            perThousandMinor: _tipsOvertimePhaseOutPerThousandMinor,
+          ),
+    );
+    return _min(tipsClaimed, cap);
+  }
+
+  int _schedule1aOvertime({
+    required int overtimeClaimed,
+    required int modifiedAdjustedGrossIncome,
+    required UsFilingStatus status,
+    required UsTaxYearTable table,
+  }) {
+    if (overtimeClaimed <= 0 ||
+        status == UsFilingStatus.marriedFilingSeparately) {
+      return 0;
+    }
+    final cap = _max(
+      0,
+      table.qualifiedOvertimeCapFor(status) -
+          _schedule1aPhaseOut(
+            modifiedAdjustedGrossIncome: modifiedAdjustedGrossIncome,
+            thresholdMinor: table.tipsOvertimePhaseOutThresholdFor(status),
+            perThousandMinor: _tipsOvertimePhaseOutPerThousandMinor,
+          ),
+    );
+    return _min(overtimeClaimed, cap);
+  }
+
+  int _schedule1aVehicleInterest({
+    required int interestClaimed,
+    required int modifiedAdjustedGrossIncome,
+    required UsFilingStatus status,
+    required UsTaxYearTable table,
+  }) {
+    if (interestClaimed <= 0) {
+      return 0;
+    }
+    final cap = _max(
+      0,
+      table.vehicleLoanInterestCapMinor -
+          _schedule1aPhaseOut(
+            modifiedAdjustedGrossIncome: modifiedAdjustedGrossIncome,
+            thresholdMinor: table.vehicleLoanPhaseOutThresholdFor(status),
+            perThousandMinor: _vehicleInterestPhaseOutPerThousandMinor,
+          ),
+    );
+    return _min(interestClaimed, cap);
+  }
+
+  int _schedule1aSenior({
+    required int seniorPersons,
+    required int modifiedAdjustedGrossIncome,
+    required UsFilingStatus status,
+    required UsTaxYearTable table,
+  }) {
+    if (seniorPersons <= 0 ||
+        status == UsFilingStatus.marriedFilingSeparately) {
+      return 0;
+    }
+    // The 6% phase-out applies once to the combined amount above the
+    // filing-status threshold; per-person application is not confirmed
+    // (I; verify against the Schedule 1-A instructions).
+    final over = _max(
+      0,
+      modifiedAdjustedGrossIncome - table.seniorPhaseOutThresholdFor(status),
+    );
+    return _max(
+      0,
+      seniorPersons * table.seniorDeductionPerPersonMinor -
+          over * _seniorPhaseOutRateBasisPoints ~/ 10000,
+    );
+  }
+
+  /// The section 199A qualified business income deduction.
+  ///
+  /// At or below the threshold this is the Form 8995 computation. Above it,
+  /// the deduction phases in over the year's phase-in range (IRC
+  /// 199A(b)(3)): a specified service trade or business loses its
+  /// component across the range; any other business is reduced toward the
+  /// W-2 wage / UBIA limitation (IRC 199A(b)(2), Form 8995-A), so a
+  /// business with no W-2 wages and no UBIA phases to zero.
+  ///
+  /// Linked businesses are combined; the per-business Form 8995-A
+  /// worksheets are not modeled.
+  int _qbiDeduction({
+    required int qbiBase,
+    required int preQbiTaxable,
+    required int preferentialIncome,
+    required int w2Wages,
+    required int ubia,
+    required bool isSstb,
+    required UsFilingStatus status,
+    required UsTaxYearTable table,
+  }) {
+    if (qbiBase <= 0) {
+      return 0;
+    }
+    final qbiAmount = qbiBase * _qbiRateBasisPoints ~/ 10000;
+    final incomeLimitBase = _max(0, preQbiTaxable - preferentialIncome);
+    final incomeLimit = incomeLimitBase * _qbiRateBasisPoints ~/ 10000;
+    final fullDeduction = _min(qbiAmount, incomeLimit);
+    final threshold = table.qualifiedBusinessIncomeThresholdFor(status);
+    if (preQbiTaxable <= threshold) {
+      final minimumDeduction = table.qbiMinimumDeductionMinor;
+      final minimumIncome = table.qbiMinimumIncomeMinor;
+      if (minimumDeduction != null &&
+          minimumIncome != null &&
+          qbiBase >= minimumIncome) {
+        return _max(fullDeduction, _min(minimumDeduction, preQbiTaxable));
+      }
+      return fullDeduction;
+    }
+    final over = preQbiTaxable - threshold;
+    final applicableBp = _min(
+      10000,
+      over * 10000 ~/ table.qbiPhaseInRangeFor(status),
+    );
+    if (isSstb) {
+      return fullDeduction * (10000 - applicableBp) ~/ 10000;
+    }
+    final wageLimit = _min(
+      _max(
+        w2Wages * _wageLimitRateBasisPoints ~/ 10000,
+        w2Wages * _wageUbiaWageRateBasisPoints ~/ 10000 +
+            ubia * _wageUbiaPropertyRateBasisPoints ~/ 10000,
+      ),
+      incomeLimit,
+    );
+    final reductionBase = _min(
+      _max(0, qbiAmount - wageLimit),
+      _max(0, incomeLimit - wageLimit),
+    );
+    return _max(
+      0,
+      fullDeduction - applicableBp * reductionBase ~/ 10000,
+    );
+  }
+
+  /// The filed income tax: the IRS Tax Table below $100,000 of taxable
+  /// income, the Tax Computation Worksheet (bracket formula) at and above.
+  /// Both work on whole dollars: taxable income is rounded to whole
+  /// dollars first, half up, and the ordinary/preferential parts are
+  /// rounded separately so they still add to the whole.
+  ///
+  /// With preferential income the Qualified Dividends and Capital Gain
+  /// Tax Worksheet comparison applies under the same $100,000 rule: the
+  /// smaller of (tax on the ordinary part) + (0/15/20% tax on the
+  /// preferential part, whole dollars) and (tax on the whole taxable
+  /// income).
+  int _incomeTax({
+    required int taxableIncome,
+    required int ordinaryTaxable,
+    required UsFilingStatus status,
+    required int year,
+    required UsTaxYearTable table,
+  }) {
+    final whole = usRoundToDollars(taxableIncome);
+    final wholeOrdinary = usRoundToDollars(ordinaryTaxable);
+    final wholePreferential = _max(0, whole - wholeOrdinary);
+    final brackets = table.ordinaryBracketsFor(status);
+    final preferentialBands = table.longTermCapitalGainsBandsFor(status);
+    // Each amount the worksheet taxes picks its own method: the Tax Table
+    // below $100,000, the Tax Computation Worksheet at and above.
+    int ordinaryTaxOn(int amountMinor) =>
+        amountMinor ~/ 100 >= usTaxTableThresholdDollars
+        ? sumBandTax(applyTaxBands(amountMinor, brackets))
+        : usIncomeTaxFromTable(amountMinor, status, year);
+    if (wholePreferential == 0) {
+      return ordinaryTaxOn(whole);
+    }
+    final preferentialPart = usRoundToDollars(
+      sumBandTax(
+        applyTaxBands(
+          wholePreferential,
+          preferentialBands,
+          startMinor: wholeOrdinary,
+        ),
+      ),
+    );
+    return _min(
+      ordinaryTaxOn(wholeOrdinary) + preferentialPart,
+      ordinaryTaxOn(whole),
     );
   }
 
@@ -406,23 +803,27 @@ final class UsTaxRules implements TaxRulePack {
     final socialSecurityTax =
         socialSecurityBase * _socialSecurityRateBasisPoints ~/ 10000;
     final medicareTax = netEarnings * _medicareRateBasisPoints ~/ 10000;
+    final tax = socialSecurityTax + medicareTax;
+    // The self-employment part of the Additional Medicare tax uses the
+    // 92.35% figure, with the threshold reduced (not below zero) by
+    // Medicare wages (Form 8959). The tax itself is computed at the
+    // individual level, combined with the wages part.
     final additionalMedicareBase = _max(
       0,
       netEarnings -
-          _max(0, table.additionalMedicareThresholdFor(status) - wages),
+          _max(
+            0,
+            table.additionalMedicareThresholdFor(status) - wages,
+          ),
     );
-    final additionalMedicareTax =
-        additionalMedicareBase * _additionalMedicareRateBasisPoints ~/ 10000;
-    final tax = socialSecurityTax + medicareTax + additionalMedicareTax;
     return _SeTax(
       tax: tax,
-      half: (socialSecurityTax + medicareTax) ~/ 2,
+      half: tax ~/ 2,
       socialSecurityBase: socialSecurityBase,
       socialSecurityTax: socialSecurityTax,
       medicareBase: netEarnings,
       medicareTax: medicareTax,
       additionalMedicareBase: additionalMedicareBase,
-      additionalMedicareTax: additionalMedicareTax,
     );
   }
 
@@ -472,6 +873,18 @@ final class UsTaxRules implements TaxRulePack {
           amountMinor: computation.standardDeduction,
           reportReference: 'Form 1040, line 12e',
         ),
+      if (computation.usingItemized && computation.saltClaimed > 0)
+        TaxReportLine(
+          label: 'State and local taxes allowed after the SALT cap',
+          amountMinor: computation.saltAllowed,
+          reportReference: 'Schedule A (Form 1040), line 5e',
+        ),
+      if (computation.schedule1aTotal > 0)
+        TaxReportLine(
+          label: 'Schedule 1-A additional deductions',
+          amountMinor: computation.schedule1aTotal,
+          reportReference: 'Form 1040, line 13b',
+        ),
       if (computation.qbiDeduction > 0)
         TaxReportLine(
           label: 'Qualified business income deduction',
@@ -483,10 +896,10 @@ final class UsTaxRules implements TaxRulePack {
         amountMinor: computation.taxableIncome,
         reportReference: 'Form 1040, line 15',
       ),
-      if (computation.ordinaryTax + computation.capitalGainsTax > 0)
+      if (computation.incomeTax > 0)
         TaxReportLine(
           label: 'Federal income tax',
-          amountMinor: computation.ordinaryTax + computation.capitalGainsTax,
+          amountMinor: computation.incomeTax,
           reportReference: 'Form 1040, line 16',
         ),
       if (computation.netInvestmentIncomeTax > 0)
@@ -495,11 +908,23 @@ final class UsTaxRules implements TaxRulePack {
           amountMinor: computation.netInvestmentIncomeTax,
           reportReference: 'Form 8960, line 17',
         ),
+      if (computation.additionalMedicareTax > 0)
+        TaxReportLine(
+          label: 'Additional Medicare tax',
+          amountMinor: computation.additionalMedicareTax,
+          reportReference: 'Form 8959',
+        ),
       if (computation.seTax.tax > 0)
         TaxReportLine(
           label: 'Self-employment tax',
           amountMinor: computation.seTax.tax,
           reportReference: 'Schedule SE (Form 1040), line 12',
+        ),
+      if (computation.creditsApplied > 0)
+        TaxReportLine(
+          label: 'Child tax credit and credit for other dependents',
+          amountMinor: computation.creditsApplied,
+          reportReference: 'Form 1040, line 19',
         ),
       TaxReportLine(
         label: 'Total tax',
@@ -529,22 +954,32 @@ final class UsTaxRules implements TaxRulePack {
       entityKind: TaxEntityKind.individual,
       lines: lines,
       liabilities: [
-        if (computation.ordinaryTax > 0)
+        if (computation.incomeTax > 0)
           TaxLiability(
-            label: 'Income tax (ordinary rates)',
-            amountMinor: computation.ordinaryTax,
-            bands: computation.ordinarySlices,
-          ),
-        if (computation.capitalGainsTax > 0)
-          TaxLiability(
-            label: 'Income tax (capital gains and qualified dividends)',
-            amountMinor: computation.capitalGainsTax,
-            bands: computation.capitalGainsSlices,
+            label: 'Federal income tax',
+            amountMinor: computation.incomeTax,
+            bands: [
+              ...computation.ordinarySlices,
+              ...computation.capitalGainsSlices,
+            ],
           ),
         if (computation.netInvestmentIncomeTax > 0)
           TaxLiability(
             label: 'Net investment income tax',
             amountMinor: computation.netInvestmentIncomeTax,
+          ),
+        if (computation.additionalMedicareTax > 0)
+          TaxLiability(
+            label: 'Additional Medicare tax',
+            amountMinor: computation.additionalMedicareTax,
+            bands: [
+              TaxBandSlice(
+                label: 'Additional Medicare 0.9%',
+                baseMinor: computation.additionalMedicareBase,
+                rateBasisPoints: _additionalMedicareRateBasisPoints,
+                taxMinor: computation.additionalMedicareTax,
+              ),
+            ],
           ),
         if (computation.seTax.tax > 0)
           TaxLiability(
@@ -565,18 +1000,22 @@ final class UsTaxRules implements TaxRulePack {
                   rateBasisPoints: _medicareRateBasisPoints,
                   taxMinor: computation.seTax.medicareTax,
                 ),
-              if (computation.seTax.additionalMedicareTax > 0)
-                TaxBandSlice(
-                  label: 'Additional Medicare 0.9%',
-                  baseMinor: computation.seTax.additionalMedicareBase,
-                  rateBasisPoints: _additionalMedicareRateBasisPoints,
-                  taxMinor: computation.seTax.additionalMedicareTax,
-                ),
             ],
+          ),
+        // A nonrefundable credit is a negative liability so the balance
+        // due reflects it.
+        if (computation.creditsApplied > 0)
+          TaxLiability(
+            label: 'Child tax credit and credit for other dependents',
+            amountMinor: -computation.creditsApplied,
           ),
       ],
       alreadyPaidMinor: computation.alreadyPaid,
-      assumptions: _individualAssumptions(table, status, uncategorizedCount),
+      assumptions: _individualAssumptions(
+        table,
+        computation,
+        uncategorizedCount,
+      ),
       sources: usTaxSources,
       rulesVerifiedOn: usRulesVerifiedOn,
       uncategorizedCount: uncategorizedCount,
@@ -620,6 +1059,7 @@ final class UsTaxRules implements TaxRulePack {
       liabilities: const [],
       alreadyPaidMinor: 0,
       assumptions: _soleTraderAssumptions(
+        _homeOfficeMethod(input),
         computation.totals.uncategorizedCount,
       ),
       sources: usTaxSources,
@@ -729,38 +1169,61 @@ final class UsTaxRules implements TaxRulePack {
 
   List<String> _individualAssumptions(
     UsTaxYearTable table,
-    UsFilingStatus status,
+    _IndividualComputation computation,
+    int uncategorizedCount,
+  ) {
+    final status = computation.filingStatus;
+    return [
+      ..._commonAssumptions,
+      _aTaxTable,
+      _aStandardVsItemized,
+      _aSalt,
+      _aSchedule1aScope,
+      _aSchedule1aRounding,
+      if (status == UsFilingStatus.marriedFilingSeparately) _aSchedule1aMfs,
+      _aSchedule1aSeniorPhaseOut,
+      if (computation.schedule1aTotal > 0 && !computation.claimantsHaveSsn)
+        _aMissingSsn,
+      if (computation.dependentsWithoutSsn > 0)
+        _aDependentWithoutSsn(computation.dependentsWithoutSsn),
+      _aCtcPhaseOut,
+      _aNoActc,
+      _aNoAgeDeductions,
+      _qbiAssumption(table, status),
+      _aQbiAboveThreshold(table, status),
+      if (table.qbiMinimumDeductionMinor != null &&
+          table.qbiMinimumIncomeMinor != null)
+        _qbiMinimumAssumption(table),
+      _aQbiBase,
+      _aMultipleBusinesses,
+      _aSeOnlyLinked,
+      _aHalfSeDeduction,
+      _aAdditionalMedicare,
+      _aNiit,
+      _aNiitScope,
+      _aCapitalLosses,
+      _aQualifiedDividends,
+      _aReliefAsEntered,
+      _aOtherAdjustments,
+      _aLinkedOnly,
+      if (uncategorizedCount > 0) _uncategorizedAssumption(uncategorizedCount),
+    ];
+  }
+
+  List<String> _soleTraderAssumptions(
+    UsHomeOfficeMethod homeOfficeMethod,
     int uncategorizedCount,
   ) => [
-    ..._commonAssumptions,
-    _aStandardVsItemized,
-    _aNoAgeDeductions,
-    _qbiAssumption(table, status),
-    if (table.qbiMinimumDeductionMinor != null &&
-        table.qbiMinimumIncomeMinor != null)
-      _qbiMinimumAssumption(table),
-    _aQbiBase,
-    _aMultipleBusinesses,
-    _aSeOnlyLinked,
-    _aHalfSeDeduction,
-    _aAdditionalMedicare,
-    _aNiit,
-    _aNiitScope,
-    _aCapitalLosses,
-    _aQualifiedDividends,
-    _aReliefAsEntered,
-    _aOtherAdjustments,
-    _aLinkedOnly,
-    if (uncategorizedCount > 0) _uncategorizedAssumption(uncategorizedCount),
-  ];
-
-  List<String> _soleTraderAssumptions(int uncategorizedCount) => [
     _aFederalOnly,
     _aSchCOnly,
     _aCalendarYear,
     _aCents,
     _aMeals,
-    _aHomeOffice,
+    switch (homeOfficeMethod) {
+      UsHomeOfficeMethod.simplified => _aHomeOfficeSimplified,
+      UsHomeOfficeMethod.regular => _aHomeOfficeRegular,
+    },
+    _aHomeOfficeGrossIncome,
     _aSection179,
     _aVehicle,
     _aCogs,
@@ -836,11 +1299,13 @@ final class UsTaxRules implements TaxRulePack {
           title: 'Qualified business income deduction',
           explanation:
               'A 20% deduction for qualified business income is applied in '
-              'this report. Taxable income before the deduction is at or '
-              'below '
-              '${_dollarAmount(table.qualifiedBusinessIncomeThresholdFor(computation.filingStatus))}. '
-              'The above-threshold W-2 wage and UBIA phase-ins and specified '
-              'service trade or business limits are not modeled.',
+              'this report, phased in above the '
+              '${_dollarAmount(table.qualifiedBusinessIncomeThresholdFor(computation.filingStatus))} '
+              'threshold with the W-2 wage and UBIA limitation. Raising the '
+              "business's W-2 wages or the unadjusted basis of qualified "
+              'property can lift the limitation; a specified service trade '
+              'or business phases out instead. These are planning estimates; '
+              'Form 8995-A computes each business separately.',
           estimatedSavingMinor: _savingForDeduction(
             computation.qbiDeduction,
             computation,
@@ -923,13 +1388,14 @@ final class UsTaxRules implements TaxRulePack {
       );
     }
 
-    if (computation.itemizedDeductions > 0 &&
-        computation.itemizedDeductions != computation.standardDeduction) {
+    if (computation.itemizedClaimed > 0 &&
+        computation.itemizedClaimed != computation.standardDeduction) {
       final itemizing =
-          computation.itemizedDeductions > computation.standardDeduction;
+          computation.usingItemized &&
+          computation.itemizedClaimed > computation.standardDeduction;
       final difference = itemizing
-          ? computation.itemizedDeductions - computation.standardDeduction
-          : computation.standardDeduction - computation.itemizedDeductions;
+          ? computation.itemizedClaimed - computation.standardDeduction
+          : computation.standardDeduction - computation.itemizedClaimed;
       opportunities.add(
         TaxOpportunity(
           id: 'us.standard_vs_itemized',
@@ -939,7 +1405,7 @@ final class UsTaxRules implements TaxRulePack {
           explanation: itemizing
               ? 'Your itemized total exceeds the standard deduction by '
                     '${_dollarAmount(difference)}. This report already uses '
-                    'the itemized amount.'
+                    'the itemized amount after the SALT cap.'
               : 'The standard deduction exceeds your itemized total by '
                     '${_dollarAmount(difference)}. This report already uses '
                     'the standard deduction.',
@@ -1117,12 +1583,12 @@ String _dateList(List<DateTime> dates) {
   return '${formatted.join(', ')}, and $last';
 }
 
-const String _aFederalOnly = 'Federal only; no state income tax.';
-const String _aNoCredits = 'No credits computed.';
+const String _aFederalOnly = 'Federal only; no state income tax return.';
 const String _aCalendarYear = 'Calendar tax year, January 1 to December 31.';
 const String _aCents =
-    'Amounts are computed in cents. The IRS allows whole-dollar rounding on '
-    'paper returns; no whole-dollar rounding is applied here.';
+    r'Amounts are computed in cents. Below $100,000 of taxable income the '
+    'filed tax uses the IRS Tax Table and is rounded to whole dollars; the '
+    'Tax Computation Worksheet above that keeps cents.';
 const String _aNoAmt =
     'No alternative minimum tax, net operating loss deduction, or loss '
     'carryforward is computed.';
@@ -1130,19 +1596,65 @@ const String _aOpportunityEstimates =
     'Opportunity savings are estimates at the top marginal income tax rate '
     'and ignore interactions with the net investment income tax, QBI '
     'deduction, self-employment tax, and credits.';
+const String _aTaxTable =
+    r'Below $100,000 of taxable income the filed tax reproduces the IRS Tax '
+    'Table: the bracket formula on the midpoint of the row containing the '
+    'taxable income, rounded to whole dollars. The method is derived from '
+    'IRS practice and must be checked against the printed 2025 and 2026 '
+    'Tax Table; the band breakdown shown with this report lists the '
+    'statutory brackets, not the Table midpoint.';
 const String _aStandardVsItemized =
-    'The standard deduction and a single user-entered itemized total are '
-    'compared; itemized deductions are not recomputed line by line.';
+    'The standard deduction and the itemized total are compared; itemized '
+    'deductions are not recomputed line by line except for the SALT cap.';
+const String _aSalt =
+    r'State and local taxes are capped for itemizers at $40,000 (2025) or '
+    r'$40,400 (2026), reduced by 30% of modified AGI over $500,000 '
+    r'($505,000 for 2026) to a $10,000 floor; married filing separately '
+    'halves the cap, threshold, and floor. Other Schedule A limits '
+    '(medical, charitable, mortgage interest) are not recomputed.';
+const String _aSchedule1aScope =
+    'Schedule 1-A conditions are not verified: the tipped-occupation list, '
+    'employer evidence for tips and overtime, the vehicle loan rules (new '
+    'vehicle, first lien, VIN, United States assembly), and the '
+    'self-employed tips limits are taken as entered.';
+const String _aSchedule1aRounding =
+    r'The Schedule 1-A phase-outs remove $100 or $200 for each $1,000 (or '
+    r'portion of $1,000) of modified AGI over the threshold. The statute '
+    'confirms "or portion thereof" only for vehicle loan interest; the same '
+    'treatment for tips, overtime, and senior is inferred until the '
+    'Schedule 1-A instructions are read.';
+const String _aSchedule1aMfs =
+    'Married filing separately cannot claim the tips, overtime, or senior '
+    'deductions.';
+const String _aSchedule1aSeniorPhaseOut =
+    'The senior deduction phase-out applies the 6% reduction once to the '
+    'combined amount above the filing-status threshold; whether the IRS '
+    'applies it per person instead is not confirmed.';
+const String _aMissingSsn =
+    'A Schedule 1-A deduction was computed without an SSN on file for '
+    'everyone claiming it; the IRS requires an SSN that is valid for '
+    'employment.';
+String _aDependentWithoutSsn(int count) =>
+    '$count dependent(s) without an SSN valid for employment earn no child '
+    'tax credit or credit for other dependents.';
+const String _aCtcPhaseOut =
+    r'The child tax credit phase-out of $50 per $1,000 of modified AGI over '
+    r'the threshold, rounded up to the next $1,000, is general knowledge not '
+    'read from the IRS sources; verify against the Form 1040 instructions.';
+const String _aNoActc =
+    'The refundable additional child tax credit (Form 8812) is not '
+    'computed; the credit here is nonrefundable and limited to the tax.';
 const String _aNoAgeDeductions =
-    'No age-based additional standard deduction, dependent standard '
-    'deduction, or senior deduction is computed.';
+    'The additional standard deduction for age 65 or blind is not computed; '
+    'the Schedule 1-A senior deduction uses the age-65 profile flags.';
 const String _aQbiBase =
     'Qualified business income is linked-business profit less the deductible '
     'part of self-employment tax and self-employed retirement contributions '
     'entered in the books.';
 const String _aMultipleBusinesses =
-    'Multiple linked businesses are combined for the simplified QBI '
-    'computation; the per-business QBI loss rules are not modeled.';
+    'Multiple linked businesses are combined for the QBI computation; the '
+    'per-business Form 8995-A worksheets and QBI loss carryforwards are not '
+    'modeled.';
 const String _aSeOnlyLinked =
     'Self-employment tax is computed only on the net profit of linked '
     'sole-proprietor businesses. All wages are assumed to be subject to '
@@ -1151,14 +1663,17 @@ const String _aHalfSeDeduction =
     'The deduction for one-half of self-employment tax excludes the '
     'Additional Medicare Tax, which is not deductible.';
 const String _aAdditionalMedicare =
-    'The Additional Medicare Tax is computed on self-employment income after '
-    'reducing the threshold by wages; Additional Medicare Tax withheld from '
-    'wages is not computed.';
+    'The Additional Medicare Tax applies to Medicare wages plus '
+    'self-employment income above the filing-status threshold, computed '
+    'together on Form 8959; the self-employment part uses the 92.35% '
+    'figure, and Additional Medicare Tax already withheld from wages is '
+    'not credited.';
 const String _aNiit =
     'Net investment income tax is 3.8% of the lesser of net investment '
     'income or modified adjusted gross income above the filing-status '
-    'threshold. Modified adjusted gross income is adjusted gross income plus '
-    'tax-exempt interest; other MAGI adjustments are not modeled.';
+    'threshold. Modified adjusted gross income is adjusted gross income '
+    'plus the foreign earned income exclusion; tax-exempt interest is not '
+    'added back.';
 const String _aNiitScope =
     'Net investment income is limited to interest, dividends, and capital '
     'gains in these books; rental, royalty, annuity, and passive business '
@@ -1184,8 +1699,14 @@ const String _aSchCOnly =
 const String _aMeals =
     'Business meals are reduced by 50%; enter the full business-use meal '
     'cost. Exceptions for fully deductible meals are not modeled.';
-const String _aHomeOffice =
+const String _aHomeOfficeSimplified =
     r'The home office deduction uses the simplified method and is capped at $1,500 (300 square feet at $5 per square foot).';
+const String _aHomeOfficeRegular =
+    'The home office deduction uses the regular Form 8829 method; the '
+    r'$1,500 simplified-method cap does not apply.';
+const String _aHomeOfficeGrossIncome =
+    'The home office deduction is not limited to gross income from the '
+    'business use, and no Form 8829 carryover is tracked.';
 const String _aSection179 =
     'Section 179 and depreciation are taken as entered; annual limits and '
     'depreciation schedules are not recomputed.';
@@ -1216,20 +1737,25 @@ const String _aEstimatedPayments =
 
 const List<String> _commonAssumptions = [
   _aFederalOnly,
-  _aNoCredits,
+  _aNoAmt,
   _aCalendarYear,
   _aCents,
-  _aNoAmt,
   _aOpportunityEstimates,
 ];
 
 String _qbiAssumption(UsTaxYearTable table, UsFilingStatus status) =>
-    'The qualified business income deduction is the simplified 20% '
-    'computation (Form 8995). It is applied only when taxable income before '
-    'the deduction is at or below '
-    '${_dollarAmount(table.qualifiedBusinessIncomeThresholdFor(status))}. '
-    'Above-threshold W-2 wage and UBIA phase-ins and specified service trade '
-    'or business limits are not modeled.';
+    'The qualified business income deduction is 20% of qualified business '
+    'income, limited to 20% of taxable income before the deduction minus '
+    'net capital gain. At or below the '
+    '${_dollarAmount(table.qualifiedBusinessIncomeThresholdFor(status))} '
+    'threshold this is the Form 8995 computation.';
+
+String _aQbiAboveThreshold(UsTaxYearTable table, UsFilingStatus status) =>
+    'Above the threshold the deduction phases in over the '
+    '${_dollarAmount(table.qbiPhaseInRangeFor(status))} range with the '
+    'W-2 wage and unadjusted-basis limitation; a specified service trade or '
+    'business phases out across the range instead. The 2026 minimum '
+    'deduction interaction above the threshold is not modeled.';
 
 String _qbiMinimumAssumption(UsTaxYearTable table) =>
     'For ${table.startYear}, the '
@@ -1253,6 +1779,28 @@ const int _capitalLossLimitMinor = 300000;
 const int _marriedSeparateCapitalLossLimitMinor = 150000;
 const int _homeOfficeCapMinor = 150000;
 
+/// The SALT cap falls by 30% of MAGI over the threshold (IRC 164(b)(6),
+/// statutory).
+const int _saltPhaseDownRateBasisPoints = 3000;
+
+/// Schedule 1-A phase-outs: $100 per $1,000 for tips and overtime (IRC
+/// 224, 225) and $200 per $1,000 for vehicle loan interest (IRC
+/// 163(h)(4)); 6% of MAGI over the threshold for the senior deduction.
+const int _tipsOvertimePhaseOutPerThousandMinor = 10000;
+const int _vehicleInterestPhaseOutPerThousandMinor = 20000;
+const int _seniorPhaseOutRateBasisPoints = 600;
+
+/// The child tax credit phase-out, $50 per $1,000 (K: not read from the
+/// IRS sources).
+const int _ctcPhaseOutPerThousandMinor = 5000;
+
+/// The section 199A W-2 wage limitation: the greater of 50% of W-2 wages
+/// or 25% of wages plus 2.5% of the unadjusted basis of qualified property
+/// (IRC 199A(b)(2)(B), statutory).
+const int _wageLimitRateBasisPoints = 5000;
+const int _wageUbiaWageRateBasisPoints = 2500;
+const int _wageUbiaPropertyRateBasisPoints = 250;
+
 const _SeTax _zeroSeTax = _SeTax(
   tax: 0,
   half: 0,
@@ -1261,7 +1809,6 @@ const _SeTax _zeroSeTax = _SeTax(
   medicareBase: 0,
   medicareTax: 0,
   additionalMedicareBase: 0,
-  additionalMedicareTax: 0,
 );
 
 final class _CategoryTotals {
@@ -1289,7 +1836,6 @@ final class _SeTax {
     required this.medicareBase,
     required this.medicareTax,
     required this.additionalMedicareBase,
-    required this.additionalMedicareTax,
   });
 
   final int tax;
@@ -1298,8 +1844,10 @@ final class _SeTax {
   final int socialSecurityTax;
   final int medicareBase;
   final int medicareTax;
+
+  /// The self-employment part of the Additional Medicare tax base; the tax
+  /// itself is computed with the wages part on Form 8959.
   final int additionalMedicareBase;
-  final int additionalMedicareTax;
 }
 
 final class _ScheduleCComputation {
@@ -1351,18 +1899,31 @@ final class _IndividualComputation {
     required this.ordinaryTaxable,
     required this.preferentialTaxable,
     required this.ordinarySlices,
-    required this.ordinaryTax,
     required this.capitalGainsSlices,
-    required this.capitalGainsTax,
+    required this.incomeTax,
     required this.netInvestmentIncomeTax,
+    required this.additionalMedicareBase,
+    required this.additionalMedicareTax,
     required this.totalIncome,
     required this.adjustments,
     required this.adjustedGrossIncome,
+    required this.modifiedAdjustedGrossIncome,
     required this.standardDeduction,
-    required this.itemizedDeductions,
+    required this.itemizedClaimed,
+    required this.saltClaimed,
+    required this.saltAllowed,
     required this.usingItemized,
+    required this.schedule1aTips,
+    required this.schedule1aOvertime,
+    required this.schedule1aVehicleInterest,
+    required this.schedule1aSenior,
+    required this.schedule1aTotal,
     required this.qbiDeduction,
     required this.taxableIncome,
+    required this.childTaxCredit,
+    required this.creditsApplied,
+    required this.dependentsWithoutSsn,
+    required this.claimantsHaveSsn,
     required this.totalTax,
     required this.alreadyPaid,
     required this.shortTermNet,
@@ -1383,18 +1944,36 @@ final class _IndividualComputation {
   final int ordinaryTaxable;
   final int preferentialTaxable;
   final List<TaxBandSlice> ordinarySlices;
-  final int ordinaryTax;
   final List<TaxBandSlice> capitalGainsSlices;
-  final int capitalGainsTax;
+
+  /// The filed income tax: Tax Table below $100,000, worksheet above.
+  final int incomeTax;
   final int netInvestmentIncomeTax;
+  final int additionalMedicareBase;
+  final int additionalMedicareTax;
   final int totalIncome;
   final int adjustments;
   final int adjustedGrossIncome;
+  final int modifiedAdjustedGrossIncome;
   final int standardDeduction;
-  final int itemizedDeductions;
+  final int itemizedClaimed;
+  final int saltClaimed;
+  final int saltAllowed;
   final bool usingItemized;
+  final int schedule1aTips;
+  final int schedule1aOvertime;
+  final int schedule1aVehicleInterest;
+  final int schedule1aSenior;
+  final int schedule1aTotal;
   final int qbiDeduction;
   final int taxableIncome;
+  final int childTaxCredit;
+  final int creditsApplied;
+  final int dependentsWithoutSsn;
+
+  /// Whether everyone claiming a Schedule 1-A deduction has an SSN on
+  /// file.
+  final bool claimantsHaveSsn;
   final int totalTax;
   final int alreadyPaid;
   final int shortTermNet;

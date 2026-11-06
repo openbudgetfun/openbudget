@@ -125,6 +125,9 @@ void main() {
       expect(find.text('Individual'), findsOneWidget);
       expect(find.text('Scottish taxpayer'), findsOneWidget);
       expect(find.text('Student loan plan'), findsOneWidget);
+      expect(find.text('Postgraduate loan'), findsOneWidget);
+      expect(find.text('Accounting period end'), findsNothing);
+      expect(find.text('Associated companies'), findsNothing);
       expect(find.text('Linked personal budget'), findsNothing);
 
       await _save(tester);
@@ -140,6 +143,125 @@ void main() {
         'salesTaxRegistered': false,
         'scottishTaxpayer': false,
       });
+    });
+
+    testWidgets('saves an undergraduate plan with a postgraduate loan', (
+      tester,
+    ) async {
+      final fake = FakeTaxRepository();
+      await tester.pumpWidget(_buildApp(fake));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byType(DropdownButtonFormField<String>).first);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Plan 2').last);
+      await tester.pumpAndSettle();
+
+      await tester.scrollUntilVisible(
+        find.text('Postgraduate loan'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Postgraduate loan'));
+      await tester.pumpAndSettle();
+
+      await _save(tester);
+
+      final saved = _lastProfileJson(fake);
+      expect(saved['studentLoanPlan'], 'plan2');
+      expect(saved['postgraduateLoan'], isTrue);
+    });
+
+    testWidgets('saves a UK company accounting period and associates', (
+      tester,
+    ) async {
+      final fake = FakeTaxRepository();
+      await tester.pumpWidget(_buildApp(fake));
+      await tester.pumpAndSettle();
+
+      await _selectEntity(tester, 'Company');
+      expect(find.text('Accounting period end'), findsOneWidget);
+      expect(find.text('Associated companies'), findsOneWidget);
+
+      await tester.scrollUntilVisible(
+        find.text('Associated companies').last,
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), '2');
+      await _save(tester);
+
+      final saved = _lastProfileJson(fake);
+      // The default 31 March end is not stored; the count is.
+      expect(saved['accountingPeriodEndMonth'], isNull);
+      expect(saved['accountingPeriodEndDay'], isNull);
+      expect(saved['associatedCompanies'], 2);
+    });
+
+    testWidgets('a UK company keeps a non-default accounting period', (
+      tester,
+    ) async {
+      final fake = FakeTaxRepository();
+      await tester.pumpWidget(_buildApp(fake));
+      await tester.pumpAndSettle();
+
+      await _selectEntity(tester, 'Company');
+      await tester.scrollUntilVisible(
+        find.text('Accounting period end'),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+
+      // Month dropdown first, then the day dropdown. The menu builds its
+      // items lazily, so pick months near the default that are visible.
+      await tester.tap(find.byType(DropdownButtonFormField<int>).first);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('May').last);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(DropdownButtonFormField<int>).last);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('31').last);
+      await tester.pumpAndSettle();
+
+      await _save(tester);
+
+      final saved = _lastProfileJson(fake);
+      expect(saved['accountingPeriodEndMonth'], 5);
+      // 31 is the default day, so it is not stored.
+      expect(saved['accountingPeriodEndDay'], isNull);
+    });
+
+    testWidgets('rejects a non-numeric associated companies count', (
+      tester,
+    ) async {
+      const error =
+          'Enter the number of associated companies as a whole number, '
+          'such as 0.';
+      final fake = FakeTaxRepository();
+      await tester.pumpWidget(_buildApp(fake));
+      await tester.pumpAndSettle();
+
+      await _selectEntity(tester, 'Company');
+      await tester.scrollUntilVisible(
+        find.text('Associated companies').last,
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), 'two');
+      await _save(tester);
+
+      await tester.scrollUntilVisible(
+        find.text(error),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+      expect(find.text(error), findsOneWidget);
+      expect(fake.savedProfiles, isEmpty);
     });
 
     testWidgets('saves a US profile with the chosen filing status', (
@@ -169,6 +291,100 @@ void main() {
       expect(saved['jurisdiction'], 'US');
       expect(saved['filingStatus'], 'marriedFilingJointly');
       expect(saved['salesTaxRegistered'], isTrue);
+    });
+
+    testWidgets('offers qualifying surviving spouse as a filing status', (
+      tester,
+    ) async {
+      final fake = FakeTaxRepository();
+      await tester.pumpWidget(_buildApp(fake));
+      await tester.pumpAndSettle();
+
+      await _selectCountry(tester, 'United States');
+      await tester.tap(find.byType(DropdownButtonFormField<UsFilingStatus>));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Qualifying surviving spouse').last);
+      await tester.pumpAndSettle();
+
+      await _save(tester);
+
+      expect(
+        _lastProfileJson(fake)['filingStatus'],
+        'qualifyingSurvivingSpouse',
+      );
+    });
+
+    testWidgets('saves US dependents, age, SSN, and exclusion', (
+      tester,
+    ) async {
+      final fake = FakeTaxRepository();
+      await tester.pumpWidget(_buildApp(fake));
+      await tester.pumpAndSettle();
+
+      await _selectCountry(tester, 'United States');
+      await tester.ensureVisible(find.text('Dependents under 17'));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Dependents under 17'),
+        '2',
+      );
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Dependents 17 or older'),
+        '1',
+      );
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Foreign earned income exclusion'),
+        '5000',
+      );
+      await tester.ensureVisible(find.text('You are 65 or older'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('You are 65 or older'));
+      await tester.pumpAndSettle();
+
+      await _save(tester);
+
+      final saved = _lastProfileJson(fake);
+      expect(saved['jurisdiction'], 'US');
+      expect(saved['taxpayer65OrOlder'], isTrue);
+      expect(saved['spouse65OrOlder'], isFalse);
+      expect(saved['taxpayerHasSsn'], isTrue);
+      expect(saved['foreignEarnedIncomeExclusionMinor'], 500000);
+      // The SSN switch starts off, so no dependent carries an SSN yet.
+      expect(saved['dependents'], [
+        {'underSeventeen': true, 'hasValidSsn': false},
+        {'underSeventeen': true, 'hasValidSsn': false},
+        {'underSeventeen': false, 'hasValidSsn': false},
+      ]);
+    });
+
+    testWidgets('saves the US home office method for a sole trader', (
+      tester,
+    ) async {
+      final fake = FakeTaxRepository();
+      await tester.pumpWidget(_buildApp(fake));
+      await tester.pumpAndSettle();
+
+      await _selectEntity(tester, 'Sole trader');
+      await _selectCountry(tester, 'United States');
+      expect(find.text('Home office method'), findsOneWidget);
+      expect(find.text('Specified service business'), findsOneWidget);
+
+      await tester.ensureVisible(
+        find.byType(DropdownButtonFormField<UsHomeOfficeMethod>),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.byType(DropdownButtonFormField<UsHomeOfficeMethod>),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Regular (Form 8829)').last);
+      await tester.pumpAndSettle();
+
+      await _save(tester);
+
+      final saved = _lastProfileJson(fake);
+      expect(saved['homeOfficeMethod'], 'regular');
+      expect(saved['specifiedServiceTrade'], isFalse);
     });
 
     testWidgets('validates a Nigerian annual rent before saving', (
@@ -272,13 +488,113 @@ void main() {
       expect(find.text('Joint assessment'), findsOneWidget);
       expect(find.text('Church tax'), findsOneWidget);
       expect(find.text('Small business VAT exemption'), findsOneWidget);
+      expect(find.text('Spouse also earns wages'), findsNothing);
 
       await _save(tester);
 
       final saved = _lastProfileJson(fake);
       expect(saved['jointAssessment'], isFalse);
       expect(saved['churchTax'], isFalse);
+      expect(saved['churchTaxState'], isNull);
       expect(saved['smallBusinessExemption'], isTrue);
+      expect(saved['children'], 0);
+      expect(saved['einkunftsArt'], 'gewerblich');
+    });
+
+    testWidgets('saves a filled-in German individual profile', (tester) async {
+      final fake = FakeTaxRepository();
+      await tester.pumpWidget(_buildApp(fake));
+      await tester.pumpAndSettle();
+
+      await _selectCountry(tester, 'Germany');
+
+      await tester.scrollUntilVisible(
+        find.text('Joint assessment'),
+        -300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Joint assessment'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Spouse also earns wages'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Church tax'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byType(DropdownButtonFormField<String>).last);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Bavaria').last);
+      await tester.pumpAndSettle();
+
+      Future<void> fill(int index, String text) async {
+        await tester.scrollUntilVisible(
+          find.byType(TextField).at(index),
+          200,
+          scrollable: find.byType(Scrollable).first,
+        );
+        await tester.enterText(find.byType(TextField).at(index), text);
+        await tester.pumpAndSettle();
+      }
+
+      await fill(0, '2');
+      await fill(1, '4800');
+      await fill(2, '25');
+      await fill(3, '220');
+
+      await _save(tester);
+
+      final saved = _lastProfileJson(fake);
+      expect(saved['jointAssessment'], isTrue);
+      expect(saved['spouseEmployed'], isTrue);
+      expect(saved['churchTax'], isTrue);
+      expect(saved['churchTaxState'], 'bayern');
+      expect(saved['children'], 2);
+      expect(saved['statutoryPensionMinor'], 480000);
+      expect(saved['commuteKmOneWay'], 25);
+      expect(saved['commuteDays'], 220);
+    });
+
+    testWidgets('rejects a non-numeric German child count', (tester) async {
+      final fake = FakeTaxRepository();
+      await tester.pumpWidget(_buildApp(fake));
+      await tester.pumpAndSettle();
+
+      await _selectCountry(tester, 'Germany');
+      await tester.scrollUntilVisible(
+        find.byType(TextField).first,
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.enterText(find.byType(TextField).first, 'two');
+      await _save(tester);
+
+      expect(find.text('Enter a whole number of 0 or more.'), findsOneWidget);
+      expect(fake.savedProfiles, isEmpty);
+    });
+
+    testWidgets('a German sole trader chooses the Einkunftsart', (
+      tester,
+    ) async {
+      final fake = FakeTaxRepository();
+      await tester.pumpWidget(_buildApp(fake));
+      await tester.pumpAndSettle();
+
+      await _selectCountry(tester, 'Germany');
+      await _selectEntity(tester, 'Sole trader');
+
+      expect(find.text('Type of self-employment'), findsOneWidget);
+      await tester.ensureVisible(
+        find.byType(DropdownButtonFormField<DeEinkunftsArt>),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(DropdownButtonFormField<DeEinkunftsArt>));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Freiberufler (liberal profession)').last);
+      await tester.pumpAndSettle();
+
+      await _save(tester);
+
+      expect(_lastProfileJson(fake)['einkunftsArt'], 'freiberuflich');
     });
 
     testWidgets('prefills an existing profile and its linked budget', (
