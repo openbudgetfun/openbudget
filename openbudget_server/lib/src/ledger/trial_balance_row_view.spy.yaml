@@ -1,0 +1,17 @@
+### One row of a computed trial balance.
+class: TrialBalanceRowView
+fields:
+  ### LedgerAccount code.
+  accountCode: String
+  ### LedgerAccount name.
+  accountName: String
+  ### LedgerAccountType name.
+  accountType: String
+  ### LedgerSystemRole name, when the account is a system account.
+  systemRole: String?
+  ### Total debits in functional minor units.
+  debitMinor: int
+  ### Total credits in functional minor units.
+  creditMinor: int
+  ### Balance with debits positive.
+  netMinor: int

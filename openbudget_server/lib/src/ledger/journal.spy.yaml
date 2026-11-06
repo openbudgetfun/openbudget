@@ -1,0 +1,33 @@
+### A journal in a budget's books: a dated, referenced bundle of lines.
+###
+### Drafts may be edited or deleted. Posted journals are immutable —
+### corrections are [Journal]s with `reversalOfJournalId` pointing back, and
+### the original flips to `reversed`. No update or delete path exists for
+### posted rows.
+class: Journal
+table: journal
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  budgetId: UuidValue, relation(parent=budget)
+  ### Calendar date in the budget's time zone, not a UTC instant.
+  date: DateTime
+  ### Human reference, such as `JB-2026-0001`.
+  reference: String, default=''
+  ### Optional narrative.
+  narration: String?
+  ### JournalStatus name: draft, posted or reversed.
+  status: String, default='draft'
+  ### JournalSource name: manual, opening, import or reversal.
+  source: String, default='manual'
+  ### Server time of posting. Never trusted from the client.
+  postedAt: DateTime?
+  ### The user who posted the journal.
+  postedBy: UuidValue?
+  ### The posted journal this one reverses, when source is `reversal`.
+  reversalOfJournalId: UuidValue?
+  createdAt: DateTime, default=now
+indexes:
+  journal_budget_date_idx:
+    fields: budgetId, date
+  journal_budget_status_idx:
+    fields: budgetId, status

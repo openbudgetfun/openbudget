@@ -11,6 +11,8 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:openbudget_server/src/generated/future_calls.dart' as _iwv90kfd;
+import 'package:openbudget_server/src/generated/ledger/journal_line_input.dart'
+    as _in0sxdux;
 import 'package:openbudget_server/src/generated/transactions/import_row.dart'
     as _iyod81ld;
 import 'package:openbudget_server/src/generated/transactions/split_item.dart'
@@ -37,6 +39,7 @@ import '../envelope_goals/envelope_goal_endpoint.dart' as _i76paldx;
 import '../envelopes/envelope_endpoint.dart' as _in6dn9dl;
 import '../fx_rates/fx_rate_endpoint.dart' as _i7xoygut;
 import '../institutions/institution_endpoint.dart' as _i9rhv37i;
+import '../ledger/ledger_endpoint.dart' as _ia4une1r;
 import '../monthly_allocations/monthly_allocation_endpoint.dart' as _ilfvovcz;
 import '../payees/payee_endpoint.dart' as _i5rb0bcw;
 import '../plaid/plaid_endpoint.dart' as _i9pkxqxw;
@@ -147,6 +150,12 @@ class Endpoints extends _is.EndpointDispatch {
         ..initialize(
           server,
           'institution',
+          null,
+        ),
+      'ledger': _ia4une1r.LedgerEndpoint()
+        ..initialize(
+          server,
+          'ledger',
           null,
         ),
       'monthlyAllocation': _ilfvovcz.MonthlyAllocationEndpoint()
@@ -1943,6 +1952,329 @@ class Endpoints extends _is.EndpointDispatch {
                         session,
                         locationCode: params['locationCode'],
                       ),
+        ),
+      },
+    );
+    connectors['ledger'] = _is.EndpointConnector(
+      name: 'ledger',
+      endpoint: endpoints['ledger']!,
+      methodConnectors: {
+        'enableLedger': _is.MethodConnector(
+          name: 'enableLedger',
+          params: {
+            'budgetId': _is.ParameterDescription(
+              name: 'budgetId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['ledger'] as _ia4une1r.LedgerEndpoint)
+                  .enableLedger(
+                    session,
+                    params['budgetId'],
+                  ),
+        ),
+        'listAccounts': _is.MethodConnector(
+          name: 'listAccounts',
+          params: {
+            'budgetId': _is.ParameterDescription(
+              name: 'budgetId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'includeArchived': _is.ParameterDescription(
+              name: 'includeArchived',
+              type: _is.getType<bool>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['ledger'] as _ia4une1r.LedgerEndpoint)
+                  .listAccounts(
+                    session,
+                    params['budgetId'],
+                    includeArchived: params['includeArchived'],
+                  ),
+        ),
+        'createAccount': _is.MethodConnector(
+          name: 'createAccount',
+          params: {
+            'budgetId': _is.ParameterDescription(
+              name: 'budgetId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'code': _is.ParameterDescription(
+              name: 'code',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'name': _is.ParameterDescription(
+              name: 'name',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'type': _is.ParameterDescription(
+              name: 'type',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'systemRole': _is.ParameterDescription(
+              name: 'systemRole',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+            'currencyCode': _is.ParameterDescription(
+              name: 'currencyCode',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+            'taxCategoryCode': _is.ParameterDescription(
+              name: 'taxCategoryCode',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['ledger'] as _ia4une1r.LedgerEndpoint)
+                  .createAccount(
+                    session,
+                    params['budgetId'],
+                    params['code'],
+                    params['name'],
+                    params['type'],
+                    systemRole: params['systemRole'],
+                    currencyCode: params['currencyCode'],
+                    taxCategoryCode: params['taxCategoryCode'],
+                  ),
+        ),
+        'archiveAccount': _is.MethodConnector(
+          name: 'archiveAccount',
+          params: {
+            'accountId': _is.ParameterDescription(
+              name: 'accountId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['ledger'] as _ia4une1r.LedgerEndpoint)
+                  .archiveAccount(
+                    session,
+                    params['accountId'],
+                  ),
+        ),
+        'saveDraftJournal': _is.MethodConnector(
+          name: 'saveDraftJournal',
+          params: {
+            'budgetId': _is.ParameterDescription(
+              name: 'budgetId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'date': _is.ParameterDescription(
+              name: 'date',
+              type: _is.getType<DateTime>(),
+              nullable: false,
+            ),
+            'lines': _is.ParameterDescription(
+              name: 'lines',
+              type: _is.getType<List<_in0sxdux.JournalLineInput>>(),
+              nullable: false,
+            ),
+            'journalId': _is.ParameterDescription(
+              name: 'journalId',
+              type: _is.getType<_is.UuidValue?>(),
+              nullable: true,
+            ),
+            'reference': _is.ParameterDescription(
+              name: 'reference',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'narration': _is.ParameterDescription(
+              name: 'narration',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+            'source': _is.ParameterDescription(
+              name: 'source',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['ledger'] as _ia4une1r.LedgerEndpoint)
+                  .saveDraftJournal(
+                    session,
+                    params['budgetId'],
+                    params['date'],
+                    params['lines'],
+                    journalId: params['journalId'],
+                    reference: params['reference'],
+                    narration: params['narration'],
+                    source: params['source'],
+                  ),
+        ),
+        'deleteDraftJournal': _is.MethodConnector(
+          name: 'deleteDraftJournal',
+          params: {
+            'journalId': _is.ParameterDescription(
+              name: 'journalId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['ledger'] as _ia4une1r.LedgerEndpoint)
+                  .deleteDraftJournal(
+                    session,
+                    params['journalId'],
+                  ),
+        ),
+        'postJournal': _is.MethodConnector(
+          name: 'postJournal',
+          params: {
+            'journalId': _is.ParameterDescription(
+              name: 'journalId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['ledger'] as _ia4une1r.LedgerEndpoint).postJournal(
+                    session,
+                    params['journalId'],
+                  ),
+        ),
+        'reverseJournal': _is.MethodConnector(
+          name: 'reverseJournal',
+          params: {
+            'journalId': _is.ParameterDescription(
+              name: 'journalId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'date': _is.ParameterDescription(
+              name: 'date',
+              type: _is.getType<DateTime>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['ledger'] as _ia4une1r.LedgerEndpoint)
+                  .reverseJournal(
+                    session,
+                    params['journalId'],
+                    params['date'],
+                  ),
+        ),
+        'listJournals': _is.MethodConnector(
+          name: 'listJournals',
+          params: {
+            'budgetId': _is.ParameterDescription(
+              name: 'budgetId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'fromDate': _is.ParameterDescription(
+              name: 'fromDate',
+              type: _is.getType<DateTime?>(),
+              nullable: true,
+            ),
+            'toDate': _is.ParameterDescription(
+              name: 'toDate',
+              type: _is.getType<DateTime?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['ledger'] as _ia4une1r.LedgerEndpoint)
+                  .listJournals(
+                    session,
+                    params['budgetId'],
+                    fromDate: params['fromDate'],
+                    toDate: params['toDate'],
+                  ),
+        ),
+        'setLockDate': _is.MethodConnector(
+          name: 'setLockDate',
+          params: {
+            'budgetId': _is.ParameterDescription(
+              name: 'budgetId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'lockDate': _is.ParameterDescription(
+              name: 'lockDate',
+              type: _is.getType<DateTime>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['ledger'] as _ia4une1r.LedgerEndpoint).setLockDate(
+                    session,
+                    params['budgetId'],
+                    params['lockDate'],
+                  ),
+        ),
+        'trialBalance': _is.MethodConnector(
+          name: 'trialBalance',
+          params: {
+            'budgetId': _is.ParameterDescription(
+              name: 'budgetId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'asOf': _is.ParameterDescription(
+              name: 'asOf',
+              type: _is.getType<DateTime>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['ledger'] as _ia4une1r.LedgerEndpoint)
+                  .trialBalance(
+                    session,
+                    params['budgetId'],
+                    params['asOf'],
+                  ),
         ),
       },
     );

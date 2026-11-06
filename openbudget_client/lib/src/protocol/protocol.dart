@@ -33,6 +33,12 @@ import 'package:openbudget_client/src/protocol/envelopes/envelope.dart'
     as _i29jf3by;
 import 'package:openbudget_client/src/protocol/institutions/institution.dart'
     as _i6ysl1a4;
+import 'package:openbudget_client/src/protocol/ledger/journal.dart'
+    as _izuizaeu;
+import 'package:openbudget_client/src/protocol/ledger/journal_line_input.dart'
+    as _i3j8x5or;
+import 'package:openbudget_client/src/protocol/ledger/ledger_account.dart'
+    as _ixq9t892;
 import 'package:openbudget_client/src/protocol/monthly_allocations/monthly_allocation.dart'
     as _iz3b7rge;
 import 'package:openbudget_client/src/protocol/payees/payee.dart' as _iaf6ifsb;
@@ -110,6 +116,14 @@ import 'fx_rates/fx_rate_quote.dart' as _i15udi7x;
 import 'fx_rates/fx_rate_snapshot.dart' as _i4xgo4ij;
 import 'institutions/institution.dart' as _ikgmcjq7;
 import 'institutions/institution_location.dart' as _iclizrec;
+import 'ledger/journal.dart' as _iqqjzj2w;
+import 'ledger/journal_line.dart' as _i6l0fo54;
+import 'ledger/journal_line_input.dart' as _id7zp91q;
+import 'ledger/ledger_account.dart' as _ivazbnnp;
+import 'ledger/ledger_audit_event.dart' as _ipq97xjw;
+import 'ledger/ledger_period_lock.dart' as _i7t4btg4;
+import 'ledger/trial_balance_row_view.dart' as _i5gsx3ds;
+import 'ledger/trial_balance_view.dart' as _i7q128aw;
 import 'monthly_allocations/monthly_allocation.dart' as _igdgld5u;
 import 'payees/payee.dart' as _ignezpci;
 import 'plaid/plaid_connection.dart' as _i1vmvtrm;
@@ -180,6 +194,14 @@ export 'fx_rates/fx_rate_quote.dart';
 export 'fx_rates/fx_rate_snapshot.dart';
 export 'institutions/institution.dart';
 export 'institutions/institution_location.dart';
+export 'ledger/journal.dart';
+export 'ledger/journal_line.dart';
+export 'ledger/journal_line_input.dart';
+export 'ledger/ledger_account.dart';
+export 'ledger/ledger_audit_event.dart';
+export 'ledger/ledger_period_lock.dart';
+export 'ledger/trial_balance_row_view.dart';
+export 'ledger/trial_balance_view.dart';
 export 'monthly_allocations/monthly_allocation.dart';
 export 'payees/payee.dart';
 export 'plaid/plaid_connection.dart';
@@ -265,6 +287,14 @@ class Protocol extends _isc.SerializationManager
           _isc.getType<_i4xgo4ij.FxRateSnapshot>,
           _isc.getType<_ikgmcjq7.Institution>,
           _isc.getType<_iclizrec.InstitutionLocation>,
+          _isc.getType<_iqqjzj2w.Journal>,
+          _isc.getType<_i6l0fo54.JournalLine>,
+          _isc.getType<_id7zp91q.JournalLineInput>,
+          _isc.getType<_ivazbnnp.LedgerAccount>,
+          _isc.getType<_ipq97xjw.LedgerAuditEvent>,
+          _isc.getType<_i7t4btg4.LedgerPeriodLock>,
+          _isc.getType<_i5gsx3ds.TrialBalanceRowView>,
+          _isc.getType<_i7q128aw.TrialBalanceView>,
           _isc.getType<_igdgld5u.MonthlyAllocation>,
           _isc.getType<_ignezpci.Payee>,
           _isc.getType<_i1vmvtrm.PlaidConnection>,
@@ -335,6 +365,14 @@ class Protocol extends _isc.SerializationManager
           _isc.getType<_i4xgo4ij.FxRateSnapshot?>,
           _isc.getType<_ikgmcjq7.Institution?>,
           _isc.getType<_iclizrec.InstitutionLocation?>,
+          _isc.getType<_iqqjzj2w.Journal?>,
+          _isc.getType<_i6l0fo54.JournalLine?>,
+          _isc.getType<_id7zp91q.JournalLineInput?>,
+          _isc.getType<_ivazbnnp.LedgerAccount?>,
+          _isc.getType<_ipq97xjw.LedgerAuditEvent?>,
+          _isc.getType<_i7t4btg4.LedgerPeriodLock?>,
+          _isc.getType<_i5gsx3ds.TrialBalanceRowView?>,
+          _isc.getType<_i7q128aw.TrialBalanceView?>,
           _isc.getType<_igdgld5u.MonthlyAllocation?>,
           _isc.getType<_ignezpci.Payee?>,
           _isc.getType<_i1vmvtrm.PlaidConnection?>,
@@ -360,6 +398,7 @@ class Protocol extends _isc.SerializationManager
           _isc.getType<_i9uqpb1b.WalletConnection?>,
           _isc.getType<_iqqppnaa.WalletHolding?>,
           _isc.getType<List<_i15udi7x.FxRateQuote>>,
+          _isc.getType<List<_i5gsx3ds.TrialBalanceRowView>>,
           _isc.getType<List<_ic4zfx3b.TaxBandSliceView>>,
           _isc.getType<List<_i6llsezf.TaxReportLineView>>,
           _isc.getType<List<_ivss6b81.TaxLiabilityView>>,
@@ -380,6 +419,9 @@ class Protocol extends _isc.SerializationManager
           _isc.getType<List<_i29jf3by.Envelope>>,
           _isc.getType<List<String>>,
           _isc.getType<List<_i6ysl1a4.Institution>>,
+          _isc.getType<List<_ixq9t892.LedgerAccount>>,
+          _isc.getType<List<_i3j8x5or.JournalLineInput>>,
+          _isc.getType<List<_izuizaeu.Journal>>,
           _isc.getType<List<_iaf6ifsb.Payee>>,
           _isc.getType<List<_i41tn6nr.RecurringTransaction>>,
           _isc.getType<List<_i1b8tal0.SolanaWallet>>,
@@ -445,6 +487,14 @@ class Protocol extends _isc.SerializationManager
           'FxRateSnapshot',
           'Institution',
           'InstitutionLocation',
+          'Journal',
+          'JournalLine',
+          'JournalLineInput',
+          'LedgerAccount',
+          'LedgerAuditEvent',
+          'LedgerPeriodLock',
+          'TrialBalanceRowView',
+          'TrialBalanceView',
           'MonthlyAllocation',
           'Payee',
           'PlaidConnection',
@@ -633,6 +683,30 @@ class Protocol extends _isc.SerializationManager
     }
     if (t == _iclizrec.InstitutionLocation) {
       return _iclizrec.InstitutionLocation.fromJson(data) as T;
+    }
+    if (t == _iqqjzj2w.Journal) {
+      return _iqqjzj2w.Journal.fromJson(data) as T;
+    }
+    if (t == _i6l0fo54.JournalLine) {
+      return _i6l0fo54.JournalLine.fromJson(data) as T;
+    }
+    if (t == _id7zp91q.JournalLineInput) {
+      return _id7zp91q.JournalLineInput.fromJson(data) as T;
+    }
+    if (t == _ivazbnnp.LedgerAccount) {
+      return _ivazbnnp.LedgerAccount.fromJson(data) as T;
+    }
+    if (t == _ipq97xjw.LedgerAuditEvent) {
+      return _ipq97xjw.LedgerAuditEvent.fromJson(data) as T;
+    }
+    if (t == _i7t4btg4.LedgerPeriodLock) {
+      return _i7t4btg4.LedgerPeriodLock.fromJson(data) as T;
+    }
+    if (t == _i5gsx3ds.TrialBalanceRowView) {
+      return _i5gsx3ds.TrialBalanceRowView.fromJson(data) as T;
+    }
+    if (t == _i7q128aw.TrialBalanceView) {
+      return _i7q128aw.TrialBalanceView.fromJson(data) as T;
     }
     if (t == _igdgld5u.MonthlyAllocation) {
       return _igdgld5u.MonthlyAllocation.fromJson(data) as T;
@@ -913,6 +987,38 @@ class Protocol extends _isc.SerializationManager
               : null)
           as T;
     }
+    if (t == _isc.getType<_iqqjzj2w.Journal?>()) {
+      return (data != null ? _iqqjzj2w.Journal.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_i6l0fo54.JournalLine?>()) {
+      return (data != null ? _i6l0fo54.JournalLine.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_id7zp91q.JournalLineInput?>()) {
+      return (data != null ? _id7zp91q.JournalLineInput.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_ivazbnnp.LedgerAccount?>()) {
+      return (data != null ? _ivazbnnp.LedgerAccount.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_ipq97xjw.LedgerAuditEvent?>()) {
+      return (data != null ? _ipq97xjw.LedgerAuditEvent.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_i7t4btg4.LedgerPeriodLock?>()) {
+      return (data != null ? _i7t4btg4.LedgerPeriodLock.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_i5gsx3ds.TrialBalanceRowView?>()) {
+      return (data != null
+              ? _i5gsx3ds.TrialBalanceRowView.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _isc.getType<_i7q128aw.TrialBalanceView?>()) {
+      return (data != null ? _i7q128aw.TrialBalanceView.fromJson(data) : null)
+          as T;
+    }
     if (t == _isc.getType<_igdgld5u.MonthlyAllocation?>()) {
       return (data != null ? _igdgld5u.MonthlyAllocation.fromJson(data) : null)
           as T;
@@ -1019,6 +1125,12 @@ class Protocol extends _isc.SerializationManager
     if (t == List<_i15udi7x.FxRateQuote>) {
       return (data as List)
               .map((e) => deserialize<_i15udi7x.FxRateQuote>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_i5gsx3ds.TrialBalanceRowView>) {
+      return (data as List)
+              .map((e) => deserialize<_i5gsx3ds.TrialBalanceRowView>(e))
               .toList()
           as T;
     }
@@ -1131,6 +1243,24 @@ class Protocol extends _isc.SerializationManager
     if (t == List<_i6ysl1a4.Institution>) {
       return (data as List)
               .map((e) => deserialize<_i6ysl1a4.Institution>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_ixq9t892.LedgerAccount>) {
+      return (data as List)
+              .map((e) => deserialize<_ixq9t892.LedgerAccount>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_i3j8x5or.JournalLineInput>) {
+      return (data as List)
+              .map((e) => deserialize<_i3j8x5or.JournalLineInput>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_izuizaeu.Journal>) {
+      return (data as List)
+              .map((e) => deserialize<_izuizaeu.Journal>(e))
               .toList()
           as T;
     }
@@ -1272,6 +1402,14 @@ class Protocol extends _isc.SerializationManager
       _i4xgo4ij.FxRateSnapshot => 'FxRateSnapshot',
       _ikgmcjq7.Institution => 'Institution',
       _iclizrec.InstitutionLocation => 'InstitutionLocation',
+      _iqqjzj2w.Journal => 'Journal',
+      _i6l0fo54.JournalLine => 'JournalLine',
+      _id7zp91q.JournalLineInput => 'JournalLineInput',
+      _ivazbnnp.LedgerAccount => 'LedgerAccount',
+      _ipq97xjw.LedgerAuditEvent => 'LedgerAuditEvent',
+      _i7t4btg4.LedgerPeriodLock => 'LedgerPeriodLock',
+      _i5gsx3ds.TrialBalanceRowView => 'TrialBalanceRowView',
+      _i7q128aw.TrialBalanceView => 'TrialBalanceView',
       _igdgld5u.MonthlyAllocation => 'MonthlyAllocation',
       _ignezpci.Payee => 'Payee',
       _i1vmvtrm.PlaidConnection => 'PlaidConnection',
@@ -1402,6 +1540,22 @@ class Protocol extends _isc.SerializationManager
         return 'Institution';
       case _iclizrec.InstitutionLocation():
         return 'InstitutionLocation';
+      case _iqqjzj2w.Journal():
+        return 'Journal';
+      case _i6l0fo54.JournalLine():
+        return 'JournalLine';
+      case _id7zp91q.JournalLineInput():
+        return 'JournalLineInput';
+      case _ivazbnnp.LedgerAccount():
+        return 'LedgerAccount';
+      case _ipq97xjw.LedgerAuditEvent():
+        return 'LedgerAuditEvent';
+      case _i7t4btg4.LedgerPeriodLock():
+        return 'LedgerPeriodLock';
+      case _i5gsx3ds.TrialBalanceRowView():
+        return 'TrialBalanceRowView';
+      case _i7q128aw.TrialBalanceView():
+        return 'TrialBalanceView';
       case _igdgld5u.MonthlyAllocation():
         return 'MonthlyAllocation';
       case _ignezpci.Payee():
@@ -1617,6 +1771,30 @@ class Protocol extends _isc.SerializationManager
     }
     if (dataClassName == 'InstitutionLocation') {
       return deserialize<_iclizrec.InstitutionLocation>(data['data']);
+    }
+    if (dataClassName == 'Journal') {
+      return deserialize<_iqqjzj2w.Journal>(data['data']);
+    }
+    if (dataClassName == 'JournalLine') {
+      return deserialize<_i6l0fo54.JournalLine>(data['data']);
+    }
+    if (dataClassName == 'JournalLineInput') {
+      return deserialize<_id7zp91q.JournalLineInput>(data['data']);
+    }
+    if (dataClassName == 'LedgerAccount') {
+      return deserialize<_ivazbnnp.LedgerAccount>(data['data']);
+    }
+    if (dataClassName == 'LedgerAuditEvent') {
+      return deserialize<_ipq97xjw.LedgerAuditEvent>(data['data']);
+    }
+    if (dataClassName == 'LedgerPeriodLock') {
+      return deserialize<_i7t4btg4.LedgerPeriodLock>(data['data']);
+    }
+    if (dataClassName == 'TrialBalanceRowView') {
+      return deserialize<_i5gsx3ds.TrialBalanceRowView>(data['data']);
+    }
+    if (dataClassName == 'TrialBalanceView') {
+      return deserialize<_i7q128aw.TrialBalanceView>(data['data']);
     }
     if (dataClassName == 'MonthlyAllocation') {
       return deserialize<_igdgld5u.MonthlyAllocation>(data['data']);
