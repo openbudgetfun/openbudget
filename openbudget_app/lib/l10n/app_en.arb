@@ -2266,5 +2266,144 @@
         "type": "String"
       }
     }
+  },
+  "booksEntryTitle": "Books",
+  "booksEntryEnableTitle": "Enable double-entry books",
+  "booksEnableDialogTitle": "Enable double-entry books?",
+  "booksEnableDialogBody": "Books add double-entry accounting to {budget}: a chart of accounts, journals and a trial balance. Envelopes keep working as they do today. The switch is one-way — once books are on for this budget, they cannot be turned back off.",
+  "booksEnableDialogConfirm": "Enable books",
+  "booksEnabledToast": "Double-entry books are on",
+  "booksEnableError": "We couldn't enable books. Try again.",
+  "booksTitle": "Books",
+  "booksTabJournals": "Journals",
+  "booksTabAccounts": "Accounts",
+  "booksTabTrialBalance": "Trial balance",
+  "booksLockDateLabel": "Lock date",
+  "booksLockDateNone": "No lock date",
+  "booksLockDateAction": "Set lock date",
+  "booksLockDateHint": "Posting and reversing on or before this date is blocked.",
+  "booksLockDateSavedToast": "Books locked through {date}",
+  "booksLockDateError": "We couldn't set the lock date. Try again.",
+  "booksJournalsLoadError": "We couldn't load your journals.",
+  "booksAccountsLoadError": "We couldn't load your chart of accounts.",
+  "booksTrialBalanceLoadError": "We couldn't load the trial balance.",
+  "booksNewJournalTooltip": "New journal",
+  "booksJournalEmptyTitle": "No journals yet",
+  "booksJournalEmptyMessage": "Post your first journal to start the books.",
+  "booksJournalEmptyAction": "New journal",
+  "booksAccountsEmptyTitle": "No accounts yet",
+  "booksAccountsEmptyMessage": "Your chart of accounts is seeded when books are enabled.",
+  "ledgerStatusDraft": "Draft",
+  "ledgerStatusPosted": "Posted",
+  "ledgerStatusReversed": "Reversed",
+  "ledgerAccountTypeAsset": "Assets",
+  "ledgerAccountTypeLiability": "Liabilities",
+  "ledgerAccountTypeEquity": "Equity",
+  "ledgerAccountTypeIncome": "Income",
+  "ledgerAccountTypeExpense": "Expenses",
+  "ledgerAccountArchived": "Archived",
+  "ledgerTrialBalanceBalanced": "Balanced",
+  "ledgerTrialBalanceUnbalanced": "Out of balance by {difference}",
+  "ledgerTrialBalanceEmpty": "No posted movement through this date yet.",
+  "ledgerColumnDebit": "Debit",
+  "ledgerColumnCredit": "Credit",
+  "ledgerTotalsLabel": "Totals",
+  "ledgerTrialBalanceAsOfLabel": "As of",
+  "ledgerRetry": "Try again",
+  "journalNewTitle": "New journal",
+  "journalDetailTitle": "Journal",
+  "journalDateLabel": "Date",
+  "journalReferenceLabel": "Reference",
+  "journalNarrationLabel": "Narration",
+  "journalLineAccountLabel": "Account",
+  "journalLinePickAccount": "Choose an account",
+  "journalLineSideDebit": "Debit",
+  "journalLineSideCredit": "Credit",
+  "journalLineAmountLabel": "Amount",
+  "journalAddLine": "Add line",
+  "journalRemoveLineTooltip": "Remove line",
+  "journalDebitsLabel": "Debits",
+  "journalCreditsLabel": "Credits",
+  "journalDifferenceLabel": "Difference",
+  "journalBalancedLabel": "Balanced",
+  "journalUnbalancedLabel": "Out of balance by {difference}",
+  "journalIssueAtLeastTwoLines": "A journal needs at least two lines.",
+  "journalIssueLineOneSideRequired": "Line {index} needs a positive amount on one side.",
+  "journalIssueUnbalancedFunctional": "Debits and credits do not match yet.",
+  "journalIssueFallback": "This journal is not ready to save.",
+  "journalAmountInvalid": "Enter a valid amount",
+  "journalSaveDraft": "Save draft",
+  "journalDraftSavedToast": "Draft saved",
+  "journalPost": "Post",
+  "journalPostConfirmTitle": "Post this journal?",
+  "journalPostConfirmBody": "Posting makes the journal permanent: posted journals cannot be edited or deleted. Mistakes are fixed by posting a reversal.",
+  "journalPostConfirmAction": "Post journal",
+  "journalPostedToast": "Journal posted",
+  "journalPostError": "We couldn't post this journal. Try again.",
+  "journalSaveError": "We couldn't save this draft. Try again.",
+  "journalDeleteTitle": "Delete this draft?",
+  "journalDeleteBody": "The draft and its lines will be removed. This cannot be undone.",
+  "journalDeleteAction": "Delete draft",
+  "journalDeletedToast": "Draft deleted",
+  "journalDeleteError": "We couldn't delete this draft. Try again.",
+  "journalReadOnlyBanner": "Posted journals cannot be edited. Fix mistakes with a reversal.",
+  "journalReverse": "Reverse",
+  "journalReverseConfirmTitle": "Reverse this journal?",
+  "journalReverseConfirmBody": "A mirror journal will undo this one on the date you choose. The original stays in the books, marked reversed.",
+  "journalReverseDateLabel": "Reversal date",
+  "journalReverseAction": "Reverse journal",
+  "journalReversedToast": "Journal reversed",
+  "journalReverseError": "We couldn't reverse this journal. Try again.",
+  "journalReversalOfLabel": "Reversal of {reference}",
+  "journalPostedAtLabel": "Posted {date}",
+  "journalDraftLinesUnavailable": "This draft's lines can't be shown here yet. Delete the draft and record it again to change them.",
+  "@booksEnableDialogBody": {
+    "placeholders": {
+      "budget": {
+        "type": "String"
+      }
+    }
+  },
+  "@booksLockDateSavedToast": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "@ledgerTrialBalanceUnbalanced": {
+    "placeholders": {
+      "difference": {
+        "type": "String"
+      }
+    }
+  },
+  "@journalUnbalancedLabel": {
+    "placeholders": {
+      "difference": {
+        "type": "String"
+      }
+    }
+  },
+  "@journalIssueLineOneSideRequired": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "@journalReversalOfLabel": {
+    "placeholders": {
+      "reference": {
+        "type": "String"
+      }
+    }
+  },
+  "@journalPostedAtLabel": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
   }
 }
