@@ -9,6 +9,14 @@
 let
   isCI = builtins.getEnv "CI" != "";
   extra = inputs.ifiokjr-nixpkgs.packages.${pkgs.stdenv.hostPlatform.system};
+
+  # Git exports GIT_DIR and friends to hooks. Flutter's launcher runs
+  # `git -C $FLUTTER_ROOT rev-parse HEAD` to check its tool snapshot; with
+  # GIT_DIR set that returns this repository's commit, so the launcher treats
+  # its snapshot as stale and deletes `bin/cache/flutter.version.json`. Pub
+  # then stops recognising the Flutter SDK ("openbudget_test_utils requires
+  # the Flutter SDK"). Hooks that run Dart or Flutter unset these first.
+  flutterHookEnv = "unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE GIT_COMMON_DIR GIT_PREFIX";
 in
 {
   packages =
@@ -62,7 +70,13 @@ in
         enable = true;
         name = "lint:commit";
         description = "Run dart analyze (fatal-infos) on the workspace.";
-        entry = "${config.env.DEVENV_PROFILE}/bin/dart analyze --fatal-infos";
+        entry = builtins.toString (
+          pkgs.writeShellScript "lint-commit" ''
+            set -e
+            ${flutterHookEnv}
+            ${config.env.DEVENV_PROFILE}/bin/dart analyze --fatal-infos
+          ''
+        );
         pass_filenames = false;
         always_run = true;
         stages = [ "pre-commit" ];
@@ -85,6 +99,7 @@ in
         entry = builtins.toString (
           pkgs.writeShellScript "lint-push" ''
             set -e
+            ${flutterHookEnv}
             export PATH="${config.env.DEVENV_PROFILE}/bin:$PATH"
             ${pkgs.dprint}/bin/dprint check
             ${config.env.DEVENV_PROFILE}/bin/dart analyze --fatal-infos
@@ -102,6 +117,7 @@ in
         entry = builtins.toString (
           pkgs.writeShellScript "test-push" ''
             set -e
+            ${flutterHookEnv}
             export PATH="${config.env.DEVENV_PROFILE}/bin:$PATH"
             echo "Running tests in background — push will proceed. Check terminal output."
             ${config.env.DEVENV_PROFILE}/bin/dart run melos run test --no-select &
