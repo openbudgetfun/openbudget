@@ -38,20 +38,6 @@ String formatRateBasisPoints(int basisPoints) {
       : percent.toStringAsFixed(2);
 }
 
-/// An amount in minor units as a plain field value, without a currency symbol.
-String minorToPlainText(int minor, int decimals) =>
-    (minor / pow10(decimals)).toStringAsFixed(decimals);
-
-/// Parses a plain field value into minor units, or null when it is not a
-/// non-negative number.
-int? parsePlainMinor(String text, int decimals) {
-  final normalized = text.trim().replaceAll(',', '');
-  if (normalized.isEmpty) return null;
-  final amount = double.tryParse(normalized);
-  if (amount == null || amount < 0) return null;
-  return (amount * pow10(decimals)).round();
-}
-
 /// The server's validation text for a rejected input, otherwise the
 /// localized [fallback].
 ///
@@ -61,11 +47,3 @@ String taxErrorMessage(Object error, String fallback) => switch (error) {
   ValidationException(:final message) when message.isNotEmpty => message,
   _ => fallback,
 };
-
-double pow10(int exponent) {
-  var result = 1.0;
-  for (var i = 0; i < exponent; i++) {
-    result *= 10;
-  }
-  return result;
-}

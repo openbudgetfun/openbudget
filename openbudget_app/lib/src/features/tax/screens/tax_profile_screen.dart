@@ -122,7 +122,7 @@ class _TaxProfileForm extends HookConsumerWidget {
     final foreignExclusionController = useTextEditingController(
       text: us == null
           ? ''
-          : minorToPlainText(us.foreignEarnedIncomeExclusionMinor, 2),
+          : formatMinorUnits(us.foreignEarnedIncomeExclusionMinor, 2),
     );
     final dependentsUnder17Controller = useTextEditingController(
       text: us == null
@@ -146,7 +146,7 @@ class _TaxProfileForm extends HookConsumerWidget {
     final annualRentController = useTextEditingController(
       text: ng == null
           ? ''
-          : minorToPlainText(ng.annualRentMinor, CurrencyCode.ngn.decimals),
+          : formatMinorUnits(ng.annualRentMinor, CurrencyCode.ngn.decimals),
     );
     final smallCompanyCeiling = useState(
       ng?.smallCompanyCeiling ?? NgSmallCompanyCeiling.ntaGazette,
@@ -168,7 +168,7 @@ class _TaxProfileForm extends HookConsumerWidget {
     final pensionController = useTextEditingController(
       text: de == null
           ? ''
-          : minorToPlainText(
+          : formatMinorUnits(
               de.statutoryPensionMinor,
               CurrencyCode.eur.decimals,
             ),
@@ -176,7 +176,7 @@ class _TaxProfileForm extends HookConsumerWidget {
     final priorTurnoverController = useTextEditingController(
       text: de == null || de.previousYearTurnoverMinor == 0
           ? ''
-          : minorToPlainText(
+          : formatMinorUnits(
               de.previousYearTurnoverMinor,
               CurrencyCode.eur.decimals,
             ),
@@ -230,7 +230,7 @@ class _TaxProfileForm extends HookConsumerWidget {
         homeOfficeMethod: homeOfficeMethod.value,
         specifiedServiceTrade: specifiedServiceTrade.value,
         foreignEarnedIncomeExclusionMinor:
-            parsePlainMinor(foreignExclusionController.text, 2) ?? 0,
+            parseMinorUnits(foreignExclusionController.text, 2) ?? 0,
         taxpayer65OrOlder: taxpayer65OrOlder.value,
         spouse65OrOlder: spouse65OrOlder.value,
         taxpayerHasSsn: taxpayerHasSsn.value,
@@ -252,7 +252,7 @@ class _TaxProfileForm extends HookConsumerWidget {
         entityKind: entityKind.value,
         salesTaxRegistered: salesTaxRegistered.value,
         annualRentMinor:
-            parsePlainMinor(
+            parseMinorUnits(
               annualRentController.text,
               CurrencyCode.ngn.decimals,
             ) ??
@@ -271,13 +271,13 @@ class _TaxProfileForm extends HookConsumerWidget {
         children: _wholeCount(childrenController.text) ?? 0,
         spouseEmployed: spouseEmployed.value,
         statutoryPensionMinor:
-            parsePlainMinor(
+            parseMinorUnits(
               pensionController.text,
               CurrencyCode.eur.decimals,
             ) ??
             0,
         previousYearTurnoverMinor:
-            parsePlainMinor(
+            parseMinorUnits(
               priorTurnoverController.text,
               CurrencyCode.eur.decimals,
             ) ??
@@ -294,7 +294,7 @@ class _TaxProfileForm extends HookConsumerWidget {
       if (country.value == TaxJurisdiction.ng) {
         final rentText = annualRentController.text.trim();
         if (rentText.isNotEmpty &&
-            parsePlainMinor(rentText, CurrencyCode.ngn.decimals) == null) {
+            parseMinorUnits(rentText, CurrencyCode.ngn.decimals) == null) {
           rentError.value = l10n.taxNgAnnualRentError;
           return;
         }
@@ -324,7 +324,7 @@ class _TaxProfileForm extends HookConsumerWidget {
         if (euroTexts.any(
           (text) =>
               text.trim().isNotEmpty &&
-              parsePlainMinor(text, CurrencyCode.eur.decimals) == null,
+              parseMinorUnits(text, CurrencyCode.eur.decimals) == null,
         )) {
           formError.value = l10n.taxDeAmountError;
           return;

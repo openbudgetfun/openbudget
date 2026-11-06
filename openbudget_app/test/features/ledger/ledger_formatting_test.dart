@@ -7,47 +7,6 @@ import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 
 void main() {
-  group('parseAmountToMinor', () {
-    test('parses whole and fractional figures', () {
-      expect(parseAmountToMinor('12.34', 2), 1234);
-      expect(parseAmountToMinor('10', 2), 1000);
-      expect(parseAmountToMinor('0.1', 2), 10);
-      expect(parseAmountToMinor('.5', 2), 50);
-      expect(parseAmountToMinor('12.', 2), 1200);
-      expect(parseAmountToMinor('1,234.56', 2), 123456);
-    });
-
-    test('honours the currency exponent', () {
-      expect(parseAmountToMinor('7', 0), 7);
-      expect(parseAmountToMinor('1234', 0), 1234);
-      expect(parseAmountToMinor('7.5', 0), isNull);
-    });
-
-    test('rejects anything that is not a clean non-negative amount', () {
-      expect(parseAmountToMinor('', 2), isNull);
-      expect(parseAmountToMinor('   ', 2), isNull);
-      expect(parseAmountToMinor('-1', 2), isNull);
-      expect(parseAmountToMinor('abc', 2), isNull);
-      expect(parseAmountToMinor('12.3.4', 2), isNull);
-      expect(parseAmountToMinor('12.345', 2), isNull);
-    });
-  });
-
-  group('minorToPlainString', () {
-    test('renders minor units as a plain figure', () {
-      expect(minorToPlainString(1234, 2), '12.34');
-      expect(minorToPlainString(5, 2), '0.05');
-      expect(minorToPlainString(-5, 2), '-0.05');
-      expect(minorToPlainString(0, 2), '0.00');
-      expect(minorToPlainString(123400, 2), '1234.00');
-    });
-
-    test('renders zero-decimal currencies without a fraction', () {
-      expect(minorToPlainString(7, 0), '7');
-      expect(minorToPlainString(-9, 0), '-9');
-    });
-  });
-
   group('ledgerErrorMessage', () {
     test('uses the server validation text when present', () {
       final error = ValidationException(message: 'Journal is locked.');
@@ -80,6 +39,7 @@ void main() {
           'lineOneSideRequired',
           'Line 2 (1000) must carry a positive debit or a positive credit, '
               'not both and not neither.',
+          lineIndex: 1,
         ),
       );
       expect(message, 'Line 2 needs a positive amount on one side.');

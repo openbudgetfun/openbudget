@@ -16,20 +16,6 @@ void main() {
     });
   });
 
-  group('plain minor units', () {
-    test('round-trips a field value', () {
-      expect(minorToPlainText(120000, 2), '1200.00');
-      expect(parsePlainMinor('1,200.00', 2), 120000);
-      expect(parsePlainMinor(' 42.5 ', 2), 4250);
-    });
-
-    test('rejects values that are not a non-negative number', () {
-      expect(parsePlainMinor('', 2), isNull);
-      expect(parsePlainMinor('twelve', 2), isNull);
-      expect(parsePlainMinor('-1', 2), isNull);
-    });
-  });
-
   group('currentTaxYearStart', () {
     test('uses the UK year that contains 6 April', () {
       expect(

@@ -332,7 +332,7 @@ class JournalEditorScreen extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final lineInputs = <JournalLineInput>[];
     for (final line in lines) {
-      final amount = parseAmountToMinor(line.controller.text, decimals);
+      final amount = parseMinorUnits(line.controller.text, decimals);
       final accountId = line.accountId;
       if (amount == null || amount == 0 || accountId == null) return;
       lineInputs.add(
@@ -542,15 +542,15 @@ class _TotalsCard extends HookWidget {
         children: [
           _TotalRow(
             label: l10n.journalDebitsLabel,
-            amount: minorToPlainString(debits, decimals),
+            amount: formatMinorUnits(debits, decimals),
           ),
           _TotalRow(
             label: l10n.journalCreditsLabel,
-            amount: minorToPlainString(credits, decimals),
+            amount: formatMinorUnits(credits, decimals),
           ),
           _TotalRow(
             label: l10n.journalDifferenceLabel,
-            amount: minorToPlainString(difference, decimals),
+            amount: formatMinorUnits(difference, decimals),
           ),
           const SizedBox(height: SpacingTokens.sm),
           if (issues.isEmpty && missingAccountLines.isEmpty)
@@ -701,7 +701,7 @@ class _EditorActionBar extends HookWidget {
   var debit = 0;
   var credit = 0;
   for (final line in lines) {
-    final amount = parseAmountToMinor(line.amountText, decimals) ?? 0;
+    final amount = parseMinorUnits(line.amountText, decimals) ?? 0;
     if (amount <= 0) continue;
     if (line.isDebit) {
       debit += amount;
@@ -728,18 +728,18 @@ List<LedgerValidationIssue> _validateDraft(
       JournalLineDraft(
         accountCode: line.accountId ?? '',
         debitMinor: line.isDebit
-            ? parseAmountToMinor(line.amountText, decimals) ?? 0
+            ? parseMinorUnits(line.amountText, decimals) ?? 0
             : 0,
         creditMinor: line.isDebit
             ? 0
-            : parseAmountToMinor(line.amountText, decimals) ?? 0,
+            : parseMinorUnits(line.amountText, decimals) ?? 0,
         currencyCode: currency,
         functionalDebitMinor: line.isDebit
-            ? parseAmountToMinor(line.amountText, decimals) ?? 0
+            ? parseMinorUnits(line.amountText, decimals) ?? 0
             : 0,
         functionalCreditMinor: line.isDebit
             ? 0
-            : parseAmountToMinor(line.amountText, decimals) ?? 0,
+            : parseMinorUnits(line.amountText, decimals) ?? 0,
         exchangeRate: '1',
         rateDate: today,
         rateSource: 'manual',

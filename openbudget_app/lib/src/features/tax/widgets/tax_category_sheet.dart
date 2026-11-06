@@ -112,7 +112,7 @@ class _TaxCategorySheet extends HookConsumerWidget {
     final salesTaxController = useTextEditingController(
       text: salesTaxCents == null
           ? ''
-          : minorToPlainText(salesTaxCents!, currencyDecimals),
+          : formatMinorUnits(salesTaxCents!, currencyDecimals),
     );
     final salesTaxError = useState<String?>(null);
     final saveError = useState<String?>(null);
@@ -129,7 +129,7 @@ class _TaxCategorySheet extends HookConsumerWidget {
       int? parsedSalesTax;
       salesTaxError.value = null;
       if (_isTransaction && salesTaxText.isNotEmpty) {
-        final parsed = parsePlainMinor(salesTaxText, currencyDecimals);
+        final parsed = parseMinorUnits(salesTaxText, currencyDecimals);
         if (parsed == null) {
           salesTaxError.value = l10n.taxTransactionSalesTaxError;
           return;
