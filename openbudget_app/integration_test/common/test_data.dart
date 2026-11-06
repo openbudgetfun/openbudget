@@ -30,6 +30,24 @@ abstract final class TestData {
       'Guidance only, not tax advice. Check figures with a qualified adviser '
       'before filing.';
   static const taxYearLabel = 'Tax year 2026/27';
+
+  // Books (double-entry ledger)
+  static const companyBudgetName = 'Studio Ltd';
+  static const booksEnableTitle = 'Enable double-entry books';
+  static const booksEnableConfirm = 'Enable books';
+  static const booksEnabledToast = 'Double-entry books are on';
+  static const journalReference = 'JB-2026-0099';
+  static const draftJournalReference = 'JB-2026-0100';
+  static const journalNarration = 'Client invoice';
+  static const journalAmount = '50.00';
+  static const bankAccountLabel = '1000 Bank';
+  static const salesAccountLabel = '4000 Sales';
+  static const balancedLabel = 'Balanced';
+  static const postedLabel = 'Posted';
+  static const reversedLabel = 'Reversed';
+  static const trialBalanceTab = 'Trial balance';
+  static const bankAccountRow = 'Bank';
+  static const salesAccountRow = 'Sales';
   // Assistant
   static const assistantBudgetId = '00000000-0000-0000-0000-000000000f01';
   static const assistantUserId = '00000000-0000-0000-0000-000000000f02';

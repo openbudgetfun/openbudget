@@ -12,6 +12,7 @@ export 'src/ledger/trial_balance.dart';
 export 'src/logging/log_entry.dart';
 export 'src/logging/log_formatter.dart';
 export 'src/logging/ob_logger.dart';
+export 'src/money/minor_units.dart';
 export 'src/tax/de/de_tax_rules.dart';
 export 'src/tax/gb/gb.dart';
 export 'src/tax/ng/ng_tax_rules.dart';
