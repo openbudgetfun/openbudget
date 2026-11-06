@@ -400,6 +400,12 @@ abstract class AppLocalizations {
   /// **'{days, plural, =1{Age of Money: 1 day} other{Age of Money: {days} days}}'**
   String ageOfMoneyLabel(int days);
 
+  /// No description provided for @amountInvalidFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid amount with at most {decimals} decimal places'**
+  String amountInvalidFormat(int decimals);
+
   /// No description provided for @appTitle.
   ///
   /// In en, this message translates to:

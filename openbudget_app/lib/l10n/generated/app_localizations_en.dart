@@ -176,6 +176,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String amountInvalidFormat(int decimals) {
+    return 'Enter a valid amount with at most $decimals decimal places';
+  }
+
+  @override
   String get appTitle => 'OpenBudget';
 
   @override
