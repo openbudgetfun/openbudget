@@ -371,8 +371,11 @@ class TaxService {
     }
   }
 
-  /// Decodes a client-provided profile, checking value types before handing
-  /// the map to [TaxProfile.fromJson].
+  /// Decodes a stored or client-provided profile.
+  ///
+  /// [TaxProfile.fromJson] is the single definition of a profile's fields:
+  /// it rejects wrong types and unknown values, and its `toJson` drops any
+  /// keys it does not know, so saving through it normalises the stored row.
   static TaxProfile _decodeProfile(String profileJson) {
     final Object? decoded;
     try {
@@ -386,121 +389,13 @@ class TaxService {
       throw ValidationException(message: 'profileJson must be a JSON object.');
     }
 
-    final sanitized = _sanitizeProfileJson(decoded);
     try {
-      return TaxProfile.fromJson(sanitized);
+      return TaxProfile.fromJson(decoded);
     } on FormatException catch (error) {
       throw ValidationException(
         message: 'profileJson is not a valid tax profile: ${error.message}',
       );
     }
-  }
-
-  static Map<String, Object?> _sanitizeProfileJson(
-    Map<String, Object?> json,
-  ) {
-    final jurisdictionCode = _requiredString(json, 'jurisdiction');
-    final entityKind = _requiredString(json, 'entityKind');
-    _parseEntityKind(entityKind);
-    final sanitized = <String, Object?>{
-      'jurisdiction': jurisdictionCode,
-      'entityKind': entityKind,
-      'salesTaxRegistered': _optional<bool>(json, 'salesTaxRegistered'),
-    };
-
-    switch (TaxJurisdiction.fromCountryCode(jurisdictionCode)) {
-      case TaxJurisdiction.gb:
-        final studentLoanPlan = _optional<String>(json, 'studentLoanPlan');
-        if (studentLoanPlan != null &&
-            !GbStudentLoanPlan.values.any(
-              (plan) => plan.name == studentLoanPlan,
-            )) {
-          throw ValidationException(
-            message:
-                'profileJson has an unknown student loan plan '
-                '"$studentLoanPlan".',
-          );
-        }
-        sanitized.addAll({
-          'scottishTaxpayer': _optional<bool>(json, 'scottishTaxpayer'),
-          'studentLoanPlan': studentLoanPlan,
-        });
-      case TaxJurisdiction.us:
-        final filingStatus = _optional<String>(json, 'filingStatus');
-        if (filingStatus != null &&
-            !UsFilingStatus.values.any(
-              (status) => status.name == filingStatus,
-            )) {
-          throw ValidationException(
-            message:
-                'profileJson has an unknown filing status "$filingStatus".',
-          );
-        }
-        final homeOfficeMethod = _optional<String>(json, 'homeOfficeMethod');
-        if (homeOfficeMethod != null &&
-            !UsHomeOfficeMethod.values.any(
-              (method) => method.name == homeOfficeMethod,
-            )) {
-          throw ValidationException(
-            message:
-                'profileJson has an unknown home office method '
-                '"$homeOfficeMethod".',
-          );
-        }
-        sanitized['filingStatus'] = filingStatus;
-        sanitized.addAll({
-          'homeOfficeMethod': homeOfficeMethod,
-          'specifiedServiceTrade': _optional<bool>(
-            json,
-            'specifiedServiceTrade',
-          ),
-          'foreignEarnedIncomeExclusionMinor': _optional<int>(
-            json,
-            'foreignEarnedIncomeExclusionMinor',
-          ),
-          'taxpayer65OrOlder': _optional<bool>(json, 'taxpayer65OrOlder'),
-          'spouse65OrOlder': _optional<bool>(json, 'spouse65OrOlder'),
-          'taxpayerHasSsn': _optional<bool>(json, 'taxpayerHasSsn'),
-          'spouseHasSsn': _optional<bool>(json, 'spouseHasSsn'),
-          'dependents': _optional<List<Object?>>(json, 'dependents'),
-        });
-      case TaxJurisdiction.ng:
-        sanitized['annualRentMinor'] = _optional<int>(json, 'annualRentMinor');
-      case TaxJurisdiction.de:
-        sanitized.addAll({
-          'jointAssessment': _optional<bool>(json, 'jointAssessment'),
-          'churchTax': _optional<bool>(json, 'churchTax'),
-          'smallBusinessExemption': _optional<bool>(
-            json,
-            'smallBusinessExemption',
-          ),
-        });
-      case null:
-        throw ValidationException(
-          message: 'Unsupported tax jurisdiction "$jurisdictionCode".',
-        );
-    }
-
-    return sanitized;
-  }
-
-  static String _requiredString(Map<String, Object?> json, String key) {
-    final value = json[key];
-    if (value is! String) {
-      throw ValidationException(
-        message: 'profileJson field "$key" must be a string.',
-      );
-    }
-    return value;
-  }
-
-  static T? _optional<T>(Map<String, Object?> json, String key) {
-    final value = json[key];
-    if (value == null) return null;
-    if (value is T) return value as T;
-    throw ValidationException(
-      message: 'profileJson field "$key" has the wrong type.',
-    );
   }
 
   static Future<TaxFxRates> _loadRates(Session session) async {
