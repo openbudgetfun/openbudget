@@ -7,6 +7,7 @@ import 'package:openbudget_app/src/features/accounts/providers/account_list_prov
 import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
 import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
+import 'package:openbudget_app/src/utils/money_input.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -44,10 +45,11 @@ String transferCurrency(
 }
 
 @visibleForTesting
-int parseTransferAmountCents(String amountText, String currencyCode) {
-  final amount = double.tryParse(amountText.trim()) ?? 0;
-  return (amount * _pow10(currencyDecimalsForCode(currencyCode))).round();
-}
+int? parseTransferAmountCents(String amountText, String currencyCode) =>
+    parseMoneyInput(
+      amountText,
+      decimals: currencyDecimalsForCode(currencyCode),
+    );
 
 class CreateTransferScreen extends HookConsumerWidget {
   const CreateTransferScreen({required this.budgetId, super.key});
@@ -68,6 +70,8 @@ class CreateTransferScreen extends HookConsumerWidget {
     final selectedDate = useState(DateTime.now());
     final isSubmitting = useState(false);
 
+    useListenable(amountController);
+
     return Scaffold(
       appBar: AppBar(title: Text(l10n.transferTitle)),
       body: accountsAsync.when(
@@ -86,6 +90,12 @@ class CreateTransferScreen extends HookConsumerWidget {
             fromAccountId: fromAccountId.value,
           );
           final zeroAmountHint = formatCentsForCode(0, selectedCurrency);
+          final amountDecimals = currencyDecimalsForCode(selectedCurrency);
+          final amountError = moneyInputError(
+            amountController.text,
+            decimals: amountDecimals,
+            message: l10n.amountInvalidFormat(amountDecimals),
+          );
 
           final toAccountOptions = transferDestinationAccounts(
             accounts,
@@ -161,6 +171,7 @@ class CreateTransferScreen extends HookConsumerWidget {
                 decoration: InputDecoration(
                   labelText:
                       '${l10n.transactionAmountLabel} (${normalizeCurrencyCode(selectedCurrency)})',
+                  errorText: amountError,
                   prefixText: '${currencySymbolForCode(selectedCurrency)} ',
                   hintText: zeroAmountHint,
                   prefixIcon: const SkribbleIcon(
@@ -276,7 +287,7 @@ class CreateTransferScreen extends HookConsumerWidget {
       amountController.text,
       currencyCode,
     );
-    if (amountCents <= 0) return;
+    if (amountCents == null || amountCents <= 0) return;
     isSubmitting.value = true;
 
     try {
@@ -308,12 +319,4 @@ class CreateTransferScreen extends HookConsumerWidget {
       );
     }
   }
-}
-
-double _pow10(int exponent) {
-  var result = 1.0;
-  for (var i = 0; i < exponent; i++) {
-    result *= 10;
-  }
-  return result;
 }

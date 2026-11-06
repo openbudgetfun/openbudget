@@ -60,19 +60,44 @@ class _FakeAccountActions extends AccountActions {
   }) async => _makeAccount(isClosed: isClosed ?? false);
 }
 
+class _RecordingAccountActions extends AccountActions {
+  int? updatedBalanceCents;
+
+  @override
+  FutureOr<void> build() {}
+
+  @override
+  Future<Account> updateAccount({
+    required String accountId,
+    required String budgetId,
+    String? name,
+    String? accountType,
+    int? balanceCents,
+    bool? onBudget,
+    int? sortOrder,
+    bool? isClosed,
+  }) async {
+    updatedBalanceCents = balanceCents;
+    return _makeAccount(isClosed: isClosed ?? false);
+  }
+}
+
 Widget _buildSubject({
   required Account account,
   VoidCallback? onDeleted,
   VoidCallback? onDeleteAction,
   bool throwOnDelete = false,
   List<Account>? accountListOverride,
+  AccountActions? actions,
 }) => ProviderScope(
   overrides: [
     accountActionsProvider.overrideWith(
-      () => _FakeAccountActions(
-        onDelete: onDeleteAction,
-        throwOnDelete: throwOnDelete,
-      ),
+      () =>
+          actions ??
+          _FakeAccountActions(
+            onDelete: onDeleteAction,
+            throwOnDelete: throwOnDelete,
+          ),
     ),
     if (accountListOverride != null)
       accountListProvider(
@@ -234,6 +259,77 @@ void main() {
         findsNothing,
       );
       expect(find.text('Edit Account'), findsNothing);
+    });
+  });
+
+  group('EditAccountDialog balance entry', () {
+    Future<void> openDialog(
+      WidgetTester tester,
+      AccountActions actions,
+    ) async {
+      await tester.pumpWidget(
+        _buildSubject(account: _makeAccount(), actions: actions),
+      );
+      await tester.tap(find.text('Open Edit Dialog'));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('saves 12.34 as 1234 minor units', (tester) async {
+      final actions = _RecordingAccountActions();
+      await openDialog(tester, actions);
+
+      await tester.enterText(find.byType(TextField).at(2), '12.34');
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(TextButton, 'Save'));
+      await tester.pumpAndSettle();
+
+      expect(actions.updatedBalanceCents, 1234);
+    });
+
+    testWidgets('refuses an over-precise amount instead of rounding it', (
+      tester,
+    ) async {
+      final actions = _RecordingAccountActions();
+      await openDialog(tester, actions);
+
+      await tester.enterText(find.byType(TextField).at(2), '12.345');
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('Enter a valid amount with at most 2 decimal places'),
+        findsOneWidget,
+      );
+
+      final saveButton = tester.widget<TextButton>(
+        find.widgetWithText(TextButton, 'Save'),
+      );
+      expect(saveButton.onPressed, isNull);
+      expect(actions.updatedBalanceCents, isNull);
+    });
+
+    testWidgets('refuses a negative balance', (tester) async {
+      final actions = _RecordingAccountActions();
+      await openDialog(tester, actions);
+
+      await tester.enterText(find.byType(TextField).at(2), '-12.34');
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('Enter a valid amount with at most 2 decimal places'),
+        findsOneWidget,
+      );
+
+      final saveButton = tester.widget<TextButton>(
+        find.widgetWithText(TextButton, 'Save'),
+      );
+      expect(saveButton.onPressed, isNull);
+      expect(actions.updatedBalanceCents, isNull);
+    });
+
+    testWidgets('shows the stored balance exactly', (tester) async {
+      await openDialog(tester, _RecordingAccountActions());
+
+      expect(find.text('50000.00'), findsOneWidget);
     });
   });
 }

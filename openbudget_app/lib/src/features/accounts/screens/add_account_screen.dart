@@ -15,6 +15,7 @@ import 'package:openbudget_app/src/features/budget/providers/budget_detail_provi
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
+import 'package:openbudget_app/src/utils/money_input.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -166,7 +167,14 @@ class AddAccountScreen extends HookConsumerWidget {
       ],
     );
 
-    final balanceValue = double.tryParse(balanceController.text.trim());
+    final balanceDecimals = currencyDecimalsForCode(
+      budgetAsync.value?.currencyCode ?? '',
+    );
+    final balanceValue = parseMoneyInput(
+      balanceController.text,
+      decimals: balanceDecimals,
+      allowNegative: true,
+    );
     final isWalletType = selectedType?.key == 'cryptoWallet';
     final canSubmit =
         selectedType != null &&
@@ -346,15 +354,13 @@ class AddAccountScreen extends HookConsumerWidget {
 
       isSubmitting.value = true;
 
-      final parsedBalance = isWalletType ? 0.0 : balanceValue;
+      final parsedBalance = isWalletType ? 0 : balanceValue;
       if (parsedBalance == null) {
         isSubmitting.value = false;
         return;
       }
 
-      var balanceCents =
-          (parsedBalance * _pow10(currencyDecimalsForCode(budget.currencyCode)))
-              .round();
+      var balanceCents = parsedBalance;
       if (chosenType.isDebt && balanceCents > 0) {
         balanceCents = -balanceCents;
       }
@@ -522,6 +528,7 @@ class AddAccountScreen extends HookConsumerWidget {
                   scrollController: unlinkedScrollController,
                   nameController: nameController,
                   balanceController: balanceController,
+                  currencyDecimals: balanceDecimals,
                   walletAddressController: walletAddressController,
                   showWalletAddress: isWalletType,
                   selectedTypeLabel:
@@ -1091,6 +1098,7 @@ class _UnlinkedAccountStep extends HookWidget {
     required this.scrollController,
     required this.nameController,
     required this.balanceController,
+    required this.currencyDecimals,
     required this.walletAddressController,
     required this.showWalletAddress,
     required this.selectedTypeLabel,
@@ -1102,6 +1110,7 @@ class _UnlinkedAccountStep extends HookWidget {
   final ScrollController scrollController;
   final TextEditingController nameController;
   final TextEditingController balanceController;
+  final int currencyDecimals;
   final TextEditingController walletAddressController;
   final bool showWalletAddress;
   final String selectedTypeLabel;
@@ -1127,6 +1136,12 @@ class _UnlinkedAccountStep extends HookWidget {
     final introText = showWalletAddress
         ? l10n.addAccountWalletIntro
         : l10n.addAccountUnlinkedIntro;
+    final balanceError = moneyInputError(
+      balanceController.text,
+      decimals: currencyDecimals,
+      allowNegative: true,
+      message: l10n.amountInvalidFormat(currencyDecimals),
+    );
 
     return SingleChildScrollView(
       key: _addAccountUnlinkedScrollKey,
@@ -1264,6 +1279,7 @@ class _UnlinkedAccountStep extends HookWidget {
               style: formValueStyle,
               decoration: InputDecoration(
                 hintText: l10n.addAccountBalanceExample,
+                errorText: balanceError,
               ),
             ),
           ],
@@ -1544,11 +1560,3 @@ List<_AccountTypeSection> _accountTypeSections(AppLocalizations l10n) => [
     ],
   ),
 ];
-
-double _pow10(int exponent) {
-  var result = 1.0;
-  for (var i = 0; i < exponent; i++) {
-    result *= 10;
-  }
-  return result;
-}

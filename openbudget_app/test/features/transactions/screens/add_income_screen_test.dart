@@ -5,10 +5,41 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
 import 'package:openbudget_app/src/features/payees/providers/payee_list_provider.dart';
+import 'package:openbudget_app/src/features/transactions/providers/transaction_actions_provider.dart';
 import 'package:openbudget_app/src/features/transactions/screens/add_income_screen.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
+
+class _RecordingIncomeActions extends TransactionActions {
+  int? incomeAmountCents;
+  String? incomeCurrencyCode;
+
+  @override
+  AsyncValue<void> build() => const AsyncValue.data(null);
+
+  @override
+  Future<Transaction> addIncome({
+    required String description,
+    required int amountCents,
+    required String currencyCode,
+    required String budgetId,
+    required DateTime date,
+    String? memo,
+  }) async {
+    incomeAmountCents = amountCents;
+    incomeCurrencyCode = currencyCode;
+    return Transaction(
+      description: description,
+      amountCents: amountCents,
+      currencyCode: currencyCode,
+      budgetId: UuidValue.fromString(
+        '00000000-0000-0000-0000-000000000001',
+      ),
+      transactionDate: date,
+    );
+  }
+}
 
 void main() {
   const budgetId = 'test-budget-1';
@@ -34,8 +65,14 @@ void main() {
     ),
   ];
 
-  Widget buildSubject({Budget? budget, List<Payee>? payees}) => ProviderScope(
+  Widget buildSubject({
+    Budget? budget,
+    List<Payee>? payees,
+    TransactionActions? actions,
+  }) => ProviderScope(
     overrides: [
+      if (actions != null)
+        transactionActionsProvider.overrideWith(() => actions),
       budgetDetailProvider.overrideWith(
         (ref, id) async => budget ?? makeBudget(),
       ),
@@ -49,7 +86,11 @@ void main() {
     ),
   );
 
-  Widget buildRoutedSubject({Budget? budget, List<Payee>? payees}) {
+  Widget buildRoutedSubject({
+    Budget? budget,
+    List<Payee>? payees,
+    TransactionActions? actions,
+  }) {
     final router = GoRouter(
       initialLocation: '/budgets/$budgetId/income/add',
       routes: [
@@ -76,6 +117,8 @@ void main() {
 
     return ProviderScope(
       overrides: [
+        if (actions != null)
+          transactionActionsProvider.overrideWith(() => actions),
         budgetDetailProvider.overrideWith(
           (ref, id) async => budget ?? makeBudget(),
         ),
@@ -284,6 +327,88 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('5000'), findsOneWidget);
+    });
+
+    testWidgets('saves 12.34 as 1234 minor units', (tester) async {
+      final actions = _RecordingIncomeActions();
+      await tester.pumpWidget(buildRoutedSubject(actions: actions));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Description'),
+        'Salary',
+      );
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Amount'),
+        '12.34',
+      );
+      await tester.pumpAndSettle();
+
+      await tester.ensureVisible(find.text('Save Transaction'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Save Transaction'));
+      await tester.pumpAndSettle();
+
+      expect(actions.incomeAmountCents, 1234);
+      expect(actions.incomeCurrencyCode, 'USD');
+    });
+
+    testWidgets('refuses an over-precise amount instead of rounding it', (
+      tester,
+    ) async {
+      final actions = _RecordingIncomeActions();
+      await tester.pumpWidget(buildRoutedSubject(actions: actions));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Description'),
+        'Salary',
+      );
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Amount'),
+        '12.345',
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('Enter a valid amount with at most 2 decimal places'),
+        findsOneWidget,
+      );
+
+      await tester.ensureVisible(find.text('Save Transaction'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Save Transaction'));
+      await tester.pumpAndSettle();
+
+      expect(actions.incomeAmountCents, isNull);
+    });
+
+    testWidgets('refuses a negative income amount', (tester) async {
+      final actions = _RecordingIncomeActions();
+      await tester.pumpWidget(buildRoutedSubject(actions: actions));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Description'),
+        'Salary',
+      );
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Amount'),
+        '-12.34',
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('Enter a valid amount with at most 2 decimal places'),
+        findsOneWidget,
+      );
+
+      await tester.ensureVisible(find.text('Save Transaction'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Save Transaction'));
+      await tester.pumpAndSettle();
+
+      expect(actions.incomeAmountCents, isNull);
     });
 
     testWidgets('shows amount hint in budget currency', (tester) async {

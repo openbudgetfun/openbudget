@@ -1,6 +1,7 @@
 import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
 import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
+import 'package:openbudget_app/src/utils/money_input.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -83,11 +84,12 @@ List<ImportRow> parseCsvText(String csv, String currencyCode) {
         ? cols[descCol]
         : 'Imported transaction';
     final amountText = cols[amountCol].replaceAll(RegExp(r'[^\d.\-]'), '');
-    final amount = double.tryParse(amountText);
-    if (amount == null) continue;
-
-    final amountCents = (amount * _pow10(currencyDecimalsForCode(currencyCode)))
-        .round();
+    final amountCents = parseMoneyInput(
+      amountText,
+      decimals: currencyDecimalsForCode(currencyCode),
+      allowNegative: true,
+    );
+    if (amountCents == null) continue;
 
     rows.add(
       ImportRow(
@@ -153,12 +155,4 @@ DateTime? _parseDate(String text) {
   }
 
   return null;
-}
-
-double _pow10(int exponent) {
-  var result = 1.0;
-  for (var i = 0; i < exponent; i++) {
-    result *= 10;
-  }
-  return result;
 }

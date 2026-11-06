@@ -8,10 +8,44 @@ import 'package:openbudget_app/src/features/budget/providers/budget_summary_prov
 import 'package:openbudget_app/src/features/payees/providers/payee_last_envelope_provider.dart';
 import 'package:openbudget_app/src/features/payees/providers/payee_list_provider.dart';
 import 'package:openbudget_app/src/features/transaction_rules/providers/rule_match_provider.dart';
+import 'package:openbudget_app/src/features/transactions/providers/transaction_actions_provider.dart';
 import 'package:openbudget_app/src/features/transactions/screens/add_expense_screen.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
+
+class _RecordingExpenseActions extends TransactionActions {
+  int? expenseAmountCents;
+  String? expenseCurrencyCode;
+
+  @override
+  AsyncValue<void> build() => const AsyncValue.data(null);
+
+  @override
+  Future<Transaction> addExpense({
+    required String description,
+    required int amountCents,
+    required String currencyCode,
+    required String budgetId,
+    required DateTime date,
+    String? envelopeId,
+    String? categoryId,
+    String? payeeId,
+    String? memo,
+  }) async {
+    expenseAmountCents = amountCents;
+    expenseCurrencyCode = currencyCode;
+    return Transaction(
+      description: description,
+      amountCents: amountCents,
+      currencyCode: currencyCode,
+      budgetId: UuidValue.fromString(
+        '00000000-0000-0000-0000-000000000001',
+      ),
+      transactionDate: date,
+    );
+  }
+}
 
 void main() {
   const budgetId = 'test-budget-1';
@@ -104,8 +138,11 @@ void main() {
     BudgetSummary? summary,
     String? Function(Ref, (String, String))? ruleMatchOverride,
     String? Function(Ref, (String, String))? payeeLastEnvelopeOverride,
+    TransactionActions? actions,
   }) => ProviderScope(
     overrides: [
+      if (actions != null)
+        transactionActionsProvider.overrideWith(() => actions),
       budgetDetailProvider.overrideWith(
         (ref, id) async => budget ?? makeBudget(),
       ),
@@ -137,6 +174,7 @@ void main() {
     BudgetSummary? summary,
     String? Function(Ref, (String, String))? ruleMatchOverride,
     String? Function(Ref, (String, String))? payeeLastEnvelopeOverride,
+    TransactionActions? actions,
   }) {
     final router = GoRouter(
       initialLocation: '/budgets/$budgetId/expenses/add',
@@ -164,6 +202,8 @@ void main() {
 
     return ProviderScope(
       overrides: [
+        if (actions != null)
+          transactionActionsProvider.overrideWith(() => actions),
         budgetDetailProvider.overrideWith(
           (ref, id) async => budget ?? makeBudget(),
         ),
@@ -393,6 +433,88 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('42.50'), findsOneWidget);
+    });
+
+    testWidgets('saves 12.34 as 1234 minor units', (tester) async {
+      final actions = _RecordingExpenseActions();
+      await tester.pumpWidget(buildRoutedSubject(actions: actions));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Description'),
+        'Coffee',
+      );
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Amount'),
+        '12.34',
+      );
+      await tester.pumpAndSettle();
+
+      await tester.ensureVisible(find.text('Save Transaction'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Save Transaction'));
+      await tester.pumpAndSettle();
+
+      expect(actions.expenseAmountCents, 1234);
+      expect(actions.expenseCurrencyCode, 'USD');
+    });
+
+    testWidgets('refuses an over-precise amount instead of rounding it', (
+      tester,
+    ) async {
+      final actions = _RecordingExpenseActions();
+      await tester.pumpWidget(buildRoutedSubject(actions: actions));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Description'),
+        'Coffee',
+      );
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Amount'),
+        '12.345',
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('Enter a valid amount with at most 2 decimal places'),
+        findsOneWidget,
+      );
+
+      await tester.ensureVisible(find.text('Save Transaction'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Save Transaction'));
+      await tester.pumpAndSettle();
+
+      expect(actions.expenseAmountCents, isNull);
+    });
+
+    testWidgets('refuses a negative expense amount', (tester) async {
+      final actions = _RecordingExpenseActions();
+      await tester.pumpWidget(buildRoutedSubject(actions: actions));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Description'),
+        'Coffee',
+      );
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Amount'),
+        '-12.34',
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('Enter a valid amount with at most 2 decimal places'),
+        findsOneWidget,
+      );
+
+      await tester.ensureVisible(find.text('Save Transaction'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Save Transaction'));
+      await tester.pumpAndSettle();
+
+      expect(actions.expenseAmountCents, isNull);
     });
 
     testWidgets('shows negative amount hint in budget currency', (

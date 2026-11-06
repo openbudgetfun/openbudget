@@ -15,6 +15,7 @@ import 'package:openbudget_app/src/features/transactions/providers/transaction_a
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
+import 'package:openbudget_app/src/utils/money_input.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
@@ -52,14 +53,14 @@ class AddExpenseScreen extends HookConsumerWidget {
     Future<void> checkDuplicates() async {
       final budget = budgetAsync.value;
       if (budget == null) return;
-      final amountText = amountController.text.trim();
-      final amount = double.tryParse(amountText) ?? 0;
-      if (amount <= 0) {
+      final amountCents = parseMoneyInput(
+        amountController.text,
+        decimals: currencyDecimalsForCode(budgetCurrency),
+      );
+      if (amountCents == null || amountCents <= 0) {
         duplicateCount.value = 0;
         return;
       }
-      final amountCents =
-          (amount * _pow10(currencyDecimalsForCode(budgetCurrency))).round();
       try {
         final duplicates = await ref.read(
           duplicateCheckProvider(
@@ -121,13 +122,17 @@ class AddExpenseScreen extends HookConsumerWidget {
       selectedCategoryId.value = null;
     }
 
+    final amountDecimals = currencyDecimalsForCode(budgetCurrency);
     final amountText = amountController.text.trim();
-    final amountValue = double.tryParse(amountText) ?? 0;
-    final amountCentsPreview =
-        (amountValue * _pow10(currencyDecimalsForCode(budgetCurrency))).round();
-    final formattedAmount = amountValue == 0
+    final amountCents = parseMoneyInput(amountText, decimals: amountDecimals);
+    final amountError = moneyInputError(
+      amountText,
+      decimals: amountDecimals,
+      message: l10n.amountInvalidFormat(amountDecimals),
+    );
+    final formattedAmount = amountCents == null || amountCents == 0
         ? '-${formatCentsForCode(0, budgetCurrency)}'
-        : formatCentsForCode(-amountCentsPreview, budgetCurrency);
+        : formatCentsForCode(-amountCents, budgetCurrency);
 
     return Scaffold(
       appBar: AppBar(
@@ -209,6 +214,7 @@ class AddExpenseScreen extends HookConsumerWidget {
                               ),
                           decoration: InputDecoration(
                             labelText: l10n.transactionAmountLabel,
+                            errorText: amountError,
                             prefixIcon: const SkribbleIcon(
                               data: OpenBudgetIcons.money,
                             ),
@@ -436,20 +442,17 @@ class AddExpenseScreen extends HookConsumerWidget {
                       : () async {
                           final description = descriptionController.text.trim();
                           final amountText = amountController.text.trim();
-                          final amount = double.tryParse(amountText) ?? 0;
-                          if (description.isEmpty || amount <= 0) {
-                            return;
-                          }
-
                           final budget = budgetAsync.value;
                           if (budget == null) return;
-
-                          final amountCents =
-                              (amount *
-                                      _pow10(
-                                        currencyDecimalsForCode(budgetCurrency),
-                                      ))
-                                  .round();
+                          final amountCents = parseMoneyInput(
+                            amountText,
+                            decimals: currencyDecimalsForCode(budgetCurrency),
+                          );
+                          if (description.isEmpty ||
+                              amountCents == null ||
+                              amountCents <= 0) {
+                            return;
+                          }
 
                           isSubmitting.value = true;
                           final router = GoRouter.of(context);
@@ -617,12 +620,4 @@ class _ReadOnlyRow extends HookWidget {
       ],
     );
   }
-}
-
-double _pow10(int exponent) {
-  var result = 1.0;
-  for (var i = 0; i < exponent; i++) {
-    result *= 10;
-  }
-  return result;
 }

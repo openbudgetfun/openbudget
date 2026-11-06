@@ -1,5 +1,7 @@
 // UuidValue is needed for constructing test model data.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -83,7 +85,28 @@ BudgetSummary _makeSummary() => BudgetSummary(
   month: 9,
 );
 
-Widget _buildSubject({List<Transaction>? transactions, Account? account}) {
+class _RecordingAccountTransactionActions extends AccountTransactionActions {
+  int? statementBalanceCents;
+
+  @override
+  FutureOr<void> build() {}
+
+  @override
+  Future<List<int>> reconcileWithBalance({
+    required String accountId,
+    required String budgetId,
+    required int statementBalanceCents,
+  }) async {
+    this.statementBalanceCents = statementBalanceCents;
+    return [1, 0];
+  }
+}
+
+Widget _buildSubject({
+  List<Transaction>? transactions,
+  Account? account,
+  AccountTransactionActions? actions,
+}) {
   final router = GoRouter(
     initialLocation: '/budgets/$_budgetId/accounts/$_accountId',
     routes: [
@@ -106,6 +129,8 @@ Widget _buildSubject({List<Transaction>? transactions, Account? account}) {
 
   return ProviderScope(
     overrides: [
+      if (actions != null)
+        accountTransactionActionsProvider.overrideWith(() => actions),
       accountListProvider.overrideWith(
         (ref, budgetId) async => [account ?? _makeAccount()],
       ),
@@ -612,6 +637,156 @@ void main() {
 
       await tester.tap(find.widgetWithText(TextButton, 'Cancel'));
       await tester.pumpAndSettle();
+    });
+
+    Future<void> openReconcileDialog(WidgetTester tester) async {
+      await tester.tap(_skribbleIcon(OpenBudgetIcons.more));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Reconcile'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('No'));
+      await tester.pumpAndSettle();
+    }
+
+    Finder reconcileField() => find.descendant(
+      of: find.byType(AlertDialog),
+      matching: find.byType(TextField),
+    );
+
+    testWidgets('reconcile saves 12.34 as 1234 minor units', (tester) async {
+      final actions = _RecordingAccountTransactionActions();
+      await tester.pumpWidget(_buildSubject(actions: actions));
+      await tester.pumpAndSettle();
+      await openReconcileDialog(tester);
+
+      await tester.enterText(reconcileField(), '12.34');
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilledButton, 'Reconcile'));
+      await tester.pumpAndSettle();
+
+      expect(actions.statementBalanceCents, 1234);
+    });
+
+    testWidgets('reconcile refuses an over-precise balance', (tester) async {
+      final actions = _RecordingAccountTransactionActions();
+      await tester.pumpWidget(_buildSubject(actions: actions));
+      await tester.pumpAndSettle();
+      await openReconcileDialog(tester);
+
+      await tester.enterText(reconcileField(), '12.345');
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('Enter a valid amount with at most 2 decimal places'),
+        findsOneWidget,
+      );
+
+      final saveButton = tester.widget<FilledButton>(
+        find.widgetWithText(FilledButton, 'Reconcile'),
+      );
+      expect(saveButton.onPressed, isNull);
+      expect(actions.statementBalanceCents, isNull);
+    });
+
+    testWidgets('reconcile accepts a negative statement balance', (
+      tester,
+    ) async {
+      final actions = _RecordingAccountTransactionActions();
+      await tester.pumpWidget(_buildSubject(actions: actions));
+      await tester.pumpAndSettle();
+      await openReconcileDialog(tester);
+
+      await tester.enterText(reconcileField(), '-12.34');
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilledButton, 'Reconcile'));
+      await tester.pumpAndSettle();
+
+      expect(actions.statementBalanceCents, -1234);
+    });
+
+    Future<void> openLoanTargetDialog(WidgetTester tester) async {
+      await tester.ensureVisible(find.text('Create Target'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Create Target'));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('loan target saves 12.34 as 1234 minor units', (tester) async {
+      await tester.pumpWidget(
+        _buildSubject(
+          account: _makeAccount(
+            name: 'Car Loan',
+            accountType: 'other',
+            balanceCents: -500000,
+            onBudget: false,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await openLoanTargetDialog(tester);
+
+      await tester.enterText(reconcileField(), '12.34');
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+      await tester.pumpAndSettle();
+
+      expect(find.text(r'$12.34'), findsWidgets);
+    });
+
+    testWidgets('loan target refuses an over-precise amount', (tester) async {
+      await tester.pumpWidget(
+        _buildSubject(
+          account: _makeAccount(
+            name: 'Car Loan',
+            accountType: 'other',
+            balanceCents: -500000,
+            onBudget: false,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await openLoanTargetDialog(tester);
+
+      await tester.enterText(reconcileField(), '12.345');
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('Enter a valid amount with at most 2 decimal places'),
+        findsOneWidget,
+      );
+
+      final saveButton = tester.widget<FilledButton>(
+        find.widgetWithText(FilledButton, 'Save'),
+      );
+      expect(saveButton.onPressed, isNull);
+    });
+
+    testWidgets('loan target refuses a negative amount', (tester) async {
+      await tester.pumpWidget(
+        _buildSubject(
+          account: _makeAccount(
+            name: 'Car Loan',
+            accountType: 'other',
+            balanceCents: -500000,
+            onBudget: false,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await openLoanTargetDialog(tester);
+
+      await tester.enterText(reconcileField(), '-12.34');
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('Enter a valid amount with at most 2 decimal places'),
+        findsOneWidget,
+      );
+
+      final saveButton = tester.widget<FilledButton>(
+        find.widgetWithText(FilledButton, 'Save'),
+      );
+      expect(saveButton.onPressed, isNull);
     });
   });
 }

@@ -3,6 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/theme/openbudget_palette.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 Future<String?> showBudgetAmountKeypadSheet({
@@ -347,9 +348,7 @@ String formatBudgetAmountInputForField({
     currencyCode: currencyCode,
   );
   if (cents == null) return '';
-  final divisor = _pow10(currencyDecimalsForCode(currencyCode));
-  final value = cents / divisor;
-  return value.toStringAsFixed(currencyDecimalsForCode(currencyCode));
+  return formatMinorUnits(cents, currencyDecimalsForCode(currencyCode));
 }
 
 String budgetAmountInputFromCents({
