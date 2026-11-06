@@ -101,10 +101,48 @@ void main() {
     expect(currency, 'EUR');
   });
 
-  test('parseTransferAmountCents respects decimal precision by currency', () {
+  test('parseTransferAmountCents parses exact minor units by currency', () {
     expect(parseTransferAmountCents('12.34', 'USD'), 1234);
-    expect(parseTransferAmountCents('12.34', 'JPY'), 12);
+    expect(parseTransferAmountCents('12.34', 'EUR'), 1234);
     expect(parseTransferAmountCents('0.00000042', 'BTC'), 42);
+    expect(parseTransferAmountCents('1200', 'JPY'), 1200);
+  });
+
+  test('parseTransferAmountCents refuses over-precise and negative input', () {
+    expect(parseTransferAmountCents('12.345', 'USD'), isNull);
+    expect(parseTransferAmountCents('12.34', 'JPY'), isNull);
+    expect(parseTransferAmountCents('-12.34', 'USD'), isNull);
+    expect(parseTransferAmountCents('', 'USD'), isNull);
+  });
+
+  testWidgets('amount field refuses malformed and negative input', (
+    tester,
+  ) async {
+    await tester.pumpWidget(buildSubject(accounts: accounts));
+    await tester.pumpAndSettle();
+
+    final amountField = find.byType(TextField).first;
+
+    await tester.enterText(amountField, '12.34');
+    await tester.pumpAndSettle();
+    expect(
+      find.text('Enter a valid amount with at most 2 decimal places'),
+      findsNothing,
+    );
+
+    await tester.enterText(amountField, '12.345');
+    await tester.pumpAndSettle();
+    expect(
+      find.text('Enter a valid amount with at most 2 decimal places'),
+      findsOneWidget,
+    );
+
+    await tester.enterText(amountField, '-12.34');
+    await tester.pumpAndSettle();
+    expect(
+      find.text('Enter a valid amount with at most 2 decimal places'),
+      findsOneWidget,
+    );
   });
 
   testWidgets(

@@ -7,8 +7,10 @@ import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_actions_provider.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
+import 'package:openbudget_app/src/utils/money_input.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 class EditAccountDialog extends HookConsumerWidget {
@@ -35,7 +37,6 @@ class EditAccountDialog extends HookConsumerWidget {
     final isSubmitting = useState(false);
     final currencyCode = account.currencyCode;
     final currencyDecimals = currencyDecimalsForCode(currencyCode);
-    final factor = _pow10(currencyDecimals);
 
     final accountTypes = [
       'checking',
@@ -49,10 +50,7 @@ class EditAccountDialog extends HookConsumerWidget {
     final selectedType = useState(account.accountType);
     final balanceIsPositive = useState(account.balanceCents >= 0);
     final balanceController = useTextEditingController(
-      text: _formatInitialAmount(
-        cents: account.balanceCents.abs(),
-        decimals: currencyDecimals,
-      ),
+      text: formatMinorUnits(account.balanceCents.abs(), currencyDecimals),
     );
 
     useListenable(nameController);
@@ -68,11 +66,17 @@ class EditAccountDialog extends HookConsumerWidget {
       _ => l10n.accountTypeOther,
     };
 
-    final parsedBalance = double.tryParse(balanceController.text.trim());
+    final balanceMinor = parseMoneyInput(
+      balanceController.text,
+      decimals: currencyDecimals,
+    );
+    final balanceError = moneyInputError(
+      balanceController.text,
+      decimals: currencyDecimals,
+      message: l10n.amountInvalidFormat(currencyDecimals),
+    );
     final canSave =
-        nameController.text.trim().isNotEmpty &&
-        parsedBalance != null &&
-        parsedBalance >= 0;
+        nameController.text.trim().isNotEmpty && balanceMinor != null;
 
     return Dialog.fullscreen(
       child: Scaffold(
@@ -94,10 +98,9 @@ class EditAccountDialog extends HookConsumerWidget {
               onPressed: canSave && !isSubmitting.value
                   ? () async {
                       final name = nameController.text.trim();
-                      final balance = parsedBalance;
                       if (name.isEmpty) return;
 
-                      var balanceCents = (balance * factor).round();
+                      var balanceCents = balanceMinor;
                       if (!balanceIsPositive.value && balanceCents > 0) {
                         balanceCents = -balanceCents;
                       }
@@ -247,9 +250,10 @@ class EditAccountDialog extends HookConsumerWidget {
                         decimal: true,
                       ),
                       textAlign: TextAlign.end,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         border: InputBorder.none,
                         isDense: true,
+                        errorText: balanceError,
                       ),
                     ),
                   ),
@@ -561,21 +565,4 @@ class _SectionLabel extends HookWidget {
       ),
     ),
   );
-}
-
-String _formatInitialAmount({required int cents, required int decimals}) {
-  final divisor = _pow10(decimals);
-  final amount = cents / divisor;
-  if (decimals == 0) return amount.toStringAsFixed(0);
-
-  final fixed = amount.toStringAsFixed(decimals);
-  return fixed.replaceFirst(RegExp(r'\.?0+$'), '');
-}
-
-double _pow10(int exponent) {
-  var result = 1.0;
-  for (var i = 0; i < exponent; i++) {
-    result *= 10;
-  }
-  return result;
 }

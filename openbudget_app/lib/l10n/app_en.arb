@@ -1,5 +1,12 @@
 {
   "@@locale": "en",
+  "@amountInvalidFormat": {
+    "placeholders": {
+      "decimals": {
+        "type": "int"
+      }
+    }
+  },
   "@bulkAssignSuccess": {
     "placeholders": {
       "count": {
@@ -264,6 +271,7 @@
   "accountTotalAssets": "Assets",
   "accountTotalLiabilities": "Liabilities",
   "ageOfMoneyLabel": "{days, plural, =1{Age of Money: 1 day} other{Age of Money: {days} days}}",
+  "amountInvalidFormat": "Enter a valid amount with at most {decimals} decimal places",
   "appTitle": "OpenBudget",
   "autoAssignAssigning": "Assigning...",
   "autoAssignButton": "Auto-Assign",

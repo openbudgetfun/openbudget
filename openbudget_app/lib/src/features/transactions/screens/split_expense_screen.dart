@@ -9,6 +9,7 @@ import 'package:openbudget_app/src/features/transactions/providers/split_transac
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
+import 'package:openbudget_app/src/utils/money_input.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
@@ -55,16 +56,30 @@ class SplitExpenseScreen extends HookConsumerWidget {
     }
 
     // Compute remaining amount
-    final totalAmount = double.tryParse(totalAmountController.text.trim()) ?? 0;
-    final splitTotal = splitControllers.value.fold<double>(
+    final currencyDecimals = currencyDecimalsForCode(budgetCurrency);
+    final previewTotalCents =
+        parseMoneyInput(
+          totalAmountController.text,
+          decimals: currencyDecimals,
+        ) ??
+        0;
+    final totalError = moneyInputError(
+      totalAmountController.text,
+      decimals: currencyDecimals,
+      message: l10n.amountInvalidFormat(currencyDecimals),
+    );
+    final previewSplitTotalCents = splitControllers.value.fold<int>(
       0,
       (sum, split) =>
-          sum + (double.tryParse(split.amountController.text.trim()) ?? 0),
+          sum +
+          (parseMoneyInput(
+                split.amountController.text,
+                decimals: currencyDecimals,
+              ) ??
+              0),
     );
-    final remaining = totalAmount - splitTotal;
-    final remainingCents =
-        (remaining * _pow10(currencyDecimalsForCode(budgetCurrency))).round();
-    final isBalanced = remaining.abs() < 0.005;
+    final remainingCents = previewTotalCents - previewSplitTotalCents;
+    final isBalanced = remainingCents == 0;
     final remainingTone = isBalanced ? ObTone.funded : ObTone.underfunded;
 
     return Scaffold(
@@ -122,6 +137,7 @@ class SplitExpenseScreen extends HookConsumerWidget {
                   ObTextField(
                     controller: totalAmountController,
                     labelText: l10n.transactionAmountLabel,
+                    errorText: totalError,
                     prefixIcon: const SkribbleIcon(
                       data: OpenBudgetIcons.money,
                     ),
@@ -171,6 +187,7 @@ class SplitExpenseScreen extends HookConsumerWidget {
                       key: ValueKey(entry.value.key),
                       index: entry.key,
                       splitData: entry.value,
+                      currencyDecimals: currencyDecimals,
                       envelopeOptions: envelopeOptions,
                       canRemove: splitControllers.value.length > 2,
                       onRemove: () {
@@ -211,12 +228,22 @@ class SplitExpenseScreen extends HookConsumerWidget {
                         : () async {
                             final description = descriptionController.text
                                 .trim();
-                            final total =
-                                double.tryParse(
-                                  totalAmountController.text.trim(),
-                                ) ??
-                                0;
-                            if (description.isEmpty || total <= 0) return;
+                            if (description.isEmpty) return;
+
+                            final budget = budgetAsync.value;
+                            if (budget == null) return;
+
+                            final currency = normalizeCurrencyCode(
+                              budget.currencyCode,
+                            );
+                            final currencyDecimals = currencyDecimalsForCode(
+                              currency,
+                            );
+                            final totalCents = parseMoneyInput(
+                              totalAmountController.text,
+                              decimals: currencyDecimals,
+                            );
+                            if (totalCents == null || totalCents <= 0) return;
 
                             // Validate splits
                             final splits = splitControllers.value;
@@ -229,34 +256,14 @@ class SplitExpenseScreen extends HookConsumerWidget {
                               return;
                             }
 
-                            final budget = budgetAsync.value;
-                            if (budget == null) return;
-
-                            final currency = normalizeCurrencyCode(
-                              budget.currencyCode,
-                            );
-                            final totalCents =
-                                (total *
-                                        _pow10(
-                                          currencyDecimalsForCode(currency),
-                                        ))
-                                    .round();
-
                             final splitItems = <SplitItem>[];
                             for (final split in splits) {
-                              final splitAmount =
-                                  double.tryParse(
-                                    split.amountController.text.trim(),
-                                  ) ??
-                                  0;
-                              if (splitAmount <= 0) return;
+                              final splitCents = parseMoneyInput(
+                                split.amountController.text,
+                                decimals: currencyDecimals,
+                              );
+                              if (splitCents == null || splitCents <= 0) return;
 
-                              final splitCents =
-                                  (splitAmount *
-                                          _pow10(
-                                            currencyDecimalsForCode(currency),
-                                          ))
-                                      .round();
                               final envId = split.selectedEnvelopeId;
                               final memo = split.memoController.text.trim();
 
@@ -378,6 +385,7 @@ class _SplitRow extends HookWidget {
   const _SplitRow({
     required this.index,
     required this.splitData,
+    required this.currencyDecimals,
     required this.envelopeOptions,
     required this.canRemove,
     required this.onRemove,
@@ -387,6 +395,7 @@ class _SplitRow extends HookWidget {
 
   final int index;
   final _SplitData splitData;
+  final int currencyDecimals;
   final List<_EnvelopeOption> envelopeOptions;
   final bool canRemove;
   final VoidCallback onRemove;
@@ -471,6 +480,11 @@ class _SplitRow extends HookWidget {
           ObTextField(
             controller: splitData.amountController,
             labelText: l10n.splitAmountLabel,
+            errorText: moneyInputError(
+              splitData.amountController.text,
+              decimals: currencyDecimals,
+              message: l10n.amountInvalidFormat(currencyDecimals),
+            ),
             prefixIcon: const SkribbleIcon(data: OpenBudgetIcons.money),
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             onChanged: (_) => onAmountChanged(),
@@ -485,12 +499,4 @@ class _SplitRow extends HookWidget {
       ),
     );
   }
-}
-
-double _pow10(int exponent) {
-  var result = 1.0;
-  for (var i = 0; i < exponent; i++) {
-    result *= 10;
-  }
-  return result;
 }

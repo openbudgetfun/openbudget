@@ -7,8 +7,10 @@ import 'package:openbudget_app/src/features/payees/providers/payee_list_provider
 import 'package:openbudget_app/src/features/tax/widgets/tax_category_row.dart';
 import 'package:openbudget_app/src/features/transactions/providers/transaction_actions_provider.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
+import 'package:openbudget_app/src/utils/money_input.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 class EditTransactionDialog extends HookConsumerWidget {
@@ -32,8 +34,7 @@ class EditTransactionDialog extends HookConsumerWidget {
     );
     final currencyDecimals = currencyDecimalsForCode(currencyCode);
     final amountController = useTextEditingController(
-      text: (transaction.amountCents.abs() / _pow10(currencyDecimals))
-          .toStringAsFixed(currencyDecimals),
+      text: formatMinorUnits(transaction.amountCents.abs(), currencyDecimals),
     );
     final memoController = useTextEditingController(
       text: transaction.memo ?? '',
@@ -45,6 +46,17 @@ class EditTransactionDialog extends HookConsumerWidget {
     );
     final isSubmitting = useState(false);
     final isIncome = transaction.amountCents > 0;
+
+    useValueListenable(amountController);
+    final amountCents = parseMoneyInput(
+      amountController.text,
+      decimals: currencyDecimals,
+    );
+    final amountError = moneyInputError(
+      amountController.text,
+      decimals: currencyDecimals,
+      message: l10n.amountInvalidFormat(currencyDecimals),
+    );
 
     final payeesAsync = ref.watch(payeeListProvider(budgetId));
     final summaryAsync = ref.watch(budgetSummaryProvider(budgetId));
@@ -101,6 +113,7 @@ class EditTransactionDialog extends HookConsumerWidget {
             ObTextField(
               controller: amountController,
               labelText: l10n.transactionAmountLabel,
+              errorText: amountError,
               prefixIcon: const SkribbleIcon(data: OpenBudgetIcons.money),
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
@@ -203,11 +216,12 @@ class EditTransactionDialog extends HookConsumerWidget {
           loadingLabel: l10n.dialogSave,
           onPressed: () async {
             final description = descriptionController.text.trim();
-            final amountText = amountController.text.trim();
-            final amount = double.tryParse(amountText) ?? 0;
-            if (description.isEmpty || amount <= 0) return;
+            if (description.isEmpty ||
+                amountCents == null ||
+                amountCents <= 0) {
+              return;
+            }
 
-            final amountCents = (amount * _pow10(currencyDecimals)).round();
             final signedAmount = isIncome ? amountCents : -amountCents;
             final memo = memoController.text.trim();
 
@@ -248,12 +262,4 @@ class EditTransactionDialog extends HookConsumerWidget {
       ],
     );
   }
-}
-
-double _pow10(int exponent) {
-  var result = 1.0;
-  for (var i = 0; i < exponent; i++) {
-    result *= 10;
-  }
-  return result;
 }

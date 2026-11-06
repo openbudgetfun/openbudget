@@ -12,6 +12,39 @@ import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
+class _RecordingCreateAccountActions extends AccountActions {
+  int? createdBalanceCents;
+
+  @override
+  Future<void> build() async {}
+
+  @override
+  Future<Account> createAccount({
+    required String name,
+    required String accountType,
+    required int balanceCents,
+    required String currencyCode,
+    required String budgetId,
+    required bool onBudget,
+    required int sortOrder,
+    String? walletAddress,
+    String? institutionId,
+  }) async {
+    createdBalanceCents = balanceCents;
+    return Account(
+      id: UuidValue.fromString('00000000-0000-0000-0000-000000000777'),
+      name: name,
+      accountType: accountType,
+      balanceCents: balanceCents,
+      currencyCode: currencyCode,
+      budgetId: UuidValue.fromString(budgetId),
+      onBudget: onBudget,
+      sortOrder: sortOrder,
+      isClosed: false,
+    );
+  }
+}
+
 class _ThrowingCreateAccountActions extends AccountActions {
   @override
   Future<void> build() async {}
@@ -365,6 +398,109 @@ void main() {
       findsNothing,
     );
     expect(accountListReads, greaterThanOrEqualTo(2));
+  });
+
+  group('unlinked account balance entry', () {
+    Widget buildSubjectWith(AccountActions actions) {
+      final router = GoRouter(
+        initialLocation: '/budgets/$budgetId/accounts/add',
+        routes: [
+          GoRoute(
+            name: addAccountRoute,
+            path: '/budgets/:id/accounts/add',
+            builder: (context, state) =>
+                AddAccountScreen(budgetId: state.pathParameters['id']!),
+          ),
+          GoRoute(
+            name: accountListRoute,
+            path: '/budgets/:id/accounts',
+            builder: (_, _) => const Scaffold(body: Text('Account List')),
+          ),
+        ],
+      );
+
+      return ProviderScope(
+        overrides: [
+          budgetDetailProvider.overrideWith((ref, id) async => makeBudget()),
+          institutionCatalogProvider.overrideWith(
+            (ref, locationCode) async => testInstitutions,
+          ),
+          accountActionsProvider.overrideWith(() => actions),
+          accountListProvider(budgetId).overrideWith((ref) async => const []),
+        ],
+        child: MaterialApp.router(
+          theme: OpenBudgetTheme.light,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          routerConfig: router,
+        ),
+      );
+    }
+
+    Future<void> fillForm(WidgetTester tester, String balance) async {
+      await _pumpToBankSearch(tester);
+      await _tapAddUnlinked(tester);
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField).at(0), 'Daily');
+      await tester.enterText(find.byType(TextField).at(1), balance);
+      await tester.pumpAndSettle();
+
+      await _openAccountTypePicker(
+        tester,
+        typeTileFinder: find.byKey(unlinkedTypeTileKey),
+      );
+      await _tapAccountTypeOption(
+        tester,
+        optionFinder: find.byKey(checkingTypeOptionKey),
+      );
+    }
+
+    testWidgets('saves 12.34 as 1234 minor units', (tester) async {
+      final actions = _RecordingCreateAccountActions();
+      await tester.pumpWidget(buildSubjectWith(actions));
+      await fillForm(tester, '12.34');
+
+      await tester.tap(find.widgetWithText(FilledButton, 'Next'));
+      await tester.pumpAndSettle();
+
+      expect(actions.createdBalanceCents, 1234);
+    });
+
+    testWidgets('refuses an over-precise balance instead of rounding it', (
+      tester,
+    ) async {
+      final actions = _RecordingCreateAccountActions();
+      await tester.pumpWidget(buildSubjectWith(actions));
+      await fillForm(tester, '12.345');
+
+      expect(
+        find.text('Enter a valid amount with at most 2 decimal places'),
+        findsOneWidget,
+      );
+
+      final nextButton = tester.widget<FilledButton>(
+        find.widgetWithText(FilledButton, 'Next'),
+      );
+      expect(nextButton.onPressed, isNull);
+      expect(actions.createdBalanceCents, isNull);
+    });
+
+    testWidgets('accepts a negative balance', (tester) async {
+      final actions = _RecordingCreateAccountActions();
+      await tester.pumpWidget(buildSubjectWith(actions));
+      await fillForm(tester, '-12.34');
+
+      expect(
+        find.text('Enter a valid amount with at most 2 decimal places'),
+        findsNothing,
+      );
+
+      await tester.tap(find.widgetWithText(FilledButton, 'Next'));
+      await tester.pumpAndSettle();
+
+      expect(actions.createdBalanceCents, -1234);
+    });
   });
 }
 

@@ -16,8 +16,10 @@ import 'package:openbudget_app/src/features/budget/providers/budget_summary_prov
 import 'package:openbudget_app/src/features/payees/providers/payee_list_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
+import 'package:openbudget_app/src/utils/money_input.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 enum _StatusFilter { all, uncleared }
@@ -2865,57 +2867,69 @@ String? _suggestedCategoryForWalletTransaction(
   return null;
 }
 
-int _pow10Int(int exponent) {
-  var result = 1;
-  for (var i = 0; i < exponent; i++) {
-    result *= 10;
-  }
-  return result;
-}
-
 Future<int?> _showLoanTargetDialog(
   BuildContext context, {
   required String currencyCode,
   required int? monthlyTargetCents,
-}) async {
-  final l10n = AppLocalizations.of(context);
-  final factor = _pow10Int(currencyDecimalsForCode(currencyCode));
-  final controller = TextEditingController(
-    text: monthlyTargetCents == null
-        ? ''
-        : (monthlyTargetCents / factor).toStringAsFixed(
-            currencyDecimalsForCode(currencyCode),
-          ),
-  );
+}) => showDialog<int>(
+  context: context,
+  builder: (_) => _LoanTargetDialog(
+    currencyCode: currencyCode,
+    monthlyTargetCents: monthlyTargetCents,
+  ),
+);
 
-  return showDialog<int>(
-    context: context,
-    builder: (dialogContext) => AlertDialog(
+class _LoanTargetDialog extends HookWidget {
+  const _LoanTargetDialog({
+    required this.currencyCode,
+    this.monthlyTargetCents,
+  });
+
+  final String currencyCode;
+  final int? monthlyTargetCents;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final decimals = currencyDecimalsForCode(currencyCode);
+    final controller = useTextEditingController(
+      text: monthlyTargetCents == null
+          ? ''
+          : formatMinorUnits(monthlyTargetCents!, decimals),
+    );
+    useValueListenable(controller);
+    final targetCents = parseMoneyInput(controller.text, decimals: decimals);
+    final errorText = moneyInputError(
+      controller.text,
+      decimals: decimals,
+      message: l10n.amountInvalidFormat(decimals),
+    );
+
+    return AlertDialog(
       title: Text(l10n.accountDetailLoanTarget),
       content: TextField(
         controller: controller,
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
         decoration: InputDecoration(
           labelText: l10n.accountDetailLoanMonthlyPayment,
+          errorText: errorText,
           prefixText: '${currencySymbolForCode(currencyCode)} ',
         ),
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.of(dialogContext).pop(),
+          onPressed: () => Navigator.of(context).pop(),
           child: Text(l10n.dialogCancel),
         ),
         FilledButton(
-          onPressed: () {
-            final value = double.tryParse(controller.text.trim());
-            if (value == null || value <= 0) return;
-            Navigator.of(dialogContext).pop((value * factor).round());
-          },
+          onPressed: targetCents != null && targetCents > 0
+              ? () => Navigator.of(context).pop(targetCents)
+              : null,
           child: Text(l10n.dialogSave),
         ),
       ],
-    ),
-  );
+    );
+  }
 }
 
 class _ReconcileDialog extends HookWidget {
@@ -2933,11 +2947,19 @@ class _ReconcileDialog extends HookWidget {
     final theme = Theme.of(context);
     final palette = theme.ob;
     final controller = useTextEditingController();
+    useValueListenable(controller);
     final enteredCents = useState<int?>(null);
+    final decimals = currencyDecimalsForCode(currencyCode);
 
     final differenceCents = enteredCents.value != null
         ? enteredCents.value! - clearedBalanceCents
         : null;
+    final errorText = moneyInputError(
+      controller.text,
+      decimals: decimals,
+      allowNegative: true,
+      message: l10n.amountInvalidFormat(decimals),
+    );
 
     return AlertDialog(
       title: Text(l10n.reconcileTitle),
@@ -2965,13 +2987,14 @@ class _ReconcileDialog extends HookWidget {
             decoration: InputDecoration(
               labelText: l10n.reconcileBalanceLabel,
               hintText: l10n.reconcileBalanceHint,
+              errorText: errorText,
             ),
             onChanged: (value) {
-              final parsed = double.tryParse(value);
-              enteredCents.value = parsed != null
-                  ? (parsed * _pow10(currencyDecimalsForCode(currencyCode)))
-                        .round()
-                  : null;
+              enteredCents.value = parseMoneyInput(
+                value,
+                decimals: decimals,
+                allowNegative: true,
+              );
             },
           ),
           if (differenceCents != null) ...[
@@ -3015,14 +3038,6 @@ class _ReconcileDialog extends HookWidget {
         ),
       ],
     );
-  }
-
-  double _pow10(int exponent) {
-    var result = 1.0;
-    for (var i = 0; i < exponent; i++) {
-      result *= 10;
-    }
-    return result;
   }
 }
 

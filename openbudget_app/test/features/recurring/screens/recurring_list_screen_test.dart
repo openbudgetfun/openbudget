@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/budget/providers/budget_detail_provider.dart';
+import 'package:openbudget_app/src/features/recurring/providers/recurring_actions_provider.dart';
 import 'package:openbudget_app/src/features/recurring/providers/recurring_list_provider.dart';
 import 'package:openbudget_app/src/features/recurring/screens/recurring_list_screen.dart';
 import 'package:openbudget_client/openbudget_client.dart';
@@ -42,6 +43,36 @@ RecurringTransaction _makeRecurring({
   nextOccurrence: nextOccurrence ?? DateTime(2099, 12, 31),
   isActive: isActive,
 );
+
+class _RecordingRecurringActions extends RecurringActions {
+  int? createdAmountCents;
+
+  @override
+  AsyncValue<void> build() => const AsyncValue.data(null);
+
+  @override
+  Future<RecurringTransaction> createRecurring({
+    required String description,
+    required int amountCents,
+    required String currencyCode,
+    required String budgetId,
+    required String frequency,
+    required DateTime nextOccurrence,
+    String? envelopeId,
+    String? accountId,
+    String? payeeId,
+    DateTime? endDate,
+  }) async {
+    createdAmountCents = amountCents;
+    return _makeRecurring(
+      description: description,
+      amountCents: amountCents,
+      currencyCode: currencyCode,
+      frequency: frequency,
+      nextOccurrence: nextOccurrence,
+    );
+  }
+}
 
 void main() {
   group('RecurringListScreen', () {
@@ -451,6 +482,86 @@ void main() {
 
       expect(find.text('Salary'), findsOneWidget);
       expect(find.text('Rent'), findsNothing);
+    });
+  });
+
+  group('add recurring amount entry', () {
+    Widget buildSubject(RecurringActions actions) => ProviderScope(
+      overrides: [
+        budgetDetailProvider.overrideWith((ref, id) async => _makeBudget()),
+        recurringListProvider.overrideWith(
+          (ref, budgetId) async => <RecurringTransaction>[],
+        ),
+        recurringActionsProvider.overrideWith(() => actions),
+      ],
+      child: MaterialApp(
+        theme: OpenBudgetTheme.light,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: const RecurringListScreen(budgetId: _budgetId),
+      ),
+    );
+
+    Future<void> openDialog(WidgetTester tester) async {
+      await tester.tap(find.byKey(RecurringListScreen.addButtonKey));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField).at(0), 'Rent');
+    }
+
+    testWidgets('saves 12.34 as 1234 minor units', (tester) async {
+      final actions = _RecordingRecurringActions();
+      await tester.pumpWidget(buildSubject(actions));
+      await tester.pumpAndSettle();
+
+      await openDialog(tester);
+      await tester.enterText(find.byType(TextField).at(1), '12.34');
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+      await tester.pumpAndSettle();
+
+      expect(actions.createdAmountCents, -1234);
+    });
+
+    testWidgets('refuses an over-precise amount instead of rounding it', (
+      tester,
+    ) async {
+      final actions = _RecordingRecurringActions();
+      await tester.pumpWidget(buildSubject(actions));
+      await tester.pumpAndSettle();
+
+      await openDialog(tester);
+      await tester.enterText(find.byType(TextField).at(1), '12.345');
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('Enter a valid amount with at most 2 decimal places'),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+      await tester.pumpAndSettle();
+
+      expect(actions.createdAmountCents, isNull);
+    });
+
+    testWidgets('refuses a negative recurring amount', (tester) async {
+      final actions = _RecordingRecurringActions();
+      await tester.pumpWidget(buildSubject(actions));
+      await tester.pumpAndSettle();
+
+      await openDialog(tester);
+      await tester.enterText(find.byType(TextField).at(1), '-12.34');
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('Enter a valid amount with at most 2 decimal places'),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+      await tester.pumpAndSettle();
+
+      expect(actions.createdAmountCents, isNull);
     });
   });
 }

@@ -11,8 +11,10 @@ import 'package:openbudget_app/src/features/recurring/providers/recurring_list_p
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
+import 'package:openbudget_app/src/utils/money_input.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
 enum RecurringViewFilter { all, expenses, income, due }
@@ -705,6 +707,14 @@ class _AddRecurringDialog extends HookConsumerWidget {
     final isExpense = useState(true);
     final isSubmitting = useState(false);
 
+    useListenable(amountController);
+    final amountDecimals = currencyDecimalsForCode(currencyCode);
+    final amountError = moneyInputError(
+      amountController.text,
+      decimals: amountDecimals,
+      message: l10n.amountInvalidFormat(amountDecimals),
+    );
+
     return AlertDialog(
       title: Text(l10n.recurringAddTitle),
       content: SingleChildScrollView(
@@ -739,6 +749,7 @@ class _AddRecurringDialog extends HookConsumerWidget {
               controller: amountController,
               labelText:
                   '${l10n.transactionAmountLabel} (${normalizeCurrencyCode(currencyCode)})',
+              errorText: amountError,
               prefixText: '${currencySymbolForCode(currencyCode)} ',
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
@@ -850,11 +861,12 @@ class _AddRecurringDialog extends HookConsumerWidget {
     final description = descController.text.trim();
     if (description.isEmpty) return;
 
-    final amount = double.tryParse(amountController.text.trim()) ?? 0;
-    if (amount <= 0) return;
+    final amountCents = parseMoneyInput(
+      amountController.text,
+      decimals: currencyDecimalsForCode(currencyCode),
+    );
+    if (amountCents == null || amountCents <= 0) return;
 
-    final amountCents = (amount * _pow10(currencyDecimalsForCode(currencyCode)))
-        .round();
     final signedCents = isExpense.value ? -amountCents : amountCents;
 
     isSubmitting.value = true;
@@ -905,13 +917,18 @@ class _EditRecurringDialog extends HookConsumerWidget {
     final currencyDecimals = currencyDecimalsForCode(currency);
     final amountCents = recurring.amountCents.abs();
     final amountController = useTextEditingController(
-      text: (amountCents / _pow10(currencyDecimals)).toStringAsFixed(
-        currencyDecimals,
-      ),
+      text: formatMinorUnits(amountCents, currencyDecimals),
     );
     final frequency = useState(recurring.frequency);
     final nextDate = useState(recurring.nextOccurrence);
     final isSubmitting = useState(false);
+
+    useListenable(amountController);
+    final amountError = moneyInputError(
+      amountController.text,
+      decimals: currencyDecimals,
+      message: l10n.amountInvalidFormat(currencyDecimals),
+    );
 
     return AlertDialog(
       title: Text(l10n.recurringEditTitle),
@@ -932,6 +949,7 @@ class _EditRecurringDialog extends HookConsumerWidget {
             ObTextField(
               controller: amountController,
               labelText: '${l10n.transactionAmountLabel} ($currency)',
+              errorText: amountError,
               prefixText: '${currencySymbolForCode(currency)} ',
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
@@ -1026,11 +1044,12 @@ class _EditRecurringDialog extends HookConsumerWidget {
     final description = descController.text.trim();
     if (description.isEmpty) return;
 
-    final amount = double.tryParse(amountController.text.trim()) ?? 0;
-    if (amount <= 0) return;
+    final amountCents = parseMoneyInput(
+      amountController.text,
+      decimals: currencyDecimalsForCode(currency),
+    );
+    if (amountCents == null || amountCents <= 0) return;
 
-    final amountCents = (amount * _pow10(currencyDecimalsForCode(currency)))
-        .round();
     final isExpense = recurring.amountCents < 0;
     final signedCents = isExpense ? -amountCents : amountCents;
 
@@ -1064,12 +1083,4 @@ class _EditRecurringDialog extends HookConsumerWidget {
       );
     }
   }
-}
-
-double _pow10(int exponent) {
-  var result = 1.0;
-  for (var i = 0; i < exponent; i++) {
-    result *= 10;
-  }
-  return result;
 }

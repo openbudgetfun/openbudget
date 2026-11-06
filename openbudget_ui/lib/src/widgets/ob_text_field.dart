@@ -7,6 +7,7 @@ class ObTextField extends HookWidget {
     this.controller,
     this.hintText,
     this.labelText,
+    this.errorText,
     this.obscureText = false,
     this.keyboardType,
     this.prefixText,
@@ -22,6 +23,7 @@ class ObTextField extends HookWidget {
   final TextEditingController? controller;
   final String? hintText;
   final String? labelText;
+  final String? errorText;
   final bool obscureText;
   final TextInputType? keyboardType;
   final String? prefixText;
@@ -44,6 +46,7 @@ class ObTextField extends HookWidget {
     decoration: InputDecoration(
       hintText: hintText,
       labelText: labelText,
+      errorText: errorText,
       prefixText: prefixText,
       prefixIcon: prefixIcon,
       suffixIcon: suffixIcon,
