@@ -8,15 +8,16 @@ import 'package:serverpod/serverpod.dart';
 /// The only writer of cached balances; every method requires the writing tx.
 abstract final class AccountBalanceService {
   /// Adds a movement while holding the account row lock.
+  ///
+  /// A net delta is the difference of two web-safe amounts, so it may be twice
+  /// the single-amount bound. The resulting balance is the real invariant and
+  /// is validated in [_set]; no temporary delta bound is imposed here.
   static Future<void> applyDelta(
     Session session,
     UuidValue accountId,
     int delta, {
     required Transaction transaction,
   }) async {
-    if (delta.abs() > 9007199254740991) {
-      throw ValidationException(message: 'Delta exceeds safe minor unit range');
-    }
     final account = await Account.db.findById(
       session,
       accountId,

@@ -340,29 +340,26 @@ abstract final class TransactionWriter {
     final rateChanged =
         input.fxRate != null &&
         _rateTextDiffers(input.fxRate!, existing.fxRate);
-    final material =
+
+    // Rate resolution is driven only by edits that change the movement or the
+    // rate itself. A line-only edit is coding: it keeps the stored rate, rate
+    // date, rate source and base total, and reuses them for the replacement
+    // lines, so it never re-prices history when market data moves or vanishes.
+    final rateAffected =
         input.date != existing.date ||
         input.amountMinor != existing.amountMinor ||
         input.accountId != existing.accountId ||
-        linesChanged ||
         rateChanged;
+    final material = rateAffected || linesChanged;
 
-    if (existing.status == TransactionStatus.reconciled &&
-        (input.date != existing.date ||
-            input.amountMinor != existing.amountMinor ||
-            input.accountId != existing.accountId ||
-            linesChanged ||
-            rateChanged)) {
+    if (existing.status == TransactionStatus.reconciled && material) {
       throw ValidationException(
         message: 'A reconciled transaction unlocks before money can change',
       );
     }
 
     final transfer = await _transferFor(session, id, tx);
-    if (transfer != null &&
-        (input.accountId != existing.accountId ||
-            input.amountMinor != existing.amountMinor ||
-            rateChanged)) {
+    if (transfer != null && material) {
       throw ValidationException(
         message: 'A transfer leg changes only through updateTransfer',
       );
@@ -379,7 +376,7 @@ abstract final class TransactionWriter {
 
     final payee = await _resolvePayee(session, entity, input, tx);
     final _ResolvedRate rate;
-    if (material) {
+    if (rateAffected) {
       rate = await _resolveRate(session, newAccount, entity, input, tx);
     } else {
       rate = _ResolvedRate(
@@ -438,18 +435,29 @@ abstract final class TransactionWriter {
       );
     }
 
-    await AccountBalanceService.applyDelta(
-      session,
-      oldAccount.id!,
-      -existing.amountMinor,
-      transaction: tx,
-    );
-    await AccountBalanceService.applyDelta(
-      session,
-      newAccount.id!,
-      input.amountMinor,
-      transaction: tx,
-    );
+    if (oldAccount.id == newAccount.id) {
+      // One net delta keeps a metadata-only edit at the safe balance limit
+      // from ever exceeding it on the way to an unchanged result.
+      await AccountBalanceService.applyDelta(
+        session,
+        oldAccount.id!,
+        input.amountMinor - existing.amountMinor,
+        transaction: tx,
+      );
+    } else {
+      await AccountBalanceService.applyDelta(
+        session,
+        oldAccount.id!,
+        -existing.amountMinor,
+        transaction: tx,
+      );
+      await AccountBalanceService.applyDelta(
+        session,
+        newAccount.id!,
+        input.amountMinor,
+        transaction: tx,
+      );
+    }
 
     if (ledgerRevision) {
       await _writeAudit(
@@ -467,12 +475,12 @@ abstract final class TransactionWriter {
       );
     }
 
-    if (oldAccount.id == newAccount.id) {
-      _queueChange(outbox, row);
-    } else {
-      _queueChange(outbox, row, accountId: oldAccount.id);
-      _queueChange(outbox, row, accountId: newAccount.id);
-    }
+    _queueUpdateChanges(
+      outbox,
+      row,
+      oldDate: existing.date,
+      oldAccountId: existing.accountId,
+    );
     return _view(session, row, transaction: tx);
   }
 
@@ -1272,11 +1280,13 @@ abstract final class TransactionWriter {
     return rate;
   }
 
+  /// Compares two exact decimals as rational numbers, so `"0.8"` and `"0.80"`
+  /// are the same rate rather than a re-pricing edit.
   static bool _rateTextDiffers(String raw, String stored) {
     final rate = _parseRate(raw);
     final previous = _parseRate(stored);
-    return rate.numerator != previous.numerator ||
-        rate.denominator != previous.denominator;
+    return rate.numerator * previous.denominator !=
+        previous.numerator * rate.denominator;
   }
 
   static bool _sameLineInputs(
@@ -1309,14 +1319,36 @@ abstract final class TransactionWriter {
     _ChangeOutbox outbox,
     model.Transaction row, {
     UuidValue? accountId,
+    int? month,
   }) {
     outbox.changes.add(
       _PendingChange(
         entityId: row.entityId,
-        month: MonthKey.fromDate(row.date),
+        month: month ?? MonthKey.fromDate(row.date),
         accountId: accountId ?? row.accountId,
       ),
     );
+  }
+
+  /// Queues the scopes an edit touched: the row's new month and account, and
+  /// its old month and account when either moved. Observers of a month or
+  /// account that did not change are not notified.
+  static void _queueUpdateChanges(
+    _ChangeOutbox outbox,
+    model.Transaction row, {
+    required DateTime oldDate,
+    required UuidValue oldAccountId,
+  }) {
+    final newMonth = MonthKey.fromDate(row.date);
+    final oldMonth = MonthKey.fromDate(oldDate);
+    final newAccountId = row.accountId;
+
+    _queueChange(outbox, row, month: newMonth, accountId: newAccountId);
+
+    final unchanged = oldMonth == newMonth && oldAccountId == newAccountId;
+    if (unchanged) return;
+
+    _queueChange(outbox, row, month: oldMonth, accountId: oldAccountId);
   }
 }
 

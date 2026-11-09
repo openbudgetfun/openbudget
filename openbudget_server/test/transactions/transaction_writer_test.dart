@@ -1125,6 +1125,376 @@ void main() {
         expect(metadata.transaction.memo, 'Allowed metadata');
       },
     );
+
+    test(
+      'a line-only edit keeps the stored market rate when history disappears',
+      () async {
+        final account = await book.addAccount(currencyCode: 'USD');
+        await book.seedMarketRate(
+          fromCurrencyCode: 'USD',
+          toCurrencyCode: 'GBP',
+          rateDate: _date,
+          fromPerUsd: '1',
+          toPerUsd: '0.8',
+        );
+        final created = await TransactionWriter.create(
+          book.session,
+          entry(account, amountMinor: -10000),
+        );
+        expect(created.transaction.fxRate, '0.8');
+        expect(created.transaction.baseAmountMinor, -8000);
+
+        await server.clearRates();
+
+        final edited = await TransactionWriter.update(
+          book.session,
+          created.transaction.id!,
+          entry(
+            account,
+            amountMinor: -10000,
+            lines: [
+              TransactionLineInput(amountMinor: -4000),
+              TransactionLineInput(amountMinor: -6000),
+            ],
+          ),
+        );
+
+        expect(edited.transaction.fxRate, '0.8');
+        expect(edited.transaction.fxRateDate, _date);
+        expect(edited.transaction.fxRateSource, FxRateSource.market);
+        expect(edited.transaction.baseAmountMinor, -8000);
+        expect(
+          edited.lines.map((line) => line.baseAmountMinor),
+          [-3200, -4800],
+        );
+        expect(
+          edited.lines.fold<int>(0, (sum, line) => sum + line.baseAmountMinor),
+          -8000,
+        );
+      },
+    );
+
+    test('a line-only edit keeps an existing manual rate', () async {
+      final account = await book.addAccount(currencyCode: 'USD');
+      final created = await TransactionWriter.create(
+        book.session,
+        entry(account, amountMinor: -10000, fxRate: '0.8'),
+      );
+      expect(created.transaction.fxRateSource, FxRateSource.manual);
+      expect(created.transaction.baseAmountMinor, -8000);
+
+      final edited = await TransactionWriter.update(
+        book.session,
+        created.transaction.id!,
+        entry(
+          account,
+          amountMinor: -10000,
+          lines: [
+            TransactionLineInput(amountMinor: -4000),
+            TransactionLineInput(amountMinor: -6000),
+          ],
+        ),
+      );
+
+      expect(edited.transaction.fxRate, '0.8');
+      expect(edited.transaction.fxRateDate, _date);
+      expect(edited.transaction.fxRateSource, FxRateSource.manual);
+      expect(edited.transaction.baseAmountMinor, -8000);
+      expect(
+        edited.lines.map((line) => line.baseAmountMinor),
+        [-3200, -4800],
+      );
+    });
+
+    test(
+      'equal rate representations are not a money change, even reconciled',
+      () async {
+        final account = await book.addAccount(currencyCode: 'USD');
+        final created = await TransactionWriter.create(
+          book.session,
+          entry(account, amountMinor: -10000, fxRate: '0.8'),
+        );
+        final id = created.transaction.id!;
+        await TransactionWriter.update(
+          book.session,
+          id,
+          entry(
+            account,
+            amountMinor: -10000,
+            fxRate: '0.8',
+            status: TransactionStatus.reconciled,
+          ),
+        );
+
+        final edited = await TransactionWriter.update(
+          book.session,
+          id,
+          entry(
+            account,
+            amountMinor: -10000,
+            fxRate: '0.80',
+            status: TransactionStatus.reconciled,
+            memo: 'Equal rate',
+          ),
+        );
+
+        expect(edited.transaction.fxRate, '0.8');
+        expect(edited.transaction.fxRateSource, FxRateSource.manual);
+        expect(edited.transaction.baseAmountMinor, -8000);
+        expect(edited.transaction.memo, 'Equal rate');
+      },
+    );
+
+    test(
+      'a metadata-only edit survives a MAX_SAFE balance with an old negative row',
+      () async {
+        final account = await book.addAccount();
+        await TransactionWriter.create(
+          book.session,
+          entry(account, amountMinor: maxSafeMinor),
+        );
+        final negative = await TransactionWriter.create(
+          book.session,
+          entry(account, amountMinor: -maxSafeMinor),
+        );
+        await TransactionWriter.create(
+          book.session,
+          entry(account, amountMinor: maxSafeMinor),
+        );
+        expect(await book.cachedBalanceMinor(account), maxSafeMinor);
+
+        final edited = await TransactionWriter.update(
+          book.session,
+          negative.transaction.id!,
+          entry(account, amountMinor: -maxSafeMinor, memo: 'Metadata only'),
+        );
+
+        expect(edited.transaction.memo, 'Metadata only');
+        expect(await book.cachedBalanceMinor(account), maxSafeMinor);
+      },
+    );
+
+    test(
+      'a valid money edit near the boundary applies one net delta',
+      () async {
+        final account = await book.addAccount();
+        await TransactionWriter.create(
+          book.session,
+          entry(account, amountMinor: maxSafeMinor),
+        );
+        final edited = await TransactionWriter.create(
+          book.session,
+          entry(account, amountMinor: -1000),
+        );
+        await TransactionWriter.create(
+          book.session,
+          entry(account, amountMinor: 990),
+        );
+        expect(await book.cachedBalanceMinor(account), maxSafeMinor - 10);
+
+        final view = await TransactionWriter.update(
+          book.session,
+          edited.transaction.id!,
+          entry(account, amountMinor: -990),
+        );
+
+        expect(view.transaction.amountMinor, -990);
+        expect(await book.cachedBalanceMinor(account), maxSafeMinor);
+      },
+    );
+
+    test(
+      'a net delta beyond the single-amount bound lands on a valid balance',
+      () async {
+        final account = await book.addAccount();
+        final created = await TransactionWriter.create(
+          book.session,
+          entry(account, amountMinor: -maxSafeMinor),
+        );
+        expect(await book.cachedBalanceMinor(account), -maxSafeMinor);
+
+        final edited = await TransactionWriter.update(
+          book.session,
+          created.transaction.id!,
+          entry(account, amountMinor: maxSafeMinor),
+        );
+
+        expect(edited.transaction.amountMinor, maxSafeMinor);
+        expect(await book.cachedBalanceMinor(account), maxSafeMinor);
+      },
+    );
+
+    test('a true overflow rolls back the header, lines and balance', () async {
+      final account = await book.addAccount();
+      await TransactionWriter.create(
+        book.session,
+        entry(account, amountMinor: maxSafeMinor),
+      );
+      final edited = await TransactionWriter.create(
+        book.session,
+        entry(
+          account,
+          amountMinor: -1000,
+          lines: [
+            TransactionLineInput(amountMinor: -400),
+            TransactionLineInput(amountMinor: -600),
+          ],
+        ),
+      );
+      final id = edited.transaction.id!;
+      events.clear();
+
+      await expectLater(
+        TransactionWriter.update(
+          book.session,
+          id,
+          entry(
+            account,
+            amountMinor: maxSafeMinor,
+            lines: [TransactionLineInput(amountMinor: maxSafeMinor)],
+          ),
+        ),
+        throwsA(isA<ValidationException>()),
+      );
+
+      final row = await book.transaction(id);
+      expect(row!.amountMinor, -1000);
+      expect(await book.lineCount(id), 2);
+      expect(await book.cachedBalanceMinor(account), maxSafeMinor - 1000);
+      expect(events, isEmpty);
+    });
+
+    test(
+      'a transfer leg rejects date and line changes but allows metadata',
+      () async {
+        final from = await book.addAccount(name: 'From');
+        final to = await book.addAccount(name: 'To');
+        final fromLeg = await TransactionWriter.create(
+          book.session,
+          entry(
+            from,
+            amountMinor: -400,
+            lines: [TransactionLineInput(amountMinor: -400)],
+          ),
+        );
+        final toLeg = await TransactionWriter.create(
+          book.session,
+          entry(to, amountMinor: 400),
+        );
+        await Transfer.db.insertRow(
+          book.session,
+          Transfer(
+            fromTransactionId: fromLeg.transaction.id!,
+            toTransactionId: toLeg.transaction.id!,
+          ),
+        );
+        final fromId = fromLeg.transaction.id!;
+        final toId = toLeg.transaction.id!;
+
+        await expectLater(
+          TransactionWriter.update(
+            book.session,
+            fromId,
+            entry(from, amountMinor: -400, date: DateTime.utc(2026, 3, 11)),
+          ),
+          throwsA(isA<ValidationException>()),
+        );
+        await expectLater(
+          TransactionWriter.update(
+            book.session,
+            fromId,
+            entry(
+              from,
+              amountMinor: -400,
+              lines: [
+                TransactionLineInput(amountMinor: -200),
+                TransactionLineInput(amountMinor: -200),
+              ],
+            ),
+          ),
+          throwsA(isA<ValidationException>()),
+        );
+        await expectLater(
+          TransactionWriter.update(
+            book.session,
+            toId,
+            entry(to, amountMinor: 400, date: DateTime.utc(2026, 3, 11)),
+          ),
+          throwsA(isA<ValidationException>()),
+        );
+
+        final metadata = await TransactionWriter.update(
+          book.session,
+          fromId,
+          entry(from, amountMinor: -400, memo: 'metadata ok'),
+        );
+
+        expect(metadata.transaction.memo, 'metadata ok');
+        expect(metadata.transaction.amountMinor, -400);
+        expect(metadata.transaction.baseAmountMinor, -400);
+        expect(metadata.transaction.fxRate, '1');
+
+        final fromRow = await book.transaction(fromId);
+        final toRow = await book.transaction(toId);
+        expect(fromRow!.amountMinor, -400);
+        expect(fromRow.baseAmountMinor, -400);
+        expect(toRow!.amountMinor, 400);
+        expect(toRow.baseAmountMinor, 400);
+        expect(await book.cachedBalanceMinor(from), -400);
+        expect(await book.cachedBalanceMinor(to), 400);
+      },
+    );
+
+    test('a date-changing edit notifies both the old and new month', () async {
+      final account = await book.addAccount();
+      final created = await TransactionWriter.create(
+        book.session,
+        entry(account, amountMinor: -250, date: DateTime.utc(2026, 3, 10)),
+      );
+      events.clear();
+
+      final edited = await TransactionWriter.update(
+        book.session,
+        created.transaction.id!,
+        entry(account, amountMinor: -250, date: DateTime.utc(2026, 4, 2)),
+      );
+
+      expect(edited.transaction.date, DateTime.utc(2026, 4, 2));
+      expect(events, hasLength(2));
+      expect(events.map((event) => event.month), containsAll([202603, 202604]));
+      expect(events.every((event) => event.accountId == account.id), isTrue);
+      expect(events.every((event) => event.entityId == book.entity.id), isTrue);
+      expect(
+        events.every((event) => event.scope == ChangeScope.transactions),
+        isTrue,
+      );
+    });
+
+    test('a rolled-back date-changing edit emits nothing', () async {
+      final account = await book.addAccount();
+      final created = await TransactionWriter.create(
+        book.session,
+        entry(account, amountMinor: -250, date: DateTime.utc(2026, 3, 10)),
+      );
+      events.clear();
+
+      await expectLater(
+        TransactionWriter.inTransaction(book.session, (tx) async {
+          await TransactionWriter.update(
+            book.session,
+            created.transaction.id!,
+            entry(account, amountMinor: -250, date: DateTime.utc(2026, 4, 2)),
+            transaction: tx,
+          );
+          throw StateError('roll back');
+        }),
+        throwsA(isA<StateError>()),
+      );
+
+      expect(events, isEmpty);
+      final row = await book.transaction(created.transaction.id!);
+      expect(row!.date, DateTime.utc(2026, 3, 10));
+    });
   });
 
   group('updateLines', () {

@@ -2758,11 +2758,12 @@ All SQL below is Postgres, run through `session.db.unsafeQuery` or `unsafeExecut
 1. Lock the old account and, if it changes, the new one, in UUID order.
 2. A `reconciled` transaction rejects changes to the date, amount, account and lines, but may change status, flag, memo, description and payee.
 3. The new account must be in the same entity. Moving a transaction between entities is a delete plus a create.
-4. Re-resolve the rate only when the date, amount, account or manual rate changed. Otherwise keep the stored `fxRate`, `fxRateDate` and `fxRateSource`, so editing a memo never re-prices history.
-5. Replace the lines: delete them all, then insert the new set.
-6. Apply the balance deltas: `−old.amountMinor` to the old account and `+new.amountMinor` to the new one. That is one delta of `new − old` when the account is unchanged.
+4. Re-resolve the rate only when the date, amount, account or manual rate changed. A manual rate is compared as an exact rational, so `0.8` and `0.80` are the same rate. Otherwise keep the stored `fxRate`, `fxRateDate` and `fxRateSource`, so editing a memo never re-prices history.
+5. Replace the lines: delete them all, then insert the new set. A line-only edit keeps the stored `baseAmountMinor`, and `splitBaseAmounts` distributes that total across the replacement lines at the stored rate.
+6. Apply the balance deltas: `−old.amountMinor` to the old account and `+new.amountMinor` to the new one. That is one delta of `new − old` when the account is unchanged. A net delta may be twice the single-amount bound; the resulting balance is what must stay within it.
 7. In ledger mode, a change to the date, amount, account or lines increments `revision`, and writes an `audit_event` (`transactionEdited`) with the before state.
-8. A transfer leg cannot change account or amount through `update`. Use `updateTransfer`, which rewrites both legs.
+8. A transfer leg cannot change date, amount, account or lines through `update`. Use `updateTransfer`, which rewrites both legs.
+9. After commit, post `EntityChangedEvent(transactions, month, accountId)` for the new month and account, and for the old month and account when either moved. A rolled-back write posts nothing.
 
 **`delete(UuidValue id)`:**
 
