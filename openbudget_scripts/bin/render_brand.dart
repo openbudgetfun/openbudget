@@ -37,8 +37,8 @@ const _brandDirectory = 'brand';
 /// Where the launcher icon and splash configs read their source images.
 const _outputDirectory = 'openbudget_app/build/brand';
 
-/// `ObSwatch.paper`, the tile behind the mark.
-const _paper = '#FCF8EF';
+/// `ObSwatch.newsprint`, the sunny cream tile behind the mark.
+const _paper = '#FFF4DE';
 
 /// The JSON files the generators rewrite in their own style.
 const _generatedJson = [

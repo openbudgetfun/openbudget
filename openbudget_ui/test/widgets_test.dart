@@ -31,7 +31,7 @@ void main() {
         const ObAmount(r'$240.00', tone: ObTone.funded, highlighted: true),
       );
       final text = tester.widget<Text>(find.text(r'$240.00'));
-      expect(text.style?.color, ObSwatch.ink);
+      expect(text.style?.color, const ObPalette.paper().onHighlighter);
       expect(find.byType(ObHighlighter), findsOneWidget);
     });
 
@@ -126,6 +126,7 @@ void main() {
         ),
       );
       expect(find.text('No envelopes yet'), findsOneWidget);
+      expect(find.byType(ObSpotDoodle), findsOneWidget);
       expect(find.byType(WiredDoodle), findsOneWidget);
       await tester.tap(find.text('Add envelope'));
       expect(tapped, 1);

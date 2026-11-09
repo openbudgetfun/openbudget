@@ -457,9 +457,12 @@ void main() {
 
       await _selectCountry(tester, 'Nigeria');
 
-      await tester.tap(
-        find.byType(DropdownButtonFormField<NgSmallCompanyCeiling>),
+      final ceiling = find.byType(
+        DropdownButtonFormField<NgSmallCompanyCeiling>,
       );
+      await tester.ensureVisible(ceiling);
+      await tester.pumpAndSettle();
+      await tester.tap(ceiling);
       await tester.pumpAndSettle();
       await tester.tap(find.text('N100,000,000 (Administration Act)').last);
       await tester.pumpAndSettle();

@@ -52,59 +52,48 @@ Future<Color> _pixel(WidgetTester tester, double x, double y) async {
   );
 }
 
+// Points on the 128-unit artboard.
+const _coin = (62.0, 46.0);
+const _pocket = (30.0, 75.0);
+const _lining = (30.0, 54.0);
+const _shadow = (100.0, 118.0);
+const _halo = (5.0, 90.0);
+
 void main() {
   group('ObMark path data', () {
     final widgetPaths = obMarkPathData.toSet();
-    final hatching = {
-      for (final path in obMarkPathData)
-        if (RegExp(r'^(M[\d.]+ [\d.]+L[\d.]+ [\d.]+)+$').hasMatch(path)) path,
-    };
 
-    for (final name in ['mark.svg', 'mark-night.svg']) {
+    for (final name in ['mark.svg', 'mark-night.svg', 'mark-mono.svg']) {
       test('is exactly the drawing in brand/$name', () {
         expect(_svgPathData(name), widgetPaths);
       });
     }
 
-    for (final name in ['lockup.svg', 'lockup-night.svg']) {
+    for (final name in ['lockup.svg', 'lockup-night.svg', 'lockup-mono.svg']) {
       test('draws the mark in brand/$name', () {
         expect(_svgPathData(name), containsAll(widgetPaths));
-      });
-    }
-
-    for (final name in ['mark-mono.svg', 'lockup-mono.svg']) {
-      test('draws the one-colour mark in brand/$name without hatching', () {
-        expect(hatching, hasLength(3));
-        expect(
-          _svgPathData(name),
-          containsAll(widgetPaths.difference(hatching)),
-        );
       });
     }
   });
 
   group('ObMark', () {
-    // Inside the left envelope, between its flap and its funded share.
-    const paperPoint = (20.0, 70.0);
-
-    testWidgets('draws on paper in the light theme', (tester) async {
+    testWidgets('prints the spot inks on paper', (tester) async {
       await _pumpMark(tester, const ObMark(size: 128));
-      expect(
-        await _pixel(tester, paperPoint.$1, paperPoint.$2),
-        ObSwatch.paper,
-      );
+      expect(await _pixel(tester, _coin.$1, _coin.$2), ObSwatch.sunflower);
+      expect(await _pixel(tester, _pocket.$1, _pocket.$2), ObSwatch.pink);
+      expect(await _pixel(tester, _lining.$1, _lining.$2), ObSwatch.pinkWash);
+      expect(await _pixel(tester, _shadow.$1, _shadow.$2), ObSwatch.teal);
+      expect((await _pixel(tester, _halo.$1, _halo.$2)).a, 0);
     });
 
-    testWidgets('draws on night paper in the dark theme', (tester) async {
+    testWidgets('wears a chalk halo in the dark theme', (tester) async {
       await _pumpMark(
         tester,
         const ObMark(size: 128),
         theme: OpenBudgetTheme.dark,
       );
-      expect(
-        await _pixel(tester, paperPoint.$1, paperPoint.$2),
-        ObSwatch.night,
-      );
+      expect(await _pixel(tester, _halo.$1, _halo.$2), ObSwatch.chalk);
+      expect(await _pixel(tester, _pocket.$1, _pocket.$2), ObSwatch.pink);
     });
 
     testWidgets('an explicit variant wins over the theme', (tester) async {
@@ -112,45 +101,33 @@ void main() {
         tester,
         const ObMark(size: 128, variant: ObMarkVariant.night),
       );
-      expect(
-        await _pixel(tester, paperPoint.$1, paperPoint.$2),
-        ObSwatch.night,
-      );
+      expect(await _pixel(tester, _halo.$1, _halo.$2), ObSwatch.chalk);
     });
 
-    testWidgets('the ink mark knocks the paper out', (tester) async {
+    testWidgets('the ink mark is one colour with the lining knocked out', (
+      tester,
+    ) async {
       await _pumpMark(
         tester,
         const ObMark(size: 128, variant: ObMarkVariant.ink),
       );
-      final paper = await _pixel(tester, paperPoint.$1, paperPoint.$2);
-      expect(paper.a, 0);
-      // The full middle envelope is solid ink.
-      final middle = await _pixel(tester, 64, 80);
-      expect(middle.withValues(alpha: 1), ObSwatch.ink);
-    });
-
-    testWidgets('the seal is highlighter yellow on every ground', (
-      tester,
-    ) async {
-      for (final variant in [ObMarkVariant.paper, ObMarkVariant.night]) {
-        await _pumpMark(tester, ObMark(size: 128, variant: variant));
-        expect(await _pixel(tester, 65, 36), ObSwatch.highlighter);
-      }
+      expect((await _pixel(tester, _lining.$1, _lining.$2)).a, 0);
+      expect(await _pixel(tester, _coin.$1, _coin.$2), ObSwatch.ink);
+      expect(await _pixel(tester, _pocket.$1, _pocket.$2), ObSwatch.ink);
     });
 
     testWidgets('a tile takes its variant ground', (tester) async {
       for (final (variant, ground) in [
-        (ObMarkVariant.paper, ObSwatch.paper),
+        (ObMarkVariant.paper, ObSwatch.newsprint),
         (ObMarkVariant.night, ObSwatch.night),
-        (ObMarkVariant.ink, ObSwatch.paper),
+        (ObMarkVariant.ink, ObSwatch.newsprint),
       ]) {
         await _pumpMark(
           tester,
           ObMark(size: 128, variant: variant, tile: true),
           theme: OpenBudgetTheme.dark,
         );
-        expect(await _pixel(tester, 64, 8), ground, reason: variant.name);
+        expect(await _pixel(tester, 64, 6), ground, reason: variant.name);
       }
     });
 

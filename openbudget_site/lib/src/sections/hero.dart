@@ -3,6 +3,7 @@ import 'package:jaspr/jaspr.dart';
 import 'package:openbudget_site/site_config.dart';
 import 'package:openbudget_site/src/components/doodles.dart';
 import 'package:openbudget_site/src/components/download_stamps.dart';
+import 'package:openbudget_site/src/components/github_mark.dart';
 import 'package:openbudget_site/src/demo_budget.dart';
 import 'package:openbudget_site/src/sections/envelope_desk.dart';
 
@@ -49,7 +50,7 @@ final class Hero extends StatelessComponent {
           a(
             href: config.sourceUrl.toString(),
             classes: 'button button-paper',
-            const [Component.text('Read the code')],
+            const [GithubMark(), Component.text('Read the code')],
           ),
         ]),
         const p(classes: 'cta-note', [
