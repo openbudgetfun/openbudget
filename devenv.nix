@@ -30,6 +30,10 @@ in
       gitleaks
       ktlint
       nixfmt
+      # Rasterise and compress the platform icons for
+      # openbudget_scripts:render_brand.
+      oxipng
+      resvg
       shfmt
     ]
     ++ lib.optionals stdenv.isDarwin [
