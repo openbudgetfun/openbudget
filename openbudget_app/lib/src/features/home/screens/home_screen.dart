@@ -341,7 +341,11 @@ class _BudgetCard extends HookConsumerWidget {
                               formatCentsForCode(readyToAssign, currencyCode),
                         ),
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: palette.hue(readyTone),
+                          // A highlighted figure carries the highlighter's
+                          // own ink; tone hues do not read on sunflower.
+                          color: readyToAssign > 0
+                              ? palette.onHighlighter
+                              : palette.hue(readyTone),
                           fontWeight: FontWeight.w600,
                         ),
                       );
@@ -451,6 +455,8 @@ class _NetWorthSummary extends HookConsumerWidget {
 
     return ObCard(
       tone: tone,
+      raised: true,
+      shadow: palette.overprint,
       padding: const EdgeInsets.all(SpacingTokens.md),
       child: Column(
         children: [

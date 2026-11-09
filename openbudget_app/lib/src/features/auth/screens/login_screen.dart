@@ -85,7 +85,9 @@ class LoginScreen extends HookConsumerWidget {
                         ObHighlighter(
                           child: Text(
                             l10n.authLoginHeadline,
-                            style: theme.textTheme.displaySmall,
+                            style: theme.textTheme.displaySmall?.copyWith(
+                              color: palette.onHighlighter,
+                            ),
                             textAlign: TextAlign.center,
                           ),
                         ),

@@ -93,6 +93,26 @@ void main() {
       expect(find.text('More'), findsOneWidget);
     });
 
+    testWidgets('draws the Add tab as a pink sticker', (tester) async {
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      final plus = find.descendant(
+        of: find.byType(NavigationBar),
+        matching: find.byWidgetPredicate(
+          (widget) =>
+              widget is SkribbleIcon && widget.data == OpenBudgetIcons.add,
+        ),
+      );
+      expect(plus, findsOneWidget);
+      final sticker = tester.widget<Container>(
+        find.ancestor(of: plus, matching: find.byType(Container)).first,
+      );
+      final decoration = sticker.decoration! as ObRoughDecoration;
+      expect(decoration.color, const ObPalette.paper().action);
+      expect(decoration.shadow, const ObPalette.paper().printShadow);
+    });
+
     testWidgets('shows Plan tab content initially', (tester) async {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();

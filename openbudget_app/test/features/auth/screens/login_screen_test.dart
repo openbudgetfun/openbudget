@@ -32,10 +32,11 @@ void main() {
   Widget buildSubject({
     SocialSignInDefines defines = _noDefines,
     TargetPlatform platform = TargetPlatform.android,
+    ThemeData? theme,
   }) => ProviderScope(
     overrides: [socialSignInDefinesProvider.overrideWithValue(defines)],
     child: MaterialApp(
-      theme: OpenBudgetTheme.light.copyWith(platform: platform),
+      theme: (theme ?? OpenBudgetTheme.light).copyWith(platform: platform),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: const LoginScreen(),
@@ -56,6 +57,20 @@ void main() {
       expect(find.text('Forgot Password?'), findsOneWidget);
       expect(find.text('Create Account'), findsOneWidget);
       expect(find.byType(TextField), findsNWidgets(2));
+    });
+
+    testWidgets('inks the highlighted headline so it reads in both themes', (
+      tester,
+    ) async {
+      for (final theme in [OpenBudgetTheme.light, OpenBudgetTheme.dark]) {
+        // A fresh tree, so the theme is not caught mid-transition.
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pumpWidget(buildSubject(theme: theme));
+        await tester.pump();
+
+        final headline = tester.widget<Text>(find.text('Welcome back'));
+        expect(headline.style?.color, theme.ob.onHighlighter);
+      }
     });
 
     testWidgets(

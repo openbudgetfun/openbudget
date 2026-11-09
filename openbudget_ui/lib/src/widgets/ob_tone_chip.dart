@@ -28,7 +28,9 @@ class ObToneChip extends HookWidget {
     final theme = Theme.of(context);
     final palette = theme.ob;
     return Container(
-      padding: const EdgeInsets.fromLTRB(10, 5, 12, 5),
+      // Tight enough that a dotted chip is no wider than a bare one used to
+      // be, so it fits beside an amount in a 390pt-wide row.
+      padding: const EdgeInsets.fromLTRB(7, 4, 9, 4),
       decoration: ObRoughDecoration(
         color: palette.wash(tone),
         outline: palette.quietPen,
@@ -47,15 +49,15 @@ class ObToneChip extends HookWidget {
           else
             ExcludeSemantics(
               child: Container(
-                width: 8,
-                height: 8,
+                width: 7,
+                height: 7,
                 decoration: BoxDecoration(
                   color: palette.hue(tone),
                   shape: BoxShape.circle,
                 ),
               ),
             ),
-          const SizedBox(width: 6),
+          const SizedBox(width: 5),
           Flexible(
             child: Text(
               label,
