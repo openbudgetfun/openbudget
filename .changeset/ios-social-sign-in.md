@@ -1,5 +1,5 @@
 ---
-openbudget_app: feat
+openbudget_app: native
 openbudget_server: feat
 ---
 
