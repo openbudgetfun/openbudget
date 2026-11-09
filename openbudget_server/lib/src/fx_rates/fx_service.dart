@@ -3,7 +3,8 @@ import 'package:openbudget_server/src/common/currency_validation.dart';
 import 'package:openbudget_server/src/fx_rates/fx_provider_client.dart';
 import 'package:openbudget_server/src/generated/future_calls.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
-import 'package:serverpod/serverpod.dart';
+import 'package:serverpod/serverpod.dart' hide Transaction;
+import 'package:serverpod/serverpod.dart' as sp;
 
 /// Schedules a provider backfill for one calendar date.
 typedef FxBackfillScheduler = Future<void> Function(
@@ -189,8 +190,9 @@ class FxService {
     Session session,
     String fromCurrencyCode,
     String toCurrencyCode,
-    DateTime date,
-  ) async {
+    DateTime date, {
+    sp.Transaction? transaction,
+  }) async {
     final from = requireSupportedCurrency(fromCurrencyCode);
     final to = requireSupportedCurrency(toCurrencyCode);
     _requireCivilDate(date);
@@ -207,8 +209,10 @@ class FxService {
     }
 
     final cacheKey = 'fx-quote:$from|$to|${_dateKey(date)}';
-    final cached = await session.caches.local.get<FxQuoteView>(cacheKey);
-    if (cached != null) return cached;
+    if (transaction == null) {
+      final cached = await session.caches.local.get<FxQuoteView>(cacheKey);
+      if (cached != null) return cached;
+    }
 
     final windowStart = date.subtract(const Duration(days: lookbackDays));
     final rows = await FxRate.db.find(
@@ -218,6 +222,7 @@ class FxService {
           (table.rateDate <= date) &
           (table.rateDate > windowStart),
       orderBy: (table) => table.rateDate.desc(),
+      transaction: transaction,
     );
 
     FxRate? fromRow;
@@ -263,11 +268,13 @@ class FxService {
       ),
     );
 
-    await session.caches.local.put(
-      cacheKey,
-      quote,
-      lifetime: cacheLifetime,
-    );
+    if (transaction == null) {
+      await session.caches.local.put(
+        cacheKey,
+        quote,
+        lifetime: cacheLifetime,
+      );
+    }
     return quote;
   }
 
