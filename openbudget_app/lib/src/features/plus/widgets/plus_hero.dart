@@ -73,7 +73,7 @@ class PlusHero extends HookWidget {
                 child: Text(
                   l10n.plusPriceAmount,
                   style: theme.textTheme.headlineMedium?.copyWith(
-                    color: palette.ink,
+                    color: palette.onHighlighter,
                   ),
                 ),
               ),

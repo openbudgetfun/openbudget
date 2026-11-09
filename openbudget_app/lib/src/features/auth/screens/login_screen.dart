@@ -85,7 +85,9 @@ class LoginScreen extends HookConsumerWidget {
                         ObHighlighter(
                           child: Text(
                             l10n.authLoginHeadline,
-                            style: theme.textTheme.displaySmall,
+                            style: theme.textTheme.displaySmall?.copyWith(
+                              color: palette.onHighlighter,
+                            ),
                             textAlign: TextAlign.center,
                           ),
                         ),
@@ -355,7 +357,7 @@ class _LoginTextField extends HookWidget {
       onSubmitted: onSubmitted,
       decoration: InputDecoration(
         labelText: labelText,
-        prefixIcon: SkribbleIcon(
+        prefixIcon: ObFieldIcon(
           data: prefixIcon,
           size: 20,
           color: palette.mutedInk,

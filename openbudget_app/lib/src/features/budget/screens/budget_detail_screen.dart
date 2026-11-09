@@ -585,7 +585,7 @@ class BudgetDetailScreen extends HookConsumerWidget {
                     onChanged: (value) => searchQuery.value = value,
                     decoration: InputDecoration(
                       hintText: l10n.budgetSearchHint,
-                      prefixIcon: const SkribbleIcon(
+                      prefixIcon: const ObFieldIcon(
                         data: OpenBudgetIcons.search,
                         size: 20,
                       ),

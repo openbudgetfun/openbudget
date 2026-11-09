@@ -61,7 +61,7 @@ class EditEnvelopeDialog extends HookConsumerWidget {
             controller: nameController,
             decoration: InputDecoration(
               labelText: l10n.budgetEnvelopeNameLabel,
-              prefixIcon: const SkribbleIcon(data: OpenBudgetIcons.envelope),
+              prefixIcon: const ObFieldIcon(data: OpenBudgetIcons.envelope),
             ),
             autofocus: true,
             textInputAction: TextInputAction.next,
@@ -75,7 +75,7 @@ class EditEnvelopeDialog extends HookConsumerWidget {
               input: '0',
               currencyCode: currencyCode,
             ),
-            prefixIcon: const SkribbleIcon(data: OpenBudgetIcons.payment),
+            prefixIcon: const ObFieldIcon(data: OpenBudgetIcons.payment),
             enabled: !isSubmitting.value,
             onTap: () async {
               final nextInput = await showBudgetAmountKeypadSheet(
@@ -95,7 +95,7 @@ class EditEnvelopeDialog extends HookConsumerWidget {
             decoration: InputDecoration(
               labelText: l10n.envelopeNoteLabel,
               hintText: l10n.envelopeNoteHint,
-              prefixIcon: const SkribbleIcon(data: OpenBudgetIcons.note),
+              prefixIcon: const ObFieldIcon(data: OpenBudgetIcons.note),
             ),
             maxLines: 3,
             minLines: 1,

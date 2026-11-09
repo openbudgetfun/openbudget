@@ -211,7 +211,7 @@ class _TaxCategorySheet extends HookConsumerWidget {
                     ObTextField(
                       controller: searchController,
                       hintText: l10n.taxCategorySheetSearch,
-                      prefixIcon: const SkribbleIcon(
+                      prefixIcon: const ObFieldIcon(
                         data: OpenBudgetIcons.search,
                       ),
                     ),

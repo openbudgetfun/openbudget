@@ -175,7 +175,7 @@ class AddIncomeScreen extends HookConsumerWidget {
                           decoration: InputDecoration(
                             labelText: l10n.transactionAmountLabel,
                             errorText: amountError,
-                            prefixIcon: const SkribbleIcon(
+                            prefixIcon: const ObFieldIcon(
                               data: OpenBudgetIcons.money,
                             ),
                             border: InputBorder.none,
@@ -286,7 +286,7 @@ class AddIncomeScreen extends HookConsumerWidget {
                       ObTextField(
                         controller: descriptionController,
                         labelText: l10n.transactionDescriptionLabel,
-                        prefixIcon: const SkribbleIcon(
+                        prefixIcon: const ObFieldIcon(
                           data: OpenBudgetIcons.document,
                         ),
                       ),
@@ -295,7 +295,7 @@ class AddIncomeScreen extends HookConsumerWidget {
                         controller: memoController,
                         decoration: InputDecoration(
                           labelText: l10n.transactionMemoLabel,
-                          prefixIcon: const SkribbleIcon(
+                          prefixIcon: const ObFieldIcon(
                             data: OpenBudgetIcons.note,
                           ),
                           hintText: l10n.transactionMemoHint,

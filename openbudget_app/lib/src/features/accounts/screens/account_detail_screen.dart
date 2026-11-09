@@ -217,7 +217,7 @@ class AccountDetailScreen extends HookConsumerWidget {
                         textInputAction: TextInputAction.search,
                         decoration: InputDecoration(
                           hintText: l10n.accountDetailSearchHint,
-                          prefixIcon: const SkribbleIcon(
+                          prefixIcon: const ObFieldIcon(
                             data: OpenBudgetIcons.search,
                           ),
                         ),
@@ -1881,7 +1881,7 @@ class _SolanaWalletAccountBody extends HookConsumerWidget {
                 textInputAction: TextInputAction.search,
                 decoration: InputDecoration(
                   hintText: l10n.accountDetailWalletTransactionSearchHint,
-                  prefixIcon: const SkribbleIcon(
+                  prefixIcon: const ObFieldIcon(
                     data: OpenBudgetIcons.search,
                   ),
                 ),

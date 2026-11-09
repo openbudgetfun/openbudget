@@ -859,7 +859,7 @@ class _BankSearchStep extends HookWidget {
           onSubmitted: (_) => FocusScope.of(context).unfocus(),
           textInputAction: TextInputAction.search,
           decoration: const InputDecoration(
-            prefixIcon: SkribbleIcon(data: OpenBudgetIcons.search),
+            prefixIcon: ObFieldIcon(data: OpenBudgetIcons.search),
           ),
         ),
         const SizedBox(height: SpacingTokens.xs),

@@ -161,7 +161,7 @@ class SetGoalDialog extends HookConsumerWidget {
                           input: '0',
                           currencyCode: currencyCode,
                         ),
-                        prefixIcon: SkribbleIcon(
+                        prefixIcon: ObFieldIcon(
                           data: OpenBudgetIcons.payment,
                           color: palette.brand,
                         ),

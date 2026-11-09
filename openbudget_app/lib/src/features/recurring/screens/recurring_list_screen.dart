@@ -725,7 +725,7 @@ class _AddRecurringDialog extends HookConsumerWidget {
             ObTextField(
               controller: descController,
               labelText: l10n.transactionDescriptionLabel,
-              prefixIcon: const SkribbleIcon(
+              prefixIcon: const ObFieldIcon(
                 data: OpenBudgetIcons.document,
                 size: 20,
               ),
@@ -940,7 +940,7 @@ class _EditRecurringDialog extends HookConsumerWidget {
             ObTextField(
               controller: descController,
               labelText: l10n.transactionDescriptionLabel,
-              prefixIcon: const SkribbleIcon(
+              prefixIcon: const ObFieldIcon(
                 data: OpenBudgetIcons.document,
                 size: 20,
               ),

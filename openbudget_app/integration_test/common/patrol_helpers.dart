@@ -167,8 +167,7 @@ class BudgetShellPage {
       _destination(OpenBudgetIcons.envelopeOpen, OpenBudgetIcons.envelope);
   Finder get accountsTab =>
       _destination(OpenBudgetIcons.bank, OpenBudgetIcons.wallet);
-  Finder get addTab =>
-      _destination(OpenBudgetIcons.addCircle, OpenBudgetIcons.addCircle);
+  Finder get addTab => _destination(OpenBudgetIcons.add, OpenBudgetIcons.add);
   Finder get reflectTab =>
       _destination(OpenBudgetIcons.pieChart, OpenBudgetIcons.barChart);
   Finder get moreTab =>

@@ -50,6 +50,8 @@ class BudgetHeader extends HookConsumerWidget {
     final materialLocalizations = MaterialLocalizations.of(context);
 
     return ObCard(
+      // The month's header is the screen's one sticker.
+      raised: true,
       padding: EdgeInsets.zero,
       child: Column(
         mainAxisSize: MainAxisSize.min,

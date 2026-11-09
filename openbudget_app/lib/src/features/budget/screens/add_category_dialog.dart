@@ -36,7 +36,7 @@ class AddCategoryDialog extends HookConsumerWidget {
         controller: nameController,
         decoration: InputDecoration(
           labelText: l10n.budgetCategoryNameLabel,
-          prefixIcon: const SkribbleIcon(data: OpenBudgetIcons.category),
+          prefixIcon: const ObFieldIcon(data: OpenBudgetIcons.category),
         ),
         autofocus: true,
         textInputAction: TextInputAction.done,

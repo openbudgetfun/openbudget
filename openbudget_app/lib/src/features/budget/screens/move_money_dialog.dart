@@ -64,7 +64,7 @@ class MoveMoneyDialog extends HookConsumerWidget {
               initialValue: fromEnvelopeId.value,
               decoration: InputDecoration(
                 labelText: l10n.moveMoneyFrom,
-                prefixIcon: const SkribbleIcon(data: OpenBudgetIcons.outflow),
+                prefixIcon: const ObFieldIcon(data: OpenBudgetIcons.outflow),
               ),
               items: envelopeItems,
               onChanged: (v) => fromEnvelopeId.value = v,
@@ -74,7 +74,7 @@ class MoveMoneyDialog extends HookConsumerWidget {
               initialValue: toEnvelopeId.value,
               decoration: InputDecoration(
                 labelText: l10n.moveMoneyTo,
-                prefixIcon: const SkribbleIcon(data: OpenBudgetIcons.inflow),
+                prefixIcon: const ObFieldIcon(data: OpenBudgetIcons.inflow),
               ),
               items: envelopeItems,
               onChanged: (v) => toEnvelopeId.value = v,
@@ -88,7 +88,7 @@ class MoveMoneyDialog extends HookConsumerWidget {
                 input: '0',
                 currencyCode: currency,
               ),
-              prefixIcon: const SkribbleIcon(data: OpenBudgetIcons.payment),
+              prefixIcon: const ObFieldIcon(data: OpenBudgetIcons.payment),
               enabled: !isSubmitting.value,
               onTap: () async {
                 final nextInput = await showBudgetAmountKeypadSheet(

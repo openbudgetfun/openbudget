@@ -97,7 +97,7 @@ class CreateBudgetScreen extends HookConsumerWidget {
                       onTapOutside: (_) => FocusScope.of(context).unfocus(),
                       decoration: InputDecoration(
                         labelText: l10n.createBudgetNameLabel,
-                        prefixIcon: SkribbleIcon(
+                        prefixIcon: ObFieldIcon(
                           data: OpenBudgetIcons.label,
                           color: palette.mutedInk,
                         ),

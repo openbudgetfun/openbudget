@@ -152,7 +152,7 @@ class PlanSettingsScreen extends HookConsumerWidget {
           controller: controller,
           decoration: InputDecoration(
             labelText: l10n.createBudgetNameLabel,
-            prefixIcon: SkribbleIcon(
+            prefixIcon: ObFieldIcon(
               data: OpenBudgetIcons.label,
               size: 20,
               color: palette.mutedInk,

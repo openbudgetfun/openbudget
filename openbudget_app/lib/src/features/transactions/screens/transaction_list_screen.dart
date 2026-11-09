@@ -276,7 +276,7 @@ class TransactionListScreen extends HookConsumerWidget {
                 child: ObTextField(
                   controller: searchController,
                   hintText: l10n.transactionSearchHint,
-                  prefixIcon: const SkribbleIcon(data: OpenBudgetIcons.search),
+                  prefixIcon: const ObFieldIcon(data: OpenBudgetIcons.search),
                   suffixIcon: searchQuery.value.isNotEmpty
                       ? IconButton(
                           key: const Key('transaction-search-clear'),
@@ -1396,81 +1396,71 @@ class _TransactionTile extends HookConsumerWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     _buildMeta(theme, palette),
-                    if (isSplit ||
-                        (!isIncome && (envelopeName?.isEmpty ?? true)) ||
-                        (flagTone != null && flagLabel != null))
-                      Padding(
-                        padding: const EdgeInsets.only(top: SpacingTokens.xs),
-                        child: Wrap(
-                          spacing: SpacingTokens.xs,
-                          runSpacing: SpacingTokens.xs,
-                          children: [
-                            if (isSplit)
-                              ConstrainedBox(
-                                constraints: const BoxConstraints(
-                                  maxWidth: 180,
-                                ),
-                                child: ObToneChip(
-                                  label: l10n.splitLabel,
-                                  tone: ObTone.review,
-                                  icon: const SkribbleIcon(
-                                    data: OpenBudgetIcons.split,
-                                    size: 14,
-                                  ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: SpacingTokens.xs),
+                      child: Wrap(
+                        spacing: SpacingTokens.xs,
+                        runSpacing: SpacingTokens.xs,
+                        children: [
+                          if (isSplit)
+                            ConstrainedBox(
+                              constraints: const BoxConstraints(
+                                maxWidth: 180,
+                              ),
+                              child: ObToneChip(
+                                label: l10n.splitLabel,
+                                tone: ObTone.review,
+                                icon: const SkribbleIcon(
+                                  data: OpenBudgetIcons.split,
+                                  size: 14,
                                 ),
                               ),
-                            if (!isIncome && (envelopeName?.isEmpty ?? true))
-                              ConstrainedBox(
-                                constraints: const BoxConstraints(
-                                  maxWidth: 180,
-                                ),
-                                child: ObToneChip(
-                                  label: l10n.transactionUnassigned,
-                                  tone: ObTone.review,
-                                  icon: const SkribbleIcon(
-                                    data: OpenBudgetIcons.envelope,
-                                    size: 14,
-                                  ),
+                            ),
+                          if (!isIncome && (envelopeName?.isEmpty ?? true))
+                            ConstrainedBox(
+                              constraints: const BoxConstraints(
+                                maxWidth: 180,
+                              ),
+                              child: ObToneChip(
+                                label: l10n.transactionUnassigned,
+                                tone: ObTone.review,
+                                icon: const SkribbleIcon(
+                                  data: OpenBudgetIcons.envelope,
+                                  size: 14,
                                 ),
                               ),
-                            if (flagTone != null && flagLabel != null)
-                              ConstrainedBox(
-                                constraints: const BoxConstraints(
-                                  maxWidth: 180,
-                                ),
-                                child: ObToneChip(
-                                  label: flagLabel,
-                                  tone: flagTone,
-                                  icon: const SkribbleIcon(
-                                    data: OpenBudgetIcons.flag,
-                                    size: 14,
-                                  ),
+                            ),
+                          if (flagTone != null && flagLabel != null)
+                            ConstrainedBox(
+                              constraints: const BoxConstraints(
+                                maxWidth: 180,
+                              ),
+                              child: ObToneChip(
+                                label: flagLabel,
+                                tone: flagTone,
+                                icon: const SkribbleIcon(
+                                  data: OpenBudgetIcons.flag,
+                                  size: 14,
                                 ),
                               ),
-                          ],
-                        ),
+                            ),
+                          ObToneChip(label: statusLabel, tone: statusTone),
+                        ],
                       ),
+                    ),
                   ],
                 ),
               ),
               const SizedBox(width: SpacingTokens.sm),
               ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 132),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    ObAmount(
-                      formatCentsForCode(
-                        transaction.amountCents,
-                        transaction.currencyCode,
-                      ),
-                      tone: tone,
-                      style: theme.textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: SpacingTokens.xs),
-                    ObToneChip(label: statusLabel, tone: statusTone),
-                  ],
+                child: ObAmount(
+                  formatCentsForCode(
+                    transaction.amountCents,
+                    transaction.currencyCode,
+                  ),
+                  tone: tone,
+                  style: theme.textTheme.titleMedium,
                 ),
               ),
             ],

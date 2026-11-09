@@ -56,8 +56,8 @@ class BudgetShellScreen extends HookConsumerWidget {
               label: l10n.tabAccounts,
             ),
             NavigationDestination(
-              icon: const SkribbleIcon(data: OpenBudgetIcons.addCircle),
-              selectedIcon: const SkribbleIcon(data: OpenBudgetIcons.addCircle),
+              icon: const _AddSticker(),
+              selectedIcon: const _AddSticker(),
               label: l10n.tabAdd,
             ),
             NavigationDestination(
@@ -223,3 +223,32 @@ class BudgetShellScreen extends HookConsumerWidget {
 }
 
 enum _MoreQuickAction { settings, recurring, payees }
+
+/// The Add tab's icon: a hot-pink sticker on a hard print shadow, so the
+/// one action in the bar stands out from the places it goes.
+class _AddSticker extends HookWidget {
+  const _AddSticker();
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = Theme.of(context).ob;
+    return Container(
+      width: 48,
+      height: 34,
+      alignment: Alignment.center,
+      decoration: ObRoughDecoration(
+        color: palette.action,
+        outline: palette.ink,
+        strokeWidth: 2.2,
+        seed: 29,
+        shadow: palette.printShadow,
+        shadowOffset: const Offset(3, 3),
+      ),
+      child: SkribbleIcon(
+        data: OpenBudgetIcons.add,
+        size: 20,
+        color: palette.onAction,
+      ),
+    );
+  }
+}

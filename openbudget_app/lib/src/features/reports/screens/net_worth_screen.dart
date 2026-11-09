@@ -117,6 +117,8 @@ class _NetWorthStatement extends HookWidget {
       ),
       children: [
         ObCard(
+          raised: true,
+          shadow: palette.overprint,
           padding: const EdgeInsets.all(SpacingTokens.md),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
