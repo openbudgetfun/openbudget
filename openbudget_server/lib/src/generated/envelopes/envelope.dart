@@ -14,36 +14,39 @@ import 'dart:async' as _ida;
 
 import 'package:serverpod/serverpod.dart' as _is;
 
-/// An envelope within a category, tracking budgeted and spent amounts.
+/// A pot of money for one purpose in an entity's envelope plan. Its
+/// activity and available balance are derived, never stored.
 abstract class Envelope
     implements _is.TableRow<_is.UuidValue?>, _is.ProtocolSerialization {
   Envelope._({
     this.id,
-    required this.name,
+    required this.entityId,
     required this.categoryId,
-    required this.budgetedAmountCents,
-    required this.spentAmountCents,
-    required this.currencyCode,
-    required this.sortOrder,
+    required this.name,
+    int? sortOrder,
     this.note,
     this.taxCategoryCode,
+    this.defaultLedgerAccountId,
     bool? isHidden,
     DateTime? createdAt,
-  }) : isHidden = isHidden ?? false,
-       createdAt = createdAt ?? DateTime.now();
+    DateTime? updatedAt,
+  }) : sortOrder = sortOrder ?? 0,
+       isHidden = isHidden ?? false,
+       createdAt = createdAt ?? DateTime.now(),
+       updatedAt = updatedAt ?? DateTime.now();
 
   factory Envelope({
     _is.UuidValue? id,
-    required String name,
+    required _is.UuidValue entityId,
     required _is.UuidValue categoryId,
-    required int budgetedAmountCents,
-    required int spentAmountCents,
-    required String currencyCode,
-    required int sortOrder,
+    required String name,
+    int? sortOrder,
     String? note,
     String? taxCategoryCode,
+    _is.UuidValue? defaultLedgerAccountId,
     bool? isHidden,
     DateTime? createdAt,
+    DateTime? updatedAt,
   }) = _EnvelopeImpl;
 
   factory Envelope.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -51,22 +54,31 @@ abstract class Envelope
       id: jsonSerialization['id'] == null
           ? null
           : _is.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
-      name: jsonSerialization['name'] as String,
+      entityId: _is.UuidValueJsonExtension.fromJson(
+        jsonSerialization['entityId'],
+      ),
       categoryId: _is.UuidValueJsonExtension.fromJson(
         jsonSerialization['categoryId'],
       ),
-      budgetedAmountCents: jsonSerialization['budgetedAmountCents'] as int,
-      spentAmountCents: jsonSerialization['spentAmountCents'] as int,
-      currencyCode: jsonSerialization['currencyCode'] as String,
-      sortOrder: jsonSerialization['sortOrder'] as int,
+      name: jsonSerialization['name'] as String,
+      sortOrder: jsonSerialization['sortOrder'] as int?,
       note: jsonSerialization['note'] as String?,
       taxCategoryCode: jsonSerialization['taxCategoryCode'] as String?,
+      defaultLedgerAccountId:
+          jsonSerialization['defaultLedgerAccountId'] == null
+          ? null
+          : _is.UuidValueJsonExtension.fromJson(
+              jsonSerialization['defaultLedgerAccountId'],
+            ),
       isHidden: jsonSerialization['isHidden'] == null
           ? null
           : _is.BoolJsonExtension.fromJson(jsonSerialization['isHidden']),
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _is.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
+      updatedAt: jsonSerialization['updatedAt'] == null
+          ? null
+          : _is.DateTimeJsonExtension.fromJson(jsonSerialization['updatedAt']),
     );
   }
 
@@ -77,32 +89,28 @@ abstract class Envelope
   @override
   _is.UuidValue? id;
 
-  String name;
+  _is.UuidValue entityId;
 
   _is.UuidValue categoryId;
 
-  /// Budgeted amount stored as integer cents to avoid floating-point issues.
-  int budgetedAmountCents;
+  String name;
 
-  /// Spent amount stored as integer cents.
-  int spentAmountCents;
-
-  /// ISO 4217 currency code.
-  String currencyCode;
-
-  /// Display order within the parent category.
   int sortOrder;
 
-  /// Optional user-facing note providing context for the envelope.
   String? note;
 
-  /// Default tax category for transactions in this envelope.
+  /// Default tax category for lines assigned to this envelope.
   String? taxCategoryCode;
 
-  /// Whether this envelope is hidden from the default budget view.
-  bool? isHidden;
+  /// Default ledger account for lines assigned to this envelope in
+  /// ledger-mode books.
+  _is.UuidValue? defaultLedgerAccountId;
+
+  bool isHidden;
 
   DateTime createdAt;
+
+  DateTime updatedAt;
 
   @override
   _is.Table<_is.UuidValue?> get table => t;
@@ -112,32 +120,33 @@ abstract class Envelope
   @_is.useResult
   Envelope copyWith({
     _is.UuidValue? id = const _is.$UndefinedUuidValue(),
-    String? name,
+    _is.UuidValue? entityId,
     _is.UuidValue? categoryId,
-    int? budgetedAmountCents,
-    int? spentAmountCents,
-    String? currencyCode,
+    String? name,
     int? sortOrder,
     String? note,
     String? taxCategoryCode,
+    _is.UuidValue? defaultLedgerAccountId = const _is.$UndefinedUuidValue(),
     bool? isHidden,
     DateTime? createdAt,
+    DateTime? updatedAt,
   });
   @override
   Map<String, dynamic> toJson() {
     return {
       '__className__': 'Envelope',
       if (id != null) 'id': id?.toJson(),
-      'name': name,
+      'entityId': entityId.toJson(),
       'categoryId': categoryId.toJson(),
-      'budgetedAmountCents': budgetedAmountCents,
-      'spentAmountCents': spentAmountCents,
-      'currencyCode': currencyCode,
+      'name': name,
       'sortOrder': sortOrder,
       if (note != null) 'note': note,
       if (taxCategoryCode != null) 'taxCategoryCode': taxCategoryCode,
-      if (isHidden != null) 'isHidden': isHidden,
+      if (defaultLedgerAccountId != null)
+        'defaultLedgerAccountId': defaultLedgerAccountId?.toJson(),
+      'isHidden': isHidden,
       'createdAt': createdAt.toJson(),
+      'updatedAt': updatedAt.toJson(),
     };
   }
 
@@ -146,16 +155,17 @@ abstract class Envelope
     return {
       '__className__': 'Envelope',
       if (id != null) 'id': id?.toJson(),
-      'name': name,
+      'entityId': entityId.toJson(),
       'categoryId': categoryId.toJson(),
-      'budgetedAmountCents': budgetedAmountCents,
-      'spentAmountCents': spentAmountCents,
-      'currencyCode': currencyCode,
+      'name': name,
       'sortOrder': sortOrder,
       if (note != null) 'note': note,
       if (taxCategoryCode != null) 'taxCategoryCode': taxCategoryCode,
-      if (isHidden != null) 'isHidden': isHidden,
+      if (defaultLedgerAccountId != null)
+        'defaultLedgerAccountId': defaultLedgerAccountId?.toJson(),
+      'isHidden': isHidden,
       'createdAt': createdAt.toJson(),
+      'updatedAt': updatedAt.toJson(),
     };
   }
 
@@ -192,28 +202,28 @@ class _Undefined {}
 class _EnvelopeImpl extends Envelope {
   _EnvelopeImpl({
     _is.UuidValue? id,
-    required String name,
+    required _is.UuidValue entityId,
     required _is.UuidValue categoryId,
-    required int budgetedAmountCents,
-    required int spentAmountCents,
-    required String currencyCode,
-    required int sortOrder,
+    required String name,
+    int? sortOrder,
     String? note,
     String? taxCategoryCode,
+    _is.UuidValue? defaultLedgerAccountId,
     bool? isHidden,
     DateTime? createdAt,
+    DateTime? updatedAt,
   }) : super._(
          id: id,
-         name: name,
+         entityId: entityId,
          categoryId: categoryId,
-         budgetedAmountCents: budgetedAmountCents,
-         spentAmountCents: spentAmountCents,
-         currencyCode: currencyCode,
+         name: name,
          sortOrder: sortOrder,
          note: note,
          taxCategoryCode: taxCategoryCode,
+         defaultLedgerAccountId: defaultLedgerAccountId,
          isHidden: isHidden,
          createdAt: createdAt,
+         updatedAt: updatedAt,
        );
 
   /// Returns a shallow copy of this [Envelope]
@@ -222,31 +232,33 @@ class _EnvelopeImpl extends Envelope {
   @override
   Envelope copyWith({
     _is.UuidValue? id = const _is.$UndefinedUuidValue(),
-    String? name,
+    _is.UuidValue? entityId,
     _is.UuidValue? categoryId,
-    int? budgetedAmountCents,
-    int? spentAmountCents,
-    String? currencyCode,
+    String? name,
     int? sortOrder,
     Object? note = _Undefined,
     Object? taxCategoryCode = _Undefined,
-    Object? isHidden = _Undefined,
+    _is.UuidValue? defaultLedgerAccountId = const _is.$UndefinedUuidValue(),
+    bool? isHidden,
     DateTime? createdAt,
+    DateTime? updatedAt,
   }) {
     return Envelope(
       id: id is _is.UndefinedSentinel ? this.id : id,
-      name: name ?? this.name,
+      entityId: entityId ?? this.entityId,
       categoryId: categoryId ?? this.categoryId,
-      budgetedAmountCents: budgetedAmountCents ?? this.budgetedAmountCents,
-      spentAmountCents: spentAmountCents ?? this.spentAmountCents,
-      currencyCode: currencyCode ?? this.currencyCode,
+      name: name ?? this.name,
       sortOrder: sortOrder ?? this.sortOrder,
       note: note is String? ? note : this.note,
       taxCategoryCode: taxCategoryCode is String?
           ? taxCategoryCode
           : this.taxCategoryCode,
-      isHidden: isHidden is bool? ? isHidden : this.isHidden,
+      defaultLedgerAccountId: defaultLedgerAccountId is _is.UndefinedSentinel
+          ? this.defaultLedgerAccountId
+          : defaultLedgerAccountId,
+      isHidden: isHidden ?? this.isHidden,
       createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 }
@@ -254,10 +266,11 @@ class _EnvelopeImpl extends Envelope {
 class EnvelopeUpdateTable extends _is.UpdateTable<EnvelopeTable> {
   EnvelopeUpdateTable(super.table);
 
-  _is.ColumnValue<String, String> name(String value) => _is.ColumnValue(
-    table.name,
-    value,
-  );
+  _is.ColumnValue<_is.UuidValue, _is.UuidValue> entityId(_is.UuidValue value) =>
+      _is.ColumnValue(
+        table.entityId,
+        value,
+      );
 
   _is.ColumnValue<_is.UuidValue, _is.UuidValue> categoryId(
     _is.UuidValue value,
@@ -266,18 +279,8 @@ class EnvelopeUpdateTable extends _is.UpdateTable<EnvelopeTable> {
     value,
   );
 
-  _is.ColumnValue<int, int> budgetedAmountCents(int value) => _is.ColumnValue(
-    table.budgetedAmountCents,
-    value,
-  );
-
-  _is.ColumnValue<int, int> spentAmountCents(int value) => _is.ColumnValue(
-    table.spentAmountCents,
-    value,
-  );
-
-  _is.ColumnValue<String, String> currencyCode(String value) => _is.ColumnValue(
-    table.currencyCode,
+  _is.ColumnValue<String, String> name(String value) => _is.ColumnValue(
+    table.name,
     value,
   );
 
@@ -297,7 +300,14 @@ class EnvelopeUpdateTable extends _is.UpdateTable<EnvelopeTable> {
         value,
       );
 
-  _is.ColumnValue<bool, bool> isHidden(bool? value) => _is.ColumnValue(
+  _is.ColumnValue<_is.UuidValue, _is.UuidValue> defaultLedgerAccountId(
+    _is.UuidValue? value,
+  ) => _is.ColumnValue(
+    table.defaultLedgerAccountId,
+    value,
+  );
+
+  _is.ColumnValue<bool, bool> isHidden(bool value) => _is.ColumnValue(
     table.isHidden,
     value,
   );
@@ -307,34 +317,33 @@ class EnvelopeUpdateTable extends _is.UpdateTable<EnvelopeTable> {
         table.createdAt,
         value,
       );
+
+  _is.ColumnValue<DateTime, DateTime> updatedAt(DateTime value) =>
+      _is.ColumnValue(
+        table.updatedAt,
+        value,
+      );
 }
 
 class EnvelopeTable extends _is.Table<_is.UuidValue?> {
   EnvelopeTable({super.tableRelation}) : super(tableName: 'envelope') {
     updateTable = EnvelopeUpdateTable(this);
-    name = _is.ColumnString(
-      'name',
+    entityId = _is.ColumnUuid(
+      'entityId',
       this,
     );
     categoryId = _is.ColumnUuid(
       'categoryId',
       this,
     );
-    budgetedAmountCents = _is.ColumnInt(
-      'budgetedAmountCents',
-      this,
-    );
-    spentAmountCents = _is.ColumnInt(
-      'spentAmountCents',
-      this,
-    );
-    currencyCode = _is.ColumnString(
-      'currencyCode',
+    name = _is.ColumnString(
+      'name',
       this,
     );
     sortOrder = _is.ColumnInt(
       'sortOrder',
       this,
+      hasDefault: true,
     );
     note = _is.ColumnString(
       'note',
@@ -342,6 +351,10 @@ class EnvelopeTable extends _is.Table<_is.UuidValue?> {
     );
     taxCategoryCode = _is.ColumnString(
       'taxCategoryCode',
+      this,
+    );
+    defaultLedgerAccountId = _is.ColumnUuid(
+      'defaultLedgerAccountId',
       this,
     );
     isHidden = _is.ColumnBool(
@@ -354,50 +367,51 @@ class EnvelopeTable extends _is.Table<_is.UuidValue?> {
       this,
       hasDefault: true,
     );
+    updatedAt = _is.ColumnDateTime(
+      'updatedAt',
+      this,
+      hasDefault: true,
+    );
   }
 
   late final EnvelopeUpdateTable updateTable;
 
-  late final _is.ColumnString name;
+  late final _is.ColumnUuid entityId;
 
   late final _is.ColumnUuid categoryId;
 
-  /// Budgeted amount stored as integer cents to avoid floating-point issues.
-  late final _is.ColumnInt budgetedAmountCents;
+  late final _is.ColumnString name;
 
-  /// Spent amount stored as integer cents.
-  late final _is.ColumnInt spentAmountCents;
-
-  /// ISO 4217 currency code.
-  late final _is.ColumnString currencyCode;
-
-  /// Display order within the parent category.
   late final _is.ColumnInt sortOrder;
 
-  /// Optional user-facing note providing context for the envelope.
   late final _is.ColumnString note;
 
-  /// Default tax category for transactions in this envelope.
+  /// Default tax category for lines assigned to this envelope.
   late final _is.ColumnString taxCategoryCode;
 
-  /// Whether this envelope is hidden from the default budget view.
+  /// Default ledger account for lines assigned to this envelope in
+  /// ledger-mode books.
+  late final _is.ColumnUuid defaultLedgerAccountId;
+
   late final _is.ColumnBool isHidden;
 
   late final _is.ColumnDateTime createdAt;
 
+  late final _is.ColumnDateTime updatedAt;
+
   @override
   List<_is.Column> get columns => [
     id,
-    name,
+    entityId,
     categoryId,
-    budgetedAmountCents,
-    spentAmountCents,
-    currencyCode,
+    name,
     sortOrder,
     note,
     taxCategoryCode,
+    defaultLedgerAccountId,
     isHidden,
     createdAt,
+    updatedAt,
   ];
 }
 

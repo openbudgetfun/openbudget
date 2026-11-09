@@ -10,42 +10,44 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'package:openbudget_core/openbudget_core.dart' as _ifz8weqz;
 import 'package:serverpod_client/serverpod_client.dart' as _isc;
 
-/// A recurring/scheduled transaction template that generates transactions on a schedule.
+/// A schedule that creates a transaction on each due date.
 abstract class RecurringTransaction
     implements _isc.SerializableModel, _isc.ProtocolSerialization {
   RecurringTransaction._({
     this.id,
-    required this.description,
-    required this.amountCents,
-    required this.currencyCode,
-    this.envelopeId,
-    required this.budgetId,
-    this.accountId,
+    required this.entityId,
+    required this.accountId,
     this.payeeId,
+    this.envelopeId,
+    required this.description,
+    this.memo,
+    required this.amountMinor,
     required this.frequency,
-    required this.nextOccurrence,
+    required this.nextDate,
     this.endDate,
-    required this.isActive,
+    bool? isActive,
     DateTime? createdAt,
     DateTime? updatedAt,
-  }) : createdAt = createdAt ?? DateTime.now(),
+  }) : isActive = isActive ?? true,
+       createdAt = createdAt ?? DateTime.now(),
        updatedAt = updatedAt ?? DateTime.now();
 
   factory RecurringTransaction({
     _isc.UuidValue? id,
-    required String description,
-    required int amountCents,
-    required String currencyCode,
-    _isc.UuidValue? envelopeId,
-    required _isc.UuidValue budgetId,
-    _isc.UuidValue? accountId,
+    required _isc.UuidValue entityId,
+    required _isc.UuidValue accountId,
     _isc.UuidValue? payeeId,
-    required String frequency,
-    required DateTime nextOccurrence,
+    _isc.UuidValue? envelopeId,
+    required String description,
+    String? memo,
+    required int amountMinor,
+    required _ifz8weqz.RecurrenceFrequency frequency,
+    required DateTime nextDate,
     DateTime? endDate,
-    required bool isActive,
+    bool? isActive,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) = _RecurringTransactionImpl;
@@ -57,33 +59,35 @@ abstract class RecurringTransaction
       id: jsonSerialization['id'] == null
           ? null
           : _isc.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
-      description: jsonSerialization['description'] as String,
-      amountCents: jsonSerialization['amountCents'] as int,
-      currencyCode: jsonSerialization['currencyCode'] as String,
+      entityId: _isc.UuidValueJsonExtension.fromJson(
+        jsonSerialization['entityId'],
+      ),
+      accountId: _isc.UuidValueJsonExtension.fromJson(
+        jsonSerialization['accountId'],
+      ),
+      payeeId: jsonSerialization['payeeId'] == null
+          ? null
+          : _isc.UuidValueJsonExtension.fromJson(jsonSerialization['payeeId']),
       envelopeId: jsonSerialization['envelopeId'] == null
           ? null
           : _isc.UuidValueJsonExtension.fromJson(
               jsonSerialization['envelopeId'],
             ),
-      budgetId: _isc.UuidValueJsonExtension.fromJson(
-        jsonSerialization['budgetId'],
+      description: jsonSerialization['description'] as String,
+      memo: jsonSerialization['memo'] as String?,
+      amountMinor: jsonSerialization['amountMinor'] as int,
+      frequency: _ifz8weqz.RecurrenceFrequency.fromJson(
+        (jsonSerialization['frequency'] as String),
       ),
-      accountId: jsonSerialization['accountId'] == null
-          ? null
-          : _isc.UuidValueJsonExtension.fromJson(
-              jsonSerialization['accountId'],
-            ),
-      payeeId: jsonSerialization['payeeId'] == null
-          ? null
-          : _isc.UuidValueJsonExtension.fromJson(jsonSerialization['payeeId']),
-      frequency: jsonSerialization['frequency'] as String,
-      nextOccurrence: _isc.DateTimeJsonExtension.fromJson(
-        jsonSerialization['nextOccurrence'],
+      nextDate: _isc.DateTimeJsonExtension.fromJson(
+        jsonSerialization['nextDate'],
       ),
       endDate: jsonSerialization['endDate'] == null
           ? null
           : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['endDate']),
-      isActive: _isc.BoolJsonExtension.fromJson(jsonSerialization['isActive']),
+      isActive: jsonSerialization['isActive'] == null
+          ? null
+          : _isc.BoolJsonExtension.fromJson(jsonSerialization['isActive']),
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
@@ -98,32 +102,29 @@ abstract class RecurringTransaction
   /// the id will be null.
   _isc.UuidValue? id;
 
-  String description;
+  _isc.UuidValue entityId;
 
-  /// Amount in integer cents. Positive = inflow, negative = outflow.
-  int amountCents;
-
-  /// ISO 4217 currency code.
-  String currencyCode;
-
-  _isc.UuidValue? envelopeId;
-
-  _isc.UuidValue budgetId;
-
-  _isc.UuidValue? accountId;
+  _isc.UuidValue accountId;
 
   _isc.UuidValue? payeeId;
 
-  /// Recurrence frequency: daily, weekly, biweekly, monthly, yearly.
-  String frequency;
+  _isc.UuidValue? envelopeId;
 
-  /// The next date a transaction should be created.
-  DateTime nextOccurrence;
+  String description;
 
-  /// Optional end date after which no more transactions are generated.
+  String? memo;
+
+  /// Signed amount in account-currency minor units.
+  int amountMinor;
+
+  _ifz8weqz.RecurrenceFrequency frequency;
+
+  /// Calendar date of the next transaction to create.
+  DateTime nextDate;
+
+  /// Calendar date after which nothing more is created.
   DateTime? endDate;
 
-  /// Whether this recurring transaction is active.
   bool isActive;
 
   DateTime createdAt;
@@ -135,15 +136,15 @@ abstract class RecurringTransaction
   @_isc.useResult
   RecurringTransaction copyWith({
     _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
-    String? description,
-    int? amountCents,
-    String? currencyCode,
-    _isc.UuidValue? envelopeId = const _isc.$UndefinedUuidValue(),
-    _isc.UuidValue? budgetId,
-    _isc.UuidValue? accountId = const _isc.$UndefinedUuidValue(),
+    _isc.UuidValue? entityId,
+    _isc.UuidValue? accountId,
     _isc.UuidValue? payeeId = const _isc.$UndefinedUuidValue(),
-    String? frequency,
-    DateTime? nextOccurrence,
+    _isc.UuidValue? envelopeId = const _isc.$UndefinedUuidValue(),
+    String? description,
+    String? memo,
+    int? amountMinor,
+    _ifz8weqz.RecurrenceFrequency? frequency,
+    DateTime? nextDate,
     DateTime? endDate = const _isc.$UndefinedDateTime(),
     bool? isActive,
     DateTime? createdAt,
@@ -154,15 +155,15 @@ abstract class RecurringTransaction
     return {
       '__className__': 'RecurringTransaction',
       if (id != null) 'id': id?.toJson(),
-      'description': description,
-      'amountCents': amountCents,
-      'currencyCode': currencyCode,
-      if (envelopeId != null) 'envelopeId': envelopeId?.toJson(),
-      'budgetId': budgetId.toJson(),
-      if (accountId != null) 'accountId': accountId?.toJson(),
+      'entityId': entityId.toJson(),
+      'accountId': accountId.toJson(),
       if (payeeId != null) 'payeeId': payeeId?.toJson(),
-      'frequency': frequency,
-      'nextOccurrence': nextOccurrence.toJson(),
+      if (envelopeId != null) 'envelopeId': envelopeId?.toJson(),
+      'description': description,
+      if (memo != null) 'memo': memo,
+      'amountMinor': amountMinor,
+      'frequency': frequency.toJson(),
+      'nextDate': nextDate.toJson(),
       if (endDate != null) 'endDate': endDate?.toJson(),
       'isActive': isActive,
       'createdAt': createdAt.toJson(),
@@ -175,15 +176,15 @@ abstract class RecurringTransaction
     return {
       '__className__': 'RecurringTransaction',
       if (id != null) 'id': id?.toJson(),
-      'description': description,
-      'amountCents': amountCents,
-      'currencyCode': currencyCode,
-      if (envelopeId != null) 'envelopeId': envelopeId?.toJson(),
-      'budgetId': budgetId.toJson(),
-      if (accountId != null) 'accountId': accountId?.toJson(),
+      'entityId': entityId.toJson(),
+      'accountId': accountId.toJson(),
       if (payeeId != null) 'payeeId': payeeId?.toJson(),
-      'frequency': frequency,
-      'nextOccurrence': nextOccurrence.toJson(),
+      if (envelopeId != null) 'envelopeId': envelopeId?.toJson(),
+      'description': description,
+      if (memo != null) 'memo': memo,
+      'amountMinor': amountMinor,
+      'frequency': frequency.toJson(),
+      'nextDate': nextDate.toJson(),
       if (endDate != null) 'endDate': endDate?.toJson(),
       'isActive': isActive,
       'createdAt': createdAt.toJson(),
@@ -197,33 +198,35 @@ abstract class RecurringTransaction
   }
 }
 
+class _Undefined {}
+
 class _RecurringTransactionImpl extends RecurringTransaction {
   _RecurringTransactionImpl({
     _isc.UuidValue? id,
-    required String description,
-    required int amountCents,
-    required String currencyCode,
-    _isc.UuidValue? envelopeId,
-    required _isc.UuidValue budgetId,
-    _isc.UuidValue? accountId,
+    required _isc.UuidValue entityId,
+    required _isc.UuidValue accountId,
     _isc.UuidValue? payeeId,
-    required String frequency,
-    required DateTime nextOccurrence,
+    _isc.UuidValue? envelopeId,
+    required String description,
+    String? memo,
+    required int amountMinor,
+    required _ifz8weqz.RecurrenceFrequency frequency,
+    required DateTime nextDate,
     DateTime? endDate,
-    required bool isActive,
+    bool? isActive,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) : super._(
          id: id,
-         description: description,
-         amountCents: amountCents,
-         currencyCode: currencyCode,
-         envelopeId: envelopeId,
-         budgetId: budgetId,
+         entityId: entityId,
          accountId: accountId,
          payeeId: payeeId,
+         envelopeId: envelopeId,
+         description: description,
+         memo: memo,
+         amountMinor: amountMinor,
          frequency: frequency,
-         nextOccurrence: nextOccurrence,
+         nextDate: nextDate,
          endDate: endDate,
          isActive: isActive,
          createdAt: createdAt,
@@ -236,15 +239,15 @@ class _RecurringTransactionImpl extends RecurringTransaction {
   @override
   RecurringTransaction copyWith({
     _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
-    String? description,
-    int? amountCents,
-    String? currencyCode,
-    _isc.UuidValue? envelopeId = const _isc.$UndefinedUuidValue(),
-    _isc.UuidValue? budgetId,
-    _isc.UuidValue? accountId = const _isc.$UndefinedUuidValue(),
+    _isc.UuidValue? entityId,
+    _isc.UuidValue? accountId,
     _isc.UuidValue? payeeId = const _isc.$UndefinedUuidValue(),
-    String? frequency,
-    DateTime? nextOccurrence,
+    _isc.UuidValue? envelopeId = const _isc.$UndefinedUuidValue(),
+    String? description,
+    Object? memo = _Undefined,
+    int? amountMinor,
+    _ifz8weqz.RecurrenceFrequency? frequency,
+    DateTime? nextDate,
     DateTime? endDate = const _isc.$UndefinedDateTime(),
     bool? isActive,
     DateTime? createdAt,
@@ -252,19 +255,17 @@ class _RecurringTransactionImpl extends RecurringTransaction {
   }) {
     return RecurringTransaction(
       id: id is _isc.UndefinedSentinel ? this.id : id,
-      description: description ?? this.description,
-      amountCents: amountCents ?? this.amountCents,
-      currencyCode: currencyCode ?? this.currencyCode,
+      entityId: entityId ?? this.entityId,
+      accountId: accountId ?? this.accountId,
+      payeeId: payeeId is _isc.UndefinedSentinel ? this.payeeId : payeeId,
       envelopeId: envelopeId is _isc.UndefinedSentinel
           ? this.envelopeId
           : envelopeId,
-      budgetId: budgetId ?? this.budgetId,
-      accountId: accountId is _isc.UndefinedSentinel
-          ? this.accountId
-          : accountId,
-      payeeId: payeeId is _isc.UndefinedSentinel ? this.payeeId : payeeId,
+      description: description ?? this.description,
+      memo: memo is String? ? memo : this.memo,
+      amountMinor: amountMinor ?? this.amountMinor,
       frequency: frequency ?? this.frequency,
-      nextOccurrence: nextOccurrence ?? this.nextOccurrence,
+      nextDate: nextDate ?? this.nextDate,
       endDate: endDate is _isc.UndefinedSentinel ? this.endDate : endDate,
       isActive: isActive ?? this.isActive,
       createdAt: createdAt ?? this.createdAt,

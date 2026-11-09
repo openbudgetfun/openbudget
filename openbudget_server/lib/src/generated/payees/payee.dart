@@ -14,20 +14,20 @@ import 'dart:async' as _ida;
 
 import 'package:serverpod/serverpod.dart' as _is;
 
-/// A payee (merchant or person) associated with transactions in a budget.
+/// A merchant or person an entity pays or is paid by.
 abstract class Payee
     implements _is.TableRow<_is.UuidValue?>, _is.ProtocolSerialization {
   Payee._({
     this.id,
+    required this.entityId,
     required this.name,
-    required this.budgetId,
     DateTime? createdAt,
   }) : createdAt = createdAt ?? DateTime.now();
 
   factory Payee({
     _is.UuidValue? id,
+    required _is.UuidValue entityId,
     required String name,
-    required _is.UuidValue budgetId,
     DateTime? createdAt,
   }) = _PayeeImpl;
 
@@ -36,10 +36,10 @@ abstract class Payee
       id: jsonSerialization['id'] == null
           ? null
           : _is.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
-      name: jsonSerialization['name'] as String,
-      budgetId: _is.UuidValueJsonExtension.fromJson(
-        jsonSerialization['budgetId'],
+      entityId: _is.UuidValueJsonExtension.fromJson(
+        jsonSerialization['entityId'],
       ),
+      name: jsonSerialization['name'] as String,
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _is.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
@@ -53,9 +53,9 @@ abstract class Payee
   @override
   _is.UuidValue? id;
 
-  String name;
+  _is.UuidValue entityId;
 
-  _is.UuidValue budgetId;
+  String name;
 
   DateTime createdAt;
 
@@ -67,8 +67,8 @@ abstract class Payee
   @_is.useResult
   Payee copyWith({
     _is.UuidValue? id = const _is.$UndefinedUuidValue(),
+    _is.UuidValue? entityId,
     String? name,
-    _is.UuidValue? budgetId,
     DateTime? createdAt,
   });
   @override
@@ -76,8 +76,8 @@ abstract class Payee
     return {
       '__className__': 'Payee',
       if (id != null) 'id': id?.toJson(),
+      'entityId': entityId.toJson(),
       'name': name,
-      'budgetId': budgetId.toJson(),
       'createdAt': createdAt.toJson(),
     };
   }
@@ -87,8 +87,8 @@ abstract class Payee
     return {
       '__className__': 'Payee',
       if (id != null) 'id': id?.toJson(),
+      'entityId': entityId.toJson(),
       'name': name,
-      'budgetId': budgetId.toJson(),
       'createdAt': createdAt.toJson(),
     };
   }
@@ -124,13 +124,13 @@ abstract class Payee
 class _PayeeImpl extends Payee {
   _PayeeImpl({
     _is.UuidValue? id,
+    required _is.UuidValue entityId,
     required String name,
-    required _is.UuidValue budgetId,
     DateTime? createdAt,
   }) : super._(
          id: id,
+         entityId: entityId,
          name: name,
-         budgetId: budgetId,
          createdAt: createdAt,
        );
 
@@ -140,14 +140,14 @@ class _PayeeImpl extends Payee {
   @override
   Payee copyWith({
     _is.UuidValue? id = const _is.$UndefinedUuidValue(),
+    _is.UuidValue? entityId,
     String? name,
-    _is.UuidValue? budgetId,
     DateTime? createdAt,
   }) {
     return Payee(
       id: id is _is.UndefinedSentinel ? this.id : id,
+      entityId: entityId ?? this.entityId,
       name: name ?? this.name,
-      budgetId: budgetId ?? this.budgetId,
       createdAt: createdAt ?? this.createdAt,
     );
   }
@@ -156,16 +156,16 @@ class _PayeeImpl extends Payee {
 class PayeeUpdateTable extends _is.UpdateTable<PayeeTable> {
   PayeeUpdateTable(super.table);
 
+  _is.ColumnValue<_is.UuidValue, _is.UuidValue> entityId(_is.UuidValue value) =>
+      _is.ColumnValue(
+        table.entityId,
+        value,
+      );
+
   _is.ColumnValue<String, String> name(String value) => _is.ColumnValue(
     table.name,
     value,
   );
-
-  _is.ColumnValue<_is.UuidValue, _is.UuidValue> budgetId(_is.UuidValue value) =>
-      _is.ColumnValue(
-        table.budgetId,
-        value,
-      );
 
   _is.ColumnValue<DateTime, DateTime> createdAt(DateTime value) =>
       _is.ColumnValue(
@@ -177,12 +177,12 @@ class PayeeUpdateTable extends _is.UpdateTable<PayeeTable> {
 class PayeeTable extends _is.Table<_is.UuidValue?> {
   PayeeTable({super.tableRelation}) : super(tableName: 'payee') {
     updateTable = PayeeUpdateTable(this);
-    name = _is.ColumnString(
-      'name',
+    entityId = _is.ColumnUuid(
+      'entityId',
       this,
     );
-    budgetId = _is.ColumnUuid(
-      'budgetId',
+    name = _is.ColumnString(
+      'name',
       this,
     );
     createdAt = _is.ColumnDateTime(
@@ -194,17 +194,17 @@ class PayeeTable extends _is.Table<_is.UuidValue?> {
 
   late final PayeeUpdateTable updateTable;
 
-  late final _is.ColumnString name;
+  late final _is.ColumnUuid entityId;
 
-  late final _is.ColumnUuid budgetId;
+  late final _is.ColumnString name;
 
   late final _is.ColumnDateTime createdAt;
 
   @override
   List<_is.Column> get columns => [
     id,
+    entityId,
     name,
-    budgetId,
     createdAt,
   ];
 }

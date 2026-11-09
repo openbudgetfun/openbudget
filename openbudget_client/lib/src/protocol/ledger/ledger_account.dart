@@ -10,39 +10,38 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'package:openbudget_core/openbudget_core.dart' as _ifz8weqz;
 import 'package:serverpod_client/serverpod_client.dart' as _isc;
 
-/// One account in a budget's double-entry chart of accounts.
+/// One account in an entity's double-entry chart of accounts.
 ///
 /// Codes are user-visible labels; nothing keys on them. Accounts with a
-/// [LedgerSystemRole]-style `systemRole` are structural: one active account
-/// per role, and they cannot be deleted.
+/// systemRole are structural: one per role, never archived.
 abstract class LedgerAccount
     implements _isc.SerializableModel, _isc.ProtocolSerialization {
   LedgerAccount._({
     this.id,
-    required this.budgetId,
+    required this.entityId,
     required this.code,
     required this.name,
     required this.type,
     this.systemRole,
     this.currencyCode,
     this.taxCategoryCode,
-    bool? archived,
+    this.archivedAt,
     DateTime? createdAt,
-  }) : archived = archived ?? false,
-       createdAt = createdAt ?? DateTime.now();
+  }) : createdAt = createdAt ?? DateTime.now();
 
   factory LedgerAccount({
     _isc.UuidValue? id,
-    required _isc.UuidValue budgetId,
+    required _isc.UuidValue entityId,
     required String code,
     required String name,
-    required String type,
-    String? systemRole,
+    required _ifz8weqz.LedgerAccountType type,
+    _ifz8weqz.LedgerSystemRole? systemRole,
     String? currencyCode,
     String? taxCategoryCode,
-    bool? archived,
+    DateTime? archivedAt,
     DateTime? createdAt,
   }) = _LedgerAccountImpl;
 
@@ -51,18 +50,26 @@ abstract class LedgerAccount
       id: jsonSerialization['id'] == null
           ? null
           : _isc.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
-      budgetId: _isc.UuidValueJsonExtension.fromJson(
-        jsonSerialization['budgetId'],
+      entityId: _isc.UuidValueJsonExtension.fromJson(
+        jsonSerialization['entityId'],
       ),
       code: jsonSerialization['code'] as String,
       name: jsonSerialization['name'] as String,
-      type: jsonSerialization['type'] as String,
-      systemRole: jsonSerialization['systemRole'] as String?,
+      type: _ifz8weqz.LedgerAccountType.fromJson(
+        (jsonSerialization['type'] as String),
+      ),
+      systemRole: jsonSerialization['systemRole'] == null
+          ? null
+          : _ifz8weqz.LedgerSystemRole.fromJson(
+              (jsonSerialization['systemRole'] as String),
+            ),
       currencyCode: jsonSerialization['currencyCode'] as String?,
       taxCategoryCode: jsonSerialization['taxCategoryCode'] as String?,
-      archived: jsonSerialization['archived'] == null
+      archivedAt: jsonSerialization['archivedAt'] == null
           ? null
-          : _isc.BoolJsonExtension.fromJson(jsonSerialization['archived']),
+          : _isc.DateTimeJsonExtension.fromJson(
+              jsonSerialization['archivedAt'],
+            ),
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
@@ -74,27 +81,25 @@ abstract class LedgerAccount
   /// the id will be null.
   _isc.UuidValue? id;
 
-  _isc.UuidValue budgetId;
+  _isc.UuidValue entityId;
 
-  /// Illustrative code from the template chart, unique per budget.
+  /// Code from the template chart, unique per entity.
   String code;
 
   String name;
 
-  /// LedgerAccountType name: asset, liability, equity, income or expense.
-  String type;
+  _ifz8weqz.LedgerAccountType type;
 
-  /// LedgerSystemRole name, when this is a structural account.
-  String? systemRole;
+  _ifz8weqz.LedgerSystemRole? systemRole;
 
-  /// ISO 4217 code for foreign-currency bank or control accounts.
+  /// ISO 4217 code for foreign-currency bank and control accounts.
   String? currencyCode;
 
-  /// Optional tax category feeding the tax engine.
+  /// Tax category feeding the tax engine.
   String? taxCategoryCode;
 
   /// Archived accounts keep their lines but accept no new postings.
-  bool archived;
+  DateTime? archivedAt;
 
   DateTime createdAt;
 
@@ -103,14 +108,14 @@ abstract class LedgerAccount
   @_isc.useResult
   LedgerAccount copyWith({
     _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
-    _isc.UuidValue? budgetId,
+    _isc.UuidValue? entityId,
     String? code,
     String? name,
-    String? type,
-    String? systemRole,
+    _ifz8weqz.LedgerAccountType? type,
+    _ifz8weqz.LedgerSystemRole? systemRole,
     String? currencyCode,
     String? taxCategoryCode,
-    bool? archived,
+    DateTime? archivedAt = const _isc.$UndefinedDateTime(),
     DateTime? createdAt,
   });
   @override
@@ -118,14 +123,14 @@ abstract class LedgerAccount
     return {
       '__className__': 'LedgerAccount',
       if (id != null) 'id': id?.toJson(),
-      'budgetId': budgetId.toJson(),
+      'entityId': entityId.toJson(),
       'code': code,
       'name': name,
-      'type': type,
-      if (systemRole != null) 'systemRole': systemRole,
+      'type': type.toJson(),
+      if (systemRole != null) 'systemRole': systemRole?.toJson(),
       if (currencyCode != null) 'currencyCode': currencyCode,
       if (taxCategoryCode != null) 'taxCategoryCode': taxCategoryCode,
-      'archived': archived,
+      if (archivedAt != null) 'archivedAt': archivedAt?.toJson(),
       'createdAt': createdAt.toJson(),
     };
   }
@@ -135,14 +140,14 @@ abstract class LedgerAccount
     return {
       '__className__': 'LedgerAccount',
       if (id != null) 'id': id?.toJson(),
-      'budgetId': budgetId.toJson(),
+      'entityId': entityId.toJson(),
       'code': code,
       'name': name,
-      'type': type,
-      if (systemRole != null) 'systemRole': systemRole,
+      'type': type.toJson(),
+      if (systemRole != null) 'systemRole': systemRole?.toJson(),
       if (currencyCode != null) 'currencyCode': currencyCode,
       if (taxCategoryCode != null) 'taxCategoryCode': taxCategoryCode,
-      'archived': archived,
+      if (archivedAt != null) 'archivedAt': archivedAt?.toJson(),
       'createdAt': createdAt.toJson(),
     };
   }
@@ -158,25 +163,25 @@ class _Undefined {}
 class _LedgerAccountImpl extends LedgerAccount {
   _LedgerAccountImpl({
     _isc.UuidValue? id,
-    required _isc.UuidValue budgetId,
+    required _isc.UuidValue entityId,
     required String code,
     required String name,
-    required String type,
-    String? systemRole,
+    required _ifz8weqz.LedgerAccountType type,
+    _ifz8weqz.LedgerSystemRole? systemRole,
     String? currencyCode,
     String? taxCategoryCode,
-    bool? archived,
+    DateTime? archivedAt,
     DateTime? createdAt,
   }) : super._(
          id: id,
-         budgetId: budgetId,
+         entityId: entityId,
          code: code,
          name: name,
          type: type,
          systemRole: systemRole,
          currencyCode: currencyCode,
          taxCategoryCode: taxCategoryCode,
-         archived: archived,
+         archivedAt: archivedAt,
          createdAt: createdAt,
        );
 
@@ -186,28 +191,32 @@ class _LedgerAccountImpl extends LedgerAccount {
   @override
   LedgerAccount copyWith({
     _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
-    _isc.UuidValue? budgetId,
+    _isc.UuidValue? entityId,
     String? code,
     String? name,
-    String? type,
+    _ifz8weqz.LedgerAccountType? type,
     Object? systemRole = _Undefined,
     Object? currencyCode = _Undefined,
     Object? taxCategoryCode = _Undefined,
-    bool? archived,
+    DateTime? archivedAt = const _isc.$UndefinedDateTime(),
     DateTime? createdAt,
   }) {
     return LedgerAccount(
       id: id is _isc.UndefinedSentinel ? this.id : id,
-      budgetId: budgetId ?? this.budgetId,
+      entityId: entityId ?? this.entityId,
       code: code ?? this.code,
       name: name ?? this.name,
       type: type ?? this.type,
-      systemRole: systemRole is String? ? systemRole : this.systemRole,
+      systemRole: systemRole is _ifz8weqz.LedgerSystemRole?
+          ? systemRole
+          : this.systemRole,
       currencyCode: currencyCode is String? ? currencyCode : this.currencyCode,
       taxCategoryCode: taxCategoryCode is String?
           ? taxCategoryCode
           : this.taxCategoryCode,
-      archived: archived ?? this.archived,
+      archivedAt: archivedAt is _isc.UndefinedSentinel
+          ? this.archivedAt
+          : archivedAt,
       createdAt: createdAt ?? this.createdAt,
     );
   }

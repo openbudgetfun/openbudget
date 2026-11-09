@@ -14,16 +14,13 @@ import 'dart:async' as _ida;
 
 import 'package:serverpod/serverpod.dart' as _is;
 
-/// The tax profile attached to a budget, stored as the tax engine's JSON.
+/// The tax profile of one entity, stored as the tax engine's JSON.
 abstract class TaxProfileRecord
     implements _is.TableRow<_is.UuidValue?>, _is.ProtocolSerialization {
   TaxProfileRecord._({
     this.id,
-    required this.budgetId,
-    required this.jurisdiction,
-    required this.entityKind,
+    required this.entityId,
     required this.profileJson,
-    this.linkedBudgetId,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) : createdAt = createdAt ?? DateTime.now(),
@@ -31,11 +28,8 @@ abstract class TaxProfileRecord
 
   factory TaxProfileRecord({
     _is.UuidValue? id,
-    required _is.UuidValue budgetId,
-    required String jurisdiction,
-    required String entityKind,
+    required _is.UuidValue entityId,
     required String profileJson,
-    _is.UuidValue? linkedBudgetId,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) = _TaxProfileRecordImpl;
@@ -45,17 +39,10 @@ abstract class TaxProfileRecord
       id: jsonSerialization['id'] == null
           ? null
           : _is.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
-      budgetId: _is.UuidValueJsonExtension.fromJson(
-        jsonSerialization['budgetId'],
+      entityId: _is.UuidValueJsonExtension.fromJson(
+        jsonSerialization['entityId'],
       ),
-      jurisdiction: jsonSerialization['jurisdiction'] as String,
-      entityKind: jsonSerialization['entityKind'] as String,
       profileJson: jsonSerialization['profileJson'] as String,
-      linkedBudgetId: jsonSerialization['linkedBudgetId'] == null
-          ? null
-          : _is.UuidValueJsonExtension.fromJson(
-              jsonSerialization['linkedBudgetId'],
-            ),
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _is.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
@@ -72,19 +59,12 @@ abstract class TaxProfileRecord
   @override
   _is.UuidValue? id;
 
-  _is.UuidValue budgetId;
+  _is.UuidValue entityId;
 
-  /// ISO 3166-1 alpha-2 country code, such as GB.
-  String jurisdiction;
-
-  /// TaxEntityKind name: individual, soleTrader, or company.
-  String entityKind;
-
-  /// TaxProfile.toJson payload for the jurisdiction.
+  /// `TaxProfile.toJson` payload. Its `jurisdiction`, `entityKind` and
+  /// accounting-period keys are rewritten from the entity on every save and
+  /// read; the entity is their source of truth.
   String profileJson;
-
-  /// Personal budget this business feeds, or the director's personal budget.
-  _is.UuidValue? linkedBudgetId;
 
   DateTime createdAt;
 
@@ -98,11 +78,8 @@ abstract class TaxProfileRecord
   @_is.useResult
   TaxProfileRecord copyWith({
     _is.UuidValue? id = const _is.$UndefinedUuidValue(),
-    _is.UuidValue? budgetId,
-    String? jurisdiction,
-    String? entityKind,
+    _is.UuidValue? entityId,
     String? profileJson,
-    _is.UuidValue? linkedBudgetId = const _is.$UndefinedUuidValue(),
     DateTime? createdAt,
     DateTime? updatedAt,
   });
@@ -111,11 +88,8 @@ abstract class TaxProfileRecord
     return {
       '__className__': 'TaxProfileRecord',
       if (id != null) 'id': id?.toJson(),
-      'budgetId': budgetId.toJson(),
-      'jurisdiction': jurisdiction,
-      'entityKind': entityKind,
+      'entityId': entityId.toJson(),
       'profileJson': profileJson,
-      if (linkedBudgetId != null) 'linkedBudgetId': linkedBudgetId?.toJson(),
       'createdAt': createdAt.toJson(),
       'updatedAt': updatedAt.toJson(),
     };
@@ -126,11 +100,8 @@ abstract class TaxProfileRecord
     return {
       '__className__': 'TaxProfileRecord',
       if (id != null) 'id': id?.toJson(),
-      'budgetId': budgetId.toJson(),
-      'jurisdiction': jurisdiction,
-      'entityKind': entityKind,
+      'entityId': entityId.toJson(),
       'profileJson': profileJson,
-      if (linkedBudgetId != null) 'linkedBudgetId': linkedBudgetId?.toJson(),
       'createdAt': createdAt.toJson(),
       'updatedAt': updatedAt.toJson(),
     };
@@ -167,20 +138,14 @@ abstract class TaxProfileRecord
 class _TaxProfileRecordImpl extends TaxProfileRecord {
   _TaxProfileRecordImpl({
     _is.UuidValue? id,
-    required _is.UuidValue budgetId,
-    required String jurisdiction,
-    required String entityKind,
+    required _is.UuidValue entityId,
     required String profileJson,
-    _is.UuidValue? linkedBudgetId,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) : super._(
          id: id,
-         budgetId: budgetId,
-         jurisdiction: jurisdiction,
-         entityKind: entityKind,
+         entityId: entityId,
          profileJson: profileJson,
-         linkedBudgetId: linkedBudgetId,
          createdAt: createdAt,
          updatedAt: updatedAt,
        );
@@ -191,23 +156,15 @@ class _TaxProfileRecordImpl extends TaxProfileRecord {
   @override
   TaxProfileRecord copyWith({
     _is.UuidValue? id = const _is.$UndefinedUuidValue(),
-    _is.UuidValue? budgetId,
-    String? jurisdiction,
-    String? entityKind,
+    _is.UuidValue? entityId,
     String? profileJson,
-    _is.UuidValue? linkedBudgetId = const _is.$UndefinedUuidValue(),
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
     return TaxProfileRecord(
       id: id is _is.UndefinedSentinel ? this.id : id,
-      budgetId: budgetId ?? this.budgetId,
-      jurisdiction: jurisdiction ?? this.jurisdiction,
-      entityKind: entityKind ?? this.entityKind,
+      entityId: entityId ?? this.entityId,
       profileJson: profileJson ?? this.profileJson,
-      linkedBudgetId: linkedBudgetId is _is.UndefinedSentinel
-          ? this.linkedBudgetId
-          : linkedBudgetId,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -218,31 +175,14 @@ class TaxProfileRecordUpdateTable
     extends _is.UpdateTable<TaxProfileRecordTable> {
   TaxProfileRecordUpdateTable(super.table);
 
-  _is.ColumnValue<_is.UuidValue, _is.UuidValue> budgetId(_is.UuidValue value) =>
+  _is.ColumnValue<_is.UuidValue, _is.UuidValue> entityId(_is.UuidValue value) =>
       _is.ColumnValue(
-        table.budgetId,
+        table.entityId,
         value,
       );
 
-  _is.ColumnValue<String, String> jurisdiction(String value) => _is.ColumnValue(
-    table.jurisdiction,
-    value,
-  );
-
-  _is.ColumnValue<String, String> entityKind(String value) => _is.ColumnValue(
-    table.entityKind,
-    value,
-  );
-
   _is.ColumnValue<String, String> profileJson(String value) => _is.ColumnValue(
     table.profileJson,
-    value,
-  );
-
-  _is.ColumnValue<_is.UuidValue, _is.UuidValue> linkedBudgetId(
-    _is.UuidValue? value,
-  ) => _is.ColumnValue(
-    table.linkedBudgetId,
     value,
   );
 
@@ -263,24 +203,12 @@ class TaxProfileRecordTable extends _is.Table<_is.UuidValue?> {
   TaxProfileRecordTable({super.tableRelation})
     : super(tableName: 'tax_profile') {
     updateTable = TaxProfileRecordUpdateTable(this);
-    budgetId = _is.ColumnUuid(
-      'budgetId',
-      this,
-    );
-    jurisdiction = _is.ColumnString(
-      'jurisdiction',
-      this,
-    );
-    entityKind = _is.ColumnString(
-      'entityKind',
+    entityId = _is.ColumnUuid(
+      'entityId',
       this,
     );
     profileJson = _is.ColumnString(
       'profileJson',
-      this,
-    );
-    linkedBudgetId = _is.ColumnUuid(
-      'linkedBudgetId',
       this,
     );
     createdAt = _is.ColumnDateTime(
@@ -297,19 +225,12 @@ class TaxProfileRecordTable extends _is.Table<_is.UuidValue?> {
 
   late final TaxProfileRecordUpdateTable updateTable;
 
-  late final _is.ColumnUuid budgetId;
+  late final _is.ColumnUuid entityId;
 
-  /// ISO 3166-1 alpha-2 country code, such as GB.
-  late final _is.ColumnString jurisdiction;
-
-  /// TaxEntityKind name: individual, soleTrader, or company.
-  late final _is.ColumnString entityKind;
-
-  /// TaxProfile.toJson payload for the jurisdiction.
+  /// `TaxProfile.toJson` payload. Its `jurisdiction`, `entityKind` and
+  /// accounting-period keys are rewritten from the entity on every save and
+  /// read; the entity is their source of truth.
   late final _is.ColumnString profileJson;
-
-  /// Personal budget this business feeds, or the director's personal budget.
-  late final _is.ColumnUuid linkedBudgetId;
 
   late final _is.ColumnDateTime createdAt;
 
@@ -318,11 +239,8 @@ class TaxProfileRecordTable extends _is.Table<_is.UuidValue?> {
   @override
   List<_is.Column> get columns => [
     id,
-    budgetId,
-    jurisdiction,
-    entityKind,
+    entityId,
     profileJson,
-    linkedBudgetId,
     createdAt,
     updatedAt,
   ];

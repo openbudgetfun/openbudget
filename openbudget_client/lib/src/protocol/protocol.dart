@@ -21,51 +21,12 @@ import 'package:openbudget_client/src/protocol/agent/agent_proposal.dart'
     as _icv7zzda;
 import 'package:openbudget_client/src/protocol/agent/mcp/agent_access_token_view.dart'
     as _itxn3wek;
-import 'package:openbudget_client/src/protocol/budget_templates/budget_template.dart'
-    as _itiojbb0;
-import 'package:openbudget_client/src/protocol/budgets/budget.dart'
-    as _iro9sz2e;
-import 'package:openbudget_client/src/protocol/categories/category.dart'
-    as _iels1fku;
 import 'package:openbudget_client/src/protocol/envelope_goals/envelope_goal.dart'
     as _ibdhi9gv;
 import 'package:openbudget_client/src/protocol/envelopes/envelope.dart'
     as _i29jf3by;
 import 'package:openbudget_client/src/protocol/institutions/institution.dart'
     as _i6ysl1a4;
-import 'package:openbudget_client/src/protocol/ledger/journal.dart'
-    as _izuizaeu;
-import 'package:openbudget_client/src/protocol/ledger/journal_line.dart'
-    as _iwruw2s3;
-import 'package:openbudget_client/src/protocol/ledger/journal_line_input.dart'
-    as _i3j8x5or;
-import 'package:openbudget_client/src/protocol/ledger/ledger_account.dart'
-    as _ixq9t892;
-import 'package:openbudget_client/src/protocol/monthly_allocations/monthly_allocation.dart'
-    as _iz3b7rge;
-import 'package:openbudget_client/src/protocol/payees/payee.dart' as _iaf6ifsb;
-import 'package:openbudget_client/src/protocol/recurring_transactions/recurring_transaction.dart'
-    as _i41tn6nr;
-import 'package:openbudget_client/src/protocol/solana_wallets/solana_wallet.dart'
-    as _i1b8tal0;
-import 'package:openbudget_client/src/protocol/solana_wallets/solana_wallet_holding.dart'
-    as _i7zpyr5z;
-import 'package:openbudget_client/src/protocol/solana_wallets/solana_wallet_tax_year_summary.dart'
-    as _igj51lwa;
-import 'package:openbudget_client/src/protocol/solana_wallets/solana_wallet_transaction.dart'
-    as _isudwq84;
-import 'package:openbudget_client/src/protocol/tax/tax_category_view.dart'
-    as _ic177lol;
-import 'package:openbudget_client/src/protocol/transaction_rules/transaction_rule.dart'
-    as _iwxd5v0a;
-import 'package:openbudget_client/src/protocol/transactions/import_row.dart'
-    as _iyud7cy9;
-import 'package:openbudget_client/src/protocol/transactions/split_item.dart'
-    as _ilmjmphd;
-import 'package:openbudget_client/src/protocol/transactions/transaction.dart'
-    as _iio3v7fv;
-import 'package:openbudget_client/src/protocol/wallets/wallet_holding.dart'
-    as _izm3e498;
 import 'package:openbudget_core/openbudget_core.dart' as _ifz8weqz;
 import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
     as _iacc;
@@ -74,6 +35,9 @@ import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart'
 import 'package:serverpod_client/serverpod_client.dart' as _isc;
 
 import 'accounts/account.dart' as _iz2jf14v;
+import 'accounts/account_balances_view.dart' as _i53yl4yp;
+import 'accounts/account_valuation.dart' as _i87oqvv1;
+import 'accounts/valuation_source.dart' as _ig9cy6ku;
 import 'agent/agent_conversation.dart' as _isfmgqgu;
 import 'agent/agent_event.dart' as _i769eo9u;
 import 'agent/agent_event_kind.dart' as _iyhb15ax;
@@ -83,23 +47,33 @@ import 'agent/agent_proposal.dart' as _iqh65hzq;
 import 'agent/agent_proposal_kind.dart' as _idxyy01n;
 import 'agent/agent_proposal_status.dart' as _iksk16ej;
 import 'agent/agent_provider.dart' as _ic667156;
-import 'agent/agent_provider_settings.dart' as _ipqgbdtd;
 import 'agent/agent_provider_settings_view.dart' as _i0760q1h;
 import 'agent/agent_usage_record.dart' as _igo4k2bu;
 import 'agent/agent_usage_view.dart' as _ipqjijih;
-import 'agent/mcp/agent_access_token.dart' as _i8betnj7;
 import 'agent/mcp/agent_access_token_created.dart' as _iis6jewo;
 import 'agent/mcp/agent_access_token_view.dart' as _i4mcrc97;
+import 'audit/audit_action.dart' as _iqje9mi5;
+import 'audit/audit_event.dart' as _ijhj7cd7;
+import 'audit/audit_subject.dart' as _i2sn5a56;
 import 'billing/entitlement.dart' as _iq2w1sa5;
 import 'billing/entitlement_source.dart' as _ipnf4x0i;
 import 'billing/entitlement_status.dart' as _imqwzx9j;
-import 'billing/solana_billing_challenge.dart' as _iw7l0hzr;
 import 'billing/solana_plan_view.dart' as _iwxkomal;
-import 'billing/stripe_customer.dart' as _in1nt6tx;
+import 'budget/allocation_input.dart' as _iouaddet;
+import 'budget/budget_month_summary.dart' as _ixyov90t;
+import 'budget/budget_month_view.dart' as _ihanl5km;
+import 'budget/envelope_month_view.dart' as _ii8h2sft;
 import 'budget_templates/budget_template.dart' as _i01fne9j;
-import 'budgets/budget.dart' as _idtyoogy;
+import 'budget_templates/budget_template_line.dart' as _iagnrffn;
 import 'categories/category.dart' as _iwxpkdmg;
+import 'common/confidence.dart' as _i4zfq652;
+import 'common/sync_status.dart' as _iynfhhr3;
+import 'entities/change_scope.dart' as _i03vgs6n;
+import 'entities/entity.dart' as _iamyw1yn;
+import 'entities/entity_changed_event.dart' as _is12mxpv;
+import 'entities/entity_summary_view.dart' as _ihqn2h4c;
 import 'envelope_goals/envelope_goal.dart' as _ifl4yivq;
+import 'envelope_goals/envelope_goal_kind.dart' as _i61aeoqs;
 import 'envelopes/envelope.dart' as _ikt21dfw;
 import 'exceptions/agent_allowance_exhausted_exception.dart' as _iozei2bz;
 import 'exceptions/agent_provider_exception.dart' as _iurccglg;
@@ -109,21 +83,20 @@ import 'exceptions/billing_provider_exception.dart' as _i9zkhl6f;
 import 'exceptions/billing_rail_unavailable_exception.dart' as _i5kq7itn;
 import 'exceptions/entitlement_required_exception.dart' as _ik3lny6q;
 import 'exceptions/forbidden_exception.dart' as _iha6yc5u;
+import 'exceptions/fx_rate_unavailable_exception.dart' as _if5umnl3;
 import 'exceptions/not_found_exception.dart' as _izob2ctl;
-import 'exceptions/tax_rate_unavailable_exception.dart' as _in744jyg;
 import 'exceptions/tax_rules_unavailable_exception.dart' as _i4yu9vcq;
 import 'exceptions/validation_exception.dart' as _igpdbyom;
 import 'fx_rates/fx_latest_snapshot.dart' as _i8cxakqz;
-import 'fx_rates/fx_rate_entry.dart' as _i41ek9pv;
+import 'fx_rates/fx_provider.dart' as _ifsg8hc8;
+import 'fx_rates/fx_quote_view.dart' as _i8bj7347;
 import 'fx_rates/fx_rate_quote.dart' as _i15udi7x;
-import 'fx_rates/fx_rate_snapshot.dart' as _i4xgo4ij;
 import 'institutions/institution.dart' as _ikgmcjq7;
 import 'institutions/institution_location.dart' as _iclizrec;
 import 'ledger/journal.dart' as _iqqjzj2w;
 import 'ledger/journal_line.dart' as _i6l0fo54;
 import 'ledger/journal_line_input.dart' as _id7zp91q;
 import 'ledger/ledger_account.dart' as _ivazbnnp;
-import 'ledger/ledger_audit_event.dart' as _ipq97xjw;
 import 'ledger/ledger_period_lock.dart' as _i7t4btg4;
 import 'ledger/trial_balance_row_view.dart' as _i5gsx3ds;
 import 'ledger/trial_balance_view.dart' as _i7q128aw;
@@ -131,11 +104,16 @@ import 'monthly_allocations/monthly_allocation.dart' as _igdgld5u;
 import 'payees/payee.dart' as _ignezpci;
 import 'plaid/plaid_connection.dart' as _i1vmvtrm;
 import 'recurring_transactions/recurring_transaction.dart' as _i9is7zb8;
-import 'solana_wallets/solana_wallet.dart' as _iotf4y4d;
-import 'solana_wallets/solana_wallet_holding.dart' as _ivqf8i64;
-import 'solana_wallets/solana_wallet_sync_result.dart' as _ir1c2di9;
-import 'solana_wallets/solana_wallet_tax_year_summary.dart' as _ijmvodfo;
-import 'solana_wallets/solana_wallet_transaction.dart' as _iwwk92r1;
+import 'reports/net_worth_account_row.dart' as _ieg4kkwo;
+import 'reports/net_worth_currency_row.dart' as _if6ke1e2;
+import 'reports/net_worth_entity_row.dart' as _i2p47r1m;
+import 'reports/net_worth_granularity.dart' as _iiyi1fdi;
+import 'reports/net_worth_history_view.dart' as _izpykydm;
+import 'reports/net_worth_point.dart' as _ihwosu5p;
+import 'reports/net_worth_view.dart' as _idk5va87;
+import 'reports/report_grouping.dart' as _ijpgwwdu;
+import 'reports/spending_row.dart' as _ikppksh7;
+import 'settings/user_settings.dart' as _i99f9doz;
 import 'tax/tax_band_slice_view.dart' as _ic4zfx3b;
 import 'tax/tax_category_view.dart' as _iv5oayw3;
 import 'tax/tax_liability_view.dart' as _ivss6b81;
@@ -144,14 +122,34 @@ import 'tax/tax_profile.dart' as _i20z9jax;
 import 'tax/tax_report_line_view.dart' as _i6llsezf;
 import 'tax/tax_report_view.dart' as _inb54q20;
 import 'transaction_rules/transaction_rule.dart' as _i6dj6ji0;
+import 'transactions/import_result.dart' as _ibzcfs2k;
 import 'transactions/import_row.dart' as _isp6bezg;
-import 'transactions/split_item.dart' as _i0jd5x9z;
+import 'transactions/reconcile_result.dart' as _igokbqfh;
 import 'transactions/transaction.dart' as _iqhl4hru;
-import 'wallets/asset_quote_cache.dart' as _i2gu4pwf;
-import 'wallets/wallet_connect_result.dart' as _igiy3v19;
-import 'wallets/wallet_connection.dart' as _i9uqpb1b;
+import 'transactions/transaction_flag.dart' as _i4fvctax;
+import 'transactions/transaction_input.dart' as _ipd1rac6;
+import 'transactions/transaction_kind.dart' as _ioneruif;
+import 'transactions/transaction_line.dart' as _ipio7ws3;
+import 'transactions/transaction_line_input.dart' as _imsv7m6w;
+import 'transactions/transaction_page.dart' as _i7f3q91r;
+import 'transactions/transaction_query.dart' as _ioinkgwn;
+import 'transactions/transaction_status.dart' as _i3rynkdl;
+import 'transactions/transaction_view.dart' as _ilixdhed;
+import 'transactions/transfer.dart' as _ign516jt;
+import 'transactions/transfer_input.dart' as _iah0rmrk;
+import 'transactions/transfer_peer_view.dart' as _i3n9n3ej;
+import 'wallets/price_quality.dart' as _i6j30n20;
+import 'wallets/price_source.dart' as _iu1a5mev;
+import 'wallets/wallet.dart' as _ilu5i0rn;
 import 'wallets/wallet_holding.dart' as _iqqppnaa;
+import 'wallets/wallet_network.dart' as _ifam4bx7;
+import 'wallets/wallet_sync_result.dart' as _ipdq2p58;
+import 'wallets/wallet_tax_year_summary.dart' as _ivsmsmw6;
+import 'wallets/wallet_transaction.dart' as _i6m1jx15;
 export 'accounts/account.dart';
+export 'accounts/account_balances_view.dart';
+export 'accounts/account_valuation.dart';
+export 'accounts/valuation_source.dart';
 export 'agent/agent_conversation.dart';
 export 'agent/agent_event.dart';
 export 'agent/agent_event_kind.dart';
@@ -161,23 +159,33 @@ export 'agent/agent_proposal.dart';
 export 'agent/agent_proposal_kind.dart';
 export 'agent/agent_proposal_status.dart';
 export 'agent/agent_provider.dart';
-export 'agent/agent_provider_settings.dart';
 export 'agent/agent_provider_settings_view.dart';
 export 'agent/agent_usage_record.dart';
 export 'agent/agent_usage_view.dart';
-export 'agent/mcp/agent_access_token.dart';
 export 'agent/mcp/agent_access_token_created.dart';
 export 'agent/mcp/agent_access_token_view.dart';
+export 'audit/audit_action.dart';
+export 'audit/audit_event.dart';
+export 'audit/audit_subject.dart';
 export 'billing/entitlement.dart';
 export 'billing/entitlement_source.dart';
 export 'billing/entitlement_status.dart';
-export 'billing/solana_billing_challenge.dart';
 export 'billing/solana_plan_view.dart';
-export 'billing/stripe_customer.dart';
+export 'budget/allocation_input.dart';
+export 'budget/budget_month_summary.dart';
+export 'budget/budget_month_view.dart';
+export 'budget/envelope_month_view.dart';
 export 'budget_templates/budget_template.dart';
-export 'budgets/budget.dart';
+export 'budget_templates/budget_template_line.dart';
 export 'categories/category.dart';
+export 'common/confidence.dart';
+export 'common/sync_status.dart';
+export 'entities/change_scope.dart';
+export 'entities/entity.dart';
+export 'entities/entity_changed_event.dart';
+export 'entities/entity_summary_view.dart';
 export 'envelope_goals/envelope_goal.dart';
+export 'envelope_goals/envelope_goal_kind.dart';
 export 'envelopes/envelope.dart';
 export 'exceptions/agent_allowance_exhausted_exception.dart';
 export 'exceptions/agent_provider_exception.dart';
@@ -187,21 +195,20 @@ export 'exceptions/billing_provider_exception.dart';
 export 'exceptions/billing_rail_unavailable_exception.dart';
 export 'exceptions/entitlement_required_exception.dart';
 export 'exceptions/forbidden_exception.dart';
+export 'exceptions/fx_rate_unavailable_exception.dart';
 export 'exceptions/not_found_exception.dart';
-export 'exceptions/tax_rate_unavailable_exception.dart';
 export 'exceptions/tax_rules_unavailable_exception.dart';
 export 'exceptions/validation_exception.dart';
 export 'fx_rates/fx_latest_snapshot.dart';
-export 'fx_rates/fx_rate_entry.dart';
+export 'fx_rates/fx_provider.dart';
+export 'fx_rates/fx_quote_view.dart';
 export 'fx_rates/fx_rate_quote.dart';
-export 'fx_rates/fx_rate_snapshot.dart';
 export 'institutions/institution.dart';
 export 'institutions/institution_location.dart';
 export 'ledger/journal.dart';
 export 'ledger/journal_line.dart';
 export 'ledger/journal_line_input.dart';
 export 'ledger/ledger_account.dart';
-export 'ledger/ledger_audit_event.dart';
 export 'ledger/ledger_period_lock.dart';
 export 'ledger/trial_balance_row_view.dart';
 export 'ledger/trial_balance_view.dart';
@@ -209,11 +216,16 @@ export 'monthly_allocations/monthly_allocation.dart';
 export 'payees/payee.dart';
 export 'plaid/plaid_connection.dart';
 export 'recurring_transactions/recurring_transaction.dart';
-export 'solana_wallets/solana_wallet.dart';
-export 'solana_wallets/solana_wallet_holding.dart';
-export 'solana_wallets/solana_wallet_sync_result.dart';
-export 'solana_wallets/solana_wallet_tax_year_summary.dart';
-export 'solana_wallets/solana_wallet_transaction.dart';
+export 'reports/net_worth_account_row.dart';
+export 'reports/net_worth_currency_row.dart';
+export 'reports/net_worth_entity_row.dart';
+export 'reports/net_worth_granularity.dart';
+export 'reports/net_worth_history_view.dart';
+export 'reports/net_worth_point.dart';
+export 'reports/net_worth_view.dart';
+export 'reports/report_grouping.dart';
+export 'reports/spending_row.dart';
+export 'settings/user_settings.dart';
 export 'tax/tax_band_slice_view.dart';
 export 'tax/tax_category_view.dart';
 export 'tax/tax_liability_view.dart';
@@ -222,13 +234,30 @@ export 'tax/tax_profile.dart';
 export 'tax/tax_report_line_view.dart';
 export 'tax/tax_report_view.dart';
 export 'transaction_rules/transaction_rule.dart';
+export 'transactions/import_result.dart';
 export 'transactions/import_row.dart';
-export 'transactions/split_item.dart';
+export 'transactions/reconcile_result.dart';
 export 'transactions/transaction.dart';
-export 'wallets/asset_quote_cache.dart';
-export 'wallets/wallet_connect_result.dart';
-export 'wallets/wallet_connection.dart';
+export 'transactions/transaction_flag.dart';
+export 'transactions/transaction_input.dart';
+export 'transactions/transaction_kind.dart';
+export 'transactions/transaction_line.dart';
+export 'transactions/transaction_line_input.dart';
+export 'transactions/transaction_page.dart';
+export 'transactions/transaction_query.dart';
+export 'transactions/transaction_status.dart';
+export 'transactions/transaction_view.dart';
+export 'transactions/transfer.dart';
+export 'transactions/transfer_input.dart';
+export 'transactions/transfer_peer_view.dart';
+export 'wallets/price_quality.dart';
+export 'wallets/price_source.dart';
+export 'wallets/wallet.dart';
 export 'wallets/wallet_holding.dart';
+export 'wallets/wallet_network.dart';
+export 'wallets/wallet_sync_result.dart';
+export 'wallets/wallet_tax_year_summary.dart';
+export 'wallets/wallet_transaction.dart';
 export 'client.dart';
 
 class Protocol extends _isc.SerializationManager
@@ -245,6 +274,9 @@ class Protocol extends _isc.SerializationManager
         this,
         types: const [
           _isc.getType<_iz2jf14v.Account>,
+          _isc.getType<_i53yl4yp.AccountBalancesView>,
+          _isc.getType<_i87oqvv1.AccountValuation>,
+          _isc.getType<_ig9cy6ku.ValuationSource>,
           _isc.getType<_isfmgqgu.AgentConversation>,
           _isc.getType<_i769eo9u.AgentEvent>,
           _isc.getType<_iyhb15ax.AgentEventKind>,
@@ -254,23 +286,33 @@ class Protocol extends _isc.SerializationManager
           _isc.getType<_idxyy01n.AgentProposalKind>,
           _isc.getType<_iksk16ej.AgentProposalStatus>,
           _isc.getType<_ic667156.AgentProvider>,
-          _isc.getType<_ipqgbdtd.AgentProviderSettings>,
           _isc.getType<_i0760q1h.AgentProviderSettingsView>,
           _isc.getType<_igo4k2bu.AgentUsageRecord>,
           _isc.getType<_ipqjijih.AgentUsageView>,
-          _isc.getType<_i8betnj7.AgentAccessToken>,
           _isc.getType<_iis6jewo.AgentAccessTokenCreated>,
           _isc.getType<_i4mcrc97.AgentAccessTokenView>,
+          _isc.getType<_iqje9mi5.AuditAction>,
+          _isc.getType<_ijhj7cd7.AuditEvent>,
+          _isc.getType<_i2sn5a56.AuditSubject>,
           _isc.getType<_iq2w1sa5.Entitlement>,
           _isc.getType<_ipnf4x0i.EntitlementSource>,
           _isc.getType<_imqwzx9j.EntitlementStatus>,
-          _isc.getType<_iw7l0hzr.SolanaBillingChallenge>,
           _isc.getType<_iwxkomal.SolanaPlanView>,
-          _isc.getType<_in1nt6tx.StripeCustomer>,
+          _isc.getType<_iouaddet.AllocationInput>,
+          _isc.getType<_ixyov90t.BudgetMonthSummary>,
+          _isc.getType<_ihanl5km.BudgetMonthView>,
+          _isc.getType<_ii8h2sft.EnvelopeMonthView>,
           _isc.getType<_i01fne9j.BudgetTemplate>,
-          _isc.getType<_idtyoogy.Budget>,
+          _isc.getType<_iagnrffn.BudgetTemplateLine>,
           _isc.getType<_iwxpkdmg.Category>,
+          _isc.getType<_i4zfq652.Confidence>,
+          _isc.getType<_iynfhhr3.SyncStatus>,
+          _isc.getType<_i03vgs6n.ChangeScope>,
+          _isc.getType<_iamyw1yn.Entity>,
+          _isc.getType<_is12mxpv.EntityChangedEvent>,
+          _isc.getType<_ihqn2h4c.EntitySummaryView>,
           _isc.getType<_ifl4yivq.EnvelopeGoal>,
+          _isc.getType<_i61aeoqs.EnvelopeGoalKind>,
           _isc.getType<_ikt21dfw.Envelope>,
           _isc.getType<_iozei2bz.AgentAllowanceExhaustedException>,
           _isc.getType<_iurccglg.AgentProviderException>,
@@ -280,21 +322,20 @@ class Protocol extends _isc.SerializationManager
           _isc.getType<_i5kq7itn.BillingRailUnavailableException>,
           _isc.getType<_ik3lny6q.EntitlementRequiredException>,
           _isc.getType<_iha6yc5u.ForbiddenException>,
+          _isc.getType<_if5umnl3.FxRateUnavailableException>,
           _isc.getType<_izob2ctl.NotFoundException>,
-          _isc.getType<_in744jyg.TaxRateUnavailableException>,
           _isc.getType<_i4yu9vcq.TaxRulesUnavailableException>,
           _isc.getType<_igpdbyom.ValidationException>,
           _isc.getType<_i8cxakqz.FxLatestSnapshot>,
-          _isc.getType<_i41ek9pv.FxRateEntry>,
+          _isc.getType<_ifsg8hc8.FxProvider>,
+          _isc.getType<_i8bj7347.FxQuoteView>,
           _isc.getType<_i15udi7x.FxRateQuote>,
-          _isc.getType<_i4xgo4ij.FxRateSnapshot>,
           _isc.getType<_ikgmcjq7.Institution>,
           _isc.getType<_iclizrec.InstitutionLocation>,
           _isc.getType<_iqqjzj2w.Journal>,
           _isc.getType<_i6l0fo54.JournalLine>,
           _isc.getType<_id7zp91q.JournalLineInput>,
           _isc.getType<_ivazbnnp.LedgerAccount>,
-          _isc.getType<_ipq97xjw.LedgerAuditEvent>,
           _isc.getType<_i7t4btg4.LedgerPeriodLock>,
           _isc.getType<_i5gsx3ds.TrialBalanceRowView>,
           _isc.getType<_i7q128aw.TrialBalanceView>,
@@ -302,11 +343,16 @@ class Protocol extends _isc.SerializationManager
           _isc.getType<_ignezpci.Payee>,
           _isc.getType<_i1vmvtrm.PlaidConnection>,
           _isc.getType<_i9is7zb8.RecurringTransaction>,
-          _isc.getType<_iotf4y4d.SolanaWallet>,
-          _isc.getType<_ivqf8i64.SolanaWalletHolding>,
-          _isc.getType<_ir1c2di9.SolanaWalletSyncResult>,
-          _isc.getType<_ijmvodfo.SolanaWalletTaxYearSummary>,
-          _isc.getType<_iwwk92r1.SolanaWalletTransaction>,
+          _isc.getType<_ieg4kkwo.NetWorthAccountRow>,
+          _isc.getType<_if6ke1e2.NetWorthCurrencyRow>,
+          _isc.getType<_i2p47r1m.NetWorthEntityRow>,
+          _isc.getType<_iiyi1fdi.NetWorthGranularity>,
+          _isc.getType<_izpykydm.NetWorthHistoryView>,
+          _isc.getType<_ihwosu5p.NetWorthPoint>,
+          _isc.getType<_idk5va87.NetWorthView>,
+          _isc.getType<_ijpgwwdu.ReportGrouping>,
+          _isc.getType<_ikppksh7.SpendingRow>,
+          _isc.getType<_i99f9doz.UserSettings>,
           _isc.getType<_ic4zfx3b.TaxBandSliceView>,
           _isc.getType<_iv5oayw3.TaxCategoryView>,
           _isc.getType<_ivss6b81.TaxLiabilityView>,
@@ -315,14 +361,34 @@ class Protocol extends _isc.SerializationManager
           _isc.getType<_i6llsezf.TaxReportLineView>,
           _isc.getType<_inb54q20.TaxReportView>,
           _isc.getType<_i6dj6ji0.TransactionRule>,
+          _isc.getType<_ibzcfs2k.ImportResult>,
           _isc.getType<_isp6bezg.ImportRow>,
-          _isc.getType<_i0jd5x9z.SplitItem>,
+          _isc.getType<_igokbqfh.ReconcileResult>,
           _isc.getType<_iqhl4hru.Transaction>,
-          _isc.getType<_i2gu4pwf.AssetQuoteCache>,
-          _isc.getType<_igiy3v19.WalletConnectResult>,
-          _isc.getType<_i9uqpb1b.WalletConnection>,
+          _isc.getType<_i4fvctax.TransactionFlag>,
+          _isc.getType<_ipd1rac6.TransactionInput>,
+          _isc.getType<_ioneruif.TransactionKind>,
+          _isc.getType<_ipio7ws3.TransactionLine>,
+          _isc.getType<_imsv7m6w.TransactionLineInput>,
+          _isc.getType<_i7f3q91r.TransactionPage>,
+          _isc.getType<_ioinkgwn.TransactionQuery>,
+          _isc.getType<_i3rynkdl.TransactionStatus>,
+          _isc.getType<_ilixdhed.TransactionView>,
+          _isc.getType<_ign516jt.Transfer>,
+          _isc.getType<_iah0rmrk.TransferInput>,
+          _isc.getType<_i3n9n3ej.TransferPeerView>,
+          _isc.getType<_i6j30n20.PriceQuality>,
+          _isc.getType<_iu1a5mev.PriceSource>,
+          _isc.getType<_ilu5i0rn.Wallet>,
           _isc.getType<_iqqppnaa.WalletHolding>,
+          _isc.getType<_ifam4bx7.WalletNetwork>,
+          _isc.getType<_ipdq2p58.WalletSyncResult>,
+          _isc.getType<_ivsmsmw6.WalletTaxYearSummary>,
+          _isc.getType<_i6m1jx15.WalletTransaction>,
           _isc.getType<_iz2jf14v.Account?>,
+          _isc.getType<_i53yl4yp.AccountBalancesView?>,
+          _isc.getType<_i87oqvv1.AccountValuation?>,
+          _isc.getType<_ig9cy6ku.ValuationSource?>,
           _isc.getType<_isfmgqgu.AgentConversation?>,
           _isc.getType<_i769eo9u.AgentEvent?>,
           _isc.getType<_iyhb15ax.AgentEventKind?>,
@@ -332,23 +398,33 @@ class Protocol extends _isc.SerializationManager
           _isc.getType<_idxyy01n.AgentProposalKind?>,
           _isc.getType<_iksk16ej.AgentProposalStatus?>,
           _isc.getType<_ic667156.AgentProvider?>,
-          _isc.getType<_ipqgbdtd.AgentProviderSettings?>,
           _isc.getType<_i0760q1h.AgentProviderSettingsView?>,
           _isc.getType<_igo4k2bu.AgentUsageRecord?>,
           _isc.getType<_ipqjijih.AgentUsageView?>,
-          _isc.getType<_i8betnj7.AgentAccessToken?>,
           _isc.getType<_iis6jewo.AgentAccessTokenCreated?>,
           _isc.getType<_i4mcrc97.AgentAccessTokenView?>,
+          _isc.getType<_iqje9mi5.AuditAction?>,
+          _isc.getType<_ijhj7cd7.AuditEvent?>,
+          _isc.getType<_i2sn5a56.AuditSubject?>,
           _isc.getType<_iq2w1sa5.Entitlement?>,
           _isc.getType<_ipnf4x0i.EntitlementSource?>,
           _isc.getType<_imqwzx9j.EntitlementStatus?>,
-          _isc.getType<_iw7l0hzr.SolanaBillingChallenge?>,
           _isc.getType<_iwxkomal.SolanaPlanView?>,
-          _isc.getType<_in1nt6tx.StripeCustomer?>,
+          _isc.getType<_iouaddet.AllocationInput?>,
+          _isc.getType<_ixyov90t.BudgetMonthSummary?>,
+          _isc.getType<_ihanl5km.BudgetMonthView?>,
+          _isc.getType<_ii8h2sft.EnvelopeMonthView?>,
           _isc.getType<_i01fne9j.BudgetTemplate?>,
-          _isc.getType<_idtyoogy.Budget?>,
+          _isc.getType<_iagnrffn.BudgetTemplateLine?>,
           _isc.getType<_iwxpkdmg.Category?>,
+          _isc.getType<_i4zfq652.Confidence?>,
+          _isc.getType<_iynfhhr3.SyncStatus?>,
+          _isc.getType<_i03vgs6n.ChangeScope?>,
+          _isc.getType<_iamyw1yn.Entity?>,
+          _isc.getType<_is12mxpv.EntityChangedEvent?>,
+          _isc.getType<_ihqn2h4c.EntitySummaryView?>,
           _isc.getType<_ifl4yivq.EnvelopeGoal?>,
+          _isc.getType<_i61aeoqs.EnvelopeGoalKind?>,
           _isc.getType<_ikt21dfw.Envelope?>,
           _isc.getType<_iozei2bz.AgentAllowanceExhaustedException?>,
           _isc.getType<_iurccglg.AgentProviderException?>,
@@ -358,21 +434,20 @@ class Protocol extends _isc.SerializationManager
           _isc.getType<_i5kq7itn.BillingRailUnavailableException?>,
           _isc.getType<_ik3lny6q.EntitlementRequiredException?>,
           _isc.getType<_iha6yc5u.ForbiddenException?>,
+          _isc.getType<_if5umnl3.FxRateUnavailableException?>,
           _isc.getType<_izob2ctl.NotFoundException?>,
-          _isc.getType<_in744jyg.TaxRateUnavailableException?>,
           _isc.getType<_i4yu9vcq.TaxRulesUnavailableException?>,
           _isc.getType<_igpdbyom.ValidationException?>,
           _isc.getType<_i8cxakqz.FxLatestSnapshot?>,
-          _isc.getType<_i41ek9pv.FxRateEntry?>,
+          _isc.getType<_ifsg8hc8.FxProvider?>,
+          _isc.getType<_i8bj7347.FxQuoteView?>,
           _isc.getType<_i15udi7x.FxRateQuote?>,
-          _isc.getType<_i4xgo4ij.FxRateSnapshot?>,
           _isc.getType<_ikgmcjq7.Institution?>,
           _isc.getType<_iclizrec.InstitutionLocation?>,
           _isc.getType<_iqqjzj2w.Journal?>,
           _isc.getType<_i6l0fo54.JournalLine?>,
           _isc.getType<_id7zp91q.JournalLineInput?>,
           _isc.getType<_ivazbnnp.LedgerAccount?>,
-          _isc.getType<_ipq97xjw.LedgerAuditEvent?>,
           _isc.getType<_i7t4btg4.LedgerPeriodLock?>,
           _isc.getType<_i5gsx3ds.TrialBalanceRowView?>,
           _isc.getType<_i7q128aw.TrialBalanceView?>,
@@ -380,11 +455,16 @@ class Protocol extends _isc.SerializationManager
           _isc.getType<_ignezpci.Payee?>,
           _isc.getType<_i1vmvtrm.PlaidConnection?>,
           _isc.getType<_i9is7zb8.RecurringTransaction?>,
-          _isc.getType<_iotf4y4d.SolanaWallet?>,
-          _isc.getType<_ivqf8i64.SolanaWalletHolding?>,
-          _isc.getType<_ir1c2di9.SolanaWalletSyncResult?>,
-          _isc.getType<_ijmvodfo.SolanaWalletTaxYearSummary?>,
-          _isc.getType<_iwwk92r1.SolanaWalletTransaction?>,
+          _isc.getType<_ieg4kkwo.NetWorthAccountRow?>,
+          _isc.getType<_if6ke1e2.NetWorthCurrencyRow?>,
+          _isc.getType<_i2p47r1m.NetWorthEntityRow?>,
+          _isc.getType<_iiyi1fdi.NetWorthGranularity?>,
+          _isc.getType<_izpykydm.NetWorthHistoryView?>,
+          _isc.getType<_ihwosu5p.NetWorthPoint?>,
+          _isc.getType<_idk5va87.NetWorthView?>,
+          _isc.getType<_ijpgwwdu.ReportGrouping?>,
+          _isc.getType<_ikppksh7.SpendingRow?>,
+          _isc.getType<_i99f9doz.UserSettings?>,
           _isc.getType<_ic4zfx3b.TaxBandSliceView?>,
           _isc.getType<_iv5oayw3.TaxCategoryView?>,
           _isc.getType<_ivss6b81.TaxLiabilityView?>,
@@ -393,52 +473,57 @@ class Protocol extends _isc.SerializationManager
           _isc.getType<_i6llsezf.TaxReportLineView?>,
           _isc.getType<_inb54q20.TaxReportView?>,
           _isc.getType<_i6dj6ji0.TransactionRule?>,
+          _isc.getType<_ibzcfs2k.ImportResult?>,
           _isc.getType<_isp6bezg.ImportRow?>,
-          _isc.getType<_i0jd5x9z.SplitItem?>,
+          _isc.getType<_igokbqfh.ReconcileResult?>,
           _isc.getType<_iqhl4hru.Transaction?>,
-          _isc.getType<_i2gu4pwf.AssetQuoteCache?>,
-          _isc.getType<_igiy3v19.WalletConnectResult?>,
-          _isc.getType<_i9uqpb1b.WalletConnection?>,
+          _isc.getType<_i4fvctax.TransactionFlag?>,
+          _isc.getType<_ipd1rac6.TransactionInput?>,
+          _isc.getType<_ioneruif.TransactionKind?>,
+          _isc.getType<_ipio7ws3.TransactionLine?>,
+          _isc.getType<_imsv7m6w.TransactionLineInput?>,
+          _isc.getType<_i7f3q91r.TransactionPage?>,
+          _isc.getType<_ioinkgwn.TransactionQuery?>,
+          _isc.getType<_i3rynkdl.TransactionStatus?>,
+          _isc.getType<_ilixdhed.TransactionView?>,
+          _isc.getType<_ign516jt.Transfer?>,
+          _isc.getType<_iah0rmrk.TransferInput?>,
+          _isc.getType<_i3n9n3ej.TransferPeerView?>,
+          _isc.getType<_i6j30n20.PriceQuality?>,
+          _isc.getType<_iu1a5mev.PriceSource?>,
+          _isc.getType<_ilu5i0rn.Wallet?>,
           _isc.getType<_iqqppnaa.WalletHolding?>,
+          _isc.getType<_ifam4bx7.WalletNetwork?>,
+          _isc.getType<_ipdq2p58.WalletSyncResult?>,
+          _isc.getType<_ivsmsmw6.WalletTaxYearSummary?>,
+          _isc.getType<_i6m1jx15.WalletTransaction?>,
+          _isc.getType<List<_iwxpkdmg.Category>>,
+          _isc.getType<List<_ii8h2sft.EnvelopeMonthView>>,
           _isc.getType<List<_i15udi7x.FxRateQuote>>,
           _isc.getType<List<_i5gsx3ds.TrialBalanceRowView>>,
+          _isc.getType<List<_ihwosu5p.NetWorthPoint>>,
+          _isc.getType<List<String>>,
+          _isc.getType<List<_if6ke1e2.NetWorthCurrencyRow>>,
+          _isc.getType<List<_i2p47r1m.NetWorthEntityRow>>,
+          _isc.getType<List<_ieg4kkwo.NetWorthAccountRow>>,
           _isc.getType<List<_ic4zfx3b.TaxBandSliceView>>,
           _isc.getType<List<_i6llsezf.TaxReportLineView>>,
           _isc.getType<List<_ivss6b81.TaxLiabilityView>>,
-          _isc.getType<List<String>>,
           _isc.getType<List<_iuft4v7q.TaxOpportunityView>>,
-          _isc.getType<List<_iqqppnaa.WalletHolding>>,
-          _isc.getType<List<_iqudaadl.Account>>,
+          _isc.getType<List<_imsv7m6w.TransactionLineInput>>,
+          _isc.getType<List<_ilixdhed.TransactionView>>,
+          _isc.getType<List<_ipio7ws3.TransactionLine>>,
+          _isc.getType<List<String>?>,
           _isc.getType<List<_in44ixo7.AgentConversation>>,
           _isc.getType<List<_i8fbky0c.AgentMessage>>,
           _isc.getType<List<_icv7zzda.AgentProposal>>,
           _isc.getType<List<_itxn3wek.AgentAccessTokenView>>,
-          _isc.getType<List<_itiojbb0.BudgetTemplate>>,
-          _isc.getType<List<_iz3b7rge.MonthlyAllocation>>,
-          _isc.getType<List<_iro9sz2e.Budget>>,
-          _isc.getType<List<_iels1fku.Category>>,
-          _isc.getType<List<_isc.UuidValue>>,
           _isc.getType<List<_ibdhi9gv.EnvelopeGoal>>,
+          _isc.getType<List<_isc.UuidValue>>,
           _isc.getType<List<_i29jf3by.Envelope>>,
           _isc.getType<List<String>>,
           _isc.getType<List<_i6ysl1a4.Institution>>,
-          _isc.getType<List<_ixq9t892.LedgerAccount>>,
-          _isc.getType<List<_i3j8x5or.JournalLineInput>>,
-          _isc.getType<List<_izuizaeu.Journal>>,
-          _isc.getType<List<_iwruw2s3.JournalLine>>,
-          _isc.getType<List<_iaf6ifsb.Payee>>,
-          _isc.getType<List<_i41tn6nr.RecurringTransaction>>,
-          _isc.getType<List<_i1b8tal0.SolanaWallet>>,
-          _isc.getType<List<_isudwq84.SolanaWalletTransaction>>,
-          _isc.getType<List<_i7zpyr5z.SolanaWalletHolding>>,
-          _isc.getType<List<_igj51lwa.SolanaWalletTaxYearSummary>>,
-          _isc.getType<List<_ic177lol.TaxCategoryView>>,
-          _isc.getType<List<_iwxd5v0a.TransactionRule>>,
-          _isc.getType<List<_iio3v7fv.Transaction>>,
-          _isc.getType<List<int>>,
-          _isc.getType<List<_ilmjmphd.SplitItem>>,
-          _isc.getType<List<_iyud7cy9.ImportRow>>,
-          _isc.getType<List<_izm3e498.WalletHolding>>,
+          _isc.getType<List<_iqudaadl.Account>>,
         ],
         modules: const [
           _iaic.Protocol.new,
@@ -447,6 +532,9 @@ class Protocol extends _isc.SerializationManager
         ],
         classNames: const [
           'Account',
+          'AccountBalancesView',
+          'AccountValuation',
+          'ValuationSource',
           'AgentConversation',
           'AgentEvent',
           'AgentEventKind',
@@ -456,23 +544,33 @@ class Protocol extends _isc.SerializationManager
           'AgentProposalKind',
           'AgentProposalStatus',
           'AgentProvider',
-          'AgentProviderSettings',
           'AgentProviderSettingsView',
           'AgentUsageRecord',
           'AgentUsageView',
-          'AgentAccessToken',
           'AgentAccessTokenCreated',
           'AgentAccessTokenView',
+          'AuditAction',
+          'AuditEvent',
+          'AuditSubject',
           'Entitlement',
           'EntitlementSource',
           'EntitlementStatus',
-          'SolanaBillingChallenge',
           'SolanaPlanView',
-          'StripeCustomer',
+          'AllocationInput',
+          'BudgetMonthSummary',
+          'BudgetMonthView',
+          'EnvelopeMonthView',
           'BudgetTemplate',
-          'Budget',
+          'BudgetTemplateLine',
           'Category',
+          'Confidence',
+          'SyncStatus',
+          'ChangeScope',
+          'Entity',
+          'EntityChangedEvent',
+          'EntitySummaryView',
           'EnvelopeGoal',
+          'EnvelopeGoalKind',
           'Envelope',
           'AgentAllowanceExhaustedException',
           'AgentProviderException',
@@ -482,21 +580,20 @@ class Protocol extends _isc.SerializationManager
           'BillingRailUnavailableException',
           'EntitlementRequiredException',
           'ForbiddenException',
+          'FxRateUnavailableException',
           'NotFoundException',
-          'TaxRateUnavailableException',
           'TaxRulesUnavailableException',
           'ValidationException',
           'FxLatestSnapshot',
-          'FxRateEntry',
+          'FxProvider',
+          'FxQuoteView',
           'FxRateQuote',
-          'FxRateSnapshot',
           'Institution',
           'InstitutionLocation',
           'Journal',
           'JournalLine',
           'JournalLineInput',
           'LedgerAccount',
-          'LedgerAuditEvent',
           'LedgerPeriodLock',
           'TrialBalanceRowView',
           'TrialBalanceView',
@@ -504,11 +601,16 @@ class Protocol extends _isc.SerializationManager
           'Payee',
           'PlaidConnection',
           'RecurringTransaction',
-          'SolanaWallet',
-          'SolanaWalletHolding',
-          'SolanaWalletSyncResult',
-          'SolanaWalletTaxYearSummary',
-          'SolanaWalletTransaction',
+          'NetWorthAccountRow',
+          'NetWorthCurrencyRow',
+          'NetWorthEntityRow',
+          'NetWorthGranularity',
+          'NetWorthHistoryView',
+          'NetWorthPoint',
+          'NetWorthView',
+          'ReportGrouping',
+          'SpendingRow',
+          'UserSettings',
           'TaxBandSliceView',
           'TaxCategoryView',
           'TaxLiabilityView',
@@ -517,13 +619,30 @@ class Protocol extends _isc.SerializationManager
           'TaxReportLineView',
           'TaxReportView',
           'TransactionRule',
+          'ImportResult',
           'ImportRow',
-          'SplitItem',
+          'ReconcileResult',
           'Transaction',
-          'AssetQuoteCache',
-          'WalletConnectResult',
-          'WalletConnection',
+          'TransactionFlag',
+          'TransactionInput',
+          'TransactionKind',
+          'TransactionLine',
+          'TransactionLineInput',
+          'TransactionPage',
+          'TransactionQuery',
+          'TransactionStatus',
+          'TransactionView',
+          'Transfer',
+          'TransferInput',
+          'TransferPeerView',
+          'PriceQuality',
+          'PriceSource',
+          'Wallet',
           'WalletHolding',
+          'WalletNetwork',
+          'WalletSyncResult',
+          'WalletTaxYearSummary',
+          'WalletTransaction',
         ],
       );
 
@@ -554,6 +673,15 @@ class Protocol extends _isc.SerializationManager
     if (t == _iz2jf14v.Account) {
       return _iz2jf14v.Account.fromJson(data) as T;
     }
+    if (t == _i53yl4yp.AccountBalancesView) {
+      return _i53yl4yp.AccountBalancesView.fromJson(data) as T;
+    }
+    if (t == _i87oqvv1.AccountValuation) {
+      return _i87oqvv1.AccountValuation.fromJson(data) as T;
+    }
+    if (t == _ig9cy6ku.ValuationSource) {
+      return _ig9cy6ku.ValuationSource.fromJson(data) as T;
+    }
     if (t == _isfmgqgu.AgentConversation) {
       return _isfmgqgu.AgentConversation.fromJson(data) as T;
     }
@@ -581,9 +709,6 @@ class Protocol extends _isc.SerializationManager
     if (t == _ic667156.AgentProvider) {
       return _ic667156.AgentProvider.fromJson(data) as T;
     }
-    if (t == _ipqgbdtd.AgentProviderSettings) {
-      return _ipqgbdtd.AgentProviderSettings.fromJson(data) as T;
-    }
     if (t == _i0760q1h.AgentProviderSettingsView) {
       return _i0760q1h.AgentProviderSettingsView.fromJson(data) as T;
     }
@@ -593,14 +718,20 @@ class Protocol extends _isc.SerializationManager
     if (t == _ipqjijih.AgentUsageView) {
       return _ipqjijih.AgentUsageView.fromJson(data) as T;
     }
-    if (t == _i8betnj7.AgentAccessToken) {
-      return _i8betnj7.AgentAccessToken.fromJson(data) as T;
-    }
     if (t == _iis6jewo.AgentAccessTokenCreated) {
       return _iis6jewo.AgentAccessTokenCreated.fromJson(data) as T;
     }
     if (t == _i4mcrc97.AgentAccessTokenView) {
       return _i4mcrc97.AgentAccessTokenView.fromJson(data) as T;
+    }
+    if (t == _iqje9mi5.AuditAction) {
+      return _iqje9mi5.AuditAction.fromJson(data) as T;
+    }
+    if (t == _ijhj7cd7.AuditEvent) {
+      return _ijhj7cd7.AuditEvent.fromJson(data) as T;
+    }
+    if (t == _i2sn5a56.AuditSubject) {
+      return _i2sn5a56.AuditSubject.fromJson(data) as T;
     }
     if (t == _iq2w1sa5.Entitlement) {
       return _iq2w1sa5.Entitlement.fromJson(data) as T;
@@ -611,26 +742,53 @@ class Protocol extends _isc.SerializationManager
     if (t == _imqwzx9j.EntitlementStatus) {
       return _imqwzx9j.EntitlementStatus.fromJson(data) as T;
     }
-    if (t == _iw7l0hzr.SolanaBillingChallenge) {
-      return _iw7l0hzr.SolanaBillingChallenge.fromJson(data) as T;
-    }
     if (t == _iwxkomal.SolanaPlanView) {
       return _iwxkomal.SolanaPlanView.fromJson(data) as T;
     }
-    if (t == _in1nt6tx.StripeCustomer) {
-      return _in1nt6tx.StripeCustomer.fromJson(data) as T;
+    if (t == _iouaddet.AllocationInput) {
+      return _iouaddet.AllocationInput.fromJson(data) as T;
+    }
+    if (t == _ixyov90t.BudgetMonthSummary) {
+      return _ixyov90t.BudgetMonthSummary.fromJson(data) as T;
+    }
+    if (t == _ihanl5km.BudgetMonthView) {
+      return _ihanl5km.BudgetMonthView.fromJson(data) as T;
+    }
+    if (t == _ii8h2sft.EnvelopeMonthView) {
+      return _ii8h2sft.EnvelopeMonthView.fromJson(data) as T;
     }
     if (t == _i01fne9j.BudgetTemplate) {
       return _i01fne9j.BudgetTemplate.fromJson(data) as T;
     }
-    if (t == _idtyoogy.Budget) {
-      return _idtyoogy.Budget.fromJson(data) as T;
+    if (t == _iagnrffn.BudgetTemplateLine) {
+      return _iagnrffn.BudgetTemplateLine.fromJson(data) as T;
     }
     if (t == _iwxpkdmg.Category) {
       return _iwxpkdmg.Category.fromJson(data) as T;
     }
+    if (t == _i4zfq652.Confidence) {
+      return _i4zfq652.Confidence.fromJson(data) as T;
+    }
+    if (t == _iynfhhr3.SyncStatus) {
+      return _iynfhhr3.SyncStatus.fromJson(data) as T;
+    }
+    if (t == _i03vgs6n.ChangeScope) {
+      return _i03vgs6n.ChangeScope.fromJson(data) as T;
+    }
+    if (t == _iamyw1yn.Entity) {
+      return _iamyw1yn.Entity.fromJson(data) as T;
+    }
+    if (t == _is12mxpv.EntityChangedEvent) {
+      return _is12mxpv.EntityChangedEvent.fromJson(data) as T;
+    }
+    if (t == _ihqn2h4c.EntitySummaryView) {
+      return _ihqn2h4c.EntitySummaryView.fromJson(data) as T;
+    }
     if (t == _ifl4yivq.EnvelopeGoal) {
       return _ifl4yivq.EnvelopeGoal.fromJson(data) as T;
+    }
+    if (t == _i61aeoqs.EnvelopeGoalKind) {
+      return _i61aeoqs.EnvelopeGoalKind.fromJson(data) as T;
     }
     if (t == _ikt21dfw.Envelope) {
       return _ikt21dfw.Envelope.fromJson(data) as T;
@@ -659,11 +817,11 @@ class Protocol extends _isc.SerializationManager
     if (t == _iha6yc5u.ForbiddenException) {
       return _iha6yc5u.ForbiddenException.fromJson(data) as T;
     }
+    if (t == _if5umnl3.FxRateUnavailableException) {
+      return _if5umnl3.FxRateUnavailableException.fromJson(data) as T;
+    }
     if (t == _izob2ctl.NotFoundException) {
       return _izob2ctl.NotFoundException.fromJson(data) as T;
-    }
-    if (t == _in744jyg.TaxRateUnavailableException) {
-      return _in744jyg.TaxRateUnavailableException.fromJson(data) as T;
     }
     if (t == _i4yu9vcq.TaxRulesUnavailableException) {
       return _i4yu9vcq.TaxRulesUnavailableException.fromJson(data) as T;
@@ -674,14 +832,14 @@ class Protocol extends _isc.SerializationManager
     if (t == _i8cxakqz.FxLatestSnapshot) {
       return _i8cxakqz.FxLatestSnapshot.fromJson(data) as T;
     }
-    if (t == _i41ek9pv.FxRateEntry) {
-      return _i41ek9pv.FxRateEntry.fromJson(data) as T;
+    if (t == _ifsg8hc8.FxProvider) {
+      return _ifsg8hc8.FxProvider.fromJson(data) as T;
+    }
+    if (t == _i8bj7347.FxQuoteView) {
+      return _i8bj7347.FxQuoteView.fromJson(data) as T;
     }
     if (t == _i15udi7x.FxRateQuote) {
       return _i15udi7x.FxRateQuote.fromJson(data) as T;
-    }
-    if (t == _i4xgo4ij.FxRateSnapshot) {
-      return _i4xgo4ij.FxRateSnapshot.fromJson(data) as T;
     }
     if (t == _ikgmcjq7.Institution) {
       return _ikgmcjq7.Institution.fromJson(data) as T;
@@ -700,9 +858,6 @@ class Protocol extends _isc.SerializationManager
     }
     if (t == _ivazbnnp.LedgerAccount) {
       return _ivazbnnp.LedgerAccount.fromJson(data) as T;
-    }
-    if (t == _ipq97xjw.LedgerAuditEvent) {
-      return _ipq97xjw.LedgerAuditEvent.fromJson(data) as T;
     }
     if (t == _i7t4btg4.LedgerPeriodLock) {
       return _i7t4btg4.LedgerPeriodLock.fromJson(data) as T;
@@ -725,20 +880,35 @@ class Protocol extends _isc.SerializationManager
     if (t == _i9is7zb8.RecurringTransaction) {
       return _i9is7zb8.RecurringTransaction.fromJson(data) as T;
     }
-    if (t == _iotf4y4d.SolanaWallet) {
-      return _iotf4y4d.SolanaWallet.fromJson(data) as T;
+    if (t == _ieg4kkwo.NetWorthAccountRow) {
+      return _ieg4kkwo.NetWorthAccountRow.fromJson(data) as T;
     }
-    if (t == _ivqf8i64.SolanaWalletHolding) {
-      return _ivqf8i64.SolanaWalletHolding.fromJson(data) as T;
+    if (t == _if6ke1e2.NetWorthCurrencyRow) {
+      return _if6ke1e2.NetWorthCurrencyRow.fromJson(data) as T;
     }
-    if (t == _ir1c2di9.SolanaWalletSyncResult) {
-      return _ir1c2di9.SolanaWalletSyncResult.fromJson(data) as T;
+    if (t == _i2p47r1m.NetWorthEntityRow) {
+      return _i2p47r1m.NetWorthEntityRow.fromJson(data) as T;
     }
-    if (t == _ijmvodfo.SolanaWalletTaxYearSummary) {
-      return _ijmvodfo.SolanaWalletTaxYearSummary.fromJson(data) as T;
+    if (t == _iiyi1fdi.NetWorthGranularity) {
+      return _iiyi1fdi.NetWorthGranularity.fromJson(data) as T;
     }
-    if (t == _iwwk92r1.SolanaWalletTransaction) {
-      return _iwwk92r1.SolanaWalletTransaction.fromJson(data) as T;
+    if (t == _izpykydm.NetWorthHistoryView) {
+      return _izpykydm.NetWorthHistoryView.fromJson(data) as T;
+    }
+    if (t == _ihwosu5p.NetWorthPoint) {
+      return _ihwosu5p.NetWorthPoint.fromJson(data) as T;
+    }
+    if (t == _idk5va87.NetWorthView) {
+      return _idk5va87.NetWorthView.fromJson(data) as T;
+    }
+    if (t == _ijpgwwdu.ReportGrouping) {
+      return _ijpgwwdu.ReportGrouping.fromJson(data) as T;
+    }
+    if (t == _ikppksh7.SpendingRow) {
+      return _ikppksh7.SpendingRow.fromJson(data) as T;
+    }
+    if (t == _i99f9doz.UserSettings) {
+      return _i99f9doz.UserSettings.fromJson(data) as T;
     }
     if (t == _ic4zfx3b.TaxBandSliceView) {
       return _ic4zfx3b.TaxBandSliceView.fromJson(data) as T;
@@ -764,29 +934,94 @@ class Protocol extends _isc.SerializationManager
     if (t == _i6dj6ji0.TransactionRule) {
       return _i6dj6ji0.TransactionRule.fromJson(data) as T;
     }
+    if (t == _ibzcfs2k.ImportResult) {
+      return _ibzcfs2k.ImportResult.fromJson(data) as T;
+    }
     if (t == _isp6bezg.ImportRow) {
       return _isp6bezg.ImportRow.fromJson(data) as T;
     }
-    if (t == _i0jd5x9z.SplitItem) {
-      return _i0jd5x9z.SplitItem.fromJson(data) as T;
+    if (t == _igokbqfh.ReconcileResult) {
+      return _igokbqfh.ReconcileResult.fromJson(data) as T;
     }
     if (t == _iqhl4hru.Transaction) {
       return _iqhl4hru.Transaction.fromJson(data) as T;
     }
-    if (t == _i2gu4pwf.AssetQuoteCache) {
-      return _i2gu4pwf.AssetQuoteCache.fromJson(data) as T;
+    if (t == _i4fvctax.TransactionFlag) {
+      return _i4fvctax.TransactionFlag.fromJson(data) as T;
     }
-    if (t == _igiy3v19.WalletConnectResult) {
-      return _igiy3v19.WalletConnectResult.fromJson(data) as T;
+    if (t == _ipd1rac6.TransactionInput) {
+      return _ipd1rac6.TransactionInput.fromJson(data) as T;
     }
-    if (t == _i9uqpb1b.WalletConnection) {
-      return _i9uqpb1b.WalletConnection.fromJson(data) as T;
+    if (t == _ioneruif.TransactionKind) {
+      return _ioneruif.TransactionKind.fromJson(data) as T;
+    }
+    if (t == _ipio7ws3.TransactionLine) {
+      return _ipio7ws3.TransactionLine.fromJson(data) as T;
+    }
+    if (t == _imsv7m6w.TransactionLineInput) {
+      return _imsv7m6w.TransactionLineInput.fromJson(data) as T;
+    }
+    if (t == _i7f3q91r.TransactionPage) {
+      return _i7f3q91r.TransactionPage.fromJson(data) as T;
+    }
+    if (t == _ioinkgwn.TransactionQuery) {
+      return _ioinkgwn.TransactionQuery.fromJson(data) as T;
+    }
+    if (t == _i3rynkdl.TransactionStatus) {
+      return _i3rynkdl.TransactionStatus.fromJson(data) as T;
+    }
+    if (t == _ilixdhed.TransactionView) {
+      return _ilixdhed.TransactionView.fromJson(data) as T;
+    }
+    if (t == _ign516jt.Transfer) {
+      return _ign516jt.Transfer.fromJson(data) as T;
+    }
+    if (t == _iah0rmrk.TransferInput) {
+      return _iah0rmrk.TransferInput.fromJson(data) as T;
+    }
+    if (t == _i3n9n3ej.TransferPeerView) {
+      return _i3n9n3ej.TransferPeerView.fromJson(data) as T;
+    }
+    if (t == _i6j30n20.PriceQuality) {
+      return _i6j30n20.PriceQuality.fromJson(data) as T;
+    }
+    if (t == _iu1a5mev.PriceSource) {
+      return _iu1a5mev.PriceSource.fromJson(data) as T;
+    }
+    if (t == _ilu5i0rn.Wallet) {
+      return _ilu5i0rn.Wallet.fromJson(data) as T;
     }
     if (t == _iqqppnaa.WalletHolding) {
       return _iqqppnaa.WalletHolding.fromJson(data) as T;
     }
+    if (t == _ifam4bx7.WalletNetwork) {
+      return _ifam4bx7.WalletNetwork.fromJson(data) as T;
+    }
+    if (t == _ipdq2p58.WalletSyncResult) {
+      return _ipdq2p58.WalletSyncResult.fromJson(data) as T;
+    }
+    if (t == _ivsmsmw6.WalletTaxYearSummary) {
+      return _ivsmsmw6.WalletTaxYearSummary.fromJson(data) as T;
+    }
+    if (t == _i6m1jx15.WalletTransaction) {
+      return _i6m1jx15.WalletTransaction.fromJson(data) as T;
+    }
     if (t == _isc.getType<_iz2jf14v.Account?>()) {
       return (data != null ? _iz2jf14v.Account.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_i53yl4yp.AccountBalancesView?>()) {
+      return (data != null
+              ? _i53yl4yp.AccountBalancesView.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _isc.getType<_i87oqvv1.AccountValuation?>()) {
+      return (data != null ? _i87oqvv1.AccountValuation.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_ig9cy6ku.ValuationSource?>()) {
+      return (data != null ? _ig9cy6ku.ValuationSource.fromJson(data) : null)
+          as T;
     }
     if (t == _isc.getType<_isfmgqgu.AgentConversation?>()) {
       return (data != null ? _isfmgqgu.AgentConversation.fromJson(data) : null)
@@ -824,12 +1059,6 @@ class Protocol extends _isc.SerializationManager
       return (data != null ? _ic667156.AgentProvider.fromJson(data) : null)
           as T;
     }
-    if (t == _isc.getType<_ipqgbdtd.AgentProviderSettings?>()) {
-      return (data != null
-              ? _ipqgbdtd.AgentProviderSettings.fromJson(data)
-              : null)
-          as T;
-    }
     if (t == _isc.getType<_i0760q1h.AgentProviderSettingsView?>()) {
       return (data != null
               ? _i0760q1h.AgentProviderSettingsView.fromJson(data)
@@ -844,10 +1073,6 @@ class Protocol extends _isc.SerializationManager
       return (data != null ? _ipqjijih.AgentUsageView.fromJson(data) : null)
           as T;
     }
-    if (t == _isc.getType<_i8betnj7.AgentAccessToken?>()) {
-      return (data != null ? _i8betnj7.AgentAccessToken.fromJson(data) : null)
-          as T;
-    }
     if (t == _isc.getType<_iis6jewo.AgentAccessTokenCreated?>()) {
       return (data != null
               ? _iis6jewo.AgentAccessTokenCreated.fromJson(data)
@@ -860,6 +1085,15 @@ class Protocol extends _isc.SerializationManager
               : null)
           as T;
     }
+    if (t == _isc.getType<_iqje9mi5.AuditAction?>()) {
+      return (data != null ? _iqje9mi5.AuditAction.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_ijhj7cd7.AuditEvent?>()) {
+      return (data != null ? _ijhj7cd7.AuditEvent.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_i2sn5a56.AuditSubject?>()) {
+      return (data != null ? _i2sn5a56.AuditSubject.fromJson(data) : null) as T;
+    }
     if (t == _isc.getType<_iq2w1sa5.Entitlement?>()) {
       return (data != null ? _iq2w1sa5.Entitlement.fromJson(data) : null) as T;
     }
@@ -871,32 +1105,63 @@ class Protocol extends _isc.SerializationManager
       return (data != null ? _imqwzx9j.EntitlementStatus.fromJson(data) : null)
           as T;
     }
-    if (t == _isc.getType<_iw7l0hzr.SolanaBillingChallenge?>()) {
-      return (data != null
-              ? _iw7l0hzr.SolanaBillingChallenge.fromJson(data)
-              : null)
-          as T;
-    }
     if (t == _isc.getType<_iwxkomal.SolanaPlanView?>()) {
       return (data != null ? _iwxkomal.SolanaPlanView.fromJson(data) : null)
           as T;
     }
-    if (t == _isc.getType<_in1nt6tx.StripeCustomer?>()) {
-      return (data != null ? _in1nt6tx.StripeCustomer.fromJson(data) : null)
+    if (t == _isc.getType<_iouaddet.AllocationInput?>()) {
+      return (data != null ? _iouaddet.AllocationInput.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_ixyov90t.BudgetMonthSummary?>()) {
+      return (data != null ? _ixyov90t.BudgetMonthSummary.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_ihanl5km.BudgetMonthView?>()) {
+      return (data != null ? _ihanl5km.BudgetMonthView.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_ii8h2sft.EnvelopeMonthView?>()) {
+      return (data != null ? _ii8h2sft.EnvelopeMonthView.fromJson(data) : null)
           as T;
     }
     if (t == _isc.getType<_i01fne9j.BudgetTemplate?>()) {
       return (data != null ? _i01fne9j.BudgetTemplate.fromJson(data) : null)
           as T;
     }
-    if (t == _isc.getType<_idtyoogy.Budget?>()) {
-      return (data != null ? _idtyoogy.Budget.fromJson(data) : null) as T;
+    if (t == _isc.getType<_iagnrffn.BudgetTemplateLine?>()) {
+      return (data != null ? _iagnrffn.BudgetTemplateLine.fromJson(data) : null)
+          as T;
     }
     if (t == _isc.getType<_iwxpkdmg.Category?>()) {
       return (data != null ? _iwxpkdmg.Category.fromJson(data) : null) as T;
     }
+    if (t == _isc.getType<_i4zfq652.Confidence?>()) {
+      return (data != null ? _i4zfq652.Confidence.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_iynfhhr3.SyncStatus?>()) {
+      return (data != null ? _iynfhhr3.SyncStatus.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_i03vgs6n.ChangeScope?>()) {
+      return (data != null ? _i03vgs6n.ChangeScope.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_iamyw1yn.Entity?>()) {
+      return (data != null ? _iamyw1yn.Entity.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_is12mxpv.EntityChangedEvent?>()) {
+      return (data != null ? _is12mxpv.EntityChangedEvent.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_ihqn2h4c.EntitySummaryView?>()) {
+      return (data != null ? _ihqn2h4c.EntitySummaryView.fromJson(data) : null)
+          as T;
+    }
     if (t == _isc.getType<_ifl4yivq.EnvelopeGoal?>()) {
       return (data != null ? _ifl4yivq.EnvelopeGoal.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_i61aeoqs.EnvelopeGoalKind?>()) {
+      return (data != null ? _i61aeoqs.EnvelopeGoalKind.fromJson(data) : null)
+          as T;
     }
     if (t == _isc.getType<_ikt21dfw.Envelope?>()) {
       return (data != null ? _ikt21dfw.Envelope.fromJson(data) : null) as T;
@@ -947,14 +1212,14 @@ class Protocol extends _isc.SerializationManager
       return (data != null ? _iha6yc5u.ForbiddenException.fromJson(data) : null)
           as T;
     }
-    if (t == _isc.getType<_izob2ctl.NotFoundException?>()) {
-      return (data != null ? _izob2ctl.NotFoundException.fromJson(data) : null)
+    if (t == _isc.getType<_if5umnl3.FxRateUnavailableException?>()) {
+      return (data != null
+              ? _if5umnl3.FxRateUnavailableException.fromJson(data)
+              : null)
           as T;
     }
-    if (t == _isc.getType<_in744jyg.TaxRateUnavailableException?>()) {
-      return (data != null
-              ? _in744jyg.TaxRateUnavailableException.fromJson(data)
-              : null)
+    if (t == _isc.getType<_izob2ctl.NotFoundException?>()) {
+      return (data != null ? _izob2ctl.NotFoundException.fromJson(data) : null)
           as T;
     }
     if (t == _isc.getType<_i4yu9vcq.TaxRulesUnavailableException?>()) {
@@ -973,15 +1238,14 @@ class Protocol extends _isc.SerializationManager
       return (data != null ? _i8cxakqz.FxLatestSnapshot.fromJson(data) : null)
           as T;
     }
-    if (t == _isc.getType<_i41ek9pv.FxRateEntry?>()) {
-      return (data != null ? _i41ek9pv.FxRateEntry.fromJson(data) : null) as T;
+    if (t == _isc.getType<_ifsg8hc8.FxProvider?>()) {
+      return (data != null ? _ifsg8hc8.FxProvider.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_i8bj7347.FxQuoteView?>()) {
+      return (data != null ? _i8bj7347.FxQuoteView.fromJson(data) : null) as T;
     }
     if (t == _isc.getType<_i15udi7x.FxRateQuote?>()) {
       return (data != null ? _i15udi7x.FxRateQuote.fromJson(data) : null) as T;
-    }
-    if (t == _isc.getType<_i4xgo4ij.FxRateSnapshot?>()) {
-      return (data != null ? _i4xgo4ij.FxRateSnapshot.fromJson(data) : null)
-          as T;
     }
     if (t == _isc.getType<_ikgmcjq7.Institution?>()) {
       return (data != null ? _ikgmcjq7.Institution.fromJson(data) : null) as T;
@@ -1004,10 +1268,6 @@ class Protocol extends _isc.SerializationManager
     }
     if (t == _isc.getType<_ivazbnnp.LedgerAccount?>()) {
       return (data != null ? _ivazbnnp.LedgerAccount.fromJson(data) : null)
-          as T;
-    }
-    if (t == _isc.getType<_ipq97xjw.LedgerAuditEvent?>()) {
-      return (data != null ? _ipq97xjw.LedgerAuditEvent.fromJson(data) : null)
           as T;
     }
     if (t == _isc.getType<_i7t4btg4.LedgerPeriodLock?>()) {
@@ -1041,32 +1301,48 @@ class Protocol extends _isc.SerializationManager
               : null)
           as T;
     }
-    if (t == _isc.getType<_iotf4y4d.SolanaWallet?>()) {
-      return (data != null ? _iotf4y4d.SolanaWallet.fromJson(data) : null) as T;
+    if (t == _isc.getType<_ieg4kkwo.NetWorthAccountRow?>()) {
+      return (data != null ? _ieg4kkwo.NetWorthAccountRow.fromJson(data) : null)
+          as T;
     }
-    if (t == _isc.getType<_ivqf8i64.SolanaWalletHolding?>()) {
+    if (t == _isc.getType<_if6ke1e2.NetWorthCurrencyRow?>()) {
       return (data != null
-              ? _ivqf8i64.SolanaWalletHolding.fromJson(data)
+              ? _if6ke1e2.NetWorthCurrencyRow.fromJson(data)
               : null)
           as T;
     }
-    if (t == _isc.getType<_ir1c2di9.SolanaWalletSyncResult?>()) {
+    if (t == _isc.getType<_i2p47r1m.NetWorthEntityRow?>()) {
+      return (data != null ? _i2p47r1m.NetWorthEntityRow.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_iiyi1fdi.NetWorthGranularity?>()) {
       return (data != null
-              ? _ir1c2di9.SolanaWalletSyncResult.fromJson(data)
+              ? _iiyi1fdi.NetWorthGranularity.fromJson(data)
               : null)
           as T;
     }
-    if (t == _isc.getType<_ijmvodfo.SolanaWalletTaxYearSummary?>()) {
+    if (t == _isc.getType<_izpykydm.NetWorthHistoryView?>()) {
       return (data != null
-              ? _ijmvodfo.SolanaWalletTaxYearSummary.fromJson(data)
+              ? _izpykydm.NetWorthHistoryView.fromJson(data)
               : null)
           as T;
     }
-    if (t == _isc.getType<_iwwk92r1.SolanaWalletTransaction?>()) {
-      return (data != null
-              ? _iwwk92r1.SolanaWalletTransaction.fromJson(data)
-              : null)
+    if (t == _isc.getType<_ihwosu5p.NetWorthPoint?>()) {
+      return (data != null ? _ihwosu5p.NetWorthPoint.fromJson(data) : null)
           as T;
+    }
+    if (t == _isc.getType<_idk5va87.NetWorthView?>()) {
+      return (data != null ? _idk5va87.NetWorthView.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_ijpgwwdu.ReportGrouping?>()) {
+      return (data != null ? _ijpgwwdu.ReportGrouping.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_ikppksh7.SpendingRow?>()) {
+      return (data != null ? _ikppksh7.SpendingRow.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_i99f9doz.UserSettings?>()) {
+      return (data != null ? _i99f9doz.UserSettings.fromJson(data) : null) as T;
     }
     if (t == _isc.getType<_ic4zfx3b.TaxBandSliceView?>()) {
       return (data != null ? _ic4zfx3b.TaxBandSliceView.fromJson(data) : null)
@@ -1100,31 +1376,109 @@ class Protocol extends _isc.SerializationManager
       return (data != null ? _i6dj6ji0.TransactionRule.fromJson(data) : null)
           as T;
     }
+    if (t == _isc.getType<_ibzcfs2k.ImportResult?>()) {
+      return (data != null ? _ibzcfs2k.ImportResult.fromJson(data) : null) as T;
+    }
     if (t == _isc.getType<_isp6bezg.ImportRow?>()) {
       return (data != null ? _isp6bezg.ImportRow.fromJson(data) : null) as T;
     }
-    if (t == _isc.getType<_i0jd5x9z.SplitItem?>()) {
-      return (data != null ? _i0jd5x9z.SplitItem.fromJson(data) : null) as T;
+    if (t == _isc.getType<_igokbqfh.ReconcileResult?>()) {
+      return (data != null ? _igokbqfh.ReconcileResult.fromJson(data) : null)
+          as T;
     }
     if (t == _isc.getType<_iqhl4hru.Transaction?>()) {
       return (data != null ? _iqhl4hru.Transaction.fromJson(data) : null) as T;
     }
-    if (t == _isc.getType<_i2gu4pwf.AssetQuoteCache?>()) {
-      return (data != null ? _i2gu4pwf.AssetQuoteCache.fromJson(data) : null)
+    if (t == _isc.getType<_i4fvctax.TransactionFlag?>()) {
+      return (data != null ? _i4fvctax.TransactionFlag.fromJson(data) : null)
           as T;
     }
-    if (t == _isc.getType<_igiy3v19.WalletConnectResult?>()) {
+    if (t == _isc.getType<_ipd1rac6.TransactionInput?>()) {
+      return (data != null ? _ipd1rac6.TransactionInput.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_ioneruif.TransactionKind?>()) {
+      return (data != null ? _ioneruif.TransactionKind.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_ipio7ws3.TransactionLine?>()) {
+      return (data != null ? _ipio7ws3.TransactionLine.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_imsv7m6w.TransactionLineInput?>()) {
       return (data != null
-              ? _igiy3v19.WalletConnectResult.fromJson(data)
+              ? _imsv7m6w.TransactionLineInput.fromJson(data)
               : null)
           as T;
     }
-    if (t == _isc.getType<_i9uqpb1b.WalletConnection?>()) {
-      return (data != null ? _i9uqpb1b.WalletConnection.fromJson(data) : null)
+    if (t == _isc.getType<_i7f3q91r.TransactionPage?>()) {
+      return (data != null ? _i7f3q91r.TransactionPage.fromJson(data) : null)
           as T;
+    }
+    if (t == _isc.getType<_ioinkgwn.TransactionQuery?>()) {
+      return (data != null ? _ioinkgwn.TransactionQuery.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_i3rynkdl.TransactionStatus?>()) {
+      return (data != null ? _i3rynkdl.TransactionStatus.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_ilixdhed.TransactionView?>()) {
+      return (data != null ? _ilixdhed.TransactionView.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_ign516jt.Transfer?>()) {
+      return (data != null ? _ign516jt.Transfer.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_iah0rmrk.TransferInput?>()) {
+      return (data != null ? _iah0rmrk.TransferInput.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_i3n9n3ej.TransferPeerView?>()) {
+      return (data != null ? _i3n9n3ej.TransferPeerView.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_i6j30n20.PriceQuality?>()) {
+      return (data != null ? _i6j30n20.PriceQuality.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_iu1a5mev.PriceSource?>()) {
+      return (data != null ? _iu1a5mev.PriceSource.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_ilu5i0rn.Wallet?>()) {
+      return (data != null ? _ilu5i0rn.Wallet.fromJson(data) : null) as T;
     }
     if (t == _isc.getType<_iqqppnaa.WalletHolding?>()) {
       return (data != null ? _iqqppnaa.WalletHolding.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_ifam4bx7.WalletNetwork?>()) {
+      return (data != null ? _ifam4bx7.WalletNetwork.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_ipdq2p58.WalletSyncResult?>()) {
+      return (data != null ? _ipdq2p58.WalletSyncResult.fromJson(data) : null)
+          as T;
+    }
+    if (t == _isc.getType<_ivsmsmw6.WalletTaxYearSummary?>()) {
+      return (data != null
+              ? _ivsmsmw6.WalletTaxYearSummary.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _isc.getType<_i6m1jx15.WalletTransaction?>()) {
+      return (data != null ? _i6m1jx15.WalletTransaction.fromJson(data) : null)
+          as T;
+    }
+    if (t == List<_iwxpkdmg.Category>) {
+      return (data as List)
+              .map((e) => deserialize<_iwxpkdmg.Category>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_ii8h2sft.EnvelopeMonthView>) {
+      return (data as List)
+              .map((e) => deserialize<_ii8h2sft.EnvelopeMonthView>(e))
+              .toList()
           as T;
     }
     if (t == List<_i15udi7x.FxRateQuote>) {
@@ -1136,6 +1490,33 @@ class Protocol extends _isc.SerializationManager
     if (t == List<_i5gsx3ds.TrialBalanceRowView>) {
       return (data as List)
               .map((e) => deserialize<_i5gsx3ds.TrialBalanceRowView>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_ihwosu5p.NetWorthPoint>) {
+      return (data as List)
+              .map((e) => deserialize<_ihwosu5p.NetWorthPoint>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<String>) {
+      return (data as List).map((e) => deserialize<String>(e)).toList() as T;
+    }
+    if (t == List<_if6ke1e2.NetWorthCurrencyRow>) {
+      return (data as List)
+              .map((e) => deserialize<_if6ke1e2.NetWorthCurrencyRow>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_i2p47r1m.NetWorthEntityRow>) {
+      return (data as List)
+              .map((e) => deserialize<_i2p47r1m.NetWorthEntityRow>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_ieg4kkwo.NetWorthAccountRow>) {
+      return (data as List)
+              .map((e) => deserialize<_ieg4kkwo.NetWorthAccountRow>(e))
               .toList()
           as T;
     }
@@ -1157,25 +1538,34 @@ class Protocol extends _isc.SerializationManager
               .toList()
           as T;
     }
-    if (t == List<String>) {
-      return (data as List).map((e) => deserialize<String>(e)).toList() as T;
-    }
     if (t == List<_iuft4v7q.TaxOpportunityView>) {
       return (data as List)
               .map((e) => deserialize<_iuft4v7q.TaxOpportunityView>(e))
               .toList()
           as T;
     }
-    if (t == List<_iqqppnaa.WalletHolding>) {
+    if (t == List<_imsv7m6w.TransactionLineInput>) {
       return (data as List)
-              .map((e) => deserialize<_iqqppnaa.WalletHolding>(e))
+              .map((e) => deserialize<_imsv7m6w.TransactionLineInput>(e))
               .toList()
           as T;
     }
-    if (t == List<_iqudaadl.Account>) {
+    if (t == List<_ilixdhed.TransactionView>) {
       return (data as List)
-              .map((e) => deserialize<_iqudaadl.Account>(e))
+              .map((e) => deserialize<_ilixdhed.TransactionView>(e))
               .toList()
+          as T;
+    }
+    if (t == List<_ipio7ws3.TransactionLine>) {
+      return (data as List)
+              .map((e) => deserialize<_ipio7ws3.TransactionLine>(e))
+              .toList()
+          as T;
+    }
+    if (t == _isc.getType<List<String>?>()) {
+      return (data != null
+              ? (data as List).map((e) => deserialize<String>(e)).toList()
+              : null)
           as T;
     }
     if (t == List<_in44ixo7.AgentConversation>) {
@@ -1202,38 +1592,14 @@ class Protocol extends _isc.SerializationManager
               .toList()
           as T;
     }
-    if (t == List<_itiojbb0.BudgetTemplate>) {
+    if (t == List<_ibdhi9gv.EnvelopeGoal>) {
       return (data as List)
-              .map((e) => deserialize<_itiojbb0.BudgetTemplate>(e))
-              .toList()
-          as T;
-    }
-    if (t == List<_iz3b7rge.MonthlyAllocation>) {
-      return (data as List)
-              .map((e) => deserialize<_iz3b7rge.MonthlyAllocation>(e))
-              .toList()
-          as T;
-    }
-    if (t == List<_iro9sz2e.Budget>) {
-      return (data as List)
-              .map((e) => deserialize<_iro9sz2e.Budget>(e))
-              .toList()
-          as T;
-    }
-    if (t == List<_iels1fku.Category>) {
-      return (data as List)
-              .map((e) => deserialize<_iels1fku.Category>(e))
+              .map((e) => deserialize<_ibdhi9gv.EnvelopeGoal>(e))
               .toList()
           as T;
     }
     if (t == List<_isc.UuidValue>) {
       return (data as List).map((e) => deserialize<_isc.UuidValue>(e)).toList()
-          as T;
-    }
-    if (t == List<_ibdhi9gv.EnvelopeGoal>) {
-      return (data as List)
-              .map((e) => deserialize<_ibdhi9gv.EnvelopeGoal>(e))
-              .toList()
           as T;
     }
     if (t == List<_i29jf3by.Envelope>) {
@@ -1251,100 +1617,9 @@ class Protocol extends _isc.SerializationManager
               .toList()
           as T;
     }
-    if (t == List<_ixq9t892.LedgerAccount>) {
+    if (t == List<_iqudaadl.Account>) {
       return (data as List)
-              .map((e) => deserialize<_ixq9t892.LedgerAccount>(e))
-              .toList()
-          as T;
-    }
-    if (t == List<_i3j8x5or.JournalLineInput>) {
-      return (data as List)
-              .map((e) => deserialize<_i3j8x5or.JournalLineInput>(e))
-              .toList()
-          as T;
-    }
-    if (t == List<_izuizaeu.Journal>) {
-      return (data as List)
-              .map((e) => deserialize<_izuizaeu.Journal>(e))
-              .toList()
-          as T;
-    }
-    if (t == List<_iwruw2s3.JournalLine>) {
-      return (data as List)
-              .map((e) => deserialize<_iwruw2s3.JournalLine>(e))
-              .toList()
-          as T;
-    }
-    if (t == List<_iaf6ifsb.Payee>) {
-      return (data as List).map((e) => deserialize<_iaf6ifsb.Payee>(e)).toList()
-          as T;
-    }
-    if (t == List<_i41tn6nr.RecurringTransaction>) {
-      return (data as List)
-              .map((e) => deserialize<_i41tn6nr.RecurringTransaction>(e))
-              .toList()
-          as T;
-    }
-    if (t == List<_i1b8tal0.SolanaWallet>) {
-      return (data as List)
-              .map((e) => deserialize<_i1b8tal0.SolanaWallet>(e))
-              .toList()
-          as T;
-    }
-    if (t == List<_isudwq84.SolanaWalletTransaction>) {
-      return (data as List)
-              .map((e) => deserialize<_isudwq84.SolanaWalletTransaction>(e))
-              .toList()
-          as T;
-    }
-    if (t == List<_i7zpyr5z.SolanaWalletHolding>) {
-      return (data as List)
-              .map((e) => deserialize<_i7zpyr5z.SolanaWalletHolding>(e))
-              .toList()
-          as T;
-    }
-    if (t == List<_igj51lwa.SolanaWalletTaxYearSummary>) {
-      return (data as List)
-              .map((e) => deserialize<_igj51lwa.SolanaWalletTaxYearSummary>(e))
-              .toList()
-          as T;
-    }
-    if (t == List<_ic177lol.TaxCategoryView>) {
-      return (data as List)
-              .map((e) => deserialize<_ic177lol.TaxCategoryView>(e))
-              .toList()
-          as T;
-    }
-    if (t == List<_iwxd5v0a.TransactionRule>) {
-      return (data as List)
-              .map((e) => deserialize<_iwxd5v0a.TransactionRule>(e))
-              .toList()
-          as T;
-    }
-    if (t == List<_iio3v7fv.Transaction>) {
-      return (data as List)
-              .map((e) => deserialize<_iio3v7fv.Transaction>(e))
-              .toList()
-          as T;
-    }
-    if (t == List<int>) {
-      return (data as List).map((e) => deserialize<int>(e)).toList() as T;
-    }
-    if (t == List<_ilmjmphd.SplitItem>) {
-      return (data as List)
-              .map((e) => deserialize<_ilmjmphd.SplitItem>(e))
-              .toList()
-          as T;
-    }
-    if (t == List<_iyud7cy9.ImportRow>) {
-      return (data as List)
-              .map((e) => deserialize<_iyud7cy9.ImportRow>(e))
-              .toList()
-          as T;
-    }
-    if (t == List<_izm3e498.WalletHolding>) {
-      return (data as List)
-              .map((e) => deserialize<_izm3e498.WalletHolding>(e))
+              .map((e) => deserialize<_iqudaadl.Account>(e))
               .toList()
           as T;
     }
@@ -1364,6 +1639,9 @@ class Protocol extends _isc.SerializationManager
   static String? getClassNameForType(Type type) {
     return switch (type) {
       _iz2jf14v.Account => 'Account',
+      _i53yl4yp.AccountBalancesView => 'AccountBalancesView',
+      _i87oqvv1.AccountValuation => 'AccountValuation',
+      _ig9cy6ku.ValuationSource => 'ValuationSource',
       _isfmgqgu.AgentConversation => 'AgentConversation',
       _i769eo9u.AgentEvent => 'AgentEvent',
       _iyhb15ax.AgentEventKind => 'AgentEventKind',
@@ -1373,23 +1651,33 @@ class Protocol extends _isc.SerializationManager
       _idxyy01n.AgentProposalKind => 'AgentProposalKind',
       _iksk16ej.AgentProposalStatus => 'AgentProposalStatus',
       _ic667156.AgentProvider => 'AgentProvider',
-      _ipqgbdtd.AgentProviderSettings => 'AgentProviderSettings',
       _i0760q1h.AgentProviderSettingsView => 'AgentProviderSettingsView',
       _igo4k2bu.AgentUsageRecord => 'AgentUsageRecord',
       _ipqjijih.AgentUsageView => 'AgentUsageView',
-      _i8betnj7.AgentAccessToken => 'AgentAccessToken',
       _iis6jewo.AgentAccessTokenCreated => 'AgentAccessTokenCreated',
       _i4mcrc97.AgentAccessTokenView => 'AgentAccessTokenView',
+      _iqje9mi5.AuditAction => 'AuditAction',
+      _ijhj7cd7.AuditEvent => 'AuditEvent',
+      _i2sn5a56.AuditSubject => 'AuditSubject',
       _iq2w1sa5.Entitlement => 'Entitlement',
       _ipnf4x0i.EntitlementSource => 'EntitlementSource',
       _imqwzx9j.EntitlementStatus => 'EntitlementStatus',
-      _iw7l0hzr.SolanaBillingChallenge => 'SolanaBillingChallenge',
       _iwxkomal.SolanaPlanView => 'SolanaPlanView',
-      _in1nt6tx.StripeCustomer => 'StripeCustomer',
+      _iouaddet.AllocationInput => 'AllocationInput',
+      _ixyov90t.BudgetMonthSummary => 'BudgetMonthSummary',
+      _ihanl5km.BudgetMonthView => 'BudgetMonthView',
+      _ii8h2sft.EnvelopeMonthView => 'EnvelopeMonthView',
       _i01fne9j.BudgetTemplate => 'BudgetTemplate',
-      _idtyoogy.Budget => 'Budget',
+      _iagnrffn.BudgetTemplateLine => 'BudgetTemplateLine',
       _iwxpkdmg.Category => 'Category',
+      _i4zfq652.Confidence => 'Confidence',
+      _iynfhhr3.SyncStatus => 'SyncStatus',
+      _i03vgs6n.ChangeScope => 'ChangeScope',
+      _iamyw1yn.Entity => 'Entity',
+      _is12mxpv.EntityChangedEvent => 'EntityChangedEvent',
+      _ihqn2h4c.EntitySummaryView => 'EntitySummaryView',
       _ifl4yivq.EnvelopeGoal => 'EnvelopeGoal',
+      _i61aeoqs.EnvelopeGoalKind => 'EnvelopeGoalKind',
       _ikt21dfw.Envelope => 'Envelope',
       _iozei2bz.AgentAllowanceExhaustedException =>
         'AgentAllowanceExhaustedException',
@@ -1403,21 +1691,20 @@ class Protocol extends _isc.SerializationManager
         'BillingRailUnavailableException',
       _ik3lny6q.EntitlementRequiredException => 'EntitlementRequiredException',
       _iha6yc5u.ForbiddenException => 'ForbiddenException',
+      _if5umnl3.FxRateUnavailableException => 'FxRateUnavailableException',
       _izob2ctl.NotFoundException => 'NotFoundException',
-      _in744jyg.TaxRateUnavailableException => 'TaxRateUnavailableException',
       _i4yu9vcq.TaxRulesUnavailableException => 'TaxRulesUnavailableException',
       _igpdbyom.ValidationException => 'ValidationException',
       _i8cxakqz.FxLatestSnapshot => 'FxLatestSnapshot',
-      _i41ek9pv.FxRateEntry => 'FxRateEntry',
+      _ifsg8hc8.FxProvider => 'FxProvider',
+      _i8bj7347.FxQuoteView => 'FxQuoteView',
       _i15udi7x.FxRateQuote => 'FxRateQuote',
-      _i4xgo4ij.FxRateSnapshot => 'FxRateSnapshot',
       _ikgmcjq7.Institution => 'Institution',
       _iclizrec.InstitutionLocation => 'InstitutionLocation',
       _iqqjzj2w.Journal => 'Journal',
       _i6l0fo54.JournalLine => 'JournalLine',
       _id7zp91q.JournalLineInput => 'JournalLineInput',
       _ivazbnnp.LedgerAccount => 'LedgerAccount',
-      _ipq97xjw.LedgerAuditEvent => 'LedgerAuditEvent',
       _i7t4btg4.LedgerPeriodLock => 'LedgerPeriodLock',
       _i5gsx3ds.TrialBalanceRowView => 'TrialBalanceRowView',
       _i7q128aw.TrialBalanceView => 'TrialBalanceView',
@@ -1425,11 +1712,16 @@ class Protocol extends _isc.SerializationManager
       _ignezpci.Payee => 'Payee',
       _i1vmvtrm.PlaidConnection => 'PlaidConnection',
       _i9is7zb8.RecurringTransaction => 'RecurringTransaction',
-      _iotf4y4d.SolanaWallet => 'SolanaWallet',
-      _ivqf8i64.SolanaWalletHolding => 'SolanaWalletHolding',
-      _ir1c2di9.SolanaWalletSyncResult => 'SolanaWalletSyncResult',
-      _ijmvodfo.SolanaWalletTaxYearSummary => 'SolanaWalletTaxYearSummary',
-      _iwwk92r1.SolanaWalletTransaction => 'SolanaWalletTransaction',
+      _ieg4kkwo.NetWorthAccountRow => 'NetWorthAccountRow',
+      _if6ke1e2.NetWorthCurrencyRow => 'NetWorthCurrencyRow',
+      _i2p47r1m.NetWorthEntityRow => 'NetWorthEntityRow',
+      _iiyi1fdi.NetWorthGranularity => 'NetWorthGranularity',
+      _izpykydm.NetWorthHistoryView => 'NetWorthHistoryView',
+      _ihwosu5p.NetWorthPoint => 'NetWorthPoint',
+      _idk5va87.NetWorthView => 'NetWorthView',
+      _ijpgwwdu.ReportGrouping => 'ReportGrouping',
+      _ikppksh7.SpendingRow => 'SpendingRow',
+      _i99f9doz.UserSettings => 'UserSettings',
       _ic4zfx3b.TaxBandSliceView => 'TaxBandSliceView',
       _iv5oayw3.TaxCategoryView => 'TaxCategoryView',
       _ivss6b81.TaxLiabilityView => 'TaxLiabilityView',
@@ -1438,13 +1730,30 @@ class Protocol extends _isc.SerializationManager
       _i6llsezf.TaxReportLineView => 'TaxReportLineView',
       _inb54q20.TaxReportView => 'TaxReportView',
       _i6dj6ji0.TransactionRule => 'TransactionRule',
+      _ibzcfs2k.ImportResult => 'ImportResult',
       _isp6bezg.ImportRow => 'ImportRow',
-      _i0jd5x9z.SplitItem => 'SplitItem',
+      _igokbqfh.ReconcileResult => 'ReconcileResult',
       _iqhl4hru.Transaction => 'Transaction',
-      _i2gu4pwf.AssetQuoteCache => 'AssetQuoteCache',
-      _igiy3v19.WalletConnectResult => 'WalletConnectResult',
-      _i9uqpb1b.WalletConnection => 'WalletConnection',
+      _i4fvctax.TransactionFlag => 'TransactionFlag',
+      _ipd1rac6.TransactionInput => 'TransactionInput',
+      _ioneruif.TransactionKind => 'TransactionKind',
+      _ipio7ws3.TransactionLine => 'TransactionLine',
+      _imsv7m6w.TransactionLineInput => 'TransactionLineInput',
+      _i7f3q91r.TransactionPage => 'TransactionPage',
+      _ioinkgwn.TransactionQuery => 'TransactionQuery',
+      _i3rynkdl.TransactionStatus => 'TransactionStatus',
+      _ilixdhed.TransactionView => 'TransactionView',
+      _ign516jt.Transfer => 'Transfer',
+      _iah0rmrk.TransferInput => 'TransferInput',
+      _i3n9n3ej.TransferPeerView => 'TransferPeerView',
+      _i6j30n20.PriceQuality => 'PriceQuality',
+      _iu1a5mev.PriceSource => 'PriceSource',
+      _ilu5i0rn.Wallet => 'Wallet',
       _iqqppnaa.WalletHolding => 'WalletHolding',
+      _ifam4bx7.WalletNetwork => 'WalletNetwork',
+      _ipdq2p58.WalletSyncResult => 'WalletSyncResult',
+      _ivsmsmw6.WalletTaxYearSummary => 'WalletTaxYearSummary',
+      _i6m1jx15.WalletTransaction => 'WalletTransaction',
       _ => null,
     };
   }
@@ -1461,6 +1770,12 @@ class Protocol extends _isc.SerializationManager
     switch (data) {
       case _iz2jf14v.Account():
         return 'Account';
+      case _i53yl4yp.AccountBalancesView():
+        return 'AccountBalancesView';
+      case _i87oqvv1.AccountValuation():
+        return 'AccountValuation';
+      case _ig9cy6ku.ValuationSource():
+        return 'ValuationSource';
       case _isfmgqgu.AgentConversation():
         return 'AgentConversation';
       case _i769eo9u.AgentEvent():
@@ -1479,40 +1794,60 @@ class Protocol extends _isc.SerializationManager
         return 'AgentProposalStatus';
       case _ic667156.AgentProvider():
         return 'AgentProvider';
-      case _ipqgbdtd.AgentProviderSettings():
-        return 'AgentProviderSettings';
       case _i0760q1h.AgentProviderSettingsView():
         return 'AgentProviderSettingsView';
       case _igo4k2bu.AgentUsageRecord():
         return 'AgentUsageRecord';
       case _ipqjijih.AgentUsageView():
         return 'AgentUsageView';
-      case _i8betnj7.AgentAccessToken():
-        return 'AgentAccessToken';
       case _iis6jewo.AgentAccessTokenCreated():
         return 'AgentAccessTokenCreated';
       case _i4mcrc97.AgentAccessTokenView():
         return 'AgentAccessTokenView';
+      case _iqje9mi5.AuditAction():
+        return 'AuditAction';
+      case _ijhj7cd7.AuditEvent():
+        return 'AuditEvent';
+      case _i2sn5a56.AuditSubject():
+        return 'AuditSubject';
       case _iq2w1sa5.Entitlement():
         return 'Entitlement';
       case _ipnf4x0i.EntitlementSource():
         return 'EntitlementSource';
       case _imqwzx9j.EntitlementStatus():
         return 'EntitlementStatus';
-      case _iw7l0hzr.SolanaBillingChallenge():
-        return 'SolanaBillingChallenge';
       case _iwxkomal.SolanaPlanView():
         return 'SolanaPlanView';
-      case _in1nt6tx.StripeCustomer():
-        return 'StripeCustomer';
+      case _iouaddet.AllocationInput():
+        return 'AllocationInput';
+      case _ixyov90t.BudgetMonthSummary():
+        return 'BudgetMonthSummary';
+      case _ihanl5km.BudgetMonthView():
+        return 'BudgetMonthView';
+      case _ii8h2sft.EnvelopeMonthView():
+        return 'EnvelopeMonthView';
       case _i01fne9j.BudgetTemplate():
         return 'BudgetTemplate';
-      case _idtyoogy.Budget():
-        return 'Budget';
+      case _iagnrffn.BudgetTemplateLine():
+        return 'BudgetTemplateLine';
       case _iwxpkdmg.Category():
         return 'Category';
+      case _i4zfq652.Confidence():
+        return 'Confidence';
+      case _iynfhhr3.SyncStatus():
+        return 'SyncStatus';
+      case _i03vgs6n.ChangeScope():
+        return 'ChangeScope';
+      case _iamyw1yn.Entity():
+        return 'Entity';
+      case _is12mxpv.EntityChangedEvent():
+        return 'EntityChangedEvent';
+      case _ihqn2h4c.EntitySummaryView():
+        return 'EntitySummaryView';
       case _ifl4yivq.EnvelopeGoal():
         return 'EnvelopeGoal';
+      case _i61aeoqs.EnvelopeGoalKind():
+        return 'EnvelopeGoalKind';
       case _ikt21dfw.Envelope():
         return 'Envelope';
       case _iozei2bz.AgentAllowanceExhaustedException():
@@ -1531,22 +1866,22 @@ class Protocol extends _isc.SerializationManager
         return 'EntitlementRequiredException';
       case _iha6yc5u.ForbiddenException():
         return 'ForbiddenException';
+      case _if5umnl3.FxRateUnavailableException():
+        return 'FxRateUnavailableException';
       case _izob2ctl.NotFoundException():
         return 'NotFoundException';
-      case _in744jyg.TaxRateUnavailableException():
-        return 'TaxRateUnavailableException';
       case _i4yu9vcq.TaxRulesUnavailableException():
         return 'TaxRulesUnavailableException';
       case _igpdbyom.ValidationException():
         return 'ValidationException';
       case _i8cxakqz.FxLatestSnapshot():
         return 'FxLatestSnapshot';
-      case _i41ek9pv.FxRateEntry():
-        return 'FxRateEntry';
+      case _ifsg8hc8.FxProvider():
+        return 'FxProvider';
+      case _i8bj7347.FxQuoteView():
+        return 'FxQuoteView';
       case _i15udi7x.FxRateQuote():
         return 'FxRateQuote';
-      case _i4xgo4ij.FxRateSnapshot():
-        return 'FxRateSnapshot';
       case _ikgmcjq7.Institution():
         return 'Institution';
       case _iclizrec.InstitutionLocation():
@@ -1559,8 +1894,6 @@ class Protocol extends _isc.SerializationManager
         return 'JournalLineInput';
       case _ivazbnnp.LedgerAccount():
         return 'LedgerAccount';
-      case _ipq97xjw.LedgerAuditEvent():
-        return 'LedgerAuditEvent';
       case _i7t4btg4.LedgerPeriodLock():
         return 'LedgerPeriodLock';
       case _i5gsx3ds.TrialBalanceRowView():
@@ -1575,16 +1908,26 @@ class Protocol extends _isc.SerializationManager
         return 'PlaidConnection';
       case _i9is7zb8.RecurringTransaction():
         return 'RecurringTransaction';
-      case _iotf4y4d.SolanaWallet():
-        return 'SolanaWallet';
-      case _ivqf8i64.SolanaWalletHolding():
-        return 'SolanaWalletHolding';
-      case _ir1c2di9.SolanaWalletSyncResult():
-        return 'SolanaWalletSyncResult';
-      case _ijmvodfo.SolanaWalletTaxYearSummary():
-        return 'SolanaWalletTaxYearSummary';
-      case _iwwk92r1.SolanaWalletTransaction():
-        return 'SolanaWalletTransaction';
+      case _ieg4kkwo.NetWorthAccountRow():
+        return 'NetWorthAccountRow';
+      case _if6ke1e2.NetWorthCurrencyRow():
+        return 'NetWorthCurrencyRow';
+      case _i2p47r1m.NetWorthEntityRow():
+        return 'NetWorthEntityRow';
+      case _iiyi1fdi.NetWorthGranularity():
+        return 'NetWorthGranularity';
+      case _izpykydm.NetWorthHistoryView():
+        return 'NetWorthHistoryView';
+      case _ihwosu5p.NetWorthPoint():
+        return 'NetWorthPoint';
+      case _idk5va87.NetWorthView():
+        return 'NetWorthView';
+      case _ijpgwwdu.ReportGrouping():
+        return 'ReportGrouping';
+      case _ikppksh7.SpendingRow():
+        return 'SpendingRow';
+      case _i99f9doz.UserSettings():
+        return 'UserSettings';
       case _ic4zfx3b.TaxBandSliceView():
         return 'TaxBandSliceView';
       case _iv5oayw3.TaxCategoryView():
@@ -1601,20 +1944,54 @@ class Protocol extends _isc.SerializationManager
         return 'TaxReportView';
       case _i6dj6ji0.TransactionRule():
         return 'TransactionRule';
+      case _ibzcfs2k.ImportResult():
+        return 'ImportResult';
       case _isp6bezg.ImportRow():
         return 'ImportRow';
-      case _i0jd5x9z.SplitItem():
-        return 'SplitItem';
+      case _igokbqfh.ReconcileResult():
+        return 'ReconcileResult';
       case _iqhl4hru.Transaction():
         return 'Transaction';
-      case _i2gu4pwf.AssetQuoteCache():
-        return 'AssetQuoteCache';
-      case _igiy3v19.WalletConnectResult():
-        return 'WalletConnectResult';
-      case _i9uqpb1b.WalletConnection():
-        return 'WalletConnection';
+      case _i4fvctax.TransactionFlag():
+        return 'TransactionFlag';
+      case _ipd1rac6.TransactionInput():
+        return 'TransactionInput';
+      case _ioneruif.TransactionKind():
+        return 'TransactionKind';
+      case _ipio7ws3.TransactionLine():
+        return 'TransactionLine';
+      case _imsv7m6w.TransactionLineInput():
+        return 'TransactionLineInput';
+      case _i7f3q91r.TransactionPage():
+        return 'TransactionPage';
+      case _ioinkgwn.TransactionQuery():
+        return 'TransactionQuery';
+      case _i3rynkdl.TransactionStatus():
+        return 'TransactionStatus';
+      case _ilixdhed.TransactionView():
+        return 'TransactionView';
+      case _ign516jt.Transfer():
+        return 'Transfer';
+      case _iah0rmrk.TransferInput():
+        return 'TransferInput';
+      case _i3n9n3ej.TransferPeerView():
+        return 'TransferPeerView';
+      case _i6j30n20.PriceQuality():
+        return 'PriceQuality';
+      case _iu1a5mev.PriceSource():
+        return 'PriceSource';
+      case _ilu5i0rn.Wallet():
+        return 'Wallet';
       case _iqqppnaa.WalletHolding():
         return 'WalletHolding';
+      case _ifam4bx7.WalletNetwork():
+        return 'WalletNetwork';
+      case _ipdq2p58.WalletSyncResult():
+        return 'WalletSyncResult';
+      case _ivsmsmw6.WalletTaxYearSummary():
+        return 'WalletTaxYearSummary';
+      case _i6m1jx15.WalletTransaction():
+        return 'WalletTransaction';
     }
     className = _iaic.Protocol().getClassNameForObject(data);
     if (className != null) {
@@ -1644,6 +2021,15 @@ class Protocol extends _isc.SerializationManager
     if (dataClassName == 'Account') {
       return deserialize<_iz2jf14v.Account>(data['data']);
     }
+    if (dataClassName == 'AccountBalancesView') {
+      return deserialize<_i53yl4yp.AccountBalancesView>(data['data']);
+    }
+    if (dataClassName == 'AccountValuation') {
+      return deserialize<_i87oqvv1.AccountValuation>(data['data']);
+    }
+    if (dataClassName == 'ValuationSource') {
+      return deserialize<_ig9cy6ku.ValuationSource>(data['data']);
+    }
     if (dataClassName == 'AgentConversation') {
       return deserialize<_isfmgqgu.AgentConversation>(data['data']);
     }
@@ -1671,9 +2057,6 @@ class Protocol extends _isc.SerializationManager
     if (dataClassName == 'AgentProvider') {
       return deserialize<_ic667156.AgentProvider>(data['data']);
     }
-    if (dataClassName == 'AgentProviderSettings') {
-      return deserialize<_ipqgbdtd.AgentProviderSettings>(data['data']);
-    }
     if (dataClassName == 'AgentProviderSettingsView') {
       return deserialize<_i0760q1h.AgentProviderSettingsView>(data['data']);
     }
@@ -1683,14 +2066,20 @@ class Protocol extends _isc.SerializationManager
     if (dataClassName == 'AgentUsageView') {
       return deserialize<_ipqjijih.AgentUsageView>(data['data']);
     }
-    if (dataClassName == 'AgentAccessToken') {
-      return deserialize<_i8betnj7.AgentAccessToken>(data['data']);
-    }
     if (dataClassName == 'AgentAccessTokenCreated') {
       return deserialize<_iis6jewo.AgentAccessTokenCreated>(data['data']);
     }
     if (dataClassName == 'AgentAccessTokenView') {
       return deserialize<_i4mcrc97.AgentAccessTokenView>(data['data']);
+    }
+    if (dataClassName == 'AuditAction') {
+      return deserialize<_iqje9mi5.AuditAction>(data['data']);
+    }
+    if (dataClassName == 'AuditEvent') {
+      return deserialize<_ijhj7cd7.AuditEvent>(data['data']);
+    }
+    if (dataClassName == 'AuditSubject') {
+      return deserialize<_i2sn5a56.AuditSubject>(data['data']);
     }
     if (dataClassName == 'Entitlement') {
       return deserialize<_iq2w1sa5.Entitlement>(data['data']);
@@ -1701,26 +2090,53 @@ class Protocol extends _isc.SerializationManager
     if (dataClassName == 'EntitlementStatus') {
       return deserialize<_imqwzx9j.EntitlementStatus>(data['data']);
     }
-    if (dataClassName == 'SolanaBillingChallenge') {
-      return deserialize<_iw7l0hzr.SolanaBillingChallenge>(data['data']);
-    }
     if (dataClassName == 'SolanaPlanView') {
       return deserialize<_iwxkomal.SolanaPlanView>(data['data']);
     }
-    if (dataClassName == 'StripeCustomer') {
-      return deserialize<_in1nt6tx.StripeCustomer>(data['data']);
+    if (dataClassName == 'AllocationInput') {
+      return deserialize<_iouaddet.AllocationInput>(data['data']);
+    }
+    if (dataClassName == 'BudgetMonthSummary') {
+      return deserialize<_ixyov90t.BudgetMonthSummary>(data['data']);
+    }
+    if (dataClassName == 'BudgetMonthView') {
+      return deserialize<_ihanl5km.BudgetMonthView>(data['data']);
+    }
+    if (dataClassName == 'EnvelopeMonthView') {
+      return deserialize<_ii8h2sft.EnvelopeMonthView>(data['data']);
     }
     if (dataClassName == 'BudgetTemplate') {
       return deserialize<_i01fne9j.BudgetTemplate>(data['data']);
     }
-    if (dataClassName == 'Budget') {
-      return deserialize<_idtyoogy.Budget>(data['data']);
+    if (dataClassName == 'BudgetTemplateLine') {
+      return deserialize<_iagnrffn.BudgetTemplateLine>(data['data']);
     }
     if (dataClassName == 'Category') {
       return deserialize<_iwxpkdmg.Category>(data['data']);
     }
+    if (dataClassName == 'Confidence') {
+      return deserialize<_i4zfq652.Confidence>(data['data']);
+    }
+    if (dataClassName == 'SyncStatus') {
+      return deserialize<_iynfhhr3.SyncStatus>(data['data']);
+    }
+    if (dataClassName == 'ChangeScope') {
+      return deserialize<_i03vgs6n.ChangeScope>(data['data']);
+    }
+    if (dataClassName == 'Entity') {
+      return deserialize<_iamyw1yn.Entity>(data['data']);
+    }
+    if (dataClassName == 'EntityChangedEvent') {
+      return deserialize<_is12mxpv.EntityChangedEvent>(data['data']);
+    }
+    if (dataClassName == 'EntitySummaryView') {
+      return deserialize<_ihqn2h4c.EntitySummaryView>(data['data']);
+    }
     if (dataClassName == 'EnvelopeGoal') {
       return deserialize<_ifl4yivq.EnvelopeGoal>(data['data']);
+    }
+    if (dataClassName == 'EnvelopeGoalKind') {
+      return deserialize<_i61aeoqs.EnvelopeGoalKind>(data['data']);
     }
     if (dataClassName == 'Envelope') {
       return deserialize<_ikt21dfw.Envelope>(data['data']);
@@ -1757,11 +2173,11 @@ class Protocol extends _isc.SerializationManager
     if (dataClassName == 'ForbiddenException') {
       return deserialize<_iha6yc5u.ForbiddenException>(data['data']);
     }
+    if (dataClassName == 'FxRateUnavailableException') {
+      return deserialize<_if5umnl3.FxRateUnavailableException>(data['data']);
+    }
     if (dataClassName == 'NotFoundException') {
       return deserialize<_izob2ctl.NotFoundException>(data['data']);
-    }
-    if (dataClassName == 'TaxRateUnavailableException') {
-      return deserialize<_in744jyg.TaxRateUnavailableException>(data['data']);
     }
     if (dataClassName == 'TaxRulesUnavailableException') {
       return deserialize<_i4yu9vcq.TaxRulesUnavailableException>(data['data']);
@@ -1772,14 +2188,14 @@ class Protocol extends _isc.SerializationManager
     if (dataClassName == 'FxLatestSnapshot') {
       return deserialize<_i8cxakqz.FxLatestSnapshot>(data['data']);
     }
-    if (dataClassName == 'FxRateEntry') {
-      return deserialize<_i41ek9pv.FxRateEntry>(data['data']);
+    if (dataClassName == 'FxProvider') {
+      return deserialize<_ifsg8hc8.FxProvider>(data['data']);
+    }
+    if (dataClassName == 'FxQuoteView') {
+      return deserialize<_i8bj7347.FxQuoteView>(data['data']);
     }
     if (dataClassName == 'FxRateQuote') {
       return deserialize<_i15udi7x.FxRateQuote>(data['data']);
-    }
-    if (dataClassName == 'FxRateSnapshot') {
-      return deserialize<_i4xgo4ij.FxRateSnapshot>(data['data']);
     }
     if (dataClassName == 'Institution') {
       return deserialize<_ikgmcjq7.Institution>(data['data']);
@@ -1798,9 +2214,6 @@ class Protocol extends _isc.SerializationManager
     }
     if (dataClassName == 'LedgerAccount') {
       return deserialize<_ivazbnnp.LedgerAccount>(data['data']);
-    }
-    if (dataClassName == 'LedgerAuditEvent') {
-      return deserialize<_ipq97xjw.LedgerAuditEvent>(data['data']);
     }
     if (dataClassName == 'LedgerPeriodLock') {
       return deserialize<_i7t4btg4.LedgerPeriodLock>(data['data']);
@@ -1823,20 +2236,35 @@ class Protocol extends _isc.SerializationManager
     if (dataClassName == 'RecurringTransaction') {
       return deserialize<_i9is7zb8.RecurringTransaction>(data['data']);
     }
-    if (dataClassName == 'SolanaWallet') {
-      return deserialize<_iotf4y4d.SolanaWallet>(data['data']);
+    if (dataClassName == 'NetWorthAccountRow') {
+      return deserialize<_ieg4kkwo.NetWorthAccountRow>(data['data']);
     }
-    if (dataClassName == 'SolanaWalletHolding') {
-      return deserialize<_ivqf8i64.SolanaWalletHolding>(data['data']);
+    if (dataClassName == 'NetWorthCurrencyRow') {
+      return deserialize<_if6ke1e2.NetWorthCurrencyRow>(data['data']);
     }
-    if (dataClassName == 'SolanaWalletSyncResult') {
-      return deserialize<_ir1c2di9.SolanaWalletSyncResult>(data['data']);
+    if (dataClassName == 'NetWorthEntityRow') {
+      return deserialize<_i2p47r1m.NetWorthEntityRow>(data['data']);
     }
-    if (dataClassName == 'SolanaWalletTaxYearSummary') {
-      return deserialize<_ijmvodfo.SolanaWalletTaxYearSummary>(data['data']);
+    if (dataClassName == 'NetWorthGranularity') {
+      return deserialize<_iiyi1fdi.NetWorthGranularity>(data['data']);
     }
-    if (dataClassName == 'SolanaWalletTransaction') {
-      return deserialize<_iwwk92r1.SolanaWalletTransaction>(data['data']);
+    if (dataClassName == 'NetWorthHistoryView') {
+      return deserialize<_izpykydm.NetWorthHistoryView>(data['data']);
+    }
+    if (dataClassName == 'NetWorthPoint') {
+      return deserialize<_ihwosu5p.NetWorthPoint>(data['data']);
+    }
+    if (dataClassName == 'NetWorthView') {
+      return deserialize<_idk5va87.NetWorthView>(data['data']);
+    }
+    if (dataClassName == 'ReportGrouping') {
+      return deserialize<_ijpgwwdu.ReportGrouping>(data['data']);
+    }
+    if (dataClassName == 'SpendingRow') {
+      return deserialize<_ikppksh7.SpendingRow>(data['data']);
+    }
+    if (dataClassName == 'UserSettings') {
+      return deserialize<_i99f9doz.UserSettings>(data['data']);
     }
     if (dataClassName == 'TaxBandSliceView') {
       return deserialize<_ic4zfx3b.TaxBandSliceView>(data['data']);
@@ -1862,26 +2290,77 @@ class Protocol extends _isc.SerializationManager
     if (dataClassName == 'TransactionRule') {
       return deserialize<_i6dj6ji0.TransactionRule>(data['data']);
     }
+    if (dataClassName == 'ImportResult') {
+      return deserialize<_ibzcfs2k.ImportResult>(data['data']);
+    }
     if (dataClassName == 'ImportRow') {
       return deserialize<_isp6bezg.ImportRow>(data['data']);
     }
-    if (dataClassName == 'SplitItem') {
-      return deserialize<_i0jd5x9z.SplitItem>(data['data']);
+    if (dataClassName == 'ReconcileResult') {
+      return deserialize<_igokbqfh.ReconcileResult>(data['data']);
     }
     if (dataClassName == 'Transaction') {
       return deserialize<_iqhl4hru.Transaction>(data['data']);
     }
-    if (dataClassName == 'AssetQuoteCache') {
-      return deserialize<_i2gu4pwf.AssetQuoteCache>(data['data']);
+    if (dataClassName == 'TransactionFlag') {
+      return deserialize<_i4fvctax.TransactionFlag>(data['data']);
     }
-    if (dataClassName == 'WalletConnectResult') {
-      return deserialize<_igiy3v19.WalletConnectResult>(data['data']);
+    if (dataClassName == 'TransactionInput') {
+      return deserialize<_ipd1rac6.TransactionInput>(data['data']);
     }
-    if (dataClassName == 'WalletConnection') {
-      return deserialize<_i9uqpb1b.WalletConnection>(data['data']);
+    if (dataClassName == 'TransactionKind') {
+      return deserialize<_ioneruif.TransactionKind>(data['data']);
+    }
+    if (dataClassName == 'TransactionLine') {
+      return deserialize<_ipio7ws3.TransactionLine>(data['data']);
+    }
+    if (dataClassName == 'TransactionLineInput') {
+      return deserialize<_imsv7m6w.TransactionLineInput>(data['data']);
+    }
+    if (dataClassName == 'TransactionPage') {
+      return deserialize<_i7f3q91r.TransactionPage>(data['data']);
+    }
+    if (dataClassName == 'TransactionQuery') {
+      return deserialize<_ioinkgwn.TransactionQuery>(data['data']);
+    }
+    if (dataClassName == 'TransactionStatus') {
+      return deserialize<_i3rynkdl.TransactionStatus>(data['data']);
+    }
+    if (dataClassName == 'TransactionView') {
+      return deserialize<_ilixdhed.TransactionView>(data['data']);
+    }
+    if (dataClassName == 'Transfer') {
+      return deserialize<_ign516jt.Transfer>(data['data']);
+    }
+    if (dataClassName == 'TransferInput') {
+      return deserialize<_iah0rmrk.TransferInput>(data['data']);
+    }
+    if (dataClassName == 'TransferPeerView') {
+      return deserialize<_i3n9n3ej.TransferPeerView>(data['data']);
+    }
+    if (dataClassName == 'PriceQuality') {
+      return deserialize<_i6j30n20.PriceQuality>(data['data']);
+    }
+    if (dataClassName == 'PriceSource') {
+      return deserialize<_iu1a5mev.PriceSource>(data['data']);
+    }
+    if (dataClassName == 'Wallet') {
+      return deserialize<_ilu5i0rn.Wallet>(data['data']);
     }
     if (dataClassName == 'WalletHolding') {
       return deserialize<_iqqppnaa.WalletHolding>(data['data']);
+    }
+    if (dataClassName == 'WalletNetwork') {
+      return deserialize<_ifam4bx7.WalletNetwork>(data['data']);
+    }
+    if (dataClassName == 'WalletSyncResult') {
+      return deserialize<_ipdq2p58.WalletSyncResult>(data['data']);
+    }
+    if (dataClassName == 'WalletTaxYearSummary') {
+      return deserialize<_ivsmsmw6.WalletTaxYearSummary>(data['data']);
+    }
+    if (dataClassName == 'WalletTransaction') {
+      return deserialize<_i6m1jx15.WalletTransaction>(data['data']);
     }
     if (dataClassName.startsWith('serverpod_auth_idp.')) {
       return _iaic.Protocol().deserializeByClassName({

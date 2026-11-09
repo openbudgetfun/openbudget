@@ -12,26 +12,30 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod_client/serverpod_client.dart' as _isc;
 
-/// A grouping of envelopes within a budget.
+/// A group of envelopes in an entity's envelope plan.
 abstract class Category
     implements _isc.SerializableModel, _isc.ProtocolSerialization {
   Category._({
     this.id,
+    required this.entityId,
     required this.name,
-    required this.budgetId,
-    required this.sortOrder,
+    int? sortOrder,
     bool? isHidden,
     DateTime? createdAt,
-  }) : isHidden = isHidden ?? false,
-       createdAt = createdAt ?? DateTime.now();
+    DateTime? updatedAt,
+  }) : sortOrder = sortOrder ?? 0,
+       isHidden = isHidden ?? false,
+       createdAt = createdAt ?? DateTime.now(),
+       updatedAt = updatedAt ?? DateTime.now();
 
   factory Category({
     _isc.UuidValue? id,
+    required _isc.UuidValue entityId,
     required String name,
-    required _isc.UuidValue budgetId,
-    required int sortOrder,
+    int? sortOrder,
     bool? isHidden,
     DateTime? createdAt,
+    DateTime? updatedAt,
   }) = _CategoryImpl;
 
   factory Category.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -39,17 +43,20 @@ abstract class Category
       id: jsonSerialization['id'] == null
           ? null
           : _isc.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
-      name: jsonSerialization['name'] as String,
-      budgetId: _isc.UuidValueJsonExtension.fromJson(
-        jsonSerialization['budgetId'],
+      entityId: _isc.UuidValueJsonExtension.fromJson(
+        jsonSerialization['entityId'],
       ),
-      sortOrder: jsonSerialization['sortOrder'] as int,
+      name: jsonSerialization['name'] as String,
+      sortOrder: jsonSerialization['sortOrder'] as int?,
       isHidden: jsonSerialization['isHidden'] == null
           ? null
           : _isc.BoolJsonExtension.fromJson(jsonSerialization['isHidden']),
       createdAt: jsonSerialization['createdAt'] == null
           ? null
           : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['createdAt']),
+      updatedAt: jsonSerialization['updatedAt'] == null
+          ? null
+          : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['updatedAt']),
     );
   }
 
@@ -58,38 +65,42 @@ abstract class Category
   /// the id will be null.
   _isc.UuidValue? id;
 
-  String name;
+  _isc.UuidValue entityId;
 
-  _isc.UuidValue budgetId;
+  String name;
 
   int sortOrder;
 
-  /// Whether this category is hidden from the default budget view.
-  bool? isHidden;
+  /// Hidden categories are left out of the default Plan view.
+  bool isHidden;
 
   DateTime createdAt;
+
+  DateTime updatedAt;
 
   /// Returns a shallow copy of this [Category]
   /// with some or all fields replaced by the given arguments.
   @_isc.useResult
   Category copyWith({
     _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
+    _isc.UuidValue? entityId,
     String? name,
-    _isc.UuidValue? budgetId,
     int? sortOrder,
     bool? isHidden,
     DateTime? createdAt,
+    DateTime? updatedAt,
   });
   @override
   Map<String, dynamic> toJson() {
     return {
       '__className__': 'Category',
       if (id != null) 'id': id?.toJson(),
+      'entityId': entityId.toJson(),
       'name': name,
-      'budgetId': budgetId.toJson(),
       'sortOrder': sortOrder,
-      if (isHidden != null) 'isHidden': isHidden,
+      'isHidden': isHidden,
       'createdAt': createdAt.toJson(),
+      'updatedAt': updatedAt.toJson(),
     };
   }
 
@@ -98,11 +109,12 @@ abstract class Category
     return {
       '__className__': 'Category',
       if (id != null) 'id': id?.toJson(),
+      'entityId': entityId.toJson(),
       'name': name,
-      'budgetId': budgetId.toJson(),
       'sortOrder': sortOrder,
-      if (isHidden != null) 'isHidden': isHidden,
+      'isHidden': isHidden,
       'createdAt': createdAt.toJson(),
+      'updatedAt': updatedAt.toJson(),
     };
   }
 
@@ -112,23 +124,23 @@ abstract class Category
   }
 }
 
-class _Undefined {}
-
 class _CategoryImpl extends Category {
   _CategoryImpl({
     _isc.UuidValue? id,
+    required _isc.UuidValue entityId,
     required String name,
-    required _isc.UuidValue budgetId,
-    required int sortOrder,
+    int? sortOrder,
     bool? isHidden,
     DateTime? createdAt,
+    DateTime? updatedAt,
   }) : super._(
          id: id,
+         entityId: entityId,
          name: name,
-         budgetId: budgetId,
          sortOrder: sortOrder,
          isHidden: isHidden,
          createdAt: createdAt,
+         updatedAt: updatedAt,
        );
 
   /// Returns a shallow copy of this [Category]
@@ -137,19 +149,21 @@ class _CategoryImpl extends Category {
   @override
   Category copyWith({
     _isc.UuidValue? id = const _isc.$UndefinedUuidValue(),
+    _isc.UuidValue? entityId,
     String? name,
-    _isc.UuidValue? budgetId,
     int? sortOrder,
-    Object? isHidden = _Undefined,
+    bool? isHidden,
     DateTime? createdAt,
+    DateTime? updatedAt,
   }) {
     return Category(
       id: id is _isc.UndefinedSentinel ? this.id : id,
+      entityId: entityId ?? this.entityId,
       name: name ?? this.name,
-      budgetId: budgetId ?? this.budgetId,
       sortOrder: sortOrder ?? this.sortOrder,
-      isHidden: isHidden is bool? ? isHidden : this.isHidden,
+      isHidden: isHidden ?? this.isHidden,
       createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 }

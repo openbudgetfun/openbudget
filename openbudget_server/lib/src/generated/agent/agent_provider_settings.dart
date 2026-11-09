@@ -78,7 +78,7 @@ abstract class AgentProviderSettings
   /// Base64 AES-GCM ciphertext of the API key, including its MAC tag.
   String encryptedApiKey;
 
-  /// Base64 nonce used for [encryptedApiKey].
+  /// Base64 nonce used for encryptedApiKey.
   String nonce;
 
   /// The last four characters of the key, for display only.
@@ -119,17 +119,7 @@ abstract class AgentProviderSettings
 
   @override
   Map<String, dynamic> toJsonForProtocol() {
-    return {
-      '__className__': 'AgentProviderSettings',
-      if (id != null) 'id': id?.toJson(),
-      'userId': userId.toJson(),
-      'baseUrl': baseUrl,
-      'model': model,
-      'encryptedApiKey': encryptedApiKey,
-      'nonce': nonce,
-      'keyHint': keyHint,
-      'updatedAt': updatedAt.toJson(),
-    };
+    return {};
   }
 
   static AgentProviderSettingsInclude include() {
@@ -298,7 +288,7 @@ class AgentProviderSettingsTable extends _is.Table<_is.UuidValue?> {
   /// Base64 AES-GCM ciphertext of the API key, including its MAC tag.
   late final _is.ColumnString encryptedApiKey;
 
-  /// Base64 nonce used for [encryptedApiKey].
+  /// Base64 nonce used for encryptedApiKey.
   late final _is.ColumnString nonce;
 
   /// The last four characters of the key, for display only.

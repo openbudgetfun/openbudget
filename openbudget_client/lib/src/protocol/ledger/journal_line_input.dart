@@ -10,9 +10,10 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'package:openbudget_core/openbudget_core.dart' as _ifz8weqz;
 import 'package:serverpod_client/serverpod_client.dart' as _isc;
 
-/// One proposed journal line as sent to `LedgerEndpoint.saveDraftJournal`.
+/// One proposed journal line, as sent to `LedgerEndpoint.saveDraftJournal`.
 abstract class JournalLineInput
     implements _isc.SerializableModel, _isc.ProtocolSerialization {
   JournalLineInput._({
@@ -21,17 +22,18 @@ abstract class JournalLineInput
     int? debitMinor,
     int? creditMinor,
     required this.currencyCode,
-    int? functionalDebitMinor,
-    int? functionalCreditMinor,
-    String? exchangeRate,
-    this.rateDate,
-    this.rateSource,
+    int? baseDebitMinor,
+    int? baseCreditMinor,
+    String? fxRate,
+    this.fxRateDate,
+    _ifz8weqz.FxRateSource? fxRateSource,
     this.taxCode,
   }) : debitMinor = debitMinor ?? 0,
        creditMinor = creditMinor ?? 0,
-       functionalDebitMinor = functionalDebitMinor ?? 0,
-       functionalCreditMinor = functionalCreditMinor ?? 0,
-       exchangeRate = exchangeRate ?? '1';
+       baseDebitMinor = baseDebitMinor ?? 0,
+       baseCreditMinor = baseCreditMinor ?? 0,
+       fxRate = fxRate ?? '1',
+       fxRateSource = fxRateSource ?? _ifz8weqz.FxRateSource.identity;
 
   factory JournalLineInput({
     required _isc.UuidValue ledgerAccountId,
@@ -39,11 +41,11 @@ abstract class JournalLineInput
     int? debitMinor,
     int? creditMinor,
     required String currencyCode,
-    int? functionalDebitMinor,
-    int? functionalCreditMinor,
-    String? exchangeRate,
-    DateTime? rateDate,
-    String? rateSource,
+    int? baseDebitMinor,
+    int? baseCreditMinor,
+    String? fxRate,
+    DateTime? fxRateDate,
+    _ifz8weqz.FxRateSource? fxRateSource,
     String? taxCode,
   }) = _JournalLineInputImpl;
 
@@ -56,13 +58,19 @@ abstract class JournalLineInput
       debitMinor: jsonSerialization['debitMinor'] as int?,
       creditMinor: jsonSerialization['creditMinor'] as int?,
       currencyCode: jsonSerialization['currencyCode'] as String,
-      functionalDebitMinor: jsonSerialization['functionalDebitMinor'] as int?,
-      functionalCreditMinor: jsonSerialization['functionalCreditMinor'] as int?,
-      exchangeRate: jsonSerialization['exchangeRate'] as String?,
-      rateDate: jsonSerialization['rateDate'] == null
+      baseDebitMinor: jsonSerialization['baseDebitMinor'] as int?,
+      baseCreditMinor: jsonSerialization['baseCreditMinor'] as int?,
+      fxRate: jsonSerialization['fxRate'] as String?,
+      fxRateDate: jsonSerialization['fxRateDate'] == null
           ? null
-          : _isc.DateTimeJsonExtension.fromJson(jsonSerialization['rateDate']),
-      rateSource: jsonSerialization['rateSource'] as String?,
+          : _isc.DateTimeJsonExtension.fromJson(
+              jsonSerialization['fxRateDate'],
+            ),
+      fxRateSource: jsonSerialization['fxRateSource'] == null
+          ? null
+          : _ifz8weqz.FxRateSource.fromJson(
+              (jsonSerialization['fxRateSource'] as String),
+            ),
       taxCode: jsonSerialization['taxCode'] as String?,
     );
   }
@@ -80,23 +88,20 @@ abstract class JournalLineInput
   /// ISO 4217 code of the transaction currency.
   String currencyCode;
 
-  /// Debit in functional-currency minor units, or 0.
-  int functionalDebitMinor;
+  /// Debit in base-currency minor units, or 0.
+  int baseDebitMinor;
 
-  /// Credit in functional-currency minor units, or 0.
-  int functionalCreditMinor;
+  /// Credit in base-currency minor units, or 0.
+  int baseCreditMinor;
 
-  /// Functional per 1 transaction currency, exact decimal string such as
-  /// `1.234567`. Never a double.
-  String exchangeRate;
+  /// Base currency per one transaction-currency unit, exact decimal.
+  String fxRate;
 
-  /// The calendar date the rate was struck on.
-  DateTime? rateDate;
+  /// Calendar date of the rate; the journal date when null.
+  DateTime? fxRateDate;
 
-  /// Where the rate came from, such as `manual` or a provider name.
-  String? rateSource;
+  _ifz8weqz.FxRateSource fxRateSource;
 
-  /// Optional sales-tax code applied to this line.
   String? taxCode;
 
   /// Returns a shallow copy of this [JournalLineInput]
@@ -108,11 +113,11 @@ abstract class JournalLineInput
     int? debitMinor,
     int? creditMinor,
     String? currencyCode,
-    int? functionalDebitMinor,
-    int? functionalCreditMinor,
-    String? exchangeRate,
-    DateTime? rateDate = const _isc.$UndefinedDateTime(),
-    String? rateSource,
+    int? baseDebitMinor,
+    int? baseCreditMinor,
+    String? fxRate,
+    DateTime? fxRateDate = const _isc.$UndefinedDateTime(),
+    _ifz8weqz.FxRateSource? fxRateSource,
     String? taxCode,
   });
   @override
@@ -124,11 +129,11 @@ abstract class JournalLineInput
       'debitMinor': debitMinor,
       'creditMinor': creditMinor,
       'currencyCode': currencyCode,
-      'functionalDebitMinor': functionalDebitMinor,
-      'functionalCreditMinor': functionalCreditMinor,
-      'exchangeRate': exchangeRate,
-      if (rateDate != null) 'rateDate': rateDate?.toJson(),
-      if (rateSource != null) 'rateSource': rateSource,
+      'baseDebitMinor': baseDebitMinor,
+      'baseCreditMinor': baseCreditMinor,
+      'fxRate': fxRate,
+      if (fxRateDate != null) 'fxRateDate': fxRateDate?.toJson(),
+      'fxRateSource': fxRateSource.toJson(),
       if (taxCode != null) 'taxCode': taxCode,
     };
   }
@@ -142,11 +147,11 @@ abstract class JournalLineInput
       'debitMinor': debitMinor,
       'creditMinor': creditMinor,
       'currencyCode': currencyCode,
-      'functionalDebitMinor': functionalDebitMinor,
-      'functionalCreditMinor': functionalCreditMinor,
-      'exchangeRate': exchangeRate,
-      if (rateDate != null) 'rateDate': rateDate?.toJson(),
-      if (rateSource != null) 'rateSource': rateSource,
+      'baseDebitMinor': baseDebitMinor,
+      'baseCreditMinor': baseCreditMinor,
+      'fxRate': fxRate,
+      if (fxRateDate != null) 'fxRateDate': fxRateDate?.toJson(),
+      'fxRateSource': fxRateSource.toJson(),
       if (taxCode != null) 'taxCode': taxCode,
     };
   }
@@ -166,11 +171,11 @@ class _JournalLineInputImpl extends JournalLineInput {
     int? debitMinor,
     int? creditMinor,
     required String currencyCode,
-    int? functionalDebitMinor,
-    int? functionalCreditMinor,
-    String? exchangeRate,
-    DateTime? rateDate,
-    String? rateSource,
+    int? baseDebitMinor,
+    int? baseCreditMinor,
+    String? fxRate,
+    DateTime? fxRateDate,
+    _ifz8weqz.FxRateSource? fxRateSource,
     String? taxCode,
   }) : super._(
          ledgerAccountId: ledgerAccountId,
@@ -178,11 +183,11 @@ class _JournalLineInputImpl extends JournalLineInput {
          debitMinor: debitMinor,
          creditMinor: creditMinor,
          currencyCode: currencyCode,
-         functionalDebitMinor: functionalDebitMinor,
-         functionalCreditMinor: functionalCreditMinor,
-         exchangeRate: exchangeRate,
-         rateDate: rateDate,
-         rateSource: rateSource,
+         baseDebitMinor: baseDebitMinor,
+         baseCreditMinor: baseCreditMinor,
+         fxRate: fxRate,
+         fxRateDate: fxRateDate,
+         fxRateSource: fxRateSource,
          taxCode: taxCode,
        );
 
@@ -196,11 +201,11 @@ class _JournalLineInputImpl extends JournalLineInput {
     int? debitMinor,
     int? creditMinor,
     String? currencyCode,
-    int? functionalDebitMinor,
-    int? functionalCreditMinor,
-    String? exchangeRate,
-    DateTime? rateDate = const _isc.$UndefinedDateTime(),
-    Object? rateSource = _Undefined,
+    int? baseDebitMinor,
+    int? baseCreditMinor,
+    String? fxRate,
+    DateTime? fxRateDate = const _isc.$UndefinedDateTime(),
+    _ifz8weqz.FxRateSource? fxRateSource,
     Object? taxCode = _Undefined,
   }) {
     return JournalLineInput(
@@ -209,12 +214,13 @@ class _JournalLineInputImpl extends JournalLineInput {
       debitMinor: debitMinor ?? this.debitMinor,
       creditMinor: creditMinor ?? this.creditMinor,
       currencyCode: currencyCode ?? this.currencyCode,
-      functionalDebitMinor: functionalDebitMinor ?? this.functionalDebitMinor,
-      functionalCreditMinor:
-          functionalCreditMinor ?? this.functionalCreditMinor,
-      exchangeRate: exchangeRate ?? this.exchangeRate,
-      rateDate: rateDate is _isc.UndefinedSentinel ? this.rateDate : rateDate,
-      rateSource: rateSource is String? ? rateSource : this.rateSource,
+      baseDebitMinor: baseDebitMinor ?? this.baseDebitMinor,
+      baseCreditMinor: baseCreditMinor ?? this.baseCreditMinor,
+      fxRate: fxRate ?? this.fxRate,
+      fxRateDate: fxRateDate is _isc.UndefinedSentinel
+          ? this.fxRateDate
+          : fxRateDate,
+      fxRateSource: fxRateSource ?? this.fxRateSource,
       taxCode: taxCode is String? ? taxCode : this.taxCode,
     );
   }

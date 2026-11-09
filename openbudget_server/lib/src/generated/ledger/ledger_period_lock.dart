@@ -14,16 +14,16 @@ import 'dart:async' as _ida;
 
 import 'package:serverpod/serverpod.dart' as _is;
 
-/// The per-budget period lock date.
+/// The per-entity period lock date.
 ///
-/// Posting or reversing into a date on or before [lockDate] is rejected.
-/// Every change writes a `ledger_audit_event`, so the lock's history lives
-/// in the audit trail rather than in append-only lock rows.
+/// Posting, reversing or editing a transaction dated on or before lockDate
+/// is rejected. Every change writes an audit_event, so the lock's history
+/// lives in the audit trail.
 abstract class LedgerPeriodLock
     implements _is.TableRow<_is.UuidValue?>, _is.ProtocolSerialization {
   LedgerPeriodLock._({
     this.id,
-    required this.budgetId,
+    required this.entityId,
     required this.lockDate,
     required this.setBy,
     DateTime? setAt,
@@ -31,7 +31,7 @@ abstract class LedgerPeriodLock
 
   factory LedgerPeriodLock({
     _is.UuidValue? id,
-    required _is.UuidValue budgetId,
+    required _is.UuidValue entityId,
     required DateTime lockDate,
     required _is.UuidValue setBy,
     DateTime? setAt,
@@ -42,8 +42,8 @@ abstract class LedgerPeriodLock
       id: jsonSerialization['id'] == null
           ? null
           : _is.UuidValueJsonExtension.fromJson(jsonSerialization['id']),
-      budgetId: _is.UuidValueJsonExtension.fromJson(
-        jsonSerialization['budgetId'],
+      entityId: _is.UuidValueJsonExtension.fromJson(
+        jsonSerialization['entityId'],
       ),
       lockDate: _is.DateTimeJsonExtension.fromJson(
         jsonSerialization['lockDate'],
@@ -62,12 +62,11 @@ abstract class LedgerPeriodLock
   @override
   _is.UuidValue? id;
 
-  _is.UuidValue budgetId;
+  _is.UuidValue entityId;
 
-  /// Dates on or before this date are locked.
+  /// Calendar dates on or before this one are locked.
   DateTime lockDate;
 
-  /// The user who set the lock.
   _is.UuidValue setBy;
 
   DateTime setAt;
@@ -80,7 +79,7 @@ abstract class LedgerPeriodLock
   @_is.useResult
   LedgerPeriodLock copyWith({
     _is.UuidValue? id = const _is.$UndefinedUuidValue(),
-    _is.UuidValue? budgetId,
+    _is.UuidValue? entityId,
     DateTime? lockDate,
     _is.UuidValue? setBy,
     DateTime? setAt,
@@ -90,7 +89,7 @@ abstract class LedgerPeriodLock
     return {
       '__className__': 'LedgerPeriodLock',
       if (id != null) 'id': id?.toJson(),
-      'budgetId': budgetId.toJson(),
+      'entityId': entityId.toJson(),
       'lockDate': lockDate.toJson(),
       'setBy': setBy.toJson(),
       'setAt': setAt.toJson(),
@@ -102,7 +101,7 @@ abstract class LedgerPeriodLock
     return {
       '__className__': 'LedgerPeriodLock',
       if (id != null) 'id': id?.toJson(),
-      'budgetId': budgetId.toJson(),
+      'entityId': entityId.toJson(),
       'lockDate': lockDate.toJson(),
       'setBy': setBy.toJson(),
       'setAt': setAt.toJson(),
@@ -140,13 +139,13 @@ abstract class LedgerPeriodLock
 class _LedgerPeriodLockImpl extends LedgerPeriodLock {
   _LedgerPeriodLockImpl({
     _is.UuidValue? id,
-    required _is.UuidValue budgetId,
+    required _is.UuidValue entityId,
     required DateTime lockDate,
     required _is.UuidValue setBy,
     DateTime? setAt,
   }) : super._(
          id: id,
-         budgetId: budgetId,
+         entityId: entityId,
          lockDate: lockDate,
          setBy: setBy,
          setAt: setAt,
@@ -158,14 +157,14 @@ class _LedgerPeriodLockImpl extends LedgerPeriodLock {
   @override
   LedgerPeriodLock copyWith({
     _is.UuidValue? id = const _is.$UndefinedUuidValue(),
-    _is.UuidValue? budgetId,
+    _is.UuidValue? entityId,
     DateTime? lockDate,
     _is.UuidValue? setBy,
     DateTime? setAt,
   }) {
     return LedgerPeriodLock(
       id: id is _is.UndefinedSentinel ? this.id : id,
-      budgetId: budgetId ?? this.budgetId,
+      entityId: entityId ?? this.entityId,
       lockDate: lockDate ?? this.lockDate,
       setBy: setBy ?? this.setBy,
       setAt: setAt ?? this.setAt,
@@ -177,9 +176,9 @@ class LedgerPeriodLockUpdateTable
     extends _is.UpdateTable<LedgerPeriodLockTable> {
   LedgerPeriodLockUpdateTable(super.table);
 
-  _is.ColumnValue<_is.UuidValue, _is.UuidValue> budgetId(_is.UuidValue value) =>
+  _is.ColumnValue<_is.UuidValue, _is.UuidValue> entityId(_is.UuidValue value) =>
       _is.ColumnValue(
-        table.budgetId,
+        table.entityId,
         value,
       );
 
@@ -205,8 +204,8 @@ class LedgerPeriodLockTable extends _is.Table<_is.UuidValue?> {
   LedgerPeriodLockTable({super.tableRelation})
     : super(tableName: 'ledger_period_lock') {
     updateTable = LedgerPeriodLockUpdateTable(this);
-    budgetId = _is.ColumnUuid(
-      'budgetId',
+    entityId = _is.ColumnUuid(
+      'entityId',
       this,
     );
     lockDate = _is.ColumnDateTime(
@@ -226,12 +225,11 @@ class LedgerPeriodLockTable extends _is.Table<_is.UuidValue?> {
 
   late final LedgerPeriodLockUpdateTable updateTable;
 
-  late final _is.ColumnUuid budgetId;
+  late final _is.ColumnUuid entityId;
 
-  /// Dates on or before this date are locked.
+  /// Calendar dates on or before this one are locked.
   late final _is.ColumnDateTime lockDate;
 
-  /// The user who set the lock.
   late final _is.ColumnUuid setBy;
 
   late final _is.ColumnDateTime setAt;
@@ -239,7 +237,7 @@ class LedgerPeriodLockTable extends _is.Table<_is.UuidValue?> {
   @override
   List<_is.Column> get columns => [
     id,
-    budgetId,
+    entityId,
     lockDate,
     setBy,
     setAt,

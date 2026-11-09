@@ -14,8 +14,8 @@ import 'dart:async' as _ida;
 
 import 'package:serverpod/serverpod.dart' as _is;
 
-/// Links an OpenBudget user to their Stripe customer for billing portal and
-/// checkout reuse.
+/// Links an OpenBudget user to their Stripe customer for checkout and the
+/// billing portal.
 abstract class StripeCustomer
     implements _is.TableRow<_is.UuidValue?>, _is.ProtocolSerialization {
   StripeCustomer._({
@@ -83,13 +83,7 @@ abstract class StripeCustomer
 
   @override
   Map<String, dynamic> toJsonForProtocol() {
-    return {
-      '__className__': 'StripeCustomer',
-      if (id != null) 'id': id?.toJson(),
-      'userId': userId.toJson(),
-      'customerId': customerId,
-      'createdAt': createdAt.toJson(),
-    };
+    return {};
   }
 
   static StripeCustomerInclude include() {
