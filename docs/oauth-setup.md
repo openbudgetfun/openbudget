@@ -1,151 +1,153 @@
-# OAuth Setup (Google, Apple, and Additional Providers)
+# OAuth setup: Google and Apple sign-in
 
-This document covers manual setup required to run OAuth login with OpenBudget across web, iOS, and Android.
+A short checklist for making "Sign in with Google" and "Sign in with Apple"
+work end to end on iPhone (and on web and Android where noted).
 
-## Scope Implemented
+Everything in angle brackets is a placeholder. Never commit a real client id,
+client secret or private key.
 
-- Implemented in code: Google + Apple
-- Documented only (not implemented in this pass): GitHub, Firebase, Passkey
+## 1. Google Cloud
 
-## Prerequisites
+1. Open the [Google Auth Platform](https://console.cloud.google.com/auth/overview)
+   and complete the project setup (app name, support email, audience).
+   While the app is in **Testing**, add every tester under **Audience**.
+2. Under **Clients**, create a **Web application** OAuth client. This is the
+   server client: it is the only Google client with a client secret.
+   - If you ship the web app through Serverpod, add your web origin under
+     **Authorized JavaScript origins** and `<server>/auth/callback` under
+     **Authorized redirect URIs**.
+   - Download the JSON. It becomes `googleClientSecret` on the server.
+3. Create an **iOS** OAuth client with bundle id `com.openbudget.app` (or
+   `com.openbudget.app.dev` for the dev flavor). Download its plist and note
+   `CLIENT_ID` (the iOS client id) and `REVERSED_CLIENT_ID` (the URL scheme).
+4. On Android, create an **Android** OAuth client for the app id and signing
+   SHA-1. The web client's id is still needed on Android as
+   `GOOGLE_SERVER_CLIENT_ID`.
 
-- Apple Developer Program account (paid)
-- Google Cloud project with OAuth enabled
-- Server running with `openbudget_server`
-- Flutter app running with `openbudget_app`
+## 2. Apple Developer
 
-## Server Password Keys
+1. In **Certificates, Identifiers & Profiles → Identifiers**, open the App ID
+   for `com.openbudget.app` (and `com.openbudget.app.dev`) and enable
+   **Sign in with Apple**. The Runner target already carries the matching
+   `com.apple.developer.applesignin` entitlement in
+   `openbudget_app/ios/Runner/Runner.entitlements`.
+2. Create a **Services ID** for web and Android sign-in, for example
+   `app.openbudget.signin`. In its configuration add your domain and the return
+   URL `https://<your-host>/auth/apple/callback`.
+3. Create a **Key** with Sign in with Apple enabled, download the `.p8` once,
+   and note its **Key ID** and your **Team ID**. The key contents, key ID, team
+   ID, service ID, bundle id and redirect URI all go to the server.
 
-Add these keys to `openbudget_server/config/passwords.yaml` (or env-injected equivalent):
+## 3. Local app configuration
 
-- `googleClientSecret`: JSON string from Google OAuth web client secret file.
-- `appleServiceIdentifier`: Apple Service ID (client id for web/android Apple sign-in).
-- `appleBundleIdentifier`: Apple app bundle id (native Apple sign-in audience).
-- `appleRedirectUri`: Apple callback URI (must point to `/auth/apple/callback` on your server web host).
-- `appleTeamId`: Apple Developer Team ID.
-- `appleKeyId`: Apple Sign in with Apple key ID.
-- `appleKey`: Contents of the Apple private key (`.p8`), including begin/end lines.
-- `appleAndroidPackageIdentifier`: Android application id used to build the secure `intent://` callback redirect.
+1. Copy the example defines file:
+   `openbudget_app/config/dart_defines.example.json` →
+   `openbudget_app/config/dart_defines.local.json` (gitignored), then fill it:
 
-## Runtime Dart Defines
+   | Key                        | Value                                                        |
+   | -------------------------- | ------------------------------------------------------------ |
+   | `GOOGLE_CLIENT_ID`         | iOS client id from step 1.3 (Android client id on Android)   |
+   | `GOOGLE_SERVER_CLIENT_ID`  | Web client id from step 1.2                                  |
+   | `APPLE_SERVICE_IDENTIFIER` | Apple Services ID from step 2.2 (web/Android only)           |
+   | `APPLE_REDIRECT_URI`       | `https://<your-host>/auth/apple/callback` (web/Android only) |
 
-Provide these to the Flutter app:
+   On iPhone, Apple sign-in needs neither `APPLE_SERVICE_IDENTIFIER` nor
+   `APPLE_REDIRECT_URI`: it identifies the app by its bundle id and entitlement.
+2. Copy `openbudget_app/ios/Flutter/Secrets.example.xcconfig` →
+   `openbudget_app/ios/Flutter/Secrets.xcconfig` (gitignored) and set
+   `GOOGLE_REVERSED_CLIENT_ID` to the `REVERSED_CLIENT_ID` from step 1.3.
+   This is the URL scheme Google returns to. Keep it consistent with
+   `GOOGLE_CLIENT_ID`.
+3. `devenv.nix` passes `config/dart_defines.local.json` to `flutter:app run`,
+   `build`, `test` and `drive` when the file exists. A direct `flutter`
+   invocation needs `--dart-define-from-file=config/dart_defines.local.json`.
 
-- `GOOGLE_CLIENT_ID`
-- `GOOGLE_SERVER_CLIENT_ID`
-- `APPLE_SERVICE_IDENTIFIER`
-- `APPLE_REDIRECT_URI`
+## 4. Server passwords
 
-Example (web):
+1. Copy the keys you need from
+   `openbudget_server/config/passwords.example.yaml` into
+   `openbudget_server/config/passwords.yaml` (gitignored).
+   - `googleClientSecret`: the web client JSON from step 1.2.
+   - `appleServiceIdentifier`, `appleBundleIdentifier`
+     (`com.openbudget.app`), `appleRedirectUri`, `appleTeamId`, `appleKeyId`,
+     `appleKey`: from steps 2.2 and 2.3. Serverpod needs all six to construct
+     the provider, including when only native iOS sign-in is used.
+   - `appleAndroidPackageIdentifier` (optional, Android only).
+2. On Serverpod Cloud, set each value from a file instead of committing it:
+
+   ```bash
+   scloud password set googleClientSecret --from-file google-client-secret.json
+   scloud password set appleServiceIdentifier --value <service-id>
+   scloud password set appleBundleIdentifier --value com.openbudget.app
+   scloud password set appleRedirectUri --value https://<your-host>/auth/apple/callback
+   scloud password set appleTeamId --value <team-id>
+   scloud password set appleKeyId --value <key-id>
+   scloud password set appleKey --from-file AuthKey_<key-id>.p8
+   ```
+
+   Use `--project <project-id>` when the project is not linked.
+
+The server enables each provider only when its passwords are present, so a
+missing key means the matching button has nothing to call.
+
+## 5. Run it
 
 ```bash
-flutter:app run -d chrome \
-  --dart-define=GOOGLE_CLIENT_ID=<google-web-client-id> \
-  --dart-define=APPLE_SERVICE_IDENTIFIER=<apple-service-id> \
-  --dart-define=APPLE_REDIRECT_URI=<https://app-domain/auth/apple/callback>
+devenv up
+
+# Dev flavor on an iPhone (devenv adds the defines file automatically).
+flutter:app run --flavor dev -t lib/main_dev.dart -d <device-id>
+
+# Production flavor.
+flutter:app run --flavor prod -t lib/main_prod.dart -d <device-id>
 ```
 
-Example (mobile):
+A physical iPhone cannot reach `localhost`. Point the app at your machine's LAN
+address or a deployed server:
 
 ```bash
-flutter:app run -d ios \
-  --dart-define=GOOGLE_CLIENT_ID=<google-ios-client-id> \
-  --dart-define=GOOGLE_SERVER_CLIENT_ID=<google-web-client-id> \
-  --dart-define=APPLE_SERVICE_IDENTIFIER=<apple-service-id> \
-  --dart-define=APPLE_REDIRECT_URI=<https://app-domain/auth/apple/callback>
+flutter:app run --flavor dev -t lib/main_dev.dart -d <device-id> \
+  --dart-define=OPENBUDGET_API_URL=http://<your-lan-ip>:8080/
 ```
 
-## Redirect URI Matrix
+## 6. Test on a real iPhone
 
-Use environment-specific callback values consistently in provider dashboards and server config.
+1. Open the workspace in Xcode, select the Runner target, and confirm the
+   Signing team matches the App ID that has the Sign in with Apple capability.
+2. Run the app, tap **Continue with Google**, and complete the account picker.
+   Then tap **Continue with Apple** and complete the native sheet.
+3. In both cases the app should land signed in and the account should appear
+   after a restart (the session token is stored by the auth session manager).
+4. If a button does not appear:
+   - Google needs `GOOGLE_CLIENT_ID` at build time, and on iPhone and Android
+     also `GOOGLE_SERVER_CLIENT_ID` (the web client id).
+   - Apple appears on iPhone without any defines; if it is missing, check the
+     platform is iOS and the entitlement is present.
+5. If sign-in fails after the native sheet:
+   - Google: the app passes `GOOGLE_SERVER_CLIENT_ID` so the token is addressed
+     to the web client. Check it matches the `client_id` inside the server's
+     `googleClientSecret`.
+   - Apple's identity token is addressed to the bundle id. Verify
+     `appleBundleIdentifier` matches the installed app (`com.openbudget.app`,
+     not `com.openbudget.app.dev`, unless you registered the dev App ID and set
+     it there too).
 
-- Local: `http://localhost:8082/auth/apple/callback`
-- Staging: `https://app-staging.examplepod.com/auth/apple/callback`
-- Production: `https://app.examplepod.com/auth/apple/callback`
+### What works in the iOS Simulator
 
-For Google web/OAuth console entries, keep all required origins and redirect URIs aligned with your actual deployed hosts.
+- Google sign-in generally works if the simulator has a Google account
+  available in Safari. The account picker is a web flow.
+- Sign in with Apple can show its sheet on an iOS 16+ simulator, but only with
+  an Apple ID signed into the simulator. It is less reliable than a device and
+  does not prove your signing setup.
+- **The simulator does not validate the Sign in with Apple entitlement.** A
+  `flutter build ios --simulator --no-codesign` build can show the button and
+  even sign in while the App ID or provisioning profile is wrong. Always
+  confirm the flow on a physical iPhone before shipping.
+- Push notifications, associated domains and App Store receipts do not work in
+  the simulator; none of them are needed for these two sign-in flows.
 
-## Google Setup (Manual)
+## 7. Verify the server picked up the configuration
 
-1. In Google Cloud Console, configure OAuth consent screen.
-2. Create OAuth clients:
-   - Web client (required for server-side verification and web sign-in).
-   - iOS client for `com.example.openbudgetFlutter` (or your real bundle id).
-   - Android client for `com.example.openbudget_app` with signing SHA fingerprints.
-3. Download the web client secret JSON.
-4. Store that JSON content in `googleClientSecret`.
-5. Set Flutter defines:
-   - `GOOGLE_CLIENT_ID`: platform client id used by app runtime.
-   - `GOOGLE_SERVER_CLIENT_ID`: web/server client id used for backend token verification flows.
-6. For web hosting, set `<meta name="google-signin-client_id" ...>` in `openbudget_app/web/index.html` to your deployed web client id.
-
-## Apple Setup (Manual)
-
-1. In Apple Developer, create or update App ID and enable Sign in with Apple.
-2. Create Service ID for web/android Apple sign-in.
-3. In the Service ID configuration:
-   - Add your domain(s) to Domains and Subdomains.
-   - Add callback URL(s) to Return URLs (must match `/auth/apple/callback`).
-4. Create a Sign in with Apple key and download the `.p8` once.
-5. Set server password keys:
-   - `appleServiceIdentifier`, `appleBundleIdentifier`, `appleRedirectUri`
-   - `appleTeamId`, `appleKeyId`, `appleKey`
-   - `appleAndroidPackageIdentifier`
-6. Set Flutter defines:
-   - `APPLE_SERVICE_IDENTIFIER`
-   - `APPLE_REDIRECT_URI`
-7. iOS manual step in Xcode:
-   - Add Sign in with Apple capability to the Runner target.
-8. Android manual step:
-   - Ensure app id matches `appleAndroidPackageIdentifier`.
-   - Keep the Sign in with Apple callback activity in `AndroidManifest.xml`.
-9. Web manual step:
-   - Keep Apple JS SDK script in `openbudget_app/web/index.html`.
-
-## Platform Validation Checklist
-
-### Web
-
-1. Launch app with all required web defines.
-2. Google button renders and completes login.
-3. Apple popup opens and completes login.
-4. App transitions to authenticated route.
-
-### iOS
-
-1. Sign in with Apple capability is enabled.
-2. Launch app with required defines.
-3. Google login completes and sets authenticated state.
-4. Apple login completes and sets authenticated state.
-
-### Android
-
-1. Launch app with required defines.
-2. Google login completes and sets authenticated state.
-3. Apple flow returns through `intent://callback` and completes login.
-
-### Regression
-
-1. Email/password login still works.
-2. Registration flow still works.
-3. Logout still clears auth state.
-
-## Other Providers (Documentation Pathways)
-
-### GitHub (Docs Only)
-
-- Use `serverpod_auth_idp_server` GitHub provider endpoint and PKCE flow.
-- Configure GitHub OAuth App with callback URLs per environment.
-- Add provider endpoint and client widget wiring similar to Google/Apple.
-
-### Firebase (Docs Only)
-
-- Use Firebase Authentication (Google/Apple/Email/etc.) for client-side identity.
-- Pass Firebase ID token to backend via Firebase IDP endpoint.
-- Configure Firebase project per platform and secure service account handling.
-
-### Passkey (Docs Only)
-
-- Use Serverpod passkey provider endpoints for registration/login challenges.
-- Configure relying party id/domain for web and associated mobile platform handling.
-- Add credential creation and assertion UX on login/register surfaces.
+Start the server and check the log. If Google or Apple was disabled, the
+missing password key is the cause. The server also logs no secrets, so the log
+is safe to share.

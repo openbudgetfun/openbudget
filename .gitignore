@@ -61,6 +61,10 @@ build/
 # Serverpod passwords
 **/config/passwords.yaml
 
+# Local OAuth client ids for the Flutter app
+openbudget_app/config/dart_defines.local.json
+openbudget_app/ios/Flutter/Secrets.xcconfig
+
 # Docker Compose env
 .env
 

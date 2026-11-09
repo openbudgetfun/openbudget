@@ -1,0 +1,6 @@
+{
+  "GOOGLE_CLIENT_ID": "<ios-client-id>.apps.googleusercontent.com",
+  "GOOGLE_SERVER_CLIENT_ID": "<web-client-id>.apps.googleusercontent.com",
+  "APPLE_SERVICE_IDENTIFIER": "<apple-service-id>",
+  "APPLE_REDIRECT_URI": "https://<your-host>/auth/apple/callback"
+}
