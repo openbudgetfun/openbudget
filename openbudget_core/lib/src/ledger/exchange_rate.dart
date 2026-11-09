@@ -54,6 +54,50 @@ class ExactDecimal {
   /// True when this decimal equals exactly 1.
   bool get isOne => numerator == denominator;
 
+  /// Divides rates, rounding once to the requested significant digits.
+  ExactDecimal divide(ExactDecimal other, {int significantDigits = 12}) {
+    if (significantDigits < 1 || other.numerator <= BigInt.zero) {
+      throw ArgumentError('Positive precision and divisor required.');
+    }
+    final n = numerator * other.denominator;
+    final d = denominator * other.numerator;
+    var order = n.toString().length - d.toString().length;
+    final ten = BigInt.from(10);
+    if (order >= 0 ? n < d * ten.pow(order) : n * ten.pow(-order) < d) {
+      order--;
+    }
+    final scale = significantDigits - 1 - order;
+    return scale >= 0
+        ? ExactDecimal(_roundHalfUp(n * ten.pow(scale), d), ten.pow(scale))
+        : ExactDecimal(
+            _roundHalfUp(n, d * ten.pow(-scale)) * ten.pow(-scale),
+            BigInt.one,
+          );
+  }
+
+  /// Normalizes a provider JSON number; never use this for money arithmetic.
+  static ExactDecimal? fromDouble(double value) {
+    if (!value.isFinite || value <= 0) return null;
+    final parts = value.toStringAsPrecision(15).toLowerCase().split('e');
+    final mantissa = parts.first.split('.');
+    final digits = mantissa.join();
+    final exponent = parts.length == 2 ? int.parse(parts.last) : 0;
+    final scale = (mantissa.length == 2 ? mantissa.last.length : 0) - exponent;
+    final ten = BigInt.from(10);
+    var n = BigInt.parse(digits);
+    var d = BigInt.one;
+    if (scale < 0) {
+      n *= ten.pow(-scale);
+    } else {
+      d = ten.pow(scale);
+    }
+    while (d > BigInt.one && n % ten == BigInt.zero) {
+      n ~/= ten;
+      d ~/= ten;
+    }
+    return ExactDecimal(n, d);
+  }
+
   @override
   String toString() {
     if (denominator == BigInt.one) {
@@ -99,6 +143,10 @@ int convertMinorUnits({
   required int transactionExponent,
   required int functionalExponent,
 }) {
+  requireSafeMinor(amountMinor);
+  if (transactionExponent < 0 || functionalExponent < 0) {
+    throw ArgumentError('Currency exponents cannot be negative.');
+  }
   final scaled =
       BigInt.from(amountMinor) *
       exchangeRate.numerator *
@@ -106,5 +154,43 @@ int convertMinorUnits({
   final divisor =
       BigInt.from(10).pow(transactionExponent) * exchangeRate.denominator;
   final rounded = _roundHalfUp(scaled.abs(), divisor);
-  return (scaled.isNegative ? -rounded : rounded).toInt();
+  final signed = scaled.isNegative ? -rounded : rounded;
+  if (signed.abs() > BigInt.from(maxSafeMinor)) {
+    throw RangeError('Converted amount exceeds the web-safe integer range.');
+  }
+  return signed.toInt();
+}
+
+/// Largest minor-unit amount representable exactly by a web client.
+const maxSafeMinor = 9007199254740991;
+
+/// Rejects amounts that would lose precision on web clients.
+void requireSafeMinor(int amount) {
+  if (amount < -maxSafeMinor || amount > maxSafeMinor) {
+    throw RangeError.range(amount, -maxSafeMinor, maxSafeMinor, 'amount');
+  }
+}
+
+/// Target units per source unit from two daily USD quotes.
+ExactDecimal crossRate({
+  required ExactDecimal fromPerUsd,
+  required ExactDecimal toPerUsd,
+}) => toPerUsd.divide(fromPerUsd);
+
+/// Derives the rate from the two actual amounts moved in a transfer.
+ExactDecimal impliedRate({
+  required int fromMinor,
+  required int toMinor,
+  required int fromExponent,
+  required int toExponent,
+}) {
+  requireSafeMinor(fromMinor);
+  requireSafeMinor(toMinor);
+  if (fromMinor == 0 || toMinor == 0 || fromExponent < 0 || toExponent < 0) {
+    throw ArgumentError('Nonzero amounts and nonnegative exponents required.');
+  }
+  return ExactDecimal(
+    BigInt.from(toMinor).abs() * BigInt.from(10).pow(fromExponent),
+    BigInt.from(fromMinor).abs() * BigInt.from(10).pow(toExponent),
+  ).divide(ExactDecimal.one);
 }

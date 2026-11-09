@@ -1,4 +1,7 @@
 import 'package:meta/meta.dart';
+import 'package:openbudget_core/src/generated/entity_kind.dart';
+
+export 'package:openbudget_core/src/generated/entity_kind.dart';
 
 /// A country whose tax rules OpenBudget can apply.
 enum TaxJurisdiction {
@@ -30,20 +33,6 @@ enum TaxJurisdiction {
     }
     return null;
   }
-}
-
-/// Who a set of books belongs to, for tax purposes.
-enum TaxEntityKind {
-  /// A person: employment, savings, investments, property, and the profit of
-  /// any sole-trade businesses linked to them.
-  individual,
-
-  /// A self-employed business. Its profit is taxed on its owner's personal
-  /// return, so its report feeds the owner's [individual] report.
-  soleTrader,
-
-  /// A company taxed in its own right (Ltd, LLC electing C-corp, GmbH).
-  company,
 }
 
 /// What a tax category does in a computation.
@@ -99,7 +88,7 @@ class TaxCategory {
   final TaxCategoryKind kind;
 
   /// The kinds of books this category may appear in.
-  final Set<TaxEntityKind> entityKinds;
+  final Set<EntityKind> entityKinds;
 
   /// Where the total lands on the official return, such as
   /// `SA103F box 20` or `Schedule C line 18`.
@@ -310,7 +299,7 @@ class TaxReport {
   });
 
   final TaxYear year;
-  final TaxEntityKind entityKind;
+  final EntityKind entityKind;
 
   /// Category totals and computed figures, in return order.
   final List<TaxReportLine> lines;

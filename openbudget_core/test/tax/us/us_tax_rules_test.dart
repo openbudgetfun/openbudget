@@ -30,7 +30,7 @@ TaxInput individualInput({
   profile:
       profile ??
       UsTaxProfile(
-        entityKind: TaxEntityKind.individual,
+        entityKind: EntityKind.individual,
         filingStatus: status,
       ),
   year: rules.taxYear(year),
@@ -43,14 +43,14 @@ TaxInput soleTraderInput({
   List<TaxEntry> entries = const [],
   UsTaxProfile? profile,
 }) => TaxInput(
-  profile: profile ?? const UsTaxProfile(entityKind: TaxEntityKind.soleTrader),
+  profile: profile ?? const UsTaxProfile(entityKind: EntityKind.soleTrader),
   year: rules.taxYear(year),
   entries: entries,
 );
 
 TaxInput companyInput({int year = 2026, List<TaxEntry> entries = const []}) =>
     TaxInput(
-      profile: const UsTaxProfile(entityKind: TaxEntityKind.company),
+      profile: const UsTaxProfile(entityKind: EntityKind.company),
       year: rules.taxYear(year),
       entries: entries,
     );
@@ -135,7 +135,7 @@ void main() {
 
     test('rejects a profile from another jurisdiction', () {
       final input = TaxInput(
-        profile: const GbTaxProfile(entityKind: TaxEntityKind.individual),
+        profile: const GbTaxProfile(entityKind: EntityKind.individual),
         year: rules.taxYear(2026),
         entries: const [],
       );
@@ -144,7 +144,7 @@ void main() {
 
     test('rejects a tax year from another jurisdiction', () {
       final input = TaxInput(
-        profile: const UsTaxProfile(entityKind: TaxEntityKind.individual),
+        profile: const UsTaxProfile(entityKind: EntityKind.individual),
         year: TaxYear(
           jurisdiction: TaxJurisdiction.gb,
           startYear: 2026,
@@ -159,9 +159,9 @@ void main() {
   });
 
   group('category catalog', () {
-    final individualCategories = rules.categoriesFor(TaxEntityKind.individual);
-    final soleTraderCategories = rules.categoriesFor(TaxEntityKind.soleTrader);
-    final companyCategories = rules.categoriesFor(TaxEntityKind.company);
+    final individualCategories = rules.categoriesFor(EntityKind.individual);
+    final soleTraderCategories = rules.categoriesFor(EntityKind.soleTrader);
+    final companyCategories = rules.categoriesFor(EntityKind.company);
     final allCategories = [
       ...individualCategories,
       ...soleTraderCategories,
@@ -176,13 +176,13 @@ void main() {
 
     test('every category is returned for a kind it supports', () {
       for (final category in individualCategories) {
-        expect(category.entityKinds, contains(TaxEntityKind.individual));
+        expect(category.entityKinds, contains(EntityKind.individual));
       }
       for (final category in soleTraderCategories) {
-        expect(category.entityKinds, contains(TaxEntityKind.soleTrader));
+        expect(category.entityKinds, contains(EntityKind.soleTrader));
       }
       for (final category in companyCategories) {
-        expect(category.entityKinds, contains(TaxEntityKind.company));
+        expect(category.entityKinds, contains(EntityKind.company));
       }
     });
 
@@ -602,7 +602,7 @@ void main() {
             entryMinor(2026, 'us.ind.taxable_interest', 3000000),
           ],
           profile: const UsTaxProfile(
-            entityKind: TaxEntityKind.individual,
+            entityKind: EntityKind.individual,
             foreignEarnedIncomeExclusionMinor: 1000000,
           ),
         ),

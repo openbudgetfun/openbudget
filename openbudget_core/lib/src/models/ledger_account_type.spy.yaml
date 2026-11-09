@@ -1,0 +1,9 @@
+### The five account types of a double-entry chart.
+enum: LedgerAccountType
+serialized: byName
+values:
+  - asset
+  - liability
+  - equity
+  - income
+  - expense

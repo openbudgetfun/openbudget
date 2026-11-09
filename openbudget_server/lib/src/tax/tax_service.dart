@@ -92,7 +92,7 @@ class TaxService {
       );
     }
 
-    if (parsedKind == TaxEntityKind.individual) {
+    if (parsedKind == EntityKind.individual) {
       if (linkedBudgetId != null) {
         throw ValidationException(
           message: 'An individual tax profile cannot link another budget.',
@@ -110,7 +110,7 @@ class TaxService {
         where: (t) => t.budgetId.equals(linkedBudgetId),
       );
       if (linkedProfile != null &&
-          (linkedProfile.entityKind != TaxEntityKind.individual.name ||
+          (linkedProfile.entityKind != EntityKind.individual.name ||
               linkedProfile.jurisdiction != parsedJurisdiction.countryCode)) {
         throw ValidationException(
           message:
@@ -329,8 +329,8 @@ class TaxService {
     return jurisdiction;
   }
 
-  static TaxEntityKind _parseEntityKind(String value) {
-    for (final kind in TaxEntityKind.values) {
+  static EntityKind _parseEntityKind(String value) {
+    for (final kind in EntityKind.values) {
       if (kind.name == value) return kind;
     }
     throw ValidationException(message: 'Unsupported tax entity kind "$value".');
@@ -353,7 +353,7 @@ class TaxService {
   static void _validateCategoryCode(
     TaxRulePack pack,
     String? code,
-    TaxEntityKind kind,
+    EntityKind kind,
   ) {
     if (code == null) return;
 
@@ -523,12 +523,12 @@ class TaxService {
     final linkedBudgetId = record.linkedBudgetId;
     final candidates = <TaxProfileRecord>[];
 
-    if (kind == TaxEntityKind.individual) {
+    if (kind == EntityKind.individual) {
       final soleTraders = await TaxProfileRecord.db.find(
         session,
         where: (t) =>
             t.linkedBudgetId.equals(budget.id) &
-            t.entityKind.equals(TaxEntityKind.soleTrader.name) &
+            t.entityKind.equals(EntityKind.soleTrader.name) &
             t.jurisdiction.equals(record.jurisdiction),
       );
       for (final candidate in soleTraders) {
@@ -541,13 +541,13 @@ class TaxService {
         }
         candidates.add(candidate);
       }
-    } else if (kind == TaxEntityKind.company && linkedBudgetId != null) {
+    } else if (kind == EntityKind.company && linkedBudgetId != null) {
       final linkedProfile = await TaxProfileRecord.db.findFirstRow(
         session,
         where: (t) => t.budgetId.equals(linkedBudgetId),
       );
       if (linkedProfile != null &&
-          linkedProfile.entityKind == TaxEntityKind.individual.name &&
+          linkedProfile.entityKind == EntityKind.individual.name &&
           linkedProfile.jurisdiction == record.jurisdiction) {
         candidates.add(linkedProfile);
       }

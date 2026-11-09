@@ -58,7 +58,7 @@ final class GbTaxRules implements TaxRulePack {
   }
 
   @override
-  List<TaxCategory> categoriesFor(TaxEntityKind kind) => List.unmodifiable(
+  List<TaxCategory> categoriesFor(EntityKind kind) => List.unmodifiable(
     gbCategories.where((category) => category.entityKinds.contains(kind)),
   );
 
@@ -70,9 +70,9 @@ final class GbTaxRules implements TaxRulePack {
     final rates = _ratesFor(input);
     final profile = _profileFor(input);
     return switch (profile.entityKind) {
-      TaxEntityKind.individual => _individualReport(profile, input, rates),
-      TaxEntityKind.soleTrader => _soleTraderReport(profile, input, rates),
-      TaxEntityKind.company => _companyReport(profile, input, rates),
+      EntityKind.individual => _individualReport(profile, input, rates),
+      EntityKind.soleTrader => _soleTraderReport(profile, input, rates),
+      EntityKind.company => _companyReport(profile, input, rates),
     };
   }
 
@@ -81,23 +81,23 @@ final class GbTaxRules implements TaxRulePack {
     final rates = _ratesFor(input);
     final profile = _profileFor(input);
     return switch (profile.entityKind) {
-      TaxEntityKind.individual => _individualOpportunities(
+      EntityKind.individual => _individualOpportunities(
         profile,
         input,
         rates,
         report,
       ),
-      TaxEntityKind.soleTrader => _vatThresholdOpportunities(
+      EntityKind.soleTrader => _vatThresholdOpportunities(
         input,
         rates,
-        _EntryTotals.of(input.entries, TaxEntityKind.soleTrader),
+        _EntryTotals.of(input.entries, EntityKind.soleTrader),
         'gb.se.turnover',
         profile.salesTaxRegistered,
       ),
-      TaxEntityKind.company => _vatThresholdOpportunities(
+      EntityKind.company => _vatThresholdOpportunities(
         input,
         rates,
-        _EntryTotals.of(input.entries, TaxEntityKind.company),
+        _EntryTotals.of(input.entries, EntityKind.company),
         'gb.co.turnover',
         profile.salesTaxRegistered,
       ),
@@ -240,7 +240,7 @@ final class GbTaxRules implements TaxRulePack {
 
     return TaxReport(
       year: input.year,
-      entityKind: TaxEntityKind.individual,
+      entityKind: EntityKind.individual,
       lines: lines,
       liabilities: figures.liabilities,
       alreadyPaidMinor: taxPaid,
@@ -370,7 +370,7 @@ final class GbTaxRules implements TaxRulePack {
 
     return TaxReport(
       year: input.year,
-      entityKind: TaxEntityKind.soleTrader,
+      entityKind: EntityKind.soleTrader,
       lines: lines,
       liabilities: liabilities,
       alreadyPaidMinor: taxPaid,
@@ -493,7 +493,7 @@ final class GbTaxRules implements TaxRulePack {
 
     return TaxReport(
       year: input.year,
-      entityKind: TaxEntityKind.company,
+      entityKind: EntityKind.company,
       lines: lines,
       liabilities: liabilities,
       alreadyPaidMinor: taxPaid,
@@ -516,13 +516,13 @@ final class GbTaxRules implements TaxRulePack {
     TaxInput input,
     GbTaxYearRates rates,
   ) {
-    final totals = _EntryTotals.of(input.entries, TaxEntityKind.individual);
+    final totals = _EntryTotals.of(input.entries, EntityKind.individual);
 
     var linkedProfit = 0;
     var linkedBusinesses = 0;
     var linkedTradingAllowanceUsed = false;
     for (final linked in input.linked) {
-      if (linked.profile.entityKind != TaxEntityKind.soleTrader) {
+      if (linked.profile.entityKind != EntityKind.soleTrader) {
         continue;
       }
       final linkedFigures = _soleTraderFigures(linked.entries, rates);
@@ -748,7 +748,7 @@ final class GbTaxRules implements TaxRulePack {
     List<TaxEntry> entries,
     GbTaxYearRates rates,
   ) {
-    final totals = _EntryTotals.of(entries, TaxEntityKind.soleTrader);
+    final totals = _EntryTotals.of(entries, EntityKind.soleTrader);
     final turnover = totals['gb.se.turnover'];
     final otherIncome = totals['gb.se.other_income'];
     final depreciation = totals['gb.se.depreciation'];
@@ -808,7 +808,7 @@ final class GbTaxRules implements TaxRulePack {
 
   _CompanyFigures _companyFigures(TaxInput input, GbTaxYearRates rates) {
     final profile = input.profile as GbTaxProfile;
-    final totals = _EntryTotals.of(input.entries, TaxEntityKind.company);
+    final totals = _EntryTotals.of(input.entries, EntityKind.company);
     final turnover = totals['gb.co.turnover'];
     final otherIncome = totals['gb.co.other_income'];
     final interest = totals['gb.co.interest_received'];
@@ -1025,7 +1025,7 @@ final class GbTaxRules implements TaxRulePack {
 
     var allowanceBase = 0;
     for (final linked in input.linked) {
-      if (linked.profile.entityKind != TaxEntityKind.soleTrader) {
+      if (linked.profile.entityKind != EntityKind.soleTrader) {
         continue;
       }
       final trade = _soleTraderFigures(linked.entries, rates);
@@ -1185,7 +1185,7 @@ final class GbTaxRules implements TaxRulePack {
     _IndividualFigures figures,
   ) {
     for (final company in input.linked) {
-      if (company.profile.entityKind != TaxEntityKind.company) {
+      if (company.profile.entityKind != EntityKind.company) {
         continue;
       }
       final companyProfile = company.profile as GbTaxProfile;
@@ -1480,7 +1480,7 @@ final class GbTaxRules implements TaxRulePack {
 final List<String> _soleTraderExpenseCodes = gbCategories
     .where(
       (category) =>
-          category.entityKinds.contains(TaxEntityKind.soleTrader) &&
+          category.entityKinds.contains(EntityKind.soleTrader) &&
           category.kind == TaxCategoryKind.expense &&
           category.code != 'gb.se.depreciation' &&
           category.code != 'gb.se.capital_allowances',
@@ -1492,7 +1492,7 @@ final List<String> _soleTraderExpenseCodes = gbCategories
 final List<String> _companyExpenseCodes = gbCategories
     .where(
       (category) =>
-          category.entityKinds.contains(TaxEntityKind.company) &&
+          category.entityKinds.contains(EntityKind.company) &&
           category.kind == TaxCategoryKind.expense &&
           category.code != 'gb.co.depreciation' &&
           category.code != 'gb.co.capital_allowances',
@@ -1506,7 +1506,7 @@ enum _IncomeKind { nonSavings, savings, dividends, top }
 final class _EntryTotals {
   const _EntryTotals(this.amounts, this.counts, this.uncategorizedCount);
 
-  factory _EntryTotals.of(Iterable<TaxEntry> entries, TaxEntityKind kind) {
+  factory _EntryTotals.of(Iterable<TaxEntry> entries, EntityKind kind) {
     final amounts = <String, int>{};
     final counts = <String, int>{};
     var uncategorized = 0;

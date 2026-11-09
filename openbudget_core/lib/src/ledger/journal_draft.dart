@@ -1,4 +1,5 @@
 import 'package:openbudget_core/src/ledger/exchange_rate.dart';
+import 'package:openbudget_core/src/ledger/journal_enums.dart';
 
 /// One validation failure found in a journal draft.
 class LedgerValidationIssue {
@@ -88,6 +89,7 @@ class JournalDraft {
   const JournalDraft({
     required this.functionalCurrency,
     required this.lines,
+    this.source = JournalSource.manual,
   });
 
   /// The budget's ISO currency code, the ledger's functional currency.
@@ -95,6 +97,9 @@ class JournalDraft {
 
   /// The proposed lines.
   final List<JournalLineDraft> lines;
+
+  /// Revaluations carry base amounts only and do not balance native amounts.
+  final JournalSource source;
 
   /// Runs every invariant. Returns one issue per failure.
   List<LedgerValidationIssue> validate() {
@@ -122,7 +127,7 @@ class JournalDraft {
 
     final validated = _validateLines(functionalExponent, issues);
     final currencies = validated.currencies.toSet();
-    if (currencies.length == 1) {
+    if (source != JournalSource.revaluation && currencies.length == 1) {
       final currency = currencies.first;
       if (currency != functionalCurrency &&
           validated.debitByCurrency[currency] !=
@@ -190,6 +195,14 @@ class JournalDraft {
         line.functionalDebitMinor,
         line.functionalCreditMinor,
       );
+      if (source == JournalSource.revaluation &&
+          line.debitMinor == 0 &&
+          line.creditMinor == 0 &&
+          functionalSide != null &&
+          ExactDecimal.tryParse(line.exchangeRate) != null &&
+          exponentForCurrency(line.currencyCode) != null) {
+        continue;
+      }
       if (side == null) {
         issues.add(
           LedgerValidationIssue(

@@ -1,8 +1,8 @@
 part of 'ng_tax_rules.dart';
 
-const Set<TaxEntityKind> _individualKinds = {TaxEntityKind.individual};
-const Set<TaxEntityKind> _soleTraderKinds = {TaxEntityKind.soleTrader};
-const Set<TaxEntityKind> _companyKinds = {TaxEntityKind.company};
+const Set<EntityKind> _individualKinds = {EntityKind.individual};
+const Set<EntityKind> _soleTraderKinds = {EntityKind.soleTrader};
+const Set<EntityKind> _companyKinds = {EntityKind.company};
 
 const String _vatOutputDescription =
     'Use this for a standalone VAT entry. Otherwise record the VAT in the '

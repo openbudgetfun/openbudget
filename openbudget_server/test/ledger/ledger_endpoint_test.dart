@@ -25,7 +25,7 @@ void main() {
     /// Creates a GB budget with a tax profile of [entityKind].
     Future<Budget> createBudget(
       TestSessionBuilder session,
-      TaxEntityKind entityKind, {
+      EntityKind entityKind, {
       String currency = 'GBP',
       String jurisdiction = 'GB',
       bool withProfile = true,
@@ -113,7 +113,7 @@ void main() {
 
     group('when enabling the ledger', () {
       test('then the caller must own the budget', () async {
-        final budget = await createBudget(owner, TaxEntityKind.company);
+        final budget = await createBudget(owner, EntityKind.company);
 
         await expectLater(
           endpoints.ledger.enableLedger(stranger, budget.id!),
@@ -124,7 +124,7 @@ void main() {
       test('then a budget without a tax profile is rejected', () async {
         final budget = await createBudget(
           owner,
-          TaxEntityKind.company,
+          EntityKind.company,
           withProfile: false,
         );
 
@@ -137,7 +137,7 @@ void main() {
       test('then individual budgets are rejected', () async {
         final budget = await createBudget(
           owner,
-          TaxEntityKind.individual,
+          EntityKind.individual,
         );
 
         await expectLater(
@@ -148,7 +148,7 @@ void main() {
       });
 
       test('then a company budget seeds the chart and switches mode', () async {
-        final budget = await createBudget(owner, TaxEntityKind.company);
+        final budget = await createBudget(owner, EntityKind.company);
 
         final accounts = await enableLedger(owner, budget);
 
@@ -167,7 +167,7 @@ void main() {
         () async {
           final budget = await createBudget(
             owner,
-            TaxEntityKind.soleTrader,
+            EntityKind.soleTrader,
           );
 
           final accounts = await enableLedger(owner, budget);
@@ -184,13 +184,13 @@ void main() {
       test('then each jurisdiction seeds its own codes', () async {
         final usBudget = await createBudget(
           owner,
-          TaxEntityKind.soleTrader,
+          EntityKind.soleTrader,
           currency: 'USD',
           jurisdiction: 'US',
         );
         final deBudget = await createBudget(
           owner,
-          TaxEntityKind.company,
+          EntityKind.company,
           currency: 'EUR',
           jurisdiction: 'DE',
         );
@@ -204,7 +204,7 @@ void main() {
       });
 
       test('then enabling twice is rejected', () async {
-        final budget = await createBudget(owner, TaxEntityKind.company);
+        final budget = await createBudget(owner, EntityKind.company);
         await enableLedger(owner, budget);
 
         await expectLater(
@@ -214,7 +214,7 @@ void main() {
       });
 
       test('then an audit event records the switch', () async {
-        final budget = await createBudget(owner, TaxEntityKind.company);
+        final budget = await createBudget(owner, EntityKind.company);
         await enableLedger(owner, budget);
 
         final events = await LedgerAuditEvent.db.find(sessionBuilder.build());
@@ -227,7 +227,7 @@ void main() {
 
     group('when budget ownership is checked', () {
       test('then a stranger cannot list accounts', () async {
-        final budget = await createBudget(owner, TaxEntityKind.company);
+        final budget = await createBudget(owner, EntityKind.company);
         await enableLedger(owner, budget);
 
         await expectLater(
@@ -241,7 +241,7 @@ void main() {
       });
 
       test('then a stranger cannot save drafts or post', () async {
-        final budget = await createBudget(owner, TaxEntityKind.company);
+        final budget = await createBudget(owner, EntityKind.company);
         final accounts = await enableLedger(owner, budget);
 
         await expectLater(
@@ -261,7 +261,7 @@ void main() {
       });
 
       test('then a stranger cannot post or reverse by journal id', () async {
-        final budget = await createBudget(owner, TaxEntityKind.company);
+        final budget = await createBudget(owner, EntityKind.company);
         final accounts = await enableLedger(owner, budget);
         final journal = await post(
           owner,
@@ -285,7 +285,7 @@ void main() {
       });
 
       test('then a stranger cannot read lines or the lock date', () async {
-        final budget = await createBudget(owner, TaxEntityKind.company);
+        final budget = await createBudget(owner, EntityKind.company);
         final accounts = await enableLedger(owner, budget);
         final journal = await post(
           owner,
@@ -314,7 +314,7 @@ void main() {
       late Map<String, LedgerAccount> accounts;
 
       setUp(() async {
-        budget = await createBudget(owner, TaxEntityKind.company);
+        budget = await createBudget(owner, EntityKind.company);
         accounts = await enableLedger(owner, budget);
       });
 
@@ -528,7 +528,7 @@ void main() {
       });
 
       test('then drafts reference only accounts inside the budget', () async {
-        final otherBudget = await createBudget(owner, TaxEntityKind.company);
+        final otherBudget = await createBudget(owner, EntityKind.company);
         await enableLedger(owner, otherBudget);
         final otherAccounts = await endpoints.ledger.listAccounts(
           owner,
@@ -558,7 +558,7 @@ void main() {
       late Map<String, LedgerAccount> accounts;
 
       setUp(() async {
-        budget = await createBudget(owner, TaxEntityKind.company);
+        budget = await createBudget(owner, EntityKind.company);
         accounts = await enableLedger(owner, budget);
       });
 
@@ -800,7 +800,7 @@ void main() {
       late Map<String, LedgerAccount> accounts;
 
       setUp(() async {
-        budget = await createBudget(owner, TaxEntityKind.company);
+        budget = await createBudget(owner, EntityKind.company);
         accounts = await enableLedger(owner, budget);
       });
 
@@ -894,7 +894,7 @@ void main() {
       late Map<String, LedgerAccount> accounts;
 
       setUp(() async {
-        budget = await createBudget(owner, TaxEntityKind.company);
+        budget = await createBudget(owner, EntityKind.company);
         accounts = await enableLedger(owner, budget);
       });
 
@@ -1009,7 +1009,7 @@ void main() {
 
     group('when computing the trial balance', () {
       test('then it balances across posted journals (T8.1 shape)', () async {
-        final budget = await createBudget(owner, TaxEntityKind.company);
+        final budget = await createBudget(owner, EntityKind.company);
         final accounts = await enableLedger(owner, budget);
 
         await post(
@@ -1053,7 +1053,7 @@ void main() {
       });
 
       test('then journals after the as-of date are excluded', () async {
-        final budget = await createBudget(owner, TaxEntityKind.company);
+        final budget = await createBudget(owner, EntityKind.company);
         final accounts = await enableLedger(owner, budget);
 
         await post(
@@ -1086,7 +1086,7 @@ void main() {
       });
 
       test('then drafts never feed the trial balance', () async {
-        final budget = await createBudget(owner, TaxEntityKind.company);
+        final budget = await createBudget(owner, EntityKind.company);
         final accounts = await enableLedger(owner, budget);
 
         await endpoints.ledger.saveDraftJournal(
@@ -1111,7 +1111,7 @@ void main() {
       });
 
       test('then a stranger cannot read the trial balance', () async {
-        final budget = await createBudget(owner, TaxEntityKind.company);
+        final budget = await createBudget(owner, EntityKind.company);
         await enableLedger(owner, budget);
 
         await expectLater(
@@ -1125,7 +1125,7 @@ void main() {
       test('then ledger calls are refused', () async {
         final budget = await createBudget(
           owner,
-          TaxEntityKind.company,
+          EntityKind.company,
           withProfile: false,
         );
 

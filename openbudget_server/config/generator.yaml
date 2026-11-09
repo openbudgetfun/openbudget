@@ -2,3 +2,6 @@ type: server
 
 client_package_path: ../openbudget_client
 server_test_tools_path: test/integration/test_tools
+
+shared_packages:
+  - ../openbudget_core

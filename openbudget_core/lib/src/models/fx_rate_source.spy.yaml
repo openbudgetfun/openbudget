@@ -1,0 +1,12 @@
+### Where a stored exchange rate came from.
+enum: FxRateSource
+serialized: byName
+values:
+  ### Same currency; the rate is exactly 1.
+  - identity
+  ### The daily provider rate from `fx_rate`.
+  - market
+  ### Implied by the two amounts that actually moved in a transfer.
+  - implied
+  ### Entered by the user.
+  - manual

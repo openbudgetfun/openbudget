@@ -582,9 +582,9 @@ void main() {
           authedSession,
           budget.id!,
           'GB',
-          TaxEntityKind.individual.name,
+          EntityKind.individual.name,
           jsonEncode(
-            const GbTaxProfile(entityKind: TaxEntityKind.individual).toJson(),
+            const GbTaxProfile(entityKind: EntityKind.individual).toJson(),
           ),
         );
         final transaction = await endpoints.transaction.create(
@@ -999,9 +999,9 @@ void main() {
             authedSession,
             budget.id!,
             'GB',
-            TaxEntityKind.individual.name,
+            EntityKind.individual.name,
             jsonEncode(
-              const GbTaxProfile(entityKind: TaxEntityKind.individual).toJson(),
+              const GbTaxProfile(entityKind: EntityKind.individual).toJson(),
             ),
           );
           final transaction = await endpoints.transaction.create(

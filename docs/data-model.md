@@ -3827,3 +3827,8 @@ Each question has a recommended default, which the implementation should follow 
 | Q10 | Allow deleting a posted transaction in a ledger-mode entity?     | **Yes**, unless it is dated within the lock or reconciled. The delete is audited, and the poster reverses its journal.                                                                                                         |
 | Q11 | Import Plaid pending transactions?                               | **No.** Skip them until they post, because pending ids change on posting and would duplicate rows. The reported balance still shows what the bank says.                                                                        |
 | Q12 | Add 3-decimal currencies (KWD, BHD) to `CurrencyCode` now?       | **Yes**, in the reset. It is two enum values plus tests, and it proves that nothing assumes 2 decimals.                                                                                                                        |
+
+## Deviations
+
+- Serverpod 4.1 rejects `import` as a reserved generated enum value. The shared `JournalSource` uses `imported`; all core and server callers use that name. Shared-package generation otherwise works, so the enum fallback is unnecessary.
+- Pure core funding calculations accept a `FundingGoal` record containing the goal kind name, amount and target date. This avoids a dependency from core on the server's `EnvelopeGoal` model.

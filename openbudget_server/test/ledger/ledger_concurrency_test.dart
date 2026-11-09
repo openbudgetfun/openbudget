@@ -88,9 +88,9 @@ void main() {
           owner,
           budget.id!,
           'GB',
-          TaxEntityKind.company.name,
+          EntityKind.company.name,
           jsonEncode(
-            const GbTaxProfile(entityKind: TaxEntityKind.company).toJson(),
+            const GbTaxProfile(entityKind: EntityKind.company).toJson(),
           ),
         );
         await endpoints.ledger.enableLedger(owner, budget.id!);

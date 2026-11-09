@@ -1,8 +1,8 @@
 import 'package:openbudget_core/src/tax/tax_model.dart';
 
-const Set<TaxEntityKind> _individualOnly = {TaxEntityKind.individual};
-const Set<TaxEntityKind> _soleTraderOnly = {TaxEntityKind.soleTrader};
-const Set<TaxEntityKind> _companyOnly = {TaxEntityKind.company};
+const Set<EntityKind> _individualOnly = {EntityKind.individual};
+const Set<EntityKind> _soleTraderOnly = {EntityKind.soleTrader};
+const Set<EntityKind> _companyOnly = {EntityKind.company};
 
 /// Categories that appear on an individual's Form 1040 and its schedules.
 ///

@@ -12,9 +12,9 @@ class FakeTaxPack implements TaxRulePack {
     label: 'Turnover',
     kind: TaxCategoryKind.income,
     entityKinds: {
-      TaxEntityKind.individual,
-      TaxEntityKind.soleTrader,
-      TaxEntityKind.company,
+      EntityKind.individual,
+      EntityKind.soleTrader,
+      EntityKind.company,
     },
   );
 
@@ -23,9 +23,9 @@ class FakeTaxPack implements TaxRulePack {
     label: 'Office costs',
     kind: TaxCategoryKind.expense,
     entityKinds: {
-      TaxEntityKind.individual,
-      TaxEntityKind.soleTrader,
-      TaxEntityKind.company,
+      EntityKind.individual,
+      EntityKind.soleTrader,
+      EntityKind.company,
     },
   );
 
@@ -33,7 +33,7 @@ class FakeTaxPack implements TaxRulePack {
     code: 'gb.test.employment',
     label: 'Employment',
     kind: TaxCategoryKind.income,
-    entityKinds: {TaxEntityKind.individual},
+    entityKinds: {EntityKind.individual},
   );
 
   static const List<TaxCategory> categories = [
@@ -66,7 +66,7 @@ class FakeTaxPack implements TaxRulePack {
   }
 
   @override
-  List<TaxCategory> categoriesFor(TaxEntityKind kind) => [
+  List<TaxCategory> categoriesFor(EntityKind kind) => [
     for (final category in categories)
       if (category.entityKinds.contains(kind)) category,
   ];

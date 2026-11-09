@@ -31,13 +31,13 @@ void main() {
       String name,
     ) => endpoints.budget.create(session, name, 'GBP');
 
-    String profileJson(TaxEntityKind kind) =>
+    String profileJson(EntityKind kind) =>
         jsonEncode(GbTaxProfile(entityKind: kind).toJson());
 
     Future<TaxProfileRecord> saveProfile(
       TestSessionBuilder session,
       Budget budget,
-      TaxEntityKind kind, {
+      EntityKind kind, {
       UuidValue? linkedBudgetId,
     }) => endpoints.tax.saveProfile(
       session,
@@ -63,7 +63,7 @@ void main() {
 
       test('then another user cannot read or write the profile', () async {
         final budget = await createBudget(authedSession, 'Personal');
-        await saveProfile(authedSession, budget, TaxEntityKind.individual);
+        await saveProfile(authedSession, budget, EntityKind.individual);
         final other = createAuthenticatedSession(sessionBuilder);
 
         await expectLater(
@@ -75,8 +75,8 @@ void main() {
             other,
             budget.id!,
             'GB',
-            TaxEntityKind.individual.name,
-            profileJson(TaxEntityKind.individual),
+            EntityKind.individual.name,
+            profileJson(EntityKind.individual),
           ),
           throwsA(isA<NotFoundException>()),
         );
@@ -98,7 +98,7 @@ void main() {
         final saved = await saveProfile(
           authedSession,
           budget,
-          TaxEntityKind.individual,
+          EntityKind.individual,
         );
         final loaded = await endpoints.tax.getProfile(
           authedSession,
@@ -118,7 +118,7 @@ void main() {
           'USD',
         );
         const profile = UsTaxProfile(
-          entityKind: TaxEntityKind.individual,
+          entityKind: EntityKind.individual,
           filingStatus: UsFilingStatus.qualifyingSurvivingSpouse,
           homeOfficeMethod: UsHomeOfficeMethod.regular,
           specifiedServiceTrade: true,
@@ -135,7 +135,7 @@ void main() {
           authedSession,
           budget.id!,
           'US',
-          TaxEntityKind.individual.name,
+          EntityKind.individual.name,
           jsonEncode(profile.toJson()),
         );
 
@@ -160,7 +160,7 @@ void main() {
       test('then a UK company profile keeps its new fields', () async {
         final budget = await createBudget(authedSession, 'Company');
         const profile = GbTaxProfile(
-          entityKind: TaxEntityKind.company,
+          entityKind: EntityKind.company,
           postgraduateLoan: true,
           accountingPeriodEndMonth: 6,
           accountingPeriodEndDay: 30,
@@ -171,7 +171,7 @@ void main() {
           authedSession,
           budget.id!,
           'GB',
-          TaxEntityKind.company.name,
+          EntityKind.company.name,
           jsonEncode(profile.toJson()),
         );
 
@@ -191,7 +191,7 @@ void main() {
           'NGN',
         );
         const profile = NgTaxProfile(
-          entityKind: TaxEntityKind.company,
+          entityKind: EntityKind.company,
           smallCompanyCeiling: NgSmallCompanyCeiling.ntaaIntended,
           mneGroupMember: true,
         );
@@ -200,7 +200,7 @@ void main() {
           authedSession,
           budget.id!,
           'NG',
-          TaxEntityKind.company.name,
+          EntityKind.company.name,
           jsonEncode(profile.toJson()),
         );
 
@@ -221,7 +221,7 @@ void main() {
           'EUR',
         );
         const profile = DeTaxProfile(
-          entityKind: TaxEntityKind.soleTrader,
+          entityKind: EntityKind.soleTrader,
           churchTax: true,
           churchTaxState: DeBundesland.bayern,
           einkunftsArt: DeEinkunftsArt.freiberuflich,
@@ -236,7 +236,7 @@ void main() {
           authedSession,
           budget.id!,
           'DE',
-          TaxEntityKind.soleTrader.name,
+          EntityKind.soleTrader.name,
           jsonEncode(profile.toJson()),
         );
 
@@ -253,7 +253,7 @@ void main() {
           authedSession,
           budget.id!,
           'GB',
-          TaxEntityKind.individual.name,
+          EntityKind.individual.name,
           jsonEncode({
             'jurisdiction': 'GB',
             'entityKind': 'individual',
@@ -282,7 +282,7 @@ void main() {
               authedSession,
               budget.id!,
               'GB',
-              TaxEntityKind.company.name,
+              EntityKind.company.name,
               jsonEncode({
                 'jurisdiction': 'GB',
                 'entityKind': 'company',
@@ -305,7 +305,7 @@ void main() {
             authedSession,
             budget.id!,
             'US',
-            TaxEntityKind.individual.name,
+            EntityKind.individual.name,
             jsonEncode({
               'jurisdiction': 'US',
               'entityKind': 'individual',
@@ -325,8 +325,8 @@ void main() {
             authedSession,
             budget.id!,
             'ZZ',
-            TaxEntityKind.individual.name,
-            profileJson(TaxEntityKind.individual),
+            EntityKind.individual.name,
+            profileJson(EntityKind.individual),
           ),
           throwsA(isA<ValidationException>()),
         );
@@ -341,7 +341,7 @@ void main() {
             budget.id!,
             'GB',
             'partnership',
-            profileJson(TaxEntityKind.individual),
+            profileJson(EntityKind.individual),
           ),
           throwsA(isA<ValidationException>()),
         );
@@ -355,7 +355,7 @@ void main() {
             authedSession,
             budget.id!,
             'GB',
-            TaxEntityKind.individual.name,
+            EntityKind.individual.name,
             '{not-json',
           ),
           throwsA(isA<ValidationException>()),
@@ -370,8 +370,8 @@ void main() {
             authedSession,
             budget.id!,
             'GB',
-            TaxEntityKind.soleTrader.name,
-            profileJson(TaxEntityKind.individual),
+            EntityKind.soleTrader.name,
+            profileJson(EntityKind.individual),
           ),
           throwsA(isA<ValidationException>()),
         );
@@ -385,7 +385,7 @@ void main() {
           saveProfile(
             authedSession,
             personal,
-            TaxEntityKind.individual,
+            EntityKind.individual,
             linkedBudgetId: other.id,
           ),
           throwsA(isA<ValidationException>()),
@@ -399,7 +399,7 @@ void main() {
           saveProfile(
             authedSession,
             business,
-            TaxEntityKind.soleTrader,
+            EntityKind.soleTrader,
             linkedBudgetId: business.id,
           ),
           throwsA(isA<ValidationException>()),
@@ -412,14 +412,14 @@ void main() {
         await saveProfile(
           authedSession,
           company,
-          TaxEntityKind.company,
+          EntityKind.company,
         );
 
         await expectLater(
           saveProfile(
             authedSession,
             business,
-            TaxEntityKind.soleTrader,
+            EntityKind.soleTrader,
             linkedBudgetId: company.id,
           ),
           throwsA(isA<ValidationException>()),
@@ -434,13 +434,13 @@ void main() {
           await saveProfile(
             authedSession,
             personal,
-            TaxEntityKind.individual,
+            EntityKind.individual,
           );
 
           final saved = await saveProfile(
             authedSession,
             business,
-            TaxEntityKind.soleTrader,
+            EntityKind.soleTrader,
             linkedBudgetId: personal.id,
           );
 
@@ -453,8 +453,8 @@ void main() {
       test('then only categories for the entity kind are returned', () async {
         final personal = await createBudget(authedSession, 'Personal');
         final company = await createBudget(authedSession, 'Company');
-        await saveProfile(authedSession, personal, TaxEntityKind.individual);
-        await saveProfile(authedSession, company, TaxEntityKind.company);
+        await saveProfile(authedSession, personal, EntityKind.individual);
+        await saveProfile(authedSession, company, EntityKind.company);
 
         final personalCategories = await endpoints.tax.listCategories(
           authedSession,
@@ -479,7 +479,7 @@ void main() {
         'when the real United Kingdom pack is used then SA103F boxes are listed',
         () async {
           final business = await createBudget(authedSession, 'Studio');
-          await saveProfile(authedSession, business, TaxEntityKind.soleTrader);
+          await saveProfile(authedSession, business, EntityKind.soleTrader);
           TaxService.packFor = TaxRules.forJurisdiction;
 
           final categories = await endpoints.tax.listCategories(
@@ -506,7 +506,7 @@ void main() {
     group('when categorising an envelope', () {
       test('then the category is stored and can be cleared', () async {
         final budget = await createBudget(authedSession, 'Personal');
-        await saveProfile(authedSession, budget, TaxEntityKind.individual);
+        await saveProfile(authedSession, budget, EntityKind.individual);
         final category = await endpoints.category.create(
           authedSession,
           'Work',
@@ -537,7 +537,7 @@ void main() {
 
       test('with an unknown category then rejects', () async {
         final budget = await createBudget(authedSession, 'Personal');
-        await saveProfile(authedSession, budget, TaxEntityKind.individual);
+        await saveProfile(authedSession, budget, EntityKind.individual);
         final category = await endpoints.category.create(
           authedSession,
           'Work',
@@ -564,7 +564,7 @@ void main() {
 
       test('with a category for another entity kind then rejects', () async {
         final budget = await createBudget(authedSession, 'Company');
-        await saveProfile(authedSession, budget, TaxEntityKind.company);
+        await saveProfile(authedSession, budget, EntityKind.company);
         final category = await endpoints.category.create(
           authedSession,
           'Work',
@@ -591,7 +591,7 @@ void main() {
 
       test('when another user tries then rejects', () async {
         final budget = await createBudget(authedSession, 'Personal');
-        await saveProfile(authedSession, budget, TaxEntityKind.individual);
+        await saveProfile(authedSession, budget, EntityKind.individual);
         final category = await endpoints.category.create(
           authedSession,
           'Work',
@@ -621,7 +621,7 @@ void main() {
     group('when categorising a transaction', () {
       test('then the values are stored and can be cleared', () async {
         final budget = await createBudget(authedSession, 'Personal');
-        await saveProfile(authedSession, budget, TaxEntityKind.individual);
+        await saveProfile(authedSession, budget, EntityKind.individual);
         final transaction = await endpoints.transaction.create(
           authedSession,
           'Receipt',
@@ -653,7 +653,7 @@ void main() {
 
       test('with an unknown category then rejects', () async {
         final budget = await createBudget(authedSession, 'Personal');
-        await saveProfile(authedSession, budget, TaxEntityKind.individual);
+        await saveProfile(authedSession, budget, EntityKind.individual);
         final transaction = await endpoints.transaction.create(
           authedSession,
           'Receipt',
@@ -675,7 +675,7 @@ void main() {
 
       test('with an invalid business use percent then rejects', () async {
         final budget = await createBudget(authedSession, 'Personal');
-        await saveProfile(authedSession, budget, TaxEntityKind.individual);
+        await saveProfile(authedSession, budget, EntityKind.individual);
         final transaction = await endpoints.transaction.create(
           authedSession,
           'Receipt',
@@ -705,7 +705,7 @@ void main() {
 
       test('with sales tax outside the amount then rejects', () async {
         final budget = await createBudget(authedSession, 'Personal');
-        await saveProfile(authedSession, budget, TaxEntityKind.individual);
+        await saveProfile(authedSession, budget, EntityKind.individual);
         final transaction = await endpoints.transaction.create(
           authedSession,
           'Receipt',
@@ -735,7 +735,7 @@ void main() {
 
       test('when another user tries then rejects', () async {
         final budget = await createBudget(authedSession, 'Personal');
-        await saveProfile(authedSession, budget, TaxEntityKind.individual);
+        await saveProfile(authedSession, budget, EntityKind.individual);
         final transaction = await endpoints.transaction.create(
           authedSession,
           'Receipt',
@@ -766,12 +766,12 @@ void main() {
           await saveProfile(
             authedSession,
             personal,
-            TaxEntityKind.individual,
+            EntityKind.individual,
           );
           await saveProfile(
             authedSession,
             business,
-            TaxEntityKind.soleTrader,
+            EntityKind.soleTrader,
             linkedBudgetId: personal.id,
           );
 
@@ -838,7 +838,7 @@ void main() {
         await saveProfile(
           authedSession,
           budget,
-          TaxEntityKind.individual,
+          EntityKind.individual,
         );
         final transaction = await endpoints.transaction.create(
           authedSession,
@@ -895,7 +895,7 @@ void main() {
         await saveProfile(
           authedSession,
           budget,
-          TaxEntityKind.individual,
+          EntityKind.individual,
         );
         await endpoints.transaction.create(
           authedSession,
@@ -923,7 +923,7 @@ void main() {
           await saveProfile(
             authedSession,
             budget,
-            TaxEntityKind.individual,
+            EntityKind.individual,
           );
           TaxService.packFor = TaxRules.forJurisdiction;
 
@@ -941,7 +941,7 @@ void main() {
           await saveProfile(
             authedSession,
             budget,
-            TaxEntityKind.individual,
+            EntityKind.individual,
           );
           TaxService.packFor = TaxRules.forJurisdiction;
           final salary = await endpoints.transaction.create(
@@ -980,7 +980,7 @@ void main() {
         await saveProfile(
           authedSession,
           budget,
-          TaxEntityKind.individual,
+          EntityKind.individual,
         );
 
         await expectLater(

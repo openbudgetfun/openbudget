@@ -8,7 +8,7 @@ part of 'ng_tax_rules.dart';
 ({Map<String, int> amounts, Map<String, int> counts, int uncategorized})
 _totals(
   Iterable<TaxEntry> entries,
-  TaxEntityKind kind, {
+  EntityKind kind, {
   int Function(TaxEntry entry, TaxCategory category)? amountOf,
 }) {
   final amounts = <String, int>{};

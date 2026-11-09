@@ -9,7 +9,7 @@ import 'package:openbudget_core/src/tax/tax_model.dart';
 sealed class TaxProfile {
   const TaxProfile({required this.entityKind});
 
-  final TaxEntityKind entityKind;
+  final EntityKind entityKind;
 
   TaxJurisdiction get jurisdiction;
 
@@ -19,7 +19,7 @@ sealed class TaxProfile {
   Map<String, Object?> toJson();
 
   static TaxProfile fromJson(Map<String, Object?> json) {
-    final entityKind = _requiredEnum(json, 'entityKind', TaxEntityKind.values);
+    final entityKind = _requiredEnum(json, 'entityKind', EntityKind.values);
     final registered = _field<bool>(json, 'salesTaxRegistered') ?? false;
     final jurisdictionCode = _required<String>(json, 'jurisdiction');
     return switch (TaxJurisdiction.fromCountryCode(jurisdictionCode)) {
@@ -183,7 +183,7 @@ final class GbTaxProfile extends TaxProfile {
 /// `studentLoanPlan`.
 GbTaxProfile gbProfileFromJson(
   Map<String, Object?> json,
-  TaxEntityKind entityKind, {
+  EntityKind entityKind, {
   required bool salesTaxRegistered,
 }) {
   final legacyPlan = _enumField(

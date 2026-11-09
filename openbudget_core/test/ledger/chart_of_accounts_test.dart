@@ -5,8 +5,8 @@ void main() {
   final combinations = [
     for (final jurisdiction in TaxJurisdiction.values)
       for (final entityKind in [
-        TaxEntityKind.soleTrader,
-        TaxEntityKind.company,
+        EntityKind.soleTrader,
+        EntityKind.company,
       ])
         (jurisdiction: jurisdiction, entityKind: entityKind),
   ];
@@ -35,7 +35,7 @@ void main() {
         expect(
           LedgerChartTemplate.forBooks(
             jurisdiction: jurisdiction,
-            entityKind: TaxEntityKind.individual,
+            entityKind: EntityKind.individual,
           ),
           isNull,
         );
@@ -118,7 +118,7 @@ void main() {
             .map((account) => account.systemRole)
             .whereType<LedgerSystemRole>()
             .toSet();
-        final expected = combination.entityKind == TaxEntityKind.company
+        final expected = combination.entityKind == EntityKind.company
             ? companyRoles
             : soleTraderRoles;
 
@@ -152,7 +152,7 @@ void main() {
               .whereType<LedgerSystemRole>()
               .toSet();
 
-          if (combination.entityKind == TaxEntityKind.company) {
+          if (combination.entityKind == EntityKind.company) {
             expect(roles, isNot(contains(LedgerSystemRole.ownerDrawings)));
           } else {
             expect(roles, isNot(contains(LedgerSystemRole.directorsLoan)));
@@ -216,13 +216,16 @@ void main() {
     });
 
     test('parses from enum names', () {
-      expect(LedgerAccountType.tryParse('asset'), LedgerAccountType.asset);
-      expect(LedgerAccountType.tryParse('nope'), isNull);
       expect(
-        LedgerSystemRole.tryParse('vatControl'),
+        LedgerAccountType.values.asNameMap()['asset'],
+        LedgerAccountType.asset,
+      );
+      expect(LedgerAccountType.values.asNameMap()['nope'], isNull);
+      expect(
+        LedgerSystemRole.values.asNameMap()['vatControl'],
         LedgerSystemRole.vatControl,
       );
-      expect(LedgerSystemRole.tryParse('VAT'), isNull);
+      expect(LedgerSystemRole.values.asNameMap()['VAT'], isNull);
     });
   });
 }

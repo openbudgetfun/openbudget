@@ -22,8 +22,8 @@ class LedgerService {
 
   /// Turns the ledger on for a budget.
   ///
-  /// The budget's tax profile must exist and name a [TaxEntityKind.soleTrader]
-  /// or [TaxEntityKind.company]; personal budgets stay envelope-only. Seeds
+  /// The budget's tax profile must exist and name a [EntityKind.soleTrader]
+  /// or [EntityKind.company]; personal budgets stay envelope-only. Seeds
   /// the chart of accounts from the jurisdiction's template and switches
   /// `accountingMode` to `ledger`. Switching back is not supported.
   static Future<Budget> enableLedger(
@@ -32,7 +32,7 @@ class LedgerService {
   }) async {
     _log.info('Enabling ledger for budget=$budgetId');
     final budget = await BudgetService.getById(session, budgetId: budgetId);
-    if (AccountingMode.tryParse(budget.accountingMode) ==
+    if (AccountingMode.values.asNameMap()[budget.accountingMode] ==
         AccountingMode.ledger) {
       throw ValidationException(
         message: 'This budget already keeps its books in the ledger.',
@@ -49,7 +49,7 @@ class LedgerService {
       );
     }
     final entityKind = _parseEntityKind(profile.entityKind);
-    if (entityKind == TaxEntityKind.individual) {
+    if (entityKind == EntityKind.individual) {
       throw ValidationException(
         message: 'Only sole-trader and company budgets can use the ledger.',
       );
@@ -162,13 +162,13 @@ class LedgerService {
     if (trimmedName.isEmpty) {
       throw ValidationException(message: 'Account name must not be empty.');
     }
-    final parsedType = LedgerAccountType.tryParse(type);
+    final parsedType = LedgerAccountType.values.asNameMap()[type];
     if (parsedType == null) {
       throw ValidationException(message: 'Unknown account type: $type.');
     }
     final parsedRole = systemRole == null
         ? null
-        : LedgerSystemRole.tryParse(systemRole);
+        : LedgerSystemRole.values.asNameMap()[systemRole];
     if (systemRole != null && parsedRole == null) {
       throw ValidationException(
         message: 'Unknown system role: $systemRole.',
@@ -326,7 +326,7 @@ class LedgerService {
     final budget = await _requireLedgerBudget(session, budgetId: budgetId);
     final userId = _requireUserId(session);
 
-    final parsedSource = JournalSource.tryParse(source);
+    final parsedSource = JournalSource.values.asNameMap()[source];
     if (parsedSource == null) {
       throw ValidationException(message: 'Unknown journal source: $source.');
     }
@@ -948,7 +948,7 @@ class LedgerService {
     required UuidValue budgetId,
   }) async {
     final budget = await BudgetService.getById(session, budgetId: budgetId);
-    if (AccountingMode.tryParse(budget.accountingMode) !=
+    if (AccountingMode.values.asNameMap()[budget.accountingMode] !=
         AccountingMode.ledger) {
       throw ValidationException(
         message:
@@ -1129,8 +1129,8 @@ class LedgerService {
   static DateTime _calendarDate(DateTime date) =>
       DateTime(date.year, date.month, date.day);
 
-  static TaxEntityKind _parseEntityKind(String name) {
-    for (final kind in TaxEntityKind.values) {
+  static EntityKind _parseEntityKind(String name) {
+    for (final kind in EntityKind.values) {
       if (kind.name == name) {
         return kind;
       }

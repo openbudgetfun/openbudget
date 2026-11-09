@@ -29,17 +29,17 @@ List<TaxOpportunity> deOpportunities(
   return [
     _filingDeadline(table),
     ...switch (profile.entityKind) {
-      TaxEntityKind.individual => _individualOpportunities(
+      EntityKind.individual => _individualOpportunities(
         input,
         profile,
         table,
       ),
-      TaxEntityKind.soleTrader => _soleTraderOpportunities(
+      EntityKind.soleTrader => _soleTraderOpportunities(
         input,
         profile,
         table,
       ),
-      TaxEntityKind.company => _companyOpportunities(input, profile, table),
+      EntityKind.company => _companyOpportunities(input, profile, table),
     },
   ];
 }
@@ -152,7 +152,7 @@ List<TaxOpportunity> _individualOpportunities(
   for (final linked in input.linked) {
     final linkedProfile = linked.profile;
     if (linkedProfile is! DeTaxProfile ||
-        linkedProfile.entityKind != TaxEntityKind.company) {
+        linkedProfile.entityKind != EntityKind.company) {
       continue;
     }
     final company = deCompanyResult(linked, table);
@@ -249,7 +249,7 @@ List<TaxOpportunity> _smallBusinessOpportunity(
     return const [];
   }
   final Map<String, int> totals;
-  if (profile.entityKind == TaxEntityKind.company) {
+  if (profile.entityKind == EntityKind.company) {
     totals = deCompanyResult(input, table).totals;
   } else {
     totals = deEuer(input, table).totals;
