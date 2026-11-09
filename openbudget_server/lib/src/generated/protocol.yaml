@@ -64,6 +64,7 @@ envelope:
 fxRate:
   - latest:
   - refresh:
+  - quote:
 institution:
   - list:
 plaid:

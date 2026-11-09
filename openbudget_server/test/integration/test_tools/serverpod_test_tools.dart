@@ -46,8 +46,12 @@ import 'package:openbudget_server/src/generated/envelope_goals/envelope_goal.dar
 import 'package:openbudget_server/src/generated/envelopes/envelope.dart'
     as _igwnqatb;
 import 'package:openbudget_server/src/generated/future_calls.dart' as _iwv90kfd;
+import 'package:openbudget_server/src/generated/future_calls_generated_models/fx_backfill_future_call_fetch_model.dart'
+    as _i0uw56cr;
 import 'package:openbudget_server/src/generated/fx_rates/fx_latest_snapshot.dart'
     as _ictw4lhv;
+import 'package:openbudget_server/src/generated/fx_rates/fx_quote_view.dart'
+    as _irw5ufyh;
 import 'package:openbudget_server/src/generated/institutions/institution.dart'
     as _izagyfe8;
 import 'package:openbudget_server/src/generated/settings/user_settings.dart'
@@ -296,6 +300,10 @@ class _FutureCalls {
   late final balanceVerify = _BalanceVerifyFutureCall();
 
   late final solanaBillingCollector = _SolanaBillingCollectorFutureCall();
+
+  late final fxBackfill = _FxBackfillFutureCall();
+
+  late final fxRefresh = _FxRefreshFutureCall();
 }
 
 class _AgentEndpoint {
@@ -2130,6 +2138,41 @@ class _FxRateEndpoint {
       }
     });
   }
+
+  _ida.Future<_irw5ufyh.FxQuoteView> quote(
+    _ist.TestSessionBuilder sessionBuilder,
+    String fromCurrencyCode,
+    String toCurrencyCode,
+    DateTime date,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'fxRate',
+            method: 'quote',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'fxRate',
+          methodName: 'quote',
+          parameters: _ist.testObjectToJson({
+            'fromCurrencyCode': fromCurrencyCode,
+            'toCurrencyCode': toCurrencyCode,
+            'date': date,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _ida.Future<_irw5ufyh.FxQuoteView>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
 }
 
 class _InstitutionEndpoint {
@@ -2400,6 +2443,40 @@ class _SolanaBillingCollectorFutureCall {
         (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild();
     try {
       await _iwv90kfd.SolanaBillingCollectorCollectFutureCall().invoke(
+        _localUniqueSession,
+        null,
+      );
+    } finally {
+      await _localUniqueSession.close();
+    }
+  }
+}
+
+class _FxBackfillFutureCall {
+  Future<void> fetch(
+    _ist.TestSessionBuilder sessionBuilder,
+    DateTime date,
+  ) async {
+    var object = _i0uw56cr.FxBackfillFutureCallFetchModel(date: date);
+    var _localUniqueSession =
+        (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild();
+    try {
+      await _iwv90kfd.FxBackfillFetchFutureCall().invoke(
+        _localUniqueSession,
+        object,
+      );
+    } finally {
+      await _localUniqueSession.close();
+    }
+  }
+}
+
+class _FxRefreshFutureCall {
+  Future<void> refresh(_ist.TestSessionBuilder sessionBuilder) async {
+    var _localUniqueSession =
+        (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild();
+    try {
+      await _iwv90kfd.FxRefreshRefreshFutureCall().invoke(
         _localUniqueSession,
         null,
       );

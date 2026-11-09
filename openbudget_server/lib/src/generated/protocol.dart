@@ -94,6 +94,8 @@ import 'exceptions/fx_rate_unavailable_exception.dart' as _if5umnl3;
 import 'exceptions/not_found_exception.dart' as _izob2ctl;
 import 'exceptions/tax_rules_unavailable_exception.dart' as _i4yu9vcq;
 import 'exceptions/validation_exception.dart' as _igpdbyom;
+import 'future_calls_generated_models/fx_backfill_future_call_fetch_model.dart'
+    as _iuflqeka;
 import 'fx_rates/fx_latest_snapshot.dart' as _i8cxakqz;
 import 'fx_rates/fx_provider.dart' as _ifsg8hc8;
 import 'fx_rates/fx_quote_view.dart' as _i8bj7347;
@@ -344,6 +346,7 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<_izob2ctl.NotFoundException>,
           _is.getType<_i4yu9vcq.TaxRulesUnavailableException>,
           _is.getType<_igpdbyom.ValidationException>,
+          _is.getType<_iuflqeka.FxBackfillFutureCallFetchModel>,
           _is.getType<_i8cxakqz.FxLatestSnapshot>,
           _is.getType<_ifsg8hc8.FxProvider>,
           _is.getType<_i8bj7347.FxQuoteView>,
@@ -462,6 +465,7 @@ class Protocol extends _is.DatabaseSerializationManager
           _is.getType<_izob2ctl.NotFoundException?>,
           _is.getType<_i4yu9vcq.TaxRulesUnavailableException?>,
           _is.getType<_igpdbyom.ValidationException?>,
+          _is.getType<_iuflqeka.FxBackfillFutureCallFetchModel?>,
           _is.getType<_i8cxakqz.FxLatestSnapshot?>,
           _is.getType<_ifsg8hc8.FxProvider?>,
           _is.getType<_i8bj7347.FxQuoteView?>,
@@ -616,6 +620,7 @@ class Protocol extends _is.DatabaseSerializationManager
           'NotFoundException',
           'TaxRulesUnavailableException',
           'ValidationException',
+          'FxBackfillFutureCallFetchModel',
           'FxLatestSnapshot',
           'FxProvider',
           'FxQuoteView',
@@ -5485,6 +5490,9 @@ class Protocol extends _is.DatabaseSerializationManager
     if (t == _igpdbyom.ValidationException) {
       return _igpdbyom.ValidationException.fromJson(data) as T;
     }
+    if (t == _iuflqeka.FxBackfillFutureCallFetchModel) {
+      return _iuflqeka.FxBackfillFutureCallFetchModel.fromJson(data) as T;
+    }
     if (t == _i8cxakqz.FxLatestSnapshot) {
       return _i8cxakqz.FxLatestSnapshot.fromJson(data) as T;
     }
@@ -5913,6 +5921,12 @@ class Protocol extends _is.DatabaseSerializationManager
     if (t == _is.getType<_igpdbyom.ValidationException?>()) {
       return (data != null
               ? _igpdbyom.ValidationException.fromJson(data)
+              : null)
+          as T;
+    }
+    if (t == _is.getType<_iuflqeka.FxBackfillFutureCallFetchModel?>()) {
+      return (data != null
+              ? _iuflqeka.FxBackfillFutureCallFetchModel.fromJson(data)
               : null)
           as T;
     }
@@ -6393,6 +6407,8 @@ class Protocol extends _is.DatabaseSerializationManager
       _izob2ctl.NotFoundException => 'NotFoundException',
       _i4yu9vcq.TaxRulesUnavailableException => 'TaxRulesUnavailableException',
       _igpdbyom.ValidationException => 'ValidationException',
+      _iuflqeka.FxBackfillFutureCallFetchModel =>
+        'FxBackfillFutureCallFetchModel',
       _i8cxakqz.FxLatestSnapshot => 'FxLatestSnapshot',
       _ifsg8hc8.FxProvider => 'FxProvider',
       _i8bj7347.FxQuoteView => 'FxQuoteView',
@@ -6582,6 +6598,8 @@ class Protocol extends _is.DatabaseSerializationManager
         return 'TaxRulesUnavailableException';
       case _igpdbyom.ValidationException():
         return 'ValidationException';
+      case _iuflqeka.FxBackfillFutureCallFetchModel():
+        return 'FxBackfillFutureCallFetchModel';
       case _i8cxakqz.FxLatestSnapshot():
         return 'FxLatestSnapshot';
       case _ifsg8hc8.FxProvider():
@@ -6912,6 +6930,11 @@ class Protocol extends _is.DatabaseSerializationManager
     }
     if (dataClassName == 'ValidationException') {
       return deserialize<_igpdbyom.ValidationException>(data['data']);
+    }
+    if (dataClassName == 'FxBackfillFutureCallFetchModel') {
+      return deserialize<_iuflqeka.FxBackfillFutureCallFetchModel>(
+        data['data'],
+      );
     }
     if (dataClassName == 'FxLatestSnapshot') {
       return deserialize<_i8cxakqz.FxLatestSnapshot>(data['data']);

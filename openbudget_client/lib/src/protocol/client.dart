@@ -45,6 +45,8 @@ import 'package:openbudget_client/src/protocol/envelopes/envelope.dart'
     as _i29jf3by;
 import 'package:openbudget_client/src/protocol/fx_rates/fx_latest_snapshot.dart'
     as _it7vndki;
+import 'package:openbudget_client/src/protocol/fx_rates/fx_quote_view.dart'
+    as _ij92xk61;
 import 'package:openbudget_client/src/protocol/institutions/institution.dart'
     as _i6ysl1a4;
 import 'package:openbudget_client/src/protocol/settings/user_settings.dart'
@@ -869,7 +871,7 @@ class EndpointFxRate extends _isc.EndpointRef {
   @override
   String get name => 'fxRate';
 
-  /// Returns the latest FX snapshot persisted by the backend.
+  /// Returns the latest daily FX rows persisted by the backend.
   _ida.Future<_it7vndki.FxLatestSnapshot> latest() =>
       caller.callServerEndpoint<_it7vndki.FxLatestSnapshot>(
         'fxRate',
@@ -884,6 +886,24 @@ class EndpointFxRate extends _isc.EndpointRef {
         'refresh',
         {},
       );
+
+  /// Resolves the rate the server would use on [date].
+  ///
+  /// Throws [FxRateUnavailableException] when no rate exists; it never answers
+  /// with an identity rate for two different currencies.
+  _ida.Future<_ij92xk61.FxQuoteView> quote(
+    String fromCurrencyCode,
+    String toCurrencyCode,
+    DateTime date,
+  ) => caller.callServerEndpoint<_ij92xk61.FxQuoteView>(
+    'fxRate',
+    'quote',
+    {
+      'fromCurrencyCode': fromCurrencyCode,
+      'toCurrencyCode': toCurrencyCode,
+      'date': date,
+    },
+  );
 }
 
 /// API surface for institution catalog discovery.

@@ -18,6 +18,10 @@ import 'package:serverpod/serverpod.dart' as _is;
 
 import '../accounts/balance_verify_future_call.dart' as _i3hgsuzd;
 import '../billing/solana_billing_collector_future_call.dart' as _i6oeyfz6;
+import '../fx_rates/fx_backfill_future_call.dart' as _idsel8od;
+import '../fx_rates/fx_refresh_future_call.dart' as _i1ol5dhc;
+import 'future_calls_generated_models/fx_backfill_future_call_fetch_model.dart'
+    as _iuflqeka;
 
 /// Invokes a future call.
 typedef _InvokeFutureCall = Future<void> Function(
@@ -66,6 +70,8 @@ class FutureCalls extends _is.FutureCallDispatch<_FutureCallRef> {
       'BalanceVerifyVerifyFutureCall': BalanceVerifyVerifyFutureCall(),
       'SolanaBillingCollectorCollectFutureCall':
           SolanaBillingCollectorCollectFutureCall(),
+      'FxBackfillFetchFutureCall': FxBackfillFetchFutureCall(),
+      'FxRefreshRefreshFutureCall': FxRefreshRefreshFutureCall(),
     };
     _futureCallManager = futureCallManager;
     _serverId = serverId;
@@ -192,6 +198,10 @@ class _FutureCallRef {
 
   late final solanaBillingCollector =
       _SolanaBillingCollectorFutureCallDispatcher(_invokeFutureCall);
+
+  late final fxBackfill = _FxBackfillFutureCallDispatcher(_invokeFutureCall);
+
+  late final fxRefresh = _FxRefreshFutureCallDispatcher(_invokeFutureCall);
 }
 
 class _BalanceVerifyFutureCallDispatcher {
@@ -220,6 +230,34 @@ class _SolanaBillingCollectorFutureCallDispatcher {
   }
 }
 
+class _FxBackfillFutureCallDispatcher {
+  _FxBackfillFutureCallDispatcher(this._invokeFutureCall);
+
+  final _InvokeFutureCall _invokeFutureCall;
+
+  Future<void> fetch(DateTime date) {
+    var object = _iuflqeka.FxBackfillFutureCallFetchModel(date: date);
+    return _invokeFutureCall(
+      'FxBackfillFetchFutureCall',
+      object,
+    );
+  }
+}
+
+class _FxRefreshFutureCallDispatcher {
+  _FxRefreshFutureCallDispatcher(this._invokeFutureCall);
+
+  final _InvokeFutureCall _invokeFutureCall;
+
+  Future<void> refresh() {
+    return _invokeFutureCall(
+      'FxRefreshRefreshFutureCall',
+      null,
+    );
+  }
+}
+
+/// Repairs drift and schedules tomorrow even if verification fails.
 class BalanceVerifyVerifyFutureCall extends _is.FutureCall
     implements _is.InvokableFutureCall {
   @override
@@ -239,5 +277,39 @@ class SolanaBillingCollectorCollectFutureCall extends _is.FutureCall
     _is.SerializableModel? object,
   ) async {
     await _i6oeyfz6.SolanaBillingCollectorFutureCall().collect(session);
+  }
+}
+
+/// Backfills exactly [date]. Never substitutes a newer day's rates.
+class FxBackfillFetchFutureCall
+    extends _is.FutureCall<_iuflqeka.FxBackfillFutureCallFetchModel>
+    implements
+        _is.InvokableFutureCall<_iuflqeka.FxBackfillFutureCallFetchModel> {
+  @override
+  _ida.Future<void> invoke(
+    _is.Session session,
+    _iuflqeka.FxBackfillFutureCallFetchModel? object,
+  ) async {
+    if (object != null) {
+      await _idsel8od.FxBackfillFutureCall().fetch(
+        session,
+        object.date,
+      );
+    }
+  }
+}
+
+/// Fetches the provider's latest rates and upserts today's rows.
+///
+/// A missing provider key skips the sweep. Provider failures propagate so a
+/// broken upstream is visible instead of silently serving stale rates.
+class FxRefreshRefreshFutureCall extends _is.FutureCall
+    implements _is.InvokableFutureCall {
+  @override
+  _ida.Future<void> invoke(
+    _is.Session session,
+    _is.SerializableModel? object,
+  ) async {
+    await _i1ol5dhc.FxRefreshFutureCall().refresh(session);
   }
 }

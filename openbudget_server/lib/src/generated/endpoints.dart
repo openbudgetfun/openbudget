@@ -1438,6 +1438,37 @@ class Endpoints extends _is.EndpointDispatch {
               ) async => (endpoints['fxRate'] as _i7xoygut.FxRateEndpoint)
                   .refresh(session),
         ),
+        'quote': _is.MethodConnector(
+          name: 'quote',
+          params: {
+            'fromCurrencyCode': _is.ParameterDescription(
+              name: 'fromCurrencyCode',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'toCurrencyCode': _is.ParameterDescription(
+              name: 'toCurrencyCode',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'date': _is.ParameterDescription(
+              name: 'date',
+              type: _is.getType<DateTime>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['fxRate'] as _i7xoygut.FxRateEndpoint).quote(
+                    session,
+                    params['fromCurrencyCode'],
+                    params['toCurrencyCode'],
+                    params['date'],
+                  ),
+        ),
       },
     );
     connectors['institution'] = _is.EndpointConnector(
