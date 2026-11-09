@@ -2,6 +2,7 @@ import 'package:jaspr/dom.dart';
 import 'package:jaspr/jaspr.dart';
 import 'package:openbudget_site/site_config.dart';
 import 'package:openbudget_site/src/components/brand_artwork.dart';
+import 'package:openbudget_site/src/components/github_mark.dart';
 
 /// The bar across the top: the lockup, the page's sections, and the way
 /// into the web app.
@@ -23,7 +24,13 @@ final class Masthead extends StatelessComponent {
       href: '/',
       classes: 'masthead-brand',
       attributes: {'aria-label': 'OpenBudget home'},
-      [BrandArtwork('lockup.svg', classes: 'lockup brand-art')],
+      [
+        BrandArtwork('lockup.svg', classes: 'lockup brand-art brand-day'),
+        BrandArtwork(
+          'lockup-night.svg',
+          classes: 'lockup brand-art brand-night',
+        ),
+      ],
     ),
     nav(
       classes: 'masthead-nav',
@@ -36,9 +43,11 @@ final class Masthead extends StatelessComponent {
           const a(href: '/#pricing', [Component.text('Pricing')]),
           const a(href: '/#questions', [Component.text('Questions')]),
         ],
-        a(href: config.sourceUrl.toString(), const [
-          Component.text('GitHub'),
-        ]),
+        a(
+          href: config.sourceUrl.toString(),
+          classes: 'with-mark',
+          const [GithubMark(), Component.text('GitHub')],
+        ),
       ],
     ),
     a(

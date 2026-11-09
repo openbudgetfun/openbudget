@@ -17,11 +17,14 @@ import 'dart:io';
 import 'dart:isolate';
 
 const _brand = '../brand';
-const _paper = '#FCF8EF';
-const _ink = '#262C44';
-const _muted = '#5C627A';
-const _indigo = '#3E4CC9';
-const _highlighter = '#FFEC8A';
+// ObSwatch values from openbudget_ui/lib/src/theme/ob_palette.dart.
+const _paper = '#FFF4DE';
+const _ink = '#1A1233';
+const _muted = '#5B4F7A';
+const _pink = '#FF3D8B';
+const _pinkText = '#B8005A';
+const _teal = '#00C2A8';
+const _highlighter = '#FFC400';
 
 Future<void> main() async {
   if (!File('$_brand/mark.svg').existsSync()) {
@@ -68,15 +71,16 @@ String _socialCard() {
   return '''
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
   <rect width="1200" height="630" fill="$_paper"/>
-  ${_nest('lockup.svg', x: left, y: 58, width: 52 * 552 / 118, height: 52)}
+  <circle cx="1010" cy="318" r="236" fill="$_teal" opacity="0.18"/>
+  ${_nest('lockup.svg', x: left, y: 58, width: 52 * 664 / 140, height: 52)}
   <rect x="${wordStart - 6}" y="230" width="${wordWidth + 12}" height="44" rx="6" fill="$_highlighter" transform="rotate(-1.2 ${wordStart + wordWidth / 2} 252)"/>
   <g font-family="SkribbleGentle" font-weight="800" font-size="92" fill="$_ink">
     <text x="$left" y="268">Put every dollar</text>
     <text x="$left" y="364">in an envelope.</text>
   </g>
-  <path d="M74 392C210 384 380 398 520 389S700 386 770 392" fill="none" stroke="$_indigo" stroke-width="5" stroke-linecap="round"/>
+  <path d="M74 392C210 384 380 398 520 389S700 386 770 392" fill="none" stroke="$_pink" stroke-width="6" stroke-linecap="round"/>
   <text x="$left" y="462" font-family="SkribbleLinearGentle" font-size="32" fill="$_muted">Envelope budgeting across currencies.</text>
-  <text x="$left" y="560" font-family="SkribbleMonoGentle" font-weight="600" font-size="28" fill="$_indigo">openbudget.app</text>
+  <text x="$left" y="560" font-family="SkribbleMonoGentle" font-weight="600" font-size="28" fill="$_pinkText">openbudget.app</text>
   <text x="330" y="560" font-family="SkribbleLinearGentle" font-size="28" fill="$_muted">Free to start · Open source</text>
   ${_nest('mark.svg', x: 846, y: 150, width: 320, height: 320)}
 </svg>

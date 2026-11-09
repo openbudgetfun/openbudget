@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:openbudget_ui/src/theme/color_tokens.dart';
 import 'package:openbudget_ui/src/theme/ob_palette.dart';
 import 'package:openbudget_ui/src/theme/ob_rough_decoration.dart';
 
 /// A short status label on its tone's wash, such as "Overspent".
 ///
-/// The label is ink on the wash so it always reads; the optional [icon]
-/// takes the tone's hue. The word carries the meaning, never the colour.
+/// A pill of wash with a pencil edge. The label is ink on the wash so it
+/// always reads; a small dot, or the optional [icon], takes the tone's hue.
+/// The word carries the meaning, never the colour.
 class ObToneChip extends HookWidget {
   const ObToneChip({
     required this.label,
@@ -26,24 +28,34 @@ class ObToneChip extends HookWidget {
     final theme = Theme.of(context);
     final palette = theme.ob;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: const EdgeInsets.fromLTRB(10, 5, 12, 5),
       decoration: ObRoughDecoration(
         color: palette.wash(tone),
         outline: palette.quietPen,
-        radius: 14,
-        strokeWidth: 1.6,
+        radius: RadiusTokens.pill,
+        strokeWidth: 1.4,
         seed: seed,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (icon case final glyph?) ...[
+          if (icon case final glyph?)
             IconTheme.merge(
               data: IconThemeData(color: palette.hue(tone), size: 16),
               child: glyph,
+            )
+          else
+            ExcludeSemantics(
+              child: Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: palette.hue(tone),
+                  shape: BoxShape.circle,
+                ),
+              ),
             ),
-            const SizedBox(width: 6),
-          ],
+          const SizedBox(width: 6),
           Flexible(
             child: Text(
               label,

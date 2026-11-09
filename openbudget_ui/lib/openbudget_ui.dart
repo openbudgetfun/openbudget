@@ -1,8 +1,8 @@
 /// Shared Flutter widgets and theme for OpenBudget.
 ///
-/// The look is a kitchen-table envelope budget: warm paper, indigo-black
-/// ink, hand-drawn outlines from Skribble, and a highlighter for the money
-/// that is ready to assign. Read colour roles with `Theme.of(context).ob`.
+/// The look is a two-colour print zine: a newsprint page, one deep ink,
+/// spot inks laid down slightly off-register, hand-drawn outlines from
+/// Skribble, and a highlighter for the money that is ready to assign. Read colour roles with `Theme.of(context).ob`.
 library;
 
 // The Skribble pieces app code draws with directly, so features depend on
@@ -16,7 +16,13 @@ export 'package:skribble/skribble.dart'
         WiredRoughness,
         WiredSvgIconData;
 
+export 'src/flourish/ob_ink_burst.dart';
+export 'src/flourish/ob_postmark.dart';
+export 'src/flourish/ob_scribble_underline.dart';
+export 'src/flourish/ob_spot_doodle.dart';
 export 'src/icons/openbudget_icons.g.dart';
+export 'src/motion/ob_ink_transition.dart';
+export 'src/motion/ob_motion.dart';
 export 'src/theme/color_tokens.dart';
 export 'src/theme/ob_palette.dart';
 export 'src/theme/ob_pen.dart';
@@ -30,6 +36,7 @@ export 'src/widgets/ob_card.dart';
 export 'src/widgets/ob_dropdown.dart';
 export 'src/widgets/ob_envelope_gauge.dart';
 export 'src/widgets/ob_highlighter.dart';
+export 'src/widgets/ob_list_row.dart';
 export 'src/widgets/ob_mark.dart';
 export 'src/widgets/ob_section_header.dart';
 export 'src/widgets/ob_state_panel.dart';

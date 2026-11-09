@@ -119,6 +119,7 @@ void main() {
       expect(find.text('Tax year 2026/27'), findsOneWidget);
       expect(find.text('Balance due'), findsOneWidget);
       expect(find.text('£7,480.00'), findsWidgets);
+      await tester.scrollUntilVisible(find.text('£42,000.00'), 120);
       expect(find.text('£42,000.00'), findsOneWidget);
       expect(find.text('SA100 box 1'), findsOneWidget);
       expect(find.text('Uncategorized: 3'), findsOneWidget);
