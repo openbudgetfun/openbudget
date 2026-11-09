@@ -461,7 +461,7 @@ in
       exec = ''
         set -e
         test:flutter
-        melos exec --scope="openbudget_core" -- dart test
+        melos exec --scope="openbudget_core" --scope="openbudget_site" -- dart test
       '';
       description = "Run tests in all packages.";
     };

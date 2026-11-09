@@ -1,0 +1,1409 @@
+/*
+ * The OpenBudget landing page.
+ *
+ * Every colour is an ObSwatch value from
+ * openbudget_ui/lib/src/theme/ob_palette.dart, and the type is the app's
+ * own Skribble trio: SkribbleGentle for display, SkribbleLinearGentle for
+ * text and SkribbleMonoGentle for numbers.
+ */
+
+@font-face {
+  font-family: "Skribble Gentle";
+  src: url("/fonts/skribble-gentle-extrabold.woff2") format("woff2");
+  font-weight: 800;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Skribble Linear Gentle";
+  src: url("/fonts/skribble-linear-gentle-regular.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Skribble Linear Gentle";
+  src: url("/fonts/skribble-linear-gentle-semibold.woff2") format("woff2");
+  font-weight: 600;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Skribble Mono Gentle";
+  src: url("/fonts/skribble-mono-gentle-semibold.woff2") format("woff2");
+  font-weight: 600;
+  font-display: swap;
+}
+
+:root {
+  color-scheme: light dark;
+
+  /* ObSwatch: paper colourway. */
+  --paper: #fcf8ef;
+  --ink: #262c44;
+  --muted: #5c627a;
+  --line: #c8c5d3;
+  --indigo: #3e4cc9;
+  --indigo-wash: #e6e8fa;
+  --funded: #2b6b45;
+  --highlighter: #ffec8a;
+  --seal: #ffec8a;
+  --sheet: #fcf8ef;
+  /* The Plus card: a sheet with an indigo cast in either colourway. */
+  --plus-sheet: #e6e8fa;
+  --envelope-paper: #fcf8ef;
+  --shadow: rgb(38 44 68 / 0.18);
+  --tape: rgb(255 236 138 / 0.72);
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .15 0 0 0 0 .17 0 0 0 0 .27 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23g)'/%3E%3C/svg%3E");
+
+  --font-display: "Skribble Gentle", ui-rounded, "SF Pro Rounded", "Segoe UI", system-ui, sans-serif;
+  --font-text: "Skribble Linear Gentle", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "Skribble Mono Gentle", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --gutter: clamp(16px, 4vw, 48px);
+  --measure: 1200px;
+  --rough: 255px 15px 225px 15px / 15px 225px 15px 255px;
+
+  /* A pen line, used as a mask so it takes any colour. */
+  --rule: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='8' viewBox='0 0 240 8'%3E%3Cpath d='M0 4C30 2.4 60 5.6 90 4S150 2.6 180 4.2 220 5 240 4' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+  --tick: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M3.5 10.8C5.4 12.4 6.9 14 8.1 15.9 10.4 10.8 13.4 6.7 17 3.6' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --cancel: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 30'%3E%3Cg fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round'%3E%3Cpath d='M2 8Q9 4 16 8T30 8 44 8 58 8'/%3E%3Cpath d='M2 15Q9 11 16 15T30 15 44 15 58 15'/%3E%3Cpath d='M2 22Q9 18 16 22T30 22 44 22 58 22'/%3E%3C/g%3E%3C/svg%3E");
+
+  interpolate-size: allow-keywords;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* ObSwatch: night colourway. */
+    --paper: #1d2131;
+    --ink: #f4efe3;
+    --muted: #b5b7c9;
+    --line: #3b4159;
+    --indigo: #a3acff;
+    --indigo-wash: #2d3349;
+    --funded: #86d3a0;
+    --highlighter: #4a4426;
+    --sheet: #2d3349;
+    --plus-sheet: #343b66;
+    --envelope-paper: #1d2131;
+    --shadow: rgb(0 0 0 / 0.45);
+    --tape: rgb(255 236 138 / 0.28);
+    --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .96 0 0 0 0 .94 0 0 0 0 .89 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23g)'/%3E%3C/svg%3E");
+  }
+}
+
+/* ---------- Base ---------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--grain) var(--paper);
+  color: var(--ink);
+  font: 400 1.0625rem/1.6 var(--font-text);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+}
+
+a {
+  color: inherit;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.22em;
+}
+
+:focus-visible {
+  outline: 3px solid var(--indigo);
+  outline-offset: 3px;
+}
+
+img,
+svg {
+  max-width: 100%;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  left: var(--gutter);
+  top: -100px;
+  z-index: 10;
+  padding: 0.6em 1em;
+  background: var(--ink);
+  color: var(--paper);
+  border-radius: 8px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  top: 12px;
+}
+
+/* The lockup and mark come straight from brand/; repaint the paper
+   colourway for night. */
+.brand-art [fill="#FCF8EF"] {
+  fill: var(--envelope-paper);
+}
+
+.brand-art [stroke="#FCF8EF"] {
+  stroke: var(--envelope-paper);
+}
+
+.brand-art [fill="#262C44"] {
+  fill: var(--ink);
+}
+
+.brand-art [stroke="#262C44"] {
+  stroke: var(--ink);
+}
+
+.brand-art [fill="#3E4CC9"] {
+  fill: var(--indigo);
+}
+
+/* ---------- Buttons ---------- */
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55em;
+  min-height: 48px;
+  padding: 0.85em 1.45em;
+  border: 2.5px solid var(--ink);
+  border-radius: var(--rough);
+  font: 600 1.05rem/1.1 var(--font-text);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: transform 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out);
+}
+
+.button-ink {
+  background: var(--ink);
+  color: var(--paper);
+  box-shadow: 0 3px 0 color-mix(in srgb, var(--ink) 45%, var(--paper));
+}
+
+.button-paper {
+  background: color-mix(in srgb, var(--paper) 70%, transparent);
+  color: var(--ink);
+}
+
+.button:hover {
+  transform: translateY(-2px) rotate(-0.6deg);
+}
+
+.button-ink:hover {
+  box-shadow: 0 5px 0 color-mix(in srgb, var(--ink) 45%, var(--paper));
+}
+
+.button:active {
+  transform: translateY(1px);
+  box-shadow: none;
+}
+
+.button:focus-visible {
+  outline-offset: 4px;
+}
+
+.button-small {
+  min-height: 40px;
+  padding: 0.55em 1.05em;
+  font-size: 0.95rem;
+}
+
+.button-arrow {
+  width: 1.15em;
+  height: auto;
+  transition: transform 0.2s var(--ease-out);
+}
+
+.button:hover .button-arrow {
+  transform: translateX(3px);
+}
+
+/* ---------- Masthead ---------- */
+
+.masthead {
+  display: flex;
+  align-items: center;
+  gap: clamp(12px, 3vw, 36px);
+  max-width: var(--measure);
+  margin: 0 auto;
+  padding: 18px var(--gutter);
+}
+
+.masthead-brand {
+  display: block;
+  flex: none;
+  border-radius: 6px;
+}
+
+.masthead-brand .lockup {
+  display: block;
+  height: clamp(28px, 2.4vw + 18px, 36px);
+  width: auto;
+}
+
+.masthead-nav {
+  display: flex;
+  gap: clamp(14px, 2vw, 28px);
+  margin-left: auto;
+  font-weight: 600;
+}
+
+.masthead-nav a {
+  color: var(--muted);
+  text-decoration: none;
+  padding-block: 6px;
+  background: linear-gradient(currentColor, currentColor) 0 100% / 0 2px no-repeat;
+  transition: color 0.2s, background-size 0.3s var(--ease-out);
+}
+
+.masthead-nav a:hover {
+  color: var(--ink);
+  background-size: 100% 2px;
+}
+
+.masthead-cta {
+  flex: none;
+}
+
+@media (max-width: 52em) {
+  .masthead-nav {
+    display: none;
+  }
+
+  .masthead-cta {
+    margin-left: auto;
+  }
+}
+
+@media (max-width: 25em) {
+  .masthead-cta {
+    display: none;
+  }
+}
+
+/* ---------- Hero ---------- */
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  align-items: center;
+  gap: clamp(40px, 6vw, 88px);
+  max-width: var(--measure);
+  margin: 0 auto;
+  padding: clamp(28px, 5vw, 64px) var(--gutter) clamp(56px, 8vw, 112px);
+}
+
+@media (max-width: 64em) {
+  .hero {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.hero-title {
+  margin: 0;
+  font: 800 clamp(2.6rem, 1.3rem + 5vw, 5.3rem) / 0.98 var(--font-display);
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+.swap {
+  position: relative;
+  display: inline-block;
+  padding-inline: 0.06em;
+  background: linear-gradient(transparent 56%, var(--highlighter) 56%, var(--highlighter) 90%, transparent 90%);
+}
+
+.swap::after {
+  content: "";
+  position: absolute;
+  left: -3%;
+  right: -3%;
+  top: 50%;
+  height: 0.085em;
+  border-radius: 1em;
+  background: var(--ink);
+  transform: scaleX(0) rotate(-2deg);
+  transform-origin: left center;
+}
+
+.swap.is-striking::after {
+  animation: strike 0.26s var(--ease-out) forwards;
+}
+
+.swap.is-writing {
+  animation: write 0.5s var(--ease-out) both;
+}
+
+@keyframes strike {
+  to {
+    transform: scaleX(1) rotate(-2deg);
+  }
+}
+
+@keyframes write {
+  from {
+    clip-path: inset(-10% 100% -10% 0);
+  }
+
+  to {
+    clip-path: inset(-10% 0 -10% 0);
+  }
+}
+
+.lede {
+  max-width: 34em;
+  margin: clamp(18px, 2.4vw, 28px) 0 0;
+  color: var(--muted);
+  font-size: clamp(1.08rem, 1rem + 0.35vw, 1.25rem);
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+
+.cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 14px;
+  margin-top: clamp(24px, 3vw, 34px);
+}
+
+.cta-note {
+  margin: 14px 0 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero-copy > * {
+    animation: rise 0.8s var(--ease-out) both;
+  }
+
+  .hero-copy > :nth-child(2) {
+    animation-delay: 0.08s;
+  }
+
+  .hero-copy > :nth-child(3) {
+    animation-delay: 0.16s;
+  }
+
+  .hero-copy > :nth-child(n + 4) {
+    animation-delay: 0.24s;
+  }
+
+  .hero-play {
+    animation: rise 0.9s 0.2s var(--ease-out) both;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    translate: 0 18px;
+  }
+}
+
+/* ---------- Download stamps ---------- */
+
+.downloads {
+  margin-top: clamp(28px, 4vw, 44px);
+}
+
+.downloads-label {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.stamps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stamp {
+  position: relative;
+  display: grid;
+  gap: 1px;
+  min-width: 7.4rem;
+  padding: 13px 16px 12px;
+  color: var(--ink);
+  text-decoration: none;
+  background-color: var(--indigo-wash);
+  background-image:
+    radial-gradient(circle, var(--paper) 2.6px, transparent 3.1px),
+    radial-gradient(circle, var(--paper) 2.6px, transparent 3.1px),
+    radial-gradient(circle, var(--paper) 2.6px, transparent 3.1px),
+    radial-gradient(circle, var(--paper) 2.6px, transparent 3.1px);
+  background-size: 9px 9px;
+  background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
+  background-position: 0 -4.5px, 0 calc(100% + 4.5px), -4.5px 0, calc(100% + 4.5px) 0;
+  rotate: var(--lean, 0deg);
+  transition: rotate 0.25s var(--ease-out), translate 0.25s var(--ease-out);
+}
+
+.stamps li:nth-child(2n) .stamp {
+  --lean: 1.2deg;
+}
+
+.stamps li:nth-child(3n) .stamp {
+  --lean: -1.4deg;
+}
+
+.stamp::before {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border: 1.5px solid color-mix(in srgb, var(--ink) 70%, transparent);
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+.stamp-note {
+  font: 600 0.66rem/1.2 var(--font-mono);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.stamp-name {
+  font: 800 1.05rem/1.15 var(--font-display);
+}
+
+a.stamp:hover {
+  rotate: 0deg;
+  translate: 0 -3px;
+}
+
+.stamp.is-soon .stamp-name {
+  color: var(--muted);
+}
+
+/* A postmark's wavy cancellation across the corner. */
+.stamp.is-soon::after {
+  content: "";
+  position: absolute;
+  right: 8px;
+  top: 7px;
+  width: 46px;
+  height: 24px;
+  background: var(--muted);
+  opacity: 0.5;
+  -webkit-mask: var(--cancel) center / contain no-repeat;
+  mask: var(--cancel) center / contain no-repeat;
+  rotate: -12deg;
+  pointer-events: none;
+}
+
+/* ---------- The envelope desk ---------- */
+
+.hero-play {
+  position: relative;
+  padding-top: 26px;
+}
+
+.hand-note {
+  position: absolute;
+  left: clamp(-8px, -1vw, 0px);
+  top: -14px;
+  z-index: 2;
+  display: flex;
+  align-items: flex-start;
+  gap: 2px;
+  margin: 0;
+  color: var(--indigo);
+  font: 800 1.2rem/1 var(--font-display);
+  rotate: -5deg;
+  pointer-events: none;
+}
+
+.hand-arrow {
+  width: 46px;
+  height: auto;
+  margin-top: 6px;
+}
+
+html:not(.js) .hand-note {
+  display: none;
+}
+
+.desk-sheet {
+  position: relative;
+  padding: clamp(18px, 3vw, 30px);
+  background: var(--sheet);
+  border: 2px solid var(--ink);
+  border-radius: 18px 24px 16px 22px / 22px 16px 24px 18px;
+  box-shadow: 0 28px 60px -34px var(--shadow), 0 3px 0 var(--line);
+  rotate: -0.8deg;
+}
+
+/* A strip of tape holding the sheet down. */
+.desk-sheet::before {
+  content: "";
+  position: absolute;
+  top: -15px;
+  left: 50%;
+  width: clamp(90px, 22%, 130px);
+  height: 28px;
+  translate: -50% 0;
+  rotate: 2.5deg;
+  background: var(--tape);
+  border-radius: 2px;
+}
+
+.desk-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
+}
+
+.desk-title {
+  margin: 0;
+  font: 800 clamp(1.05rem, 0.95rem + 0.4vw, 1.25rem) / 1.2 var(--font-display);
+}
+
+.currencies {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+html:not(.js) .currencies {
+  display: none;
+}
+
+.currency {
+  position: relative;
+}
+
+.currency input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.currency-face {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  min-height: 34px;
+  padding: 0.3em 0.75em;
+  border: 1.5px solid var(--line);
+  border-radius: 999px;
+  font: 600 0.82rem/1 var(--font-mono);
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.currency-symbol {
+  font-size: 1.05em;
+}
+
+.currency input:hover + .currency-face {
+  border-color: var(--ink);
+}
+
+.currency input:checked + .currency-face {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+
+.currency input:focus-visible + .currency-face {
+  outline: 3px solid var(--indigo);
+  outline-offset: 2px;
+}
+
+.ready {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 18px 0 20px;
+  padding-bottom: 14px;
+  border-bottom: 2px dashed var(--line);
+}
+
+.ready-label {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.ready-amount {
+  padding-inline: 0.12em;
+  font: 600 clamp(1.7rem, 1.2rem + 1.8vw, 2.5rem) / 1 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  background: linear-gradient(transparent 52%, var(--highlighter) 52%, var(--highlighter) 92%, transparent 92%);
+  transition: color 0.3s;
+}
+
+.desk[data-done] .ready-amount {
+  color: var(--funded);
+  background: none;
+}
+
+.envelopes {
+  --tallest: clamp(150px, 20vw + 70px, 250px);
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: end;
+  gap: clamp(10px, 2.4vw, 24px);
+  margin: 0;
+  padding: 0 4px;
+  list-style: none;
+}
+
+.envelope {
+  position: relative;
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  text-align: center;
+}
+
+.envelope-body {
+  position: relative;
+  display: block;
+  height: calc(var(--height) * var(--tallest));
+  margin-bottom: 8px;
+  overflow: hidden;
+  background: var(--envelope-paper);
+  border: 3px solid var(--ink);
+  border-radius: 9px 12px 10px 11px / 12px 9px 11px 10px;
+  rotate: var(--tilt);
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.js .envelope-body {
+  cursor: ns-resize;
+}
+
+.envelope-fill {
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(-55deg, color-mix(in srgb, var(--envelope-paper) 28%, transparent) 0 1.3px, transparent 1.3px 6.5px),
+    var(--indigo);
+  /* Clipped rather than resized, so the fill animates without layout and
+     the hatching keeps its angle. */
+  clip-path: inset(calc((1 - var(--fill)) * 100%) 0 0);
+  transition: clip-path 0.55s var(--ease-out);
+}
+
+.desk.is-dragging .envelope-fill {
+  transition: none;
+}
+
+.envelope-flap {
+  position: absolute;
+  inset: 0 0 auto;
+  width: 100%;
+  height: clamp(26px, 3vw + 12px, 36px);
+  overflow: visible;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.flap-halo {
+  stroke: var(--envelope-paper);
+  stroke-width: 7px;
+  opacity: 0.85;
+}
+
+.flap-line {
+  stroke: var(--ink);
+  stroke-width: 3px;
+}
+
+.envelope[data-sealed] .flap-halo {
+  opacity: 0;
+}
+
+.envelope[data-sealed] .flap-line {
+  stroke: var(--envelope-paper);
+}
+
+.envelope-seal {
+  position: absolute;
+  left: 50%;
+  top: clamp(24px, 3vw + 10px, 33px);
+  width: clamp(18px, 1.4vw + 10px, 24px);
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  background: var(--seal);
+  border: 2.5px solid var(--ink);
+  border-radius: 47% 53% 50% 50% / 52% 46% 54% 48%;
+  scale: 0;
+  rotate: -8deg;
+  transition: scale 0.3s var(--ease-out);
+}
+
+.envelope[data-sealed] .envelope-seal {
+  scale: 1;
+}
+
+.envelope.is-stamping .envelope-seal {
+  animation: stamp 0.5s var(--ease-out) both;
+}
+
+@keyframes stamp {
+  0% {
+    scale: 1.9;
+    rotate: -30deg;
+    opacity: 0;
+  }
+
+  55% {
+    scale: 0.88;
+    opacity: 1;
+  }
+
+  100% {
+    scale: 1;
+    rotate: -8deg;
+  }
+}
+
+.envelope:has(.envelope-input:focus-visible) .envelope-body {
+  outline: 3px solid var(--indigo);
+  outline-offset: 4px;
+}
+
+/* The slider is the envelope's keyboard and screen reader interface; the
+   envelope itself is what people see and drag. */
+.envelope-input {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+html:not(.js) .envelope-input {
+  display: none;
+}
+
+.envelope-name {
+  overflow: hidden;
+  font: 800 clamp(0.86rem, 0.75rem + 0.4vw, 1.08rem) / 1.15 var(--font-display);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.envelope-amount {
+  color: var(--muted);
+  font: 600 clamp(0.7rem, 0.62rem + 0.3vw, 0.88rem) / 1.2 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.desk-status {
+  min-height: 1.6em;
+  margin: 18px 0 0;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.98rem;
+}
+
+html:not(.js) .desk-status {
+  visibility: hidden;
+}
+
+.desk[data-done] .desk-status {
+  color: var(--funded);
+}
+
+@media (max-width: 64em) {
+  .hero-play {
+    max-width: 640px;
+    width: 100%;
+    margin-inline: auto;
+  }
+}
+
+/* ---------- Section heads ---------- */
+
+.difference,
+.pricing,
+.questions {
+  padding-block: clamp(64px, 9vw, 128px);
+}
+
+.section-head {
+  max-width: var(--measure);
+  margin: 0 auto;
+  padding-inline: var(--gutter);
+}
+
+.section-title {
+  display: inline-block;
+  max-width: 20ch;
+  margin: 0;
+  font: 800 clamp(2.1rem, 1.3rem + 3.2vw, 3.7rem) / 1.02 var(--font-display);
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.underline {
+  display: block;
+  width: min(100%, 9em);
+  height: 0.28em;
+  margin-top: 0.12em;
+  overflow: visible;
+  color: var(--indigo);
+}
+
+.underline path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 1s 0.15s var(--ease-out);
+}
+
+.section-lede {
+  max-width: 40em;
+  margin: 22px 0 0;
+  color: var(--muted);
+  font-size: clamp(1.05rem, 1rem + 0.3vw, 1.2rem);
+  text-wrap: pretty;
+}
+
+/* ---------- What makes it different: a ledger ---------- */
+
+.ledger {
+  --number: 3.4rem;
+  max-width: var(--measure);
+  margin: clamp(36px, 5vw, 64px) auto 0;
+  padding: 0 var(--gutter);
+  list-style: none;
+}
+
+.ledger-entry {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--number) minmax(0, 1fr) clamp(140px, 18vw, 210px);
+  align-items: center;
+  gap: clamp(16px, 3vw, 44px);
+  padding-block: clamp(22px, 3vw, 34px);
+}
+
+.ledger-entry::before,
+.ledger-entry:last-child::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -4px;
+  height: 8px;
+  background: var(--line);
+  -webkit-mask: var(--rule) 0 0 / 240px 8px repeat-x;
+  mask: var(--rule) 0 0 / 240px 8px repeat-x;
+}
+
+.ledger-entry:last-child::after {
+  top: auto;
+  bottom: -4px;
+}
+
+/* The double rule down an account book's margin. */
+.ledger-text {
+  position: relative;
+  padding-left: clamp(16px, 2vw, 28px);
+  border-left: 4px double var(--line);
+}
+
+.ledger-number {
+  align-self: start;
+  padding-top: 0.45rem;
+  color: var(--indigo);
+  font: 600 1.05rem/1 var(--font-mono);
+}
+
+.ledger-title {
+  margin: 0 0 8px;
+  font: 800 clamp(1.4rem, 1.1rem + 1.1vw, 2rem) / 1.08 var(--font-display);
+  text-wrap: balance;
+}
+
+.ledger-text p {
+  max-width: 38em;
+  margin: 0;
+  color: var(--muted);
+  text-wrap: pretty;
+}
+
+.ledger-doodle {
+  justify-self: end;
+  width: 100%;
+  max-width: 210px;
+}
+
+.doodle {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  color: var(--ink);
+}
+
+.doodle .d-paper {
+  fill: var(--envelope-paper);
+}
+
+.doodle .d-indigo {
+  fill: var(--indigo);
+}
+
+.doodle .d-wash {
+  fill: var(--indigo-wash);
+}
+
+.doodle .d-seal {
+  fill: var(--seal);
+}
+
+.doodle .d-ink {
+  fill: currentColor;
+}
+
+.doodle .d-text {
+  fill: currentColor;
+  stroke: none;
+  font-family: var(--font-mono);
+  font-weight: 600;
+}
+
+.ledger-entry:nth-child(even) .doodle {
+  rotate: 2deg;
+}
+
+.ledger-entry:nth-child(odd) .doodle {
+  rotate: -2deg;
+}
+
+@media (max-width: 44em) {
+  .ledger-entry {
+    grid-template-columns: 2.2rem minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .ledger-doodle {
+    grid-column: 2;
+    justify-self: start;
+    max-width: 170px;
+    padding-left: clamp(16px, 2vw, 28px);
+  }
+}
+
+/* ---------- Pricing: two envelopes ---------- */
+
+.plans {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 330px), 1fr));
+  gap: clamp(28px, 4vw, 44px);
+  max-width: 1000px;
+  margin: clamp(40px, 5vw, 64px) auto 0;
+  padding-inline: var(--gutter);
+}
+
+.plan {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: clamp(70px, 6vw + 40px, 92px) clamp(22px, 3vw, 38px) clamp(26px, 3vw, 38px);
+  background: var(--sheet);
+  border: 2.5px solid var(--ink);
+  border-radius: 14px 18px 12px 16px / 16px 12px 18px 14px;
+  box-shadow: 0 26px 50px -36px var(--shadow);
+  rotate: -0.6deg;
+}
+
+.plan-sealed {
+  background: var(--plus-sheet);
+  rotate: 0.8deg;
+}
+
+.plan-flap {
+  position: absolute;
+  inset: 0 0 auto;
+  width: 100%;
+  height: clamp(44px, 4vw + 24px, 60px);
+  color: var(--ink);
+}
+
+.plan-seal {
+  position: absolute;
+  left: 50%;
+  top: clamp(44px, 4vw + 24px, 60px);
+  display: grid;
+  place-items: center;
+  width: 46px;
+  aspect-ratio: 1;
+  translate: -50% -58%;
+  background: var(--seal);
+  border: 2.5px solid var(--ink);
+  border-radius: 47% 53% 50% 50% / 52% 46% 54% 48%;
+  rotate: -8deg;
+}
+
+/* The seal is embossed with a plus, so the colour never reads as text. */
+.plan-seal::before,
+.plan-seal::after {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 3px;
+  border-radius: 2px;
+  background: #262c44;
+}
+
+.plan-seal::after {
+  rotate: 90deg;
+}
+
+.plan-name {
+  margin: 0;
+  font: 800 clamp(1.45rem, 1.2rem + 0.8vw, 1.8rem) / 1.1 var(--font-display);
+}
+
+.plan-price {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0;
+}
+
+.plan-amount {
+  font: 600 clamp(2.6rem, 2rem + 2vw, 3.4rem) / 1 var(--font-mono);
+  letter-spacing: -0.02em;
+}
+
+.plan-period {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.plan-summary {
+  margin: 0;
+  font-weight: 600;
+}
+
+.plan-benefits {
+  display: grid;
+  gap: 10px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.plan-benefits li {
+  position: relative;
+  padding-left: 30px;
+  text-wrap: pretty;
+}
+
+.plan-benefits li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.18em;
+  width: 20px;
+  height: 20px;
+  background: var(--indigo);
+  -webkit-mask: var(--tick) center / contain no-repeat;
+  mask: var(--tick) center / contain no-repeat;
+}
+
+.plan-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.93rem;
+  text-wrap: pretty;
+}
+
+.plan .button {
+  align-self: flex-start;
+  margin-top: auto;
+}
+
+.pricing-disclaimer {
+  max-width: 40em;
+  margin: clamp(28px, 4vw, 40px) auto 0;
+  padding-inline: var(--gutter);
+  color: var(--muted);
+  font-size: 0.93rem;
+  text-align: center;
+}
+
+/* ---------- Questions ---------- */
+
+.faq {
+  max-width: 880px;
+  margin: clamp(32px, 4vw, 52px) auto 0;
+  padding-inline: var(--gutter);
+}
+
+.faq-item {
+  position: relative;
+}
+
+.faq-item::before,
+.faq-item:last-child::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -4px;
+  height: 8px;
+  background: var(--line);
+  -webkit-mask: var(--rule) 0 0 / 240px 8px repeat-x;
+  mask: var(--rule) 0 0 / 240px 8px repeat-x;
+}
+
+.faq-item:last-child::after {
+  top: auto;
+  bottom: -4px;
+}
+
+.faq-item::details-content {
+  block-size: 0;
+  overflow: clip;
+  transition: block-size 0.35s var(--ease-out), content-visibility 0.35s allow-discrete;
+}
+
+.faq-item[open]::details-content {
+  block-size: auto;
+}
+
+.faq-question {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  min-height: 48px;
+  padding: 20px 0;
+  font: 800 clamp(1.15rem, 1rem + 0.6vw, 1.45rem) / 1.25 var(--font-display);
+  list-style: none;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.faq-question::-webkit-details-marker {
+  display: none;
+}
+
+.faq-mark {
+  position: relative;
+  flex: none;
+  width: 22px;
+  height: 22px;
+}
+
+.faq-mark::before,
+.faq-mark::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 9.5px;
+  width: 22px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--indigo);
+  transition: rotate 0.3s var(--ease-out), scale 0.3s var(--ease-out);
+}
+
+.faq-mark::before {
+  rotate: -2deg;
+}
+
+.faq-mark::after {
+  rotate: 92deg;
+}
+
+.faq-item[open] .faq-mark::after {
+  rotate: 0deg;
+  scale: 0 1;
+}
+
+.faq-answer p {
+  max-width: 44em;
+  margin: 0 0 24px;
+  color: var(--muted);
+  line-height: 1.65;
+  text-wrap: pretty;
+}
+
+/* ---------- Footer ---------- */
+
+.site-footer {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 24px 40px;
+  max-width: var(--measure);
+  margin: 0 auto;
+  padding: clamp(44px, 6vw, 72px) var(--gutter) clamp(28px, 4vw, 44px);
+}
+
+.site-footer::before {
+  content: "";
+  position: absolute;
+  left: var(--gutter);
+  right: var(--gutter);
+  top: 0;
+  height: 8px;
+  background: var(--line);
+  -webkit-mask: var(--rule) 0 0 / 240px 8px repeat-x;
+  mask: var(--rule) 0 0 / 240px 8px repeat-x;
+}
+
+.footer-brand .lockup {
+  display: block;
+  height: 30px;
+  width: auto;
+  color: var(--ink);
+}
+
+.footer-brand p {
+  margin: 12px 0 0;
+  color: var(--muted);
+}
+
+.footer-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 10px 26px;
+  font-weight: 600;
+}
+
+.footer-nav a {
+  text-decoration: none;
+  padding-block: 4px;
+}
+
+.footer-nav a:hover {
+  text-decoration: underline;
+}
+
+.footer-small {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+@media (max-width: 44em) {
+  .site-footer {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ---------- Not found ---------- */
+
+.not-found {
+  display: grid;
+  justify-items: center;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: clamp(40px, 8vw, 110px) var(--gutter) clamp(64px, 10vw, 140px);
+  text-align: center;
+}
+
+.not-found-art {
+  width: min(220px, 60vw);
+  rotate: -3deg;
+}
+
+.not-found-title {
+  margin: 24px 0 0;
+  font: 800 clamp(2.4rem, 1.4rem + 4vw, 4.4rem) / 1 var(--font-display);
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.not-found .lede {
+  margin-inline: auto;
+}
+
+.not-found .cta-row {
+  justify-content: center;
+}
+
+/* ---------- Scroll reveals, once site.js is running ---------- */
+
+@media (prefers-reduced-motion: no-preference) {
+  .js-ready [data-reveal] {
+    transition: opacity 0.7s var(--ease-out), translate 0.7s var(--ease-out);
+  }
+
+  .js-ready [data-reveal]:not(.is-inview) {
+    opacity: 0;
+    translate: 0 18px;
+  }
+
+  .js-ready .section-title:not(.is-inview) .underline path {
+    stroke-dashoffset: 1;
+  }
+}
+
+/* ---------- Reduced motion ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

@@ -15,6 +15,7 @@ workspace:
   - openbudget_client
   - openbudget_scripts
   - openbudget_server
+  - openbudget_site
   - openbudget_core
   - openbudget_ui
   - openbudget_lints
