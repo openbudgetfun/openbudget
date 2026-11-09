@@ -35,6 +35,10 @@ import 'package:openbudget_client/src/protocol/billing/entitlement.dart'
     as _iyhncv6f;
 import 'package:openbudget_client/src/protocol/billing/solana_plan_view.dart'
     as _ij0nbz0v;
+import 'package:openbudget_client/src/protocol/entities/entity.dart'
+    as _i2ulk6h5;
+import 'package:openbudget_client/src/protocol/entities/entity_changed_event.dart'
+    as _irhjjor1;
 import 'package:openbudget_client/src/protocol/envelope_goals/envelope_goal.dart'
     as _ibdhi9gv;
 import 'package:openbudget_client/src/protocol/envelopes/envelope.dart'
@@ -43,6 +47,9 @@ import 'package:openbudget_client/src/protocol/fx_rates/fx_latest_snapshot.dart'
     as _it7vndki;
 import 'package:openbudget_client/src/protocol/institutions/institution.dart'
     as _i6ysl1a4;
+import 'package:openbudget_client/src/protocol/settings/user_settings.dart'
+    as _ivxpuwvx;
+import 'package:openbudget_core/openbudget_core.dart' as _ifz8weqz;
 import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
     as _iacc;
 import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart'
@@ -583,6 +590,135 @@ class EndpointBilling extends _isc.EndpointRef {
   );
 }
 
+/// Entity lifecycle for the signed-in owner.
+/// {@category Endpoint}
+class EndpointEntity extends _isc.EndpointRef {
+  EndpointEntity(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'entity';
+
+  /// Creates an entity with country fiscal defaults.
+  _ida.Future<_i2ulk6h5.Entity> create(
+    String name,
+    _ifz8weqz.EntityKind kind,
+    String countryCode,
+    String baseCurrencyCode,
+    String timeZone, {
+    int? fiscalYearEndMonth,
+    int? fiscalYearEndDay,
+    _isc.UuidValue? linkedPersonalEntityId,
+  }) => caller.callServerEndpoint<_i2ulk6h5.Entity>(
+    'entity',
+    'create',
+    {
+      'name': name,
+      'kind': kind,
+      'countryCode': countryCode,
+      'baseCurrencyCode': baseCurrencyCode,
+      'timeZone': timeZone,
+      'fiscalYearEndMonth': fiscalYearEndMonth,
+      'fiscalYearEndDay': fiscalYearEndDay,
+      'linkedPersonalEntityId': linkedPersonalEntityId,
+    },
+  );
+
+  /// Lists entities owned by the caller.
+  _ida.Future<List<_i2ulk6h5.Entity>> list({bool? includeArchived}) =>
+      caller.callServerEndpoint<List<_i2ulk6h5.Entity>>(
+        'entity',
+        'list',
+        {'includeArchived': includeArchived},
+      );
+
+  /// Loads one owned entity.
+  _ida.Future<_i2ulk6h5.Entity> get(_isc.UuidValue entityId) =>
+      caller.callServerEndpoint<_i2ulk6h5.Entity>(
+        'entity',
+        'get',
+        {'entityId': entityId},
+      );
+
+  /// Updates mutable entity properties.
+  _ida.Future<_i2ulk6h5.Entity> update(
+    _isc.UuidValue entityId, {
+    String? name,
+    String? baseCurrencyCode,
+    String? timeZone,
+    int? fiscalYearEndMonth,
+    int? fiscalYearEndDay,
+    bool? includeInNetWorth,
+    _isc.UuidValue? linkedPersonalEntityId,
+    bool? clearLinkedPersonalEntity,
+    int? sortOrder,
+  }) => caller.callServerEndpoint<_i2ulk6h5.Entity>(
+    'entity',
+    'update',
+    {
+      'entityId': entityId,
+      'name': name,
+      'baseCurrencyCode': baseCurrencyCode,
+      'timeZone': timeZone,
+      'fiscalYearEndMonth': fiscalYearEndMonth,
+      'fiscalYearEndDay': fiscalYearEndDay,
+      'includeInNetWorth': includeInNetWorth,
+      'linkedPersonalEntityId': linkedPersonalEntityId,
+      'clearLinkedPersonalEntity': clearLinkedPersonalEntity,
+      'sortOrder': sortOrder,
+    },
+  );
+
+  /// Hides an entity from active lists.
+  _ida.Future<_i2ulk6h5.Entity> archive(_isc.UuidValue entityId) =>
+      caller.callServerEndpoint<_i2ulk6h5.Entity>(
+        'entity',
+        'archive',
+        {'entityId': entityId},
+      );
+
+  /// Restores an entity to active lists.
+  _ida.Future<_i2ulk6h5.Entity> unarchive(_isc.UuidValue entityId) =>
+      caller.callServerEndpoint<_i2ulk6h5.Entity>(
+        'entity',
+        'unarchive',
+        {'entityId': entityId},
+      );
+
+  /// Requires an exact name confirmation for every entity, including ledger mode.
+  _ida.Future<void> delete(
+    _isc.UuidValue entityId,
+    String confirmName,
+  ) => caller.callServerEndpoint<void>(
+    'entity',
+    'delete',
+    {
+      'entityId': entityId,
+      'confirmName': confirmName,
+    },
+  );
+}
+
+/// Streams scoped changes to the entity's owner.
+/// {@category Endpoint}
+class EndpointEntityStream extends _isc.EndpointRef {
+  EndpointEntityStream(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'entityStream';
+
+  /// Ownership is checked before subscribing to the global channel.
+  _ida.Stream<_irhjjor1.EntityChangedEvent> watch(_isc.UuidValue entityId) =>
+      caller.callStreamingServerEndpoint<
+        _ida.Stream<_irhjjor1.EntityChangedEvent>,
+        _irhjjor1.EntityChangedEvent
+      >(
+        'entityStream',
+        'watch',
+        {'entityId': entityId},
+        {},
+      );
+}
+
 /// API surface for envelope goal operations.
 ///
 /// All methods require authentication.
@@ -823,6 +959,32 @@ class EndpointPlaid extends _isc.EndpointRef {
   );
 }
 
+/// User preferences independent of the selected entity.
+/// {@category Endpoint}
+class EndpointSettings extends _isc.EndpointRef {
+  EndpointSettings(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'settings';
+
+  /// Loads or creates the caller's settings.
+  _ida.Future<_ivxpuwvx.UserSettings> get() =>
+      caller.callServerEndpoint<_ivxpuwvx.UserSettings>(
+        'settings',
+        'get',
+        {},
+      );
+
+  /// Sets a supported ISO reporting currency.
+  _ida.Future<_ivxpuwvx.UserSettings> setReportingCurrency(
+    String currencyCode,
+  ) => caller.callServerEndpoint<_ivxpuwvx.UserSettings>(
+    'settings',
+    'setReportingCurrency',
+    {'currencyCode': currencyCode},
+  );
+}
+
 class Modules {
   Modules(Client client) {
     serverpod_auth_idp = _iaic.Caller(client);
@@ -868,11 +1030,14 @@ class Client extends _isc.ServerpodClientShared {
     googleIdp = EndpointGoogleIdp(this);
     jwtRefresh = EndpointJwtRefresh(this);
     billing = EndpointBilling(this);
+    entity = EndpointEntity(this);
+    entityStream = EndpointEntityStream(this);
     envelopeGoal = EndpointEnvelopeGoal(this);
     envelope = EndpointEnvelope(this);
     fxRate = EndpointFxRate(this);
     institution = EndpointInstitution(this);
     plaid = EndpointPlaid(this);
+    settings = EndpointSettings(this);
     modules = Modules(this);
   }
 
@@ -890,6 +1055,10 @@ class Client extends _isc.ServerpodClientShared {
 
   late final EndpointBilling billing;
 
+  late final EndpointEntity entity;
+
+  late final EndpointEntityStream entityStream;
+
   late final EndpointEnvelopeGoal envelopeGoal;
 
   late final EndpointEnvelope envelope;
@@ -899,6 +1068,8 @@ class Client extends _isc.ServerpodClientShared {
   late final EndpointInstitution institution;
 
   late final EndpointPlaid plaid;
+
+  late final EndpointSettings settings;
 
   late final Modules modules;
 
@@ -911,11 +1082,14 @@ class Client extends _isc.ServerpodClientShared {
     'googleIdp': googleIdp,
     'jwtRefresh': jwtRefresh,
     'billing': billing,
+    'entity': entity,
+    'entityStream': entityStream,
     'envelopeGoal': envelopeGoal,
     'envelope': envelope,
     'fxRate': fxRate,
     'institution': institution,
     'plaid': plaid,
+    'settings': settings,
   };
 
   @override

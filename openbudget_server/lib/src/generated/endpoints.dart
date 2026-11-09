@@ -10,6 +10,7 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'package:openbudget_core/openbudget_core.dart' as _ifz8weqz;
 import 'package:openbudget_server/src/generated/future_calls.dart' as _iwv90kfd;
 import 'package:serverpod/serverpod.dart' as _is;
 import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
@@ -24,11 +25,14 @@ import '../auth/email_idp_endpoint.dart' as _iuc1hd5t;
 import '../auth/google_idp_endpoint.dart' as _i71axiz0;
 import '../auth/jwt_refresh_endpoint.dart' as _inwq3ztq;
 import '../billing/billing_endpoint.dart' as _irc9lmoc;
+import '../entities/entity_endpoint.dart' as _ib6f7fzy;
+import '../entities/entity_stream.dart' as _il264xkw;
 import '../envelope_goals/envelope_goal_endpoint.dart' as _i76paldx;
 import '../envelopes/envelope_endpoint.dart' as _in6dn9dl;
 import '../fx_rates/fx_rate_endpoint.dart' as _i7xoygut;
 import '../institutions/institution_endpoint.dart' as _i9rhv37i;
 import '../plaid/plaid_endpoint.dart' as _i9pkxqxw;
+import '../settings/settings_endpoint.dart' as _iy0sqmtu;
 export 'future_calls.dart' show ServerpodFutureCallsGetter;
 
 class Endpoints extends _is.EndpointDispatch {
@@ -77,6 +81,18 @@ class Endpoints extends _is.EndpointDispatch {
           'billing',
           null,
         ),
+      'entity': _ib6f7fzy.EntityEndpoint()
+        ..initialize(
+          server,
+          'entity',
+          null,
+        ),
+      'entityStream': _il264xkw.EntityStreamEndpoint()
+        ..initialize(
+          server,
+          'entityStream',
+          null,
+        ),
       'envelopeGoal': _i76paldx.EnvelopeGoalEndpoint()
         ..initialize(
           server,
@@ -105,6 +121,12 @@ class Endpoints extends _is.EndpointDispatch {
         ..initialize(
           server,
           'plaid',
+          null,
+        ),
+      'settings': _iy0sqmtu.SettingsEndpoint()
+        ..initialize(
+          server,
+          'settings',
           null,
         ),
     };
@@ -840,6 +862,274 @@ class Endpoints extends _is.EndpointDispatch {
         ),
       },
     );
+    connectors['entity'] = _is.EndpointConnector(
+      name: 'entity',
+      endpoint: endpoints['entity']!,
+      methodConnectors: {
+        'create': _is.MethodConnector(
+          name: 'create',
+          params: {
+            'name': _is.ParameterDescription(
+              name: 'name',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'kind': _is.ParameterDescription(
+              name: 'kind',
+              type: _is.getType<_ifz8weqz.EntityKind>(),
+              nullable: false,
+            ),
+            'countryCode': _is.ParameterDescription(
+              name: 'countryCode',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'baseCurrencyCode': _is.ParameterDescription(
+              name: 'baseCurrencyCode',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'timeZone': _is.ParameterDescription(
+              name: 'timeZone',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'fiscalYearEndMonth': _is.ParameterDescription(
+              name: 'fiscalYearEndMonth',
+              type: _is.getType<int?>(),
+              nullable: true,
+            ),
+            'fiscalYearEndDay': _is.ParameterDescription(
+              name: 'fiscalYearEndDay',
+              type: _is.getType<int?>(),
+              nullable: true,
+            ),
+            'linkedPersonalEntityId': _is.ParameterDescription(
+              name: 'linkedPersonalEntityId',
+              type: _is.getType<_is.UuidValue?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['entity'] as _ib6f7fzy.EntityEndpoint).create(
+                    session,
+                    params['name'],
+                    params['kind'],
+                    params['countryCode'],
+                    params['baseCurrencyCode'],
+                    params['timeZone'],
+                    fiscalYearEndMonth: params['fiscalYearEndMonth'],
+                    fiscalYearEndDay: params['fiscalYearEndDay'],
+                    linkedPersonalEntityId: params['linkedPersonalEntityId'],
+                  ),
+        ),
+        'list': _is.MethodConnector(
+          name: 'list',
+          params: {
+            'includeArchived': _is.ParameterDescription(
+              name: 'includeArchived',
+              type: _is.getType<bool?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['entity'] as _ib6f7fzy.EntityEndpoint).list(
+                session,
+                includeArchived: params['includeArchived'],
+              ),
+        ),
+        'get': _is.MethodConnector(
+          name: 'get',
+          params: {
+            'entityId': _is.ParameterDescription(
+              name: 'entityId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['entity'] as _ib6f7fzy.EntityEndpoint).get(
+                session,
+                params['entityId'],
+              ),
+        ),
+        'update': _is.MethodConnector(
+          name: 'update',
+          params: {
+            'entityId': _is.ParameterDescription(
+              name: 'entityId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'name': _is.ParameterDescription(
+              name: 'name',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+            'baseCurrencyCode': _is.ParameterDescription(
+              name: 'baseCurrencyCode',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+            'timeZone': _is.ParameterDescription(
+              name: 'timeZone',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+            'fiscalYearEndMonth': _is.ParameterDescription(
+              name: 'fiscalYearEndMonth',
+              type: _is.getType<int?>(),
+              nullable: true,
+            ),
+            'fiscalYearEndDay': _is.ParameterDescription(
+              name: 'fiscalYearEndDay',
+              type: _is.getType<int?>(),
+              nullable: true,
+            ),
+            'includeInNetWorth': _is.ParameterDescription(
+              name: 'includeInNetWorth',
+              type: _is.getType<bool?>(),
+              nullable: true,
+            ),
+            'linkedPersonalEntityId': _is.ParameterDescription(
+              name: 'linkedPersonalEntityId',
+              type: _is.getType<_is.UuidValue?>(),
+              nullable: true,
+            ),
+            'clearLinkedPersonalEntity': _is.ParameterDescription(
+              name: 'clearLinkedPersonalEntity',
+              type: _is.getType<bool?>(),
+              nullable: true,
+            ),
+            'sortOrder': _is.ParameterDescription(
+              name: 'sortOrder',
+              type: _is.getType<int?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['entity'] as _ib6f7fzy.EntityEndpoint).update(
+                    session,
+                    params['entityId'],
+                    name: params['name'],
+                    baseCurrencyCode: params['baseCurrencyCode'],
+                    timeZone: params['timeZone'],
+                    fiscalYearEndMonth: params['fiscalYearEndMonth'],
+                    fiscalYearEndDay: params['fiscalYearEndDay'],
+                    includeInNetWorth: params['includeInNetWorth'],
+                    linkedPersonalEntityId: params['linkedPersonalEntityId'],
+                    clearLinkedPersonalEntity:
+                        params['clearLinkedPersonalEntity'],
+                    sortOrder: params['sortOrder'],
+                  ),
+        ),
+        'archive': _is.MethodConnector(
+          name: 'archive',
+          params: {
+            'entityId': _is.ParameterDescription(
+              name: 'entityId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['entity'] as _ib6f7fzy.EntityEndpoint).archive(
+                    session,
+                    params['entityId'],
+                  ),
+        ),
+        'unarchive': _is.MethodConnector(
+          name: 'unarchive',
+          params: {
+            'entityId': _is.ParameterDescription(
+              name: 'entityId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['entity'] as _ib6f7fzy.EntityEndpoint).unarchive(
+                    session,
+                    params['entityId'],
+                  ),
+        ),
+        'delete': _is.MethodConnector(
+          name: 'delete',
+          params: {
+            'entityId': _is.ParameterDescription(
+              name: 'entityId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'confirmName': _is.ParameterDescription(
+              name: 'confirmName',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['entity'] as _ib6f7fzy.EntityEndpoint).delete(
+                    session,
+                    params['entityId'],
+                    params['confirmName'],
+                  ),
+        ),
+      },
+    );
+    connectors['entityStream'] = _is.EndpointConnector(
+      name: 'entityStream',
+      endpoint: endpoints['entityStream']!,
+      methodConnectors: {
+        'watch': _is.MethodStreamConnector(
+          name: 'watch',
+          params: {
+            'entityId': _is.ParameterDescription(
+              name: 'entityId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          streamParams: {},
+          returnType: _is.MethodStreamReturnType.streamType,
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+                Map<String, Stream> streamParams,
+              ) => (endpoints['entityStream'] as _il264xkw.EntityStreamEndpoint)
+                  .watch(
+                    session,
+                    params['entityId'],
+                  ),
+        ),
+      },
+    );
     connectors['envelopeGoal'] = _is.EndpointConnector(
       name: 'envelopeGoal',
       endpoint: endpoints['envelopeGoal']!,
@@ -1272,6 +1562,41 @@ class Endpoints extends _is.EndpointDispatch {
                     session,
                     params['budgetId'],
                     plaidInstitutionId: params['plaidInstitutionId'],
+                  ),
+        ),
+      },
+    );
+    connectors['settings'] = _is.EndpointConnector(
+      name: 'settings',
+      endpoint: endpoints['settings']!,
+      methodConnectors: {
+        'get': _is.MethodConnector(
+          name: 'get',
+          params: {},
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['settings'] as _iy0sqmtu.SettingsEndpoint)
+                  .get(session),
+        ),
+        'setReportingCurrency': _is.MethodConnector(
+          name: 'setReportingCurrency',
+          params: {
+            'currencyCode': _is.ParameterDescription(
+              name: 'currencyCode',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['settings'] as _iy0sqmtu.SettingsEndpoint)
+                  .setReportingCurrency(
+                    session,
+                    params['currencyCode'],
                   ),
         ),
       },

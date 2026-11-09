@@ -39,6 +39,16 @@ billing:
   - getSolanaPlan:
   - solanaSubscriptionChallenge:
   - confirmSolanaSubscription:
+entity:
+  - create:
+  - list:
+  - get:
+  - update:
+  - archive:
+  - unarchive:
+  - delete:
+entityStream:
+  - watch:
 envelopeGoal:
   - upsert:
   - getForEnvelope:
@@ -61,3 +71,6 @@ plaid:
   - exchangePublicToken:
   - syncConnection:
   - importSandboxAccounts:
+settings:
+  - get:
+  - setReportingCurrency:

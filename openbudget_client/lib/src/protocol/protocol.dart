@@ -21,6 +21,8 @@ import 'package:openbudget_client/src/protocol/agent/agent_proposal.dart'
     as _icv7zzda;
 import 'package:openbudget_client/src/protocol/agent/mcp/agent_access_token_view.dart'
     as _itxn3wek;
+import 'package:openbudget_client/src/protocol/entities/entity.dart'
+    as _i2ulk6h5;
 import 'package:openbudget_client/src/protocol/envelope_goals/envelope_goal.dart'
     as _ibdhi9gv;
 import 'package:openbudget_client/src/protocol/envelopes/envelope.dart'
@@ -518,6 +520,7 @@ class Protocol extends _isc.SerializationManager
           _isc.getType<List<_i8fbky0c.AgentMessage>>,
           _isc.getType<List<_icv7zzda.AgentProposal>>,
           _isc.getType<List<_itxn3wek.AgentAccessTokenView>>,
+          _isc.getType<List<_i2ulk6h5.Entity>>,
           _isc.getType<List<_ibdhi9gv.EnvelopeGoal>>,
           _isc.getType<List<_isc.UuidValue>>,
           _isc.getType<List<_i29jf3by.Envelope>>,
@@ -1589,6 +1592,12 @@ class Protocol extends _isc.SerializationManager
     if (t == List<_itxn3wek.AgentAccessTokenView>) {
       return (data as List)
               .map((e) => deserialize<_itxn3wek.AgentAccessTokenView>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_i2ulk6h5.Entity>) {
+      return (data as List)
+              .map((e) => deserialize<_i2ulk6h5.Entity>(e))
               .toList()
           as T;
     }
