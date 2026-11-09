@@ -16,6 +16,7 @@ import 'dart:async' as _ida;
 import 'package:clock/clock.dart' as _io0w16m8;
 import 'package:serverpod/serverpod.dart' as _is;
 
+import '../accounts/balance_verify_future_call.dart' as _i3hgsuzd;
 import '../billing/solana_billing_collector_future_call.dart' as _i6oeyfz6;
 
 /// Invokes a future call.
@@ -62,6 +63,7 @@ class FutureCalls extends _is.FutureCallDispatch<_FutureCallRef> {
     String serverId,
   ) {
     var registeredFutureCalls = <String, _is.InvokableFutureCall>{
+      'BalanceVerifyVerifyFutureCall': BalanceVerifyVerifyFutureCall(),
       'SolanaBillingCollectorCollectFutureCall':
           SolanaBillingCollectorCollectFutureCall(),
     };
@@ -184,8 +186,25 @@ class _FutureCallRef {
 
   final _InvokeFutureCall _invokeFutureCall;
 
+  late final balanceVerify = _BalanceVerifyFutureCallDispatcher(
+    _invokeFutureCall,
+  );
+
   late final solanaBillingCollector =
       _SolanaBillingCollectorFutureCallDispatcher(_invokeFutureCall);
+}
+
+class _BalanceVerifyFutureCallDispatcher {
+  _BalanceVerifyFutureCallDispatcher(this._invokeFutureCall);
+
+  final _InvokeFutureCall _invokeFutureCall;
+
+  Future<void> verify() {
+    return _invokeFutureCall(
+      'BalanceVerifyVerifyFutureCall',
+      null,
+    );
+  }
 }
 
 class _SolanaBillingCollectorFutureCallDispatcher {
@@ -198,6 +217,17 @@ class _SolanaBillingCollectorFutureCallDispatcher {
       'SolanaBillingCollectorCollectFutureCall',
       null,
     );
+  }
+}
+
+class BalanceVerifyVerifyFutureCall extends _is.FutureCall
+    implements _is.InvokableFutureCall {
+  @override
+  _ida.Future<void> invoke(
+    _is.Session session,
+    _is.SerializableModel? object,
+  ) async {
+    await _i3hgsuzd.BalanceVerifyFutureCall().verify(session);
   }
 }
 

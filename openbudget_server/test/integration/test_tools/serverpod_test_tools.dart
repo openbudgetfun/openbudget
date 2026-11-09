@@ -293,6 +293,8 @@ class _InternalTestEndpoints extends TestEndpoints
 }
 
 class _FutureCalls {
+  late final balanceVerify = _BalanceVerifyFutureCall();
+
   late final solanaBillingCollector = _SolanaBillingCollectorFutureCall();
 }
 
@@ -2374,6 +2376,21 @@ class _SettingsEndpoint {
         await _localUniqueSession.close();
       }
     });
+  }
+}
+
+class _BalanceVerifyFutureCall {
+  Future<void> verify(_ist.TestSessionBuilder sessionBuilder) async {
+    var _localUniqueSession =
+        (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild();
+    try {
+      await _iwv90kfd.BalanceVerifyVerifyFutureCall().invoke(
+        _localUniqueSession,
+        null,
+      );
+    } finally {
+      await _localUniqueSession.close();
+    }
   }
 }
 
