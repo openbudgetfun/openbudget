@@ -6,7 +6,7 @@ import 'package:test/test.dart';
 
 void main() {
   Entity entity(String zone) => Entity(
-    ownerId: Uuid().v4obj(),
+    ownerId: const Uuid().v4obj(),
     name: 'Home',
     kind: EntityKind.individual,
     countryCode: 'GB',
@@ -47,7 +47,7 @@ void main() {
         entity('Europe/London'),
         now: DateTime.utc(2026, 12, 1, 23, 30),
       ),
-      DateTime.utc(2026, 12, 1),
+      DateTime.utc(2026, 12),
     );
   });
   test('unknown IANA zone is rejected', () {
