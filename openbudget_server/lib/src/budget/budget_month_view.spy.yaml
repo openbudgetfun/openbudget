@@ -1,0 +1,14 @@
+### The whole Plan screen for one month: one call, computed by section 6.4.
+class: BudgetMonthView
+fields:
+  entityId: UuidValue
+  ### yyyymm.
+  month: int
+  ### ISO 4217 base currency every amount here is in.
+  currencyCode: String
+  summary: BudgetMonthSummary
+  ### Every category, hidden ones included, in sortOrder.
+  categories: List<Category>
+  ### One row per envelope, hidden ones included, in category then envelope
+  ### sortOrder.
+  envelopes: List<EnvelopeMonthView>

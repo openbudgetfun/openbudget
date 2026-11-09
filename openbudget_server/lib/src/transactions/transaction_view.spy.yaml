@@ -1,0 +1,11 @@
+### A transaction with everything a list row or detail screen shows.
+class: TransactionView
+fields:
+  transaction: Transaction
+  lines: List<TransactionLine>
+  ### ISO 4217 currency of the account.
+  accountCurrencyCode: String
+  accountName: String
+  payeeName: String?
+  ### The other leg, when this transaction is part of a transfer.
+  transferPeer: TransferPeerView?

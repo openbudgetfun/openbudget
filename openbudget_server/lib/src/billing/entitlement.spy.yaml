@@ -6,7 +6,7 @@ class: Entitlement
 table: entitlement
 fields:
   id: UuidValue?, defaultPersist=random_v7
-  userId: UuidValue
+  userId: UuidValue, relation(parent=serverpod_auth_core_user, onDelete=Cascade)
   source: EntitlementSource
   ### The rail's subscription id: a Stripe subscription, a RevenueCat
   ### original transaction, or a Solana subscription account address.

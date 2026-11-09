@@ -1,0 +1,38 @@
+### A parsed on-chain transaction that touched a wallet.
+class: WalletTransaction
+table: wallet_transaction
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  walletId: UuidValue, relation(parent=wallet, onDelete=Cascade)
+  signature: String
+  slot: int
+  occurredAt: DateTime?
+  description: String
+  ### Helius transaction type, such as `SWAP`. External vocabulary.
+  txType: String
+  ### Helius source, such as `JUPITER`. External vocabulary.
+  source: String
+  interpretationConfidence: Confidence?
+  ### JSON list of program ids the transaction invoked.
+  programsJson: String?
+  nativeTransfersJson: String?
+  tokenTransfersJson: String?
+  ### ISO 4217 code of the three estimates below.
+  pnlCurrencyCode: String?
+  costBasisMinor: int?
+  proceedsMinor: int?
+  realizedPnlMinor: int?
+  ### User-managed classification.
+  category: String?
+  tags: List<String>?
+  memo: String?
+  ### Raw enhanced transaction payload from Helius.
+  rawJson: String?, scope=serverOnly
+  createdAt: DateTime, default=now
+  updatedAt: DateTime, default=now
+indexes:
+  wallet_transaction_wallet_signature_unique_idx:
+    fields: walletId, signature
+    unique: true
+  wallet_transaction_wallet_time_idx:
+    fields: walletId, occurredAt

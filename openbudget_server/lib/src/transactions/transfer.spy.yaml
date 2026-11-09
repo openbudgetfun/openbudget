@@ -1,0 +1,17 @@
+### Links the two legs of a move between two accounts.
+class: Transfer
+table: transfer
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  ### The outflow leg.
+  fromTransactionId: UuidValue, relation(parent=transaction, onDelete=Cascade)
+  ### The inflow leg.
+  toTransactionId: UuidValue, relation(parent=transaction, onDelete=Cascade)
+  createdAt: DateTime, default=now
+indexes:
+  transfer_from_unique_idx:
+    fields: fromTransactionId
+    unique: true
+  transfer_to_unique_idx:
+    fields: toTransactionId
+    unique: true

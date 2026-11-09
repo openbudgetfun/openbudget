@@ -1,0 +1,12 @@
+### What a transaction represents, beyond an ordinary movement.
+enum: TransactionKind
+serialized: byName
+values:
+  - standard
+  ### The balance an account started with.
+  - openingBalance
+  ### A difference found while reconciling against a statement.
+  - balanceAdjustment
+  ### Recognises the change in base-currency value of a foreign-currency
+  ### account. amountMinor is 0; baseAmountMinor carries the difference.
+  - fxRevaluation

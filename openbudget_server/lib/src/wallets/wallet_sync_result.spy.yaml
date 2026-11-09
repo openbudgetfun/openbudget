@@ -1,0 +1,21 @@
+### What one wallet sync did.
+class: WalletSyncResult
+fields:
+  walletId: UuidValue
+  insertedTransactions: int
+  updatedTransactions: int
+  holdingCount: int
+  pricedHoldingCount: int
+  cachedHoldingCount: int
+  unpricedHoldingCount: int
+  nftHoldingCount: int
+  pricedNftHoldingCount: int
+  cachedNftHoldingCount: int
+  unpricedNftHoldingCount: int
+  ### Share of holdings with a price, 0.0-1.0. Not money.
+  valuationCoverageRatio: double?
+  ### Sum of priced holdings, in valuationCurrencyCode minor units.
+  totalValueMinor: int?
+  valuationCurrencyCode: String?
+  syncedAt: DateTime
+  warnings: List<String>

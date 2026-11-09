@@ -1,33 +1,39 @@
-### A journal in a budget's books: a dated, referenced bundle of lines.
+### A journal in an entity's books: a dated, referenced bundle of lines.
 ###
-### Drafts may be edited or deleted. Posted journals are immutable —
-### corrections are [Journal]s with `reversalOfJournalId` pointing back, and
-### the original flips to `reversed`. No update or delete path exists for
-### posted rows.
+### Drafts may be edited or deleted. Posted journals are immutable:
+### corrections are journals with reversalOfJournalId pointing back, and the
+### original flips to reversed. No update or delete path exists for posted
+### rows.
 class: Journal
 table: journal
 fields:
   id: UuidValue?, defaultPersist=random_v7
-  budgetId: UuidValue, relation(parent=budget)
-  ### Calendar date in the budget's time zone, not a UTC instant.
+  entityId: UuidValue, relation(parent=entity, onDelete=Cascade)
+  ### Calendar date in the entity's time zone.
   date: DateTime
   ### Human reference, such as `JB-2026-0001`.
   reference: String, default=''
-  ### Optional narrative.
   narration: String?
-  ### JournalStatus name: draft, posted or reversed.
-  status: String, default='draft'
-  ### JournalSource name: manual, opening, import or reversal.
-  source: String, default='manual'
+  status: JournalStatus, default=draft
+  source: JournalSource, default=manual
+  ### The transaction this journal posts, when source is `transaction`.
+  ### No foreign key: posted journals outlive deleted transactions.
+  sourceTransactionId: UuidValue?
+  ### The transaction revision this journal posts.
+  sourceRevision: int?
   ### Server time of posting. Never trusted from the client.
   postedAt: DateTime?
-  ### The user who posted the journal.
   postedBy: UuidValue?
   ### The posted journal this one reverses, when source is `reversal`.
-  reversalOfJournalId: UuidValue?
+  reversalOfJournalId: UuidValue?, relation(parent=journal, onDelete=NoAction)
   createdAt: DateTime, default=now
 indexes:
-  journal_budget_date_idx:
-    fields: budgetId, date
-  journal_budget_status_idx:
-    fields: budgetId, status
+  journal_entity_date_idx:
+    fields: entityId, date
+  journal_entity_status_idx:
+    fields: entityId, status
+  journal_source_transaction_unique_idx:
+    fields: sourceTransactionId, sourceRevision
+    unique: true
+  journal_reversal_of_idx:
+    fields: reversalOfJournalId

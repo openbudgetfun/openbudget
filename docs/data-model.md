@@ -3832,3 +3832,5 @@ Each question has a recommended default, which the implementation should follow 
 
 - Serverpod 4.1 rejects `import` as a reserved generated enum value. The shared `JournalSource` uses `imported`; all core and server callers use that name. Shared-package generation otherwise works, so the enum fallback is unnecessary.
 - Pure core funding calculations accept a `FundingGoal` record containing the goal kind name, amount and target date. This avoids a dependency from core on the server's `EnvelopeGoal` model.
+- The server's `ValuationSource` likewise uses `imported` because `import` is reserved by the generator.
+- Serverpod 4.1 requires nullable fields for `scope=serverOnly`: Plaid's `accessTokenCiphertext` and `accessTokenNonce`, and wallet transaction `rawJson`, are nullable in the model. Secret-writing services must supply both token fields together.

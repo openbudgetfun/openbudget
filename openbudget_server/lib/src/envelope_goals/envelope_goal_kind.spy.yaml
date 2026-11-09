@@ -1,0 +1,10 @@
+### What an envelope goal asks for.
+enum: EnvelopeGoalKind
+serialized: byName
+values:
+  ### Keep the available balance at or above amountMinor.
+  - targetBalance
+  ### Assign amountMinor every month.
+  - monthlyFunding
+  ### Reach amountMinor available by targetDate.
+  - targetByDate

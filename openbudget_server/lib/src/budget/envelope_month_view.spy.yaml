@@ -1,0 +1,17 @@
+### One envelope's figures for one month, in base minor units.
+class: EnvelopeMonthView
+fields:
+  envelope: Envelope
+  goal: EnvelopeGoal?
+  ### Available at the end of last month, floored at 0.
+  carryoverMinor: int
+  ### Assigned this month.
+  allocatedMinor: int
+  ### Sum of this month's lines; negative is spending.
+  activityMinor: int
+  ### carryoverMinor + allocatedMinor + activityMinor. Negative means
+  ### overspent.
+  availableMinor: int
+  ### What the goal still needs this month, from goal_math; 0 when met or
+  ### when there is no goal.
+  goalUnderfundedMinor: int

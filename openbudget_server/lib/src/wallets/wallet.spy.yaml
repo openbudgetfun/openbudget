@@ -1,0 +1,28 @@
+### A read-only blockchain wallet whose holdings value one crypto account.
+class: Wallet
+table: wallet
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  entityId: UuidValue, relation(parent=entity, onDelete=Cascade)
+  ### The crypto account carrying the wallet's value into net worth.
+  accountId: UuidValue, relation(parent=account, onDelete=Cascade)
+  network: WalletNetwork
+  ### Base58 address.
+  address: String
+  label: String?
+  ### Newest signature already processed, for incremental sync.
+  lastSignature: String?
+  syncStatus: SyncStatus, default=pending
+  lastSyncedAt: DateTime?
+  lastSyncError: String?
+  createdAt: DateTime, default=now
+  updatedAt: DateTime, default=now
+indexes:
+  wallet_account_unique_idx:
+    fields: accountId
+    unique: true
+  wallet_entity_network_address_unique_idx:
+    fields: entityId, network, address
+    unique: true
+  wallet_address_idx:
+    fields: address

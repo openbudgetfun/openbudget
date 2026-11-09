@@ -3,7 +3,7 @@ class: AgentMessage
 table: agent_message
 fields:
   id: UuidValue?, defaultPersist=random_v7
-  conversationId: UuidValue, relation(parent=agent_conversation, onDelete=cascade)
+  conversationId: UuidValue, relation(parent=agent_conversation, onDelete=Cascade)
   role: AgentMessageRole
   ### The message text. Empty for an assistant turn that only calls tools.
   content: String

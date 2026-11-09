@@ -1,0 +1,13 @@
+### What `transaction.reconcile` found and did.
+class: ReconcileResult
+fields:
+  ### Cleared and reconciled total up to the statement date, before any
+  ### adjustment, in account minor units.
+  clearedBalanceMinor: int
+  ### statementBalanceMinor - clearedBalanceMinor.
+  differenceMinor: int
+  ### The balanceAdjustment created, when one was asked for and needed.
+  adjustmentTransactionId: UuidValue?
+  ### Transactions moved from cleared to reconciled. 0 when the difference
+  ### was non-zero and no adjustment was asked for.
+  reconciledCount: int

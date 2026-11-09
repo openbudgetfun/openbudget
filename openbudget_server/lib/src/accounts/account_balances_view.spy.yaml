@@ -1,0 +1,13 @@
+### The balances of one account, in account minor units.
+class: AccountBalancesView
+fields:
+  accountId: UuidValue
+  currencyCode: String
+  ### account.balanceMinor.
+  balanceMinor: int
+  ### Cleared and reconciled transactions.
+  clearedMinor: int
+  unclearedMinor: int
+  reportedBalanceMinor: int?
+  reportedBalanceAt: DateTime?
+  reconciledThroughDate: DateTime?

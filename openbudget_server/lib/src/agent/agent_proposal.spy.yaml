@@ -3,20 +3,22 @@ class: AgentProposal
 table: agent_proposal
 fields:
   id: UuidValue?, defaultPersist=random_v7
-  userId: UuidValue
-  budgetId: UuidValue, relation(parent=budget, onDelete=cascade)
+  userId: UuidValue, relation(parent=serverpod_auth_core_user, onDelete=Cascade)
+  entityId: UuidValue, relation(parent=entity, onDelete=Cascade)
   ### The conversation that produced it, when it came from chat.
-  conversationId: UuidValue?
+  conversationId: UuidValue?, relation(parent=agent_conversation, onDelete=SetNull)
   kind: AgentProposalKind
   ### Kind-specific arguments, as a JSON object.
   payloadJson: String
   ### One sentence the user can decide on.
   summary: String
-  status: AgentProposalStatus
+  status: AgentProposalStatus, default=pending
+  ### Version of the tax rule pack and guardrails the proposal was made under.
+  rulesVersion: String?
   createdAt: DateTime, default=now
   resolvedAt: DateTime?
 indexes:
-  agent_proposal_budget_idx:
-    fields: budgetId, status
+  agent_proposal_entity_status_idx:
+    fields: entityId, status
   agent_proposal_user_idx:
     fields: userId, createdAt

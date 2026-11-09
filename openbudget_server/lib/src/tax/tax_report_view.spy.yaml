@@ -1,4 +1,4 @@
-### The computed tax position for one budget and tax year.
+### The computed tax position for one entity and tax year.
 class: TaxReportView
 fields:
   ### ISO 3166-1 alpha-2 country code.
@@ -9,8 +9,8 @@ fields:
   yearLabel: String
   yearStart: DateTime
   yearEnd: DateTime
-  ### TaxEntityKind name.
-  entityKind: String
+  ### The entity kind.
+  entityKind: EntityKind
   ### ISO 4217 code every amount in this report is in.
   currencyCode: String
   ### Category totals and computed figures, in return order.
