@@ -66,6 +66,7 @@ import 'package:openbudget_client/src/protocol/transactions/transaction.dart'
     as _iio3v7fv;
 import 'package:openbudget_client/src/protocol/wallets/wallet_holding.dart'
     as _izm3e498;
+import 'package:openbudget_core/openbudget_core.dart' as _ifz8weqz;
 import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
     as _iacc;
 import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart'
@@ -442,6 +443,7 @@ class Protocol extends _isc.SerializationManager
         modules: const [
           _iaic.Protocol.new,
           _iacc.Protocol.new,
+          _ifz8weqz.Protocol.new,
         ],
         classNames: const [
           'Account',
@@ -1626,6 +1628,10 @@ class Protocol extends _isc.SerializationManager
           ? className
           : 'serverpod_auth_core.$className';
     }
+    className = _ifz8weqz.Protocol().getClassNameForObject(data);
+    if (className != null) {
+      return className.contains('.') ? className : 'openbudget_core.$className';
+    }
     return null;
   }
 
@@ -1889,12 +1895,19 @@ class Protocol extends _isc.SerializationManager
         'className': dataClassName.substring(20),
       });
     }
+    if (dataClassName.startsWith('openbudget_core.')) {
+      return _ifz8weqz.Protocol().deserializeByClassName({
+        ...data,
+        'className': dataClassName.substring(16),
+      });
+    }
     return super.deserializeByClassName(data);
   }
 
   void _registerHostProtocols() {
     _iaic.Protocol().registerHostProtocol('openbudget', this);
     _iacc.Protocol().registerHostProtocol('openbudget', this);
+    _ifz8weqz.Protocol().registerHostProtocol('openbudget', this);
   }
 
   @override

@@ -11,6 +11,7 @@
 // ignore_for_file: dead_code, unnecessary_type_check
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'package:openbudget_core/openbudget_core.dart' as _ifz8weqz;
 import 'package:openbudget_server/src/generated/accounts/account.dart'
     as _i3fh9aci;
 import 'package:openbudget_server/src/generated/agent/agent_conversation.dart'
@@ -442,6 +443,7 @@ class Protocol extends _is.DatabaseSerializationManager
         modules: const [
           _iais.Protocol.new,
           _iacs.Protocol.new,
+          _ifz8weqz.Protocol.new,
           _isp.Protocol.new,
         ],
         classNames: const [
@@ -4787,6 +4789,10 @@ class Protocol extends _is.DatabaseSerializationManager
     ),
     ..._iais.Protocol.targetTableDefinitions,
     ..._iacs.Protocol.targetTableDefinitions,
+    ..._ifz8weqz.Protocol() is _is.DatabaseSerializationManager
+        ? (_ifz8weqz.Protocol() as _is.DatabaseSerializationManager)
+              .getTargetTableDefinitions()
+        : [],
     ..._isp.Protocol.targetTableDefinitions,
   ];
 
@@ -5891,6 +5897,10 @@ class Protocol extends _is.DatabaseSerializationManager
           ? className
           : 'serverpod_auth_core.$className';
     }
+    className = _ifz8weqz.Protocol().getClassNameForObject(data);
+    if (className != null) {
+      return className.contains('.') ? className : 'openbudget_core.$className';
+    }
     className = _isp.Protocol().getClassNameForObject(data);
     if (className != null) {
       return className.contains('.') ? className : 'serverpod.$className';
@@ -6158,6 +6168,12 @@ class Protocol extends _is.DatabaseSerializationManager
         'className': dataClassName.substring(20),
       });
     }
+    if (dataClassName.startsWith('openbudget_core.')) {
+      return _ifz8weqz.Protocol().deserializeByClassName({
+        ...data,
+        'className': dataClassName.substring(16),
+      });
+    }
     if (dataClassName.startsWith('serverpod.')) {
       return _isp.Protocol().deserializeByClassName({
         ...data,
@@ -6170,6 +6186,7 @@ class Protocol extends _is.DatabaseSerializationManager
   void _registerHostProtocols() {
     _iais.Protocol().registerHostProtocol('openbudget', this);
     _iacs.Protocol().registerHostProtocol('openbudget', this);
+    _ifz8weqz.Protocol().registerHostProtocol('openbudget', this);
   }
 
   @override
@@ -6182,6 +6199,15 @@ class Protocol extends _is.DatabaseSerializationManager
     }
     {
       var table = _iacs.Protocol().getTableForType(t);
+      if (table != null) {
+        return table;
+      }
+    }
+    {
+      var protocol = _ifz8weqz.Protocol();
+      var table = protocol is _is.DatabaseSerializationManager
+          ? (protocol as _is.DatabaseSerializationManager).getTableForType(t)
+          : null;
       if (table != null) {
         return table;
       }
