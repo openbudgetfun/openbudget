@@ -311,36 +311,15 @@ class LoginScreen extends HookConsumerWidget {
   }
 }
 
+/// The OpenBudget app icon, in the colourway picked under Settings.
 class _OpenBudgetMark extends HookConsumerWidget {
   const _OpenBudgetMark({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final palette = theme.ob;
     final appIconStyle = ref.watch(appIconStyleProvider);
-    return SizedBox(
-      height: 96,
-      width: 96,
-      child: Image.asset(
-        appIconStyle.previewAssetPathFor(theme.brightness),
-        fit: BoxFit.contain,
-        errorBuilder: (context, error, stackTrace) => DecoratedBox(
-          decoration: ObRoughDecoration(
-            color: palette.wash(ObTone.brand),
-            outline: palette.quietPen,
-            seed: 9,
-          ),
-          child: Center(
-            child: SkribbleIcon(
-              data: OpenBudgetIcons.wallet,
-              color: palette.hue(ObTone.brand),
-              size: 44,
-            ),
-          ),
-        ),
-      ),
-    );
+    // The headline below names the product, so the icon stays decorative.
+    return ObMark(size: 96, variant: appIconStyle.markVariant, tile: true);
   }
 }
 

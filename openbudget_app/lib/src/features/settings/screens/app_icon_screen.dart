@@ -56,9 +56,6 @@ class AppIconScreen extends HookConsumerWidget {
                     (style) => _AppIconStyleTile(
                       style: style,
                       label: _styleLabel(l10n, style),
-                      previewAssetPath: style.previewAssetPathFor(
-                        theme.brightness,
-                      ),
                       selected: style == currentStyle,
                       onTap: () => ref
                           .read(appIconStyleProvider.notifier)
@@ -89,11 +86,8 @@ class AppIconScreen extends HookConsumerWidget {
   String _styleLabel(AppLocalizations l10n, AppIconStyle style) =>
       switch (style) {
         AppIconStyle.primary => l10n.settingsAppIconPrimary,
-        AppIconStyle.v1 => l10n.settingsAppIconV1,
-        AppIconStyle.v2 => l10n.settingsAppIconV2,
-        AppIconStyle.v3 => l10n.settingsAppIconV3,
-        AppIconStyle.v4 => l10n.settingsAppIconV4,
-        AppIconStyle.v5 => l10n.settingsAppIconV5,
+        AppIconStyle.night => l10n.settingsAppIconNight,
+        AppIconStyle.ink => l10n.settingsAppIconInk,
       };
 }
 
@@ -101,14 +95,12 @@ class _AppIconStyleTile extends HookWidget {
   const _AppIconStyleTile({
     required this.style,
     required this.label,
-    required this.previewAssetPath,
     required this.selected,
     required this.onTap,
   });
 
   final AppIconStyle style;
   final String label;
-  final String previewAssetPath;
   final bool selected;
   final VoidCallback onTap;
 
@@ -125,17 +117,7 @@ class _AppIconStyleTile extends HookWidget {
             )
           : const SizedBox(width: 24),
       title: Text(label),
-      trailing: Container(
-        height: 34,
-        width: 34,
-        decoration: ObRoughDecoration(
-          outline: palette.quietPen,
-          radius: 8,
-          seed: 19,
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: Image.asset(previewAssetPath, fit: BoxFit.cover),
-      ),
+      trailing: ObMark(size: 40, variant: style.markVariant, tile: true),
     );
   }
 }

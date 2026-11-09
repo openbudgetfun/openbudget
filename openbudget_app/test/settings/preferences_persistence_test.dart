@@ -39,7 +39,7 @@ void main() {
         final store = InMemoryUiPreferencesStore();
         await store.writeString(
           key: UiPreferenceKeys.appIconStyle,
-          value: AppIconStyle.v3.name,
+          value: AppIconStyle.night.name,
         );
 
         final container = ProviderContainer(
@@ -47,15 +47,33 @@ void main() {
         );
         addTearDown(container.dispose);
 
-        expect(container.read(appIconStyleProvider), AppIconStyle.v3);
+        expect(container.read(appIconStyleProvider), AppIconStyle.night);
 
         container
             .read(appIconStyleProvider.notifier)
-            .setAppIconStyle(AppIconStyle.v1);
+            .setAppIconStyle(AppIconStyle.ink);
         expect(
           store.readString(UiPreferenceKeys.appIconStyle),
-          AppIconStyle.v1.name,
+          AppIconStyle.ink.name,
         );
+      },
+    );
+
+    test(
+      'an app icon style from the retired logo set falls back to paper',
+      () async {
+        final store = InMemoryUiPreferencesStore();
+        await store.writeString(
+          key: UiPreferenceKeys.appIconStyle,
+          value: 'v3',
+        );
+
+        final container = ProviderContainer(
+          overrides: [uiPreferencesStoreProvider.overrideWithValue(store)],
+        );
+        addTearDown(container.dispose);
+
+        expect(container.read(appIconStyleProvider), AppIconStyle.primary);
       },
     );
 

@@ -5,11 +5,12 @@ import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/settings/providers/display_options_provider.dart';
 import 'package:openbudget_app/src/features/settings/providers/ui_preferences_store.dart';
 import 'package:openbudget_app/src/features/settings/screens/app_icon_screen.dart';
+import 'package:openbudget_ui/openbudget_ui.dart';
 import 'package:patrol/patrol.dart';
 
 void main() {
   patrolWidgetTest(
-    'app icon screen uses dark icon previews and persists icon selection',
+    'app icon screen previews each mark colourway and persists the choice',
     ($) async {
       final tester = $.tester;
       final store = InMemoryUiPreferencesStore();
@@ -33,23 +34,22 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final sproutTile = find.widgetWithText(ListTile, 'Sprout');
-      final sproutImage = tester.widget<Image>(
-        find.descendant(of: sproutTile, matching: find.byType(Image)).first,
+      final nightMark = tester.widget<ObMark>(
+        find.descendant(
+          of: find.widgetWithText(ListTile, 'Night'),
+          matching: find.byType(ObMark),
+        ),
       );
-      final sproutAsset = sproutImage.image as AssetImage;
-      expect(
-        sproutAsset.assetName,
-        'assets/branding/logos/ob_v3_dark_preview.png',
-      );
+      expect(nightMark.variant, ObMarkVariant.night);
+      expect(nightMark.tile, isTrue);
 
-      await tester.tap(find.text('Arrow'));
+      await tester.tap(find.text('Ink'));
       await tester.pumpAndSettle();
 
-      expect(container.read(appIconStyleProvider), AppIconStyle.v5);
+      expect(container.read(appIconStyleProvider), AppIconStyle.ink);
       expect(
         store.readString(UiPreferenceKeys.appIconStyle),
-        AppIconStyle.v5.name,
+        AppIconStyle.ink.name,
       );
     },
   );
