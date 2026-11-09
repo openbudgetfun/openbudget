@@ -9,8 +9,10 @@ import 'package:openbudget_app/src/features/more/screens/more_screen.dart';
 import 'package:openbudget_app/src/features/payees/providers/payee_list_provider.dart';
 import 'package:openbudget_app/src/features/recurring/providers/recurring_list_provider.dart';
 import 'package:openbudget_app/src/features/recurring/screens/recurring_list_screen.dart';
+import 'package:openbudget_app/src/features/tax/providers/tax_providers.dart';
 import 'package:openbudget_app/src/features/transaction_rules/providers/rule_list_provider.dart';
 import 'package:openbudget_app/src/features/transaction_rules/screens/rule_list_screen.dart';
+import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:patrol/patrol.dart';
@@ -145,6 +147,7 @@ Widget _buildApp() {
   return ProviderScope(
     overrides: [
       budgetDetailProvider.overrideWith((ref, id) async => _makeBudget()),
+      taxProfileProvider.overrideWith((ref, id) async => null),
       budgetSummaryProvider.overrideWith((ref, id) async => _makeSummary()),
       payeeListProvider.overrideWith(
         (ref, id) async => [
@@ -170,6 +173,9 @@ void main() {
     final tester = $.tester;
     await tester.pumpWidget(_buildApp());
     await tester.pumpAndSettle();
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(MoreScreen)),
+    );
 
     await tester.tap(find.text('Recurring Transactions'));
     await tester.pumpAndSettle();
@@ -180,6 +186,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(AlertDialog), findsOneWidget);
+    expect(container.exists(serverpodClientProvider), isFalse);
   });
 
   patrolWidgetTest('navigates from More to rules and opens add rule dialog', (
@@ -188,6 +195,9 @@ void main() {
     final tester = $.tester;
     await tester.pumpWidget(_buildApp());
     await tester.pumpAndSettle();
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(MoreScreen)),
+    );
 
     await tester.tap(find.text('Transaction Rules'));
     await tester.pumpAndSettle();
@@ -198,5 +208,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(AlertDialog), findsOneWidget);
+    expect(container.exists(serverpodClientProvider), isFalse);
   });
 }
