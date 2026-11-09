@@ -17,7 +17,7 @@
     "useTabs": false,
     "quoteStyle": "alwaysDouble",
     "semiColons": "always",
-    "trailingCommas": "always"
+    "trailingCommas": "onlyMultiLine"
   },
   "exec": {
     "commands": [
