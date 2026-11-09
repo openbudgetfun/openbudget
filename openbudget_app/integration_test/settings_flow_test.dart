@@ -150,6 +150,9 @@ void main() {
 
       await tester.drag(find.byType(ListView).first, const Offset(0, 500));
       await tester.pumpAndSettle();
+      // The row can stop half under the app bar; bring all of it into view.
+      await tester.ensureVisible(find.text('Plan Settings'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Plan Settings'));
       await tester.pumpAndSettle();
 
