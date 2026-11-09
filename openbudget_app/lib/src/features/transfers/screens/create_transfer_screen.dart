@@ -121,7 +121,7 @@ class CreateTransferScreen extends HookConsumerWidget {
                 initialValue: fromAccountId.value,
                 decoration: InputDecoration(
                   labelText: l10n.transferFromAccount,
-                  prefixIcon: const SkribbleIcon(
+                  prefixIcon: const ObFieldIcon(
                     data: OpenBudgetIcons.outflow,
                   ),
                 ),
@@ -153,7 +153,7 @@ class CreateTransferScreen extends HookConsumerWidget {
                 initialValue: toAccountId.value,
                 decoration: InputDecoration(
                   labelText: l10n.transferToAccount,
-                  prefixIcon: const SkribbleIcon(data: OpenBudgetIcons.inflow),
+                  prefixIcon: const ObFieldIcon(data: OpenBudgetIcons.inflow),
                 ),
                 items: toAccountOptions
                     .map(
@@ -174,7 +174,7 @@ class CreateTransferScreen extends HookConsumerWidget {
                   errorText: amountError,
                   prefixText: '${currencySymbolForCode(selectedCurrency)} ',
                   hintText: zeroAmountHint,
-                  prefixIcon: const SkribbleIcon(
+                  prefixIcon: const ObFieldIcon(
                     data: OpenBudgetIcons.coins,
                   ),
                 ),
@@ -188,7 +188,7 @@ class CreateTransferScreen extends HookConsumerWidget {
                 controller: descController,
                 decoration: InputDecoration(
                   labelText: l10n.transactionDescriptionLabel,
-                  prefixIcon: const SkribbleIcon(
+                  prefixIcon: const ObFieldIcon(
                     data: OpenBudgetIcons.note,
                   ),
                 ),

@@ -61,7 +61,7 @@ class BudgetAmountField extends HookWidget {
           hintText: hintText,
           prefixIcon: prefixIcon,
           prefixText: '${currencySymbolForCode(currencyCode)} ',
-          suffixIcon: const SkribbleIcon(data: OpenBudgetIcons.keypad),
+          suffixIcon: const ObFieldIcon(data: OpenBudgetIcons.keypad),
           enabled: enabled,
         ),
         child: Text(displayText, style: Theme.of(context).textTheme.bodyLarge),

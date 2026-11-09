@@ -129,7 +129,7 @@ class SplitExpenseScreen extends HookConsumerWidget {
                   ObTextField(
                     controller: descriptionController,
                     labelText: l10n.transactionDescriptionLabel,
-                    prefixIcon: const SkribbleIcon(
+                    prefixIcon: const ObFieldIcon(
                       data: OpenBudgetIcons.document,
                     ),
                   ),
@@ -138,7 +138,7 @@ class SplitExpenseScreen extends HookConsumerWidget {
                     controller: totalAmountController,
                     labelText: l10n.transactionAmountLabel,
                     errorText: totalError,
-                    prefixIcon: const SkribbleIcon(
+                    prefixIcon: const ObFieldIcon(
                       data: OpenBudgetIcons.money,
                     ),
                     keyboardType: const TextInputType.numberWithOptions(
@@ -485,7 +485,7 @@ class _SplitRow extends HookWidget {
               decimals: currencyDecimals,
               message: l10n.amountInvalidFormat(currencyDecimals),
             ),
-            prefixIcon: const SkribbleIcon(data: OpenBudgetIcons.money),
+            prefixIcon: const ObFieldIcon(data: OpenBudgetIcons.money),
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             onChanged: (_) => onAmountChanged(),
           ),
@@ -493,7 +493,7 @@ class _SplitRow extends HookWidget {
           ObTextField(
             controller: splitData.memoController,
             labelText: l10n.splitMemoLabel,
-            prefixIcon: const SkribbleIcon(data: OpenBudgetIcons.note),
+            prefixIcon: const ObFieldIcon(data: OpenBudgetIcons.note),
           ),
         ],
       ),

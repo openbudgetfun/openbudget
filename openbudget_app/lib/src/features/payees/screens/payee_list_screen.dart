@@ -109,7 +109,7 @@ class PayeeListScreen extends HookConsumerWidget {
                   child: ObTextField(
                     controller: searchController,
                     hintText: l10n.payeeSearchHint,
-                    prefixIcon: const SkribbleIcon(
+                    prefixIcon: const ObFieldIcon(
                       data: OpenBudgetIcons.search,
                     ),
                     suffixIcon: searchQuery.value.isNotEmpty
@@ -395,7 +395,7 @@ class _AddPayeeDialog extends HookConsumerWidget {
       content: ObTextField(
         controller: nameController,
         labelText: l10n.payeeNameLabel,
-        prefixIcon: const SkribbleIcon(data: OpenBudgetIcons.store),
+        prefixIcon: const ObFieldIcon(data: OpenBudgetIcons.store),
         autofocus: true,
         onSubmitted: isSubmitting.value
             ? null
@@ -468,7 +468,7 @@ class _EditPayeeDialog extends HookConsumerWidget {
       content: ObTextField(
         controller: nameController,
         labelText: l10n.payeeNameLabel,
-        prefixIcon: const SkribbleIcon(data: OpenBudgetIcons.store),
+        prefixIcon: const ObFieldIcon(data: OpenBudgetIcons.store),
         autofocus: true,
         onSubmitted: isSubmitting.value
             ? null

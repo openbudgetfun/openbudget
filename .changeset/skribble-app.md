@@ -13,3 +13,4 @@ Screens keep their providers, routes and data flow; only widgets, colours and la
 - Text on the highlighter takes `ObPalette.onHighlighter` on the login headline, the Plus price and the home "ready to assign" figure; before, they were chalk or a tone hue on sunflower in dark mode, which failed WCAG AA.
 - Transaction rows move the cleared status chip into the row's chip strip beside "Unassigned", so neither chip truncates at 390pt and the amount stands alone like a ledger column.
 - `ObToneChip` is tighter (7/9pt sides, a 7pt dot) so a dotted chip is no wider than the old bare chip.
+- Every Skribble icon in a text field's `prefixIcon` or `suffixIcon` slot (47 across 23 files) is an `ObFieldIcon`, so the glyph sits centred inside the outline instead of on its top-left corner. A login test asserts both field icons sit inside the outline's inner rect.

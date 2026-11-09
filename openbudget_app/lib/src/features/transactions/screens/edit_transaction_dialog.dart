@@ -105,7 +105,7 @@ class EditTransactionDialog extends HookConsumerWidget {
             ObTextField(
               controller: descriptionController,
               labelText: l10n.transactionDescriptionLabel,
-              prefixIcon: const SkribbleIcon(
+              prefixIcon: const ObFieldIcon(
                 data: OpenBudgetIcons.document,
               ),
             ),
@@ -114,7 +114,7 @@ class EditTransactionDialog extends HookConsumerWidget {
               controller: amountController,
               labelText: l10n.transactionAmountLabel,
               errorText: amountError,
-              prefixIcon: const SkribbleIcon(data: OpenBudgetIcons.money),
+              prefixIcon: const ObFieldIcon(data: OpenBudgetIcons.money),
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
               ),
@@ -192,7 +192,7 @@ class EditTransactionDialog extends HookConsumerWidget {
               decoration: InputDecoration(
                 labelText: l10n.transactionMemoLabel,
                 hintText: l10n.transactionMemoHint,
-                prefixIcon: const SkribbleIcon(data: OpenBudgetIcons.note),
+                prefixIcon: const ObFieldIcon(data: OpenBudgetIcons.note),
               ),
               maxLines: 2,
               textInputAction: TextInputAction.done,

@@ -215,7 +215,7 @@ class AddExpenseScreen extends HookConsumerWidget {
                           decoration: InputDecoration(
                             labelText: l10n.transactionAmountLabel,
                             errorText: amountError,
-                            prefixIcon: const SkribbleIcon(
+                            prefixIcon: const ObFieldIcon(
                               data: OpenBudgetIcons.money,
                             ),
                             border: InputBorder.none,
@@ -389,7 +389,7 @@ class AddExpenseScreen extends HookConsumerWidget {
                       ObTextField(
                         controller: descriptionController,
                         labelText: l10n.transactionDescriptionLabel,
-                        prefixIcon: const SkribbleIcon(
+                        prefixIcon: const ObFieldIcon(
                           data: OpenBudgetIcons.document,
                         ),
                       ),
@@ -398,7 +398,7 @@ class AddExpenseScreen extends HookConsumerWidget {
                         controller: memoController,
                         decoration: InputDecoration(
                           labelText: l10n.transactionMemoLabel,
-                          prefixIcon: const SkribbleIcon(
+                          prefixIcon: const ObFieldIcon(
                             data: OpenBudgetIcons.note,
                           ),
                           hintText: l10n.transactionMemoHint,

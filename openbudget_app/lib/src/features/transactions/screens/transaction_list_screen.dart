@@ -276,7 +276,7 @@ class TransactionListScreen extends HookConsumerWidget {
                 child: ObTextField(
                   controller: searchController,
                   hintText: l10n.transactionSearchHint,
-                  prefixIcon: const SkribbleIcon(data: OpenBudgetIcons.search),
+                  prefixIcon: const ObFieldIcon(data: OpenBudgetIcons.search),
                   suffixIcon: searchQuery.value.isNotEmpty
                       ? IconButton(
                           key: const Key('transaction-search-clear'),

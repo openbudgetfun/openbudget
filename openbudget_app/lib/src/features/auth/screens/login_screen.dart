@@ -357,7 +357,7 @@ class _LoginTextField extends HookWidget {
       onSubmitted: onSubmitted,
       decoration: InputDecoration(
         labelText: labelText,
-        prefixIcon: SkribbleIcon(
+        prefixIcon: ObFieldIcon(
           data: prefixIcon,
           size: 20,
           color: palette.mutedInk,
