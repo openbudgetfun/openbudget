@@ -9,6 +9,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/auth/providers/auth_provider.dart';
 import 'package:openbudget_app/src/features/auth/providers/auth_state.dart';
+import 'package:openbudget_app/src/features/auth/providers/social_sign_in_provider.dart';
+import 'package:openbudget_app/src/features/auth/social_sign_in.dart';
 import 'package:openbudget_app/src/features/settings/providers/display_options_provider.dart';
 import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
@@ -40,19 +42,16 @@ class LoginScreen extends HookConsumerWidget {
         passwordController.text.isNotEmpty;
 
     final client = ref.watch(serverpodClientProvider);
-    final supportsSocialSignIn =
-        kIsWeb ||
-        switch (theme.platform) {
-          TargetPlatform.android || TargetPlatform.iOS => true,
-          _ => false,
-        };
-    final showGoogleSignIn =
-        supportsSocialSignIn && const bool.hasEnvironment('GOOGLE_CLIENT_ID');
-    final showAppleSignIn =
-        supportsSocialSignIn &&
-        const bool.hasEnvironment('APPLE_SERVICE_IDENTIFIER') &&
-        const bool.hasEnvironment('APPLE_REDIRECT_URI');
-    final showSocialSection = showGoogleSignIn || showAppleSignIn;
+    final socialAvailability = socialSignInAvailability(
+      platform: socialSignInPlatform(
+        isWeb: kIsWeb,
+        targetPlatform: theme.platform,
+      ),
+      defines: ref.watch(socialSignInDefinesProvider),
+    );
+    final showGoogleSignIn = socialAvailability.google;
+    final showAppleSignIn = socialAvailability.apple;
+    final showSocialSection = socialAvailability.hasAny;
     final statusBarStyle =
         (theme.brightness == Brightness.light
                 ? SystemUiOverlayStyle.dark

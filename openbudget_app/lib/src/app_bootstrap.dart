@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/analytics/analytics_provider.dart';
 import 'package:openbudget_app/src/config/app_environment.dart';
+import 'package:openbudget_app/src/features/auth/apple_sign_in_bootstrap.dart';
 import 'package:openbudget_app/src/features/auth/providers/auth_provider.dart';
 import 'package:openbudget_app/src/features/auth/providers/auth_state.dart';
 import 'package:openbudget_app/src/features/settings/providers/ui_preferences_store.dart';
@@ -27,6 +28,9 @@ Future<void> runOpenBudgetApp(AppFlavor flavor) async {
   );
 
   initAppLogging();
+
+  // Native Apple sign-in does not need the web-only Apple defines.
+  await prepareNativeAppleSignIn();
 
   // Initialize PostHog analytics (no-ops in debug mode).
   await container.read(analyticsProvider).init();

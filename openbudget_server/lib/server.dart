@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:openbudget_server/src/agent/mcp/agent_mcp_route.dart';
 import 'package:openbudget_server/src/auth/apple_oauth_callback_route.dart';
 import 'package:openbudget_server/src/auth/email_sender.dart';
+import 'package:openbudget_server/src/auth/google_ios_audience_idp.dart';
+import 'package:openbudget_server/src/auth/idp_settings.dart';
 import 'package:openbudget_server/src/fx_rates/fx_rate_service.dart';
 import 'package:openbudget_server/src/generated/serverpod.dart';
 import 'package:openbudget_server/src/institutions/institution_service.dart';
@@ -42,17 +44,9 @@ Future<void> run(List<String> args) async {
         _readBoolPassword(pod, 'smtpIgnoreBadCertificate') ?? false,
   );
   final emailIdpEnabled = emailSender != null;
-  final googleIdpEnabled = _hasRequiredPasswords(pod, const [
-    'googleClientSecret',
-  ]);
-  final appleIdpEnabled = _hasRequiredPasswords(pod, const [
-    'appleServiceIdentifier',
-    'appleBundleIdentifier',
-    'appleRedirectUri',
-    'appleTeamId',
-    'appleKeyId',
-    'appleKey',
-  ]);
+  final idpSettings = SocialIdpSettings.fromPasswords(pod.getPassword);
+  final googleIdpEnabled = idpSettings.googleEnabled;
+  final appleIdpEnabled = idpSettings.appleEnabled;
   if (!emailIdpEnabled) {
     stderr.writeln(
       'Email IDP disabled for run mode "${pod.runMode}". Missing required SMTP passwords: ${_smtpPasswordKeys.join(', ')}.',
@@ -99,6 +93,16 @@ Future<void> run(List<String> args) async {
       if (appleIdpEnabled) AppleIdpConfigFromPasswords(),
     ],
   );
+
+  final googleIosClientId = idpSettings.googleIosClientId;
+  if (googleIdpEnabled && googleIosClientId != null) {
+    GoogleIosAudienceIdp.configure(
+      clientId: googleIosClientId,
+      tokenIssuer: AuthServices.instance.tokenManager,
+      authUsers: AuthServices.instance.authUsers,
+      userProfiles: AuthServices.instance.userProfiles,
+    );
+  }
 
   // Setup a default page at the web root.
   // These are used by the default page.
@@ -210,9 +214,6 @@ bool? _readBoolPassword(Serverpod pod, String key) {
       return null;
   }
 }
-
-bool _hasRequiredPasswords(Serverpod pod, List<String> keys) =>
-    keys.every((key) => _readPassword(pod, key) != null);
 
 Future<void> _seedInstitutions(Serverpod pod) async {
   final session = await pod.createSession(enableLogging: false);

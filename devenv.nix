@@ -274,7 +274,19 @@ in
       exec = ''
         set -e
         cd "$DEVENV_ROOT/openbudget_app"
-        flutter $@
+
+        # Pick up local OAuth client ids when they exist. Only the commands that
+        # understand --dart-define-from-file get the extra argument.
+        defines_args=()
+        case "''${1:-}" in
+          run|build|test|drive)
+            if [[ -f config/dart_defines.local.json ]]; then
+              defines_args+=(--dart-define-from-file=config/dart_defines.local.json)
+            fi
+            ;;
+        esac
+
+        flutter $@ "''${defines_args[@]}"
       '';
       description = "Run flutter commands from the openbudget_app directory.";
     };
