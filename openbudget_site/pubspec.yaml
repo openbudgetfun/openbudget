@@ -1,0 +1,27 @@
+name: openbudget_site
+description: The OpenBudget landing page, a static site built with Jaspr.
+version: 0.0.0
+publish_to: none
+
+environment:
+  sdk: ^3.13.0
+
+resolution: workspace
+
+dependencies:
+  jaspr: ^0.23.5
+
+dev_dependencies:
+  # `jaspr build` drives build_runner and build_web_compilers. The site has
+  # no client components or generated styles, so it does without
+  # jaspr_builder, which does not resolve against the workspace's analyzer.
+  build_runner: ^2.16.1
+  build_web_compilers: ^4.8.12
+  html: ^0.15.6
+  jaspr_test: ^0.23.5
+  openbudget_lints:
+    path: ../openbudget_lints
+  test: ^1.31.1
+
+jaspr:
+  mode: static

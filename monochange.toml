@@ -55,6 +55,9 @@ path = "openbudget_test_utils"
 [package.openbudget_scripts]
 path = "openbudget_scripts"
 
+[package.openbudget_site]
+path = "openbudget_site"
+
 # =============================================================================
 # [group.*] — the product release identity
 # =============================================================================
@@ -69,6 +72,7 @@ packages = [
   "openbudget_lints",
   "openbudget_test_utils",
   "openbudget_scripts",
+  "openbudget_site",
 ]
 tag = true
 release = true
