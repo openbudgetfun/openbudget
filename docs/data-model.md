@@ -3834,3 +3834,4 @@ Each question has a recommended default, which the implementation should follow 
 - Pure core funding calculations accept a `FundingGoal` record containing the goal kind name, amount and target date. This avoids a dependency from core on the server's `EnvelopeGoal` model.
 - The server's `ValuationSource` likewise uses `imported` because `import` is reserved by the generator.
 - Serverpod 4.1 requires nullable fields for `scope=serverOnly`: Plaid's `accessTokenCiphertext` and `accessTokenNonce`, and wallet transaction `rawJson`, are nullable in the model. Secret-writing services must supply both token fields together.
+- `FxRateEndpoint.refresh` stays in the reset even though section 7 removes it. This port keeps the authenticated endpoint so the hourly `fx-refresh-hourly` job can be validated against a forced refresh; remove it once the job is proven.

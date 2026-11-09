@@ -5,7 +5,7 @@ import 'package:openbudget_server/src/agent/mcp/agent_mcp_route.dart';
 import 'package:openbudget_server/src/auth/apple_oauth_callback_route.dart';
 import 'package:openbudget_server/src/auth/email_sender.dart';
 import 'package:openbudget_server/src/auth/idp_settings.dart';
-import 'package:openbudget_server/src/fx_rates/fx_rate_service.dart';
+import 'package:openbudget_server/src/fx_rates/fx_service.dart';
 import 'package:openbudget_server/src/generated/serverpod.dart';
 import 'package:openbudget_server/src/institutions/institution_service.dart';
 import 'package:openbudget_server/src/logging/server_logging.dart';
@@ -149,7 +149,7 @@ Future<void> run(List<String> args) async {
     );
   }
 
-  FxRateService.configure(
+  FxService.configure(
     apiKey: _readPassword(pod, 'currencyApiKey'),
     baseUrl: _readPassword(pod, 'currencyApiBaseUrl'),
   );
@@ -160,8 +160,14 @@ Future<void> run(List<String> args) async {
   // Ensure institution catalog seed data exists for account linking/search.
   await _seedInstitutions(pod);
 
-  // Keep persisted FX rates fresh for display-currency conversion.
-  FxRateService.startBackgroundRefresh(pod);
+  // Refresh today's daily FX rows every hour.
+  const fxRefreshIdentifier = 'fx-refresh-hourly';
+  await pod.futureCalls.cancel(fxRefreshIdentifier);
+  await pod.futureCalls
+      .callRecurring(identifier: fxRefreshIdentifier)
+      .every(const Duration(hours: 1))
+      .fxRefresh
+      .refresh();
 
   // Repair cached balance drift at the next 03:00 UTC boundary.
   await pod.futureCalls.cancel('balance-verify-nightly');
