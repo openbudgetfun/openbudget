@@ -78,7 +78,7 @@ void main() {
             functionalDebitMinor: debit,
             functionalCreditMinor: credit,
             exchangeRate: '0.8',
-            rateDate: DateTime.utc(2026, 11, 1),
+            rateDate: DateTime.utc(2026, 11),
             rateSource: 'market',
           );
       final lines = [line('bank', 100, 0), line('unrealisedFx', 0, 100)];
