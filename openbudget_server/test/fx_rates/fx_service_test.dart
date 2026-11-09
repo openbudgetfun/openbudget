@@ -2,8 +2,10 @@
 // ignore_for_file: avoid_redundant_argument_values
 
 import 'package:openbudget_core/openbudget_core.dart';
+import 'package:openbudget_server/src/fx_rates/fx_backfill_future_call.dart';
 import 'package:openbudget_server/src/fx_rates/fx_provider_client.dart';
 import 'package:openbudget_server/src/fx_rates/fx_rate_endpoint.dart';
+import 'package:openbudget_server/src/fx_rates/fx_refresh_future_call.dart';
 import 'package:openbudget_server/src/fx_rates/fx_service.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
@@ -565,6 +567,62 @@ void main() {
     expect(
       latest.rates.map((quote) => quote.currencyCode),
       ['EUR', 'USD'],
+    );
+  });
+
+  test(
+    'refresh future call skips without credentials and persists with them',
+    () async {
+      FxService.configure(
+        apiKey: null,
+        baseUrl: null,
+        providerClient: provider,
+        clock: () => _now,
+      );
+      await FxRefreshFutureCall().refresh(session);
+      expect(provider.latestCalls, 0);
+
+      provider = _FakeFxProviderClient(
+        latest: (_) => FxProviderResult(
+          fetchedAt: _now,
+          rates: const {'USD': '1', 'EUR': '0.9'},
+        ),
+      );
+      configureProvider();
+      await FxRefreshFutureCall().refresh(session);
+
+      expect(provider.latestCalls, 1);
+      expect(
+        await FxRate.db.count(
+          session,
+          where: (table) => table.rateDate.equals(DateTime.utc(2026, 3, 10)),
+        ),
+        2,
+      );
+    },
+  );
+
+  test('backfill future call stores the requested day', () async {
+    final date = DateTime.utc(2026, 3, 1);
+    provider = _FakeFxProviderClient(
+      historical: {
+        date: FxProviderResult(
+          fetchedAt: DateTime.utc(2026, 3, 10, 9),
+          rates: const {'USD': '1', 'GBP': '0.8'},
+        ),
+      },
+    );
+    configureProvider();
+
+    await FxBackfillFutureCall().fetch(session, date);
+
+    expect(provider.historicalCalls, [date]);
+    expect(
+      await FxRate.db.count(
+        session,
+        where: (table) => table.rateDate.equals(date),
+      ),
+      2,
     );
   });
 
