@@ -18,6 +18,8 @@ dependencies:
   flutter_hooks: ^0.21.3+1
   openbudget_core:
     path: ../openbudget_core
+  # Parses the mark's SVG path data (`ObMark`).
+  path_parsing: ^1.1.0
   skribble: 0.3.1
   skribble_font_recursive: 0.3.1
 
