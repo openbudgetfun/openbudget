@@ -1,0 +1,9 @@
+### Net worth on one date, in the reporting currency.
+class: NetWorthPoint
+fields:
+  ### Calendar date: the last day of the period, or today for the last point.
+  date: DateTime
+  assetsMinor: int
+  liabilitiesMinor: int
+  netWorthMinor: int
+  isComplete: bool

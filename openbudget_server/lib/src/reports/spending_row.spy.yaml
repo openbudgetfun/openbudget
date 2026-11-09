@@ -1,0 +1,14 @@
+### One group's spending and income over a month range, in base minor units.
+class: SpendingRow
+fields:
+  ### Envelope, category or payee id; null for the "no envelope" or "no
+  ### payee" group.
+  groupId: UuidValue?
+  name: String
+  ### yyyymm, or null when the row covers the whole range.
+  month: int?
+  ### Sum of negative lines, as a negative number.
+  outflowMinor: int
+  ### Sum of positive lines.
+  inflowMinor: int
+  transactionCount: int

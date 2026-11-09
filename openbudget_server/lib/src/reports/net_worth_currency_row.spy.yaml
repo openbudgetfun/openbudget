@@ -1,0 +1,16 @@
+### Accounts held in one currency, in that currency and converted.
+class: NetWorthCurrencyRow
+fields:
+  ### ISO 4217 code the accounts are held in.
+  currencyCode: String
+  ### Sum of balances in this currency's minor units.
+  nativeMinor: int
+  ### Sum of the converted accounts in the reporting currency; null when
+  ### no rate was available.
+  convertedMinor: int?
+  ### Reporting currency per one unit of this currency, exact decimal.
+  fxRate: String?
+  fxRateDate: DateTime?
+  fxRateSource: FxRateSource?
+  isStale: bool
+  accountCount: int
