@@ -35,6 +35,7 @@ export 'src/widgets/ob_button.dart';
 export 'src/widgets/ob_card.dart';
 export 'src/widgets/ob_dropdown.dart';
 export 'src/widgets/ob_envelope_gauge.dart';
+export 'src/widgets/ob_field_icon.dart';
 export 'src/widgets/ob_highlighter.dart';
 export 'src/widgets/ob_list_row.dart';
 export 'src/widgets/ob_mark.dart';

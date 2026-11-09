@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:openbudget_ui/src/widgets/ob_field_icon.dart';
 
 /// A themed text field with consistent styling.
+///
+/// Its icons are centred in the 48pt slots the field lays them out in, so
+/// even a bare `SkribbleIcon` sits inside the outline rather than on its
+/// corner. In a plain `TextField`, use [ObFieldIcon] for the same result.
 class ObTextField extends HookWidget {
   const ObTextField({
     this.controller,
@@ -48,8 +53,12 @@ class ObTextField extends HookWidget {
       labelText: labelText,
       errorText: errorText,
       prefixText: prefixText,
-      prefixIcon: prefixIcon,
-      suffixIcon: suffixIcon,
+      prefixIcon: _centred(prefixIcon),
+      suffixIcon: _centred(suffixIcon),
     ),
   );
+
+  static Widget? _centred(Widget? icon) => icon == null
+      ? null
+      : Center(widthFactor: 1, heightFactor: 1, child: icon);
 }
