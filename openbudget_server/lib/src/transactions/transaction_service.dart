@@ -163,12 +163,12 @@ class TransactionService {
     );
     await BudgetService.getById(session, budgetId: budgetId);
     final normalizedCurrencyCode = requireSupportedCurrency(currencyCode);
-    await _assertAccountBelongsToBudget(
+    final fromAccount = await _assertAccountBelongsToBudget(
       session,
       accountId: fromAccountId,
       budgetId: budgetId,
     );
-    await _assertAccountBelongsToBudget(
+    final toAccount = await _assertAccountBelongsToBudget(
       session,
       accountId: toAccountId,
       budgetId: budgetId,
@@ -177,6 +177,23 @@ class TransactionService {
     if (fromAccountId == toAccountId) {
       throw ValidationException(
         message: 'Source and destination accounts must be different',
+      );
+    }
+    // A transfer is one movement of money. The two accounts and the amount
+    // have to be the same currency; otherwise the pair of rows cannot be
+    // added back together.
+    if (fromAccount.currencyCode != toAccount.currencyCode) {
+      throw ValidationException(
+        message:
+            'Source and destination accounts must share a currency '
+            '(${fromAccount.currencyCode} and ${toAccount.currencyCode})',
+      );
+    }
+    if (fromAccount.currencyCode != normalizedCurrencyCode) {
+      throw ValidationException(
+        message:
+            'Transfer currency must match the account currency '
+            '(${fromAccount.currencyCode})',
       );
     }
 
@@ -277,10 +294,12 @@ class TransactionService {
 
   /// Reconciles an account with a statement balance.
   ///
-  /// Computes the cleared balance (sum of all cleared & unreconciled
-  /// transactions plus previously reconciled transactions). If it differs
-  /// from [statementBalanceCents], an adjustment transaction is created.
-  /// All cleared transactions are then marked reconciled.
+  /// Computes the cleared balance (sum of all cleared and reconciled
+  /// transactions in the account currency). If it differs from
+  /// [statementBalanceCents], an adjustment in that same currency is created.
+  /// A transaction in another currency fails the reconcile instead of being
+  /// added into the statement. All cleared transactions are then marked
+  /// reconciled.
   ///
   /// Returns a list containing: [reconciledCount, adjustmentCents].
   static Future<List<int>> reconcileWithBalance(
@@ -289,7 +308,12 @@ class TransactionService {
     required UuidValue budgetId,
     required int statementBalanceCents,
   }) async {
-    final budget = await BudgetService.getById(session, budgetId: budgetId);
+    await BudgetService.getById(session, budgetId: budgetId);
+    final account = await _assertAccountBelongsToBudget(
+      session,
+      accountId: accountId,
+      budgetId: budgetId,
+    );
 
     // Sum all transactions for this account to get the current balance.
     final allTransactions = await Transaction.db.find(
@@ -298,8 +322,17 @@ class TransactionService {
     );
 
     // Cleared balance = sum of all reconciled + cleared transactions.
+    // Every row on the account has to be in the account currency; adding
+    // another currency's minor units to the statement is not a balance.
     var clearedBalanceCents = 0;
     for (final txn in allTransactions) {
+      if (txn.currencyCode != account.currencyCode) {
+        throw ValidationException(
+          message:
+              'Cannot reconcile ${account.currencyCode} account while it has '
+              'a ${txn.currencyCode} transaction',
+        );
+      }
       if (txn.reconciled || txn.cleared) {
         clearedBalanceCents += txn.amountCents;
       }
@@ -313,7 +346,7 @@ class TransactionService {
         budgetId: budgetId,
         accountId: accountId,
         amountCents: adjustmentCents,
-        currencyCode: budget.currencyCode,
+        currencyCode: account.currencyCode,
         description: 'Reconciliation adjustment',
         transactionDate: DateTime.now(),
         cleared: true,
@@ -580,7 +613,7 @@ class TransactionService {
     return Transaction.db.deleteRow(session, transaction);
   }
 
-  static Future<void> _assertAccountBelongsToBudget(
+  static Future<Account> _assertAccountBelongsToBudget(
     Session session, {
     required UuidValue accountId,
     required UuidValue budgetId,
@@ -589,6 +622,7 @@ class TransactionService {
     if (account.budgetId != budgetId) {
       throw NotFoundException(message: 'Account not found in this budget');
     }
+    return account;
   }
 
   static Future<void> _assertEnvelopeBelongsToBudget(
