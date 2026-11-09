@@ -190,3 +190,7 @@ flutter:app run --dart-define=POSTHOG_API_KEY=phc_xxx
 - **Riverpod + Hooks** — state management following repository > service > provider > UI pattern
 - **Multi-currency native** — first-class support for multiple currencies including crypto
 - **AI-first** — financial intelligence features integrated into the budgeting workflow
+
+## License
+
+OpenBudget is licensed under the [Apache License 2.0](LICENSE).
