@@ -2656,41 +2656,23 @@ abstract class AppLocalizations {
   /// **'Applies instantly to OpenBudget in-app branding previews.'**
   String get settingsAppIconHint;
 
+  /// No description provided for @settingsAppIconInk.
+  ///
+  /// In en, this message translates to:
+  /// **'Ink'**
+  String get settingsAppIconInk;
+
+  /// No description provided for @settingsAppIconNight.
+  ///
+  /// In en, this message translates to:
+  /// **'Night'**
+  String get settingsAppIconNight;
+
   /// No description provided for @settingsAppIconPrimary.
   ///
   /// In en, this message translates to:
-  /// **'Primary'**
+  /// **'Paper'**
   String get settingsAppIconPrimary;
-
-  /// No description provided for @settingsAppIconV1.
-  ///
-  /// In en, this message translates to:
-  /// **'Classic'**
-  String get settingsAppIconV1;
-
-  /// No description provided for @settingsAppIconV2.
-  ///
-  /// In en, this message translates to:
-  /// **'Compass'**
-  String get settingsAppIconV2;
-
-  /// No description provided for @settingsAppIconV3.
-  ///
-  /// In en, this message translates to:
-  /// **'Sprout'**
-  String get settingsAppIconV3;
-
-  /// No description provided for @settingsAppIconV4.
-  ///
-  /// In en, this message translates to:
-  /// **'Ledger'**
-  String get settingsAppIconV4;
-
-  /// No description provided for @settingsAppIconV5.
-  ///
-  /// In en, this message translates to:
-  /// **'Arrow'**
-  String get settingsAppIconV5;
 
   /// No description provided for @settingsAppSection.
   ///

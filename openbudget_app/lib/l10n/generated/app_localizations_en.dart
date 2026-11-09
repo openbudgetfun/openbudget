@@ -1586,22 +1586,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Applies instantly to OpenBudget in-app branding previews.';
 
   @override
-  String get settingsAppIconPrimary => 'Primary';
+  String get settingsAppIconInk => 'Ink';
 
   @override
-  String get settingsAppIconV1 => 'Classic';
+  String get settingsAppIconNight => 'Night';
 
   @override
-  String get settingsAppIconV2 => 'Compass';
-
-  @override
-  String get settingsAppIconV3 => 'Sprout';
-
-  @override
-  String get settingsAppIconV4 => 'Ledger';
-
-  @override
-  String get settingsAppIconV5 => 'Arrow';
+  String get settingsAppIconPrimary => 'Paper';
 
   @override
   String get settingsAppSection => 'App';
