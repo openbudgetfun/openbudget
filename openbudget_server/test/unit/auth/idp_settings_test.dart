@@ -40,7 +40,6 @@ void main() {
 
       expect(settings.googleEnabled, isFalse);
       expect(settings.appleEnabled, isFalse);
-      expect(settings.googleIosClientId, isNull);
     });
 
     test('enables Google from the web client secret alone', () {
@@ -50,33 +49,6 @@ void main() {
 
       expect(settings.googleEnabled, isTrue);
       expect(settings.appleEnabled, isFalse);
-    });
-
-    test('trims the optional iOS Google client id', () {
-      final settings = SocialIdpSettings.fromPasswords(
-        (key) => switch (key) {
-          'googleClientSecret' => '{...}',
-          'googleIosClientId' => '  ios-client-id.apps.googleusercontent.com  ',
-          _ => null,
-        },
-      );
-
-      expect(
-        settings.googleIosClientId,
-        'ios-client-id.apps.googleusercontent.com',
-      );
-    });
-
-    test('ignores an empty iOS Google client id', () {
-      final settings = SocialIdpSettings.fromPasswords(
-        (key) => switch (key) {
-          'googleClientSecret' => '{...}',
-          'googleIosClientId' => '   ',
-          _ => null,
-        },
-      );
-
-      expect(settings.googleIosClientId, isNull);
     });
 
     test('enables Apple from all six Apple passwords', () {

@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:openbudget_server/src/agent/mcp/agent_mcp_route.dart';
 import 'package:openbudget_server/src/auth/apple_oauth_callback_route.dart';
 import 'package:openbudget_server/src/auth/email_sender.dart';
-import 'package:openbudget_server/src/auth/google_ios_audience_idp.dart';
 import 'package:openbudget_server/src/auth/idp_settings.dart';
 import 'package:openbudget_server/src/fx_rates/fx_rate_service.dart';
 import 'package:openbudget_server/src/generated/serverpod.dart';
@@ -93,16 +92,6 @@ Future<void> run(List<String> args) async {
       if (appleIdpEnabled) AppleIdpConfigFromPasswords(),
     ],
   );
-
-  final googleIosClientId = idpSettings.googleIosClientId;
-  if (googleIdpEnabled && googleIosClientId != null) {
-    GoogleIosAudienceIdp.configure(
-      clientId: googleIosClientId,
-      tokenIssuer: AuthServices.instance.tokenManager,
-      authUsers: AuthServices.instance.authUsers,
-      userProfiles: AuthServices.instance.userProfiles,
-    );
-  }
 
   // Setup a default page at the web root.
   // These are used by the default page.

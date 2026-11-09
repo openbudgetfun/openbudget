@@ -68,9 +68,6 @@ client secret or private key.
    `openbudget_server/config/passwords.example.yaml` into
    `openbudget_server/config/passwords.yaml` (gitignored).
    - `googleClientSecret`: the web client JSON from step 1.2.
-   - `googleIosClientId` (optional): the iOS client id. Set it when the app
-     does not send `GOOGLE_SERVER_CLIENT_ID`; the server then also accepts
-     native iOS tokens minted for the iOS client.
    - `appleServiceIdentifier`, `appleBundleIdentifier`
      (`com.openbudget.app`), `appleRedirectUri`, `appleTeamId`, `appleKeyId`,
      `appleKey`: from steps 2.2 and 2.3. Serverpod needs all six to construct
@@ -80,7 +77,6 @@ client secret or private key.
 
    ```bash
    scloud password set googleClientSecret --from-file google-client-secret.json
-   scloud password set googleIosClientId --value <ios-client-id>
    scloud password set appleServiceIdentifier --value <service-id>
    scloud password set appleBundleIdentifier --value com.openbudget.app
    scloud password set appleRedirectUri --value https://<your-host>/auth/apple/callback
@@ -123,13 +119,14 @@ flutter:app run --flavor dev -t lib/main_dev.dart -d <device-id> \
 3. In both cases the app should land signed in and the account should appear
    after a restart (the session token is stored by the auth session manager).
 4. If a button does not appear:
-   - Google needs `GOOGLE_CLIENT_ID` at build time.
+   - Google needs `GOOGLE_CLIENT_ID` at build time, and on iPhone and Android
+     also `GOOGLE_SERVER_CLIENT_ID` (the web client id).
    - Apple appears on iPhone without any defines; if it is missing, check the
      platform is iOS and the entitlement is present.
 5. If sign-in fails after the native sheet:
-   - Google tokens are minted for the iOS client id when
-     `GOOGLE_SERVER_CLIENT_ID` is absent. Either set it, or set
-     `googleIosClientId` on the server.
+   - Google: the app passes `GOOGLE_SERVER_CLIENT_ID` so the token is addressed
+     to the web client. Check it matches the `client_id` inside the server's
+     `googleClientSecret`.
    - Apple's identity token is addressed to the bundle id. Verify
      `appleBundleIdentifier` matches the installed app (`com.openbudget.app`,
      not `com.openbudget.app.dev`, unless you registered the dev App ID and set

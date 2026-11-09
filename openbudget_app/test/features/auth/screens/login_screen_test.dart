@@ -12,12 +12,14 @@ import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
 
 const _noDefines = SocialSignInDefines(
   googleClientId: false,
+  googleServerClientId: false,
   appleServiceIdentifier: false,
   appleRedirectUri: false,
 );
 
 const _googleOnly = SocialSignInDefines(
   googleClientId: true,
+  googleServerClientId: true,
   appleServiceIdentifier: false,
   appleRedirectUri: false,
 );

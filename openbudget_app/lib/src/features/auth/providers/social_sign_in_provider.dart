@@ -11,6 +11,7 @@ part 'social_sign_in_provider.g.dart';
 @riverpod
 SocialSignInDefines socialSignInDefines(Ref ref) => const SocialSignInDefines(
   googleClientId: bool.hasEnvironment('GOOGLE_CLIENT_ID'),
+  googleServerClientId: bool.hasEnvironment('GOOGLE_SERVER_CLIENT_ID'),
   appleServiceIdentifier: bool.hasEnvironment('APPLE_SERVICE_IDENTIFIER'),
   appleRedirectUri: bool.hasEnvironment('APPLE_REDIRECT_URI'),
 );

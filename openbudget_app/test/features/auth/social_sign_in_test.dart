@@ -4,24 +4,28 @@ import 'package:openbudget_app/src/features/auth/social_sign_in.dart';
 
 const _noDefines = SocialSignInDefines(
   googleClientId: false,
+  googleServerClientId: false,
   appleServiceIdentifier: false,
   appleRedirectUri: false,
 );
 
 const _googleOnly = SocialSignInDefines(
   googleClientId: true,
+  googleServerClientId: true,
   appleServiceIdentifier: false,
   appleRedirectUri: false,
 );
 
 const _appleWebOnly = SocialSignInDefines(
   googleClientId: false,
+  googleServerClientId: false,
   appleServiceIdentifier: true,
   appleRedirectUri: true,
 );
 
 const _allDefines = SocialSignInDefines(
   googleClientId: true,
+  googleServerClientId: true,
   appleServiceIdentifier: true,
   appleRedirectUri: true,
 );
@@ -103,6 +107,32 @@ void main() {
       expect(availability.google, isTrue);
     });
 
+    test('hides native Google without the server client id', () {
+      const clientIdOnly = SocialSignInDefines(
+        googleClientId: true,
+        googleServerClientId: false,
+        appleServiceIdentifier: false,
+        appleRedirectUri: false,
+      );
+
+      for (final platform in [
+        SocialSignInPlatform.ios,
+        SocialSignInPlatform.android,
+      ]) {
+        final availability = socialSignInAvailability(
+          platform: platform,
+          defines: clientIdOnly,
+        );
+        expect(availability.google, isFalse, reason: '$platform');
+      }
+
+      final web = socialSignInAvailability(
+        platform: SocialSignInPlatform.web,
+        defines: clientIdOnly,
+      );
+      expect(web.google, isTrue);
+    });
+
     test('keeps Apple hidden on Android without the web-only defines', () {
       final availability = socialSignInAvailability(
         platform: SocialSignInPlatform.android,
@@ -128,6 +158,7 @@ void main() {
         platform: SocialSignInPlatform.web,
         defines: const SocialSignInDefines(
           googleClientId: false,
+          googleServerClientId: false,
           appleServiceIdentifier: true,
           appleRedirectUri: false,
         ),
@@ -138,6 +169,7 @@ void main() {
         platform: SocialSignInPlatform.web,
         defines: const SocialSignInDefines(
           googleClientId: false,
+          googleServerClientId: false,
           appleServiceIdentifier: false,
           appleRedirectUri: true,
         ),

@@ -26,7 +26,6 @@ class SocialIdpSettings {
   const SocialIdpSettings({
     required this.googleEnabled,
     required this.appleEnabled,
-    required this.googleIosClientId,
   });
 
   /// Reads the settings through [read].
@@ -34,7 +33,6 @@ class SocialIdpSettings {
       SocialIdpSettings(
         googleEnabled: hasRequiredPasswords(read, googleIdpPasswordKeys),
         appleEnabled: hasRequiredPasswords(read, appleIdpPasswordKeys),
-        googleIosClientId: normalizedPassword(read('googleIosClientId')),
       );
 
   /// Whether the Google provider has all of its required passwords.
@@ -42,12 +40,6 @@ class SocialIdpSettings {
 
   /// Whether the Apple provider has all of its required passwords.
   final bool appleEnabled;
-
-  /// The iOS OAuth client id that native Google tokens can be issued to.
-  ///
-  /// Optional. When set, the server accepts native iOS Google ID tokens whose
-  /// audience is this client id, in addition to the web client's audience.
-  final String? googleIosClientId;
 }
 
 /// Trims a password and treats an empty value as absent.

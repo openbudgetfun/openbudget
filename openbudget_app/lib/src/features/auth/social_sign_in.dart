@@ -16,6 +16,7 @@ class SocialSignInDefines {
   /// Creates a new [SocialSignInDefines].
   const SocialSignInDefines({
     required this.googleClientId,
+    required this.googleServerClientId,
     required this.appleServiceIdentifier,
     required this.appleRedirectUri,
   });
@@ -25,6 +26,13 @@ class SocialSignInDefines {
   /// On iOS this is the iOS OAuth client id. On Android and web it is that
   /// platform's client id.
   final bool googleClientId;
+
+  /// Whether `GOOGLE_SERVER_CLIENT_ID` was supplied.
+  ///
+  /// Native iOS and Android sign-in pass it to Google so the ID token is
+  /// addressed to the web client, which is the only audience the server's
+  /// Google provider verifies. Without it the server rejects native tokens.
+  final bool googleServerClientId;
 
   /// Whether `APPLE_SERVICE_IDENTIFIER` was supplied.
   ///
@@ -79,23 +87,29 @@ SocialSignInPlatform socialSignInPlatform({
 /// Native Apple sign-in on iOS works from the app's bundle id and its
 /// entitlement, so it never needs `APPLE_SERVICE_IDENTIFIER` or
 /// `APPLE_REDIRECT_URI`; those exist for the web and Android flows. Google
-/// still needs a client id on every platform.
+/// needs a client id on every platform, and native platforms also need the
+/// server (web) client id so the server can verify the token.
 SocialSignInAvailability socialSignInAvailability({
   required SocialSignInPlatform platform,
   required SocialSignInDefines defines,
 }) {
   final appleWebConfigured =
       defines.appleServiceIdentifier && defines.appleRedirectUri;
+  final googleNativeConfigured =
+      defines.googleClientId && defines.googleServerClientId;
 
   return switch (platform) {
-    SocialSignInPlatform.web ||
-    SocialSignInPlatform.android => SocialSignInAvailability(
+    SocialSignInPlatform.web => SocialSignInAvailability(
       apple: appleWebConfigured,
       google: defines.googleClientId,
     ),
+    SocialSignInPlatform.android => SocialSignInAvailability(
+      apple: appleWebConfigured,
+      google: googleNativeConfigured,
+    ),
     SocialSignInPlatform.ios => SocialSignInAvailability(
       apple: true,
-      google: defines.googleClientId,
+      google: googleNativeConfigured,
     ),
     SocialSignInPlatform.other => const SocialSignInAvailability(
       apple: false,
