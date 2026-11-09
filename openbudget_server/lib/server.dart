@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:openbudget_server/src/accounts/balance_verify_future_call.dart';
 import 'package:openbudget_server/src/agent/mcp/agent_mcp_route.dart';
 import 'package:openbudget_server/src/auth/apple_oauth_callback_route.dart';
 import 'package:openbudget_server/src/auth/email_sender.dart';
@@ -161,6 +162,16 @@ Future<void> run(List<String> args) async {
 
   // Keep persisted FX rates fresh for display-currency conversion.
   FxRateService.startBackgroundRefresh(pod);
+
+  // Repair cached balance drift at the next 03:00 UTC boundary.
+  await pod.futureCalls.cancel('balance-verify-nightly');
+  await pod.futureCalls
+      .callAtTime(
+        BalanceVerifyFutureCall.nextRun(DateTime.now()),
+        identifier: 'balance-verify-nightly',
+      )
+      .balanceVerify
+      .verify();
 
   // Charge due Solana subscriptions once an hour.
   const collectorIdentifier = 'solana-billing-collector';
