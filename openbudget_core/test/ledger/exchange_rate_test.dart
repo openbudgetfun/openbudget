@@ -58,6 +58,26 @@ void main() {
   });
 
   group('convertMinorUnits', () {
+    test('rounds negative amounts half up on their absolute value', () {
+      for (final exponent in [0, 2, 3, 8]) {
+        for (final (amount, rate, expected) in [
+          (-5, '0.5', -3),
+          (-3333, '0.8', -2666),
+          (-10, '1', -10),
+        ]) {
+          expect(
+            convertMinorUnits(
+              amountMinor: amount,
+              exchangeRate: ExactDecimal.tryParse(rate)!,
+              transactionExponent: exponent,
+              functionalExponent: exponent,
+            ),
+            expected,
+          );
+        }
+      }
+    });
+
     int convert({
       required int amountMinor,
       required String rate,

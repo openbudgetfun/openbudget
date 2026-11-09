@@ -105,5 +105,6 @@ int convertMinorUnits({
       BigInt.from(10).pow(functionalExponent);
   final divisor =
       BigInt.from(10).pow(transactionExponent) * exchangeRate.denominator;
-  return _roundHalfUp(scaled, divisor).toInt();
+  final rounded = _roundHalfUp(scaled.abs(), divisor);
+  return (scaled.isNegative ? -rounded : rounded).toInt();
 }
