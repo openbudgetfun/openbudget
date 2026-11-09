@@ -4,8 +4,8 @@ import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
 import 'package:serverpod_test/serverpod_test.dart';
 
-/// Minimal endpoint dispatch: FX service tests exercise the database directly
-/// and do not need the unfinished endpoint surface to compile.
+/// Minimal endpoint dispatch: database tests exercise services directly and
+/// do not need the unfinished endpoint surface to compile.
 class _EmptyEndpointDispatch extends EndpointDispatch {
   @override
   void initializeEndpoints(Server server) {}
@@ -20,9 +20,9 @@ class EmptyTestEndpoints implements InternalTestEndpoints {
   ) {}
 }
 
-/// A disposable PostgreSQL cluster and Serverpod test server for FX tests.
-class FxTestServer {
-  FxTestServer._({
+/// A disposable PostgreSQL cluster and Serverpod test server.
+class PgTestServer {
+  PgTestServer._({
     required this.dataDirectory,
     required this.port,
     required this.serverpod,
@@ -33,6 +33,8 @@ class FxTestServer {
   final Directory dataDirectory;
   final int port;
   final TestServerpod<EmptyTestEndpoints> serverpod;
+
+  /// An unauthenticated session for direct database work.
   final InternalServerpodSession session;
   final String postgresBin;
 
@@ -40,13 +42,13 @@ class FxTestServer {
   ///
   /// Set `OPENBUDGET_TEST_POSTGRES_BIN` to a PostgreSQL `bin` directory when
   /// `initdb`, `pg_ctl` and `postgres` are not the right ones on `PATH`.
-  static Future<FxTestServer> start() async {
+  static Future<PgTestServer> start() async {
     final postgresBin =
         Platform.environment['OPENBUDGET_TEST_POSTGRES_BIN']?.trim() ?? '';
     final initdb = _postgresExecutable(postgresBin, 'initdb');
     final pgCtl = _postgresExecutable(postgresBin, 'pg_ctl');
     final dataDirectory = await Directory.systemTemp.createTemp(
-      'openbudget-fx-pg-',
+      'openbudget-pg-',
     );
     final socketDirectory = Directory(_join(dataDirectory.path, 'socket'))
       ..createSync();
@@ -82,7 +84,7 @@ class FxTestServer {
         port: port,
         user: 'postgres',
         password: 'test',
-        name: 'openbudget_fx_test',
+        name: 'openbudget_test',
       ),
       redis: RedisConfig(
         enabled: false,
@@ -108,13 +110,42 @@ class FxTestServer {
       rollbackDatabase: RollbackDatabase.disabled,
     );
 
-    return FxTestServer._(
+    return PgTestServer._(
       dataDirectory: dataDirectory,
       port: port,
       serverpod: testServerpod,
       session: session,
       postgresBin: postgresBin,
     );
+  }
+
+  /// Creates a session with no authentication override.
+  Session anonymousSession() => serverpod.createSession(
+    rollbackDatabase: RollbackDatabase.disabled,
+  );
+
+  /// Creates a session authenticated as [userId].
+  Session authenticatedSession(UuidValue userId) =>
+      serverpod.createSession(
+        rollbackDatabase: RollbackDatabase.disabled,
+      )..updateAuthenticated(
+        AuthenticationInfo(
+          userId.toString(),
+          const {},
+          authId: 'test-auth',
+        ),
+      );
+
+  /// Inserts an auth user row so entities can satisfy their owner foreign key.
+  Future<UuidValue> insertAuthUser({Session? session}) async {
+    final id = const Uuid().v7obj();
+    await (session ?? this.session).db.unsafeExecute(
+      'INSERT INTO serverpod_auth_core_user '
+      '(id, "createdAt", "scopeNames", blocked) '
+      "VALUES (@id::uuid, now(), '[]'::json, false)",
+      parameters: QueryParameters.named({'id': id.toString()}),
+    );
+    return id;
   }
 
   /// Stops Serverpod, the temporary cluster and removes the data directory.

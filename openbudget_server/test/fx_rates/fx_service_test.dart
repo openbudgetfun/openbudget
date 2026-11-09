@@ -11,7 +11,7 @@ import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
 import 'package:test/test.dart';
 
-import 'support/fx_test_server.dart';
+import '../support/pg_test_server.dart';
 
 final _now = DateTime.utc(2026, 3, 10, 12);
 
@@ -69,14 +69,14 @@ class _FakeFxProviderClient implements FxRateProviderClient {
 }
 
 void main() {
-  late FxTestServer server;
+  late PgTestServer server;
   late Session session;
   late List<DateTime> backfillRequests;
   late _FakeFxProviderClient provider;
   var serverStarted = false;
 
   setUpAll(() async {
-    server = await FxTestServer.start();
+    server = await PgTestServer.start();
     serverStarted = true;
     session = server.session;
   });
