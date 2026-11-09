@@ -49,6 +49,8 @@ PODS:
     - GTMSessionFetcher/Core
   - integration_test (0.0.1):
     - Flutter
+  - package_info_plus (0.4.5):
+    - Flutter
   - patrol (0.0.1):
     - CocoaAsyncSocket (~> 7.6)
     - Flutter
@@ -65,13 +67,21 @@ PODS:
   - PromisesObjC (2.4.1)
   - PromisesSwift (2.4.1):
     - PromisesObjC (= 2.4.1)
+  - purchases_flutter (10.19.0):
+    - Flutter
+    - PurchasesHybridCommon (= 19.17.0)
+  - PurchasesHybridCommon (19.17.0):
+    - RevenueCat (= 5.99.0)
   - RecaptchaInterop (101.0.0)
+  - RevenueCat (5.99.0)
   - shared_preferences_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
   - sign_in_with_apple (0.0.1):
     - Flutter
     - FlutterMacOS
+  - solana_kit_mobile_wallet_adapter (0.0.1):
+    - Flutter
   - url_launcher_ios (0.0.1):
     - Flutter
 
@@ -82,11 +92,14 @@ DEPENDENCIES:
   - flutter_web_auth_2 (from `.symlinks/plugins/flutter_web_auth_2/ios`)
   - google_sign_in_ios (from `.symlinks/plugins/google_sign_in_ios/darwin`)
   - integration_test (from `.symlinks/plugins/integration_test/ios`)
+  - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
   - patrol (from `.symlinks/plugins/patrol/darwin`)
   - plaid_flutter (from `.symlinks/plugins/plaid_flutter/ios`)
   - posthog_flutter (from `.symlinks/plugins/posthog_flutter/darwin`)
+  - purchases_flutter (from `.symlinks/plugins/purchases_flutter/ios`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
   - sign_in_with_apple (from `.symlinks/plugins/sign_in_with_apple/darwin`)
+  - solana_kit_mobile_wallet_adapter (from `.symlinks/plugins/solana_kit_mobile_wallet_adapter/ios`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
 
 SPEC REPOS:
@@ -102,7 +115,9 @@ SPEC REPOS:
     - PostHog
     - PromisesObjC
     - PromisesSwift
+    - PurchasesHybridCommon
     - RecaptchaInterop
+    - RevenueCat
 
 EXTERNAL SOURCES:
   connectivity_plus:
@@ -117,16 +132,22 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/google_sign_in_ios/darwin"
   integration_test:
     :path: ".symlinks/plugins/integration_test/ios"
+  package_info_plus:
+    :path: ".symlinks/plugins/package_info_plus/ios"
   patrol:
     :path: ".symlinks/plugins/patrol/darwin"
   plaid_flutter:
     :path: ".symlinks/plugins/plaid_flutter/ios"
   posthog_flutter:
     :path: ".symlinks/plugins/posthog_flutter/darwin"
+  purchases_flutter:
+    :path: ".symlinks/plugins/purchases_flutter/ios"
   shared_preferences_foundation:
     :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
   sign_in_with_apple:
     :path: ".symlinks/plugins/sign_in_with_apple/darwin"
+  solana_kit_mobile_wallet_adapter:
+    :path: ".symlinks/plugins/solana_kit_mobile_wallet_adapter/ios"
   url_launcher_ios:
     :path: ".symlinks/plugins/url_launcher_ios/ios"
 
@@ -144,6 +165,7 @@ SPEC CHECKSUMS:
   GTMAppAuth: 217a876b249c3c585a54fd6f73e6b58c4f5c4238
   GTMSessionFetcher: 5aea5ba6bd522a239e236100971f10cb71b96ab6
   integration_test: 252f60fa39af5e17c3aa9899d35d908a0721b573
+  package_info_plus: c0502532a26c7662a62a356cebe2692ec5fe4ec4
   patrol: c5604f9b899a0076cc30ba183ddd78fb3465e9bc
   Plaid: 2f4e0d6deb335e141ac62e082a872414ca058b74
   plaid_flutter: 6558fd71e3bf29818273af8f22a27bbd4a56378c
@@ -151,11 +173,15 @@ SPEC CHECKSUMS:
   posthog_flutter: b95314041725c95f198889daf21cd8a27f9eaaaa
   PromisesObjC: 752c3227f599e3467650e47ea36f433eeb10c273
   PromisesSwift: 217dea0fd5d2ad65222a109c48698add13cc1c5b
+  purchases_flutter: 24f030c492b0b8c21452f3bcfe4a701040a25a6a
+  PurchasesHybridCommon: 46a92170257b674766b5ed5366be53c9d1603bbd
   RecaptchaInterop: 11e0b637842dfb48308d242afc3f448062325aba
+  RevenueCat: 8e91d216b71708bb2c97be0aa86f47bfdb450655
   shared_preferences_foundation: 9a36184bb1299692bf7b972bd6c60ab373084504
   sign_in_with_apple: fb98447f3dfb81e2926945ea43a8c9c7205eaca9
+  solana_kit_mobile_wallet_adapter: a463ea7f4944a52d5bfcee7b104572e2b17d383c
   url_launcher_ios: bb13df5870e8c4234ca12609d04010a21be43dfa
 
-PODFILE CHECKSUM: 9836382e181b3b324bbac4b1e4f55dc19388a78e
+PODFILE CHECKSUM: e81dbd823e1c9ad790800ca19e47c5db61dd991b
 
 COCOAPODS: 1.16.2

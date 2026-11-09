@@ -32,7 +32,7 @@ dependencies:
   package_info_plus: 10.2.2
   plaid_flutter: 5.2.1
   posthog_flutter: 5.58.4
-  purchases_flutter: 11.0.0
+  purchases_flutter: 10.19.0
   riverpod_annotation: 4.0.7
   serverpod_auth_idp_flutter: 4.1.0
   serverpod_flutter: 4.1.0

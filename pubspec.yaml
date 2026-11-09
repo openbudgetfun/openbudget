@@ -4,6 +4,12 @@ publish_to: none
 environment:
   sdk: ^3.13.0
 
+flutter:
+  config:
+    # Workspace-level `flutter pub get` must not switch the shared plugin list
+    # to Swift Package Manager; the iOS and macOS apps stay on CocoaPods.
+    enable-swift-package-manager: false
+
 workspace:
   - openbudget_app
   - openbudget_client
