@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <title>OpenBudget</title>
+  <!--
+    The mark redrawn for 16 to 32 pixels: no tilt, no pencil hatching, a
+    paper gap between the envelopes, and every outline centred on the 16px
+    pixel grid, so a favicon stays crisp.
+    It follows the browser's colour scheme.
+  -->
+  <style>
+    .paper { fill: #FCF8EF }
+    .ink { stroke: #262C44 }
+    .funded { fill: #3E4CC9 }
+    .fold { stroke: #FCF8EF }
+    @media (prefers-color-scheme: dark) {
+      .paper { fill: #1D2131 }
+      .ink { stroke: #F4EFE3 }
+      .funded { fill: #A3ACFF }
+      .fold { stroke: #1D2131 }
+    }
+  </style>
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <rect class="paper" x="1" y="13" width="6" height="16" rx="2"/>
+    <path class="funded" d="M1 21H7V27Q7 29 5 29H3Q1 29 1 27Z"/>
+    <rect class="ink" x="1" y="13" width="6" height="16" rx="2" stroke-width="2"/>
+    <path class="ink" d="M2.4 14.4L4 15.8L5.6 14.4" stroke-width="1.4"/>
+
+    <rect class="paper" x="25" y="9" width="6" height="20" rx="2"/>
+    <path class="funded" d="M25 18H31V27Q31 29 29 29H27Q25 29 25 27Z"/>
+    <rect class="ink" x="25" y="9" width="6" height="20" rx="2" stroke-width="2"/>
+    <path class="ink" d="M26.4 10.4L28 11.8L29.6 10.4" stroke-width="1.4"/>
+
+    <rect class="funded ink" x="11" y="3" width="10" height="26" rx="2" stroke-width="2"/>
+    <path class="fold" d="M12.6 4.6L16 8.4L19.4 4.6" stroke-width="1.5"/>
+    <circle cx="16" cy="8.8" r="2.8" fill="#FFEC8A"/>
+  </g>
+</svg>

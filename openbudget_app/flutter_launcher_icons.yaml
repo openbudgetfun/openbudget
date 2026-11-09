@@ -1,21 +1,29 @@
+# Source images are rendered from `brand/*.svg` by
+# `dart run openbudget_scripts:render_brand` (run from the repository root),
+# which then runs this generator. Never edit the generated icons by hand.
 flutter_launcher_icons:
-  image_path: assets/branding/logos/ob_primary_light_1024.png
-  image_path_ios: assets/branding/logos/ob_primary_light_1024.png
-  image_path_ios_dark_transparent: assets/branding/logos/ob_primary_dark_1024.png
-  image_path_ios_tinted_grayscale: assets/branding/logos/ob_primary_light_1024.png
-  desaturate_tinted_to_grayscale_ios: true
-  remove_alpha_ios: false
-  android: true
+  image_path: build/brand/app_icon.png
   ios: true
+  remove_alpha_ios: true
+  background_color_ios: "#FCF8EF"
+  image_path_ios_dark_transparent: build/brand/app_icon_ios_dark.png
+  image_path_ios_tinted_grayscale: build/brand/app_icon_ios_tinted.png
+  desaturate_tinted_to_grayscale_ios: true
+  android: true
+  adaptive_icon_background: "#FCF8EF"
+  adaptive_icon_foreground: build/brand/android_foreground.png
+  # The foreground is already laid out inside the 66dp safe zone.
+  adaptive_icon_foreground_inset: 0
+  adaptive_icon_monochrome: build/brand/android_monochrome.png
   web:
     generate: true
-    image_path: assets/branding/logos/ob_primary_light_1024.png
-    background_color: "#F2F7FF"
-    theme_color: "#2C4BAA"
+    image_path: build/brand/app_icon.png
+    background_color: "#FCF8EF"
+    theme_color: "#FCF8EF"
   windows:
     generate: true
-    image_path: assets/branding/logos/ob_primary_light_1024.png
+    image_path: build/brand/app_icon.png
     icon_size: 256
   macos:
     generate: true
-    image_path: assets/branding/logos/ob_primary_light_1024.png
+    image_path: build/brand/app_icon_macos.png

@@ -137,12 +137,12 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('App Icon'), findsWidgets);
-      await tester.tap(find.text('Arrow'));
+      await tester.tap(find.text('Night'));
       await tester.pumpAndSettle();
-      expect(container.read(appIconStyleProvider), AppIconStyle.v5);
+      expect(container.read(appIconStyleProvider), AppIconStyle.night);
       expect(
         store.readString(UiPreferenceKeys.appIconStyle),
-        AppIconStyle.v5.name,
+        AppIconStyle.night.name,
       );
 
       await tester.tap(find.text('Done'));

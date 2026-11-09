@@ -22,12 +22,9 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('App Icon'), findsOneWidget);
-      expect(find.text('Primary'), findsOneWidget);
-      expect(find.text('Classic'), findsOneWidget);
-      expect(find.text('Compass'), findsOneWidget);
-      expect(find.text('Sprout'), findsOneWidget);
-      expect(find.text('Ledger'), findsOneWidget);
-      expect(find.text('Arrow'), findsOneWidget);
+      expect(find.text('Paper'), findsOneWidget);
+      expect(find.text('Night'), findsOneWidget);
+      expect(find.text('Ink'), findsOneWidget);
     });
 
     testWidgets('updates provider when selecting icon style', (tester) async {
@@ -47,13 +44,15 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Arrow'));
+      await tester.tap(find.text('Ink'));
       await tester.pumpAndSettle();
 
-      expect(container.read(appIconStyleProvider), AppIconStyle.v5);
+      expect(container.read(appIconStyleProvider), AppIconStyle.ink);
     });
 
-    testWidgets('uses dark icon previews in dark mode', (tester) async {
+    testWidgets('previews each style as its tile, whatever the theme', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         ProviderScope(
           child: MaterialApp(
@@ -68,16 +67,20 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final sproutTile = find.widgetWithText(ListTile, 'Sprout');
-      final sproutImage = tester.widget<Image>(
-        find.descendant(of: sproutTile, matching: find.byType(Image)).first,
-      );
-      final sproutAsset = sproutImage.image as AssetImage;
-
-      expect(
-        sproutAsset.assetName,
-        'assets/branding/logos/ob_v3_dark_preview.png',
-      );
+      for (final (label, variant) in [
+        ('Paper', ObMarkVariant.paper),
+        ('Night', ObMarkVariant.night),
+        ('Ink', ObMarkVariant.ink),
+      ]) {
+        final mark = tester.widget<ObMark>(
+          find.descendant(
+            of: find.widgetWithText(ListTile, label),
+            matching: find.byType(ObMark),
+          ),
+        );
+        expect(mark.variant, variant, reason: label);
+        expect(mark.tile, isTrue, reason: label);
+      }
     });
   });
 }

@@ -30,6 +30,7 @@ export 'src/widgets/ob_card.dart';
 export 'src/widgets/ob_dropdown.dart';
 export 'src/widgets/ob_envelope_gauge.dart';
 export 'src/widgets/ob_highlighter.dart';
+export 'src/widgets/ob_mark.dart';
 export 'src/widgets/ob_section_header.dart';
 export 'src/widgets/ob_state_panel.dart';
 export 'src/widgets/ob_text_field.dart';
