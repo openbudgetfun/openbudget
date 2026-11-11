@@ -21,6 +21,8 @@ class BudgetTestBook {
     EntityKind kind = EntityKind.individual,
     AccountingMode accountingMode = AccountingMode.envelope,
     String timeZone = 'Europe/London',
+    int fiscalYearEndMonth = 4,
+    int fiscalYearEndDay = 5,
   }) async {
     final userId = const Uuid().v7obj();
     await session.db.unsafeExecute(
@@ -47,8 +49,8 @@ class BudgetTestBook {
         baseCurrencyCode: baseCurrencyCode,
         timeZone: timeZone,
         accountingMode: accountingMode,
-        fiscalYearEndMonth: 4,
-        fiscalYearEndDay: 5,
+        fiscalYearEndMonth: fiscalYearEndMonth,
+        fiscalYearEndDay: fiscalYearEndDay,
       ),
     );
     return BudgetTestBook._(session, userId, entity);
@@ -60,20 +62,25 @@ class BudgetTestBook {
     String baseCurrencyCode = 'GBP',
     String countryCode = 'GB',
     String timeZone = 'Europe/London',
+    EntityKind kind = EntityKind.individual,
     DateTime? archivedAt,
+    int fiscalYearEndMonth = 4,
+    int fiscalYearEndDay = 5,
+    UuidValue? linkedPersonalEntityId,
   }) => Entity.db.insertRow(
     session,
     Entity(
       id: const Uuid().v7obj(),
       ownerId: userId,
       name: name,
-      kind: EntityKind.individual,
+      kind: kind,
       countryCode: countryCode,
       baseCurrencyCode: baseCurrencyCode,
       timeZone: timeZone,
       accountingMode: AccountingMode.envelope,
-      fiscalYearEndMonth: 4,
-      fiscalYearEndDay: 5,
+      fiscalYearEndMonth: fiscalYearEndMonth,
+      fiscalYearEndDay: fiscalYearEndDay,
+      linkedPersonalEntityId: linkedPersonalEntityId,
       archivedAt: archivedAt,
     ),
   );
