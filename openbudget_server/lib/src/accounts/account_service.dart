@@ -56,6 +56,78 @@ abstract final class AccountService {
     UuidValue? institutionId,
     String? note,
   }) async {
+    final result = await TransactionWriter.inTransaction(
+      session,
+      (tx) => _createInTransaction(
+        session,
+        tx,
+        entityId: entityId,
+        name: name,
+        kind: kind,
+        currencyCode: currencyCode,
+        balanceSource: balanceSource,
+        onBudget: onBudget,
+        openingBalanceMinor: openingBalanceMinor,
+        openingDate: openingDate,
+        institutionId: institutionId,
+        note: note,
+      ),
+    );
+
+    await _notify(session, result.$2, result.$1.id);
+    return result.$1;
+  }
+
+  /// Creates an account inside the caller's transaction without publishing.
+  ///
+  /// Wallet connect uses this so a fixed crypto account and its wallet commit
+  /// together. Validation is identical to [create]; the caller must publish
+  /// the [ChangeScope.accounts] event after its transaction commits.
+  static Future<Account> createInTransaction(
+    Session session,
+    Transaction transaction, {
+    required UuidValue entityId,
+    required String name,
+    required AccountKind kind,
+    required String currencyCode,
+    AccountBalanceSource? balanceSource,
+    bool? onBudget,
+    int? openingBalanceMinor,
+    DateTime? openingDate,
+    UuidValue? institutionId,
+    String? note,
+  }) async {
+    final result = await _createInTransaction(
+      session,
+      transaction,
+      entityId: entityId,
+      name: name,
+      kind: kind,
+      currencyCode: currencyCode,
+      balanceSource: balanceSource,
+      onBudget: onBudget,
+      openingBalanceMinor: openingBalanceMinor,
+      openingDate: openingDate,
+      institutionId: institutionId,
+      note: note,
+    );
+    return result.$1;
+  }
+
+  static Future<(Account, UuidValue)> _createInTransaction(
+    Session session,
+    Transaction tx, {
+    required UuidValue entityId,
+    required String name,
+    required AccountKind kind,
+    required String currencyCode,
+    AccountBalanceSource? balanceSource,
+    bool? onBudget,
+    int? openingBalanceMinor,
+    DateTime? openingDate,
+    UuidValue? institutionId,
+    String? note,
+  }) async {
     final accountName = _requireName(name);
     final currency = requireSupportedCurrency(currencyCode);
     final source = _requireSource(kind, balanceSource);
@@ -63,86 +135,81 @@ abstract final class AccountService {
     _requireBudgetable(kind, source, budgeted);
     _requireMinor(openingBalanceMinor, 'openingBalanceMinor');
 
-    final result = await TransactionWriter.inTransaction(session, (tx) async {
-      final entity = _requireWritable(
-        await EntityAccess.requireOwned(
-          session,
-          entityId,
-          transaction: tx,
-          lock: true,
-        ),
-      );
-      await _requireInstitution(session, institutionId, tx);
-      final date = openingDate ?? EntityClock.today(entity);
-      _requireOpeningDate(source, date, entity);
-      final sortOrder = await _nextSortOrder(session, entityId, tx);
-
-      final now = DateTime.now().toUtc();
-      var account = await Account.db.insertRow(
+    final entity = _requireWritable(
+      await EntityAccess.requireOwned(
         session,
-        Account(
-          entityId: entityId,
-          name: accountName,
-          kind: kind,
-          currencyCode: currency,
-          balanceSource: source,
-          onBudget: budgeted,
-          institutionId: institutionId,
-          note: _normaliseNote(note),
-          sortOrder: sortOrder,
-          createdAt: now,
-          updatedAt: now,
-        ),
+        entityId,
         transaction: tx,
-      );
+        lock: true,
+      ),
+    );
+    await _requireInstitution(session, institutionId, tx);
+    final date = openingDate ?? EntityClock.today(entity);
+    _requireOpeningDate(source, date, entity);
+    final sortOrder = await _nextSortOrder(session, entityId, tx);
 
-      if (openingBalanceMinor != null) {
-        if (source == AccountBalanceSource.transactions) {
-          if (openingBalanceMinor != 0) {
-            await TransactionWriter.create(
-              session,
-              TransactionInput(
-                accountId: account.id!,
-                date: date,
-                amountMinor: openingBalanceMinor,
-                lines: const [],
-              ),
-              transaction: tx,
-              metadata: const TransactionWriteMetadata(
-                kind: TransactionKind.openingBalance,
-              ),
-            );
-          }
-        } else {
-          await AccountValuation.db.insertRow(
+    final now = DateTime.now().toUtc();
+    var account = await Account.db.insertRow(
+      session,
+      Account(
+        entityId: entityId,
+        name: accountName,
+        kind: kind,
+        currencyCode: currency,
+        balanceSource: source,
+        onBudget: budgeted,
+        institutionId: institutionId,
+        note: _normaliseNote(note),
+        sortOrder: sortOrder,
+        createdAt: now,
+        updatedAt: now,
+      ),
+      transaction: tx,
+    );
+
+    if (openingBalanceMinor != null) {
+      if (source == AccountBalanceSource.transactions) {
+        if (openingBalanceMinor != 0) {
+          await TransactionWriter.create(
             session,
-            AccountValuation(
+            TransactionInput(
               accountId: account.id!,
-              valuationDate: date,
-              valueMinor: openingBalanceMinor,
-              source: ValuationSource.manual,
+              date: date,
+              amountMinor: openingBalanceMinor,
+              lines: const [],
             ),
             transaction: tx,
-          );
-          await AccountBalanceService.refreshValuation(
-            session,
-            account.id!,
-            transaction: tx,
+            metadata: const TransactionWriteMetadata(
+              kind: TransactionKind.openingBalance,
+            ),
           );
         }
-
-        account = (await Account.db.findById(
+      } else {
+        await AccountValuation.db.insertRow(
+          session,
+          AccountValuation(
+            accountId: account.id!,
+            valuationDate: date,
+            valueMinor: openingBalanceMinor,
+            source: ValuationSource.manual,
+          ),
+          transaction: tx,
+        );
+        await AccountBalanceService.refreshValuation(
           session,
           account.id!,
           transaction: tx,
-        ))!;
+        );
       }
 
-      return (account, entity.id!);
-    });
+      account = (await Account.db.findById(
+        session,
+        account.id!,
+        transaction: tx,
+      ))!;
+    }
 
-    await _notify(session, result.$2, result.$1.id);
-    return result.$1;
+    return (account, entity.id!);
   }
 
   /// Lists every account of one owned entity in display order.

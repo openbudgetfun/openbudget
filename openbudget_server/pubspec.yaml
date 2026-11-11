@@ -25,7 +25,6 @@ dependencies:
   solana_kit_subscriptions: ^0.4.1
   timezone: ^0.11.0
 
-
 dev_dependencies:
   openbudget_lints:
     path: ../openbudget_lints

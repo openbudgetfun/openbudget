@@ -21,6 +21,31 @@ abstract final class AccountValuationService {
     int valueMinor, {
     String? note,
   }) => session.db.transaction((tx) async {
+    final result = await setInTransaction(
+      session,
+      tx,
+      accountId,
+      date,
+      valueMinor,
+      source: ValuationSource.manual,
+      note: note,
+    );
+    return result;
+  });
+
+  /// Upserts a valuation inside the caller's transaction without publishing.
+  ///
+  /// Wallet sync uses this with [ValuationSource.wallet] so the holdings,
+  /// valuation and account balance cache commit or roll back together.
+  static Future<(AccountValuation, UuidValue)> setInTransaction(
+    Session session,
+    Transaction tx,
+    UuidValue accountId,
+    DateTime date,
+    int valueMinor, {
+    required ValuationSource source,
+    String? note,
+  }) async {
     final account = await _lockAccount(session, accountId, tx);
     final entity = await _requireWritableEntity(session, account, tx);
     if (account.balanceSource != AccountBalanceSource.valuations ||
@@ -45,7 +70,7 @@ abstract final class AccountValuationService {
               accountId: accountId,
               valuationDate: date,
               valueMinor: valueMinor,
-              source: ValuationSource.manual,
+              source: source,
               note: _normaliseNote(note),
             ),
             transaction: tx,
@@ -54,7 +79,7 @@ abstract final class AccountValuationService {
             session,
             existing.copyWith(
               valueMinor: valueMinor,
-              source: ValuationSource.manual,
+              source: source,
               note: _normaliseNote(note),
               updatedAt: DateTime.now().toUtc(),
             ),
@@ -66,7 +91,7 @@ abstract final class AccountValuationService {
       transaction: tx,
     );
     return (value, account.entityId);
-  });
+  }
 
   /// Deletes a value and falls back to the previous date or zero.
   ///

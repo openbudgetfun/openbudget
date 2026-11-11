@@ -1,4 +1,4 @@
-import 'package:openbudget_server/src/solana_wallets/magic_eden_nft_price_client.dart';
+import 'package:openbudget_server/src/wallets/magic_eden_nft_price_client.dart';
 import 'package:test/test.dart';
 
 void main() {

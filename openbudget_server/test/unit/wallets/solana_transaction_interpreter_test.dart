@@ -1,4 +1,4 @@
-import 'package:openbudget_server/src/solana_wallets/solana_transaction_interpreter.dart';
+import 'package:openbudget_server/src/wallets/solana_transaction_interpreter.dart';
 import 'package:solana_kit_helius/solana_kit_helius.dart';
 import 'package:test/test.dart';
 
