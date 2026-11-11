@@ -991,7 +991,7 @@
   "deleteAccountUnavailableButton": "Delete Account (Unavailable)",
   "transactionCategoryLabel": "Category",
   "transactionAccountLabel": "Account",
-  "transactionDateLabel": "{year}-{month}-{day}",
+  "transactionDateLabel": "Date",
   "addAccountConnectWallet": "Connect Solana Wallet",
   "addAccountUnlinkedTitle": "Add Unlinked Account",
   "addAccountSelectAccountType": "Select Account Type",
@@ -2537,19 +2537,6 @@
       }
     }
   },
-  "@transactionDateLabel": {
-    "placeholders": {
-      "year": {
-        "type": "int"
-      },
-      "month": {
-        "type": "int"
-      },
-      "day": {
-        "type": "int"
-      }
-    }
-  },
   "accountDetailReconcile": "Reconcile",
   "accountDetailReportedBalance": "Bank says {amount}",
   "accountDetailClearedLabel": "Cleared {amount}",
@@ -2651,5 +2638,63 @@
         "type": "String"
       }
     }
-  }
+  },
+  "fxRateLoading": "Fetching rate…",
+  "fxRateSetRate": "Set rate",
+  "fxRateSetRateTitle": "Use your own rate",
+  "fxRateRateField": "Exchange rate",
+  "fxRateInvalidRate": "Enter a positive rate, e.g. 0.79",
+  "fxRateUseThisRate": "Use this rate",
+  "fxRateStale": "stale",
+  "fxRateApproximate": "≈ {amount}",
+  "@fxRateApproximate": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "fxRateUnavailableTitle": "No exchange rate",
+  "linesEditorSplit": "Split into lines",
+  "linesEditorTitle": "Lines",
+  "linesEditorLineLabel": "Line {index}",
+  "@linesEditorLineLabel": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "linesEditorLineAmount": "Line {index} amount",
+  "@linesEditorLineAmount": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "linesEditorAddLine": "Add a line",
+  "linesEditorRemaining": "{amount} left to allocate",
+  "@linesEditorRemaining": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionDateFullLabel": "{year}-{month}-{day}",
+  "@transactionDateFullLabel": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      },
+      "month": {
+        "type": "int"
+      },
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+  "importTargetAccount": "Import into account"
 }

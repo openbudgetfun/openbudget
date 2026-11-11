@@ -2365,9 +2365,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get transactionAccountLabel => 'Account';
 
   @override
-  String transactionDateLabel(int year, int month, int day) {
-    return '$year-$month-$day';
-  }
+  String get transactionDateLabel => 'Date';
 
   @override
   String get addAccountConnectWallet => 'Connect Solana Wallet';
@@ -5401,4 +5399,65 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get accountReconcileFailed =>
       'Reconcile failed — check the statement balance';
+
+  @override
+  String get fxRateLoading => 'Fetching rate…';
+
+  @override
+  String get fxRateSetRate => 'Set rate';
+
+  @override
+  String get fxRateSetRateTitle => 'Use your own rate';
+
+  @override
+  String get fxRateRateField => 'Exchange rate';
+
+  @override
+  String get fxRateInvalidRate => 'Enter a positive rate, e.g. 0.79';
+
+  @override
+  String get fxRateUseThisRate => 'Use this rate';
+
+  @override
+  String get fxRateStale => 'stale';
+
+  @override
+  String fxRateApproximate(String amount) {
+    return '≈ $amount';
+  }
+
+  @override
+  String get fxRateUnavailableTitle => 'No exchange rate';
+
+  @override
+  String get linesEditorSplit => 'Split into lines';
+
+  @override
+  String get linesEditorTitle => 'Lines';
+
+  @override
+  String linesEditorLineLabel(int index) {
+    return 'Line $index';
+  }
+
+  @override
+  String linesEditorLineAmount(int index) {
+    return 'Line $index amount';
+  }
+
+  @override
+  String get linesEditorAddLine => 'Add a line';
+
+  @override
+  String linesEditorRemaining(String amount) {
+    return '$amount left to allocate';
+  }
+
+  @override
+  String transactionDateFullLabel(int year, int month, int day) {
+    return '$year-$month-$day';
+  }
+
+  @override
+  String get importTargetAccount => 'Import into account';
 }

@@ -4051,8 +4051,8 @@ abstract class AppLocalizations {
   /// No description provided for @transactionDateLabel.
   ///
   /// In en, this message translates to:
-  /// **'{year}-{month}-{day}'**
-  String transactionDateLabel(int year, int month, int day);
+  /// **'Date'**
+  String get transactionDateLabel;
 
   /// No description provided for @addAccountConnectWallet.
   ///
@@ -9257,6 +9257,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Reconcile failed — check the statement balance'**
   String get accountReconcileFailed;
+
+  /// No description provided for @fxRateLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetching rate…'**
+  String get fxRateLoading;
+
+  /// No description provided for @fxRateSetRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Set rate'**
+  String get fxRateSetRate;
+
+  /// No description provided for @fxRateSetRateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Use your own rate'**
+  String get fxRateSetRateTitle;
+
+  /// No description provided for @fxRateRateField.
+  ///
+  /// In en, this message translates to:
+  /// **'Exchange rate'**
+  String get fxRateRateField;
+
+  /// No description provided for @fxRateInvalidRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a positive rate, e.g. 0.79'**
+  String get fxRateInvalidRate;
+
+  /// No description provided for @fxRateUseThisRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this rate'**
+  String get fxRateUseThisRate;
+
+  /// No description provided for @fxRateStale.
+  ///
+  /// In en, this message translates to:
+  /// **'stale'**
+  String get fxRateStale;
+
+  /// No description provided for @fxRateApproximate.
+  ///
+  /// In en, this message translates to:
+  /// **'≈ {amount}'**
+  String fxRateApproximate(String amount);
+
+  /// No description provided for @fxRateUnavailableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No exchange rate'**
+  String get fxRateUnavailableTitle;
+
+  /// No description provided for @linesEditorSplit.
+  ///
+  /// In en, this message translates to:
+  /// **'Split into lines'**
+  String get linesEditorSplit;
+
+  /// No description provided for @linesEditorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Lines'**
+  String get linesEditorTitle;
+
+  /// No description provided for @linesEditorLineLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Line {index}'**
+  String linesEditorLineLabel(int index);
+
+  /// No description provided for @linesEditorLineAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Line {index} amount'**
+  String linesEditorLineAmount(int index);
+
+  /// No description provided for @linesEditorAddLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a line'**
+  String get linesEditorAddLine;
+
+  /// No description provided for @linesEditorRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} left to allocate'**
+  String linesEditorRemaining(String amount);
+
+  /// No description provided for @transactionDateFullLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{year}-{month}-{day}'**
+  String transactionDateFullLabel(int year, int month, int day);
+
+  /// No description provided for @importTargetAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Import into account'**
+  String get importTargetAccount;
 }
 
 class _AppLocalizationsDelegate

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/budget_month_provider.dart';
 import 'package:openbudget_app/src/features/payees/providers/payee_list_provider.dart';
 import 'package:openbudget_app/src/features/tax/widgets/tax_category_row.dart';
 import 'package:openbudget_app/src/features/transactions/providers/transaction_actions_provider.dart';
@@ -13,36 +13,42 @@ import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
+/// Edits one transaction: description, amount in the account's currency,
+/// date, payee and memo. The envelope is edited on the single line; a
+/// multi-line transaction keeps its lines and is edited line by line in
+/// the tax sheet. A reconciled transaction rejects money edits on the
+/// server.
 class EditTransactionDialog extends HookConsumerWidget {
   const EditTransactionDialog({
-    required this.transaction,
+    required this.view,
     required this.entityId,
-    required this.currencyCode,
     super.key,
   });
 
-  final Transaction transaction;
+  final TransactionView view;
   final String entityId;
-  final String currencyCode;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final palette = Theme.of(context).ob;
+    final transaction = view.transaction;
+    final currencyCode = view.accountCurrencyCode;
+    final currencyDecimals = currencyDecimalsForCode(currencyCode);
     final descriptionController = useTextEditingController(
       text: transaction.description,
     );
-    final currencyDecimals = currencyDecimalsForCode(currencyCode);
     final amountController = useTextEditingController(
       text: formatMinorUnits(transaction.amountMinor.abs(), currencyDecimals),
     );
     final memoController = useTextEditingController(
       text: transaction.memo ?? '',
     );
-    final selectedDate = useState(transaction.transactionDate);
+    final selectedDate = useState(transaction.date);
     final selectedPayeeId = useState<String?>(transaction.payeeId?.toString());
+    final firstLine = view.lines.isEmpty ? null : view.lines.first;
     final selectedEnvelopeId = useState<String?>(
-      transaction.envelopeId?.toString(),
+      firstLine?.envelopeId?.toString(),
     );
     final isSubmitting = useState(false);
     final isIncome = transaction.amountMinor > 0;
@@ -59,9 +65,8 @@ class EditTransactionDialog extends HookConsumerWidget {
     );
 
     final payeesAsync = ref.watch(payeeListProvider(entityId));
-    final summaryAsync = ref.watch(budgetSummaryProvider(entityId));
+    final groupsAsync = ref.watch(budgetMonthGroupsProvider(entityId));
 
-    // Build payee dropdown items.
     final payeeItems = <DropdownMenuItem<String>>[
       DropdownMenuItem<String>(value: '', child: Text(l10n.payeeNone)),
     ];
@@ -76,20 +81,21 @@ class EditTransactionDialog extends HookConsumerWidget {
       }
     }
 
-    // Build envelope dropdown items.
     final envelopeItems = <DropdownMenuItem<String>>[
       DropdownMenuItem<String>(
         value: '',
         child: Text(l10n.transactionUnassigned),
       ),
     ];
-    if (summaryAsync.hasValue) {
-      for (final catEnv in summaryAsync.value!.categories) {
-        for (final envelope in catEnv.envelopes) {
+    if (groupsAsync.hasValue) {
+      for (final group in groupsAsync.value!) {
+        for (final envelope in group.envelopes) {
+          final id = envelope.envelope.id?.toString() ?? '';
+          if (id.isEmpty) continue;
           envelopeItems.add(
             DropdownMenuItem<String>(
-              value: envelope.id?.toString() ?? '',
-              child: Text('${catEnv.category.name} / ${envelope.name}'),
+              value: id,
+              child: Text('${group.category.name} / ${envelope.envelope.name}'),
             ),
           );
         }
@@ -136,7 +142,11 @@ class EditTransactionDialog extends HookConsumerWidget {
                   lastDate: DateTime(2100),
                 );
                 if (picked != null) {
-                  selectedDate.value = picked;
+                  selectedDate.value = DateTime.utc(
+                    picked.year,
+                    picked.month,
+                    picked.day,
+                  );
                 }
               },
             ),
@@ -162,7 +172,7 @@ class EditTransactionDialog extends HookConsumerWidget {
                 ),
               ],
             ),
-            if (!isIncome) ...[
+            if (!isIncome && view.lines.length <= 1) ...[
               const SizedBox(height: SpacingTokens.md),
               Row(
                 children: [
@@ -198,11 +208,12 @@ class EditTransactionDialog extends HookConsumerWidget {
               textInputAction: TextInputAction.done,
             ),
             const SizedBox(height: SpacingTokens.sm),
-            TransactionTaxCategoryRow(
-              entityId: entityId,
-              transaction: transaction,
-              currencyCode: currencyCode,
-            ),
+            for (final line in view.lines)
+              TransactionTaxCategoryRow(
+                entityId: entityId,
+                transactionLineId: line.id?.toString() ?? '',
+                currencyCode: currencyCode,
+              ),
           ],
         ),
       ),
@@ -228,17 +239,40 @@ class EditTransactionDialog extends HookConsumerWidget {
             isSubmitting.value = true;
             final navigator = Navigator.of(context);
             try {
+              final lines = view.lines.isEmpty
+                  ? <TransactionLineInput>[TransactionLineInput(amountMinor: signedAmount)]
+                  : [
+                      for (final line in view.lines)
+                        TransactionLineInput(
+                          amountMinor: line.amountMinor,
+                          envelopeId: selectedEnvelopeId.value == null
+                              ? null
+                              : UuidValue.fromString(
+                                  selectedEnvelopeId.value!,
+                                ),
+                          taxCategoryCode: line.taxCategoryCode,
+                          businessUsePercent: line.businessUsePercent,
+                          salesTaxMinor: line.salesTaxMinor,
+                          memo: line.memo,
+                        ),
+                    ];
               await ref
                   .read(transactionActionsProvider.notifier)
-                  .updateTransaction(
+                  .update(
                     transactionId: transaction.id?.toString() ?? '',
                     entityId: entityId,
-                    description: description,
-                    amountMinor: signedAmount,
-                    transactionDate: selectedDate.value,
-                    payeeId: selectedPayeeId.value,
-                    envelopeId: selectedEnvelopeId.value,
-                    memo: memo.isNotEmpty ? memo : null,
+                    input: TransactionInput(
+                      accountId: transaction.accountId,
+                      date: selectedDate.value,
+                      amountMinor: signedAmount,
+                      fxRate: transaction.fxRate,
+                      payeeId: selectedPayeeId.value == null
+                          ? null
+                          : UuidValue.fromString(selectedPayeeId.value!),
+                      description: description,
+                      memo: memo.isNotEmpty ? memo : null,
+                      lines: lines,
+                    ),
                   );
               if (!context.mounted) return;
               showAppToast(

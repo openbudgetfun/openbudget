@@ -71,15 +71,23 @@ class EnvelopeTaxCategoryRow extends HookWidget {
 class TransactionTaxCategoryRow extends HookWidget {
   const TransactionTaxCategoryRow({
     required this.entityId,
-    required this.transaction,
+    required this.transactionLineId,
     required this.currencyCode,
+    this.subject = '',
+    this.currentCode,
+    this.businessUsePercent,
+    this.salesTaxMinor,
     this.onChanged,
     super.key,
   });
 
   final String entityId;
-  final Transaction transaction;
+  final String transactionLineId;
   final String currencyCode;
+  final String subject;
+  final String? currentCode;
+  final int? businessUsePercent;
+  final int? salesTaxMinor;
   final VoidCallback? onChanged;
 
   @override
@@ -87,7 +95,7 @@ class TransactionTaxCategoryRow extends HookWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final palette = theme.ob;
-    final selectedCode = useState<String?>(transaction.taxCategoryCode);
+    final selectedCode = useState<String?>(currentCode);
     final subtitle = selectedCode.value == null
         ? l10n.taxCategoryNotSet
         : l10n.taxCategoryTagged;
@@ -114,12 +122,12 @@ class TransactionTaxCategoryRow extends HookWidget {
         final selection = await showTransactionTaxCategorySheet(
           context,
           entityId: entityId,
-          transactionId: transaction.id?.toString() ?? '',
-          subject: transaction.description,
+          transactionLineId: transactionLineId,
+          subject: subject,
           currencyCode: currencyCode,
           currentCode: selectedCode.value,
-          businessUsePercent: transaction.businessUsePercent,
-          salesTaxMinor: transaction.salesTaxMinor,
+          businessUsePercent: businessUsePercent,
+          salesTaxMinor: salesTaxMinor,
         );
         if (selection == null) return;
         selectedCode.value = selection.code;

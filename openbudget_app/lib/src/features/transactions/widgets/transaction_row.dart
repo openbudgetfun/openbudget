@@ -151,7 +151,7 @@ class TransactionRow extends HookWidget {
   }
 
   static String _formatDate(DateTime date, AppLocalizations l10n) =>
-      l10n.transactionDateLabel(
+      l10n.transactionDateFullLabel(
         date.year,
         date.month,
         date.day,

@@ -46,7 +46,7 @@ Future<TaxSelection?> showEnvelopeTaxCategorySheet(
 Future<TaxSelection?> showTransactionTaxCategorySheet(
   BuildContext context, {
   required String entityId,
-  required String transactionId,
+  required String transactionLineId,
   required String subject,
   required String currencyCode,
   String? currentCode,
@@ -59,7 +59,7 @@ Future<TaxSelection?> showTransactionTaxCategorySheet(
   builder: (_) => _TaxCategorySheet(
     entityId: entityId,
     subject: subject,
-    transactionId: transactionId,
+    transactionLineId: transactionLineId,
     currencyCode: currencyCode,
     currentCode: currentCode,
     businessUsePercent: businessUsePercent,
@@ -72,7 +72,7 @@ class _TaxCategorySheet extends HookConsumerWidget {
     required this.entityId,
     required this.subject,
     this.envelopeId,
-    this.transactionId,
+    this.transactionLineId,
     this.currencyCode,
     this.currentCode,
     this.businessUsePercent,
@@ -82,13 +82,13 @@ class _TaxCategorySheet extends HookConsumerWidget {
   final String entityId;
   final String subject;
   final String? envelopeId;
-  final String? transactionId;
+  final String? transactionLineId;
   final String? currencyCode;
   final String? currentCode;
   final int? businessUsePercent;
   final int? salesTaxMinor;
 
-  bool get _isTransaction => transactionId != null;
+  bool get _isTransaction => transactionLineId != null;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -147,10 +147,10 @@ class _TaxCategorySheet extends HookConsumerWidget {
             envelopeId: id,
             code: selectedCode.value,
           );
-        } else if (transactionId case final id?) {
-          await actions.setTransactionTax(
+        } else if (transactionLineId case final id?) {
+          await actions.setLineTax(
             entityId: entityId,
-            transactionId: id,
+            transactionLineId: id,
             code: selectedCode.value,
             businessUsePercent: businessUse.value,
             salesTaxMinor: parsedSalesTax,
