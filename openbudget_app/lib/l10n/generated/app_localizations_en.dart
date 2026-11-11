@@ -5485,4 +5485,48 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get transferCrossEntityHint =>
       'Transfers between your entities convert into each entity\'s base currency. Money never appears or disappears.';
+
+  @override
+  String get budgetBreakdownTitle => 'Budget breakdown';
+
+  @override
+  String get budgetBreakdownHint => 'Tap the amount to see where it comes from';
+
+  @override
+  String get budgetBreakdownFxDifference => 'Exchange-rate difference';
+
+  @override
+  String get budgetBreakdownOverspentLastMonth => 'Overspent last month';
+
+  @override
+  String get budgetBreakdownAssignedInFuture => 'Assigned in future months';
+
+  @override
+  String get budgetBreakdownAvailable => 'Available in envelopes';
+
+  @override
+  String get budgetBreakdownUncategorised => 'Uncategorised transactions';
+
+  @override
+  String creditCardOwes(String amount) {
+    return 'Owes $amount';
+  }
+
+  @override
+  String get setGoalSetAsideMonthlyLabel => 'Every month';
+
+  @override
+  String get setGoalTargetBalanceLabel => 'Target balance';
+
+  @override
+  String get setGoalTargetByDateLabel => 'By the date';
+
+  @override
+  String setGoalHaveAmount(String amount) {
+    return 'To have $amount';
+  }
+
+  @override
+  String get envelopeDeleteMoveHistoryTitle =>
+      'Move its history to which envelope?';
 }

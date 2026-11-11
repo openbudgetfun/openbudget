@@ -9407,6 +9407,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Transfers between your entities convert into each entity\'s base currency. Money never appears or disappears.'**
   String get transferCrossEntityHint;
+
+  /// No description provided for @budgetBreakdownTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget breakdown'**
+  String get budgetBreakdownTitle;
+
+  /// No description provided for @budgetBreakdownHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the amount to see where it comes from'**
+  String get budgetBreakdownHint;
+
+  /// No description provided for @budgetBreakdownFxDifference.
+  ///
+  /// In en, this message translates to:
+  /// **'Exchange-rate difference'**
+  String get budgetBreakdownFxDifference;
+
+  /// No description provided for @budgetBreakdownOverspentLastMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Overspent last month'**
+  String get budgetBreakdownOverspentLastMonth;
+
+  /// No description provided for @budgetBreakdownAssignedInFuture.
+  ///
+  /// In en, this message translates to:
+  /// **'Assigned in future months'**
+  String get budgetBreakdownAssignedInFuture;
+
+  /// No description provided for @budgetBreakdownAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Available in envelopes'**
+  String get budgetBreakdownAvailable;
+
+  /// No description provided for @budgetBreakdownUncategorised.
+  ///
+  /// In en, this message translates to:
+  /// **'Uncategorised transactions'**
+  String get budgetBreakdownUncategorised;
+
+  /// No description provided for @creditCardOwes.
+  ///
+  /// In en, this message translates to:
+  /// **'Owes {amount}'**
+  String creditCardOwes(String amount);
+
+  /// No description provided for @setGoalSetAsideMonthlyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Every month'**
+  String get setGoalSetAsideMonthlyLabel;
+
+  /// No description provided for @setGoalTargetBalanceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Target balance'**
+  String get setGoalTargetBalanceLabel;
+
+  /// No description provided for @setGoalTargetByDateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'By the date'**
+  String get setGoalTargetByDateLabel;
+
+  /// No description provided for @setGoalHaveAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'To have {amount}'**
+  String setGoalHaveAmount(String amount);
+
+  /// No description provided for @envelopeDeleteMoveHistoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Move its history to which envelope?'**
+  String get envelopeDeleteMoveHistoryTitle;
 }
 
 class _AppLocalizationsDelegate
