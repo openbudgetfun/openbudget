@@ -983,6 +983,57 @@ void main() {
       },
     );
 
+    test(
+      'ledger material edits bump both revisions and audit both legs',
+      () async {
+        final ledger = await BudgetTestBook.create(
+          server.anonymousSession(),
+          accountingMode: AccountingMode.ledger,
+        );
+        final from = await ledger.addAccount(name: 'From');
+        final to = await ledger.addAccount(name: 'To');
+        final created = await TransactionWriter.createTransfer(
+          ledger.session,
+          movement(from, to, fromAmountMinor: 1000),
+        );
+        final link = await linkFor(created[0].transaction.id!);
+        expect(created[0].transaction.revision, 0);
+        expect(created[1].transaction.revision, 0);
+
+        final edited = await TransactionWriter.updateTransfer(
+          ledger.session,
+          link!.id!,
+          movement(from, to, fromAmountMinor: 2000),
+        );
+
+        expect(edited[0].transaction.revision, 1);
+        expect(edited[1].transaction.revision, 1);
+        final audits = await AuditEvent.db.find(
+          ledger.session,
+          where: (t) =>
+              t.entityId.equals(ledger.entity.id) &
+              t.action.equals(AuditAction.transactionEdited),
+        );
+        expect(audits, hasLength(2));
+        expect(
+          audits.map((audit) => audit.subjectId),
+          {created[0].transaction.id, created[1].transaction.id},
+        );
+        expect(
+          audits.every((audit) => audit.payloadJson.contains('"before"')),
+          isTrue,
+        );
+        expect(
+          audits.every(
+            (audit) =>
+                audit.payloadJson.contains('"amountMinor":-1000') ||
+                audit.payloadJson.contains('"amountMinor":1000'),
+          ),
+          isTrue,
+        );
+      },
+    );
+
     test('a period lock protects material transfer edits', () async {
       final ledger = await BudgetTestBook.create(
         server.anonymousSession(),
