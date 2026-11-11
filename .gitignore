@@ -74,6 +74,7 @@ openbudget_app/ios/Flutter/Secrets.xcconfig
 # Temp / dev logs
 .temp/
 .tmp/
+.devlogs/
 .screenshots/
 tmp/log.txt
 

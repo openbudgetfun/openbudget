@@ -187,6 +187,19 @@ in
       exec = ''
         set -eo pipefail
 
+        seeker_flag="$DEVENV_ROOT/.tmp/dev-seeker.active"
+        if [[ -f "$seeker_flag" ]]; then
+          seeker_pid="$(cat "$seeker_flag" 2>/dev/null || true)"
+          if [[ "$seeker_pid" =~ ^[0-9]+$ ]] && kill -0 "$seeker_pid" 2>/dev/null; then
+            seeker_command="$(ps -p "$seeker_pid" -o command= 2>/dev/null || true)"
+            if [[ "$seeker_command" == *"dev_seeker"* || "$seeker_command" == *"main_dev.dart"* ]]; then
+              echo "dev:seeker is launching Flutter on the attached device."
+              exit 0
+            fi
+          fi
+          rm -f "$seeker_flag"
+        fi
+
         GENERATED_ENV_FILE="$DEVENV_ROOT/.tmp/flutter.env"
         if [[ -f "$GENERATED_ENV_FILE" ]]; then
           # shellcheck disable=SC1090
@@ -410,11 +423,80 @@ in
           fi
         fi
 
-        openbudget:url:update development
+        if [[ -z "''${OPENBUDGET_API_URL:-}" ]]; then
+          openbudget:url:update development
+        fi
+
+        if [[ "''${OPENBUDGET_DEVENV_UP_DETACH:-}" == "1" ]]; then
+          exec devenv up -d
+        fi
 
         exec devenv up "$@"
       '';
       description = "Start devenv after cleaning stale local postgres/redis state.";
+      binary = "bash";
+    };
+    "dev:seeker" = {
+      exec = ''
+        set -euo pipefail
+        cd "$DEVENV_ROOT"
+        dart run openbudget_scripts:dev_seeker start
+      '';
+      description = "Start Postgres, Redis, Serverpod, and Flutter on the attached Android device. Tries Tailscale, then LAN, then USB.";
+      binary = "bash";
+    };
+    "dev:seeker:status" = {
+      exec = ''
+        set -euo pipefail
+        cd "$DEVENV_ROOT"
+        dart run openbudget_scripts:dev_seeker status
+      '';
+      description = "Show the Seeker runner, API URL, shared services, and Android devices.";
+      binary = "bash";
+    };
+    "dev:seeker:reload" = {
+      exec = ''
+        set -euo pipefail
+        cd "$DEVENV_ROOT"
+        dart run openbudget_scripts:dev_seeker reload
+      '';
+      description = "Trigger hot reload for the background Seeker Flutter runner.";
+      binary = "bash";
+    };
+    "dev:seeker:hot-restart" = {
+      exec = ''
+        set -euo pipefail
+        cd "$DEVENV_ROOT"
+        dart run openbudget_scripts:dev_seeker hot-restart
+      '';
+      description = "Trigger hot restart for the background Seeker Flutter runner.";
+      binary = "bash";
+    };
+    "dev:seeker:signal" = {
+      exec = ''
+        set -euo pipefail
+        cd "$DEVENV_ROOT"
+        dart run openbudget_scripts:dev_seeker signal "$@"
+      '';
+      description = "Send one Flutter resident-runner key to the Seeker session.";
+      binary = "bash";
+    };
+    "dev:seeker:stop" = {
+      exec = ''
+        set -euo pipefail
+        cd "$DEVENV_ROOT"
+        dart run openbudget_scripts:dev_seeker stop
+      '';
+      description = "Stop the owned Seeker Flutter runner and remove only the USB forwards it created on the recorded device. Leaves shared services running.";
+      binary = "bash";
+    };
+    "dev:seeker:restart" = {
+      exec = ''
+        set -euo pipefail
+        cd "$DEVENV_ROOT"
+        dart run openbudget_scripts:dev_seeker restart
+      '';
+      description = "Restart the Seeker Flutter runner against the attached device.";
       binary = "bash";
     };
     "install:all" = {
