@@ -7,6 +7,7 @@ import 'package:openbudget_server/src/entities/entity_access.dart';
 import 'package:openbudget_server/src/entities/entity_clock.dart';
 import 'package:openbudget_server/src/entities/entity_realtime_notifier.dart';
 import 'package:openbudget_server/src/generated/protocol.dart' hide Transaction;
+import 'package:openbudget_server/src/ledger/ledger_account_linker.dart';
 import 'package:openbudget_server/src/transactions/transaction_writer.dart';
 import 'package:serverpod/serverpod.dart';
 
@@ -166,6 +167,19 @@ abstract final class AccountService {
       ),
       transaction: tx,
     );
+
+    // Ledger-mode money accounts mirror into the chart in the same
+    // transaction, so a new bank, card or loan account can never exist
+    // without its ledger link.
+    if (entity.accountingMode == AccountingMode.ledger) {
+      account = await LedgerAccountLinker.attachMoneyAccount(
+        session,
+        tx,
+        entity: entity,
+        account: account,
+        actorId: EntityAccess.userId(session),
+      );
+    }
 
     if (openingBalanceMinor != null) {
       if (source == AccountBalanceSource.transactions) {

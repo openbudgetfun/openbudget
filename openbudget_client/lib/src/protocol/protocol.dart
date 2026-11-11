@@ -21,6 +21,8 @@ import 'package:openbudget_client/src/protocol/agent/agent_proposal.dart'
     as _icv7zzda;
 import 'package:openbudget_client/src/protocol/agent/mcp/agent_access_token_view.dart'
     as _itxn3wek;
+import 'package:openbudget_client/src/protocol/audit/audit_event.dart'
+    as _ioe147d0;
 import 'package:openbudget_client/src/protocol/entities/entity.dart'
     as _i2ulk6h5;
 import 'package:openbudget_client/src/protocol/envelope_goals/envelope_goal.dart'
@@ -29,6 +31,14 @@ import 'package:openbudget_client/src/protocol/envelopes/envelope.dart'
     as _i29jf3by;
 import 'package:openbudget_client/src/protocol/institutions/institution.dart'
     as _i6ysl1a4;
+import 'package:openbudget_client/src/protocol/ledger/journal.dart'
+    as _izuizaeu;
+import 'package:openbudget_client/src/protocol/ledger/journal_line.dart'
+    as _iwruw2s3;
+import 'package:openbudget_client/src/protocol/ledger/journal_line_input.dart'
+    as _i3j8x5or;
+import 'package:openbudget_client/src/protocol/ledger/ledger_account.dart'
+    as _ixq9t892;
 import 'package:openbudget_core/openbudget_core.dart' as _ifz8weqz;
 import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
     as _iacc;
@@ -522,10 +532,14 @@ class Protocol extends _isc.SerializationManager
           _isc.getType<List<_itxn3wek.AgentAccessTokenView>>,
           _isc.getType<List<_i2ulk6h5.Entity>>,
           _isc.getType<List<_ibdhi9gv.EnvelopeGoal>>,
-          _isc.getType<List<_isc.UuidValue>>,
           _isc.getType<List<_i29jf3by.Envelope>>,
-          _isc.getType<List<String>>,
+          _isc.getType<List<_isc.UuidValue>>,
           _isc.getType<List<_i6ysl1a4.Institution>>,
+          _isc.getType<List<_ixq9t892.LedgerAccount>>,
+          _isc.getType<List<_i3j8x5or.JournalLineInput>>,
+          _isc.getType<List<_izuizaeu.Journal>>,
+          _isc.getType<List<_iwruw2s3.JournalLine>>,
+          _isc.getType<List<_ioe147d0.AuditEvent>>,
           _isc.getType<List<_iqudaadl.Account>>,
         ],
         modules: const [
@@ -1607,22 +1621,49 @@ class Protocol extends _isc.SerializationManager
               .toList()
           as T;
     }
-    if (t == List<_isc.UuidValue>) {
-      return (data as List).map((e) => deserialize<_isc.UuidValue>(e)).toList()
-          as T;
-    }
     if (t == List<_i29jf3by.Envelope>) {
       return (data as List)
               .map((e) => deserialize<_i29jf3by.Envelope>(e))
               .toList()
           as T;
     }
-    if (t == List<String>) {
-      return (data as List).map((e) => deserialize<String>(e)).toList() as T;
+    if (t == List<_isc.UuidValue>) {
+      return (data as List).map((e) => deserialize<_isc.UuidValue>(e)).toList()
+          as T;
     }
     if (t == List<_i6ysl1a4.Institution>) {
       return (data as List)
               .map((e) => deserialize<_i6ysl1a4.Institution>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_ixq9t892.LedgerAccount>) {
+      return (data as List)
+              .map((e) => deserialize<_ixq9t892.LedgerAccount>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_i3j8x5or.JournalLineInput>) {
+      return (data as List)
+              .map((e) => deserialize<_i3j8x5or.JournalLineInput>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_izuizaeu.Journal>) {
+      return (data as List)
+              .map((e) => deserialize<_izuizaeu.Journal>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_iwruw2s3.JournalLine>) {
+      return (data as List)
+              .map((e) => deserialize<_iwruw2s3.JournalLine>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_ioe147d0.AuditEvent>) {
+      return (data as List)
+              .map((e) => deserialize<_ioe147d0.AuditEvent>(e))
               .toList()
           as T;
     }

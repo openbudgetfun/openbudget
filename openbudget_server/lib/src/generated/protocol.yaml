@@ -51,8 +51,7 @@ entityStream:
   - watch:
 envelopeGoal:
   - upsert:
-  - getForEnvelope:
-  - listForEnvelopes:
+  - list:
   - delete:
 envelope:
   - create:
@@ -67,6 +66,21 @@ fxRate:
   - quote:
 institution:
   - list:
+ledger:
+  - enableLedger:
+  - listAccounts:
+  - createAccount:
+  - archiveAccount:
+  - saveDraftJournal:
+  - deleteDraftJournal:
+  - postJournal:
+  - reverseJournal:
+  - listJournals:
+  - listJournalLines:
+  - getLockDate:
+  - setLockDate:
+  - trialBalance:
+  - listAuditEvents:
 plaid:
   - createLinkToken:
   - exchangePublicToken:

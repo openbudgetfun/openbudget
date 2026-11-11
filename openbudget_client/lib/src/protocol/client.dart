@@ -31,6 +31,8 @@ import 'package:openbudget_client/src/protocol/agent/mcp/agent_access_token_crea
     as _ie7c2xv8;
 import 'package:openbudget_client/src/protocol/agent/mcp/agent_access_token_view.dart'
     as _itxn3wek;
+import 'package:openbudget_client/src/protocol/audit/audit_event.dart'
+    as _ioe147d0;
 import 'package:openbudget_client/src/protocol/billing/entitlement.dart'
     as _iyhncv6f;
 import 'package:openbudget_client/src/protocol/billing/solana_plan_view.dart'
@@ -41,6 +43,8 @@ import 'package:openbudget_client/src/protocol/entities/entity_changed_event.dar
     as _irhjjor1;
 import 'package:openbudget_client/src/protocol/envelope_goals/envelope_goal.dart'
     as _ibdhi9gv;
+import 'package:openbudget_client/src/protocol/envelope_goals/envelope_goal_kind.dart'
+    as _ilw4dz54;
 import 'package:openbudget_client/src/protocol/envelopes/envelope.dart'
     as _i29jf3by;
 import 'package:openbudget_client/src/protocol/fx_rates/fx_latest_snapshot.dart'
@@ -49,6 +53,18 @@ import 'package:openbudget_client/src/protocol/fx_rates/fx_quote_view.dart'
     as _ij92xk61;
 import 'package:openbudget_client/src/protocol/institutions/institution.dart'
     as _i6ysl1a4;
+import 'package:openbudget_client/src/protocol/ledger/journal.dart'
+    as _izuizaeu;
+import 'package:openbudget_client/src/protocol/ledger/journal_line.dart'
+    as _iwruw2s3;
+import 'package:openbudget_client/src/protocol/ledger/journal_line_input.dart'
+    as _i3j8x5or;
+import 'package:openbudget_client/src/protocol/ledger/ledger_account.dart'
+    as _ixq9t892;
+import 'package:openbudget_client/src/protocol/ledger/ledger_period_lock.dart'
+    as _i10h3ni6;
+import 'package:openbudget_client/src/protocol/ledger/trial_balance_view.dart'
+    as _i0gvlz5s;
 import 'package:openbudget_client/src/protocol/settings/user_settings.dart'
     as _ivxpuwvx;
 import 'package:openbudget_core/openbudget_core.dart' as _ifz8weqz;
@@ -723,7 +739,8 @@ class EndpointEntityStream extends _isc.EndpointRef {
 
 /// API surface for envelope goal operations.
 ///
-/// All methods require authentication.
+/// All methods require authentication and delegate to [EnvelopeGoalService],
+/// which owns the entity boundary.
 /// {@category Endpoint}
 class EndpointEnvelopeGoal extends _isc.EndpointRef {
   EndpointEnvelopeGoal(_isc.EndpointCaller caller) : super(caller);
@@ -731,46 +748,34 @@ class EndpointEnvelopeGoal extends _isc.EndpointRef {
   @override
   String get name => 'envelopeGoal';
 
-  /// Creates or updates a goal for an envelope.
+  /// Creates or replaces the goal for one envelope.
   _ida.Future<_ibdhi9gv.EnvelopeGoal> upsert(
     _isc.UuidValue envelopeId,
-    String goalType,
-    int targetAmountCents, {
+    _ilw4dz54.EnvelopeGoalKind kind,
+    int amountMinor, {
     DateTime? targetDate,
-    int? monthlyFundingCents,
   }) => caller.callServerEndpoint<_ibdhi9gv.EnvelopeGoal>(
     'envelopeGoal',
     'upsert',
     {
       'envelopeId': envelopeId,
-      'goalType': goalType,
-      'targetAmountCents': targetAmountCents,
+      'kind': kind,
+      'amountMinor': amountMinor,
       'targetDate': targetDate,
-      'monthlyFundingCents': monthlyFundingCents,
     },
   );
 
-  /// Gets the goal for an envelope.
-  _ida.Future<_ibdhi9gv.EnvelopeGoal?> getForEnvelope(
-    _isc.UuidValue envelopeId,
-  ) => caller.callServerEndpoint<_ibdhi9gv.EnvelopeGoal?>(
-    'envelopeGoal',
-    'getForEnvelope',
-    {'envelopeId': envelopeId},
-  );
+  /// Lists every goal of an entity.
+  _ida.Future<List<_ibdhi9gv.EnvelopeGoal>> list(_isc.UuidValue entityId) =>
+      caller.callServerEndpoint<List<_ibdhi9gv.EnvelopeGoal>>(
+        'envelopeGoal',
+        'list',
+        {'entityId': entityId},
+      );
 
-  /// Lists all goals for a set of envelope IDs.
-  _ida.Future<List<_ibdhi9gv.EnvelopeGoal>> listForEnvelopes(
-    List<_isc.UuidValue> envelopeIds,
-  ) => caller.callServerEndpoint<List<_ibdhi9gv.EnvelopeGoal>>(
-    'envelopeGoal',
-    'listForEnvelopes',
-    {'envelopeIds': envelopeIds},
-  );
-
-  /// Deletes a goal by ID.
-  _ida.Future<_ibdhi9gv.EnvelopeGoal> delete(_isc.UuidValue goalId) =>
-      caller.callServerEndpoint<_ibdhi9gv.EnvelopeGoal>(
+  /// Deletes one goal by id.
+  _ida.Future<void> delete(_isc.UuidValue goalId) =>
+      caller.callServerEndpoint<void>(
         'envelopeGoal',
         'delete',
         {'goalId': goalId},
@@ -779,7 +784,8 @@ class EndpointEnvelopeGoal extends _isc.EndpointRef {
 
 /// API surface for envelope operations.
 ///
-/// All methods require authentication.
+/// All methods require authentication and delegate to [EnvelopeService],
+/// which owns the entity boundary and the reassignment transaction.
 /// {@category Endpoint}
 class EndpointEnvelope extends _isc.EndpointRef {
   EndpointEnvelope(_isc.EndpointCaller caller) : super(caller);
@@ -787,32 +793,32 @@ class EndpointEnvelope extends _isc.EndpointRef {
   @override
   String get name => 'envelope';
 
-  /// Creates a new envelope within a category.
+  /// Creates an envelope at the end of its category's list.
   _ida.Future<_i29jf3by.Envelope> create(
-    String name,
     _isc.UuidValue categoryId,
-    int budgetedAmountCents,
-    String currencyCode,
-  ) => caller.callServerEndpoint<_i29jf3by.Envelope>(
+    String name, {
+    String? note,
+    String? taxCategoryCode,
+  }) => caller.callServerEndpoint<_i29jf3by.Envelope>(
     'envelope',
     'create',
     {
-      'name': name,
       'categoryId': categoryId,
-      'budgetedAmountCents': budgetedAmountCents,
-      'currencyCode': currencyCode,
+      'name': name,
+      'note': note,
+      'taxCategoryCode': taxCategoryCode,
     },
   );
 
-  /// Lists all envelopes for a category.
-  _ida.Future<List<_i29jf3by.Envelope>> list(_isc.UuidValue categoryId) =>
+  /// Lists every envelope of an entity.
+  _ida.Future<List<_i29jf3by.Envelope>> list(_isc.UuidValue entityId) =>
       caller.callServerEndpoint<List<_i29jf3by.Envelope>>(
         'envelope',
         'list',
-        {'categoryId': categoryId},
+        {'entityId': entityId},
       );
 
-  /// Gets a single envelope by ID.
+  /// Loads one envelope by id.
   _ida.Future<_i29jf3by.Envelope> get(_isc.UuidValue envelopeId) =>
       caller.callServerEndpoint<_i29jf3by.Envelope>(
         'envelope',
@@ -820,31 +826,37 @@ class EndpointEnvelope extends _isc.EndpointRef {
         {'envelopeId': envelopeId},
       );
 
-  /// Updates an envelope by ID.
+  /// Updates one envelope, including nullable clear flags.
   _ida.Future<_i29jf3by.Envelope> update(
     _isc.UuidValue envelopeId, {
     String? name,
-    int? budgetedAmountCents,
-    int? spentAmountCents,
+    _isc.UuidValue? categoryId,
     String? note,
     bool? isHidden,
+    String? taxCategoryCode,
+    bool? clearTaxCategoryCode,
+    _isc.UuidValue? defaultLedgerAccountId,
+    bool? clearDefaultLedgerAccount,
   }) => caller.callServerEndpoint<_i29jf3by.Envelope>(
     'envelope',
     'update',
     {
       'envelopeId': envelopeId,
       'name': name,
-      'budgetedAmountCents': budgetedAmountCents,
-      'spentAmountCents': spentAmountCents,
+      'categoryId': categoryId,
       'note': note,
       'isHidden': isHidden,
+      'taxCategoryCode': taxCategoryCode,
+      'clearTaxCategoryCode': clearTaxCategoryCode,
+      'defaultLedgerAccountId': defaultLedgerAccountId,
+      'clearDefaultLedgerAccount': clearDefaultLedgerAccount,
     },
   );
 
-  /// Reorders envelopes within a category.
+  /// Rewrites one category's envelope order from an exact id list.
   _ida.Future<List<_i29jf3by.Envelope>> reorder(
     _isc.UuidValue categoryId,
-    List<String> envelopeIds,
+    List<_isc.UuidValue> envelopeIds,
   ) => caller.callServerEndpoint<List<_i29jf3by.Envelope>>(
     'envelope',
     'reorder',
@@ -854,13 +866,18 @@ class EndpointEnvelope extends _isc.EndpointRef {
     },
   );
 
-  /// Deletes an envelope by ID.
-  _ida.Future<_i29jf3by.Envelope> delete(_isc.UuidValue envelopeId) =>
-      caller.callServerEndpoint<_i29jf3by.Envelope>(
-        'envelope',
-        'delete',
-        {'envelopeId': envelopeId},
-      );
+  /// Deletes an envelope, optionally moving every reference first.
+  _ida.Future<void> delete(
+    _isc.UuidValue envelopeId, {
+    _isc.UuidValue? reassignToEnvelopeId,
+  }) => caller.callServerEndpoint<void>(
+    'envelope',
+    'delete',
+    {
+      'envelopeId': envelopeId,
+      'reassignToEnvelopeId': reassignToEnvelopeId,
+    },
+  );
 }
 
 /// API surface for exchange rates used by display-currency conversion.
@@ -921,6 +938,206 @@ class EndpointInstitution extends _isc.EndpointRef {
         'list',
         {'locationCode': locationCode},
       );
+}
+
+/// API surface for an entity's double-entry books.
+///
+/// All methods require authentication and cross [LedgerService], which checks
+/// entity ownership. Posted journals have no update or delete path anywhere
+/// in this API: corrections go through [reverseJournal]. Revaluation is not
+/// exposed until the revaluation unit exists.
+/// {@category Endpoint}
+class EndpointLedger extends _isc.EndpointRef {
+  EndpointLedger(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'ledger';
+
+  /// Enables ledger accounting on a sole-trader or company entity: seeds the
+  /// country chart, links one ledger account per money account, and switches
+  /// the entity to ledger mode atomically.
+  _ida.Future<_i2ulk6h5.Entity> enableLedger(_isc.UuidValue entityId) =>
+      caller.callServerEndpoint<_i2ulk6h5.Entity>(
+        'ledger',
+        'enableLedger',
+        {'entityId': entityId},
+      );
+
+  /// Lists the entity's ledger accounts.
+  _ida.Future<List<_ixq9t892.LedgerAccount>> listAccounts(
+    _isc.UuidValue entityId, {
+    required bool includeArchived,
+  }) => caller.callServerEndpoint<List<_ixq9t892.LedgerAccount>>(
+    'ledger',
+    'listAccounts',
+    {
+      'entityId': entityId,
+      'includeArchived': includeArchived,
+    },
+  );
+
+  /// Adds an account to the entity's chart of accounts.
+  _ida.Future<_ixq9t892.LedgerAccount> createAccount(
+    _isc.UuidValue entityId,
+    String code,
+    String name,
+    _ifz8weqz.LedgerAccountType type, {
+    _ifz8weqz.LedgerSystemRole? systemRole,
+    String? currencyCode,
+    String? taxCategoryCode,
+  }) => caller.callServerEndpoint<_ixq9t892.LedgerAccount>(
+    'ledger',
+    'createAccount',
+    {
+      'entityId': entityId,
+      'code': code,
+      'name': name,
+      'type': type,
+      'systemRole': systemRole,
+      'currencyCode': currencyCode,
+      'taxCategoryCode': taxCategoryCode,
+    },
+  );
+
+  /// Archives a non-structural account so it stops accepting postings.
+  _ida.Future<_ixq9t892.LedgerAccount> archiveAccount(
+    _isc.UuidValue accountId,
+  ) => caller.callServerEndpoint<_ixq9t892.LedgerAccount>(
+    'ledger',
+    'archiveAccount',
+    {'accountId': accountId},
+  );
+
+  /// Saves a draft journal: creates one, or replaces the lines of an existing
+  /// draft when [journalId] is given.
+  _ida.Future<_izuizaeu.Journal> saveDraftJournal(
+    _isc.UuidValue entityId,
+    DateTime date,
+    List<_i3j8x5or.JournalLineInput> lines, {
+    _isc.UuidValue? journalId,
+    required String reference,
+    String? narration,
+    required _ifz8weqz.JournalSource source,
+  }) => caller.callServerEndpoint<_izuizaeu.Journal>(
+    'ledger',
+    'saveDraftJournal',
+    {
+      'entityId': entityId,
+      'date': date,
+      'lines': lines,
+      'journalId': journalId,
+      'reference': reference,
+      'narration': narration,
+      'source': source,
+    },
+  );
+
+  /// Deletes a draft journal. Posted journals cannot be deleted.
+  _ida.Future<void> deleteDraftJournal(_isc.UuidValue journalId) =>
+      caller.callServerEndpoint<void>(
+        'ledger',
+        'deleteDraftJournal',
+        {'journalId': journalId},
+      );
+
+  /// Posts a draft journal, making it immutable.
+  _ida.Future<_izuizaeu.Journal> postJournal(_isc.UuidValue journalId) =>
+      caller.callServerEndpoint<_izuizaeu.Journal>(
+        'ledger',
+        'postJournal',
+        {'journalId': journalId},
+      );
+
+  /// Reverses a posted journal on [date] with a mirror journal.
+  _ida.Future<_izuizaeu.Journal> reverseJournal(
+    _isc.UuidValue journalId,
+    DateTime date,
+  ) => caller.callServerEndpoint<_izuizaeu.Journal>(
+    'ledger',
+    'reverseJournal',
+    {
+      'journalId': journalId,
+      'date': date,
+    },
+  );
+
+  /// Lists one bounded page of the entity's journals, newest first.
+  _ida.Future<List<_izuizaeu.Journal>> listJournals(
+    _isc.UuidValue entityId, {
+    DateTime? fromDate,
+    DateTime? toDate,
+    required int limit,
+    String? cursor,
+  }) => caller.callServerEndpoint<List<_izuizaeu.Journal>>(
+    'ledger',
+    'listJournals',
+    {
+      'entityId': entityId,
+      'fromDate': fromDate,
+      'toDate': toDate,
+      'limit': limit,
+      'cursor': cursor,
+    },
+  );
+
+  /// Lists one journal's lines, oldest first.
+  _ida.Future<List<_iwruw2s3.JournalLine>> listJournalLines(
+    _isc.UuidValue journalId,
+  ) => caller.callServerEndpoint<List<_iwruw2s3.JournalLine>>(
+    'ledger',
+    'listJournalLines',
+    {'journalId': journalId},
+  );
+
+  /// The entity's period lock, or null when no lock date has been set.
+  _ida.Future<_i10h3ni6.LedgerPeriodLock?> getLockDate(
+    _isc.UuidValue entityId,
+  ) => caller.callServerEndpoint<_i10h3ni6.LedgerPeriodLock?>(
+    'ledger',
+    'getLockDate',
+    {'entityId': entityId},
+  );
+
+  /// Sets or moves the entity's period lock date.
+  _ida.Future<_i10h3ni6.LedgerPeriodLock> setLockDate(
+    _isc.UuidValue entityId,
+    DateTime lockDate,
+  ) => caller.callServerEndpoint<_i10h3ni6.LedgerPeriodLock>(
+    'ledger',
+    'setLockDate',
+    {
+      'entityId': entityId,
+      'lockDate': lockDate,
+    },
+  );
+
+  /// Computes the trial balance through [asOf] over posted journals.
+  _ida.Future<_i0gvlz5s.TrialBalanceView> trialBalance(
+    _isc.UuidValue entityId,
+    DateTime asOf,
+  ) => caller.callServerEndpoint<_i0gvlz5s.TrialBalanceView>(
+    'ledger',
+    'trialBalance',
+    {
+      'entityId': entityId,
+      'asOf': asOf,
+    },
+  );
+
+  /// Lists one bounded page of the entity's audit trail, newest first.
+  _ida.Future<List<_ioe147d0.AuditEvent>> listAuditEvents(
+    _isc.UuidValue entityId, {
+    DateTime? before,
+    int? limit,
+  }) => caller.callServerEndpoint<List<_ioe147d0.AuditEvent>>(
+    'ledger',
+    'listAuditEvents',
+    {
+      'entityId': entityId,
+      'before': before,
+      'limit': limit,
+    },
+  );
 }
 
 /// API surface for Plaid-linked account integration.
@@ -1056,6 +1273,7 @@ class Client extends _isc.ServerpodClientShared {
     envelope = EndpointEnvelope(this);
     fxRate = EndpointFxRate(this);
     institution = EndpointInstitution(this);
+    ledger = EndpointLedger(this);
     plaid = EndpointPlaid(this);
     settings = EndpointSettings(this);
     modules = Modules(this);
@@ -1087,6 +1305,8 @@ class Client extends _isc.ServerpodClientShared {
 
   late final EndpointInstitution institution;
 
+  late final EndpointLedger ledger;
+
   late final EndpointPlaid plaid;
 
   late final EndpointSettings settings;
@@ -1108,6 +1328,7 @@ class Client extends _isc.ServerpodClientShared {
     'envelope': envelope,
     'fxRate': fxRate,
     'institution': institution,
+    'ledger': ledger,
     'plaid': plaid,
     'settings': settings,
   };

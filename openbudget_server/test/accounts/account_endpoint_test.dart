@@ -886,23 +886,19 @@ void main() {
       final ledgerEntity = await addEntity(
         accountingMode: AccountingMode.ledger,
       );
-      final account = await createAccount(
+      final created = await createAccount(
         name: 'Bank',
         entityId: ledgerEntity.id,
       );
-      final ledger = await LedgerAccount.db.insertRow(
+      final account = (await Account.db.findById(
         book.session,
-        LedgerAccount(
-          entityId: ledgerEntity.id!,
-          code: '1000',
-          name: 'Bank',
-          type: LedgerAccountType.asset,
-        ),
-      );
-      await Account.db.updateRow(
+        created.id!,
+      ))!;
+      expect(account.ledgerAccountId, isNotNull);
+      final ledger = (await LedgerAccount.db.findById(
         book.session,
-        account.copyWith(ledgerAccountId: ledger.id),
-      );
+        account.ledgerAccountId!,
+      ))!;
       final journal = await Journal.db.insertRow(
         book.session,
         Journal(entityId: ledgerEntity.id!, date: day(0)),

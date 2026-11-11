@@ -11,7 +11,11 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:openbudget_core/openbudget_core.dart' as _ifz8weqz;
+import 'package:openbudget_server/src/generated/envelope_goals/envelope_goal_kind.dart'
+    as _i16hg0wx;
 import 'package:openbudget_server/src/generated/future_calls.dart' as _iwv90kfd;
+import 'package:openbudget_server/src/generated/ledger/journal_line_input.dart'
+    as _in0sxdux;
 import 'package:serverpod/serverpod.dart' as _is;
 import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
     as _iacs;
@@ -31,6 +35,7 @@ import '../envelope_goals/envelope_goal_endpoint.dart' as _i76paldx;
 import '../envelopes/envelope_endpoint.dart' as _in6dn9dl;
 import '../fx_rates/fx_rate_endpoint.dart' as _i7xoygut;
 import '../institutions/institution_endpoint.dart' as _i9rhv37i;
+import '../ledger/ledger_endpoint.dart' as _ia4une1r;
 import '../plaid/plaid_endpoint.dart' as _i9pkxqxw;
 import '../settings/settings_endpoint.dart' as _iy0sqmtu;
 export 'future_calls.dart' show ServerpodFutureCallsGetter;
@@ -115,6 +120,12 @@ class Endpoints extends _is.EndpointDispatch {
         ..initialize(
           server,
           'institution',
+          null,
+        ),
+      'ledger': _ia4une1r.LedgerEndpoint()
+        ..initialize(
+          server,
+          'ledger',
           null,
         ),
       'plaid': _i9pkxqxw.PlaidEndpoint()
@@ -1142,24 +1153,19 @@ class Endpoints extends _is.EndpointDispatch {
               type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'goalType': _is.ParameterDescription(
-              name: 'goalType',
-              type: _is.getType<String>(),
+            'kind': _is.ParameterDescription(
+              name: 'kind',
+              type: _is.getType<_i16hg0wx.EnvelopeGoalKind>(),
               nullable: false,
             ),
-            'targetAmountCents': _is.ParameterDescription(
-              name: 'targetAmountCents',
+            'amountMinor': _is.ParameterDescription(
+              name: 'amountMinor',
               type: _is.getType<int>(),
               nullable: false,
             ),
             'targetDate': _is.ParameterDescription(
               name: 'targetDate',
               type: _is.getType<DateTime?>(),
-              nullable: true,
-            ),
-            'monthlyFundingCents': _is.ParameterDescription(
-              name: 'monthlyFundingCents',
-              type: _is.getType<int?>(),
               nullable: true,
             ),
           },
@@ -1172,17 +1178,16 @@ class Endpoints extends _is.EndpointDispatch {
                       .upsert(
                         session,
                         params['envelopeId'],
-                        params['goalType'],
-                        params['targetAmountCents'],
+                        params['kind'],
+                        params['amountMinor'],
                         targetDate: params['targetDate'],
-                        monthlyFundingCents: params['monthlyFundingCents'],
                       ),
         ),
-        'getForEnvelope': _is.MethodConnector(
-          name: 'getForEnvelope',
+        'list': _is.MethodConnector(
+          name: 'list',
           params: {
-            'envelopeId': _is.ParameterDescription(
-              name: 'envelopeId',
+            'entityId': _is.ParameterDescription(
+              name: 'entityId',
               type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
@@ -1193,29 +1198,9 @@ class Endpoints extends _is.EndpointDispatch {
                 Map<String, dynamic> params,
               ) async =>
                   (endpoints['envelopeGoal'] as _i76paldx.EnvelopeGoalEndpoint)
-                      .getForEnvelope(
+                      .list(
                         session,
-                        params['envelopeId'],
-                      ),
-        ),
-        'listForEnvelopes': _is.MethodConnector(
-          name: 'listForEnvelopes',
-          params: {
-            'envelopeIds': _is.ParameterDescription(
-              name: 'envelopeIds',
-              type: _is.getType<List<_is.UuidValue>>(),
-              nullable: false,
-            ),
-          },
-          call:
-              (
-                _is.Session session,
-                Map<String, dynamic> params,
-              ) async =>
-                  (endpoints['envelopeGoal'] as _i76paldx.EnvelopeGoalEndpoint)
-                      .listForEnvelopes(
-                        session,
-                        params['envelopeIds'],
+                        params['entityId'],
                       ),
         ),
         'delete': _is.MethodConnector(
@@ -1247,25 +1232,25 @@ class Endpoints extends _is.EndpointDispatch {
         'create': _is.MethodConnector(
           name: 'create',
           params: {
-            'name': _is.ParameterDescription(
-              name: 'name',
-              type: _is.getType<String>(),
-              nullable: false,
-            ),
             'categoryId': _is.ParameterDescription(
               name: 'categoryId',
               type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
-            'budgetedAmountCents': _is.ParameterDescription(
-              name: 'budgetedAmountCents',
-              type: _is.getType<int>(),
-              nullable: false,
-            ),
-            'currencyCode': _is.ParameterDescription(
-              name: 'currencyCode',
+            'name': _is.ParameterDescription(
+              name: 'name',
               type: _is.getType<String>(),
               nullable: false,
+            ),
+            'note': _is.ParameterDescription(
+              name: 'note',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+            'taxCategoryCode': _is.ParameterDescription(
+              name: 'taxCategoryCode',
+              type: _is.getType<String?>(),
+              nullable: true,
             ),
           },
           call:
@@ -1275,17 +1260,17 @@ class Endpoints extends _is.EndpointDispatch {
               ) async =>
                   (endpoints['envelope'] as _in6dn9dl.EnvelopeEndpoint).create(
                     session,
-                    params['name'],
                     params['categoryId'],
-                    params['budgetedAmountCents'],
-                    params['currencyCode'],
+                    params['name'],
+                    note: params['note'],
+                    taxCategoryCode: params['taxCategoryCode'],
                   ),
         ),
         'list': _is.MethodConnector(
           name: 'list',
           params: {
-            'categoryId': _is.ParameterDescription(
-              name: 'categoryId',
+            'entityId': _is.ParameterDescription(
+              name: 'entityId',
               type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
@@ -1297,7 +1282,7 @@ class Endpoints extends _is.EndpointDispatch {
               ) async =>
                   (endpoints['envelope'] as _in6dn9dl.EnvelopeEndpoint).list(
                     session,
-                    params['categoryId'],
+                    params['entityId'],
                   ),
         ),
         'get': _is.MethodConnector(
@@ -1332,14 +1317,9 @@ class Endpoints extends _is.EndpointDispatch {
               type: _is.getType<String?>(),
               nullable: true,
             ),
-            'budgetedAmountCents': _is.ParameterDescription(
-              name: 'budgetedAmountCents',
-              type: _is.getType<int?>(),
-              nullable: true,
-            ),
-            'spentAmountCents': _is.ParameterDescription(
-              name: 'spentAmountCents',
-              type: _is.getType<int?>(),
+            'categoryId': _is.ParameterDescription(
+              name: 'categoryId',
+              type: _is.getType<_is.UuidValue?>(),
               nullable: true,
             ),
             'note': _is.ParameterDescription(
@@ -1349,6 +1329,26 @@ class Endpoints extends _is.EndpointDispatch {
             ),
             'isHidden': _is.ParameterDescription(
               name: 'isHidden',
+              type: _is.getType<bool?>(),
+              nullable: true,
+            ),
+            'taxCategoryCode': _is.ParameterDescription(
+              name: 'taxCategoryCode',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+            'clearTaxCategoryCode': _is.ParameterDescription(
+              name: 'clearTaxCategoryCode',
+              type: _is.getType<bool?>(),
+              nullable: true,
+            ),
+            'defaultLedgerAccountId': _is.ParameterDescription(
+              name: 'defaultLedgerAccountId',
+              type: _is.getType<_is.UuidValue?>(),
+              nullable: true,
+            ),
+            'clearDefaultLedgerAccount': _is.ParameterDescription(
+              name: 'clearDefaultLedgerAccount',
               type: _is.getType<bool?>(),
               nullable: true,
             ),
@@ -1362,10 +1362,14 @@ class Endpoints extends _is.EndpointDispatch {
                     session,
                     params['envelopeId'],
                     name: params['name'],
-                    budgetedAmountCents: params['budgetedAmountCents'],
-                    spentAmountCents: params['spentAmountCents'],
+                    categoryId: params['categoryId'],
                     note: params['note'],
                     isHidden: params['isHidden'],
+                    taxCategoryCode: params['taxCategoryCode'],
+                    clearTaxCategoryCode: params['clearTaxCategoryCode'],
+                    defaultLedgerAccountId: params['defaultLedgerAccountId'],
+                    clearDefaultLedgerAccount:
+                        params['clearDefaultLedgerAccount'],
                   ),
         ),
         'reorder': _is.MethodConnector(
@@ -1378,7 +1382,7 @@ class Endpoints extends _is.EndpointDispatch {
             ),
             'envelopeIds': _is.ParameterDescription(
               name: 'envelopeIds',
-              type: _is.getType<List<String>>(),
+              type: _is.getType<List<_is.UuidValue>>(),
               nullable: false,
             ),
           },
@@ -1401,6 +1405,11 @@ class Endpoints extends _is.EndpointDispatch {
               type: _is.getType<_is.UuidValue>(),
               nullable: false,
             ),
+            'reassignToEnvelopeId': _is.ParameterDescription(
+              name: 'reassignToEnvelopeId',
+              type: _is.getType<_is.UuidValue?>(),
+              nullable: true,
+            ),
           },
           call:
               (
@@ -1410,6 +1419,7 @@ class Endpoints extends _is.EndpointDispatch {
                   (endpoints['envelope'] as _in6dn9dl.EnvelopeEndpoint).delete(
                     session,
                     params['envelopeId'],
+                    reassignToEnvelopeId: params['reassignToEnvelopeId'],
                   ),
         ),
       },
@@ -1494,6 +1504,410 @@ class Endpoints extends _is.EndpointDispatch {
                         session,
                         locationCode: params['locationCode'],
                       ),
+        ),
+      },
+    );
+    connectors['ledger'] = _is.EndpointConnector(
+      name: 'ledger',
+      endpoint: endpoints['ledger']!,
+      methodConnectors: {
+        'enableLedger': _is.MethodConnector(
+          name: 'enableLedger',
+          params: {
+            'entityId': _is.ParameterDescription(
+              name: 'entityId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['ledger'] as _ia4une1r.LedgerEndpoint)
+                  .enableLedger(
+                    session,
+                    params['entityId'],
+                  ),
+        ),
+        'listAccounts': _is.MethodConnector(
+          name: 'listAccounts',
+          params: {
+            'entityId': _is.ParameterDescription(
+              name: 'entityId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'includeArchived': _is.ParameterDescription(
+              name: 'includeArchived',
+              type: _is.getType<bool>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['ledger'] as _ia4une1r.LedgerEndpoint)
+                  .listAccounts(
+                    session,
+                    params['entityId'],
+                    includeArchived: params['includeArchived'],
+                  ),
+        ),
+        'createAccount': _is.MethodConnector(
+          name: 'createAccount',
+          params: {
+            'entityId': _is.ParameterDescription(
+              name: 'entityId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'code': _is.ParameterDescription(
+              name: 'code',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'name': _is.ParameterDescription(
+              name: 'name',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'type': _is.ParameterDescription(
+              name: 'type',
+              type: _is.getType<_ifz8weqz.LedgerAccountType>(),
+              nullable: false,
+            ),
+            'systemRole': _is.ParameterDescription(
+              name: 'systemRole',
+              type: _is.getType<_ifz8weqz.LedgerSystemRole?>(),
+              nullable: true,
+            ),
+            'currencyCode': _is.ParameterDescription(
+              name: 'currencyCode',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+            'taxCategoryCode': _is.ParameterDescription(
+              name: 'taxCategoryCode',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['ledger'] as _ia4une1r.LedgerEndpoint)
+                  .createAccount(
+                    session,
+                    params['entityId'],
+                    params['code'],
+                    params['name'],
+                    params['type'],
+                    systemRole: params['systemRole'],
+                    currencyCode: params['currencyCode'],
+                    taxCategoryCode: params['taxCategoryCode'],
+                  ),
+        ),
+        'archiveAccount': _is.MethodConnector(
+          name: 'archiveAccount',
+          params: {
+            'accountId': _is.ParameterDescription(
+              name: 'accountId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['ledger'] as _ia4une1r.LedgerEndpoint)
+                  .archiveAccount(
+                    session,
+                    params['accountId'],
+                  ),
+        ),
+        'saveDraftJournal': _is.MethodConnector(
+          name: 'saveDraftJournal',
+          params: {
+            'entityId': _is.ParameterDescription(
+              name: 'entityId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'date': _is.ParameterDescription(
+              name: 'date',
+              type: _is.getType<DateTime>(),
+              nullable: false,
+            ),
+            'lines': _is.ParameterDescription(
+              name: 'lines',
+              type: _is.getType<List<_in0sxdux.JournalLineInput>>(),
+              nullable: false,
+            ),
+            'journalId': _is.ParameterDescription(
+              name: 'journalId',
+              type: _is.getType<_is.UuidValue?>(),
+              nullable: true,
+            ),
+            'reference': _is.ParameterDescription(
+              name: 'reference',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'narration': _is.ParameterDescription(
+              name: 'narration',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+            'source': _is.ParameterDescription(
+              name: 'source',
+              type: _is.getType<_ifz8weqz.JournalSource>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['ledger'] as _ia4une1r.LedgerEndpoint)
+                  .saveDraftJournal(
+                    session,
+                    params['entityId'],
+                    params['date'],
+                    params['lines'],
+                    journalId: params['journalId'],
+                    reference: params['reference'],
+                    narration: params['narration'],
+                    source: params['source'],
+                  ),
+        ),
+        'deleteDraftJournal': _is.MethodConnector(
+          name: 'deleteDraftJournal',
+          params: {
+            'journalId': _is.ParameterDescription(
+              name: 'journalId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['ledger'] as _ia4une1r.LedgerEndpoint)
+                  .deleteDraftJournal(
+                    session,
+                    params['journalId'],
+                  ),
+        ),
+        'postJournal': _is.MethodConnector(
+          name: 'postJournal',
+          params: {
+            'journalId': _is.ParameterDescription(
+              name: 'journalId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['ledger'] as _ia4une1r.LedgerEndpoint).postJournal(
+                    session,
+                    params['journalId'],
+                  ),
+        ),
+        'reverseJournal': _is.MethodConnector(
+          name: 'reverseJournal',
+          params: {
+            'journalId': _is.ParameterDescription(
+              name: 'journalId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'date': _is.ParameterDescription(
+              name: 'date',
+              type: _is.getType<DateTime>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['ledger'] as _ia4une1r.LedgerEndpoint)
+                  .reverseJournal(
+                    session,
+                    params['journalId'],
+                    params['date'],
+                  ),
+        ),
+        'listJournals': _is.MethodConnector(
+          name: 'listJournals',
+          params: {
+            'entityId': _is.ParameterDescription(
+              name: 'entityId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'fromDate': _is.ParameterDescription(
+              name: 'fromDate',
+              type: _is.getType<DateTime?>(),
+              nullable: true,
+            ),
+            'toDate': _is.ParameterDescription(
+              name: 'toDate',
+              type: _is.getType<DateTime?>(),
+              nullable: true,
+            ),
+            'limit': _is.ParameterDescription(
+              name: 'limit',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'cursor': _is.ParameterDescription(
+              name: 'cursor',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['ledger'] as _ia4une1r.LedgerEndpoint)
+                  .listJournals(
+                    session,
+                    params['entityId'],
+                    fromDate: params['fromDate'],
+                    toDate: params['toDate'],
+                    limit: params['limit'],
+                    cursor: params['cursor'],
+                  ),
+        ),
+        'listJournalLines': _is.MethodConnector(
+          name: 'listJournalLines',
+          params: {
+            'journalId': _is.ParameterDescription(
+              name: 'journalId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['ledger'] as _ia4une1r.LedgerEndpoint)
+                  .listJournalLines(
+                    session,
+                    params['journalId'],
+                  ),
+        ),
+        'getLockDate': _is.MethodConnector(
+          name: 'getLockDate',
+          params: {
+            'entityId': _is.ParameterDescription(
+              name: 'entityId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['ledger'] as _ia4une1r.LedgerEndpoint).getLockDate(
+                    session,
+                    params['entityId'],
+                  ),
+        ),
+        'setLockDate': _is.MethodConnector(
+          name: 'setLockDate',
+          params: {
+            'entityId': _is.ParameterDescription(
+              name: 'entityId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'lockDate': _is.ParameterDescription(
+              name: 'lockDate',
+              type: _is.getType<DateTime>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async =>
+                  (endpoints['ledger'] as _ia4une1r.LedgerEndpoint).setLockDate(
+                    session,
+                    params['entityId'],
+                    params['lockDate'],
+                  ),
+        ),
+        'trialBalance': _is.MethodConnector(
+          name: 'trialBalance',
+          params: {
+            'entityId': _is.ParameterDescription(
+              name: 'entityId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'asOf': _is.ParameterDescription(
+              name: 'asOf',
+              type: _is.getType<DateTime>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['ledger'] as _ia4une1r.LedgerEndpoint)
+                  .trialBalance(
+                    session,
+                    params['entityId'],
+                    params['asOf'],
+                  ),
+        ),
+        'listAuditEvents': _is.MethodConnector(
+          name: 'listAuditEvents',
+          params: {
+            'entityId': _is.ParameterDescription(
+              name: 'entityId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'before': _is.ParameterDescription(
+              name: 'before',
+              type: _is.getType<DateTime?>(),
+              nullable: true,
+            ),
+            'limit': _is.ParameterDescription(
+              name: 'limit',
+              type: _is.getType<int?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['ledger'] as _ia4une1r.LedgerEndpoint)
+                  .listAuditEvents(
+                    session,
+                    params['entityId'],
+                    before: params['before'],
+                    limit: params['limit'],
+                  ),
         ),
       },
     );

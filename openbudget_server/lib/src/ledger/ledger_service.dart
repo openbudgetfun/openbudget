@@ -1,726 +1,918 @@
 import 'dart:convert';
 
 import 'package:openbudget_core/openbudget_core.dart';
-import 'package:openbudget_server/src/budgets/budget_service.dart';
 import 'package:openbudget_server/src/common/currency_validation.dart';
+import 'package:openbudget_server/src/entities/entity_access.dart';
+import 'package:openbudget_server/src/entities/entity_realtime_notifier.dart';
 import 'package:openbudget_server/src/generated/protocol.dart' hide Transaction;
+import 'package:openbudget_server/src/ledger/ledger_account_linker.dart';
 import 'package:serverpod/serverpod.dart';
 
-/// Business logic for a budget's double-entry books.
+/// Business logic for an entity's double-entry books.
 ///
-/// Every method verifies that the authenticated user owns the budget. The
-/// arithmetic and validation rules live in `openbudget_core`; this service
-/// enforces ownership, immutability of posted journals, the period lock and
-/// the audit trail.
-class LedgerService {
+/// Every method crosses [EntityAccess], so a journal, ledger account or lock
+/// is visible only to the owner of its entity. The arithmetic and posting
+/// invariants live in `openbudget_core`; this service owns entity
+/// serialization, immutability of posted journals, the period lock and the
+/// audit trail.
+///
+/// Manual journals deliberately do not move [Account.balanceMinor] and do not
+/// write [Transaction] rows. The ledger is authoritative once
+/// `JournalPoster` exists; until then the bank cache and single-entry
+/// projection stay a separate unit.
+abstract final class LedgerService {
   static final _log = ObLogger('LedgerService');
 
-  /// Journal statuses whose lines count toward balances. A `reversed`
-  /// journal's own lines stay in the books; its posted reversal journal
-  /// undoes them, so both count.
-  static const _balanceStatuses = {'posted', 'reversed'};
-
-  /// Turns the ledger on for a budget.
+  /// Structural accounts a manual journal may not code to.
   ///
-  /// The budget's tax profile must exist and name a [EntityKind.soleTrader]
-  /// or [EntityKind.company]; personal budgets stay envelope-only. Seeds
-  /// the chart of accounts from the jurisdiction's template and switches
-  /// `accountingMode` to `ledger`. Switching back is not supported.
-  static Future<Budget> enableLedger(
-    Session session, {
-    required UuidValue budgetId,
-  }) async {
-    _log.info('Enabling ledger for budget=$budgetId');
-    final budget = await BudgetService.getById(session, budgetId: budgetId);
-    if (AccountingMode.values.asNameMap()[budget.accountingMode] ==
-        AccountingMode.ledger) {
-      throw ValidationException(
-        message: 'This budget already keeps its books in the ledger.',
-      );
-    }
+  /// The ledger skill requires a party and a document reference for these
+  /// controls. The reset model has neither yet (documents arrive in a later
+  /// unit), so every manual line to one is rejected rather than silently
+  /// bypassing the control invariant.
+  static const _controlRoles = <LedgerSystemRole>{
+    LedgerSystemRole.accountsReceivable,
+    LedgerSystemRole.accountsPayable,
+    LedgerSystemRole.vatControl,
+    LedgerSystemRole.payrollLiabilities,
+  };
 
-    final profile = await TaxProfileRecord.db.findFirstRow(
-      session,
-      where: (t) => t.budgetId.equals(budgetId),
-    );
-    if (profile == null) {
-      throw ValidationException(
-        message: 'Set a tax profile before enabling the ledger.',
-      );
-    }
-    final entityKind = _parseEntityKind(profile.entityKind);
-    if (entityKind == EntityKind.individual) {
-      throw ValidationException(
-        message: 'Only sole-trader and company budgets can use the ledger.',
-      );
-    }
-    final jurisdiction = TaxJurisdiction.fromCountryCode(profile.jurisdiction);
-    if (jurisdiction == null) {
-      throw ValidationException(
-        message:
-            'No chart of accounts template exists for '
-            '${profile.jurisdiction}.',
-      );
-    }
-    final template = LedgerChartTemplate.forBooks(
-      jurisdiction: jurisdiction,
-      entityKind: entityKind,
-    );
-    if (template == null) {
-      throw ValidationException(
-        message:
-            'No chart of accounts template exists for '
-            '${jurisdiction.countryCode} ${entityKind.name} books.',
-      );
-    }
+  /// Sources a caller may choose. System-owned sources are created only by
+  /// the service that owns them.
+  static const _callerSources = <JournalSource>{
+    JournalSource.manual,
+    JournalSource.opening,
+    JournalSource.imported,
+  };
 
-    final userId = _requireUserId(session);
-    return session.db.transaction((transaction) async {
-      for (final seeded in template.accounts) {
-        await LedgerAccount.db.insertRow(
-          session,
-          LedgerAccount(
-            budgetId: budgetId,
-            code: seeded.code,
-            name: seeded.name,
-            type: seeded.type.name,
-            systemRole: seeded.systemRole?.name,
-          ),
-          transaction: transaction,
+  static const _maxPageLimit = 200;
+  static const _defaultPageLimit = 100;
+  static const _cursorPattern = r'^[A-Za-z0-9_-]+$';
+  static const _cursorDatePattern = r'^\d{4}-\d{2}-\d{2}$';
+
+  /// Turns the ledger on for a sole-trader or company entity.
+  ///
+  /// Seeds the chart from the country and entity-kind template in
+  /// `openbudget_core`, creates one mirror account per transactions-sourced
+  /// money account, links both sides through `account.ledgerAccountId`, and
+  /// switches `accountingMode` to ledger. The whole change is atomic and
+  /// idempotent: a retry or a concurrent second call returns the already
+  /// enabled entity without seeding a second chart.
+  static Future<Entity> enableLedger(
+    Session session,
+    UuidValue entityId,
+  ) async {
+    final actorId = EntityAccess.userId(session);
+    final result = await session.db.transaction((transaction) async {
+      final entity = await EntityAccess.requireOwned(
+        session,
+        entityId,
+        transaction: transaction,
+        lock: true,
+      );
+      _requireWritable(entity);
+      if (entity.accountingMode == AccountingMode.ledger) {
+        return (entity: entity, changed: false);
+      }
+      if (entity.kind == EntityKind.individual) {
+        throw ValidationException(
+          message: 'Only sole-trader and company entities can use the ledger.',
         );
       }
-      final updated = await Budget.db.updateRow(
+      final jurisdiction = TaxJurisdiction.fromCountryCode(entity.countryCode);
+      final template = jurisdiction == null
+          ? null
+          : LedgerChartTemplate.forBooks(
+              jurisdiction: jurisdiction,
+              entityKind: entity.kind,
+            );
+      if (template == null) {
+        throw ValidationException(
+          message:
+              'No chart of accounts template exists for '
+              '${entity.countryCode} ${entity.kind.name} books.',
+        );
+      }
+
+      final seeded = <LedgerAccount>[];
+      for (final account in template.accounts) {
+        seeded.add(
+          await LedgerAccount.db.insertRow(
+            session,
+            LedgerAccount(
+              entityId: entity.id!,
+              code: account.code,
+              name: account.name,
+              type: account.type,
+              systemRole: account.systemRole,
+            ),
+            transaction: transaction,
+          ),
+        );
+      }
+
+      // Lock the money accounts in UUID order, as every multi-account writer
+      // does, then assign codes in display order.
+      final lockedAccounts = await Account.db.find(
         session,
-        budget.copyWith(
-          accountingMode: AccountingMode.ledger.name,
-          updatedAt: DateTime.now().toUtc(),
+        where: (t) =>
+            t.entityId.equals(entity.id) &
+            t.balanceSource.equals(AccountBalanceSource.transactions),
+        orderByList: (t) => [t.id],
+        transaction: transaction,
+        lockMode: LockMode.forUpdate,
+      );
+      final orderedAccounts = [...lockedAccounts]
+        ..sort((a, b) {
+          final bySortOrder = a.sortOrder.compareTo(b.sortOrder);
+          if (bySortOrder != 0) return bySortOrder;
+          return a.id.toString().compareTo(b.id.toString());
+        });
+
+      var linked = 0;
+      for (final account in orderedAccounts) {
+        if (account.ledgerAccountId != null) continue;
+        await LedgerAccountLinker.attachMoneyAccount(
+          session,
+          transaction,
+          entity: entity,
+          account: account,
+          actorId: actorId,
+        );
+        linked++;
+      }
+
+      final now = DateTime.now().toUtc();
+      final updated = await Entity.db.updateRow(
+        session,
+        entity.copyWith(accountingMode: AccountingMode.ledger, updatedAt: now),
+        transaction: transaction,
+      );
+      await _writeAudit(
+        session,
+        transaction: transaction,
+        entity: entity,
+        actorId: actorId,
+        action: AuditAction.ledgerEnabled,
+        subjectType: AuditSubject.entity,
+        subjectId: entity.id,
+        payload: {
+          'before': {
+            'accountingMode': entity.accountingMode.name,
+            'kind': entity.kind.name,
+            'countryCode': entity.countryCode,
+            'baseCurrencyCode': entity.baseCurrencyCode,
+          },
+          'after': {
+            'accountingMode': AccountingMode.ledger.name,
+            'seededAccountCount': seeded.length,
+            'linkedMoneyAccountCount': linked,
+          },
+        },
+      );
+      _log.info(
+        'Ledger enabled entity=${entity.id} '
+        'accounts=${seeded.length} linked=$linked',
+      );
+      return (entity: updated, changed: true);
+    });
+
+    if (result.changed) {
+      await EntityRealtimeNotifier.notify(
+        session,
+        entityId,
+        ChangeScope.entity,
+      );
+    }
+    return result.entity;
+  }
+
+  /// Lists the entity's ledger accounts.
+  ///
+  /// Archived accounts are hidden unless [includeArchived] is set.
+  static Future<List<LedgerAccount>> listAccounts(
+    Session session,
+    UuidValue entityId, {
+    bool includeArchived = false,
+  }) async {
+    await _requireLedgerEntity(session, entityId);
+    return LedgerAccount.db.find(
+      session,
+      where: (a) => includeArchived
+          ? a.entityId.equals(entityId)
+          : a.entityId.equals(entityId) & a.archivedAt.equals(null),
+      orderByList: (a) => [a.code, a.id],
+    );
+  }
+
+  /// Adds an account to the entity's chart.
+  ///
+  /// Codes and structural roles are unique per entity. A [systemRole] makes
+  /// the account structural: it cannot be archived, and only one active
+  /// account may hold it.
+  static Future<LedgerAccount> createAccount(
+    Session session,
+    UuidValue entityId,
+    String code,
+    String name,
+    LedgerAccountType type, {
+    LedgerSystemRole? systemRole,
+    String? currencyCode,
+    String? taxCategoryCode,
+  }) async {
+    final actorId = EntityAccess.userId(session);
+    final result = await session.db.transaction((transaction) async {
+      final entity = await EntityAccess.requireOwned(
+        session,
+        entityId,
+        transaction: transaction,
+        lock: true,
+      );
+      _requireWritable(entity);
+      _requireLedger(entity);
+
+      final trimmedCode = _requireText(code, 'Account code');
+      final trimmedName = _requireText(name, 'Account name');
+      final currency = currencyCode == null
+          ? null
+          : requireSupportedCurrency(currencyCode);
+
+      final duplicateCode = await LedgerAccount.db.findFirstRow(
+        session,
+        where: (a) => a.entityId.equals(entityId) & a.code.equals(trimmedCode),
+        transaction: transaction,
+      );
+      if (duplicateCode != null) {
+        throw ValidationException(
+          message: 'Account code $trimmedCode is already in use.',
+        );
+      }
+      if (systemRole != null) {
+        final duplicateRole = await LedgerAccount.db.findFirstRow(
+          session,
+          where: (a) =>
+              a.entityId.equals(entityId) & a.systemRole.equals(systemRole),
+          transaction: transaction,
+        );
+        if (duplicateRole != null) {
+          throw ValidationException(
+            message:
+                '${systemRole.name} is already assigned to account '
+                '${duplicateRole.code}.',
+          );
+        }
+      }
+
+      final account = await LedgerAccount.db.insertRow(
+        session,
+        LedgerAccount(
+          entityId: entityId,
+          code: trimmedCode,
+          name: trimmedName,
+          type: type,
+          systemRole: systemRole,
+          currencyCode: currency,
+          taxCategoryCode: taxCategoryCode,
         ),
         transaction: transaction,
       );
       await _writeAudit(
         session,
         transaction: transaction,
-        budgetId: budgetId,
-        actor: userId,
-        action: 'ledger.enabled',
+        entity: entity,
+        actorId: actorId,
+        action: AuditAction.ledgerAccountCreated,
+        subjectType: AuditSubject.ledgerAccount,
+        subjectId: account.id,
         payload: {
-          'jurisdiction': jurisdiction.countryCode,
-          'entityKind': entityKind.name,
-          'seededAccountCount': template.accounts.length,
+          'before': null,
+          'after': {
+            'code': account.code,
+            'name': account.name,
+            'type': account.type.name,
+            'systemRole': account.systemRole?.name,
+            'currencyCode': account.currencyCode,
+            'taxCategoryCode': account.taxCategoryCode,
+          },
         },
       );
-      _log.info(
-        'Ledger enabled budget=$budgetId '
-        'accounts=${template.accounts.length}',
-      );
-      return updated;
+      return account;
     });
+
+    await EntityRealtimeNotifier.notify(
+      session,
+      entityId,
+      ChangeScope.ledger,
+    );
+    return result;
   }
 
-  /// Lists the budget's ledger accounts.
+  /// Archives a non-structural account so it stops accepting postings.
   ///
-  /// Archived accounts are hidden unless [includeArchived] is set.
-  static Future<List<LedgerAccount>> listAccounts(
-    Session session, {
-    required UuidValue budgetId,
-    bool includeArchived = false,
-  }) async {
-    await _requireLedgerBudget(session, budgetId: budgetId);
-    return LedgerAccount.db.find(
-      session,
-      where: (a) => includeArchived
-          ? a.budgetId.equals(budgetId)
-          : a.budgetId.equals(budgetId) & a.archived.equals(false),
-      orderBy: (a) => a.code,
-    );
-  }
-
-  /// Adds an account to the budget's chart.
-  ///
-  /// Codes are unique per budget. A [systemRole] may be attached only while
-  /// no active account holds that role: there is exactly one active account
-  /// per role.
-  static Future<LedgerAccount> createAccount(
-    Session session, {
-    required UuidValue budgetId,
-    required String code,
-    required String name,
-    required String type,
-    String? systemRole,
-    String? currencyCode,
-    String? taxCategoryCode,
-  }) async {
-    _log.info('Creating ledger account budget=$budgetId code=$code');
-    final budget = await _requireLedgerBudget(session, budgetId: budgetId);
-    final userId = _requireUserId(session);
-
-    final trimmedCode = code.trim();
-    if (trimmedCode.isEmpty) {
-      throw ValidationException(message: 'Account code must not be empty.');
-    }
-    final trimmedName = name.trim();
-    if (trimmedName.isEmpty) {
-      throw ValidationException(message: 'Account name must not be empty.');
-    }
-    final parsedType = LedgerAccountType.values.asNameMap()[type];
-    if (parsedType == null) {
-      throw ValidationException(message: 'Unknown account type: $type.');
-    }
-    final parsedRole = systemRole == null
-        ? null
-        : LedgerSystemRole.values.asNameMap()[systemRole];
-    if (systemRole != null && parsedRole == null) {
-      throw ValidationException(
-        message: 'Unknown system role: $systemRole.',
-      );
-    }
-    final normalizedCurrency = currencyCode == null
-        ? null
-        : requireSupportedCurrency(currencyCode);
-
-    final duplicateCode = await LedgerAccount.db.findFirstRow(
-      session,
-      where: (a) => a.budgetId.equals(budgetId) & a.code.equals(trimmedCode),
-    );
-    if (duplicateCode != null) {
-      throw ValidationException(
-        message: 'Account code $trimmedCode is already in use.',
-      );
-    }
-    if (parsedRole != null) {
-      final duplicateRole = await LedgerAccount.db.findFirstRow(
-        session,
-        where: (a) =>
-            a.budgetId.equals(budgetId) &
-            a.systemRole.equals(parsedRole.name) &
-            a.archived.equals(false),
-      );
-      if (duplicateRole != null) {
-        throw ValidationException(
-          message:
-              '${parsedRole.name} is already assigned to account '
-              '${duplicateRole.code}.',
-        );
-      }
-    }
-
-    final account = await LedgerAccount.db.insertRow(
-      session,
-      LedgerAccount(
-        budgetId: budgetId,
-        code: trimmedCode,
-        name: trimmedName,
-        type: parsedType.name,
-        systemRole: parsedRole?.name,
-        currencyCode: normalizedCurrency,
-        taxCategoryCode: taxCategoryCode,
-      ),
-    );
-    await _writeAudit(
-      session,
-      budgetId: budget.id!,
-      actor: userId,
-      action: 'account.created',
-      entity: 'ledger_account',
-      entityId: account.id,
-      payload: {
-        'code': account.code,
-        'name': account.name,
-        'type': account.type,
-        'systemRole': account.systemRole,
-      },
-    );
-    return account;
-  }
-
-  /// Archives an account so it stops accepting postings.
-  ///
-  /// System accounts cannot be archived or deleted. An account with posted
-  /// lines can only be archived when its posted balance is zero.
+  /// Its lines and balances stay in the books. Structural accounts carry a
+  /// system role and are never archived.
   static Future<LedgerAccount> archiveAccount(
-    Session session, {
-    required UuidValue accountId,
-  }) async {
-    final account = await LedgerAccount.db.findById(session, accountId);
-    if (account == null) {
+    Session session,
+    UuidValue accountId,
+  ) async {
+    final actorId = EntityAccess.userId(session);
+    final initial = await LedgerAccount.db.findById(session, accountId);
+    if (initial == null) {
       throw NotFoundException(message: 'Ledger account not found');
     }
-    final budget = await _requireLedgerBudget(
-      session,
-      budgetId: account.budgetId,
-    );
-    final userId = _requireUserId(session);
 
-    if (account.systemRole != null) {
-      throw ValidationException(
-        message:
-            'System account ${account.code} cannot be archived or deleted.',
-      );
-    }
-
-    final postedLines = await JournalLine.db.find(
-      session,
-      where: (l) => l.ledgerAccountId.equals(accountId),
-    );
-    final postedLineIds = postedLines.map((line) => line.journalId).toSet();
-    var postedNetMinor = 0;
-    var hasPostedLines = false;
-    if (postedLineIds.isNotEmpty) {
-      final postedJournals = await Journal.db.find(
+    final result = await session.db.transaction((transaction) async {
+      final entity = await EntityAccess.requireOwned(
         session,
-        where: (j) =>
-            j.budgetId.equals(budget.id) & j.status.inSet(_balanceStatuses),
+        initial.entityId,
+        transaction: transaction,
+        lock: true,
       );
-      final postedJournalIds = postedJournals
-          .map((journal) => journal.id)
-          .toSet();
-      for (final line in postedLines) {
-        if (!postedJournalIds.contains(line.journalId)) {
-          continue;
-        }
-        hasPostedLines = true;
-        postedNetMinor +=
-            line.functionalDebitMinor - line.functionalCreditMinor;
-      }
-    }
-    if (hasPostedLines && postedNetMinor != 0) {
-      throw ValidationException(
-        message:
-            'Account ${account.code} has posted lines and a non-zero '
-            'balance of $postedNetMinor minor; clear it first.',
-      );
-    }
+      _requireWritable(entity);
+      _requireLedger(entity);
 
-    final archived = await LedgerAccount.db.updateRow(
-      session,
-      account.copyWith(archived: true),
-    );
-    await _writeAudit(
-      session,
-      budgetId: budget.id!,
-      actor: userId,
-      action: 'account.archived',
-      entity: 'ledger_account',
-      entityId: accountId,
-      payload: {'code': account.code, 'postedNetMinor': postedNetMinor},
-    );
-    return archived;
+      final account = await LedgerAccount.db.findById(
+        session,
+        accountId,
+        transaction: transaction,
+        lockMode: LockMode.forUpdate,
+      );
+      if (account == null || account.entityId != entity.id) {
+        throw NotFoundException(message: 'Ledger account not found');
+      }
+      if (account.systemRole != null) {
+        throw ValidationException(
+          message:
+              'Structural account ${account.code} cannot be archived or '
+              'deleted.',
+        );
+      }
+      if (account.archivedAt != null) {
+        return (account: account, changed: false);
+      }
+
+      final now = DateTime.now().toUtc();
+      final archived = await LedgerAccount.db.updateRow(
+        session,
+        account.copyWith(archivedAt: now),
+        transaction: transaction,
+      );
+      await _writeAudit(
+        session,
+        transaction: transaction,
+        entity: entity,
+        actorId: actorId,
+        action: AuditAction.ledgerAccountArchived,
+        subjectType: AuditSubject.ledgerAccount,
+        subjectId: accountId,
+        payload: {
+          'before': {
+            'code': account.code,
+            'name': account.name,
+            'type': account.type.name,
+            'systemRole': account.systemRole?.name,
+            'currencyCode': account.currencyCode,
+            'archivedAt': null,
+          },
+          'after': {
+            'code': archived.code,
+            'archivedAt': now.toIso8601String(),
+          },
+        },
+      );
+      return (account: archived, changed: true);
+    });
+
+    if (result.changed) {
+      await EntityRealtimeNotifier.notify(
+        session,
+        initial.entityId,
+        ChangeScope.ledger,
+      );
+    }
+    return result.account;
   }
 
-  /// Saves a draft journal: creates one, or replaces the lines of an
-  /// existing draft when [journalId] is given.
+  /// Saves a draft journal: creates one, or replaces the lines of an existing
+  /// draft when [journalId] is given.
   ///
-  /// The draft is validated with the core rules before anything is written.
-  /// Posted journals are never touched by this path.
+  /// The draft is validated with the core posting invariants before anything
+  /// is written. Posted journals are never touched by this path. A draft in
+  /// a period on or before the lock date cannot be created, edited or
+  /// deleted.
   static Future<Journal> saveDraftJournal(
-    Session session, {
-    required UuidValue budgetId,
-    required DateTime date,
-    required List<JournalLineInput> lines,
+    Session session,
+    UuidValue entityId,
+    DateTime date,
+    List<JournalLineInput> lines, {
     UuidValue? journalId,
     String reference = '',
     String? narration,
-    String source = 'manual',
+    JournalSource source = JournalSource.manual,
   }) async {
-    _log.info('Saving draft journal budget=$budgetId journal=$journalId');
-    final budget = await _requireLedgerBudget(session, budgetId: budgetId);
-    final userId = _requireUserId(session);
+    _requireCivilDate(date, 'date');
+    EntityAccess.userId(session);
+    _requireCallerSource(source);
+    final trimmedReference = reference.trim();
+    final trimmedNarration = _normaliseOptional(narration);
 
-    final parsedSource = JournalSource.values.asNameMap()[source];
-    if (parsedSource == null) {
-      throw ValidationException(message: 'Unknown journal source: $source.');
-    }
-    if (parsedSource == JournalSource.reversal) {
-      throw ValidationException(
-        message:
-            'Reversal journals are created by reversing a posted '
-            'journal, not saved by hand.',
+    final result = await session.db.transaction((transaction) async {
+      final entity = await EntityAccess.requireOwned(
+        session,
+        entityId,
+        transaction: transaction,
+        lock: true,
       );
-    }
+      _requireWritable(entity);
+      _requireLedger(entity);
+      final lock = await _readLock(session, entity, transaction);
+      _rejectLockedDate(date, lock);
 
-    final drafts = await _buildDrafts(
-      session,
-      budget: budget,
-      lines: lines,
-    );
-
-    return session.db.transaction((transaction) async {
-      Journal journal;
-      if (journalId == null) {
-        journal = await Journal.db.insertRow(
-          session,
-          Journal(
-            budgetId: budgetId,
-            date: _calendarDate(date),
-            reference: reference,
-            narration: narration,
-            status: JournalStatus.draft.name,
-            source: parsedSource.name,
-          ),
-          transaction: transaction,
-        );
-      } else {
-        // Lock the row so a concurrent post cannot validate the old lines
-        // while this edit replaces them.
-        final existing = await Journal.db.findById(
+      Journal? existing;
+      if (journalId != null) {
+        existing = await Journal.db.findById(
           session,
           journalId,
           transaction: transaction,
           lockMode: LockMode.forUpdate,
         );
-        if (existing == null) {
+        if (existing == null || existing.entityId != entityId) {
           throw NotFoundException(message: 'Journal not found');
         }
-        if (existing.budgetId != budgetId) {
-          throw NotFoundException(message: 'Journal not found');
-        }
-        if (existing.status != JournalStatus.draft.name) {
+        if (existing.status != JournalStatus.draft) {
           throw ValidationException(
             message:
-                'Journal ${existing.reference} is ${existing.status} and '
-                'immutable; post a reversal instead.',
+                'Journal ${existing.reference} is ${existing.status.name} '
+                'and immutable; post a reversal instead.',
           );
         }
+        _rejectLockedDate(existing.date, lock);
+      }
+
+      final drafts = await _buildDrafts(
+        session,
+        transaction,
+        entity: entity,
+        journalDate: date,
+        lines: lines,
+      );
+
+      final now = DateTime.now().toUtc();
+      final Journal journal;
+      if (existing == null) {
+        journal = await Journal.db.insertRow(
+          session,
+          Journal(
+            entityId: entityId,
+            date: date,
+            reference: trimmedReference,
+            narration: trimmedNarration,
+            status: JournalStatus.draft,
+            source: source,
+            createdAt: now,
+          ),
+          transaction: transaction,
+        );
+      } else {
         await JournalLine.db.deleteWhere(
           session,
-          where: (l) => l.journalId.equals(journalId),
+          where: (l) => l.journalId.equals(existing!.id),
           transaction: transaction,
         );
         journal = await Journal.db.updateRow(
           session,
           existing.copyWith(
-            date: _calendarDate(date),
-            reference: reference,
-            narration: narration,
-            source: parsedSource.name,
+            date: date,
+            reference: trimmedReference,
+            narration: trimmedNarration,
+            source: source,
           ),
           transaction: transaction,
         );
       }
 
-      for (var index = 0; index < lines.length; index++) {
-        final input = lines[index];
-        final draft = drafts[index];
+      for (final line in drafts) {
         await JournalLine.db.insertRow(
           session,
           JournalLine(
             journalId: journal.id!,
-            ledgerAccountId: input.ledgerAccountId,
-            description: input.description,
-            debitMinor: draft.debitMinor,
-            creditMinor: draft.creditMinor,
-            currencyCode: draft.currencyCode,
-            functionalDebitMinor: draft.functionalDebitMinor,
-            functionalCreditMinor: draft.functionalCreditMinor,
-            exchangeRate: draft.exchangeRate,
-            rateDate: draft.rateDate,
-            rateSource: draft.rateSource,
-            taxCode: input.taxCode,
+            ledgerAccountId: line.account.id!,
+            description: line.description,
+            debitMinor: line.debitMinor,
+            creditMinor: line.creditMinor,
+            currencyCode: line.currencyCode,
+            baseDebitMinor: line.baseDebitMinor,
+            baseCreditMinor: line.baseCreditMinor,
+            fxRate: line.fxRate,
+            fxRateDate: line.fxRateDate,
+            fxRateSource: line.fxRateSource,
+            taxCode: line.taxCode,
           ),
           transaction: transaction,
         );
       }
-
-      await _writeAudit(
-        session,
-        transaction: transaction,
-        budgetId: budgetId,
-        actor: userId,
-        action: journalId == null
-            ? 'journal.draft_saved'
-            : 'journal.draft_updated',
-        entity: 'journal',
-        entityId: journal.id,
-        payload: {
-          'reference': journal.reference,
-          'date': journal.date.toIso8601String(),
-          'lineCount': lines.length,
-        },
-      );
       return journal;
     });
+
+    await EntityRealtimeNotifier.notify(
+      session,
+      entityId,
+      ChangeScope.ledger,
+    );
+    return result;
   }
 
   /// Deletes a draft journal and its lines.
   ///
   /// Posted and reversed journals are immutable; deleting one throws.
   static Future<void> deleteDraftJournal(
-    Session session, {
-    required UuidValue journalId,
-  }) async {
-    final journal = await _getOwnedJournal(session, journalId: journalId);
-    final userId = _requireUserId(session);
-    if (journal.status != JournalStatus.draft.name) {
-      throw ValidationException(
-        message:
-            'Journal ${journal.reference} is ${journal.status} and cannot '
-            'be deleted; post a reversal instead.',
-      );
-    }
+    Session session,
+    UuidValue journalId,
+  ) async {
+    EntityAccess.userId(session);
+    final initial = await _loadJournal(session, journalId);
+    final entityId = initial.entityId;
 
     await session.db.transaction((transaction) async {
+      final entity = await EntityAccess.requireOwned(
+        session,
+        entityId,
+        transaction: transaction,
+        lock: true,
+      );
+      _requireWritable(entity);
+      _requireLedger(entity);
+      final journal = await _lockJournal(
+        session,
+        transaction,
+        entityId: entityId,
+        journalId: journalId,
+      );
+      if (journal.status != JournalStatus.draft) {
+        throw ValidationException(
+          message:
+              'Journal ${journal.reference} is ${journal.status.name} and '
+              'cannot be deleted; post a reversal instead.',
+        );
+      }
+      _rejectLockedDate(
+        journal.date,
+        await _readLock(session, entity, transaction),
+      );
       await JournalLine.db.deleteWhere(
         session,
         where: (l) => l.journalId.equals(journalId),
         transaction: transaction,
       );
-      await Journal.db.deleteRow(
-        session,
-        journal,
-        transaction: transaction,
-      );
-      await _writeAudit(
-        session,
-        transaction: transaction,
-        budgetId: journal.budgetId,
-        actor: userId,
-        action: 'journal.draft_deleted',
-        entity: 'journal',
-        entityId: journalId,
-        payload: {'reference': journal.reference},
-      );
+      await Journal.db.deleteRow(session, journal, transaction: transaction);
     });
-    _log.info('Draft journal deleted journal=$journalId');
+
+    await EntityRealtimeNotifier.notify(
+      session,
+      entityId,
+      ChangeScope.ledger,
+    );
   }
 
   /// Posts a draft journal.
   ///
-  /// Re-validates the stored lines with the core validator inside the
-  /// posting transaction, refuses dates on or before the period lock, and
-  /// stamps `postedAt` with server time. Posting is the only transition out
-  /// of `draft`; a posted journal is immutable afterwards.
+  /// Re-validates the stored lines with the core invariants inside the posting
+  /// transaction, refuses dates on or before the period lock, and stamps
+  /// `postedAt` and `postedBy` with server facts. Posting is the only
+  /// transition out of `draft`; a posted journal is immutable afterwards.
   static Future<Journal> postJournal(
-    Session session, {
-    required UuidValue journalId,
-  }) async {
-    final journal = await _getOwnedJournal(session, journalId: journalId);
-    final budget = await _requireLedgerBudget(
-      session,
-      budgetId: journal.budgetId,
-    );
-    final userId = _requireUserId(session);
-    if (journal.status != JournalStatus.draft.name) {
-      throw ValidationException(
-        message:
-            'Only draft journals can be posted; journal '
-            '${journal.reference} is ${journal.status}.',
-      );
-    }
-    await _assertDateOpen(session, budget: budget, date: journal.date);
+    Session session,
+    UuidValue journalId,
+  ) async {
+    final actorId = EntityAccess.userId(session);
+    final initial = await _loadJournal(session, journalId);
+    final entityId = initial.entityId;
 
-    return session.db.transaction((transaction) async {
-      // Re-read under a row lock: a concurrent post, edit or delete of the
-      // same draft waits here, and the date and lines validated below are
-      // exactly the ones that get posted.
-      final current = await _lockJournal(
+    final posted = await session.db.transaction((transaction) async {
+      final entity = await EntityAccess.requireOwned(
         session,
+        entityId,
         transaction: transaction,
+        lock: true,
+      );
+      _requireWritable(entity);
+      _requireLedger(entity);
+      final journal = await _lockJournal(
+        session,
+        transaction,
+        entityId: entityId,
         journalId: journalId,
       );
-      if (current.status != JournalStatus.draft.name) {
+      if (journal.status != JournalStatus.draft) {
         throw ValidationException(
           message:
               'Only draft journals can be posted; journal '
-              '${current.reference} is ${current.status}.',
+              '${journal.reference} is ${journal.status.name}.',
         );
       }
-      await _assertDateOpen(session, budget: budget, date: current.date);
+      _rejectLockedDate(
+        journal.date,
+        await _readLock(session, entity, transaction),
+      );
+
       final storedLines = await JournalLine.db.find(
         session,
         where: (l) => l.journalId.equals(journalId),
+        orderBy: (l) => l.id,
         transaction: transaction,
       );
-      final draft = await _rebuildDraft(
+      final drafts = await _draftsFromStored(
         session,
-        budget: budget,
+        transaction,
+        entity: entity,
+        journalDate: journal.date,
         lines: storedLines,
       );
-      _throwIfInvalid(draft);
 
-      final posted = await Journal.db.updateRow(
+      final now = DateTime.now().toUtc();
+      final updated = await Journal.db.updateRow(
         session,
-        current.copyWith(
-          status: JournalStatus.posted.name,
-          postedAt: DateTime.now().toUtc(),
-          postedBy: userId,
+        journal.copyWith(
+          status: JournalStatus.posted,
+          postedAt: now,
+          postedBy: actorId,
         ),
         transaction: transaction,
       );
       await _writeAudit(
         session,
         transaction: transaction,
-        budgetId: budget.id!,
-        actor: userId,
-        action: 'journal.posted',
-        entity: 'journal',
-        entityId: journalId,
+        entity: entity,
+        actorId: actorId,
+        action: AuditAction.journalPosted,
+        subjectType: AuditSubject.journal,
+        subjectId: journalId,
         payload: {
-          'reference': current.reference,
-          'date': current.date.toIso8601String(),
-          'lineCount': storedLines.length,
-          'totalFunctionalDebitMinor': storedLines.fold<int>(
-            0,
-            (sum, line) => sum + line.functionalDebitMinor,
-          ),
+          'before': {
+            'status': journal.status.name,
+            'postedAt': null,
+            'postedBy': null,
+            'reference': journal.reference,
+            'date': journal.date.toIso8601String(),
+            'lineCount': storedLines.length,
+          },
+          'after': {
+            'status': updated.status.name,
+            'postedAt': now.toIso8601String(),
+            'postedBy': actorId.toString(),
+            'totalBaseDebitMinor': drafts.fold<int>(
+              0,
+              (sum, line) => sum + line.baseDebitMinor,
+            ),
+          },
         },
       );
-      _log.info('Journal posted journal=$journalId');
-      return posted;
+      return updated;
     });
+
+    await EntityRealtimeNotifier.notify(
+      session,
+      entityId,
+      ChangeScope.ledger,
+    );
+    _log.info('Journal posted journal=$journalId');
+    return posted;
   }
 
   /// Reverses a posted journal on [date] by posting a mirror journal.
   ///
-  /// Every line swaps debit and credit, so all account balances return to
-  /// their pre-journal values. The original journal flips to `reversed` and
-  /// stays immutable. The reversal date must be after the period lock.
+  /// Every line swaps debit and credit, including the base pair, while
+  /// keeping the original stored rate, rate date and rate source. The
+  /// original journal flips to `reversed` and stays immutable: its dates,
+  /// amounts and lines never change. The reversal date must be after the
+  /// period lock.
   static Future<Journal> reverseJournal(
-    Session session, {
-    required UuidValue journalId,
-    required DateTime date,
-  }) async {
-    final original = await _getOwnedJournal(session, journalId: journalId);
-    final budget = await _requireLedgerBudget(
-      session,
-      budgetId: original.budgetId,
-    );
-    final userId = _requireUserId(session);
-    if (original.status != JournalStatus.posted.name) {
-      throw ValidationException(
-        message:
-            'Only posted journals can be reversed; journal '
-            '${original.reference} is ${original.status}.',
-      );
-    }
-    final reversalDate = _calendarDate(date);
-    await _assertDateOpen(session, budget: budget, date: reversalDate);
+    Session session,
+    UuidValue journalId,
+    DateTime date,
+  ) async {
+    _requireCivilDate(date, 'date');
+    final actorId = EntityAccess.userId(session);
+    final initial = await _loadJournal(session, journalId);
+    final entityId = initial.entityId;
 
-    final storedLines = await JournalLine.db.find(
-      session,
-      where: (l) => l.journalId.equals(journalId),
-    );
-    final accounts = await LedgerAccount.db.find(
-      session,
-      where: (a) => a.budgetId.equals(budget.id),
-    );
-    final accountById = {
-      for (final account in accounts) account.id: account,
-    };
-    final reversalLines = [
-      for (final line in storedLines)
-        (
-          accountId: line.ledgerAccountId,
-          draft: JournalLineDraft(
-            accountCode: accountById[line.ledgerAccountId]?.code ?? '',
-            description: line.description,
-            debitMinor: line.creditMinor,
-            creditMinor: line.debitMinor,
-            currencyCode: line.currencyCode,
-            functionalDebitMinor: line.functionalCreditMinor,
-            functionalCreditMinor: line.functionalDebitMinor,
-            exchangeRate: line.exchangeRate,
-            rateDate: line.rateDate ?? reversalDate,
-            rateSource: line.rateSource ?? 'reversal',
-            taxCode: line.taxCode,
-          ),
-        ),
-    ];
-    final draft = JournalDraft(
-      functionalCurrency: budget.currencyCode,
-      lines: [for (final line in reversalLines) line.draft],
-    );
-    _throwIfInvalid(draft);
-
-    final reversalReference = original.reference.isEmpty
-        ? 'REV-${original.id}'
-        : '${original.reference}-REV';
-
-    return session.db.transaction((transaction) async {
-      // Re-read under a row lock so two concurrent reversals of the same
-      // journal cannot both pass the status check and reverse it twice.
-      final current = await _lockJournal(
+    final reversal = await session.db.transaction((transaction) async {
+      final entity = await EntityAccess.requireOwned(
         session,
+        entityId,
         transaction: transaction,
+        lock: true,
+      );
+      _requireWritable(entity);
+      _requireLedger(entity);
+      final journal = await _lockJournal(
+        session,
+        transaction,
+        entityId: entityId,
         journalId: journalId,
       );
-      if (current.status != JournalStatus.posted.name) {
+      if (journal.status != JournalStatus.posted) {
         throw ValidationException(
           message:
               'Only posted journals can be reversed; journal '
-              '${current.reference} is ${current.status}.',
+              '${journal.reference} is ${journal.status.name}.',
         );
       }
-      final reversal = await Journal.db.insertRow(
+      final existingReversal = await Journal.db.findFirstRow(
+        session,
+        where: (j) => j.reversalOfJournalId.equals(journalId),
+        transaction: transaction,
+      );
+      if (existingReversal != null) {
+        throw ValidationException(
+          message:
+              'Journal ${journal.reference} is already reversed by '
+              '${existingReversal.reference}.',
+        );
+      }
+      _rejectLockedDate(
+        date,
+        await _readLock(session, entity, transaction),
+      );
+
+      final storedLines = await JournalLine.db.find(
+        session,
+        where: (l) => l.journalId.equals(journalId),
+        orderBy: (l) => l.id,
+        transaction: transaction,
+      );
+      final accounts = await LedgerAccount.db.find(
+        session,
+        where: (a) => a.entityId.equals(entityId),
+        transaction: transaction,
+      );
+      final codeById = {
+        for (final account in accounts) account.id: account.code,
+      };
+      final reversalLines = [
+        for (final line in storedLines)
+          (
+            source: line,
+            draft: JournalLineDraft(
+              accountCode: codeById[line.ledgerAccountId] ?? '',
+              description: line.description,
+              debitMinor: line.creditMinor,
+              creditMinor: line.debitMinor,
+              currencyCode: line.currencyCode,
+              functionalDebitMinor: line.baseCreditMinor,
+              functionalCreditMinor: line.baseDebitMinor,
+              exchangeRate: line.fxRate,
+              rateDate: line.fxRateDate,
+              rateSource: line.fxRateSource.name,
+              taxCode: line.taxCode,
+            ),
+          ),
+      ];
+      _throwIfInvalid(
+        JournalDraft(
+          functionalCurrency: entity.baseCurrencyCode,
+          lines: [for (final line in reversalLines) line.draft],
+          source: JournalSource.reversal,
+        ),
+      );
+
+      final now = DateTime.now().toUtc();
+      final reference = journal.reference.isEmpty
+          ? 'REV-${journal.id}'
+          : '${journal.reference}-REV';
+      final created = await Journal.db.insertRow(
         session,
         Journal(
-          budgetId: original.budgetId,
-          date: reversalDate,
-          reference: reversalReference,
+          entityId: entityId,
+          date: date,
+          reference: reference,
           narration:
-              'Reversal of ${original.reference.isEmpty ? original.id : original.reference}',
-          status: JournalStatus.posted.name,
-          source: JournalSource.reversal.name,
-          postedAt: DateTime.now().toUtc(),
-          postedBy: userId,
-          reversalOfJournalId: original.id,
+              'Reversal of '
+              '${journal.reference.isEmpty ? journal.id : journal.reference}',
+          status: JournalStatus.posted,
+          source: JournalSource.reversal,
+          postedAt: now,
+          postedBy: actorId,
+          reversalOfJournalId: journal.id,
+          createdAt: now,
         ),
         transaction: transaction,
       );
-      for (final line in reversalLines) {
+      for (final entry in reversalLines) {
+        final line = entry.draft;
         await JournalLine.db.insertRow(
           session,
           JournalLine(
-            journalId: reversal.id!,
-            ledgerAccountId: line.accountId,
-            description: line.draft.description,
-            debitMinor: line.draft.debitMinor,
-            creditMinor: line.draft.creditMinor,
-            currencyCode: line.draft.currencyCode,
-            functionalDebitMinor: line.draft.functionalDebitMinor,
-            functionalCreditMinor: line.draft.functionalCreditMinor,
-            exchangeRate: line.draft.exchangeRate,
-            rateDate: line.draft.rateDate,
-            rateSource: line.draft.rateSource,
-            taxCode: line.draft.taxCode,
+            journalId: created.id!,
+            ledgerAccountId: entry.source.ledgerAccountId,
+            description: line.description,
+            debitMinor: line.debitMinor,
+            creditMinor: line.creditMinor,
+            currencyCode: line.currencyCode,
+            baseDebitMinor: line.functionalDebitMinor,
+            baseCreditMinor: line.functionalCreditMinor,
+            fxRate: line.exchangeRate,
+            fxRateDate: line.rateDate,
+            fxRateSource: entry.source.fxRateSource,
+            taxCode: line.taxCode,
           ),
           transaction: transaction,
         );
       }
       await Journal.db.updateRow(
         session,
-        current.copyWith(status: JournalStatus.reversed.name),
+        journal.copyWith(status: JournalStatus.reversed),
         transaction: transaction,
       );
       await _writeAudit(
         session,
         transaction: transaction,
-        budgetId: original.budgetId,
-        actor: userId,
-        action: 'journal.reversed',
-        entity: 'journal',
-        entityId: reversal.id,
+        entity: entity,
+        actorId: actorId,
+        action: AuditAction.journalReversed,
+        subjectType: AuditSubject.journal,
+        subjectId: created.id,
         payload: {
-          'originalJournalId': original.id?.toString(),
-          'date': reversalDate.toIso8601String(),
-          'reference': reversalReference,
+          'before': {
+            'originalJournalId': journal.id?.toString(),
+            'originalStatus': journal.status.name,
+            'originalReference': journal.reference,
+            'originalDate': journal.date.toIso8601String(),
+            'originalPostedAt': journal.postedAt?.toIso8601String(),
+            'originalPostedBy': journal.postedBy?.toString(),
+            'lineCount': storedLines.length,
+          },
+          'after': {
+            'reversalJournalId': created.id?.toString(),
+            'reversalDate': date.toIso8601String(),
+            'originalStatus': JournalStatus.reversed.name,
+          },
         },
       );
-      _log.info('Journal reversed journal=$journalId reversal=${reversal.id}');
-      return reversal;
+      _log.info(
+        'Journal reversed journal=$journalId reversal=${created.id}',
+      );
+      return created;
     });
+
+    await EntityRealtimeNotifier.notify(
+      session,
+      entityId,
+      ChangeScope.ledger,
+    );
+    return reversal;
   }
 
-  /// Lists one journal's lines, oldest first.
+  /// Lists one bounded page of the entity's journals.
   ///
-  /// Line ids are UUIDv7, so ordering by id follows insertion time. Line
-  /// order carries no accounting meaning; it only lets an editor show the
-  /// lines roughly as they were entered.
-  static Future<List<JournalLine>> listJournalLines(
-    Session session, {
-    required UuidValue journalId,
+  /// Rows come newest first by `(date desc, id desc)`. Both date bounds are
+  /// inclusive. [limit] is capped at 200. The opaque [cursor] is base64url of
+  /// `yyyy-mm-dd|uuid`, matching the transaction list contract, and continues
+  /// after that row.
+  static Future<List<Journal>> listJournals(
+    Session session,
+    UuidValue entityId, {
+    DateTime? fromDate,
+    DateTime? toDate,
+    int limit = _defaultPageLimit,
+    String? cursor,
   }) async {
-    final journal = await _getOwnedJournal(session, journalId: journalId);
-    await _requireLedgerBudget(session, budgetId: journal.budgetId);
+    _requirePageLimit(limit);
+    _requireOptionalCivilDate(fromDate, 'fromDate');
+    _requireOptionalCivilDate(toDate, 'toDate');
+    if (fromDate != null && toDate != null && fromDate.isAfter(toDate)) {
+      throw ValidationException(
+        message: 'fromDate must not be after toDate',
+      );
+    }
+    final decoded = _decodeCursor(cursor);
+    await _requireLedgerEntity(session, entityId);
+
+    return Journal.db.find(
+      session,
+      where: (j) {
+        var filter = j.entityId.equals(entityId);
+        if (fromDate != null) filter = filter & (j.date >= fromDate);
+        if (toDate != null) filter = filter & (j.date <= toDate);
+        if (decoded != null) {
+          filter =
+              filter &
+              ((j.date < decoded.date) |
+                  (j.date.equals(decoded.date) & (j.id < decoded.id)));
+        }
+        return filter;
+      },
+      orderByList: (j) => [j.date.desc(), j.id.desc()],
+      limit: limit,
+    );
+  }
+
+  /// Lists one journal's lines in insertion order.
+  static Future<List<JournalLine>> listJournalLines(
+    Session session,
+    UuidValue journalId,
+  ) async {
+    final journal = await _loadJournal(session, journalId);
+    await _requireLedgerEntity(session, journal.entityId);
     return JournalLine.db.find(
       session,
       where: (l) => l.journalId.equals(journalId),
@@ -728,206 +920,345 @@ class LedgerService {
     );
   }
 
-  /// The budget's period lock, or null when no lock date has been set.
+  /// The entity's period lock, or null when no lock date has been set.
   static Future<LedgerPeriodLock?> getLockDate(
-    Session session, {
-    required UuidValue budgetId,
-  }) async {
-    await _requireLedgerBudget(session, budgetId: budgetId);
+    Session session,
+    UuidValue entityId,
+  ) async {
+    await _requireLedgerEntity(session, entityId);
     return LedgerPeriodLock.db.findFirstRow(
       session,
-      where: (l) => l.budgetId.equals(budgetId),
+      where: (l) => l.entityId.equals(entityId),
     );
   }
 
-  /// Lists the budget's journals between the optional dates, newest first.
+  /// Sets or moves the entity's period lock.
   ///
-  /// Both bounds are inclusive calendar dates.
-  static Future<List<Journal>> listJournals(
-    Session session, {
-    required UuidValue budgetId,
-    DateTime? fromDate,
-    DateTime? toDate,
-  }) async {
-    await _requireLedgerBudget(session, budgetId: budgetId);
-    return Journal.db.find(
-      session,
-      where: (j) {
-        var filter = j.budgetId.equals(budgetId);
-        final from = fromDate == null ? null : _calendarDate(fromDate);
-        final to = toDate == null ? null : _calendarDate(toDate);
-        if (from != null) {
-          filter = filter & (j.date >= from);
-        }
-        if (to != null) {
-          filter = filter & (j.date <= to);
-        }
-        return filter;
-      },
-      orderBy: (j) => j.date.desc(),
-    );
-  }
-
-  /// Sets or moves the budget's period lock.
-  ///
-  /// Posting or reversing into a date on or before the lock date is
-  /// rejected. Moving the lock is allowed and audited.
+  /// Posting, reversing, or creating, editing or deleting a draft dated on or
+  /// before the lock date is rejected. Moving the lock is owner-controlled
+  /// and audited with the previous date.
   static Future<LedgerPeriodLock> setLockDate(
-    Session session, {
-    required UuidValue budgetId,
-    required DateTime lockDate,
-  }) async {
-    final budget = await _requireLedgerBudget(session, budgetId: budgetId);
-    final userId = _requireUserId(session);
-    final normalized = _calendarDate(lockDate);
-    _log.info('Setting lock date budget=${budget.id} date=$normalized');
+    Session session,
+    UuidValue entityId,
+    DateTime lockDate,
+  ) async {
+    _requireCivilDate(lockDate, 'lockDate');
+    final actorId = EntityAccess.userId(session);
 
-    return session.db.transaction((transaction) async {
+    final lock = await session.db.transaction((transaction) async {
+      final entity = await EntityAccess.requireOwned(
+        session,
+        entityId,
+        transaction: transaction,
+        lock: true,
+      );
+      _requireWritable(entity);
+      _requireLedger(entity);
       final existing = await LedgerPeriodLock.db.findFirstRow(
         session,
-        where: (l) => l.budgetId.equals(budgetId),
+        where: (l) => l.entityId.equals(entityId),
         transaction: transaction,
+        lockMode: LockMode.forUpdate,
       );
-      final lock = existing == null
+      final now = DateTime.now().toUtc();
+      final saved = existing == null
           ? await LedgerPeriodLock.db.insertRow(
               session,
               LedgerPeriodLock(
-                budgetId: budgetId,
-                lockDate: normalized,
-                setBy: userId,
+                entityId: entityId,
+                lockDate: lockDate,
+                setBy: actorId,
+                setAt: now,
               ),
               transaction: transaction,
             )
           : await LedgerPeriodLock.db.updateRow(
               session,
-              existing.copyWith(lockDate: normalized),
+              existing.copyWith(
+                lockDate: lockDate,
+                setBy: actorId,
+                setAt: now,
+              ),
               transaction: transaction,
             );
       await _writeAudit(
         session,
         transaction: transaction,
-        budgetId: budgetId,
-        actor: userId,
-        action: 'lock.set',
+        entity: entity,
+        actorId: actorId,
+        action: AuditAction.lockSet,
+        subjectType: AuditSubject.periodLock,
+        subjectId: saved.id,
         payload: {
-          'lockDate': normalized.toIso8601String(),
-          'previousLockDate': existing?.lockDate.toIso8601String(),
+          'before': {'lockDate': existing?.lockDate.toIso8601String()},
+          'after': {'lockDate': lockDate.toIso8601String()},
+          'setBy': actorId.toString(),
+          'setAt': now.toIso8601String(),
         },
       );
-      return lock;
+      return saved;
     });
+
+    await EntityRealtimeNotifier.notify(
+      session,
+      entityId,
+      ChangeScope.ledger,
+    );
+    return lock;
   }
 
   /// Computes the trial balance through [asOf] over posted journals.
   ///
-  /// Returns rows per account with debit, credit and net totals. A trial
-  /// balance that does not balance is a hard error and throws instead of
-  /// returning a report labelled "difference".
+  /// One indexed aggregate groups base debits and credits per account; no
+  /// financial history is loaded into Dart. A result whose debits differ from
+  /// its credits is a hard error and throws instead of returning a report
+  /// labelled "difference". The entity and aggregate run under one
+  /// repeatable-read snapshot so the currency and figures agree.
   static Future<TrialBalanceView> trialBalance(
-    Session session, {
-    required UuidValue budgetId,
-    required DateTime asOf,
-  }) async {
-    final budget = await _requireLedgerBudget(session, budgetId: budgetId);
-    final asOfDay = _calendarDate(asOf);
+    Session session,
+    UuidValue entityId,
+    DateTime asOf,
+  ) async {
+    _requireCivilDate(asOf, 'asOf');
+    return session.db.transaction(
+      (transaction) async {
+        final entity = await EntityAccess.requireOwned(
+          session,
+          entityId,
+          transaction: transaction,
+        );
+        _requireLedger(entity);
+        final rows = await session.db.unsafeQuery(
+          _trialBalanceSql,
+          parameters: QueryParameters.named({
+            'entityId': entityId.toString(),
+            'asOf': asOf,
+          }),
+          transaction: transaction,
+        );
 
-    /// Journals whose lines count toward balances. A `reversed` journal's
-    /// own lines stay in the books; its posted reversal journal undoes them.
-    final postedJournals = await Journal.db.find(
-      session,
-      where: (j) =>
-          j.budgetId.equals(budgetId) &
-          j.status.inSet(_balanceStatuses) &
-          (j.date <= asOfDay),
-    );
-    final journalIds = postedJournals.map((journal) => journal.id!).toSet();
-
-    final lines = journalIds.isEmpty
-        ? const <JournalLine>[]
-        : await JournalLine.db.find(
-            session,
-            where: (l) => l.journalId.inSet(journalIds),
+        var totalDebit = 0;
+        var totalCredit = 0;
+        final views = <TrialBalanceRowView>[];
+        for (final row in rows) {
+          final debit = row[5] as int;
+          final credit = row[6] as int;
+          totalDebit += debit;
+          totalCredit += credit;
+          final typeName = row[3] as String;
+          final type = LedgerAccountType.values.asNameMap()[typeName];
+          if (type == null) {
+            throw StateError(
+              'Persisted ledger account type "$typeName" is not valid.',
+            );
+          }
+          final roleName = row[4] as String?;
+          final role = roleName == null
+              ? null
+              : LedgerSystemRole.values.asNameMap()[roleName];
+          if (roleName != null && role == null) {
+            throw StateError(
+              'Persisted ledger system role "$roleName" is not valid.',
+            );
+          }
+          views.add(
+            TrialBalanceRowView(
+              ledgerAccountId: UuidValue.fromString(row[0] as String),
+              accountCode: row[1] as String,
+              accountName: row[2] as String,
+              accountType: type,
+              systemRole: role,
+              debitMinor: debit,
+              creditMinor: credit,
+              netMinor: debit - credit,
+            ),
           );
+        }
+        if (totalDebit != totalCredit) {
+          throw ValidationException(
+            message:
+                'Trial balance is out by ${totalDebit - totalCredit} minor; '
+                'the books do not balance.',
+          );
+        }
+        final net = views.fold<int>(0, (sum, row) => sum + row.netMinor);
+        if (net != 0) {
+          throw ValidationException(
+            message: 'Trial balance nets to $net minor, not zero.',
+          );
+        }
 
-    final accounts = await LedgerAccount.db.find(
-      session,
-      where: (a) => a.budgetId.equals(budgetId),
+        return TrialBalanceView(
+          entityId: entityId,
+          currencyCode: entity.baseCurrencyCode,
+          asOf: asOf,
+          rows: views,
+          totalDebitMinor: totalDebit,
+          totalCreditMinor: totalCredit,
+        );
+      },
+      settings: const TransactionSettings(
+        isolationLevel: IsolationLevel.repeatableRead,
+      ),
     );
-    final accountById = {
-      for (final account in accounts) account.id: account,
-    };
-    final accountByCode = {
-      for (final account in accounts) account.code: account,
-    };
+  }
 
-    final trialBalance = computeTrialBalance([
-      for (final line in lines)
-        TrialBalanceEntry(
-          accountCode: accountById[line.ledgerAccountId]?.code ?? '',
-          functionalDebitMinor: line.functionalDebitMinor,
-          functionalCreditMinor: line.functionalCreditMinor,
-        ),
-    ]);
-    if (!trialBalance.isBalanced) {
-      throw ValidationException(
-        message:
-            'Trial balance is out by '
-            '${trialBalance.totalDebitMinor - trialBalance.totalCreditMinor} '
-            'minor; the books do not balance.',
-      );
-    }
-
-    return TrialBalanceView(
-      budgetId: budgetId,
-      currencyCode: budget.currencyCode,
-      asOf: asOfDay,
-      rows: [
-        for (final row in trialBalance.rows)
-          TrialBalanceRowView(
-            accountCode: row.accountCode,
-            accountName: accountByCode[row.accountCode]?.name ?? '',
-            accountType:
-                accountByCode[row.accountCode]?.type ??
-                LedgerAccountType.asset.name,
-            systemRole: accountByCode[row.accountCode]?.systemRole,
-            debitMinor: row.debitMinor,
-            creditMinor: row.creditMinor,
-            netMinor: row.netMinor,
-          ),
-      ],
-      totalDebitMinor: trialBalance.totalDebitMinor,
-      totalCreditMinor: trialBalance.totalCreditMinor,
+  /// Lists one bounded page of the entity's audit trail, newest first.
+  ///
+  /// Rows order by `(createdAt desc, id desc)` so equal server timestamps
+  /// still have one stable order. [before] is exclusive, and [limit] is
+  /// capped at 200.
+  static Future<List<AuditEvent>> listAuditEvents(
+    Session session,
+    UuidValue entityId, {
+    DateTime? before,
+    int? limit,
+  }) async {
+    final pageSize = limit ?? _defaultPageLimit;
+    _requirePageLimit(pageSize);
+    await _requireLedgerEntity(session, entityId);
+    final cutoff = before?.toUtc();
+    return AuditEvent.db.find(
+      session,
+      where: (e) => cutoff == null
+          ? e.entityId.equals(entityId)
+          : e.entityId.equals(entityId) & (e.createdAt < cutoff),
+      orderByList: (e) => [e.createdAt.desc(), e.id.desc()],
+      limit: pageSize,
     );
   }
 
   // -- Helpers ---------------------------------------------------------------
 
-  static UuidValue _requireUserId(Session session) {
-    final userIdentifier = session.authenticated?.userIdentifier;
-    if (userIdentifier == null) {
-      throw AuthenticationRequiredException();
-    }
-    return UuidValue.fromString(userIdentifier);
+  static Future<Entity> _requireLedgerEntity(
+    Session session,
+    UuidValue entityId,
+  ) async {
+    final entity = await EntityAccess.requireOwned(session, entityId);
+    _requireLedger(entity);
+    return entity;
   }
 
-  /// Loads a journal after verifying the caller owns its budget.
-  static Future<Journal> _getOwnedJournal(
-    Session session, {
-    required UuidValue journalId,
-  }) async {
+  static void _requireLedger(Entity entity) {
+    if (entity.accountingMode != AccountingMode.ledger) {
+      throw ValidationException(
+        message:
+            'This entity is in envelope mode; enable the ledger on it '
+            'first.',
+      );
+    }
+  }
+
+  static void _requireWritable(Entity entity) {
+    if (entity.archivedAt != null) {
+      throw ValidationException(
+        message: 'An archived entity rejects new ledger writes.',
+      );
+    }
+  }
+
+  static void _requireCallerSource(JournalSource source) {
+    if (!_callerSources.contains(source)) {
+      throw ValidationException(
+        message:
+            'Journal source ${source.name} is posted by its owning service, '
+            'not by a caller.',
+      );
+    }
+  }
+
+  static String _requireText(String raw, String field) {
+    final text = raw.trim();
+    if (text.isEmpty) {
+      throw ValidationException(message: '$field must not be empty.');
+    }
+    return text;
+  }
+
+  static String? _normaliseOptional(String? raw) {
+    final text = raw?.trim();
+    return text == null || text.isEmpty ? null : text;
+  }
+
+  static void _requireCivilDate(DateTime date, String field) {
+    if (!isCivilDate(date)) {
+      throw ValidationException(
+        message: '$field must be a UTC calendar date.',
+      );
+    }
+    if (date.year < 1900) {
+      throw ValidationException(
+        message: '$field is before the supported calendar range.',
+      );
+    }
+  }
+
+  static void _requireOptionalCivilDate(DateTime? date, String field) {
+    if (date != null) _requireCivilDate(date, field);
+  }
+
+  static void _requirePageLimit(int limit) {
+    if (limit < 1 || limit > _maxPageLimit) {
+      throw ValidationException(
+        message: 'limit must be between 1 and $_maxPageLimit',
+      );
+    }
+  }
+
+  static void _requireSafeAmount(int amount, String field) {
+    if (amount < 0) {
+      throw ValidationException(message: '$field must not be negative.');
+    }
+    if (amount > maxSafeMinor) {
+      throw ValidationException(
+        message: '$field exceeds the safe minor-unit range.',
+      );
+    }
+  }
+
+  static Future<LedgerPeriodLock?> _readLock(
+    Session session,
+    Entity entity,
+    Transaction transaction,
+  ) => LedgerPeriodLock.db.findFirstRow(
+    session,
+    where: (l) => l.entityId.equals(entity.id),
+    transaction: transaction,
+  );
+
+  static void _rejectLockedDate(DateTime date, LedgerPeriodLock? lock) {
+    if (lock == null) return;
+    if (!date.isAfter(lock.lockDate)) {
+      throw ValidationException(
+        message:
+            'The period on or before '
+            '${_civilText(lock.lockDate)} is locked; use an open date.',
+      );
+    }
+  }
+
+  static String _civilText(DateTime date) =>
+      date.toIso8601String().substring(0, 10);
+
+  /// Loads a journal for its entity id after authenticating and checking
+  /// ownership. The later write transaction re-reads it under a lock.
+  static Future<Journal> _loadJournal(
+    Session session,
+    UuidValue journalId,
+  ) async {
+    EntityAccess.userId(session);
     final journal = await Journal.db.findById(session, journalId);
     if (journal == null) {
       throw NotFoundException(message: 'Journal not found');
     }
-    await BudgetService.getById(session, budgetId: journal.budgetId);
+    await EntityAccess.requireOwned(session, journal.entityId);
     return journal;
   }
 
-  /// Re-reads a journal inside [transaction] with a row lock, so concurrent
-  /// writers to the same journal wait until the transaction ends.
   static Future<Journal> _lockJournal(
-    Session session, {
-    required Transaction transaction,
+    Session session,
+    Transaction transaction, {
+    required UuidValue entityId,
     required UuidValue journalId,
   }) async {
     final journal = await Journal.db.findById(
@@ -936,165 +1267,257 @@ class LedgerService {
       transaction: transaction,
       lockMode: LockMode.forUpdate,
     );
-    if (journal == null) {
+    if (journal == null || journal.entityId != entityId) {
       throw NotFoundException(message: 'Journal not found');
     }
     return journal;
   }
 
-  /// Loads the budget for an owned budgetId and requires ledger mode.
-  static Future<Budget> _requireLedgerBudget(
-    Session session, {
-    required UuidValue budgetId,
-  }) async {
-    final budget = await BudgetService.getById(session, budgetId: budgetId);
-    if (AccountingMode.values.asNameMap()[budget.accountingMode] !=
-        AccountingMode.ledger) {
-      throw ValidationException(
-        message:
-            'This budget is in envelope mode; enable the ledger on it '
-            'first.',
-      );
-    }
-    return budget;
-  }
-
-  /// Rejects [date] when it falls on or before the budget's lock date.
-  static Future<void> _assertDateOpen(
-    Session session, {
-    required Budget budget,
-    required DateTime date,
-  }) async {
-    final lock = await LedgerPeriodLock.db.findFirstRow(
-      session,
-      where: (l) => l.budgetId.equals(budget.id),
-    );
-    if (lock == null) {
-      return;
-    }
-    if (!_calendarDate(date).isAfter(_calendarDate(lock.lockDate))) {
-      throw ValidationException(
-        message:
-            'The period on or before ${_calendarDate(lock.lockDate).toIso8601String().substring(0, 10)} '
-            'is locked; post or reverse into an open period instead.',
-      );
-    }
-  }
-
-  /// Validates [lines] against the budget's accounts and functional
-  /// currency, returning the checked core drafts in input order.
-  static Future<List<JournalLineDraft>> _buildDrafts(
-    Session session, {
-    required Budget budget,
+  /// Validates caller lines against the entity's chart and base currency.
+  static Future<List<_ValidatedLine>> _buildDrafts(
+    Session session,
+    Transaction transaction, {
+    required Entity entity,
+    required DateTime journalDate,
     required List<JournalLineInput> lines,
   }) async {
-    final accounts = await LedgerAccount.db.find(
+    final chart = await LedgerAccount.db.find(
       session,
-      where: (a) => a.budgetId.equals(budget.id),
+      where: (a) => a.entityId.equals(entity.id),
+      transaction: transaction,
     );
-    final accountById = {
-      for (final account in accounts) account.id: account,
-    };
+    final accountById = {for (final account in chart) account.id: account};
 
-    final drafts = <JournalLineDraft>[];
-    for (final line in lines) {
+    final stored = <_StoredLine>[];
+    for (var index = 0; index < lines.length; index++) {
+      final line = lines[index];
       final account = accountById[line.ledgerAccountId];
       if (account == null) {
         throw ValidationException(
-          message: 'Line references an account outside this budget.',
+          message:
+              'Line ${index + 1} references an account outside this entity.',
         );
       }
-      if (account.archived) {
+      stored.add(
+        _StoredLine(
+          lineIndex: index,
+          account: account,
+          description: _normaliseOptional(line.description),
+          debitMinor: line.debitMinor,
+          creditMinor: line.creditMinor,
+          currencyCode: line.currencyCode,
+          baseDebitMinor: line.baseDebitMinor,
+          baseCreditMinor: line.baseCreditMinor,
+          fxRate: line.fxRate,
+          fxRateDate: line.fxRateDate,
+          fxRateSource: line.fxRateSource,
+          taxCode: _normaliseOptional(line.taxCode),
+        ),
+      );
+    }
+    return _validatedLines(
+      entity: entity,
+      journalDate: journalDate,
+      lines: stored,
+    );
+  }
+
+  /// Re-validates the stored lines at posting, including the archived and
+  /// control-account guards that may have changed since the draft was saved.
+  static Future<List<_ValidatedLine>> _draftsFromStored(
+    Session session,
+    Transaction transaction, {
+    required Entity entity,
+    required DateTime journalDate,
+    required List<JournalLine> lines,
+  }) async {
+    final chart = await LedgerAccount.db.find(
+      session,
+      where: (a) => a.entityId.equals(entity.id),
+      transaction: transaction,
+    );
+    final accountById = {for (final account in chart) account.id: account};
+
+    final stored = <_StoredLine>[];
+    for (var index = 0; index < lines.length; index++) {
+      final line = lines[index];
+      final account = accountById[line.ledgerAccountId];
+      if (account == null) {
         throw ValidationException(
           message:
-              'Account ${account.code} is archived and takes no new '
-              'lines.',
+              'Line ${index + 1} references an account outside this entity.',
         );
       }
-      final normalizedCurrency = requireSupportedCurrency(line.currencyCode);
-      if (line.rateDate == null || line.rateSource == null) {
-        throw ValidationException(
-          message: 'Every line needs the exchange rate date and source.',
-        );
-      }
-      drafts.add(
-        JournalLineDraft(
-          accountCode: account.code,
+      stored.add(
+        _StoredLine(
+          lineIndex: index,
+          account: account,
           description: line.description,
           debitMinor: line.debitMinor,
           creditMinor: line.creditMinor,
-          currencyCode: normalizedCurrency,
-          functionalDebitMinor: line.functionalDebitMinor,
-          functionalCreditMinor: line.functionalCreditMinor,
-          exchangeRate: line.exchangeRate,
-          rateDate: line.rateDate!,
-          rateSource: line.rateSource!,
+          currencyCode: line.currencyCode,
+          baseDebitMinor: line.baseDebitMinor,
+          baseCreditMinor: line.baseCreditMinor,
+          fxRate: line.fxRate,
+          fxRateDate: line.fxRateDate,
+          fxRateSource: line.fxRateSource,
+          taxCode: line.taxCode,
+        ),
+      );
+    }
+    return _validatedLines(
+      entity: entity,
+      journalDate: journalDate,
+      lines: stored,
+    );
+  }
+
+  /// Runs the full per-line validation and the core journal invariants.
+  ///
+  /// Returns rows whose currency, rate and rate date are normalized for
+  /// persistence, so the stored line reproduces exactly what was validated.
+  static List<_ValidatedLine> _validatedLines({
+    required Entity entity,
+    required DateTime journalDate,
+    required List<_StoredLine> lines,
+  }) {
+    final drafts = <JournalLineDraft>[];
+    final validated = <_ValidatedLine>[];
+    for (final line in lines) {
+      final label = 'Line ${line.lineIndex + 1} (${line.account.code})';
+      _requireSafeAmount(line.debitMinor, '$label debitMinor');
+      _requireSafeAmount(line.creditMinor, '$label creditMinor');
+      _requireSafeAmount(line.baseDebitMinor, '$label baseDebitMinor');
+      _requireSafeAmount(line.baseCreditMinor, '$label baseCreditMinor');
+
+      if (line.account.archivedAt != null) {
+        throw ValidationException(
+          message:
+              'Account ${line.account.code} is archived and takes no '
+              'new lines.',
+        );
+      }
+      final role = line.account.systemRole;
+      if (role != null && _controlRoles.contains(role)) {
+        throw ValidationException(
+          message:
+              'Manual journals cannot post to control account '
+              '${line.account.code} (${role.name}). Post through an invoice '
+              'or bill once documents exist.',
+        );
+      }
+
+      final currency = requireSupportedCurrency(line.currencyCode);
+      final rate = ExactDecimal.tryParse(line.fxRate);
+      if (rate == null) {
+        throw ValidationException(
+          message:
+              '$label has exchange rate "${line.fxRate}", which is not a '
+              'positive decimal string.',
+        );
+      }
+      final fxRateDate = line.fxRateDate ?? journalDate;
+      _requireCivilDate(fxRateDate, '$label fxRateDate');
+      if (fxRateDate.isAfter(journalDate)) {
+        throw ValidationException(
+          message: '$label has a rate date after the journal date.',
+        );
+      }
+      if (line.fxRateSource == FxRateSource.identity) {
+        if (currency != entity.baseCurrencyCode || !rate.isOne) {
+          throw ValidationException(
+            message:
+                '$label uses the identity rate for $currency; identity is '
+                'only valid for ${entity.baseCurrencyCode} at rate 1.',
+          );
+        }
+      } else if (currency == entity.baseCurrencyCode) {
+        throw ValidationException(
+          message:
+              '$label is in the base currency and must use the identity '
+              'rate.',
+        );
+      }
+
+      final storedRate = rate.isOne ? '1' : line.fxRate.trim();
+      drafts.add(
+        JournalLineDraft(
+          accountCode: line.account.code,
+          description: line.description,
+          debitMinor: line.debitMinor,
+          creditMinor: line.creditMinor,
+          currencyCode: currency,
+          functionalDebitMinor: line.baseDebitMinor,
+          functionalCreditMinor: line.baseCreditMinor,
+          exchangeRate: storedRate,
+          rateDate: fxRateDate,
+          rateSource: line.fxRateSource.name,
+          taxCode: line.taxCode,
+        ),
+      );
+      validated.add(
+        _ValidatedLine(
+          account: line.account,
+          description: line.description,
+          debitMinor: line.debitMinor,
+          creditMinor: line.creditMinor,
+          currencyCode: currency,
+          baseDebitMinor: line.baseDebitMinor,
+          baseCreditMinor: line.baseCreditMinor,
+          fxRate: storedRate,
+          fxRateDate: fxRateDate,
+          fxRateSource: line.fxRateSource,
           taxCode: line.taxCode,
         ),
       );
     }
 
     final draft = JournalDraft(
-      functionalCurrency: budget.currencyCode,
+      functionalCurrency: entity.baseCurrencyCode,
       lines: drafts,
     );
     _throwIfInvalid(draft);
-    return drafts;
+    return validated;
   }
 
-  /// Rebuilds a core draft from stored lines for re-validation at posting.
-  static Future<JournalDraft> _rebuildDraft(
-    Session session, {
-    required Budget budget,
-    required List<JournalLine> lines,
-  }) async {
-    final accounts = await LedgerAccount.db.find(
-      session,
-      where: (a) => a.budgetId.equals(budget.id),
-    );
-    final accountById = {
-      for (final account in accounts) account.id: account,
-    };
-
-    final drafts = <JournalLineDraft>[];
-    for (final line in lines) {
-      final account = accountById[line.ledgerAccountId];
-      if (account == null) {
-        throw ValidationException(
-          message: 'Line references an account outside this budget.',
-        );
-      }
-      if (account.archived) {
-        throw ValidationException(
-          message:
-              'Account ${account.code} is archived and takes no new '
-              'lines.',
-        );
-      }
-      drafts.add(
-        JournalLineDraft(
-          accountCode: account.code,
-          description: line.description,
-          debitMinor: line.debitMinor,
-          creditMinor: line.creditMinor,
-          currencyCode: line.currencyCode,
-          functionalDebitMinor: line.functionalDebitMinor,
-          functionalCreditMinor: line.functionalCreditMinor,
-          exchangeRate: line.exchangeRate,
-          rateDate: line.rateDate ?? _calendarDate(DateTime.now()),
-          rateSource: line.rateSource ?? 'stored',
-          taxCode: line.taxCode,
-        ),
+  /// Runs core validation plus the per-currency check for mixed journals.
+  ///
+  /// The core rule balances a single transaction currency natively. A manual
+  /// journal that uses one currency on both sides must balance that currency
+  /// too, even when other currencies make up the base total.
+  static void _throwIfInvalid(JournalDraft draft) {
+    final issues = [...draft.validate()];
+    final debitByCurrency = <String, int>{};
+    final creditByCurrency = <String, int>{};
+    for (final line in draft.lines) {
+      debitByCurrency.update(
+        line.currencyCode,
+        (value) => value + line.debitMinor,
+        ifAbsent: () => line.debitMinor,
+      );
+      creditByCurrency.update(
+        line.currencyCode,
+        (value) => value + line.creditMinor,
+        ifAbsent: () => line.creditMinor,
       );
     }
-    return JournalDraft(
-      functionalCurrency: budget.currencyCode,
-      lines: drafts,
+    final alreadyFlagged = issues.any(
+      (issue) => issue.code == 'unbalancedTransactionCurrency',
     );
-  }
-
-  static void _throwIfInvalid(JournalDraft draft) {
-    final issues = draft.validate();
+    if (!alreadyFlagged) {
+      for (final currency in debitByCurrency.keys) {
+        final debit = debitByCurrency[currency]!;
+        final credit = creditByCurrency[currency] ?? 0;
+        if (debit > 0 && credit > 0 && debit != credit) {
+          issues.add(
+            LedgerValidationIssue(
+              'unbalancedTransactionCurrency',
+              'Lines in $currency do not balance: $debit Dr vs $credit Cr.',
+            ),
+          );
+        }
+      }
+    }
     if (issues.isNotEmpty) {
       throw ValidationException(
         message: issues.map((issue) => issue.toString()).join('; '),
@@ -1104,37 +1527,150 @@ class LedgerService {
 
   static Future<void> _writeAudit(
     Session session, {
-    required UuidValue budgetId,
-    required UuidValue actor,
-    required String action,
-    Transaction? transaction,
-    String? entity,
-    UuidValue? entityId,
-    Object? payload,
-  }) async {
-    await LedgerAuditEvent.db.insertRow(
-      session,
-      LedgerAuditEvent(
-        budgetId: budgetId,
-        actor: actor,
-        action: action,
-        entity: entity,
-        entityId: entityId,
-        payloadJson: jsonEncode(payload ?? {}),
-      ),
-      transaction: transaction,
-    );
-  }
+    required Transaction transaction,
+    required Entity entity,
+    required UuidValue actorId,
+    required AuditAction action,
+    required AuditSubject? subjectType,
+    required UuidValue? subjectId,
+    required Map<String, Object?> payload,
+  }) => AuditEvent.db.insertRow(
+    session,
+    AuditEvent(
+      entityId: entity.id!,
+      actorId: actorId,
+      action: action,
+      subjectType: subjectType,
+      subjectId: subjectId,
+      payloadJson: jsonEncode(payload),
+      createdAt: DateTime.now().toUtc(),
+    ),
+    transaction: transaction,
+  );
 
-  static DateTime _calendarDate(DateTime date) =>
-      DateTime(date.year, date.month, date.day);
-
-  static EntityKind _parseEntityKind(String name) {
-    for (final kind in EntityKind.values) {
-      if (kind.name == name) {
-        return kind;
-      }
+  static _JournalCursor? _decodeCursor(String? raw) {
+    if (raw == null) return null;
+    if (raw.isEmpty ||
+        raw.length > 128 ||
+        !RegExp(_cursorPattern).hasMatch(raw)) {
+      throw ValidationException(message: 'Invalid journal cursor');
     }
-    throw ValidationException(message: 'Unknown entity kind: $name.');
+
+    final String decoded;
+    try {
+      decoded = utf8.decode(base64Url.decode(base64Url.normalize(raw)));
+    } on FormatException {
+      throw ValidationException(message: 'Invalid journal cursor');
+    }
+    if (decoded.length != 47 || decoded[10] != '|') {
+      throw ValidationException(message: 'Invalid journal cursor');
+    }
+    final dateText = decoded.substring(0, 10);
+    if (!RegExp(_cursorDatePattern).hasMatch(dateText)) {
+      throw ValidationException(message: 'Invalid journal cursor');
+    }
+    final year = int.parse(dateText.substring(0, 4));
+    final month = int.parse(dateText.substring(5, 7));
+    final day = int.parse(dateText.substring(8, 10));
+    if (year < 1900 || month < 1 || month > 12 || day < 1 || day > 31) {
+      throw ValidationException(message: 'Invalid journal cursor');
+    }
+    final date = DateTime.utc(year, month, day);
+    if (date.year != year || date.month != month || date.day != day) {
+      throw ValidationException(message: 'Invalid journal cursor');
+    }
+    final UuidValue id;
+    try {
+      id = UuidValue.withValidation(decoded.substring(11));
+    } on FormatException {
+      throw ValidationException(message: 'Invalid journal cursor');
+    }
+    return _JournalCursor(date, id);
   }
+
+  static const _trialBalanceSql = '''
+SELECT
+  la.id::text AS ledger_account_id,
+  la.code AS code,
+  la.name AS name,
+  la.type AS type,
+  la."systemRole" AS system_role,
+  SUM(jl."baseDebitMinor")::bigint AS debit,
+  SUM(jl."baseCreditMinor")::bigint AS credit
+FROM journal_line jl
+JOIN journal j ON j.id = jl."journalId"
+JOIN ledger_account la ON la.id = jl."ledgerAccountId"
+WHERE j."entityId" = @entityId::uuid
+  AND j.status IN ('posted', 'reversed')
+  AND j.date <= @asOf::timestamp
+GROUP BY la.id, la.code, la.name, la.type, la."systemRole"
+ORDER BY la.code, la.id
+''';
+}
+
+/// One validated line, ready to persist or re-validate.
+final class _StoredLine {
+  const _StoredLine({
+    required this.lineIndex,
+    required this.account,
+    required this.description,
+    required this.debitMinor,
+    required this.creditMinor,
+    required this.currencyCode,
+    required this.baseDebitMinor,
+    required this.baseCreditMinor,
+    required this.fxRate,
+    required this.fxRateDate,
+    required this.fxRateSource,
+    required this.taxCode,
+  });
+
+  final int lineIndex;
+  final LedgerAccount account;
+  final String? description;
+  final int debitMinor;
+  final int creditMinor;
+  final String currencyCode;
+  final int baseDebitMinor;
+  final int baseCreditMinor;
+  final String fxRate;
+  final DateTime? fxRateDate;
+  final FxRateSource fxRateSource;
+  final String? taxCode;
+}
+
+final class _JournalCursor {
+  const _JournalCursor(this.date, this.id);
+
+  final DateTime date;
+  final UuidValue id;
+}
+
+/// A line whose currency, rate and rate date are normalized and validated.
+final class _ValidatedLine {
+  const _ValidatedLine({
+    required this.account,
+    required this.description,
+    required this.debitMinor,
+    required this.creditMinor,
+    required this.currencyCode,
+    required this.baseDebitMinor,
+    required this.baseCreditMinor,
+    required this.fxRate,
+    required this.fxRateDate,
+    required this.fxRateSource,
+    required this.taxCode,
+  });
+
+  final LedgerAccount account;
+  final String? description;
+  final int debitMinor;
+  final int creditMinor;
+  final String currencyCode;
+  final int baseDebitMinor;
+  final int baseCreditMinor;
+  final String fxRate;
+  final DateTime fxRateDate;
+  final FxRateSource fxRateSource;
+  final String? taxCode;
 }
