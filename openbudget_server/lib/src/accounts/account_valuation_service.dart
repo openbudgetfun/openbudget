@@ -2,117 +2,136 @@ import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_server/src/accounts/account_balance_service.dart';
 import 'package:openbudget_server/src/entities/entity_access.dart';
 import 'package:openbudget_server/src/entities/entity_clock.dart';
-import 'package:openbudget_server/src/entities/entity_realtime_notifier.dart';
-import 'package:openbudget_server/src/generated/protocol.dart';
-import 'package:serverpod/serverpod.dart' hide Transaction;
+import 'package:openbudget_server/src/generated/protocol.dart' hide Transaction;
+import 'package:serverpod/serverpod.dart';
 
 /// Maintains valuation history and its current cache in a single transaction.
+///
+/// Callers publish the committed change after this returns; the service never
+/// notifies inside its own transaction.
 abstract final class AccountValuationService {
-  /// Upserts the day's value after checking ownership and the account source.
-  static Future<AccountValuation> set(
+  /// Upserts the day's value after checking ownership, the account source and
+  /// every lifecycle restriction that must hold before money can move.
+  ///
+  /// Returns the stored valuation and the entity that owns its account.
+  static Future<(AccountValuation, UuidValue)> set(
     Session session,
     UuidValue accountId,
     DateTime date,
     int valueMinor, {
     String? note,
-  }) async {
-    final result = await session.db.transaction((tx) async {
-      final account = await Account.db.findById(
-        session,
-        accountId,
-        transaction: tx,
-        lockMode: LockMode.forUpdate,
-      );
-      if (account == null) throw NotFoundException();
-      final entity = await EntityAccess.requireOwned(
-        session,
-        account.entityId,
-        transaction: tx,
-      );
-      if (account.balanceSource != AccountBalanceSource.valuations ||
-          !isCivilDate(date) ||
-          date.isAfter(EntityClock.today(entity)) ||
-          valueMinor.abs() > 9007199254740991) {
-        throw ValidationException(message: 'Invalid account valuation');
-      }
-      final existing = await AccountValuation.db.findFirstRow(
-        session,
-        where: (t) =>
-            t.accountId.equals(accountId) & t.valuationDate.equals(date),
-        transaction: tx,
-      );
-      final value = existing == null
-          ? await AccountValuation.db.insertRow(
-              session,
-              AccountValuation(
-                accountId: accountId,
-                valuationDate: date,
-                valueMinor: valueMinor,
-                source: ValuationSource.manual,
-                note: note,
-              ),
-              transaction: tx,
-            )
-          : await AccountValuation.db.updateRow(
-              session,
-              existing.copyWith(
-                valueMinor: valueMinor,
-                source: ValuationSource.manual,
-                note: note,
-                updatedAt: DateTime.now().toUtc(),
-              ),
-              transaction: tx,
-            );
-      await AccountBalanceService.refreshValuation(
-        session,
-        accountId,
-        transaction: tx,
-      );
-      return (value, account.entityId);
-    });
-    await EntityRealtimeNotifier.notify(
+  }) => session.db.transaction((tx) async {
+    final account = await _lockAccount(session, accountId, tx);
+    final entity = await _requireWritableEntity(session, account, tx);
+    if (account.balanceSource != AccountBalanceSource.valuations ||
+        !isCivilDate(date) ||
+        date.year < 1900 ||
+        date.isAfter(EntityClock.today(entity)) ||
+        valueMinor < -maxSafeMinor ||
+        valueMinor > maxSafeMinor) {
+      throw ValidationException(message: 'Invalid account valuation');
+    }
+
+    final existing = await AccountValuation.db.findFirstRow(
       session,
-      result.$2,
-      ChangeScope.accounts,
-      accountId: accountId,
+      where: (t) =>
+          t.accountId.equals(accountId) & t.valuationDate.equals(date),
+      transaction: tx,
     );
-    return result.$1;
-  }
+    final value = existing == null
+        ? await AccountValuation.db.insertRow(
+            session,
+            AccountValuation(
+              accountId: accountId,
+              valuationDate: date,
+              valueMinor: valueMinor,
+              source: ValuationSource.manual,
+              note: _normaliseNote(note),
+            ),
+            transaction: tx,
+          )
+        : await AccountValuation.db.updateRow(
+            session,
+            existing.copyWith(
+              valueMinor: valueMinor,
+              source: ValuationSource.manual,
+              note: _normaliseNote(note),
+              updatedAt: DateTime.now().toUtc(),
+            ),
+            transaction: tx,
+          );
+    await AccountBalanceService.refreshValuation(
+      session,
+      accountId,
+      transaction: tx,
+    );
+    return (value, account.entityId);
+  });
 
   /// Deletes a value and falls back to the previous date or zero.
-  static Future<void> delete(Session session, UuidValue valuationId) async {
-    final result = await session.db.transaction((tx) async {
-      final value = await AccountValuation.db.findById(
-        session,
-        valuationId,
-        transaction: tx,
-      );
-      if (value == null) throw NotFoundException();
-      final account = await Account.db.findById(
-        session,
-        value.accountId,
-        transaction: tx,
-        lockMode: LockMode.forUpdate,
-      );
-      if (account == null) throw NotFoundException();
-      await EntityAccess.requireOwned(
-        session,
-        account.entityId,
-        transaction: tx,
-      );
-      await AccountValuation.db.deleteRow(session, value, transaction: tx);
-      await AccountBalanceService.refreshValuation(
-        session,
-        account.id!,
-        transaction: tx,
-      );
-      return account;
-    });
-    await EntityRealtimeNotifier.notify(
+  ///
+  /// Returns the owning entity and the account whose cache moved.
+  static Future<(UuidValue, UuidValue)> delete(
+    Session session,
+    UuidValue valuationId,
+  ) => session.db.transaction((tx) async {
+    final value = await AccountValuation.db.findById(
       session,
-      result.entityId,
-      ChangeScope.accounts,
-      accountId: result.id,
+      valuationId,
+      transaction: tx,
     );
+    if (value == null) throw NotFoundException();
+    final account = await _lockAccount(session, value.accountId, tx);
+    await _requireWritableEntity(session, account, tx);
+    await AccountValuation.db.deleteRow(session, value, transaction: tx);
+    await AccountBalanceService.refreshValuation(
+      session,
+      account.id!,
+      transaction: tx,
+    );
+    return (account.entityId, account.id!);
+  });
+
+  static Future<Account> _lockAccount(
+    Session session,
+    UuidValue accountId,
+    Transaction tx,
+  ) async {
+    final account = await Account.db.findById(
+      session,
+      accountId,
+      transaction: tx,
+      lockMode: LockMode.forUpdate,
+    );
+    if (account == null) throw NotFoundException();
+    return account;
+  }
+
+  static Future<Entity> _requireWritableEntity(
+    Session session,
+    Account account,
+    Transaction tx,
+  ) async {
+    final entity = await EntityAccess.requireOwned(
+      session,
+      account.entityId,
+      transaction: tx,
+    );
+    if (entity.archivedAt != null) {
+      throw ValidationException(
+        message: 'An archived entity rejects account changes',
+      );
+    }
+    if (account.closedAt != null) {
+      throw ValidationException(
+        message: 'A closed account rejects valuations',
+      );
+    }
+    return entity;
+  }
+
+  static String? _normaliseNote(String? raw) {
+    final note = raw?.trim();
+    return note == null || note.isEmpty ? null : note;
   }
 }

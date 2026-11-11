@@ -178,6 +178,34 @@ abstract final class TransactionWriter {
     return _owned(session, (tx, outbox) => _delete(session, id, tx, outbox));
   }
 
+  /// Deletes every transfer touching [accountId], both legs.
+  ///
+  /// Account deletion uses this before removing the account row so a surviving
+  /// peer's cached balance is reversed through the writer instead of being
+  /// left behind by a database cascade. The usual delete restrictions apply:
+  /// a reconciled or period-locked leg rejects the whole account deletion
+  /// rather than producing a partial delete.
+  static Future<void> deleteTransfersForAccount(
+    Session session,
+    UuidValue accountId, {
+    Transaction? transaction,
+  }) {
+    final joined = transaction;
+    if (joined != null) {
+      return _deleteTransfersForAccount(
+        session,
+        accountId,
+        joined,
+        _requireOutbox(joined),
+      );
+    }
+    return _owned(
+      session,
+      (tx, outbox) =>
+          _deleteTransfersForAccount(session, accountId, tx, outbox),
+    );
+  }
+
   static Future<T> _owned<T>(
     Session session,
     Future<T> Function(Transaction transaction, _ChangeOutbox outbox) body,
@@ -582,6 +610,34 @@ abstract final class TransactionWriter {
 
     _queueChange(outbox, row);
     return _view(session, row, transaction: tx);
+  }
+
+  static Future<void> _deleteTransfersForAccount(
+    Session session,
+    UuidValue accountId,
+    Transaction tx,
+    _ChangeOutbox outbox,
+  ) async {
+    final rows = await session.db.unsafeQuery(
+      '''
+SELECT DISTINCT tf."fromTransactionId"::text AS "transactionId"
+FROM transfer tf
+JOIN "transaction" t
+  ON t.id IN (tf."fromTransactionId", tf."toTransactionId")
+WHERE t."accountId" = @accountId::uuid
+ORDER BY 1''',
+      parameters: QueryParameters.named({'accountId': accountId.toString()}),
+      transaction: tx,
+    );
+
+    for (final row in rows) {
+      await _delete(
+        session,
+        UuidValue.fromString(row.first as String),
+        tx,
+        outbox,
+      );
+    }
   }
 
   static Future<void> _delete(

@@ -606,6 +606,8 @@ Rules:
 - `onBudget` requires `canBeOnBudget(kind)` and `balanceSource == transactions`. It can change only while the account has no transactions other than its opening balance.
 - `kind` may change only to another kind with the same `isLiability` and the same allowed source.
 - `balanceMinor` is written only by `AccountBalanceService`.
+- Writes to accounts are rejected while the owning entity is archived. A closed account rejects new transactions and valuation writes.
+- Deleting an account removes both legs of every transfer that touches it, through `TransactionWriter`, so a surviving peer's cached balance is reversed. A reconciled or period-locked transfer leg rejects the whole delete.
 
 `accounts/account.spy.yaml`:
 
@@ -3234,6 +3236,8 @@ Future<void> deleteValuation(Session session, UuidValue valuationId);
 ```
 
 Removed: `listMine` and `addMineToBudget`. An account belongs to exactly one entity. Cross-entity views use `listAll` and `report.netWorth`.
+
+A zero `openingBalanceMinor` writes no zero-amount transaction, because every transaction line must be non-zero, and leaves the cache at 0; its name, currency, date, amount and institution are still validated. A valuations-sourced zero opening stores one zero valuation. `delete` removes every transfer that touches the account through `TransactionWriter`, deleting both legs and reversing the surviving peer's balance, so a reconciled or period-locked leg rejects the whole delete. A ledger account with journal lines also rejects it.
 
 **`TransactionEndpoint`** (`transaction`).
 
