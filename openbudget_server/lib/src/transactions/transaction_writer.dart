@@ -11,6 +11,7 @@ import 'package:openbudget_server/src/fx_rates/fx_service.dart';
 import 'package:openbudget_server/src/generated/protocol.dart' hide Transaction;
 import 'package:openbudget_server/src/generated/transactions/transaction.dart'
     as model;
+import 'package:openbudget_server/src/tax/tax_catalogue_validation.dart';
 import 'package:serverpod/serverpod.dart';
 
 /// Publishes one committed change event through Serverpod's message bus.
@@ -307,6 +308,231 @@ abstract final class TransactionWriter {
       session,
       (tx, outbox) => _updateLines(session, id, lines, tx, outbox),
     );
+  }
+
+  /// Locks, in UUID order, every account a source envelope's lines touch.
+  ///
+  /// Envelope deletion calls this before it locks the envelope's catalogue
+  /// rows. A transaction writer takes its account lock before it touches an
+  /// envelope, so taking accounts first keeps both paths in one order and
+  /// stops a line writer from holding an account while it waits for the
+  /// envelope row.
+  static Future<Set<UuidValue>> lockEnvelopeLineAccounts(
+    Session session, {
+    required UuidValue entityId,
+    required UuidValue envelopeId,
+    required Transaction transaction,
+  }) async {
+    final lines = await TransactionLine.db.find(
+      session,
+      where: (t) => t.envelopeId.equals(envelopeId),
+      transaction: transaction,
+    );
+    if (lines.isEmpty) return const <UuidValue>{};
+
+    final transactionIds = {for (final line in lines) line.transactionId};
+    final headers = await model.Transaction.db.find(
+      session,
+      where: (t) => t.id.inSet(transactionIds),
+      transaction: transaction,
+    );
+    if (headers.length != transactionIds.length) {
+      throw ValidationException(
+        message: 'An envelope line points at a missing transaction',
+      );
+    }
+    for (final header in headers) {
+      if (header.entityId != entityId) {
+        throw ForbiddenException(
+          message: 'An envelope line belongs to another entity',
+        );
+      }
+    }
+
+    final accountIds = {for (final header in headers) header.accountId};
+    final transfers = await Transfer.db.find(
+      session,
+      where: (t) =>
+          t.fromTransactionId.inSet(transactionIds) |
+          t.toTransactionId.inSet(transactionIds),
+      transaction: transaction,
+    );
+    for (final transfer in transfers) {
+      final peerId = transactionIds.contains(transfer.fromTransactionId)
+          ? transfer.toTransactionId
+          : transfer.fromTransactionId;
+      final peer = await model.Transaction.db.findById(
+        session,
+        peerId,
+        transaction: transaction,
+      );
+      if (peer == null) {
+        throw NotFoundException(message: 'Transfer leg not found');
+      }
+      await EntityAccess.requireOwned(
+        session,
+        peer.entityId,
+        transaction: transaction,
+      );
+      accountIds.add(peer.accountId);
+    }
+
+    await _lockAccounts(session, accountIds, transaction);
+    return accountIds;
+  }
+
+  /// Moves every line that codes to [fromEnvelopeId] onto [toEnvelopeId].
+  ///
+  /// This is the narrow seam envelope deletion uses. Ordinary rows go through
+  /// [updateLines], so reconciliation, period locks, ledger revisions, stored
+  /// FX/base amounts, balances and audit rules are exactly the app edit path.
+  /// A transfer's envelope-bearing leg goes through the normal transfer
+  /// update, because [updateLines] refuses to touch a transfer leg. The caller
+  /// joins this method to a transaction opened by [inTransaction]; change
+  /// events publish only after that transaction commits.
+  ///
+  /// Pass [lockedAccountIds] from [lockEnvelopeLineAccounts] when the caller
+  /// has already locked them. A line added on an unlocked account meanwhile
+  /// rejects the whole operation with a retryable validation error instead of
+  /// locking after the envelope and risking a deadlock.
+  ///
+  /// Returns the number of transaction headers whose lines moved.
+  static Future<int> reassignEnvelopeLines(
+    Session session, {
+    required UuidValue fromEnvelopeId,
+    required UuidValue toEnvelopeId,
+    required Transaction transaction,
+    Set<UuidValue>? lockedAccountIds,
+  }) async {
+    if (fromEnvelopeId == toEnvelopeId) {
+      throw ValidationException(
+        message: 'Reassignment needs a different destination envelope',
+      );
+    }
+
+    final outbox = _requireOutbox(transaction);
+    final source = await Envelope.db.findById(
+      session,
+      fromEnvelopeId,
+      transaction: transaction,
+    );
+    if (source == null) {
+      throw NotFoundException(message: 'Envelope not found');
+    }
+    final destination = await Envelope.db.findById(
+      session,
+      toEnvelopeId,
+      transaction: transaction,
+    );
+    if (destination == null) {
+      throw NotFoundException(message: 'Destination envelope not found');
+    }
+    if (destination.entityId != source.entityId) {
+      throw ForbiddenException(
+        message: 'Destination envelope belongs to another entity',
+      );
+    }
+
+    final entity = await EntityAccess.requireOwned(
+      session,
+      source.entityId,
+      transaction: transaction,
+    );
+    if (entity.archivedAt != null) {
+      throw ValidationException(
+        message: 'An archived entity rejects envelope changes',
+      );
+    }
+
+    final lines = await TransactionLine.db.find(
+      session,
+      where: (t) => t.envelopeId.equals(fromEnvelopeId),
+      transaction: transaction,
+    );
+    if (lines.isEmpty) return 0;
+
+    final transactionIds = {
+      for (final line in lines) line.transactionId,
+    }.toList()..sort((a, b) => a.uuid.compareTo(b.uuid));
+    final headers = await model.Transaction.db.find(
+      session,
+      where: (t) => t.id.inSet(transactionIds.toSet()),
+      transaction: transaction,
+    );
+    if (headers.length != transactionIds.length) {
+      throw ValidationException(
+        message: 'An envelope line points at a missing transaction',
+      );
+    }
+    for (final header in headers) {
+      if (header.entityId != source.entityId) {
+        throw ForbiddenException(
+          message: 'An envelope line belongs to another entity',
+        );
+      }
+      if (lockedAccountIds != null &&
+          !lockedAccountIds.contains(header.accountId)) {
+        throw ValidationException(
+          message:
+              'Envelope lines changed concurrently; retry the reassignment',
+        );
+      }
+    }
+
+    // Accounts first, in UUID order, exactly like every other writer path.
+    if (lockedAccountIds == null) {
+      await _lockAccounts(
+        session,
+        headers.map((header) => header.accountId),
+        transaction,
+      );
+    }
+
+    final headersById = {for (final header in headers) header.id!: header};
+    var moved = 0;
+
+    for (final id in transactionIds) {
+      final header = headersById[id]!;
+      final transfer = await _transferFor(session, id, transaction);
+
+      if (transfer != null) {
+        await _reassignTransferEnvelope(
+          session,
+          header: header,
+          transfer: transfer,
+          toEnvelopeId: toEnvelopeId,
+          transaction: transaction,
+          outbox: outbox,
+          lockedAccountIds: lockedAccountIds,
+        );
+      } else {
+        final stored = await _lines(session, id, transaction);
+        await _updateLines(
+          session,
+          id,
+          [
+            for (final line in stored)
+              TransactionLineInput(
+                amountMinor: line.amountMinor,
+                envelopeId: line.envelopeId == fromEnvelopeId
+                    ? toEnvelopeId
+                    : line.envelopeId,
+                ledgerAccountId: line.ledgerAccountId,
+                taxCategoryCode: line.taxCategoryCode,
+                businessUsePercent: line.businessUsePercent,
+                salesTaxMinor: line.salesTaxMinor,
+                memo: line.memo,
+              ),
+          ],
+          transaction,
+          outbox,
+        );
+      }
+
+      moved++;
+    }
+
+    return moved;
   }
 
   /// Creates both legs of a transfer and their link atomically.
@@ -1509,6 +1735,71 @@ RETURNING date''',
       await _view(session, fromRow, transaction: tx),
       await _view(session, toRow, transaction: tx),
     ];
+  }
+
+  static Future<void> _reassignTransferEnvelope(
+    Session session, {
+    required model.Transaction header,
+    required Transfer transfer,
+    required UuidValue toEnvelopeId,
+    required Transaction transaction,
+    required _ChangeOutbox outbox,
+    Set<UuidValue>? lockedAccountIds,
+  }) async {
+    if (transfer.toTransactionId == header.id) {
+      throw ValidationException(
+        message: 'A transfer destination leg cannot carry an envelope',
+      );
+    }
+    if (transfer.fromTransactionId != header.id) {
+      throw ValidationException(
+        message: 'The transfer changed concurrently; retry the reassignment',
+      );
+    }
+
+    final peer = await model.Transaction.db.findById(
+      session,
+      transfer.toTransactionId,
+      transaction: transaction,
+    );
+    if (peer == null) {
+      throw NotFoundException(message: 'Transfer leg not found');
+    }
+    if (lockedAccountIds != null &&
+        (!lockedAccountIds.contains(header.accountId) ||
+            !lockedAccountIds.contains(peer.accountId))) {
+      throw ValidationException(
+        message: 'Envelope lines changed concurrently; retry the reassignment',
+      );
+    }
+    if (header.date != peer.date ||
+        header.status != peer.status ||
+        header.memo != peer.memo ||
+        header.amountMinor >= 0 ||
+        peer.amountMinor <= 0) {
+      throw ValidationException(
+        message:
+            'The transfer legs are inconsistent; repair the transfer before '
+            'reassigning its envelope',
+      );
+    }
+
+    await _updateTransfer(
+      session,
+      transfer.id!,
+      TransferInput(
+        fromAccountId: header.accountId,
+        toAccountId: peer.accountId,
+        date: header.date,
+        fromAmountMinor: -header.amountMinor,
+        toAmountMinor: peer.amountMinor,
+        envelopeId: toEnvelopeId,
+        memo: header.memo,
+        status: header.status,
+      ),
+      transaction,
+      outbox,
+    );
   }
 
   static Future<List<TransactionView>> _updateTransfer(
@@ -2720,20 +3011,7 @@ RETURNING date''',
 
     final taxCode = _normaliseTaxCode(line.taxCategoryCode);
     if (taxCode != null) {
-      _validateTaxCode(entity, taxCode);
-    }
-  }
-
-  static void _validateTaxCode(Entity entity, String code) {
-    final jurisdiction = TaxJurisdiction.fromCountryCode(entity.countryCode);
-    if (jurisdiction == null) {
-      throw ValidationException(
-        message: 'No tax catalog exists for ${entity.countryCode}',
-      );
-    }
-    final category = TaxRules.forJurisdiction(jurisdiction).category(code);
-    if (category == null || !category.entityKinds.contains(entity.kind)) {
-      throw ValidationException(message: 'Unknown tax category "$code"');
+      TaxCatalogueValidation.requireCode(entity, taxCode);
     }
   }
 

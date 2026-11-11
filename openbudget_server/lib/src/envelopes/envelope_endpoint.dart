@@ -1,96 +1,82 @@
-import 'package:openbudget_server/src/budgets/budget_realtime_notifier.dart';
 import 'package:openbudget_server/src/envelopes/envelope_service.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
 
 /// API surface for envelope operations.
 ///
-/// All methods require authentication.
+/// All methods require authentication and delegate to [EnvelopeService],
+/// which owns the entity boundary and the reassignment transaction.
 class EnvelopeEndpoint extends Endpoint {
   @override
   bool get requireLogin => true;
 
-  /// Creates a new envelope within a category.
+  /// Creates an envelope at the end of its category's list.
   Future<Envelope> create(
     Session session,
-    String name,
     UuidValue categoryId,
-    int budgetedAmountCents,
-    String currencyCode,
-  ) async {
-    final envelope = await EnvelopeService.create(
-      session,
-      name: name,
-      categoryId: categoryId,
-      budgetedAmountCents: budgetedAmountCents,
-      currencyCode: currencyCode,
-    );
-    await BudgetRealtimeNotifier.notifyCategoryChanged(
-      session,
-      envelope.categoryId,
-    );
-    return envelope;
-  }
+    String name, {
+    String? note,
+    String? taxCategoryCode,
+  }) => EnvelopeService.create(
+    session,
+    categoryId: categoryId,
+    name: name,
+    note: note,
+    taxCategoryCode: taxCategoryCode,
+  );
 
-  /// Lists all envelopes for a category.
-  Future<List<Envelope>> list(Session session, UuidValue categoryId) async =>
-      EnvelopeService.listForCategory(session, categoryId: categoryId);
+  /// Lists every envelope of an entity.
+  Future<List<Envelope>> list(Session session, UuidValue entityId) =>
+      EnvelopeService.list(session, entityId: entityId);
 
-  /// Gets a single envelope by ID.
-  Future<Envelope> get(Session session, UuidValue envelopeId) async =>
+  /// Loads one envelope by id.
+  Future<Envelope> get(Session session, UuidValue envelopeId) =>
       EnvelopeService.getById(session, envelopeId: envelopeId);
 
-  /// Updates an envelope by ID.
+  /// Updates one envelope, including nullable clear flags.
   Future<Envelope> update(
     Session session,
     UuidValue envelopeId, {
     String? name,
-    int? budgetedAmountCents,
-    int? spentAmountCents,
+    UuidValue? categoryId,
     String? note,
     bool? isHidden,
-  }) async {
-    final envelope = await EnvelopeService.update(
-      session,
-      envelopeId: envelopeId,
-      name: name,
-      budgetedAmountCents: budgetedAmountCents,
-      spentAmountCents: spentAmountCents,
-      note: note,
-      isHidden: isHidden,
-    );
-    await BudgetRealtimeNotifier.notifyCategoryChanged(
-      session,
-      envelope.categoryId,
-    );
-    return envelope;
-  }
+    String? taxCategoryCode,
+    bool? clearTaxCategoryCode,
+    UuidValue? defaultLedgerAccountId,
+    bool? clearDefaultLedgerAccount,
+  }) => EnvelopeService.update(
+    session,
+    envelopeId: envelopeId,
+    name: name,
+    categoryId: categoryId,
+    note: note,
+    isHidden: isHidden,
+    taxCategoryCode: taxCategoryCode,
+    clearTaxCategoryCode: clearTaxCategoryCode,
+    defaultLedgerAccountId: defaultLedgerAccountId,
+    clearDefaultLedgerAccount: clearDefaultLedgerAccount,
+  );
 
-  /// Reorders envelopes within a category.
+  /// Rewrites one category's envelope order from an exact id list.
   Future<List<Envelope>> reorder(
     Session session,
     UuidValue categoryId,
-    List<String> envelopeIds,
-  ) async {
-    final envelopes = await EnvelopeService.reorder(
-      session,
-      categoryId: categoryId,
-      envelopeIds: envelopeIds.map(UuidValue.fromString).toList(),
-    );
-    await BudgetRealtimeNotifier.notifyCategoryChanged(session, categoryId);
-    return envelopes;
-  }
+    List<UuidValue> envelopeIds,
+  ) => EnvelopeService.reorder(
+    session,
+    categoryId: categoryId,
+    envelopeIds: envelopeIds,
+  );
 
-  /// Deletes an envelope by ID.
-  Future<Envelope> delete(Session session, UuidValue envelopeId) async {
-    final envelope = await EnvelopeService.delete(
-      session,
-      envelopeId: envelopeId,
-    );
-    await BudgetRealtimeNotifier.notifyCategoryChanged(
-      session,
-      envelope.categoryId,
-    );
-    return envelope;
-  }
+  /// Deletes an envelope, optionally moving every reference first.
+  Future<void> delete(
+    Session session,
+    UuidValue envelopeId, {
+    UuidValue? reassignToEnvelopeId,
+  }) => EnvelopeService.delete(
+    session,
+    envelopeId: envelopeId,
+    reassignToEnvelopeId: reassignToEnvelopeId,
+  );
 }
