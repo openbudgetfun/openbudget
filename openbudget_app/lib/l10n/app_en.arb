@@ -2704,5 +2704,32 @@
   "transferReceivedLabel": "Received",
   "transferUseTodayRate": "Use today's rate",
   "transferEnvelopeLeavesPlan": "Envelope (money leaves the plan)",
-  "transferCrossEntityHint": "Transfers between your entities convert into each entity's base currency. Money never appears or disappears."
+  "transferCrossEntityHint": "Transfers between your entities convert into each entity's base currency. Money never appears or disappears.",
+  "budgetBreakdownTitle": "Budget breakdown",
+  "budgetBreakdownHint": "Tap the amount to see where it comes from",
+  "budgetBreakdownFxDifference": "Exchange-rate difference",
+  "budgetBreakdownOverspentLastMonth": "Overspent last month",
+  "budgetBreakdownAssignedInFuture": "Assigned in future months",
+  "budgetBreakdownAvailable": "Available in envelopes",
+  "budgetBreakdownUncategorised": "Uncategorised transactions",
+  "creditCardOwes": "Owes {amount}",
+  "@creditCardOwes": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "setGoalSetAsideMonthlyLabel": "Every month",
+  "setGoalTargetBalanceLabel": "Target balance",
+  "setGoalTargetByDateLabel": "By the date",
+  "setGoalHaveAmount": "To have {amount}",
+  "@setGoalHaveAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "envelopeDeleteMoveHistoryTitle": "Move its history to which envelope?"
 }

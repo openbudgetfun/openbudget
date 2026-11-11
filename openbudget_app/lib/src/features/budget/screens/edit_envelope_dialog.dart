@@ -4,41 +4,44 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
+import 'package:openbudget_app/src/features/budget/providers/budget_month_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/envelope_actions_provider.dart';
-import 'package:openbudget_app/src/features/budget/providers/envelope_goal_provider.dart';
-import 'package:openbudget_app/src/features/budget/providers/monthly_allocation_provider.dart';
 import 'package:openbudget_app/src/features/budget/screens/set_goal_dialog.dart';
 import 'package:openbudget_app/src/features/budget/widgets/budget_amount_keypad.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
+/// Edits an envelope's identity and this month's allocation, offers the
+/// goal dialog, and deletes — asking where history should move when the
+/// server refuses a bare delete.
 class EditEnvelopeDialog extends HookConsumerWidget {
   const EditEnvelopeDialog({
-    required this.envelope,
+    required this.monthEnvelope,
     required this.categoryId,
     required this.entityId,
     required this.currencyCode,
-    required this.year,
     required this.month,
     super.key,
   });
 
-  final Envelope envelope;
+  final EnvelopeMonthView monthEnvelope;
   final String categoryId;
   final String entityId;
   final String currencyCode;
-  final int year;
+
+  /// The month whose allocation the amount field edits, as yyyymm.
   final int month;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
+    final envelope = monthEnvelope.envelope;
     final nameController = useTextEditingController(text: envelope.name);
     final amountInput = useState(
       budgetAmountInputFromMinor(
-        cents: envelope.budgetedAmountMinor,
+        minor: monthEnvelope.allocatedMinor,
         currencyCode: currencyCode,
       ),
     );
@@ -156,11 +159,14 @@ class EditEnvelopeDialog extends HookConsumerWidget {
   ) async {
     final l10n = AppLocalizations.of(context);
     final palette = Theme.of(context).ob;
+    final envelopeId = monthEnvelope.envelope.id?.toString() ?? '';
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(l10n.deleteConfirmTitle),
-        content: Text('${l10n.deleteConfirmMessage}\n\n"${envelope.name}"'),
+        content: Text(
+          '${l10n.deleteConfirmMessage}\n\n"${monthEnvelope.envelope.name}"',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
@@ -184,10 +190,70 @@ class EditEnvelopeDialog extends HookConsumerWidget {
     try {
       await ref
           .read(envelopeActionsProvider.notifier)
+          .deleteEnvelope(envelopeId: envelopeId);
+      if (!context.mounted) return;
+      showAppToast(
+        context,
+        message: l10n.deleteSuccess,
+        variant: AppToastVariant.success,
+      );
+      if (context.mounted) Navigator.of(context).pop();
+    } on Exception {
+      // The server refuses to delete an envelope with history. Ask which
+      // envelope should inherit it, then retry.
+      isSubmitting.value = false;
+      if (!context.mounted) return;
+      await _deleteWithReassign(context, ref, envelopeId, isSubmitting);
+    }
+  }
+
+  Future<void> _deleteWithReassign(
+    BuildContext context,
+    WidgetRef ref,
+    String envelopeId,
+    ValueNotifier<bool> isSubmitting,
+  ) async {
+    final l10n = AppLocalizations.of(context);
+    final groups = await ref.read(budgetMonthGroupsProvider(entityId).future);
+    final candidates = groups
+        .expand((group) => group.envelopes)
+        .where((view) => view.envelope.id?.toString() != envelopeId)
+        .toList();
+    if (!context.mounted) return;
+    if (candidates.isEmpty) {
+      showAppToast(
+        context,
+        message: l10n.deleteError,
+        variant: AppToastVariant.error,
+      );
+      return;
+    }
+
+    final reassignTo = await showDialog<String>(
+      context: context,
+      builder: (ctx) => SimpleDialog(
+        title: Text(l10n.envelopeDeleteMoveHistoryTitle),
+        children: [
+          for (final view in candidates)
+            SimpleDialogOption(
+              onPressed: () => Navigator.of(ctx).pop(view.envelope.id.toString()),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: SpacingTokens.xs),
+                child: Text(view.envelope.name),
+              ),
+            ),
+        ],
+      ),
+    );
+    if (reassignTo == null || !context.mounted) return;
+
+    isSubmitting.value = true;
+    try {
+      await ref
+          .read(envelopeActionsProvider.notifier)
           .deleteEnvelope(
-            envelopeId: envelope.id?.toString() ?? '',
-            categoryId: categoryId,
-            entityId: entityId,
+            envelopeId: envelopeId,
+            reassignToEnvelopeId: reassignTo,
           );
       if (!context.mounted) return;
       showAppToast(
@@ -219,13 +285,12 @@ class EditEnvelopeDialog extends HookConsumerWidget {
     final name = nameController.text.trim();
     if (name.isEmpty) return;
 
-    final amountMinor =
-        parseBudgetAmountInputToMinor(
-          input: amountInput,
-          currencyCode: currencyCode,
-        ) ??
-        0;
+    final amountMinor = parseBudgetAmountInputToMinor(
+      input: amountInput,
+      currencyCode: currencyCode,
+    );
     final note = noteController.text.trim();
+    final envelopeId = monthEnvelope.envelope.id?.toString() ?? '';
 
     isSubmitting.value = true;
     final navigator = Navigator.of(context);
@@ -233,22 +298,26 @@ class EditEnvelopeDialog extends HookConsumerWidget {
       await ref
           .read(envelopeActionsProvider.notifier)
           .updateEnvelope(
-            envelopeId: envelope.id?.toString() ?? '',
+            envelopeId: envelopeId,
             categoryId: categoryId,
             entityId: entityId,
             name: name,
-            budgetedAmountMinor: amountMinor,
             note: note.isEmpty ? null : note,
           );
-      await ref
-          .read(monthlyAllocationActionsProvider.notifier)
-          .upsertAllocation(
-            envelopeId: envelope.id?.toString() ?? '',
-            entityId: entityId,
-            year: year,
-            month: month,
-            allocatedMinor: amountMinor,
-          );
+      // An empty amount field leaves the month's allocation alone.
+      if (amountMinor != null) {
+        await ref
+            .read(budgetMonthActionsProvider.notifier)
+            .setAllocations(
+              entityId: entityId,
+              allocations: [
+                AllocationInput(
+                  envelopeId: UuidValue.fromString(envelopeId),
+                  allocatedMinor: amountMinor,
+                ),
+              ],
+            );
+      }
       if (!context.mounted) return;
       showAppToast(
         context,
@@ -268,20 +337,14 @@ class EditEnvelopeDialog extends HookConsumerWidget {
   }
 
   void _showGoalDialog(BuildContext context, WidgetRef ref) {
-    final goalAsync = ref.read(
-      envelopeGoalProvider(envelope.id?.toString() ?? ''),
-    );
-    final existingGoal = goalAsync.whenOrNull(data: (g) => g);
-
     unawaited(
       showDialog<void>(
         context: context,
         builder: (_) => SetGoalDialog(
-          envelopeId: envelope.id?.toString() ?? '',
+          monthEnvelope: monthEnvelope,
           entityId: entityId,
           currencyCode: currencyCode,
-          existingGoal: existingGoal,
-          envelopeName: envelope.name,
+          month: month,
         ),
       ),
     );

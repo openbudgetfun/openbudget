@@ -4,16 +4,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_summary_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/budget_month_provider.dart';
 import 'package:openbudget_app/src/features/budget/widgets/envelope_row.dart';
 import 'package:openbudget_app/src/features/settings/providers/display_options_provider.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
+/// One category's section of the plan list: header with the category's
+/// available total, then its envelope rows. Figures come from the server's
+/// month view, grouped by [CategoryMonthGroup].
 class CategoryGroup extends HookConsumerWidget {
   const CategoryGroup({
-    required this.categoryWithEnvelopes,
+    required this.group,
     required this.currencyCode,
     required this.onAddEnvelope,
     required this.onDeleteCategory,
@@ -26,14 +29,12 @@ class CategoryGroup extends HookConsumerWidget {
     this.onToggleHideCategory,
     this.onToggleHideEnvelope,
     this.onToggleCollapsed,
-    this.showHidden = false,
     this.collapsed = false,
-    this.goalsMap = const {},
     this.selectedEnvelopeId,
     super.key,
   });
 
-  final CategoryWithEnvelopes categoryWithEnvelopes;
+  final CategoryMonthGroup group;
   final String currencyCode;
   final VoidCallback onAddEnvelope;
   final VoidCallback onDeleteCategory;
@@ -41,23 +42,20 @@ class CategoryGroup extends HookConsumerWidget {
   final void Function(Envelope envelope) onEditEnvelope;
   final void Function(Envelope envelope) onDeleteEnvelope;
   final void Function(Envelope envelope)? onQuickBudget;
-  final void Function(Envelope envelope, MonthlyEnvelopeData?, EnvelopeGoal?)?
-  onShowActivity;
+  final void Function(EnvelopeMonthView monthEnvelope)? onShowActivity;
   final void Function(List<String> envelopeIds)? onReorderEnvelopes;
   final void Function({required bool isHidden})? onToggleHideCategory;
   final void Function(Envelope envelope, {required bool isHidden})?
   onToggleHideEnvelope;
   final VoidCallback? onToggleCollapsed;
-  final bool showHidden;
   final bool collapsed;
-  final Map<String, EnvelopeGoal> goalsMap;
   final String? selectedEnvelopeId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final category = categoryWithEnvelopes.category;
-    final envelopes = categoryWithEnvelopes.envelopes;
+    final category = group.category;
+    final envelopes = group.envelopes;
     final theme = Theme.of(context);
     final palette = theme.ob;
     final hideAmounts = ref.watch(hideAmountsProvider);
@@ -70,7 +68,7 @@ class CategoryGroup extends HookConsumerWidget {
       return null;
     }, [envelopes]);
 
-    final totalAvailable = categoryWithEnvelopes.totalAvailableMinor;
+    final totalAvailable = group.availableMinor;
     final availableTone = totalAvailable < 0
         ? ObTone.overspent
         : totalAvailable > 0
@@ -95,7 +93,7 @@ class CategoryGroup extends HookConsumerWidget {
                 top: Radius.circular(12),
               ),
               child: Opacity(
-                opacity: (category.isHidden ?? false) ? 0.55 : 1.0,
+                opacity: category.isHidden ? 0.55 : 1.0,
                 child: Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: SpacingTokens.sm,
@@ -116,7 +114,7 @@ class CategoryGroup extends HookConsumerWidget {
                         color: palette.mutedInk,
                       ),
                       const SizedBox(width: SpacingTokens.xs),
-                      if (category.isHidden ?? false) ...[
+                      if (category.isHidden) ...[
                         SkribbleIcon(
                           data: OpenBudgetIcons.hidden,
                           size: 16,
@@ -208,7 +206,7 @@ class CategoryGroup extends HookConsumerWidget {
             ),
             ...orderedEnvelopes.value.asMap().entries.map((entry) {
               final index = entry.key;
-              final envelope = entry.value;
+              final envelope = entry.value.envelope;
               return ListTile(
                 key: ValueKey(envelope.id),
                 dense: true,
@@ -260,32 +258,24 @@ class CategoryGroup extends HookConsumerWidget {
             }),
           ] else
             ...envelopes.asMap().entries.expand((entry) sync* {
-              final envelope = entry.value;
-              final envelopeId = envelope.id?.toString() ?? '';
-              final monthlyData =
-                  categoryWithEnvelopes.monthlyEnvelopes.isNotEmpty &&
-                      entry.key < categoryWithEnvelopes.monthlyEnvelopes.length
-                  ? categoryWithEnvelopes.monthlyEnvelopes[entry.key]
-                  : null;
-              final envelopeGoal = goalsMap[envelopeId];
+              final monthEnvelope = entry.value;
+              final envelopeId = monthEnvelope.envelope.id?.toString() ?? '';
               yield EnvelopeRow(
-                envelope: envelope,
+                monthEnvelope: monthEnvelope,
                 currencyCode: currencyCode,
                 isSelected: selectedEnvelopeId == envelopeId,
-                monthlyData: monthlyData,
-                goal: envelopeGoal,
                 hideAmounts: hideAmounts,
                 hideProgressBars: hideProgressBars,
                 onTap: onShowActivity != null
-                    ? () => onShowActivity!(envelope, monthlyData, envelopeGoal)
-                    : () => onEditEnvelope(envelope),
+                    ? () => onShowActivity!(monthEnvelope)
+                    : () => onEditEnvelope(monthEnvelope.envelope),
                 onLongPress: () => _showEnvelopeMenu(
                   context,
-                  envelope,
+                  monthEnvelope.envelope,
                   isReorderingEnvelopes,
                 ),
                 onQuickBudget: onQuickBudget != null
-                    ? () => onQuickBudget!(envelope)
+                    ? () => onQuickBudget!(monthEnvelope.envelope)
                     : null,
               );
               if (entry.key < envelopes.length - 1) {
@@ -334,8 +324,8 @@ class CategoryGroup extends HookConsumerWidget {
   ) {
     final l10n = AppLocalizations.of(context);
     final palette = Theme.of(context).ob;
-    final category = categoryWithEnvelopes.category;
-    final isHidden = category.isHidden ?? false;
+    final category = group.category;
+    final isHidden = category.isHidden;
 
     unawaited(
       showModalBottomSheet<void>(
@@ -355,8 +345,7 @@ class CategoryGroup extends HookConsumerWidget {
                   onEditCategory();
                 },
               ),
-              if (onReorderEnvelopes != null &&
-                  categoryWithEnvelopes.envelopes.length > 1)
+              if (onReorderEnvelopes != null && group.envelopes.length > 1)
                 ListTile(
                   leading: SkribbleIcon(
                     data: OpenBudgetIcons.sort,
@@ -414,7 +403,7 @@ class CategoryGroup extends HookConsumerWidget {
   ) {
     final l10n = AppLocalizations.of(context);
     final palette = Theme.of(context).ob;
-    final isHidden = envelope.isHidden ?? false;
+    final isHidden = envelope.isHidden;
 
     unawaited(
       showModalBottomSheet<void>(
@@ -446,8 +435,7 @@ class CategoryGroup extends HookConsumerWidget {
                     onQuickBudget!(envelope);
                   },
                 ),
-              if (onReorderEnvelopes != null &&
-                  categoryWithEnvelopes.envelopes.length > 1)
+              if (onReorderEnvelopes != null && group.envelopes.length > 1)
                 ListTile(
                   leading: SkribbleIcon(
                     data: OpenBudgetIcons.sort,
@@ -499,7 +487,7 @@ class CategoryGroup extends HookConsumerWidget {
   }
 
   void _swapEnvelopes(
-    ValueNotifier<List<Envelope>> orderedEnvelopes,
+    ValueNotifier<List<EnvelopeMonthView>> orderedEnvelopes,
     int from,
     int to,
   ) {
@@ -509,7 +497,7 @@ class CategoryGroup extends HookConsumerWidget {
     orderedEnvelopes.value = list;
 
     final envelopeIds = list
-        .map((e) => e.id?.toString() ?? '')
+        .map((e) => e.envelope.id?.toString() ?? '')
         .where((id) => id.isNotEmpty)
         .toList();
 

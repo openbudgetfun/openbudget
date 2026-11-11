@@ -2,19 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
+import 'package:openbudget_app/src/features/budget/providers/budget_month_provider.dart';
 import 'package:openbudget_app/src/features/budget/providers/envelope_actions_provider.dart';
-import 'package:openbudget_app/src/features/budget/providers/monthly_allocation_provider.dart';
 import 'package:openbudget_app/src/features/budget/widgets/budget_amount_keypad.dart';
-import 'package:openbudget_app/src/utils/currency_code_utils.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
+import 'package:openbudget_client/openbudget_client.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
+/// Creates an envelope and, when an amount was entered, assigns it in the
+/// selected month through one `budget.setAllocations`.
 class AddEnvelopeDialog extends HookConsumerWidget {
   const AddEnvelopeDialog({
     required this.categoryId,
     required this.entityId,
     required this.currencyCode,
-    required this.year,
     required this.month,
     super.key,
   });
@@ -22,7 +23,8 @@ class AddEnvelopeDialog extends HookConsumerWidget {
   final String categoryId;
   final String entityId;
   final String currencyCode;
-  final int year;
+
+  /// The month to allocate into, as yyyymm.
   final int month;
 
   @override
@@ -129,22 +131,21 @@ class AddEnvelopeDialog extends HookConsumerWidget {
     try {
       final envelope = await ref
           .read(envelopeActionsProvider.notifier)
-          .createEnvelope(
-            name: name,
-            categoryId: categoryId,
-            budgetedAmountMinor: amountMinor,
-            currencyCode: normalizeCurrencyCode(currencyCode),
-            entityId: entityId,
-          );
-      await ref
-          .read(monthlyAllocationActionsProvider.notifier)
-          .upsertAllocation(
-            envelopeId: envelope.id?.toString() ?? '',
-            entityId: entityId,
-            year: year,
-            month: month,
-            allocatedMinor: amountMinor,
-          );
+          .createEnvelope(name: name, categoryId: categoryId);
+      final envelopeId = envelope.id?.toString() ?? '';
+      if (amountMinor != 0 && envelopeId.isNotEmpty) {
+        await ref
+            .read(budgetMonthActionsProvider.notifier)
+            .setAllocations(
+              entityId: entityId,
+              allocations: [
+                AllocationInput(
+                  envelopeId: UuidValue.fromString(envelopeId),
+                  allocatedMinor: amountMinor,
+                ),
+              ],
+            );
+      }
       if (!context.mounted) return;
       showAppToast(
         context,
