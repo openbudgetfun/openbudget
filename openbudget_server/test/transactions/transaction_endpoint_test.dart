@@ -382,6 +382,10 @@ void main() {
         endpoint.findDuplicates(anonymous, account.id!, _date, -100),
         throwsA(isA<AuthenticationRequiredException>()),
       );
+      await expectLater(
+        endpoint.importRows(anonymous, account.id!, const []),
+        throwsA(isA<AuthenticationRequiredException>()),
+      );
     });
   });
 
@@ -475,6 +479,10 @@ void main() {
       );
       await expectLater(
         endpoint.findDuplicates(session, account.id!, _date, -100),
+        throwsA(isA<ForbiddenException>()),
+      );
+      await expectLater(
+        endpoint.importRows(session, account.id!, const []),
         throwsA(isA<ForbiddenException>()),
       );
     });

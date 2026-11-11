@@ -95,6 +95,17 @@ abstract final class TransactionService {
     createAdjustment,
   );
 
+  /// Imports rows into one owned transactions account idempotently.
+  ///
+  /// Valid rows commit together; invalid rows come back with their 0-based
+  /// index in [ImportResult.errors]. The contract lives in
+  /// [TransactionWriter.importRows].
+  static Future<ImportResult> importRows(
+    Session session,
+    UuidValue accountId,
+    List<ImportRow> rows,
+  ) => TransactionWriter.importRows(session, accountId, rows);
+
   /// Lists one keyset page of an owned entity's transactions.
   ///
   /// Rows are newest first by `(date desc, id desc)`. Every filter is

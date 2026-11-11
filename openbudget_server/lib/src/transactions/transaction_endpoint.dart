@@ -6,8 +6,6 @@ import 'package:serverpod/serverpod.dart';
 ///
 /// Every method requires authentication and delegates to
 /// [TransactionService], which owns ownership checks and the write boundary.
-/// Import is a separate unit; this endpoint exposes only the implemented
-/// modern surface and has no placeholder methods for it.
 class TransactionEndpoint extends Endpoint {
   @override
   bool get requireLogin => true;
@@ -82,6 +80,17 @@ class TransactionEndpoint extends Endpoint {
     statementBalanceMinor,
     createAdjustment,
   );
+
+  /// Imports rows into one owned transactions account idempotently.
+  ///
+  /// `externalId` dedupes the file, so retrying the same rows inserts only
+  /// the new ones. Row-level validation failures come back with their
+  /// 0-based index in [ImportResult.errors].
+  Future<ImportResult> importRows(
+    Session session,
+    UuidValue accountId,
+    List<ImportRow> rows,
+  ) => TransactionService.importRows(session, accountId, rows);
 
   /// Finds same-account, same-amount transactions within three days.
   Future<List<TransactionView>> findDuplicates(

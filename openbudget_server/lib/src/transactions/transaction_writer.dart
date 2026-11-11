@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_server/src/accounts/account_balance_service.dart';
@@ -62,6 +63,16 @@ abstract final class TransactionWriter {
   /// A page from `transaction.list` holds at most 200 rows, so a bulk action
   /// covers at most one page.
   static const maxBulkTransactionIds = 200;
+
+  /// The most rows one import accepts in one call.
+  ///
+  /// One batch of this size fits one database transaction, one account lock
+  /// and one insert statement while staying far below PostgreSQL's bind
+  /// parameter limit.
+  static const maxImportRows = 1000;
+
+  /// The longest `externalId` one import row accepts.
+  static const maxImportExternalIdLength = 255;
 
   static EntityChangePublisher _publisher = EntityRealtimeNotifier.notify;
   static final Expando<_ChangeOutbox> _outboxes = Expando(
@@ -499,6 +510,57 @@ abstract final class TransactionWriter {
         tx,
         outbox,
       ),
+    );
+  }
+
+  /// Imports a file of rows into one transactions account.
+  ///
+  /// The account is locked once and every row follows the ordinary [create]
+  /// rules: ownership, account source and state, the civil-date bound, period
+  /// locks, safe non-zero amounts, payee rules and the market FX rate. A row
+  /// with a validation problem is reported in [ImportResult.errors] as
+  /// `"<0-based index>: <reason>"` and skipped; the valid rows commit together
+  /// in one database transaction. Ownership, a valuation source, a closed
+  /// account and an archived entity fail the whole call before any row is
+  /// written.
+  ///
+  /// A supplied `externalId` is trimmed and must be 1-255 printable
+  /// characters. A null one becomes
+  /// `csv:<sha256(yyyy-mm-dd|amountMinor|description|n)>`, where n counts
+  /// identical rows earlier in this call. That keeps one file deterministic
+  /// on retry while several identical rows in one file stay distinct. The
+  /// unique `(accountId, externalId)` index makes the insert idempotent: rows
+  /// already on the account, repeated ids in the batch and rows a concurrent
+  /// import wins are skipped as duplicates without consuming balance.
+  ///
+  /// Headers insert with `ON CONFLICT DO NOTHING`, so only new rows get lines
+  /// and payees. The cached balance moves once by the sum of the inserted
+  /// amounts; a valid final balance therefore never fails on an intermediate
+  /// per-row step. Imports are ordinary `uncleared` postings: never
+  /// reconciled, transferred or given server metadata. Change events publish
+  /// after the commit for the inserted rows' distinct months.
+  ///
+  /// Empty [rows] is a no-op after the account ownership check. A call accepts
+  /// at most [maxImportRows] rows.
+  static Future<ImportResult> importRows(
+    Session session,
+    UuidValue accountId,
+    List<ImportRow> rows, {
+    Transaction? transaction,
+  }) {
+    final joined = transaction;
+    if (joined != null) {
+      return _importRows(
+        session,
+        accountId,
+        rows,
+        joined,
+        _requireOutbox(joined),
+      );
+    }
+    return _owned(
+      session,
+      (tx, outbox) => _importRows(session, accountId, rows, tx, outbox),
     );
   }
 
@@ -2926,8 +2988,8 @@ ORDER BY 1, 2''',
       return payee;
     }
 
-    final name = input.payeeName?.trim();
-    if (name == null || name.isEmpty) return null;
+    final name = _normalisePayeeName(input.payeeName);
+    if (name == null) return null;
     await session.db.unsafeExecute(
       'INSERT INTO payee ("entityId", name, "createdAt") '
       'VALUES (@entityId::uuid, @name, now()) '
@@ -3112,6 +3174,11 @@ ORDER BY 1, 2''',
     return trimmed == null || trimmed.isEmpty ? null : trimmed;
   }
 
+  static String? _normalisePayeeName(String? name) {
+    final trimmed = name?.trim();
+    return trimmed == null || trimmed.isEmpty ? null : trimmed;
+  }
+
   static void _queueChange(
     _ChangeOutbox outbox,
     model.Transaction row, {
@@ -3157,6 +3224,429 @@ ORDER BY 1, 2''',
 
     _queueChange(outbox, row, month: oldMonth, accountId: oldAccountId);
   }
+
+  static final _externalIdControlCharacters = RegExp(r'[\x00-\x1F\x7F]');
+
+  static Future<ImportResult> _importRows(
+    Session session,
+    UuidValue accountId,
+    List<ImportRow> rows,
+    Transaction tx,
+    _ChangeOutbox outbox,
+  ) async {
+    final account = await _lockAccount(session, accountId, tx);
+    final entity = await EntityAccess.requireOwned(
+      session,
+      account.entityId,
+      transaction: tx,
+    );
+    if (rows.isEmpty) {
+      return _importResult(rowCount: 0, insertedCount: 0, errors: const {});
+    }
+    if (rows.length > maxImportRows) {
+      throw ValidationException(
+        message: 'An import accepts at most $maxImportRows rows',
+      );
+    }
+
+    _requireTransactionAccount(account);
+    if (account.closedAt != null) {
+      throw ValidationException(
+        message: 'A closed account rejects imported transactions',
+      );
+    }
+    if (entity.archivedAt != null) {
+      throw ValidationException(message: 'An archived entity rejects imports');
+    }
+
+    // Account-level currency problems fail every row the same way, so they
+    // are whole-call failures like an unsupported account in `create`.
+    _exponent(account.currencyCode);
+    _exponent(entity.baseCurrencyCode);
+    final lockDate = await _lockDate(session, entity, tx);
+
+    final derivedCounts = <String, int>{};
+    final errors = <int, String>{};
+    final pending = <_PendingImportRow>[];
+    for (var index = 0; index < rows.length; index++) {
+      final row = rows[index];
+      final derivedKey =
+          '${_civilDateKey(row.date)}|${row.amountMinor}|${row.description}';
+      final identicalEarlier = derivedCounts[derivedKey] ?? 0;
+      derivedCounts[derivedKey] = identicalEarlier + 1;
+
+      try {
+        pending.add(
+          _PendingImportRow(
+            index: index,
+            row: row,
+            externalId: _importExternalId(row, identicalEarlier),
+          ),
+        );
+      } on ValidationException catch (error) {
+        errors[index] = error.message;
+      }
+    }
+
+    // A row already on the account is a duplicate even when its payload would
+    // no longer validate, so a retried file stays idempotent after a period
+    // lock or a rate gap. This is a snapshot only; the unique index decides a
+    // concurrent race at insert time.
+    final existing = await _existingExternalIds(
+      session,
+      account.id!,
+      pending.map((row) => row.externalId),
+      tx,
+    );
+
+    final reserved = <String>{};
+    final accepted = <_ImportCandidate>[];
+    final payeesByName = <String, Payee?>{};
+    for (final row in pending) {
+      if (existing.contains(row.externalId)) continue;
+      if (!reserved.add(row.externalId)) continue;
+
+      try {
+        accepted.add(
+          await _validateImportRow(
+            session,
+            pending: row,
+            account: account,
+            entity: entity,
+            lockDate: lockDate,
+            payeesByName: payeesByName,
+            transaction: tx,
+          ),
+        );
+        // A rejected row never claims its id, so a later row with the same id
+        // can still be the one that inserts.
+      } on ValidationException catch (error) {
+        reserved.remove(row.externalId);
+        errors[row.index] = error.message;
+      } on NotFoundException catch (error) {
+        reserved.remove(row.externalId);
+        errors[row.index] = error.message;
+      } on ForbiddenException catch (error) {
+        reserved.remove(row.externalId);
+        errors[row.index] = error.message;
+      } on FxRateUnavailableException catch (error) {
+        reserved.remove(row.externalId);
+        errors[row.index] = error.message;
+      }
+    }
+
+    if (accepted.isEmpty) {
+      return _importResult(
+        rowCount: rows.length,
+        insertedCount: 0,
+        errors: errors,
+      );
+    }
+
+    final now = DateTime.now().toUtc();
+    final ids = {
+      for (final candidate in accepted)
+        candidate.externalId: const Uuid().v7obj(),
+    };
+    final headers = [
+      for (final candidate in accepted)
+        model.Transaction(
+          id: ids[candidate.externalId],
+          entityId: entity.id!,
+          accountId: account.id!,
+          date: candidate.date,
+          amountMinor: candidate.amountMinor,
+          baseAmountMinor: candidate.rate.baseAmountMinor,
+          fxRate: candidate.rate.rate,
+          fxRateDate: candidate.rate.rateDate,
+          fxRateSource: candidate.rate.source,
+          status: TransactionStatus.uncleared,
+          payeeId: candidate.payee?.id,
+          description: candidate.description,
+          memo: candidate.memo,
+          externalId: candidate.externalId,
+          createdAt: now,
+          updatedAt: now,
+        ),
+    ];
+    // ignoreConflicts emits ON CONFLICT DO NOTHING and returns only the rows
+    // this call inserted. The only realistic conflict is the unique
+    // (accountId, externalId) index, because every id here is fresh. A row
+    // another import already committed is absent, so it gets no lines, payee,
+    // balance movement or event.
+    final inserted = await model.Transaction.db.insert(
+      session,
+      headers,
+      transaction: tx,
+      ignoreConflicts: true,
+    );
+    if (inserted.isEmpty) {
+      return _importResult(
+        rowCount: rows.length,
+        insertedCount: 0,
+        errors: errors,
+      );
+    }
+
+    final insertedById = {for (final row in inserted) row.id!: row};
+    final insertedCandidates = [
+      for (final candidate in accepted)
+        if (insertedById.containsKey(ids[candidate.externalId])) candidate,
+    ];
+
+    // Payees are created only for headers that actually inserted, and only
+    // after the conflict check, so a rejected or duplicate row never leaves a
+    // payee behind.
+    final payees = await _upsertImportPayees(
+      session,
+      entity,
+      {
+        for (final candidate in insertedCandidates)
+          if (candidate.payeeName != null) candidate.payeeName!,
+      },
+      tx,
+    );
+    final payeeUpdates = <model.Transaction>[];
+    for (final candidate in insertedCandidates) {
+      final payeeName = candidate.payeeName;
+      if (payeeName == null) continue;
+      final payee = payees[payeeName];
+      if (payee == null) {
+        throw StateError('Import payee upsert did not produce a row');
+      }
+      final row = insertedById[ids[candidate.externalId]]!;
+      payeeUpdates.add(row.copyWith(payeeId: payee.id));
+    }
+    if (payeeUpdates.isNotEmpty) {
+      await model.Transaction.db.update(
+        session,
+        payeeUpdates,
+        transaction: tx,
+      );
+    }
+
+    final lineRows = [
+      for (final candidate in insertedCandidates)
+        ..._lineRows(ids[candidate.externalId]!, candidate.lines),
+    ];
+    if (lineRows.isNotEmpty) {
+      await TransactionLine.db.insert(session, lineRows, transaction: tx);
+    }
+
+    var insertedSum = BigInt.zero;
+    for (final candidate in insertedCandidates) {
+      insertedSum += BigInt.from(candidate.amountMinor);
+    }
+    // Bounded rows and safe amounts keep the sum inside int64. One delta is
+    // the contract: the final balance, not an intermediate per-row step, is
+    // what must stay in range.
+    await AccountBalanceService.applyDelta(
+      session,
+      account.id!,
+      insertedSum.toInt(),
+      transaction: tx,
+    );
+
+    _queueUniqueChanges(outbox, inserted);
+    return _importResult(
+      rowCount: rows.length,
+      insertedCount: inserted.length,
+      errors: errors,
+    );
+  }
+
+  static Future<_ImportCandidate> _validateImportRow(
+    Session session, {
+    required _PendingImportRow pending,
+    required Account account,
+    required Entity entity,
+    required DateTime? lockDate,
+    required Map<String, Payee?> payeesByName,
+    required Transaction transaction,
+  }) async {
+    final row = pending.row;
+    _requireNonZeroSafeMinor(row.amountMinor);
+    final date = _requireWritableDate(entity, row.date);
+    _rejectLockedDate(date, lockDate);
+
+    final payeeName = _normalisePayeeName(row.payeeName);
+    final payee = await _cachedImportPayee(
+      session,
+      entity,
+      payeeName,
+      payeesByName,
+      transaction,
+    );
+
+    final input = TransactionInput(
+      accountId: account.id!,
+      date: date,
+      amountMinor: row.amountMinor,
+      payeeId: payee?.id,
+      description: row.description,
+      memo: row.memo,
+      status: TransactionStatus.uncleared,
+      lines: const [],
+    );
+    final rate = await _resolveRate(
+      session,
+      account,
+      entity,
+      input,
+      transaction,
+    );
+    final lines = await _buildLines(
+      session,
+      account: account,
+      entity: entity,
+      input: input,
+      payeeId: payee?.id,
+      rate: rate.value,
+      baseAmountMinor: rate.baseAmountMinor,
+      transaction: transaction,
+    );
+
+    return _ImportCandidate(
+      externalId: pending.externalId,
+      date: date,
+      amountMinor: row.amountMinor,
+      description: row.description,
+      memo: row.memo,
+      payee: payee,
+      payeeName: payee == null ? payeeName : null,
+      rate: rate,
+      lines: lines,
+    );
+  }
+
+  static Future<Payee?> _cachedImportPayee(
+    Session session,
+    Entity entity,
+    String? name,
+    Map<String, Payee?> cache,
+    Transaction transaction,
+  ) async {
+    if (name == null) return null;
+    if (cache.containsKey(name)) return cache[name];
+
+    final payee = await Payee.db.findFirstRow(
+      session,
+      where: (t) => t.entityId.equals(entity.id) & t.name.equals(name),
+      transaction: transaction,
+    );
+    cache[name] = payee;
+    return payee;
+  }
+
+  static Future<Set<String>> _existingExternalIds(
+    Session session,
+    UuidValue accountId,
+    Iterable<String> externalIds,
+    Transaction transaction,
+  ) async {
+    final ids = externalIds.toSet();
+    if (ids.isEmpty) return const {};
+
+    final rows = await model.Transaction.db.find(
+      session,
+      where: (t) => t.accountId.equals(accountId) & t.externalId.inSet(ids),
+      transaction: transaction,
+    );
+    return {
+      for (final row in rows)
+        if (row.externalId != null) row.externalId!,
+    };
+  }
+
+  /// Trims and validates a supplied id, or derives the file id for a null one.
+  static String _importExternalId(ImportRow row, int identicalEarlier) {
+    final supplied = row.externalId;
+    if (supplied != null) {
+      final trimmed = supplied.trim();
+      if (trimmed.isEmpty) {
+        throw ValidationException(message: 'externalId must not be blank');
+      }
+      if (trimmed.length > maxImportExternalIdLength) {
+        throw ValidationException(
+          message:
+              'externalId must be at most '
+              '$maxImportExternalIdLength characters',
+        );
+      }
+      if (_externalIdControlCharacters.hasMatch(trimmed)) {
+        throw ValidationException(
+          message: 'externalId must not contain control characters',
+        );
+      }
+      return trimmed;
+    }
+
+    final key =
+        '${_civilDateKey(row.date)}|${row.amountMinor}|'
+        '${row.description}|$identicalEarlier';
+    return 'csv:${sha256.convert(utf8.encode(key))}';
+  }
+
+  static Future<Map<String, Payee>> _upsertImportPayees(
+    Session session,
+    Entity entity,
+    Set<String> names,
+    Transaction transaction,
+  ) async {
+    if (names.isEmpty) return const {};
+
+    final now = DateTime.now().toUtc();
+    await Payee.db.insert(
+      session,
+      [
+        for (final name in names)
+          Payee(
+            id: const Uuid().v7obj(),
+            entityId: entity.id!,
+            name: name,
+            createdAt: now,
+          ),
+      ],
+      transaction: transaction,
+      ignoreConflicts: true,
+    );
+    final rows = await Payee.db.find(
+      session,
+      where: (t) => t.entityId.equals(entity.id) & t.name.inSet(names),
+      transaction: transaction,
+    );
+    return {for (final payee in rows) payee.name: payee};
+  }
+
+  static ImportResult _importResult({
+    required int rowCount,
+    required int insertedCount,
+    required Map<int, String> errors,
+  }) {
+    final indexes = errors.keys.toList()..sort();
+    return ImportResult(
+      insertedCount: insertedCount,
+      // Everything neither inserted nor rejected is a duplicate, including a
+      // row a concurrent import won at the unique index.
+      skippedDuplicateCount: rowCount - insertedCount - errors.length,
+      errors: [for (final index in indexes) '$index: ${errors[index]}'],
+    );
+  }
+
+  /// Rejects a zero amount, and a value outside the safe minor range.
+  static void _requireNonZeroSafeMinor(int amount) {
+    if (amount == 0) {
+      throw ValidationException(message: 'amountMinor must not be zero');
+    }
+    _requireSafeMinor(amount, 'amountMinor');
+  }
+
+  static String _civilDateKey(DateTime date) {
+    final year = date.year.toString().padLeft(4, '0');
+    final month = date.month.toString().padLeft(2, '0');
+    final day = date.day.toString().padLeft(2, '0');
+    return '$year-$month-$day';
+  }
 }
 
 final class _ResolvedRate {
@@ -3197,6 +3687,42 @@ final class _BuiltLine {
   final int? salesTaxMinor;
   final String? memo;
   final int sortOrder;
+}
+
+final class _PendingImportRow {
+  const _PendingImportRow({
+    required this.index,
+    required this.row,
+    required this.externalId,
+  });
+
+  final int index;
+  final ImportRow row;
+  final String externalId;
+}
+
+final class _ImportCandidate {
+  const _ImportCandidate({
+    required this.externalId,
+    required this.date,
+    required this.amountMinor,
+    required this.description,
+    required this.memo,
+    required this.payee,
+    required this.payeeName,
+    required this.rate,
+    required this.lines,
+  });
+
+  final String externalId;
+  final DateTime date;
+  final int amountMinor;
+  final String description;
+  final String? memo;
+  final Payee? payee;
+  final String? payeeName;
+  final _ResolvedRate rate;
+  final List<_BuiltLine> lines;
 }
 
 final class _PendingChange {

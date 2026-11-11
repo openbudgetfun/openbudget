@@ -2779,6 +2779,10 @@ All SQL below is Postgres, run through `session.db.unsafeQuery` or `unsafeExecut
 **Bulk paths:**
 
 - `importRows(accountId, List<ImportRow>)` runs the same per-row steps in one database transaction. It inserts with `INSERT ... ON CONFLICT ("accountId", "externalId") DO NOTHING RETURNING id`, then inserts lines for the returned rows only, and applies one balance delta for the sum of what was inserted.
+  - The account is locked once and every row follows the `create` rules: ownership, a `transactions` balance source, an open account, an unarchived entity, the civil-date bound, the ledger period lock, safe non-zero amounts, payee rules and the ordinary market FX rate. Ownership, source, closed and archived failures reject the whole call; a row that fails the date, amount, external-id, rate or payee checks is skipped and reported in `errors` as `"<0-based index>: <reason>"`. The valid rows commit together. Empty `rows` is a no-op after the ownership check, and one call accepts at most 1000 rows.
+  - A supplied `externalId` is trimmed, stored as given after trimming, and must be 1-255 printable characters. When null it is derived as `csv:<sha256(yyyy-mm-dd|amountMinor|description|n)>`, where n counts identical `(date, amount, description)` rows earlier in the same call. Re-importing a file derives the same ids, and several identical rows in one file stay distinct. Ids are unique per account; the unique index is the final race guard.
+  - A row whose id already exists on the account, repeats an id already claimed in this call, or loses a concurrent insert is a duplicate: it skips payload validation and gets no lines, payee, balance movement or event. A rejected row does not claim its id, so a later row with the same id can still insert.
+  - Imports are ordinary `uncleared` postings: never reconciled, transferred, or given server metadata. Payees and change events exist only for inserted rows; events publish after commit, one per distinct affected month.
 - Plaid sync uses the same path. Pending Plaid transactions are skipped until they post, because pending ids change.
 
 ### 6.2 Account balance maintenance and verification
