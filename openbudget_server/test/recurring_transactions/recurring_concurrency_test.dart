@@ -9,6 +9,7 @@ import 'package:openbudget_server/src/generated/protocol.dart' hide Transaction;
 import 'package:openbudget_server/src/generated/transactions/transaction.dart'
     as model;
 import 'package:openbudget_server/src/payees/payee_endpoint.dart';
+import 'package:openbudget_server/src/recurring_transactions/recurring_post_future_call.dart';
 import 'package:openbudget_server/src/recurring_transactions/recurring_transaction_endpoint.dart';
 import 'package:openbudget_server/src/transactions/transaction_writer.dart';
 import 'package:serverpod/serverpod.dart';
@@ -113,6 +114,30 @@ void main() {
           results.whereType<int>().fold<int>(0, (sum, count) => sum + count),
           1,
         );
+      },
+    );
+
+    test(
+      'when a manual poster races the hourly sweep then one occurrence wins',
+      () async {
+        final account = await book.addAccount();
+        final schedule = await createDue(account);
+        final unauthenticated = server.anonymousSession();
+        addTearDown(unauthenticated.close);
+        final job = RecurringPostFutureCall();
+
+        final results = await Future.wait([
+          _capture(endpoint.postDue(sessionOf(), book.entity.id!)),
+          _capture(job.postDue(unauthenticated)),
+        ]);
+        _expectNoDeadlock(results);
+
+        final rows = await model.Transaction.db.find(
+          book.session,
+          where: (t) => t.recurringTransactionId.equals(schedule.id),
+        );
+        expect(rows, hasLength(1));
+        expect(await endpoint.countDue(book.session, book.entity.id!), 0);
       },
     );
 
