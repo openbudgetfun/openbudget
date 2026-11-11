@@ -183,10 +183,11 @@ class TaxService {
   /// Sets one stored line's tax treatment and returns the transaction view.
   ///
   /// Null leaves that field unchanged; [clearTaxCategoryCode] clears only the
-  /// category. The write locks the entity, account and header in the writer's
-  /// order, then goes through [TransactionWriter.updateLines], so a
-  /// reconciled row, period lock, archived entity, ledger revision, audit and
-  /// every other line keep their existing rules and values.
+  /// category. The write locks the account and header in the writer's order,
+  /// verifies the locked header still names that account, then goes through
+  /// [TransactionWriter.updateLines], so a reconciled row, period lock,
+  /// archived entity, ledger revision, audit and every other line keep their
+  /// existing rules and values.
   static Future<TransactionView> setLineTax(
     Session session, {
     required UuidValue transactionLineId,
@@ -230,7 +231,10 @@ class TaxService {
       }
 
       // Ownership rejects a foreign line before any row is locked or read
-      // further.
+      // further. The entity lock is FOR NO KEY UPDATE by default, so it
+      // serializes with other entity writers without blocking the foreign-key
+      // key share an ordinary create takes on this row while it holds the
+      // account. A stronger entity lock here would close a 40P01 cycle.
       final entity = _requireWritable(
         await EntityAccess.requireOwned(
           session,
@@ -249,7 +253,9 @@ class TaxService {
         lockMode: LockMode.forUpdate,
       );
       if (account == null) {
-        throw StateError('Transaction account disappeared');
+        throw ValidationException(
+          message: 'The transaction changed concurrently; retry the edit',
+        );
       }
 
       final header = await model.Transaction.db.findById(
@@ -258,7 +264,12 @@ class TaxService {
         transaction: tx,
         lockMode: LockMode.forUpdate,
       );
-      if (header == null || header.entityId != entity.id) {
+      // An ordinary edit may have moved the header to another account of the
+      // same entity while this call waited. Reject it here, before the writer
+      // locks that new account after the header and inverts the lock order.
+      if (header == null ||
+          header.entityId != entity.id ||
+          header.accountId != account.id) {
         throw ValidationException(
           message: 'The transaction changed concurrently; retry the edit',
         );

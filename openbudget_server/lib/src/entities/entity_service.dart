@@ -125,9 +125,21 @@ abstract final class EntityService {
           ? old.baseCurrencyCode
           : requireSupportedCurrency(baseCurrencyCode);
       if (currency != old.baseCurrencyCode) {
+        // An entity write lock is FOR NO KEY UPDATE, which still admits a
+        // child insert's foreign-key key-share check. Upgrade it before the
+        // count so a transaction create either commits first and is counted,
+        // or waits until this change commits.
+        await EntityAccess.requireOwned(
+          session,
+          entityId,
+          transaction: tx,
+          lockMode: LockMode.forUpdate,
+        );
         final count = await session.db.unsafeQuery(
           'SELECT 1 FROM "transaction" WHERE "entityId" = @entityId LIMIT 1',
-          parameters: QueryParameters.named({'entityId': entityId}),
+          parameters: QueryParameters.named({
+            'entityId': entityId.toString(),
+          }),
           transaction: tx,
         );
         if (count.isNotEmpty) {

@@ -56,10 +56,19 @@ abstract final class EntityAccess {
 
   /// Loads an entity only when the caller owns it.
   ///
-  /// [lockMode] defaults to [LockMode.forUpdate] when [lock] is true. Payee
-  /// and rule writes pass [LockMode.forNoKeyUpdate] so they still serialise
-  /// with each other and with account creation without blocking the foreign
-  /// key check a transaction insert takes on the entity row.
+  /// [lock] takes a row lock that lasts for the rest of the caller's
+  /// transaction. [lockMode] defaults to [LockMode.forNoKeyUpdate] when [lock]
+  /// is true; an explicit [lockMode] always wins.
+  ///
+  /// Every child insert takes PostgreSQL's `FOR KEY SHARE` on its entity row
+  /// for the foreign-key check, so entity serialization needs no key lock.
+  /// `FOR NO KEY UPDATE` excludes other entity writers and entity row updates
+  /// but stays compatible with that check. A `FOR UPDATE` entity lock instead
+  /// lets a money writer hold its account and wait for the key share while the
+  /// entity holder waits for the account, which PostgreSQL reports as a 40P01
+  /// deadlock. Pass [LockMode.forUpdate] only when the caller must also block
+  /// new child rows, such as a base-currency change guarded by "this entity
+  /// has no transaction yet".
   ///
   /// A [systemOwner] replaces the session's authenticated user for one
   /// server-owned operation. The entity id must match, and the stored owner
@@ -81,7 +90,7 @@ abstract final class EntityAccess {
       session,
       entityId,
       transaction: transaction,
-      lockMode: lockMode ?? (lock ? LockMode.forUpdate : null),
+      lockMode: lockMode ?? (lock ? LockMode.forNoKeyUpdate : null),
     );
     if (entity == null) throw NotFoundException();
     if (entity.ownerId != owner) throw ForbiddenException();
