@@ -6,8 +6,8 @@ import 'package:serverpod/serverpod.dart';
 ///
 /// Every method requires authentication and delegates to
 /// [TransactionService], which owns ownership checks and the write boundary.
-/// Reconciliation and import are separate units; this endpoint exposes only
-/// the implemented modern surface and has no placeholder methods for them.
+/// Import is a separate unit; this endpoint exposes only the implemented
+/// modern surface and has no placeholder methods for it.
 class TransactionEndpoint extends Endpoint {
   @override
   bool get requireLogin => true;
@@ -65,6 +65,23 @@ class TransactionEndpoint extends Endpoint {
     UuidValue transferId,
     TransferInput input,
   ) => TransactionService.updateTransfer(session, transferId, input);
+
+  /// Reconciles one owned transactions account against a statement balance.
+  Future<ReconcileResult> reconcile(
+    Session session,
+    UuidValue accountId,
+    DateTime statementDate,
+    int statementBalanceMinor,
+    // The documented reconcile signature keeps createAdjustment positional.
+    // ignore: avoid_positional_boolean_parameters
+    bool createAdjustment,
+  ) => TransactionService.reconcile(
+    session,
+    accountId,
+    statementDate,
+    statementBalanceMinor,
+    createAdjustment,
+  );
 
   /// Finds same-account, same-amount transactions within three days.
   Future<List<TransactionView>> findDuplicates(

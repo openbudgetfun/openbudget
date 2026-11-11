@@ -375,6 +375,10 @@ void main() {
         throwsA(isA<AuthenticationRequiredException>()),
       );
       await expectLater(
+        endpoint.reconcile(anonymous, account.id!, _date, 0, false),
+        throwsA(isA<AuthenticationRequiredException>()),
+      );
+      await expectLater(
         endpoint.findDuplicates(anonymous, account.id!, _date, -100),
         throwsA(isA<AuthenticationRequiredException>()),
       );
@@ -463,6 +467,10 @@ void main() {
             fromAmountMinor: 100,
           ),
         ),
+        throwsA(isA<ForbiddenException>()),
+      );
+      await expectLater(
+        endpoint.reconcile(session, account.id!, _date, 0, false),
         throwsA(isA<ForbiddenException>()),
       );
       await expectLater(

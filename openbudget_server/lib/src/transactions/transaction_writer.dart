@@ -451,6 +451,277 @@ abstract final class TransactionWriter {
     );
   }
 
+  /// Reconciles one transactions account against a statement balance.
+  ///
+  /// Cleared is the signed sum of `cleared` and `reconciled` rows dated on or
+  /// before [statementDate]. A non-zero difference with [createAdjustment]
+  /// false is a read-only preview: it returns the facts and writes nothing.
+  /// With [createAdjustment] true the difference is posted through [create]
+  /// as a `balanceAdjustment` dated [statementDate], then every row that is
+  /// still cleared on or before that date becomes reconciled. Only rows on
+  /// [accountId] change; a transfer peer keeps its status.
+  ///
+  /// An archived entity rejects every write; a preview, which writes nothing,
+  /// is still readable. Because the adjustment is an ordinary create, a closed
+  /// account or ledger period lock rejects only the adjustment; a matching
+  /// statement still reconciles status metadata. Change events publish only
+  /// after the owning transaction commits.
+  static Future<ReconcileResult> reconcile(
+    Session session,
+    UuidValue accountId,
+    DateTime statementDate,
+    int statementBalanceMinor,
+    // The documented reconcile signature keeps createAdjustment positional.
+    // ignore: avoid_positional_boolean_parameters
+    bool createAdjustment, {
+    Transaction? transaction,
+  }) {
+    final joined = transaction;
+    if (joined != null) {
+      return _reconcile(
+        session,
+        accountId,
+        statementDate,
+        statementBalanceMinor,
+        createAdjustment,
+        joined,
+        _requireOutbox(joined),
+      );
+    }
+    return _owned(
+      session,
+      (tx, outbox) => _reconcile(
+        session,
+        accountId,
+        statementDate,
+        statementBalanceMinor,
+        createAdjustment,
+        tx,
+        outbox,
+      ),
+    );
+  }
+
+  static Future<ReconcileResult> _reconcile(
+    Session session,
+    UuidValue accountId,
+    DateTime statementDate,
+    int statementBalanceMinor,
+    bool createAdjustment,
+    Transaction tx,
+    _ChangeOutbox outbox,
+  ) async {
+    _requireSafeMinor(statementBalanceMinor, 'statementBalanceMinor');
+
+    final account = await _lockAccount(session, accountId, tx);
+    final entity = await EntityAccess.requireOwned(
+      session,
+      account.entityId,
+      transaction: tx,
+    );
+    _requireReconcileAccount(account);
+    _requireStatementDate(entity, statementDate);
+
+    final cleared = await _clearedMinor(session, accountId, statementDate, tx);
+    final difference = BigInt.from(statementBalanceMinor) - cleared;
+    if (difference.abs() > BigInt.from(maxSafeMinor)) {
+      throw ValidationException(
+        message:
+            'The reconciliation difference exceeds the safe minor-unit range',
+      );
+    }
+    final clearedMinor = cleared.toInt();
+    final differenceMinor = difference.toInt();
+
+    if (differenceMinor != 0 && !createAdjustment) {
+      return ReconcileResult(
+        clearedBalanceMinor: clearedMinor,
+        differenceMinor: differenceMinor,
+        reconciledCount: 0,
+      );
+    }
+
+    // A preview above writes nothing, so it stays readable while the entity is
+    // archived. Every path below writes the account or a transaction.
+    if (entity.archivedAt != null) {
+      throw ValidationException(
+        message: 'An archived entity rejects reconciliation',
+      );
+    }
+
+    UuidValue? adjustmentTransactionId;
+    if (differenceMinor != 0) {
+      final adjustment = await _create(
+        session,
+        TransactionInput(
+          accountId: accountId,
+          date: statementDate,
+          amountMinor: differenceMinor,
+          description: 'Reconciliation adjustment',
+          status: TransactionStatus.cleared,
+          lines: const [],
+        ),
+        tx,
+        const TransactionWriteMetadata(kind: TransactionKind.balanceAdjustment),
+        outbox,
+      );
+      adjustmentTransactionId = adjustment.transaction.id;
+    }
+
+    final reconciled = await _markReconciled(
+      session,
+      accountId,
+      statementDate,
+      tx,
+    );
+
+    // The adjustment above moved the cached balance, so the account is read
+    // again under its lock before the statement date is written.
+    final current = await _lockAccount(session, accountId, tx);
+    final throughChanged = current.reconciledThroughDate != statementDate;
+    if (throughChanged) {
+      await Account.db.updateRow(
+        session,
+        current.copyWith(
+          reconciledThroughDate: statementDate,
+          updatedAt: DateTime.now().toUtc(),
+        ),
+        transaction: tx,
+      );
+    }
+
+    if (throughChanged || reconciled.changed > 0) {
+      _queueReconcileChanges(
+        outbox,
+        entityId: entity.id!,
+        accountId: accountId,
+        statementMonth: MonthKey.fromDate(statementDate),
+        months: reconciled.months,
+      );
+    }
+
+    return ReconcileResult(
+      clearedBalanceMinor: clearedMinor,
+      differenceMinor: differenceMinor,
+      adjustmentTransactionId: adjustmentTransactionId,
+      reconciledCount: reconciled.changed,
+    );
+  }
+
+  /// The signed cleared and reconciled total through [statementDate].
+  static Future<BigInt> _clearedMinor(
+    Session session,
+    UuidValue accountId,
+    DateTime statementDate,
+    Transaction transaction,
+  ) async {
+    final rows = await session.db.unsafeQuery(
+      '''
+SELECT COALESCE(SUM("amountMinor"), 0)::text
+FROM "transaction"
+WHERE "accountId" = @accountId::uuid
+  AND status IN ('cleared', 'reconciled')
+  AND date <= @statementDate::timestamp''',
+      parameters: QueryParameters.named({
+        'accountId': accountId.toString(),
+        'statementDate': statementDate,
+      }),
+      transaction: transaction,
+    );
+    final cleared = BigInt.parse(rows.single.single as String);
+    if (cleared.abs() > BigInt.from(maxSafeMinor)) {
+      throw ValidationException(
+        message: 'The cleared balance exceeds the safe minor-unit range',
+      );
+    }
+    return cleared;
+  }
+
+  /// Marks [accountId]'s cleared rows through [statementDate] reconciled and
+  /// returns the changed row count with the distinct months it touched.
+  static Future<({int changed, List<int> months})> _markReconciled(
+    Session session,
+    UuidValue accountId,
+    DateTime statementDate,
+    Transaction transaction,
+  ) async {
+    final rows = await session.db.unsafeQuery(
+      '''
+UPDATE "transaction"
+SET status = 'reconciled', "updatedAt" = now() AT TIME ZONE 'UTC'
+WHERE "accountId" = @accountId::uuid
+  AND status = 'cleared'
+  AND date <= @statementDate::timestamp
+RETURNING date''',
+      parameters: QueryParameters.named({
+        'accountId': accountId.toString(),
+        'statementDate': statementDate,
+      }),
+      transaction: transaction,
+    );
+
+    final months = <int>{};
+    for (final row in rows) {
+      months.add(MonthKey.fromDate(row.first as DateTime));
+    }
+    return (changed: rows.length, months: months.toList()..sort());
+  }
+
+  /// Queues one event per affected month, reusing a scope the adjustment
+  /// create already queued.
+  static void _queueReconcileChanges(
+    _ChangeOutbox outbox, {
+    required UuidValue entityId,
+    required UuidValue accountId,
+    required int statementMonth,
+    required List<int> months,
+  }) {
+    final queued = <String>{
+      for (final change in outbox.changes)
+        '${change.entityId}|${change.month}|${change.accountId}',
+    };
+
+    void queue(int month) {
+      final key = '$entityId|$month|$accountId';
+      if (!queued.add(key)) return;
+      _queueScope(
+        outbox,
+        entityId: entityId,
+        month: month,
+        accountId: accountId,
+      );
+    }
+
+    queue(statementMonth);
+    months.forEach(queue);
+  }
+
+  static void _requireReconcileAccount(Account account) {
+    if (account.balanceSource != AccountBalanceSource.transactions) {
+      throw ValidationException(
+        message: 'Reconciliation requires a transactions account',
+      );
+    }
+  }
+
+  static void _requireStatementDate(Entity entity, DateTime statementDate) {
+    if (!isCivilDate(statementDate)) {
+      throw ValidationException(
+        message: 'statementDate must be a UTC calendar date',
+      );
+    }
+    if (statementDate.year < 1900) {
+      throw ValidationException(
+        message: 'statementDate is before the supported calendar range',
+      );
+    }
+    if (statementDate.isAfter(EntityClock.today(entity))) {
+      throw ValidationException(
+        message: 'statementDate cannot be after the entity today',
+      );
+    }
+  }
+
   static List<UuidValue> _bulkIds(List<UuidValue> ids) {
     final unique = ids.toSet().toList()
       ..sort((a, b) => a.uuid.compareTo(b.uuid));

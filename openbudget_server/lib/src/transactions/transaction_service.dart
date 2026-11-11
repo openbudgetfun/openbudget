@@ -78,6 +78,23 @@ abstract final class TransactionService {
     TransferInput input,
   ) => TransactionWriter.updateTransfer(session, transferId, input);
 
+  /// Reconciles one transactions account against a statement balance.
+  static Future<ReconcileResult> reconcile(
+    Session session,
+    UuidValue accountId,
+    DateTime statementDate,
+    int statementBalanceMinor,
+    // The documented reconcile signature keeps createAdjustment positional.
+    // ignore: avoid_positional_boolean_parameters
+    bool createAdjustment,
+  ) => TransactionWriter.reconcile(
+    session,
+    accountId,
+    statementDate,
+    statementBalanceMinor,
+    createAdjustment,
+  );
+
   /// Lists one keyset page of an owned entity's transactions.
   ///
   /// Rows are newest first by `(date desc, id desc)`. Every filter is
