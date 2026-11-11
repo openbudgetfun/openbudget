@@ -386,8 +386,9 @@ abstract final class TransactionWriter {
   /// This is the narrow seam envelope deletion uses. Ordinary rows go through
   /// [updateLines], so reconciliation, period locks, ledger revisions, stored
   /// FX/base amounts, balances and audit rules are exactly the app edit path.
-  /// A transfer's envelope-bearing leg goes through the normal transfer
-  /// update, because [updateLines] refuses to touch a transfer leg. The caller
+  /// A transfer's envelope-bearing leg is recoded in place, because
+  /// [updateLines] refuses to touch a transfer leg and a full transfer update
+  /// would rewrite the peer's independently editable metadata. The caller
   /// joins this method to a transaction opened by [inTransaction]; change
   /// events publish only after that transaction commits.
   ///
@@ -1640,7 +1641,7 @@ RETURNING date''',
     );
     await _validateTransferEnvelope(
       session,
-      input: input,
+      envelopeId: input.envelopeId,
       fromAccount: fromAccount,
       toAccount: toAccount,
       fromEntity: fromEntity,
@@ -1737,6 +1738,14 @@ RETURNING date''',
     ];
   }
 
+  /// Moves the envelope on one outflow transfer leg without rewriting either
+  /// header.
+  ///
+  /// A transfer's status, flag, memo, payee and description are per-leg user
+  /// choices: ordinary updates edit one leg at a time, and reconciliation only
+  /// changes the leg it selected. Recoding the outflow therefore replaces its
+  /// line and bumps its ledger revision, while the peer and both headers keep
+  /// their metadata, rates, amounts and balances exactly as stored.
   static Future<void> _reassignTransferEnvelope(
     Session session, {
     required model.Transaction header,
@@ -1772,11 +1781,57 @@ RETURNING date''',
         message: 'Envelope lines changed concurrently; retry the reassignment',
       );
     }
-    if (header.date != peer.date ||
-        header.status != peer.status ||
-        header.memo != peer.memo ||
-        header.amountMinor >= 0 ||
-        peer.amountMinor <= 0) {
+
+    // Accounts first, in UUID order, then rows in UUID order, then the link:
+    // the hierarchy every writer path follows.
+    final accounts = await _lockAccounts(session, {
+      header.accountId,
+      peer.accountId,
+    }, transaction);
+
+    final legIds = [header.id!, peer.id!]
+      ..sort((a, b) => a.uuid.compareTo(b.uuid));
+    final lockedRows = <UuidValue, model.Transaction>{};
+    for (final id in legIds) {
+      final row = await model.Transaction.db.findById(
+        session,
+        id,
+        transaction: transaction,
+        lockMode: LockMode.forUpdate,
+      );
+      if (row == null) {
+        throw NotFoundException(message: 'Transfer leg not found');
+      }
+      lockedRows[id] = row;
+    }
+    final link = await Transfer.db.findById(
+      session,
+      transfer.id!,
+      transaction: transaction,
+      lockMode: LockMode.forUpdate,
+    );
+    if (link == null) {
+      throw NotFoundException(message: 'Transfer not found');
+    }
+    if (link.fromTransactionId != header.id ||
+        link.toTransactionId != peer.id) {
+      throw ValidationException(
+        message: 'The transfer changed concurrently; retry the reassignment',
+      );
+    }
+
+    final from = lockedRows[header.id!]!;
+    final to = lockedRows[peer.id!]!;
+    if (from.accountId != header.accountId || to.accountId != peer.accountId) {
+      throw ValidationException(
+        message: 'The transfer changed concurrently; retry the reassignment',
+      );
+    }
+
+    // Only the movement itself must agree. Status and memo are per-leg: a
+    // cleared outflow may legitimately face an uncleared, differently memoed
+    // inflow, so recoding never compares them.
+    if (from.date != to.date || from.amountMinor >= 0 || to.amountMinor <= 0) {
       throw ValidationException(
         message:
             'The transfer legs are inconsistent; repair the transfer before '
@@ -1784,22 +1839,93 @@ RETURNING date''',
       );
     }
 
-    await _updateTransfer(
+    final fromAccount = accounts[from.accountId]!;
+    final toAccount = accounts[to.accountId]!;
+    final fromEntity = await EntityAccess.requireOwned(
       session,
-      transfer.id!,
-      TransferInput(
-        fromAccountId: header.accountId,
-        toAccountId: peer.accountId,
-        date: header.date,
-        fromAmountMinor: -header.amountMinor,
-        toAmountMinor: peer.amountMinor,
-        envelopeId: toEnvelopeId,
-        memo: header.memo,
-        status: header.status,
-      ),
-      transaction,
-      outbox,
+      from.entityId,
+      transaction: transaction,
     );
+    final toEntity = to.entityId == from.entityId
+        ? fromEntity
+        : await EntityAccess.requireOwned(
+            session,
+            to.entityId,
+            transaction: transaction,
+          );
+    if (from.entityId != fromAccount.entityId ||
+        to.entityId != toAccount.entityId) {
+      throw ValidationException(
+        message: 'The transfer changed concurrently; retry the reassignment',
+      );
+    }
+    if (fromEntity.archivedAt != null || toEntity.archivedAt != null) {
+      throw ValidationException(
+        message: 'An archived entity rejects transfers',
+      );
+    }
+    if (from.status == TransactionStatus.reconciled ||
+        to.status == TransactionStatus.reconciled) {
+      throw ValidationException(
+        message: 'A reconciled transfer unlocks before money can change',
+      );
+    }
+
+    _requireTransferAccount(fromAccount, fromEntity);
+    _requireTransferAccount(toAccount, toEntity);
+    _requireWritableDate(fromEntity, from.date);
+    _requireWritableDate(toEntity, to.date);
+    _rejectLockedDate(
+      from.date,
+      await _lockDate(session, fromEntity, transaction),
+    );
+    if (toEntity.id != fromEntity.id) {
+      _rejectLockedDate(
+        to.date,
+        await _lockDate(session, toEntity, transaction),
+      );
+    }
+    await _validateTransferEnvelope(
+      session,
+      envelopeId: toEnvelopeId,
+      fromAccount: fromAccount,
+      toAccount: toAccount,
+      fromEntity: fromEntity,
+      transaction: transaction,
+    );
+
+    final fromLines = await _lines(session, from.id!, transaction);
+    final now = DateTime.now().toUtc();
+    final ledger = fromEntity.accountingMode == AccountingMode.ledger;
+    final updatedFrom = await model.Transaction.db.updateRow(
+      session,
+      from.copyWith(
+        revision: ledger ? from.revision + 1 : from.revision,
+        updatedAt: now,
+      ),
+      transaction: transaction,
+    );
+    await _replaceTransferLine(
+      session,
+      from.id!,
+      fromLines,
+      amountMinor: from.amountMinor,
+      baseAmountMinor: from.baseAmountMinor,
+      envelopeId: toEnvelopeId,
+      transaction: transaction,
+    );
+    if (ledger) {
+      await _writeTransferAudit(
+        session,
+        fromEntity,
+        fromEntity,
+        from,
+        fromLines,
+        transaction,
+      );
+    }
+
+    _queueChange(outbox, updatedFrom);
   }
 
   static Future<List<TransactionView>> _updateTransfer(
@@ -1999,7 +2125,7 @@ RETURNING date''',
     }
     await _validateTransferEnvelope(
       session,
-      input: input,
+      envelopeId: input.envelopeId,
       fromAccount: newFromAccount,
       toAccount: newToAccount,
       fromEntity: newFromEntity,
@@ -2434,13 +2560,12 @@ RETURNING date''',
 
   static Future<void> _validateTransferEnvelope(
     Session session, {
-    required TransferInput input,
+    required UuidValue? envelopeId,
     required Account fromAccount,
     required Account toAccount,
     required Entity fromEntity,
     required Transaction transaction,
   }) async {
-    final envelopeId = input.envelopeId;
     if (envelopeId == null) return;
 
     if (!fromAccount.onBudget) {

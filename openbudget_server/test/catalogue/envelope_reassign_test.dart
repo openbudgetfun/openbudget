@@ -337,6 +337,239 @@ void main() {
     );
   });
 
+  test(
+    'a transfer keeps each leg metadata when its envelope moves',
+    () async {
+      final book = await newBook(accountingMode: AccountingMode.ledger);
+      final onBudget = await book.addAccount();
+      final offBudget = await book.addAccount(
+        name: 'Brokerage',
+        onBudget: false,
+      );
+      final source = await book.addEnvelopeIn(await book.addCategory());
+      final destination = await book.addEnvelopeIn(await book.addCategory());
+      final outflowPayee = await book.addPayee(name: 'Broker fee');
+      final inflowPayee = await book.addPayee(name: 'Broker sweep');
+      final date = EntityClock.today(book.entity);
+
+      final legs = await TransactionWriter.createTransfer(
+        book.session,
+        TransferInput(
+          fromAccountId: onBudget.id!,
+          toAccountId: offBudget.id!,
+          date: date,
+          fromAmountMinor: 500,
+          envelopeId: source.id,
+        ),
+      );
+      final from = legs.first.transaction;
+      final to = legs.last.transaction;
+
+      await TransactionWriter.update(
+        book.session,
+        from.id!,
+        TransactionInput(
+          accountId: onBudget.id!,
+          date: date,
+          amountMinor: -500,
+          status: TransactionStatus.cleared,
+          memo: 'Outflow memo',
+          flag: TransactionFlag.blue,
+          payeeId: outflowPayee.id,
+          description: 'Broker fee',
+          lines: const [],
+        ),
+      );
+      await TransactionWriter.update(
+        book.session,
+        to.id!,
+        TransactionInput(
+          accountId: offBudget.id!,
+          date: date,
+          amountMinor: 500,
+          status: TransactionStatus.uncleared,
+          memo: 'Inflow memo',
+          flag: TransactionFlag.green,
+          payeeId: inflowPayee.id,
+          description: 'Broker sweep',
+          lines: const [],
+        ),
+      );
+
+      final beforeFrom = (await model.Transaction.db.findById(
+        book.session,
+        from.id!,
+      ))!;
+      final beforeTo = (await model.Transaction.db.findById(
+        book.session,
+        to.id!,
+      ))!;
+      final fromBalance = (await book.reload(onBudget)).balanceMinor;
+      final toBalance = (await book.reload(offBudget)).balanceMinor;
+      events.events.clear();
+
+      await endpoint.delete(
+        book.session,
+        source.id!,
+        reassignToEnvelopeId: destination.id,
+      );
+
+      expect(await Envelope.db.findById(book.session, source.id!), isNull);
+      final afterFrom = (await model.Transaction.db.findById(
+        book.session,
+        from.id!,
+      ))!;
+      final afterTo = (await model.Transaction.db.findById(
+        book.session,
+        to.id!,
+      ))!;
+
+      expect(afterFrom.status, TransactionStatus.cleared);
+      expect(afterFrom.memo, 'Outflow memo');
+      expect(afterFrom.flag, TransactionFlag.blue);
+      expect(afterFrom.payeeId, outflowPayee.id);
+      expect(afterFrom.description, 'Broker fee');
+      expect(afterTo.status, TransactionStatus.uncleared);
+      expect(afterTo.memo, 'Inflow memo');
+      expect(afterTo.flag, TransactionFlag.green);
+      expect(afterTo.payeeId, inflowPayee.id);
+      expect(afterTo.description, 'Broker sweep');
+
+      for (final before in [beforeFrom, beforeTo]) {
+        final after = before.id == from.id ? afterFrom : afterTo;
+        expect(after.amountMinor, before.amountMinor);
+        expect(after.baseAmountMinor, before.baseAmountMinor);
+        expect(after.fxRate, before.fxRate);
+        expect(after.fxRateDate, before.fxRateDate);
+        expect(after.fxRateSource, before.fxRateSource);
+        expect(after.date, before.date);
+        expect(after.accountId, before.accountId);
+        expect(after.entityId, before.entityId);
+      }
+      expect(afterFrom.revision, beforeFrom.revision + 1);
+      expect(afterTo.revision, beforeTo.revision);
+
+      final fromLine = (await TransactionLine.db.find(
+        book.session,
+        where: (t) => t.transactionId.equals(from.id),
+      )).single;
+      final toLine = (await TransactionLine.db.find(
+        book.session,
+        where: (t) => t.transactionId.equals(to.id),
+      )).single;
+      expect(fromLine.envelopeId, destination.id);
+      expect(fromLine.amountMinor, -500);
+      expect(fromLine.baseAmountMinor, beforeFrom.baseAmountMinor);
+      expect(toLine.envelopeId, isNull);
+      expect(toLine.amountMinor, 500);
+
+      expect((await book.reload(onBudget)).balanceMinor, fromBalance);
+      expect((await book.reload(offBudget)).balanceMinor, toBalance);
+
+      final audits = await AuditEvent.db.find(
+        book.session,
+        where: (t) => t.entityId.equals(book.entity.id),
+      );
+      expect(audits, hasLength(1));
+      expect(audits.single.action, AuditAction.transactionEdited);
+      expect(audits.single.subjectId, from.id);
+      expect(audits.single.payloadJson, contains('before'));
+
+      final transactionEvents = events.events
+          .where((event) => event.scope == ChangeScope.transactions)
+          .toList();
+      expect(transactionEvents, hasLength(1));
+      expect(transactionEvents.single.entityId, book.entity.id);
+      expect(transactionEvents.single.accountId, onBudget.id);
+      expect(transactionEvents.single.month, MonthKey.fromDate(date));
+    },
+  );
+
+  test('a reconciled transfer peer rejects the whole reassignment', () async {
+    final book = await newBook(accountingMode: AccountingMode.ledger);
+    final onBudget = await book.addAccount();
+    final offBudget = await book.addAccount(
+      name: 'Brokerage',
+      onBudget: false,
+    );
+    final source = await book.addEnvelopeIn(await book.addCategory());
+    final destination = await book.addEnvelopeIn(await book.addCategory());
+    final date = EntityClock.today(book.entity);
+
+    final legs = await TransactionWriter.createTransfer(
+      book.session,
+      TransferInput(
+        fromAccountId: onBudget.id!,
+        toAccountId: offBudget.id!,
+        date: date,
+        fromAmountMinor: 500,
+        envelopeId: source.id,
+      ),
+    );
+    final from = legs.first.transaction;
+    final to = legs.last.transaction;
+    await TransactionWriter.update(
+      book.session,
+      to.id!,
+      TransactionInput(
+        accountId: offBudget.id!,
+        date: date,
+        amountMinor: 500,
+        status: TransactionStatus.reconciled,
+        lines: const [],
+      ),
+    );
+    final beforeFrom = (await model.Transaction.db.findById(
+      book.session,
+      from.id!,
+    ))!;
+    final beforeTo = (await model.Transaction.db.findById(
+      book.session,
+      to.id!,
+    ))!;
+    final fromBalance = (await book.reload(onBudget)).balanceMinor;
+    final toBalance = (await book.reload(offBudget)).balanceMinor;
+    events.events.clear();
+
+    await expectLater(
+      endpoint.delete(
+        book.session,
+        source.id!,
+        reassignToEnvelopeId: destination.id,
+      ),
+      throwsA(isA<ValidationException>()),
+    );
+
+    expect(await Envelope.db.findById(book.session, source.id!), isNotNull);
+    final line = await TransactionLine.db.find(
+      book.session,
+      where: (t) => t.transactionId.equals(from.id),
+    );
+    expect(line.single.envelopeId, source.id);
+    final afterFrom = (await model.Transaction.db.findById(
+      book.session,
+      from.id!,
+    ))!;
+    final afterTo = (await model.Transaction.db.findById(
+      book.session,
+      to.id!,
+    ))!;
+    expect(afterFrom.revision, beforeFrom.revision);
+    expect(afterTo.revision, beforeTo.revision);
+    expect(afterFrom.status, beforeFrom.status);
+    expect(afterTo.status, TransactionStatus.reconciled);
+    expect((await book.reload(onBudget)).balanceMinor, fromBalance);
+    expect((await book.reload(offBudget)).balanceMinor, toBalance);
+    expect(
+      await AuditEvent.db.count(
+        book.session,
+        where: (t) => t.entityId.equals(book.entity.id),
+      ),
+      0,
+    );
+    expect(events.events, isEmpty);
+  });
+
   test('a conflicting goal rejects the whole reassignment', () async {
     final book = await newBook();
     final account = await book.addAccount();
