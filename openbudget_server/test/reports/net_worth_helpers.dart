@@ -30,6 +30,7 @@ class NetWorthFixture {
     bool includeInNetWorth = true,
     DateTime? archivedAt,
     String timeZone = 'Europe/London',
+    int sortOrder = 0,
   }) => Entity.db.insertRow(
     session,
     Entity(
@@ -43,6 +44,7 @@ class NetWorthFixture {
       fiscalYearEndMonth: 12,
       fiscalYearEndDay: 31,
       includeInNetWorth: includeInNetWorth,
+      sortOrder: sortOrder,
       archivedAt: archivedAt,
     ),
   );

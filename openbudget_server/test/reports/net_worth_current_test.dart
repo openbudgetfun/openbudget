@@ -313,14 +313,16 @@ void main() {
     'archives, duplicates and ownership follow one contract',
     () async {
       final first = fixture.entity;
-      final second = await fixture.addEntity(name: 'Included');
+      final second = await fixture.addEntity(name: 'Included', sortOrder: 1);
       final excluded = await fixture.addEntity(
         name: 'Excluded company',
+        sortOrder: 2,
         kind: EntityKind.company,
         includeInNetWorth: false,
       );
       final archived = await fixture.addEntity(
         name: 'Archived',
+        sortOrder: 3,
         archivedAt: DateTime.utc(2026, 1, 1),
       );
       final foreign = await fixture.addForeignEntity();
