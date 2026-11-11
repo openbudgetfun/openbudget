@@ -1,59 +1,105 @@
 import 'package:openbudget_core/openbudget_core.dart';
-import 'package:openbudget_server/src/budgets/budget_service.dart';
-import 'package:openbudget_server/src/categories/category_service.dart';
-import 'package:openbudget_server/src/envelopes/envelope_service.dart';
-import 'package:openbudget_server/src/generated/protocol.dart';
-import 'package:openbudget_server/src/payees/payee_service.dart';
+import 'package:openbudget_server/src/entities/entity_access.dart';
+import 'package:openbudget_server/src/entities/entity_realtime_notifier.dart';
+import 'package:openbudget_server/src/generated/protocol.dart' hide Transaction;
+import 'package:openbudget_server/src/transaction_rules/payee_rule_lookup.dart';
 import 'package:serverpod/serverpod.dart';
 
-/// Business logic for managing transaction rules within a budget.
+/// Owns transaction-rule lifecycle within one entity.
 ///
-/// Transaction rules auto-assign an envelope when a specific payee is used.
-/// Each payee can have at most one rule per budget (unique constraint).
-class TransactionRuleService {
+/// A rule assigns one envelope whenever a payee codes a future ordinary or
+/// imported transaction with no explicit envelope. A payee has at most one
+/// rule, enforced by the unique `payeeId` index. Every read and write crosses
+/// [EntityAccess] and verifies that the payee and envelope belong to the same
+/// owned entity.
+abstract final class TransactionRuleService {
   static final _log = ObLogger('TransactionRuleService');
 
-  /// Creates a transaction rule, verifying budget ownership.
+  /// Creates the entity's rule for [payeeId].
+  ///
+  /// The unique index settles a concurrent create: the losing call rolls back
+  /// with a domain validation error instead of a raw database error, and
+  /// exactly one rule remains.
   static Future<TransactionRule> create(
     Session session, {
-    required UuidValue budgetId,
+    required UuidValue entityId,
     required UuidValue payeeId,
-    required UuidValue targetEnvelopeId,
+    required UuidValue envelopeId,
   }) async {
-    _log.info('Creating rule payee=$payeeId envelope=$targetEnvelopeId');
-    await BudgetService.getById(session, budgetId: budgetId);
-    await _validateRuleReferences(
-      session,
-      budgetId: budgetId,
-      payeeId: payeeId,
-      targetEnvelopeId: targetEnvelopeId,
-    );
+    _log.info('Creating rule payee=$payeeId envelope=$envelopeId');
 
-    final rule = TransactionRule(
-      budgetId: budgetId,
-      payeeId: payeeId,
-      targetEnvelopeId: targetEnvelopeId,
-      enabled: true,
-      createdAt: DateTime.now(),
-    );
-    return TransactionRule.db.insertRow(session, rule);
+    final rule = await session.db.transaction((tx) async {
+      _requireWritable(
+        await EntityAccess.requireOwned(
+          session,
+          entityId,
+          transaction: tx,
+          lockMode: LockMode.forNoKeyUpdate,
+        ),
+      );
+      await _requirePayee(
+        session,
+        entityId: entityId,
+        payeeId: payeeId,
+        tx: tx,
+      );
+      await _requireEnvelope(
+        session,
+        entityId: entityId,
+        envelopeId: envelopeId,
+        tx: tx,
+      );
+
+      final inserted = await session.db.unsafeExecute(
+        'INSERT INTO transaction_rule '
+        '("entityId", "payeeId", "envelopeId", enabled, "createdAt") '
+        'VALUES (@entityId::uuid, @payeeId::uuid, @envelopeId::uuid, true, '
+        'now()) '
+        'ON CONFLICT ("payeeId") DO NOTHING',
+        parameters: QueryParameters.named({
+          'entityId': entityId.toString(),
+          'payeeId': payeeId.toString(),
+          'envelopeId': envelopeId.toString(),
+        }),
+        transaction: tx,
+      );
+      if (inserted == 0) {
+        throw ValidationException(
+          message: 'A rule already exists for this payee',
+        );
+      }
+
+      final row = await TransactionRule.db.findFirstRow(
+        session,
+        where: (t) => t.payeeId.equals(payeeId),
+        transaction: tx,
+      );
+      if (row == null) {
+        throw StateError('Transaction rule insert did not produce a row');
+      }
+
+      return row;
+    });
+
+    await _notify(session, rule.entityId);
+    return rule;
   }
 
-  /// Lists all transaction rules for a budget, verifying ownership.
-  static Future<List<TransactionRule>> listForBudget(
+  /// Lists every rule of an entity, ordered by creation time and id.
+  static Future<List<TransactionRule>> list(
     Session session, {
-    required UuidValue budgetId,
+    required UuidValue entityId,
   }) async {
-    await BudgetService.getById(session, budgetId: budgetId);
+    await EntityAccess.requireOwned(session, entityId);
 
     return TransactionRule.db.find(
       session,
-      where: (t) => t.budgetId.equals(budgetId),
-      orderBy: (t) => t.createdAt,
+      where: (t) => t.entityId.equals(entityId),
+      orderByList: (t) => [t.createdAt, t.id],
     );
   }
 
-  /// Fetches a single rule, verifying budget ownership.
+  /// Loads one rule after checking that the caller owns its entity.
   static Future<TransactionRule> getById(
     Session session, {
     required UuidValue ruleId,
@@ -63,115 +109,197 @@ class TransactionRuleService {
       throw NotFoundException(message: 'Transaction rule not found');
     }
 
-    await BudgetService.getById(session, budgetId: rule.budgetId);
+    await EntityAccess.requireOwned(session, rule.entityId);
     return rule;
   }
 
-  /// Updates a rule's target envelope or enabled state.
+  /// Changes a rule's destination envelope, its enabled state, or both.
   static Future<TransactionRule> update(
     Session session, {
     required UuidValue ruleId,
-    UuidValue? targetEnvelopeId,
+    UuidValue? envelopeId,
     bool? enabled,
   }) async {
-    final rule = await getById(session, ruleId: ruleId);
-    if (targetEnvelopeId != null) {
-      await _assertEnvelopeBelongsToBudget(
+    _log.info('Updating rule id=$ruleId');
+
+    final updated = await session.db.transaction((tx) async {
+      final discovered = await TransactionRule.db.findById(
         session,
-        budgetId: rule.budgetId,
-        envelopeId: targetEnvelopeId,
+        ruleId,
+        transaction: tx,
+      );
+      if (discovered == null) {
+        throw NotFoundException(message: 'Transaction rule not found');
+      }
+
+      _requireWritable(
+        await EntityAccess.requireOwned(
+          session,
+          discovered.entityId,
+          transaction: tx,
+          lockMode: LockMode.forNoKeyUpdate,
+        ),
+      );
+
+      final rule = await TransactionRule.db.findById(
+        session,
+        ruleId,
+        transaction: tx,
+        lockMode: LockMode.forUpdate,
+      );
+      if (rule == null) {
+        throw NotFoundException(message: 'Transaction rule not found');
+      }
+      if (rule.entityId != discovered.entityId) {
+        throw ValidationException(
+          message: 'The rule changed concurrently; retry the update',
+        );
+      }
+
+      if (envelopeId != null) {
+        await _requireEnvelope(
+          session,
+          entityId: rule.entityId,
+          envelopeId: envelopeId,
+          tx: tx,
+        );
+      }
+
+      return TransactionRule.db.updateRow(
+        session,
+        rule.copyWith(
+          envelopeId: envelopeId ?? rule.envelopeId,
+          enabled: enabled ?? rule.enabled,
+        ),
+        transaction: tx,
+      );
+    });
+
+    await _notify(session, updated.entityId);
+    return updated;
+  }
+
+  /// Returns the envelope an enabled rule supplies for a payee, or null.
+  ///
+  /// This is the preview the client shows before a transaction is written. It
+  /// uses [PayeeRuleLookup], the same read `TransactionWriter` applies, so the
+  /// preview cannot disagree with the next ordinary or imported transaction.
+  static Future<UuidValue?> findMatchingEnvelope(
+    Session session, {
+    required UuidValue entityId,
+    required UuidValue payeeId,
+  }) async {
+    await EntityAccess.requireOwned(session, entityId);
+    await _requirePayee(session, entityId: entityId, payeeId: payeeId);
+
+    final envelopeId = await PayeeRuleLookup.enabledEnvelope(
+      session,
+      entityId: entityId,
+      payeeId: payeeId,
+    );
+    if (envelopeId == null) return null;
+
+    final envelope = await Envelope.db.findById(session, envelopeId);
+    if (envelope == null || envelope.entityId != entityId) {
+      throw ValidationException(
+        message: 'A rule points at an envelope of another entity',
       );
     }
 
-    final updated = rule.copyWith(
-      targetEnvelopeId: targetEnvelopeId ?? rule.targetEnvelopeId,
-      enabled: enabled ?? rule.enabled,
-    );
-    return TransactionRule.db.updateRow(session, updated);
+    return envelopeId;
   }
 
-  /// Finds a matching rule for a payee within a budget.
-  ///
-  /// Returns the target envelope ID if an enabled rule exists, or null.
-  static Future<UuidValue?> findMatchingEnvelope(
-    Session session, {
-    required UuidValue budgetId,
-    required UuidValue payeeId,
-  }) async {
-    await BudgetService.getById(session, budgetId: budgetId);
-    await _assertPayeeBelongsToBudget(
-      session,
-      budgetId: budgetId,
-      payeeId: payeeId,
-    );
-
-    final rules = await TransactionRule.db.find(
-      session,
-      where: (t) =>
-          t.budgetId.equals(budgetId) &
-          t.payeeId.equals(payeeId) &
-          t.enabled.equals(true),
-      limit: 1,
-    );
-
-    if (rules.isEmpty) return null;
-    return rules.first.targetEnvelopeId;
-  }
-
-  /// Deletes a rule, verifying budget ownership.
+  /// Deletes a rule.
   static Future<TransactionRule> delete(
     Session session, {
     required UuidValue ruleId,
   }) async {
     _log.info('Deleting rule id=$ruleId');
-    final rule = await getById(session, ruleId: ruleId);
-    return TransactionRule.db.deleteRow(session, rule);
+
+    final deleted = await session.db.transaction((tx) async {
+      final discovered = await TransactionRule.db.findById(
+        session,
+        ruleId,
+        transaction: tx,
+      );
+      if (discovered == null) {
+        throw NotFoundException(message: 'Transaction rule not found');
+      }
+
+      _requireWritable(
+        await EntityAccess.requireOwned(
+          session,
+          discovered.entityId,
+          transaction: tx,
+          lockMode: LockMode.forNoKeyUpdate,
+        ),
+      );
+
+      final rule = await TransactionRule.db.findById(
+        session,
+        ruleId,
+        transaction: tx,
+        lockMode: LockMode.forUpdate,
+      );
+      if (rule == null) {
+        throw NotFoundException(message: 'Transaction rule not found');
+      }
+      if (rule.entityId != discovered.entityId) {
+        throw ValidationException(
+          message: 'The rule changed concurrently; retry the delete',
+        );
+      }
+
+      await TransactionRule.db.deleteRow(session, rule, transaction: tx);
+      return rule;
+    });
+
+    await _notify(session, deleted.entityId);
+    return deleted;
   }
 
-  static Future<void> _assertEnvelopeBelongsToBudget(
+  static Future<void> _requirePayee(
     Session session, {
-    required UuidValue budgetId,
+    required UuidValue entityId,
+    required UuidValue payeeId,
+    Transaction? tx,
+  }) async {
+    final payee = await Payee.db.findById(session, payeeId, transaction: tx);
+    if (payee == null || payee.entityId != entityId) {
+      throw NotFoundException(message: 'Payee not found in this entity');
+    }
+  }
+
+  static Future<void> _requireEnvelope(
+    Session session, {
+    required UuidValue entityId,
     required UuidValue envelopeId,
+    Transaction? tx,
   }) async {
-    final envelope = await EnvelopeService.getById(
+    final envelope = await Envelope.db.findById(
       session,
-      envelopeId: envelopeId,
+      envelopeId,
+      transaction: tx,
     );
-    final category = await CategoryService.getById(
-      session,
-      categoryId: envelope.categoryId,
-    );
-    if (category.budgetId != budgetId) {
-      throw NotFoundException(message: 'Envelope not found in this budget');
+    if (envelope == null || envelope.entityId != entityId) {
+      throw NotFoundException(message: 'Envelope not found in this entity');
     }
   }
 
-  static Future<void> _assertPayeeBelongsToBudget(
-    Session session, {
-    required UuidValue budgetId,
-    required UuidValue payeeId,
-  }) async {
-    final payee = await PayeeService.getById(session, payeeId: payeeId);
-    if (payee.budgetId != budgetId) {
-      throw NotFoundException(message: 'Payee not found in this budget');
+  static Entity _requireWritable(Entity entity) {
+    if (entity.archivedAt != null) {
+      throw ValidationException(
+        message: 'An archived entity rejects transaction-rule changes',
+      );
     }
+
+    return entity;
   }
 
-  static Future<void> _validateRuleReferences(
-    Session session, {
-    required UuidValue budgetId,
-    required UuidValue payeeId,
-    required UuidValue targetEnvelopeId,
-  }) async {
-    await _assertPayeeBelongsToBudget(
-      session,
-      budgetId: budgetId,
-      payeeId: payeeId,
-    );
-    await _assertEnvelopeBelongsToBudget(
-      session,
-      budgetId: budgetId,
-      envelopeId: targetEnvelopeId,
-    );
-  }
+  static Future<void> _notify(Session session, UuidValue entityId) =>
+      EntityRealtimeNotifier.notify(
+        session,
+        entityId,
+        ChangeScope.transactions,
+      );
 }

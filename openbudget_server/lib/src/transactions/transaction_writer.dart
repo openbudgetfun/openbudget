@@ -12,6 +12,7 @@ import 'package:openbudget_server/src/generated/protocol.dart' hide Transaction;
 import 'package:openbudget_server/src/generated/transactions/transaction.dart'
     as model;
 import 'package:openbudget_server/src/tax/tax_catalogue_validation.dart';
+import 'package:openbudget_server/src/transaction_rules/payee_rule_lookup.dart';
 import 'package:serverpod/serverpod.dart';
 
 /// Publishes one committed change event through Serverpod's message bus.
@@ -308,6 +309,124 @@ abstract final class TransactionWriter {
       session,
       (tx, outbox) => _updateLines(session, id, lines, tx, outbox),
     );
+  }
+
+  /// Moves the payee reference on every transaction of [entityId] from
+  /// [fromPayeeId] to [toPayeeId], or clears it when [toPayeeId] is null.
+  ///
+  /// Payee merging and deletion use this narrow seam instead of writing
+  /// transaction rows themselves. It follows the writer's lock hierarchy:
+  /// every account of the entity is locked in UUID order, then the affected
+  /// rows in UUID order. Locking every account stops a concurrent writer from
+  /// adding a row that references the source payee between discovery and the
+  /// delete. Only `payeeId` and `updatedAt` change. Lines, amounts, FX rate and
+  /// date, base totals, status, revision, transfer links and cached balances
+  /// stay exactly as they were, so a reconciled or transfer leg accepts the
+  /// change and a ledger-mode entity needs no revision or audit. Change events
+  /// publish only after the caller's transaction commits.
+  ///
+  /// The caller locks the entity; this method validates both payees belong to
+  /// [entityId] and returns the number of headers whose payee moved.
+  static Future<int> reassignPayee(
+    Session session, {
+    required UuidValue entityId,
+    required UuidValue fromPayeeId,
+    required UuidValue? toPayeeId,
+    required Transaction transaction,
+  }) async {
+    if (toPayeeId == fromPayeeId) {
+      throw ValidationException(
+        message: 'Reassigning a payee needs a different destination',
+      );
+    }
+
+    final outbox = _requireOutbox(transaction);
+    final source = await Payee.db.findById(
+      session,
+      fromPayeeId,
+      transaction: transaction,
+    );
+    if (source == null) {
+      throw NotFoundException(message: 'Payee not found');
+    }
+    if (source.entityId != entityId) {
+      throw ForbiddenException(message: 'Payee belongs to another entity');
+    }
+    if (toPayeeId != null) {
+      final destination = await Payee.db.findById(
+        session,
+        toPayeeId,
+        transaction: transaction,
+      );
+      if (destination == null) {
+        throw NotFoundException(message: 'Destination payee not found');
+      }
+      if (destination.entityId != entityId) {
+        throw ForbiddenException(
+          message: 'Destination payee belongs to another entity',
+        );
+      }
+    }
+
+    // Lock every account of the entity first, in UUID order, then discover the
+    // rows. A writer holds an account before it touches a transaction, so this
+    // both keeps the shared hierarchy and stops a new row with the source
+    // payee from appearing between discovery and the delete.
+    final accounts = await Account.db.find(
+      session,
+      where: (t) => t.entityId.equals(entityId),
+      orderByList: (t) => [t.id],
+      transaction: transaction,
+    );
+    await _lockSurvivingAccounts(
+      session,
+      accounts.map((account) => account.id!),
+      transaction,
+    );
+
+    final discovered = await model.Transaction.db.find(
+      session,
+      where: (t) => t.entityId.equals(entityId) & t.payeeId.equals(fromPayeeId),
+      orderByList: (t) => [t.id],
+      transaction: transaction,
+    );
+
+    final now = DateTime.now().toUtc();
+    var changed = 0;
+    for (final header in discovered) {
+      final locked = await model.Transaction.db.findById(
+        session,
+        header.id!,
+        transaction: transaction,
+        lockMode: LockMode.forUpdate,
+      );
+      if (locked == null) {
+        throw ValidationException(
+          message: 'A transaction changed concurrently; retry the payee change',
+        );
+      }
+      if (locked.entityId != entityId) {
+        throw ForbiddenException(
+          message: 'A transaction belongs to another entity',
+        );
+      }
+      if (locked.payeeId != fromPayeeId) continue;
+
+      final row = await model.Transaction.db.updateRow(
+        session,
+        locked.copyWith(payeeId: toPayeeId, updatedAt: now),
+        transaction: transaction,
+      );
+      _queueUpdateChanges(
+        outbox,
+        row,
+        oldDate: locked.date,
+        oldAccountId: locked.accountId,
+      );
+      changed++;
+    }
+
+    return changed;
   }
 
   /// Locks, in UUID order, every account a source envelope's lines touch.
@@ -2966,16 +3085,14 @@ RETURNING date''',
         account.onBudget &&
         input.amountMinor < 0 &&
         payeeId != null) {
-      final rule = await TransactionRule.db.findFirstRow(
+      final envelopeId = await PayeeRuleLookup.enabledEnvelope(
         session,
-        where: (t) =>
-            t.entityId.equals(entity.id) &
-            t.payeeId.equals(payeeId) &
-            t.enabled.equals(true),
+        entityId: entity.id!,
+        payeeId: payeeId,
         transaction: transaction,
       );
-      if (rule != null) {
-        resolved[0] = resolved[0].copyWith(envelopeId: rule.envelopeId);
+      if (envelopeId != null) {
+        resolved[0] = resolved[0].copyWith(envelopeId: envelopeId);
       }
     }
 
