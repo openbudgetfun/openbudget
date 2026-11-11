@@ -1,6 +1,7 @@
 import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_server/src/common/currency_validation.dart';
 import 'package:openbudget_server/src/fx_rates/fx_provider_client.dart';
+import 'package:openbudget_server/src/fx_rates/fx_quote_selection.dart';
 import 'package:openbudget_server/src/generated/future_calls.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart' hide Transaction;
@@ -179,6 +180,18 @@ class FxService {
     await _upsert(session, rows);
   }
 
+  /// The configured server clock in UTC.
+  ///
+  /// Report staleness and rate lookup use the same clock, so a test can make
+  /// both deterministic with [configure].
+  static DateTime utcNow() => _clock().toUtc();
+
+  /// Asks for a historical backfill of [date] without letting a scheduling
+  /// failure break a read. A read path may call this after its transaction
+  /// commits; it never contacts the provider itself.
+  static Future<void> requestBackfill(Session session, DateTime date) =>
+      _requestBackfill(session, date);
+
   /// Resolves the rate that converts [fromCurrencyCode] to [toCurrencyCode]
   /// on [date], or null when a rate is unavailable.
   ///
@@ -198,13 +211,18 @@ class FxService {
     _requireCivilDate(date);
 
     if (from == to) {
+      final identity = FxQuoteSelection.identity(
+        fromCurrencyCode: from,
+        toCurrencyCode: to,
+        date: date,
+      );
       return FxQuoteView(
         fromCurrencyCode: from,
         toCurrencyCode: to,
-        rate: '1',
-        rateDate: date,
-        source: FxRateSource.identity,
-        isStale: false,
+        rate: identity.rateText,
+        rateDate: identity.rateDate,
+        source: identity.source,
+        isStale: identity.isStale,
       );
     }
 
@@ -225,47 +243,34 @@ class FxService {
       transaction: transaction,
     );
 
-    FxRate? fromRow;
-    FxRate? toRow;
-    for (final row in rows) {
-      final parsed = ExactDecimal.tryParse(row.rate);
-      if (parsed == null) continue;
-      if (row.currencyCode == from) {
-        fromRow ??= row;
-      } else if (row.currencyCode == to) {
-        toRow ??= row;
-      }
-    }
-
-    if (fromRow == null || toRow == null) {
+    final selection = FxQuoteSelection.select(
+      fromCurrencyCode: from,
+      toCurrencyCode: to,
+      date: date,
+      rates: [
+        for (final row in rows)
+          FxDailyRate(
+            currencyCode: row.currencyCode,
+            rateDate: row.rateDate,
+            rate: row.rate,
+            fetchedAt: row.fetchedAt,
+          ),
+      ],
+      now: _clock().toUtc(),
+    );
+    if (selection == null) {
       await _requestBackfill(session, date);
       return null;
     }
 
-    final fromPerUsd = ExactDecimal.tryParse(fromRow.rate);
-    final toPerUsd = ExactDecimal.tryParse(toRow.rate);
-    if (fromPerUsd == null || toPerUsd == null) {
-      await _requestBackfill(session, date);
-      return null;
-    }
-
-    final rate = crossRate(fromPerUsd: fromPerUsd, toPerUsd: toPerUsd);
-    final rateDate = _earlierDate(fromRow.rateDate, toRow.rateDate);
-    final fetchedAt = fromRow.fetchedAt.isBefore(toRow.fetchedAt)
-        ? fromRow.fetchedAt
-        : toRow.fetchedAt;
     final quote = FxQuoteView(
       fromCurrencyCode: from,
       toCurrencyCode: to,
-      rate: _formatRate(rate),
-      rateDate: rateDate,
-      source: FxRateSource.market,
-      fetchedAt: fetchedAt,
-      isStale: _quoteIsStale(
-        rateDate: rateDate,
-        fetchedAt: fetchedAt,
-        requestedDate: date,
-      ),
+      rate: selection.rateText,
+      rateDate: selection.rateDate,
+      source: selection.source,
+      fetchedAt: selection.fetchedAt,
+      isStale: selection.isStale,
     );
 
     if (transaction == null) {
@@ -393,16 +398,6 @@ class FxService {
         .fetch(date);
   }
 
-  static bool _quoteIsStale({
-    required DateTime rateDate,
-    required DateTime fetchedAt,
-    required DateTime requestedDate,
-  }) {
-    if (_dateIsBehind(rateDate, requestedDate)) return true;
-    final today = _today();
-    return rateDate == today && _fetchedAtIsBehind(fetchedAt);
-  }
-
   static bool _dateIsBehind(DateTime rateDate, DateTime reference) {
     final days = reference.difference(rateDate).inDays;
     return days > maxStaleDays;
@@ -410,22 +405,6 @@ class FxService {
 
   static bool _fetchedAtIsBehind(DateTime fetchedAt) =>
       _clock().toUtc().difference(fetchedAt.toUtc()) > maxFetchedAge;
-
-  static DateTime _earlierDate(DateTime first, DateTime second) =>
-      first.isBefore(second) ? first : second;
-
-  /// Drops insignificant trailing zeros from a 12-digit cross rate.
-  ///
-  /// The value is unchanged; `"0.800000000000"` becomes `"0.8"` so stored and
-  /// displayed rates match the provider's own plain decimal form.
-  static String _formatRate(ExactDecimal rate) {
-    final text = rate.toString();
-    if (!text.contains('.')) return text;
-    final trimmed = text.replaceFirst(RegExp(r'0+$'), '');
-    return trimmed.endsWith('.')
-        ? trimmed.substring(0, trimmed.length - 1)
-        : trimmed;
-  }
 
   static DateTime _today() {
     final now = _clock().toUtc();
