@@ -54,7 +54,31 @@ class BudgetTestBook {
     return BudgetTestBook._(session, userId, entity);
   }
 
-  /// Creates an account in this entity.
+  /// Creates a second entity owned by the same user.
+  Future<Entity> addEntity({
+    String name = 'Second book',
+    String baseCurrencyCode = 'GBP',
+    String countryCode = 'GB',
+    String timeZone = 'Europe/London',
+    DateTime? archivedAt,
+  }) => Entity.db.insertRow(
+    session,
+    Entity(
+      id: const Uuid().v7obj(),
+      ownerId: userId,
+      name: name,
+      kind: EntityKind.individual,
+      countryCode: countryCode,
+      baseCurrencyCode: baseCurrencyCode,
+      timeZone: timeZone,
+      accountingMode: AccountingMode.envelope,
+      fiscalYearEndMonth: 4,
+      fiscalYearEndDay: 5,
+      archivedAt: archivedAt,
+    ),
+  );
+
+  /// Creates an account, in [entity] when one is given.
   Future<Account> addAccount({
     String name = 'Checking',
     AccountKind kind = AccountKind.checking,
@@ -64,29 +88,37 @@ class BudgetTestBook {
     int balanceMinor = 0,
     DateTime? closedAt,
     UuidValue? ledgerAccountId,
-  }) => Account.db.insertRow(
-    session,
-    Account(
-      id: const Uuid().v7obj(),
-      entityId: entity.id!,
-      name: name,
-      kind: kind,
-      currencyCode: currencyCode ?? entity.baseCurrencyCode,
-      balanceSource: balanceSource,
-      balanceMinor: balanceMinor,
-      onBudget: onBudget,
-      closedAt: closedAt,
-      ledgerAccountId: ledgerAccountId,
-    ),
-  );
+    Entity? entity,
+  }) {
+    final owner = entity ?? this.entity;
+    return Account.db.insertRow(
+      session,
+      Account(
+        id: const Uuid().v7obj(),
+        entityId: owner.id!,
+        name: name,
+        kind: kind,
+        currencyCode: currencyCode ?? owner.baseCurrencyCode,
+        balanceSource: balanceSource,
+        balanceMinor: balanceMinor,
+        onBudget: onBudget,
+        closedAt: closedAt,
+        ledgerAccountId: ledgerAccountId,
+      ),
+    );
+  }
 
-  /// Creates a category and an envelope in this entity.
-  Future<Envelope> addEnvelope({String name = 'Groceries'}) async {
+  /// Creates a category and an envelope, in [entity] when one is given.
+  Future<Envelope> addEnvelope({
+    String name = 'Groceries',
+    Entity? entity,
+  }) async {
+    final owner = entity ?? this.entity;
     final category = await Category.db.insertRow(
       session,
       Category(
         id: const Uuid().v7obj(),
-        entityId: entity.id!,
+        entityId: owner.id!,
         name: '$name category',
       ),
     );
@@ -94,7 +126,7 @@ class BudgetTestBook {
       session,
       Envelope(
         id: const Uuid().v7obj(),
-        entityId: entity.id!,
+        entityId: owner.id!,
         categoryId: category.id!,
         name: name,
       ),

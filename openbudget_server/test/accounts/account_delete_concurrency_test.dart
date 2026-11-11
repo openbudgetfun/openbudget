@@ -284,6 +284,80 @@ void main() {
         await _expectNoOrphanTransfer(fixture, book, events);
       },
     );
+
+    test(
+      'when a transfer commits while an account delete waits for the target '
+      'then the delete fails clearly and both legs survive',
+      () async {
+        late Account target;
+        late Account peer;
+        for (var attempt = 0; attempt < 20; attempt++) {
+          target = await book.addAccount(name: 'Target $attempt');
+          peer = await book.addAccount(name: 'Peer $attempt');
+          if (target.id!.uuid.compareTo(peer.id!.uuid) < 0) break;
+        }
+        expect(
+          target.id!.uuid.compareTo(peer.id!.uuid),
+          lessThan(0),
+          reason: 'the create must lock the target before the peer',
+        );
+
+        // The create locks the target, then blocks on the peer. The account
+        // delete discovers no transfer and blocks on the target, so releasing
+        // the peer lets the create commit before the delete can re-read.
+        final gate = await _RowGate.hold(sessionOf(), 'account', peer.id!);
+        addTearDown(gate.release);
+        final createRun = _runCatching(() async {
+          await TransactionWriter.createTransfer(
+            sessionOf(),
+            TransferInput(
+              fromAccountId: target.id!,
+              toAccountId: peer.id!,
+              date: _date,
+              fromAmountMinor: 400,
+            ),
+          );
+        });
+        await _waitForBlockedCount(server, 1);
+
+        final deleteRun = _runCatching(
+          () => AccountService.delete(sessionOf(), target.id!),
+        );
+        await _waitForBlockedWriters(server);
+        await gate.release();
+
+        final outcomes = await Future.wait([
+          createRun.timeout(const Duration(seconds: 20)),
+          deleteRun.timeout(const Duration(seconds: 20)),
+        ]);
+        expect(outcomes.first, isNull, reason: 'the transfer must commit');
+        expect(
+          outcomes.last,
+          isA<ValidationException>(),
+          reason: 'the delete must report the new transfer, not a StateError',
+        );
+
+        expect(await Account.db.findById(book.session, target.id!), isNotNull);
+        expect(await Account.db.findById(book.session, peer.id!), isNotNull);
+        final currentLegs = await model.Transaction.db.find(
+          book.session,
+          where: (t) =>
+              t.accountId.equals(target.id) | t.accountId.equals(peer.id),
+        );
+        expect(currentLegs, hasLength(2));
+        final legIds = {for (final leg in currentLegs) leg.id!};
+        final currentTransfers = [
+          for (final link in await Transfer.db.find(book.session))
+            if (legIds.contains(link.fromTransactionId) ||
+                legIds.contains(link.toTransactionId))
+              link,
+        ];
+        expect(currentTransfers, hasLength(1));
+        expect((await book.reload(target)).balanceMinor, -400);
+        expect((await book.reload(peer)).balanceMinor, 400);
+        await book.expectBalancesConsistent();
+      },
+    );
   });
 }
 
@@ -424,7 +498,11 @@ Future<void> _waitForAccountLock(
 ) => _waitForRowLock(server, 'account', accountId);
 
 /// Waits until both racing writes are blocked on their row locks.
-Future<void> _waitForBlockedWriters(PgTestServer server) async {
+Future<void> _waitForBlockedWriters(PgTestServer server) =>
+    _waitForBlockedCount(server, 2);
+
+/// Waits until [minimum] backends are blocked on row locks.
+Future<void> _waitForBlockedCount(PgTestServer server, int minimum) async {
   final deadline = DateTime.now().add(const Duration(seconds: 10));
   while (DateTime.now().isBefore(deadline)) {
     final rows = await server.session.db.unsafeQuery(
@@ -432,11 +510,11 @@ Future<void> _waitForBlockedWriters(PgTestServer server) async {
       'WHERE datname = current_database() '
       "AND wait_event_type = 'Lock' AND pid <> pg_backend_pid()",
     );
-    if ((rows.first.first as int) >= 2) return;
+    if ((rows.first.first as int) >= minimum) return;
 
     await Future<void>.delayed(const Duration(milliseconds: 10));
   }
-  fail('both writers did not block on a row lock within the timeout');
+  fail('$minimum writers did not block on a row lock within the timeout');
 }
 
 /// Holds a row lock in its own transaction until [release] is called.

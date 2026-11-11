@@ -121,13 +121,7 @@ abstract final class TransactionWriter {
   }) {
     final joined = transaction;
     if (joined != null) {
-      return _create(
-        session,
-        input,
-        joined,
-        metadata,
-        _requireOutbox(joined),
-      );
+      return _create(session, input, joined, metadata, _requireOutbox(joined));
     }
     return _owned(
       session,
@@ -166,6 +160,54 @@ abstract final class TransactionWriter {
     return _owned(
       session,
       (tx, outbox) => _updateLines(session, id, lines, tx, outbox),
+    );
+  }
+
+  /// Creates both legs of a transfer and their link atomically.
+  ///
+  /// Returns `[from leg, to leg]`. Both accounts belong to the caller and may
+  /// sit in different entities or currencies. The entity base moves follow
+  /// section 6.3: a transfer inside one entity nets to exactly zero in base,
+  /// while a cross-entity transfer converts each leg into its own base.
+  static Future<List<TransactionView>> createTransfer(
+    Session session,
+    TransferInput input, {
+    Transaction? transaction,
+  }) {
+    final joined = transaction;
+    if (joined != null) {
+      return _createTransfer(session, input, joined, _requireOutbox(joined));
+    }
+    return _owned(
+      session,
+      (tx, outbox) => _createTransfer(session, input, tx, outbox),
+    );
+  }
+
+  /// Replaces both existing legs of a transfer and their link atomically.
+  ///
+  /// The transaction ids and the link id stay stable. Returns
+  /// `[from leg, to leg]` in the input's direction, so a source/destination
+  /// swap is just an account change on the same two rows.
+  static Future<List<TransactionView>> updateTransfer(
+    Session session,
+    UuidValue transferId,
+    TransferInput input, {
+    Transaction? transaction,
+  }) {
+    final joined = transaction;
+    if (joined != null) {
+      return _updateTransfer(
+        session,
+        transferId,
+        input,
+        joined,
+        _requireOutbox(joined),
+      );
+    }
+    return _owned(
+      session,
+      (tx, outbox) => _updateTransfer(session, transferId, input, tx, outbox),
     );
   }
 
@@ -346,11 +388,10 @@ abstract final class TransactionWriter {
 
     // Both accounts, in UUID order, before the row: an edit must never hold a
     // row while waiting for an account that an account delete already owns.
-    final accounts = await _lockAccounts(
-      session,
-      {discovered.accountId, input.accountId},
-      tx,
-    );
+    final accounts = await _lockAccounts(session, {
+      discovered.accountId,
+      input.accountId,
+    }, tx);
     final existing = await model.Transaction.db.findById(
       session,
       id,
@@ -651,6 +692,931 @@ abstract final class TransactionWriter {
     return _view(session, row, transaction: tx);
   }
 
+  static Future<List<TransactionView>> _createTransfer(
+    Session session,
+    TransferInput input,
+    Transaction tx,
+    _ChangeOutbox outbox,
+  ) async {
+    _requirePositiveSafeMinor(input.fromAmountMinor, 'fromAmountMinor');
+    final explicitTo = input.toAmountMinor;
+    if (explicitTo != null) {
+      _requirePositiveSafeMinor(explicitTo, 'toAmountMinor');
+    }
+    if (input.fromAccountId == input.toAccountId) {
+      throw ValidationException(
+        message: 'A transfer needs two different accounts',
+      );
+    }
+    if (input.status == TransactionStatus.reconciled) {
+      throw ValidationException(
+        message: 'Reconciled status is set only by reconciliation',
+      );
+    }
+
+    final accounts = await _lockAccounts(session, {
+      input.fromAccountId,
+      input.toAccountId,
+    }, tx);
+    final fromAccount = accounts[input.fromAccountId]!;
+    final toAccount = accounts[input.toAccountId]!;
+    final fromEntity = await EntityAccess.requireOwned(
+      session,
+      fromAccount.entityId,
+      transaction: tx,
+    );
+    final toEntity = fromAccount.entityId == toAccount.entityId
+        ? fromEntity
+        : await EntityAccess.requireOwned(
+            session,
+            toAccount.entityId,
+            transaction: tx,
+          );
+
+    _requireTransferAccount(fromAccount, fromEntity);
+    _requireTransferAccount(toAccount, toEntity);
+    _requireWritableDate(fromEntity, input.date);
+    _requireWritableDate(toEntity, input.date);
+    _rejectLockedDate(input.date, await _lockDate(session, fromEntity, tx));
+    if (toEntity.id != fromEntity.id) {
+      _rejectLockedDate(input.date, await _lockDate(session, toEntity, tx));
+    }
+
+    final toAmount = await _transferDestinationAmount(
+      session,
+      input: input,
+      fromAccount: fromAccount,
+      toAccount: toAccount,
+      transaction: tx,
+      storedToAmount: null,
+      sameMovement: false,
+    );
+    await _validateTransferEnvelope(
+      session,
+      input: input,
+      fromAccount: fromAccount,
+      toAccount: toAccount,
+      fromEntity: fromEntity,
+      transaction: tx,
+    );
+    final rates = await _resolveTransferRates(
+      session,
+      fromAccount: fromAccount,
+      toAccount: toAccount,
+      fromEntity: fromEntity,
+      toEntity: toEntity,
+      fromAmountMinor: input.fromAmountMinor,
+      toAmountMinor: toAmount,
+      date: input.date,
+      transaction: tx,
+    );
+
+    final now = DateTime.now().toUtc();
+    var fromRow = model.Transaction(
+      id: const Uuid().v7obj(),
+      entityId: fromEntity.id!,
+      accountId: fromAccount.id!,
+      date: input.date,
+      amountMinor: -input.fromAmountMinor,
+      baseAmountMinor: rates.from.baseAmountMinor,
+      fxRate: rates.from.rate,
+      fxRateDate: rates.from.rateDate,
+      fxRateSource: rates.from.source,
+      status: input.status,
+      memo: input.memo,
+      revision: 0,
+      createdAt: now,
+      updatedAt: now,
+    );
+    var toRow = model.Transaction(
+      id: const Uuid().v7obj(),
+      entityId: toEntity.id!,
+      accountId: toAccount.id!,
+      date: input.date,
+      amountMinor: toAmount,
+      baseAmountMinor: rates.to.baseAmountMinor,
+      fxRate: rates.to.rate,
+      fxRateDate: rates.to.rateDate,
+      fxRateSource: rates.to.source,
+      status: input.status,
+      memo: input.memo,
+      revision: 0,
+      createdAt: now,
+      updatedAt: now,
+    );
+
+    fromRow = await model.Transaction.db.insertRow(
+      session,
+      fromRow,
+      transaction: tx,
+    );
+    toRow = await model.Transaction.db.insertRow(
+      session,
+      toRow,
+      transaction: tx,
+    );
+    await TransactionLine.db.insert(session, [
+      TransactionLine(
+        id: const Uuid().v7obj(),
+        transactionId: fromRow.id!,
+        amountMinor: -input.fromAmountMinor,
+        baseAmountMinor: rates.from.baseAmountMinor,
+        envelopeId: input.envelopeId,
+        sortOrder: 0,
+      ),
+      TransactionLine(
+        id: const Uuid().v7obj(),
+        transactionId: toRow.id!,
+        amountMinor: toAmount,
+        baseAmountMinor: rates.to.baseAmountMinor,
+        sortOrder: 0,
+      ),
+    ], transaction: tx);
+    await Transfer.db.insertRow(
+      session,
+      Transfer(fromTransactionId: fromRow.id!, toTransactionId: toRow.id!),
+      transaction: tx,
+    );
+    await _applyTransferDeltas(session, [
+      (fromAccount.id!, -input.fromAmountMinor),
+      (toAccount.id!, toAmount),
+    ], tx);
+
+    _queueChange(outbox, fromRow);
+    _queueChange(outbox, toRow);
+    return [
+      await _view(session, fromRow, transaction: tx),
+      await _view(session, toRow, transaction: tx),
+    ];
+  }
+
+  static Future<List<TransactionView>> _updateTransfer(
+    Session session,
+    UuidValue transferId,
+    TransferInput input,
+    Transaction tx,
+    _ChangeOutbox outbox,
+  ) async {
+    _requirePositiveSafeMinor(input.fromAmountMinor, 'fromAmountMinor');
+    final explicitTo = input.toAmountMinor;
+    if (explicitTo != null) {
+      _requirePositiveSafeMinor(explicitTo, 'toAmountMinor');
+    }
+    if (input.fromAccountId == input.toAccountId) {
+      throw ValidationException(
+        message: 'A transfer needs two different accounts',
+      );
+    }
+
+    final discoveredLink = await Transfer.db.findById(
+      session,
+      transferId,
+      transaction: tx,
+    );
+    if (discoveredLink == null) {
+      throw NotFoundException(message: 'Transfer not found');
+    }
+    final discoveredFrom = await model.Transaction.db.findById(
+      session,
+      discoveredLink.fromTransactionId,
+      transaction: tx,
+    );
+    final discoveredTo = await model.Transaction.db.findById(
+      session,
+      discoveredLink.toTransactionId,
+      transaction: tx,
+    );
+    if (discoveredFrom == null || discoveredTo == null) {
+      throw NotFoundException(message: 'Transfer leg not found');
+    }
+
+    // Accounts first, in UUID order, covering both the old and the new legs.
+    final accounts = await _lockAccounts(session, {
+      discoveredFrom.accountId,
+      discoveredTo.accountId,
+      input.fromAccountId,
+      input.toAccountId,
+    }, tx);
+
+    // Then the transaction rows, in UUID order, then the link.
+    final legIds = [
+      discoveredLink.fromTransactionId,
+      discoveredLink.toTransactionId,
+    ]..sort((a, b) => a.uuid.compareTo(b.uuid));
+    final lockedRows = <UuidValue, model.Transaction>{};
+    for (final id in legIds) {
+      final row = await model.Transaction.db.findById(
+        session,
+        id,
+        transaction: tx,
+        lockMode: LockMode.forUpdate,
+      );
+      if (row == null) {
+        throw NotFoundException(message: 'Transfer leg not found');
+      }
+      lockedRows[id] = row;
+    }
+    final link = await Transfer.db.findById(
+      session,
+      transferId,
+      transaction: tx,
+      lockMode: LockMode.forUpdate,
+    );
+    if (link == null) {
+      throw NotFoundException(message: 'Transfer not found');
+    }
+    if (link.fromTransactionId != discoveredLink.fromTransactionId ||
+        link.toTransactionId != discoveredLink.toTransactionId) {
+      throw ValidationException(
+        message: 'The transfer changed concurrently; retry the edit',
+      );
+    }
+
+    final oldFrom = lockedRows[link.fromTransactionId]!;
+    final oldTo = lockedRows[link.toTransactionId]!;
+    for (final row in [oldFrom, oldTo]) {
+      if (!accounts.containsKey(row.accountId)) {
+        throw ValidationException(
+          message: 'The transfer changed concurrently; retry the edit',
+        );
+      }
+    }
+
+    final oldFromAccount = accounts[oldFrom.accountId]!;
+    final oldToAccount = accounts[oldTo.accountId]!;
+    final newFromAccount = accounts[input.fromAccountId]!;
+    final newToAccount = accounts[input.toAccountId]!;
+    final oldFromEntity = await EntityAccess.requireOwned(
+      session,
+      oldFrom.entityId,
+      transaction: tx,
+    );
+    final oldToEntity = oldTo.entityId == oldFrom.entityId
+        ? oldFromEntity
+        : await EntityAccess.requireOwned(
+            session,
+            oldTo.entityId,
+            transaction: tx,
+          );
+    if (oldFrom.entityId != oldFromAccount.entityId ||
+        oldTo.entityId != oldToAccount.entityId) {
+      throw ValidationException(
+        message: 'The transfer changed concurrently; retry the edit',
+      );
+    }
+    if (oldFromEntity.archivedAt != null || oldToEntity.archivedAt != null) {
+      throw ValidationException(
+        message: 'An archived entity rejects transfers',
+      );
+    }
+    final newFromEntity = newFromAccount.entityId == oldFromAccount.entityId
+        ? oldFromEntity
+        : await EntityAccess.requireOwned(
+            session,
+            newFromAccount.entityId,
+            transaction: tx,
+          );
+    final newToEntity = newToAccount.entityId == oldToAccount.entityId
+        ? oldToEntity
+        : await EntityAccess.requireOwned(
+            session,
+            newToAccount.entityId,
+            transaction: tx,
+          );
+
+    final oldFromLines = await _lines(session, oldFrom.id!, tx);
+    final oldToLines = await _lines(session, oldTo.id!, tx);
+    final sameMovement =
+        input.fromAccountId == oldFrom.accountId &&
+        input.toAccountId == oldTo.accountId &&
+        input.date == oldFrom.date &&
+        input.date == oldTo.date &&
+        input.fromAmountMinor == -oldFrom.amountMinor;
+    final toAmount = await _transferDestinationAmount(
+      session,
+      input: input,
+      fromAccount: newFromAccount,
+      toAccount: newToAccount,
+      transaction: tx,
+      storedToAmount: oldTo.amountMinor,
+      sameMovement: sameMovement,
+    );
+
+    final pricingChanged = !sameMovement || toAmount != oldTo.amountMinor;
+    final envelopeChanged =
+        oldFromLines.length != 1 ||
+        oldToLines.length != 1 ||
+        input.envelopeId != _singleEnvelope(oldFromLines);
+    final material = pricingChanged || envelopeChanged;
+
+    if (input.status == TransactionStatus.reconciled &&
+        (oldFrom.status != TransactionStatus.reconciled ||
+            oldTo.status != TransactionStatus.reconciled)) {
+      throw ValidationException(
+        message: 'Reconciled status is set only by reconciliation',
+      );
+    }
+    if (material &&
+        (oldFrom.status == TransactionStatus.reconciled ||
+            oldTo.status == TransactionStatus.reconciled)) {
+      throw ValidationException(
+        message: 'A reconciled transfer unlocks before money can change',
+      );
+    }
+
+    _requireTransferAccount(newFromAccount, newFromEntity);
+    _requireTransferAccount(newToAccount, newToEntity);
+    _requireWritableDate(newFromEntity, input.date);
+    _requireWritableDate(newToEntity, input.date);
+    if (material) {
+      _rejectLockedDate(
+        oldFrom.date,
+        await _lockDate(session, oldFromEntity, tx),
+      );
+      _rejectLockedDate(oldTo.date, await _lockDate(session, oldToEntity, tx));
+      _rejectLockedDate(
+        input.date,
+        await _lockDate(session, newFromEntity, tx),
+      );
+      if (newToEntity.id != newFromEntity.id) {
+        _rejectLockedDate(
+          input.date,
+          await _lockDate(session, newToEntity, tx),
+        );
+      }
+    }
+    await _validateTransferEnvelope(
+      session,
+      input: input,
+      fromAccount: newFromAccount,
+      toAccount: newToAccount,
+      fromEntity: newFromEntity,
+      transaction: tx,
+    );
+
+    final _ResolvedRate fromRate;
+    final _ResolvedRate toRate;
+    if (pricingChanged) {
+      final rates = await _resolveTransferRates(
+        session,
+        fromAccount: newFromAccount,
+        toAccount: newToAccount,
+        fromEntity: newFromEntity,
+        toEntity: newToEntity,
+        fromAmountMinor: input.fromAmountMinor,
+        toAmountMinor: toAmount,
+        date: input.date,
+        transaction: tx,
+      );
+      fromRate = rates.from;
+      toRate = rates.to;
+    } else {
+      fromRate = _storedRate(oldFrom);
+      toRate = _storedRate(oldTo);
+    }
+
+    final fromLedger = _isLedgerRevision(
+      oldFromEntity,
+      newFromEntity,
+      material,
+    );
+    final toLedger = _isLedgerRevision(oldToEntity, newToEntity, material);
+    final now = DateTime.now().toUtc();
+    var newFrom = oldFrom.copyWith(
+      entityId: newFromEntity.id,
+      accountId: newFromAccount.id,
+      date: input.date,
+      amountMinor: -input.fromAmountMinor,
+      baseAmountMinor: fromRate.baseAmountMinor,
+      fxRate: fromRate.rate,
+      fxRateDate: fromRate.rateDate,
+      fxRateSource: fromRate.source,
+      status: input.status,
+      memo: input.memo,
+      payeeId: newFromEntity.id == oldFromEntity.id ? oldFrom.payeeId : null,
+      revision: fromLedger ? oldFrom.revision + 1 : oldFrom.revision,
+      updatedAt: now,
+    );
+    var newTo = oldTo.copyWith(
+      entityId: newToEntity.id,
+      accountId: newToAccount.id,
+      date: input.date,
+      amountMinor: toAmount,
+      baseAmountMinor: toRate.baseAmountMinor,
+      fxRate: toRate.rate,
+      fxRateDate: toRate.rateDate,
+      fxRateSource: toRate.source,
+      status: input.status,
+      memo: input.memo,
+      payeeId: newToEntity.id == oldToEntity.id ? oldTo.payeeId : null,
+      revision: toLedger ? oldTo.revision + 1 : oldTo.revision,
+      updatedAt: now,
+    );
+
+    final updatedRows = <UuidValue, model.Transaction>{};
+    for (final id in legIds) {
+      final row = id == oldFrom.id ? newFrom : newTo;
+      updatedRows[id] = await model.Transaction.db.updateRow(
+        session,
+        row,
+        transaction: tx,
+      );
+    }
+    newFrom = updatedRows[oldFrom.id!]!;
+    newTo = updatedRows[oldTo.id!]!;
+
+    await _replaceTransferLine(
+      session,
+      oldFrom.id!,
+      oldFromLines,
+      amountMinor: -input.fromAmountMinor,
+      baseAmountMinor: fromRate.baseAmountMinor,
+      envelopeId: input.envelopeId,
+      transaction: tx,
+    );
+    await _replaceTransferLine(
+      session,
+      oldTo.id!,
+      oldToLines,
+      amountMinor: toAmount,
+      baseAmountMinor: toRate.baseAmountMinor,
+      envelopeId: null,
+      transaction: tx,
+    );
+    await _applyTransferDeltas(session, [
+      (oldFromAccount.id!, -oldFrom.amountMinor),
+      (oldToAccount.id!, -oldTo.amountMinor),
+      (newFromAccount.id!, -input.fromAmountMinor),
+      (newToAccount.id!, toAmount),
+    ], tx);
+
+    if (material && fromLedger) {
+      await _writeTransferAudit(
+        session,
+        oldFromEntity,
+        newFromEntity,
+        oldFrom,
+        oldFromLines,
+        tx,
+      );
+    }
+    if (material && toLedger) {
+      await _writeTransferAudit(
+        session,
+        oldToEntity,
+        newToEntity,
+        oldTo,
+        oldToLines,
+        tx,
+      );
+    }
+
+    _queueTransferUpdate(outbox, newFrom, oldFrom);
+    _queueTransferUpdate(outbox, newTo, oldTo);
+    return [
+      await _view(session, newFrom, transaction: tx),
+      await _view(session, newTo, transaction: tx),
+    ];
+  }
+
+  static Future<int> _transferDestinationAmount(
+    Session session, {
+    required TransferInput input,
+    required Account fromAccount,
+    required Account toAccount,
+    required Transaction transaction,
+    required int? storedToAmount,
+    required bool sameMovement,
+  }) async {
+    if (fromAccount.currencyCode == toAccount.currencyCode) {
+      final explicit = input.toAmountMinor;
+      if (explicit != null && explicit != input.fromAmountMinor) {
+        throw ValidationException(
+          message: 'A same-currency transfer moves the same amount',
+        );
+      }
+      return input.fromAmountMinor;
+    }
+    final explicit = input.toAmountMinor;
+    if (explicit != null) return explicit;
+    // A metadata-only edit keeps the amount that actually moved; it must not
+    // re-resolve a market rate that moved or disappeared.
+    if (sameMovement && storedToAmount != null) return storedToAmount;
+    if (!input.useMarketRate) {
+      throw ValidationException(
+        message:
+            'A cross-currency transfer needs toAmountMinor or useMarketRate',
+      );
+    }
+
+    final quote = await FxService.rateOn(
+      session,
+      fromAccount.currencyCode,
+      toAccount.currencyCode,
+      input.date,
+      transaction: transaction,
+    );
+    if (quote == null) {
+      throw FxRateUnavailableException(
+        fromCurrencyCode: fromAccount.currencyCode,
+        toCurrencyCode: toAccount.currencyCode,
+        date: input.date,
+      );
+    }
+    final rate = ExactDecimal.tryParse(quote.rate);
+    if (rate == null) {
+      throw FxRateUnavailableException(
+        fromCurrencyCode: fromAccount.currencyCode,
+        toCurrencyCode: toAccount.currencyCode,
+        date: input.date,
+      );
+    }
+    final amount = _convert(
+      input.fromAmountMinor,
+      rate,
+      fromAccount.currencyCode,
+      toAccount.currencyCode,
+    );
+    if (amount <= 0) {
+      throw ValidationException(
+        message: 'The market conversion rounds to a non-positive amount',
+      );
+    }
+    return amount;
+  }
+
+  static Future<({_ResolvedRate from, _ResolvedRate to})> _resolveTransferRates(
+    Session session, {
+    required Account fromAccount,
+    required Account toAccount,
+    required Entity fromEntity,
+    required Entity toEntity,
+    required int fromAmountMinor,
+    required int toAmountMinor,
+    required DateTime date,
+    required Transaction transaction,
+  }) async {
+    final fromLegAmount = -fromAmountMinor;
+    if (fromEntity.id == toEntity.id) {
+      final baseCurrency = fromEntity.baseCurrencyCode;
+      final fromInBase = fromAccount.currencyCode == baseCurrency;
+      final toInBase = toAccount.currencyCode == baseCurrency;
+      if (fromInBase && toInBase) {
+        return (
+          from: await _resolveTransferLegRate(
+            session,
+            fromAccount,
+            fromEntity,
+            fromLegAmount,
+            date,
+            transaction,
+          ),
+          to: await _resolveTransferLegRate(
+            session,
+            toAccount,
+            toEntity,
+            toAmountMinor,
+            date,
+            transaction,
+          ),
+        );
+      }
+      if (fromInBase) {
+        final from = await _resolveTransferLegRate(
+          session,
+          fromAccount,
+          fromEntity,
+          fromLegAmount,
+          date,
+          transaction,
+        );
+        return (
+          from: from,
+          to: _impliedTransferRate(
+            account: toAccount,
+            entity: fromEntity,
+            amountMinor: toAmountMinor,
+            signedBaseAmountMinor: -from.baseAmountMinor,
+            date: date,
+          ),
+        );
+      }
+      if (toInBase) {
+        final to = await _resolveTransferLegRate(
+          session,
+          toAccount,
+          toEntity,
+          toAmountMinor,
+          date,
+          transaction,
+        );
+        return (
+          from: _impliedTransferRate(
+            account: fromAccount,
+            entity: fromEntity,
+            amountMinor: fromLegAmount,
+            signedBaseAmountMinor: -to.baseAmountMinor,
+            date: date,
+          ),
+          to: to,
+        );
+      }
+
+      final from = await _resolveTransferLegRate(
+        session,
+        fromAccount,
+        fromEntity,
+        fromLegAmount,
+        date,
+        transaction,
+      );
+      return (
+        from: from,
+        to: _impliedTransferRate(
+          account: toAccount,
+          entity: fromEntity,
+          amountMinor: toAmountMinor,
+          signedBaseAmountMinor: -from.baseAmountMinor,
+          date: date,
+        ),
+      );
+    }
+
+    return (
+      from: await _resolveTransferLegRate(
+        session,
+        fromAccount,
+        fromEntity,
+        fromLegAmount,
+        date,
+        transaction,
+      ),
+      to: await _resolveTransferLegRate(
+        session,
+        toAccount,
+        toEntity,
+        toAmountMinor,
+        date,
+        transaction,
+      ),
+    );
+  }
+
+  static Future<_ResolvedRate> _resolveTransferLegRate(
+    Session session,
+    Account account,
+    Entity entity,
+    int amountMinor,
+    DateTime date,
+    Transaction transaction,
+  ) => _resolveRate(
+    session,
+    account,
+    entity,
+    TransactionInput(
+      accountId: account.id!,
+      date: date,
+      amountMinor: amountMinor,
+      lines: const [],
+    ),
+    transaction,
+  );
+
+  static _ResolvedRate _impliedTransferRate({
+    required Account account,
+    required Entity entity,
+    required int amountMinor,
+    required int signedBaseAmountMinor,
+    required DateTime date,
+  }) {
+    final baseAmount = signedBaseAmountMinor.abs();
+    final accountAmount = amountMinor.abs();
+    if (baseAmount == 0 || accountAmount == 0) {
+      throw ValidationException(
+        message: 'The transfer conversion rounds to zero',
+      );
+    }
+    final rate = impliedRate(
+      fromMinor: accountAmount,
+      toMinor: baseAmount,
+      fromExponent: _exponent(account.currencyCode),
+      toExponent: _exponent(entity.baseCurrencyCode),
+    );
+    return _ResolvedRate(
+      value: rate,
+      rate: _formatRate(rate),
+      rateDate: date,
+      source: FxRateSource.implied,
+      baseAmountMinor: signedBaseAmountMinor,
+    );
+  }
+
+  static _ResolvedRate _storedRate(model.Transaction row) => _ResolvedRate(
+    value: _parseRate(row.fxRate),
+    rate: row.fxRate,
+    rateDate: row.fxRateDate,
+    source: row.fxRateSource,
+    baseAmountMinor: row.baseAmountMinor,
+  );
+
+  static bool _isLedgerRevision(
+    Entity oldEntity,
+    Entity newEntity,
+    bool material,
+  ) =>
+      material &&
+      (oldEntity.accountingMode == AccountingMode.ledger ||
+          newEntity.accountingMode == AccountingMode.ledger);
+
+  static UuidValue? _singleEnvelope(List<TransactionLine> lines) =>
+      lines.length == 1 ? lines.single.envelopeId : null;
+
+  static Future<void> _replaceTransferLine(
+    Session session,
+    UuidValue transactionId,
+    List<TransactionLine> existing, {
+    required int amountMinor,
+    required int baseAmountMinor,
+    required UuidValue? envelopeId,
+    required Transaction transaction,
+  }) async {
+    if (existing.length == 1) {
+      await TransactionLine.db.updateRow(
+        session,
+        TransactionLine(
+          id: existing.single.id,
+          transactionId: transactionId,
+          amountMinor: amountMinor,
+          baseAmountMinor: baseAmountMinor,
+          envelopeId: envelopeId,
+          sortOrder: 0,
+        ),
+        transaction: transaction,
+      );
+      return;
+    }
+
+    await TransactionLine.db.deleteWhere(
+      session,
+      where: (t) => t.transactionId.equals(transactionId),
+      transaction: transaction,
+    );
+    await TransactionLine.db.insert(
+      session,
+      _lineRows(transactionId, [
+        _BuiltLine(
+          amountMinor: amountMinor,
+          baseAmountMinor: baseAmountMinor,
+          envelopeId: envelopeId,
+          ledgerAccountId: null,
+          taxCategoryCode: null,
+          businessUsePercent: null,
+          salesTaxMinor: null,
+          memo: null,
+          sortOrder: 0,
+        ),
+      ]),
+      transaction: transaction,
+    );
+  }
+
+  static Future<void> _validateTransferEnvelope(
+    Session session, {
+    required TransferInput input,
+    required Account fromAccount,
+    required Account toAccount,
+    required Entity fromEntity,
+    required Transaction transaction,
+  }) async {
+    final envelopeId = input.envelopeId;
+    if (envelopeId == null) return;
+
+    if (!fromAccount.onBudget) {
+      throw ValidationException(
+        message: 'An off-budget transfer cannot use an envelope',
+      );
+    }
+    if (toAccount.onBudget && toAccount.entityId == fromAccount.entityId) {
+      throw ValidationException(
+        message: 'An internal transfer cannot use an envelope',
+      );
+    }
+    final envelope = await Envelope.db.findById(
+      session,
+      envelopeId,
+      transaction: transaction,
+    );
+    if (envelope == null) {
+      throw NotFoundException(message: 'Envelope not found');
+    }
+    if (envelope.entityId != fromEntity.id) {
+      throw ForbiddenException(message: 'Envelope belongs to another entity');
+    }
+  }
+
+  static Future<void> _applyTransferDeltas(
+    Session session,
+    Iterable<(UuidValue, int)> deltas,
+    Transaction transaction,
+  ) async {
+    final combined = <UuidValue, int>{};
+    for (final (accountId, delta) in deltas) {
+      combined.update(
+        accountId,
+        (existing) => existing + delta,
+        ifAbsent: () => delta,
+      );
+    }
+
+    final ordered = combined.keys.toList()
+      ..sort((a, b) => a.uuid.compareTo(b.uuid));
+    for (final accountId in ordered) {
+      final delta = combined[accountId]!;
+      if (delta == 0) continue;
+      await AccountBalanceService.applyDelta(
+        session,
+        accountId,
+        delta,
+        transaction: transaction,
+      );
+    }
+  }
+
+  static Future<void> _writeTransferAudit(
+    Session session,
+    Entity oldEntity,
+    Entity newEntity,
+    model.Transaction before,
+    List<TransactionLine> lines,
+    Transaction transaction,
+  ) async {
+    if (oldEntity.accountingMode != AccountingMode.ledger &&
+        newEntity.accountingMode != AccountingMode.ledger) {
+      return;
+    }
+    final entity = oldEntity.accountingMode == AccountingMode.ledger
+        ? oldEntity
+        : newEntity;
+    await _writeAudit(
+      session,
+      entity.id!,
+      AuditAction.transactionEdited,
+      before.id!,
+      {
+        'before': {
+          'transaction': before.toJson(),
+          'lines': lines.map((line) => line.toJson()).toList(),
+        },
+      },
+      transaction,
+    );
+  }
+
+  static void _requirePositiveSafeMinor(int amount, String field) {
+    if (amount <= 0 || amount > maxSafeMinor) {
+      throw ValidationException(
+        message: '$field must be positive and within the safe minor-unit range',
+      );
+    }
+  }
+
+  static void _requireTransferAccount(Account account, Entity entity) {
+    _requireTransactionAccount(account);
+    if (account.closedAt != null) {
+      throw ValidationException(message: 'A closed account rejects transfers');
+    }
+    if (entity.archivedAt != null) {
+      throw ValidationException(
+        message: 'An archived entity rejects transfers',
+      );
+    }
+  }
+
+  static void _queueTransferUpdate(
+    _ChangeOutbox outbox,
+    model.Transaction row,
+    model.Transaction before,
+  ) {
+    final newMonth = MonthKey.fromDate(row.date);
+    final newAccountId = row.accountId;
+    final oldMonth = MonthKey.fromDate(before.date);
+    final oldAccountId = before.accountId;
+
+    _queueChange(outbox, row, month: newMonth, accountId: newAccountId);
+    final unchanged =
+        before.entityId == row.entityId &&
+        oldMonth == newMonth &&
+        oldAccountId == newAccountId;
+    if (unchanged) return;
+
+    _queueScope(
+      outbox,
+      entityId: before.entityId,
+      month: oldMonth,
+      accountId: oldAccountId,
+    );
+  }
+
   static Future<void> _deleteTransfersForAccount(
     Session session,
     UuidValue accountId,
@@ -663,19 +1629,23 @@ abstract final class TransactionWriter {
     // so every account is taken in UUID order ahead of the transfer rows. A
     // peer that another deletion already removed is skipped: its transfers
     // went with it.
-    final accounts = await _lockSurvivingAccounts(
-      session,
-      {accountId, ...discovered.accountIds},
-      tx,
-    );
+    final accounts = await _lockSurvivingAccounts(session, {
+      accountId,
+      ...discovered.accountIds,
+    }, tx);
 
     // Re-read under the account locks. Holding the target account's row lock
     // stops a writer from adding a leg, so the set can only shrink.
     final current = await _transfersTouching(session, accountId, tx);
     final missing = current.accountIds.difference(accounts.keys.toSet());
     if (missing.isNotEmpty) {
-      throw StateError(
-        'A transfer gained an account after the writer locked its accounts',
+      // A transfer committed after discovery while this delete waited for the
+      // target account lock. Locking its peer now would break UUID order and
+      // risk a deadlock, so roll the whole delete back with a domain outcome.
+      throw ValidationException(
+        message:
+            'A transfer was created while the account was being deleted; '
+            'retry the delete',
       );
     }
 
@@ -740,8 +1710,8 @@ abstract final class TransactionWriter {
         );
       }
       if (row.accountId != rows[transactionId]!.accountId) {
-        throw StateError(
-          'A transaction moved accounts while the writer locked it',
+        throw ValidationException(
+          message: 'The transaction changed concurrently; retry the delete',
         );
       }
       lockedRows[transactionId] = row;
@@ -752,7 +1722,9 @@ abstract final class TransactionWriter {
         ? null
         : _peerLegId(lockedTransfer, id);
     if (lockedOtherLegId != otherLegId) {
-      throw StateError('A transfer link changed while the writer locked it');
+      throw ValidationException(
+        message: 'The transfer changed concurrently; retry the delete',
+      );
     }
 
     final entities = <UuidValue, Entity>{};
@@ -771,10 +1743,7 @@ abstract final class TransactionWriter {
         );
       }
       final entity = entities[row.entityId]!;
-      _rejectLockedDate(
-        row.date,
-        await _lockDate(session, entity, tx),
-      );
+      _rejectLockedDate(row.date, await _lockDate(session, entity, tx));
       final account = accounts[row.accountId]!;
       _requireTransactionAccount(account);
     }
@@ -1394,9 +2363,7 @@ ORDER BY 1, 2''',
 
   static DateTime _requireWritableDate(Entity entity, DateTime date) {
     if (!isCivilDate(date)) {
-      throw ValidationException(
-        message: 'date must be a UTC calendar date',
-      );
+      throw ValidationException(message: 'date must be a UTC calendar date');
     }
     if (date.year < 1900) {
       throw ValidationException(
@@ -1478,6 +2445,16 @@ ORDER BY 1, 2''',
     return rate;
   }
 
+  /// Stores the exact value without insignificant trailing zeros.
+  static String _formatRate(ExactDecimal rate) {
+    final text = rate.toString();
+    if (!text.contains('.')) return text;
+    final trimmed = text.replaceFirst(RegExp(r'0+$'), '');
+    return trimmed.endsWith('.')
+        ? trimmed.substring(0, trimmed.length - 1)
+        : trimmed;
+  }
+
   /// Compares two exact decimals as rational numbers, so `"0.8"` and `"0.80"`
   /// are the same rate rather than a re-pricing edit.
   static bool _rateTextDiffers(String raw, String stored) {
@@ -1519,12 +2496,22 @@ ORDER BY 1, 2''',
     UuidValue? accountId,
     int? month,
   }) {
+    _queueScope(
+      outbox,
+      entityId: row.entityId,
+      month: month ?? MonthKey.fromDate(row.date),
+      accountId: accountId ?? row.accountId,
+    );
+  }
+
+  static void _queueScope(
+    _ChangeOutbox outbox, {
+    required UuidValue entityId,
+    required int month,
+    required UuidValue accountId,
+  }) {
     outbox.changes.add(
-      _PendingChange(
-        entityId: row.entityId,
-        month: month ?? MonthKey.fromDate(row.date),
-        accountId: accountId ?? row.accountId,
-      ),
+      _PendingChange(entityId: entityId, month: month, accountId: accountId),
     );
   }
 
