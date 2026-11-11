@@ -57,10 +57,28 @@ class TransactionWriteMetadata {
 /// commits. A caller that passes `transaction:` must have opened it with
 /// [inTransaction], so a rolled-back write never emits an event.
 abstract final class TransactionWriter {
+  /// The largest number of transactions one bulk status or flag change takes.
+  ///
+  /// A page from `transaction.list` holds at most 200 rows, so a bulk action
+  /// covers at most one page.
+  static const maxBulkTransactionIds = 200;
+
   static EntityChangePublisher _publisher = EntityRealtimeNotifier.notify;
   static final Expando<_ChangeOutbox> _outboxes = Expando(
     'TransactionWriter.outbox',
   );
+  static int _viewBatchQueries = 0;
+
+  /// Counts the relation queries [views] ran since the last reset.
+  @visibleForTesting
+  static int get debugViewBatchQueryCount => _viewBatchQueries;
+
+  /// Resets [debugViewBatchQueryCount] so a test can prove a page stays
+  /// bounded as rows grow.
+  @visibleForTesting
+  static void resetDebugViewBatchQueryCount() {
+    _viewBatchQueries = 0;
+  }
 
   /// Replaces how committed events are delivered. Tests use this to observe
   /// notifications without opening a WebSocket.
@@ -110,6 +128,123 @@ abstract final class TransactionWriter {
       transaction: transaction,
     );
     return _view(session, row, transaction: transaction);
+  }
+
+  /// Builds views for one page of [rows] with one query per relation.
+  ///
+  /// A page never costs a round trip per row: accounts, lines, payees,
+  /// transfers, peer legs and peer accounts each load in one `IN` query. The
+  /// caller passes at most one page, so the query count is bounded by the six
+  /// relations rather than by the number of transactions.
+  static Future<List<TransactionView>> views(
+    Session session,
+    List<model.Transaction> rows, {
+    Transaction? transaction,
+  }) async {
+    if (rows.isEmpty) return const [];
+
+    _viewBatchQueries++;
+    final accountIds = <UuidValue>{
+      for (final row in rows) row.accountId,
+    };
+    final accounts = await Account.db.find(
+      session,
+      where: (t) => t.id.inSet(accountIds),
+      transaction: transaction,
+    );
+    final accountById = {for (final account in accounts) account.id!: account};
+    for (final row in rows) {
+      if (!accountById.containsKey(row.accountId)) {
+        throw StateError('Transaction account disappeared');
+      }
+    }
+
+    final ids = {for (final row in rows) row.id!};
+    _viewBatchQueries++;
+    final lines = await TransactionLine.db.find(
+      session,
+      where: (t) => t.transactionId.inSet(ids),
+      orderByList: (t) => [t.sortOrder, t.id],
+      transaction: transaction,
+    );
+    final linesByTransaction = <UuidValue, List<TransactionLine>>{};
+    for (final line in lines) {
+      (linesByTransaction[line.transactionId] ??= []).add(line);
+    }
+
+    final payeeIds = {
+      for (final row in rows)
+        if (row.payeeId != null) row.payeeId!,
+    };
+    final payees = payeeIds.isEmpty
+        ? const <Payee>[]
+        : await Payee.db.find(
+            session,
+            where: (t) => t.id.inSet(payeeIds),
+            transaction: transaction,
+          );
+    if (payeeIds.isNotEmpty) _viewBatchQueries++;
+    final payeeById = {for (final payee in payees) payee.id!: payee};
+
+    _viewBatchQueries++;
+    final transfers = await Transfer.db.find(
+      session,
+      where: (t) =>
+          t.fromTransactionId.inSet(ids) | t.toTransactionId.inSet(ids),
+      transaction: transaction,
+    );
+    final transferByLeg = <UuidValue, Transfer>{};
+    for (final transfer in transfers) {
+      transferByLeg[transfer.fromTransactionId] = transfer;
+      transferByLeg[transfer.toTransactionId] = transfer;
+    }
+    final peerIds = <UuidValue>{};
+    for (final row in rows) {
+      final transfer = transferByLeg[row.id];
+      if (transfer == null) continue;
+      peerIds.add(_peerLegId(transfer, row.id!));
+    }
+
+    final peerRows = peerIds.isEmpty
+        ? const <model.Transaction>[]
+        : await model.Transaction.db.find(
+            session,
+            where: (t) => t.id.inSet(peerIds),
+            transaction: transaction,
+          );
+    if (peerIds.isNotEmpty) _viewBatchQueries++;
+    final rowsById = <UuidValue, model.Transaction>{
+      for (final row in rows) row.id!: row,
+      for (final peer in peerRows) peer.id!: peer,
+    };
+
+    final missingAccountIds = {
+      for (final peer in peerRows)
+        if (!accountById.containsKey(peer.accountId)) peer.accountId,
+    };
+    if (missingAccountIds.isNotEmpty) {
+      _viewBatchQueries++;
+      final peerAccounts = await Account.db.find(
+        session,
+        where: (t) => t.id.inSet(missingAccountIds),
+        transaction: transaction,
+      );
+      for (final account in peerAccounts) {
+        accountById[account.id!] = account;
+      }
+    }
+
+    return [
+      for (final row in rows)
+        TransactionView(
+          transaction: row,
+          lines: linesByTransaction[row.id] ?? const [],
+          accountCurrencyCode: accountById[row.accountId]!.currencyCode,
+          accountName: accountById[row.accountId]!.name,
+          payeeName: row.payeeId == null ? null : payeeById[row.payeeId]?.name,
+          transferPeer: _peerView(row, transferByLeg, rowsById, accountById),
+        ),
+    ];
   }
 
   /// Creates a header, its lines and the account balance movement atomically.
@@ -253,6 +388,199 @@ abstract final class TransactionWriter {
       (tx, outbox) =>
           _deleteTransfersForAccount(session, accountId, tx, outbox),
     );
+  }
+
+  /// Sets [status] on every listed transaction in one owned transaction.
+  ///
+  /// Status is metadata: the movement, lines, FX rate, revision and cached
+  /// balance stay untouched. `reconciled` cannot be set here, but moving a
+  /// reconciled row back to `cleared` or `uncleared` unlocks it.
+  ///
+  /// A foreign or missing id fails the whole call with a generic
+  /// [NotFoundException], so a caller cannot tell another user's transaction
+  /// from one that does not exist. Duplicate ids apply once. Empty [ids] is a
+  /// no-op. The returned count is the number of rows whose status changed.
+  static Future<int> setStatus(
+    Session session,
+    List<UuidValue> ids,
+    TransactionStatus status, {
+    Transaction? transaction,
+  }) async {
+    if (status == TransactionStatus.reconciled) {
+      throw ValidationException(
+        message: 'Reconciled status is set only by reconciliation',
+      );
+    }
+    final unique = _bulkIds(ids);
+    if (unique.isEmpty) return 0;
+    final joined = transaction;
+    if (joined != null) {
+      return _setStatus(
+        session,
+        unique,
+        status,
+        joined,
+        _requireOutbox(joined),
+      );
+    }
+    return _owned(
+      session,
+      (tx, outbox) => _setStatus(session, unique, status, tx, outbox),
+    );
+  }
+
+  /// Sets or clears [flag] on every listed transaction in one transaction.
+  ///
+  /// A null [flag] clears the colour. The rules for ownership, duplicates,
+  /// empty ids and the returned changed count match [setStatus].
+  static Future<int> setFlag(
+    Session session,
+    List<UuidValue> ids,
+    TransactionFlag? flag, {
+    Transaction? transaction,
+  }) async {
+    final unique = _bulkIds(ids);
+    if (unique.isEmpty) return 0;
+    final joined = transaction;
+    if (joined != null) {
+      return _setFlag(session, unique, flag, joined, _requireOutbox(joined));
+    }
+    return _owned(
+      session,
+      (tx, outbox) => _setFlag(session, unique, flag, tx, outbox),
+    );
+  }
+
+  static List<UuidValue> _bulkIds(List<UuidValue> ids) {
+    final unique = ids.toSet().toList()
+      ..sort((a, b) => a.uuid.compareTo(b.uuid));
+    if (unique.length > maxBulkTransactionIds) {
+      throw ValidationException(
+        message:
+            'A bulk transaction change accepts at most '
+            '$maxBulkTransactionIds ids',
+      );
+    }
+    return unique;
+  }
+
+  static Future<int> _setStatus(
+    Session session,
+    List<UuidValue> ids,
+    TransactionStatus status,
+    Transaction tx,
+    _ChangeOutbox outbox,
+  ) async {
+    final rows = await _lockBulkRows(session, ids, tx);
+    final now = DateTime.now().toUtc();
+    final changed = <model.Transaction>[];
+    for (final row in rows) {
+      if (row.status == status) continue;
+      await model.Transaction.db.updateRow(
+        session,
+        row.copyWith(status: status, updatedAt: now),
+        transaction: tx,
+      );
+      changed.add(row);
+    }
+    _queueUniqueChanges(outbox, changed);
+    return changed.length;
+  }
+
+  static Future<int> _setFlag(
+    Session session,
+    List<UuidValue> ids,
+    TransactionFlag? flag,
+    Transaction tx,
+    _ChangeOutbox outbox,
+  ) async {
+    final rows = await _lockBulkRows(session, ids, tx);
+    final now = DateTime.now().toUtc();
+    final changed = <model.Transaction>[];
+    for (final row in rows) {
+      if (row.flag == flag) continue;
+      await model.Transaction.db.updateRow(
+        session,
+        row.copyWith(flag: flag, updatedAt: now),
+        transaction: tx,
+      );
+      changed.add(row);
+    }
+    _queueUniqueChanges(outbox, changed);
+    return changed.length;
+  }
+
+  /// Discovers every row and owner before taking the first lock, then follows
+  /// the writer hierarchy: accounts in UUID order, then transaction rows in
+  /// UUID order. A bulk metadata change never takes a transaction row first,
+  /// so it cannot deadlock with a delete or a transfer rewrite.
+  static Future<List<model.Transaction>> _lockBulkRows(
+    Session session,
+    List<UuidValue> ids,
+    Transaction tx,
+  ) async {
+    final discovered = await model.Transaction.db.find(
+      session,
+      where: (t) => t.id.inSet(ids.toSet()),
+      transaction: tx,
+    );
+    if (discovered.length != ids.length) {
+      throw NotFoundException(message: 'Transaction not found');
+    }
+    final byId = {for (final row in discovered) row.id!: row};
+    final entityIds = {for (final row in discovered) row.entityId};
+    final entities = await Entity.db.find(
+      session,
+      where: (t) => t.id.inSet(entityIds),
+      transaction: tx,
+    );
+    final entityById = {for (final entity in entities) entity.id!: entity};
+    final owner = EntityAccess.userId(session);
+    for (final entityId in entityIds) {
+      final entity = entityById[entityId];
+      if (entity == null || entity.ownerId != owner) {
+        throw NotFoundException(message: 'Transaction not found');
+      }
+    }
+
+    await _lockAccounts(session, {
+      for (final row in discovered) row.accountId,
+    }, tx);
+
+    final locked = <model.Transaction>[];
+    for (final id in ids) {
+      final row = await model.Transaction.db.findById(
+        session,
+        id,
+        transaction: tx,
+        lockMode: LockMode.forUpdate,
+      );
+      if (row == null) {
+        throw NotFoundException(message: 'Transaction not found');
+      }
+      final before = byId[id]!;
+      if (row.accountId != before.accountId ||
+          row.entityId != before.entityId) {
+        throw ValidationException(
+          message: 'The transaction changed concurrently; retry the change',
+        );
+      }
+      locked.add(row);
+    }
+    return locked;
+  }
+
+  static void _queueUniqueChanges(
+    _ChangeOutbox outbox,
+    Iterable<model.Transaction> rows,
+  ) {
+    final seen = <String>{};
+    for (final row in rows) {
+      final month = MonthKey.fromDate(row.date);
+      final key = '${row.entityId}|$month|${row.accountId}';
+      if (!seen.add(key)) continue;
+      _queueChange(outbox, row, month: month);
+    }
   }
 
   static Future<T> _owned<T>(
@@ -2167,6 +2495,29 @@ abstract final class TransactionWriter {
       accountName: account.name,
       payeeName: payee?.name,
       transferPeer: peer,
+    );
+  }
+
+  static TransferPeerView? _peerView(
+    model.Transaction row,
+    Map<UuidValue, Transfer> transferByLeg,
+    Map<UuidValue, model.Transaction> rowsById,
+    Map<UuidValue, Account> accountById,
+  ) {
+    final transfer = transferByLeg[row.id];
+    if (transfer == null) return null;
+    final peerId = _peerLegId(transfer, row.id!);
+    final peer = rowsById[peerId];
+    final peerAccount = peer == null ? null : accountById[peer.accountId];
+    if (peer == null || peerAccount == null) return null;
+    return TransferPeerView(
+      transferId: transfer.id!,
+      transactionId: peer.id!,
+      accountId: peer.accountId,
+      accountName: peerAccount.name,
+      entityId: peer.entityId,
+      amountMinor: peer.amountMinor,
+      currencyCode: peerAccount.currencyCode,
     );
   }
 
