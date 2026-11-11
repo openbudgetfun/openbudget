@@ -1,137 +1,115 @@
-import 'package:openbudget_server/src/budgets/budget_realtime_notifier.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:openbudget_server/src/recurring_transactions/recurring_transaction_service.dart';
 import 'package:serverpod/serverpod.dart';
 
 /// API surface for recurring transaction operations.
 ///
-/// All methods require authentication.
+/// All methods require authentication and delegate to
+/// [RecurringTransactionService], which owns the entity boundary and publishes
+/// committed change events.
 class RecurringTransactionEndpoint extends Endpoint {
   @override
   bool get requireLogin => true;
 
-  /// Creates a new recurring transaction.
+  /// Creates a schedule for one transactions-sourced account.
   Future<RecurringTransaction> create(
     Session session,
+    UuidValue accountId,
     String description,
-    int amountCents,
-    String currencyCode,
-    UuidValue budgetId,
-    String frequency,
-    DateTime nextOccurrence, {
-    UuidValue? envelopeId,
-    UuidValue? accountId,
+    int amountMinor,
+    RecurrenceFrequency frequency,
+    DateTime nextDate, {
     UuidValue? payeeId,
+    UuidValue? envelopeId,
+    String? memo,
     DateTime? endDate,
-  }) async {
-    final recurring = await RecurringTransactionService.create(
-      session,
-      description: description,
-      amountCents: amountCents,
-      currencyCode: currencyCode,
-      budgetId: budgetId,
-      frequency: frequency,
-      nextOccurrence: nextOccurrence,
-      envelopeId: envelopeId,
-      accountId: accountId,
-      payeeId: payeeId,
-      endDate: endDate,
-    );
-    BudgetRealtimeNotifier.notifyBudgetChanged(recurring.budgetId);
-    return recurring;
-  }
-
-  /// Lists recurring transactions for a budget.
-  Future<List<RecurringTransaction>> list(
-    Session session,
-    UuidValue budgetId, {
-    bool? activeOnly,
-  }) async => RecurringTransactionService.listForBudget(
+  }) => RecurringTransactionService.create(
     session,
-    budgetId: budgetId,
-    activeOnly: activeOnly,
+    accountId: accountId,
+    description: description,
+    amountMinor: amountMinor,
+    frequency: frequency,
+    nextDate: nextDate,
+    payeeId: payeeId,
+    envelopeId: envelopeId,
+    memo: memo,
+    endDate: endDate,
   );
 
-  /// Gets a recurring transaction by ID.
+  /// Lists every schedule of an owned entity in due-date order.
+  Future<List<RecurringTransaction>> list(
+    Session session,
+    UuidValue entityId,
+  ) => RecurringTransactionService.list(session, entityId: entityId);
+
+  /// Gets one schedule by ID.
   Future<RecurringTransaction> get(
     Session session,
     UuidValue recurringTransactionId,
-  ) async => RecurringTransactionService.getById(
+  ) => RecurringTransactionService.getById(
     session,
     recurringTransactionId: recurringTransactionId,
   );
 
-  /// Updates a recurring transaction.
+  /// Updates the named fields and clear flags from the §7.1 contract.
   Future<RecurringTransaction> update(
     Session session,
     UuidValue recurringTransactionId, {
-    String? description,
-    int? amountCents,
-    UuidValue? envelopeId,
     UuidValue? accountId,
+    String? description,
+    int? amountMinor,
+    RecurrenceFrequency? frequency,
+    DateTime? nextDate,
     UuidValue? payeeId,
-    String? frequency,
-    DateTime? nextOccurrence,
+    bool? clearPayee,
+    UuidValue? envelopeId,
+    bool? clearEnvelope,
+    String? memo,
     DateTime? endDate,
+    bool? clearEndDate,
     bool? isActive,
-  }) async {
-    final recurring = await RecurringTransactionService.update(
-      session,
-      recurringTransactionId: recurringTransactionId,
-      description: description,
-      amountCents: amountCents,
-      envelopeId: envelopeId,
-      accountId: accountId,
-      payeeId: payeeId,
-      frequency: frequency,
-      nextOccurrence: nextOccurrence,
-      endDate: endDate,
-      isActive: isActive,
-    );
-    BudgetRealtimeNotifier.notifyBudgetChanged(recurring.budgetId);
-    return recurring;
-  }
+  }) => RecurringTransactionService.update(
+    session,
+    recurringTransactionId: recurringTransactionId,
+    accountId: accountId,
+    description: description,
+    amountMinor: amountMinor,
+    frequency: frequency,
+    nextDate: nextDate,
+    payeeId: payeeId,
+    clearPayee: clearPayee ?? false,
+    envelopeId: envelopeId,
+    clearEnvelope: clearEnvelope ?? false,
+    memo: memo,
+    endDate: endDate,
+    clearEndDate: clearEndDate ?? false,
+    isActive: isActive,
+  );
 
-  /// Deletes a recurring transaction.
+  /// Deletes one schedule without deleting its posted transactions.
   Future<RecurringTransaction> delete(
     Session session,
     UuidValue recurringTransactionId,
-  ) async {
-    final recurring = await RecurringTransactionService.delete(
-      session,
-      recurringTransactionId: recurringTransactionId,
-    );
-    BudgetRealtimeNotifier.notifyBudgetChanged(recurring.budgetId);
-    return recurring;
-  }
+  ) => RecurringTransactionService.delete(
+    session,
+    recurringTransactionId: recurringTransactionId,
+  );
 
-  /// Skips the next occurrence of a recurring transaction by advancing the
-  /// schedule without creating a transaction.
+  /// Advances the schedule by one occurrence without posting it.
   Future<RecurringTransaction> skipOccurrence(
     Session session,
     UuidValue recurringTransactionId,
-  ) async {
-    final recurring = await RecurringTransactionService.skipOccurrence(
-      session,
-      recurringTransactionId: recurringTransactionId,
-    );
-    BudgetRealtimeNotifier.notifyBudgetChanged(recurring.budgetId);
-    return recurring;
-  }
+  ) => RecurringTransactionService.skipOccurrence(
+    session,
+    recurringTransactionId: recurringTransactionId,
+  );
 
-  /// Posts all due recurring transactions for a budget, creating actual
-  /// transactions and advancing the schedule. Returns the count of created
-  /// transactions.
-  Future<int> postDue(Session session, UuidValue budgetId) async {
-    final postedCount = await RecurringTransactionService.postDue(
-      session,
-      budgetId: budgetId,
-    );
-    BudgetRealtimeNotifier.notifyBudgetChanged(budgetId);
-    return postedCount;
-  }
+  /// Posts every due occurrence for one entity and returns the actual count.
+  Future<int> postDue(Session session, UuidValue entityId) =>
+      RecurringTransactionService.postDue(session, entityId: entityId);
 
-  /// Returns the count of active recurring transactions that are currently due.
-  Future<int> countDue(Session session, UuidValue budgetId) async =>
-      RecurringTransactionService.countDue(session, budgetId: budgetId);
+  /// Counts active schedules that are due on the entity's local today.
+  Future<int> countDue(Session session, UuidValue entityId) =>
+      RecurringTransactionService.countDue(session, entityId: entityId);
 }

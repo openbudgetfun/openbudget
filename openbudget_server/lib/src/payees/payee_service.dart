@@ -303,19 +303,23 @@ LIMIT 1
         target: targetRow,
         transaction: tx,
       );
-      await _moveRecurringPayees(
-        session,
-        entity: entity,
-        source: sourceRow,
-        target: targetRow,
-        transaction: tx,
-      );
 
+      // Accounts first, then transaction rows, then recurring schedules. The
+      // writer locks every account of the entity in UUID order; moving the
+      // schedules afterwards keeps the recurring poster's account-then-row
+      // order and avoids a schedule-then-account inversion.
       final changed = await TransactionWriter.reassignPayee(
         session,
         entityId: entity.id!,
         fromPayeeId: sourceRow.id!,
         toPayeeId: targetRow.id,
+        transaction: tx,
+      );
+      await _moveRecurringPayees(
+        session,
+        entity: entity,
+        source: sourceRow,
+        target: targetRow,
         transaction: tx,
       );
 

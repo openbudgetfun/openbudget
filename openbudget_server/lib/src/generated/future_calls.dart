@@ -20,6 +20,7 @@ import '../accounts/balance_verify_future_call.dart' as _i3hgsuzd;
 import '../billing/solana_billing_collector_future_call.dart' as _i6oeyfz6;
 import '../fx_rates/fx_backfill_future_call.dart' as _idsel8od;
 import '../fx_rates/fx_refresh_future_call.dart' as _i1ol5dhc;
+import '../recurring_transactions/recurring_post_future_call.dart' as _ibpoas7h;
 import 'future_calls_generated_models/fx_backfill_future_call_fetch_model.dart'
     as _iuflqeka;
 
@@ -72,6 +73,7 @@ class FutureCalls extends _is.FutureCallDispatch<_FutureCallRef> {
           SolanaBillingCollectorCollectFutureCall(),
       'FxBackfillFetchFutureCall': FxBackfillFetchFutureCall(),
       'FxRefreshRefreshFutureCall': FxRefreshRefreshFutureCall(),
+      'RecurringPostPostDueFutureCall': RecurringPostPostDueFutureCall(),
     };
     _futureCallManager = futureCallManager;
     _serverId = serverId;
@@ -202,6 +204,10 @@ class _FutureCallRef {
   late final fxBackfill = _FxBackfillFutureCallDispatcher(_invokeFutureCall);
 
   late final fxRefresh = _FxRefreshFutureCallDispatcher(_invokeFutureCall);
+
+  late final recurringPost = _RecurringPostFutureCallDispatcher(
+    _invokeFutureCall,
+  );
 }
 
 class _BalanceVerifyFutureCallDispatcher {
@@ -252,6 +258,19 @@ class _FxRefreshFutureCallDispatcher {
   Future<void> refresh() {
     return _invokeFutureCall(
       'FxRefreshRefreshFutureCall',
+      null,
+    );
+  }
+}
+
+class _RecurringPostFutureCallDispatcher {
+  _RecurringPostFutureCallDispatcher(this._invokeFutureCall);
+
+  final _InvokeFutureCall _invokeFutureCall;
+
+  Future<void> postDue() {
+    return _invokeFutureCall(
+      'RecurringPostPostDueFutureCall',
       null,
     );
   }
@@ -311,5 +330,17 @@ class FxRefreshRefreshFutureCall extends _is.FutureCall
     _is.SerializableModel? object,
   ) async {
     await _i1ol5dhc.FxRefreshFutureCall().refresh(session);
+  }
+}
+
+/// Posts all due schedules across every non-archived entity.
+class RecurringPostPostDueFutureCall extends _is.FutureCall
+    implements _is.InvokableFutureCall {
+  @override
+  _ida.Future<void> invoke(
+    _is.Session session,
+    _is.SerializableModel? object,
+  ) async {
+    await _ibpoas7h.RecurringPostFutureCall().postDue(session);
   }
 }

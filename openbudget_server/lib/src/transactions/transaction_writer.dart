@@ -261,19 +261,32 @@ abstract final class TransactionWriter {
   }
 
   /// Creates a header, its lines and the account balance movement atomically.
+  ///
+  /// [systemOwner] is reserved for a server-owned job acting for a persisted
+  /// entity owner. Endpoints leave it null and cross the session's normal
+  /// authentication check.
   static Future<TransactionView> create(
     Session session,
     TransactionInput input, {
     Transaction? transaction,
     TransactionWriteMetadata metadata = const TransactionWriteMetadata(),
+    SystemEntityOwner? systemOwner,
   }) {
     final joined = transaction;
     if (joined != null) {
-      return _create(session, input, joined, metadata, _requireOutbox(joined));
+      return _create(
+        session,
+        input,
+        joined,
+        metadata,
+        _requireOutbox(joined),
+        systemOwner,
+      );
     }
     return _owned(
       session,
-      (tx, outbox) => _create(session, input, tx, metadata, outbox),
+      (tx, outbox) =>
+          _create(session, input, tx, metadata, outbox, systemOwner),
     );
   }
 
@@ -972,6 +985,7 @@ abstract final class TransactionWriter {
         tx,
         const TransactionWriteMetadata(kind: TransactionKind.balanceAdjustment),
         outbox,
+        null,
       );
       adjustmentTransactionId = adjustment.transaction.id;
     }
@@ -1302,12 +1316,14 @@ RETURNING date''',
     Transaction tx,
     TransactionWriteMetadata metadata,
     _ChangeOutbox outbox,
+    SystemEntityOwner? systemOwner,
   ) async {
     final account = await _lockAccount(session, input.accountId, tx);
     final entity = await EntityAccess.requireOwned(
       session,
       account.entityId,
       transaction: tx,
+      systemOwner: systemOwner,
     );
     _requireTransactionAccount(account);
     if (account.closedAt != null) {
