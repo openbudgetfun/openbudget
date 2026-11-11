@@ -3655,7 +3655,7 @@ abstract class AppLocalizations {
   /// No description provided for @transferSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Transfer completed'**
+  /// **'Transfer saved'**
   String get transferSuccess;
 
   /// No description provided for @transferTitle.
@@ -9359,6 +9359,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Import into account'**
   String get importTargetAccount;
+
+  /// No description provided for @transferFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'From account'**
+  String get transferFrom;
+
+  /// No description provided for @transferTo.
+  ///
+  /// In en, this message translates to:
+  /// **'To account'**
+  String get transferTo;
+
+  /// No description provided for @transferAmountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get transferAmountLabel;
+
+  /// No description provided for @transferSentLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent'**
+  String get transferSentLabel;
+
+  /// No description provided for @transferReceivedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Received'**
+  String get transferReceivedLabel;
+
+  /// No description provided for @transferUseTodayRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Use today\'s rate'**
+  String get transferUseTodayRate;
+
+  /// No description provided for @transferEnvelopeLeavesPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Envelope (money leaves the plan)'**
+  String get transferEnvelopeLeavesPlan;
+
+  /// No description provided for @transferCrossEntityHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfers between your entities convert into each entity\'s base currency. Money never appears or disappears.'**
+  String get transferCrossEntityHint;
 }
 
 class _AppLocalizationsDelegate

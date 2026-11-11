@@ -1,56 +1,27 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
 import 'package:openbudget_app/src/features/accounts/providers/account_list_provider.dart';
-import 'package:openbudget_app/src/providers/serverpod_client_provider.dart';
-import 'package:openbudget_app/src/utils/currency_code_utils.dart';
+import 'package:openbudget_app/src/features/budget/providers/budget_month_provider.dart';
+import 'package:openbudget_app/src/features/transactions/providers/transaction_actions_provider.dart';
+import 'package:openbudget_app/src/features/transactions/widgets/fx_rate_line.dart';
+import 'package:openbudget_app/src/providers/fx_rate_provider.dart';
+import 'package:openbudget_app/src/routing/route_names.dart';
 import 'package:openbudget_app/src/utils/currency_formatter.dart';
 import 'package:openbudget_app/src/utils/money_input.dart';
 import 'package:openbudget_app/src/widgets/app_toast.dart';
 import 'package:openbudget_client/openbudget_client.dart';
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_ui/openbudget_ui.dart';
 
-@visibleForTesting
-Account? findTransferAccountById(List<Account> accounts, String? accountId) =>
-    accounts
-        .where((account) => account.id?.toString() == accountId)
-        .firstOrNull;
-
-@visibleForTesting
-List<Account> transferDestinationAccounts(
-  List<Account> accounts, {
-  required String? fromAccountId,
-}) {
-  final fromAccount = findTransferAccountById(accounts, fromAccountId);
-  if (fromAccount == null) return accounts;
-
-  return accounts
-      .where(
-        (account) =>
-            account.currencyCode == fromAccount.currencyCode &&
-            account.id != fromAccount.id,
-      )
-      .toList();
-}
-
-@visibleForTesting
-String transferCurrency(
-  List<Account> accounts, {
-  required String? fromAccountId,
-}) {
-  final fromAccount = findTransferAccountById(accounts, fromAccountId);
-  return normalizeCurrencyCode(fromAccount?.currencyCode ?? '');
-}
-
-@visibleForTesting
-int? parseTransferAmountMinor(String amountText, String currencyCode) =>
-    parseMoneyInput(
-      amountText,
-      decimals: currencyDecimalsForCode(currencyCode),
-    );
-
+/// Cross-currency and cross-entity transfers: From and To pickers list every
+/// account in every entity; different currencies get Sent and Received
+/// fields with a live implied rate and "Use today's rate". An envelope
+/// appears only when the money leaves the envelope plan.
 class CreateTransferScreen extends HookConsumerWidget {
   const CreateTransferScreen({required this.entityId, super.key});
 
@@ -59,18 +30,157 @@ class CreateTransferScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final accountsAsync = ref.watch(accountListProvider(entityId));
+    final theme = Theme.of(context);
+    final palette = theme.ob;
+    final accountsAsync = ref.watch(accountListAllProvider);
+    final groupsAsync = ref.watch(budgetMonthGroupsProvider(entityId));
 
     final descController = useTextEditingController(
       text: l10n.transferDefaultDescription,
     );
-    final amountController = useTextEditingController();
+    final fromAmountController = useTextEditingController();
+    final toAmountController = useTextEditingController();
     final fromAccountId = useState<String?>(null);
     final toAccountId = useState<String?>(null);
     final selectedDate = useState(DateTime.now());
+    final selectedEnvelopeId = useState<String?>(null);
     final isSubmitting = useState(false);
 
-    useListenable(amountController);
+    useListenable(fromAmountController);
+    useListenable(toAmountController);
+
+    final allAccounts = accountsAsync.value ?? const <Account>[];
+    final fromAccount = allAccounts
+        .where((a) => a.id?.toString() == fromAccountId.value)
+        .firstOrNull;
+    final toAccount = allAccounts
+        .where((a) => a.id?.toString() == toAccountId.value)
+        .firstOrNull;
+    final isCrossCurrency =
+        fromAccount != null &&
+        toAccount != null &&
+        fromAccount.currencyCode != toAccount.currencyCode;
+    final leavesThePlan =
+        fromAccount != null &&
+        toAccount != null &&
+        (fromAccount.onBudget &&
+            (!toAccount.onBudget ||
+                toAccount.entityId != fromAccount.entityId));
+    final sameAccount = fromAccountId.value != null &&
+        fromAccountId.value == toAccountId.value;
+
+    final fromDecimals = currencyDecimalsForCode(
+      fromAccount?.currencyCode ?? '',
+    );
+    final toDecimals = currencyDecimalsForCode(toAccount?.currencyCode ?? '');
+    final fromMinor = parseMoneyInput(
+      fromAmountController.text,
+      decimals: fromDecimals,
+    );
+    final toMinor = isCrossCurrency
+        ? parseMoneyInput(toAmountController.text, decimals: toDecimals)
+        : fromMinor;
+    final fromError = moneyInputError(
+      fromAmountController.text,
+      decimals: fromDecimals,
+      message: l10n.amountInvalidFormat(fromDecimals),
+    );
+    final toError = isCrossCurrency
+        ? moneyInputError(
+            toAmountController.text,
+            decimals: toDecimals,
+            message: l10n.amountInvalidFormat(toDecimals),
+          )
+        : null;
+
+    final canSubmit =
+        fromAccount != null &&
+        toAccount != null &&
+        !sameAccount &&
+        fromMinor != null &&
+        fromMinor > 0 &&
+        toMinor != null && toMinor > 0;
+
+    Future<void> useMarketRate() async {
+      // "Use today's rate": quote the market rate and fill Received. The
+      // server re-prices from its own stored rate when the field is empty.
+      final from = fromAccount;
+      final to = toAccount;
+      if (from == null || to == null) return;
+      if (fromMinor == null || fromMinor <= 0) return;
+      try {
+        final quote = await ref.read(
+          fxQuoteProvider(
+            from.currencyCode,
+            to.currencyCode,
+            selectedDate.value,
+          ).future,
+        );
+        final rate = ExactDecimal.tryParse(quote.rate);
+        if (rate == null) return;
+        final converted = convertMinorUnits(
+          amountMinor: fromMinor,
+          exchangeRate: rate,
+          transactionExponent: fromDecimals,
+          functionalExponent: toDecimals,
+        );
+        toAmountController.text = formatMinorUnits(converted, toDecimals);
+      } on Exception {
+        // The FX line shows the server's explanation.
+      }
+    }
+
+    Future<void> submit() async {
+      if (!canSubmit || isSubmitting.value) return;
+      isSubmitting.value = true;
+      final router = GoRouter.of(context);
+      final messenger = ScaffoldMessenger.of(context);
+      try {
+        final fromId = fromAccount.id;
+        final toId = toAccount.id;
+        if (fromId == null || toId == null) return;
+        final input = TransferInput(
+          fromAccountId: fromId,
+          toAccountId: toId,
+          date: DateTime.utc(
+            selectedDate.value.year,
+            selectedDate.value.month,
+            selectedDate.value.day,
+          ),
+          fromAmountMinor: fromMinor,
+          toAmountMinor:
+              isCrossCurrency && toAmountController.text.trim().isNotEmpty
+              ? toMinor
+              : null,
+          useMarketRate:
+              isCrossCurrency && toAmountController.text.trim().isEmpty,
+          envelopeId: leavesThePlan && selectedEnvelopeId.value != null
+              ? UuidValue.fromString(selectedEnvelopeId.value!)
+              : null,
+          memo: descController.text.trim().isEmpty
+              ? null
+              : descController.text.trim(),
+        );
+        await ref
+            .read(transactionActionsProvider.notifier)
+            .createTransfer(input: input, entityId: entityId);
+        if (!context.mounted) return;
+        showAppToast(
+          context,
+          message: l10n.transferSuccess,
+          variant: AppToastVariant.success,
+        );
+        router.goNamed(
+          accountListRoute,
+          pathParameters: {'entityId': entityId},
+        );
+      } on Exception catch (_) {
+        isSubmitting.value = false;
+        messenger.showSnackBar(
+          SnackBar(content: Text(l10n.transferError)),
+        );
+      }
+    }
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.transferTitle)),
@@ -84,239 +194,225 @@ class CreateTransferScreen extends HookConsumerWidget {
             child: ObStatePanel.problem(title: l10n.accountLoadError),
           ),
         ),
-        data: (accounts) {
-          final selectedCurrency = transferCurrency(
-            accounts,
-            fromAccountId: fromAccountId.value,
-          );
-          final zeroAmountHint = formatMinorForCode(0, selectedCurrency);
-          final amountDecimals = currencyDecimalsForCode(selectedCurrency);
-          final amountError = moneyInputError(
-            amountController.text,
-            decimals: amountDecimals,
-            message: l10n.amountInvalidFormat(amountDecimals),
-          );
-
-          final toAccountOptions = transferDestinationAccounts(
-            accounts,
-            fromAccountId: fromAccountId.value,
-          );
-
-          if (accounts.length < 2) {
-            return Center(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(SpacingTokens.lg),
-                child: ObStatePanel.empty(
-                  title: l10n.transferNeedTwoAccounts,
-                  doodle: WiredDoodleKind.balloon,
-                ),
-              ),
-            );
-          }
-
-          return ListView(
-            padding: const EdgeInsets.all(SpacingTokens.md),
-            children: [
-              DropdownButtonFormField<String>(
-                initialValue: fromAccountId.value,
-                decoration: InputDecoration(
-                  labelText: l10n.transferFromAccount,
-                  prefixIcon: const ObFieldIcon(
-                    data: OpenBudgetIcons.outflow,
-                  ),
-                ),
-                items: accounts
-                    .map(
-                      (a) => DropdownMenuItem(
-                        value: a.id?.toString(),
-                        child: Text('${a.name} (${a.currencyCode})'),
+        data: (_) {
+          return Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(SpacingTokens.md),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 420),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _AccountPicker(
+                      label: l10n.transferFrom,
+                      accounts: allAccounts,
+                      selectedAccountId: fromAccountId.value,
+                      excludeAccountId: toAccountId.value,
+                      onChanged: (value) => fromAccountId.value = value,
+                    ),
+                    const SizedBox(height: SpacingTokens.sm),
+                    _AccountPicker(
+                      label: l10n.transferTo,
+                      accounts: allAccounts,
+                      selectedAccountId: toAccountId.value,
+                      excludeAccountId: fromAccountId.value,
+                      onChanged: (value) => toAccountId.value = value,
+                    ),
+                    const SizedBox(height: SpacingTokens.md),
+                    ObCard(
+                      padding: const EdgeInsets.all(SpacingTokens.md),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          if (!isCrossCurrency)
+                            TextField(
+                              controller: fromAmountController,
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  ),
+                              decoration: InputDecoration(
+                                labelText: l10n.transferAmountLabel,
+                                errorText: fromError,
+                                prefixText:
+                                    '${fromAccount!.currencyCode} ',
+                              ),
+                            )
+                          else ...[
+                            TextField(
+                              controller: fromAmountController,
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  ),
+                              decoration: InputDecoration(
+                                labelText: l10n.transferSentLabel,
+                                errorText: fromError,
+                                prefixText: '${fromAccount.currencyCode} ',
+                              ),
+                            ),
+                            const SizedBox(height: SpacingTokens.sm),
+                            TextField(
+                              controller: toAmountController,
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  ),
+                              decoration: InputDecoration(
+                                labelText: l10n.transferReceivedLabel,
+                                errorText: toError,
+                                prefixText: '${toAccount.currencyCode} ',
+                              ),
+                            ),
+                            if (fromMinor != null && fromMinor > 0)
+                              FxRateLine(
+                                fromCurrencyCode: fromAccount.currencyCode,
+                                toCurrencyCode: toAccount.currencyCode,
+                                date: selectedDate.value,
+                                amountMinor: fromMinor,
+                                onSetRate: useMarketRate,
+                              ),
+                            TextButton(
+                              onPressed: useMarketRate,
+                              child: Text(l10n.transferUseTodayRate),
+                            ),
+                          ],
+                        ],
                       ),
-                    )
-                    .toList(),
-                onChanged: (v) {
-                  fromAccountId.value = v;
-                  final from = findTransferAccountById(accounts, v);
-                  final currentTo = findTransferAccountById(
-                    accounts,
-                    toAccountId.value,
-                  );
-                  if (from != null &&
-                      currentTo != null &&
-                      (from.id == currentTo.id ||
-                          from.currencyCode != currentTo.currencyCode)) {
-                    toAccountId.value = null;
-                  }
-                },
-              ),
-              const SizedBox(height: SpacingTokens.md),
-              DropdownButtonFormField<String>(
-                initialValue: toAccountId.value,
-                decoration: InputDecoration(
-                  labelText: l10n.transferToAccount,
-                  prefixIcon: const ObFieldIcon(data: OpenBudgetIcons.inflow),
-                ),
-                items: toAccountOptions
-                    .map(
-                      (a) => DropdownMenuItem(
-                        value: a.id?.toString(),
-                        child: Text('${a.name} (${a.currencyCode})'),
+                    ),
+                    const SizedBox(height: SpacingTokens.sm),
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: const SkribbleIcon(data: OpenBudgetIcons.calendar),
+                      title: Text(l10n.transactionDateLabel),
+                      subtitle: Text(
+                        '${selectedDate.value.year}-'
+                        '${selectedDate.value.month.toString().padLeft(2, '0')}-'
+                        '${selectedDate.value.day.toString().padLeft(2, '0')}',
                       ),
-                    )
-                    .toList(),
-                onChanged: (v) => toAccountId.value = v,
-              ),
-              const SizedBox(height: SpacingTokens.md),
-              TextField(
-                controller: amountController,
-                decoration: InputDecoration(
-                  labelText:
-                      '${l10n.transactionAmountLabel} (${normalizeCurrencyCode(selectedCurrency)})',
-                  errorText: amountError,
-                  prefixText: '${currencySymbolForCode(selectedCurrency)} ',
-                  hintText: zeroAmountHint,
-                  prefixIcon: const ObFieldIcon(
-                    data: OpenBudgetIcons.coins,
-                  ),
-                ),
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-                textInputAction: TextInputAction.next,
-              ),
-              const SizedBox(height: SpacingTokens.md),
-              TextField(
-                controller: descController,
-                decoration: InputDecoration(
-                  labelText: l10n.transactionDescriptionLabel,
-                  prefixIcon: const ObFieldIcon(
-                    data: OpenBudgetIcons.note,
-                  ),
-                ),
-                textInputAction: TextInputAction.done,
-              ),
-              const SizedBox(height: SpacingTokens.md),
-              ObCard(
-                child: ListTile(
-                  leading: const SkribbleIcon(
-                    data: OpenBudgetIcons.calendar,
-                  ),
-                  title: Text(l10n.transferDate),
-                  subtitle: Text(
-                    '${selectedDate.value.year}-${selectedDate.value.month.toString().padLeft(2, '0')}-${selectedDate.value.day.toString().padLeft(2, '0')}',
-                  ),
-                  onTap: () async {
-                    final picked = await showDatePicker(
-                      context: context,
-                      initialDate: selectedDate.value,
-                      firstDate: DateTime(2000),
-                      lastDate: DateTime(2100),
-                    );
-                    if (picked != null) selectedDate.value = picked;
-                  },
-                ),
-              ),
-              const SizedBox(height: SpacingTokens.lg),
-              FilledButton.icon(
-                onPressed: isSubmitting.value
-                    ? null
-                    : () => _submit(
-                        context,
-                        ref,
-                        descController,
-                        amountController,
-                        accounts,
-                        fromAccountId,
-                        toAccountId,
-                        selectedDate,
-                        isSubmitting,
+                      onTap: () async {
+                        final picked = await showDatePicker(
+                          context: context,
+                          initialDate: selectedDate.value,
+                          firstDate: DateTime(2000),
+                          lastDate: DateTime(2100),
+                        );
+                        if (picked != null) {
+                          selectedDate.value = DateTime.utc(
+                            picked.year,
+                            picked.month,
+                            picked.day,
+                          );
+                        }
+                      },
+                    ),
+                    if (leavesThePlan) ...[
+                      const SizedBox(height: SpacingTokens.sm),
+                      ObDropdown<String>(
+                        value: selectedEnvelopeId.value ?? '',
+                        items: [
+                          DropdownMenuItem<String>(
+                            value: '',
+                            child: Text(l10n.transactionUnassigned),
+                          ),
+                          if (groupsAsync.hasValue)
+                            for (final group in groupsAsync.value!)
+                              for (final envelope in group.envelopes)
+                                DropdownMenuItem<String>(
+                                  value:
+                                      envelope.envelope.id?.toString() ?? '',
+                                  child: Text(
+                                    '${group.category.name} / '
+                                    '${envelope.envelope.name}',
+                                  ),
+                                ),
+                        ],
+                        labelText: l10n.transferEnvelopeLeavesPlan,
+                        onChanged: (value) =>
+                            selectedEnvelopeId.value = value,
                       ),
-                icon: isSubmitting.value
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const SkribbleIcon(data: OpenBudgetIcons.transfer),
-                label: Text(l10n.transferButton),
+                    ],
+                    const SizedBox(height: SpacingTokens.md),
+                    ObTextField(
+                      controller: descController,
+                      labelText: l10n.transactionDescriptionLabel,
+                      prefixIcon: const ObFieldIcon(
+                        data: OpenBudgetIcons.document,
+                      ),
+                    ),
+                    const SizedBox(height: SpacingTokens.md),
+                    ObFilledButton(
+                      onPressed: canSubmit && !isSubmitting.value
+                          ? submit
+                          : null,
+                      child: Text(l10n.transferButton),
+                    ),
+                    const SizedBox(height: SpacingTokens.md),
+                    Row(
+                      children: [
+                        SkribbleIcon(
+                          data: OpenBudgetIcons.info,
+                          size: 14,
+                          color: palette.mutedInk,
+                        ),
+                        const SizedBox(width: SpacingTokens.xs),
+                        Expanded(
+                          child: Text(
+                            l10n.transferCrossEntityHint,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: palette.mutedInk,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ],
+            ),
           );
         },
       ),
     );
   }
+}
 
-  Future<void> _submit(
-    BuildContext context,
-    WidgetRef ref,
-    TextEditingController descController,
-    TextEditingController amountController,
-    List<Account> accounts,
-    ValueNotifier<String?> fromAccountId,
-    ValueNotifier<String?> toAccountId,
-    ValueNotifier<DateTime> selectedDate,
-    ValueNotifier<bool> isSubmitting,
-  ) async {
-    final l10n = AppLocalizations.of(context);
+/// One account picker row listing every account in every entity; the
+/// entity name shows as the subtitle for cross-entity transfers.
+class _AccountPicker extends HookWidget {
+  const _AccountPicker({
+    required this.label,
+    required this.accounts,
+    required this.selectedAccountId,
+    required this.excludeAccountId,
+    required this.onChanged,
+  });
 
-    if (fromAccountId.value == null || toAccountId.value == null) return;
-    final fromAccount = findTransferAccountById(accounts, fromAccountId.value);
-    final toAccount = findTransferAccountById(accounts, toAccountId.value);
-    if (fromAccount == null || toAccount == null) return;
-    if (fromAccountId.value == toAccountId.value) {
-      showAppToast(
-        context,
-        message: l10n.transferSameAccountError,
-        variant: AppToastVariant.error,
-      );
-      return;
-    }
+  final String label;
+  final List<Account> accounts;
+  final String? selectedAccountId;
+  final String? excludeAccountId;
+  final ValueChanged<String?> onChanged;
 
-    if (fromAccount.currencyCode != toAccount.currencyCode) {
-      showAppToast(
-        context,
-        message:
-            '${l10n.transferError} (${fromAccount.currencyCode} -> ${toAccount.currencyCode})',
-        variant: AppToastVariant.error,
-      );
-      return;
-    }
-
-    final currencyCode = normalizeCurrencyCode(fromAccount.currencyCode);
-    final amountMinor = parseTransferAmountMinor(
-      amountController.text,
-      currencyCode,
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return ObDropdown<String>(
+      value: selectedAccountId ?? '',
+      items: [
+        for (final account in accounts)
+          if (account.id?.toString() != excludeAccountId)
+            DropdownMenuItem<String>(
+              value: account.id?.toString() ?? '',
+              child: Text(
+                '${account.name} (${account.currencyCode})',
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodyMedium,
+              ),
+            ),
+      ],
+      labelText: label,
+      onChanged: onChanged,
     );
-    if (amountMinor == null || amountMinor <= 0) return;
-    isSubmitting.value = true;
-
-    try {
-      final client = ref.read(serverpodClientProvider);
-      await client.transaction.transfer(
-        descController.text.trim(),
-        amountMinor,
-        currencyCode,
-        UuidValue.fromString(entityId),
-        UuidValue.fromString(fromAccountId.value!),
-        UuidValue.fromString(toAccountId.value!),
-        selectedDate.value,
-      );
-      ref.invalidate(accountListProvider(entityId));
-      if (!context.mounted) return;
-      showAppToast(
-        context,
-        message: l10n.transferSuccess,
-        variant: AppToastVariant.success,
-      );
-      if (context.mounted) context.pop();
-    } on Exception catch (_) {
-      isSubmitting.value = false;
-      if (!context.mounted) return;
-      showAppToast(
-        context,
-        message: l10n.transferError,
-        variant: AppToastVariant.error,
-      );
-    }
   }
 }

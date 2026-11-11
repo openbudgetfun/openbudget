@@ -195,9 +195,10 @@ class AutoAssignDialog extends HookConsumerWidget {
 
     isAssigning.value = true;
     try {
-      final count = await ref
+      final view = await ref
           .read(autoAssignActionsProvider.notifier)
           .execute(entityId: entityId, items: proposal.items);
+      final count = proposal.items.length;
       if (context.mounted) {
         showAppToast(
           context,

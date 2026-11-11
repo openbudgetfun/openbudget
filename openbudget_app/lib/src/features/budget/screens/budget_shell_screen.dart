@@ -5,7 +5,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:openbudget_app/l10n/generated/app_localizations.dart';
-import 'package:openbudget_app/src/features/budget/providers/budget_realtime_provider.dart';
+import 'package:openbudget_app/src/features/budget/providers/entity_events_provider.dart';
 import 'package:openbudget_app/src/features/budget/widgets/add_transaction_sheet.dart';
 import 'package:openbudget_app/src/features/whats_new/hooks/use_whats_new_auto_prompt.dart';
 import 'package:openbudget_app/src/routing/route_names.dart';
@@ -23,7 +23,7 @@ class BudgetShellScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    ref.watch(budgetRealtimeProvider(entityId));
+    ref.watch(entityEventsProvider(entityId));
     useWhatsNewAutoPrompt(context, ref);
 
     final l10n = AppLocalizations.of(context);

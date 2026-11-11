@@ -2144,7 +2144,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get transferSameAccountError => 'Cannot transfer to the same account';
 
   @override
-  String get transferSuccess => 'Transfer completed';
+  String get transferSuccess => 'Transfer saved';
 
   @override
   String get transferTitle => 'Transfer';
@@ -5460,4 +5460,29 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get importTargetAccount => 'Import into account';
+
+  @override
+  String get transferFrom => 'From account';
+
+  @override
+  String get transferTo => 'To account';
+
+  @override
+  String get transferAmountLabel => 'Amount';
+
+  @override
+  String get transferSentLabel => 'Sent';
+
+  @override
+  String get transferReceivedLabel => 'Received';
+
+  @override
+  String get transferUseTodayRate => 'Use today\'s rate';
+
+  @override
+  String get transferEnvelopeLeavesPlan => 'Envelope (money leaves the plan)';
+
+  @override
+  String get transferCrossEntityHint =>
+      'Transfers between your entities convert into each entity\'s base currency. Money never appears or disappears.';
 }

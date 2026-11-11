@@ -83,3 +83,50 @@ final class AccountListFamily extends $Family
   @override
   String toString() => r'accountListProvider';
 }
+
+/// Every account in every entity the user owns, for pickers that cross
+/// entities (transfers).
+
+@ProviderFor(accountListAll)
+final accountListAllProvider = AccountListAllProvider._();
+
+/// Every account in every entity the user owns, for pickers that cross
+/// entities (transfers).
+
+final class AccountListAllProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<Account>>,
+          List<Account>,
+          FutureOr<List<Account>>
+        >
+    with $FutureModifier<List<Account>>, $FutureProvider<List<Account>> {
+  /// Every account in every entity the user owns, for pickers that cross
+  /// entities (transfers).
+  AccountListAllProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'accountListAllProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$accountListAllHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<List<Account>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<Account>> create(Ref ref) {
+    return accountListAll(ref);
+  }
+}
+
+String _$accountListAllHash() => r'c69187184f963f128558f2292dc97d966daed3d6';

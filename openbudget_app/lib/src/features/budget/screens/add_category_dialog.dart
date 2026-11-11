@@ -82,7 +82,6 @@ class AddCategoryDialog extends HookConsumerWidget {
           .createCategory(
             name: name,
             entityId: entityId,
-            sortOrder: nextSortOrder,
           );
       if (!context.mounted) return;
       showAppToast(

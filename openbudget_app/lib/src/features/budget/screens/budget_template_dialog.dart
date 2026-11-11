@@ -199,7 +199,7 @@ class BudgetTemplateDialog extends HookConsumerWidget {
     try {
       await ref
           .read(budgetTemplateActionsProvider.notifier)
-          .deleteTemplate(templateId: templateId, entityId: entityId);
+          .deleteTemplate(templateId: templateId);
       if (!context.mounted) return;
       showAppToast(
         context,
