@@ -127,6 +127,30 @@ void main() {
   );
 
   test(
+    'given an account whose first fact is inside the range when history runs '
+    'then points before that fact are zero',
+    () async {
+      final account = await addAccount();
+      await fixture.addTransaction(
+        account: account,
+        date: DateTime.utc(2024, 1, 2),
+        amountMinor: 500,
+      );
+
+      final view = await NetWorthService.history(
+        fixture.session,
+        fromDate: DateTime.utc(2024, 1, 1),
+        toDate: DateTime.utc(2024, 1, 3),
+        granularity: NetWorthGranularity.day,
+        currencyCode: 'USD',
+      );
+
+      expect(view.points.map((point) => point.netWorthMinor), [0, 500, 500]);
+      expect(view.points.every((point) => point.isComplete), isTrue);
+    },
+  );
+
+  test(
     'given dated valuations including zero when month history runs then each '
     'point takes the latest value on or before its date',
     () async {
