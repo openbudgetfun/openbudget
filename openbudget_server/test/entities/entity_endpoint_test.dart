@@ -12,9 +12,11 @@ void main() {
     late TestSessionBuilder authedSession;
     late TestSessionBuilder otherSession;
 
-    setUp(() {
-      authedSession = createAuthenticatedSession(sessionBuilder);
-      otherSession = createAuthenticatedSession(sessionBuilder);
+    setUp(() async {
+      final owner = await createAuthenticatedUser(sessionBuilder);
+      final other = await createAuthenticatedUser(sessionBuilder);
+      authedSession = owner.session;
+      otherSession = other.session;
     });
 
     Matcher throwsUnsupportedCurrency(String code) => throwsA(
@@ -261,7 +263,7 @@ void main() {
         expect(accounts, hasLength(1));
         expect(
           (accounts.single! as Map<String, Object?>)['balanceMinor'],
-          100000,
+          97500, // opening 100000 minus the 2500 spend.
         );
 
         final categories = decoded['categories']! as List<Object?>;
@@ -274,7 +276,11 @@ void main() {
         );
 
         final transactions = decoded['transactions']! as List<Object?>;
-        final transactionJson = transactions.single! as Map<String, Object?>;
+        // The opening balance fact and the weekly shop.
+        expect(transactions, hasLength(2));
+        final transactionJson = transactions
+            .map((row) => row! as Map<String, Object?>)
+            .singleWhere((row) => row['description'] == 'Weekly shop');
         expect(transactionJson['id'], transaction.transaction.id.toString());
         expect(transactionJson['amountMinor'], -2500);
         expect(transactionJson['baseAmountMinor'], -2500);

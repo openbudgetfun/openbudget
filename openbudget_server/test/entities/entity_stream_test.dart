@@ -14,8 +14,9 @@ void main() {
     late TestSessionBuilder authedSession;
     late Session rawSession;
 
-    setUp(() {
-      authedSession = createAuthenticatedSession(sessionBuilder);
+    setUp(() async {
+      final owner = await createAuthenticatedUser(sessionBuilder);
+      authedSession = owner.session;
       rawSession = sessionBuilder.build();
     });
 
@@ -37,23 +38,33 @@ void main() {
         final entity = await createEntity();
 
         final updates = endpoints.entityStream.watch(authedSession, entity.id!);
-        final iterator = StreamIterator(updates);
-
-        final published = EntityRealtimeNotifier.notify(
-          rawSession,
-          entity.id!,
-          ChangeScope.entity,
+        final received = Completer<EntityChangedEvent>();
+        final subscription = updates.listen(
+          received.complete,
+          onError: received.completeError,
         );
-        final hasNext = await iterator.moveNext().timeout(
-          const Duration(seconds: 2),
-        );
-        await published;
 
-        expect(hasNext, isTrue);
-        expect(iterator.current.entityId, entity.id);
-        expect(iterator.current.scope, ChangeScope.entity);
+        // A global message only reaches listeners that are already
+        // subscribed, and the Redis subscription behind `createStream` comes
+        // up asynchronously. Post until the watcher confirms one event.
+        while (!received.isCompleted) {
+          await flushEventQueue();
+          await EntityRealtimeNotifier.notify(
+            rawSession,
+            entity.id!,
+            ChangeScope.entity,
+          );
+          await Future.any<Object?>([
+            received.future,
+            Future<void>.delayed(const Duration(milliseconds: 500)),
+          ]);
+        }
 
-        await iterator.cancel();
+        final event = await received.future;
+        expect(event.entityId, entity.id);
+        expect(event.scope, ChangeScope.entity);
+
+        await subscription.cancel();
       },
     );
 

@@ -67,13 +67,17 @@ class PgTestServer {
       '--no-sync',
     ]);
 
+    // mmap keeps each concurrent test cluster off the machine's small
+    // System V shared-memory pool, which a full `dart test` run exhausts.
+    const shmSettings =
+        '-c shared_memory_type=mmap -c dynamic_shared_memory_type=posix';
     await _run(pgCtl, [
       '-D',
       dataPath,
       '-l',
       logPath,
       '-o',
-      '-p $port -k ${socketDirectory.path} -h 127.0.0.1',
+      '-p $port -k ${socketDirectory.path} -h 127.0.0.1 $shmSettings',
       '-w',
       'start',
     ]);

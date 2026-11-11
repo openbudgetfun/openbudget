@@ -26,6 +26,22 @@ var _userCounter = 0;
   );
 }
 
+/// Inserts the auth user row that entity-owned tables reference.
+Future<void> _ensureAuthUser(
+  TestSessionBuilder base,
+  UuidValue userId,
+) async {
+  final session = base.build();
+  await session.db.unsafeExecute(
+    'INSERT INTO serverpod_auth_core_user '
+    '(id, "createdAt", "scopeNames", blocked) '
+    "VALUES (@id::uuid, now(), '[]'::json, false) "
+    'ON CONFLICT (id) DO NOTHING',
+    parameters: QueryParameters.named({'id': userId.toString()}),
+  );
+  await session.close();
+}
+
 String _request(
   String method, {
   Object? id = 1,
@@ -58,6 +74,7 @@ void main() {
 
     setUp(() async {
       final user = _newUser(sessionBuilder);
+      await _ensureAuthUser(sessionBuilder, user.userId);
       authedSession = user.session;
       userId = user.userId;
       rawSession = sessionBuilder.build();
@@ -251,6 +268,7 @@ void main() {
       test("then it returns only the token owner's data", () async {
         final mine = await createEntity('Mine');
         final other = _newUser(sessionBuilder);
+        await _ensureAuthUser(sessionBuilder, other.userId);
         await endpoints.entity.create(
           other.session,
           'Theirs',
@@ -599,7 +617,8 @@ void main() {
           token: created.token,
         );
         row = await AgentAccessToken.db.findById(rawSession, created.view.id);
-        expect(row!.lastUsedAt!.toUtc(), now);
+        // The resolution keeps the minute-old value.
+        expect(row!.lastUsedAt!.toUtc(), DateTime.utc(2026, 1, 1, 12));
 
         now = now.add(const Duration(minutes: 2));
         await send(

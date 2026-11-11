@@ -13,8 +13,9 @@ void main() {
     late TestSessionBuilder authedSession;
     late Session rawSession;
 
-    setUp(() {
-      authedSession = createAuthenticatedSession(sessionBuilder);
+    setUp(() async {
+      final owner = await createAuthenticatedUser(sessionBuilder);
+      authedSession = owner.session;
       rawSession = sessionBuilder.build();
     });
 
@@ -71,7 +72,7 @@ void main() {
     );
 
     test(
-      'when syncing another owner connection then it is not found',
+      'when syncing another owner connection then it is refused',
       () async {
         final entity = await createEntity();
 
@@ -85,14 +86,14 @@ void main() {
           ),
         );
 
-        final otherSession = createAuthenticatedSession(sessionBuilder);
+        final other = await createAuthenticatedUser(sessionBuilder);
         await expectLater(
-          endpoints.plaid.syncConnection(otherSession, connection.id!),
-          throwsA(isA<NotFoundException>()),
+          endpoints.plaid.syncConnection(other.session, connection.id!),
+          throwsA(isA<ForbiddenException>()),
         );
         await expectLater(
-          endpoints.plaid.removeConnection(otherSession, connection.id!),
-          throwsA(isA<NotFoundException>()),
+          endpoints.plaid.removeConnection(other.session, connection.id!),
+          throwsA(isA<ForbiddenException>()),
         );
       },
     );
@@ -101,10 +102,10 @@ void main() {
       "when creating a link token for another user's entity then it is not found",
       () async {
         final entity = await createEntity('Owner Entity');
-        final otherSession = createAuthenticatedSession(sessionBuilder);
+        final other = await createAuthenticatedUser(sessionBuilder);
 
         await expectLater(
-          endpoints.plaid.createLinkToken(otherSession, entity.id!),
+          endpoints.plaid.createLinkToken(other.session, entity.id!),
           throwsA(isA<ForbiddenException>()),
         );
       },

@@ -25,6 +25,22 @@ const _zenKey = 'test-zen-key';
 
 var _userCounter = 0;
 
+/// Inserts the auth user row that entity-owned tables reference.
+Future<void> _ensureAuthUser(
+  TestSessionBuilder base,
+  UuidValue userId,
+) async {
+  final session = base.build();
+  await session.db.unsafeExecute(
+    'INSERT INTO serverpod_auth_core_user '
+    '(id, "createdAt", "scopeNames", blocked) '
+    "VALUES (@id::uuid, now(), '[]'::json, false) "
+    'ON CONFLICT (id) DO NOTHING',
+    parameters: QueryParameters.named({'id': userId.toString()}),
+  );
+  await session.close();
+}
+
 ({TestSessionBuilder session, UuidValue userId}) _newUser(
   TestSessionBuilder base,
 ) {
@@ -109,8 +125,9 @@ void main() {
     late Session rawSession;
     late List<http.Request> requests;
 
-    setUp(() {
+    setUp(() async {
       final user = _newUser(sessionBuilder);
+      await _ensureAuthUser(sessionBuilder, user.userId);
       authedSession = user.session;
       userId = user.userId;
       // The tools call session-authenticated services. Production sessions
@@ -595,7 +612,7 @@ void main() {
                 envelopeId: envelope.id,
                 taxCategoryCode: 'gb.ind.employment',
                 businessUsePercent: 40,
-                salesTaxMinor: 500,
+                salesTaxMinor: -500,
               ),
             ],
           ),
@@ -634,7 +651,7 @@ void main() {
         );
         expect(updated.lines.single.taxCategoryCode, 'gb.ind.property');
         expect(updated.lines.single.businessUsePercent, 40);
-        expect(updated.lines.single.salesTaxMinor, 500);
+        expect(updated.lines.single.salesTaxMinor, -500);
       });
     });
 
@@ -816,6 +833,7 @@ void main() {
           ),
         );
         final other = _newUser(sessionBuilder);
+        await _ensureAuthUser(sessionBuilder, other.userId);
         final otherSession = other.session.build()
           ..updateAuthenticated(
             AuthenticationInfo(
