@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:openbudget_core/openbudget_core.dart';
 import 'package:openbudget_server/src/agent/mcp/agent_access_token_service.dart';
 import 'package:openbudget_server/src/agent/mcp/agent_mcp_handler.dart';
 import 'package:openbudget_server/src/agent/mcp/agent_mcp_rate_limiter.dart';
@@ -8,8 +9,8 @@ import 'package:openbudget_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart' hide Transaction;
 import 'package:test/test.dart';
 
-import '../../helpers/auth_helper.dart';
-import '../../test_tools/serverpod_test_tools.dart';
+import '../../integration/helpers/auth_helper.dart';
+import '../../integration/test_tools/serverpod_test_tools.dart';
 
 var _userCounter = 0;
 
@@ -45,8 +46,8 @@ Map<String, Object?> _error(AgentMcpResponse response) =>
 Map<String, Object?> _result(AgentMcpResponse response) =>
     _body(response)['result']! as Map<String, Object?>;
 
-String _month(DateTime date) =>
-    '${date.year}-${date.month.toString().padLeft(2, '0')}';
+/// The plan month as yyyymm.
+int _month(DateTime date) => date.year * 100 + date.month;
 
 void main() {
   withServerpod('Given AgentMcpHandler', (sessionBuilder, endpoints) {
@@ -94,34 +95,35 @@ void main() {
       origin: origin,
     );
 
-    Future<Budget> createBudget(String name) =>
-        endpoints.budget.create(authedSession, name, 'GBP');
+    Future<Entity> createEntity(String name) => endpoints.entity.create(
+      authedSession,
+      name,
+      EntityKind.individual,
+      'GB',
+      'GBP',
+      'Europe/London',
+    );
 
-    Future<({Budget budget, Envelope from, Envelope to, String month})>
+    Future<({Entity entity, Envelope from, Envelope to, int month})>
     createMoveSetup() async {
-      final budget = await createBudget('Household');
+      final entity = await createEntity('Household');
       final category = await endpoints.category.create(
         authedSession,
+        entity.id!,
         'Everyday',
-        budget.id!,
-        0,
       );
       final from = await endpoints.envelope.create(
         authedSession,
-        'Groceries',
         category.id!,
-        10000,
-        'GBP',
+        'Groceries',
       );
       final to = await endpoints.envelope.create(
         authedSession,
-        'Dining',
         category.id!,
-        0,
-        'GBP',
+        'Dining',
       );
       return (
-        budget: budget,
+        entity: entity,
         from: from,
         to: to,
         month: _month(DateTime.now()),
@@ -213,12 +215,13 @@ void main() {
           for (final tool in tools)
             (tool! as Map<String, Object?>)['name']! as String,
         ];
-        expect(names, hasLength(5));
-        expect(names, contains('list_budgets'));
+        expect(names, hasLength(6));
+        expect(names, contains('list_entities'));
         expect(names, contains('list_envelopes'));
         expect(names, contains('search_transactions'));
         expect(names, contains('get_tax_report'));
         expect(names, contains('list_tax_categories'));
+        expect(names, contains('get_net_worth'));
         expect(names, isNot(contains('propose_move_money')));
         expect(names, isNot(contains('propose_transaction_tax_category')));
         expect(names, isNot(contains('propose_envelope_tax_category')));
@@ -237,7 +240,7 @@ void main() {
           for (final tool in tools)
             (tool! as Map<String, Object?>)['name']! as String,
         ];
-        expect(names, hasLength(8));
+        expect(names, hasLength(9));
         expect(names, contains('propose_move_money'));
         expect(names, contains('propose_transaction_tax_category'));
         expect(names, contains('propose_envelope_tax_category'));
@@ -246,14 +249,24 @@ void main() {
 
     group('when calling a read tool', () {
       test("then it returns only the token owner's data", () async {
-        final mine = await createBudget('Mine');
+        final mine = await createEntity('Mine');
         final other = _newUser(sessionBuilder);
-        await endpoints.budget.create(other.session, 'Theirs', 'GBP');
+        await endpoints.entity.create(
+          other.session,
+          'Theirs',
+          EntityKind.individual,
+          'GB',
+          'GBP',
+          'Europe/London',
+        );
 
         final response = await send(
           _request(
             'tools/call',
-            params: {'name': 'list_budgets', 'arguments': <String, Object?>{}},
+            params: {
+              'name': 'list_entities',
+              'arguments': <String, Object?>{},
+            },
           ),
         );
 
@@ -263,12 +276,12 @@ void main() {
         final content = result['content']! as List<Object?>;
         final text =
             (content.single! as Map<String, Object?>)['text']! as String;
-        final budgets =
-            (jsonDecode(text) as Map<String, Object?>)['budgets']!
+        final entities =
+            (jsonDecode(text) as Map<String, Object?>)['entities']!
                 as List<Object?>;
-        expect(budgets, hasLength(1));
+        expect(entities, hasLength(1));
         expect(
-          (budgets.single! as Map<String, Object?>)['name'],
+          (entities.single! as Map<String, Object?>)['name'],
           mine.name,
         );
       });
@@ -279,7 +292,7 @@ void main() {
             'tools/call',
             params: {
               'name': 'list_envelopes',
-              'arguments': {'budgetId': 'not-a-uuid'},
+              'arguments': {'entityId': 'not-a-uuid'},
             },
           ),
         );
@@ -306,7 +319,7 @@ void main() {
             params: {
               'name': 'propose_move_money',
               'arguments': {
-                'budgetId': setup.budget.id.toString(),
+                'entityId': setup.entity.id.toString(),
                 'fromEnvelopeId': setup.from.id.toString(),
                 'toEnvelopeId': setup.to.id.toString(),
                 'amountMinor': 2500,
@@ -328,7 +341,7 @@ void main() {
 
         final proposals = await endpoints.agent.listProposals(
           authedSession,
-          setup.budget.id!,
+          setup.entity.id!,
           pendingOnly: true,
         );
         expect(proposals, hasLength(1));
@@ -347,7 +360,7 @@ void main() {
             params: {
               'name': 'propose_move_money',
               'arguments': {
-                'budgetId': setup.budget.id.toString(),
+                'entityId': setup.entity.id.toString(),
                 'fromEnvelopeId': setup.from.id.toString(),
                 'toEnvelopeId': setup.to.id.toString(),
                 'amountMinor': 2500,
@@ -369,7 +382,7 @@ void main() {
         expect(
           await endpoints.agent.listProposals(
             authedSession,
-            setup.budget.id!,
+            setup.entity.id!,
             pendingOnly: true,
           ),
           isEmpty,
@@ -427,7 +440,7 @@ void main() {
         final response = await send(
           _request(
             'tools/call',
-            params: {'name': 'list_budgets', 'arguments': 'nope'},
+            params: {'name': 'list_entities', 'arguments': 'nope'},
           ),
         );
 
@@ -586,16 +599,16 @@ void main() {
           token: created.token,
         );
         row = await AgentAccessToken.db.findById(rawSession, created.view.id);
-        expect(row!.lastUsedAt!.toUtc(), DateTime.utc(2026, 1, 1, 12));
+        expect(row!.lastUsedAt!.toUtc(), now);
 
-        now = now.add(const Duration(seconds: 31));
+        now = now.add(const Duration(minutes: 2));
         await send(
           _request('ping'),
           handler: clockHandler,
           token: created.token,
         );
         row = await AgentAccessToken.db.findById(rawSession, created.view.id);
-        expect(row!.lastUsedAt!.toUtc(), DateTime.utc(2026, 1, 1, 12, 1, 1));
+        expect(row!.lastUsedAt!.toUtc(), now);
       });
     });
   });

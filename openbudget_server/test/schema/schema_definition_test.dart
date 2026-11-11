@@ -75,10 +75,12 @@ void main() {
       for (final constraint in constraints) {
         final column = constraint[2]!;
         final action = constraint[3]!.trim();
-        if (column == 'entityId')
+        if (column == 'entityId') {
           expect(action, 'CASCADE', reason: constraint[1]);
-        if (column == 'ownerId')
+        }
+        if (column == 'ownerId') {
           expect(action, 'RESTRICT', reason: constraint[1]);
+        }
       }
     },
   );
