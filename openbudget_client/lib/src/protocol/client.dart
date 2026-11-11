@@ -15,6 +15,10 @@ import 'dart:async' as _ida;
 import 'package:http/http.dart' as _i85jenna;
 import 'package:openbudget_client/src/protocol/accounts/account.dart'
     as _iqudaadl;
+import 'package:openbudget_client/src/protocol/accounts/account_balances_view.dart'
+    as _i83280l7;
+import 'package:openbudget_client/src/protocol/accounts/account_valuation.dart'
+    as _idms9t2z;
 import 'package:openbudget_client/src/protocol/agent/agent_conversation.dart'
     as _in44ixo7;
 import 'package:openbudget_client/src/protocol/agent/agent_event.dart'
@@ -37,6 +41,16 @@ import 'package:openbudget_client/src/protocol/billing/entitlement.dart'
     as _iyhncv6f;
 import 'package:openbudget_client/src/protocol/billing/solana_plan_view.dart'
     as _ij0nbz0v;
+import 'package:openbudget_client/src/protocol/budget/allocation_input.dart'
+    as _inutgv28;
+import 'package:openbudget_client/src/protocol/budget/budget_month_view.dart'
+    as _i6xxh8m1;
+import 'package:openbudget_client/src/protocol/budget_templates/budget_template.dart'
+    as _itiojbb0;
+import 'package:openbudget_client/src/protocol/budget_templates/budget_template_line.dart'
+    as _ik2p0evm;
+import 'package:openbudget_client/src/protocol/categories/category.dart'
+    as _iels1fku;
 import 'package:openbudget_client/src/protocol/entities/entity.dart'
     as _i2ulk6h5;
 import 'package:openbudget_client/src/protocol/entities/entity_changed_event.dart'
@@ -65,8 +79,59 @@ import 'package:openbudget_client/src/protocol/ledger/ledger_period_lock.dart'
     as _i10h3ni6;
 import 'package:openbudget_client/src/protocol/ledger/trial_balance_view.dart'
     as _i0gvlz5s;
+import 'package:openbudget_client/src/protocol/payees/payee.dart' as _iaf6ifsb;
+import 'package:openbudget_client/src/protocol/plaid/plaid_connection.dart'
+    as _itydqisw;
+import 'package:openbudget_client/src/protocol/recurring_transactions/recurring_transaction.dart'
+    as _i41tn6nr;
+import 'package:openbudget_client/src/protocol/reports/net_worth_granularity.dart'
+    as _idze6lni;
+import 'package:openbudget_client/src/protocol/reports/net_worth_history_view.dart'
+    as _iynyr02m;
+import 'package:openbudget_client/src/protocol/reports/net_worth_view.dart'
+    as _ilmu26ji;
 import 'package:openbudget_client/src/protocol/settings/user_settings.dart'
     as _ivxpuwvx;
+import 'package:openbudget_client/src/protocol/tax/tax_category_view.dart'
+    as _ic177lol;
+import 'package:openbudget_client/src/protocol/tax/tax_profile.dart'
+    as _ibyrfq34;
+import 'package:openbudget_client/src/protocol/tax/tax_report_view.dart'
+    as _ieaa4q0n;
+import 'package:openbudget_client/src/protocol/transaction_rules/transaction_rule.dart'
+    as _iwxd5v0a;
+import 'package:openbudget_client/src/protocol/transactions/import_result.dart'
+    as _ish80d3o;
+import 'package:openbudget_client/src/protocol/transactions/import_row.dart'
+    as _iyud7cy9;
+import 'package:openbudget_client/src/protocol/transactions/reconcile_result.dart'
+    as _idhtlbwy;
+import 'package:openbudget_client/src/protocol/transactions/transaction_flag.dart'
+    as _idwby6z8;
+import 'package:openbudget_client/src/protocol/transactions/transaction_input.dart'
+    as _iufp60gr;
+import 'package:openbudget_client/src/protocol/transactions/transaction_page.dart'
+    as _ipoksp8f;
+import 'package:openbudget_client/src/protocol/transactions/transaction_query.dart'
+    as _in48a2uo;
+import 'package:openbudget_client/src/protocol/transactions/transaction_status.dart'
+    as _itmjglt7;
+import 'package:openbudget_client/src/protocol/transactions/transaction_view.dart'
+    as _irfj6dpt;
+import 'package:openbudget_client/src/protocol/transactions/transfer_input.dart'
+    as _i4fjyt55;
+import 'package:openbudget_client/src/protocol/wallets/wallet.dart'
+    as _igzh8mor;
+import 'package:openbudget_client/src/protocol/wallets/wallet_holding.dart'
+    as _izm3e498;
+import 'package:openbudget_client/src/protocol/wallets/wallet_network.dart'
+    as _i8u1c0bj;
+import 'package:openbudget_client/src/protocol/wallets/wallet_sync_result.dart'
+    as _idhyojww;
+import 'package:openbudget_client/src/protocol/wallets/wallet_tax_year_summary.dart'
+    as _il62txu0;
+import 'package:openbudget_client/src/protocol/wallets/wallet_transaction.dart'
+    as _itxp58mr;
 import 'package:openbudget_core/openbudget_core.dart' as _ifz8weqz;
 import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
     as _iacc;
@@ -76,10 +141,180 @@ import 'package:serverpod_client/serverpod_client.dart' as _isc;
 
 import 'protocol.dart' as _il2as5qe;
 
+/// API surface for account operations.
+///
+/// All methods require authentication and cross [AccountService] for the
+/// entity-ownership check.
+/// {@category Endpoint}
+class EndpointAccount extends _isc.EndpointRef {
+  EndpointAccount(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'account';
+
+  /// Creates an account and its opening balance or first valuation.
+  _ida.Future<_iqudaadl.Account> create(
+    _isc.UuidValue entityId,
+    String name,
+    _ifz8weqz.AccountKind kind,
+    String currencyCode, {
+    _ifz8weqz.AccountBalanceSource? balanceSource,
+    bool? onBudget,
+    int? openingBalanceMinor,
+    DateTime? openingDate,
+    _isc.UuidValue? institutionId,
+    String? note,
+  }) => caller.callServerEndpoint<_iqudaadl.Account>(
+    'account',
+    'create',
+    {
+      'entityId': entityId,
+      'name': name,
+      'kind': kind,
+      'currencyCode': currencyCode,
+      'balanceSource': balanceSource,
+      'onBudget': onBudget,
+      'openingBalanceMinor': openingBalanceMinor,
+      'openingDate': openingDate,
+      'institutionId': institutionId,
+      'note': note,
+    },
+  );
+
+  /// Lists every account of one owned entity.
+  _ida.Future<List<_iqudaadl.Account>> list(_isc.UuidValue entityId) =>
+      caller.callServerEndpoint<List<_iqudaadl.Account>>(
+        'account',
+        'list',
+        {'entityId': entityId},
+      );
+
+  /// Lists every account in every entity the caller owns.
+  _ida.Future<List<_iqudaadl.Account>> listAll() =>
+      caller.callServerEndpoint<List<_iqudaadl.Account>>(
+        'account',
+        'listAll',
+        {},
+      );
+
+  /// Loads one owned account.
+  _ida.Future<_iqudaadl.Account> get(_isc.UuidValue accountId) =>
+      caller.callServerEndpoint<_iqudaadl.Account>(
+        'account',
+        'get',
+        {'accountId': accountId},
+      );
+
+  /// Updates mutable account metadata.
+  _ida.Future<_iqudaadl.Account> update(
+    _isc.UuidValue accountId, {
+    String? name,
+    _ifz8weqz.AccountKind? kind,
+    bool? onBudget,
+    _isc.UuidValue? institutionId,
+    bool? clearInstitution,
+    String? note,
+    int? sortOrder,
+  }) => caller.callServerEndpoint<_iqudaadl.Account>(
+    'account',
+    'update',
+    {
+      'accountId': accountId,
+      'name': name,
+      'kind': kind,
+      'onBudget': onBudget,
+      'institutionId': institutionId,
+      'clearInstitution': clearInstitution,
+      'note': note,
+      'sortOrder': sortOrder,
+    },
+  );
+
+  /// Replaces the account order of one owned entity.
+  _ida.Future<List<_iqudaadl.Account>> reorder(
+    _isc.UuidValue entityId,
+    List<_isc.UuidValue> accountIds,
+  ) => caller.callServerEndpoint<List<_iqudaadl.Account>>(
+    'account',
+    'reorder',
+    {
+      'entityId': entityId,
+      'accountIds': accountIds,
+    },
+  );
+
+  /// Closes an account whose balance is zero.
+  _ida.Future<_iqudaadl.Account> close(_isc.UuidValue accountId) =>
+      caller.callServerEndpoint<_iqudaadl.Account>(
+        'account',
+        'close',
+        {'accountId': accountId},
+      );
+
+  /// Reopens a closed account.
+  _ida.Future<_iqudaadl.Account> reopen(_isc.UuidValue accountId) =>
+      caller.callServerEndpoint<_iqudaadl.Account>(
+        'account',
+        'reopen',
+        {'accountId': accountId},
+      );
+
+  /// Deletes the account, its transactions and its valuations.
+  _ida.Future<void> delete(_isc.UuidValue accountId) =>
+      caller.callServerEndpoint<void>(
+        'account',
+        'delete',
+        {'accountId': accountId},
+      );
+
+  /// Returns the cached and cleared balances of one account.
+  _ida.Future<_i83280l7.AccountBalancesView> getBalances(
+    _isc.UuidValue accountId,
+  ) => caller.callServerEndpoint<_i83280l7.AccountBalancesView>(
+    'account',
+    'getBalances',
+    {'accountId': accountId},
+  );
+
+  /// Lists one account's valuations newest-first.
+  _ida.Future<List<_idms9t2z.AccountValuation>> listValuations(
+    _isc.UuidValue accountId,
+  ) => caller.callServerEndpoint<List<_idms9t2z.AccountValuation>>(
+    'account',
+    'listValuations',
+    {'accountId': accountId},
+  );
+
+  /// Upserts one manual valuation.
+  _ida.Future<_idms9t2z.AccountValuation> setValuation(
+    _isc.UuidValue accountId,
+    DateTime valuationDate,
+    int valueMinor, {
+    String? note,
+  }) => caller.callServerEndpoint<_idms9t2z.AccountValuation>(
+    'account',
+    'setValuation',
+    {
+      'accountId': accountId,
+      'valuationDate': valuationDate,
+      'valueMinor': valueMinor,
+      'note': note,
+    },
+  );
+
+  /// Deletes one valuation and recomputes the account balance.
+  _ida.Future<void> deleteValuation(_isc.UuidValue valuationId) =>
+      caller.callServerEndpoint<void>(
+        'account',
+        'deleteValuation',
+        {'valuationId': valuationId},
+      );
+}
+
 /// The financial assistant: chat, its history, its proposals and the user's
 /// own provider settings.
 ///
-/// Every method requires a signed-in user and checks that the budget, chat or
+/// Every method requires a signed-in user and checks that the entity, chat or
 /// proposal belongs to them. The assistant never changes financial data; it
 /// creates proposals that `applyProposal` carries out on the user's behalf.
 /// {@category Endpoint}
@@ -89,14 +324,14 @@ class EndpointAgent extends _isc.EndpointRef {
   @override
   String get name => 'agent';
 
-  /// Streams one assistant turn in budget `budgetId`.
+  /// Streams one assistant turn in entity `entityId`.
   ///
   /// A null [conversationId] starts a conversation titled from [message].
   /// Events are `usage` after each model call, `toolCall` before a tool runs,
   /// `proposal` for each change suggested, one `textDelta` with the reply, and
   /// a final `done`.
   _ida.Stream<_isrqm714.AgentEvent> chat(
-    _isc.UuidValue budgetId,
+    _isc.UuidValue entityId,
     _isc.UuidValue? conversationId,
     String message,
   ) =>
@@ -107,20 +342,20 @@ class EndpointAgent extends _isc.EndpointRef {
         'agent',
         'chat',
         {
-          'budgetId': budgetId,
+          'entityId': entityId,
           'conversationId': conversationId,
           'message': message,
         },
         {},
       );
 
-  /// Lists the user's conversations in one budget, newest first.
+  /// Lists the user's conversations in one entity, newest first.
   _ida.Future<List<_in44ixo7.AgentConversation>> listConversations(
-    _isc.UuidValue budgetId,
+    _isc.UuidValue entityId,
   ) => caller.callServerEndpoint<List<_in44ixo7.AgentConversation>>(
     'agent',
     'listConversations',
-    {'budgetId': budgetId},
+    {'entityId': entityId},
   );
 
   /// Returns the visible user and assistant messages of a conversation.
@@ -180,20 +415,20 @@ class EndpointAgent extends _isc.EndpointRef {
     {},
   );
 
-  /// Lists the changes the assistant proposed for one budget.
+  /// Lists the changes the assistant proposed for one entity.
   _ida.Future<List<_icv7zzda.AgentProposal>> listProposals(
-    _isc.UuidValue budgetId, {
+    _isc.UuidValue entityId, {
     required bool pendingOnly,
   }) => caller.callServerEndpoint<List<_icv7zzda.AgentProposal>>(
     'agent',
     'listProposals',
     {
-      'budgetId': budgetId,
+      'entityId': entityId,
       'pendingOnly': pendingOnly,
     },
   );
 
-  /// Applies a pending proposal through the normal budget and tax services.
+  /// Applies a pending proposal through the normal plan and tax services.
   _ida.Future<_icv7zzda.AgentProposal> applyProposal(
     _isc.UuidValue proposalId,
   ) => caller.callServerEndpoint<_icv7zzda.AgentProposal>(
@@ -608,6 +843,212 @@ class EndpointBilling extends _isc.EndpointRef {
   );
 }
 
+/// API surface for the envelope plan.
+///
+/// Every method requires authentication. The services own entity ownership,
+/// archived-entity rejection and the transaction boundaries; this endpoint
+/// only exposes the contract.
+/// {@category Endpoint}
+class EndpointBudget extends _isc.EndpointRef {
+  EndpointBudget(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'budget';
+
+  /// Reads one month of the Plan screen in a single database snapshot.
+  _ida.Future<_i6xxh8m1.BudgetMonthView> getMonth(
+    _isc.UuidValue entityId,
+    int month,
+  ) => caller.callServerEndpoint<_i6xxh8m1.BudgetMonthView>(
+    'budget',
+    'getMonth',
+    {
+      'entityId': entityId,
+      'month': month,
+    },
+  );
+
+  /// Replaces the named envelopes' allocations for one month.
+  _ida.Future<_i6xxh8m1.BudgetMonthView> setAllocations(
+    _isc.UuidValue entityId,
+    int month,
+    List<_inutgv28.AllocationInput> allocations,
+  ) => caller.callServerEndpoint<_i6xxh8m1.BudgetMonthView>(
+    'budget',
+    'setAllocations',
+    {
+      'entityId': entityId,
+      'month': month,
+      'allocations': allocations,
+    },
+  );
+
+  /// Moves a positive amount between envelopes or Ready to Assign.
+  _ida.Future<_i6xxh8m1.BudgetMonthView> moveMoney(
+    _isc.UuidValue entityId,
+    int month,
+    _isc.UuidValue? fromEnvelopeId,
+    _isc.UuidValue? toEnvelopeId,
+    int amountMinor,
+  ) => caller.callServerEndpoint<_i6xxh8m1.BudgetMonthView>(
+    'budget',
+    'moveMoney',
+    {
+      'entityId': entityId,
+      'month': month,
+      'fromEnvelopeId': fromEnvelopeId,
+      'toEnvelopeId': toEnvelopeId,
+      'amountMinor': amountMinor,
+    },
+  );
+
+  /// Replaces the target month's allocations with the source month's.
+  _ida.Future<_i6xxh8m1.BudgetMonthView> copyMonth(
+    _isc.UuidValue entityId,
+    int fromMonth,
+    int toMonth,
+  ) => caller.callServerEndpoint<_i6xxh8m1.BudgetMonthView>(
+    'budget',
+    'copyMonth',
+    {
+      'entityId': entityId,
+      'fromMonth': fromMonth,
+      'toMonth': toMonth,
+    },
+  );
+
+  /// Saves one month's exact sparse allocations as a named template.
+  _ida.Future<_itiojbb0.BudgetTemplate> saveTemplate(
+    _isc.UuidValue entityId,
+    int month,
+    String name,
+  ) => caller.callServerEndpoint<_itiojbb0.BudgetTemplate>(
+    'budget',
+    'saveTemplate',
+    {
+      'entityId': entityId,
+      'month': month,
+      'name': name,
+    },
+  );
+
+  /// Lists every template of an owned entity.
+  _ida.Future<List<_itiojbb0.BudgetTemplate>> listTemplates(
+    _isc.UuidValue entityId,
+  ) => caller.callServerEndpoint<List<_itiojbb0.BudgetTemplate>>(
+    'budget',
+    'listTemplates',
+    {'entityId': entityId},
+  );
+
+  /// Loads one template's lines.
+  _ida.Future<List<_ik2p0evm.BudgetTemplateLine>> getTemplateLines(
+    _isc.UuidValue templateId,
+  ) => caller.callServerEndpoint<List<_ik2p0evm.BudgetTemplateLine>>(
+    'budget',
+    'getTemplateLines',
+    {'templateId': templateId},
+  );
+
+  /// Replaces one month's allocations with a template's lines.
+  _ida.Future<_i6xxh8m1.BudgetMonthView> applyTemplate(
+    _isc.UuidValue templateId,
+    int month,
+  ) => caller.callServerEndpoint<_i6xxh8m1.BudgetMonthView>(
+    'budget',
+    'applyTemplate',
+    {
+      'templateId': templateId,
+      'month': month,
+    },
+  );
+
+  /// Deletes one template.
+  _ida.Future<void> deleteTemplate(_isc.UuidValue templateId) =>
+      caller.callServerEndpoint<void>(
+        'budget',
+        'deleteTemplate',
+        {'templateId': templateId},
+      );
+}
+
+/// API surface for category operations.
+///
+/// All methods require authentication and delegate to [CategoryService],
+/// which owns the entity boundary.
+/// {@category Endpoint}
+class EndpointCategory extends _isc.EndpointRef {
+  EndpointCategory(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'category';
+
+  /// Creates a category at the end of the entity's list.
+  _ida.Future<_iels1fku.Category> create(
+    _isc.UuidValue entityId,
+    String name,
+  ) => caller.callServerEndpoint<_iels1fku.Category>(
+    'category',
+    'create',
+    {
+      'entityId': entityId,
+      'name': name,
+    },
+  );
+
+  /// Lists every category of an entity, hidden ones included.
+  _ida.Future<List<_iels1fku.Category>> list(_isc.UuidValue entityId) =>
+      caller.callServerEndpoint<List<_iels1fku.Category>>(
+        'category',
+        'list',
+        {'entityId': entityId},
+      );
+
+  /// Loads one category by id.
+  _ida.Future<_iels1fku.Category> get(_isc.UuidValue categoryId) =>
+      caller.callServerEndpoint<_iels1fku.Category>(
+        'category',
+        'get',
+        {'categoryId': categoryId},
+      );
+
+  /// Renames or hides a category.
+  _ida.Future<_iels1fku.Category> update(
+    _isc.UuidValue categoryId, {
+    String? name,
+    bool? isHidden,
+  }) => caller.callServerEndpoint<_iels1fku.Category>(
+    'category',
+    'update',
+    {
+      'categoryId': categoryId,
+      'name': name,
+      'isHidden': isHidden,
+    },
+  );
+
+  /// Rewrites the entity's category order from an exact id list.
+  _ida.Future<List<_iels1fku.Category>> reorder(
+    _isc.UuidValue entityId,
+    List<_isc.UuidValue> categoryIds,
+  ) => caller.callServerEndpoint<List<_iels1fku.Category>>(
+    'category',
+    'reorder',
+    {
+      'entityId': entityId,
+      'categoryIds': categoryIds,
+    },
+  );
+
+  /// Deletes an empty category.
+  _ida.Future<void> delete(_isc.UuidValue categoryId) =>
+      caller.callServerEndpoint<void>(
+        'category',
+        'delete',
+        {'categoryId': categoryId},
+      );
+}
+
 /// Entity lifecycle for the signed-in owner.
 /// {@category Endpoint}
 class EndpointEntity extends _isc.EndpointRef {
@@ -714,6 +1155,14 @@ class EndpointEntity extends _isc.EndpointRef {
       'confirmName': confirmName,
     },
   );
+
+  /// Exports every record of the entity as one portable JSON document.
+  _ida.Future<String> exportData(_isc.UuidValue entityId) =>
+      caller.callServerEndpoint<String>(
+        'entity',
+        'exportData',
+        {'entityId': entityId},
+      );
 }
 
 /// Streams scoped changes to the entity's owner.
@@ -1140,7 +1589,102 @@ class EndpointLedger extends _isc.EndpointRef {
   );
 }
 
-/// API surface for Plaid-linked account integration.
+/// API surface for payee operations.
+///
+/// All methods require authentication and delegate to [PayeeService], which
+/// owns the entity boundary and publishes committed change events.
+/// {@category Endpoint}
+class EndpointPayee extends _isc.EndpointRef {
+  EndpointPayee(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'payee';
+
+  /// Creates a payee, or reuses the entity's payee with the same name.
+  _ida.Future<_iaf6ifsb.Payee> create(
+    String name,
+    _isc.UuidValue entityId,
+  ) => caller.callServerEndpoint<_iaf6ifsb.Payee>(
+    'payee',
+    'create',
+    {
+      'name': name,
+      'entityId': entityId,
+    },
+  );
+
+  /// Lists every payee of an entity, ordered by name and id.
+  _ida.Future<List<_iaf6ifsb.Payee>> list(_isc.UuidValue entityId) =>
+      caller.callServerEndpoint<List<_iaf6ifsb.Payee>>(
+        'payee',
+        'list',
+        {'entityId': entityId},
+      );
+
+  /// Gets a single payee by ID.
+  _ida.Future<_iaf6ifsb.Payee> get(_isc.UuidValue payeeId) =>
+      caller.callServerEndpoint<_iaf6ifsb.Payee>(
+        'payee',
+        'get',
+        {'payeeId': payeeId},
+      );
+
+  /// Renames a payee by ID.
+  _ida.Future<_iaf6ifsb.Payee> update(
+    _isc.UuidValue payeeId, {
+    String? name,
+  }) => caller.callServerEndpoint<_iaf6ifsb.Payee>(
+    'payee',
+    'update',
+    {
+      'payeeId': payeeId,
+      'name': name,
+    },
+  );
+
+  /// Returns the envelope used by the payee's most recent coded transaction.
+  _ida.Future<_isc.UuidValue?> lastUsedEnvelopeId(
+    _isc.UuidValue payeeId,
+    _isc.UuidValue entityId,
+  ) => caller.callServerEndpoint<_isc.UuidValue?>(
+    'payee',
+    'lastUsedEnvelopeId',
+    {
+      'payeeId': payeeId,
+      'entityId': entityId,
+    },
+  );
+
+  /// Merges the source payee into the target payee.
+  ///
+  /// Returns the number of transactions reassigned. The source payee is
+  /// deleted after its transactions, recurring schedules and rules move.
+  _ida.Future<int> merge(
+    _isc.UuidValue sourcePayeeId,
+    _isc.UuidValue targetPayeeId,
+  ) => caller.callServerEndpoint<int>(
+    'payee',
+    'merge',
+    {
+      'sourcePayeeId': sourcePayeeId,
+      'targetPayeeId': targetPayeeId,
+    },
+  );
+
+  /// Deletes a payee and clears every reference to it.
+  _ida.Future<_iaf6ifsb.Payee> delete(_isc.UuidValue payeeId) =>
+      caller.callServerEndpoint<_iaf6ifsb.Payee>(
+        'payee',
+        'delete',
+        {'payeeId': payeeId},
+      );
+}
+
+/// API surface for Plaid-linked bank connections.
+///
+/// Every method is entity-scoped. The connection rows carry no secrets for
+/// the client: the token and cursor fields are `scope=serverOnly`, so the
+/// generated class cannot leak them.
 /// {@category Endpoint}
 class EndpointPlaid extends _isc.EndpointRef {
   EndpointPlaid(_isc.EndpointCaller caller) : super(caller);
@@ -1149,49 +1693,237 @@ class EndpointPlaid extends _isc.EndpointRef {
   String get name => 'plaid';
 
   /// Creates a short-lived link token for starting Plaid Link in the client.
-  _ida.Future<String> createLinkToken(_isc.UuidValue budgetId) =>
+  _ida.Future<String> createLinkToken(_isc.UuidValue entityId) =>
       caller.callServerEndpoint<String>(
         'plaid',
         'createLinkToken',
-        {'budgetId': budgetId},
+        {'entityId': entityId},
       );
 
-  /// Exchanges a public token and imports linked bank accounts into OpenBudget.
-  _ida.Future<List<_iqudaadl.Account>> exchangePublicToken(
-    _isc.UuidValue budgetId,
+  /// Exchanges a public token, imports the item's accounts with their
+  /// opening balances, and syncs the posted movements once.
+  _ida.Future<_itydqisw.PlaidConnection> exchangePublicToken(
+    _isc.UuidValue entityId,
     String publicToken,
-  ) => caller.callServerEndpoint<List<_iqudaadl.Account>>(
+  ) => caller.callServerEndpoint<_itydqisw.PlaidConnection>(
     'plaid',
     'exchangePublicToken',
     {
-      'budgetId': budgetId,
+      'entityId': entityId,
       'publicToken': publicToken,
     },
   );
 
-  /// Refreshes an existing Plaid item connection and updates imported accounts.
-  _ida.Future<List<_iqudaadl.Account>> syncConnection(
-    _isc.UuidValue budgetId,
+  /// Refreshes one connection: reported balances, valuations and movements.
+  _ida.Future<_itydqisw.PlaidConnection> syncConnection(
     _isc.UuidValue connectionId,
-  ) => caller.callServerEndpoint<List<_iqudaadl.Account>>(
+  ) => caller.callServerEndpoint<_itydqisw.PlaidConnection>(
     'plaid',
     'syncConnection',
-    {
-      'budgetId': budgetId,
-      'connectionId': connectionId,
-    },
+    {'connectionId': connectionId},
   );
 
-  /// Creates a Plaid sandbox item and imports accounts without client-side Link.
-  _ida.Future<List<_iqudaadl.Account>> importSandboxAccounts(
-    _isc.UuidValue budgetId, {
+  /// Lists the entity's connections, secrets never included.
+  _ida.Future<List<_itydqisw.PlaidConnection>> listConnections(
+    _isc.UuidValue entityId,
+  ) => caller.callServerEndpoint<List<_itydqisw.PlaidConnection>>(
+    'plaid',
+    'listConnections',
+    {'entityId': entityId},
+  );
+
+  /// Removes a connection, revokes the item at Plaid, and keeps the
+  /// accounts' imported history.
+  _ida.Future<void> removeConnection(_isc.UuidValue connectionId) =>
+      caller.callServerEndpoint<void>(
+        'plaid',
+        'removeConnection',
+        {'connectionId': connectionId},
+      );
+
+  /// Creates a Plaid sandbox item and links it without client-side Link.
+  _ida.Future<_itydqisw.PlaidConnection> importSandboxAccounts(
+    _isc.UuidValue entityId, {
     String? plaidInstitutionId,
-  }) => caller.callServerEndpoint<List<_iqudaadl.Account>>(
+  }) => caller.callServerEndpoint<_itydqisw.PlaidConnection>(
     'plaid',
     'importSandboxAccounts',
     {
-      'budgetId': budgetId,
+      'entityId': entityId,
       'plaidInstitutionId': plaidInstitutionId,
+    },
+  );
+}
+
+/// API surface for recurring transaction operations.
+///
+/// All methods require authentication and delegate to
+/// [RecurringTransactionService], which owns the entity boundary and publishes
+/// committed change events.
+/// {@category Endpoint}
+class EndpointRecurringTransaction extends _isc.EndpointRef {
+  EndpointRecurringTransaction(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'recurringTransaction';
+
+  /// Creates a schedule for one transactions-sourced account.
+  _ida.Future<_i41tn6nr.RecurringTransaction> create(
+    _isc.UuidValue accountId,
+    String description,
+    int amountMinor,
+    _ifz8weqz.RecurrenceFrequency frequency,
+    DateTime nextDate, {
+    _isc.UuidValue? payeeId,
+    _isc.UuidValue? envelopeId,
+    String? memo,
+    DateTime? endDate,
+  }) => caller.callServerEndpoint<_i41tn6nr.RecurringTransaction>(
+    'recurringTransaction',
+    'create',
+    {
+      'accountId': accountId,
+      'description': description,
+      'amountMinor': amountMinor,
+      'frequency': frequency,
+      'nextDate': nextDate,
+      'payeeId': payeeId,
+      'envelopeId': envelopeId,
+      'memo': memo,
+      'endDate': endDate,
+    },
+  );
+
+  /// Lists every schedule of an owned entity in due-date order.
+  _ida.Future<List<_i41tn6nr.RecurringTransaction>> list(
+    _isc.UuidValue entityId,
+  ) => caller.callServerEndpoint<List<_i41tn6nr.RecurringTransaction>>(
+    'recurringTransaction',
+    'list',
+    {'entityId': entityId},
+  );
+
+  /// Gets one schedule by ID.
+  _ida.Future<_i41tn6nr.RecurringTransaction> get(
+    _isc.UuidValue recurringTransactionId,
+  ) => caller.callServerEndpoint<_i41tn6nr.RecurringTransaction>(
+    'recurringTransaction',
+    'get',
+    {'recurringTransactionId': recurringTransactionId},
+  );
+
+  /// Updates the named fields and clear flags from the §7.1 contract.
+  _ida.Future<_i41tn6nr.RecurringTransaction> update(
+    _isc.UuidValue recurringTransactionId, {
+    _isc.UuidValue? accountId,
+    String? description,
+    int? amountMinor,
+    _ifz8weqz.RecurrenceFrequency? frequency,
+    DateTime? nextDate,
+    _isc.UuidValue? payeeId,
+    bool? clearPayee,
+    _isc.UuidValue? envelopeId,
+    bool? clearEnvelope,
+    String? memo,
+    DateTime? endDate,
+    bool? clearEndDate,
+    bool? isActive,
+  }) => caller.callServerEndpoint<_i41tn6nr.RecurringTransaction>(
+    'recurringTransaction',
+    'update',
+    {
+      'recurringTransactionId': recurringTransactionId,
+      'accountId': accountId,
+      'description': description,
+      'amountMinor': amountMinor,
+      'frequency': frequency,
+      'nextDate': nextDate,
+      'payeeId': payeeId,
+      'clearPayee': clearPayee,
+      'envelopeId': envelopeId,
+      'clearEnvelope': clearEnvelope,
+      'memo': memo,
+      'endDate': endDate,
+      'clearEndDate': clearEndDate,
+      'isActive': isActive,
+    },
+  );
+
+  /// Deletes one schedule without deleting its posted transactions.
+  _ida.Future<_i41tn6nr.RecurringTransaction> delete(
+    _isc.UuidValue recurringTransactionId,
+  ) => caller.callServerEndpoint<_i41tn6nr.RecurringTransaction>(
+    'recurringTransaction',
+    'delete',
+    {'recurringTransactionId': recurringTransactionId},
+  );
+
+  /// Advances the schedule by one occurrence without posting it.
+  _ida.Future<_i41tn6nr.RecurringTransaction> skipOccurrence(
+    _isc.UuidValue recurringTransactionId,
+  ) => caller.callServerEndpoint<_i41tn6nr.RecurringTransaction>(
+    'recurringTransaction',
+    'skipOccurrence',
+    {'recurringTransactionId': recurringTransactionId},
+  );
+
+  /// Posts every due occurrence for one entity and returns the actual count.
+  _ida.Future<int> postDue(_isc.UuidValue entityId) =>
+      caller.callServerEndpoint<int>(
+        'recurringTransaction',
+        'postDue',
+        {'entityId': entityId},
+      );
+
+  /// Counts active schedules that are due on the entity's local today.
+  _ida.Future<int> countDue(_isc.UuidValue entityId) =>
+      caller.callServerEndpoint<int>(
+        'recurringTransaction',
+        'countDue',
+        {'entityId': entityId},
+      );
+}
+
+/// Read-only reporting surface. This unit exposes net worth only; spending,
+/// month summaries and age of money arrive with their own service.
+/// {@category Endpoint}
+class EndpointReport extends _isc.EndpointRef {
+  EndpointReport(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'report';
+
+  /// Combined net worth for the caller's entities on one date.
+  _ida.Future<_ilmu26ji.NetWorthView> netWorth({
+    List<_isc.UuidValue>? entityIds,
+    String? currencyCode,
+    DateTime? asOf,
+  }) => caller.callServerEndpoint<_ilmu26ji.NetWorthView>(
+    'report',
+    'netWorth',
+    {
+      'entityIds': entityIds,
+      'currencyCode': currencyCode,
+      'asOf': asOf,
+    },
+  );
+
+  /// Net worth at the last day of each period in a range.
+  _ida.Future<_iynyr02m.NetWorthHistoryView> netWorthHistory(
+    DateTime fromDate,
+    DateTime toDate,
+    _idze6lni.NetWorthGranularity granularity, {
+    List<_isc.UuidValue>? entityIds,
+    String? currencyCode,
+  }) => caller.callServerEndpoint<_iynyr02m.NetWorthHistoryView>(
+    'report',
+    'netWorthHistory',
+    {
+      'fromDate': fromDate,
+      'toDate': toDate,
+      'granularity': granularity,
+      'entityIds': entityIds,
+      'currencyCode': currencyCode,
     },
   );
 }
@@ -1219,6 +1951,470 @@ class EndpointSettings extends _isc.EndpointRef {
     'settings',
     'setReportingCurrency',
     {'currencyCode': currencyCode},
+  );
+}
+
+/// API surface for tax profiles, line coding, envelope defaults and reports.
+///
+/// Every method requires authentication and delegates to [TaxService], which
+/// owns the entity boundary and the write rules.
+/// {@category Endpoint}
+class EndpointTax extends _isc.EndpointRef {
+  EndpointTax(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'tax';
+
+  /// Returns the entity's canonical tax profile, or null when none is set.
+  _ida.Future<_ibyrfq34.TaxProfileRecord?> getProfile(
+    _isc.UuidValue entityId,
+  ) => caller.callServerEndpoint<_ibyrfq34.TaxProfileRecord?>(
+    'tax',
+    'getProfile',
+    {'entityId': entityId},
+  );
+
+  /// Creates or replaces the entity's tax profile.
+  ///
+  /// [jurisdiction] and [entityKind] are kept for the documented §7.1 surface,
+  /// but they are redundant assertions: the entity's country and kind are the
+  /// source of truth and always rewrite the stored profile, and a conflicting
+  /// value rejects. The personal-business link is set on the entity, not here.
+  _ida.Future<_ibyrfq34.TaxProfileRecord> saveProfile(
+    _isc.UuidValue entityId,
+    String jurisdiction,
+    String entityKind,
+    String profileJson,
+  ) => caller.callServerEndpoint<_ibyrfq34.TaxProfileRecord>(
+    'tax',
+    'saveProfile',
+    {
+      'entityId': entityId,
+      'jurisdiction': jurisdiction,
+      'entityKind': entityKind,
+      'profileJson': profileJson,
+    },
+  );
+
+  /// Lists the tax categories available to the entity's kind.
+  _ida.Future<List<_ic177lol.TaxCategoryView>> listCategories(
+    _isc.UuidValue entityId,
+  ) => caller.callServerEndpoint<List<_ic177lol.TaxCategoryView>>(
+    'tax',
+    'listCategories',
+    {'entityId': entityId},
+  );
+
+  /// Sets or clears the default tax category on an envelope.
+  ///
+  /// A null or blank [code] clears the default, matching the existing surface.
+  _ida.Future<_i29jf3by.Envelope> setEnvelopeTaxCategory(
+    _isc.UuidValue envelopeId, {
+    String? code,
+  }) => caller.callServerEndpoint<_i29jf3by.Envelope>(
+    'tax',
+    'setEnvelopeTaxCategory',
+    {
+      'envelopeId': envelopeId,
+      'code': code,
+    },
+  );
+
+  /// Sets or clears one transaction line's tax treatment.
+  ///
+  /// Null leaves a field unchanged; [clearTaxCategoryCode] clears only the
+  /// category. The write uses the transaction writer's rules, so reconciled
+  /// rows, period locks, transfers and ledger revisions behave exactly as an
+  /// ordinary line edit.
+  _ida.Future<_irfj6dpt.TransactionView> setLineTax(
+    _isc.UuidValue transactionLineId, {
+    String? taxCategoryCode,
+    bool? clearTaxCategoryCode,
+    int? businessUsePercent,
+    int? salesTaxMinor,
+  }) => caller.callServerEndpoint<_irfj6dpt.TransactionView>(
+    'tax',
+    'setLineTax',
+    {
+      'transactionLineId': transactionLineId,
+      'taxCategoryCode': taxCategoryCode,
+      'clearTaxCategoryCode': clearTaxCategoryCode,
+      'businessUsePercent': businessUsePercent,
+      'salesTaxMinor': salesTaxMinor,
+    },
+  );
+
+  /// Computes the entity's tax report for the year starting in [startYear].
+  ///
+  /// When [startYear] is null the tax year containing the entity's local today
+  /// is used.
+  _ida.Future<_ieaa4q0n.TaxReportView> getReport(
+    _isc.UuidValue entityId, {
+    int? startYear,
+  }) => caller.callServerEndpoint<_ieaa4q0n.TaxReportView>(
+    'tax',
+    'getReport',
+    {
+      'entityId': entityId,
+      'startYear': startYear,
+    },
+  );
+}
+
+/// API surface for transaction rule operations.
+///
+/// All methods require authentication and delegate to
+/// [TransactionRuleService], which owns the entity boundary and publishes
+/// committed change events.
+/// {@category Endpoint}
+class EndpointTransactionRule extends _isc.EndpointRef {
+  EndpointTransactionRule(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'transactionRule';
+
+  /// Creates the entity's rule for a payee.
+  _ida.Future<_iwxd5v0a.TransactionRule> create(
+    _isc.UuidValue entityId,
+    _isc.UuidValue payeeId,
+    _isc.UuidValue envelopeId,
+  ) => caller.callServerEndpoint<_iwxd5v0a.TransactionRule>(
+    'transactionRule',
+    'create',
+    {
+      'entityId': entityId,
+      'payeeId': payeeId,
+      'envelopeId': envelopeId,
+    },
+  );
+
+  /// Lists every rule of an entity.
+  _ida.Future<List<_iwxd5v0a.TransactionRule>> list(_isc.UuidValue entityId) =>
+      caller.callServerEndpoint<List<_iwxd5v0a.TransactionRule>>(
+        'transactionRule',
+        'list',
+        {'entityId': entityId},
+      );
+
+  /// Gets a single transaction rule by ID.
+  _ida.Future<_iwxd5v0a.TransactionRule> get(_isc.UuidValue ruleId) =>
+      caller.callServerEndpoint<_iwxd5v0a.TransactionRule>(
+        'transactionRule',
+        'get',
+        {'ruleId': ruleId},
+      );
+
+  /// Changes a rule's envelope, its enabled state, or both.
+  _ida.Future<_iwxd5v0a.TransactionRule> update(
+    _isc.UuidValue ruleId, {
+    _isc.UuidValue? envelopeId,
+    bool? enabled,
+  }) => caller.callServerEndpoint<_iwxd5v0a.TransactionRule>(
+    'transactionRule',
+    'update',
+    {
+      'ruleId': ruleId,
+      'envelopeId': envelopeId,
+      'enabled': enabled,
+    },
+  );
+
+  /// Returns the envelope an enabled rule supplies for a payee.
+  _ida.Future<_isc.UuidValue?> findMatchingEnvelope(
+    _isc.UuidValue entityId,
+    _isc.UuidValue payeeId,
+  ) => caller.callServerEndpoint<_isc.UuidValue?>(
+    'transactionRule',
+    'findMatchingEnvelope',
+    {
+      'entityId': entityId,
+      'payeeId': payeeId,
+    },
+  );
+
+  /// Deletes a transaction rule.
+  _ida.Future<_iwxd5v0a.TransactionRule> delete(_isc.UuidValue ruleId) =>
+      caller.callServerEndpoint<_iwxd5v0a.TransactionRule>(
+        'transactionRule',
+        'delete',
+        {'ruleId': ruleId},
+      );
+}
+
+/// API surface for transaction operations.
+///
+/// Every method requires authentication and delegates to
+/// [TransactionService], which owns ownership checks and the write boundary.
+/// {@category Endpoint}
+class EndpointTransaction extends _isc.EndpointRef {
+  EndpointTransaction(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'transaction';
+
+  /// Creates a transaction header and its lines.
+  _ida.Future<_irfj6dpt.TransactionView> create(
+    _iufp60gr.TransactionInput input,
+  ) => caller.callServerEndpoint<_irfj6dpt.TransactionView>(
+    'transaction',
+    'create',
+    {'input': input},
+  );
+
+  /// Loads one owned transaction with its lines and transfer peer.
+  _ida.Future<_irfj6dpt.TransactionView> get(_isc.UuidValue transactionId) =>
+      caller.callServerEndpoint<_irfj6dpt.TransactionView>(
+        'transaction',
+        'get',
+        {'transactionId': transactionId},
+      );
+
+  /// Lists one keyset page of an owned entity's transactions.
+  _ida.Future<_ipoksp8f.TransactionPage> list(
+    _in48a2uo.TransactionQuery query,
+  ) => caller.callServerEndpoint<_ipoksp8f.TransactionPage>(
+    'transaction',
+    'list',
+    {'query': query},
+  );
+
+  /// Replaces a transaction and its lines.
+  _ida.Future<_irfj6dpt.TransactionView> update(
+    _isc.UuidValue transactionId,
+    _iufp60gr.TransactionInput input,
+  ) => caller.callServerEndpoint<_irfj6dpt.TransactionView>(
+    'transaction',
+    'update',
+    {
+      'transactionId': transactionId,
+      'input': input,
+    },
+  );
+
+  /// Deletes a transaction, both legs of a transfer, and their balances.
+  _ida.Future<void> delete(_isc.UuidValue transactionId) =>
+      caller.callServerEndpoint<void>(
+        'transaction',
+        'delete',
+        {'transactionId': transactionId},
+      );
+
+  /// Sets one status on a page of owned transactions.
+  ///
+  /// `reconciled` is rejected here; clearing a reconciled row unlocks it.
+  _ida.Future<int> setStatus(
+    List<_isc.UuidValue> transactionIds,
+    _itmjglt7.TransactionStatus status,
+  ) => caller.callServerEndpoint<int>(
+    'transaction',
+    'setStatus',
+    {
+      'transactionIds': transactionIds,
+      'status': status,
+    },
+  );
+
+  /// Sets or clears one flag on a page of owned transactions.
+  _ida.Future<int> setFlag(
+    List<_isc.UuidValue> transactionIds,
+    _idwby6z8.TransactionFlag? flag,
+  ) => caller.callServerEndpoint<int>(
+    'transaction',
+    'setFlag',
+    {
+      'transactionIds': transactionIds,
+      'flag': flag,
+    },
+  );
+
+  /// Creates both legs of a transfer and their link.
+  _ida.Future<List<_irfj6dpt.TransactionView>> createTransfer(
+    _i4fjyt55.TransferInput input,
+  ) => caller.callServerEndpoint<List<_irfj6dpt.TransactionView>>(
+    'transaction',
+    'createTransfer',
+    {'input': input},
+  );
+
+  /// Replaces both legs of an existing transfer.
+  _ida.Future<List<_irfj6dpt.TransactionView>> updateTransfer(
+    _isc.UuidValue transferId,
+    _i4fjyt55.TransferInput input,
+  ) => caller.callServerEndpoint<List<_irfj6dpt.TransactionView>>(
+    'transaction',
+    'updateTransfer',
+    {
+      'transferId': transferId,
+      'input': input,
+    },
+  );
+
+  /// Reconciles one owned transactions account against a statement balance.
+  _ida.Future<_idhtlbwy.ReconcileResult> reconcile(
+    _isc.UuidValue accountId,
+    DateTime statementDate,
+    int statementBalanceMinor,
+    bool createAdjustment,
+  ) => caller.callServerEndpoint<_idhtlbwy.ReconcileResult>(
+    'transaction',
+    'reconcile',
+    {
+      'accountId': accountId,
+      'statementDate': statementDate,
+      'statementBalanceMinor': statementBalanceMinor,
+      'createAdjustment': createAdjustment,
+    },
+  );
+
+  /// Imports rows into one owned transactions account idempotently.
+  ///
+  /// `externalId` dedupes the file, so retrying the same rows inserts only
+  /// the new ones. Row-level validation failures come back with their
+  /// 0-based index in [ImportResult.errors].
+  _ida.Future<_ish80d3o.ImportResult> importRows(
+    _isc.UuidValue accountId,
+    List<_iyud7cy9.ImportRow> rows,
+  ) => caller.callServerEndpoint<_ish80d3o.ImportResult>(
+    'transaction',
+    'importRows',
+    {
+      'accountId': accountId,
+      'rows': rows,
+    },
+  );
+
+  /// Finds same-account, same-amount transactions within three days.
+  _ida.Future<List<_irfj6dpt.TransactionView>> findDuplicates(
+    _isc.UuidValue accountId,
+    DateTime date,
+    int amountMinor,
+  ) => caller.callServerEndpoint<List<_irfj6dpt.TransactionView>>(
+    'transaction',
+    'findDuplicates',
+    {
+      'accountId': accountId,
+      'date': date,
+      'amountMinor': amountMinor,
+    },
+  );
+}
+
+/// API surface for read-only blockchain wallets.
+///
+/// Every method requires a signed-in caller and lets [WalletService] cross
+/// [EntityAccess] before touching a wallet, account or transaction.
+/// {@category Endpoint}
+class EndpointWallet extends _isc.EndpointRef {
+  EndpointWallet(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'wallet';
+
+  /// Creates the wallet and its crypto account in one transaction, then syncs.
+  _ida.Future<_igzh8mor.Wallet> connect(
+    _isc.UuidValue entityId,
+    _i8u1c0bj.WalletNetwork network,
+    String address, {
+    String? label,
+    String? accountName,
+  }) => caller.callServerEndpoint<_igzh8mor.Wallet>(
+    'wallet',
+    'connect',
+    {
+      'entityId': entityId,
+      'network': network,
+      'address': address,
+      'label': label,
+      'accountName': accountName,
+    },
+  );
+
+  /// Lists the wallets of one owned entity.
+  _ida.Future<List<_igzh8mor.Wallet>> list(_isc.UuidValue entityId) =>
+      caller.callServerEndpoint<List<_igzh8mor.Wallet>>(
+        'wallet',
+        'list',
+        {'entityId': entityId},
+      );
+
+  /// Loads the wallet that values one owned account, if any.
+  _ida.Future<_igzh8mor.Wallet?> getForAccount(_isc.UuidValue accountId) =>
+      caller.callServerEndpoint<_igzh8mor.Wallet?>(
+        'wallet',
+        'getForAccount',
+        {'accountId': accountId},
+      );
+
+  /// Fetches the chain and commits holdings, transactions and the valuation.
+  _ida.Future<_idhyojww.WalletSyncResult> sync(_isc.UuidValue walletId) =>
+      caller.callServerEndpoint<_idhyojww.WalletSyncResult>(
+        'wallet',
+        'sync',
+        {'walletId': walletId},
+      );
+
+  /// Lists the wallet's persisted holdings.
+  _ida.Future<List<_izm3e498.WalletHolding>> listHoldings(
+    _isc.UuidValue walletId,
+  ) => caller.callServerEndpoint<List<_izm3e498.WalletHolding>>(
+    'wallet',
+    'listHoldings',
+    {'walletId': walletId},
+  );
+
+  /// Lists the wallet's transactions, newest first.
+  _ida.Future<List<_itxp58mr.WalletTransaction>> listTransactions(
+    _isc.UuidValue walletId, {
+    DateTime? before,
+    int? limit,
+  }) => caller.callServerEndpoint<List<_itxp58mr.WalletTransaction>>(
+    'wallet',
+    'listTransactions',
+    {
+      'walletId': walletId,
+      'before': before,
+      'limit': limit,
+    },
+  );
+
+  /// Groups estimated realised P&L by fiscal year and currency.
+  _ida.Future<List<_il62txu0.WalletTaxYearSummary>> listTaxYearSummaries(
+    _isc.UuidValue walletId,
+  ) => caller.callServerEndpoint<List<_il62txu0.WalletTaxYearSummary>>(
+    'wallet',
+    'listTaxYearSummaries',
+    {'walletId': walletId},
+  );
+
+  /// Replaces category, tags and memo on one wallet transaction.
+  _ida.Future<_itxp58mr.WalletTransaction> updateTransactionMetadata(
+    _isc.UuidValue walletTransactionId, {
+    String? category,
+    List<String>? tags,
+    String? memo,
+  }) => caller.callServerEndpoint<_itxp58mr.WalletTransaction>(
+    'wallet',
+    'updateTransactionMetadata',
+    {
+      'walletTransactionId': walletTransactionId,
+      'category': category,
+      'tags': tags,
+      'memo': memo,
+    },
+  );
+
+  /// Deletes the wallet; deleteAccount also deletes the crypto account and its
+  /// protections apply.
+  _ida.Future<void> disconnect(
+    _isc.UuidValue walletId, {
+    bool? deleteAccount,
+  }) => caller.callServerEndpoint<void>(
+    'wallet',
+    'disconnect',
+    {
+      'walletId': walletId,
+      'deleteAccount': deleteAccount,
+    },
   );
 }
 
@@ -1260,6 +2456,7 @@ class Client extends _isc.ServerpodClientShared {
              disconnectStreamsOnLostInternetConnection,
          httpClientOverride: httpClientOverride,
        ) {
+    account = EndpointAccount(this);
     agent = EndpointAgent(this);
     agentToken = EndpointAgentToken(this);
     appleIdp = EndpointAppleIdp(this);
@@ -1267,6 +2464,8 @@ class Client extends _isc.ServerpodClientShared {
     googleIdp = EndpointGoogleIdp(this);
     jwtRefresh = EndpointJwtRefresh(this);
     billing = EndpointBilling(this);
+    budget = EndpointBudget(this);
+    category = EndpointCategory(this);
     entity = EndpointEntity(this);
     entityStream = EndpointEntityStream(this);
     envelopeGoal = EndpointEnvelopeGoal(this);
@@ -1274,10 +2473,19 @@ class Client extends _isc.ServerpodClientShared {
     fxRate = EndpointFxRate(this);
     institution = EndpointInstitution(this);
     ledger = EndpointLedger(this);
+    payee = EndpointPayee(this);
     plaid = EndpointPlaid(this);
+    recurringTransaction = EndpointRecurringTransaction(this);
+    report = EndpointReport(this);
     settings = EndpointSettings(this);
+    tax = EndpointTax(this);
+    transactionRule = EndpointTransactionRule(this);
+    transaction = EndpointTransaction(this);
+    wallet = EndpointWallet(this);
     modules = Modules(this);
   }
+
+  late final EndpointAccount account;
 
   late final EndpointAgent agent;
 
@@ -1293,6 +2501,10 @@ class Client extends _isc.ServerpodClientShared {
 
   late final EndpointBilling billing;
 
+  late final EndpointBudget budget;
+
+  late final EndpointCategory category;
+
   late final EndpointEntity entity;
 
   late final EndpointEntityStream entityStream;
@@ -1307,14 +2519,29 @@ class Client extends _isc.ServerpodClientShared {
 
   late final EndpointLedger ledger;
 
+  late final EndpointPayee payee;
+
   late final EndpointPlaid plaid;
 
+  late final EndpointRecurringTransaction recurringTransaction;
+
+  late final EndpointReport report;
+
   late final EndpointSettings settings;
+
+  late final EndpointTax tax;
+
+  late final EndpointTransactionRule transactionRule;
+
+  late final EndpointTransaction transaction;
+
+  late final EndpointWallet wallet;
 
   late final Modules modules;
 
   @override
   Map<String, _isc.EndpointRef> get endpointRefLookup => {
+    'account': account,
     'agent': agent,
     'agentToken': agentToken,
     'appleIdp': appleIdp,
@@ -1322,6 +2549,8 @@ class Client extends _isc.ServerpodClientShared {
     'googleIdp': googleIdp,
     'jwtRefresh': jwtRefresh,
     'billing': billing,
+    'budget': budget,
+    'category': category,
     'entity': entity,
     'entityStream': entityStream,
     'envelopeGoal': envelopeGoal,
@@ -1329,8 +2558,15 @@ class Client extends _isc.ServerpodClientShared {
     'fxRate': fxRate,
     'institution': institution,
     'ledger': ledger,
+    'payee': payee,
     'plaid': plaid,
+    'recurringTransaction': recurringTransaction,
+    'report': report,
     'settings': settings,
+    'tax': tax,
+    'transactionRule': transactionRule,
+    'transaction': transaction,
+    'wallet': wallet,
   };
 
   @override

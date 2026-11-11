@@ -1,3 +1,17 @@
+account:
+  - create:
+  - list:
+  - listAll:
+  - get:
+  - update:
+  - reorder:
+  - close:
+  - reopen:
+  - delete:
+  - getBalances:
+  - listValuations:
+  - setValuation:
+  - deleteValuation:
 agent:
   - chat:
   - listConversations:
@@ -39,6 +53,23 @@ billing:
   - getSolanaPlan:
   - solanaSubscriptionChallenge:
   - confirmSolanaSubscription:
+budget:
+  - getMonth:
+  - setAllocations:
+  - moveMoney:
+  - copyMonth:
+  - saveTemplate:
+  - listTemplates:
+  - getTemplateLines:
+  - applyTemplate:
+  - deleteTemplate:
+category:
+  - create:
+  - list:
+  - get:
+  - update:
+  - reorder:
+  - delete:
 entity:
   - create:
   - list:
@@ -47,6 +78,7 @@ entity:
   - archive:
   - unarchive:
   - delete:
+  - exportData:
 entityStream:
   - watch:
 envelopeGoal:
@@ -81,11 +113,70 @@ ledger:
   - setLockDate:
   - trialBalance:
   - listAuditEvents:
+payee:
+  - create:
+  - list:
+  - get:
+  - update:
+  - lastUsedEnvelopeId:
+  - merge:
+  - delete:
 plaid:
   - createLinkToken:
   - exchangePublicToken:
   - syncConnection:
+  - listConnections:
+  - removeConnection:
   - importSandboxAccounts:
+recurringTransaction:
+  - create:
+  - list:
+  - get:
+  - update:
+  - delete:
+  - skipOccurrence:
+  - postDue:
+  - countDue:
+report:
+  - netWorth:
+  - netWorthHistory:
 settings:
   - get:
   - setReportingCurrency:
+tax:
+  - getProfile:
+  - saveProfile:
+  - listCategories:
+  - setEnvelopeTaxCategory:
+  - setLineTax:
+  - getReport:
+transactionRule:
+  - create:
+  - list:
+  - get:
+  - update:
+  - findMatchingEnvelope:
+  - delete:
+transaction:
+  - create:
+  - get:
+  - list:
+  - update:
+  - delete:
+  - setStatus:
+  - setFlag:
+  - createTransfer:
+  - updateTransfer:
+  - reconcile:
+  - importRows:
+  - findDuplicates:
+wallet:
+  - connect:
+  - list:
+  - getForAccount:
+  - sync:
+  - listHoldings:
+  - listTransactions:
+  - listTaxYearSummaries:
+  - updateTransactionMetadata:
+  - disconnect:

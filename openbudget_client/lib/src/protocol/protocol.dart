@@ -13,6 +13,8 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:openbudget_client/src/protocol/accounts/account.dart'
     as _iqudaadl;
+import 'package:openbudget_client/src/protocol/accounts/account_valuation.dart'
+    as _idms9t2z;
 import 'package:openbudget_client/src/protocol/agent/agent_conversation.dart'
     as _in44ixo7;
 import 'package:openbudget_client/src/protocol/agent/agent_message.dart'
@@ -23,6 +25,14 @@ import 'package:openbudget_client/src/protocol/agent/mcp/agent_access_token_view
     as _itxn3wek;
 import 'package:openbudget_client/src/protocol/audit/audit_event.dart'
     as _ioe147d0;
+import 'package:openbudget_client/src/protocol/budget/allocation_input.dart'
+    as _inutgv28;
+import 'package:openbudget_client/src/protocol/budget_templates/budget_template.dart'
+    as _itiojbb0;
+import 'package:openbudget_client/src/protocol/budget_templates/budget_template_line.dart'
+    as _ik2p0evm;
+import 'package:openbudget_client/src/protocol/categories/category.dart'
+    as _iels1fku;
 import 'package:openbudget_client/src/protocol/entities/entity.dart'
     as _i2ulk6h5;
 import 'package:openbudget_client/src/protocol/envelope_goals/envelope_goal.dart'
@@ -39,6 +49,27 @@ import 'package:openbudget_client/src/protocol/ledger/journal_line_input.dart'
     as _i3j8x5or;
 import 'package:openbudget_client/src/protocol/ledger/ledger_account.dart'
     as _ixq9t892;
+import 'package:openbudget_client/src/protocol/payees/payee.dart' as _iaf6ifsb;
+import 'package:openbudget_client/src/protocol/plaid/plaid_connection.dart'
+    as _itydqisw;
+import 'package:openbudget_client/src/protocol/recurring_transactions/recurring_transaction.dart'
+    as _i41tn6nr;
+import 'package:openbudget_client/src/protocol/tax/tax_category_view.dart'
+    as _ic177lol;
+import 'package:openbudget_client/src/protocol/transaction_rules/transaction_rule.dart'
+    as _iwxd5v0a;
+import 'package:openbudget_client/src/protocol/transactions/import_row.dart'
+    as _iyud7cy9;
+import 'package:openbudget_client/src/protocol/transactions/transaction_view.dart'
+    as _irfj6dpt;
+import 'package:openbudget_client/src/protocol/wallets/wallet.dart'
+    as _igzh8mor;
+import 'package:openbudget_client/src/protocol/wallets/wallet_holding.dart'
+    as _izm3e498;
+import 'package:openbudget_client/src/protocol/wallets/wallet_tax_year_summary.dart'
+    as _il62txu0;
+import 'package:openbudget_client/src/protocol/wallets/wallet_transaction.dart'
+    as _itxp58mr;
 import 'package:openbudget_core/openbudget_core.dart' as _ifz8weqz;
 import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart'
     as _iacc;
@@ -526,21 +557,40 @@ class Protocol extends _isc.SerializationManager
           _isc.getType<List<_ilixdhed.TransactionView>>,
           _isc.getType<List<_ipio7ws3.TransactionLine>>,
           _isc.getType<List<String>?>,
+          _isc.getType<List<_iqudaadl.Account>>,
+          _isc.getType<List<_isc.UuidValue>>,
+          _isc.getType<List<_idms9t2z.AccountValuation>>,
           _isc.getType<List<_in44ixo7.AgentConversation>>,
           _isc.getType<List<_i8fbky0c.AgentMessage>>,
           _isc.getType<List<_icv7zzda.AgentProposal>>,
           _isc.getType<List<_itxn3wek.AgentAccessTokenView>>,
+          _isc.getType<List<_inutgv28.AllocationInput>>,
+          _isc.getType<List<_itiojbb0.BudgetTemplate>>,
+          _isc.getType<List<_ik2p0evm.BudgetTemplateLine>>,
+          _isc.getType<List<_iels1fku.Category>>,
           _isc.getType<List<_i2ulk6h5.Entity>>,
           _isc.getType<List<_ibdhi9gv.EnvelopeGoal>>,
           _isc.getType<List<_i29jf3by.Envelope>>,
-          _isc.getType<List<_isc.UuidValue>>,
           _isc.getType<List<_i6ysl1a4.Institution>>,
           _isc.getType<List<_ixq9t892.LedgerAccount>>,
           _isc.getType<List<_i3j8x5or.JournalLineInput>>,
           _isc.getType<List<_izuizaeu.Journal>>,
           _isc.getType<List<_iwruw2s3.JournalLine>>,
           _isc.getType<List<_ioe147d0.AuditEvent>>,
-          _isc.getType<List<_iqudaadl.Account>>,
+          _isc.getType<List<_iaf6ifsb.Payee>>,
+          _isc.getType<List<_itydqisw.PlaidConnection>>,
+          _isc.getType<List<_i41tn6nr.RecurringTransaction>>,
+          _isc.getType<List<_isc.UuidValue>?>,
+          _isc.getType<List<_ic177lol.TaxCategoryView>>,
+          _isc.getType<List<_iwxd5v0a.TransactionRule>>,
+          _isc.getType<List<_irfj6dpt.TransactionView>>,
+          _isc.getType<List<_iyud7cy9.ImportRow>>,
+          _isc.getType<List<_igzh8mor.Wallet>>,
+          _isc.getType<List<_izm3e498.WalletHolding>>,
+          _isc.getType<List<_itxp58mr.WalletTransaction>>,
+          _isc.getType<List<_il62txu0.WalletTaxYearSummary>>,
+          _isc.getType<List<String>>,
+          _isc.getType<List<String>?>,
         ],
         modules: const [
           _iaic.Protocol.new,
@@ -1585,6 +1635,22 @@ class Protocol extends _isc.SerializationManager
               : null)
           as T;
     }
+    if (t == List<_iqudaadl.Account>) {
+      return (data as List)
+              .map((e) => deserialize<_iqudaadl.Account>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_isc.UuidValue>) {
+      return (data as List).map((e) => deserialize<_isc.UuidValue>(e)).toList()
+          as T;
+    }
+    if (t == List<_idms9t2z.AccountValuation>) {
+      return (data as List)
+              .map((e) => deserialize<_idms9t2z.AccountValuation>(e))
+              .toList()
+          as T;
+    }
     if (t == List<_in44ixo7.AgentConversation>) {
       return (data as List)
               .map((e) => deserialize<_in44ixo7.AgentConversation>(e))
@@ -1609,6 +1675,30 @@ class Protocol extends _isc.SerializationManager
               .toList()
           as T;
     }
+    if (t == List<_inutgv28.AllocationInput>) {
+      return (data as List)
+              .map((e) => deserialize<_inutgv28.AllocationInput>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_itiojbb0.BudgetTemplate>) {
+      return (data as List)
+              .map((e) => deserialize<_itiojbb0.BudgetTemplate>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_ik2p0evm.BudgetTemplateLine>) {
+      return (data as List)
+              .map((e) => deserialize<_ik2p0evm.BudgetTemplateLine>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_iels1fku.Category>) {
+      return (data as List)
+              .map((e) => deserialize<_iels1fku.Category>(e))
+              .toList()
+          as T;
+    }
     if (t == List<_i2ulk6h5.Entity>) {
       return (data as List)
               .map((e) => deserialize<_i2ulk6h5.Entity>(e))
@@ -1625,10 +1715,6 @@ class Protocol extends _isc.SerializationManager
       return (data as List)
               .map((e) => deserialize<_i29jf3by.Envelope>(e))
               .toList()
-          as T;
-    }
-    if (t == List<_isc.UuidValue>) {
-      return (data as List).map((e) => deserialize<_isc.UuidValue>(e)).toList()
           as T;
     }
     if (t == List<_i6ysl1a4.Institution>) {
@@ -1667,10 +1753,85 @@ class Protocol extends _isc.SerializationManager
               .toList()
           as T;
     }
-    if (t == List<_iqudaadl.Account>) {
+    if (t == List<_iaf6ifsb.Payee>) {
+      return (data as List).map((e) => deserialize<_iaf6ifsb.Payee>(e)).toList()
+          as T;
+    }
+    if (t == List<_itydqisw.PlaidConnection>) {
       return (data as List)
-              .map((e) => deserialize<_iqudaadl.Account>(e))
+              .map((e) => deserialize<_itydqisw.PlaidConnection>(e))
               .toList()
+          as T;
+    }
+    if (t == List<_i41tn6nr.RecurringTransaction>) {
+      return (data as List)
+              .map((e) => deserialize<_i41tn6nr.RecurringTransaction>(e))
+              .toList()
+          as T;
+    }
+    if (t == _isc.getType<List<_isc.UuidValue>?>()) {
+      return (data != null
+              ? (data as List)
+                    .map((e) => deserialize<_isc.UuidValue>(e))
+                    .toList()
+              : null)
+          as T;
+    }
+    if (t == List<_ic177lol.TaxCategoryView>) {
+      return (data as List)
+              .map((e) => deserialize<_ic177lol.TaxCategoryView>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_iwxd5v0a.TransactionRule>) {
+      return (data as List)
+              .map((e) => deserialize<_iwxd5v0a.TransactionRule>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_irfj6dpt.TransactionView>) {
+      return (data as List)
+              .map((e) => deserialize<_irfj6dpt.TransactionView>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_iyud7cy9.ImportRow>) {
+      return (data as List)
+              .map((e) => deserialize<_iyud7cy9.ImportRow>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_igzh8mor.Wallet>) {
+      return (data as List)
+              .map((e) => deserialize<_igzh8mor.Wallet>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_izm3e498.WalletHolding>) {
+      return (data as List)
+              .map((e) => deserialize<_izm3e498.WalletHolding>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_itxp58mr.WalletTransaction>) {
+      return (data as List)
+              .map((e) => deserialize<_itxp58mr.WalletTransaction>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_il62txu0.WalletTaxYearSummary>) {
+      return (data as List)
+              .map((e) => deserialize<_il62txu0.WalletTaxYearSummary>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<String>) {
+      return (data as List).map((e) => deserialize<String>(e)).toList() as T;
+    }
+    if (t == _isc.getType<List<String>?>()) {
+      return (data != null
+              ? (data as List).map((e) => deserialize<String>(e)).toList()
+              : null)
           as T;
     }
     final modules = deserializationMetadata.modulesForDeserialization(
