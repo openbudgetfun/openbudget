@@ -45,9 +45,13 @@ class TransactionWriteMetadata {
 /// The only writer of `transaction`, `transaction_line` and `transfer` rows.
 ///
 /// Every operation either owns a database transaction or joins one opened by
-/// [inTransaction]. It locks accounts in UUID order, verifies ownership and
-/// the account's balance source, validates every line, stores a reproducible
-/// FX rate, and moves cached balances atomically with the rows.
+/// [inTransaction]. Row locks always follow one hierarchy: the accounts the
+/// write touches, in UUID order, then the transaction rows, in UUID order,
+/// then any link rows. Every affected account is discovered before the first
+/// row lock, so account deletion and a transfer delete can wait on each other
+/// without forming a cycle. Each operation then verifies ownership, validates
+/// every line, stores a reproducible FX rate, and moves cached balances
+/// atomically with the rows.
 ///
 /// Change events are published only after the owning database transaction
 /// commits. A caller that passes `transaction:` must have opened it with
@@ -182,9 +186,12 @@ abstract final class TransactionWriter {
   ///
   /// Account deletion uses this before removing the account row so a surviving
   /// peer's cached balance is reversed through the writer instead of being
-  /// left behind by a database cascade. The usual delete restrictions apply:
-  /// a reconciled or period-locked leg rejects the whole account deletion
-  /// rather than producing a partial delete.
+  /// left behind by a database cascade. The target account and every account a
+  /// transfer touches are locked in UUID order before the first transfer row,
+  /// so the caller must not already hold an account outside that set. The
+  /// usual delete restrictions apply: a reconciled or period-locked leg
+  /// rejects the whole account deletion rather than producing a partial
+  /// delete.
   static Future<void> deleteTransfersForAccount(
     Session session,
     UuidValue accountId, {
@@ -323,6 +330,27 @@ abstract final class TransactionWriter {
     Transaction tx,
     _ChangeOutbox outbox,
   ) async {
+    final discovered = await model.Transaction.db.findById(
+      session,
+      id,
+      transaction: tx,
+    );
+    if (discovered == null) {
+      throw NotFoundException(message: 'Transaction not found');
+    }
+    final entity = await EntityAccess.requireOwned(
+      session,
+      discovered.entityId,
+      transaction: tx,
+    );
+
+    // Both accounts, in UUID order, before the row: an edit must never hold a
+    // row while waiting for an account that an account delete already owns.
+    final accounts = await _lockAccounts(
+      session,
+      {discovered.accountId, input.accountId},
+      tx,
+    );
     final existing = await model.Transaction.db.findById(
       session,
       id,
@@ -332,16 +360,13 @@ abstract final class TransactionWriter {
     if (existing == null) {
       throw NotFoundException(message: 'Transaction not found');
     }
-    final entity = await EntityAccess.requireOwned(
-      session,
-      existing.entityId,
-      transaction: tx,
-    );
-    final accounts = await _lockAccounts(
-      session,
-      {existing.accountId, input.accountId},
-      tx,
-    );
+    if (existing.accountId != discovered.accountId ||
+        existing.entityId != discovered.entityId) {
+      throw ValidationException(
+        message: 'The transaction changed concurrently; retry the edit',
+      );
+    }
+
     final oldAccount = accounts[existing.accountId]!;
     final newAccount = accounts[input.accountId]!;
     _requireTransactionAccount(oldAccount);
@@ -519,6 +544,20 @@ abstract final class TransactionWriter {
     Transaction tx,
     _ChangeOutbox outbox,
   ) async {
+    final discovered = await model.Transaction.db.findById(
+      session,
+      id,
+      transaction: tx,
+    );
+    if (discovered == null) {
+      throw NotFoundException(message: 'Transaction not found');
+    }
+    final entity = await EntityAccess.requireOwned(
+      session,
+      discovered.entityId,
+      transaction: tx,
+    );
+    final account = await _lockAccount(session, discovered.accountId, tx);
     final existing = await model.Transaction.db.findById(
       session,
       id,
@@ -528,12 +567,12 @@ abstract final class TransactionWriter {
     if (existing == null) {
       throw NotFoundException(message: 'Transaction not found');
     }
-    final entity = await EntityAccess.requireOwned(
-      session,
-      existing.entityId,
-      transaction: tx,
-    );
-    final account = await _lockAccount(session, existing.accountId, tx);
+    if (existing.accountId != discovered.accountId) {
+      throw ValidationException(
+        message: 'The transaction changed concurrently; retry the edit',
+      );
+    }
+
     _requireTransactionAccount(account);
     final storedLines = await _lines(session, id, tx);
     if (existing.status == TransactionStatus.reconciled &&
@@ -618,25 +657,30 @@ abstract final class TransactionWriter {
     Transaction tx,
     _ChangeOutbox outbox,
   ) async {
-    final rows = await session.db.unsafeQuery(
-      '''
-SELECT DISTINCT tf."fromTransactionId"::text AS "transactionId"
-FROM transfer tf
-JOIN "transaction" t
-  ON t.id IN (tf."fromTransactionId", tf."toTransactionId")
-WHERE t."accountId" = @accountId::uuid
-ORDER BY 1''',
-      parameters: QueryParameters.named({'accountId': accountId.toString()}),
-      transaction: tx,
+    final discovered = await _transfersTouching(session, accountId, tx);
+
+    // The target and the peer accounts are known before the first row lock,
+    // so every account is taken in UUID order ahead of the transfer rows. A
+    // peer that another deletion already removed is skipped: its transfers
+    // went with it.
+    final accounts = await _lockSurvivingAccounts(
+      session,
+      {accountId, ...discovered.accountIds},
+      tx,
     );
 
-    for (final row in rows) {
-      await _delete(
-        session,
-        UuidValue.fromString(row.first as String),
-        tx,
-        outbox,
+    // Re-read under the account locks. Holding the target account's row lock
+    // stops a writer from adding a leg, so the set can only shrink.
+    final current = await _transfersTouching(session, accountId, tx);
+    final missing = current.accountIds.difference(accounts.keys.toSet());
+    if (missing.isNotEmpty) {
+      throw StateError(
+        'A transfer gained an account after the writer locked its accounts',
       );
+    }
+
+    for (final id in current.legIds) {
+      await _delete(session, id, tx, outbox);
     }
   }
 
@@ -655,16 +699,33 @@ ORDER BY 1''',
       throw NotFoundException(message: 'Transaction not found');
     }
     final transfer = await _transferFor(session, id, tx);
-    final otherLegId = transfer == null
-        ? null
-        : transfer.fromTransactionId == id
-        ? transfer.toTransactionId
-        : transfer.fromTransactionId;
-    final ids = {id, ?otherLegId}.toList()
-      ..sort((a, b) => a.uuid.compareTo(b.uuid));
+    final otherLegId = transfer == null ? null : _peerLegId(transfer, id);
 
-    final rows = <UuidValue, model.Transaction>{};
-    for (final transactionId in ids) {
+    final rows = <UuidValue, model.Transaction>{id: existing};
+    if (otherLegId != null) {
+      final other = await model.Transaction.db.findById(
+        session,
+        otherLegId,
+        transaction: tx,
+      );
+      if (other == null) {
+        throw NotFoundException(message: 'Transfer leg not found');
+      }
+      rows[otherLegId] = other;
+    }
+
+    // Accounts first, in UUID order, then the rows: the hierarchy every writer
+    // shares, so a delete never holds one account while waiting for the peer.
+    final accounts = await _lockAccounts(
+      session,
+      rows.values.map((row) => row.accountId),
+      tx,
+    );
+
+    final orderedIds = rows.keys.toList()
+      ..sort((a, b) => a.uuid.compareTo(b.uuid));
+    final lockedRows = <UuidValue, model.Transaction>{};
+    for (final transactionId in orderedIds) {
       final row = await model.Transaction.db.findById(
         session,
         transactionId,
@@ -672,26 +733,38 @@ ORDER BY 1''',
         lockMode: LockMode.forUpdate,
       );
       if (row == null) {
-        throw NotFoundException(message: 'Transfer leg not found');
+        throw NotFoundException(
+          message: transfer == null
+              ? 'Transaction not found'
+              : 'Transfer leg not found',
+        );
       }
-      rows[transactionId] = row;
+      if (row.accountId != rows[transactionId]!.accountId) {
+        throw StateError(
+          'A transaction moved accounts while the writer locked it',
+        );
+      }
+      lockedRows[transactionId] = row;
+    }
+
+    final lockedTransfer = await _transferFor(session, id, tx);
+    final lockedOtherLegId = lockedTransfer == null
+        ? null
+        : _peerLegId(lockedTransfer, id);
+    if (lockedOtherLegId != otherLegId) {
+      throw StateError('A transfer link changed while the writer locked it');
     }
 
     final entities = <UuidValue, Entity>{};
-    for (final row in rows.values) {
+    for (final row in lockedRows.values) {
       entities[row.entityId] = await EntityAccess.requireOwned(
         session,
         row.entityId,
         transaction: tx,
       );
     }
-    final accounts = await _lockAccounts(
-      session,
-      rows.values.map((row) => row.accountId),
-      tx,
-    );
 
-    for (final row in rows.values) {
+    for (final row in lockedRows.values) {
       if (row.status == TransactionStatus.reconciled) {
         throw ValidationException(
           message: 'A reconciled transaction unlocks before deletion',
@@ -706,7 +779,7 @@ ORDER BY 1''',
       _requireTransactionAccount(account);
     }
 
-    for (final row in rows.values) {
+    for (final row in lockedRows.values) {
       await AccountBalanceService.applyDelta(
         session,
         row.accountId,
@@ -715,7 +788,7 @@ ORDER BY 1''',
       );
     }
 
-    for (final row in rows.values) {
+    for (final row in lockedRows.values) {
       final entity = entities[row.entityId]!;
       if (entity.accountingMode == AccountingMode.ledger) {
         final lines = await _lines(session, row.id!, tx);
@@ -738,7 +811,7 @@ ORDER BY 1''',
     if (transfer != null) {
       await Transfer.db.deleteRow(session, transfer, transaction: tx);
     }
-    for (final row in rows.values) {
+    for (final row in lockedRows.values) {
       await model.Transaction.db.deleteRow(session, row, transaction: tx);
       _queueChange(outbox, row);
     }
@@ -1170,6 +1243,75 @@ ORDER BY 1''',
     }
     return accounts;
   }
+
+  /// Locks every listed account that still exists, in UUID order.
+  ///
+  /// Account deletion uses this for the peers of its transfers: a peer removed
+  /// by another deletion took its transfers with it, so it is skipped instead
+  /// of failing the surviving account's delete.
+  static Future<Map<UuidValue, Account>> _lockSurvivingAccounts(
+    Session session,
+    Iterable<UuidValue> ids,
+    Transaction transaction,
+  ) async {
+    final ordered = ids.toSet().toList()
+      ..sort((a, b) => a.uuid.compareTo(b.uuid));
+    final accounts = <UuidValue, Account>{};
+    for (final id in ordered) {
+      final account = await Account.db.findById(
+        session,
+        id,
+        transaction: transaction,
+        lockMode: LockMode.forUpdate,
+      );
+      if (account != null) accounts[id] = account;
+    }
+    return accounts;
+  }
+
+  /// Reads the transfers touching [accountId] and every account they use.
+  static Future<({List<UuidValue> legIds, Set<UuidValue> accountIds})>
+  _transfersTouching(
+    Session session,
+    UuidValue accountId,
+    Transaction tx,
+  ) async {
+    final rows = await session.db.unsafeQuery(
+      '''
+SELECT DISTINCT
+  tf."fromTransactionId"::text AS "transactionId",
+  leg."accountId"::text AS "accountId"
+FROM transfer tf
+JOIN "transaction" leg
+  ON leg.id IN (tf."fromTransactionId", tf."toTransactionId")
+WHERE EXISTS (
+  SELECT 1
+  FROM "transaction" own
+  WHERE own.id IN (tf."fromTransactionId", tf."toTransactionId")
+    AND own."accountId" = @accountId::uuid
+)
+ORDER BY 1, 2''',
+      parameters: QueryParameters.named({'accountId': accountId.toString()}),
+      transaction: tx,
+    );
+
+    final legIds = <UuidValue>{};
+    final accountIds = <UuidValue>{};
+    for (final row in rows) {
+      legIds.add(UuidValue.fromString(row[0] as String));
+      accountIds.add(UuidValue.fromString(row[1] as String));
+    }
+
+    return (
+      legIds: legIds.toList()..sort((a, b) => a.uuid.compareTo(b.uuid)),
+      accountIds: accountIds,
+    );
+  }
+
+  static UuidValue _peerLegId(Transfer transfer, UuidValue id) =>
+      transfer.fromTransactionId == id
+      ? transfer.toTransactionId
+      : transfer.fromTransactionId;
 
   static Future<Payee?> _resolvePayee(
     Session session,

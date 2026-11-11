@@ -280,9 +280,12 @@ abstract final class AccountService {
           lock: true,
         ),
       );
+      // Sorted by id so the account lock set follows the same UUID order as
+      // every other multi-account writer.
       final accounts = await Account.db.find(
         session,
         where: (t) => t.entityId.equals(entityId),
+        orderByList: (t) => [t.id],
         transaction: tx,
         lockMode: LockMode.forUpdate,
       );
@@ -320,21 +323,40 @@ abstract final class AccountService {
   ///
   /// Every transfer that touches the account is removed through
   /// [TransactionWriter], which deletes both legs and reverses the surviving
-  /// peer's cached balance. A ledger account with journal lines protects the
-  /// account from deletion, as section 7.1 requires.
+  /// peer's cached balance. The writer locks every account a transfer touches
+  /// in UUID order before any transfer row, so the target account is locked
+  /// with its peers instead of being pinned first and then waiting on them.
+  /// A ledger account with journal lines protects the account from deletion,
+  /// as section 7.1 requires.
   static Future<void> delete(Session session, UuidValue accountId) async {
     final result = await TransactionWriter.inTransaction(session, (tx) async {
+      final discovered = await Account.db.findById(
+        session,
+        accountId,
+        transaction: tx,
+      );
+      if (discovered == null) {
+        throw NotFoundException(message: 'Account not found');
+      }
+      await EntityAccess.requireOwned(
+        session,
+        discovered.entityId,
+        transaction: tx,
+      );
+      await _requireJournalFree(session, discovered, tx);
+
+      await TransactionWriter.deleteTransfersForAccount(
+        session,
+        accountId,
+        transaction: tx,
+      );
+
       final (entity, account) = await _lockWritableAccount(
         session,
         accountId,
         tx,
       );
       await _requireJournalFree(session, account, tx);
-      await TransactionWriter.deleteTransfersForAccount(
-        session,
-        accountId,
-        transaction: tx,
-      );
       await Account.db.deleteRow(session, account, transaction: tx);
       return entity.id!;
     });
